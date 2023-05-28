@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX3_laowa 11mm__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "il jun yang",
+  "camera_brand": "Sony",
+  "camera_model": "FX3",
+  "lens_model": "laowa 11mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.47326174883638267,
+    "camera_matrix": [
+      [
+        1244.6472961519669,
+        0.0,
+        1912.589046370988
+      ],
+      [
+        0.0,
+        1244.718927141403,
+        1069.1554150871789
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30868363930936,
+      0.12590144661663877,
+      -0.03979999243169037,
+      0.07766536404042894
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

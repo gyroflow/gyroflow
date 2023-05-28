@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6K_Canon 10-18__5k_1.90by1_5746x3024-25.00fps",
+  "note": "",
+  "calibrated_by": "Pawel Sidoryk",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6K",
+  "lens_model": "Canon 10-18",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5746,
+    "h": 3024
+  },
+  "orig_dimension": {
+    "w": 5746,
+    "h": 3024
+  },
+  "output_dimension": {
+    "w": 5744,
+    "h": 3024
+  },
+  "frame_readout_time": 16.26,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 20,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5292710833517519,
+    "camera_matrix": [
+      [
+        2827.5462792142575,
+        0.0,
+        2958.7211618348956
+      ],
+      [
+        0.0,
+        2826.38809674918,
+        1476.5488836586994
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32753167322049676,
+      0.15952290946847258,
+      -0.06441913438230658,
+      0.04018676957800258
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

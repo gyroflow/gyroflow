@@ -1,0 +1,69 @@
+{
+  "name": "Nikon_D3300_NIKKOR 50MM__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Biel Alsina Illa",
+  "camera_brand": "Nikon",
+  "camera_model": "D3300",
+  "lens_model": "NIKKOR 50MM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.360049653461932,
+    "camera_matrix": [
+      [
+        4424.563429977746,
+        0.0,
+        964.2560511735314
+      ],
+      [
+        0.0,
+        4452.468993926877,
+        521.0797315214555
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.02186379062646164,
+      23.27635355482851,
+      -836.3328082756943,
+      9852.41899801284
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-13",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

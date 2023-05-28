@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_Nikkor SC 55mm f/1.2_6K 17:9_6k_1.90by1_6910x3645-24.00fps",
+  "note": "",
+  "calibrated_by": "Marco Joe Fazio",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Nikkor SC 55mm f/1.2",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.4414534012617486,
+    "camera_matrix": [
+      [
+        13995.326847427668,
+        0.0,
+        3499.3748085748653
+      ],
+      [
+        0.0,
+        14003.414107611192,
+        1886.7834130507329
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08784150957221751,
+      2.5793490231846965,
+      -71.95971516203777,
+      622.4935700179999
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

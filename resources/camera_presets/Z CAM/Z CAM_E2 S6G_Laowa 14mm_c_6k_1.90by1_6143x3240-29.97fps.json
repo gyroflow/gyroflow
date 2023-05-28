@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2 S6G_Laowa 14mm_c_6k_1.90by1_6143x3240-29.97fps",
+  "note": "",
+  "calibrated_by": "Andrew Orton",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2 S6G",
+  "lens_model": "Laowa 14mm",
+  "camera_setting": "c",
+  "calib_dimension": {
+    "w": 6143,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6143,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7382103149640721,
+    "camera_matrix": [
+      [
+        4025.6685884490585,
+        0.0,
+        3083.0912962091315
+      ],
+      [
+        0.0,
+        4025.976367643135,
+        1601.102324388281
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31925518851938756,
+      0.11506427875714412,
+      0.16272392358310653,
+      -0.12558541971212953
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-16",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

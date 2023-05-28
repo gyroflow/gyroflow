@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_GH5S_Olympus 12-40mm f2.8_C All-I 400M_C4k_1.90by1_4095x2160-24.00fps",
+  "note": "16mm f7",
+  "calibrated_by": "Yoeri Bulk",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH5S",
+  "lens_model": "Olympus 12-40mm f2.8",
+  "camera_setting": "C All-I 400M",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9742361074623312,
+    "camera_matrix": [
+      [
+        3357.8180676772367,
+        0.0,
+        2087.914493681751
+      ],
+      [
+        0.0,
+        3362.75816166673,
+        1030.1996008127546
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31966064067783767,
+      0.36139942024648575,
+      -1.533055007084654,
+      3.3067219647652735
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

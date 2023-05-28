@@ -1,0 +1,69 @@
+{
+  "name": "Redmi_10c__nodata_1080p_16by9_1920x1080-30.00fps",
+  "note": "",
+  "calibrated_by": "Kosh",
+  "camera_brand": "Redmi",
+  "camera_model": "10c",
+  "lens_model": "",
+  "camera_setting": "nodata",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 30.002375,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2711391830452254,
+    "camera_matrix": [
+      [
+        1617.349639525737,
+        0.0,
+        971.2709379800748
+      ],
+      [
+        0.0,
+        1615.9724088666726,
+        546.5123251125757
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5727200472631766,
+      -2.1180462711857007,
+      12.173982280516894,
+      -22.47960329966344
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "GoPro_HERO3 Black___1440p_4by3_1920x1440-29.97fps",
+  "note": "",
+  "calibrated_by": "David Zucker",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO3 Black",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.1196403528099914,
+    "camera_matrix": [
+      [
+        403.9108147156894,
+        0.0,
+        919.8777183989978
+      ],
+      [
+        0.0,
+        405.7014846067783,
+        669.9483414590408
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2658172898493173,
+      0.04168011880793549,
+      0.03890847946956497,
+      0.0013017509234841548
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-14",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

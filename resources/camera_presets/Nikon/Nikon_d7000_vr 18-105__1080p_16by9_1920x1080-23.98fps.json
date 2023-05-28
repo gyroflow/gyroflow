@@ -1,0 +1,68 @@
+{
+  "name": "Nikon_d7000_vr 18-105__1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Shevin Fernando",
+  "camera_brand": "Nikon",
+  "camera_model": "d7000",
+  "lens_model": "vr 18-105",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.34255089629745694,
+    "camera_matrix": [
+      [
+        1577.8130122390485,
+        0.0,
+        959.8032288459848
+      ],
+      [
+        0.0,
+        1571.066080262073,
+        555.2538161409755
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.18745464785880217,
+      0.09856104262887794,
+      0.24113148719068425,
+      0.1426421890367242
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-04-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

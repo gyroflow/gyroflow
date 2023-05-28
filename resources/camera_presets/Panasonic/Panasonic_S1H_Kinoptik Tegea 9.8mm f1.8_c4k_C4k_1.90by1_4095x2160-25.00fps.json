@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_S1H_Kinoptik Tegea 9.8mm f1.8_c4k_C4k_1.90by1_4095x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "📷",
+  "camera_brand": "Panasonic",
+  "camera_model": "S1H",
+  "lens_model": "Kinoptik Tegea 9.8mm f1.8",
+  "camera_setting": "c4k",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8565078092551597,
+    "camera_matrix": [
+      [
+        1662.8530009115257,
+        0.0,
+        2059.7326783292606
+      ],
+      [
+        0.0,
+        1664.5796733058903,
+        1094.627232288872
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33749099726895126,
+      0.03445415642100746,
+      0.1627808117419024,
+      -0.03511879502924369
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-29",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "OnePlus_9T_Mobile/wide_30fps_1080p_16by9_1920x1080-30.00fps",
+  "note": "30fps",
+  "calibrated_by": "Clout.fx",
+  "camera_brand": "OnePlus",
+  "camera_model": "9T",
+  "lens_model": "Mobile/wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6340928060897985,
+    "camera_matrix": [
+      [
+        1329.8672077218555,
+        0.0,
+        947.2703754409824
+      ],
+      [
+        0.0,
+        1326.1036164841455,
+        526.3670978678831
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5306854177848702,
+      -1.3887948380331343,
+      5.477147748975672,
+      -6.896101481995296
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-22",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

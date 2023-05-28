@@ -1,0 +1,69 @@
+{
+  "name": "LG_V60_27mm_-_1080p_16by9_1920x1080-24.00fps",
+  "note": "",
+  "calibrated_by": "Abdul Mateen",
+  "camera_brand": "LG",
+  "camera_model": "V60",
+  "lens_model": "27mm",
+  "camera_setting": "-",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5269325112433058,
+    "camera_matrix": [
+      [
+        1451.3178175996309,
+        0.0,
+        967.7654597134616
+      ],
+      [
+        0.0,
+        1452.1675187632216,
+        527.2786990189696
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32777571129725525,
+      0.4521777640851416,
+      -0.4317733977809413,
+      -0.3832815175930074
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-27",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

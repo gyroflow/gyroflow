@@ -1,0 +1,69 @@
+{
+  "name": "Realme_6_Основная_1/30_1080p_16by9_1920x1080-30.00fps",
+  "note": "H264 50 Mbit",
+  "calibrated_by": "Сергей",
+  "camera_brand": "Realme",
+  "camera_model": "6",
+  "lens_model": "Основная",
+  "camera_setting": "1/30",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 30.000368,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0398622638098467,
+    "camera_matrix": [
+      [
+        2060.9765698415326,
+        0.0,
+        997.168477445234
+      ],
+      [
+        0.0,
+        2060.0001667463407,
+        616.2880035281858
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.36018622989330346,
+      1.2537511223426,
+      -8.533494738898048,
+      19.038804382796176
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-22",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

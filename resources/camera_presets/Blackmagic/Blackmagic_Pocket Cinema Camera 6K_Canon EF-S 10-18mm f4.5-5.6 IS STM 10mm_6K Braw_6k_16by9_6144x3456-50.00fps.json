@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6K_Canon EF-S 10-18mm f/4.5-5.6 IS STM 10mm_6K Braw_6k_16by9_6144x3456-50.00fps",
+  "note": "",
+  "calibrated_by": "Bean-FPV",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6K",
+  "lens_model": "Canon EF-S 10-18mm f/4.5-5.6 IS STM 10mm",
+  "camera_setting": "6K Braw",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": true,
+  "fisheye_params": {
+    "RMS_error": 1.5881259543369388,
+    "camera_matrix": [
+      [
+        2626.2192911130023,
+        0.0,
+        3226.805848684613
+      ],
+      [
+        0.0,
+        2628.2499138598373,
+        1726.1201986283068
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3272705048238433,
+      0.22405313535247132,
+      -0.284409568155655,
+      0.4943958844582176
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 10.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

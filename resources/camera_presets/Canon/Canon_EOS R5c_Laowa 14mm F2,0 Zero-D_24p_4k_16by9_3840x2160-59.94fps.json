@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS R5c_Laowa 14mm F2,0 Zero-D_24p_4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "YeomPD",
+  "camera_brand": "Canon",
+  "camera_model": "EOS R5c",
+  "lens_model": "Laowa 14mm F2,0 Zero-D",
+  "camera_setting": "24p",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 51,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.48518929719685744,
+    "camera_matrix": [
+      [
+        1652.5797570557331,
+        0.0,
+        1915.5427174417268
+      ],
+      [
+        0.0,
+        1653.1895294418748,
+        1072.1612858423568
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.334986059273084,
+      0.1053055724636376,
+      0.02583066578864205,
+      0.05722584929072865
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

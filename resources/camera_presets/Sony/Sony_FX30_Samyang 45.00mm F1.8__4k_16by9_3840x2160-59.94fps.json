@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX30_Samyang 45.00mm F1.8__4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Anthony Disbrow",
+  "camera_brand": "Sony",
+  "camera_model": "FX30",
+  "lens_model": "Samyang 45.00mm F1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 15.8,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 21,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.158593867393801,
+    "camera_matrix": [
+      [
+        7990.789144933479,
+        0.0,
+        1859.759331221425
+      ],
+      [
+        0.0,
+        7975.392836285424,
+        1123.8685595471893
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5339473375785877,
+      -8.282376622544653,
+      213.5650390057088,
+      -1972.0138431038035
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilme-fx30-45.00mm-3840x2160@59940",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-21",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 45.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

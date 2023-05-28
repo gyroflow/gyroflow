@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M50_EF-M 15-45__1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "Niklas",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M50",
+  "lens_model": "EF-M 15-45",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 16,
+    "h": 9
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.46059588282620634,
+    "camera_matrix": [
+      [
+        1269.1926156605932,
+        0.0,
+        959.4473028817338
+      ],
+      [
+        0.0,
+        1268.9008635113782,
+        519.2720837126592
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2058833082629013,
+      0.164776872835531,
+      0.028596942872471973,
+      0.0501124740192052
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-01",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

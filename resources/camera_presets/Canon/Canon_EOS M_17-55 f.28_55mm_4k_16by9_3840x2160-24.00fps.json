@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M_17-55 f.28_55mm_4k_16by9_3840x2160-24.00fps",
+  "note": "5k 24fps",
+  "calibrated_by": "Nhut Nguyen",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "17-55 f.28",
+  "camera_setting": "55mm",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 21.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6005298434610616,
+    "camera_matrix": [
+      [
+        7841.243269977498,
+        0.0,
+        2325.3138202747095
+      ],
+      [
+        0.0,
+        7787.932945359794,
+        962.8830816567868
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4618075631052403,
+      -0.4434190033864524,
+      -6.696572425329842,
+      115.114644733996
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-23",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

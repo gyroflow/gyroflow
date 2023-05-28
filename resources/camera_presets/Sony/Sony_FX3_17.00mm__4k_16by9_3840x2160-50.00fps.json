@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX3_17.00mm__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "GOMOR",
+  "camera_brand": "Sony",
+  "camera_model": "FX3",
+  "lens_model": "17.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6853526603198975,
+    "camera_matrix": [
+      [
+        1942.499774974685,
+        0.0,
+        1928.2573661000545
+      ],
+      [
+        0.0,
+        1941.7146780296848,
+        1052.0995470837152
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2358741617247611,
+      0.07419409221912641,
+      0.17555941481338286,
+      0.011784113875217475
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilme-fx3-17.00mm-3840x2160@50000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-27",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 17.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

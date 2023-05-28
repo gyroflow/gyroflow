@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-1_b3af8e03__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "User",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-1",
+  "lens_model": "b3af8e03",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4968077726712095,
+    "camera_matrix": [
+      [
+        1370.763415622522,
+        0.0,
+        960.3142924064113
+      ],
+      [
+        0.0,
+        1364.1321875489132,
+        541.5802268868641
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.310859079286519,
+      0.4328885639170521,
+      -1.2582037145097995,
+      2.3715846544741503
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-1-b3af8e03-1920x1080@25000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-25",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Samsung_galaxy note 10_ultra wide__4k_16by9_3840x2160-30.01fps",
+  "note": "",
+  "calibrated_by": "AHMET BERK GÜLER",
+  "camera_brand": "Samsung",
+  "camera_model": "galaxy note 10",
+  "lens_model": "ultra wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 30.010372,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0261379025230182,
+    "camera_matrix": [
+      [
+        1517.9798403799798,
+        0.0,
+        1898.618307784454
+      ],
+      [
+        0.0,
+        1519.289614247273,
+        1091.003166966043
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.28608328093228336,
+      0.358029595972102,
+      -0.22430983450679223,
+      0.05072308141839426
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-23",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

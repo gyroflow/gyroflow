@@ -1,0 +1,69 @@
+{
+  "name": "Sony_RX0II_6ba74ca5__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "正成影音二",
+  "camera_brand": "Sony",
+  "camera_model": "RX0II",
+  "lens_model": "6ba74ca5",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9946100179682724,
+    "camera_matrix": [
+      [
+        1934.4216235244824,
+        0.0,
+        1953.863453129516
+      ],
+      [
+        0.0,
+        1890.393857086955,
+        1040.8688015781604
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1929036335193343,
+      0.17624103493380155,
+      -0.1870112880740072,
+      0.10566738050718552
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-dsc-rx0m2-6ba74ca5-3840x2160@23976",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

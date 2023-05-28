@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX6V_Leica M0.8 50mm F1.4 Summilux__C4k_1.90by1_4095x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "Benoit Finck",
+  "camera_brand": "Sony",
+  "camera_model": "FX6V",
+  "lens_model": "Leica M0.8 50mm F1.4 Summilux",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9819145535535456,
+    "camera_matrix": [
+      [
+        6613.597573947729,
+        0.0,
+        2029.37659658574
+      ],
+      [
+        0.0,
+        6615.656681944478,
+        1030.6761968834824
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4304771295997943,
+      -4.008124029924767,
+      58.564329917286365,
+      -253.9960507064944
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

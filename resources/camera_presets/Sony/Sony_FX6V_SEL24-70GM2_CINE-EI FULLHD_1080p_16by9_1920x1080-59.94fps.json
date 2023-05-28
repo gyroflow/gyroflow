@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX6V_SEL24-70GM2_CINE-EI FULLHD_1080p_16by9_1920x1080-59.94fps",
+  "note": "@24mm 59.94p all correction on in camera",
+  "calibrated_by": "Alessandro Bartoletti",
+  "camera_brand": "Sony",
+  "camera_model": "FX6V",
+  "lens_model": "SEL24-70GM2",
+  "camera_setting": "CINE-EI FULLHD",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.28868679550176407,
+    "camera_matrix": [
+      [
+        1358.855411172599,
+        0.0,
+        960.5964022273356
+      ],
+      [
+        0.0,
+        1358.46176364324,
+        542.43913112425
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3061971511662668,
+      0.2542128027650952,
+      -0.4114859339442793,
+      0.6520898140380104
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilme-fx6v-24.00mm-1920x1080@59940",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-01",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 24.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

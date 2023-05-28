@@ -1,0 +1,66 @@
+{
+  "name": "SJCAM_SJ4000___1080p_16by9_1920x1080-30.00fps",
+  "note": "",
+  "calibrated_by": "Никитос",
+  "camera_brand": "SJCAM",
+  "camera_model": "SJ4000",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6058656801101424,
+    "camera_matrix": [
+      [
+        1295.8532739409684,
+        0.0,
+        976.849597578334
+      ],
+      [
+        0.0,
+        1309.469924290138,
+        495.92764857240695
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.1070440770710346,
+      0.10876525922157484,
+      -0.3991746874066988,
+      0.4547099369421369
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2023-03-30",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

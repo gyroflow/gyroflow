@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6K_Sigma 8mm f/3.5 EX DG Circular Fisheye 8mm_6K Braw_6k_16by9_6144x3456-50.00fps",
+  "note": "",
+  "calibrated_by": "Bean-FPV",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6K",
+  "lens_model": "Sigma 8mm f/3.5 EX DG Circular Fisheye 8mm",
+  "camera_setting": "6K Braw",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": 19.73,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 48,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 5.537120525849603,
+    "camera_matrix": [
+      [
+        2145.3354821314692,
+        0.0,
+        3113.600774706212
+      ],
+      [
+        0.0,
+        2143.0045632225606,
+        1706.5830926525489
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.021715076128176546,
+      0.03360411065165803,
+      -0.03307615606463134,
+      0.007882482944418165
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "blackmagic-pocketcinemacamera6k-sigma8mmf/3.5exdgcircularfisheye-8mm-6144x3456@50000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 8.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

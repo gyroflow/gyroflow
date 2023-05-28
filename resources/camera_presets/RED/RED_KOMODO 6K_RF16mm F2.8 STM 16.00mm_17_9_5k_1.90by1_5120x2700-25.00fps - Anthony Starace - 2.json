@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_RF16mm F2.8 STM 16.00mm_17:9_5k_1.90by1_5120x2700-25.00fps",
+  "note": "",
+  "calibrated_by": "Anthony Starace",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "RF16mm F2.8 STM 16.00mm",
+  "camera_setting": "17:9",
+  "calib_dimension": {
+    "w": 5120,
+    "h": 2700
+  },
+  "orig_dimension": {
+    "w": 5120,
+    "h": 2700
+  },
+  "output_dimension": {
+    "w": 5120,
+    "h": 2700
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8518372539626511,
+    "camera_matrix": [
+      [
+        3830.4328678660927,
+        0.0,
+        2562.763196748477
+      ],
+      [
+        0.0,
+        3831.4763681411914,
+        1334.657784861332
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1762010914451558,
+      -0.02193908902536549,
+      0.25483032582720183,
+      -0.2540628426743825
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-10",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 16.0,
+  "crop_factor": null,
+  "global_shutter": true
+}

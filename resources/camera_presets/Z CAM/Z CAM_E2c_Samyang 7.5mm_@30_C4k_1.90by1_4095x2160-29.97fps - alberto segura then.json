@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2c_Samyang 7.5mm_@30_C4k_1.90by1_4095x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "alberto segura then",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2c",
+  "lens_model": "Samyang 7.5mm",
+  "camera_setting": "@30",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.127198971056904,
+    "camera_matrix": [
+      [
+        2037.862907609792,
+        0.0,
+        2092.127061138799
+      ],
+      [
+        0.0,
+        2035.6066582353697,
+        1129.4334348811412
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.034560945273521174,
+      0.025709010846972986,
+      -0.02412886986355503,
+      0.007804095996039845
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Caddx_Walnut_LDC Wide__2.5k_16by9_2688x1512-59.94fps",
+  "note": "",
+  "calibrated_by": "Jason",
+  "camera_brand": "Caddx",
+  "camera_model": "Walnut",
+  "lens_model": "LDC Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.39963185546762,
+    "camera_matrix": [
+      [
+        2250.928656988906,
+        0.0,
+        1286.478594104282
+      ],
+      [
+        0.0,
+        2081.256391468227,
+        70.8206005429386
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.44724668076472823,
+      -0.13423575261026371,
+      -1.773082182210593,
+      1.25359493591507
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "caddx-walnutcam-caddx/caddx_walnut_ldc_2.7k60_2.7k_16by9_2720x1530-59.94fps-wide-2688x1512@59940",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-07",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

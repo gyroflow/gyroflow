@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6K_Canon EF 85mm f/1.8 USM 85mm__6k_16by9_6144x3456-23.98fps",
+  "note": "",
+  "calibrated_by": "Media Services",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6K",
+  "lens_model": "Canon EF 85mm f/1.8 USM 85mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976028,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.1885858348643965,
+    "camera_matrix": [
+      [
+        23445.24169560558,
+        0.0,
+        3150.1069152131195
+      ],
+      [
+        0.0,
+        23404.56289124192,
+        1772.6672463138516
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.12275980604601332,
+      120.30917219385078,
+      -10779.795156356771,
+      330198.2550617634
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "blackmagic-pocketcinemacamera6k-canonef85mmf/1.8usm-85mm-6144x3456@23976",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 85.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

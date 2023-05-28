@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_Mitakon Speedmaster Cine 35mm T1.0_6K 17:9_6k_1.90by1_6910x3645-25.00fps",
+  "note": "Full Sensor 17by9",
+  "calibrated_by": "Florian Koch",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Mitakon Speedmaster Cine 35mm T1.0",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.2112142077052466,
+    "camera_matrix": [
+      [
+        9161.01098575924,
+        0.0,
+        3448.8455249111475
+      ],
+      [
+        0.0,
+        9156.88626590794,
+        1788.8733360351473
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.002793525235480657,
+      3.525808154727517,
+      -40.10731478074107,
+      194.4335873947395
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

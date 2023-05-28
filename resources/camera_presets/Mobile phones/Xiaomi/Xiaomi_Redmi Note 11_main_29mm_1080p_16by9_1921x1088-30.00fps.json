@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_Redmi Note 11_main_29mm_1080p_16by9_1921x1088-30.00fps",
+  "note": "",
+  "calibrated_by": "mathieu chantelat",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi Note 11",
+  "lens_model": "main",
+  "camera_setting": "29mm",
+  "calib_dimension": {
+    "w": 1921,
+    "h": 1088
+  },
+  "orig_dimension": {
+    "w": 1921,
+    "h": 1088
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1088
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 30.002369,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6053421494467841,
+    "camera_matrix": [
+      [
+        1757.0239418562403,
+        0.0,
+        953.5165524229076
+      ],
+      [
+        0.0,
+        1767.799124475874,
+        538.6338993767127
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4790196810376339,
+      -0.28605226147077484,
+      1.6650112637615813,
+      -3.142884189786674
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

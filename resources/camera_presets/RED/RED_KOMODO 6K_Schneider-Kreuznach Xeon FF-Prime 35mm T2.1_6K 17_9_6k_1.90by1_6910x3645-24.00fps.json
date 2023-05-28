@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_Schneider-Kreuznach Xeon FF-Prime 35mm T2.1_6K 17:9_6k_1.90by1_6910x3645-24.00fps",
+  "note": "",
+  "calibrated_by": "Marco Joe Fazio",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Schneider-Kreuznach Xeon FF-Prime 35mm T2.1",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.7062051787408925,
+    "camera_matrix": [
+      [
+        8696.349195256806,
+        0.0,
+        3492.24309366384
+      ],
+      [
+        0.0,
+        8699.459184330051,
+        1875.0951924263811
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23662288755264285,
+      3.400501961649822,
+      -85.56961222827516,
+      606.7410848561922
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

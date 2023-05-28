@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E1_17.00mm__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Sendera",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E1",
+  "lens_model": "17.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 8.6,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 20,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6096790359483426,
+    "camera_matrix": [
+      [
+        1891.6727460888112,
+        0.0,
+        1920.2322426401192
+      ],
+      [
+        0.0,
+        1891.8364739334793,
+        1083.0712325500751
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30986613285113956,
+      0.14369910573271424,
+      0.11609366273095516,
+      -0.03344876907712985
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e1-17.00mm-3840x2160@50000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-16",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 17.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

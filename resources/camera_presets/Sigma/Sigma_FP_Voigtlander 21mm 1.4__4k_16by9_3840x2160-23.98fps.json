@@ -1,0 +1,69 @@
+{
+  "name": "Sigma_FP_Voigtlander 21mm 1.4__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Edward Robison",
+  "camera_brand": "Sigma",
+  "camera_model": "FP",
+  "lens_model": "Voigtlander 21mm 1.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7605015227919512,
+    "camera_matrix": [
+      [
+        2393.60859263405,
+        0.0,
+        1940.0921312815128
+      ],
+      [
+        0.0,
+        2391.0852079484544,
+        1057.461926275671
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2377029598359632,
+      0.5945747795113053,
+      -2.210052129161812,
+      4.418621370483514
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

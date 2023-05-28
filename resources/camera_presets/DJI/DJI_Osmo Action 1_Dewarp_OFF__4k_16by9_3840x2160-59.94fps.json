@@ -1,0 +1,69 @@
+{
+  "name": "DJI_Osmo Action 1_Dewarp_OFF__4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "jung sungho",
+  "camera_brand": "DJI",
+  "camera_model": "Osmo Action 1",
+  "lens_model": "Dewarp_OFF",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": 60.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7846320604975139,
+    "camera_matrix": [
+      [
+        1703.8951029243551,
+        0.0,
+        1950.8722577950375
+      ],
+      [
+        0.0,
+        1703.5886769954675,
+        1102.9691474367926
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20073230956978075,
+      0.06043983308338289,
+      -0.155116667196817,
+      0.05459470031675882
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

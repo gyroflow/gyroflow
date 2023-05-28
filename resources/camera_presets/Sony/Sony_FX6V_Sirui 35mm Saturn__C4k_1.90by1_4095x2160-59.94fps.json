@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX6V_Sirui 35mm Saturn__C4k_1.90by1_4095x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Nicholas Schraml",
+  "camera_brand": "Sony",
+  "camera_model": "FX6V",
+  "lens_model": "Sirui 35mm Saturn",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.781935620323034,
+    "camera_matrix": [
+      [
+        2565.05579870868,
+        0.0,
+        1883.8665307868184
+      ],
+      [
+        0.0,
+        4082.56431289796,
+        1312.3543097631657
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23216882631257452,
+      0.2071094950803807,
+      -0.8332064615683565,
+      1.171722076934843
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-31",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

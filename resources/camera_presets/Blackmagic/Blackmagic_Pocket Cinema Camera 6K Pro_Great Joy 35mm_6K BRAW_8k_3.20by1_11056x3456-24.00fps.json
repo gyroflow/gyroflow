@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6K Pro_Great Joy 35mm_6K BRAW_8k_3.20by1_11056x3456-24.00fps",
+  "note": "Anamorphic 1.8X T2.9",
+  "calibrated_by": "kilotwo",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6K Pro",
+  "lens_model": "Great Joy 35mm",
+  "camera_setting": "6K BRAW",
+  "calib_dimension": {
+    "w": 11056,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 11056,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 11059,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.8,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 2.2242442981089936,
+    "camera_matrix": [
+      [
+        9634.217157341847,
+        0.0,
+        5034.089681259015
+      ],
+      [
+        0.0,
+        9559.41172397814,
+        1329.131931116846
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.035049781923597846,
+      2.6679393667161735,
+      -9.698412017483063,
+      14.99782145479622
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "blackmagic-pocketcinemacamera6kpro-35mm-6144x3456@24000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-27",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 35.0,
+  "crop_factor": 1.0,
+  "global_shutter": false
+}

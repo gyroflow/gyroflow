@@ -1,0 +1,69 @@
+{
+  "name": "RunCam_SPLIT-HD_wide__2.7k_4by3_2704x2032-60.00fps",
+  "note": "",
+  "calibrated_by": "Administrator",
+  "camera_brand": "RunCam",
+  "camera_model": "SPLIT-HD",
+  "lens_model": "wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2704,
+    "h": 2032
+  },
+  "orig_dimension": {
+    "w": 2704,
+    "h": 2032
+  },
+  "output_dimension": {
+    "w": 2704,
+    "h": 2032
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9131978176896588,
+    "camera_matrix": [
+      [
+        1890.2198005175328,
+        0.0,
+        1392.5883988368566
+      ],
+      [
+        0.0,
+        1906.4962524156724,
+        1056.64594648435
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.022953769412425235,
+      -0.1355075335301664,
+      0.7663481162445123,
+      -1.201984558850177
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "runcam-split-hd-wide-2704x2032@60000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "RED_Raptor_Leica R 19_7K 17:9_C4k_1.90by1_4095x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Adam Mach",
+  "camera_brand": "RED",
+  "camera_model": "Raptor",
+  "lens_model": "Leica R 19",
+  "camera_setting": "7K 17:9",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0622326677909693,
+    "camera_matrix": [
+      [
+        2197.750406719229,
+        0.0,
+        2062.288484470294
+      ],
+      [
+        0.0,
+        2199.2793532038713,
+        1062.2841366674368
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22315975034864213,
+      0.22118711229523785,
+      -0.19578419894357876,
+      0.38466976693833543
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

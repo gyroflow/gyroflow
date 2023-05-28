@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_Mi 10T PRO_Samsung Bright S5KHMX__1080p_16by9_1920x1080-30.05fps",
+  "note": "",
+  "calibrated_by": "Pablo Cesar Fraga Rodriguez",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 10T PRO",
+  "lens_model": "Samsung Bright S5KHMX",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.053272,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5398340417190602,
+    "camera_matrix": [
+      [
+        1779.062585892902,
+        0.0,
+        956.7471928221772
+      ],
+      [
+        0.0,
+        1785.6460219415833,
+        521.9956068782069
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4217167114712687,
+      -0.3804762835439404,
+      -3.062867877227976,
+      15.685810187565398
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-13",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

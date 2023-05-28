@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E10_Canon 18-135mm_f3.5_4k_16by9_3840x2160-23.98fps",
+  "note": "f3.5",
+  "calibrated_by": "Teo Oliveira",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "Canon 18-135mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 4.311863984208889,
+    "camera_matrix": [
+      [
+        7575.060524092338,
+        0.0,
+        1953.2161302765217
+      ],
+      [
+        0.0,
+        7762.788039696808,
+        917.1051283121112
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.19994761144190287,
+      -39.71825293695018,
+      1219.2647525692137,
+      -7812.383926108974
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e10-5a74ebbb-3840x2160@23976",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

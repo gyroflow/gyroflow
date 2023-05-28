@@ -1,0 +1,69 @@
+{
+  "name": "Samsung_S10 5g_Front facing__1080p_16by9_1920x1080-29.87fps",
+  "note": "",
+  "calibrated_by": "TBM",
+  "camera_brand": "Samsung",
+  "camera_model": "S10 5g",
+  "lens_model": "Front facing",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.874933,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4327099386952956,
+    "camera_matrix": [
+      [
+        1389.0807650527647,
+        0.0,
+        926.7696957735624
+      ],
+      [
+        0.0,
+        1394.6607632532423,
+        532.6981824978147
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6249402514856439,
+      -2.2357835282933816,
+      7.585066416296876,
+      -8.23719056623291
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-28",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Google_Pixel 6_Main_Raw_C4k_4by3_4079x3072-30.02fps",
+  "note": "",
+  "calibrated_by": "Kol",
+  "camera_brand": "Google",
+  "camera_model": "Pixel 6",
+  "lens_model": "Main",
+  "camera_setting": "Raw",
+  "calib_dimension": {
+    "w": 4079,
+    "h": 3072
+  },
+  "orig_dimension": {
+    "w": 4079,
+    "h": 3072
+  },
+  "output_dimension": {
+    "w": 4080,
+    "h": 3072
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 21,
+  "fps": 30.018122,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.7103730927512144,
+    "camera_matrix": [
+      [
+        2891.5878781277584,
+        0.0,
+        2044.8829770027075
+      ],
+      [
+        0.0,
+        2889.413751405455,
+        1521.878014409776
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.530281601389254,
+      -1.2989887634910158,
+      5.203385519586422,
+      -6.54802530332622
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4K_24mm__4k_16by9_3840x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "E Honda",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4K",
+  "lens_model": "24mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.233055824233204,
+    "camera_matrix": [
+      [
+        3351.3995329577497,
+        0.0,
+        1961.645154142655
+      ],
+      [
+        0.0,
+        3350.1906953826287,
+        1051.574290616796
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20129551079989336,
+      -0.18348366270714037,
+      1.687007364781434,
+      -1.3605213599545185
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "blackmagic-pocketcinemacamera4k-26mm-3840x2160@24000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 26.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

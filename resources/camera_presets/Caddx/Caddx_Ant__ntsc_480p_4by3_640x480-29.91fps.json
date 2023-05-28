@@ -1,0 +1,69 @@
+{
+  "name": "Caddx_Ant__ntsc_480p_4by3_640x480-29.91fps",
+  "note": "",
+  "calibrated_by": "DarkWing",
+  "camera_brand": "Caddx",
+  "camera_model": "Ant",
+  "lens_model": "",
+  "camera_setting": "ntsc",
+  "calib_dimension": {
+    "w": 640,
+    "h": 480
+  },
+  "orig_dimension": {
+    "w": 640,
+    "h": 480
+  },
+  "output_dimension": {
+    "w": 640,
+    "h": 480
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 29.90699,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.32899778063917656,
+    "camera_matrix": [
+      [
+        326.9721909300615,
+        0.0,
+        325.2330320261964
+      ],
+      [
+        0.0,
+        418.21957980882706,
+        251.2598036903412
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.02445375785727127,
+      -0.14427491708253903,
+      0.18561487958835837,
+      -0.09612225144639971
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

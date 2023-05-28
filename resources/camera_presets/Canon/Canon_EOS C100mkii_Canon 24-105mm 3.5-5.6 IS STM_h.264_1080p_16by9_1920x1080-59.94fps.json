@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS C100mkii_Canon 24-105mm 3.5-5.6 IS STM_h.264_1080p_16by9_1920x1080-59.94fps",
+  "note": "24mm",
+  "calibrated_by": "Rowan McCann",
+  "camera_brand": "Canon",
+  "camera_model": "EOS C100mkii",
+  "lens_model": "Canon 24-105mm 3.5-5.6 IS STM",
+  "camera_setting": "h.264",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6100671993069987,
+    "camera_matrix": [
+      [
+        2186.8264935980196,
+        0.0,
+        905.799981270026
+      ],
+      [
+        0.0,
+        2221.4299257317443,
+        531.3997761595108
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1866748814311483,
+      -0.6192133091566966,
+      7.2598653850898,
+      -22.25578695717569
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

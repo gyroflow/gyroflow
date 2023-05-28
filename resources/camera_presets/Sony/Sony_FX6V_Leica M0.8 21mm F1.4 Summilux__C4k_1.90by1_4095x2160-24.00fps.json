@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX6V_Leica M0.8 21mm F1.4 Summilux__C4k_1.90by1_4095x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "Benoit Finck",
+  "camera_brand": "Sony",
+  "camera_model": "FX6V",
+  "lens_model": "Leica M0.8 21mm F1.4 Summilux",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7219703432448111,
+    "camera_matrix": [
+      [
+        2601.2638276510747,
+        0.0,
+        2034.975469521817
+      ],
+      [
+        0.0,
+        2601.691014448852,
+        1046.545277343149
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24341245839454517,
+      0.17074541603099155,
+      0.23415438327842591,
+      -0.193547006798666
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

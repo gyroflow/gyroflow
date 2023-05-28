@@ -1,0 +1,69 @@
+{
+  "name": "Walksnail_Nano_RunCam Phoenix 2 Nano__1080p_16by9_1920x1080-60.02fps",
+  "note": "",
+  "calibrated_by": "Marcin",
+  "camera_brand": "Walksnail",
+  "camera_model": "Nano",
+  "lens_model": "RunCam Phoenix 2 Nano",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 60.018299,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.24604080390567296,
+    "camera_matrix": [
+      [
+        885.0314681150726,
+        0.0,
+        977.3371644948446
+      ],
+      [
+        0.0,
+        883.9846301612,
+        541.9767878573313
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.05393597765920538,
+      -0.03258921052205093,
+      0.03067306876501403,
+      -0.004181286558060743
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

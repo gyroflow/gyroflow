@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_CANON FD 20mm_6K_6k_16by9_6480x3645-25.00fps",
+  "note": "Rehoused ZeroOptics CINE Lens",
+  "calibrated_by": "Angelo Felchle / CINEQUADS",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "CANON FD 20mm",
+  "camera_setting": "6K",
+  "calib_dimension": {
+    "w": 6480,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6480,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.1887807999100624,
+    "camera_matrix": [
+      [
+        5123.749461276907,
+        0.0,
+        3293.9466032055248
+      ],
+      [
+        0.0,
+        5123.164370246366,
+        1825.9328183215032
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2190163534775065,
+      0.34803716198305745,
+      -0.7406286365027381,
+      1.1032458972481003
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-14",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

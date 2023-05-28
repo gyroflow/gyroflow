@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO_Leica 28mm F2.8_6K_6k_1.90by1_6143x3240-23.98fps",
+  "note": "",
+  "calibrated_by": "Clayton Simoncic",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Leica 28mm F2.8",
+  "camera_setting": "6K",
+  "calib_dimension": {
+    "w": 6143,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6143,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8889970875537057,
+    "camera_matrix": [
+      [
+        6717.583407053985,
+        0.0,
+        3061.7054528017466
+      ],
+      [
+        0.0,
+        6719.081424161898,
+        1549.235348827456
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22927940105103145,
+      0.050036434001054696,
+      0.7223608371266647,
+      -0.6116204022481869
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

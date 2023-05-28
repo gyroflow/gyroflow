@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a1_14.00mm__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "marcello alongi",
+  "camera_brand": "Sony",
+  "camera_model": "a1",
+  "lens_model": "14.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.1950784677541328,
+    "camera_matrix": [
+      [
+        769.3646360914225,
+        0.0,
+        956.7205039233096
+      ],
+      [
+        0.0,
+        762.4980376834407,
+        538.3525768584536
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31708095369161776,
+      0.1762142026235423,
+      0.048659416841097425,
+      0.014552107438374248
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-1-14.00mm-1920x1080@25000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-14",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 14.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

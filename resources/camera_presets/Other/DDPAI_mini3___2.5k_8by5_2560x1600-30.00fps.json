@@ -1,0 +1,69 @@
+{
+  "name": "DDPAI_mini3___2.5k_8by5_2560x1600-30.00fps",
+  "note": "",
+  "calibrated_by": "BDH",
+  "camera_brand": "DDPAI",
+  "camera_model": "mini3",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1600
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1600
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1600
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7976794529992441,
+    "camera_matrix": [
+      [
+        1568.79914331079,
+        0.0,
+        1301.4968457471612
+      ],
+      [
+        0.0,
+        1564.4460375018964,
+        827.240871494391
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.09356108740913362,
+      -0.05280747863026621,
+      0.09468319764782324,
+      -0.058397057875487254
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

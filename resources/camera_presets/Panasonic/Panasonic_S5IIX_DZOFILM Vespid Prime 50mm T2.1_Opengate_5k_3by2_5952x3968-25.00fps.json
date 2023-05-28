@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_S5IIX_DZOFILM Vespid Prime 50mm T2.1_Opengate_5k_3by2_5952x3968-25.00fps",
+  "note": "",
+  "calibrated_by": "Tartaglia",
+  "camera_brand": "Panasonic",
+  "camera_model": "S5IIX",
+  "lens_model": "DZOFILM Vespid Prime 50mm T2.1",
+  "camera_setting": "Opengate",
+  "calib_dimension": {
+    "w": 5952,
+    "h": 3968
+  },
+  "orig_dimension": {
+    "w": 5952,
+    "h": 3968
+  },
+  "output_dimension": {
+    "w": 5952,
+    "h": 3968
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7628095117810366,
+    "camera_matrix": [
+      [
+        9136.023522245632,
+        0.0,
+        2888.5626872055977
+      ],
+      [
+        0.0,
+        9164.030867881947,
+        1972.0817547036324
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.16814544531238632,
+      -0.9897016332038842,
+      21.192944360944033,
+      -106.81155195631148
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-23",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

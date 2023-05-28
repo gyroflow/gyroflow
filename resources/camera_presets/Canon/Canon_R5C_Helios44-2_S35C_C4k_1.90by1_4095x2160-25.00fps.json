@@ -1,0 +1,69 @@
+{
+  "name": "Canon_R5C_Helios44-2_S35C_C4k_1.90by1_4095x2160-25.00fps",
+  "note": "0.71",
+  "calibrated_by": "lengwen",
+  "camera_brand": "Canon",
+  "camera_model": "R5C",
+  "lens_model": "Helios44-2",
+  "camera_setting": "S35C",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4355847137287327,
+    "camera_matrix": [
+      [
+        7120.429409596562,
+        0.0,
+        2143.447097492123
+      ],
+      [
+        0.0,
+        7138.582266685286,
+        999.1743590715756
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.037856764445567626,
+      27.686859553217413,
+      -1283.2210128037837,
+      23942.07824625238
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

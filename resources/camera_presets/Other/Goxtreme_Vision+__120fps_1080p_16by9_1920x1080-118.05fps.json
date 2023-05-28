@@ -1,0 +1,69 @@
+{
+  "name": "Goxtreme_Vision+__120fps_1080p_16by9_1920x1080-118.05fps",
+  "note": "",
+  "calibrated_by": "admin",
+  "camera_brand": "Goxtreme",
+  "camera_model": "Vision+",
+  "lens_model": "",
+  "camera_setting": "120fps",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 118.051521,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9456807422713362,
+    "camera_matrix": [
+      [
+        1062.717500135244,
+        0.0,
+        941.6355587255148
+      ],
+      [
+        0.0,
+        958.5926658353794,
+        525.5708558482253
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04880168029956283,
+      0.01048761867097004,
+      -0.04855551220960112,
+      0.04994410054879877
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

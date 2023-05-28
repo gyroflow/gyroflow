@@ -1,0 +1,69 @@
+{
+  "name": "DJI_FPV_dji fpv_automatique_4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "KEVIN THRASH",
+  "camera_brand": "DJI",
+  "camera_model": "FPV",
+  "lens_model": "dji fpv",
+  "camera_setting": "automatique",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.6708475620418726,
+    "camera_matrix": [
+      [
+        1521.447268647323,
+        0.0,
+        1921.5538013885568
+      ],
+      [
+        0.0,
+        1526.6308437451498,
+        951.8331419020108
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3876828005223577,
+      0.14906326161090047,
+      0.1530383575229617,
+      0.010019670947277385
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

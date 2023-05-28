@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX30_Sigma ART 18-35 1.8_shot on 35mm_4k_16by9_3840x2160-25.00fps",
+  "note": "shot on 35mm",
+  "calibrated_by": "Karol Mikina",
+  "camera_brand": "Sony",
+  "camera_model": "FX30",
+  "lens_model": "Sigma ART 18-35 1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5560150406173667,
+    "camera_matrix": [
+      [
+        5852.489512588116,
+        0.0,
+        1875.030506518806
+      ],
+      [
+        0.0,
+        5851.258165691973,
+        1054.9093966558733
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.27619756254680455,
+      2.047167167027742,
+      -27.384919905780645,
+      130.05601174884816
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-27",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 35.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

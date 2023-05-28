@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6K G2_Sigma art 11mm__6k_16by9_6144x3456-50.00fps",
+  "note": "",
+  "calibrated_by": "HiDrone",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6K G2",
+  "lens_model": "Sigma art 11mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.823325924318644,
+    "camera_matrix": [
+      [
+        2962.265296819293,
+        0.0,
+        3071.164079012723
+      ],
+      [
+        0.0,
+        2960.090574186023,
+        1772.5130392157785
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3055811810172784,
+      0.22055196948405523,
+      -0.2603122252475338,
+      0.21626644881844745
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "blackmagic-pocketcinemacamera6kg2-sigmaart-11mm-6144x3456@50000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 11.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

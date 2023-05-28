@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E10_Laowa 10mm f4 Cookie_1/60 Shutter Speed_4k_16by9_3840x2160-23.98fps",
+  "note": "1/60 Shutter Speed",
+  "calibrated_by": "Max Peters",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "Laowa 10mm f4 Cookie",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6152752263882785,
+    "camera_matrix": [
+      [
+        1717.7631967475083,
+        0.0,
+        1931.3702895289343
+      ],
+      [
+        0.0,
+        1720.978270126922,
+        1055.3650568113007
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31830660439233194,
+      0.08522474339215703,
+      0.056639676081872606,
+      0.08767449691873101
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-17",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

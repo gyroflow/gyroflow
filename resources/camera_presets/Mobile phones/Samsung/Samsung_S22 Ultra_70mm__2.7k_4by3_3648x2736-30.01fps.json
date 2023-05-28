@@ -1,0 +1,69 @@
+{
+  "name": "Samsung_S22 Ultra_70mm__2.7k_4by3_3648x2736-30.01fps",
+  "note": "",
+  "calibrated_by": "Andrea Ettore D'Elia",
+  "camera_brand": "Samsung",
+  "camera_model": "S22 Ultra",
+  "lens_model": "70mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3648,
+    "h": 2736
+  },
+  "orig_dimension": {
+    "w": 3648,
+    "h": 2736
+  },
+  "output_dimension": {
+    "w": 3648,
+    "h": 2736
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 30.009132,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8499672645478714,
+    "camera_matrix": [
+      [
+        7064.011583209024,
+        0.0,
+        1817.713948983349
+      ],
+      [
+        0.0,
+        7071.124537693334,
+        1401.6196776956554
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -1.3853604177258212,
+      62.634824418004584,
+      -943.63150422485,
+      5167.499182517597
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-25",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

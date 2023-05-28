@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7sIII_helios 44-2 aivascope_anamorphic_4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "JC",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "helios 44-2 aivascope",
+  "camera_setting": "anamorphic",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 2160
+  },
+  "frame_readout_time": 8.7,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.5,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 3.117984667499768,
+    "camera_matrix": [
+      [
+        3174.162503065065,
+        0.0,
+        1988.4386905576737
+      ],
+      [
+        0.0,
+        4867.8225871992345,
+        1103.026102089978
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05134104181799437,
+      -0.673822264969791,
+      2.0181558455636908,
+      -1.7578910346048455
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 58.0,
+  "crop_factor": 1.0,
+  "global_shutter": false
+}

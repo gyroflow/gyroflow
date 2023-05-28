@@ -1,0 +1,66 @@
+{
+  "name": "Redmi_Note 10 Pro__64 MP, f/1.9, 26mm (wide), 1/1.97\", 0.7µm_1080p_16by9_1920x1080-30.01fps",
+  "note": "",
+  "calibrated_by": "Goran Boskovic",
+  "camera_brand": "Redmi",
+  "camera_model": "Note 10 Pro",
+  "lens_model": "",
+  "camera_setting": "64 MP, f/1.9, 26mm (wide), 1/1.97\", 0.7µm",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.010643,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.312944153833093,
+    "camera_matrix": [
+      [
+        1746.1556522984813,
+        0.0,
+        954.24756723218
+      ],
+      [
+        0.0,
+        1743.1859315518195,
+        535.5677419473242
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.617286213663791,
+      -2.682803452539019,
+      17.392359674773942,
+      -36.67943954716101
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0-rc",
+  "date": "2023-04-14",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

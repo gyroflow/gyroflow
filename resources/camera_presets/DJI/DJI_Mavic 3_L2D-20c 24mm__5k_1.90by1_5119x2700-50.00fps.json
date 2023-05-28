@@ -1,0 +1,69 @@
+{
+  "name": "DJI_Mavic 3_L2D-20c 24mm__5k_1.90by1_5119x2700-50.00fps",
+  "note": "",
+  "calibrated_by": "Usuari",
+  "camera_brand": "DJI",
+  "camera_model": "Mavic 3",
+  "lens_model": "L2D-20c 24mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5119,
+    "h": 2700
+  },
+  "orig_dimension": {
+    "w": 5119,
+    "h": 2700
+  },
+  "output_dimension": {
+    "w": 5120,
+    "h": 2700
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9204080981727976,
+    "camera_matrix": [
+      [
+        3652.3404714032326,
+        0.0,
+        2548.3711559565136
+      ],
+      [
+        0.0,
+        3657.254821889763,
+        1338.7248257752383
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3421651507367583,
+      0.5305355444130901,
+      -1.9199092459534868,
+      2.7796438068729823
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-04",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

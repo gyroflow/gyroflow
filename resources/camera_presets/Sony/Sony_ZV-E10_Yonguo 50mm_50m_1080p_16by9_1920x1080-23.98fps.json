@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E10_Yonguo 50mm_50m_1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Teo Oliveira",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "Yonguo 50mm",
+  "camera_setting": "50m",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5824739579071366,
+    "camera_matrix": [
+      [
+        4327.643105176423,
+        0.0,
+        1077.9039902605025
+      ],
+      [
+        0.0,
+        4326.254019569472,
+        573.3315071167292
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30788517553378725,
+      -6.418257589769565,
+      116.29445254719911,
+      -741.3250641065008
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e10-a7d8b728-1920x1080@23976",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 50.0,
+  "crop_factor": 1.6,
+  "global_shutter": false
+}

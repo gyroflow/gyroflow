@@ -1,0 +1,69 @@
+{
+  "name": "Walksnail_Avatar Pro HD___1080p_16by9_1920x1080-60.03fps",
+  "note": "",
+  "calibrated_by": "Pavel Rybakov",
+  "camera_brand": "Walksnail",
+  "camera_model": "Avatar Pro HD",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 49,
+  "fps": 60.03207,
+  "crop": null,
+  "official": false,
+  "asymmetrical": true,
+  "fisheye_params": {
+    "RMS_error": 0.8461516027525877,
+    "camera_matrix": [
+      [
+        932.8897506036744,
+        0.0,
+        928.8860885148486
+      ],
+      [
+        0.0,
+        932.0961194416336,
+        571.5630867785419
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.027671052715488653,
+      -0.004355183182466551,
+      -0.007048869075278753,
+      0.0065426263430837395
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS 1100D_EFS 18-55mm__720p_16by9_1280x720-25.00fps",
+  "note": "",
+  "calibrated_by": "Daniel Größinger",
+  "camera_brand": "Canon",
+  "camera_model": "EOS 1100D",
+  "lens_model": "EFS 18-55mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6450431504138927,
+    "camera_matrix": [
+      [
+        1478.4613735775545,
+        0.0,
+        624.297567196929
+      ],
+      [
+        0.0,
+        1475.9232051393324,
+        375.0107286349699
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1946505244760725,
+      -0.16595926731501334,
+      4.983224130505395,
+      -15.984533313906908
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

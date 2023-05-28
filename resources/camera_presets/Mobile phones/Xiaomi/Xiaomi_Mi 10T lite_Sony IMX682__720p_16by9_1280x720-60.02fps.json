@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_Mi 10T lite_Sony IMX682__720p_16by9_1280x720-60.02fps",
+  "note": "",
+  "calibrated_by": "User",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 10T lite",
+  "lens_model": "Sony IMX682",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 60.024887,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3728976576051598,
+    "camera_matrix": [
+      [
+        808.6235607588602,
+        0.0,
+        629.4237196454778
+      ],
+      [
+        0.0,
+        812.3954963156418,
+        386.8608129723376
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4016221746335699,
+      -0.04518431403187389,
+      0.6324610677296065,
+      -0.7099240877233882
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-30",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

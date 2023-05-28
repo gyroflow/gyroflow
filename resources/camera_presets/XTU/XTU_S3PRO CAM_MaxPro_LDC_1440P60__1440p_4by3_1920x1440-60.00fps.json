@@ -1,0 +1,69 @@
+{
+  "name": "XTU_S3PRO CAM_MaxPro_LDC_1440P60__1440p_4by3_1920x1440-60.00fps",
+  "note": "",
+  "calibrated_by": "mjd",
+  "camera_brand": "XTU",
+  "camera_model": "S3PRO CAM",
+  "lens_model": "MaxPro_LDC_1440P60",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0013585948198749,
+    "camera_matrix": [
+      [
+        7298.5107319157805,
+        0.0,
+        785.3347541927134
+      ],
+      [
+        0.0,
+        7555.100172486174,
+        1628.0050506988496
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.320502846836939,
+      -49.217998677987914,
+      1746.1246014960768,
+      -18293.65803144676
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "xtu-s3procam-xtu/xtu_maxpro_ldc_1440p60_1440p_4by3_1920x1440-59.94fps-wide-1920x1440@60000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-18",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

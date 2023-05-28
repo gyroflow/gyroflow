@@ -1,0 +1,69 @@
+{
+  "name": "Caddx_Walnut___2.5k_4by3_2688x2016-59.94fps",
+  "note": "",
+  "calibrated_by": "Aleš Hybner",
+  "camera_brand": "Caddx",
+  "camera_model": "Walnut",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 2016
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 2016
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 2016
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5368887155370567,
+    "camera_matrix": [
+      [
+        881.4885631848084,
+        0.0,
+        1264.1514698206013
+      ],
+      [
+        0.0,
+        879.70374208828,
+        1020.7475952272292
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.21099406612580435,
+      -0.07798740710566056,
+      0.18254586051103455,
+      -0.09121572152335364
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-13",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

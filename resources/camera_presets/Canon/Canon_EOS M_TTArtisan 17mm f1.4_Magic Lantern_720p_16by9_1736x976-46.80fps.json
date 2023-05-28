@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M_TTArtisan 17mm f/1.4_Magic Lantern_720p_16by9_1736x976-46.80fps",
+  "note": "Bilal's Crop Mood",
+  "calibrated_by": "Ahmed Ma",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "TTArtisan 17mm f/1.4",
+  "camera_setting": "Magic Lantern",
+  "calib_dimension": {
+    "w": 1736,
+    "h": 976
+  },
+  "orig_dimension": {
+    "w": 1736,
+    "h": 976
+  },
+  "output_dimension": {
+    "w": 1736,
+    "h": 976
+  },
+  "frame_readout_time": 32.9,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 46.799999,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.43299063107693114,
+    "camera_matrix": [
+      [
+        1458.0234189262983,
+        0.0,
+        869.091578883248
+      ],
+      [
+        0.0,
+        1424.5936445236928,
+        514.7194122954189
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20689476369333085,
+      0.3099726996879812,
+      -0.33256123967935153,
+      0.758984939867858
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-27",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

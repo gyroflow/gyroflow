@@ -1,0 +1,68 @@
+{
+  "name": "Nikon_d3200_nikkor__720p_16by9_1280x720-50.00fps",
+  "note": "",
+  "calibrated_by": "Otetz_drakonov",
+  "camera_brand": "Nikon",
+  "camera_model": "d3200",
+  "lens_model": "nikkor",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.29357698546421734,
+    "camera_matrix": [
+      [
+        2064.892384397253,
+        0.0,
+        620.1873026106897
+      ],
+      [
+        0.0,
+        2068.8079470844173,
+        353.12965963625254
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12394449055180053,
+      -0.6617150585019552,
+      19.133845391737875,
+      -144.47511943420395
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

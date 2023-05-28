@@ -1,0 +1,69 @@
+{
+  "name": "Walksnail_Avatar Micro_Micro__1080p_16by9_1920x1080-60.02fps",
+  "note": "",
+  "calibrated_by": "Pavel Rybakov",
+  "camera_brand": "Walksnail",
+  "camera_model": "Avatar Micro",
+  "lens_model": "Micro",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 16.660779857783584,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 42,
+  "fps": 60.021156,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6014411105183997,
+    "camera_matrix": [
+      [
+        722.9662661657858,
+        0.0,
+        919.7217292016868
+      ],
+      [
+        0.0,
+        722.1356807125412,
+        530.5156889338446
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.026813434769217295,
+      0.0008231161801133582,
+      0.004510776751309983,
+      -0.003003830107278345
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

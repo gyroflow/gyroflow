@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_Helios 44-2, Canon Speedbooster_6K 17:9_6k_1.90by1_6910x3645-25.00fps",
+  "note": "",
+  "calibrated_by": "Mikołaj Szczepka",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Helios 44-2, Canon Speedbooster",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.3604369941271548,
+    "camera_matrix": [
+      [
+        10440.017512322533,
+        0.0,
+        3451.795843329186
+      ],
+      [
+        0.0,
+        10451.625477396548,
+        1809.873138290016
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24032210151088473,
+      2.9598666603713024,
+      -32.86045432327919,
+      178.8274762257891
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 58.0,
+  "crop_factor": null,
+  "global_shutter": true
+}

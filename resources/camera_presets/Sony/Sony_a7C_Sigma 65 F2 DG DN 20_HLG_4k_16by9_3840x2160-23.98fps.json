@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7C_Sigma 65 F2 DG DN 20_HLG_4k_16by9_3840x2160-23.98fps",
+  "note": "1/200",
+  "calibrated_by": "Theanea Theang",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "Sigma 65 F2 DG DN 20",
+  "camera_setting": "HLG",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": 50.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7441020059378992,
+    "camera_matrix": [
+      [
+        7794.322125295642,
+        0.0,
+        1967.4918945193667
+      ],
+      [
+        0.0,
+        7784.494238141382,
+        1082.1080455182955
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1563767981117185,
+      10.063043383739554,
+      -222.33425173797724,
+      1812.969470080146
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7c-7e0d487f-3840x2160@23976",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-10",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

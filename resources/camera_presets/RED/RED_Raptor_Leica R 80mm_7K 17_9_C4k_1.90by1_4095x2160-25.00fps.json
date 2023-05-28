@@ -1,0 +1,69 @@
+{
+  "name": "RED_Raptor_Leica R 80mm_7K 17:9_C4k_1.90by1_4095x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Adam Mach",
+  "camera_brand": "RED",
+  "camera_model": "Raptor",
+  "lens_model": "Leica R 80mm",
+  "camera_setting": "7K 17:9",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9350127219961264,
+    "camera_matrix": [
+      [
+        13367.61654807976,
+        0.0,
+        1844.3023352527637
+      ],
+      [
+        0.0,
+        13315.68392674421,
+        369.47369159471936
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6136992910858213,
+      -22.644046131876127,
+      1048.6292756198677,
+      -15873.438431834256
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

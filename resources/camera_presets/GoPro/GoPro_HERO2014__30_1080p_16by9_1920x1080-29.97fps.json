@@ -1,0 +1,69 @@
+{
+  "name": "GoPro_HERO2014__30_1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Fabio Meazza",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO2014",
+  "lens_model": "",
+  "camera_setting": "30",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7633591193508826,
+    "camera_matrix": [
+      [
+        844.4645397699302,
+        0.0,
+        937.824403827804
+      ],
+      [
+        0.0,
+        843.3793576510649,
+        547.9954463796612
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.037940638555142264,
+      0.09990858040096516,
+      -0.10395085607704006,
+      0.036012275610338505
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-22",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

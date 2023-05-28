@@ -1,0 +1,69 @@
+{
+  "name": "Sony_PXW-FX9V_Zeiss Super Speed MkIII 50mm t1.3__C4k_1.90by1_4095x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "Chad McClarnon",
+  "camera_brand": "Sony",
+  "camera_model": "PXW-FX9V",
+  "lens_model": "Zeiss Super Speed MkIII 50mm t1.3",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6382458159628354,
+    "camera_matrix": [
+      [
+        7743.153181080894,
+        0.0,
+        2123.9047132578476
+      ],
+      [
+        0.0,
+        7727.953855874608,
+        1057.467895060153
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.03418666221736356,
+      0.3492359264027717,
+      5.005573826636331,
+      -130.46314720092582
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

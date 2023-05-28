@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_Redmi Note 8___1080p_16by9_1920x1080-29.22fps",
+  "note": "",
+  "calibrated_by": "Dino Rico Bendanillo",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi Note 8",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.223124,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5264008644455562,
+    "camera_matrix": [
+      [
+        1418.1290459040206,
+        0.0,
+        963.0532088576008
+      ],
+      [
+        0.0,
+        1414.9551452674675,
+        528.2566185473488
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34110002595091027,
+      1.0053700200520248,
+      -4.167080864873963,
+      5.1439594000672555
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-30",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "XTU_S5k___4k_16by9_3840x2160-60.00fps",
+  "note": "",
+  "calibrated_by": "Administrator",
+  "camera_brand": "XTU",
+  "camera_model": "S5k",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.950539197843002,
+    "camera_matrix": [
+      [
+        1842.0472303979195,
+        0.0,
+        1838.8622672783083
+      ],
+      [
+        0.0,
+        1843.617976090469,
+        1075.966571646614
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.004402806893856206,
+      0.011734131485287689,
+      -0.01993033375225902,
+      0.010586679409891038
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-18",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

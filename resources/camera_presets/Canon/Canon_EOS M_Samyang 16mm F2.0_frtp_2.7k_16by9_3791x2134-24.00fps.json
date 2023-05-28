@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M_Samyang 16mm F2.0_frtp_2.7k_16by9_3791x2134-24.00fps",
+  "note": "16x9",
+  "calibrated_by": "Eos M Cinema",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "Samyang 16mm F2.0",
+  "camera_setting": "frtp",
+  "calib_dimension": {
+    "w": 3791,
+    "h": 2134
+  },
+  "orig_dimension": {
+    "w": 3791,
+    "h": 2134
+  },
+  "output_dimension": {
+    "w": 3792,
+    "h": 2134
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 98,
+  "fps": 24.000999,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.2338613629760498,
+    "camera_matrix": [
+      [
+        3892.1173534382265,
+        0.0,
+        1910.8246236218877
+      ],
+      [
+        0.0,
+        3900.8861493545182,
+        834.0046668157188
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23863923786842403,
+      0.180910869796912,
+      -0.20542478404906253,
+      1.047558113506494
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

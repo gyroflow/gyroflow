@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4K_Vespid Prime 40mm_Metabones speedbooster xl 0.64_C4k_1.90by1_4096x2160-24.00fps",
+  "note": "Metabones speedbooster xl 0.64",
+  "calibrated_by": "Jason Warriner",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4K",
+  "lens_model": "Vespid Prime 40mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.1776095275991345,
+    "camera_matrix": [
+      [
+        5610.299147416707,
+        0.0,
+        2033.015589565327
+      ],
+      [
+        0.0,
+        5629.494283066373,
+        1002.3916857053335
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.049929054394599645,
+      1.6473842333399575,
+      -12.456567613982278,
+      47.20114910593093
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "blackmagic-pocketcinemacamera4k-vespidprime-40mm-4096x2160@24000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-17",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 40.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

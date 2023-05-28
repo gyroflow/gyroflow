@@ -1,0 +1,69 @@
+{
+  "name": "GoPro_HERO11 Black_Narrow_HS Boost_5k_16by9_5312x2988-50.00fps",
+  "note": "HS Boost",
+  "calibrated_by": "Павел Пятигорский",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO11 Black",
+  "lens_model": "Narrow",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "orig_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "output_dimension": {
+    "w": 5312,
+    "h": 2988
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.3615678487535132,
+    "camera_matrix": [
+      [
+        4199.003792542436,
+        0.0,
+        2670.8819728828366
+      ],
+      [
+        0.0,
+        4202.053060386534,
+        1515.5508142566412
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3710195365814009,
+      0.23950452982383968,
+      -1.3372525074281392,
+      2.932727395526418
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero11black-narrow-5312x2988@50000-hsboost",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-31",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7IV_SEL90M28G__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Dominik Amrein",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "SEL90M28G",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8724891144690485,
+    "camera_matrix": [
+      [
+        10798.879768892417,
+        0.0,
+        1580.2098564626715
+      ],
+      [
+        0.0,
+        10756.190358206317,
+        1150.4449372733234
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2075695440849155,
+      1.1934594450369775,
+      2.9822171819238266,
+      -461.2012475192016
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7m4-90.00mm-3840x2160@25000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 90.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

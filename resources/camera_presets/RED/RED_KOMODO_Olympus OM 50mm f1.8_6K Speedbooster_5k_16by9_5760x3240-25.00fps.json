@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO_Olympus OM 50mm f1.8_6K Speedbooster_5k_16by9_5760x3240-25.00fps",
+  "note": "Canon Speedbooster 0.71x",
+  "calibrated_by": "Andrzej Asijuk",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO",
+  "lens_model": "Olympus OM 50mm f1.8",
+  "camera_setting": "6K Speedbooster",
+  "calib_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 19,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.20148473570258607,
+    "camera_matrix": [
+      [
+        8626.5362103625,
+        0.0,
+        2905.023127953601
+      ],
+      [
+        0.0,
+        8627.012328079383,
+        1610.7013350797424
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22437560794243097,
+      -0.06912043519492667,
+      4.7067618178040025,
+      -1.2012227341212545
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7IV_SEL2470GM2_70.00mm_4k_16by9_3840x2160-29.97fps",
+  "note": "70.00mm",
+  "calibrated_by": "Kian Boon Sim",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "SEL2470GM2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 26.8,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7805356191598836,
+    "camera_matrix": [
+      [
+        8344.949536372667,
+        0.0,
+        1969.5522837588371
+      ],
+      [
+        0.0,
+        8375.548823264353,
+        1096.1393073615473
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6350486212335466,
+      5.769614985183247,
+      -120.31749976181774,
+      1000.0061782476348
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7m4-70.00mm-3840x2160@29970",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-27",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 70.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

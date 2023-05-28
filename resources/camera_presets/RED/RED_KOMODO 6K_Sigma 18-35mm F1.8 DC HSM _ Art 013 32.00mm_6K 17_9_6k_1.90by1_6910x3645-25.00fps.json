@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_Sigma 18-35mm F1.8 DC HSM | Art 013 32.00mm_6K 17:9_6k_1.90by1_6910x3645-25.00fps",
+  "note": "35mm",
+  "calibrated_by": "David Lougedo",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Sigma 18-35mm F1.8 DC HSM | Art 013 32.00mm",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0861196356908709,
+    "camera_matrix": [
+      [
+        8069.99187907027,
+        0.0,
+        3469.1485477780648
+      ],
+      [
+        0.0,
+        8073.380728546856,
+        1790.8477009686087
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.34142875781291326,
+      1.1641678171440275,
+      -6.392716735810153,
+      20.862292487302355
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "red-komodo6k-18-35mmf1.8dchsm|art013-32.00mm-6144x3240@0",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-18",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

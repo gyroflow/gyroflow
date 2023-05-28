@@ -1,0 +1,69 @@
+{
+  "name": "RED_V-RAPTOR 8K VV_Laowa 45 proteus 2x anamorphic_7K  2x_8k_2.67by1_13230x4961-25.00fps",
+  "note": "",
+  "calibrated_by": "teodor görtz",
+  "camera_brand": "RED",
+  "camera_model": "V-RAPTOR 8K VV",
+  "lens_model": "Laowa 45 proteus 2x anamorphic",
+  "camera_setting": "7K  2x",
+  "calib_dimension": {
+    "w": 13230,
+    "h": 4961
+  },
+  "orig_dimension": {
+    "w": 13230,
+    "h": 4961
+  },
+  "output_dimension": {
+    "w": 10080,
+    "h": 3780
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 2.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 7.587490538174414,
+    "camera_matrix": [
+      [
+        30890.57441359223,
+        0.0,
+        -4768.753417648004
+      ],
+      [
+        0.0,
+        32146.681299405365,
+        -3902.5310227275663
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.5578526546102954,
+      3.2955561893236163,
+      -8.459343086713965,
+      8.769692881499907
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

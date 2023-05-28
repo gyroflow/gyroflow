@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX3_Laowa 12mm Zero-D_12mm T4.0_4k_16by9_3840x2160-25.00fps",
+  "note": "12mm T4.0",
+  "calibrated_by": "Luca Schroeder",
+  "camera_brand": "Sony",
+  "camera_model": "FX3",
+  "lens_model": "Laowa 12mm Zero-D",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0957540296162054,
+    "camera_matrix": [
+      [
+        1514.708350687088,
+        0.0,
+        1904.256860476481
+      ],
+      [
+        0.0,
+        1514.1357951373736,
+        1062.0965792612124
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3097373481893277,
+      0.19686021273409757,
+      -0.03683768211516697,
+      0.07290957464575555
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

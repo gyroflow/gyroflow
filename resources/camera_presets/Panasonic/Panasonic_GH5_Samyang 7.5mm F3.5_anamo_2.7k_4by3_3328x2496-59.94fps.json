@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_GH5_Samyang 7.5mm F3.5_anamo_2.7k_4by3_3328x2496-59.94fps",
+  "note": "",
+  "calibrated_by": "TAKASHI MATSUDA",
+  "camera_brand": "Panasonic",
+  "camera_model": "GH5",
+  "lens_model": "Samyang 7.5mm F3.5",
+  "camera_setting": "anamo",
+  "calib_dimension": {
+    "w": 3328,
+    "h": 2496
+  },
+  "orig_dimension": {
+    "w": 3328,
+    "h": 2496
+  },
+  "output_dimension": {
+    "w": 3328,
+    "h": 2496
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8586481364412599,
+    "camera_matrix": [
+      [
+        1461.3342950833046,
+        0.0,
+        1671.9264332027728
+      ],
+      [
+        0.0,
+        1463.6032201575986,
+        1247.0652609243557
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.01601288012205631,
+      -0.0018020980111691568,
+      -0.0028049682515689923,
+      0.0005580977688711548
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-22",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

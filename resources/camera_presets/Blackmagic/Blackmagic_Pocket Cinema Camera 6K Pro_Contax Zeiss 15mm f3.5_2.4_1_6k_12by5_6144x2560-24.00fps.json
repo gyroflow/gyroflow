@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6K Pro_Contax Zeiss 15mm f3.5_2.4:1_6k_12by5_6144x2560-24.00fps",
+  "note": "2.4:1",
+  "calibrated_by": "Dylan",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6K Pro",
+  "lens_model": "Contax Zeiss 15mm f3.5",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 2560
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 2560
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 2560
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.790159565976956,
+    "camera_matrix": [
+      [
+        4134.55674377951,
+        0.0,
+        3064.3297929504856
+      ],
+      [
+        0.0,
+        4130.558349182545,
+        1228.1178409105926
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.21025020666520344,
+      0.4688597588076851,
+      -1.1646339166457205,
+      1.6523935351014774
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

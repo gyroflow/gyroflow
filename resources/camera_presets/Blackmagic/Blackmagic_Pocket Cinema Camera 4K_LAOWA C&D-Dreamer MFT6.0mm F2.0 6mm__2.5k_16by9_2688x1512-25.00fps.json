@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4K_LAOWA C&D-Dreamer MFT6.0mm F2.0 6mm__2.5k_16by9_2688x1512-25.00fps",
+  "note": "",
+  "calibrated_by": "Timon Terzić",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4K",
+  "lens_model": "LAOWA C&D-Dreamer MFT6.0mm F2.0 6mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 32,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.2846442454806857,
+    "camera_matrix": [
+      [
+        1372.6654017144515,
+        0.0,
+        1330.4271578276976
+      ],
+      [
+        0.0,
+        1373.2187260318954,
+        775.6584885696407
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3554993310874143,
+      -0.031027264750312197,
+      0.49383973424651423,
+      -0.37908924761148055
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "blackmagic-pocketcinemacamera4k-laowac&d-dreamermft6.0mmf2.0-6mm-2688x1512@25000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 6.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

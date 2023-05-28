@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX30_Rokinon 24mm T1.5_60f_4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Alex Hahnebach",
+  "camera_brand": "Sony",
+  "camera_model": "FX30",
+  "lens_model": "Rokinon 24mm T1.5",
+  "camera_setting": "60f",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4509129374427763,
+    "camera_matrix": [
+      [
+        4876.158135968498,
+        0.0,
+        1954.150364424024
+      ],
+      [
+        0.0,
+        4873.807743872526,
+        1090.244117626155
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2265711026669288,
+      0.8804477152678275,
+      -8.521565180492821,
+      32.0304299140873
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

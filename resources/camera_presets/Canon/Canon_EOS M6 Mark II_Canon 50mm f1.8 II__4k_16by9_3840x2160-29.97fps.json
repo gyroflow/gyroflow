@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M6 Mark II_Canon 50mm f/1.8 II__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Marshall Guillory",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M6 Mark II",
+  "lens_model": "Canon 50mm f/1.8 II",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7073595414811951,
+    "camera_matrix": [
+      [
+        10853.213146285674,
+        0.0,
+        1633.923470994342
+      ],
+      [
+        0.0,
+        10847.543815311024,
+        1206.1360297943252
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0664658085975999,
+      38.55105944952226,
+      -1766.2276330233317,
+      26167.44992420315
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

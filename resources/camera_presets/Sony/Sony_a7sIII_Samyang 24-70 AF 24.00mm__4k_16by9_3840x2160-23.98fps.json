@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7sIII_Samyang 24-70 AF 24.00mm__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "nils dressel",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "Samyang 24-70 AF 24.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5983786952549732,
+    "camera_matrix": [
+      [
+        2674.985904241584,
+        0.0,
+        1925.947966397724
+      ],
+      [
+        0.0,
+        2673.945426650833,
+        1058.894081070446
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2039432980028772,
+      -0.005437922520826601,
+      0.424092849236616,
+      -0.16711863509407118
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 24.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_Cooke S4 Mini 35mm_6K_6k_16by9_6480x3645-23.98fps",
+  "note": "",
+  "calibrated_by": "Mark Helsel",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Cooke S4 Mini 35mm",
+  "camera_setting": "6K",
+  "calib_dimension": {
+    "w": 6480,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6480,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.056076670759594,
+    "camera_matrix": [
+      [
+        8488.130992050621,
+        0.0,
+        3252.8847792854235
+      ],
+      [
+        0.0,
+        8489.147329412435,
+        1727.578594403198
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.162135207900874,
+      0.5257557058184172,
+      -5.384468326686467,
+      31.839733738675868
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-23",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

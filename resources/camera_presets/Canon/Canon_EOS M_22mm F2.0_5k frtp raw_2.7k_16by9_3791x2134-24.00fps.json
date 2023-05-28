@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M_22mm F2.0_5k frtp raw_2.7k_16by9_3791x2134-24.00fps",
+  "note": "",
+  "calibrated_by": "Eos M Cinema",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "22mm F2.0",
+  "camera_setting": "5k frtp raw",
+  "calib_dimension": {
+    "w": 3791,
+    "h": 2134
+  },
+  "orig_dimension": {
+    "w": 3791,
+    "h": 2134
+  },
+  "output_dimension": {
+    "w": 3792,
+    "h": 2134
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 97,
+  "fps": 24.000999,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.475890204965515,
+    "camera_matrix": [
+      [
+        5115.040603677613,
+        0.0,
+        1888.2928532612973
+      ],
+      [
+        0.0,
+        5098.492885966753,
+        947.3231876906744
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.27531231076285084,
+      1.1598145194522549,
+      -7.866704175621302,
+      27.79200627990672
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-22",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

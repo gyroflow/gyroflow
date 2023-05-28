@@ -1,0 +1,69 @@
+{
+  "name": "Canon_M50_7artisans 7.5mm__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Enginair",
+  "camera_brand": "Canon",
+  "camera_model": "M50",
+  "lens_model": "7artisans 7.5mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3156741999527131,
+    "camera_matrix": [
+      [
+        714.5946534799779,
+        0.0,
+        958.6008875849636
+      ],
+      [
+        0.0,
+        715.2265891714043,
+        563.7158057971025
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.04526726645666732,
+      0.007293527842888093,
+      -0.000820777675949506,
+      0.0003880840015995247
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

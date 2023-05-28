@@ -1,0 +1,69 @@
+{
+  "name": "Apple_iPhone 11__1920 x_1080p_16by9_1920x1080-59.96fps",
+  "note": "",
+  "calibrated_by": "Hely Costa Aguiar",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 11",
+  "lens_model": "",
+  "camera_setting": "1920 x",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.961189,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.501739083932532,
+    "camera_matrix": [
+      [
+        1614.3775161769413,
+        0.0,
+        952.849287394603
+      ],
+      [
+        0.0,
+        1614.6747527817868,
+        518.2521571029296
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4768393901134545,
+      0.7859632777732439,
+      -12.369260845680175,
+      34.759664207631616
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

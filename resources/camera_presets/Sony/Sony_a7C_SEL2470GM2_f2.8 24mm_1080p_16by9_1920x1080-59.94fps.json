@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7C_SEL2470GM2_f2.8 24mm_1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "太朗竹田",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "SEL2470GM2",
+  "camera_setting": "f2.8 24mm",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.27368382253344486,
+    "camera_matrix": [
+      [
+        1375.110805564487,
+        0.0,
+        958.0112640437196
+      ],
+      [
+        0.0,
+        1374.673620692682,
+        520.8759089303898
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2124490486346683,
+      -0.1412067824962142,
+      2.390488178709336,
+      -5.5620893295825065
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7c-a5e4f435-1920x1080@59940",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-30",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

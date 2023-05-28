@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4K_SLRmagic 8mm__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Cinedrone Productions",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4K",
+  "lens_model": "SLRmagic 8mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 3.009612100982689,
+    "camera_matrix": [
+      [
+        2753.114782533248,
+        0.0,
+        1919.4616486860152
+      ],
+      [
+        0.0,
+        3090.3456712436237,
+        584.0286026429436
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.7322911988495021,
+      1.4965866070509817,
+      -5.16269618067833,
+      16.996752755764916
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "blackmagic-pocketcinemacamera4k-74mm-3840x2160@25000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 74.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

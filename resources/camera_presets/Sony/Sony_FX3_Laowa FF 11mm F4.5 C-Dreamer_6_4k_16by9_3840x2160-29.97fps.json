@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX3_Laowa FF 11mm F4.5 C-Dreamer_6_4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Dennis Hope",
+  "camera_brand": "Sony",
+  "camera_model": "FX3",
+  "lens_model": "Laowa FF 11mm F4.5 C-Dreamer",
+  "camera_setting": "6",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.4058421204859275,
+    "camera_matrix": [
+      [
+        1534.616045396246,
+        0.0,
+        1914.646210231958
+      ],
+      [
+        0.0,
+        1537.6908807093089,
+        1084.2235059370237
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3759164039113558,
+      -0.1082474356318923,
+      0.6789149318678547,
+      -0.303167625627672
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "RunCam_HYBRID__P30_1080p_16by9_1920x1080-30.00fps",
+  "note": "",
+  "calibrated_by": "ZJY",
+  "camera_brand": "RunCam",
+  "camera_model": "HYBRID",
+  "lens_model": "",
+  "camera_setting": "P30",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7515079707954864,
+    "camera_matrix": [
+      [
+        976.4635551474648,
+        0.0,
+        953.7083222390928
+      ],
+      [
+        0.0,
+        975.1418576112776,
+        516.15926160674
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04300054603407116,
+      0.029533861733152204,
+      -0.050295815931242695,
+      0.021047472131140648
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "DJI_FPV___1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Dean L. Strawberry",
+  "camera_brand": "DJI",
+  "camera_model": "FPV",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4576779190450528,
+    "camera_matrix": [
+      [
+        936.4087721742108,
+        0.0,
+        933.936461008928
+      ],
+      [
+        0.0,
+        936.3703546874608,
+        530.9817480524118
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08883355666783764,
+      0.011475660938394744,
+      -0.02986740144796902,
+      0.010400444675504416
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-04",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

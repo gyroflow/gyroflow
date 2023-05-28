@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_BGH1_Olympus 9-18@14__C4k_1.90by1_4095x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "csk",
+  "camera_brand": "Panasonic",
+  "camera_model": "BGH1",
+  "lens_model": "Olympus 9-18@14",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9483749977979534,
+    "camera_matrix": [
+      [
+        2993.0351519668384,
+        0.0,
+        2041.7126545141753
+      ],
+      [
+        0.0,
+        2987.6233653202926,
+        1109.2056569844865
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3351202892248619,
+      -0.1925932765979463,
+      2.543126704481076,
+      -4.957340368828112
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-03-16",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

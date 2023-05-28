@@ -1,0 +1,69 @@
+{
+  "name": "Foxeer_Lite___480p_4by3_640x480-24.97fps",
+  "note": "",
+  "calibrated_by": "Alvin Aufar",
+  "camera_brand": "Foxeer",
+  "camera_model": "Lite",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 640,
+    "h": 480
+  },
+  "orig_dimension": {
+    "w": 640,
+    "h": 480
+  },
+  "output_dimension": {
+    "w": 640,
+    "h": 480
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 24.97163,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.29886145394357444,
+    "camera_matrix": [
+      [
+        331.60038704743187,
+        0.0,
+        324.8532130412209
+      ],
+      [
+        0.0,
+        461.932989220219,
+        156.31893638569565
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.042540908466208414,
+      -0.03497317535869627,
+      -0.035666103623201884,
+      0.10269061330904758
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

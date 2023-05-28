@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4K_OLYMPUS M.12-50mm F3.5-6.3 50mm__2.5k_16by9_2688x1512-30.00fps",
+  "note": "",
+  "calibrated_by": "SUMGLE",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4K",
+  "lens_model": "OLYMPUS M.12-50mm F3.5-6.3 50mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8642642433699648,
+    "camera_matrix": [
+      [
+        13934.789020179353,
+        0.0,
+        1748.5382569010108
+      ],
+      [
+        0.0,
+        13858.30941274444,
+        746.8340285363049
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      1.8385135189230748,
+      -249.0111299901487,
+      22218.07470292126,
+      -679795.726865551
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "blackmagic-pocketcinemacamera4k-lumixgvario14-45/f3.5-5.6-50mm-2688x1512@30000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-13",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 50.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

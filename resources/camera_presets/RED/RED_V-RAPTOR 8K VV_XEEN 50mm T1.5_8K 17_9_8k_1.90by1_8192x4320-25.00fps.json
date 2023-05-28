@@ -1,0 +1,69 @@
+{
+  "name": "RED_V-RAPTOR 8K VV_XEEN 50mm T1.5_8K 17:9_8k_1.90by1_8192x4320-25.00fps",
+  "note": "",
+  "calibrated_by": "Daniel Boist",
+  "camera_brand": "RED",
+  "camera_model": "V-RAPTOR 8K VV",
+  "lens_model": "XEEN 50mm T1.5",
+  "camera_setting": "8K 17:9",
+  "calib_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.9962639137447171,
+    "camera_matrix": [
+      [
+        10670.307865525812,
+        0.0,
+        4036.7156668185503
+      ],
+      [
+        0.0,
+        10670.769010319911,
+        2164.079959272098
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.000401557368748184,
+      3.78881084569522,
+      -38.18367668491282,
+      135.60033148797706
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

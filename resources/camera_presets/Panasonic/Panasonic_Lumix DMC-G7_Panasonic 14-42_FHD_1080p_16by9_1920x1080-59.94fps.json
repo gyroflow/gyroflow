@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_Lumix DMC-G7_Panasonic 14-42_FHD_1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "LeoBar",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix DMC-G7",
+  "lens_model": "Panasonic 14-42",
+  "camera_setting": "FHD",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5277656725966594,
+    "camera_matrix": [
+      [
+        1621.931837421895,
+        0.0,
+        958.6588189776954
+      ],
+      [
+        0.0,
+        1619.4690063117505,
+        539.3992854196531
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33591575725656725,
+      -0.33205788416368487,
+      2.476579841375115,
+      -4.074076987027903
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-18",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

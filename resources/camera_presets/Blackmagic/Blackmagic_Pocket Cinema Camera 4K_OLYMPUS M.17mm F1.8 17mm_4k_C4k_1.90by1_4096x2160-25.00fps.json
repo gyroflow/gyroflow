@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4K_OLYMPUS M.17mm F1.8 17mm_4k_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Illes Istvan",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4K",
+  "lens_model": "OLYMPUS M.17mm F1.8 17mm",
+  "camera_setting": "4k",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.3789375726591668,
+    "camera_matrix": [
+      [
+        3629.088495627556,
+        0.0,
+        2003.5162238737855
+      ],
+      [
+        0.0,
+        3628.491077956892,
+        1017.8793075119078
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10705113982644206,
+      -0.1050649643697794,
+      0.23197703904434197,
+      -0.3741714970466888
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "blackmagic-pocketcinemacamera4k-olympusm.17mmf1.8-17mm-4096x2160@25000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 17.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

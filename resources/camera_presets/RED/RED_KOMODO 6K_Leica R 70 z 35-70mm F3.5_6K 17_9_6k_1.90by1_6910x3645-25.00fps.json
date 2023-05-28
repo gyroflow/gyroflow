@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_Leica R 70 z 35-70mm F3.5_6K 17:9_6k_1.90by1_6910x3645-25.00fps",
+  "note": "",
+  "calibrated_by": "Ascaro.tv",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Leica R 70 z 35-70mm F3.5",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.160249168639443,
+    "camera_matrix": [
+      [
+        12438.4058804932,
+        0.0,
+        3461.04500089016
+      ],
+      [
+        0.0,
+        12435.2125850658,
+        1754.2030201578427
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.39151714163548545,
+      2.174459044320628,
+      -5.137225056192326,
+      125.06494811213852
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-21",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

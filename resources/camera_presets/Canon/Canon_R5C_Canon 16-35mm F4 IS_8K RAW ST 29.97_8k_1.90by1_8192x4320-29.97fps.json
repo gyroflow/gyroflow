@@ -1,0 +1,68 @@
+{
+  "name": "Canon_R5C_Canon 16-35mm F4 IS_8K RAW ST 29.97_8k_1.90by1_8192x4320-29.97fps",
+  "note": "@16mm, IS OFF",
+  "calibrated_by": "Ryan Jackson",
+  "camera_brand": "Canon",
+  "camera_model": "R5C",
+  "lens_model": "Canon 16-35mm F4 IS",
+  "camera_setting": "8K RAW ST 29.97",
+  "calib_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "frame_readout_time": 15.5,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6443844827403161,
+    "camera_matrix": [
+      [
+        3780.530752719456,
+        0.0,
+        4136.140174112767
+      ],
+      [
+        0.0,
+        3780.0019128842014,
+        2118.379365401396
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.18028175393696133,
+      0.5002780802934993,
+      -0.611502757037781,
+      0.4228549126319693
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-03-09",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

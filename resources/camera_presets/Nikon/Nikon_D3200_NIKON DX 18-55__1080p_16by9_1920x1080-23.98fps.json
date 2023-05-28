@@ -1,0 +1,69 @@
+{
+  "name": "Nikon_D3200_NIKON DX 18-55__1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Dj Hinds",
+  "camera_brand": "Nikon",
+  "camera_model": "D3200",
+  "lens_model": "NIKON DX 18-55",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4440833996986098,
+    "camera_matrix": [
+      [
+        1590.507839814438,
+        0.0,
+        931.9940059167418
+      ],
+      [
+        0.0,
+        1586.8476380004508,
+        565.5343837439063
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2479386927154742,
+      0.14360201181467386,
+      -0.4455480874647475,
+      0.713269752778871
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Samsung_S10e___1080p_16by9_1920x1080-29.58fps",
+  "note": "",
+  "calibrated_by": "Malcolm Greig",
+  "camera_brand": "Samsung",
+  "camera_model": "S10e",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.581083,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5750475234310483,
+    "camera_matrix": [
+      [
+        1510.019875143188,
+        0.0,
+        961.4347310366086
+      ],
+      [
+        0.0,
+        1508.9309477129614,
+        515.3521520290828
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.7847993385509766,
+      -3.3739913198659375,
+      11.58892203576307,
+      -13.003184376116042
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

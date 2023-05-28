@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX3_Samyang 135mm t2.2_no stabilization_4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Nikan Ansari Esfahani",
+  "camera_brand": "Sony",
+  "camera_model": "FX3",
+  "lens_model": "Samyang 135mm t2.2",
+  "camera_setting": "no stabilization",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9937401154008264,
+    "camera_matrix": [
+      [
+        15041.06364536428,
+        0.0,
+        2169.9175438237953
+      ],
+      [
+        0.0,
+        15054.44769699677,
+        892.9999664360531
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.0716658309371877,
+      75.62388366181213,
+      -3971.707107342214,
+      58472.224563263386
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-31",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 135.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

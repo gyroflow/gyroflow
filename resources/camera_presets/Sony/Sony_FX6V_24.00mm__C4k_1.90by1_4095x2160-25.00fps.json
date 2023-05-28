@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX6V_24.00mm__C4k_1.90by1_4095x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Matjaz Pinter",
+  "camera_brand": "Sony",
+  "camera_model": "FX6V",
+  "lens_model": "24.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9746332155763128,
+    "camera_matrix": [
+      [
+        2983.360325279889,
+        0.0,
+        2055.2840494874945
+      ],
+      [
+        0.0,
+        2974.79977029764,
+        1066.5109702691557
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2849633982643098,
+      0.38448765782219024,
+      -0.7984079940251105,
+      1.2497538019905798
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-09",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 24.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

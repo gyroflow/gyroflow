@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_G9_H-NS043__4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Verix",
+  "camera_brand": "Panasonic",
+  "camera_model": "G9",
+  "lens_model": "H-NS043",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 11.0,
+  "gyro_lpf": 0.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0908317166405253,
+    "camera_matrix": [
+      [
+        13670.2895244394,
+        0.0,
+        1554.505727303129
+      ],
+      [
+        0.0,
+        13699.938482751566,
+        808.9819018032739
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4262252677602293,
+      -24.53182371767714,
+      988.3694394880156,
+      -14534.296494374452
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-28",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 42.2,
+  "crop_factor": 2.0,
+  "global_shutter": false
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Panasonic_G9_Leica 12-60mm__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "christian pisecki",
+  "camera_brand": "Panasonic",
+  "camera_model": "G9",
+  "lens_model": "Leica 12-60mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5860384714062019,
+    "camera_matrix": [
+      [
+        2713.047955964886,
+        0.0,
+        1949.338862261612
+      ],
+      [
+        0.0,
+        2712.0415803825636,
+        1013.335007503954
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31074295038767935,
+      -0.04625466264661461,
+      0.45625298349711224,
+      -0.30264339617238184
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-04-21",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

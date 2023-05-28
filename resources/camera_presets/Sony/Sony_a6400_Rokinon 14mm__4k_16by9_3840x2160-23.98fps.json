@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a6400_Rokinon 14mm__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Sam Pfeiffer",
+  "camera_brand": "Sony",
+  "camera_model": "a6400",
+  "lens_model": "Rokinon 14mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8942187768766817,
+    "camera_matrix": [
+      [
+        2377.631077272346,
+        0.0,
+        1919.7811164442464
+      ],
+      [
+        0.0,
+        2378.899464471145,
+        1026.9414312056126
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22658253566560585,
+      -0.12557961935798656,
+      0.5845969511581771,
+      -0.3822460461217609
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-10",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

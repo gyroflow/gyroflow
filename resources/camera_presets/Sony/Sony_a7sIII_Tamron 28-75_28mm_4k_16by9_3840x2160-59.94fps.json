@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7sIII_Tamron 28-75_28mm_4k_16by9_3840x2160-59.94fps",
+  "note": "28mm",
+  "calibrated_by": "Brad Bogdan",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "Tamron 28-75",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7044900813994551,
+    "camera_matrix": [
+      [
+        3096.9012689378014,
+        0.0,
+        1919.833109510785
+      ],
+      [
+        0.0,
+        3304.9589645829046,
+        1073.3648028445743
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2065381557350109,
+      0.2517075523719545,
+      -0.3875020983223552,
+      0.979490992784678
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-18",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 28.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

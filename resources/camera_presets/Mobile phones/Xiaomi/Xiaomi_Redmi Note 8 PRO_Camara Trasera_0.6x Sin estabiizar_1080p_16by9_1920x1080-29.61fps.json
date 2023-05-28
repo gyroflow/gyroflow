@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_Redmi Note 8 PRO_Camara Trasera_0.6x Sin estabiizar_1080p_16by9_1920x1080-29.61fps",
+  "note": "0.6x 1080 30FPS NoEIS",
+  "calibrated_by": "Estanislao García Rey",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Redmi Note 8 PRO",
+  "lens_model": "Camara Trasera",
+  "camera_setting": "0.6x Sin estabiizar",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.606379,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.34498853659678097,
+    "camera_matrix": [
+      [
+        877.4008765867768,
+        0.0,
+        967.6043728838024
+      ],
+      [
+        0.0,
+        877.3488640756823,
+        557.2482752948252
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2621219978138853,
+      -0.0022023081723079405,
+      0.5868914835639301,
+      -0.5027914335806937
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-13",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_RF24-70mm F2.8 L IS USM 24.00mm_6K 17:9_6k_1.90by1_6910x3645-25.00fps",
+  "note": "",
+  "calibrated_by": "Massimiliano Serra",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "RF24-70mm F2.8 L IS USM 24.00mm",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.236674530251807,
+    "camera_matrix": [
+      [
+        6243.063735016881,
+        0.0,
+        3448.9513704589217
+      ],
+      [
+        0.0,
+        6242.750195649808,
+        1797.2888031148889
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1960830683568298,
+      0.49812760337929385,
+      -2.2338396066751045,
+      5.275908249766941
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "red-komodo6k-rf24-70mmf2.8lisusm-24.00mm-6144x3240@0",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-14",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 24.0,
+  "crop_factor": null,
+  "global_shutter": true
+}

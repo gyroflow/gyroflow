@@ -1,0 +1,69 @@
+{
+  "name": "XTU_S3PRO CAM_MaxPro_NO-LDC_2.7k30__2.5k_16by9_2688x1512-30.00fps",
+  "note": "",
+  "calibrated_by": "yx xiao",
+  "camera_brand": "XTU",
+  "camera_model": "S3PRO CAM",
+  "lens_model": "MaxPro_NO-LDC_2.7k30",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6885637316063162,
+    "camera_matrix": [
+      [
+        1502.7416553972696,
+        0.0,
+        1367.1395773499523
+      ],
+      [
+        0.0,
+        1501.0174006731067,
+        707.4281232732947
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04536280599714688,
+      -0.010409335507404782,
+      0.027955295397080117,
+      -0.02011177264224809
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "xtu-s3procam-xtu/xtu_maxpro_no-ldc_2.7k30_2.7k_16by9_2720x1530-29.97fps-wide-2688x1512@30000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

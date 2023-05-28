@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M_Tamron 15-30 F2.8_15mm_5k_2.39by1_5208x2180-23.98fps",
+  "note": "VC off Manual Focus Anam",
+  "calibrated_by": "Manuel_Carrera",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "Tamron 15-30 F2.8",
+  "camera_setting": "15mm",
+  "calib_dimension": {
+    "w": 5208,
+    "h": 2180
+  },
+  "orig_dimension": {
+    "w": 5208,
+    "h": 2180
+  },
+  "output_dimension": {
+    "w": 5208,
+    "h": 2180
+  },
+  "frame_readout_time": 16.3,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.983,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 2.3059474640553246,
+    "camera_matrix": [
+      [
+        3927.875174839032,
+        0.0,
+        2651.053177392364
+      ],
+      [
+        0.0,
+        3941.425566493347,
+        1017.847913024485
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2935519702189095,
+      0.6143689940810346,
+      -2.233876166821166,
+      3.2685935663275707
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

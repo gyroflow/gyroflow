@@ -1,0 +1,69 @@
+{
+  "name": "Sigma_fp_Helios-44м-4 2/58mm h113-a_, , 12 bit CDNG_4k_16by9_3840x2160-24.00fps",
+  "note": "3200 ISO, 172.8 Shutter Angle",
+  "calibrated_by": "Viv Jos",
+  "camera_brand": "Sigma",
+  "camera_model": "fp",
+  "lens_model": "Helios-44м-4 2/58mm h113-a",
+  "camera_setting": ", , 12 bit CDNG",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7801960311276525,
+    "camera_matrix": [
+      [
+        6866.941001445353,
+        0.0,
+        1942.0320224368245
+      ],
+      [
+        0.0,
+        6856.276982241054,
+        1073.606555124875
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.41560522910152325,
+      -2.5601919611218413,
+      54.41920146738902,
+      -394.2122259055862
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

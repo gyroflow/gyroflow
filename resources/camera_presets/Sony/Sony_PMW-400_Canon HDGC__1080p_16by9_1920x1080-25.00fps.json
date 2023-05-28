@@ -1,0 +1,69 @@
+{
+  "name": "Sony_PMW-400_Canon HDGC__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "RTP",
+  "camera_brand": "Sony",
+  "camera_model": "PMW-400",
+  "lens_model": "Canon HDGC",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.44458176825931395,
+    "camera_matrix": [
+      [
+        1903.4224707722888,
+        0.0,
+        900.3037490109463
+      ],
+      [
+        0.0,
+        1911.6381784833577,
+        561.1732580134245
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1507655987396044,
+      1.3850000125067314,
+      -7.067315517384815,
+      16.584796727928527
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-09",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

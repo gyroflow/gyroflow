@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E10_Minolta AF 50mm (75mm crop) f1.4__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "CGBOOK",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "Minolta AF 50mm (75mm crop) f1.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 50,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.2053669762594783,
+    "camera_matrix": [
+      [
+        9709.689048958846,
+        0.0,
+        2182.261146653091
+      ],
+      [
+        0.0,
+        9686.4703129446,
+        1059.7926794975929
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.003591699126932287,
+      12.7856010752345,
+      396.84103634587336,
+      -23715.819235552564
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

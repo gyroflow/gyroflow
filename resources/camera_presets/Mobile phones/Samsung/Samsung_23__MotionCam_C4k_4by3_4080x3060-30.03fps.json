@@ -1,0 +1,69 @@
+{
+  "name": "Samsung_23__MotionCam_C4k_4by3_4080x3060-30.03fps",
+  "note": "",
+  "calibrated_by": "Sergey Shirgin",
+  "camera_brand": "Samsung",
+  "camera_model": "23",
+  "lens_model": "",
+  "camera_setting": "MotionCam",
+  "calib_dimension": {
+    "w": 4080,
+    "h": 3060
+  },
+  "orig_dimension": {
+    "w": 4080,
+    "h": 3060
+  },
+  "output_dimension": {
+    "w": 4080,
+    "h": 3060
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 0.9580645161290322,
+  "input_vertical_stretch": 1.0,
+  "num_images": 16,
+  "fps": 30.029665,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9278564354673156,
+    "camera_matrix": [
+      [
+        2599.4788243821617,
+        0.0,
+        2044.4666264219184
+      ],
+      [
+        0.0,
+        2598.1301267468825,
+        1521.33711981117
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5421101132234628,
+      -0.8351767036080042,
+      2.3843359609299837,
+      -2.041900140366645
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-18",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 1.7,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_HDR-AS200V_ZEISS® Tessar®_PS_1080p_16by9_1920x1080-59.94fps",
+  "note": "1/2.3-inch back-illuminated Exmor R® CMOS sensor",
+  "calibrated_by": "Roman TR",
+  "camera_brand": "Sony",
+  "camera_model": "HDR-AS200V",
+  "lens_model": "ZEISS® Tessar®",
+  "camera_setting": "PS",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4598961607841068,
+    "camera_matrix": [
+      [
+        1154.6916536403653,
+        0.0,
+        981.765175218504
+      ],
+      [
+        0.0,
+        1155.639803263522,
+        552.7147511509305
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.05169466493496102,
+      -0.0041299441346352135,
+      0.028843931122704555,
+      -0.05200541409411795
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-23",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

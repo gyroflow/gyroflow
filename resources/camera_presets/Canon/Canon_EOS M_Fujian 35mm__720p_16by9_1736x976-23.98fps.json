@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M_Fujian 35mm__720p_16by9_1736x976-23.98fps",
+  "note": "",
+  "calibrated_by": "user",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "Fujian 35mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1736,
+    "h": 976
+  },
+  "orig_dimension": {
+    "w": 1736,
+    "h": 976
+  },
+  "output_dimension": {
+    "w": 1736,
+    "h": 976
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.98,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3732359264683279,
+    "camera_matrix": [
+      [
+        3081.4562366312366,
+        0.0,
+        869.4370657309673
+      ],
+      [
+        0.0,
+        3078.5234866634787,
+        486.3903683059118
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5425869436634868,
+      -0.19853418707841564,
+      22.703667573446257,
+      -126.81669711243713
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

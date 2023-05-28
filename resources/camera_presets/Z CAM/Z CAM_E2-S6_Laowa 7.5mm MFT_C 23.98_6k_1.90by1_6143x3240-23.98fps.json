@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2-S6_Laowa 7.5mm MFT_C 23.98_6k_1.90by1_6143x3240-23.98fps",
+  "note": "no rolling shutter correction",
+  "calibrated_by": "Luke Connor",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-S6",
+  "lens_model": "Laowa 7.5mm MFT",
+  "camera_setting": "C 23.98",
+  "calib_dimension": {
+    "w": 6143,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6143,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9953227555481668,
+    "camera_matrix": [
+      [
+        2059.09189654181,
+        0.0,
+        3151.304081536802
+      ],
+      [
+        0.0,
+        2059.5953503545256,
+        1538.07025215143
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3304432863791288,
+      0.09993901961728402,
+      -0.0031588676400339834,
+      0.06726498753297169
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

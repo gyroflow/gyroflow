@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E10_Samyang AF 24mm F2.8 FE_4k 25p_1080p_16by9_1920x1080-50.00fps",
+  "note": "FF lens on APS-C sensor",
+  "calibrated_by": "CentralPier9",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "Samyang AF 24mm F2.8 FE",
+  "camera_setting": "4k 25p",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4654520804477938,
+    "camera_matrix": [
+      [
+        2069.244341788618,
+        0.0,
+        954.156556674384
+      ],
+      [
+        0.0,
+        2067.4335387375672,
+        549.7366408496359
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31696772249025634,
+      -0.2391292043827322,
+      2.648777875413759,
+      -4.227650947988915
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e10-11c8aacb-1920x1080@50000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-07",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

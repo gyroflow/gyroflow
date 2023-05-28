@@ -1,0 +1,69 @@
+{
+  "name": "Caddx_Nebula Pro Micro_2.1mm f/2.1__480p_4by3_960x720-60.00fps",
+  "note": "",
+  "calibrated_by": "Fynn Hübner",
+  "camera_brand": "Caddx",
+  "camera_model": "Nebula Pro Micro",
+  "lens_model": "2.1mm f/2.1",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3309686129584725,
+    "camera_matrix": [
+      [
+        449.2986109774435,
+        0.0,
+        478.33834713325615
+      ],
+      [
+        0.0,
+        448.7648488989283,
+        383.7726204837855
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.0254070123664574,
+      -0.0061287339206388194,
+      0.021781386729643765,
+      -0.012462435010771943
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

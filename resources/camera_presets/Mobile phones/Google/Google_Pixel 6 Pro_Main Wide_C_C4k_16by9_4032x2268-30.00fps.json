@@ -1,0 +1,69 @@
+{
+  "name": "Google_Pixel 6 Pro_Main Wide_C_C4k_16by9_4032x2268-30.00fps",
+  "note": "24mm f/1.85",
+  "calibrated_by": "GrumpyGuy",
+  "camera_brand": "Google",
+  "camera_model": "Pixel 6 Pro",
+  "lens_model": "Main Wide",
+  "camera_setting": "C",
+  "calib_dimension": {
+    "w": 4032,
+    "h": 2268
+  },
+  "orig_dimension": {
+    "w": 4032,
+    "h": 2268
+  },
+  "output_dimension": {
+    "w": 4032,
+    "h": 2268
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 30.000135,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3500351768468854,
+    "camera_matrix": [
+      [
+        1902.0747761717876,
+        0.0,
+        1987.777308124608
+      ],
+      [
+        0.0,
+        1906.3175401457345,
+        1133.918842843417
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3625706225903462,
+      -0.20056307832322265,
+      0.9664271922442892,
+      -0.5245062859795965
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

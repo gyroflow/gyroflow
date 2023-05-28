@@ -1,0 +1,69 @@
+{
+  "name": "Apple_iPhone 13_Wide angle_FHD 60_1080p_16by9_1920x1080-59.97fps",
+  "note": "iPhone 13 FHD 60FPS 16:9",
+  "calibrated_by": "Aditya kn",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 13",
+  "lens_model": "Wide angle",
+  "camera_setting": "FHD 60",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 59.968838,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4502371093177871,
+    "camera_matrix": [
+      [
+        1720.541800897392,
+        0.0,
+        952.4998907247788
+      ],
+      [
+        0.0,
+        1717.7657755236637,
+        548.897482368813
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6429530492797632,
+      -2.70724869241925,
+      11.473413352746912,
+      -15.709952190098464
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

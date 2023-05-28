@@ -1,0 +1,69 @@
+{
+  "name": "BETAFPV_HD_X65HD___1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "Robert Wolfgang Lange",
+  "camera_brand": "BETAFPV",
+  "camera_model": "HD_X65HD",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2763845747143113,
+    "camera_matrix": [
+      [
+        834.7625889687638,
+        0.0,
+        955.6366491783822
+      ],
+      [
+        0.0,
+        835.5859318775372,
+        534.9807104513727
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.00800279878362301,
+      -0.0865395149453271,
+      0.028958528614587316,
+      0.04192402737968397
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

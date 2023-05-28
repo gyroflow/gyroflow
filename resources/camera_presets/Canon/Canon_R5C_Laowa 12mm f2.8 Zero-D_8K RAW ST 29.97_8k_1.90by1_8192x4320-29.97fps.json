@@ -1,0 +1,68 @@
+{
+  "name": "Canon_R5C_Laowa 12mm f/2.8 Zero-D_8K RAW ST 29.97_8k_1.90by1_8192x4320-29.97fps",
+  "note": "Full Frame",
+  "calibrated_by": "Ryan Jackson",
+  "camera_brand": "Canon",
+  "camera_model": "R5C",
+  "lens_model": "Laowa 12mm f/2.8 Zero-D",
+  "camera_setting": "8K RAW ST 29.97",
+  "calib_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "orig_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "output_dimension": {
+    "w": 8192,
+    "h": 4320
+  },
+  "frame_readout_time": 15.5,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7027872795946494,
+    "camera_matrix": [
+      [
+        2848.4496433393306,
+        0.0,
+        4049.345549032502
+      ],
+      [
+        0.0,
+        2850.9693158984164,
+        2104.805846388146
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30432852303112773,
+      0.199527187412246,
+      -0.04349577790601876,
+      0.0661403234638825
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "2023-03-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

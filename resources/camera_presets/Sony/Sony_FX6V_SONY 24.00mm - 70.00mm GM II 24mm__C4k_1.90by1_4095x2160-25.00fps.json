@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX6V_SONY 24.00mm - 70.00mm GM II 24mm__C4k_1.90by1_4095x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Cas",
+  "camera_brand": "Sony",
+  "camera_model": "FX6V",
+  "lens_model": "SONY 24.00mm - 70.00mm GM II 24mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8041423955231026,
+    "camera_matrix": [
+      [
+        2992.502149190453,
+        0.0,
+        2049.8875835586136
+      ],
+      [
+        0.0,
+        2917.9240816888514,
+        1089.680590784672
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30845025928441255,
+      0.04054557166713407,
+      0.7335466623472963,
+      -1.1267282446664328
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 24.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

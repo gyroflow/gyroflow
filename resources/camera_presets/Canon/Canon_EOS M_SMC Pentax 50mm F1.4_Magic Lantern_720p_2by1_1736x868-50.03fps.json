@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M_SMC Pentax 50mm F1.4_Magic Lantern_720p_2by1_1736x868-50.03fps",
+  "note": "Bilal's Crop Mood",
+  "calibrated_by": "Ahmed Ma",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "SMC Pentax 50mm F1.4",
+  "camera_setting": "Magic Lantern",
+  "calib_dimension": {
+    "w": 1736,
+    "h": 868
+  },
+  "orig_dimension": {
+    "w": 1736,
+    "h": 868
+  },
+  "output_dimension": {
+    "w": 1736,
+    "h": 868
+  },
+  "frame_readout_time": 14.1,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 50.030998,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5578667399158939,
+    "camera_matrix": [
+      [
+        4230.5242858605325,
+        0.0,
+        873.4111466572042
+      ],
+      [
+        0.0,
+        4145.641652359709,
+        481.0107941808231
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.073238525364413,
+      11.730317550528891,
+      -388.4390961783405,
+      3746.5607367413386
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 50.0,
+  "crop_factor": 1.61,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_TokinaATXi  11-20 T3.1 at 20mm_6K 17:9_6k_1.90by1_6910x3645-24.00fps",
+  "note": "20mm",
+  "calibrated_by": "Mario AV",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "TokinaATXi  11-20 T3.1 at 20mm",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8499517646840998,
+    "camera_matrix": [
+      [
+        4914.028899100707,
+        0.0,
+        3454.0393682243007
+      ],
+      [
+        0.0,
+        4916.057529626931,
+        1867.163662428358
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33988427614410616,
+      0.17740646189996792,
+      -0.2849462162420702,
+      0.639124104207487
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 20.0,
+  "crop_factor": null,
+  "global_shutter": true
+}

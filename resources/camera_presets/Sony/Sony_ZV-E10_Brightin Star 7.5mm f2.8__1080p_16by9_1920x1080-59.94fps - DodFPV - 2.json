@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E10_Brightin Star 7.5mm f2.8__1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "DodFPV",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "Brightin Star 7.5mm f2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": 50.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.39773960081208287,
+    "camera_matrix": [
+      [
+        674.7103676912584,
+        0.0,
+        968.812757727036
+      ],
+      [
+        0.0,
+        674.1538294725475,
+        538.4871269776388
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.023460349924355688,
+      0.03670029560678298,
+      -0.03497755073194416,
+      0.016285821593166303
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-23",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 7.5,
+  "crop_factor": 1.5,
+  "global_shutter": false
+}

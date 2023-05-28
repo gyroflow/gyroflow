@@ -1,0 +1,69 @@
+{
+  "name": "Kinefinity_MAVO-LF_Samyang 50mm F1.4__6k_3by2_6015x3984-25.00fps",
+  "note": "",
+  "calibrated_by": "Sound Scavenger",
+  "camera_brand": "Kinefinity",
+  "camera_model": "MAVO-LF",
+  "lens_model": "Samyang 50mm F1.4",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6015,
+    "h": 3984
+  },
+  "orig_dimension": {
+    "w": 6015,
+    "h": 3984
+  },
+  "output_dimension": {
+    "w": 6016,
+    "h": 3984
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.051017903090106,
+    "camera_matrix": [
+      [
+        9155.411507035053,
+        0.0,
+        2990.5327798393796
+      ],
+      [
+        0.0,
+        8938.742718939218,
+        1922.1972173632923
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.061783106277406345,
+      1.6307824558189508,
+      -22.95648019799611,
+      118.65074515781376
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-14",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

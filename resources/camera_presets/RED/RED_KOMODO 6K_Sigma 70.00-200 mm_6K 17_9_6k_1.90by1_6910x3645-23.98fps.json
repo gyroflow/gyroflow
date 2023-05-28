@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_Sigma 70.00-200 mm_6K 17:9_6k_1.90by1_6910x3645-23.98fps",
+  "note": "",
+  "calibrated_by": "Dennis Trushechkin",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Sigma 70.00-200 mm",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9324632681690412,
+    "camera_matrix": [
+      [
+        19749.94937311182,
+        0.0,
+        3562.8525184291134
+      ],
+      [
+        0.0,
+        19590.31622542328,
+        1617.480996568867
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.21014512829772192,
+      -18.870468110859957,
+      1012.316779470578,
+      -16820.277011179
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-13",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 70.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_Meike FF Cine 50mm, Canon RF Speedbooster,_6K 17:9,_6k_1.90by1_6910x3645-25.00fps",
+  "note": "",
+  "calibrated_by": "Mikołaj Szczepka",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Meike FF Cine 50mm, Canon RF Speedbooster,",
+  "camera_setting": "6K 17:9,",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 34,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.8310423659842736,
+    "camera_matrix": [
+      [
+        9188.083421890904,
+        0.0,
+        3443.1498811316433
+      ],
+      [
+        0.0,
+        9198.364903011514,
+        1835.896263704306
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1818706725292713,
+      1.19291204286186,
+      -7.068795281730311,
+      32.66937073098667
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

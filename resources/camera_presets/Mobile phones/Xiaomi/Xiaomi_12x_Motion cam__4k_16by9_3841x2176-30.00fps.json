@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_12x_Motion cam__4k_16by9_3841x2176-30.00fps",
+  "note": "",
+  "calibrated_by": "Mirko v.s",
+  "camera_brand": "Xiaomi",
+  "camera_model": "12x",
+  "lens_model": "Motion cam",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3841,
+    "h": 2176
+  },
+  "orig_dimension": {
+    "w": 3841,
+    "h": 2176
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2176
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 30.000156,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3802794987155332,
+    "camera_matrix": [
+      [
+        2716.9362073826296,
+        0.0,
+        1900.8875168752968
+      ],
+      [
+        0.0,
+        2713.5352347935163,
+        1075.3268088388347
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4971245995858538,
+      -0.9747427796066646,
+      3.588125847076711,
+      -3.9445597204333698
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

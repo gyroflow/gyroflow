@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX6V_SLR Magic microprime 35mm__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Jimmy Chow",
+  "camera_brand": "Sony",
+  "camera_model": "FX6V",
+  "lens_model": "SLR Magic microprime 35mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 8.7,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6516482153028966,
+    "camera_matrix": [
+      [
+        4239.674943643959,
+        0.0,
+        1922.799021718292
+      ],
+      [
+        0.0,
+        4238.67941493732,
+        1064.1465039668003
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2016932329364783,
+      1.3629127229739348,
+      -13.459556832669165,
+      49.61949085732231
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-18",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

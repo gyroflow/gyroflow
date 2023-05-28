@@ -1,0 +1,68 @@
+{
+  "name": "Sony_FX6V_16.00mm_16-35 variable GM_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "16-35 variable GM",
+  "calibrated_by": "Rudi Browning",
+  "camera_brand": "Sony",
+  "camera_model": "FX6V",
+  "lens_model": "16.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 8.7,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2403482253775529,
+    "camera_matrix": [
+      [
+        1946.5008390702612,
+        0.0,
+        2070.8654822425874
+      ],
+      [
+        0.0,
+        1945.9843735567424,
+        1059.9906927570328
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33750230797433073,
+      0.013293975297072347,
+      0.34386789862415407,
+      -0.2127200866473547
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.4.2",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

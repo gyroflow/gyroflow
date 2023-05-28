@@ -1,0 +1,68 @@
+{
+  "name": "Walksnail_Avatar Wide___720p_4by3_1440x1080-60.02fps",
+  "note": "",
+  "calibrated_by": "小",
+  "camera_brand": "Walksnail",
+  "camera_model": "Avatar Wide",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1440,
+    "h": 810
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.019001,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2097629048299663,
+    "camera_matrix": [
+      [
+        716.2058074831865,
+        0.0,
+        751.3355526103113
+      ],
+      [
+        0.0,
+        716.0415979765017,
+        519.3995623933429
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.010417823603942462,
+      -0.07546384774237827,
+      0.061022923258585875,
+      -0.021597653554916826
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "walksnail-fpvcam-wide-1440x1080@60019",
+  "calibrator_version": "1.4.2",
+  "date": "2023-03-30",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null
+}

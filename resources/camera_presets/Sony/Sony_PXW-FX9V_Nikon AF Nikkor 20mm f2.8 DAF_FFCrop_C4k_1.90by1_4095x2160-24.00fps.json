@@ -1,0 +1,69 @@
+{
+  "name": "Sony_PXW-FX9V_Nikon AF Nikkor 20mm f2.8 DAF_FFCrop_C4k_1.90by1_4095x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "Chad McClarnon",
+  "camera_brand": "Sony",
+  "camera_model": "PXW-FX9V",
+  "lens_model": "Nikon AF Nikkor 20mm f2.8 DAF",
+  "camera_setting": "FFCrop",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6753412642309577,
+    "camera_matrix": [
+      [
+        2902.440793916217,
+        0.0,
+        2069.4916916314614
+      ],
+      [
+        0.0,
+        2846.398045020864,
+        1090.4586771762126
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.1914535460597493,
+      0.29721537040630286,
+      -0.49079365779930073,
+      0.8403939593824162
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

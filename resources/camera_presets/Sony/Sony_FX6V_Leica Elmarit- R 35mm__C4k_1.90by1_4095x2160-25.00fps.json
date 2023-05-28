@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX6V_Leica Elmarit- R 35mm__C4k_1.90by1_4095x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Jakub Urbanski",
+  "camera_brand": "Sony",
+  "camera_model": "FX6V",
+  "lens_model": "Leica Elmarit- R 35mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5968511024083671,
+    "camera_matrix": [
+      [
+        4285.216021818769,
+        0.0,
+        2067.7406425440195
+      ],
+      [
+        0.0,
+        4286.327616478248,
+        1026.4482912872036
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22365517081434083,
+      0.7476752775252574,
+      -3.9048627702354626,
+      10.223466407438671
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

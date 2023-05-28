@@ -1,0 +1,69 @@
+{
+  "name": "Sony_PXW-FX9V_Zeiss Super Speed MkIII 25mm T1.3_FFCrop5k_C4k_1.90by1_4095x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "Chad McClarnon",
+  "camera_brand": "Sony",
+  "camera_model": "PXW-FX9V",
+  "lens_model": "Zeiss Super Speed MkIII 25mm T1.3",
+  "camera_setting": "FFCrop5k",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 16,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6530373195712545,
+    "camera_matrix": [
+      [
+        3576.7754943409245,
+        0.0,
+        2037.4824934535
+      ],
+      [
+        0.0,
+        3579.4798841074653,
+        1069.8207457714584
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.18211809180239116,
+      0.3307518947732733,
+      -1.0425672857244417,
+      2.720967340266459
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-22",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

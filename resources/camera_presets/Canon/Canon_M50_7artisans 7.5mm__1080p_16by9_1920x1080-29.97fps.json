@@ -1,0 +1,69 @@
+{
+  "name": "Canon_M50_7artisans 7.5mm__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Patrick White",
+  "camera_brand": "Canon",
+  "camera_model": "M50",
+  "lens_model": "7artisans 7.5mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.32285459440725467,
+    "camera_matrix": [
+      [
+        714.1274750002689,
+        0.0,
+        958.9898050723046
+      ],
+      [
+        0.0,
+        714.8761432681553,
+        563.8710551605179
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.04218757810120665,
+      0.014096844506345067,
+      -0.006295078316815588,
+      0.0020187656776388487
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

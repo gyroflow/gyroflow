@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_RF35mm F1.8 MACRO IS STM 35.00mm_6K 17:9_6k_1.90by1_6910x3645-23.98fps",
+  "note": "",
+  "calibrated_by": "Craig Beckta",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "RF35mm F1.8 MACRO IS STM 35.00mm",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.813197803194089,
+    "camera_matrix": [
+      [
+        9168.41018593391,
+        0.0,
+        3482.416908911826
+      ],
+      [
+        0.0,
+        9172.33054956457,
+        1804.0814615095655
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.28676223701969505,
+      -0.8906538824485372,
+      12.691152610665622,
+      -56.04306635111675
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "red-komodo6k-rf35mmf1.8macroisstm-35.00mm-6144x3240@0",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-18",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 35.0,
+  "crop_factor": null,
+  "global_shutter": true
+}

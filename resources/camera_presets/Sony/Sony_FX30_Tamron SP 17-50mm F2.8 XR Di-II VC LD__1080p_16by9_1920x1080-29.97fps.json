@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX30_Tamron SP 17-50mm F/2.8 XR Di-II VC LD__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Lukas Antti",
+  "camera_brand": "Sony",
+  "camera_model": "FX30",
+  "lens_model": "Tamron SP 17-50mm F/2.8 XR Di-II VC LD",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": true,
+  "fisheye_params": {
+    "RMS_error": 0.762097966597818,
+    "camera_matrix": [
+      [
+        3620.2812414521854,
+        0.0,
+        934.1868228241564
+      ],
+      [
+        0.0,
+        3619.876595590187,
+        550.0071735359127
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.34423273687719086,
+      41.52979380105891,
+      -1158.6530546500987,
+      11303.448316997286
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilme-fx30-17.00mm-1920x1080@29970",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-18",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 17.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

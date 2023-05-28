@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4K_7.5mm_1/200_C4k_1.90by1_4096x2160-60.00fps",
+  "note": "",
+  "calibrated_by": "félix LLORENS",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4K",
+  "lens_model": "7.5mm",
+  "camera_setting": "1/200",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0658947211556118,
+    "camera_matrix": [
+      [
+        1646.5388391975323,
+        0.0,
+        2045.25613571602
+      ],
+      [
+        0.0,
+        1647.0990520772104,
+        1051.5955923418603
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3055031070637645,
+      0.16735176857385192,
+      -0.09848578753928672,
+      0.1053397714006681
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "blackmagic-pocketcinemacamera4k-10mm-4096x2160@60000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-20",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 10.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_G9_9mm Pana Leica DG H-X09__4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Verix",
+  "camera_brand": "Panasonic",
+  "camera_model": "G9",
+  "lens_model": "9mm Pana Leica DG H-X09",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.4,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7972979025151598,
+    "camera_matrix": [
+      [
+        2831.085503353228,
+        0.0,
+        1877.788778689798
+      ],
+      [
+        0.0,
+        2819.4391596395553,
+        1062.2399882992736
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3204278363177604,
+      0.202449303718837,
+      -0.3639228860392476,
+      0.5445122389242987
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-25",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 9.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

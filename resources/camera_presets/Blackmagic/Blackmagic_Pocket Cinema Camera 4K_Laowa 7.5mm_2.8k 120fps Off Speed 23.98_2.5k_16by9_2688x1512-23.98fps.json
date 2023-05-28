@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 4K_Laowa 7.5mm_2.8k 120fps Off Speed 23.98_2.5k_16by9_2688x1512-23.98fps",
+  "note": "",
+  "calibrated_by": "Ian Tunney",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 4K",
+  "lens_model": "Laowa 7.5mm",
+  "camera_setting": "2.8k 120fps Off Speed 23.98",
+  "calib_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "orig_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "output_dimension": {
+    "w": 2688,
+    "h": 1512
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.976028,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8001279570712869,
+    "camera_matrix": [
+      [
+        1688.191798238137,
+        0.0,
+        1320.649651598662
+      ],
+      [
+        0.0,
+        1687.925896856247,
+        777.1175908481398
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3048494328632174,
+      0.35282405558975594,
+      -0.8119734778188372,
+      0.9176020944302028
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "blackmagic-pocketcinemacamera4k-16mm-2688x1512@23976",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-25",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 16.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

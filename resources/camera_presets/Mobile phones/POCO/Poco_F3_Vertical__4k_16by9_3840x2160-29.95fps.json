@@ -1,0 +1,69 @@
+{
+  "name": "Poco_F3_Vertical__4k_16by9_3840x2160-29.95fps",
+  "note": "",
+  "calibrated_by": "Rubens Gabriel",
+  "camera_brand": "Poco",
+  "camera_model": "F3",
+  "lens_model": "Vertical",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 2160,
+    "h": 3840
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": 0.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.946743,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0212137224945692,
+    "camera_matrix": [
+      [
+        3742.225300986818,
+        0.0,
+        1981.0199159131269
+      ],
+      [
+        0.0,
+        3513.7660741528725,
+        1096.2200927831543
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5863201604307324,
+      -2.029275055414455,
+      9.148684830346264,
+      -7.962062021158771
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

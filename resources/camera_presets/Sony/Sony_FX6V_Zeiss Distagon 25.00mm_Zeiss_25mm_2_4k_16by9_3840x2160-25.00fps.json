@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX6V_Zeiss Distagon 25.00mm_Zeiss_25mm_2_4k_16by9_3840x2160-25.00fps",
+  "note": "Zeiss_25mm_2",
+  "calibrated_by": "Ruppert, Peter",
+  "camera_brand": "Sony",
+  "camera_model": "FX6V",
+  "lens_model": "Zeiss Distagon 25.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6249800608762796,
+    "camera_matrix": [
+      [
+        2254.3924568698853,
+        0.0,
+        1875.5944231117735
+      ],
+      [
+        0.0,
+        2250.396210037439,
+        1041.3851874423945
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32961393516975585,
+      0.10610798939635548,
+      0.17389795730242014,
+      -0.10396013877512351
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilme-fx6v-25.00mm-3840x2160@25000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-17",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 25.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

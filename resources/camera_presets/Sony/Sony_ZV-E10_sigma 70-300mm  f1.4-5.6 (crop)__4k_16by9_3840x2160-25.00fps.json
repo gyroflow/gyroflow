@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E10_sigma 70-300mm  f1.4-5.6 (crop)__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "CGBOOK",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "sigma 70-300mm  f1.4-5.6 (crop)",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 23,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7272137947003826,
+    "camera_matrix": [
+      [
+        104864.32624802426,
+        0.0,
+        3599.4202659673488
+      ],
+      [
+        0.0,
+        119519.19750084702,
+        1292.931272553674
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -5.7303587310756425,
+      -22471.846176448493,
+      69244236.4310815,
+      -48205058142.28754
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-01",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

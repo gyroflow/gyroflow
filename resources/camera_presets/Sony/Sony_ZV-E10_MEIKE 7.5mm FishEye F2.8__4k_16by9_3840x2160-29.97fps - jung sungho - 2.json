@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E10_MEIKE 7.5mm FishEye F2.8__4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "jung sungho",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "MEIKE 7.5mm FishEye F2.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 33.37,
+  "gyro_lpf": 60.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 29,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 4.600561660960946,
+    "camera_matrix": [
+      [
+        1740.2752246653204,
+        0.0,
+        1868.032589991148
+      ],
+      [
+        0.0,
+        1732.1808263636278,
+        1115.974415902801
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.031100232390514373,
+      0.05724145369725359,
+      -0.0500169582272541,
+      0.015746208970182855
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 7.5,
+  "crop_factor": null,
+  "global_shutter": false
+}

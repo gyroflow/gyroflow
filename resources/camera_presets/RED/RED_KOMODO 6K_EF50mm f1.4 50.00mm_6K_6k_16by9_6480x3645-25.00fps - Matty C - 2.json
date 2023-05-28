@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_EF50mm f/1.4 50.00mm_6K_6k_16by9_6480x3645-25.00fps",
+  "note": "",
+  "calibrated_by": "Matty C",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "EF50mm f/1.4 50.00mm",
+  "camera_setting": "6K",
+  "calib_dimension": {
+    "w": 6480,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6480,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.1470095922987853,
+    "camera_matrix": [
+      [
+        12733.603328181967,
+        0.0,
+        3281.669784845235
+      ],
+      [
+        0.0,
+        12737.514268415774,
+        1699.3703856458628
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.10434663338100482,
+      3.6632361862292,
+      -77.6245345537472,
+      561.2137131522467
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 50.0,
+  "crop_factor": null,
+  "global_shutter": true
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Hawkeye_Firefly Whoop Split_165 degrees_60_720p_16by9_1280x720-60.00fps",
+  "note": "",
+  "calibrated_by": "WizzX",
+  "camera_brand": "Hawkeye",
+  "camera_model": "Firefly Whoop Split",
+  "lens_model": "165 degrees",
+  "camera_setting": "60",
+  "calib_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 1280,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.34346464931894494,
+    "camera_matrix": [
+      [
+        638.0604081547788,
+        0.0,
+        646.9454934870271
+      ],
+      [
+        0.0,
+        637.9020707846896,
+        375.1591309736224
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.06609998451041334,
+      0.023679555539892774,
+      -0.040297109430200706,
+      0.016790229998419545
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7IV_SEL2470GM2_24.00mm_4k_16by9_3840x2160-59.94fps",
+  "note": "24.00mm",
+  "calibrated_by": "Kian Boon Sim",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "SEL2470GM2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 12.8,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5596352896752638,
+    "camera_matrix": [
+      [
+        4043.989226542915,
+        0.0,
+        1910.6310703581128
+      ],
+      [
+        0.0,
+        4040.504361015898,
+        1013.4243310123984
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20024206528298752,
+      0.1262112317396283,
+      -0.0531370366758694,
+      0.9362136350726696
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-27",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 24.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

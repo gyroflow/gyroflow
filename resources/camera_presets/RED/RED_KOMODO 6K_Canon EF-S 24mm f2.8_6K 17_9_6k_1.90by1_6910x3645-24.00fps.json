@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_Canon EF-S 24mm f/2.8_6K 17:9_6k_1.90by1_6910x3645-24.00fps",
+  "note": "",
+  "calibrated_by": "Marco Joe Fazio",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Canon EF-S 24mm f/2.8",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.635370841032509,
+    "camera_matrix": [
+      [
+        6276.36644601782,
+        0.0,
+        3507.6541166494258
+      ],
+      [
+        0.0,
+        6278.288721660815,
+        1850.962999042333
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.19169260854367945,
+      0.3200944901844703,
+      -0.902210911183045,
+      2.1920374360919026
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "red-komodo6k-ef-s24mmf/2.8stm-24.00mm-6144x3240@0",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 24.0,
+  "crop_factor": null,
+  "global_shutter": true
+}

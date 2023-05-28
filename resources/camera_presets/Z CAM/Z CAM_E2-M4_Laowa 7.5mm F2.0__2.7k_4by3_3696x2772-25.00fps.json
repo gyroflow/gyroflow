@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2-M4_Laowa 7.5mm F2.0__2.7k_4by3_3696x2772-25.00fps",
+  "note": "",
+  "calibrated_by": "BANGFPV",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-M4",
+  "lens_model": "Laowa 7.5mm F2.0",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3696,
+    "h": 2772
+  },
+  "orig_dimension": {
+    "w": 3696,
+    "h": 2772
+  },
+  "output_dimension": {
+    "w": 3696,
+    "h": 2772
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7555120522263273,
+    "camera_matrix": [
+      [
+        1632.9900841106232,
+        0.0,
+        1869.909240236193
+      ],
+      [
+        0.0,
+        1632.9557526956096,
+        1350.7372473480418
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32513851422618784,
+      0.14323312737516625,
+      -0.07715763483890455,
+      0.11060258595675852
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-04-19",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

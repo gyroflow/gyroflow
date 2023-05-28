@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_S1H_Schneider Arriflex cine xenon 50mm f2__C4k_1.90by1_4095x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "📷",
+  "camera_brand": "Panasonic",
+  "camera_model": "S1H",
+  "lens_model": "Schneider Arriflex cine xenon 50mm f2",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8662190624163413,
+    "camera_matrix": [
+      [
+        5437.256837761346,
+        0.0,
+        2059.877295495031
+      ],
+      [
+        0.0,
+        5436.542422901539,
+        1119.176427092442
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.243069680721596,
+      0.6509934085621097,
+      -2.5797050851757937,
+      4.514587587875179
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-03-28",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

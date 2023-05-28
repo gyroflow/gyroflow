@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX30_SEL35F18__1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Alex Summers",
+  "camera_brand": "Sony",
+  "camera_model": "FX30",
+  "lens_model": "SEL35F18",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4365120413840024,
+    "camera_matrix": [
+      [
+        2816.4681721105185,
+        0.0,
+        968.9314460370522
+      ],
+      [
+        0.0,
+        2817.6678366880274,
+        544.588451305615
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32964027642825744,
+      2.11500941745588,
+      -48.3672378947272,
+      351.0786616952268
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}
