@@ -640,8 +640,10 @@ Item {
                         Qt.callLater(() => {
                             vid.currentFrame++;
                             Qt.callLater(() => vid.currentFrame = 0);
-                            if (vid.loaded)
+                            if (vid.loaded) {
                                 stabEnabledBtn.checked = true;
+                                vid.volume = volumeSlider.value / 100.0;
+                            }
                         });
                     }
                 }
@@ -871,10 +873,48 @@ Item {
                 }
 
                 SmallLinkButton {
+                    id: muteBtn;
                     iconName: checked? "sound" : "sound-mute";
-                    onClicked: vid.muted = !vid.muted;
                     tooltip: checked? qsTr("Mute") : qsTr("Unmute");
                     checked: !vid.muted;
+
+                    MouseArea {
+                        anchors.fill: parent;
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton;
+                        propagateComposedEvents: true;
+                        cursorShape: Qt.PointingHandCursor;
+                        onClicked: mouse => {
+                            if (mouse.button === Qt.RightButton) {
+                                volumePopup.open();
+                            } else {
+                                vid.muted = !vid.muted;
+                            }
+                        }
+                    }
+                    Popup {
+                        id: volumePopup;
+                        width: volumeLabel.width + 25 * dpiScale;
+                        height: 30 * dpiScale;
+                        x: -width + muteBtn.width;
+                        y: -height;
+                        Label {
+                            id: volumeLabel;
+                            anchors.centerIn: parent;
+                            text: qsTr("Volume");
+                            position: Label.LeftPosition;
+                            width: t.width + volumeSlider.width;
+                            Slider {
+                                id: volumeSlider;
+                                width: 200 * dpiScale;
+                                unit: "%";
+                                from: 0;
+                                to: 100;
+                                value: window.settings.value("volume", 100);
+                                precision: 0;
+                                onValueChanged: { vid.volume = value / 100.0; window.settings.setValue("volume", value); }
+                            }
+                        }
+                    }
                 }
 
                 ComboBox {

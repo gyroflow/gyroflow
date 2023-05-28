@@ -12,6 +12,7 @@ Grid {
     default property alias data: inner.data;
     property alias text: t.text;
     property alias inner: inner;
+    property alias t: t;
 
     rows:    position === Label.TopPosition? 2 : 1;
     columns: position === Label.TopPosition? 1 : 2;
