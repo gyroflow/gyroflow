@@ -636,7 +636,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="340"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Сохранить</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="347"/>
@@ -1035,140 +1035,140 @@ Do you want to submit your profile?</source>
       <translation>Данные движения</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="27"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="28"/>
       <source>Choose a motion data file</source>
       <translation>Выберите файл данных движения</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="28"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="29"/>
       <source>Motion data files</source>
       <translation>Файлы данных движения</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="40"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="41"/>
       <source>Video file is not loaded.</source>
       <translation>Видео файл не загружен.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="40"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="41"/>
       <source>Ok</source>
       <translation>Ок</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="145"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="147"/>
       <source>Open file</source>
       <translation>Открыть файл</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="165"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="167"/>
       <source>Select log</source>
       <translation>Выберите лог</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="183"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="185"/>
       <source>Low pass filter</source>
       <translation>Фильтр нижних частот</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="191"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="193"/>
       <source>Hz</source>
       <translation>Гц</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="196"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="198"/>
       <source>Lower cutoff frequency means more filtering</source>
       <translation>Чем ниже частота отсечения, тем больше фильтрации будет применено</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="208"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="210"/>
       <source>Rotation</source>
       <translation>Поворот</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="220"/>
-      <location filename="../../src/ui/menu/MotionData.qml" line="297"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="222"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="299"/>
       <source>Pitch</source>
       <translation>Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="224"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="226"/>
       <source>Pitch is camera angle up/down when using FPV blackbox data</source>
       <translation>Pitch - это угол камеры вверх/вниз при использовании данных FPV в черном ящике</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="228"/>
-      <location filename="../../src/ui/menu/MotionData.qml" line="305"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="230"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="307"/>
       <source>Roll</source>
       <translation>Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="236"/>
-      <location filename="../../src/ui/menu/MotionData.qml" line="313"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="238"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="315"/>
       <source>Yaw</source>
       <translation>Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="277"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="279"/>
       <source>Separate accelerometer rotation</source>
       <translation>Поворот акселерометра отдельно</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="285"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="287"/>
       <source>Accelerometer rotation</source>
       <translation>Поворот акселерометра</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="323"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="325"/>
       <source>Gyro bias</source>
       <translation>Расположение гироскопа</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="335"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="337"/>
       <source>X</source>
       <translation>X</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="343"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="345"/>
       <source>Y</source>
       <translation>Y</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="351"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="353"/>
       <source>Z</source>
       <translation>Z</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="361"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="363"/>
       <source>IMU orientation</source>
       <translation>Ориентация IMU</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="368"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="370"/>
       <source>Uppercase is positive, lowercase is negative. eg. zYX</source>
       <translation>Верхний регистр положительный, нижний регистр отрицательный. Например. zYX</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="374"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="376"/>
       <source>Integration method</source>
       <translation>Способ интегрирования</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="383"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="385"/>
       <source>Use built-in quaternions instead of IMU data</source>
       <translation>Использовать встроенные кватернионы вместо данных IMU</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="383"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="385"/>
       <source>IMU integration method for calculating motion data</source>
       <translation>Метод интеграции IMU для вычисления данных движения</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="399"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="401"/>
       <source>Orientation indicator</source>
       <translation>Индикатор ориентации</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="494"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="496"/>
       <source>Statistics</source>
       <translation>Статистика</translation>
     </message>
@@ -1272,12 +1272,12 @@ Do you want to submit your profile?</source>
       <translation>Темная тема</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="171"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="173"/>
       <source>All logs combined</source>
       <translation>Все логи объединены</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="380"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="382"/>
       <source>None</source>
       <translation>Отсутствует</translation>
     </message>
@@ -1309,7 +1309,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="430"/>
       <source>Dynamic zooming</source>
-      <translation>Динамический зум</translation>
+      <translation>Без зума</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="430"/>
@@ -1974,7 +1974,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="377"/>
       <source>Integration method</source>
-      <translation type="unfinished">Integration method</translation>
+      <translation>Способ встраивания</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="387"/>
@@ -2277,13 +2277,13 @@ Make sure you have proper rolling shutter value set before syncing.</source>
   <context>
     <name>TableList</name>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="154"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="156"/>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="24"/>
       <source>File name</source>
       <translation>Имя файла</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="155"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="157"/>
       <source>Detected format</source>
       <translation>Обнаруженный формат</translation>
     </message>
@@ -2756,30 +2756,30 @@ Are you sure you want to continue?</source>
   <context>
     <name>VideoArea</name>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="420"/>
+      <location filename="../../src/ui/VideoArea.qml" line="424"/>
       <source>There&apos;s a %1 file associated with this video, do you want to load it?</source>
       <translation>С этим видео связан файл %1, хотите ли вы загрузить его?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="320"/>
-      <location filename="../../src/ui/VideoArea.qml" line="385"/>
-      <location filename="../../src/ui/VideoArea.qml" line="421"/>
+      <location filename="../../src/ui/VideoArea.qml" line="324"/>
+      <location filename="../../src/ui/VideoArea.qml" line="389"/>
+      <location filename="../../src/ui/VideoArea.qml" line="425"/>
       <source>Yes</source>
       <translation>Да</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="390"/>
-      <location filename="../../src/ui/VideoArea.qml" line="424"/>
+      <location filename="../../src/ui/VideoArea.qml" line="394"/>
+      <location filename="../../src/ui/VideoArea.qml" line="428"/>
       <source>No</source>
       <translation>Нет</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="581"/>
+      <location filename="../../src/ui/VideoArea.qml" line="585"/>
       <source>Zoom: %1</source>
       <translation>Масштаб: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="625"/>
+      <location filename="../../src/ui/VideoArea.qml" line="629"/>
       <source>Failed to load the selected file, it may be unsupported or invalid.</source>
       <translation>Не удалось загрузить выбранный файл, он может быть неподдерживаемым или недопустимым.</translation>
     </message>
@@ -2789,23 +2789,23 @@ Are you sure you want to continue?</source>
       <location filename="../../src/ui/VideoArea.qml" line="193"/>
       <location filename="../../src/ui/VideoArea.qml" line="212"/>
       <location filename="../../src/ui/VideoArea.qml" line="236"/>
-      <location filename="../../src/ui/VideoArea.qml" line="243"/>
-      <location filename="../../src/ui/VideoArea.qml" line="369"/>
-      <location filename="../../src/ui/VideoArea.qml" line="625"/>
+      <location filename="../../src/ui/VideoArea.qml" line="247"/>
+      <location filename="../../src/ui/VideoArea.qml" line="373"/>
+      <location filename="../../src/ui/VideoArea.qml" line="629"/>
       <source>Ok</source>
       <translation>Ок</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="368"/>
+      <location filename="../../src/ui/VideoArea.qml" line="372"/>
       <source>Image sequence has been detected.
 Please provide frame rate: </source>
       <translation>Обнаружена последовательность изображений.
 Пожалуйста, укажите частоту кадров: </translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="325"/>
-      <location filename="../../src/ui/VideoArea.qml" line="375"/>
-      <location filename="../../src/ui/VideoArea.qml" line="465"/>
+      <location filename="../../src/ui/VideoArea.qml" line="329"/>
+      <location filename="../../src/ui/VideoArea.qml" line="379"/>
+      <location filename="../../src/ui/VideoArea.qml" line="469"/>
       <source>Cancel</source>
       <translation>Отмена</translation>
     </message>
@@ -2829,32 +2829,32 @@ Your render queue and current file is saved automatically.</source>
       <translation>Объединение файлов в %1 (%2)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="319"/>
+      <location filename="../../src/ui/VideoArea.qml" line="323"/>
       <source>This format requires an external SDK. Do you want to download it now?</source>
       <translation>Этот формат требует внешнего SDK. Загрузить его сейчас?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="384"/>
+      <location filename="../../src/ui/VideoArea.qml" line="388"/>
       <source>Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?</source>
       <translation>Обнаружена разделенная запись, вы хотите автоматически соединить файлы (%1), чтобы создать один полный клип?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="450"/>
+      <location filename="../../src/ui/VideoArea.qml" line="454"/>
       <source>You have opened multiple files. What do you want to do?</source>
       <translation>Вы открыли несколько файлов. Что хотите сделать?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="451"/>
+      <location filename="../../src/ui/VideoArea.qml" line="455"/>
       <source>Add to render queue</source>
       <translation>Добавить в очередь рендера</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="455"/>
+      <location filename="../../src/ui/VideoArea.qml" line="459"/>
       <source>Merge them into one video</source>
       <translation>Объединить их в одно видео</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="462"/>
+      <location filename="../../src/ui/VideoArea.qml" line="466"/>
       <source>Open the first file</source>
       <translation>Открыть первый файл</translation>
     </message>
@@ -2866,29 +2866,29 @@ The camera probably doesn&apos;t record motion data in this particular shooting 
 Вероятно, камера не записывала данные движения в этом конкретном режиме съёмки.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="243"/>
+      <location filename="../../src/ui/VideoArea.qml" line="247"/>
       <source>Motion data sampling rate is too low (%1 Hz).
 50 Hz is an absolute minimum and we recommend at least 200 Hz.</source>
       <translation>Слишком малая частота дискретизации данных движения (%1 Гц).
 Абсолютный минимум - 50 Гц, и рекомендуется использовать не менее 200 Гц.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="663"/>
+      <location filename="../../src/ui/VideoArea.qml" line="667"/>
       <source>Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.</source>
       <translation>Профиль объектива не загружен, результаты будут выглядеть некорректно. Пожалуйста, загрузите профиль объектива для вашей камеры.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="695"/>
+      <location filename="../../src/ui/VideoArea.qml" line="699"/>
       <source>Loading %1...</source>
       <translation>Загрузка %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="695"/>
+      <location filename="../../src/ui/VideoArea.qml" line="699"/>
       <source>Drop video file here</source>
       <translation>Перетащите видеофайл сюда</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="273"/>
+      <location filename="../../src/ui/VideoArea.qml" line="277"/>
       <source>Analyzing %1...</source>
       <translation>Анализ %1...</translation>
     </message>
@@ -2912,72 +2912,72 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
       <translation>Конвертация в %1 (%2)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="282"/>
+      <location filename="../../src/ui/VideoArea.qml" line="286"/>
       <source>Loading gyro data %1...</source>
       <translation>Загрузка данных гироскопа %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="585"/>
+      <location filename="../../src/ui/VideoArea.qml" line="589"/>
       <source>Focal length: %1 mm</source>
       <translation>Фокусное расстояние: %1 мм</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="587"/>
+      <location filename="../../src/ui/VideoArea.qml" line="591"/>
       <source>full frame equiv.: %1 mm</source>
       <translation>полный кадр.: %1 мм</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="823"/>
+      <location filename="../../src/ui/VideoArea.qml" line="827"/>
       <source>Trim start</source>
       <translation>Обрезать начало</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="824"/>
+      <location filename="../../src/ui/VideoArea.qml" line="828"/>
       <source>Previous frame</source>
       <translation>Предыдущий кадр</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="827"/>
+      <location filename="../../src/ui/VideoArea.qml" line="831"/>
       <source>Pause</source>
       <translation>Пауза</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="827"/>
+      <location filename="../../src/ui/VideoArea.qml" line="831"/>
       <source>Play</source>
       <translation>Воспроизведение</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="830"/>
+      <location filename="../../src/ui/VideoArea.qml" line="834"/>
       <source>Next frame</source>
       <translation>Следующий кадр</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="831"/>
+      <location filename="../../src/ui/VideoArea.qml" line="835"/>
       <source>Trim end</source>
       <translation>Обрезать конец</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="859"/>
+      <location filename="../../src/ui/VideoArea.qml" line="863"/>
       <source>Toggle stabilization overview</source>
       <translation>Вкл/выкл обзор стабилизации</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="866"/>
+      <location filename="../../src/ui/VideoArea.qml" line="870"/>
       <source>Toggle stabilization</source>
       <translation>Включить стабилизацию</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="872"/>
+      <location filename="../../src/ui/VideoArea.qml" line="876"/>
       <source>Mute</source>
       <translation>Откл. звук</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="872"/>
+      <location filename="../../src/ui/VideoArea.qml" line="876"/>
       <source>Unmute</source>
       <translation>Вкл. звук</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="889"/>
+      <location filename="../../src/ui/VideoArea.qml" line="893"/>
       <source>Playback speed</source>
       <translation>Скорость воспроизведения</translation>
     </message>
