@@ -65,5 +65,5 @@
   "interpolations": null,
   "focal_length": 20.0,
   "crop_factor": null,
-  "global_shutter": false
+  "global_shutter": true
 }

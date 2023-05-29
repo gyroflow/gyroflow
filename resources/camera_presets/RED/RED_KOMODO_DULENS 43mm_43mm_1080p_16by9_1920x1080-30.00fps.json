@@ -64,5 +64,6 @@
   "digital_lens_params": null,
   "interpolations": null,
   "focal_length": null,
-  "crop_factor": null
+  "crop_factor": null,
+  "global_shutter": true
 }
