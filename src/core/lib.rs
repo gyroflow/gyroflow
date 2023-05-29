@@ -548,7 +548,7 @@ impl StabilizationManager {
         undist.process_pixels::<T>(timestamp_us, buffers)
     }
 
-    pub fn set_video_rotation(&self, v: f64) { self.params.write().video_rotation = v; }
+    pub fn set_video_rotation(&self, v: f64) { self.params.write().video_rotation = v; self.invalidate_smoothing(); }
 
     pub fn set_trim_start(&self, v: f64) { self.params.write().trim_start = v; self.invalidate_smoothing(); }
     pub fn set_trim_end  (&self, v: f64) { self.params.write().trim_end   = v; self.invalidate_smoothing(); }
