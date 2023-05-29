@@ -109,6 +109,12 @@ Row {
                         }
                     }
                 }
+                Action {
+                    iconName: "plus";
+                    enabled: root.keyframe.length > 0 && root.keyframesEnabled;
+                    text: qsTr("Add keyframe");
+                    onTriggered: controller.set_keyframe(root.keyframe, window.videoArea.timeline.getTimestampUs(), root.value);
+                }
             }
         }
         Loader {
