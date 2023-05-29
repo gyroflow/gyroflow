@@ -81,6 +81,8 @@ MenuItem {
         property alias preserveOtherTracks: preserveOtherTracks.checked;
         property alias padWithBlack: padWithBlack.checked;
         property alias metadataComment: metadataComment.text;
+        property alias audioCodec: audioCodec.currentIndex;
+        property alias preserveOutputSettings: preserveOutputSettings.checked;
     }
 
     property real aspectRatio: 1.0;
@@ -120,12 +122,17 @@ MenuItem {
             keyframe_distance:     keyframeDistance.value,
             preserve_other_tracks: preserveOtherTracks.checked,
             pad_with_black:        padWithBlack.checked,
+            audio_codec:           audioCodec.currentText
         };
     }
 
     property bool disableUpdate: false;
     function notifySizeChanged() {
         controller.set_output_size(outWidth, outHeight);
+        if (preserveOutputSettings.checked && outWidth > 0 && outHeight > 0) {
+            settings.setValue("preservedWidth", outWidth);
+            settings.setValue("preservedHeight", outHeight);
+        }
     }
     function ensureAspectRatio(byWidth: bool) {
         if (lockAspectRatio.checked && aspectRatio > 0) {
@@ -142,6 +149,10 @@ MenuItem {
         defaultHeight = h;
 
         disableUpdate = true;
+        if (preserveOutputSettings.checked) {
+            const pw = +settings.value("preservedWidth",  w); if (pw > 0) w = pw;
+            const ph = +settings.value("preservedHeight", h); if (ph > 0) h = ph;
+        }
         outWidth      = w;
         outHeight     = h;
         disableUpdate = false;
@@ -151,6 +162,10 @@ MenuItem {
         root.originalWidth = w;
         root.originalHeight = h;
         Qt.callLater(notifySizeChanged);
+        if (preserveOutputSettings.checked) {
+            const pbr = +settings.value("preservedBitrate", br);
+            if (pbr > 0) br = pbr;
+        }
 
         outBitrate     = br;
         defaultBitrate = br;
@@ -189,6 +204,7 @@ MenuItem {
             if (output.hasOwnProperty("keyframe_distance"))     keyframeDistance.value      = +output.keyframe_distance;
             if (output.hasOwnProperty("preserve_other_tracks")) preserveOtherTracks.checked = output.preserve_other_tracks;
             if (output.hasOwnProperty("pad_with_black"))        padWithBlack.checked        = output.pad_with_black;
+            if (output.hasOwnProperty("audio_codec"))           Util.setComboValue(audioCodec, output.audio_codec);
             if (output.hasOwnProperty("metadata")) {
                 metadataComment.text = output.metadata.comment || "";
             }
@@ -397,6 +413,11 @@ MenuItem {
             defaultValue: 20;
             unit: qsTr("Mbps");
             width: parent.width;
+            onValueChanged: {
+                if (preserveOutputSettings.checked && value > 0) {
+                    settings.setValue("preservedBitrate", value);
+                }
+            }
         }
     }
 
@@ -498,6 +519,18 @@ MenuItem {
             Component.onCompleted: contentItem.wrapMode = Text.WordWrap;
         }
         Label {
+            position: Label.LeftPosition;
+            text: qsTr("Audio codec");
+            enabled: audio.checked;
+            ComboBox {
+                id: audioCodec;
+                model: ["AAC", "PCM (s16le)", "PCM (s16be)", "PCM (s24le)", "PCM (s24be)"];
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                currentIndex: 0;
+            }
+        }
+        Label {
             position: Label.TopPosition;
             text: qsTr("Device for rendering");
             visible: root.outGpu && renderingDevice.model.length > 0;
@@ -544,6 +577,19 @@ MenuItem {
                 function updateController() {
                     controller.set_rendering_gpu_type_from_name(renderingDevice.currentText);
                     settings.setValue("renderingDevice", renderingDevice.orgList[renderingDevice.currentIndex]);
+                }
+            }
+        }
+        CheckBox {
+            id: preserveOutputSettings;
+            text: qsTr("Preserve export settings");
+            checked: false;
+            tooltip: qsTr("Save output size and bitrate in settings and use it for all files.");
+            onCheckedChanged: {
+                if (checked) {
+                    if (outputWidth.value  > 0) settings.setValue("preservedWidth",  outputWidth.value);
+                    if (outputHeight.value > 0) settings.setValue("preservedHeight", outputHeight.value);
+                    if (bitrate.value > 0) settings.setValue("preservedBitrate", bitrate.value);
                 }
             }
         }

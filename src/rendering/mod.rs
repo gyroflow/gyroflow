@@ -212,6 +212,15 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     let render_options_dict = render_options.get_encoder_options_dict();
     let hwaccel_device = render_options_dict.get("hwaccel_device");
 
+    match render_options.audio_codec.as_ref() {
+        "AAC"         => proc.audio_codec = ffmpeg_next::codec::Id::AAC,
+        "PCM (s16le)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S16LE,
+        "PCM (s16be)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S16BE,
+        "PCM (s24le)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S24LE,
+        "PCM (s24be)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S24BE,
+        _ => { }
+    }
+
     log::debug!("proc.gpu_device: {:?}", &proc.gpu_device);
     let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(&render_options.codec, render_options.use_gpu), hwaccel_device);
     proc.video_codec = Some(encoder.0.to_owned());
