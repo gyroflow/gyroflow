@@ -530,9 +530,9 @@ impl StabilizationManager {
         }
     }
 
-    pub fn process_pixels<T: PixelType>(&self, mut timestamp_us: i64, buffers: &mut Buffers) -> Option<stabilization::ProcessedInfo> {
-        if let gpu::BufferSource::Cpu { buffer } = &buffers.input.data  { if buffer.is_empty() { return None; } }
-        if let gpu::BufferSource::Cpu { buffer } = &buffers.output.data { if buffer.is_empty() { return None; } }
+    pub fn process_pixels<T: PixelType>(&self, mut timestamp_us: i64, buffers: &mut Buffers) -> Result<stabilization::ProcessedInfo, GyroflowCoreError> {
+        if let gpu::BufferSource::Cpu { buffer } = &buffers.input.data  { if buffer.is_empty() { return Err(GyroflowCoreError::InputBufferEmpty); } }
+        if let gpu::BufferSource::Cpu { buffer } = &buffers.output.data { if buffer.is_empty() { return Err(GyroflowCoreError::OutputBufferEmpty); } }
 
         if let Some(scale) = self.params.read().fps_scale {
             timestamp_us = (timestamp_us as f64 / scale).round() as i64;
@@ -1350,14 +1350,32 @@ pub fn run_threaded<F>(cb: F) where F: FnOnce() + Send + 'static {
     THREAD_POOL.spawn(cb);
 }
 
-pub fn run_threaded_wait<F>(cb: F) where F: FnOnce() + Send + 'static {
-    let done = Arc::new(AtomicBool::new(false));
-    let done2 = done.clone();
-    THREAD_POOL.spawn(move || {
-        cb();
-        done2.store(true, SeqCst);
-    });
-    while !done.load(SeqCst) {
-        std::thread::sleep(std::time::Duration::from_millis(100));
-    }
+#[derive(thiserror::Error, Debug)]
+pub enum GyroflowCoreError {
+    #[error("No stabilization data at {0}. Make sure you called `ensure_ready_for_processing`")]
+    NoStabilizationData(i64),
+
+    #[error("Buffer too small")]
+    BufferTooSmall,
+
+    #[error("Size too small")]
+    SizeTooSmall,
+
+    #[error("Size mismatch ({0:?} != ({1:?})")]
+    SizeMismatch((usize, usize), (usize, usize)),
+
+    #[error("Invalid stride: {0} must be greater than width ({1})")]
+    InvalidStride(i32, i32),
+
+    #[error("Input buffer is empty")]
+    InputBufferEmpty,
+
+    #[error("Output buffer is empty")]
+    OutputBufferEmpty,
+
+    #[error("Failed to find cached wgpu in process_pixels. Key: {0}")]
+    NoCachedWgpuInstance(String),
+
+    #[error("Unknown error")]
+    Unknown
 }

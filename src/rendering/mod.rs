@@ -453,7 +453,9 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                                 transform.kernel_params.flags |= KernelParamsFlags::FILL_WITH_BACKGROUND.bits();
                             }
                         }
-                        plane.process_pixels::<$t>(timestamp_us, &mut buffers);
+                        if let Err(e) = plane.process_pixels::<$t>(timestamp_us, &mut buffers) {
+                            ::log::error!("Failed to process pixels: {e:?}");
+                        }
                     }));
                 })*
             };

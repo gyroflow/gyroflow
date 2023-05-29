@@ -4,6 +4,8 @@
 use std::collections::BTreeMap;
 use std::cell::RefCell;
 
+use crate::GyroflowCoreError;
+
 #[cfg(feature = "use-opencl")]
 use super::gpu::opencl;
 use super::gpu::*;
@@ -396,8 +398,8 @@ impl Stabilization {
             }
         }
     }
-    pub fn process_pixels<T: PixelType>(&self, timestamp_us: i64, buffers: &mut Buffers) -> Option<ProcessedInfo> {
-        if /*self.size != buffers.input.size || */buffers.input.size.1 < 4 || buffers.output.size.1 < 4 { return None; }
+    pub fn process_pixels<T: PixelType>(&self, timestamp_us: i64, buffers: &mut Buffers) -> Result<ProcessedInfo, GyroflowCoreError> {
+        if /*self.size != buffers.input.size || */buffers.input.size.1 < 4 || buffers.output.size.1 < 4 { return Err(GyroflowCoreError::SizeTooSmall); }
 
         let mut _last_frame_data = None;
 
@@ -420,11 +422,11 @@ impl Stabilization {
                 *last_frame_data = itm.clone();
             }
 
-            if self.size        != (itm.kernel_params.width as usize,        itm.kernel_params.height as usize) ||
-               self.output_size != (itm.kernel_params.output_width as usize, itm.kernel_params.output_height as usize) {
-                log::warn!("Size mismatch ({:?} != ({}, {}, {}) || ({:?} != ({}, {}, {})", self.size, itm.kernel_params.width, itm.kernel_params.height, itm.kernel_params.stride, self.output_size, itm.kernel_params.output_width, itm.kernel_params.output_height, itm.kernel_params.output_stride);
-                return None;
-            }
+            if self.size        != (itm.kernel_params.width        as usize, itm.kernel_params.height        as usize) { return Err(GyroflowCoreError::SizeMismatch(self.size, (itm.kernel_params.width        as usize, itm.kernel_params.height        as usize))); }
+            if self.output_size != (itm.kernel_params.output_width as usize, itm.kernel_params.output_height as usize) { return Err(GyroflowCoreError::SizeMismatch(self.size, (itm.kernel_params.output_width as usize, itm.kernel_params.output_height as usize))); }
+
+            if self.size.0 as i32        > itm.kernel_params.stride        { return Err(GyroflowCoreError::InvalidStride(itm.kernel_params.stride, self.size.0 as i32)); }
+            if self.output_size.0 as i32 > itm.kernel_params.output_stride { return Err(GyroflowCoreError::InvalidStride(itm.kernel_params.output_stride, self.output_size.0 as i32)); }
 
             // OpenCL path
             #[cfg(feature = "use-opencl")]
@@ -434,7 +436,7 @@ impl Stabilization {
                         log::error!("OpenCL error undistort: {:?}", err);
                     } else {
                         ret.backend = "OpenCL";
-                        return Some(ret);
+                        return Ok(ret);
                     }
                 }
             }
@@ -448,17 +450,16 @@ impl Stabilization {
                         if let Some(wgpu) = cached.get(&hash) {
                             wgpu.undistort_image(buffers, &itm, drawing_buffer);
                             ret.backend = "wgpu";
-                            Some(ret)
+                            Ok(ret)
                         } else {
-                            log::error!("Failed to find cached wgpu in process_pixels. Key: {}", self.get_current_key(buffers));
-                            None
+                            Err(GyroflowCoreError::NoCachedWgpuInstance(self.get_current_key(buffers)))
                         }
                     });
                 } else {
                     if let Some(ref wgpu) = self.wgpu {
                         wgpu.undistort_image(buffers, &itm, drawing_buffer);
                         ret.backend = "wgpu";
-                        return Some(ret);
+                        return Ok(ret);
                     }
                 }
             }
@@ -471,12 +472,13 @@ impl Stabilization {
             };
             if ok {
                 ret.backend = "CPU";
-                return Some(ret);
+                return Ok(ret);
             }
         } else {
             log::warn!("No stab data at {timestamp_us}");
+            return Err(GyroflowCoreError::NoStabilizationData(timestamp_us));
         }
-        None
+        Err(GyroflowCoreError::Unknown)
     }
 }
 

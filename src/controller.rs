@@ -1060,9 +1060,14 @@ impl Controller {
                     };
 
                 if let Some((ref mut buffers, backend)) = buffers {
-                    if let Some(ret) = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, buffers) {
-                        update_info2((ret.fov, ret.minimal_fov, ret.focal_length, QString::from(format!("Processing {}x{} using {backend}->{} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
-                        return true;
+                    match stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, buffers) {
+                        Ok(ret) =>  {
+                            update_info2((ret.fov, ret.minimal_fov, ret.focal_length, QString::from(format!("Processing {}x{} using {backend}->{} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
+                            return true;
+                        },
+                        Err(e) => {
+                            ::log::error!("Failed to process pixels: {e:?}");
+                        }
                     }
                 }
 
@@ -1098,11 +1103,11 @@ impl Controller {
                     },
                 });
                 match ret {
-                    Some(bk) => {
+                    Ok(bk) => {
                         update_info2((bk.fov, bk.minimal_fov, bk.focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, bk.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
                         (ow as u32, oh as u32, os as u32, out_pixels.as_mut_ptr())
                     },
-                    None => {
+                    Err(_) => {
                         update_info2((1.0, 1.0, None, QString::from("---")));
                         (0, 0, 0, std::ptr::null_mut())
                     }

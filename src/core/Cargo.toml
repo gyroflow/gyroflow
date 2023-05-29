@@ -41,6 +41,7 @@ enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.2.1"
 lru = "0.10"
+thiserror = "1.0.40"
 
 dyn-clone = "1.0.11"
 

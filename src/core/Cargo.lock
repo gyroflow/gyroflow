@@ -82,6 +82,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "android-tzdata"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e999941b234f3131b00bc13c22d06e8c5ff726d1b6318ac7eb276997bbb4fef0"
+
+[[package]]
 name = "android_system_properties"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -372,13 +378,13 @@ dependencies = [
 
 [[package]]
 name = "chrono"
-version = "0.4.24"
+version = "0.4.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e3c5919066adf22df73762e50cffcde3a758f2a848b113b586d1f86728b673b"
+checksum = "fdbc37d37da9e5bce8173f3a41b71d9bf3c674deebbaceacd0ebdabde76efb03"
 dependencies = [
+ "android-tzdata",
  "iana-time-zone",
  "js-sys",
- "num-integer",
  "num-traits 0.2.15",
  "time 0.1.45",
  "wasm-bindgen",
@@ -983,6 +989,7 @@ dependencies = [
  "simple-easing",
  "space",
  "telemetry-parser",
+ "thiserror",
  "time 0.3.21",
  "walkdir",
  "wgpu",
@@ -1425,9 +1432,9 @@ dependencies = [
 
 [[package]]
 name = "mp4parse"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67d2b6c6932c2cce721e9bd213461412300466d4613d93d25a36fb8881d9f8de"
+checksum = "10d189404bad70963b8848d9619032b02a115093f1fe9fb3d8ddf858e9b69ee9"
 dependencies = [
  "bitreader",
  "byteorder",
@@ -1753,9 +1760,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.17.1"
+version = "1.17.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7e5500299e16ebb147ae15a00a942af264cf3688f47923b8fc2cd5858f23ad3"
+checksum = "9670a07f94779e00908f3e686eab508878ebb390ba6e604d3a284c00e8d0487b"
 
 [[package]]
 name = "opencv"
