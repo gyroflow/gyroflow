@@ -102,11 +102,11 @@ impl LensCalibrator {
         self.used_points.clear();
     }
 
-    pub fn feed_frame<F>(&mut self, timestamp_us: i64, frame: i32, width: u32, height: u32, stride: usize, pt_scale: f32, pixels: &[u8], cancel_flag: Arc<AtomicBool>, total: usize, processed_imgs: Arc<AtomicUsize>, progress: F)
+    pub fn feed_frame<F>(&mut self, timestamp_us: i64, frame: i32, size: (u32, u32), org_size: (u32, u32), stride: usize, pt_scale: f32, pixels: &[u8], cancel_flag: Arc<AtomicBool>, total: usize, processed_imgs: Arc<AtomicUsize>, progress: F)
     where F: Fn((usize, usize, usize, f64, f64)) + Send + Sync + Clone + 'static {
 
-        self.width = (width as f32 * pt_scale).round() as usize;
-        self.height = (height as f32 * pt_scale).round() as usize;
+        self.width = org_size.0 as usize;
+        self.height = org_size.1 as usize;
         let grid_size = Size::new(self.columns as i32, self.rows as i32);
         let max_sharpness = self.max_sharpness;
 
@@ -142,8 +142,8 @@ impl LensCalibrator {
                     *px = (*px as f64 * contrast + brightness).min(255.0) as u8;
                 }
 
-                let inp1 = unsafe { Mat::new_size_with_data(Size::new(width as i32, height as i32), CV_8UC1, pixels.as_ptr() as *mut c_void, stride as usize)? };
-                let mut inp = unsafe { Mat::new_size_with_data(Size::new(width as i32, height as i32), CV_8UC1, pixels.as_ptr() as *mut c_void, stride as usize)? };
+                let inp1 = unsafe { Mat::new_size_with_data(Size::new(size.0 as i32, size.1 as i32), CV_8UC1, pixels.as_ptr() as *mut c_void, stride as usize)? };
+                let mut inp = unsafe { Mat::new_size_with_data(Size::new(size.0 as i32, size.1 as i32), CV_8UC1, pixels.as_ptr() as *mut c_void, stride as usize)? };
 
                 let _ = opencv::imgproc::equalize_hist(&inp1, &mut inp);
 
@@ -168,10 +168,10 @@ impl LensCalibrator {
                         }
                         // TODO more params
                         let kernel_params = crate::stabilization::KernelParams {
-                            width : width as i32,
-                            height: height as i32,
-                            output_width: width as i32,
-                            output_height: height as i32,
+                            width : size.0 as i32,
+                            height: size.1 as i32,
+                            output_width: size.0 as i32,
+                            output_height: size.1 as i32,
                             digital_lens_params,
                             ..Default::default()
                         };

@@ -26,7 +26,6 @@ MenuItem {
     property int videoWidth: 0;
     property int videoHeight: 0;
     property real fps: 0;
-    property string cameraBrand;
 
     function setVideoSize(w: int, h: int) {
         videoWidth = w;
@@ -108,8 +107,6 @@ MenuItem {
 
                     if (camera_id.brand === "GoPro" && camera_id.lens_info === "Super") digitalLens.currentIndex = 1;
                     if (camera_id.brand === "GoPro" && camera_id.lens_info === "Hyper") digitalLens.currentIndex = 2;
-
-                    calib.cameraBrand = camera_id.brand;
 
                     // RED KOMODO is global shutter
                     gs.checked = camera_id.model.startsWith("KOMODO");
@@ -465,10 +462,8 @@ MenuItem {
             onTriggered: {
                 let w = Math.round(calib.videoWidth  * (xStretch.value || 1));
                 let h = Math.round(calib.videoHeight * (yStretch.value || 1));
-                if (!calib.cameraBrand.startsWith("RED")) {
-                    if ((xStretch.value || 1) != 1 && (w % 2) != 0) w--;
-                    if ((yStretch.value || 1) != 1 && (h % 2) != 0) h--;
-                }
+                if ((xStretch.value || 1) != 1 && (w % 2) != 0) w--;
+                if ((yStretch.value || 1) != 1 && (h % 2) != 0) h--;
                 if (calib.calibrationInfo.output_dimension.w != w || calib.calibrationInfo.output_dimension.h != h) {
                     messageBox(Modal.Info, qsTr("Do you want to update the output resolution to %1?").arg("<b>" + w + "x" + h + "</b>"), [
                         { text: qsTr("Yes"), accent: true, clicked: () => {
