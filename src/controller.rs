@@ -1544,7 +1544,7 @@ impl Controller {
                             if (frame % every_nth_frame as i32) == 0 {
                                 let mut width = (input_frame.width() as f64 * input_horizontal_stretch).round() as u32;
                                 let mut height = (input_frame.height() as f64 * input_vertical_stretch).round() as u32;
-                                let org_size = (width, height);
+                                let mut org_size = (width, height);
                                 let mut pt_scale = 1.0;
                                 if processing_resolution > 0 && height > processing_resolution as u32 {
                                     pt_scale = height as f32 / processing_resolution as f32;
@@ -1567,6 +1567,7 @@ impl Controller {
                                             let (w, h) = (dims.0.load(SeqCst), dims.1.load(SeqCst));
                                             if w > 0 && h > 0 {
                                                 pt_scale = h as f32 / height as f32;
+                                                org_size = (w as u32, h as u32);
                                             }
                                         }
                                         cal.feed_frame(timestamp_us, frame, (width, height), org_size, stride, pt_scale, pixels, cancel_flag2.clone(), total, processed.clone(), progress.clone());
