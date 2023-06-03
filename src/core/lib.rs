@@ -906,13 +906,13 @@ impl StabilizationManager {
         if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
             if thin {
                 let metadata_copy = crate::gyro_source::FileMetadata {
-                    raw_imu: Default::default(),
-                    quaternions: Default::default(),
-                    image_orientations: None,
-                    gravity_vectors: None,
-                    lens_positions: None,
+                    raw_imu:                Default::default(),
+                    quaternions:            Default::default(),
+                    image_orientations:     Default::default(),
+                    gravity_vectors:        Default::default(),
+                    lens_positions:         Default::default(),
                     per_frame_time_offsets: Default::default(),
-                    per_frame_data: Default::default(),
+                    per_frame_data:         Default::default(),
                     ..gyro.file_metadata.clone()
                 };
                 if let Ok(val) = serde_json::to_value(metadata_copy) {
