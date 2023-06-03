@@ -39,6 +39,8 @@ pub use wgpu::TextureFormat as WgpuTextureFormat;
 use gpu::Buffers;
 use gpu::drawing::*;
 
+pub use telemetry_parser;
+
 #[cfg(feature = "opencv")]
 use calibration::LensCalibrator;
 

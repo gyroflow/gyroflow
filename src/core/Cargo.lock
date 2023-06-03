@@ -381,6 +381,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "ciborium"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "effd91f6c78e5a4ace8a5d3c0b6bfaec9e2baaef55f3efc00e45fb2e477ee926"
+dependencies = [
+ "ciborium-io",
+ "ciborium-ll",
+ "serde",
+]
+
+[[package]]
+name = "ciborium-io"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cdf919175532b369853f5d5e20b26b43112613fd6fe7aee757e35f7a44642656"
+
+[[package]]
+name = "ciborium-ll"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "defaa24ecc093c77630e6c15e17c51f5e187bf35ee514f4e2d67baaa96dae22b"
+dependencies = [
+ "ciborium-io",
+ "half 1.8.2",
+]
+
+[[package]]
 name = "cl-sys"
 version = "0.4.2"
 source = "git+https://github.com/cogciprocate/ocl#0c87db692a9eb8c03e9ccfb2248c92d4b13b4cb7"
@@ -921,6 +948,7 @@ dependencies = [
  "bitflags 2.3.1",
  "bytemuck",
  "byteorder",
+ "ciborium",
  "core-foundation-sys",
  "crc32fast",
  "cv-core",
@@ -934,7 +962,7 @@ dependencies = [
  "flate2",
  "foreign-types",
  "futures-intrusive",
- "half",
+ "half 2.2.1",
  "image",
  "include_dir",
  "itertools",
@@ -974,6 +1002,12 @@ dependencies = [
  "winapi",
  "windows 0.48.0",
 ]
+
+[[package]]
+name = "half"
+version = "1.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eabb4a44450da02c90444cf74558da904edde8fb4e9035a9a6a4e15445af0bd7"
 
 [[package]]
 name = "half"
