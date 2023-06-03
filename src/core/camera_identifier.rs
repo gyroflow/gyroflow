@@ -111,8 +111,20 @@ impl CameraIdentifier {
                             if let Some(v) = tag_map.get(&GroupId::Custom("LensDistortion".into())).and_then(|map| map.get_t(TagId::Data) as Option<&serde_json::Value>) {
                                 if id.lens_info.is_empty() {
                                     let mut hasher = crc32fast::Hasher::new();
-                                    hasher.update(v.to_string().as_bytes());
-                                    id.lens_info = format!("{:x}", hasher.finalize());
+                                    // use previous json for hash to load previous lens profiles
+                                    if let Some(v) = v.as_object() {
+                                        if v.contains_key("focal_length_nm") {
+                                            let s = serde_json::json!({
+                                                "unk1": [v["focal_length_nm"], v["effective_sensor_height_nm"]],
+                                                "unk2": v["unk1"],
+                                                "unk3": v["coeff_scale"],
+                                                "unk4": v["coeffs"]
+                                            }).to_string();
+                                            hasher.update(s.as_bytes());
+
+                                            id.lens_info = format!("{:x}", hasher.finalize());
+                                        }
+                                    }
                                 }
                             }
                         }

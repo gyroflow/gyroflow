@@ -302,13 +302,13 @@ impl GyroSource {
                         let exposure_time      =  (imager.get_t(TagId::ExposureTime)        as Option<&f64>)?;
                         let offset             =  (gyro  .get_t(TagId::TimeOffset)          as Option<&f64>)?;
                         let sampling_frequency = *(gyro  .get_t(TagId::Frequency)           as Option<&i32>)? as f64;
-                        let scaler             = *(gyro  .get_t(TagId::Unknown(0xe436))     as Option<&i32>).unwrap_or(&1000000) as f64 / 1000.0;
+                        let scaler             = *(gyro  .get_t(TagId::Unknown(0xe436))     as Option<&i32>).unwrap_or(&1000000) as f64;
                         original_sample_rate = sampling_frequency;
 
-                        let rounded_offset = (offset * (1000.0 / scaler)).round();
-                        let offset_diff = ((rounded_offset - (1000.0 / sampling_frequency) * (rounded_offset / (1000.0 / sampling_frequency)).floor())).round();
+                        let rounded_offset = (offset * 1000.0 * (1000000.0 / scaler)).round();
+                        let offset_diff = ((rounded_offset - (1000000.0 / sampling_frequency) * (rounded_offset / (1000000.0 / sampling_frequency)).floor())).round() / 1000.0;
 
-                        let frame_offset = first_frame_ts - exposure_time / 2.0 + (md.frame_readout_time.unwrap_or_default() / 2.0) + model_offset + offset_diff - offset;
+                        let frame_offset = first_frame_ts - (exposure_time / 2.0) + (md.frame_readout_time.unwrap_or_default() / 2.0) + model_offset + offset_diff - offset;
 
                         md.per_frame_time_offsets.push(frame_offset / sampling_frequency * sample_rate);
                     });
