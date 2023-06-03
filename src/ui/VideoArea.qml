@@ -388,7 +388,11 @@ Item {
                 const dlg = messageBox(Modal.Info, qsTr("Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?").arg(list), [
                     { text: qsTr("Yes"), accent: true, clicked: function() {
                         dlg.btnsRow.children[0].enabled = false;
-                        controller.mp4_merge(sequenceList);
+                        let path = sequenceList[0];
+                        let output_file = path.substr(0, path.lastIndexOf('.')) + "_joined" + path.substr(path.lastIndexOf('.'));
+                        askForOutputLocation(output_file, function(out_path) {
+                            controller.mp4_merge(sequenceList, out_path);
+                        });
                         return false;
                     } },
                     { text: qsTr("No"), clicked: function() {
@@ -460,7 +464,11 @@ Item {
                     dlg.btnsRow.children[0].enabled = false;
                     dlg.btnsRow.children[1].enabled = false;
                     dlg.btnsRow.children[2].enabled = false;
-                    controller.mp4_merge(paths);
+                    let path = paths[0];
+                    let output_file = path.substr(0, path.lastIndexOf('.')) + "_joined" + path.substr(path.lastIndexOf('.'));
+                    askForOutputLocation(output_file, function(out_path) {
+                        controller.mp4_merge(paths, out_path);
+                    });
                     return false;
                 } },
                 { text: qsTr("Open the first file"), clicked: () => {
@@ -472,6 +480,17 @@ Item {
             dlg.addLoader();
         }
     }
+
+    function askForOutputLocation(location: string, cb) {
+        const dlg = messageBox(Modal.Info, qsTr("Please enter the output path:"), [
+            { text: qsTr("Ok"), accent: true, clicked: function() {
+                cb(dlg.mainColumn.children[1].text);
+            } },
+            { text: qsTr("Cancel") },
+        ]);
+        Qt.createComponent("components/OutputPathField.qml").createObject(dlg.mainColumn, { text: location });
+    }
+
     function detectImageSequence(url: url) {
         const urlStr = controller.url_to_path(url);
         if (!urlStr.includes("%0")) {

@@ -250,7 +250,7 @@ pub struct Controller {
     install_external_sdk: qt_method!(fn(&self, path: QString)),
     external_sdk_progress: qt_signal!(percent: f64, sdk_name: QString, error_string: QString, path: QString),
 
-    mp4_merge: qt_method!(fn(&self, file_list: QStringList)),
+    mp4_merge: qt_method!(fn(&self, file_list: QStringList, output_path: String)),
     mp4_merge_progress: qt_signal!(percent: f64, error_string: QString, path: QString),
 
     // ---------- REDline conversion ----------
@@ -1914,7 +1914,7 @@ impl Controller {
         crate::external_sdk::install(&path_str, progress);
     }
 
-    fn mp4_merge(&self, file_list: QStringList) {
+    fn mp4_merge(&self, file_list: QStringList, mut output_file: String) {
         let mut file_list: Vec<String> = file_list.into_iter().map(QString::to_string).collect();
         file_list.sort_by(|a, b| human_sort::compare(a, b));
 
@@ -1924,7 +1924,9 @@ impl Controller {
             return;
         }
         let p = std::path::Path::new(file_list.first().unwrap());
-        let output_file = p.with_file_name(format!("{}_joined.{}", p.file_stem().unwrap().to_str().unwrap(), p.extension().unwrap().to_str().unwrap())).to_string_lossy().replace('\\', "/");
+        if output_file.is_empty() {
+            output_file = p.with_file_name(format!("{}_joined.{}", p.file_stem().unwrap().to_str().unwrap(), p.extension().unwrap().to_str().unwrap())).to_string_lossy().replace('\\', "/");
+        }
         let out = output_file.clone();
         let progress = util::qt_queued_callback_mut(self, move |this, (percent, error_string): (f64, String)| {
             this.mp4_merge_progress(percent, QString::from(error_string), QString::from(out.as_str()));
