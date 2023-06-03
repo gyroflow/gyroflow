@@ -195,9 +195,9 @@ dependencies = [
 
 [[package]]
 name = "ash"
-version = "0.37.2+1.3.238"
+version = "0.37.3+1.3.251"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28bf19c1f0a470be5fbf7522a308a05df06610252c5bcf5143e1b23f629a9a03"
+checksum = "39e9c3835d686b0a6084ab4234fcd1b07dbf6e4767dce60874b12356a25ecd4a"
 dependencies = [
  "libloading 0.7.4",
 ]
@@ -207,17 +207,6 @@ name = "assert_float_eq"
 version = "1.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4cea652ffbedecf29e9cd41bb4c066881057a42c0c119040f022802b26853e77"
-
-[[package]]
-name = "atty"
-version = "0.2.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9b39be18770d11421cdb1b9947a45dd3f37e93092cbf377614828a319d5fee8"
-dependencies = [
- "hermit-abi 0.1.19",
- "libc",
- "winapi",
-]
 
 [[package]]
 name = "autocfg"
@@ -378,9 +367,9 @@ dependencies = [
 
 [[package]]
 name = "chrono"
-version = "0.4.25"
+version = "0.4.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fdbc37d37da9e5bce8173f3a41b71d9bf3c674deebbaceacd0ebdabde76efb03"
+checksum = "ec837a71355b28f6556dbd569b37b3f363091c0bd4b2e735674521b4c5fd9bc5"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
@@ -394,7 +383,7 @@ dependencies = [
 [[package]]
 name = "cl-sys"
 version = "0.4.2"
-source = "git+https://github.com/cogciprocate/ocl#250934ace865ebeae3dac59abdcb87085e6f68ce"
+source = "git+https://github.com/cogciprocate/ocl#0c87db692a9eb8c03e9ccfb2248c92d4b13b4cb7"
 dependencies = [
  "libc",
 ]
@@ -560,9 +549,9 @@ checksum = "7a81dae078cea95a014a339291cec439d2f232ebe854a9d672b796c6afafa9b7"
 
 [[package]]
 name = "csv"
-version = "1.2.1"
+version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b015497079b9a9d69c02ad25de6c0a6edef051ea6360a327d0bd05802ef64ad"
+checksum = "626ae34994d3d8d668f4269922248239db4ae42d538b14c398b74a52208e8086"
 dependencies = [
  "csv-core",
  "itoa",
@@ -717,19 +706,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "env_logger"
-version = "0.8.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a19187fea3ac7e84da7dacf48de0c45d63c6a76f9490dae389aead16c243fce3"
-dependencies = [
- "atty",
- "humantime",
- "log",
- "regex",
- "termcolor",
-]
-
-[[package]]
 name = "fallible_collections"
 version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -868,9 +844,9 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "glow"
-version = "0.12.1"
+version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e007a07a24de5ecae94160f141029e9a347282cfe25d1d58d85d845cf3130f1"
+checksum = "807edf58b70c0b5b2181dd39fe1839dbdb3ba02645630dc5f753e23da307f762"
 dependencies = [
  "js-sys",
  "slotmap",
@@ -1049,15 +1025,6 @@ dependencies = [
 
 [[package]]
 name = "hermit-abi"
-version = "0.1.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62b467343b94ba476dcb2500d242dadbb39557df889310ac77c5d99100aaac33"
-dependencies = [
- "libc",
-]
-
-[[package]]
-name = "hermit-abi"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ee512640fe35acbfb4bb779db6f0d80704c2cacfa2e39b601ef3e3f47d1ae4c7"
@@ -1076,12 +1043,6 @@ name = "human-sort"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "140a09c9305e6d5e557e2ed7cbc68e05765a7d4213975b87cb04920689cc6219"
-
-[[package]]
-name = "humantime"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 
 [[package]]
 name = "iana-time-zone"
@@ -1432,13 +1393,12 @@ dependencies = [
 
 [[package]]
 name = "mp4parse"
-version = "0.12.1"
+version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10d189404bad70963b8848d9619032b02a115093f1fe9fb3d8ddf858e9b69ee9"
+checksum = "63a35203d3c6ce92d5251c77520acb2e57108c88728695aa883f70023624c570"
 dependencies = [
  "bitreader",
  "byteorder",
- "env_logger",
  "fallible_collections",
  "log",
  "num-traits 0.2.15",
@@ -1651,7 +1611,7 @@ version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fac9e2da13b5eb447a6ce3d392f23a29d8694bff781bf03a16cd9ac8697593b"
 dependencies = [
- "hermit-abi 0.2.6",
+ "hermit-abi",
  "libc",
 ]
 
@@ -1715,7 +1675,7 @@ dependencies = [
 [[package]]
 name = "ocl"
 version = "0.19.4"
-source = "git+https://github.com/cogciprocate/ocl#250934ace865ebeae3dac59abdcb87085e6f68ce"
+source = "git+https://github.com/cogciprocate/ocl#0c87db692a9eb8c03e9ccfb2248c92d4b13b4cb7"
 dependencies = [
  "futures",
  "nodrop",
@@ -1728,7 +1688,7 @@ dependencies = [
 [[package]]
 name = "ocl-core"
 version = "0.11.3"
-source = "git+https://github.com/cogciprocate/ocl#250934ace865ebeae3dac59abdcb87085e6f68ce"
+source = "git+https://github.com/cogciprocate/ocl#0c87db692a9eb8c03e9ccfb2248c92d4b13b4cb7"
 dependencies = [
  "bitflags 1.3.2",
  "cl-sys",
@@ -1743,7 +1703,7 @@ dependencies = [
 [[package]]
 name = "ocl-core-vector"
 version = "0.1.1"
-source = "git+https://github.com/cogciprocate/ocl#250934ace865ebeae3dac59abdcb87085e6f68ce"
+source = "git+https://github.com/cogciprocate/ocl#0c87db692a9eb8c03e9ccfb2248c92d4b13b4cb7"
 dependencies = [
  "num-traits 0.2.15",
 ]
@@ -1751,7 +1711,7 @@ dependencies = [
 [[package]]
 name = "ocl-interop"
 version = "0.1.5"
-source = "git+https://github.com/cogciprocate/ocl#250934ace865ebeae3dac59abdcb87085e6f68ce"
+source = "git+https://github.com/cogciprocate/ocl#0c87db692a9eb8c03e9ccfb2248c92d4b13b4cb7"
 dependencies = [
  "cgl",
  "gl_generator",
@@ -2356,7 +2316,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.2.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=92ff910#92ff910d0d801abc676fde22061c80aa8d8090b3"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=1f8342a#1f8342a6267564435fac0dacf40a2bc46dccae3a"
 dependencies = [
  "argh",
  "byteorder",
@@ -2447,9 +2407,9 @@ checksum = "7300fbefb4dadc1af235a9cef3737cea692a9d97e1b9cbcd4ebdae6f8868e6fb"
 
 [[package]]
 name = "topology-traits"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f34076ac0a15d54be52883b0987cb1b35dddede52ce4003c7a3a3490a9252ec"
+checksum = "c0c8dab428531e30115d3bfd6e3092b55256a4a7b4f87cb3abe37a000b1f4032"
 dependencies = [
  "num-traits 0.2.15",
 ]
@@ -2911,6 +2871,6 @@ checksum = "85e60b0d1b5f99db2556934e21937020776a5d31520bf169e851ac44e6420214"
 
 [[package]]
 name = "xml-rs"
-version = "0.8.13"
+version = "0.8.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d8f380ae16a37b30e6a2cf67040608071384b1450c189e61bea3ff57cde922d"
+checksum = "52839dc911083a8ef63efa4d039d1f58b5e409f923e44c80828f206f66e5541c"

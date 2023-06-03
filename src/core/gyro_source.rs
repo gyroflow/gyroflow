@@ -24,11 +24,12 @@ pub type TimeQuat = BTreeMap<i64, Quat64>; // key is timestamp_us
 pub type TimeVec = BTreeMap<i64, Vector3<f64>>; // key is timestamp_us
 pub type TimeFloat = BTreeMap<i64, f64>; // key is timestamp_us
 
-#[derive(Default)]
+#[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
 pub struct FileMetadata {
     pub imu_orientation:     Option<String>,
-    pub raw_imu:             Option<Vec<TimeIMU>>,
-    pub quaternions:         Option<TimeQuat>,
+    pub raw_imu:             Vec<TimeIMU>,
+    pub quaternions:         TimeQuat,
     pub gravity_vectors:     Option<TimeVec>,
     pub image_orientations:  Option<TimeQuat>,
     pub detected_source:     Option<String>,
@@ -38,7 +39,9 @@ pub struct FileMetadata {
     pub lens_profile:        Option<serde_json::Value>,
     pub lens_positions:      Option<TimeFloat>,
     pub has_accurate_timestamps: bool,
-    pub additional_data:     serde_json::Value
+    pub additional_data:     serde_json::Value,
+    pub per_frame_time_offsets: Vec<f64>,
+    pub per_frame_data:      Vec<serde_json::Value>,
 }
 
 #[derive(Default, Clone)]
@@ -48,14 +51,11 @@ pub struct FileLoadOptions {
 
 #[derive(Default, Clone)]
 pub struct GyroSource {
-    pub detected_source: Option<String>,
-
     pub file_load_options: FileLoadOptions,
 
     pub duration_ms: f64,
 
     pub raw_imu: Vec<TimeIMU>,
-    pub org_raw_imu: Vec<TimeIMU>,
 
     pub imu_orientation: Option<String>,
 
@@ -70,18 +70,12 @@ pub struct GyroSource {
     pub integration_method: usize,
 
     pub quaternions: TimeQuat,
-    pub org_quaternions: TimeQuat,
 
     pub smoothed_quaternions: TimeQuat,
     pub org_smoothed_quaternions: TimeQuat,
 
-    pub image_orientations: TimeQuat,
-
-    pub gravity_vectors: Option<TimeVec>,
     pub use_gravity_vectors: bool,
     pub horizon_lock_integration_method: i32,
-
-    pub lens_positions: Option<TimeFloat>,
 
     pub max_angles: (f64, f64, f64), // (pitch, yaw, roll) in deg
 
@@ -89,7 +83,7 @@ pub struct GyroSource {
 
     pub prevent_recompute: bool,
 
-    pub has_accurate_timestamps: bool,
+    pub file_metadata: FileMetadata,
 
     offsets: BTreeMap<i64, f64>, // <microseconds timestamp, offset in milliseconds>
     offsets_linear: BTreeMap<i64, f64>, // <microseconds timestamp, offset in milliseconds> - linear fit
@@ -136,7 +130,7 @@ impl GyroSource {
         if let Some(m) = input.camera_model() { detected_source.push(' '); detected_source.push_str(m); }
 
         let mut imu_orientation = None;
-        let mut quaternions = None;
+        let mut quaternions = TimeQuat::default();
         let mut gravity_vectors: Option<TimeVec> = None;
         let mut image_orientations = None;
         let mut lens_profile = None;
@@ -269,13 +263,13 @@ impl GyroSource {
                     lens_positions = Some(quats.iter().zip(crop_score.iter()).map(|((ts, _), crop)| (*ts, *crop)).collect());
                 }
 
-                quaternions = Some(quats);
+                quaternions = quats;
             }
         }
 
-        let raw_imu = util::normalized_imu_interpolated(&input, Some("XYZ".into())).ok();
+        let raw_imu = util::normalized_imu_interpolated(&input, Some("XYZ".into())).unwrap_or_default();
 
-        Ok(FileMetadata {
+        let mut md = FileMetadata {
             imu_orientation,
             detected_source: Some(detected_source),
             quaternions,
@@ -288,8 +282,50 @@ impl GyroSource {
             lens_profile,
             camera_identifier,
             has_accurate_timestamps: input.has_accurate_timestamps(),
-            additional_data
-        })
+            additional_data,
+            per_frame_time_offsets: Default::default(),
+            per_frame_data: Default::default(),
+        };
+
+        let sample_rate = Self::get_sample_rate(&md);
+        let mut original_sample_rate = sample_rate;
+        if let Some(ref samples) = input.samples {
+            for info in samples {
+                if let Some(ref tag_map) = info.tag_map {
+                    // --------------------------------- Sony ---------------------------------
+                    telemetry_parser::try_block!({
+                        let imager = tag_map.get(&GroupId::Imager)?;
+                        let first_frame_ts = (imager.get_t(TagId::FirstFrameTimestamp) as Option<&f64>)?;
+                        let exposure_time = (imager.get_t(TagId::ExposureTime) as Option<&f64>)?;
+                        let offset = (tag_map.get(&GroupId::Gyroscope)?.get_t(TagId::TimeOffset) as Option<&f64>)?;
+                        let sampling_frequency = *(tag_map.get(&GroupId::Gyroscope)?.get_t(TagId::Frequency) as Option<&i32>)? as f64;
+                        let scaler = *(tag_map.get(&GroupId::Gyroscope)?.get_t(TagId::Unknown(0xe436)) as Option<&i32>).unwrap_or(&1000000) as f64 / 1000.0;
+                        original_sample_rate = sampling_frequency;
+
+                        let model_offset = if input.camera_model().map(|x| x == "DSC-RX0M2").unwrap_or_default() {
+                            1.5
+                        } else {
+                            0.0
+                        };
+
+                        let rounded_offset = (offset * (1000.0 / scaler)).round();
+                        let offset_diff = ((rounded_offset - (1000.0 / sampling_frequency) * (rounded_offset / (1000.0 / sampling_frequency)).floor())).round();
+
+                        let frame_offset = first_frame_ts - exposure_time / 2.0 + (input.frame_readout_time().unwrap() / 2.0) + model_offset + offset_diff - offset;
+
+                        md.per_frame_time_offsets.push(frame_offset / sampling_frequency * sample_rate);
+                    });
+                    // --------------------------------- Sony ---------------------------------
+                }
+            }
+            if input.camera_type() == "Sony" {
+                if let Some(frt) = md.frame_readout_time {
+                    md.frame_readout_time = Some(frt / original_sample_rate * sample_rate);
+                }
+            }
+        }
+
+        Ok(md)
     }
 
     pub fn load_from_telemetry(&mut self, telemetry: &FileMetadata) {
@@ -299,62 +335,43 @@ impl GyroSource {
         }
 
         self.quaternions.clear();
-        self.org_quaternions.clear();
         self.smoothed_quaternions.clear();
         self.org_smoothed_quaternions.clear();
         self.offsets.clear();
         self.offsets_adjusted.clear();
         self.raw_imu.clear();
-        self.org_raw_imu.clear();
         self.imu_rotation = None;
         self.acc_rotation = None;
         self.imu_lpf = 0.0;
 
         self.imu_orientation = telemetry.imu_orientation.clone();
-        self.detected_source = telemetry.detected_source.clone();
 
-        if let Some(quats) = &telemetry.quaternions {
-            self.quaternions = quats.clone();
-            self.org_quaternions = self.quaternions.clone();
-        }
-        if let Some(ioris) = &telemetry.image_orientations {
-            self.image_orientations = ioris.clone();
-        }
-        if !self.org_quaternions.is_empty() {
+        self.file_metadata = telemetry.clone();
+
+        if !telemetry.quaternions.is_empty() {
+            self.quaternions = telemetry.quaternions.clone();
             self.integration_method = 0;
-        }
-
-        self.gravity_vectors = telemetry.gravity_vectors.clone();
-        self.lens_positions = telemetry.lens_positions.clone();
-        self.has_accurate_timestamps = telemetry.has_accurate_timestamps;
-
-        if !self.org_quaternions.is_empty() {
-            let len = self.org_quaternions.len() as f64;
-            if len > 0.0 {
-                let first_ts = self.org_quaternions.iter().next()      .map(|x| *x.0 as f64 / 1000.0).unwrap_or_default();
-                let last_ts  = self.org_quaternions.iter().next_back() .map(|x| *x.0 as f64 / 1000.0).unwrap_or_default();
-                let imu_duration = (last_ts - first_ts) * ((len + 1.0) / len.max(1.0));
-                if (imu_duration - self.duration_ms).abs() > 0.01 {
-                    log::warn!("IMU duration {imu_duration} is different than video duration ({})", self.duration_ms);
-                    if imu_duration > 0.0 {
-                        self.duration_ms = imu_duration;
-                    }
+            let len = telemetry.quaternions.len() as f64;
+            let first_ts = telemetry.quaternions.iter().next()      .map(|x| *x.0 as f64 / 1000.0).unwrap_or_default();
+            let last_ts  = telemetry.quaternions.iter().next_back() .map(|x| *x.0 as f64 / 1000.0).unwrap_or_default();
+            let imu_duration = (last_ts - first_ts) * ((len + 1.0) / len);
+            if (imu_duration - self.duration_ms).abs() > 0.01 {
+                log::warn!("IMU duration {imu_duration} is different than video duration ({})", self.duration_ms);
+                if imu_duration > 0.0 {
+                    self.duration_ms = imu_duration;
                 }
             }
         }
 
-        if let Some(imu) = &telemetry.raw_imu {
-            self.org_raw_imu = imu.clone();
-            let len = self.org_raw_imu.len() as f64;
-            if len > 0.0 {
-                let first_ts = self.org_raw_imu.first().map(|x| x.timestamp_ms).unwrap_or_default();
-                let last_ts  = self.org_raw_imu.last() .map(|x| x.timestamp_ms).unwrap_or_default();
-                let imu_duration = (last_ts - first_ts) * ((len + 1.0) / len.max(1.0));
-                if (imu_duration - self.duration_ms).abs() > 0.01 {
-                    log::warn!("IMU duration {imu_duration} is different than video duration ({})", self.duration_ms);
-                    if imu_duration > 0.0 {
-                        self.duration_ms = imu_duration;
-                    }
+        if !telemetry.raw_imu.is_empty() {
+            let len = telemetry.raw_imu.len() as f64;
+            let first_ts = telemetry.raw_imu.first().map(|x| x.timestamp_ms).unwrap_or_default();
+            let last_ts  = telemetry.raw_imu.last() .map(|x| x.timestamp_ms).unwrap_or_default();
+            let imu_duration = (last_ts - first_ts) * ((len + 1.0) / len);
+            if (imu_duration - self.duration_ms).abs() > 0.01 {
+                log::warn!("IMU duration {imu_duration} is different than video duration ({})", self.duration_ms);
+                if imu_duration > 0.0 {
+                    self.duration_ms = imu_duration;
                 }
             }
             self.apply_transforms();
@@ -365,11 +382,11 @@ impl GyroSource {
     pub fn integrate(&mut self) {
         match self.integration_method {
             0 => {
-                self.quaternions = if self.detected_source.as_ref().unwrap_or(&"".into()).starts_with("GoPro") && !self.org_quaternions.is_empty() && (self.gravity_vectors.is_none() || !self.use_gravity_vectors) {
+                self.quaternions = if self.file_metadata.detected_source.as_ref().unwrap_or(&"".into()).starts_with("GoPro") && !self.file_metadata.quaternions.is_empty() && (self.file_metadata.gravity_vectors.is_none() || !self.use_gravity_vectors) {
                     log::info!("No gravity vectors - using accelerometer");
-                    QuaternionConverter::convert(self.horizon_lock_integration_method, &self.org_quaternions, &self.image_orientations, &self.raw_imu, self.duration_ms)
+                    QuaternionConverter::convert(self.horizon_lock_integration_method, &self.file_metadata.quaternions, self.file_metadata.image_orientations.as_ref().unwrap_or(&TimeQuat::default()), &self.raw_imu, self.duration_ms)
                 } else {
-                    self.org_quaternions.clone()
+                    self.file_metadata.quaternions.clone()
                 };
                 if self.imu_lpf > 0.0 && !self.quaternions.is_empty() && self.duration_ms > 0.0 {
                     let sample_rate = self.quaternions.len() as f64 / (self.duration_ms / 1000.0);
@@ -396,12 +413,12 @@ impl GyroSource {
     pub fn recompute_smoothness(&mut self, alg: &dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) {
         if true {
             // Lock horizon, then smooth
-            self.smoothed_quaternions = horizon_lock.lock(&self.quaternions, &self.quaternions, &self.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes, stabilization_params);
+            self.smoothed_quaternions = horizon_lock.lock(&self.quaternions, &self.quaternions, &self.file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes, stabilization_params);
             self.smoothed_quaternions = alg.smooth(&self.smoothed_quaternions, self.duration_ms, stabilization_params, keyframes);
         } else {
             // Smooth, then lock horizon
             self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms, stabilization_params, keyframes);
-            self.smoothed_quaternions = horizon_lock.lock(&self.smoothed_quaternions, &self.quaternions, &self.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes, stabilization_params);
+            self.smoothed_quaternions = horizon_lock.lock(&self.smoothed_quaternions, &self.quaternions, &self.file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes, stabilization_params);
         }
 
         self.max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &self.smoothed_quaternions, stabilization_params);
@@ -542,7 +559,7 @@ impl GyroSource {
     }
 
     pub fn apply_transforms(&mut self) {
-        self.raw_imu = self.org_raw_imu.clone();
+        self.raw_imu = self.file_metadata.raw_imu.clone();
 
         if let Some(bias) = self.gyro_bias {
             for x in &mut self.raw_imu {
@@ -613,8 +630,8 @@ impl GyroSource {
             }
         }
 
-        if self.imu_lpf > 0.0 && !self.org_raw_imu.is_empty() && self.duration_ms > 0.0 {
-            let sample_rate = self.org_raw_imu.len() as f64 / (self.duration_ms / 1000.0);
+        if self.imu_lpf > 0.0 && !self.file_metadata.raw_imu.is_empty() && self.duration_ms > 0.0 {
+            let sample_rate = self.file_metadata.raw_imu.len() as f64 / (self.duration_ms / 1000.0);
             if let Err(e) = super::filtering::Lowpass::filter_gyro_forward_backward(self.imu_lpf, sample_rate, &mut self.raw_imu) {
                 log::error!("Filter error {:?}", e);
             }
@@ -630,7 +647,7 @@ impl GyroSource {
 
         if let Some(&first_ts) = quats.keys().next() {
             if let Some(&last_ts) = quats.keys().next_back() {
-                let lookup_ts = ((timestamp_ms * 1000.0) as i64).min(last_ts).max(first_ts);
+                let lookup_ts = ((timestamp_ms * 1000.0).round() as i64).min(last_ts).max(first_ts);
 
                 if let Some(quat1) = quats.range(..=lookup_ts).next_back() {
                     if *quat1.0 == lookup_ts {
@@ -679,6 +696,7 @@ impl GyroSource {
     pub fn offset_at_video_timestamp(&self, timestamp_ms: f64) -> f64 { Self::offset_at_timestamp(&self.offsets_adjusted, timestamp_ms) }
     pub fn offset_at_gyro_timestamp (&self, timestamp_ms: f64) -> f64 { Self::offset_at_timestamp(&self.offsets, timestamp_ms) }
 
+    /// Partial clone with data necessary only for computations
     pub fn clone_quaternions(&self) -> Self {
         Self {
             duration_ms:          self.duration_ms,
@@ -686,8 +704,14 @@ impl GyroSource {
             smoothed_quaternions: self.smoothed_quaternions.clone(),
             offsets:              self.offsets.clone(),
             offsets_adjusted:     self.offsets_adjusted.clone(),
-            gravity_vectors:      self.gravity_vectors.clone(),
-            lens_positions:       self.lens_positions.clone(),
+            file_metadata:        FileMetadata {
+                gravity_vectors:        self.file_metadata.gravity_vectors.clone(),
+                lens_positions:         self.file_metadata.lens_positions.clone(),
+                per_frame_time_offsets: self.file_metadata.per_frame_time_offsets.clone(),
+                per_frame_data:         self.file_metadata.per_frame_data.clone(),
+                additional_data:        self.file_metadata.additional_data.clone(),
+                ..Default::default()
+            },
             use_gravity_vectors:  self.use_gravity_vectors,
             integration_method:   self.integration_method,
             ..Default::default()
@@ -697,7 +721,7 @@ impl GyroSource {
     pub fn get_checksum(&self) -> u64 {
         use std::hash::Hasher;
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
-        if let Some(v) = &self.detected_source { hasher.write(v.as_bytes()); }
+        if let Some(v) = &self.file_metadata.detected_source { hasher.write(v.as_bytes()); }
         if let Some(v) = &self.imu_orientation { hasher.write(v.as_bytes()); }
         if let Some(v) = &self.imu_rotation_angles { hasher.write_u64(v[0].to_bits()); hasher.write_u64(v[1].to_bits()); hasher.write_u64(v[2].to_bits()); }
         if let Some(v) = &self.acc_rotation_angles { hasher.write_u64(v[0].to_bits()); hasher.write_u64(v[1].to_bits()); hasher.write_u64(v[2].to_bits()); }
@@ -706,11 +730,11 @@ impl GyroSource {
         hasher.write_u64(self.duration_ms.to_bits());
         hasher.write_u64(self.imu_lpf.to_bits());
         hasher.write_usize(self.raw_imu.len());
-        hasher.write_usize(self.org_raw_imu.len());
+        hasher.write_usize(self.file_metadata.raw_imu.len());
         hasher.write_usize(self.quaternions.len());
-        hasher.write_usize(self.org_quaternions.len());
-        hasher.write_usize(self.image_orientations.len());
-        hasher.write_usize(self.lens_positions.as_ref().map(|v| v.len()).unwrap_or_default());
+        hasher.write_usize(self.file_metadata.quaternions.len());
+        hasher.write_usize(self.file_metadata.image_orientations.as_ref().map(|v| v.len()).unwrap_or_default());
+        hasher.write_usize(self.file_metadata.lens_positions.as_ref().map(|v| v.len()).unwrap_or_default());
         hasher.write_u32(if self.use_gravity_vectors { 1 } else { 0 });
         hasher.write_usize(self.integration_method);
         for (ts, v) in &self.offsets {
@@ -721,15 +745,19 @@ impl GyroSource {
         hasher.finish()
     }
 
-    pub fn get_sample_rate(&self) -> f64 {
-        if self.org_raw_imu.len() > 2 {
-            let duration_ms = self.org_raw_imu.last().unwrap().timestamp_ms - self.org_raw_imu.first().unwrap().timestamp_ms;
-            self.org_raw_imu.len() as f64 / (duration_ms / 1000.0)
-        } else if self.org_quaternions.len() > 2 {
-            let first = *self.org_quaternions.iter().next().unwrap().0 as f64 / 1000.0;
-            let last = *self.org_quaternions.iter().next_back().unwrap().0 as f64 / 1000.0;
+    pub fn get_sample_rate(file_metadata: &FileMetadata) -> f64 {
+        if file_metadata.raw_imu.len() > 2 {
+            let len = file_metadata.raw_imu.len() as f64;
+            let duration_ms = file_metadata.raw_imu.last().unwrap().timestamp_ms - file_metadata.raw_imu.first().unwrap().timestamp_ms;
+            let duration_ms = duration_ms * ((len + 1.0) / len.max(1.0));
+            file_metadata.raw_imu.len() as f64 / (duration_ms / 1000.0)
+        } else if file_metadata.quaternions.len() > 2 {
+            let len = file_metadata.quaternions.len() as f64;
+            let first = *file_metadata.quaternions.iter().next().unwrap().0 as f64 / 1000.0;
+            let last = *file_metadata.quaternions.iter().next_back().unwrap().0 as f64 / 1000.0;
             let duration_ms = last - first;
-            self.org_quaternions.len() as f64 / (duration_ms / 1000.0)
+            let duration_ms = duration_ms * ((len + 1.0) / len.max(1.0));
+            file_metadata.quaternions.len() as f64 / (duration_ms / 1000.0)
         } else {
             0.0
         }
@@ -741,7 +769,7 @@ impl GyroSource {
         let mut bias_vals = [0.0, 0.0, 0.0];
         let mut n = 0;
 
-        for x in &self.org_raw_imu {
+        for x in &self.file_metadata.raw_imu {
             if let Some(g) = x.gyro {
                 if x.timestamp_ms > ts_start && x.timestamp_ms < ts_stop {
                     bias_vals[0] -= g[0];

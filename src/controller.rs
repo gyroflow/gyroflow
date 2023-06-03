@@ -771,16 +771,16 @@ impl Controller {
                     stab.recompute_smoothness();
 
                     let gyro = stab.gyro.read();
-                    let detected = gyro.detected_source.as_ref().map(String::clone).unwrap_or_default();
-                    let has_raw_gyro = !gyro.org_raw_imu.is_empty();
-                    let has_quats = !gyro.org_quaternions.is_empty();
+                    let detected = gyro.file_metadata.detected_source.as_ref().map(String::clone).unwrap_or_default();
+                    let has_raw_gyro = !gyro.file_metadata.raw_imu.is_empty();
+                    let has_quats = !gyro.file_metadata.quaternions.is_empty();
                     let has_motion = has_raw_gyro || has_quats;
                     additional_obj.insert("imu_orientation".to_owned(),   serde_json::Value::String(gyro.imu_orientation.clone().unwrap_or_else(|| "XYZ".into())));
                     additional_obj.insert("contains_raw_gyro".to_owned(), serde_json::Value::Bool(has_raw_gyro));
                     additional_obj.insert("contains_quats".to_owned(),    serde_json::Value::Bool(has_quats));
                     additional_obj.insert("contains_motion".to_owned(),   serde_json::Value::Bool(has_motion));
-                    additional_obj.insert("has_accurate_timestamps".to_owned(), serde_json::Value::Bool(gyro.has_accurate_timestamps));
-                    additional_obj.insert("sample_rate".to_owned(),       serde_json::to_value(gyro.get_sample_rate()).unwrap());
+                    additional_obj.insert("has_accurate_timestamps".to_owned(), serde_json::Value::Bool(gyro.file_metadata.has_accurate_timestamps));
+                    additional_obj.insert("sample_rate".to_owned(),       serde_json::to_value(gyroflow_core::gyro_source::GyroSource::get_sample_rate(&gyro.file_metadata)).unwrap());
                     drop(gyro);
 
                     let camera_id = stab.camera_id.read();
@@ -1900,7 +1900,7 @@ impl Controller {
     }
 
     fn has_gravity_vectors(&self) -> bool {
-        self.stabilizer.gyro.read().gravity_vectors.as_ref().map(|v| !v.is_empty()).unwrap_or_default()
+        self.stabilizer.gyro.read().file_metadata.gravity_vectors.as_ref().map(|v| !v.is_empty()).unwrap_or_default()
     }
 
     fn check_external_sdk(&self, path: QString) -> bool {

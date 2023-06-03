@@ -333,6 +333,10 @@ impl RenderQueue {
                         }
                     }
                     let stab = self.stabilizer.get_cloned();
+
+                    // If it's added from main UI, never do the additional autosync
+                    if let Some(ref mut obj) = stab.lens.write().sync_settings { obj.as_object_mut().and_then(|x| x.remove("do_autosync")); }
+
                     self.add_internal(job_id, Arc::new(stab), render_options, additional_data, thumbnail_url);
                 }
             }

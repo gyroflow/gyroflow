@@ -54,7 +54,7 @@ impl FrameTransform {
 
     pub fn get_lens_data_at_timestamp(params: &ComputeParams, timestamp_ms: f64) -> (Matrix3<f64>, [f64; 12], f64, f64, f64, Option<f64>) {
         let mut interpolated_lens = None;
-        if let Some(lens_positions) = params.gyro.lens_positions.as_ref() {
+        if let Some(lens_positions) = params.gyro.file_metadata.lens_positions.as_ref() {
             use crate::util::MapClosest;
             if let Some(val) = lens_positions.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
                 interpolated_lens = Some(params.lens.get_interpolated_lens_at(*val));
@@ -122,6 +122,7 @@ impl FrameTransform {
         let frame_readout_time = Self::get_frame_readout_time(&params, true);
 
         let row_readout_time = frame_readout_time / params.height as f64;
+        let timestamp_ms = timestamp_ms + params.gyro.file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
 
@@ -134,10 +135,10 @@ impl FrameTransform {
         let rows = if frame_readout_time.abs() > 0.0 { params.height } else { 1 };
 
         let matrices = (0..rows).into_par_iter().map(|y| {
-            let quat_time = if frame_readout_time.abs() > 0.0 && timestamp_ms > 0.0 {
+            let quat_time = if frame_readout_time.abs() > 0.0 {
                 start_ts + row_readout_time * y as f64
             } else {
-                timestamp_ms
+                start_ts
             };
             let quat = smoothed_quat1
                      * quat1
@@ -204,6 +205,8 @@ impl FrameTransform {
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
         // ----------- Keyframes -----------
 
+        let frame = crate::frame_at_timestamp(timestamp_ms, params.scaled_fps) as usize;
+
         let (camera_matrix, distortion_coeffs, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms);
 
         let img_dim_ratio = Self::get_ratio(params);
@@ -216,6 +219,7 @@ impl FrameTransform {
         let frame_readout_time = Self::get_frame_readout_time(params, false);
 
         let row_readout_time = frame_readout_time / params.height as f64;
+        let timestamp_ms = timestamp_ms + params.gyro.file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
 
@@ -228,10 +232,10 @@ impl FrameTransform {
         let points_iter = if frame_readout_time.abs() > 0.0 { points } else { &[(0.0, 0.0)] };
 
         let rotations: Vec<Matrix3<f64>> = points_iter.iter().map(|&(_, y)| {
-            let quat_time = if frame_readout_time.abs() > 0.0 && timestamp_ms > 0.0 {
+            let quat_time = if frame_readout_time.abs() > 0.0 {
                 start_ts + row_readout_time * y as f64
             } else {
-                timestamp_ms
+                start_ts
             };
             let quat = smoothed_quat1
                      * quat1

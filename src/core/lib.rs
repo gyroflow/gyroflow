@@ -888,13 +888,7 @@ impl StabilizationManager {
                 "gyro_bias":          gyro.gyro_bias,
                 "integration_method": gyro.integration_method,
                 "sample_index":       gyro.file_load_options.sample_index,
-                "detected_source":    gyro.detected_source,
-                "has_accurate_timestamps": gyro.has_accurate_timestamps,
-                "raw_imu":            if !thin { util::compress_to_base91(&gyro.org_raw_imu) } else { None },
-                "quaternions":        if !thin && !gyro.org_quaternions.is_empty() { util::compress_to_base91(&gyro.org_quaternions) } else { None },
-                "image_orientations": if !thin { util::compress_to_base91(&gyro.image_orientations) } else { None },
-                "gravity_vectors":    if !thin && gyro.gravity_vectors.is_some() { util::compress_to_base91(gyro.gravity_vectors.as_ref().unwrap()) } else { None },
-                // "smoothed_quaternions": smooth_quats
+                "detected_source":    gyro.file_metadata.detected_source,
             },
 
             "offsets": gyro.get_offsets(), // timestamp, offset value
@@ -909,12 +903,32 @@ impl StabilizationManager {
 
         util::merge_json(&mut obj, &serde_json::from_str(additional_data).unwrap_or_default());
 
-        if extended {
-            if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
-                if let Some(q) = util::compress_to_base91(&gyro.quaternions) {
+        if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
+            if thin {
+                let metadata_copy = crate::gyro_source::FileMetadata {
+                    raw_imu: Default::default(),
+                    quaternions: Default::default(),
+                    image_orientations: None,
+                    gravity_vectors: None,
+                    lens_positions: None,
+                    per_frame_time_offsets: Default::default(),
+                    per_frame_data: Default::default(),
+                    ..gyro.file_metadata.clone()
+                };
+                if let Ok(val) = serde_json::to_value(metadata_copy) {
+                    obj.insert("file_metadata".into(), val);
+                }
+            } else {
+                if let Some(q) = util::compress_to_base91_cbor(&gyro.file_metadata) {
+                    obj.insert("file_metadata".into(), serde_json::Value::String(q));
+                }
+            }
+
+            if extended {
+                if let Some(q) = util::compress_to_base91_cbor(&gyro.quaternions) {
                     obj.insert("integrated_quaternions".into(), serde_json::Value::String(q));
                 }
-                if let Some(q) = util::compress_to_base91(&gyro.smoothed_quaternions) {
+                if let Some(q) = util::compress_to_base91_cbor(&gyro.smoothed_quaternions) {
                     obj.insert("smoothed_quaternions".into(),   serde_json::Value::String(q));
                 }
             }
@@ -1013,19 +1027,19 @@ impl StabilizationManager {
 
                 // Load IMU data only if it's from another file or the gyro file is not accessible anymore
                 if (!org_gyro_path.is_empty() && org_gyro_path != org_video_path) || !gyro_path.exists() || std::fs::File::open(&gyro_path).is_err() {
-                    let mut raw_imu = None;
-                    let mut quaternions = None;
+                    let mut raw_imu = Vec::new();
+                    let mut quaternions = TimeQuat::default();
                     let mut image_orientations = None;
                     let mut gravity_vectors = None;
                     if is_compressed {
                         if let Some(bytes) = util::decompress_from_base91(obj.get("raw_imu").and_then(|x| x.as_str()).unwrap_or_default()) {
                             if let Ok(data) = bincode::deserialize(&bytes) as bincode::Result<Vec<TimeIMU>> {
-                                raw_imu = Some(data);
+                                raw_imu = data;
                             }
                         }
                         if let Some(bytes) = util::decompress_from_base91(obj.get("quaternions").and_then(|x| x.as_str()).unwrap_or_default()) {
                             if let Ok(data) = bincode::deserialize(&bytes) as bincode::Result<TimeQuat> {
-                                quaternions = Some(data);
+                                quaternions = data;
                             }
                         }
                         if let Some(bytes) = util::decompress_from_base91(obj.get("image_orientations").and_then(|x| x.as_str()).unwrap_or_default()) {
@@ -1041,7 +1055,7 @@ impl StabilizationManager {
                     } else {
                         if let Some(ri) = obj.get("raw_imu") {
                             if ri.is_array() {
-                                raw_imu = serde_json::from_value(ri.clone()).ok();
+                                raw_imu = serde_json::from_value(ri.clone()).unwrap_or_default();
                             }
                         }
                         quaternions = obj.get("quaternions")
@@ -1060,10 +1074,11 @@ impl StabilizationManager {
                                     }
                                 }
                                 if !ret.is_empty() { Some(ret) } else { None }
-                            });
+                            })
+                            .unwrap_or_default();
                     }
 
-                    if raw_imu.is_some() {
+                    if !raw_imu.is_empty() {
                         let md = crate::gyro_source::FileMetadata {
                             imu_orientation: obj.get("imu_orientation").and_then(|x| x.as_str().map(|x| x.to_string())),
                             detected_source: Some(obj.get("detected_source").and_then(|x| x.as_str()).unwrap_or("Gyroflow file").to_string()),
@@ -1071,15 +1086,12 @@ impl StabilizationManager {
                             gravity_vectors,
                             image_orientations,
                             raw_imu,
-                            lens_profile: None,
-                            frame_readout_time: None,
-                            frame_rate: None,
-                            camera_identifier: None,
-                            has_accurate_timestamps: obj.get("has_accurate_timestamps").and_then(|x| x.as_bool()).unwrap_or_default(),
-                            lens_positions: None,
-                            additional_data: Default::default()
+                            ..Default::default()
                         };
 
+                        let mut gyro = self.gyro.write();
+                        gyro.load_from_telemetry(&md);
+                    } else if let Ok(md) = util::decompress_from_base91_cbor(obj.get("file_metadata").and_then(|x| x.as_str()).unwrap_or_default()) as std::io::Result<crate::gyro_source::FileMetadata> {
                         let mut gyro = self.gyro.write();
                         gyro.load_from_telemetry(&md);
                     } else if gyro_path.exists() && blocking {
@@ -1110,6 +1122,7 @@ impl StabilizationManager {
                 obj.remove("smoothed_quaternions");
                 obj.remove("image_orientations");
                 obj.remove("gravity_vectors");
+                obj.remove("file_metadata");
             }
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("stabilization") {
                 let mut params = self.params.write();

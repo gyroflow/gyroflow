@@ -14,7 +14,7 @@ opencv = ["gyroflow-core/use-opencv"]
 gyroflow-core = { path = "src/core/", features = ["use-opencv", "use-opencl"] }
 keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "0f34aaf" }
 system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", rev = "29ff230" }
-breakpad-sys = "0.1.1"
+breakpad-sys = "0.2.0"
 
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
 gyroflow-core = { path = "src/core/", features = ["use-opencv"] }
@@ -55,7 +55,7 @@ lazy_static = "1.4.0"
 parking_lot = "0.12.1"
 
 simplelog = "0.12.1"
-log = "0.4.17"
+log = "0.4.18"
 
 ureq = "2.6.2"
 url = "2.3.1"

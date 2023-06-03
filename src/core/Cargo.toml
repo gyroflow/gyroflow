@@ -10,7 +10,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "92ff910" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "1f8342a" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", rev = "bf7b41d", features = ["field_access"] }
 
@@ -42,6 +42,7 @@ simple-easing = "1.0.1"
 half = "2.2.1"
 lru = "0.10"
 thiserror = "1.0.40"
+ciborium = "0.2.1"
 
 dyn-clone = "1.0.11"
 
@@ -72,7 +73,7 @@ futures-intrusive = "0.5.0"
 flate2 = "1.0.26"
 walkdir = "2.3.3"
 
-log = "0.4.17"
+log = "0.4.18"
 
 ocl = { version = "0.19.4", optional = true, git = "https://github.com/cogciprocate/ocl" }
 ocl-interop = { version = "0.1.5", optional = true, git = "https://github.com/cogciprocate/ocl" }

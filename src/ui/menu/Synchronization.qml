@@ -63,7 +63,7 @@ MenuItem {
         running: controller.lens_loaded && controller.gyro_loaded && !window.isDialogOpened && doRun && render_queue.editing_job_id == 0;
         onTriggered: {
             doRun = false;
-            if (controller.offsets_model.rowCount() == 0)
+            if (controller.offsets_model.rowCount() == 0 && !window.motionData.hasAccurateTimestamps)
                 autosync.doSync();
         }
     }

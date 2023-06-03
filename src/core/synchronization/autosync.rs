@@ -142,6 +142,12 @@ impl AutosyncProcess {
             timestamp_us = (timestamp_us as f64 / scale) as i64;
         }
 
+        {
+            let compute_params = compute_params.read();
+            let frame = crate::frame_at_timestamp(timestamp_us as f64 / 1000.0, compute_params.scaled_fps) as usize;
+            timestamp_us += (compute_params.gyro.file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0) * 1000.0).round() as i64;
+        }
+
         if let Some(_current_range) = self.scaled_ranges_us.iter().find(|(from, to)| (*from..*to).contains(&timestamp_us)).copied() {
             self.total_read_frames.fetch_add(1, SeqCst);
 
