@@ -308,7 +308,7 @@ impl GyroSource {
                         let rounded_offset = (offset * (1000.0 / scaler)).round();
                         let offset_diff = ((rounded_offset - (1000.0 / sampling_frequency) * (rounded_offset / (1000.0 / sampling_frequency)).floor())).round();
 
-                        let frame_offset = first_frame_ts - exposure_time / 2.0 + (input.frame_readout_time().unwrap() / 2.0) + model_offset + offset_diff - offset;
+                        let frame_offset = first_frame_ts - exposure_time / 2.0 + (md.frame_readout_time.unwrap_or_default() / 2.0) + model_offset + offset_diff - offset;
 
                         md.per_frame_time_offsets.push(frame_offset / sampling_frequency * sample_rate);
                     });
