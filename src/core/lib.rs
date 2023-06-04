@@ -870,8 +870,7 @@ impl StabilizationManager {
                 "frame_readout_time":     params.frame_readout_time,
                 "adaptive_zoom_window":   params.adaptive_zoom_window,
                 "adaptive_zoom_center_offset": params.adaptive_zoom_center_offset,
-                "adaptive_zoom_method": params.adaptive_zoom_method,
-                // "adaptive_zoom_fovs":     if !thin { util::compress_to_base91(&params.fovs) } else { None },
+                "adaptive_zoom_method":   params.adaptive_zoom_method,
                 "lens_correction_amount": params.lens_correction_amount,
                 "horizon_lock_amount":    horizon_amount,
                 "horizon_lock_roll":      horizon_roll,
@@ -927,12 +926,22 @@ impl StabilizationManager {
             }
 
             if extended {
-                if let Some(q) = util::compress_to_base91_cbor(&gyro.quaternions) {
-                    obj.insert("integrated_quaternions".into(), serde_json::Value::String(q));
+                let mut imu_timestamps = Vec::with_capacity(gyro.quaternions.len());
+                let mut imu_timestamps_final = Vec::with_capacity(gyro.quaternions.len());
+                for (t, _) in &gyro.quaternions {
+                    let mut timestamp_ms = *t as f64 / 1000.0;
+                    timestamp_ms += gyro.offset_at_gyro_timestamp(timestamp_ms);
+
+                    imu_timestamps.push(timestamp_ms);
+
+                    let frame = ((timestamp_ms - params.frame_readout_time / 2.0) * (params.get_scaled_fps() / 1000.0)).ceil() as usize;
+                    imu_timestamps_final.push(timestamp_ms - gyro.file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0));
                 }
-                if let Some(q) = util::compress_to_base91_cbor(&gyro.smoothed_quaternions) {
-                    obj.insert("smoothed_quaternions".into(),   serde_json::Value::String(q));
-                }
+                util::compress_to_base91_cbor(&imu_timestamps)           .and_then(|s| obj.insert("synced_imu_timestamps" .into(), serde_json::Value::String(s)));
+                util::compress_to_base91_cbor(&imu_timestamps_final)     .and_then(|s| obj.insert("synced_imu_timestamps_with_per_frame_offset".into(), serde_json::Value::String(s)));
+                util::compress_to_base91_cbor(&gyro.quaternions)         .and_then(|s| obj.insert("integrated_quaternions".into(), serde_json::Value::String(s)));
+                util::compress_to_base91_cbor(&gyro.smoothed_quaternions).and_then(|s| obj.insert("smoothed_quaternions"  .into(), serde_json::Value::String(s)));
+                util::compress_to_base91_cbor(&params.fovs)              .and_then(|s| obj.insert("adaptive_zoom_fovs"    .into(), serde_json::Value::String(s)));
             }
         }
 
