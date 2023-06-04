@@ -839,7 +839,7 @@ impl StabilizationManager {
 
         let mut obj = serde_json::json!({
             "title": "Gyroflow data file",
-            "version": 2,
+            "version": 3,
             "app_version": env!("CARGO_PKG_VERSION").to_string(),
             "videofile": input_file.path,
             "calibration_data": self.lens.read().get_json_value().unwrap_or_else(|_| serde_json::json!({})),
