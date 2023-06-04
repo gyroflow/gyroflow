@@ -92,7 +92,7 @@ impl FrameTransform {
         let background_feather = params.keyframes.value_at_video_timestamp(&KeyframeType::BackgroundFeather, timestamp_ms).unwrap_or(params.background_margin_feather);
         let lens_correction_amount = params.keyframes.value_at_video_timestamp(&KeyframeType::LensCorrectionStrength, timestamp_ms).unwrap_or(params.lens_correction_amount);
         let adaptive_zoom_center_x = params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterX, timestamp_ms).unwrap_or(params.adaptive_zoom_center_offset.0);
-        let adaptive_zoom_center_y = params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterY, timestamp_ms).unwrap_or(params.adaptive_zoom_center_offset.1);
+        let mut adaptive_zoom_center_y = params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterY, timestamp_ms).unwrap_or(params.adaptive_zoom_center_offset.1);
         // ----------- Keyframes -----------
 
         // ----------- Lens -----------
@@ -170,6 +170,9 @@ impl FrameTransform {
             for (i, v) in p.iter().enumerate() {
                 digital_lens_params[i] = *v as f32;
             }
+        }
+        if params.framebuffer_inverted {
+            adaptive_zoom_center_y *= -1.0;
         }
 
         let kernel_params = KernelParams {
