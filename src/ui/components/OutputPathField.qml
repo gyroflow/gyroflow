@@ -42,7 +42,7 @@ TextField {
         type: "output-video";
         onAccepted: {
             outputFile.text = controller.url_to_path(outputFileDialog.selectedFile);
-            window.exportSettings.item.updateCodecParams();
+            window.exportSettings.updateCodecParams();
         }
     }
     QQD.FolderDialog {
@@ -53,7 +53,7 @@ TextField {
         onAccepted: {
             outputFolderDialog.urlString = selectedFolder.toString();
             outputFile.text = controller.url_to_path(selectedFolder) + outputFile.text.split('/').slice(-1);
-            window.exportSettings.item.updateCodecParams();
+            window.exportSettings.updateCodecParams();
 
             if (Qt.platform.os == "ios") {
                 controller.start_apple_url_access(outputFolderDialog.urlString);
