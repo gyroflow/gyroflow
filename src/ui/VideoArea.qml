@@ -482,6 +482,7 @@ Item {
     }
 
     function askForOutputLocation(location: string, cb) {
+        let _ = qsTr("Same as the original file") + qsTr("Custom path");
         const dlg = messageBox(Modal.Info, qsTr("Please enter the output path:"), [
             { text: qsTr("Ok"), accent: true, clicked: function() {
                 cb(dlg.mainColumn.children[1].text);

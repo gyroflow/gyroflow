@@ -612,12 +612,12 @@ Limit ostrosti můžete zvýšit v sekci Pokročilé.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="585"/>
       <source>Preserve export settings</source>
-      <translation type="unfinished">Preserve export settings</translation>
+      <translation>Zachovat nastavení exportu</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="587"/>
       <source>Save output size and bitrate in settings and use it for all files.</source>
-      <translation type="unfinished">Save output size and bitrate in settings and use it for all files.</translation>
+      <translation>Uložit výstupní velikost a bitrate v nastavení a použít ji pro všechny soubory.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="363"/>
@@ -688,7 +688,7 @@ Limit ostrosti můžete zvýšit v sekci Pokročilé.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="523"/>
       <source>Audio codec</source>
-      <translation type="unfinished">Audio codec</translation>
+      <translation>Audio kodek</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="535"/>
@@ -1204,12 +1204,12 @@ Chcete odeslat svůj profil?</translation>
       <location filename="../../src/ui/components/OutputPathField.qml" line="40"/>
       <location filename="../../src/ui/components/OutputPathField.qml" line="50"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>Vyberte cíl souboru</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="41"/>
       <source>Video files</source>
-      <translation type="unfinished">Video files</translation>
+      <translation>Video soubory</translation>
     </message>
   </context>
   <context>
@@ -1878,7 +1878,7 @@ Chcete převést na jiný podporovaný formát nebo zachovat originální a vykr
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="115"/>
       <source>Add keyframe</source>
-      <translation type="unfinished">Add keyframe</translation>
+      <translation>Přidat klíčový snímek</translation>
     </message>
   </context>
   <context>
@@ -2806,12 +2806,12 @@ Opravdu chcete pokračovat?</translation>
       <translation>Ne</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="604"/>
+      <location filename="../../src/ui/VideoArea.qml" line="605"/>
       <source>Zoom: %1</source>
       <translation>Zvětšení: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="648"/>
+      <location filename="../../src/ui/VideoArea.qml" line="649"/>
       <source>Failed to load the selected file, it may be unsupported or invalid.</source>
       <translation>Nepodařilo se načíst vybraný soubor, může být nepodporovaný nebo neplatný.</translation>
     </message>
@@ -2823,8 +2823,8 @@ Opravdu chcete pokračovat?</translation>
       <location filename="../../src/ui/VideoArea.qml" line="236"/>
       <location filename="../../src/ui/VideoArea.qml" line="247"/>
       <location filename="../../src/ui/VideoArea.qml" line="373"/>
-      <location filename="../../src/ui/VideoArea.qml" line="486"/>
-      <location filename="../../src/ui/VideoArea.qml" line="648"/>
+      <location filename="../../src/ui/VideoArea.qml" line="487"/>
+      <location filename="../../src/ui/VideoArea.qml" line="649"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
@@ -2839,7 +2839,7 @@ Zadejte prosím frekvenci snímku: </translation>
       <location filename="../../src/ui/VideoArea.qml" line="329"/>
       <location filename="../../src/ui/VideoArea.qml" line="379"/>
       <location filename="../../src/ui/VideoArea.qml" line="477"/>
-      <location filename="../../src/ui/VideoArea.qml" line="489"/>
+      <location filename="../../src/ui/VideoArea.qml" line="490"/>
       <source>Cancel</source>
       <translation>Zrušit</translation>
     </message>
@@ -2907,17 +2907,17 @@ Kamera pravděpodobně nezaznamenává údaje o pohybu v tomto konkrétním mód
 50 Hz je absolutní minimum, ale doporučujeme aspoň 200 Hz.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="688"/>
+      <location filename="../../src/ui/VideoArea.qml" line="689"/>
       <source>Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.</source>
       <translation>Profil objektivu není načten, výsledky nebudou vypadat správně. Prosím načtěte profil objektivu pro vaši kameru.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="720"/>
+      <location filename="../../src/ui/VideoArea.qml" line="721"/>
       <source>Loading %1...</source>
       <translation>Načítání %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="720"/>
+      <location filename="../../src/ui/VideoArea.qml" line="721"/>
       <source>Drop video file here</source>
       <translation>Sem přetáhněte video soubory</translation>
     </message>
@@ -2952,76 +2952,86 @@ Pokud máte Gyroflow v C: Program Files, pak budete muset spustit Gyroflow jako 
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
-      <source>Please enter the output path:</source>
-      <translation type="unfinished">Please enter the output path:</translation>
+      <source>Same as the original file</source>
+      <translation type="unfinished">Same as the original file</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="608"/>
+      <location filename="../../src/ui/VideoArea.qml" line="485"/>
+      <source>Custom path</source>
+      <translation type="unfinished">Custom path</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="486"/>
+      <source>Please enter the output path:</source>
+      <translation>Prosím zadejte výstupní cestu:</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="609"/>
       <source>Focal length: %1 mm</source>
       <translation>Ohnisková vzdálenost: %1 mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="610"/>
+      <location filename="../../src/ui/VideoArea.qml" line="611"/>
       <source>full frame equiv.: %1 mm</source>
       <translation>full frame ekvivalent: %1 mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="848"/>
+      <location filename="../../src/ui/VideoArea.qml" line="849"/>
       <source>Trim start</source>
       <translation>Oříznout začátek</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="849"/>
+      <location filename="../../src/ui/VideoArea.qml" line="850"/>
       <source>Previous frame</source>
       <translation>Předchozí snímek</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="852"/>
+      <location filename="../../src/ui/VideoArea.qml" line="853"/>
       <source>Pause</source>
       <translation>Pauza</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="852"/>
+      <location filename="../../src/ui/VideoArea.qml" line="853"/>
       <source>Play</source>
       <translation>Přehrát</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="855"/>
+      <location filename="../../src/ui/VideoArea.qml" line="856"/>
       <source>Next frame</source>
       <translation>Další snímek</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="856"/>
+      <location filename="../../src/ui/VideoArea.qml" line="857"/>
       <source>Trim end</source>
       <translation>Oříznout konec</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="884"/>
+      <location filename="../../src/ui/VideoArea.qml" line="885"/>
       <source>Toggle stabilization overview</source>
       <translation>Přepínač stabilizace</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="891"/>
+      <location filename="../../src/ui/VideoArea.qml" line="892"/>
       <source>Toggle stabilization</source>
       <translation>Zapnout/vypnout stabilizaci</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="897"/>
+      <location filename="../../src/ui/VideoArea.qml" line="898"/>
       <source>Mute</source>
       <translation>Ztišit</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="897"/>
+      <location filename="../../src/ui/VideoArea.qml" line="898"/>
       <source>Unmute</source>
       <translation>Zrušit ztlumení</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="922"/>
+      <location filename="../../src/ui/VideoArea.qml" line="923"/>
       <source>Volume</source>
       <translation>Hlasitost</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="952"/>
+      <location filename="../../src/ui/VideoArea.qml" line="953"/>
       <source>Playback speed</source>
       <translation>Rychlost přehrávání</translation>
     </message>

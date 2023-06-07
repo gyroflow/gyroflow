@@ -2806,12 +2806,12 @@ Czy na pewno chcesz kontynuować?</translation>
       <translation>Nie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="604"/>
+      <location filename="../../src/ui/VideoArea.qml" line="605"/>
       <source>Zoom: %1</source>
       <translation>Zoom: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="648"/>
+      <location filename="../../src/ui/VideoArea.qml" line="649"/>
       <source>Failed to load the selected file, it may be unsupported or invalid.</source>
       <translation>Nie udało się wczytać tego pliku, może być nieobsługiwany lub uszkodzony.</translation>
     </message>
@@ -2823,8 +2823,8 @@ Czy na pewno chcesz kontynuować?</translation>
       <location filename="../../src/ui/VideoArea.qml" line="236"/>
       <location filename="../../src/ui/VideoArea.qml" line="247"/>
       <location filename="../../src/ui/VideoArea.qml" line="373"/>
-      <location filename="../../src/ui/VideoArea.qml" line="486"/>
-      <location filename="../../src/ui/VideoArea.qml" line="648"/>
+      <location filename="../../src/ui/VideoArea.qml" line="487"/>
+      <location filename="../../src/ui/VideoArea.qml" line="649"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
@@ -2839,7 +2839,7 @@ Podaj ilość klatek na sekundę: </translation>
       <location filename="../../src/ui/VideoArea.qml" line="329"/>
       <location filename="../../src/ui/VideoArea.qml" line="379"/>
       <location filename="../../src/ui/VideoArea.qml" line="477"/>
-      <location filename="../../src/ui/VideoArea.qml" line="489"/>
+      <location filename="../../src/ui/VideoArea.qml" line="490"/>
       <source>Cancel</source>
       <translation>Anuluj</translation>
     </message>
@@ -2907,17 +2907,17 @@ Aparat prawdopodobnie nie zapisuje danych ruchu w tym konkretnym trybie nagrywan
 50 Hz to absolutne minimum, a zalecamy co najmniej 200 Hz.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="688"/>
+      <location filename="../../src/ui/VideoArea.qml" line="689"/>
       <source>Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.</source>
       <translation>Profil obiektywu nie jest wczytany, stabilizacja nie będzie działać poprawnie. Wczytaj profil obiektywu dla swojej kamery.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="720"/>
+      <location filename="../../src/ui/VideoArea.qml" line="721"/>
       <source>Loading %1...</source>
       <translation>Ładowanie %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="720"/>
+      <location filename="../../src/ui/VideoArea.qml" line="721"/>
       <source>Drop video file here</source>
       <translation>Upuść plik wideo tutaj</translation>
     </message>
@@ -2952,76 +2952,86 @@ Jeśli masz Gyroflow w C:\Program Files, musisz uruchomić Gyroflow jako Adminis
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
+      <source>Same as the original file</source>
+      <translation>Taka sama jak oryginalny plik</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="485"/>
+      <source>Custom path</source>
+      <translation>Własna ścieżka</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="486"/>
       <source>Please enter the output path:</source>
       <translation>Podaj ścieżkę docelową:</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="608"/>
+      <location filename="../../src/ui/VideoArea.qml" line="609"/>
       <source>Focal length: %1 mm</source>
       <translation>Ogniskowa: %1 mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="610"/>
+      <location filename="../../src/ui/VideoArea.qml" line="611"/>
       <source>full frame equiv.: %1 mm</source>
       <translation>pełna klatka: %1 mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="848"/>
+      <location filename="../../src/ui/VideoArea.qml" line="849"/>
       <source>Trim start</source>
       <translation>Początek przycięcia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="849"/>
+      <location filename="../../src/ui/VideoArea.qml" line="850"/>
       <source>Previous frame</source>
       <translation>Poprzednia klatka</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="852"/>
+      <location filename="../../src/ui/VideoArea.qml" line="853"/>
       <source>Pause</source>
       <translation>Pauza</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="852"/>
+      <location filename="../../src/ui/VideoArea.qml" line="853"/>
       <source>Play</source>
       <translation>Odtwórz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="855"/>
+      <location filename="../../src/ui/VideoArea.qml" line="856"/>
       <source>Next frame</source>
       <translation>Następna klatka</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="856"/>
+      <location filename="../../src/ui/VideoArea.qml" line="857"/>
       <source>Trim end</source>
       <translation>Koniec przycięcia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="884"/>
+      <location filename="../../src/ui/VideoArea.qml" line="885"/>
       <source>Toggle stabilization overview</source>
       <translation>Włącz podgląd stabilizacji</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="891"/>
+      <location filename="../../src/ui/VideoArea.qml" line="892"/>
       <source>Toggle stabilization</source>
       <translation>Włącz stabilizację</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="897"/>
+      <location filename="../../src/ui/VideoArea.qml" line="898"/>
       <source>Mute</source>
       <translation>Wycisz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="897"/>
+      <location filename="../../src/ui/VideoArea.qml" line="898"/>
       <source>Unmute</source>
       <translation>Włącz dźwięk</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="922"/>
+      <location filename="../../src/ui/VideoArea.qml" line="923"/>
       <source>Volume</source>
       <translation>Głośność</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="952"/>
+      <location filename="../../src/ui/VideoArea.qml" line="953"/>
       <source>Playback speed</source>
       <translation>Prędkość odtwarzania</translation>
     </message>
