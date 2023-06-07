@@ -40,11 +40,11 @@ impl REDSdk {
 
     pub fn get_download_url() -> Option<&'static str> {
         if cfg!(target_os = "windows") {
-            Some("https://api.gyroflow.xyz/sdk/RED_SDK_Windows.tar.gz")
+            Some("https://api.gyroflow.xyz/sdk/v1.5.1/RED_SDK_Windows.tar.gz")
         } else if cfg!(target_os = "macos") {
-            Some("https://api.gyroflow.xyz/sdk/RED_SDK_MacOS.tar.gz")
+            Some("https://api.gyroflow.xyz/sdk/v1.5.1/RED_SDK_MacOS.tar.gz")
         } else if cfg!(target_os = "linux") {
-            Some("https://api.gyroflow.xyz/sdk/RED_SDK_Linux.tar.gz")
+            Some("https://api.gyroflow.xyz/sdk/v1.5.1/RED_SDK_Linux.tar.gz")
         } else {
             None
         }
