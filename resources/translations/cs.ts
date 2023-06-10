@@ -2953,12 +2953,12 @@ Pokud máte Gyroflow v C: Program Files, pak budete muset spustit Gyroflow jako 
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Same as the original file</source>
-      <translation type="unfinished">Same as the original file</translation>
+      <translation>Stejný jako původní soubor</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Custom path</source>
-      <translation type="unfinished">Custom path</translation>
+      <translation>Vlastní cesta</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="486"/>

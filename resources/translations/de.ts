@@ -169,8 +169,8 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
       <location filename="../../src/ui/App.qml" line="217"/>
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use one of [video editor plugins] (%1).</source>
-      <translation type="unfinished">This format is not available for rendering.
-The recommended workflow is to export project file and use one of [video editor plugins] (%1).</translation>
+      <translation>Dieses Format ist nicht zum Rendern verfügbar.
+Es ist empfohlen, die Projektdatei zu exportieren und eines der [Video Editor Plugins] zu verwenden. (%1)</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="244"/>
@@ -251,8 +251,8 @@ Bitte überprüfe die Bitrate nach dem Export - sollte diese zu niedrig sein, he
       <location filename="../../src/ui/App.qml" line="264"/>
       <source>Due to iOS&apos;s file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to iOS&apos;s file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>Aufgrund von iOS Dateizugriffsbeschränkungen müssen Sie den Zielordner manuell auswählen.
+Klicken Sie auf Ok und wählen sie den Zielordner.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="325"/>
@@ -611,12 +611,12 @@ Das untere Bildschärfe-Limit kann bei Bedarf in den erweiterten Einstellungen a
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="585"/>
       <source>Preserve export settings</source>
-      <translation type="unfinished">Preserve export settings</translation>
+      <translation>Exporteinstellungen beibehalten</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="587"/>
       <source>Save output size and bitrate in settings and use it for all files.</source>
-      <translation type="unfinished">Save output size and bitrate in settings and use it for all files.</translation>
+      <translation>Ausgabegröße und Bitrate in den Einstellungen speichern und für alle Dateien verwenden.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="363"/>
@@ -637,7 +637,7 @@ Das untere Bildschärfe-Limit kann bei Bedarf in den erweiterten Einstellungen a
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="355"/>
       <source>You can edit the output size presets here:</source>
-      <translation type="unfinished">You can edit the output size presets here:</translation>
+      <translation>Du kannst die Voreinstellungen für die Ausgabegrößen hier ändern:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="356"/>
@@ -687,7 +687,7 @@ Das untere Bildschärfe-Limit kann bei Bedarf in den erweiterten Einstellungen a
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="523"/>
       <source>Audio codec</source>
-      <translation type="unfinished">Audio codec</translation>
+      <translation>Audio-Codec</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="535"/>
@@ -1208,7 +1208,7 @@ Soll das Profil hoch geladen werden?</translation>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="41"/>
       <source>Video files</source>
-      <translation type="unfinished">Video files</translation>
+      <translation>Videodateien</translation>
     </message>
   </context>
   <context>
@@ -1877,7 +1877,7 @@ Soll das Format angepasst oder auf der CPU berechnet werden?</translation>
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="115"/>
       <source>Add keyframe</source>
-      <translation type="unfinished">Add keyframe</translation>
+      <translation>Keyframe hinzufügen</translation>
     </message>
   </context>
   <context>
@@ -2009,7 +2009,7 @@ Soll das Format angepasst oder auf der CPU berechnet werden?</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="387"/>
       <source>IMU integration method for keeping track of the horizon and adjust built-in quaternions</source>
-      <translation type="unfinished">IMU integration method for keeping track of the horizon and adjust built-in quaternions</translation>
+      <translation>IMU-Integrationsmethode zur Verfolgung des Horizonts und Anpassung der eingebauten Quaternionen</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="396"/>
@@ -2931,15 +2931,15 @@ Möglicherweise zeichnet die Kamera im gewählten Aufnahme-Modus keine Bewegungs
       <location filename="../../src/ui/VideoArea.qml" line="169"/>
       <source>This is often caused by read-only file system.
 Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</translation>
+      <translation>Dies wird oft durch das schreibgeschützte Dateisystem verursacht.
+Achte darauf, dass du die Gyroflow-App in deinem Programmeordner kopiert hast, anstatt es direkt von .dmg auszuführen.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="172"/>
       <source>This is often caused by read-only file system.
 If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</translation>
+      <translation>Dies wird oft durch das schreibgeschützte Dateisystem verursacht.
+Wenn du Gyroflow unter C:Programme / C:Program Files hast, musst du Gyroflow als Administrator ausführen, um das SDK in den Gyroflow-Ordner zu extrahieren.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="185"/>
@@ -2954,17 +2954,17 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Same as the original file</source>
-      <translation type="unfinished">Same as the original file</translation>
+      <translation>Wie die Originaldatei</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Custom path</source>
-      <translation type="unfinished">Custom path</translation>
+      <translation>Benutzerdefinierter Pfad</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="486"/>
       <source>Please enter the output path:</source>
-      <translation type="unfinished">Please enter the output path:</translation>
+      <translation>Bitte gebe den Ausgabepfad ein:</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="609"/>
@@ -3029,7 +3029,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="923"/>
       <source>Volume</source>
-      <translation type="unfinished">Volume</translation>
+      <translation>Lautstärke</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="953"/>

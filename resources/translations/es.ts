@@ -251,8 +251,8 @@ Compruebe la tasa de bits del archivo después de procesarlo y si se ve afectado
       <location filename="../../src/ui/App.qml" line="264"/>
       <source>Due to iOS&apos;s file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to iOS&apos;s file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>Debido a las restricciones de acceso de archivos de iOS&apos;s, debe seleccionar la carpeta de destino manualmente.
+Haga clic en Aceptar y seleccione la carpeta de destino.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="325"/>
@@ -615,7 +615,7 @@ Puedes aumentar el límite de nitidez en la sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="587"/>
       <source>Save output size and bitrate in settings and use it for all files.</source>
-      <translation type="unfinished">Save output size and bitrate in settings and use it for all files.</translation>
+      <translation>Guardar tamaño de salida y tasa de bits en la configuración y usarlo para todos los archivos.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="363"/>
@@ -626,7 +626,7 @@ Puedes aumentar el límite de nitidez en la sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="344"/>
       <source>Edit sizes</source>
-      <translation type="unfinished">Edit sizes</translation>
+      <translation>Editar tallas</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="347"/>
@@ -646,7 +646,7 @@ Puedes aumentar el límite de nitidez en la sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="363"/>
       <source>Invalid JSON format!</source>
-      <translation type="unfinished">Invalid JSON format!</translation>
+      <translation>¡Formato de JSON inválido!</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="366"/>
@@ -656,7 +656,7 @@ Puedes aumentar el límite de nitidez en la sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="487"/>
       <source>Metadata comment</source>
-      <translation type="unfinished">Metadata comment</translation>
+      <translation>Comentario de metadatos</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="495"/>
@@ -686,7 +686,7 @@ Puedes aumentar el límite de nitidez en la sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="523"/>
       <source>Audio codec</source>
-      <translation type="unfinished">Audio codec</translation>
+      <translation>Códec de Audio</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="535"/>
@@ -2955,12 +2955,12 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Custom path</source>
-      <translation type="unfinished">Custom path</translation>
+      <translation>Ruta personalizada</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="486"/>
       <source>Please enter the output path:</source>
-      <translation type="unfinished">Please enter the output path:</translation>
+      <translation>Por favor, introduzca la ruta:</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="609"/>
@@ -3025,7 +3025,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="923"/>
       <source>Volume</source>
-      <translation type="unfinished">Volume</translation>
+      <translation>Volumen</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="953"/>

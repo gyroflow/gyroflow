@@ -2952,12 +2952,12 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Same as the original file</source>
-      <translation type="unfinished">Same as the original file</translation>
+      <translation>Как и исходный файл</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Custom path</source>
-      <translation type="unfinished">Custom path</translation>
+      <translation>Пользовательский Путь</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="486"/>

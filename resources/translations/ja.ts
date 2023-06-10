@@ -2956,12 +2956,12 @@ GyroflowがC:Program Filesにある場合、SDKをGyroflowフォルダに展開�
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Same as the original file</source>
-      <translation type="unfinished">Same as the original file</translation>
+      <translation>オリジナルファイルと同じ</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Custom path</source>
-      <translation type="unfinished">Custom path</translation>
+      <translation>別の保存先</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="486"/>

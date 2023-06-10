@@ -2954,12 +2954,12 @@ Hvis du har Gyroflow i C:Program Files, skal du køre Gyroflow som administrator
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Same as the original file</source>
-      <translation type="unfinished">Same as the original file</translation>
+      <translation>Samme som den oprindelige fil</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Custom path</source>
-      <translation type="unfinished">Custom path</translation>
+      <translation>Brugerdefineret sti</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="486"/>
