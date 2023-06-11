@@ -480,12 +480,14 @@ Item {
             onDoubleClicked: (mouse) => root.resetZoom();
             onWheel: (wheel) => {
                 if ((wheel.modifiers & Qt.AltModifier) || (wheel.modifiers & Qt.MetaModifier)) {
-                    const factor = (wheel.angleDelta.x / 120) / 10;
+                    const delta = Qt.platform.os == "osx"? wheel.angleDelta.y : wheel.angleDelta.x;
+
+                    const factor = (delta / 120) / 10;
                     chart.vscale += factor;
                 } else if ((wheel.modifiers & Qt.ControlModifier)) { // move horizontally
                     const remainingWindow = (root.visibleAreaRight - root.visibleAreaLeft);
                     const factor = (wheel.angleDelta.y / 120) / (50 / remainingWindow);
-                    root.visibleAreaLeft  = Math.min(root.visibleAreaRight, Math.max(0.0, Math.min(1-remainingWindow, root.visibleAreaLeft - factor)));
+                    root.visibleAreaLeft  = Math.min(root.visibleAreaRight, Math.max(0.0, Math.min(1 - remainingWindow, root.visibleAreaLeft - factor)));
                     root.visibleAreaRight = Math.max(root.visibleAreaLeft,  Math.min(1.0, Math.max(remainingWindow, root.visibleAreaRight - factor)));
 
                     scrollbar.position = root.visibleAreaLeft;
@@ -834,7 +836,7 @@ Item {
         ToolTip {
             text: qsTr("%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom")
                     .arg("<b>" + qsTr("Scroll") + "</b>")
-                    .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Control+Shift+Scroll") : qsTr("Alt+Scroll")) + "</b>")
+                    .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Option+Scroll") : qsTr("Alt+Scroll")) + "</b>")
                     .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Command+Scroll") : qsTr("Ctrl+Scroll")) + "</b>");
             visible: ma.containsMouse;
             delay: 2000;
