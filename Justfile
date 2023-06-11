@@ -33,7 +33,6 @@ publish version:
     sed -i'' -E "0,/<key>CFBundleShortVersionString<.key><string>[0-9\.a-z-]+<.string>/s//<key>CFBundleShortVersionString<\/key><string>{{version}}<\/string>/" _deployment/mac/Gyroflow.app/Contents/Info.plist
     sed -i'' -E "0,/<key>CFBundleVersion<.key><string>[0-9\.a-z-]+<.string>/s//<key>CFBundleVersion<\/key><string>{{version}}<\/string>/" _deployment/mac/Gyroflow.app/Contents/Info.plist
     sed -i'' -E "0,/Gyroflow v[0-9\.a-z-]+/s//Gyroflow v{{version}}/" src/cli.rs
-    sed -i'' -E "0,/APP_VERSION=[0-9\.a-z-]+/s//APP_VERSION={{version}}/" _deployment/linux/build-appimage.sh
     sed -i'' -E "0,/versionName=\"[0-9\.a-z-]+\"/s//versionName=\"{{version}}\"/" _deployment/android/AndroidManifest.xml
     sed -i'' -E "0,/<key>CFBundleShortVersionString<.key><string>[0-9\.a-z-]+<.string>/s//<key>CFBundleShortVersionString<\/key><string>{{version}}<\/string>/" _deployment/ios/Info.plist
     sed -i'' -E "0,/<key>CFBundleVersion<.key><string>[0-9\.a-z-]+<.string>/s//<key>CFBundleVersion<\/key><string>{{version}}<\/string>/" _deployment/ios/Info.plist
