@@ -578,13 +578,17 @@ Item {
         anchors.topMargin: lv.y;
         extensions: fileDialog.extensions;
         onLoadFiles: (urls) => {
-            const additional = window.getAdditionalProjectDataJson();
+            window.videoArea.askForOutputLocation(Util.getFolder(window.outputFile), true, function(outPath) {
+                let additional = window.getAdditionalProjectData();
+                additional.output.output_path = outPath;
+                additional = JSON.stringify(additional);
 
-            for (const url of urls) {
-                const job_id = render_queue.add_file(controller.url_to_path(url), "", additional);
-                loader.pendingJobs[job_id] = true;
-            }
-            loader.updateStatus();
+                for (const url of urls) {
+                    const job_id = render_queue.add_file(controller.url_to_path(url), "", additional);
+                    loader.pendingJobs[job_id] = true;
+                }
+                loader.updateStatus();
+            });
         }
     }
 

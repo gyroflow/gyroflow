@@ -8,11 +8,12 @@ import "../Util.js" as Util
 import "."
 
 TextField {
-    id: outputFile;
+    id: root;
     text: "";
     width: parent.width;
 
     property bool renderAfterSelect: false;
+    property bool folderOnly: false;
 
     property alias outputFileDialog: outputFileDialog;
     property alias outputFolderDialog: outputFolderDialog;
@@ -24,13 +25,16 @@ TextField {
         font.underline: false;
         font.pixelSize: 15 * dpiScale;
         onClicked: {
-            if (Qt.platform.os == "ios") {
+            if (Qt.platform.os == "ios" || root.folderOnly) {
+                if (root.folderOnly) {
+                    outputFolderDialog.currentFolder = controller.path_to_url(Util.getFolder(root.text));
+                }
                 outputFolderDialog.open();
                 return;
             }
-            outputFileDialog.defaultSuffix = outputFile.text.substring(outputFile.text.length - 3);
-            outputFileDialog.selectedFile = controller.path_to_url(outputFile.text);
-            outputFileDialog.currentFolder = controller.path_to_url(Util.getFolder(outputFile.text));
+            outputFileDialog.defaultSuffix = root.text.substring(root.text.length - 3);
+            outputFileDialog.selectedFile = controller.path_to_url(root.text);
+            outputFileDialog.currentFolder = controller.path_to_url(Util.getFolder(root.text));
             outputFileDialog.open();
         }
     }
@@ -41,7 +45,7 @@ TextField {
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*.mp4 *.mov *.png *.exr)"];
         type: "output-video";
         onAccepted: {
-            outputFile.text = controller.url_to_path(outputFileDialog.selectedFile);
+            root.text = controller.url_to_path(outputFileDialog.selectedFile);
             window.exportSettings.updateCodecParams();
         }
     }
@@ -52,15 +56,15 @@ TextField {
 
         onAccepted: {
             outputFolderDialog.urlString = selectedFolder.toString();
-            outputFile.text = controller.url_to_path(selectedFolder) + outputFile.text.split('/').slice(-1);
+            root.text = controller.url_to_path(selectedFolder) + root.text.split('/').slice(-1);
             window.exportSettings.updateCodecParams();
 
             if (Qt.platform.os == "ios") {
                 controller.start_apple_url_access(outputFolderDialog.urlString);
                 // TODO: stop access
                 window.allowedOutputUrls.push(outputFolderDialog.urlString);
-                if (outputFile.renderAfterSelect) {
-                    outputFile.renderAfterSelect = false;
+                if (root.renderAfterSelect) {
+                    root.renderAfterSelect = false;
                     window.renderBtn.btn.clicked();
                 }
             }

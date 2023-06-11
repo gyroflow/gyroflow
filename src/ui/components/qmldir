@@ -27,6 +27,7 @@ NumberField 1.0 NumberField.qml
 OutputPathField 1.0 OutputPathField.qml
 Popup 1.0 Popup.qml
 PopupDelegate 1.0 PopupDelegate.qml
+RadioButton 1.0 RadioButton.qml
 ResizablePanel 1.0 ResizablePanel.qml
 SearchField 1.0 SearchField.qml
 SidePanel 1.0 SidePanel.qml

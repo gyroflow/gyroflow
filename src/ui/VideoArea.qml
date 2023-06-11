@@ -390,7 +390,7 @@ Item {
                         dlg.btnsRow.children[0].enabled = false;
                         let path = sequenceList[0];
                         let output_file = path.substr(0, path.lastIndexOf('.')) + "_joined" + path.substr(path.lastIndexOf('.'));
-                        askForOutputLocation(output_file, function(out_path) {
+                        askForOutputLocation(output_file, false, function(out_path) {
                             controller.mp4_merge(sequenceList, out_path);
                         });
                         return false;
@@ -466,7 +466,7 @@ Item {
                     dlg.btnsRow.children[2].enabled = false;
                     let path = paths[0];
                     let output_file = path.substr(0, path.lastIndexOf('.')) + "_joined" + path.substr(path.lastIndexOf('.'));
-                    askForOutputLocation(output_file, function(out_path) {
+                    askForOutputLocation(output_file, false, function(out_path) {
                         controller.mp4_merge(paths, out_path);
                     });
                     return false;
@@ -481,15 +481,34 @@ Item {
         }
     }
 
-    function askForOutputLocation(location: string, cb) {
-        let _ = qsTr("Same as the original file") + qsTr("Custom path");
-        const dlg = messageBox(Modal.Info, qsTr("Please enter the output path:"), [
+    function askForOutputLocation(location: string, choice: bool, cb) {
+        const dlg = messageBox(Modal.Question, qsTr("Please enter the output path:"), [
             { text: qsTr("Ok"), accent: true, clicked: function() {
-                cb(dlg.mainColumn.children[1].text);
+                if (choice) {
+                    if (dlg.mainColumn.children[1].children[0].checked) { cb(""); }
+                    if (dlg.mainColumn.children[1].children[1].checked) { cb(dlg.mainColumn.children[1].children[3].text); }
+                } else {
+                    cb(dlg.mainColumn.children[1].text);
+                }
             } },
             { text: qsTr("Cancel") },
         ]);
-        Qt.createComponent("components/OutputPathField.qml").createObject(dlg.mainColumn, { text: location });
+
+        if (choice) {
+            let col = Qt.createQmlObject(`import QtQuick; import "components/";
+                Column {
+                    width: parent.width;
+                    RadioButton { checked: true; }
+                    RadioButton { id: custom; }
+                    Item { height: 10 * dpiScale; width: 1; }
+                    OutputPathField { enabled: custom.checked; folderOnly: true; }
+                }`, dlg.mainColumn, "dlgRadios");
+            col.children[0].text = qsTr("Same as the original file");
+            col.children[1].text = qsTr("Custom path");
+            col.children[3].text = location;
+        } else {
+            Qt.createComponent("components/OutputPathField.qml").createObject(dlg.mainColumn, { text: location });
+        }
     }
 
     function detectImageSequence(url: url) {
