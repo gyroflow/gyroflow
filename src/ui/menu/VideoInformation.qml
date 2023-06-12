@@ -152,9 +152,9 @@ MenuItem {
                 "width": 70,
                 "value": function() { return root.fps; },
                 "onChange": function(value) {
-                    root.fps = value;
-                    root.updateEntry("Frame rate", value.toFixed(3) + " fps");
-                    controller.override_video_fps(value);
+                    root.fps = +value;
+                    root.updateEntry("Frame rate", (+value).toFixed(3) + " fps");
+                    controller.override_video_fps(+value);
 
                     const scale = root.fps / root.org_fps;
                     window.sync.everyNthFrame.value = Math.max(1, Math.floor(scale));
