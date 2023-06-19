@@ -334,7 +334,7 @@ impl Controller {
 
         if file_path.to_ascii_lowercase().ends_with("braw") {
             let gpu = if *rendering::GPU_DECODING.read() { "auto" } else { "no" }; // Disable GPU decoding for BRAW
-            custom_decoder = format!("BRAW:gpu={}{}", gpu, options);
+            custom_decoder = format!("BRAW:copy=1:gpu={}{}", gpu, options);
         }
         if file_path.to_ascii_lowercase().ends_with("r3d") {
             custom_decoder = format!("R3D:gpu=auto{}", options);
