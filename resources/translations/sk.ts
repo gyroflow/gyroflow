@@ -2953,12 +2953,12 @@ Ak je Gyroflow umiestnený v "C:\Program Files" je potrebné ho spustiť ako Adm
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Same as the original file</source>
-      <translation type="unfinished">Same as the original file</translation>
+      <translation>Ako pôvodný súbor</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Custom path</source>
-      <translation type="unfinished">Custom path</translation>
+      <translation>Vlastná cesta</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="486"/>

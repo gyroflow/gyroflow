@@ -627,17 +627,17 @@ You can increase the sharpness limit in the Advanced section.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="344"/>
       <source>Edit sizes</source>
-      <translation type="unfinished">Edit sizes</translation>
+      <translation>Modifier les tailles</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="347"/>
       <source>Original</source>
-      <translation type="unfinished">Original</translation>
+      <translation>Original</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="355"/>
       <source>You can edit the output size presets here:</source>
-      <translation type="unfinished">You can edit the output size presets here:</translation>
+      <translation>Vous pouvez modifier les préréglages de la taille de sortie ici :</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="356"/>
@@ -647,7 +647,7 @@ You can increase the sharpness limit in the Advanced section.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="363"/>
       <source>Invalid JSON format!</source>
-      <translation type="unfinished">Invalid JSON format!</translation>
+      <translation>Format JSON non valide !</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="366"/>
@@ -687,7 +687,7 @@ You can increase the sharpness limit in the Advanced section.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="523"/>
       <source>Audio codec</source>
-      <translation type="unfinished">Audio codec</translation>
+      <translation>Codec audio</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="535"/>
@@ -1203,12 +1203,12 @@ Voulez-vous soumettre votre profil ?</translation>
       <location filename="../../src/ui/components/OutputPathField.qml" line="40"/>
       <location filename="../../src/ui/components/OutputPathField.qml" line="50"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>Sélectionner la destination du fichier</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="41"/>
       <source>Video files</source>
-      <translation type="unfinished">Video files</translation>
+      <translation>Fichiers vidéo</translation>
     </message>
   </context>
   <context>
@@ -1354,7 +1354,7 @@ Voulez-vous soumettre votre profil ?</translation>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="363"/>
       <source>Visual features</source>
-      <translation type="unfinished">Visual features</translation>
+      <translation>Fonctionnalités visuelles</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="598"/>
@@ -1877,7 +1877,7 @@ Voulez-vous convertir à un format de pixel supporté ou garder l'original et fa
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="115"/>
       <source>Add keyframe</source>
-      <translation type="unfinished">Add keyframe</translation>
+      <translation>Ajouter une image clé</translation>
     </message>
   </context>
   <context>
@@ -2459,7 +2459,7 @@ Assurez-vous d'avoir une valeur d'e mouvement d'obturateur correcte avant de syn
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="65"/>
       <source>Good frames</source>
-      <translation type="unfinished">Good frames</translation>
+      <translation>Bonnes images</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="66"/>
@@ -2953,17 +2953,17 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Same as the original file</source>
-      <translation type="unfinished">Same as the original file</translation>
+      <translation>Identique au fichier original</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Custom path</source>
-      <translation type="unfinished">Custom path</translation>
+      <translation>Chemin personnalisé</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="486"/>
       <source>Please enter the output path:</source>
-      <translation type="unfinished">Please enter the output path:</translation>
+      <translation>Veuillez entrer le chemin de sortie :</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="609"/>
@@ -3028,7 +3028,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="923"/>
       <source>Volume</source>
-      <translation type="unfinished">Volume</translation>
+      <translation>Volume</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="953"/>

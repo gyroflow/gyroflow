@@ -22,21 +22,21 @@ mimalloc = { version = "0.1.37", default-features = false }
 nalgebra = { version = "0.32", features = ["serde-serialize"] }
 rayon = "1.7"
 biquad = "0.4.2"
-fastrand = "1.9.0"
+fastrand = "2.0.0"
 lazy_static = "1.4.0"
 parking_lot = "0.12.1"
 bincode = "1.3.3"
-serde = "1.0.163"
-serde_json = "1.0.96"
+serde = "1.0"
+serde_json = "1.0"
 crc32fast = "1.3.2"
 byteorder = "1.4.3"
 line_drawing = "1.0.0"
 rand = "0.8.5"
-time = { version = "0.3.21", features = ["local-offset"] }
+time = { version = "0.3.22", features = ["local-offset"] }
 itertools = "0.10.5"
 num = "0.4.0"
 base91 = "0.1.0"
-bitflags = "2.2.1"
+bitflags = "2.3.2"
 enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.2.1"
@@ -56,7 +56,7 @@ rand_xoshiro = "0.6.0"
 image = "0.23"
 space = { version = "0.17", features = ["alloc"] }
 bitarray = { version = "0.9", features = ["space"] }
-enterpolation = "0.2.0"
+enterpolation = "0.2.1"
 libloading = "0.8"
 libc = "0.2"
 
@@ -66,14 +66,14 @@ wgpu       = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_
 wgpu-hal   = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
 wgpu-types = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
 bytemuck = "1.13.1"
-ash = "0.37.2"
+ash = "0.37.3"
 
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"
 flate2 = "1.0.26"
 walkdir = "2.3.3"
 
-log = "0.4.18"
+log = "0.4"
 
 ocl = { version = "0.19.4", optional = true, git = "https://github.com/cogciprocate/ocl" }
 ocl-interop = { version = "0.1.5", optional = true, git = "https://github.com/cogciprocate/ocl" }
