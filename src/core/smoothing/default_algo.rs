@@ -169,6 +169,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 "to": 5.0,
                 "value": self.max_smoothness,
                 "default": 1.0,
+                "precision": 3,
                 "unit": "s",
                 "keyframe": "SmoothingParamTimeConstant"
             },
@@ -181,6 +182,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 "to": 1.0,
                 "value": self.alpha_0_1s,
                 "default": 0.1,
+                "precision": 3,
                 "unit": "s",
                 "keyframe": "SmoothingParamTimeConstant2"
             }
