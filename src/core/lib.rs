@@ -175,7 +175,15 @@ impl StabilizationManager {
             if let Some(ref lens) = md.lens_profile {
                 let mut l = self.lens.write();
                 if let Some(lens_str) = lens.as_str() {
-                    let db = self.lens_profile_db.read();
+                    let mut db = self.lens_profile_db.read();
+                    if !db.loaded {
+                        drop(db);
+                        {
+                            let mut db = self.lens_profile_db.write();
+                            db.load_all();
+                        }
+                        db = self.lens_profile_db.read();
+                    }
                     if let Some(found) = db.find(lens_str) {
                         *l = found.clone();
                     }
