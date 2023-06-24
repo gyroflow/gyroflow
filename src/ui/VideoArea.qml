@@ -261,9 +261,12 @@ Item {
         function onZooming_data_changed() {
             timeline.triggerUpdateChart("8");
         }
+        function updateKeyframesView() {
+            controller.update_keyframes_view(timeline.getKeyframesView());
+            controller.update_keyframe_values(vid.timestamp);
+        }
         function onKeyframes_changed() {
-            Qt.callLater(controller.update_keyframes_view, timeline.getKeyframesView());
-            Qt.callLater(controller.update_keyframe_values, vid.timestamp);
+            Qt.callLater(updateKeyframesView);
         }
         function onCompute_progress(id: real, progress: real) {
             videoLoader.active = progress < 1;
