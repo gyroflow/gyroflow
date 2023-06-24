@@ -71,22 +71,12 @@ pub struct LensProfile {
     pub crop_factor: Option<f64>,
     pub global_shutter: bool,
 
-    #[serde(skip)]
+    // Skip these fields, make sure to update in `get_json_value`
     pub filename: String,
-
-    #[serde(skip)]
     pub optimal_fov: Option<f64>,
-
-    #[serde(skip)]
     pub is_copy: bool,
-
-    #[serde(skip)]
     pub rating: Option<f64>,
-
-    #[serde(skip)]
     pub checksum: Option<String>,
-
-    #[serde(skip)]
     parsed_interpolations: BTreeMap<i64, LensProfile>,
 }
 
@@ -147,7 +137,16 @@ impl LensProfile {
     }
 
     pub fn get_json_value(&self) -> Result<serde_json::Value, serde_json::error::Error> {
-        Ok(serde_json::to_value(&self)?)
+        let mut v = serde_json::to_value(&self)?;
+        if let Some(obj) = v.as_object_mut() {
+            obj.remove("filename");
+            obj.remove("optimal_fov");
+            obj.remove("is_copy");
+            obj.remove("rating");
+            obj.remove("checksum");
+            obj.remove("parsed_interpolations");
+        }
+        Ok(v)
     }
     pub fn get_json(&self) -> Result<String, serde_json::error::Error> {
         Ok(serde_json::to_string_pretty(&self.get_json_value()?)?)
@@ -211,6 +210,27 @@ impl LensProfile {
         std::fs::write(path, &json)?;
 
         Ok(json)
+    }
+
+    pub fn swapped(&self) -> LensProfile {
+        let mut ret = self.clone();
+        std::mem::swap(&mut ret.orig_dimension.w, &mut ret.orig_dimension.h);
+        std::mem::swap(&mut ret.calib_dimension.w, &mut ret.calib_dimension.h);
+        if let Some(ref mut out) = ret.output_dimension {
+            std::mem::swap(&mut out.w, &mut out.h);
+        }
+        std::mem::swap(&mut ret.input_horizontal_stretch, &mut ret.input_vertical_stretch);
+
+        if ret.fisheye_params.camera_matrix.len() == 3 {
+            let mut mtrx0 = ret.fisheye_params.camera_matrix[0];
+            let mut mtrx1 = ret.fisheye_params.camera_matrix[1];
+            std::mem::swap(&mut mtrx0[0], &mut mtrx1[1]);
+            std::mem::swap(&mut mtrx0[2], &mut mtrx1[2]);
+            ret.fisheye_params.camera_matrix[0] = mtrx0;
+            ret.fisheye_params.camera_matrix[1] = mtrx1;
+        }
+
+        ret
     }
 
     fn get_camera_matrix_internal(&self) -> Option<nalgebra::Matrix3<f64>> {
