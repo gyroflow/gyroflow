@@ -194,6 +194,9 @@ impl StabilizationManager {
                     l.resolve_interpolations(&db);
                 }
             }
+        } else {
+            log::info!("Not a main video, clearing {} per-frame offsets", md.per_frame_time_offsets.len());
+            md.per_frame_time_offsets.clear();
         }
         if let Some(ref id) = md.camera_identifier {
             *self.camera_id.write() = Some(id.clone());

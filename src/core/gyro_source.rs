@@ -313,6 +313,22 @@ impl GyroSource {
                         md.per_frame_time_offsets.push(frame_offset / sampling_frequency * sample_rate);
                     });
                     // --------------------------------- Sony ---------------------------------
+                    // --------------------------------- Insta360 ---------------------------------
+                    // Timing
+                    if input.camera_type() == "Insta360" {
+                        telemetry_parser::try_block!({
+                            use telemetry_parser::tags_impl::TimeScalar;
+                            let exp = (tag_map.get(&GroupId::Exposure)?.get_t(TagId::Data) as Option<&Vec<TimeScalar<f64>>>)?;
+
+                            for x in exp {
+                                if x.t >= 0.0 {
+                                    // The additional 0.9 ms is a mystery
+                                    md.per_frame_time_offsets.push(-(x.v * 1000.0 / 2.0) - 0.9);
+                                }
+                            }
+                        });
+                    }
+                    // --------------------------------- Insta360 ---------------------------------
                 }
             }
             if input.camera_type() == "Sony" {
