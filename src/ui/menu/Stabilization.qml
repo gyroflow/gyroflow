@@ -53,7 +53,9 @@ MenuItem {
                     }
                 });
             }
-            setFrameReadoutTime(+stab.frame_readout_time);
+            if (typeof stab.frame_readout_time === 'number') {
+                setFrameReadoutTime(+stab.frame_readout_time);
+            }
 
             if (typeof stab.lens_correction_amount !== "undefined") {
                 correctionAmount.value = +stab.lens_correction_amount;

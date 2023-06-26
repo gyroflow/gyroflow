@@ -104,7 +104,7 @@ Item {
                     if (info.hasOwnProperty("vfr_fps") && Math.round(+info.vfr_fps * 1000) != Math.round(+info.fps * 1000)) {
                         vidInfo.updateEntryWithTrigger("Frame rate", +info.vfr_fps);
                     }
-                    if (info.hasOwnProperty("rotation") && Math.abs(+info.rotation) > 0) {
+                    if (info.hasOwnProperty("rotation")) {
                         vidInfo.updateEntryWithTrigger("Rotation", +info.rotation);
                     }
                 }

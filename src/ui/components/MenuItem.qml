@@ -25,9 +25,9 @@ Item {
     }
 
     function ensureVisible() {
-        const flick = parent.parent.parent;
-        if (canEnsureVisible && opened && anim.enabled && (y + height > flick.height)) {
-            flick.contentY = y;
+        const flick = parent.parent.parent.parent;
+        if (canEnsureVisible && opened && anim.enabled && (parent.y + height > flick.height)) {
+            flick.contentY = parent.y;
         }
     }
 

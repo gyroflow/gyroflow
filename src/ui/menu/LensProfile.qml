@@ -110,7 +110,7 @@ MenuItem {
 
                     root.cropFactor = +obj.crop_factor;
 
-                    officialInfo.show = !obj.official;
+                    officialInfo.show = !obj.official && !+window.settings.value("rated-profile-" + checksum, "0");
                     officialInfo.canRate = true;
                     officialInfo.thankYou = false;
                     root.profileName = (filepath || obj.name || "").replace(/^.*?[\/\\]([^\/\\]+?)$/, "$1");
@@ -248,6 +248,8 @@ MenuItem {
             target: officialInfo.t;
             function onLinkActivated(link: url) {
                 controller.rate_profile(root.profileName, root.profileOriginalJson, root.profileChecksum, link === "#good");
+                if (link === "#good")
+                    window.settings.setValue("rated-profile-" + root.profileChecksum, "1");
                 officialInfo.thankYou = true;
                 officialInfo.canRate = false;
                 tyTimer.start();
