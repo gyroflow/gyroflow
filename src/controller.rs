@@ -797,7 +797,7 @@ impl Controller {
                         });
                     }
                     if is_main_video {
-                    reload_lens(());
+                        reload_lens(());
                     }
 
                     additional_obj.insert("frame_readout_time".to_owned(), serde_json::to_value(stab.params.read().frame_readout_time).unwrap());
