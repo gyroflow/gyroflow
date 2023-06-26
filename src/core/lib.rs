@@ -1287,7 +1287,14 @@ impl StabilizationManager {
             let frame_count = (metadata.duration_s * metadata.fps).ceil() as usize;
 
             self.init_from_video_data(filepath, metadata.duration_s * 1000.0, metadata.fps, frame_count, video_size)?;
-            let _ = self.load_gyro_data(filepath, true, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
+            if let Ok(md) = self.load_gyro_data(filepath, true, &Default::default(), |_|(), Arc::new(AtomicBool::new(false))) {
+                if let Some(md_fps) = md.frame_rate {
+                    let fps = self.params.read().fps;
+                    if (md_fps - fps).abs() > 1.0 {
+                        self.override_video_fps(md_fps);
+                    }
+                }
+            }
 
             let camera_id = self.camera_id.read();
 

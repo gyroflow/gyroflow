@@ -1117,14 +1117,7 @@ impl RenderQueue {
                                     if let Some(md_fps) = md.frame_rate {
                                         let fps = stab.params.read().fps;
                                         if (md_fps - fps).abs() > 1.0 {
-                                            let mut params = stab.params.write();
-                                            if (md_fps - params.fps).abs() > 0.001 {
-                                                params.fps_scale = Some(md_fps / params.fps);
-                                            } else {
-                                                params.fps_scale = None;
-                                            }
-                                            stab.gyro.write().init_from_params(&params);
-                                            stab.keyframes.write().timestamp_scale = params.fps_scale;
+                                            stab.override_video_fps(md_fps);
                                         }
                                     }
                                 }
