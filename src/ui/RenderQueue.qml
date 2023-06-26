@@ -577,18 +577,24 @@ Item {
         anchors.margins: 0 * dpiScale;
         anchors.topMargin: lv.y;
         extensions: fileDialog.extensions;
-        onLoadFiles: (urls) => {
-            window.videoArea.askForOutputLocation(Util.getFolder(window.outputFile), true, function(outPath) {
-                let additional = window.getAdditionalProjectData();
-                additional.output.output_path = outPath;
-                additional = JSON.stringify(additional);
+        function add(outPath, urls) {
+            let additional = window.getAdditionalProjectData();
+            if (outPath) additional.output.output_path = outPath;
+            additional = JSON.stringify(additional);
 
-                for (const url of urls) {
-                    const job_id = render_queue.add_file(controller.url_to_path(url), "", additional);
-                    loader.pendingJobs[job_id] = true;
-                }
-                loader.updateStatus();
-            });
+            for (const url of urls) {
+                const job_id = render_queue.add_file(controller.url_to_path(url), "", additional);
+                loader.pendingJobs[job_id] = true;
+            }
+            loader.updateStatus();
+        }
+        onLoadFiles: (urls) => {
+            if (!urls.length) return;
+            if (urls[0].toString().toLowerCase().endsWith(".gyroflow")) {
+                add("", urls);
+            } else {
+                window.videoArea.askForOutputLocation(Util.getFolder(window.outputFile), true, function(outPath) { add(outPath, urls); });
+            }
         }
     }
 

@@ -106,7 +106,7 @@ pub struct Controller {
     set_imu_bias: qt_method!(fn(&self, bx: f64, by: f64, bz: f64)),
     recompute_gyro: qt_method!(fn(&self)),
 
-    override_video_fps: qt_method!(fn(&self, fps: f64)),
+    override_video_fps: qt_method!(fn(&self, fps: f64, recompute: bool)),
     get_org_duration_ms: qt_method!(fn(&self) -> f64),
     get_scaled_duration_ms: qt_method!(fn(&self) -> f64),
     get_scaled_fps: qt_method!(fn(&self) -> f64),
@@ -1335,7 +1335,7 @@ impl Controller {
         }
     }
 
-    wrap_simple_method!(override_video_fps,         v: f64; recompute; update_offset_model);
+    wrap_simple_method!(override_video_fps,         v: f64, r: bool; recompute; update_offset_model);
     wrap_simple_method!(set_video_rotation,         v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_stab_enabled,           v: bool);
     wrap_simple_method!(set_show_detected_features, v: bool);

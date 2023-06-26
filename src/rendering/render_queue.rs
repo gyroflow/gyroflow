@@ -1117,7 +1117,7 @@ impl RenderQueue {
                                     if let Some(md_fps) = md.frame_rate {
                                         let fps = stab.params.read().fps;
                                         if (md_fps - fps).abs() > 1.0 {
-                                            stab.override_video_fps(md_fps);
+                                            stab.override_video_fps(md_fps, false);
                                         }
                                     }
                                 }

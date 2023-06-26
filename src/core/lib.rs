@@ -780,7 +780,7 @@ impl StabilizationManager {
         self.pose_estimator.clear();
     }
 
-    pub fn override_video_fps(&self, fps: f64) {
+    pub fn override_video_fps(&self, fps: f64, recompute: bool) {
         {
             let mut params = self.params.write();
             if (fps - params.fps).abs() > 0.001 {
@@ -792,9 +792,11 @@ impl StabilizationManager {
             self.keyframes.write().timestamp_scale = params.fps_scale;
         }
 
-        self.stabilization.write().set_compute_params(stabilization::ComputeParams::from_manager(self, false));
+        if recompute {
+            self.stabilization.write().set_compute_params(stabilization::ComputeParams::from_manager(self, false));
 
-        self.invalidate_smoothing();
+            self.invalidate_smoothing();
+        }
     }
 
     pub fn list_gpu_devices<F: Fn(Vec<String>) + Send + Sync + 'static>(&self, cb: F) {
@@ -1291,7 +1293,7 @@ impl StabilizationManager {
                 if let Some(md_fps) = md.frame_rate {
                     let fps = self.params.read().fps;
                     if (md_fps - fps).abs() > 1.0 {
-                        self.override_video_fps(md_fps);
+                        self.override_video_fps(md_fps, false);
                     }
                 }
             }
