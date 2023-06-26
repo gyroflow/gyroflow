@@ -90,7 +90,7 @@ impl Stabilization {
     // Adapted from OpenCV: initUndistortRectifyMap + remap
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
-    pub fn undistort_image_cpu<const I: i32, T: PixelType>(buffers: &mut Buffers, params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, matrices: &[[f32; 9]], drawing: &[u8]) -> bool {
+    pub fn undistort_image_cpu<const I: i32, T: PixelType>(buffers: &mut Buffers, params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, matrices: &[[f32; 12]], drawing: &[u8]) -> bool {
         // #[cold]
         // fn draw_pixel(pix: &mut Vector4<f32>, x: i32, y: i32, is_input: bool, width: i32, params: &KernelParams, drawing: &[u8]) {
         //     if drawing.is_empty() || (params.flags & 8) == 0 { return; }
@@ -122,7 +122,7 @@ impl Stabilization {
             return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
         }
 
-        fn rotate_and_distort(pos: (f32, f32), idx: usize, params: &KernelParams, matrices: &[[f32; 9]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit: f32) -> Option<(f32, f32)> {
+        fn rotate_and_distort(pos: (f32, f32), idx: usize, params: &KernelParams, matrices: &[[f32; 12]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit: f32) -> Option<(f32, f32)> {
             let matrices = matrices[idx];
             let _x = (pos.0 * matrices[0]) + (pos.1 * matrices[1]) + matrices[2] + params.translation3d[0];
             let _y = (pos.0 * matrices[3]) + (pos.1 * matrices[4]) + matrices[5] + params.translation3d[1];
@@ -205,7 +205,12 @@ impl Stabilization {
                 }
                 src_index += params.stride as isize;
             }
-            sum
+            Vector4::new(
+                sum.x.min(params.max_pixel_value),
+                sum.y.min(params.max_pixel_value),
+                sum.z.min(params.max_pixel_value),
+                sum.w.min(params.max_pixel_value),
+            )
         }
 
         if let BufferSource::Cpu { buffer: input } = &mut buffers.input.data {
@@ -278,11 +283,20 @@ impl Stabilization {
 
                             ///////////////////////////////////////////////////////////////////
                             // Calculate source `y` for rolling shutter
-                            let mut sy = (out_pos.1.round() as i32).min(params.height).max(0) as usize;
+                            let mut sy = 0;
+                            if (params.flags & 16) == 16 { // Horizontal RS
+                                sy = (out_pos.0.round() as i32).min(params.width).max(0) as usize;
+                            } else {
+                                sy = (out_pos.1.round() as i32).min(params.height).max(0) as usize;
+                            }
                             if params.matrix_count > 1 {
                                 let idx = params.matrix_count as usize / 2;
                                 if let Some(pt) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit) {
-                                    sy = (pt.1.round() as i32).min(params.height).max(0) as usize;
+                                    if (params.flags & 16) == 16 { // Horizontal RS
+                                        sy = (pt.0.round() as i32).min(params.width).max(0) as usize;
+                                    } else {
+                                        sy = (pt.1.round() as i32).min(params.height).max(0) as usize;
+                                    }
                                 }
                             }
                             ///////////////////////////////////////////////////////////////////

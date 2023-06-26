@@ -44,6 +44,7 @@ bitflags::bitflags! {
         const HAS_DIGITAL_LENS     = 2;
         const FILL_WITH_BACKGROUND = 4;
         const DRAWING_ENABLED      = 8;
+        const HORIZONTAL_RS        = 16; // right-to-left or left-to-right rolling shutter
     }
 }
 
@@ -64,12 +65,12 @@ pub struct KernelParams {
     pub flags:             i32, // 8
     pub bytes_per_pixel:   i32, // 12
     pub pix_element_count: i32, // 16
-    pub background:    [f32; 4], // 16
-    pub f:             [f32; 2], // 8  - focal length in pixels
-    pub c:             [f32; 2], // 16 - lens center
-    pub k:             [f32; 12], // 16,16,16 - distortion coefficients
-    pub fov:           f32, // 4
-    pub r_limit:       f32, // 8
+    pub background:        [f32; 4], // 16
+    pub f:                 [f32; 2], // 8  - focal length in pixels
+    pub c:                 [f32; 2], // 16 - lens center
+    pub k:                 [f32; 12], // 16,16,16 - distortion coefficients
+    pub fov:               f32, // 4
+    pub r_limit:           f32, // 8
     pub lens_correction_amount:   f32, // 12
     pub input_vertical_stretch:   f32, // 16
     pub input_horizontal_stretch: f32, // 4
@@ -77,13 +78,17 @@ pub struct KernelParams {
     pub background_margin_feather:f32, // 12
     pub canvas_scale:             f32, // 16
     pub input_rotation:           f32, // 4
-    pub reserved3:                f32, // 8
-    pub translation2d:         [f32; 2], // 16
-    pub translation3d:         [f32; 4], // 16
-    pub source_rect:           [i32; 4], // 16 - x, y, w, h
-    pub output_rect:           [i32; 4], // 16 - x, y, w, h
-    pub digital_lens_params:   [f32; 4], // 16
-    pub safe_area_rect:        [f32; 4], // 16
+    pub output_rotation:          f32, // 8
+    pub translation2d:            [f32; 2], // 16
+    pub translation3d:            [f32; 4], // 16
+    pub source_rect:              [i32; 4], // 16 - x, y, w, h
+    pub output_rect:              [i32; 4], // 16 - x, y, w, h
+    pub digital_lens_params:      [f32; 4], // 16
+    pub safe_area_rect:           [f32; 4], // 16
+    pub max_pixel_value:          f32, // 4
+    pub reserved1:                f32, // 8
+    pub reserved2:                f32, // 12
+    pub reserved3:                f32, // 16
 }
 unsafe impl bytemuck::Zeroable for KernelParams {}
 unsafe impl bytemuck::Pod for KernelParams {}
@@ -145,8 +150,10 @@ impl Stabilization {
             let frame = crate::frame_at_timestamp(timestamp_ms, self.compute_params.scaled_fps) as usize; // Only for FOVs
 
             self.kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, self.compute_params.digital_lens.is_some());
+            self.kernel_flags.set(KernelParamsFlags::HORIZONTAL_RS, self.compute_params.horizontal_rs);
 
             let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
+            transform.kernel_params.max_pixel_value = f32::MAX;
             transform.kernel_params.interpolation = self.interpolation as i32;
             transform.kernel_params.width  = self.size.0 as i32;
             transform.kernel_params.height = self.size.1 as i32;
@@ -181,6 +188,9 @@ impl Stabilization {
 
             if let Some(r) = buffers.input.rotation {
                 transform.kernel_params.input_rotation = r;
+            }
+            if let Some(r) = buffers.output.rotation {
+                transform.kernel_params.output_rotation = r;
             }
 
             if let Some(r) = buffers.input.rect {

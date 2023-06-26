@@ -37,13 +37,17 @@ typedef struct {
     float background_margin_feather; // 12
     float canvas_scale;              // 16
     float input_rotation;            // 4
-    float reserved3;                 // 8
+    float output_rotation;           // 8
     float2 translation2d;            // 16
     float4 translation3d;            // 16
     int4 source_rect;                // 16
     int4 output_rect;                // 16
     float4 digital_lens_params;      // 16
     float4 safe_area_rect;           // 16
+    float max_pixel_value;           // 4
+    float reserved1;                 // 8
+    float reserved2;                 // 12
+    float reserved3;                 // 16
 } KernelParams;
 
 #if INTERPOLATION == 2 // Bilinear
@@ -214,7 +218,7 @@ DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global Ker
         }
         src_index += params->stride;
     }
-    return sum;
+    return min(sum, (DATA_TYPEF)(params->max_pixel_value));
 }
 
 float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, __global const float *matrices) {
@@ -288,19 +292,28 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
 
         ///////////////////////////////////////////////////////////////////
         // Calculate source `y` for rolling shutter
-        int sy = min((int)params->height, max(0, (int)round(out_pos.y)));
+        int sy = 0;
+        if ((params->flags & 16) == 16) { // Horizontal RS
+            sy = min((int)params->width, max(0, (int)round(out_pos.x)));
+        } else {
+            sy = min((int)params->height, max(0, (int)round(out_pos.y)));
+        }
         if (params->matrix_count > 1) {
-            int idx = (params->matrix_count / 2) * 9; // Use middle matrix
+            int idx = (params->matrix_count / 2) * 12; // Use middle matrix
             float2 uv = rotate_and_distort(out_pos, idx, params, matrices);
             if (uv.x > -99998.0f) {
+                if ((params->flags & 16) == 16) { // Horizontal RS
+                    sy = min((int)params->width, max(0, (int)round(uv.x)));
+                } else {
                 sy = min((int)params->height, max(0, (int)round(uv.y)));
+                }
             }
         }
         ///////////////////////////////////////////////////////////////////
 
         DATA_TYPE final_pix;
 
-        int idx = min(sy, params->matrix_count - 1) * 9;
+        int idx = min(sy, params->matrix_count - 1) * 12;
         float2 uv = rotate_and_distort(out_pos, idx, params, matrices);
         if (uv.x > -99998.0f) {
             switch (params->background_mode) {

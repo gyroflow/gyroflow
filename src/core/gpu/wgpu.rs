@@ -125,7 +125,7 @@ impl WgpuWrapper {
     }
 
     pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, f64), compute_params: &ComputeParams, buffers: &Buffers, mut drawing_len: usize) -> Result<Self, WgpuError> {
-        let max_matrix_count = 9 * params.height as usize;
+        let max_matrix_count = 12 * if (params.flags & 16) == 16 { params.width } else { params.height } as usize;
 
         if params.height < 4 || params.output_height < 4 || buffers.input.size.2 < 1 || params.width > 8192 || params.output_width > 8192 {
             return Err(WgpuError::ParamCheck);

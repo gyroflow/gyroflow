@@ -36,14 +36,18 @@ layout(std140, binding = 2) uniform KernelParams {
     float background_margin;        // 8
     float background_margin_feather;// 12
     float canvas_scale;             // 16
-    float reserved2;                // 4
-    float reserved3;                // 8
+    float input_rotation;           // 4
+    float output_rotation;          // 8
     vec2 translation2d;             // 16
     vec4 translation3d;             // 16
     ivec4 source_rect;              // 16 - x, y, w, h - unused in this kernel
     ivec4 output_rect;              // 16 - x, y, w, h - unused in this kernel
     vec4 digital_lens_params;       // 16
     vec4 safe_area_rect;            // 16
+    float max_pixel_value;          // 4
+    float reserved1;                // 8
+    float reserved2;                // 12
+    float reserved3;                // 16
 } params;
 
 LENS_MODEL_FUNCTIONS;
@@ -102,7 +106,7 @@ void draw_safe_area(inout vec4 out_pix, float x, float y) {
 }
 
 float get_param(float row, float idx) {
-    return texture(texParams, vec2(idx / 8.0, row / float(params.height - 1))).r;
+    return texture(texParams, vec2(idx / 11.0, row / float(params.height - 1))).r;
 }
 
 vec2 rotate_and_distort(vec2 pos, float idx) {
@@ -161,11 +165,18 @@ void main() {
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
     float sy = texPos.y;
+    if (bool(params.flags & 16)) { // Horizontal RS
+        sy = texPos.x;
+    }
     if (params.matrix_count > 1) {
         float idx = params.matrix_count / 2.0; // Use middle matrix
         vec2 uv = rotate_and_distort(texPos, idx);
         if (uv.x > -99998.0) {
-            sy = min(params.height, max(0, floor(0.5 + uv.y)));
+            if (bool(params.flags & 16)) { // Horizontal RS
+                sy = min(params.width, max(0, floor(0.5 + uv.x)));
+            } else {
+                sy = min(params.height, max(0, floor(0.5 + uv.y)));
+            }
         }
     }
     ///////////////////////////////////////////////////////////////////

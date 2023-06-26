@@ -8,7 +8,7 @@ use crate::keyframes::KeyframeType;
 
 #[derive(Default, Clone)]
 pub struct FrameTransform {
-    pub matrices: Vec<[f32; 9]>,
+    pub matrices: Vec<[f32; 12]>,
     pub kernel_params: super::KernelParams,
     pub fov: f64,
     pub minimal_fov: f64,
@@ -132,7 +132,7 @@ impl FrameTransform {
         let smoothed_quat1 = params.gyro.smoothed_quat_at_timestamp(timestamp_ms);
 
         // Only compute 1 matrix if not using rolling shutter correction
-        let rows = if frame_readout_time.abs() > 0.0 { params.height } else { 1 };
+        let rows = if frame_readout_time.abs() > 0.0 { if params.horizontal_rs { params.width } else { params.height } } else { 1 };
 
         let matrices = (0..rows).into_par_iter().map(|y| {
             let quat_time = if frame_readout_time.abs() > 0.0 {
@@ -162,8 +162,9 @@ impl FrameTransform {
                 i_r[(0, 0)], i_r[(0, 1)], i_r[(0, 2)],
                 i_r[(1, 0)], i_r[(1, 1)], i_r[(1, 2)],
                 i_r[(2, 0)], i_r[(2, 1)], i_r[(2, 2)],
+                0.0, 0.0, 0.0
             ]
-        }).collect::<Vec<[f32; 9]>>();
+        }).collect::<Vec<[f32; 12]>>();
 
         let mut digital_lens_params = [0f32; 4];
         if let Some(p) = &params.digital_lens_params {

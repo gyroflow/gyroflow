@@ -64,6 +64,7 @@ pub struct StabilizationParams {
     pub background_margin: f64,
     pub background_margin_feather: f64,
 
+    pub horizontal_rs: bool,
     pub framebuffer_inverted: bool,
     pub is_calibrator: bool,
 
@@ -105,6 +106,7 @@ impl Default for StabilizationParams {
             background_margin: 0.0,
             background_margin_feather: 0.0,
 
+            horizontal_rs: false,
             framebuffer_inverted: false,
             is_calibrator: false,
 

@@ -51,7 +51,7 @@ public:
     QString shaderPath() { return m_shaderPath; }
     QRhiTexture *itemTexturePtr() { return m_itemTexturePtr; }
 
-    bool init(MDKPlayer *item, QSize textureSize, QSize outputSize, const QString &shaderPath, int kernelParmsSize, QSize canvasSize) {
+    bool init(MDKPlayer *item, QSize textureSize, QSize outputSize, const QString &shaderPath, int kernelParmsSize, int sizeForRS, QSize canvasSize) {
         if (!item) return false;
         auto context = item->rhiContext();
         auto rhi = context->rhi();
@@ -77,10 +77,10 @@ public:
         m_kernelParams.reset(rhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, kernelParmsSize));
         if (!m_kernelParams->create()) { qDebug2("init") << "failed to create m_kernelParams"; return false; }
 
-        m_texMatrices.reset(rhi->newTexture(QRhiTexture::R32F, QSize(9, textureSize.height()), 1, QRhiTexture::Flags()));
+        m_texMatrices.reset(rhi->newTexture(QRhiTexture::R32F, QSize(12, sizeForRS), 1, QRhiTexture::Flags()));
         if (!m_texMatrices->create()) { qDebug2("init") << "failed to create m_texMatrices"; return false; }
 
-        matricesBuffer.resize(textureSize.height() * 9 * sizeof(float));
+        matricesBuffer.resize(sizeForRS * 12 * sizeof(float));
 
         m_texCanvas.reset(rhi->newTexture(QRhiTexture::R8, canvasSize, 1, QRhiTexture::Flags()));
         if (!m_texCanvas->create()) { qDebug2("init") << "failed to create m_texCanvas"; return false; }

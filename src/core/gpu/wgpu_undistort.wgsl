@@ -27,13 +27,17 @@ struct KernelParams {
     background_margin_feather:f32, // 12
     canvas_scale:             f32, // 16
     input_rotation:           f32, // 4
-    reserved3:                f32, // 8
+    output_rotation:          f32, // 8
     translation2d:      vec2<f32>, // 16
     translation3d:      vec4<f32>, // 16
     source_rect:        vec4<i32>, // 16 - x, y, w, h
     output_rect:        vec4<i32>, // 16 - x, y, w, h
     digital_lens_params:vec4<f32>, // 16
     safe_area_rect:     vec4<f32>, // 16
+    max_pixel_value:          f32, // 4
+    reserved1:                f32, // 8
+    reserved2:                f32, // 12
+    reserved3:                f32, // 16
 }
 
 @group(0) @binding(0) @fragment var<uniform> params: KernelParams;
@@ -181,8 +185,12 @@ fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
             sum = sum + bg * coeffs[coeffs_y + yp];
         }
     }
-
-    return sum;
+    return vec4<f32>(
+        min(sum.x, params.max_pixel_value),
+        min(sum.y, params.max_pixel_value),
+        min(sum.z, params.max_pixel_value),
+        min(sum.w, params.max_pixel_value)
+    );
 }
 
 fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>) -> vec2<f32> {
@@ -252,17 +260,26 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
 
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
-    var sy = u32(min(params.height, max(0, i32(floor(0.5 + out_pos.y)))));
+    var sy = 0u;
+    if (bool(params.flags & 16)) { // Horizontal RS
+        sy = u32(min(params.width, max(0, i32(floor(0.5 + out_pos.x)))));
+    } else {
+        sy = u32(min(params.height, max(0, i32(floor(0.5 + out_pos.y)))));
+    }
     if (params.matrix_count > 1) {
-        let idx: u32 = u32((params.matrix_count / 2) * 9); // Use middle matrix
+        let idx: u32 = u32((params.matrix_count / 2) * 12); // Use middle matrix
         let uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k1, params.k2, params.k3);
         if (uv.x > -99998.0) {
-            sy = u32(min(params.height, max(0, i32(floor(0.5 + uv.y)))));
+            if (bool(params.flags & 16)) { // Horizontal RS
+                sy = u32(min(params.width, max(0, i32(floor(0.5 + uv.x)))));
+            } else {
+                sy = u32(min(params.height, max(0, i32(floor(0.5 + uv.y)))));
+            }
         }
     }
     ///////////////////////////////////////////////////////////////////
 
-    let idx: u32 = min(sy, u32(params.matrix_count - 1)) * 9u;
+    let idx: u32 = min(sy, u32(params.matrix_count - 1)) * 12u;
 
     var pixel: vec4<f32> = bg;
 

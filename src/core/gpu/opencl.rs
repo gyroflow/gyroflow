@@ -270,7 +270,7 @@ impl OclWrapper {
                 .devices(ctx.device)
                 .build(&ctx.context)?;
 
-            let max_matrix_count = 9 * params.height;
+            let max_matrix_count = 12 * if (params.flags & 16) == 16 { params.width } else { params.height };
             let flags = MemFlags::new().read_only().host_write_only();
 
             let buf_params   = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(std::mem::size_of::<KernelParams>()).build()?;
@@ -308,7 +308,7 @@ impl OclWrapper {
     }
 
     pub fn undistort_image(&self, buffers: &mut Buffers, itm: &crate::stabilization::FrameTransform, drawing_buffer: &[u8]) -> ocl::Result<()> {
-        let matrices = unsafe { std::slice::from_raw_parts(itm.matrices.as_ptr() as *const f32, itm.matrices.len() * 9 ) };
+        let matrices = unsafe { std::slice::from_raw_parts(itm.matrices.as_ptr() as *const f32, itm.matrices.len() * 12 ) };
 
         if self.buf_matrices.len() < matrices.len() { log::error!("Buffer size mismatch matrices! {} vs {}", self.buf_matrices.len(), matrices.len()); return Ok(()); }
 

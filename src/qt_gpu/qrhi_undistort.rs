@@ -46,15 +46,17 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: 
             let params_ptr = params.as_ptr();
             let params_len = params.len() as u32;
             let matrices_ptr = itm.matrices.as_ptr();
-            let matrices_len = (itm.matrices.len() * 9 * std::mem::size_of::<f32>()) as u32;
+            let matrices_len = (itm.matrices.len() * 12 * std::mem::size_of::<f32>()) as u32;
             let canvas = undist.drawing.get_buffer();
             let canvas_ptr = canvas.as_ptr();
             let canvas_len = canvas.len() as u32;
 
+            let size_for_rs = if (itm.kernel_params.flags & 16) == 16 { itm.kernel_params.width } else { itm.kernel_params.height } as u32;
+
             let canvas_size = undist.drawing.get_size();
             let canvas_size = QSize { width: canvas_size.0 as u32, height: canvas_size.1 as u32 };
 
-            let ok = cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *", output_size as "QSize", shader_path as "QString", width as "uint32_t", height as "uint32_t", params_ptr as "uint8_t*", matrices_ptr as "uint8_t*", canvas_ptr as "uint8_t*", matrices_len as "uint32_t", params_len as "uint32_t", canvas_len as "uint32_t", canvas_size as "QSize"] -> bool as "bool" {
+            let ok = cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *", output_size as "QSize", shader_path as "QString", width as "uint32_t", height as "uint32_t", params_ptr as "uint8_t*", matrices_ptr as "uint8_t*", canvas_ptr as "uint8_t*", matrices_len as "uint32_t", params_len as "uint32_t", canvas_len as "uint32_t", canvas_size as "QSize", size_for_rs as "uint32_t"] -> bool as "bool" {
                 if (!mdkplayer || !mdkplayer->mdkplayer || shader_path.isEmpty() || output_size.isEmpty()) return false;
 
                 auto rhiUndistortion = static_cast<QtRHIUndistort *>(mdkplayer->mdkplayer->userData());
@@ -78,7 +80,7 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: 
                 || rhiUndistortion->itemTexturePtr() != mdkplayer->mdkplayer->rhiTexture()) {
                     delete rhiUndistortion;
                     rhiUndistortion = new QtRHIUndistort();
-                    if (!rhiUndistortion->init(mdkplayer->mdkplayer, QSize(width, height), output_size, shader_path, params_len, canvas_size)) {
+                    if (!rhiUndistortion->init(mdkplayer->mdkplayer, QSize(width, height), output_size, shader_path, params_len, size_for_rs, canvas_size)) {
                         qDebug2("render") << "Failed to initialize";
                         delete rhiUndistortion;
                         mdkplayer->mdkplayer->setUserData(nullptr);

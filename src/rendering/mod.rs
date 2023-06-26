@@ -448,8 +448,9 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                         };
 
                         plane.ensure_ready_for_processing::<$t>(timestamp_us, &mut buffers);
-                        if fill_with_background {
-                            if let Some(transform) = plane.stab_data.get_mut(&timestamp_us) {
+                        if let Some(transform) = plane.stab_data.get_mut(&timestamp_us) {
+                            transform.kernel_params.max_pixel_value = $max_val;
+                            if fill_with_background {
                                 transform.kernel_params.flags |= KernelParamsFlags::FILL_WITH_BACKGROUND.bits();
                             }
                         }

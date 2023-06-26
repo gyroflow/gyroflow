@@ -44,6 +44,7 @@ pub struct ComputeParams {
     pub adaptive_zoom_center_offset: (f64, f64),
     pub adaptive_zoom_method: i32,
     pub framebuffer_inverted: bool,
+    pub horizontal_rs: bool,
 
     pub zooming_debug_points: bool,
 
@@ -85,6 +86,7 @@ impl ComputeParams {
             background_margin_feather: params.background_margin_feather,
             lens_correction_amount: params.lens_correction_amount,
             framebuffer_inverted: params.framebuffer_inverted,
+            horizontal_rs: params.horizontal_rs,
             frame_readout_time: params.frame_readout_time,
             trim_start: params.trim_start,
             trim_end: params.trim_end,
