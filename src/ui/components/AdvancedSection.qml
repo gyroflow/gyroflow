@@ -7,13 +7,16 @@ Column {
     spacing: parent.spacing;
     width: parent.width;
 
+    property alias btn: btn;
     property real diff: -10 * dpiScale;
     default property alias data: advanced.data;
 
     LinkButton {
+        id: btn;
         text: qsTr("Advanced");
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: advanced.opened = !advanced.opened;
+        font.bold: advanced.opened;
     }
     Column {
         spacing: parent.spacing;

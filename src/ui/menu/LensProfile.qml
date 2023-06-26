@@ -276,22 +276,9 @@ MenuItem {
         copyable: true;
         model: ({ })
     }
-    LinkButton {
-        visible: Object.keys(info.model).length > 0;
-        text: qsTr("Adjust parameters");
-        anchors.horizontalCenter: parent.horizontalCenter;
-        onClicked: adjust.opened = !adjust.opened;
-    }
-    Column {
-        spacing: parent.spacing;
-        id: adjust;
-        property bool opened: false;
-        width: parent.width;
-        visible: opacity > 0;
-        opacity: opened? 1 : 0;
-        height: opened? implicitHeight : -10 * dpiScale;
-        Ease on opacity { }
-        Ease on height { }
+    AdvancedSection {
+        btn.text: qsTr("Adjust parameters");
+        visible: Object.keys(info.model).length > 0
 
         component SmallNumberField: NumberField {
             property bool preventChange2: true;
