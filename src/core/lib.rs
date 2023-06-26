@@ -1028,6 +1028,7 @@ impl StabilizationManager {
                 if let Some(v) = vid_info.get("fps_scale") { params.fps_scale = v.as_f64(); }
 
                 self.gyro.write().init_from_params(&params);
+                self.keyframes.write().timestamp_scale = params.fps_scale;
             }
             if let Some(lens) = obj.get("calibration_data") {
                 let mut l = self.lens.write();

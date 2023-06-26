@@ -122,7 +122,7 @@ impl KeyframeManager {
     pub fn value_at_video_timestamp(&self, typ: &KeyframeType, timestamp_ms: f64) -> Option<f64> {
         if let Some(custom) = &self.custom_provider {
             if let Ok(mut custom) = custom.lock() {
-                if let Some(v) = (*custom)(self, typ, timestamp_ms) {
+                if let Some(v) = (*custom)(self, typ, timestamp_ms * self.timestamp_scale.unwrap_or(1.0)) {
                     return Some(v);
                 }
             }
