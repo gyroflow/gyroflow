@@ -19,7 +19,7 @@ QQC.ItemDelegate {
     property bool isFavorite:  !!profilesMenu.favorites[modelData[2]];
     property bool isOfficial:  modelData[3];
     property bool isPreset:    modelData[1].endsWith(".gyroflow");
-    property bool aspectMatch: profilesMenu.currentVideoAspectRatio == 0 || modelData[5] == 0 || profilesMenu.currentVideoAspectRatio == modelData[5];
+    property bool aspectMatch: profilesMenu.currentVideoAspectRatio == 0 || modelData[5] == 0 || profilesMenu.currentVideoAspectRatio == modelData[5] || profilesMenu.currentVideoAspectRatioSwapped == modelData[5];
     property bool hasRating:   rating != 0;
     property real rating:      modelData[4] || 0;
 

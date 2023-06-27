@@ -164,13 +164,6 @@ impl StabilizationManager {
             // If gopro reports rolling shutter value, it already applied it, ie. the video is already corrected
             md.frame_readout_time = None;
         }
-        if !cancel_flag.load(SeqCst) {
-            let mut gyro = self.gyro.write();
-            gyro.load_from_telemetry(&md);
-            gyro.file_load_options = options.clone();
-        }
-        self.params.write().frame_readout_time = md.frame_readout_time.unwrap_or_default();
-
         if is_main_video {
             if let Some(ref lens) = md.lens_profile {
                 let mut l = self.lens.write();
@@ -194,10 +187,37 @@ impl StabilizationManager {
                     l.resolve_interpolations(&db);
                 }
             }
+            if let Some(md_fps) = md.frame_rate {
+                let fps = self.params.read().fps;
+                if (md_fps - fps).abs() > 1.0 {
+                    self.override_video_fps(md_fps, false);
+                }
+            }
+            if md.detected_source.as_ref().map(|v| v.starts_with("Blackmagic ")).unwrap_or_default() {
+                if let Some(rot) = md.additional_data.get("rotation").and_then(|x| x.as_u64()) {
+                    if rot == 90 || rot == 270 {
+                        log::info!("Using horizontal rolling shutter correction");
+                        self.params.write().horizontal_rs = true;
+                        if rot == 90 {
+                            md.imu_orientation = Some("xYz".into());
+                            md.frame_readout_time = md.frame_readout_time.map(|x| -x);
+                        } else {
+                            md.imu_orientation = Some("Xyz".into());
+                        }
+                    }
+                }
+            }
+            self.params.write().frame_readout_time = md.frame_readout_time.unwrap_or_default();
         } else {
             log::info!("Not a main video, clearing {} per-frame offsets", md.per_frame_time_offsets.len());
             md.per_frame_time_offsets.clear();
         }
+        if !cancel_flag.load(SeqCst) {
+            let mut gyro = self.gyro.write();
+            gyro.load_from_telemetry(&md);
+            gyro.file_load_options = options.clone();
+        }
+
         if let Some(ref id) = md.camera_identifier {
             *self.camera_id.write() = Some(id.clone());
         }
@@ -214,14 +234,22 @@ impl StabilizationManager {
         } else {
             (self.lens.write().load_from_file(path), false)
         };
+        let (width, height, aspect, id, fps) = {
+            let params = self.params.read();
+            (params.video_size.0, params.video_size.1, ((params.video_size.0 * 100) as f64 / params.video_size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.identifier.clone()).unwrap_or_default(), (params.fps * 100.0).round() as i32)
+        };
 
         let mut lens = self.lens.write();
+
+        // Check if the lens profile needs to be swapped for vertical
+        let lens_aspect_swapped = ((lens.calib_dimension.h * 100) as f64 / lens.calib_dimension.w.max(1) as f64).round() as u32;
+        if (width == lens.calib_dimension.h && height == lens.calib_dimension.w) || lens_aspect_swapped == aspect {
+            log::info!("Lens profile swapped from {}x{} to {}x{} to match the video aspect", lens.calib_dimension.w, lens.calib_dimension.h, lens.calib_dimension.h, lens.calib_dimension.w);
+            *lens = lens.swapped();
+        }
+
         let matching = lens.get_all_matching_profiles();
         if matching.len() > 1 {
-            let (width, height, aspect, id, fps) = {
-                let params = self.params.read();
-                (params.video_size.0, params.video_size.1, ((params.video_size.0 * 100) as f64 / params.video_size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.identifier.clone()).unwrap_or_default(), (params.fps * 100.0).round() as i32)
-            };
             let mut found = false;
             if !id.is_empty() && lens.identifier == id {
                 found = true;
@@ -892,6 +920,7 @@ impl StabilizationManager {
                 "video_speed":                   params.video_speed,
                 "video_speed_affects_smoothing": params.video_speed_affects_smoothing,
                 "video_speed_affects_zooming":   params.video_speed_affects_zooming,
+                "horizontal_rs":          params.horizontal_rs,
             },
             "gyro_source": {
                 "filepath":           gyro.file_path,
@@ -1155,6 +1184,7 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("frame_readout_time")    .and_then(|x| x.as_f64()) { params.frame_readout_time      = v; }
                 if let Some(v) = obj.get("adaptive_zoom_window")  .and_then(|x| x.as_f64()) { params.adaptive_zoom_window    = v; }
                 if let Some(v) = obj.get("lens_correction_amount").and_then(|x| x.as_f64()) { params.lens_correction_amount  = v; }
+                if let Some(v) = obj.get("horizontal_rs")        .and_then(|x| x.as_bool()) { params.horizontal_rs          = v; }
 
                 if let Some(v) = obj.get("video_speed").and_then(|x| x.as_f64()) { params.video_speed = v; }
                 if let Some(v) = obj.get("video_speed_affects_smoothing").and_then(|x| x.as_bool()) { params.video_speed_affects_smoothing = v; }
@@ -1289,14 +1319,7 @@ impl StabilizationManager {
             let frame_count = (metadata.duration_s * metadata.fps).ceil() as usize;
 
             self.init_from_video_data(filepath, metadata.duration_s * 1000.0, metadata.fps, frame_count, video_size)?;
-            if let Ok(md) = self.load_gyro_data(filepath, true, &Default::default(), |_|(), Arc::new(AtomicBool::new(false))) {
-                if let Some(md_fps) = md.frame_rate {
-                    let fps = self.params.read().fps;
-                    if (md_fps - fps).abs() > 1.0 {
-                        self.override_video_fps(md_fps, false);
-                    }
-                }
-            }
+            let _ = self.load_gyro_data(filepath, true, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
 
             let camera_id = self.camera_id.read();
 

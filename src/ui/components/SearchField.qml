@@ -106,6 +106,12 @@ TextField {
                 if (aPriority2 && !bPriority2) return -1;
                 if (bPriority2 && !aPriority2) return 1;
 
+                // Check swapped aspect match
+                const aPriority3 = a[5] != 0 && profilesMenu.currentVideoAspectRatioSwapped == a[5];
+                const bPriority3 = b[5] != 0 && profilesMenu.currentVideoAspectRatioSwapped == b[5];
+                if (aPriority3 && !bPriority3) return -1;
+                if (bPriority3 && !aPriority3) return 1;
+
                 return a[0].localeCompare(b[0]);
             });
         }

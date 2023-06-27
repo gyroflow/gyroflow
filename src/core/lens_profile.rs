@@ -230,6 +230,24 @@ impl LensProfile {
             ret.fisheye_params.camera_matrix[1] = mtrx1;
         }
 
+        // Swap compatible settings
+        for x in ret.compatible_settings.iter_mut() {
+            if let Some(x) = x.as_object_mut() {
+                match (x.get("width").and_then(|x| x.as_u64()), x.get("height").and_then(|x| x.as_u64())) {
+                    (Some(w), Some(h)) => {
+                        x["width"] = h.into();
+                        x["height"] = w.into();
+                    }
+                    _ => { }
+                }
+            }
+        }
+
+        // Swap interpolations
+        for (_, x) in ret.parsed_interpolations.iter_mut() {
+            *x = x.swapped();
+        }
+
         ret
     }
 

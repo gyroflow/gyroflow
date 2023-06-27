@@ -1113,14 +1113,7 @@ impl RenderQueue {
 
                                 let is_main_video = gyro_path.is_empty();
                                 let gyro_path = if !gyro_path.is_empty() { &gyro_path } else { &path };
-                                if let Ok(md) = stab.load_gyro_data(gyro_path, is_main_video, &Default::default(), |_|(), Arc::new(AtomicBool::new(false))) {
-                                    if let Some(md_fps) = md.frame_rate {
-                                        let fps = stab.params.read().fps;
-                                        if (md_fps - fps).abs() > 1.0 {
-                                            stab.override_video_fps(md_fps, false);
-                                        }
-                                    }
-                                }
+                                let _ = stab.load_gyro_data(gyro_path, is_main_video, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
 
                                 let camera_id = stab.camera_id.read();
 

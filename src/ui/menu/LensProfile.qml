@@ -165,6 +165,7 @@ MenuItem {
     }
 
     property int currentVideoAspectRatio: Math.round((root.videoWidth / Math.max(1, root.videoHeight)) * 1000);
+    property int currentVideoAspectRatioSwapped: Math.round((root.videoHeight / Math.max(1, root.videoWidth)) * 1000);
 
     property var favorites: ({});
     function loadFavorites() {
