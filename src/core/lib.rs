@@ -205,6 +205,10 @@ impl StabilizationManager {
                             md.imu_orientation = Some("Xyz".into());
                         }
                     }
+                    if rot == 180 {
+                        md.frame_readout_time = md.frame_readout_time.map(|x| -x);
+                        md.imu_orientation = Some("YXz".into());
+                    }
                 }
             }
             self.params.write().frame_readout_time = md.frame_readout_time.unwrap_or_default();
