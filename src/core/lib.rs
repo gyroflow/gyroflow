@@ -1313,6 +1313,7 @@ impl StabilizationManager {
             metadata = Some(util::get_video_metadata(filepath)?);
         }
         let metadata = metadata.unwrap();
+        log::info!("Loading video file: {metadata:?}");
 
         if metadata.width > 0 && metadata.height > 0 && metadata.duration_s > 0.0 && metadata.fps > 0.0 {
             let video_size = (metadata.width as usize, metadata.height as usize);

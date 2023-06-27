@@ -18,7 +18,7 @@ pub struct FrameTransform {
 impl FrameTransform {
     fn get_frame_readout_time(params: &ComputeParams, can_invert: bool) -> f64 {
         let mut frame_readout_time = params.frame_readout_time;
-        if can_invert && params.framebuffer_inverted {
+        if can_invert && params.framebuffer_inverted && !params.horizontal_rs {
             frame_readout_time *= -1.0;
         }
         frame_readout_time
@@ -121,7 +121,7 @@ impl FrameTransform {
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(&params, true);
 
-        let row_readout_time = frame_readout_time / params.height as f64;
+        let row_readout_time = frame_readout_time / if params.horizontal_rs { params.width } else { params.height } as f64;
         let timestamp_ms = timestamp_ms + params.gyro.file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
@@ -222,7 +222,7 @@ impl FrameTransform {
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(params, false);
 
-        let row_readout_time = frame_readout_time / params.height as f64;
+        let row_readout_time = frame_readout_time / if params.horizontal_rs { params.width } else { params.height } as f64;
         let timestamp_ms = timestamp_ms + params.gyro.file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
@@ -235,9 +235,9 @@ impl FrameTransform {
         // Only compute 1 matrix if not using rolling shutter correction
         let points_iter = if frame_readout_time.abs() > 0.0 { points } else { &[(0.0, 0.0)] };
 
-        let rotations: Vec<Matrix3<f64>> = points_iter.iter().map(|&(_, y)| {
+        let rotations: Vec<Matrix3<f64>> = points_iter.iter().map(|&(x, y)| {
             let quat_time = if frame_readout_time.abs() > 0.0 {
-                start_ts + row_readout_time * y as f64
+                start_ts + row_readout_time * if params.horizontal_rs { x } else { y } as f64
             } else {
                 start_ts
             };
