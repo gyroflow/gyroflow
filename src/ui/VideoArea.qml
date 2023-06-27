@@ -727,7 +727,7 @@ Item {
                 property bool shown: false;
                 anchors.fill: vid;
                 visible: opacity > 0;
-                opacity: vid.loaded && shown? 0.5 : 0;
+                opacity: vid.loaded && shown? 0.9 : 0;
                 Ease on opacity { }
                 Row {
                     anchors.fill: parent;
