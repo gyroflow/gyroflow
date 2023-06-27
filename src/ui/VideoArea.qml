@@ -25,6 +25,7 @@ Item {
     property alias queue: queue.item;
     property alias statistics: statistics;
     property alias infoMessages: infoMessages;
+    property alias gridGuide: gridGuide;
 
     property int outWidth: window? window.exportSettings.outWidth : 0;
     property int outHeight: window? window.exportSettings.outHeight : 0;
@@ -720,6 +721,28 @@ Item {
                 anchors.fill: parent;
                 onClicked: timeline.focus = true;
                 onDoubleClicked: root.fullScreen = root.fullScreen? 0 : 1;
+            }
+            Item {
+                id: gridGuide;
+                property bool shown: false;
+                anchors.fill: vid;
+                visible: opacity > 0;
+                opacity: vid.loaded && shown? 0.5 : 0;
+                Ease on opacity { }
+                Row {
+                    anchors.fill: parent;
+                    spacing: (parent.width - 3*2*dpiScale) / 3;
+                    Item { width: 1; height: 1; }
+                    Repeater { model: 2; Rectangle { width: 2 * dpiScale; height: parent.height; color: "#fff"; } }
+                    Item { width: 1; height: 1; }
+                }
+                Column {
+                    anchors.fill: parent;
+                    spacing: (parent.height - 3*2*dpiScale) / 3;
+                    Item { width: 1; height: 1; }
+                    Repeater { model: 2; Rectangle { height: 2 * dpiScale; width: parent.width; color: "#fff"; } }
+                    Item { width: 1; height: 1; }
+                }
             }
         }
         Rectangle {

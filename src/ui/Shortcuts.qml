@@ -190,6 +190,12 @@ Item {
         onActivated: window.saveProject();
     }
 
+    // Toggle grid guide
+    Shortcut {
+        sequence: "G";
+        onActivated: window.videoArea.gridGuide.shown = !window.videoArea.gridGuide.shown;
+    }
+
     // Horizon lock roll adjustment shortcuts
     function hlRollAdjust(v) {
         if (window.stab.horizonCb.checked) {
