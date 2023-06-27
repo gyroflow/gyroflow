@@ -13,6 +13,8 @@ MenuItem {
     innerItem.enabled: window.videoArea.vid.loaded;
     objectName: "stabilization";
 
+    property alias horizonCb: horizonCb;
+    property alias horizonRollSlider: horizonRollSlider;
     property alias fovSlider: fov;
     property alias maxValues: maxValues;
     property alias videoSpeed: videoSpeed;
