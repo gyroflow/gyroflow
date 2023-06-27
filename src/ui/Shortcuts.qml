@@ -195,6 +195,11 @@ Item {
         sequence: "G";
         onActivated: window.videoArea.gridGuide.shown = !window.videoArea.gridGuide.shown;
     }
+    // Grid guide color white/black
+    Shortcut {
+        sequence: "Ctrl+G";
+        onActivated: window.videoArea.gridGuide.isBlack = !window.videoArea.gridGuide.isBlack;
+    }
 
     // Horizon lock roll adjustment shortcuts
     function hlRollAdjust(v) {
