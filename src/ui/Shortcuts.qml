@@ -208,11 +208,11 @@ Item {
         }
     }
     Shortcut { sequence: "E";       onActivated: hlRollAdjust(0.5);  }
-    Shortcut { sequence: "Alt+E";   onActivated: hlRollAdjust(0.1);  }
-    Shortcut { sequence: "Ctrl+E";  onActivated: hlRollAdjust(1);    }
+    Shortcut { sequence: "Ctrl+E";  onActivated: hlRollAdjust(0.1);  }
+    Shortcut { sequence: "Alt+E";   onActivated: hlRollAdjust(1);    }
     Shortcut { sequence: "Shift+E"; onActivated: hlRollAdjust(5);    }
     Shortcut { sequence: "R";       onActivated: hlRollAdjust(-0.5); }
-    Shortcut { sequence: "Alt+R";   onActivated: hlRollAdjust(-0.1); }
-    Shortcut { sequence: "Ctrl+R";  onActivated: hlRollAdjust(-1);   }
+    Shortcut { sequence: "Ctrl+R";  onActivated: hlRollAdjust(-0.1); }
+    Shortcut { sequence: "Alt+R";   onActivated: hlRollAdjust(-1);   }
     Shortcut { sequence: "Shift+R"; onActivated: hlRollAdjust(-5);   }
 }
