@@ -202,9 +202,9 @@ Item {
     }
 
     // Horizon lock roll adjustment shortcuts
-    function hlRollAdjust(v) {
+    function hlRollAdjust(v: real) {
         if (window.stab.horizonCb.checked) {
-            window.stab.horizonRollSlider.value += v;
+            window.stab.horizonRollSlider.field.value += v;
         }
     }
     Shortcut { sequence: "E";       onActivated: hlRollAdjust(0.5);  }
