@@ -286,9 +286,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitflags"
-version = "2.3.2"
+version = "2.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6dbe3c979c178231552ecba20214a8272df4e09f232a87aef4320cf06539aded"
+checksum = "630be753d4e58660abd17930c71b647fe46c27ea6b63cc59e1e3851406972e42"
 
 [[package]]
 name = "bitreader"
@@ -948,7 +948,7 @@ dependencies = [
  "bincode",
  "biquad",
  "bitarray",
- "bitflags 2.3.2",
+ "bitflags 2.3.3",
  "bytemuck",
  "byteorder",
  "ciborium",
@@ -2379,7 +2379,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.2.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=2ca9dbb#2ca9dbbc3cecd1958cfc222343af28b819c9ce15"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=94442af#94442af8c9a864a275d8e1960664f2d34cc091a1"
 dependencies = [
  "argh",
  "byteorder",
@@ -2663,7 +2663,7 @@ source = "git+https://github.com/AdrianEddy/wgpu.git?branch=buffer_from_raw#6ff2
 dependencies = [
  "arrayvec 0.7.4",
  "bit-vec",
- "bitflags 2.3.2",
+ "bitflags 2.3.3",
  "codespan-reporting",
  "log",
  "naga",
@@ -2687,7 +2687,7 @@ dependencies = [
  "arrayvec 0.7.4",
  "ash",
  "bit-set",
- "bitflags 2.3.2",
+ "bitflags 2.3.3",
  "block",
  "core-graphics-types",
  "d3d12",
@@ -2724,7 +2724,7 @@ name = "wgpu-types"
 version = "0.16.0"
 source = "git+https://github.com/AdrianEddy/wgpu.git?branch=buffer_from_raw#6ff21ec398c9b5cca7d96a12b463bd0dc726dae6"
 dependencies = [
- "bitflags 2.3.2",
+ "bitflags 2.3.3",
  "js-sys",
  "web-sys",
 ]
