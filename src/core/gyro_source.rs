@@ -22,7 +22,16 @@ pub type Quat64 = UnitQuaternion<f64>;
 pub type TimeIMU = telemetry_parser::util::IMUData;
 pub type TimeQuat = BTreeMap<i64, Quat64>; // key is timestamp_us
 pub type TimeVec = BTreeMap<i64, Vector3<f64>>; // key is timestamp_us
-pub type TimeFloat = BTreeMap<i64, f64>; // key is timestamp_us
+
+#[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
+pub struct LensParams {
+    pub focal_length: Option<f32>, // millimeters
+    pub pixel_pitch: Option<(u32, u32)>, // nanometers
+    pub capture_area_origin: Option<(u32, u32)>, // pixels
+    pub capture_area_size: Option<(u32, u32)>, // pixels
+    pub pixel_focal_length: Option<f32>, // pixels
+}
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
@@ -37,7 +46,8 @@ pub struct FileMetadata {
     pub frame_rate:          Option<f64>,
     pub camera_identifier:   Option<CameraIdentifier>,
     pub lens_profile:        Option<serde_json::Value>,
-    pub lens_positions:      Option<TimeFloat>,
+    pub lens_positions:      BTreeMap<i64, f64>,
+    pub lens_params:         BTreeMap<i64, LensParams>,
     pub has_accurate_timestamps: bool,
     pub additional_data:     serde_json::Value,
     pub per_frame_time_offsets: Vec<f64>,
@@ -135,7 +145,8 @@ impl GyroSource {
         let mut image_orientations = None;
         let mut lens_profile = None;
         let mut frame_rate = None;
-        let mut lens_positions = None;
+        let mut lens_positions = BTreeMap::new();
+        let mut lens_params = BTreeMap::new();
         let mut additional_data = serde_json::Value::Object(serde_json::Map::new());
 
         if input.camera_type() == "BlackBox" {
@@ -162,7 +173,9 @@ impl GyroSource {
             let mut iori = Vec::<Quat64>::new();
             let mut crop_score = Vec::<f64>::new();
             let mut grav_is_usable = false;
+            let mut lens_info = LensParams::default();
             for info in samples {
+                let timestamp_us = (info.timestamp_ms * 1000.0).round() as i64;
                 if let Some(ref tag_map) = info.tag_map {
                     if let Some(map) = tag_map.get(&GroupId::Quaternion) {
                         if let Some(arr) = map.get_t(TagId::Data) as Option<&Vec<TimeQuaternion<f64>>> {
@@ -174,6 +187,14 @@ impl GyroSource {
                             }
                         }
                     }
+                    if let Some(im) = tag_map.get(&GroupId::Imager) {
+                        if input.camera_type() == "RED" {
+                            lens_info.capture_area_size = Some((size.0 as u32, size.1 as u32));
+                        }
+                        if let Some(v) = im.get_t(TagId::PixelPitch) as Option<&(u32, u32)> { lens_info.pixel_pitch = Some(*v); }
+                        if let Some(v) = im.get_t(TagId::CaptureAreaSize) as Option<&(u32, u32)> { lens_info.capture_area_size = Some(*v); }
+                        if let Some(v) = im.get_t(TagId::CaptureAreaOrigin) as Option<&(u32, u32)> { lens_info.capture_area_origin = Some(*v); }
+                    }
                     if let Some(map) = tag_map.get(&GroupId::Lens) {
                         if let Some(v) = map.get_t(TagId::Data) as Option<&serde_json::Value> {
                             lens_profile = Some(v.clone());
@@ -181,11 +202,26 @@ impl GyroSource {
                         if let Some(v) = map.get_t(TagId::Name) as Option<&String> {
                             lens_profile = Some(serde_json::Value::String(v.clone()));
                         }
-                        if let Some(v) = map.get_t(TagId::LensZoomNative) as Option<&f32> {
-                            if lens_positions.is_none() { lens_positions = Some(BTreeMap::new()) };
-                            lens_positions.as_mut().unwrap().insert((info.timestamp_ms * 1000.0).round() as i64, *v as f64);
+                        if let Some(v) = map.get_t(TagId::FocalLength) as Option<&f32> {
+                            lens_positions.insert(timestamp_us, *v as f64);
+                            lens_info.focal_length = Some(*v);
+                    }
+                    }
+                    if lens_info.focal_length.is_none() {
+                        if let Some(md) = tag_map.get(&GroupId::Custom("LensDistortion".into())) {
+                            if let Some(v) = md.get_t(TagId::Data) as Option<&serde_json::Value> {
+                                // lens.focal_length = v.get("focal_length_nm").and_then(|x| x.as_f64()).map(|x| (x / 1000000.0) as f32);
+                                let focal_length_nm = v.get("focal_length_nm").and_then(|x| x.as_f64()).unwrap_or_default();
+                                let effective_sensor_height_nm = v.get("effective_sensor_height_nm").and_then(|x| x.as_f64()).unwrap_or(1.0);
+
+                                lens_info.pixel_focal_length = Some(((focal_length_nm as f64 / effective_sensor_height_nm as f64) * size.1 as f64) as f32);
+                            }
                         }
                     }
+                    if lens_info.pixel_pitch.is_some() && lens_info.capture_area_size.is_some() && (lens_info.pixel_focal_length.is_some() || lens_info.focal_length.is_some()) {
+                        lens_params.insert(timestamp_us, lens_info.clone());
+                    }
+
                     if let Some(map) = tag_map.get(&GroupId::Default) {
                         if let Some(v) = map.get_t(TagId::FrameRate) as Option<&f64> {
                             frame_rate = Some(*v);
@@ -259,8 +295,8 @@ impl GyroSource {
                     gravity_vectors = Some(quats.keys().copied().zip(grav.into_iter()).collect());
                 }
 
-                if lens_positions.is_none() && !crop_score.is_empty() && crop_score.len() == quats.len() {
-                    lens_positions = Some(quats.iter().zip(crop_score.iter()).map(|((ts, _), crop)| (*ts, *crop)).collect());
+                if lens_positions.is_empty() && !crop_score.is_empty() && crop_score.len() == quats.len() {
+                    lens_positions = quats.iter().zip(crop_score.iter()).map(|((ts, _), crop)| (*ts, *crop)).collect();
                 }
 
                 quaternions = quats;
@@ -276,6 +312,7 @@ impl GyroSource {
             image_orientations,
             gravity_vectors,
             lens_positions,
+            lens_params,
             raw_imu,
             frame_readout_time: input.frame_readout_time(),
             frame_rate,
@@ -720,6 +757,7 @@ impl GyroSource {
             file_metadata:        FileMetadata {
                 gravity_vectors:        self.file_metadata.gravity_vectors.clone(),
                 lens_positions:         self.file_metadata.lens_positions.clone(),
+                lens_params:            self.file_metadata.lens_params.clone(),
                 per_frame_time_offsets: self.file_metadata.per_frame_time_offsets.clone(),
                 per_frame_data:         self.file_metadata.per_frame_data.clone(),
                 additional_data:        self.file_metadata.additional_data.clone(),
@@ -747,7 +785,8 @@ impl GyroSource {
         hasher.write_usize(self.quaternions.len());
         hasher.write_usize(self.file_metadata.quaternions.len());
         hasher.write_usize(self.file_metadata.image_orientations.as_ref().map(|v| v.len()).unwrap_or_default());
-        hasher.write_usize(self.file_metadata.lens_positions.as_ref().map(|v| v.len()).unwrap_or_default());
+        hasher.write_usize(self.file_metadata.lens_positions.len());
+        hasher.write_usize(self.file_metadata.lens_params.len());
         hasher.write_u32(if self.use_gravity_vectors { 1 } else { 0 });
         hasher.write_usize(self.integration_method);
         for (ts, v) in &self.offsets {

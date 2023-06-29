@@ -10,6 +10,8 @@ pub struct OpenCVFisheye { }
 
 impl OpenCVFisheye {
     pub fn undistort_point(&self, point: (f32, f32), params: &KernelParams) -> Option<(f32, f32)> {
+        if params.k[0] == 0.0 && params.k[1] == 0.0 && params.k[2] == 0.0 && params.k[3] == 0.0 { return Some(point); }
+
         const EPS: f32 = 1e-6;
 
         let mut theta_d = (point.0 * point.0 + point.1 * point.1).sqrt();
@@ -70,6 +72,8 @@ impl OpenCVFisheye {
     pub fn distort_point(&self, x: f32, y: f32, z: f32, params: &KernelParams) -> (f32, f32) {
         let x = x / z;
         let y = y / z;
+        if params.k[0] == 0.0 && params.k[1] == 0.0 && params.k[2] == 0.0 && params.k[3] == 0.0 { return (x, y); }
+
         let r = (x.powi(2) + y.powi(2)).sqrt();
 
         let theta = r.atan();

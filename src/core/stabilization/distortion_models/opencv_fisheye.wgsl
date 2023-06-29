@@ -2,6 +2,7 @@
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 fn undistort_point(pos: vec2<f32>) -> vec2<f32> {
+    if (params.k1.x == 0.0 && params.k1.y == 0.0 && params.k1.z == 0.0 && params.k1.w == 0.0) { return pos; }
     let theta_d = min(max(length(pos), -1.5707963267948966), 1.5707963267948966); // PI/2
 
     var converged = false;
@@ -45,6 +46,7 @@ fn undistort_point(pos: vec2<f32>) -> vec2<f32> {
 
 fn distort_point(x: f32, y: f32, z: f32) -> vec2<f32> {
     let pos = vec2<f32>(x, y) / z;
+    if (params.k1.x == 0.0 && params.k1.y == 0.0 && params.k1.z == 0.0 && params.k1.w == 0.0) { return pos; }
     let r = length(pos);
 
     let theta = atan(r);

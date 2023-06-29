@@ -2,6 +2,8 @@
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 vec2 undistort_point(vec2 pos) {
+    if (params.k1 == vec4(0.0, 0.0, 0.0, 0.0)) return pos;
+
     float theta_d = min(max(length(pos), -1.5707963267948966), 1.5707963267948966); // PI/2
 
     bool converged = false;
@@ -45,6 +47,8 @@ vec2 undistort_point(vec2 pos) {
 
 vec2 distort_point(float x, float y, float z) {
     vec2 pos = vec2(x, y) / z;
+    if (params.k1 == vec4(0.0, 0.0, 0.0, 0.0)) return pos;
+
     float r = length(pos);
 
     float theta = atan(r);

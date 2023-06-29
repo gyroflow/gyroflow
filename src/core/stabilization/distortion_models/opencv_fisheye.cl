@@ -2,6 +2,8 @@
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 float2 undistort_point(float2 pos, __global KernelParams *params) {
+    if (params->k[0] == 0.0 && params->k[1] == 0.0 && params->k[2] == 0.0 && params->k[3] == 0.0) return pos;
+
     float theta_d = fmin(fmax(length(pos), -1.5707963267948966f), 1.5707963267948966f); // PI/2
 
     bool converged = false;
@@ -45,6 +47,7 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
 
 float2 distort_point(float x, float y, float z, __global KernelParams *params) {
     float2 pos = (float2)(x, y) / z;
+    if (params->k[0] == 0.0 && params->k[1] == 0.0 && params->k[2] == 0.0 && params->k[3] == 0.0) return pos;
     float r = length(pos);
 
     float theta = atan(r);

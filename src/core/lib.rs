@@ -958,6 +958,7 @@ impl StabilizationManager {
                     image_orientations:     Default::default(),
                     gravity_vectors:        Default::default(),
                     lens_positions:         Default::default(),
+                    lens_params:            Default::default(),
                     per_frame_time_offsets: Default::default(),
                     per_frame_data:         Default::default(),
                     ..gyro.file_metadata.clone()

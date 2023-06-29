@@ -293,11 +293,7 @@ impl LensProfile {
         }
     }
     pub fn get_distortion_coeffs(&self) -> [f64; 12] {
-        if self.fisheye_params.distortion_coeffs.len() < 4 {
-            // Default coefficients
-            return [0.25, 0.05, 0.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-        }
-        let mut ret = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+        let mut ret = [0.0; 12];
         for (i, x) in self.fisheye_params.distortion_coeffs.iter().enumerate() {
             if i < 12 {
                 ret[i] = *x;
