@@ -186,7 +186,7 @@ pub mod mac_ffi {
             Self::new_with_device(metal::Device::system_default()?)
         }
         pub fn new_with_device(mtl_device: metal::Device) -> Option<Self> {
-            use foreign_types::ForeignType;
+            use metal::foreign_types::ForeignType;
             let mut cache: CVMetalTextureCacheRef = std::ptr::null_mut();
             let ret = unsafe { CVMetalTextureCacheCreate(
                 std::ptr::null(),

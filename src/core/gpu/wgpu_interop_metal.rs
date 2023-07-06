@@ -3,7 +3,7 @@
 
 use wgpu::Device;
 use wgpu_hal::api::Metal;
-use foreign_types::ForeignTypeRef;
+use metal::foreign_types::ForeignTypeRef;
 
 pub fn create_metal_texture_from_buffer(buffer: *mut metal::MTLBuffer, width: u32, height: u32, stride: u32, format: wgpu::TextureFormat, usage: metal::MTLTextureUsage) -> metal::Texture {
     let buf = unsafe { metal::BufferRef::from_ptr(buffer) };

@@ -12,7 +12,7 @@ use crate::gpu::{ BufferDescription, BufferSource };
 #[cfg(target_os = "windows")]                            use { super::wgpu_interop_directx::*, windows::{ Win32::Graphics::Direct3D11::*, core::Interface } };
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
-use foreign_types::ForeignTypeRef;
+use metal::foreign_types::ForeignTypeRef;
 
 use wgpu::{ Origin3d, Extent3d, TextureAspect, ImageCopyTexture, ImageCopyBuffer, ImageDataLayout };
 

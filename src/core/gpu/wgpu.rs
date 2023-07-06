@@ -158,7 +158,7 @@ impl WgpuWrapper {
                 BufferSource::Metal { command_queue, .. } |
                 BufferSource::MetalBuffer { command_queue, .. } if !(*command_queue).is_null() => {
                     unsafe {
-                        use foreign_types::ForeignType;
+                        use metal::foreign_types::ForeignType;
                         use wgpu_hal::api::Metal;
 
                         let mtl_cq = metal::CommandQueue::from_ptr(*command_queue);
