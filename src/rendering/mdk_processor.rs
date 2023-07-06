@@ -89,6 +89,7 @@ impl MDKProcessor {
                 unsafe {
                     (*ffmpeg_frame.as_mut_ptr()).buf[0] = ffi::av_buffer_create(data.as_mut_ptr(), data.len(), Some(noop), std::ptr::null_mut(), 0);
                     (*ffmpeg_frame.as_mut_ptr()).data[0] = data.as_mut_ptr();
+                    (*ffmpeg_frame.as_mut_ptr()).linesize[0] = data.len() as i32 / height as i32;
                 }
                 if let Err(e) = cb(timestamp_us, ffmpeg_frame, None, &mut converter, &mut RateControl::default()) {
                     ::log::error!("mdk_processor error: {:?}", e);
