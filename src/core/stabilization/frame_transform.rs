@@ -98,12 +98,12 @@ impl FrameTransform {
         let input_vertical_stretch = if lens.input_vertical_stretch > 0.01 { lens.input_vertical_stretch } else { 1.0 };
 
         if stretch_lens {
-        let lens_ratiox = (params.video_width as f64 / calib_width) * input_horizontal_stretch;
-        let lens_ratioy = (params.video_height as f64 / calib_height) * input_vertical_stretch;
-        camera_matrix[(0, 0)] *= lens_ratiox;
-        camera_matrix[(1, 1)] *= lens_ratioy;
-        camera_matrix[(0, 2)] *= lens_ratiox;
-        camera_matrix[(1, 2)] *= lens_ratioy;
+            let lens_ratiox = (params.video_width as f64 / calib_width) * input_horizontal_stretch;
+            let lens_ratioy = (params.video_height as f64 / calib_height) * input_vertical_stretch;
+            camera_matrix[(0, 0)] *= lens_ratiox;
+            camera_matrix[(1, 1)] *= lens_ratioy;
+            camera_matrix[(0, 2)] *= lens_ratiox;
+            camera_matrix[(1, 2)] *= lens_ratioy;
         }
         (camera_matrix, distortion_coeffs, radial_distortion_limit, input_horizontal_stretch, input_vertical_stretch, focal_length)
     }

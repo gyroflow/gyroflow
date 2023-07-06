@@ -79,6 +79,10 @@ debug *param:
     $Env:OPENCV_LINK_LIBS="$Env:OPENCV_LINK_LIBS,opencv_dnn4,opencv_ml4,opencv_highgui4,opencv_videoio4" ; \
     cargo run -- {{param}}
 
+[no-cd]
+profile *param:
+    cargo run --profile profile -- {{param}}
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Deployment ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

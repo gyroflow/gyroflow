@@ -14,6 +14,7 @@ telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git",
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", rev = "bf7b41d", features = ["field_access"] }
 
+stabilize_spirv = { path = "./gpu/stabilize_spirv" }
 
 #rs-sync = { path = "../../../rs-sync" }
 rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "4285ea7" }
@@ -62,11 +63,12 @@ libc = "0.2"
 
 opencv = { version = "0.81", features = ["clang-runtime"], optional = true }
 
-wgpu       = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
+wgpu       = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw", features = ["spirv"] }
 wgpu-hal   = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
 wgpu-types = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
 bytemuck = "1.13.1"
 ash = "0.37.3"
+naga = { git = "https://github.com/gfx-rs/naga", rev = "76003dc0035d53a474d366dcdf49d2e4d12e921f", version = "0.12.0", features = ["clone", "span", "validate", "spv-in"] }
 
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"
@@ -83,7 +85,7 @@ rustfft = "6.1.0"
 include_dir = { version = "0.7.3", features = ["glob"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.metal]
-version = "0.24.0"
+version = "0.25.0"
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.foreign-types]
 version = "0.3.2"
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.objc-foundation]
@@ -114,3 +116,7 @@ bundle-lens-profiles = []
 inherits = "release"
 lto = true
 codegen-units = 1
+
+[profile.profile]
+inherits = "release"
+debug = true

@@ -8,6 +8,9 @@ run *param:
 debug *param:
     just --unstable -f _scripts/{{BaseFile}}.just debug {{param}}
 
+profile *param:
+    just --unstable -f _scripts/{{BaseFile}}.just profile {{param}}
+
 clippy *param:
     just --unstable -f _scripts/{{BaseFile}}.just clippy {{param}}
 

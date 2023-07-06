@@ -205,7 +205,7 @@ impl GyroSource {
                         if let Some(v) = map.get_t(TagId::FocalLength) as Option<&f32> {
                             lens_positions.insert(timestamp_us, *v as f64);
                             lens_info.focal_length = Some(*v);
-                    }
+                        }
                     }
                     if lens_info.focal_length.is_none() {
                         if let Some(md) = tag_map.get(&GroupId::Custom("LensDistortion".into())) {

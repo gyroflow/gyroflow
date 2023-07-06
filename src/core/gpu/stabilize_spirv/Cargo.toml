@@ -1,0 +1,13 @@
+[package]
+name = "stabilize_spirv"
+version = "0.0.0"
+edition = "2021"
+
+[lib]
+crate-type = ["lib", "dylib"]
+
+[dependencies]
+spirv-std = { version = "0.8" }
+
+[features]
+for_glsl = []
