@@ -1,6 +1,6 @@
 {
   "name": "Sony_a7IV_Tamron 28-75 @ 28.00mm_APSC_4k_16by9_3840x2160-23.98fps",
-  "note": "",
+  "note": "APSC",
   "calibrated_by": "Golden",
   "camera_brand": "Sony",
   "camera_model": "a7IV",
@@ -19,7 +19,7 @@
     "h": 2160
   },
   "frame_readout_time": null,
-  "gyro_lpf": 3.0,
+  "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "sync_settings": {
     "initial_offset": 0,
@@ -68,7 +68,7 @@
     "distortion_coeffs": [],
     "radial_distortion_limit": null
   },
-  "identifier": "sony-ilce-7m4-28.00mm-3840x2160@23976",
+  "identifier": "",
   "calibrator_version": "1.0.0-rc3",
   "date": "2022-02-14",
   "compatible_settings": []
