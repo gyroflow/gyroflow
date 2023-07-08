@@ -170,7 +170,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     };
     let total_frame_count = params.frame_count;
     let fps_scale = params.fps_scale;
-    let has_alpha = params.background[3] < 255.0;
+    let has_alpha = params.background[3] < 1.0;
 
     let mut pixel_format = render_options.pixel_format.clone();
 
@@ -185,7 +185,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     let render_frame_count = (total_frame_count as f64 * trim_ratio).round() as usize;
 
     // Only use post-conversion processing when background is not opaque
-    let order = if params.background[3] < 255.0 {
+    let order = if params.background[3] < 1.0 {
         ffmpeg_video::ProcessingOrder::PostConversion
     } else {
         ffmpeg_video::ProcessingOrder::PreConversion
@@ -424,7 +424,6 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                         params.output_size = (out_size.0, out_size.1);
                         params.video_size  = params.size;
                         params.video_output_size = params.output_size;
-                        params.background = <$t as PixelType>::from_rgb_color(params.background, &$yuvi, $max_val);
                     }
                     let mut plane = Stabilization::default();
                     plane.interpolation = Interpolation::Lanczos4;
@@ -435,8 +434,13 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                         plane.kernel_flags.set(KernelParamsFlags::FIX_COLOR_RANGE, true);
                     }
 
+                    let mut compute_params = ComputeParams::from_manager(&stab, false);
+
+                    let is_limited_range = $out_frame.color_range() == ffmpeg_next::util::color::Range::MPEG;
+                    compute_params.background = <$t as PixelType>::from_rgb_color(compute_params.background, &$yuvi, is_limited_range);
+
                     plane.init_size(in_size, out_size);
-                    plane.set_compute_params(ComputeParams::from_manager(&stab, false));
+                    plane.set_compute_params(compute_params);
                     let render_globals = render_globals.clone();
                     $planes.push(Box::new(move |timestamp_us: i64, in_frame_data: &mut Video, out_frame_data: &mut Video, plane_index: usize, fill_with_background: bool| {
                         let mut g = render_globals.borrow_mut();

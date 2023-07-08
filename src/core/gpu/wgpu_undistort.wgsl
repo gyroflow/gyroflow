@@ -76,10 +76,10 @@ fn draw_pixel(in_pix: vec4<f32>, x: u32, y: u32, isInput: bool) -> vec4<f32> {
         let stage = data & 1u;
         if (((stage == 0u && isInput) || (stage == 1u && !isInput)) && color < 9u) {
             let color_offs = 448u + (color * 4u);
-            let colorf = vec4<f32>(coeffs[color_offs], coeffs[color_offs + 1u], coeffs[color_offs + 2u], coeffs[color_offs + 3u]) / bg_scaler;
+            let colorf = vec4<f32>(coeffs[color_offs], coeffs[color_offs + 1u], coeffs[color_offs + 2u], coeffs[color_offs + 3u]) * params.max_pixel_value;
             let alphaf = coeffs[484u + alpha];
             pix = colorf * alphaf + pix * (1.0 - alphaf);
-            pix.w = 255.0 / bg_scaler;
+            pix.w = colorf.w;
         }
     }
     return pix;
@@ -95,7 +95,7 @@ fn draw_safe_area(in_pix: vec4<f32>, x: f32, y: f32) -> vec4<f32> {
         let isBorder = x > params.safe_area_rect.x - 5.0 && x < params.safe_area_rect.z + 5.0 &&
                        y > params.safe_area_rect.y - 5.0 && y < params.safe_area_rect.w + 5.0;
         if (isBorder) {
-           pix = vec4<f32>(40.0, 40.0, 40.0, 255.0) / bg_scaler;
+           pix = (vec4<f32>(40.0, 40.0, 40.0, 255.0) / 255.0) * params.max_pixel_value;
         }
     }
     return pix;
@@ -103,8 +103,8 @@ fn draw_safe_area(in_pix: vec4<f32>, x: f32, y: f32) -> vec4<f32> {
 
 // From 0-255(JPEG/Full) to 16-235(MPEG/Limited)
 fn remap_colorrange(px: vec4<f32>, isY: bool) -> vec4<f32> {
-    if (isY) { return (16.0 / bg_scaler) + (px * 0.85882352); } // (235 - 16) / 255
-    else     { return (16.0 / bg_scaler) + (px * 0.87843137); } // (240 - 16) / 255
+    if (isY) { return ((16.0 / 255.0) * params.max_pixel_value) + (px * 0.85882352); } // (235 - 16) / 255
+    else     { return ((16.0 / 255.0) * params.max_pixel_value) + (px * 0.87843137); } // (240 - 16) / 255
 }
 fn map_coord(x: f32, in_min: f32, in_max: f32, out_min: f32, out_max: f32) -> f32 {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -134,7 +134,7 @@ fn rotate_point(pos: vec2<f32>, angle: f32, origin: vec2<f32>) -> vec2<f32> {
 fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
     let fix_range = bool(params.flags & 1);
 
-    let bg = params.background / bg_scaler;
+    let bg = params.background * params.max_pixel_value;
     var sum = vec4<f32>(0.0);
 
     let shift = (params.interpolation >> 2u) + 1u;
@@ -220,7 +220,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
 fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
-    let bg = vec4<f32>(params.background.x / bg_scaler, params.background.y / bg_scaler, params.background.z / bg_scaler, params.background.w / bg_scaler);
+    let bg = vec4<f32>(params.background.x, params.background.y, params.background.z, params.background.w) * params.max_pixel_value;
 
     if (bool(params.flags & 4)) { // Fill with background
         return vec4<SCALAR>(bg);

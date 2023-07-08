@@ -447,6 +447,7 @@ name = "shader_builder"
 version = "0.1.0"
 dependencies = [
  "naga",
+ "regex",
  "spirv-builder",
 ]
 

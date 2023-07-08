@@ -10,4 +10,5 @@ crate-type = ["lib", "dylib"]
 spirv-std = { version = "0.8" }
 
 [features]
-for_glsl = []
+for_qtrhi = []
+texture_u32 = []

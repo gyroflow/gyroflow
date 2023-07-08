@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 naga = { git = "https://github.com/gfx-rs/naga.git", features = ["validate", "span", "spv-in", "wgsl-out", "glsl-out"] }
+regex = "1.9.0"
 
 [build-dependencies]
 spirv-builder = "0.8"

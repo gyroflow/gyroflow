@@ -5,8 +5,9 @@ use glam::{ vec2, Vec2, Vec4 };
 use super::types::*;
 
 pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &KernelParams, _sampler: SamplerType) -> Vec4 {
-    let bg = params.background / BG_SCALER;
-    #[cfg(feature = "for_glsl")]
+    let max_value = if cfg!(all(target_arch = "spirv", not(feature = "texture_u32"))) { 1.0 } else { params.max_pixel_value };
+    let bg = params.background * max_value;
+    #[cfg(feature = "for_qtrhi")]
     {
         use spirv_std::image::{ ImageWithMethods, sample_with };
         if (uv.x >= 0.0 && uv.x < params.width as f32) && (uv.y >= 0.0 && uv.y < params.height as f32) {
@@ -16,7 +17,7 @@ pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &Ke
             bg
         }
     }
-    #[cfg(not(feature = "for_glsl"))]
+    #[cfg(not(feature = "for_qtrhi"))]
     {
         const INTER_BITS: usize = 5;
         const INTER_TAB_SIZE: usize = 1 << INTER_BITS;
@@ -60,7 +61,7 @@ pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &Ke
                         #[cfg(target_arch = "spirv")]
                         {
                             use spirv_std::image::{ ImageWithMethods, sample_with };
-                            input.fetch_with(glam::IVec2::new((sx + xp) as i32, (sy + yp) as i32), sample_with::lod(0))
+                            to_float(input.fetch_with(glam::IVec2::new((sx + xp) as i32, (sy + yp) as i32), sample_with::lod(0)))
                         }
                         #[cfg(not(target_arch = "spirv"))]
                         { input.1(&input.0[_src_index as usize + (params.bytes_per_pixel * xp) as usize.._src_index as usize + (params.bytes_per_pixel * (xp + 1)) as usize]) }
@@ -81,10 +82,10 @@ pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &Ke
             if yp >= params.interpolation { break; } // Bug in Dx12 backend, doesn't work without it for some strange reason
         }
         glam::vec4(
-            sum.x.min(params.max_pixel_value),
-            sum.y.min(params.max_pixel_value),
-            sum.z.min(params.max_pixel_value),
-            sum.w.min(params.max_pixel_value),
+            sum.x.min(max_value),
+            sum.y.min(max_value),
+            sum.z.min(max_value),
+            sum.w.min(max_value),
         )
     }
 }

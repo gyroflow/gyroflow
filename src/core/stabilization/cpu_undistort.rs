@@ -217,7 +217,7 @@ impl Stabilization {
             if let BufferSource::Cpu { buffer: output } = &mut buffers.output.data {
                 let r_limit = params.r_limit * params.r_limit; // Square it so we don't have to do sqrt on the point length
 
-                let bg = Vector4::<f32>::new(params.background[0], params.background[1], params.background[2], params.background[3]);
+                let bg = Vector4::<f32>::new(params.background[0], params.background[1], params.background[2], params.background[3]) * params.max_pixel_value;
                 let bg_t: T = PixelType::from_float(bg);
 
                 let factor = (1.0 - params.lens_correction_amount).max(0.001); // FIXME: this is close but wrong

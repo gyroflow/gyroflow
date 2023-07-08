@@ -256,7 +256,8 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
     float x = map_coord((float)buf_x, (float)params->output_rect.x, (float)(params->output_rect.x + params->output_rect.z), 0.0f, (float)params->output_width );
     float y = map_coord((float)buf_y, (float)params->output_rect.y, (float)(params->output_rect.y + params->output_rect.w), 0.0f, (float)params->output_height);
 
-    DATA_TYPEF bg = *(__global DATA_TYPEF *)&params->background;
+
+    DATA_TYPEF bg = (*(__global DATA_TYPEF *)&params->background) * params->max_pixel_value;
 
     if (matrices == 0 || params->width < 1) return;
 
@@ -305,7 +306,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
                 if ((params->flags & 16) == 16) { // Horizontal RS
                     sy = min((int)params->width, max(0, (int)round(uv.x)));
                 } else {
-                sy = min((int)params->height, max(0, (int)round(uv.y)));
+                    sy = min((int)params->height, max(0, (int)round(uv.y)));
                 }
             }
         }

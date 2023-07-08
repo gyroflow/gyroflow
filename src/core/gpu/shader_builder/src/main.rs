@@ -27,12 +27,15 @@ impl<T, E: Error> PrettyResult for Result<T, E> {
 }
 
 fn main() {
-    let main_shader_path = env!("stabilize_spirv.spv").replace("spirv-unknown-vulkan1.1spv1.4", "spirv-unknown-vulkan1.2");
-    let glsl_shader_path = env!("stabilize_spirv.spv").replace("spirv-unknown-vulkan1.2", "spirv-unknown-vulkan1.1spv1.4");
+    let main_shader_path     = env!("stabilize_f32");
+    let main_u32_shader_path = env!("stabilize_u32");
+    let glsl_shader_path     = env!("stabilize_qtrhi");
 
     let main_shader = std::fs::read(&main_shader_path).unwrap();
+    let main_u32_shader = std::fs::read(&main_u32_shader_path).unwrap();
     let glsl_shader = std::fs::read(&glsl_shader_path).unwrap();
     println!("SPIR-V shader len: {}, {main_shader_path}", main_shader.len());
+    println!("SPIR-V shader (u32) len: {}, {main_u32_shader_path}", main_u32_shader.len());
     println!("GLSL shader len: {}, {glsl_shader_path}", glsl_shader.len());
 
     let options = spv::Options {
@@ -41,17 +44,20 @@ fn main() {
         block_ctx_dump_prefix: None,
     };
 
-    let spirv_out_path = format!("{}/../compiled/stabilize.spv", env!("CARGO_MANIFEST_DIR"));
-    let frag_out_path  = format!("{}/../compiled/stabilize.spv.frag", env!("CARGO_MANIFEST_DIR"));
-    let qsb_out_path   = format!("{}/../compiled/stabilize.frag.qsb", env!("CARGO_MANIFEST_DIR"));
+    let spirv_out_path     = format!("{}/../compiled/stabilize.spv", env!("CARGO_MANIFEST_DIR"));
+    let spirv_u32_out_path = format!("{}/../compiled/stabilize_u32.spv", env!("CARGO_MANIFEST_DIR"));
+    let frag_out_path      = format!("{}/../compiled/stabilize.spv.frag", env!("CARGO_MANIFEST_DIR"));
+    let qsb_out_path       = format!("{}/../compiled/stabilize.frag.qsb", env!("CARGO_MANIFEST_DIR"));
     // let wgsl_out_path  = format!("{}/../compiled/stabilize.spv.wgsl", env!("CARGO_MANIFEST_DIR"));
 
     println!("Resulting SPIR-V: {spirv_out_path:?}");
+    println!("Resulting SPIR-V (u32): {spirv_u32_out_path:?}");
     println!("Resulting FRAG: {frag_out_path:?}");
     println!("Resulting QSB: {qsb_out_path:?}");
     // println!("Resulting WGSL: {wgsl_out_path:?}");
 
     std::fs::write(&spirv_out_path, main_shader).unwrap();
+    std::fs::write(&spirv_u32_out_path, main_u32_shader).unwrap();
 
     // Emit WGSL
     /*{
@@ -88,6 +94,7 @@ fn main() {
         let mut writer = glsl::Writer::new(&mut buffer, &module, &info, &options, &pipeline_options, naga::proc::BoundsCheckPolicies::default()).unwrap();
         writer.write().unwrap();
 
+        // Uints are not supported in ES
         buffer = buffer.replace("uint", "int")
                        .replace("0u", "0")
                        .replace("1u", "1")
@@ -99,6 +106,12 @@ fn main() {
                        .replace("7u", "7")
                        .replace("8u", "8")
                        .replace("9u", "9");
+
+        // Remove nested member
+        let re = regex::Regex::new(r"struct (type_\d+) \{\s+(type_\d+) member;\s+\};").unwrap();
+        let (_, [type1, type2]) = re.captures(&buffer).unwrap().extract();
+        buffer = buffer.replace(&format!("{type1} _group_0_binding_2_fs"), &format!("{type2} _group_0_binding_2_fs"));
+        buffer = buffer.replace(".member.", ".");
 
         std::fs::write(&frag_out_path, &buffer).unwrap();
         // println!("{}", buffer);

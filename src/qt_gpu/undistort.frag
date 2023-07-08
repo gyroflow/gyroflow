@@ -138,7 +138,7 @@ void main() {
     vec2 outPos = v_texcoord.xy * vec2(params.output_width, params.output_height);
 
     if (bool(params.flags & 4)) { // Fill with background
-        fragColor = params.background / 255.0;
+        fragColor = params.background;
         return;
     }
 
@@ -214,7 +214,7 @@ void main() {
             fragColor = c1 * alpha + c2 * (1.0 - alpha);
             fragColor.a = 1.0;
             if (!((pt2.x >= 0 && pt2.x < params.width) && (pt2.y >= 0 && pt2.y < params.height))) {
-                fragColor = params.background / 255.0;
+                fragColor = params.background;
             }
             draw_pixel(fragColor, uv.x, uv.y, true);
             draw_pixel(fragColor, outPos.x, outPos.y, false);
@@ -231,7 +231,7 @@ void main() {
         }
     }
 
-    fragColor = params.background / 255.0;
+    fragColor = params.background;
     draw_pixel(fragColor, outPos.x, outPos.y, false);
     draw_safe_area(fragColor, outPos.x, outPos.y);
 }

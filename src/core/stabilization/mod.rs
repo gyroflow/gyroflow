@@ -153,7 +153,7 @@ impl Stabilization {
             self.kernel_flags.set(KernelParamsFlags::HORIZONTAL_RS, self.compute_params.horizontal_rs);
 
             let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
-            transform.kernel_params.max_pixel_value = f32::MAX;
+            transform.kernel_params.max_pixel_value = 255.0;
             transform.kernel_params.interpolation = self.interpolation as i32;
             transform.kernel_params.width  = self.size.0 as i32;
             transform.kernel_params.height = self.size.1 as i32;
@@ -280,6 +280,7 @@ impl Stabilization {
     }
 
     pub fn update_device(&mut self, i: isize, buffers: &Buffers) -> bool {
+        self.stab_data.clear();
         self.next_backend = None;
         self.backend_initialized = None;
         #[cfg(feature = "use-opencl")]

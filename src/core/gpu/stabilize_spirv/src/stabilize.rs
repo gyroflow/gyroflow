@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2023 Adrian <adrian.eddy at gmail>
 
-use glam::{ vec2, Vec2, vec3 };
+use glam::{ vec2, Vec2, vec3, Vec4 };
 use super::drawing::*;
 use super::types::*;
 use super::lens::*;
@@ -9,9 +9,9 @@ use super::background::*;
 
 #[inline]
 fn get_mtrx_param(_params: &KernelParams, matrices: &MatricesType, _sampler: SamplerType, row: i32, idx: usize) -> f32 {
-    #[cfg(not(feature = "for_glsl"))]
+    #[cfg(not(feature = "for_qtrhi"))]
     { matrices[row as usize * 12 + idx] }
-    #[cfg(feature = "for_glsl")]
+    #[cfg(feature = "for_qtrhi")]
     {
         use spirv_std::image::{ ImageWithMethods, sample_with };
         let size = if (_params.flags & 16) == 16 { _params.width as f32 } else { _params.height as f32 };
@@ -29,7 +29,7 @@ pub fn rotate_and_distort(pos: Vec2, idx: i32, params: &KernelParams, matrices: 
         if params.r_limit > 0.0 && vec2(point_3d.x / point_3d.z, point_3d.y / point_3d.z).length_squared() > params.r_limit.powi(2) {
             return vec2(-99999.0, -99999.0);
         }
-        let mut uv = params.f * lens_distort(point_3d, &params) + params.c;
+        let mut uv = params.f * lens_distort(point_3d, params) + params.c;
 
         if (params.flags & 2) == 2 { // Has digital lens
             uv = digital_lens_distort(vec3(uv.x, uv.y, 1.0), params);
@@ -43,11 +43,13 @@ pub fn rotate_and_distort(pos: Vec2, idx: i32, params: &KernelParams, matrices: 
     vec2(-99999.0, -99999.0)
 }
 
-pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeffs: &[f32], _lens_data: &[f32], drawing: &DrawingType, input: &ImageType, sampler: SamplerType) -> ScalarVec4 {
-    let bg = params.background / BG_SCALER;
+pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeffs: &[f32], _lens_data: &[f32], drawing: &DrawingType, input: &ImageType, sampler: SamplerType) -> Vec4 {
+    let max_value = if cfg!(all(target_arch = "spirv", not(feature = "texture_u32"))) { 1.0 } else { params.max_pixel_value };
+
+    let bg = params.background * max_value;
 
     if (params.flags & 4) == 4 { // Fill with background
-        return ScalarVec4::from(bg);
+        return bg;
     }
 
     let mut out_pos = vec2(
@@ -76,7 +78,7 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
         }
 
         new_out_pos = (new_out_pos - out_c) / out_f;
-        new_out_pos = lens_undistort(new_out_pos, &params);
+        new_out_pos = lens_undistort(new_out_pos, params);
         new_out_pos = new_out_pos * out_f + out_c;
 
         out_pos = new_out_pos * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);
@@ -112,5 +114,5 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
     }
     pixel = process_final_pixel(pixel, uv, org_out_pos, params, coeffs, drawing, sampler);
 
-    return ScalarVec4::from(pixel);
+    pixel
 }

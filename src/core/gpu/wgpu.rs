@@ -206,6 +206,9 @@ impl WgpuWrapper {
             kernel = kernel.replace("LENS_MODEL_FUNCTIONS;", &lens_model_functions);
             kernel = kernel.replace("SCALAR", wgpu_format.1);
             kernel = kernel.replace("bg_scaler", &format!("{:.6}", wgpu_format.2));
+            if wgpu_format.1 == "f32" {
+                kernel = kernel.replace("params.max_pixel_value", "1.0");
+            }
             // Replace it in source to allow for loop unrolling when compiling shader
             kernel = kernel.replace("params.interpolation", &format!("{}u", params.interpolation));
 

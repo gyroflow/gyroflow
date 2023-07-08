@@ -38,7 +38,7 @@ MenuItem {
         if (obj.hasOwnProperty("background_mode")) backgroundMode.currentIndex = +obj.background_mode;
         if (obj.hasOwnProperty("background_margin")) marginPixels.value = +obj.background_margin;
         if (obj.hasOwnProperty("background_margin_feather")) featherPixels.value = +obj.background_margin_feather;
-        if (obj.hasOwnProperty("background_color")) renderBackground.text = Qt.rgba(obj.background_color[0] / 255.0, obj.background_color[1] / 255.0, obj.background_color[2] / 255.0, obj.background_color[3] / 255.0).toString();
+        if (obj.hasOwnProperty("background_color")) renderBackground.text = Qt.rgba(obj.background_color[0], obj.background_color[1], obj.background_color[2], obj.background_color[3]).toString();
     }
     Label {
         position: Label.LeftPosition;

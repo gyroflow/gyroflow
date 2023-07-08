@@ -4,8 +4,7 @@
 #![deny(warnings)]
 #![no_std]
 
-// TODO: u32 texture type
-// TODO: BG_SCALER
+// TODO: compute stage with buffer
 
 mod types;       pub use types::*;
 mod drawing;     pub use drawing::*;
@@ -19,7 +18,7 @@ pub use spirv_std::glam;
 use glam::{ vec2, vec4, Vec4 };
 use spirv_std::spirv;
 
-#[cfg(feature = "for_glsl")]
+#[cfg(feature = "for_qtrhi")]
 #[spirv(fragment)]
 pub fn undistort_fragment(
     #[spirv(frag_coord)] in_frag_coord: Vec4,
@@ -33,7 +32,7 @@ pub fn undistort_fragment(
     *output = undistort(vec2(in_frag_coord.x, in_frag_coord.y), params, matrices, &[], &[], drawing, input_texture, sampler);
 }
 
-#[cfg(not(feature = "for_glsl"))]
+#[cfg(not(feature = "for_qtrhi"))]
 #[spirv(fragment)]
 pub fn undistort_fragment(
     #[spirv(frag_coord)] in_frag_coord: Vec4,
@@ -45,7 +44,7 @@ pub fn undistort_fragment(
     #[spirv(descriptor_set = 0, binding = 5)] input_texture: &ImageType,
     output: &mut ScalarVec4,
 ) {
-    *output = undistort(vec2(in_frag_coord.x, in_frag_coord.y), params, matrices, coeffs, lens_data, drawing, input_texture, 0.0);
+    *output = from_float(undistort(vec2(in_frag_coord.x, in_frag_coord.y), params, matrices, coeffs, lens_data, drawing, input_texture, 0.0));
     // *output *= 1.3;
 }
 

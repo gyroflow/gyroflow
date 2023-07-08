@@ -925,7 +925,7 @@ impl Controller {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
 
             let bg_color = vid.getBackgroundColor().get_rgba_f();
-            self.stabilizer.params.write().background = Vector4::new(bg_color.0 as f32 * 255.0, bg_color.1 as f32 * 255.0, bg_color.2 as f32 * 255.0, bg_color.3 as f32 * 255.0);
+            self.stabilizer.params.write().background = Vector4::new(bg_color.0 as f32, bg_color.1 as f32, bg_color.2 as f32, bg_color.3 as f32);
             self.stabilizer.stabilization.write().kernel_flags.set(KernelParamsFlags::DRAWING_ENABLED, true);
             let request_recompute = util::qt_queued_callback_mut(self, move |this, _: ()| {
                 this.request_recompute();
@@ -1126,7 +1126,7 @@ impl Controller {
             vid.setBackgroundColor(color);
 
             let bg = color.get_rgba_f();
-            self.stabilizer.set_background_color(Vector4::new(bg.0 as f32 * 255.0, bg.1 as f32 * 255.0, bg.2 as f32 * 255.0, bg.3 as f32 * 255.0));
+            self.stabilizer.set_background_color(Vector4::new(bg.0 as f32, bg.1 as f32, bg.2 as f32, bg.3 as f32));
             self.request_recompute();
         }
     }
