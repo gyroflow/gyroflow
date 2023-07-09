@@ -131,7 +131,7 @@ fn rotate_point(pos: vec2<f32>, angle: f32, origin: vec2<f32>) -> vec2<f32> {
                       sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin.y);
 }
 
-fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
+fn sample_input_at(uv_param: vec2<f32>) -> vec4<f32> {
     let fix_range = bool(params.flags & 1);
 
     let bg = params.background * params.max_pixel_value;
@@ -143,7 +143,7 @@ fn sample_input_at(uv: vec2<f32>) -> vec4<f32> {
     var offsets: array<f32, 3> = array<f32, 3>(0.0, 1.0, 3.0);
     let offset = offsets[params.interpolation >> 2u];
 
-    var uv = uv;
+    var uv = uv_param;
     if (params.input_rotation != 0.0) {
         uv = rotate_point(uv, params.input_rotation * (3.14159265359 / 180.0), vec2<f32>(f32(params.width) / 2.0, f32(params.height) / 2.0));
     }
