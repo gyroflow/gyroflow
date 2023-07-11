@@ -135,13 +135,37 @@ impl Stabilization {
         self.compute_params = params;
     }
 
-    pub fn ensure_stab_data_at_timestamp<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers) {
+    fn get_rect(desc: &BufferDescription) -> [i32; 4] {
+        let mut ret = [0i32; 4];
+        if let Some(r) = desc.rect {
+            ret[0] = r.0 as i32;
+            ret[1] = r.1 as i32;
+            ret[2] = r.2 as i32;
+            ret[3] = r.3 as i32;
+        } else {
+            // Stretch to the buffer by default
+            ret[0] = 0;
+            ret[1] = 0;
+            ret[2] = desc.size.0  as i32;
+            ret[3] = desc.size.1  as i32;
+        }
+        ret
+    }
+
+    pub fn ensure_stab_data_at_timestamp<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers, is_rhi: bool) {
         let mut insert = true;
         if let Some(itm) = self.stab_data.get(&timestamp_us) {
             insert = false;
             if itm.kernel_params.stride        != buffers.input.size.2 as i32 ||
                itm.kernel_params.output_stride != buffers.output.size.2 as i32 {
                 log::warn!("Stride mismatch ({} != {} || {} != {})", itm.kernel_params.stride, buffers.input.size.2, itm.kernel_params.output_stride, buffers.output.size.2);
+                insert = true;
+            }
+            if itm.kernel_params.input_rotation != buffers.input.rotation.unwrap_or(0.0) ||
+               itm.kernel_params.output_rotation != buffers.output.rotation.unwrap_or(0.0) ||
+               itm.kernel_params.source_rect != Self::get_rect(&buffers.input) ||
+               itm.kernel_params.output_rect != Self::get_rect(&buffers.output) {
+                log::warn!("Updating stab params at {timestamp_us}");
                 insert = true;
             }
         }
@@ -193,30 +217,9 @@ impl Stabilization {
                 transform.kernel_params.output_rotation = r;
             }
 
-            if let Some(r) = buffers.input.rect {
-                transform.kernel_params.source_rect[0] = r.0 as i32;
-                transform.kernel_params.source_rect[1] = r.1 as i32;
-                transform.kernel_params.source_rect[2] = r.2 as i32;
-                transform.kernel_params.source_rect[3] = r.3 as i32;
-            } else {
-                // Stretch to the buffer by default
-                transform.kernel_params.source_rect[0] = 0;
-                transform.kernel_params.source_rect[1] = 0;
-                transform.kernel_params.source_rect[2] = buffers.input.size.0  as i32;
-                transform.kernel_params.source_rect[3] = buffers.input.size.1  as i32;
-            }
-            if let Some(r) = buffers.output.rect {
-                transform.kernel_params.output_rect[0] = r.0 as i32;
-                transform.kernel_params.output_rect[1] = r.1 as i32;
-                transform.kernel_params.output_rect[2] = r.2 as i32;
-                transform.kernel_params.output_rect[3] = r.3 as i32;
-            } else {
-                // Stretch to the buffer by default
-                transform.kernel_params.output_rect[0] = 0;
-                transform.kernel_params.output_rect[1] = 0;
-                transform.kernel_params.output_rect[2] = buffers.output.size.0 as i32;
-                transform.kernel_params.output_rect[3] = buffers.output.size.1 as i32;
-            }
+            transform.kernel_params.source_rect = Self::get_rect(&buffers.input);
+            transform.kernel_params.output_rect = Self::get_rect(&buffers.output);
+
 
             self.stab_data.insert(timestamp_us, transform);
         }
