@@ -111,7 +111,7 @@ fn main() {
         let re = regex::Regex::new(r"struct (type_\d+) \{\s+(type_\d+) member;\s+\};").unwrap();
         let (_, [type1, type2]) = re.captures(&buffer).unwrap().extract();
         buffer = buffer.replace(&format!("{type1} _group_0_binding_2_fs"), &format!("{type2} _group_0_binding_2_fs"));
-        buffer = buffer.replace(".member.", ".");
+        buffer = buffer.replace("_group_0_binding_2_fs.member", "_group_0_binding_2_fs");
 
         std::fs::write(&frag_out_path, &buffer).unwrap();
         // println!("{}", buffer);

@@ -29,7 +29,7 @@ nalgebra = "0.32"
 semver = "1.0.17"
 fastrand = "2.0.0"
 itertools = "0.11.0"
-regex = "1.8.4"
+regex = "1.9.0"
 rayon = "1.7"
 
 pollster = "0.3.0"
@@ -47,7 +47,7 @@ filetime_creation = "0.1"
 
 qmetaobject = { version = "0.2.7", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.8", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "6805f19" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "b5fa77b" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "6.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
@@ -57,11 +57,11 @@ parking_lot = "0.12.1"
 simplelog = "0.12.1"
 log = "0.4"
 
-ureq = "2.7.0"
+ureq = "2.7.1"
 url = "2.4.0"
-whoami = "1.4.0"
+whoami = "1.4.1"
 tar = "0.4.38"
-lru = "0.10.0"
+lru = "0.10.1"
 
 log-panics = { version = "2.1", features = ["with-backtrace"] }
 

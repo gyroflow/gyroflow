@@ -42,7 +42,7 @@ enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.3.1"
 lru = "0.10"
-thiserror = "1.0.40"
+thiserror = "1.0.41"
 ciborium = "0.2.1"
 
 dyn-clone = "1.0.11"

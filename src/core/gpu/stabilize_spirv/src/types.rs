@@ -4,18 +4,18 @@
 pub use spirv_std::glam;
 use glam::{ Vec2, vec2, Vec4, IVec4 };
 
-
 #[cfg(target_arch = "spirv")]
 pub use spirv_std::num_traits::Float;
 
+#[cfg(all(target_arch = "spirv", feature = "texture_u32"))]
+pub type ImageType     = spirv_std::image::Image!(2D, type=u32, sampled);
+#[cfg(all(target_arch = "spirv", not(feature = "texture_u32")))]
+pub type ImageType     = spirv_std::image::Image!(2D, type=f32, sampled);
+#[cfg(not(target_arch = "spirv"))]
+pub type ImageType<'a> = (&'a [u8], fn(&[u8]) -> spirv_std::glam::Vec4);
+
 #[cfg(not(feature = "for_qtrhi"))]
 mod inner_types {
-    #[cfg(all(target_arch = "spirv", feature = "texture_u32"))]
-    pub type ImageType     = spirv_std::image::Image!(2D, type=u32, sampled);
-    #[cfg(all(target_arch = "spirv", not(feature = "texture_u32")))]
-    pub type ImageType     = spirv_std::image::Image!(2D, type=f32, sampled);
-    #[cfg(not(target_arch = "spirv"))]
-    pub type ImageType<'a> = (&'a [u8], fn(&[u8]) -> spirv_std::glam::Vec4);
     pub type MatricesType  = [f32];
     pub type DrawingType   = [u32];
     pub type SamplerType   = f32;
@@ -23,7 +23,6 @@ mod inner_types {
 #[cfg(feature = "for_qtrhi")]
 mod inner_types {
     pub use spirv_std::image::Image;
-    pub type ImageType       = Image!(2D, type=f32, sampled);
     pub type MatricesType    = Image!(2D, type=f32, sampled);
     pub type DrawingType     = Image!(2D, type=f32, sampled);
     pub type SamplerType<'a> =  &'a spirv_std::Sampler;
