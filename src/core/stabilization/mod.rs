@@ -152,7 +152,7 @@ impl Stabilization {
         ret
     }
 
-    pub fn ensure_stab_data_at_timestamp<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers, is_rhi: bool) {
+    pub fn ensure_stab_data_at_timestamp<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers) {
         let mut insert = true;
         if let Some(itm) = self.stab_data.get(&timestamp_us) {
             insert = false;
