@@ -1988,6 +1988,9 @@ impl Controller {
                                         if let Ok(timestamp) = line.split(',').next().unwrap().parse::<f64>() {
                                             last_diff = timestamp - last_timestamp;
                                             last_timestamp = timestamp;
+                                            if timestamp >= add_timestamp {
+                                                add_timestamp = 0.0;
+                                            }
                                             let new_timestamp = timestamp + add_timestamp;
                                             line = [new_timestamp.to_string()].into_iter().chain(line.split(',').skip(1).map(str::to_string)).join(",");
                                         }
