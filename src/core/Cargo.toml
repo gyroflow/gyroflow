@@ -10,14 +10,14 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "d88d411" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "3657dd0" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", rev = "bf7b41d", features = ["field_access"] }
 
 stabilize_spirv = { path = "./gpu/stabilize_spirv" }
 
 #rs-sync = { path = "../../../rs-sync" }
-rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "4285ea7" }
+rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "b5bca7f" }
 
 mimalloc = { version = "0.1.37", default-features = false }
 nalgebra = { version = "0.32", features = ["serde-serialize"] }
@@ -63,9 +63,9 @@ libc = "0.2"
 
 opencv = { version = "0.81", features = ["clang-runtime"], optional = true }
 
-wgpu       = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw", features = ["spirv"] }
-wgpu-hal   = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
-wgpu-types = { git = "https://github.com/AdrianEddy/wgpu.git", branch = "buffer_from_raw" }
+wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "89f721f", features = ["spirv"] }
+wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "89f721f" }
+wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "89f721f" }
 bytemuck = "1.13.1"
 ash = "0.37.3"
 naga = { git = "https://github.com/gfx-rs/naga", rev = "76003dc0035d53a474d366dcdf49d2e4d12e921f", version = "0.12.0", features = ["clone", "span", "validate", "spv-in"] }

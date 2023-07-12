@@ -2437,9 +2437,9 @@ dependencies = [
 
 [[package]]
 name = "num"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43db66d1170d347f9a065114077f7dccb00c1b9478c89384490a3425279a4606"
+checksum = "b05180d69e3da0e530ba2a1dae5110317e49e3b7f3d41be227dc5f92e49ee7af"
 dependencies = [
  "num-bigint",
  "num-complex",
@@ -2877,9 +2877,9 @@ checksum = "22686f4785f02a4fcc856d3b3bb19bf6c8160d103f7a99cc258bddd0251dc7f2"
 
 [[package]]
 name = "portable-atomic"
-version = "1.3.3"
+version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "767eb9f07d4a5ebcb39bbf2d452058a93c011373abf6832e24194a1c3f004794"
+checksum = "d220334a184db82b31b83f5ff093e3315280fb2b6bbc032022b2304a509aab7a"
 
 [[package]]
 name = "ppv-lite86"
@@ -2989,8 +2989,8 @@ dependencies = [
 
 [[package]]
 name = "qmetaobject"
-version = "0.2.7"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?rev=ecf70fb#ecf70fbeff53019b877d101f86027b37ceca374e"
+version = "0.2.9"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?rev=98ebed1#98ebed170704dc526a0ba372b35baa92ddae0dfa"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3003,8 +3003,8 @@ dependencies = [
 
 [[package]]
 name = "qmetaobject_impl"
-version = "0.2.7"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?rev=ecf70fb#ecf70fbeff53019b877d101f86027b37ceca374e"
+version = "0.2.9"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?rev=98ebed1#98ebed170704dc526a0ba372b35baa92ddae0dfa"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3014,7 +3014,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=b5fa77b#b5fa77b1cb6b99447b0bafee42789ec58c58dcbf"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=6fe24e9#6fe24e9e977556c13d4d168a79a4a8b3102b1956"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3026,8 +3026,8 @@ dependencies = [
 
 [[package]]
 name = "qttypes"
-version = "0.2.8"
-source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?rev=ecf70fb#ecf70fbeff53019b877d101f86027b37ceca374e"
+version = "0.2.9"
+source = "git+https://github.com/AdrianEddy/qmetaobject-rs.git?rev=98ebed1#98ebed170704dc526a0ba372b35baa92ddae0dfa"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3164,9 +3164,9 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.3.2"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83d3daa6976cffb758ec878f108ba0e062a45b2d6ca3a2cca965338855476caf"
+checksum = "39354c10dd07468c2e73926b23bb9c2caca74c5501e38a35da70406f1d923310"
 dependencies = [
  "aho-corasick 1.0.2",
  "memchr",
@@ -3213,7 +3213,7 @@ dependencies = [
 [[package]]
 name = "rs-sync"
 version = "0.1.0"
-source = "git+https://github.com/gyroflow/rs-sync.git?rev=4285ea7#4285ea72ddc3f755602578f4431fe3a5906a81f3"
+source = "git+https://github.com/gyroflow/rs-sync.git?rev=b5bca7f#b5bca7f58f16e52b031d6fec7dfb964c4ae32d5b"
 dependencies = [
  "argmin",
  "argmin-math",
@@ -3387,9 +3387,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.100"
+version = "1.0.102"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f1e14e89be7aa4c4b78bdbdc9eb5bf8517829a600ae8eaa39a6e1d960b5185c"
+checksum = "b5062a995d481b2308b6064e9af76011f2921c35f97b0468811ed9f6cd91dfed"
 dependencies = [
  "indexmap 2.0.0",
  "itoa",
@@ -3662,7 +3662,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.2.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=d88d411#d88d41125e185a2e4d014701573331ab2e2eeffc"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=3657dd0#3657dd0c959e6e086ecdd81f734ae469a4b862a1"
 dependencies = [
  "argh",
  "byteorder",
@@ -4090,7 +4090,7 @@ checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
 [[package]]
 name = "wgpu"
 version = "0.16.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=buffer_from_raw#fc56db93bae0bada4b3142731a99b4caa77f9020"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=89f721f#89f721f8820b35431224cd2979809127097c2a28"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -4113,7 +4113,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.16.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=buffer_from_raw#fc56db93bae0bada4b3142731a99b4caa77f9020"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=89f721f#89f721f8820b35431224cd2979809127097c2a28"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4135,7 +4135,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.16.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=buffer_from_raw#fc56db93bae0bada4b3142731a99b4caa77f9020"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=89f721f#89f721f8820b35431224cd2979809127097c2a28"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4175,7 +4175,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.16.0"
-source = "git+https://github.com/AdrianEddy/wgpu.git?branch=buffer_from_raw#fc56db93bae0bada4b3142731a99b4caa77f9020"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=89f721f#89f721f8820b35431224cd2979809127097c2a28"
 dependencies = [
  "bitflags 2.3.3",
  "js-sys",
@@ -4194,9 +4194,9 @@ dependencies = [
 
 [[package]]
 name = "wide"
-version = "0.7.10"
+version = "0.7.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "40018623e2dba2602a9790faba8d33f2ebdebf4b86561b83928db735f8784728"
+checksum = "aa469ffa65ef7e0ba0f164183697b89b854253fd31aeb92358b7b6155177d62f"
 dependencies = [
  "bytemuck",
  "safe_arch",

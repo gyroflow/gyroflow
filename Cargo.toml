@@ -45,9 +45,9 @@ crc32fast = "1.3.2"
 rodio = { default-features = false, features = ["vorbis"], version = "0.17.1" }
 filetime_creation = "0.1"
 
-qmetaobject = { version = "0.2.7", default-features = false, features = ["log"] }
-qttypes     = { version = "0.2.8", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "b5fa77b" }
+qmetaobject = { version = "0.2.9", default-features = false, features = ["log"] }
+qttypes     = { version = "0.2.9", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "6fe24e9" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "6.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
@@ -67,8 +67,8 @@ log-panics = { version = "2.1", features = ["with-backtrace"] }
 
 [patch.crates-io]
 fc-blackbox = { git = "https://github.com/AdrianEddy/fc-blackbox.git",    rev = "4e9e4e6" }
-qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "ecf70fb" }
-qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "ecf70fb" }
+qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "98ebed1" }
+qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "98ebed1" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.48.0"
