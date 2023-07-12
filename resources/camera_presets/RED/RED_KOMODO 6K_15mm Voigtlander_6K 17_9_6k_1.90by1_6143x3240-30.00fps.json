@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_15mm Voigtlander_6K 17:9_6k_1.90by1_6143x3240-30.00fps",
+  "note": "",
+  "calibrated_by": "NikoFilmz",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "15mm Voigtlander",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6143,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6143,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8392452265048704,
+    "camera_matrix": [
+      [
+        3553.4925607233204,
+        0.0,
+        3061.6673783226843
+      ],
+      [
+        0.0,
+        3552.192259814579,
+        1618.7405917581198
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30624910558095303,
+      0.18214255081015737,
+      -0.11482813259367056,
+      0.18329615182921136
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-29",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

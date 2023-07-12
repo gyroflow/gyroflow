@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX30_Samyang 85__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "clement",
+  "camera_brand": "Sony",
+  "camera_model": "FX30",
+  "lens_model": "Samyang 85",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8388462525884884,
+    "camera_matrix": [
+      [
+        16475.982246358275,
+        0.0,
+        1927.257190440167
+      ],
+      [
+        0.0,
+        16522.846198825235,
+        1087.351507098095
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.9854674790116978,
+      376.1607682979048,
+      -40728.75017759302,
+      1444966.1709972883
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

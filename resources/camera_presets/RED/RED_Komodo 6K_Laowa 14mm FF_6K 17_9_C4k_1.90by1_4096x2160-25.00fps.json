@@ -1,0 +1,69 @@
+{
+  "name": "RED_Komodo 6K_Laowa 14mm FF_6K 17:9_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "R3D",
+  "calibrated_by": "Charlie Locke",
+  "camera_brand": "RED",
+  "camera_model": "Komodo 6K",
+  "lens_model": "Laowa 14mm FF",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4862706515040805,
+    "camera_matrix": [
+      [
+        2157.0964827625335,
+        0.0,
+        2042.6632812809307
+      ],
+      [
+        0.0,
+        2157.928940774765,
+        1072.157215553089
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32295806781893904,
+      0.10938067045760602,
+      0.00934665211381449,
+      0.06955822842406197
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-30",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 14.0,
+  "crop_factor": 1.5,
+  "global_shutter": true
+}

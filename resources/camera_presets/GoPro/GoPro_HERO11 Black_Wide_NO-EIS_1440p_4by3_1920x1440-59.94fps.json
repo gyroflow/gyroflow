@@ -1,0 +1,69 @@
+{
+  "name": "GoPro_HERO11 Black_Wide_NO-EIS_1440p_4by3_1920x1440-59.94fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Eric John Gangob",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO11 Black",
+  "lens_model": "Wide",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3026169636660809,
+    "camera_matrix": [
+      [
+        850.9258300101518,
+        0.0,
+        955.4606669132976
+      ],
+      [
+        0.0,
+        851.2297124259651,
+        703.684385237145
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.04811393335542556,
+      0.014462655278865172,
+      0.015455756126129904,
+      -0.016796419293154025
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "gopro-hero11black-wide-1920x1440@59940-no-eis",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-27",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

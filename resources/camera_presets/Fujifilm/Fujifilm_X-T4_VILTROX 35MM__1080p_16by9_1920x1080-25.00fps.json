@@ -1,0 +1,69 @@
+{
+  "name": "Fujifilm_X-T4_VILTROX 35MM__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Francesco Roviello",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T4",
+  "lens_model": "VILTROX 35MM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.644637180905524,
+    "camera_matrix": [
+      [
+        1528.8034091957202,
+        0.0,
+        975.284320844734
+      ],
+      [
+        0.0,
+        1528.1025274467418,
+        556.7944879248797
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24664360554909712,
+      0.2131066583812496,
+      0.02043165169418842,
+      0.10792379743862383
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-07",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

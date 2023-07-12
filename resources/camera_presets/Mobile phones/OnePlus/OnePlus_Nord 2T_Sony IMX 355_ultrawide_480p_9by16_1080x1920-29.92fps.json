@@ -1,0 +1,69 @@
+{
+  "name": "OnePlus_Nord 2T_Sony IMX 355_ultrawide_480p_9by16_1080x1920-29.92fps",
+  "note": "",
+  "calibrated_by": "javier.garcia.ta",
+  "camera_brand": "OnePlus",
+  "camera_model": "Nord 2T",
+  "lens_model": "Sony IMX 355",
+  "camera_setting": "ultrawide",
+  "calib_dimension": {
+    "w": 1080,
+    "h": 1920
+  },
+  "orig_dimension": {
+    "w": 1080,
+    "h": 1920
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 51,
+  "fps": 29.921177,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7429225252875172,
+    "camera_matrix": [
+      [
+        870.900922074527,
+        0.0,
+        531.3985245128802
+      ],
+      [
+        0.0,
+        861.6456202241994,
+        960.6288746855188
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.33129539711473094,
+      0.16681287534514527,
+      0.055151897770564486,
+      0.01800178300971344
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 16.0,
+  "crop_factor": 0.6,
+  "global_shutter": false
+}

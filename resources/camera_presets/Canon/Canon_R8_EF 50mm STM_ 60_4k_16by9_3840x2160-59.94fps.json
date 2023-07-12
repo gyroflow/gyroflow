@@ -1,0 +1,69 @@
+{
+  "name": "Canon_R8_EF 50mm STM_/ 60_4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Johannes Waschke",
+  "camera_brand": "Canon",
+  "camera_model": "R8",
+  "lens_model": "EF 50mm STM",
+  "camera_setting": "/ 60",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 37,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7796116189023442,
+    "camera_matrix": [
+      [
+        5801.606439877379,
+        0.0,
+        1930.5760969035823
+      ],
+      [
+        0.0,
+        5810.509627755767,
+        1112.9812445517732
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.27548726435520854,
+      -2.1102239947731887,
+      25.6426432549478,
+      -99.77349159535086
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

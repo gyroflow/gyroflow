@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7III_Rokinon 14mm T3.1_3840x2160_4k_16by9_3840x2160-25.00fps",
+  "note": "3840x2160",
+  "calibrated_by": "AEREA.com.ar",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "Rokinon 14mm T3.1",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.2222107007068324,
+    "camera_matrix": [
+      [
+        1594.8617346541926,
+        0.0,
+        1858.213055180879
+      ],
+      [
+        0.0,
+        1593.2466358547747,
+        1091.2104060540426
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2107108873490965,
+      0.014002608824620524,
+      0.127537162615007,
+      0.048433200796912
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-07",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_Lumix GH5S_11-16 MM__1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "IRFAN SYAPUTRA",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix GH5S",
+  "lens_model": "11-16 MM",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 0,
+    "h": 0
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4713615632043656,
+    "camera_matrix": [
+      [
+        2407.787034038804,
+        0.0,
+        1014.3841532434266
+      ],
+      [
+        0.0,
+        2411.157544004557,
+        503.6181726397213
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.361008870524283,
+      0.8043434002301411,
+      -16.78954861282092,
+      70.81114606892308
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-07",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

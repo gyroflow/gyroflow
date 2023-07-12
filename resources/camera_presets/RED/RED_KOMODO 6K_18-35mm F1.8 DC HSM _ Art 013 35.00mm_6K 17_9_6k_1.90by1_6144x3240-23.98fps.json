@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_18-35mm F1.8 DC HSM | Art 013 35.00mm_6K 17:9_6k_1.90by1_6144x3240-23.98fps",
+  "note": "35mm",
+  "calibrated_by": "Brandan FPV",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "18-35mm F1.8 DC HSM | Art 013 35.00mm",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0780137639334333,
+    "camera_matrix": [
+      [
+        7669.621378636746,
+        0.0,
+        3137.121737767012
+      ],
+      [
+        0.0,
+        7679.08173651997,
+        1591.5721328217296
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3631298241961776,
+      1.3474511851417388,
+      -8.787746516407049,
+      28.72913023594374
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "red-komodo6k-18-35mmf1.8dchsm|art013-35.00mm-6144x3240@0",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-27",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 35.0,
+  "crop_factor": null,
+  "global_shutter": true
+}

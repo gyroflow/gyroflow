@@ -1,0 +1,69 @@
+{
+  "name": "RunCam_Split lite 3__Mobula7_1080p_16by9_1920x1080-60.00fps",
+  "note": "Mobula7",
+  "calibrated_by": "Mario Juchelka",
+  "camera_brand": "RunCam",
+  "camera_model": "Split lite 3",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5832347008310449,
+    "camera_matrix": [
+      [
+        798.0455685365569,
+        0.0,
+        922.4503482805178
+      ],
+      [
+        0.0,
+        798.103028160696,
+        536.7654147895986
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.038068812098783135,
+      0.05008467888483134,
+      -0.002048626267625238,
+      -0.013149057257853465
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

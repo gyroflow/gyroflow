@@ -1,0 +1,69 @@
+{
+  "name": "RED_V-RAPTOR 8K VV__8K 2,4:1_8k_2.37by1_8192x3456-25.00fps",
+  "note": "",
+  "calibrated_by": "BABS STUDIO",
+  "camera_brand": "RED",
+  "camera_model": "V-RAPTOR 8K VV",
+  "lens_model": "",
+  "camera_setting": "8K 2,4:1",
+  "calib_dimension": {
+    "w": 8192,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 8192,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 8192,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.197789524314094,
+    "camera_matrix": [
+      [
+        7598.524075871449,
+        0.0,
+        4092.386068169757
+      ],
+      [
+        0.0,
+        7605.917031745143,
+        1738.9091082358557
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.28810566852451164,
+      -0.7585434898006059,
+      7.746545340050943,
+      -18.568576610603465
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-18",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

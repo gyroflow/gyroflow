@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7rV_14mm F1.8_1/200 f5.6 HD  ISO2500_1080p_16by9_1920x1080-25.00fps",
+  "note": "PP11",
+  "calibrated_by": "Azmi Abdul Rahman",
+  "camera_brand": "Sony",
+  "camera_model": "a7rV",
+  "lens_model": "14mm F1.8",
+  "camera_setting": "1/200 f5.6 HD  ISO2500",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2233019655029181,
+    "camera_matrix": [
+      [
+        776.3181837168789,
+        0.0,
+        962.7977822738952
+      ],
+      [
+        0.0,
+        776.3068842295238,
+        538.3491592185194
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3157543750818433,
+      0.18086511143740888,
+      -0.11035703287895848,
+      0.12155858443980327
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7rm5-14.00mm-1920x1080@25000",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 14.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

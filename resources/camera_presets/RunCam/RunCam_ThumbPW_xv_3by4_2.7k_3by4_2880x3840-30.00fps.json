@@ -1,0 +1,69 @@
+{
+  "name": "RunCam_ThumbPW_xv_3by4_2.7k_3by4_2880x3840-30.00fps",
+  "note": "3by4",
+  "calibrated_by": "RD5500",
+  "camera_brand": "RunCam",
+  "camera_model": "ThumbPW",
+  "lens_model": "xv",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2880,
+    "h": 3840
+  },
+  "orig_dimension": {
+    "w": 2880,
+    "h": 3840
+  },
+  "output_dimension": {
+    "w": 2880,
+    "h": 3840
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.333,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8651488591610845,
+    "camera_matrix": [
+      [
+        1819.964053347095,
+        0.0,
+        1440.7664248943863
+      ],
+      [
+        0.0,
+        1816.0440774325032,
+        1896.632688661179
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.027591423735281867,
+      0.06390404812706436,
+      -0.09249399890146556,
+      0.045096012272996755
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-09",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

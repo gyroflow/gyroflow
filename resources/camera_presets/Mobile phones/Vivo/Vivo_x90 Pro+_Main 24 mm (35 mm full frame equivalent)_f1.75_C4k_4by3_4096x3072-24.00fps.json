@@ -1,0 +1,69 @@
+{
+  "name": "Vivo_x90 Pro+_Main 24 mm (35 mm full frame equivalent)_f/1.75_C4k_4by3_4096x3072-24.00fps",
+  "note": "13.11 x 9.83 sensor",
+  "calibrated_by": "Steven Winters, Jr",
+  "camera_brand": "Vivo",
+  "camera_model": "x90 Pro+",
+  "lens_model": "Main 24 mm (35 mm full frame equivalent)",
+  "camera_setting": "f/1.75",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 3072
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 3072
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 3072
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 24.004978,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8166893660237231,
+    "camera_matrix": [
+      [
+        2190.938994351651,
+        0.0,
+        2103.6743455574338
+      ],
+      [
+        0.0,
+        2194.216987848654,
+        1555.483654308265
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5220439910387752,
+      -0.9642361747214682,
+      2.3559622579880015,
+      -1.6588752656001906
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-04",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 8.67,
+  "crop_factor": 3.0,
+  "global_shutter": false
+}

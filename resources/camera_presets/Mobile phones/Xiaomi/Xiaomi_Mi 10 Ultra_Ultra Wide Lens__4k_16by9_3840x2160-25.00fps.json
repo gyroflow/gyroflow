@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_Mi 10 Ultra_Ultra Wide Lens__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Mitchell Gates",
+  "camera_brand": "Xiaomi",
+  "camera_model": "Mi 10 Ultra",
+  "lens_model": "Ultra Wide Lens",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 24.996218,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6909300483874141,
+    "camera_matrix": [
+      [
+        1476.0089632674851,
+        0.0,
+        1907.8864397094867
+      ],
+      [
+        0.0,
+        1474.3450956251245,
+        1080.6815384594863
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.21942070823346035,
+      0.5944899469789261,
+      -0.6842917121056034,
+      0.23258899223932655
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-04",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

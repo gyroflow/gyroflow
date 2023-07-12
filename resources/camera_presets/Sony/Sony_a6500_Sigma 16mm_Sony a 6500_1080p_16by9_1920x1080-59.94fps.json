@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a6500_Sigma 16mm_Sony a 6500_1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "cristiamfils",
+  "camera_brand": "Sony",
+  "camera_model": "a6500",
+  "lens_model": "Sigma 16mm",
+  "camera_setting": "Sony a 6500",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4290915125133898,
+    "camera_matrix": [
+      [
+        683.925479885641,
+        0.0,
+        940.6120597764844
+      ],
+      [
+        0.0,
+        686.5212710584655,
+        422.5213075060965
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3153359716271146,
+      0.07264918273537999,
+      0.09859171517584,
+      -0.0008408634681660534
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

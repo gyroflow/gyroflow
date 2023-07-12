@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_Laowa 15mm non cine_6K 17:9_6k_1.90by1_6910x3645-23.98fps",
+  "note": "23.98fps",
+  "calibrated_by": "Brandan FPV",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Laowa 15mm non cine",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "orig_dimension": {
+    "w": 6910,
+    "h": 3645
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9580570696531572,
+    "camera_matrix": [
+      [
+        4046.012792654057,
+        0.0,
+        3475.4607839139453
+      ],
+      [
+        0.0,
+        4047.428971351208,
+        1797.3835679179135
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3156142489879395,
+      0.14007905148373512,
+      -0.01886118584434424,
+      0.05794000358666342
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-01",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_Lumix S5II_Lumix 20-60mm_20MM_4k_16by9_3840x2160-25.00fps",
+  "note": "20MM",
+  "calibrated_by": "Garcea George",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix S5II",
+  "lens_model": "Lumix 20-60mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.821897258124537,
+    "camera_matrix": [
+      [
+        2446.0829039161094,
+        0.0,
+        1929.921675646116
+      ],
+      [
+        0.0,
+        2453.158085761871,
+        1082.4717950938468
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29180834705189346,
+      0.1413906436707776,
+      0.10711182826753364,
+      -0.05898969298831562
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

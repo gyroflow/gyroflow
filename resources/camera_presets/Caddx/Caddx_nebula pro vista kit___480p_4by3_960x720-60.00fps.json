@@ -1,0 +1,69 @@
+{
+  "name": "Caddx_nebula pro vista kit___480p_4by3_960x720-60.00fps",
+  "note": "",
+  "calibrated_by": "ADRIAN",
+  "camera_brand": "Caddx",
+  "camera_model": "nebula pro vista kit",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "orig_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "output_dimension": {
+    "w": 960,
+    "h": 720
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2343405279196196,
+    "camera_matrix": [
+      [
+        447.72008480540256,
+        0.0,
+        446.11712698864466
+      ],
+      [
+        0.0,
+        448.6960921049808,
+        351.98947298782923
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.05529910544048217,
+      -0.09102557441301104,
+      0.11327318027369836,
+      -0.04936342376694856
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-31",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

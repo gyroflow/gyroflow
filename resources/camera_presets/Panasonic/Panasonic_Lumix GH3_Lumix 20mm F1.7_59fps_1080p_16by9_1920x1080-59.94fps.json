@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_Lumix GH3_Lumix 20mm F1.7_59fps_1080p_16by9_1920x1080-59.94fps",
+  "note": "50mbps",
+  "calibrated_by": "RaQUiB",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix GH3",
+  "lens_model": "Lumix 20mm F1.7",
+  "camera_setting": "59fps",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.42578941242897894,
+    "camera_matrix": [
+      [
+        2512.319499743449,
+        0.0,
+        932.7669882545237
+      ],
+      [
+        0.0,
+        2526.5414177573657,
+        580.0006815314556
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2396975894974009,
+      1.7117976504355612,
+      -12.823377641597316,
+      44.38268667289024
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

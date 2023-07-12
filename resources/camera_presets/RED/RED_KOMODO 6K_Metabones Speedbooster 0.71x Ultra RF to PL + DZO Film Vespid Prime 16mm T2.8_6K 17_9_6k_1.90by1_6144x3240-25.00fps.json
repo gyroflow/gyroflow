@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_Metabones Speedbooster 0.71x Ultra RF to PL + DZO Film Vespid Prime 16mm T2.8_6K 17:9_6k_1.90by1_6144x3240-25.00fps",
+  "note": "",
+  "calibrated_by": "STARLINECOMP",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "Metabones Speedbooster 0.71x Ultra RF to PL + DZO Film Vespid Prime 16mm T2.8",
+  "camera_setting": "6K 17:9",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.208229883018945,
+    "camera_matrix": [
+      [
+        2751.1716948691605,
+        0.0,
+        3086.0877014659745
+      ],
+      [
+        0.0,
+        2751.752473931959,
+        1627.6099452186857
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23633469289239484,
+      0.25729050364614925,
+      -0.2339397846335409,
+      0.24586737627728503
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": true
+}

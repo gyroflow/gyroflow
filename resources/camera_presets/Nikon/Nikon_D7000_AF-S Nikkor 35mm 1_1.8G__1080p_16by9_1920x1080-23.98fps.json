@@ -1,0 +1,69 @@
+{
+  "name": "Nikon_D7000_AF-S Nikkor 35mm 1:1.8G__1080p_16by9_1920x1080-23.98fps",
+  "note": "",
+  "calibrated_by": "Nicholas Lubbe",
+  "camera_brand": "Nikon",
+  "camera_model": "D7000",
+  "lens_model": "AF-S Nikkor 35mm 1:1.8G",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4759722920128102,
+    "camera_matrix": [
+      [
+        3311.8641916021943,
+        0.0,
+        879.4234059126403
+      ],
+      [
+        0.0,
+        3291.235719833682,
+        503.5966085607278
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08055930119857897,
+      1.7135714061122276,
+      -19.846833577879178,
+      90.19610220854604
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-22",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

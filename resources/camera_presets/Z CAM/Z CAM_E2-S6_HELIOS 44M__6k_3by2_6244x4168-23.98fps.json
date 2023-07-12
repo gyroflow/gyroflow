@@ -1,0 +1,69 @@
+{
+  "name": "Z CAM_E2-S6_HELIOS 44M__6k_3by2_6244x4168-23.98fps",
+  "note": "",
+  "calibrated_by": "Abraham Tortora",
+  "camera_brand": "Z CAM",
+  "camera_model": "E2-S6",
+  "lens_model": "HELIOS 44M",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6244,
+    "h": 4168
+  },
+  "orig_dimension": {
+    "w": 6244,
+    "h": 4168
+  },
+  "output_dimension": {
+    "w": 6244,
+    "h": 4168
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.8544998899310965,
+    "camera_matrix": [
+      [
+        11979.421602978791,
+        0.0,
+        2931.909111063747
+      ],
+      [
+        0.0,
+        11965.321238520475,
+        2054.348763632602
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.08435936048878752,
+      8.792571566874676,
+      -156.7717109255474,
+      1257.3846112048464
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-15",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

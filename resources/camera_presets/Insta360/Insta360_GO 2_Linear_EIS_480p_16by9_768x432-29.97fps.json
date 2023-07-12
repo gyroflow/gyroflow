@@ -1,0 +1,69 @@
+{
+  "name": "Insta360_GO 2_Linear_EIS_480p_16by9_768x432-29.97fps",
+  "note": "EIS",
+  "calibrated_by": "Matias Reyes",
+  "camera_brand": "Insta360",
+  "camera_model": "GO 2",
+  "lens_model": "Linear",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 768,
+    "h": 432
+  },
+  "orig_dimension": {
+    "w": 768,
+    "h": 432
+  },
+  "output_dimension": {
+    "w": 768,
+    "h": 432
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.28706544058954075,
+    "camera_matrix": [
+      [
+        277.1435666529611,
+        0.0,
+        382.67305598148226
+      ],
+      [
+        0.0,
+        276.98517586664536,
+        216.0549884728071
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4053169653224985,
+      0.0001492873880247264,
+      0.17187694311062654,
+      0.08836688686022187
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "insta360-go2-linear-768x432@29970-eis",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-14",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

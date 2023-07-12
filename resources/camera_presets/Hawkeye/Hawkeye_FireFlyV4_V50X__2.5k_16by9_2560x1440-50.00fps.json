@@ -1,0 +1,66 @@
+{
+  "name": "Hawkeye_FireFlyV4_V50X__2.5k_16by9_2560x1440-50.00fps",
+  "note": "",
+  "calibrated_by": "Aquira",
+  "camera_brand": "Hawkeye",
+  "camera_model": "FireFlyV4",
+  "lens_model": "V50X",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "orig_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "output_dimension": {
+    "w": 2560,
+    "h": 1440
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.41791123799599866,
+    "camera_matrix": [
+      [
+        1289.1572469174278,
+        0.0,
+        1340.7836742296784
+      ],
+      [
+        0.0,
+        1283.3689984416962,
+        703.328967199971
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.04824846781365647,
+      0.011742188472790764,
+      -0.028702210539884507,
+      0.017603683678354187
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.3.0",
+  "date": "2023-06-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null
+}

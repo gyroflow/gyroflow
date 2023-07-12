@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX30_20.00mm_Tamron 11-20mm @20mm_1080p_16by9_1920x1080-29.97fps",
+  "note": "Tamron 11-20mm @20mm",
+  "calibrated_by": "Anthony Wong",
+  "camera_brand": "Sony",
+  "camera_model": "FX30",
+  "lens_model": "20.00mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.48610301109321713,
+    "camera_matrix": [
+      [
+        2439.855799346661,
+        0.0,
+        950.7083380332846
+      ],
+      [
+        0.0,
+        2438.8081758893486,
+        507.27590525337007
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5446526819321462,
+      0.21634935656351112,
+      4.466378631125392,
+      -16.006705559523603
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilme-fx30-20.00mm-1920x1080@29970",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 20.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -19,7 +19,7 @@
     "h": 2160
   },
   "frame_readout_time": null,
-  "gyro_lpf": 30.0,
+  "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,
   "sync_settings": {

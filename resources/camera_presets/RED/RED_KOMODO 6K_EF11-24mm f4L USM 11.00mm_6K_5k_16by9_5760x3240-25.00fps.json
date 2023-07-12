@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_EF11-24mm f/4L USM 11.00mm_6K_5k_16by9_5760x3240-25.00fps",
+  "note": "Canon 0.71X",
+  "calibrated_by": "Melvin Ong",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "EF11-24mm f/4L USM 11.00mm",
+  "camera_setting": "6K",
+  "calib_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 14,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.6518461909650868,
+    "camera_matrix": [
+      [
+        1809.0815893904355,
+        0.0,
+        2877.837334192903
+      ],
+      [
+        0.0,
+        1807.784928042142,
+        1611.4935259638326
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.31248908296883054,
+      0.20503283960370008,
+      -0.12348340967110095,
+      0.1081520975747362
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "red-komodo6k-ef11-24mmf/4lusm-11.00mm-5760x3240@0",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-10",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 11.0,
+  "crop_factor": null,
+  "global_shutter": true
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Google_Pixel 7 Pro_14mm__C4k_2.37by1_4032x1704-25.02fps",
+  "note": "",
+  "calibrated_by": "dachob",
+  "camera_brand": "Google",
+  "camera_model": "Pixel 7 Pro",
+  "lens_model": "14mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4032,
+    "h": 1704
+  },
+  "orig_dimension": {
+    "w": 4032,
+    "h": 1704
+  },
+  "output_dimension": {
+    "w": 4032,
+    "h": 1704
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.021544,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6256249715871328,
+    "camera_matrix": [
+      [
+        1605.3624417667818,
+        0.0,
+        1995.2155664443355
+      ],
+      [
+        0.0,
+        1601.2239091755637,
+        859.3283006667332
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22755256587104267,
+      0.5174684391655885,
+      -0.5185175147095213,
+      0.1120331210596482
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

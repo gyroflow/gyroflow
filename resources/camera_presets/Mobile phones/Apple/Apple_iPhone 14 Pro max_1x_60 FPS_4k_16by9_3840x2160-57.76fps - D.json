@@ -1,0 +1,69 @@
+{
+  "name": "Apple_iPhone 14 Pro max_1x_60 FPS_4k_16by9_3840x2160-57.76fps",
+  "note": "",
+  "calibrated_by": "D",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 14 Pro max",
+  "lens_model": "1x",
+  "camera_setting": "60 FPS",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 57.762138,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5433077997268694,
+    "camera_matrix": [
+      [
+        3167.5891935239097,
+        0.0,
+        1907.239939330231
+      ],
+      [
+        0.0,
+        3169.0125416956175,
+        1075.6521577665271
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.39133217840609535,
+      2.374408987266592,
+      -17.153748570282705,
+      33.80239941065362
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7C_Sigma 28-70 F2.8 DG DN_50mm_4k_16by9_3840x2160-25.00fps",
+  "note": "16:9",
+  "calibrated_by": "chamquin",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "Sigma 28-70 F2.8 DG DN",
+  "camera_setting": "50mm",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4939945444682002,
+    "camera_matrix": [
+      [
+        5508.869836585228,
+        0.0,
+        1931.7002160007653
+      ],
+      [
+        0.0,
+        5496.109090460217,
+        1064.473293596196
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.41624241799236605,
+      -1.912940900746816,
+      24.54943892941866,
+      -109.68260949144992
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7c-bc306cd1-3840x2160@25000",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-23",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

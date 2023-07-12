@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7IV_7Artisans 7.5mm_Super 35mm crop_4k_16by9_3840x2160-29.97fps",
+  "note": "",
+  "calibrated_by": "Alexprofpv",
+  "camera_brand": "Sony",
+  "camera_model": "a7IV",
+  "lens_model": "7Artisans 7.5mm",
+  "camera_setting": "Super 35mm crop",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 13.8,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.1314567399480753,
+    "camera_matrix": [
+      [
+        1351.083511978949,
+        0.0,
+        1878.647939306896
+      ],
+      [
+        0.0,
+        1349.256634223501,
+        1117.4311776707298
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.054334554811491464,
+      0.0235290268552815,
+      -0.0278892741429226,
+      0.01421347894348452
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-01",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

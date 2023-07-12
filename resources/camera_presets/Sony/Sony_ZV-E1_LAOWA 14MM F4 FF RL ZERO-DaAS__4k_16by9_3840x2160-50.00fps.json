@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E1_LAOWA 14MM F4 FF RL ZERO-DaAS__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "Kwong Kan",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E1",
+  "lens_model": "LAOWA 14MM F4 FF RL ZERO-DaAS",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8793981855732601,
+    "camera_matrix": [
+      [
+        1592.43271428534,
+        0.0,
+        1899.1956796446416
+      ],
+      [
+        0.0,
+        1590.6004993149268,
+        1086.5748360010668
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32223051061791874,
+      0.16418897856666315,
+      -0.113290698738755,
+      0.15677780358128973
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-09",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

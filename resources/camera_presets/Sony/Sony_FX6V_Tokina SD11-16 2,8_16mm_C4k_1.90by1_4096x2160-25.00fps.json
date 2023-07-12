@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX6V_Tokina SD11-16 2,8_16mm_C4k_1.90by1_4096x2160-25.00fps",
+  "note": "16mm",
+  "calibrated_by": "Paolo Panno",
+  "camera_brand": "Sony",
+  "camera_model": "FX6V",
+  "lens_model": "Tokina SD11-16 2,8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4868748066849092,
+    "camera_matrix": [
+      [
+        1885.712895806088,
+        0.0,
+        2021.7148810784763
+      ],
+      [
+        0.0,
+        1888.5981782076265,
+        1106.8466225254936
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.35410213540626273,
+      0.09615230915674976,
+      -0.08368699131154708,
+      0.15831177242866715
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

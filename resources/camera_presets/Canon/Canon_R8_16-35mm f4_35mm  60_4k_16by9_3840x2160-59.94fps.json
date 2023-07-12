@@ -1,0 +1,69 @@
+{
+  "name": "Canon_R8_16-35mm f/4_35mm  60_4k_16by9_3840x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Johannes Waschke",
+  "camera_brand": "Canon",
+  "camera_model": "R8",
+  "lens_model": "16-35mm f/4",
+  "camera_setting": "35mm  60",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 32,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8633179210817946,
+    "camera_matrix": [
+      [
+        3606.2476716263977,
+        0.0,
+        1936.6153326844244
+      ],
+      [
+        0.0,
+        3606.6906470970457,
+        1079.433472303254
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3845478711173505,
+      -0.2124560830119492,
+      2.3759400768044467,
+      -5.084611657320054
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-07-09",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

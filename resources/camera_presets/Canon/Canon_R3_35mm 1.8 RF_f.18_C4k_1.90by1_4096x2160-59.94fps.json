@@ -1,0 +1,69 @@
+{
+  "name": "Canon_R3_35mm 1.8 RF_f.18_C4k_1.90by1_4096x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Irving De Jong",
+  "camera_brand": "Canon",
+  "camera_model": "R3",
+  "lens_model": "35mm 1.8 RF",
+  "camera_setting": "f.18",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 9.5,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5856469904295728,
+    "camera_matrix": [
+      [
+        4240.546452303541,
+        0.0,
+        2006.8112940926335
+      ],
+      [
+        0.0,
+        4243.966990281918,
+        1057.342261620786
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2647781678338522,
+      -0.15850692066725264,
+      2.058858893587996,
+      -4.96405551624041
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

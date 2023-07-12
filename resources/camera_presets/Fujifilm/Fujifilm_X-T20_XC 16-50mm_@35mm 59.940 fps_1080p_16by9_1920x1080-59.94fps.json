@@ -1,0 +1,69 @@
+{
+  "name": "Fujifilm_X-T20_XC 16-50mm_@35mm 59.940 fps_1080p_16by9_1920x1080-59.94fps",
+  "note": "@35mm 59.940 fps",
+  "calibrated_by": "Wendy",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T20",
+  "lens_model": "XC 16-50mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4302150792502261,
+    "camera_matrix": [
+      [
+        3456.516033160157,
+        0.0,
+        939.7969500977237
+      ],
+      [
+        0.0,
+        3456.898459464312,
+        518.3699944071244
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.10782059386042504,
+      16.309928475667167,
+      -261.49012437835364,
+      1501.3152926591702
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-12",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "RunCam_2 4K___1080p_16by9_1920x1080-60.00fps",
+  "note": "",
+  "calibrated_by": "Dan Counts",
+  "camera_brand": "RunCam",
+  "camera_model": "2 4K",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 6,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 2.098722489964484,
+    "camera_matrix": [
+      [
+        979.780971740101,
+        0.0,
+        1031.015232259271
+      ],
+      [
+        0.0,
+        980.4204783947304,
+        574.8247841135944
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.1316214958874945,
+      1.5010433121810225,
+      -4.640644643526869,
+      4.7561147796276835
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-29",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

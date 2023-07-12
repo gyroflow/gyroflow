@@ -1,0 +1,69 @@
+{
+  "name": "Apple_iPhone 12 Pro___4k_16by9_3840x2160-59.97fps",
+  "note": "",
+  "calibrated_by": "Daniel Cabrera Zepeda",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 12 Pro",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.972759,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5255140385904962,
+    "camera_matrix": [
+      [
+        2776.014235972737,
+        0.0,
+        1941.420168517676
+      ],
+      [
+        0.0,
+        2775.476804378045,
+        1012.714086577432
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.4274440665365453,
+      0.9744855087989336,
+      -8.472256562745322,
+      21.12912702636242
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

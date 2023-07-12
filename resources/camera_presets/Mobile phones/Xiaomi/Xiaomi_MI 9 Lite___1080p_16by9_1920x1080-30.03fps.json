@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_MI 9 Lite___1080p_16by9_1920x1080-30.03fps",
+  "note": "",
+  "calibrated_by": "Jordan G",
+  "camera_brand": "Xiaomi",
+  "camera_model": "MI 9 Lite",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 30.028584,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.47611253904268613,
+    "camera_matrix": [
+      [
+        1550.7436195869836,
+        0.0,
+        955.2933209973316
+      ],
+      [
+        0.0,
+        1541.6312926636826,
+        571.340270620149
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2595984204879505,
+      1.636868954072573,
+      -5.9237949832525265,
+      7.420039390066688
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-01",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

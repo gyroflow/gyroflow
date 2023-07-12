@@ -1,0 +1,69 @@
+{
+  "name": "RED_KOMODO 6K_TAMRON SP 35mm F/1.8 Di VC USD F012 35.00mm_6K_5k_16by9_5760x3240-25.00fps",
+  "note": "",
+  "calibrated_by": "Khris Burton",
+  "camera_brand": "RED",
+  "camera_model": "KOMODO 6K",
+  "lens_model": "TAMRON SP 35mm F/1.8 Di VC USD F012 35.00mm",
+  "camera_setting": "6K",
+  "calib_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "orig_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "output_dimension": {
+    "w": 5760,
+    "h": 3240
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9141254562016808,
+    "camera_matrix": [
+      [
+        5796.298575307048,
+        0.0,
+        2893.8800975778418
+      ],
+      [
+        0.0,
+        5796.0856442958775,
+        1563.832583680926
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2524643178256723,
+      0.2956013932779976,
+      -0.5676499343647461,
+      2.5349432865760813
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "red-komodo6k-tamronsp35mmf/1.8divcusdf012-35.00mm-5760x3240@0",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-22",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 35.0,
+  "crop_factor": null,
+  "global_shutter": true
+}

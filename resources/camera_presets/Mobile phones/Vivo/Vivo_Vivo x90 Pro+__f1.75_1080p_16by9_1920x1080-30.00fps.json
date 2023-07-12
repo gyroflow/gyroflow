@@ -1,0 +1,69 @@
+{
+  "name": "Vivo_Vivo x90 Pro+__f/1.75_1080p_16by9_1920x1080-30.00fps",
+  "note": "Sony IMX989",
+  "calibrated_by": "Steven Winters, Jr",
+  "camera_brand": "Vivo",
+  "camera_model": "Vivo x90 Pro+",
+  "lens_model": "",
+  "camera_setting": "f/1.75",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 30.000937,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3645159516235664,
+    "camera_matrix": [
+      [
+        1667.201228802452,
+        0.0,
+        970.337553007554
+      ],
+      [
+        0.0,
+        1676.4577557479588,
+        539.1962095485392
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6342428350332594,
+      -1.6851728707378997,
+      2.0777922817305523,
+      7.02631204757786
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E1_sigma 2870 35mm__4k_16by9_3840x2160-50.00fps",
+  "note": "",
+  "calibrated_by": "edcze",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E1",
+  "lens_model": "sigma 2870 35mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 9,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8472457047806753,
+    "camera_matrix": [
+      [
+        3708.7007885184858,
+        0.0,
+        1896.860498142193
+      ],
+      [
+        0.0,
+        3719.094656987762,
+        1098.797380142803
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.17574764450847566,
+      0.3761423132900819,
+      0.5479512354546867,
+      -1.6519169453804337
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e1-34.80mm-3840x2160@50000",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-30",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 34.8,
+  "crop_factor": null,
+  "global_shutter": false
+}

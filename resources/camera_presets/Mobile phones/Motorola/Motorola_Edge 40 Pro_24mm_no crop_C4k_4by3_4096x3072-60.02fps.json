@@ -1,0 +1,69 @@
+{
+  "name": "Motorola_Edge 40 Pro_24mm_no crop_C4k_4by3_4096x3072-60.02fps",
+  "note": "",
+  "calibrated_by": "Luis Fernandes",
+  "camera_brand": "Motorola",
+  "camera_model": "Edge 40 Pro",
+  "lens_model": "24mm",
+  "camera_setting": "no crop",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 3072
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 3072
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 3072
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 60.024727,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.3436660280624546,
+    "camera_matrix": [
+      [
+        2591.152820628308,
+        0.0,
+        2040.7568492836024
+      ],
+      [
+        0.0,
+        2585.747009508015,
+        1520.4003382477902
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24362350941516123,
+      1.1145852556390965,
+      -3.1075098234869585,
+      3.0576374906657597
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-05-29",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

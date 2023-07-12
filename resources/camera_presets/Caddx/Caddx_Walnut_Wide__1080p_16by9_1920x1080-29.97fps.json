@@ -18,7 +18,7 @@
     "w": 1920,
     "h": 1080
   },
-  "frame_readout_time": -8.897786675564454,
+  "frame_readout_time": 8.897786675564454,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7III___4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "stas",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 20,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8612942231244891,
+    "camera_matrix": [
+      [
+        1508.5438290709976,
+        0.0,
+        1935.4711161289624
+      ],
+      [
+        0.0,
+        1509.060268588403,
+        1054.66111125649
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.18701561343339165,
+      0.11686628492194158,
+      -0.05343686370383489,
+      0.1306985293641833
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-16",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

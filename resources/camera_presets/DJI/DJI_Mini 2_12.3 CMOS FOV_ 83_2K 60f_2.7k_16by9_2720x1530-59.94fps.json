@@ -1,0 +1,69 @@
+{
+  "name": "DJI_Mini 2_1/2.3” CMOS FOV: 83°_2K 60f_2.7k_16by9_2720x1530-59.94fps",
+  "note": "n/a",
+  "calibrated_by": "Thomasinstockport",
+  "camera_brand": "DJI",
+  "camera_model": "Mini 2",
+  "lens_model": "1/2.3” CMOS FOV: 83°",
+  "camera_setting": "2K 60f",
+  "calib_dimension": {
+    "w": 2720,
+    "h": 1530
+  },
+  "orig_dimension": {
+    "w": 2720,
+    "h": 1530
+  },
+  "output_dimension": {
+    "w": 0,
+    "h": 0
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.65836329544566,
+    "camera_matrix": [
+      [
+        2095.5042404670708,
+        0.0,
+        1355.293962860707
+      ],
+      [
+        0.0,
+        2096.0787565144506,
+        778.2888551766641
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.7414125321059125,
+      -2.0483644135712504,
+      5.965620126234941,
+      -6.982533953242773
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-22",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

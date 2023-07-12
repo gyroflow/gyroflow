@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a1_Sigma Art Canon /w MC11 14.00mm 1.8f__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "JFK_Creator",
+  "camera_brand": "Sony",
+  "camera_model": "a1",
+  "lens_model": "Sigma Art Canon /w MC11 14.00mm 1.8f",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6527059381054474,
+    "camera_matrix": [
+      [
+        1731.63098364991,
+        0.0,
+        1902.3506807249237
+      ],
+      [
+        0.0,
+        1732.3837514626462,
+        1076.4673590220475
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2965820794414358,
+      0.2486437664580892,
+      -0.15579299434333652,
+      0.14355141566424132
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-1-14.00mm-3840x2160@25000",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 14.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

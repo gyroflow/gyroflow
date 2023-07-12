@@ -1,0 +1,69 @@
+{
+  "name": "OnePlus_7 PRO_Main sensor__4k_4by3_4000x3000-30.00fps",
+  "note": "",
+  "calibrated_by": "silvan",
+  "camera_brand": "OnePlus",
+  "camera_model": "7 PRO",
+  "lens_model": "Main sensor",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "orig_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "output_dimension": {
+    "w": 4000,
+    "h": 3000
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 25,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.6758042508087494,
+    "camera_matrix": [
+      [
+        2856.2760525288877,
+        0.0,
+        1994.062346845849
+      ],
+      [
+        0.0,
+        2855.404072506705,
+        1444.8976514610758
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.6093977333532854,
+      -2.2283858296572254,
+      8.556460023922266,
+      -10.19286353703221
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 27.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

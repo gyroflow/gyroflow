@@ -18,7 +18,7 @@
     "w": 4096,
     "h": 2160
   },
-  "frame_readout_time": -14.6,
+  "frame_readout_time": 14.6,
   "gyro_lpf": null,
   "input_horizontal_stretch": 1.0,
   "input_vertical_stretch": 1.0,

@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_Lumix GH4_meike 3,5mm__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Alberto Conrad",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix GH4",
+  "lens_model": "meike 3,5mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 2.0879305862783486,
+    "camera_matrix": [
+      [
+        125.35923378763326,
+        0.0,
+        958.165049199914
+      ],
+      [
+        0.0,
+        123.82210660963946,
+        515.172645058168
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22955817628203423,
+      0.3351050135871989,
+      -0.17379066479607827,
+      0.0922155173077103
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-07-09",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

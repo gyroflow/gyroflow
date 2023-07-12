@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6k_Canon 50mm_2.8k 120fps_2.7k_1.89by1_2864x1512-60.00fps",
+  "note": "",
+  "calibrated_by": "Laurin",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6k",
+  "lens_model": "Canon 50mm",
+  "camera_setting": "2.8k 120fps",
+  "calib_dimension": {
+    "w": 2864,
+    "h": 1512
+  },
+  "orig_dimension": {
+    "w": 2864,
+    "h": 1512
+  },
+  "output_dimension": {
+    "w": 2864,
+    "h": 1512
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 60.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5208177476609499,
+    "camera_matrix": [
+      [
+        18342.5521643824,
+        0.0,
+        -295.54754815105775
+      ],
+      [
+        0.0,
+        18292.32562438206,
+        1209.8339430036483
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.35274550149243655,
+      41.09620431817136,
+      -1621.5331631442712,
+      24359.377366946992
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Walksnail_V2_Walksnail_Avatar_V2_Camera_1080p_4by3_60fps wide_60_720p_4by3_1440x1080-60.01fps",
+  "note": "",
+  "calibrated_by": "FodosFPV",
+  "camera_brand": "Walksnail",
+  "camera_model": "V2",
+  "lens_model": "Walksnail_Avatar_V2_Camera_1080p_4by3_60fps wide",
+  "camera_setting": "60",
+  "calib_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1440,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 60.014236,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5326480126181774,
+    "camera_matrix": [
+      [
+        663.0712192048632,
+        0.0,
+        743.4157583799139
+      ],
+      [
+        0.0,
+        662.4041142675761,
+        535.421550342122
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.012406849480600918,
+      0.023040589267819177,
+      -0.022695888467285784,
+      0.008402275558057335
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "walksnail-fpvcam-walksnail_avatar_v2_camera_1080p_4by3_60fps-wide-1440x1080@60014",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-10",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

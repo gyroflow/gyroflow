@@ -1,0 +1,69 @@
+{
+  "name": "Pentax_6x7_105mm f2.4 + MetaBones 0.71__C4k_1.90by1_4096x2160-24.00fps",
+  "note": "",
+  "calibrated_by": "Mark",
+  "camera_brand": "Pentax",
+  "camera_model": "6x7",
+  "lens_model": "105mm f2.4 + MetaBones 0.71",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 24.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5199751343566379,
+    "camera_matrix": [
+      [
+        17314.305338982856,
+        0.0,
+        1950.3915532050623
+      ],
+      [
+        0.0,
+        17315.79865740342,
+        1138.923048819498
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.33419823041648483,
+      19.96811309832618,
+      -1493.148392021029,
+      75640.03848636938
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

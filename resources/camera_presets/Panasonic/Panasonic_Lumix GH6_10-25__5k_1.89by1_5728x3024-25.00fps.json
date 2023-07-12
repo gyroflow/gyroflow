@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_Lumix GH6_10-25__5k_1.89by1_5728x3024-25.00fps",
+  "note": "",
+  "calibrated_by": "Pierre Guéguen",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix GH6",
+  "lens_model": "10-25",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 5728,
+    "h": 3024
+  },
+  "orig_dimension": {
+    "w": 5728,
+    "h": 3024
+  },
+  "output_dimension": {
+    "w": 5728,
+    "h": 3024
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0414607563258005,
+    "camera_matrix": [
+      [
+        3399.943039194234,
+        0.0,
+        2851.7672025043116
+      ],
+      [
+        0.0,
+        3400.403705752195,
+        1514.8035092973407
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30773558106526716,
+      0.08981807668242467,
+      0.08449666169589995,
+      -0.018512495247081383
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-04",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

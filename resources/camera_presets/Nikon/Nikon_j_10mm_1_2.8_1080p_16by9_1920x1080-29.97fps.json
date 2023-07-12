@@ -1,0 +1,69 @@
+{
+  "name": "Nikon_j_10mm_1:2.8_1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "vm",
+  "camera_brand": "Nikon",
+  "camera_model": "j",
+  "lens_model": "10mm",
+  "camera_setting": "1:2.8",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.3743287963126052,
+    "camera_matrix": [
+      [
+        1501.062193774712,
+        0.0,
+        972.3975039777978
+      ],
+      [
+        0.0,
+        1501.010324522793,
+        531.5466068695501
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.24547359277936776,
+      0.1477112109378993,
+      -0.09108435413263204,
+      0.34283306599438446
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

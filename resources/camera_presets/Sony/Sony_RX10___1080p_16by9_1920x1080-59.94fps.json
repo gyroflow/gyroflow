@@ -1,0 +1,69 @@
+{
+  "name": "Sony_RX10___1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "Admin",
+  "camera_brand": "Sony",
+  "camera_model": "RX10",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5709468338135599,
+    "camera_matrix": [
+      [
+        1517.1471918531884,
+        0.0,
+        957.1668860227134
+      ],
+      [
+        0.0,
+        1511.26504463252,
+        533.3392689624417
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3327636079736025,
+      0.06568222592629681,
+      0.95008000011116,
+      -2.2262560909587226
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-10",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

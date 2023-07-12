@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7C_a3a23ffd_Sony FE 35mm F1.8 lens_4k_16by9_3840x2160-25.00fps",
+  "note": "Sony FE 35mm F1.8 lens",
+  "calibrated_by": "mdf",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "a3a23ffd",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.169482112905241,
+    "camera_matrix": [
+      [
+        3833.2862374491865,
+        0.0,
+        1942.0186036176983
+      ],
+      [
+        0.0,
+        3831.889902424321,
+        1065.0129730089575
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2728567465783326,
+      0.43047238820373784,
+      -0.9427258718269952,
+      3.3565292190322444
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7c-a3a23ffd-3840x2160@25000",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6K Pro_Sigma 17-50mm f/2.8 OS HSM 17mm__6k_16by9_6144x3456-50.00fps",
+  "note": "",
+  "calibrated_by": "Excelsior Lutheran",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6K Pro",
+  "lens_model": "Sigma 17-50mm f/2.8 OS HSM 17mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.6320205016727074,
+    "camera_matrix": [
+      [
+        9446.037920282552,
+        0.0,
+        3043.023394975655
+      ],
+      [
+        0.0,
+        9454.526422290684,
+        1738.5470422072335
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.4913647944919017,
+      12.339266246274915,
+      -239.60708309783547,
+      1809.2753342316096
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "blackmagic-pocketcinemacamera6kpro-sigma17-50mmf/2.8oshsm-17mm-6144x3456@50000",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-24",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 17.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

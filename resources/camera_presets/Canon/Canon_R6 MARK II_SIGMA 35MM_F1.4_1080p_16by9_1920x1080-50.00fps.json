@@ -1,0 +1,69 @@
+{
+  "name": "Canon_R6 MARK II_SIGMA 35MM_F/1.4_1080p_16by9_1920x1080-50.00fps",
+  "note": "",
+  "calibrated_by": "AMAEL GICQUEL",
+  "camera_brand": "Canon",
+  "camera_model": "R6 MARK II",
+  "lens_model": "SIGMA 35MM",
+  "camera_setting": "F/1.4",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 50.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.2720453839994215,
+    "camera_matrix": [
+      [
+        2075.6748734853745,
+        0.0,
+        954.6351610628492
+      ],
+      [
+        0.0,
+        2074.864544073983,
+        529.9593322302674
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.25393585174343974,
+      0.19549560554320056,
+      0.2023425767041062,
+      0.3678148555919982
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-10",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

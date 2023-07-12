@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M_28MM 2.8 IS USM_4. 1x3 12-bit 23.976 fps_C4k_2by1_4416x2208-23.98fps",
+  "note": "Magic Lantern",
+  "calibrated_by": "Edgar Alvarado",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "28MM 2.8 IS USM",
+  "camera_setting": "4. 1x3 12-bit 23.976 fps",
+  "calib_dimension": {
+    "w": 4416,
+    "h": 2208
+  },
+  "orig_dimension": {
+    "w": 4416,
+    "h": 2208
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.983,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8746177064453774,
+    "camera_matrix": [
+      [
+        6809.4332429956,
+        0.0,
+        2285.6697830963335
+      ],
+      [
+        0.0,
+        6668.733094013623,
+        1118.758395290427
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.30975831769865825,
+      -0.8839853109772949,
+      11.795000512724148,
+      -59.36912428231663
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-13",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

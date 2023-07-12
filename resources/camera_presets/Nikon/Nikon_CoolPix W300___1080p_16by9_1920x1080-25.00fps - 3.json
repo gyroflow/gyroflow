@@ -1,0 +1,69 @@
+{
+  "name": "Nikon_CoolPix W300___1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Joakim Söderlind",
+  "camera_brand": "Nikon",
+  "camera_model": "CoolPix W300",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4215704377007709,
+    "camera_matrix": [
+      [
+        1394.133446645808,
+        0.0,
+        966.0105682580868
+      ],
+      [
+        0.0,
+        1392.915041310529,
+        541.7408348047231
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3757383949199039,
+      -0.020376375103586596,
+      0.4202681887542176,
+      -0.04951515292111465
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-13",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

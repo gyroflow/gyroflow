@@ -1,0 +1,69 @@
+{
+  "name": "Nikon_d3200_AF-SNIKKOR55-200_1.4-5.6GED_1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "michel",
+  "camera_brand": "Nikon",
+  "camera_model": "d3200",
+  "lens_model": "AF-SNIKKOR55-200",
+  "camera_setting": "1.4-5.6GED",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.3602146959270027,
+    "camera_matrix": [
+      [
+        6029.611338246564,
+        0.0,
+        955.7985166826132
+      ],
+      [
+        0.0,
+        5968.860385777807,
+        582.9744231077232
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.8694577219990374,
+      -39.264315821788934,
+      3414.193333233352,
+      -78708.26474631677
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

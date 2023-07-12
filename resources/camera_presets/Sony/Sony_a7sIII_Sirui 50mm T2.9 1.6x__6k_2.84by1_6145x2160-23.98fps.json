@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7sIII_Sirui 50mm T2.9 1.6x__6k_2.84by1_6145x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Joshua Currer",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "Sirui 50mm T2.9 1.6x",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 6145,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 6145,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.6002176251956182,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.7140622125337046,
+    "camera_matrix": [
+      [
+        5640.056943716337,
+        0.0,
+        3218.3813872294472
+      ],
+      [
+        0.0,
+        5449.337030482466,
+        910.7749345322496
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.20405060018284213,
+      -0.11782379707065915,
+      0.2425566713159827,
+      2.1354356344376
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

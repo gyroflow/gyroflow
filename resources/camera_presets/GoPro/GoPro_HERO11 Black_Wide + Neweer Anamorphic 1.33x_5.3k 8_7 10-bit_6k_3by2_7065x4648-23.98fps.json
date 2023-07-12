@@ -1,0 +1,69 @@
+{
+  "name": "GoPro_HERO11 Black_Wide + Neweer Anamorphic 1.33x_5.3k 8:7 10-bit_6k_3by2_7065x4648-23.98fps",
+  "note": "NO-EIS",
+  "calibrated_by": "Luis Cardenas (SKYLABS)",
+  "camera_brand": "GoPro",
+  "camera_model": "HERO11 Black",
+  "lens_model": "Wide + Neweer Anamorphic 1.33x",
+  "camera_setting": "5.3k 8:7 10-bit",
+  "calib_dimension": {
+    "w": 7065,
+    "h": 4648
+  },
+  "orig_dimension": {
+    "w": 7065,
+    "h": 4648
+  },
+  "output_dimension": {
+    "w": 5312,
+    "h": 4648
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.33,
+  "input_vertical_stretch": 1.0,
+  "num_images": 21,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 4.702920927996128,
+    "camera_matrix": [
+      [
+        2861.199967511397,
+        0.0,
+        3521.9367020980967
+      ],
+      [
+        0.0,
+        2494.944836460017,
+        2341.84209917066
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.05569441715879823,
+      0.03981772340245039,
+      -0.024345713144910727,
+      -0.000040208151689079624
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Maginon_AC-500___2.7k_16by9_2720x1536-29.97fps",
+  "note": "",
+  "calibrated_by": "刘奕搏",
+  "camera_brand": "Maginon",
+  "camera_model": "AC-500",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 2720,
+    "h": 1536
+  },
+  "orig_dimension": {
+    "w": 2720,
+    "h": 1536
+  },
+  "output_dimension": {
+    "w": 2720,
+    "h": 1536
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.969999,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7213797753581853,
+    "camera_matrix": [
+      [
+        1331.6025332124325,
+        0.0,
+        1401.2582853907786
+      ],
+      [
+        0.0,
+        1334.4565233093167,
+        775.420108407111
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.030853557782989604,
+      -0.01906645291884457,
+      0.030888259481477876,
+      -0.01748304536159763
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-18",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

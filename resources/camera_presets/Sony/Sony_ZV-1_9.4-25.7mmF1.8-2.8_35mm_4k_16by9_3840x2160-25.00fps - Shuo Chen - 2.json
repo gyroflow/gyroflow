@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-1_9.4-25.7mm/F1.8-2.8_35mm_4k_16by9_3840x2160-25.00fps",
+  "note": "SteadyShotSTD_4K25P",
+  "calibrated_by": "Shuo Chen",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-1",
+  "lens_model": "9.4-25.7mm/F1.8-2.8",
+  "camera_setting": "35mm",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 90,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.3600816174139332,
+    "camera_matrix": [
+      [
+        27025.997962890386,
+        0.0,
+        1933.131669191776
+      ],
+      [
+        0.0,
+        29709.519439574877,
+        1043.214187526922
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      2.9824429733167266,
+      9757.324944000193,
+      -4099204.50824249,
+      575126603.436262
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-1-2b5ba26e-3840x2160@25000",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-06",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7C_Samyang 75mm f1.8__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "robert",
+  "camera_brand": "Sony",
+  "camera_model": "a7C",
+  "lens_model": "Samyang 75mm f1.8",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 23.856384564919193,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 50,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.144873793557004,
+    "camera_matrix": [
+      [
+        8402.371237266889,
+        0.0,
+        1903.849849317431
+      ],
+      [
+        0.0,
+        8410.096564164282,
+        1077.915767473244
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.5846053756605663,
+      -5.974748769185353,
+      102.95965947709688,
+      -615.9022242878086
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7c-646e8dbd-3840x2160@23976",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

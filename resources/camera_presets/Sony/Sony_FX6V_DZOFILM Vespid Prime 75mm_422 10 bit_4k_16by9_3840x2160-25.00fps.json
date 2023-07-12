@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX6V_DZOFILM Vespid Prime 75mm_422 10 bit_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Lucas Plank",
+  "camera_brand": "Sony",
+  "camera_model": "FX6V",
+  "lens_model": "DZOFILM Vespid Prime 75mm",
+  "camera_setting": "422 10 bit",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6662386668841652,
+    "camera_matrix": [
+      [
+        7891.724141229261,
+        0.0,
+        1896.7691003425111
+      ],
+      [
+        0.0,
+        7891.219048249619,
+        1062.63154723372
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.13688295650135548,
+      -4.444178708829059,
+      137.68842458223395,
+      -1154.9470380310538
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-02",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

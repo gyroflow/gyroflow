@@ -1,0 +1,69 @@
+{
+  "name": "Fujifilm_X-T4_18-55 Kit lens_4096x 59fps_C4k_1.90by1_4095x2160-59.94fps",
+  "note": "",
+  "calibrated_by": "Thore Hassel",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T4",
+  "lens_model": "18-55 Kit lens",
+  "camera_setting": "4096x 59fps",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.8100644796594134,
+    "camera_matrix": [
+      [
+        4125.421804626382,
+        0.0,
+        2032.3756489131804
+      ],
+      [
+        0.0,
+        4125.2123583812545,
+        1079.7645416347968
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.12151330793194376,
+      3.535413810587727,
+      -25.58536788696751,
+      69.60026703166204
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-10",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

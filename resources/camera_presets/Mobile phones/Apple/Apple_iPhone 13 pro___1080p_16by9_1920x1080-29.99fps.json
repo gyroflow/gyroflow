@@ -1,0 +1,69 @@
+{
+  "name": "Apple_iPhone 13 pro___1080p_16by9_1920x1080-29.99fps",
+  "note": "",
+  "calibrated_by": "Roman Grimmius",
+  "camera_brand": "Apple",
+  "camera_model": "iPhone 13 pro",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 29.98646,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.22650122518506485,
+    "camera_matrix": [
+      [
+        884.8177438664699,
+        0.0,
+        952.9559993335972
+      ],
+      [
+        0.0,
+        884.657896002745,
+        537.8398412567824
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32326725410417556,
+      0.17426285160578928,
+      -0.09905984321913404,
+      0.1945935844846466
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

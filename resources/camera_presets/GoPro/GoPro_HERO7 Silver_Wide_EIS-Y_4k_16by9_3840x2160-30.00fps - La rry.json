@@ -27,7 +27,7 @@
     "time_per_syncpoint": 0.5,
     "do_autosync": true
   },
-  "frame_readout_time": -8.143709986034617,
+  "frame_readout_time": null,
   "gyro_lpf": 50.0,
   "input_horizontal_stretch": 1.0,
   "num_images": 15,

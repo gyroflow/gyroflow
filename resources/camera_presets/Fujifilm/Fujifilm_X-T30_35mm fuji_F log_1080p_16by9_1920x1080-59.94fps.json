@@ -1,0 +1,69 @@
+{
+  "name": "Fujifilm_X-T30_35mm fuji_F log_1080p_16by9_1920x1080-59.94fps",
+  "note": "",
+  "calibrated_by": "guest1",
+  "camera_brand": "Fujifilm",
+  "camera_model": "X-T30",
+  "lens_model": "35mm fuji",
+  "camera_setting": "F log",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.23968315229529943,
+    "camera_matrix": [
+      [
+        2756.882546089714,
+        0.0,
+        932.9599003399924
+      ],
+      [
+        0.0,
+        2751.8717861951773,
+        553.1707311349088
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.26320445021847727,
+      3.076999263002929,
+      -27.39500669583934,
+      113.6913452883728
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-07",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

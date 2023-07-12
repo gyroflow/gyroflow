@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX30_Laowa 9mm ZeroD__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Leon Knarr",
+  "camera_brand": "Sony",
+  "camera_model": "FX30",
+  "lens_model": "Laowa 9mm ZeroD",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 15.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.1105434782662191,
+    "camera_matrix": [
+      [
+        1587.5836619935944,
+        0.0,
+        1916.0397964264555
+      ],
+      [
+        0.0,
+        1548.5071001266542,
+        1064.7537109128948
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3330401601651323,
+      0.13979546421801908,
+      -0.03701346549694425,
+      0.0973703684894267
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-03",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

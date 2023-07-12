@@ -1,0 +1,69 @@
+{
+  "name": "Sony_FX6V_Sony FE 12-24mm f4.0 G_21mm_C4k_1.90by1_4095x2160-59.94fps",
+  "note": "21mm",
+  "calibrated_by": "aeroquads",
+  "camera_brand": "Sony",
+  "camera_model": "FX6V",
+  "lens_model": "Sony FE 12-24mm f4.0 G",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4095,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.5024139254677792,
+    "camera_matrix": [
+      [
+        2646.0110526950893,
+        0.0,
+        2057.939190690821
+      ],
+      [
+        0.0,
+        2643.0653359153143,
+        1081.8560797035004
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.29853298021059077,
+      0.5368509543223315,
+      -1.369994086414861,
+      1.6632518837375097
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilme-fx6v-21.00mm-4096x2160@59940",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 21.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

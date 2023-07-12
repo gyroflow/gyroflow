@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E10_7Artisans 35mm 1.4f_35MM_4k_16by9_3840x2160-29.97fps",
+  "note": "35MM",
+  "calibrated_by": "Ioannis Karazournias",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "7Artisans 35mm 1.4f",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 33.37,
+  "gyro_lpf": 0.0,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 10,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7222569174791773,
+    "camera_matrix": [
+      [
+        6991.822819080769,
+        0.0,
+        1877.119974079793
+      ],
+      [
+        0.0,
+        7004.07734498488,
+        814.0171496874857
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.3087539299104893,
+      -2.0342088702004477,
+      5.93345903938833,
+      61.31153274433455
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-21",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 35.0,
+  "crop_factor": 1.5,
+  "global_shutter": false
+}

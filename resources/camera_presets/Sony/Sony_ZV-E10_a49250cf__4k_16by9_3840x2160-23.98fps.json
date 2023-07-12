@@ -1,0 +1,69 @@
+{
+  "name": "Sony_ZV-E10_a49250cf__4k_16by9_3840x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "SMK. Rishikumaar",
+  "camera_brand": "Sony",
+  "camera_model": "ZV-E10",
+  "lens_model": "a49250cf",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.6072818461862056,
+    "camera_matrix": [
+      [
+        8346.273586945,
+        0.0,
+        2056.3695390739354
+      ],
+      [
+        0.0,
+        8321.617254236204,
+        1895.4618129912044
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.5672242140947338,
+      27.70304431147194,
+      -477.4056483072858,
+      2858.0983101769284
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-zv-e10-a49250cf-3840x2160@23976",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-11",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

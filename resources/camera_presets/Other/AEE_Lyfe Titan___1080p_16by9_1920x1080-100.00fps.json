@@ -1,0 +1,69 @@
+{
+  "name": "AEE_Lyfe Titan___1080p_16by9_1920x1080-100.00fps",
+  "note": "",
+  "calibrated_by": "Alexandre Denesle",
+  "camera_brand": "AEE",
+  "camera_model": "Lyfe Titan",
+  "lens_model": "",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 100.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4106148181584317,
+    "camera_matrix": [
+      [
+        1128.007690599069,
+        0.0,
+        967.3746652529984
+      ],
+      [
+        0.0,
+        1128.6629600909082,
+        559.4248636418614
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      -0.06022910528483012,
+      -0.012972852393438304,
+      -0.06636562333407638,
+      0.09823786611521332
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-26",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

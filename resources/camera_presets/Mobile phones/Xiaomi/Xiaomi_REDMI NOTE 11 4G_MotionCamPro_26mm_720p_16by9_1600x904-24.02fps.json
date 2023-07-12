@@ -1,0 +1,69 @@
+{
+  "name": "Xiaomi_REDMI NOTE 11 4G_MotionCamPro_26mm_720p_16by9_1600x904-24.02fps",
+  "note": "",
+  "calibrated_by": "mathieu chantelat",
+  "camera_brand": "Xiaomi",
+  "camera_model": "REDMI NOTE 11 4G",
+  "lens_model": "MotionCamPro",
+  "camera_setting": "26mm",
+  "calib_dimension": {
+    "w": 1600,
+    "h": 904
+  },
+  "orig_dimension": {
+    "w": 1600,
+    "h": 904
+  },
+  "output_dimension": {
+    "w": 1600,
+    "h": 904
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 8,
+  "fps": 24.020342,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.49479953967967527,
+    "camera_matrix": [
+      [
+        1244.4907320765649,
+        0.0,
+        772.1107841219925
+      ],
+      [
+        0.0,
+        1247.023466037141,
+        446.3200375566916
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.285093558910417,
+      0.8049183868416601,
+      -3.0134820207434263,
+      4.257215720503503
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

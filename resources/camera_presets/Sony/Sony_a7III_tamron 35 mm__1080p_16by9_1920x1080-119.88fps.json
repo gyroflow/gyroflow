@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7III_tamron 35 mm__1080p_16by9_1920x1080-119.88fps",
+  "note": "",
+  "calibrated_by": "David Gracia Lopez",
+  "camera_brand": "Sony",
+  "camera_model": "a7III",
+  "lens_model": "tamron 35 mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 119.880119,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.33491455192347763,
+    "camera_matrix": [
+      [
+        1907.2190152336264,
+        0.0,
+        967.2438258719347
+      ],
+      [
+        0.0,
+        1909.679890555671,
+        567.4516128411144
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.22164216502542008,
+      1.8949611435778304,
+      -16.695495833172373,
+      52.90299094801371
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-04",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Blackmagic_Pocket Cinema Camera 6K_Sigma 10-20mm f/3.5 EX DC HSM 10mm_10mm_6k_16by9_6144x3456-30.00fps",
+  "note": "",
+  "calibrated_by": "félix LLORENS",
+  "camera_brand": "Blackmagic",
+  "camera_model": "Pocket Cinema Camera 6K",
+  "lens_model": "Sigma 10-20mm f/3.5 EX DC HSM 10mm",
+  "camera_setting": "10mm",
+  "calib_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "orig_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "output_dimension": {
+    "w": 6144,
+    "h": 3456
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 30.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 4.236753084014216,
+    "camera_matrix": [
+      [
+        2794.730665734284,
+        0.0,
+        3121.5855307098245
+      ],
+      [
+        0.0,
+        2787.737363374123,
+        1725.474171147169
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.23663696079257143,
+      0.3491972092338295,
+      -0.4755094260989223,
+      0.38933551351953977
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "blackmagic-pocketcinemacamera6k-sigma10-20mmf/3.5exdchsm-10mm-6144x3456@30000",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-10",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 10.0,
+  "crop_factor": null,
+  "global_shutter": false
+}

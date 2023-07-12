@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOS M_EF 40MM 2.8MM_4. 1x3 12-bit 23.976 fps_C4k_2by1_4416x2208-23.98fps",
+  "note": "Magic Lantern",
+  "calibrated_by": "Edgar Alvarado",
+  "camera_brand": "Canon",
+  "camera_model": "EOS M",
+  "lens_model": "EF 40MM 2.8MM",
+  "camera_setting": "4. 1x3 12-bit 23.976 fps",
+  "calib_dimension": {
+    "w": 4416,
+    "h": 2208
+  },
+  "orig_dimension": {
+    "w": 4416,
+    "h": 2208
+  },
+  "output_dimension": {
+    "w": 1472,
+    "h": 2208
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 23.983,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.1668502073571836,
+    "camera_matrix": [
+      [
+        9831.870665996878,
+        0.0,
+        2074.0551758801266
+      ],
+      [
+        0.0,
+        9606.995230161278,
+        1169.290796750452
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.18610187684526516,
+      18.849873925235777,
+      -928.022997975856,
+      13278.386879510446
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-13",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

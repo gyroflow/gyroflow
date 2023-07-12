@@ -1,0 +1,69 @@
+{
+  "name": "Caddx_Walnut_NA_NA_4k_16by9_3840x2160-59.94fps",
+  "note": "NA",
+  "calibrated_by": "Seth",
+  "camera_brand": "Caddx",
+  "camera_model": "Walnut",
+  "lens_model": "NA",
+  "camera_setting": "NA",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 59.94006,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.9438839090837924,
+    "camera_matrix": [
+      [
+        1843.38010480757,
+        0.0,
+        1798.8524635077254
+      ],
+      [
+        0.0,
+        1837.9785905298415,
+        1145.745850570859
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.03419495655596495,
+      0.014570397073043292,
+      -0.009076159804496898,
+      0.002923358602025803
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-06-22",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

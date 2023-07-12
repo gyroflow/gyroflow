@@ -1,0 +1,69 @@
+{
+  "name": "Nokia_1020_PureView 41MPix_@25_1080p_16by9_1920x1080-25.02fps",
+  "note": "",
+  "calibrated_by": "SF",
+  "camera_brand": "Nokia",
+  "camera_model": "1020",
+  "lens_model": "PureView 41MPix",
+  "camera_setting": "@25",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.021259,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.0333760067994446,
+    "camera_matrix": [
+      [
+        2109.9832358083836,
+        0.0,
+        896.8783879977609
+      ],
+      [
+        0.0,
+        2106.43338171568,
+        455.00565834907405
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.42798872226113466,
+      -0.24757549217002311,
+      6.278713350904192,
+      -27.98664958851517
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-10",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

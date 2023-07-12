@@ -1,0 +1,69 @@
+{
+  "name": "Canon_6D_16-35 f/4 L__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Johannes Waschke",
+  "camera_brand": "Canon",
+  "camera_model": "6D",
+  "lens_model": "16-35 f/4 L",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 39,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.7215099643142023,
+    "camera_matrix": [
+      [
+        877.2622072001467,
+        0.0,
+        958.7378584856796
+      ],
+      [
+        0.0,
+        876.5499710313546,
+        534.0340595948389
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.27728828793128557,
+      0.1802004704365521,
+      -0.22367677149996748,
+      0.2580167625997874
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-06-04",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Canon_EOSD 1 DX MK3_EF 16-35mm 2.8 MK2_23.98_C4k_1.90by1_4096x2160-23.98fps",
+  "note": "",
+  "calibrated_by": "Joyo Soetomo",
+  "camera_brand": "Canon",
+  "camera_model": "EOSD 1 DX MK3",
+  "lens_model": "EF 16-35mm 2.8 MK2",
+  "camera_setting": "23.98",
+  "calib_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 4096,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 5,
+  "fps": 23.976025,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4895772781934968,
+    "camera_matrix": [
+      [
+        2418.2947343126243,
+        0.0,
+        2022.9742945336136
+      ],
+      [
+        0.0,
+        2426.47673007624,
+        1154.1864612097804
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.32899749538376916,
+      0.06513027584972263,
+      0.18356652109148455,
+      0.00906449731322526
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

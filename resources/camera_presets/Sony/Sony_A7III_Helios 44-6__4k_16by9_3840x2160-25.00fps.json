@@ -1,0 +1,69 @@
+{
+  "name": "Sony_A7III_Helios 44-6__4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Berno",
+  "camera_brand": "Sony",
+  "camera_model": "A7III",
+  "lens_model": "Helios 44-6",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 7,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 1.2072192831352475,
+    "camera_matrix": [
+      [
+        8614.237808728052,
+        0.0,
+        1812.6839019221736
+      ],
+      [
+        0.0,
+        8767.113690019034,
+        1127.433004250291
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      1.0465712533797675,
+      -40.89465310258519,
+      1136.513143416147,
+      -11010.526712090428
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-08",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

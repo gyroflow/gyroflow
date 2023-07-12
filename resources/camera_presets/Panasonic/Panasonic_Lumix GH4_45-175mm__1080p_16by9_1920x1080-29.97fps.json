@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_Lumix GH4_45-175mm__1080p_16by9_1920x1080-29.97fps",
+  "note": "",
+  "calibrated_by": "Alberto Conrad",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix GH4",
+  "lens_model": "45-175mm",
+  "camera_setting": "",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 12,
+  "fps": 29.97003,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 2.9895395316188114,
+    "camera_matrix": [
+      [
+        -280354.29650987807,
+        -0.0,
+        911.2673166204002
+      ],
+      [
+        0.0,
+        -683294.9153106939,
+        7370.881287999765
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      166.71473238514173,
+      -80490.04643337583,
+      83125745.74308565,
+      -20570227451.8758
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.0",
+  "date": "2023-07-09",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

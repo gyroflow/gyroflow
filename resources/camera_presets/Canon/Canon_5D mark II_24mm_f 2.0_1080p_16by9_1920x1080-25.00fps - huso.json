@@ -1,0 +1,69 @@
+{
+  "name": "Canon_5D mark II_24mm_f 2.0_1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "huso",
+  "camera_brand": "Canon",
+  "camera_model": "5D mark II",
+  "lens_model": "24mm",
+  "camera_setting": "f 2.0",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": 0.0,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 15,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.41555223175908895,
+    "camera_matrix": [
+      [
+        1207.2011355106297,
+        0.0,
+        978.0955523546622
+      ],
+      [
+        0.0,
+        1205.689641580402,
+        519.3595733548074
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2696959560171305,
+      0.002759549361250903,
+      0.4917884224910146,
+      -0.2245062367552966
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-07",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

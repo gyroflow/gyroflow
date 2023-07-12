@@ -1,0 +1,69 @@
+{
+  "name": "Panasonic_Lumix GH5_Panasonic Lumix G 25mm f/1.7_fullHD,10bit_1080p_16by9_1920x1080-25.00fps",
+  "note": "",
+  "calibrated_by": "Norbert Varga",
+  "camera_brand": "Panasonic",
+  "camera_model": "Lumix GH5",
+  "lens_model": "Panasonic Lumix G 25mm f/1.7",
+  "camera_setting": "fullHD,10bit",
+  "calib_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "orig_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "output_dimension": {
+    "w": 1920,
+    "h": 1080
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 13,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.4149825087974458,
+    "camera_matrix": [
+      [
+        3193.03867585067,
+        0.0,
+        960.2908698059056
+      ],
+      [
+        0.0,
+        3156.2289414760203,
+        494.24817995344534
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.373076948231015,
+      0.21863102840445103,
+      -5.388995080404933,
+      49.72906692428826
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": null,
+  "crop_factor": null,
+  "global_shutter": false
+}

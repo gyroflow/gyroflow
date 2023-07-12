@@ -1,0 +1,69 @@
+{
+  "name": "Sony_a7sIII_Samyang AF FE 85.00mm f1.4_50fps_4k_16by9_3840x2160-25.00fps",
+  "note": "",
+  "calibrated_by": "Gail Malbete",
+  "camera_brand": "Sony",
+  "camera_model": "a7sIII",
+  "lens_model": "Samyang AF FE 85.00mm f1.4",
+  "camera_setting": "50fps",
+  "calib_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "orig_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "output_dimension": {
+    "w": 3840,
+    "h": 2160
+  },
+  "frame_readout_time": null,
+  "gyro_lpf": null,
+  "input_horizontal_stretch": 1.0,
+  "input_vertical_stretch": 1.0,
+  "num_images": 11,
+  "fps": 25.0,
+  "crop": null,
+  "official": false,
+  "asymmetrical": false,
+  "fisheye_params": {
+    "RMS_error": 0.825257684964062,
+    "camera_matrix": [
+      [
+        9788.348478540198,
+        0.0,
+        1831.4751590654284
+      ],
+      [
+        0.0,
+        9767.862000663254,
+        1054.948101432925
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "distortion_coeffs": [
+      0.2105651087533477,
+      11.937495976251672,
+      -437.1890723635747,
+      5709.355708785096
+    ],
+    "radial_distortion_limit": null
+  },
+  "identifier": "sony-ilce-7sm3-85.00mm-3840x2160@25000",
+  "calibrator_version": "1.5.1",
+  "date": "2023-07-05",
+  "compatible_settings": [],
+  "sync_settings": null,
+  "distortion_model": null,
+  "digital_lens": null,
+  "digital_lens_params": null,
+  "interpolations": null,
+  "focal_length": 85.0,
+  "crop_factor": null,
+  "global_shutter": false
+}
