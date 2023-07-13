@@ -943,9 +943,6 @@ impl StabilizationManager {
 
             "trim_start": params.trim_start,
             "trim_end":   params.trim_end,
-
-            // "frame_orientation": {}, // timestamp, original frame quaternion
-            // "stab_transform":    {} // timestamp, final quaternion
         });
 
         util::merge_json(&mut obj, &serde_json::from_str(additional_data).unwrap_or_default());
@@ -1066,14 +1063,6 @@ impl StabilizationManager {
                 self.gyro.write().init_from_params(&params);
                 self.keyframes.write().timestamp_scale = params.fps_scale;
             }
-            if let Some(lens) = obj.get("calibration_data") {
-                let mut l = self.lens.write();
-                l.load_from_json_value(&lens);
-                let db = self.lens_profile_db.read();
-                l.resolve_interpolations(&db);
-            }
-            obj.remove("frame_orientation");
-            obj.remove("stab_transform");
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
                 let org_gyro_path = obj.get("filepath").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
                 let gyro_path = Self::get_new_videofile_path(&org_gyro_path, path.clone(), sequence_start);
@@ -1183,6 +1172,12 @@ impl StabilizationManager {
                 obj.remove("image_orientations");
                 obj.remove("gravity_vectors");
                 obj.remove("file_metadata");
+            }
+            if let Some(lens) = obj.get("calibration_data") {
+                let mut l = self.lens.write();
+                l.load_from_json_value(&lens);
+                let db = self.lens_profile_db.read();
+                l.resolve_interpolations(&db);
             }
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("stabilization") {
                 let mut params = self.params.write();
