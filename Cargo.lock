@@ -1541,7 +1541,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow"
-version = "1.5.1"
+version = "1.5.2"
 dependencies = [
  "argh",
  "breakpad-sys",
@@ -1597,7 +1597,7 @@ dependencies = [
 
 [[package]]
 name = "gyroflow-core"
-version = "1.5.1"
+version = "1.5.2"
 dependencies = [
  "ahrs",
  "akaze",
@@ -3650,9 +3650,9 @@ dependencies = [
 
 [[package]]
 name = "tar"
-version = "0.4.38"
+version = "0.4.39"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b55807c0344e1e6c04d7c965f5289c39a8d94ae23ed5c0b57aabac549f871c6"
+checksum = "ec96d2ffad078296368d46ff1cb309be1c23c513b4ab0e22a45de0185275ac96"
 dependencies = [
  "filetime",
  "libc",
@@ -3662,7 +3662,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.2.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=3657dd0#3657dd0c959e6e086ecdd81f734ae469a4b862a1"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=6d4f848#6d4f848c71d12c4662198c09e1f9446aded75f57"
 dependencies = [
  "argh",
  "byteorder",
