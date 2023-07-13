@@ -1083,6 +1083,7 @@ impl StabilizationManager {
                 use crate::gyro_source::TimeIMU;
 
                 let is_compressed = obj.get("raw_imu").map(|x| x.is_string()).unwrap_or_default();
+                let is_main_video = org_gyro_path == org_video_path;
 
                 // Load IMU data only if it's from another file or the gyro file is not accessible anymore
                 if (!org_gyro_path.is_empty() && org_gyro_path != org_video_path) || !gyro_path.exists() || std::fs::File::open(&gyro_path).is_err() {
@@ -1154,12 +1155,12 @@ impl StabilizationManager {
                         let mut gyro = self.gyro.write();
                         gyro.load_from_telemetry(&md);
                     } else if gyro_path.exists() && blocking {
-                        if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), false, &Default::default(), progress_cb, cancel_flag) {
+                        if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), is_main_video, &Default::default(), progress_cb, cancel_flag) {
                             ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
                         }
                     }
                 } else if gyro_path.exists() && blocking {
-                    if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), false, &Default::default(), progress_cb, cancel_flag) {
+                    if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), is_main_video, &Default::default(), progress_cb, cancel_flag) {
                         ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
                     }
                 }
