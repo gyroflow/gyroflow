@@ -626,6 +626,25 @@ impl StabilizationManager {
         self.invalidate_smoothing();
     }
 
+    pub fn disable_lens_stretch(&mut self) {
+        let (x_stretch, y_stretch) = {
+            let lens = self.lens.read();
+            (lens.input_horizontal_stretch, lens.input_vertical_stretch)
+        };
+        if (x_stretch > 0.01 && x_stretch != 1.0) || (y_stretch > 0.01 && y_stretch != 1.0) {
+            {
+                let mut params = self.params.write();
+                params.video_size.0 = (params.video_size.0 as f64 * x_stretch).round() as usize;
+                params.video_size.1 = (params.video_size.1 as f64 * y_stretch).round() as usize;
+            }
+            {
+                let mut lens = self.lens.write();
+                lens.input_horizontal_stretch = 1.0;
+                lens.input_vertical_stretch = 1.0;
+            }
+        }
+    }
+
     pub fn get_scaling_ratio(&self) -> f64 { let params = self.params.read(); params.video_size.0 as f64 / params.video_output_size.0 as f64 }
     pub fn get_min_fov      (&self) -> f64 { self.params.read().min_fov }
 
