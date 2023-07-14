@@ -626,7 +626,7 @@ impl StabilizationManager {
         self.invalidate_smoothing();
     }
 
-    pub fn disable_lens_stretch(&mut self) {
+    pub fn disable_lens_stretch(&self) {
         let (x_stretch, y_stretch) = {
             let lens = self.lens.read();
             (lens.input_horizontal_stretch, lens.input_vertical_stretch)
