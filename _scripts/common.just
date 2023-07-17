@@ -28,7 +28,7 @@ VcpkgArch := if os() == "windows"               { "x64-windows-release"
       } else if os() + arch() == "macosaarch64" { "arm64-osx"
       } else if os() + arch() == "macosx86_64"  { "x64-osx-release"
       } else                                    { "x64-linux-release" }
-export OPENCV_LINK_LIBS := "opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4,opencv_imgcodecs4,opencv_objdetect4" + if os() == "linux" { ",png" } else if os() + arch() == "macosaarch64" { ",tegra_hal" } else { "" }
+export OPENCV_LINK_LIBS := "opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4,opencv_imgcodecs4,opencv_objdetect4,opencv_stitching4" + if os() == "linux" { ",png" } else if os() + arch() == "macosaarch64" { ",tegra_hal" } else { "" }
 export OPENCV_LINK_PATHS := ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "lib," + ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "lib/manual-link/opencv4_thirdparty"
 export OPENCV_INCLUDE_PATHS := ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "include"
 OpenCVPath := ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "bin"

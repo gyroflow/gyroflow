@@ -247,7 +247,7 @@ impl PixelType for R32f {
     #[inline] fn from_float_glam(v: stabilize_spirv::glam::Vec4) -> Self { Self(v[0]) }
     #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0, 0.0, 0.0, 0.0) }
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0]) }
-    #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize], is_limited: bool) -> Vector4<f32> { Vector4::new(v[ind[0]], 0.0, 0.0, 0.0) }
+    #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize], _is_limited: bool) -> Vector4<f32> { Vector4::new(v[ind[0]], 0.0, 0.0, 0.0) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("float", "convert_float", "float", "convert_float") }
     #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::R32Float, "f32", 255.0)) }
 }

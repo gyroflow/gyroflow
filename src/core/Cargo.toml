@@ -41,7 +41,7 @@ bitflags = "2.3.3"
 enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.3.1"
-lru = "0.10"
+lru = "0.11"
 thiserror = "1.0.41"
 ciborium = "0.2.1"
 
@@ -61,7 +61,7 @@ enterpolation = "0.2.1"
 libloading = "0.8"
 libc = "0.2"
 
-opencv = { version = "0.81", features = ["clang-runtime"], optional = true }
+opencv = { version = "0.83", features = ["clang-runtime"], optional = true }
 
 wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "89f721f", features = ["spirv"] }
 wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "89f721f" }
