@@ -9,7 +9,7 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 use parking_lot::RwLock;
 #[cfg(feature = "use-opencv")]
-use opencv::{ core::{ Mat, Size, CV_8UC1, Vec2f }, prelude::{ MatTraitConst, DenseOpticalFlow } };
+use opencv::{ core::{ Mat, Size, CV_8UC1, Vec2f }, prelude::{ MatTraitConst, DenseOpticalFlowTrait } };
 
 #[derive(Clone)]
 pub struct OFOpenCVDis {
@@ -53,7 +53,7 @@ impl OpticalFlowTrait for OFOpenCVDis {
                 let a2_img = unsafe { Mat::new_size_with_data(Size::new(next.img.width() as i32, next.img.height() as i32), CV_8UC1, next.img.as_raw().as_ptr() as *mut std::ffi::c_void, 0) }?;
 
                 let mut of = Mat::default();
-                let mut optflow = <dyn opencv::video::DISOpticalFlow>::create(opencv::video::DISOpticalFlow_PRESET_FAST)?;
+                let mut optflow = opencv::video::DISOpticalFlow::create(opencv::video::DISOpticalFlow_PRESET_FAST)?;
                 optflow.calc(&a1_img, &a2_img, &mut of)?;
 
                 let mut points_a = Vec::new();
