@@ -304,7 +304,7 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
                         }
                         let mut frames_ctx_ref = (*encoder_ctx).hw_frames_ctx;
 
-                        let mut frames_ctx = (*frames_ctx_ref).data as *mut ffi::AVHWFramesContext;
+                        let frames_ctx = (*frames_ctx_ref).data as *mut ffi::AVHWFramesContext;
                         if (*frames_ctx).format    == ffi::AVPixelFormat::AV_PIX_FMT_NONE { (*frames_ctx).format    = hw_format.into(); }
                         if (*frames_ctx).sw_format == ffi::AVPixelFormat::AV_PIX_FMT_NONE { (*frames_ctx).sw_format = target_format; }
                         (*frames_ctx).width     = size.0 as i32;

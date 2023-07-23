@@ -26,10 +26,10 @@ serde = "1.0"
 serde_json = "1.0"
 bytemuck = "1.13.1"
 nalgebra = "0.32"
-semver = "1.0.17"
+semver = "1.0.18"
 fastrand = "2.0.0"
 itertools = "0.11.0"
-regex = "1.9.0"
+regex = "1.9.1"
 rayon = "1.7"
 
 pollster = "0.3.0"
@@ -60,8 +60,8 @@ log = "0.4"
 ureq = "2.7.1"
 url = "2.4.0"
 whoami = "1.4.1"
-tar = "0.4.38"
-lru = "0.10.1"
+tar = "0.4.39"
+lru = "0.11.0"
 
 log-panics = { version = "2.1", features = ["with-backtrace"] }
 
@@ -76,8 +76,7 @@ features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemSer
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry" ]
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.metal]
-git = "https://github.com/gfx-rs/metal-rs.git"
-rev = "a6a0446"
+version = "0.26.0"
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.core-foundation-sys]
 version = "0.8.4"
 

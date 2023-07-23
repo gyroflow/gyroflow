@@ -610,7 +610,7 @@ Puedes aumentar el límite de nitidez en la sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="585"/>
       <source>Preserve export settings</source>
-      <translation type="unfinished">Preserve export settings</translation>
+      <translation>Conservar ajustes de exportación</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="587"/>
@@ -631,12 +631,12 @@ Puedes aumentar el límite de nitidez en la sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="347"/>
       <source>Original</source>
-      <translation type="unfinished">Original</translation>
+      <translation>Original</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="355"/>
       <source>You can edit the output size presets here:</source>
-      <translation type="unfinished">You can edit the output size presets here:</translation>
+      <translation>Puedes editar los ajustes de tamaño de salida aquí:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="356"/>
@@ -1202,12 +1202,12 @@ Do you want to submit your profile?</source>
       <location filename="../../src/ui/components/OutputPathField.qml" line="40"/>
       <location filename="../../src/ui/components/OutputPathField.qml" line="50"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>Seleccionar archivo de destino</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="41"/>
       <source>Video files</source>
-      <translation type="unfinished">Video files</translation>
+      <translation>Archivos de vídeo</translation>
     </message>
   </context>
   <context>
@@ -1601,7 +1601,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="692"/>
       <source>Stabilized video + Project file with gyro data</source>
-      <translation type="unfinished">Stabilized video + Project file with gyro data</translation>
+      <translation>Vídeo estabilizado + Archivo de proyecto con datos de giro</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="696"/>
@@ -1876,7 +1876,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="115"/>
       <source>Add keyframe</source>
-      <translation type="unfinished">Add keyframe</translation>
+      <translation>Añadir fotograma clave</translation>
     </message>
   </context>
   <context>
@@ -2008,7 +2008,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="387"/>
       <source>IMU integration method for keeping track of the horizon and adjust built-in quaternions</source>
-      <translation type="unfinished">IMU integration method for keeping track of the horizon and adjust built-in quaternions</translation>
+      <translation>Método de integración IMU para realizar un seguimiento del horizonte y ajustar las cuaterniones incorporadas</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="396"/>
@@ -2950,7 +2950,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Same as the original file</source>
-      <translation type="unfinished">Same as the original file</translation>
+      <translation>Descargar como el archivo original</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>

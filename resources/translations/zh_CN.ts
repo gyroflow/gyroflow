@@ -252,8 +252,8 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="264"/>
       <source>Due to iOS&apos;s file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to iOS&apos;s file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>由于iOS的文件访问限制，您需要手动选择目标文件夹。
+单击确定并选择目标文件夹。</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="325"/>
@@ -612,12 +612,12 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="585"/>
       <source>Preserve export settings</source>
-      <translation type="unfinished">Preserve export settings</translation>
+      <translation>保留导出设置</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="587"/>
       <source>Save output size and bitrate in settings and use it for all files.</source>
-      <translation type="unfinished">Save output size and bitrate in settings and use it for all files.</translation>
+      <translation>在设置中保存输出大小和比特率，并将其用于所有文件。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="363"/>
@@ -628,17 +628,17 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="344"/>
       <source>Edit sizes</source>
-      <translation type="unfinished">Edit sizes</translation>
+      <translation>编辑大小</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="347"/>
       <source>Original</source>
-      <translation type="unfinished">Original</translation>
+      <translation>原文件</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="355"/>
       <source>You can edit the output size presets here:</source>
-      <translation type="unfinished">You can edit the output size presets here:</translation>
+      <translation>您可以在此处编辑输出大小预设：</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="356"/>
@@ -648,7 +648,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="363"/>
       <source>Invalid JSON format!</source>
-      <translation type="unfinished">Invalid JSON format!</translation>
+      <translation>无效的JSON格式！</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="366"/>
@@ -658,7 +658,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="487"/>
       <source>Metadata comment</source>
-      <translation type="unfinished">Metadata comment</translation>
+      <translation>元数据注释</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="495"/>
@@ -688,7 +688,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="523"/>
       <source>Audio codec</source>
-      <translation type="unfinished">Audio codec</translation>
+      <translation>音频编码器</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="535"/>
@@ -1204,12 +1204,12 @@ Do you want to submit your profile?</source>
       <location filename="../../src/ui/components/OutputPathField.qml" line="40"/>
       <location filename="../../src/ui/components/OutputPathField.qml" line="50"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>选择目标路径</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="41"/>
       <source>Video files</source>
-      <translation type="unfinished">Video files</translation>
+      <translation>视频文件</translation>
     </message>
   </context>
   <context>
@@ -1603,7 +1603,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="692"/>
       <source>Stabilized video + Project file with gyro data</source>
-      <translation type="unfinished">Stabilized video + Project file with gyro data</translation>
+      <translation>增稳的视频 + 带有陀螺数据的项目文件</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="696"/>
@@ -1878,7 +1878,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="115"/>
       <source>Add keyframe</source>
-      <translation type="unfinished">Add keyframe</translation>
+      <translation>增加关键帧</translation>
     </message>
   </context>
   <context>
@@ -2010,7 +2010,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="387"/>
       <source>IMU integration method for keeping track of the horizon and adjust built-in quaternions</source>
-      <translation type="unfinished">IMU integration method for keeping track of the horizon and adjust built-in quaternions</translation>
+      <translation>一种跟踪地平线并调整内置四元数的IMU积分方法</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="396"/>
@@ -2954,17 +2954,17 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Same as the original file</source>
-      <translation type="unfinished">Same as the original file</translation>
+      <translation>和原始文件一致</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Custom path</source>
-      <translation type="unfinished">Custom path</translation>
+      <translation>自定义路径</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="486"/>
       <source>Please enter the output path:</source>
-      <translation type="unfinished">Please enter the output path:</translation>
+      <translation>请输入输出路径：</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="609"/>
@@ -3029,7 +3029,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="923"/>
       <source>Volume</source>
-      <translation type="unfinished">Volume</translation>
+      <translation>音量</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="953"/>

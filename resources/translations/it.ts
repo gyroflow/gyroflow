@@ -252,8 +252,8 @@ Controlla il bitrate del file dopo il rendering e se riscontri questo bug, puoi:
       <location filename="../../src/ui/App.qml" line="264"/>
       <source>Due to iOS&apos;s file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to iOS&apos;s file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>A causa delle limitazioni di accesso ai file di iOS&apos;s, è necessario selezionare manualmente la cartella di destinazione.
+Fare clic su Ok e selezionare la cartella di destinazione.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="325"/>
@@ -610,12 +610,12 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="585"/>
       <source>Preserve export settings</source>
-      <translation type="unfinished">Preserve export settings</translation>
+      <translation>Mantieni le impostazioni di esportazione</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="587"/>
       <source>Save output size and bitrate in settings and use it for all files.</source>
-      <translation type="unfinished">Save output size and bitrate in settings and use it for all files.</translation>
+      <translation>Salva la dimensione dell'output e il bitrate nelle impostazioni e usalo per tutti i file.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="363"/>
@@ -636,7 +636,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="355"/>
       <source>You can edit the output size presets here:</source>
-      <translation type="unfinished">You can edit the output size presets here:</translation>
+      <translation>È possibile modificare le preimpostazioni delle dimensioni di output qui:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="356"/>
@@ -646,7 +646,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="363"/>
       <source>Invalid JSON format!</source>
-      <translation type="unfinished">Invalid JSON format!</translation>
+      <translation>Formato JSON non valido!</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="366"/>
@@ -656,7 +656,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="487"/>
       <source>Metadata comment</source>
-      <translation type="unfinished">Metadata comment</translation>
+      <translation>Commento dei metadati</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="495"/>
@@ -1600,7 +1600,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="692"/>
       <source>Stabilized video + Project file with gyro data</source>
-      <translation type="unfinished">Stabilized video + Project file with gyro data</translation>
+      <translation>Video stabilizzato + file di progetto con dati giroscopici</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="696"/>
@@ -1875,7 +1875,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="115"/>
       <source>Add keyframe</source>
-      <translation type="unfinished">Add keyframe</translation>
+      <translation>Aggiungi frame chiave</translation>
     </message>
   </context>
   <context>
@@ -2007,7 +2007,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="387"/>
       <source>IMU integration method for keeping track of the horizon and adjust built-in quaternions</source>
-      <translation type="unfinished">IMU integration method for keeping track of the horizon and adjust built-in quaternions</translation>
+      <translation>Metodo di integrazione IMU per tenere traccia dell'orizzonte e regolare i quaternioni incorporati</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="396"/>
@@ -2951,12 +2951,12 @@ Se hai Gyroflow in C:File programma, allora devi eseguire Gyroflow come amminist
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Same as the original file</source>
-      <translation type="unfinished">Same as the original file</translation>
+      <translation>Uguale al file originale</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Custom path</source>
-      <translation type="unfinished">Custom path</translation>
+      <translation>Percorso personalizzato</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="486"/>
