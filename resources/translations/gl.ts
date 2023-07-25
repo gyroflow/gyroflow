@@ -251,8 +251,8 @@ Comprobe a taxa de bits do ficheiro despois da renderización e se &apos;está a
       <location filename="../../src/ui/App.qml" line="264"/>
       <source>Due to iOS&apos;s file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to iOS&apos;s file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>Debido ás restricións de acceso aos ficheiros de iOS&apos;, cómpre seleccionar o cartafol de destino manualmente.
+Faga clic en Aceptar e seleccione o cartafol de destino.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="325"/>
@@ -610,12 +610,12 @@ Pode aumentar o límite de nitidez na sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="585"/>
       <source>Preserve export settings</source>
-      <translation type="unfinished">Preserve export settings</translation>
+      <translation>Conserva a configuración de exportación</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="587"/>
       <source>Save output size and bitrate in settings and use it for all files.</source>
-      <translation type="unfinished">Save output size and bitrate in settings and use it for all files.</translation>
+      <translation>Garda o tamaño de saída e a taxa de bits na configuración e utilízao para tódolos ficheiros.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="363"/>
@@ -626,17 +626,17 @@ Pode aumentar o límite de nitidez na sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="344"/>
       <source>Edit sizes</source>
-      <translation type="unfinished">Edit sizes</translation>
+      <translation>Editar tamaños</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="347"/>
       <source>Original</source>
-      <translation type="unfinished">Original</translation>
+      <translation>Orixinal</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="355"/>
       <source>You can edit the output size presets here:</source>
-      <translation type="unfinished">You can edit the output size presets here:</translation>
+      <translation>Pode editar os preestablecidos de tamaño de saída aquí:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="356"/>
@@ -646,7 +646,7 @@ Pode aumentar o límite de nitidez na sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="363"/>
       <source>Invalid JSON format!</source>
-      <translation type="unfinished">Invalid JSON format!</translation>
+      <translation>Formato JSON non válido!</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="366"/>
@@ -656,7 +656,7 @@ Pode aumentar o límite de nitidez na sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="487"/>
       <source>Metadata comment</source>
-      <translation type="unfinished">Metadata comment</translation>
+      <translation>Comentario de metadatos</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="495"/>
@@ -686,7 +686,7 @@ Pode aumentar o límite de nitidez na sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="523"/>
       <source>Audio codec</source>
-      <translation type="unfinished">Audio codec</translation>
+      <translation>Códec de son</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="535"/>
@@ -1202,12 +1202,12 @@ Quere envialo seu perfil?</translation>
       <location filename="../../src/ui/components/OutputPathField.qml" line="40"/>
       <location filename="../../src/ui/components/OutputPathField.qml" line="50"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>Seleccione o destino do ficheiro</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="41"/>
       <source>Video files</source>
-      <translation type="unfinished">Video files</translation>
+      <translation>Arquivos de vídeo</translation>
     </message>
   </context>
   <context>
@@ -1601,7 +1601,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="692"/>
       <source>Stabilized video + Project file with gyro data</source>
-      <translation type="unfinished">Stabilized video + Project file with gyro data</translation>
+      <translation>Vídeo estabilizado + ficheiro de proxecto con datos do xiroscopio</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="696"/>
@@ -1876,7 +1876,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="115"/>
       <source>Add keyframe</source>
-      <translation type="unfinished">Add keyframe</translation>
+      <translation>Engadir fotograma clave</translation>
     </message>
   </context>
   <context>
@@ -2008,7 +2008,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="387"/>
       <source>IMU integration method for keeping track of the horizon and adjust built-in quaternions</source>
-      <translation type="unfinished">IMU integration method for keeping track of the horizon and adjust built-in quaternions</translation>
+      <translation>Método de integración IMU para facer un seguimento do horizonte e axustar os cuaternións incorporados</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="396"/>
@@ -2953,17 +2953,17 @@ Se ten Gyroflow en "C:Arquivos de programas", terá&apos; que executar Gyroflow 
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Same as the original file</source>
-      <translation type="unfinished">Same as the original file</translation>
+      <translation>Igual que o ficheiro orixinal</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="485"/>
       <source>Custom path</source>
-      <translation type="unfinished">Custom path</translation>
+      <translation>Ruta personalizada</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="486"/>
       <source>Please enter the output path:</source>
-      <translation type="unfinished">Please enter the output path:</translation>
+      <translation>Introduza a ruta de saída:</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="609"/>
@@ -3028,7 +3028,7 @@ Se ten Gyroflow en "C:Arquivos de programas", terá&apos; que executar Gyroflow 
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="923"/>
       <source>Volume</source>
-      <translation type="unfinished">Volume</translation>
+      <translation>Volume</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="953"/>
