@@ -420,6 +420,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                     let out_size = zero_copy::get_plane_size($out_frame, $ind);
                     {
                         let mut params = stab.params.write();
+                        params.plane_scale = Some(in_size.0 as f64 / params.video_size.0.max(1) as f64);
                         params.size        = (in_size.0,  in_size.1);
                         params.output_size = (out_size.0, out_size.1);
                         params.video_size  = params.size;

@@ -71,7 +71,7 @@ impl FrameTransform {
         if !params.gyro.file_metadata.lens_params.is_empty() && lens.fisheye_params.distortion_coeffs.len() < 4 {
             use crate::util::MapClosest;
             if let Some(val) = params.gyro.file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
-                let pixel_focal_length = val.pixel_focal_length.map(|x| x as f64).or_else(|| {
+                let pixel_focal_length = val.pixel_focal_length.map(|x| x as f64 * params.plane_scale).or_else(|| {
                     focal_length = Some(val.focal_length? as f64);
                     Some((val.focal_length? as f64 / ((val.pixel_pitch?.1 as f64 / 1000000.0) * val.capture_area_size?.1 as f64)) * params.height as f64)
                 });

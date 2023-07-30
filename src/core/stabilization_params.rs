@@ -47,6 +47,7 @@ pub struct StabilizationParams {
     pub min_fov: f64,
     pub fps: f64,
     pub fps_scale: Option<f64>,
+    pub plane_scale: Option<f64>,
     pub video_speed: f64,
     pub video_speed_affects_smoothing: bool,
     pub video_speed_affects_zooming: bool,
@@ -123,6 +124,7 @@ impl Default for StabilizationParams {
 
             fps: 0.0,
             fps_scale: None,
+            plane_scale: None,
             video_speed: 1.0,
             video_speed_affects_smoothing: true,
             video_speed_affects_zooming: true,
