@@ -10,7 +10,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "1ec16bd" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "db4a8c3" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", rev = "bf7b41d", features = ["field_access"] }
 
@@ -61,11 +61,11 @@ enterpolation = "0.2.1"
 libloading = "0.8"
 libc = "0.2"
 
-opencv = { version = "0.83", features = ["clang-runtime"], optional = true }
+opencv = { version = "0.84", features = ["clang-runtime"], optional = true }
 
-wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "adc43b5", features = ["spirv"] }
-wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "adc43b5" }
-wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "adc43b5" }
+wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "09b010b", features = ["spirv"] }
+wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "09b010b" }
+wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "09b010b" }
 bytemuck = "1.13.1"
 ash = "0.37.3"
 naga = { git = "https://github.com/gfx-rs/naga", rev = "bac2d82a430fbfcf100ee22b7c3bc12f3d593079", version = "0.13.0", features = ["clone", "span", "validate", "spv-in"] }
