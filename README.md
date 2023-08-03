@@ -299,7 +299,7 @@ As additional permission under section 7, you are allowed to distribute [`gyrofl
 * [Marc Roeschlin](https://github.com/marcroe/) - *Author of the adaptive zoom algorithm*
 * [Ilya Epifanov](https://github.com/ilya-epifanov/) - *Author of the OpenFX plugin*
 * [Vladimir Pinchuk](https://github.com/VladimirP1/) - *Author of robust gyro-to-video synchronization algorithm*
-* [Chris Hocking](https://github.com/latenitefilms) - *Author of the BRAW Toolbox Final Cut Pro Plugin*
+* [Chris Hocking](https://github.com/latenitefilms) - *Author of the [Gyroflow Toolbox](https://gyroflowtoolbox.io) Final Cut Pro Plugin*
 
 ## Acknowledgements
 
