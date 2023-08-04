@@ -166,7 +166,7 @@ impl WgpuWrapper {
 
                         adapter.create_device_from_hal(wgpu_hal::OpenDevice::<Metal> {
                             device: <Metal as wgpu_hal::Api>::Device::device_from_raw(mtl_dev.to_owned(), wgpu::Features::empty()),
-                            queue: <Metal as wgpu_hal::Api>::Queue::queue_from_raw(mtl_cq)
+                            queue: <Metal as wgpu_hal::Api>::Queue::queue_from_raw(mtl_cq, 1.0)
                         }, &wgpu::DeviceDescriptor {
                             label: None,
                             features: wgpu::Features::empty(),
