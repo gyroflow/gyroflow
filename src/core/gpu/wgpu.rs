@@ -410,7 +410,7 @@ impl WgpuWrapper {
 
         match &self.pipeline {
             PipelineType::Compute(p) => {
-                let mut cpass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None });
+                let mut cpass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
                 cpass.set_pipeline(p);
                 cpass.set_bind_group(0, &self.bind_group, &[]);
                 cpass.dispatch_workgroups((buffers.output.size.0 as f32 / 8.0).ceil() as u32, (buffers.output.size.1 as f32 / 8.0).ceil() as u32, 1);
@@ -419,6 +419,8 @@ impl WgpuWrapper {
                 let view = self.out_texture.wgpu_texture.as_ref().unwrap().create_view(&wgpu::TextureViewDescriptor::default());
                 let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label: None,
+                    timestamp_writes: None,
+                    occlusion_query_set: None,
                     color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                         view: &view,
                         resolve_target: None,
