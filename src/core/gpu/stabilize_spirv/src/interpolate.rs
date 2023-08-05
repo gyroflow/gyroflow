@@ -5,7 +5,7 @@ use glam::{ vec2, Vec2, Vec4 };
 use super::types::*;
 
 pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &KernelParams, _sampler: SamplerType) -> Vec4 {
-    let max_value = if cfg!(all(target_arch = "spirv", not(feature = "texture_u32"))) { 1.0 } else { params.max_pixel_value };
+    let max_value = params.max_pixel_value;
     let bg = params.background * max_value;
     #[cfg(feature = "for_qtrhi")]
     {

@@ -7,23 +7,23 @@ use super::types::*;
 use super::lens::*;
 use super::background::*;
 
-#[inline]
-fn get_mtrx_param(_params: &KernelParams, matrices: &MatricesType, _sampler: SamplerType, row: i32, idx: usize) -> f32 {
+#[inline(never)]
+fn get_mtrx_param(_size_for_rs: f32, matrices: &MatricesType, _sampler: SamplerType, row: i32, idx: usize) -> f32 {
     #[cfg(not(feature = "for_qtrhi"))]
     { matrices[row as usize * 12 + idx] }
     #[cfg(feature = "for_qtrhi")]
     {
         use spirv_std::image::{ ImageWithMethods, sample_with };
-        let size = if (_params.flags & 16) == 16 { _params.width as f32 } else { _params.height as f32 };
-        matrices.sample_with(*_sampler, vec2(idx as f32 / 11.0, row as f32 / (size - 1.0)), sample_with::lod(0.0f32)).x
+        matrices.sample_with(*_sampler, vec2(idx as f32 / 11.0, row as f32 / (_size_for_rs - 1.0)), sample_with::lod(0.0f32)).x
     }
 }
 
 pub fn rotate_and_distort(pos: Vec2, idx: i32, params: &KernelParams, matrices: &MatricesType, sampler: SamplerType) -> Vec2 {
+    let size_for_rs = if (params.flags & 16) == 16 { params.width as f32 } else { params.height as f32 };
     let point_3d = vec3(
-        (pos.x * get_mtrx_param(params, matrices, sampler, idx, 0)) + (pos.y * get_mtrx_param(params, matrices, sampler, idx, 1)) + get_mtrx_param(params, matrices, sampler, idx, 2) + params.translation3d.x,
-        (pos.x * get_mtrx_param(params, matrices, sampler, idx, 3)) + (pos.y * get_mtrx_param(params, matrices, sampler, idx, 4)) + get_mtrx_param(params, matrices, sampler, idx, 5) + params.translation3d.y,
-        (pos.x * get_mtrx_param(params, matrices, sampler, idx, 6)) + (pos.y * get_mtrx_param(params, matrices, sampler, idx, 7)) + get_mtrx_param(params, matrices, sampler, idx, 8) + params.translation3d.z
+        (pos.x * get_mtrx_param(size_for_rs, matrices, sampler, idx, 0)) + (pos.y * get_mtrx_param(size_for_rs, matrices, sampler, idx, 1)) + get_mtrx_param(size_for_rs, matrices, sampler, idx, 2) + params.translation3d.x,
+        (pos.x * get_mtrx_param(size_for_rs, matrices, sampler, idx, 3)) + (pos.y * get_mtrx_param(size_for_rs, matrices, sampler, idx, 4)) + get_mtrx_param(size_for_rs, matrices, sampler, idx, 5) + params.translation3d.y,
+        (pos.x * get_mtrx_param(size_for_rs, matrices, sampler, idx, 6)) + (pos.y * get_mtrx_param(size_for_rs, matrices, sampler, idx, 7)) + get_mtrx_param(size_for_rs, matrices, sampler, idx, 8) + params.translation3d.z
     );
     if point_3d.z > 0.0 {
         if params.r_limit > 0.0 && vec2(point_3d.x / point_3d.z, point_3d.y / point_3d.z).length_squared() > params.r_limit.powi(2) {
@@ -44,7 +44,7 @@ pub fn rotate_and_distort(pos: Vec2, idx: i32, params: &KernelParams, matrices: 
 }
 
 pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeffs: &[f32], _lens_data: &[f32], drawing: &DrawingType, input: &ImageType, sampler: SamplerType) -> Vec4 {
-    let max_value = if cfg!(all(target_arch = "spirv", not(feature = "texture_u32"))) { 1.0 } else { params.max_pixel_value };
+    let max_value = params.max_pixel_value;
 
     let bg = params.background * max_value;
 

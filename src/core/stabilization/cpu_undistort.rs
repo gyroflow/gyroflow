@@ -87,6 +87,35 @@ pub const COEFFS: [f32; 64+128+256 + 9*4 + 4] = [
 // const ALPHAS: [f32; 4] = [ 1.0, 0.75, 0.50, 0.25 ];
 
 impl Stabilization {
+    pub fn undistort_image_cpu_spirv<T: PixelType>(buffers: &mut Buffers, params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, matrices: &[[f32; 12]], drawing: &[u8]) -> bool {
+        if let BufferSource::Cpu { buffer: input } = &mut buffers.input.data {
+            if let BufferSource::Cpu { buffer: output } = &mut buffers.output.data {
+                if buffers.output.size.2 <= 0 {
+                    log::error!("buffers.output_size: {:?}", buffers.output.size);
+                    return false;
+                }
+
+                output.par_chunks_mut(buffers.output.size.2).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
+                    row_bytes.chunks_mut(params.bytes_per_pixel as usize).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
+                        let matrices2: &[f32] = unsafe { std::slice::from_raw_parts(matrices.as_ptr() as *const f32, matrices.len() * 12 ) };
+                        let params2: stabilize_spirv::KernelParams  = unsafe { std::mem::transmute(*params) };
+                        let drawing2: &[u32]  = unsafe { std::slice::from_raw_parts(drawing.as_ptr() as *const u32, drawing.len() / 4 ) };
+
+                        let color = stabilize_spirv::undistort(stabilize_spirv::glam::vec2(x as f32, y as f32), &params2, matrices2, &COEFFS, &[], drawing2, &(input, T::to_float_glam), 0.0);
+
+                        let pix_out: &mut T = bytemuck::from_bytes_mut(pix_chunk); // treat this byte chunk as `T`
+                        *pix_out = PixelType::from_float_glam(color);
+                    });
+                });
+                true
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    }
+
     // Adapted from OpenCV: initUndistortRectifyMap + remap
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498

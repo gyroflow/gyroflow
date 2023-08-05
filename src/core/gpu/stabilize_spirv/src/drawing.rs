@@ -75,7 +75,7 @@ fn remap_colorrange(px: Vec4, is_y: bool, max_value: f32) -> Vec4 {
 }
 
 pub fn process_final_pixel(mut pixel: Vec4, src_pos: Vec2, out_pos: Vec2, params: &KernelParams, coeffs: &[f32], drawing: &DrawingType, sampler: SamplerType) -> Vec4 {
-    let max_value = if cfg!(all(target_arch = "spirv", not(feature = "texture_u32"))) { 1.0 } else { params.max_pixel_value };
+    let max_value = params.max_pixel_value;
 
     if (params.flags & 1) == 1 {
         pixel = remap_colorrange(pixel, params.bytes_per_pixel == 1, max_value);
