@@ -10,7 +10,7 @@ jobs:
       matrix:
         targets: [
           { os: ubuntu-latest },
-          { os: macos-latest },
+          { os: macos-13 },
           { os: windows-2022 }
         ]
     runs-on: ${{ matrix.targets.os }}
@@ -49,7 +49,7 @@ jobs:
         run: rm -r -force ${{ github.workspace }}/target/deploy/build/qml-video-rs* -ErrorAction SilentlyContinue
 
       - name: Install Mac certificate
-        if: ${{ matrix.targets.os == 'macos-latest' }}
+        if: ${{ matrix.targets.os == 'macos-13' }}
         uses: apple-actions/import-codesign-certs@v2
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
@@ -58,10 +58,9 @@ jobs:
       - uses: extractions/setup-just@v1
 
       - name: Build Gyroflow (macOS)
-        if: ${{ matrix.targets.os == 'macos-latest' }}
+        if: ${{ matrix.targets.os == 'macos-13' }}
         env:
           SIGNING_FINGERPRINT: ${{ secrets.MACOS_CERTIFICATE_FINGERPRINT }}
-          CARGO_BUILD_JOBS: 1
         run: |
           just install-deps
           just deploy universal
