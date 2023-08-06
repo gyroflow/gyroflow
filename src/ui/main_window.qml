@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2021-2023 Adrian <adrian.eddy at gmail>
 
 import QtQuick
 import QtQuick.Window
@@ -13,6 +13,8 @@ Window {
     id: main_window;
     width: Math.min(Screen.width, 1650 * dpiScale);
     height: Math.min(Screen.height, 950 * dpiScale);
+    minimumWidth: 900 * dpiScale;
+    minimumHeight: 400 * dpiScale;
     visible: true;
     color: styleBackground;
 

@@ -8,6 +8,8 @@ Window {
     id: root;
     width: 1000;
     height: 571;
+    minimumWidth: 900 * dpiScale;
+    minimumHeight: 400 * dpiScale;
     visible: true;
     visibility: Window.Maximized;
     color: "#ffffff";

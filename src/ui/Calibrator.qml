@@ -17,6 +17,8 @@ Window {
     height: Math.min(Screen.height, 700 * dpiScale);
     visible: true;
     color: styleBackground;
+    minimumWidth: 900 * dpiScale;
+    minimumHeight: 400 * dpiScale;
 
     property QtObject controller: calib_controller;
 
