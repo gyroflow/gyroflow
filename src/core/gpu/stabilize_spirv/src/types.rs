@@ -69,7 +69,7 @@ pub struct KernelParams {
     pub max_pixel_value:          f32, // 4
     pub distortion_model:         crate::distortion_models::DistortionModel, // 8
     pub digital_lens:             crate::distortion_models::DistortionModel, // 12
-    pub reserved3:                f32, // 16
+    pub pixel_value_limit:        f32, // 16
 }
 
 // #[inline] pub fn fast_floor(x: f32) -> i32 { x as i32 }

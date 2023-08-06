@@ -59,6 +59,33 @@ fn main() {
     std::fs::write(&spirv_out_path, main_shader).unwrap();
     std::fs::write(&spirv_u32_out_path, main_u32_shader).unwrap();
 
+    // Emit HLSL
+    /*{
+        let module = spv::parse_u8_slice(&glsl_shader, &options).unwrap();
+        let info = Validator::new(ValidationFlags::default(), Capabilities::all()).validate(&module).unwrap_pretty();
+
+        let options = naga::back::hlsl::Options {
+            shader_model: naga::back::hlsl::ShaderModel::V5_1,
+            binding_map: naga::back::hlsl::BindingMap::from([
+                (naga::ResourceBinding { group: 0, binding: 1 }, naga::back::hlsl::BindTarget { space: 0, register: 1, ..Default::default() }),
+                (naga::ResourceBinding { group: 0, binding: 2 }, naga::back::hlsl::BindTarget { space: 0, register: 0, ..Default::default() }), // KernelParams
+                (naga::ResourceBinding { group: 0, binding: 3 }, naga::back::hlsl::BindTarget { space: 0, register: 0, ..Default::default() }),
+                (naga::ResourceBinding { group: 0, binding: 4 }, naga::back::hlsl::BindTarget { space: 0, register: 2, ..Default::default() }),
+
+                (naga::ResourceBinding { group: 0, binding: 5 }, naga::back::hlsl::BindTarget { space: 0, register: 1, ..Default::default() }), // samplers
+                (naga::ResourceBinding { group: 0, binding: 6 }, naga::back::hlsl::BindTarget { space: 0, register: 0, ..Default::default() }), // samplers
+                (naga::ResourceBinding { group: 0, binding: 7 }, naga::back::hlsl::BindTarget { space: 0, register: 2, ..Default::default() }), // samplers
+            ]),
+            fake_missing_bindings: false,
+            special_constants_binding: None,
+            push_constants_target: None,
+            zero_initialize_workgroup_memory: false,
+        };
+        let mut code = String::new();
+        naga::back::hlsl::Writer::new(&mut code, &options).write(&module, &info).unwrap();
+
+        std::fs::write(frag_out_path.replace(".frag", ".hlsl"), &code).unwrap();
+    }*/
     // Emit WGSL
     /*{
         let module = spv::parse_u8_slice(&main_shader, &options).unwrap();

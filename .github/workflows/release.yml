@@ -61,6 +61,7 @@ jobs:
         if: ${{ matrix.targets.os == 'macos-latest' }}
         env:
           SIGNING_FINGERPRINT: ${{ secrets.MACOS_CERTIFICATE_FINGERPRINT }}
+          CARGO_BUILD_JOBS: 1
         run: |
           just install-deps
           just deploy universal

@@ -40,9 +40,6 @@ pub fn draw_pixel(in_pix: Vec4, x: f32, y: f32, is_input: bool, params: &KernelP
         let alpha = ((data & 0x06) >> 1) as usize;
         let stage = data & 1;
         if ((stage == 0 && is_input) || (stage == 1 && !is_input)) && color < 9 {
-            //let color_offs = 448 + (color * 4);
-            //let colorf = vec4(coeffs[color_offs], coeffs[color_offs + 1], coeffs[color_offs + 2], coeffs[color_offs + 3]) / BG_SCALER;
-            //let alphaf = coeffs[484 + alpha];
             let colorf = COLORS[color] * max_value;
             let alphaf = ALPHAS[alpha];
             pix = colorf * alphaf + pix * (1.0 - alphaf);
@@ -51,18 +48,20 @@ pub fn draw_pixel(in_pix: Vec4, x: f32, y: f32, is_input: bool, params: &KernelP
     }
     pix
 }
-pub fn draw_safe_area(in_pix: Vec4, x: f32, y: f32, params: &KernelParams, max_value: f32) -> Vec4 {
+pub fn draw_safe_area(in_pix: Vec4, x: f32, y: f32, params: &KernelParams) -> Vec4 {
     let mut pix = in_pix;
     let is_safe_area = x >= params.safe_area_rect.x && x <= params.safe_area_rect.z &&
-                           y >= params.safe_area_rect.y && y <= params.safe_area_rect.w;
+                       y >= params.safe_area_rect.y && y <= params.safe_area_rect.w;
     if !is_safe_area {
         pix.x *= 0.5;
         pix.y *= 0.5;
         pix.z *= 0.5;
         let is_border = x > params.safe_area_rect.x - 5.0 && x < params.safe_area_rect.z + 5.0 &&
-                            y > params.safe_area_rect.y - 5.0 && y < params.safe_area_rect.w + 5.0;
+                        y > params.safe_area_rect.y - 5.0 && y < params.safe_area_rect.w + 5.0;
         if is_border {
-           pix = vec4(40.0 / 255.0, 40.0 / 255.0, 40.0 / 255.0, 255.0 / 255.0) * max_value;
+            pix.x *= 0.5;
+            pix.y *= 0.5;
+            pix.z *= 0.5;
         }
     }
     pix
@@ -75,10 +74,8 @@ fn remap_colorrange(px: Vec4, is_y: bool, max_value: f32) -> Vec4 {
 }
 
 pub fn process_final_pixel(mut pixel: Vec4, src_pos: Vec2, out_pos: Vec2, params: &KernelParams, coeffs: &[f32], drawing: &DrawingType, sampler: SamplerType) -> Vec4 {
-    let max_value = params.max_pixel_value;
-
     if (params.flags & 1) == 1 {
-        pixel = remap_colorrange(pixel, params.bytes_per_pixel == 1, max_value);
+        pixel = remap_colorrange(pixel, params.bytes_per_pixel == 1, params.max_pixel_value);
     }
 
     #[cfg(feature="for_qtrhi")]
@@ -89,11 +86,11 @@ pub fn process_final_pixel(mut pixel: Vec4, src_pos: Vec2, out_pos: Vec2, params
     if drawing_enabled {
         if src_pos.y >= params.source_rect.y as f32 && src_pos.y < (params.source_rect.y + params.source_rect.w) as f32 {
             if src_pos.x >= params.source_rect.x as f32 && src_pos.x < (params.source_rect.x + params.source_rect.z) as f32 {
-                pixel = draw_pixel(pixel, src_pos.x, src_pos.y, true, params, coeffs, drawing, sampler, max_value);
+                pixel = draw_pixel(pixel, src_pos.x, src_pos.y, true, params, coeffs, drawing, sampler, params.max_pixel_value);
             }
         }
-        pixel = draw_pixel(pixel, out_pos.x, out_pos.y, false, params, coeffs, drawing, sampler, max_value);
-        pixel = draw_safe_area(pixel, out_pos.x, out_pos.y, params, max_value);
+        pixel = draw_pixel(pixel, out_pos.x, out_pos.y, false, params, coeffs, drawing, sampler, params.max_pixel_value);
+        pixel = draw_safe_area(pixel, out_pos.x, out_pos.y, params);
     }
     pixel
 }

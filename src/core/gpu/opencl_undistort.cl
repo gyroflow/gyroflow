@@ -47,7 +47,7 @@ typedef struct {
     float max_pixel_value;           // 4
     float reserved1;                 // 8
     float reserved2;                 // 12
-    float reserved3;                 // 16
+    float pixel_value_limit;         // 16
 } KernelParams;
 
 #if INTERPOLATION == 2 // Bilinear
@@ -145,9 +145,7 @@ void draw_safe_area(DATA_TYPE *pix, float x, float y, __global KernelParams *par
         bool isBorder = x >= params->safe_area_rect.x - 5.0 && x <= params->safe_area_rect.z + 5.0 &&
                         y >= params->safe_area_rect.y - 5.0 && y <= params->safe_area_rect.w + 5.0;
         if (isBorder) {
-            float4 borderf4 = (float4)(40.0, 40.0, 40.0, 255.0);
-            DATA_TYPEF borderf = *(DATA_TYPEF *)&borderf4;
-            *pix = DATA_CONVERT(borderf);
+            *pix = DATA_CONVERT(DATA_CONVERTF(*pix) * factorf);
         }
     }
 }
@@ -218,7 +216,7 @@ DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global Ker
         }
         src_index += params->stride;
     }
-    return min(sum, (DATA_TYPEF)(params->max_pixel_value));
+    return min(sum, (DATA_TYPEF)(params->pixel_value_limit));
 }
 
 float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, __global const float *matrices) {

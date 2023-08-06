@@ -37,7 +37,7 @@ struct KernelParams {
     max_pixel_value:          f32, // 4
     reserved1:                f32, // 8
     reserved2:                f32, // 12
-    reserved3:                f32, // 16
+    pixel_value_limit:        f32, // 16
 }
 
 @group(0) @binding(0) @fragment var<uniform> params: KernelParams;
@@ -95,7 +95,9 @@ fn draw_safe_area(in_pix: vec4<f32>, x: f32, y: f32) -> vec4<f32> {
         let isBorder = x > params.safe_area_rect.x - 5.0 && x < params.safe_area_rect.z + 5.0 &&
                        y > params.safe_area_rect.y - 5.0 && y < params.safe_area_rect.w + 5.0;
         if (isBorder) {
-           pix = (vec4<f32>(40.0, 40.0, 40.0, 255.0) / 255.0) * params.max_pixel_value;
+            pix.x *= 0.5;
+            pix.y *= 0.5;
+            pix.z *= 0.5;
         }
     }
     return pix;
@@ -186,10 +188,10 @@ fn sample_input_at(uv_param: vec2<f32>) -> vec4<f32> {
         }
     }
     return vec4<f32>(
-        min(sum.x, params.max_pixel_value),
-        min(sum.y, params.max_pixel_value),
-        min(sum.z, params.max_pixel_value),
-        min(sum.w, params.max_pixel_value)
+        min(sum.x, params.pixel_value_limit),
+        min(sum.y, params.pixel_value_limit),
+        min(sum.z, params.pixel_value_limit),
+        min(sum.w, params.pixel_value_limit)
     );
 }
 

@@ -956,6 +956,8 @@ impl Controller {
                 this.processing_info_changed();
             });
             let update_info2 = update_info.clone();
+
+            #[allow(unused_variables)]
             vid.onProcessTexture(Box::new(move |_frame, timestamp_ms, width, height, backend_id, ptr1, ptr2, ptr3, ptr4, ptr5| -> bool {
                 if width < 4 || height < 4 || backend_id == 0 { return false; }
 

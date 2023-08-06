@@ -44,9 +44,7 @@ pub fn rotate_and_distort(pos: Vec2, idx: i32, params: &KernelParams, matrices: 
 }
 
 pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeffs: &[f32], _lens_data: &[f32], drawing: &DrawingType, input: &ImageType, sampler: SamplerType) -> Vec4 {
-    let max_value = params.max_pixel_value;
-
-    let bg = params.background * max_value;
+    let bg = params.background * params.max_pixel_value;
 
     if (params.flags & 4) == 4 { // Fill with background
         return bg;

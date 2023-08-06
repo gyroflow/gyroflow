@@ -5,8 +5,7 @@ use glam::{ vec2, Vec2, Vec4 };
 use super::types::*;
 
 pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &KernelParams, _sampler: SamplerType) -> Vec4 {
-    let max_value = params.max_pixel_value;
-    let bg = params.background * max_value;
+    let bg = params.background * params.max_pixel_value;
     #[cfg(feature = "for_qtrhi")]
     {
         use spirv_std::image::{ ImageWithMethods, sample_with };
@@ -82,10 +81,10 @@ pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &Ke
             if yp >= params.interpolation { break; } // Bug in Dx12 backend, doesn't work without it for some strange reason
         }
         glam::vec4(
-            sum.x.min(max_value),
-            sum.y.min(max_value),
-            sum.z.min(max_value),
-            sum.w.min(max_value),
+            sum.x.min(params.pixel_value_limit),
+            sum.y.min(params.pixel_value_limit),
+            sum.z.min(params.pixel_value_limit),
+            sum.w.min(params.pixel_value_limit),
         )
     }
 }
