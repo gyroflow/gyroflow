@@ -59,6 +59,7 @@ qrc!(pub rsrc,
         "resources/icons/svg/stars5.svg",
         "resources/icons/svg/stars5_empty.svg",
         "resources/icons/svg/loop.svg",
+        "resources/icons/svg/external_link.svg",
 
         "src/core/gpu/compiled/stabilize.frag.qsb",
         "src/qt_gpu/compiled/texture.vert.qsb",

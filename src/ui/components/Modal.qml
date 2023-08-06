@@ -157,6 +157,16 @@ Rectangle {
                     }
                 }
             }
+            Item { visible: root.iconType == Modal.Error; height: 15 * dpiScale; width: 1; }
+            LinkButton {
+                visible: root.iconType == Modal.Error;
+                anchors.horizontalCenter: parent.horizontalCenter;
+                text: qsTr("Troubleshooting");
+                icon.width: 14 * dpiScale;
+                icon.height: 14 * dpiScale;
+                iconName: "external_link";
+                onClicked: Qt.openUrlExternally("https://docs.gyroflow.xyz/app/getting-started/troubleshooting")
+            }
             Item { visible: root.modalIdentifier; height: 15 * dpiScale; width: 1; }
             CheckBox {
                 anchors.horizontalCenter: parent.horizontalCenter;
