@@ -463,3 +463,17 @@ pub fn stop_accessing_security_scoped_resource(url: &str) -> bool {
     }
     ok
 }
+
+pub fn update_file_times<P: AsRef<std::path::Path> + std::fmt::Display>(output_path: P, input_path: P) {
+    if let Err(e) = || -> std::io::Result<()> {
+        let org_time = filetime_creation::FileTime::from_creation_time(&std::fs::metadata(&input_path)?).ok_or(std::io::ErrorKind::Other)?;
+        if cfg!(target_os = "windows") {
+            ::log::debug!("Updating creation time of {} to {}", output_path, org_time.to_string());
+            filetime_creation::set_file_ctime(output_path, org_time)?;
+        } else {
+            ::log::debug!("Updating modification time of {} to {}", output_path, org_time.to_string());
+            filetime_creation::set_file_mtime(output_path, org_time)?;
+        }
+        Ok(())
+    }() { ::log::warn!("Failed to update file times: {e:?}"); }
+}

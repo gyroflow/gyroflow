@@ -4,7 +4,11 @@
 #include <QQuickWindow>
 #include <QFile>
 #include <private/qquickitem_p.h>
-#include <private/qrhi_p.h>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+#   include <rhi/qrhi.h>
+#else
+#   include <private/qrhi_p.h>
+#endif
 #include <private/qsgrenderer_p.h>
 #include <private/qsgdefaultrendercontext_p.h>
 #include <private/qshader_p.h>

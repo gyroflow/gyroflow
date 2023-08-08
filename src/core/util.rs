@@ -125,19 +125,22 @@ pub fn get_setting(key: &str) -> Option<String> {
     unsafe {
         use windows::Win32::System::Registry::*;
         use windows::Win32::Foundation::NO_ERROR;
-        use windows::core::PCSTR;
+        use windows::core::PCWSTR;
         let mut hkey = HKEY::default();
-        if RegOpenKeyExA(HKEY_CURRENT_USER, PCSTR::from_raw("Software\\Gyroflow\\Gyroflow\0".as_ptr()), 0, KEY_READ, &mut hkey) == NO_ERROR {
-            let key = format!("{}\0", key);
-            let key = PCSTR::from_raw(key.as_ptr());
+        let key_path = "Software\\Gyroflow\\Gyroflow\0".encode_utf16().collect::<Vec<_>>();
+        if RegOpenKeyExW(HKEY_CURRENT_USER, PCWSTR::from_raw(key_path.as_ptr()), 0, KEY_READ, &mut hkey) == NO_ERROR {
+            let key = format!("{}\0", key).encode_utf16().collect::<Vec<_>>();
+            let key = PCWSTR::from_raw(key.as_ptr());
             let mut size: u32 = 0;
             let mut typ = REG_VALUE_TYPE::default();
-            if RegQueryValueExA(hkey, key, None, None, None, Some(&mut size)) == NO_ERROR {
+            if RegQueryValueExW(hkey, key, None, None, None, Some(&mut size)) == NO_ERROR {
                 if size > 0 {
                     let mut buf: Vec<u8> = vec![0u8; size as usize];
-                    if RegQueryValueExA(hkey, key, None, Some(&mut typ), Some(buf.as_mut_ptr()), Some(&mut size)) == NO_ERROR {
+                    if RegQueryValueExW(hkey, key, None, Some(&mut typ), Some(buf.as_mut_ptr()), Some(&mut size)) == NO_ERROR {
                         if typ == REG_SZ {
-                            if let Ok(v) = std::str::from_utf8(&buf[..size as usize - 1]) {
+                            let u8buf = &buf[..size as usize - 1];
+                            let u16buf = std::slice::from_raw_parts(u8buf.as_ptr() as *const u16, u8buf.len() / 2);
+                            if let Ok(v) = String::from_utf16(u16buf) {
                                 RegCloseKey(hkey);
                                 return Some(v.to_owned());
                             }

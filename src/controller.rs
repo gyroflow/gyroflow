@@ -1927,7 +1927,8 @@ impl Controller {
             self.mp4_merge_progress(1.0, QString::from("Not enough files!"), QString::default());
             return;
         }
-        let p = std::path::Path::new(file_list.first().unwrap());
+        let first_path = file_list.first().unwrap().clone();
+        let p = std::path::Path::new(&first_path);
         if output_file.is_empty() {
             output_file = p.with_file_name(format!("{}_joined.{}", p.file_stem().unwrap().to_str().unwrap(), p.extension().unwrap().to_str().unwrap())).to_string_lossy().replace('\\', "/");
         }
@@ -1939,7 +1940,6 @@ impl Controller {
             let res = mp4_merge::join_files(&file_list, output_file.clone(), |p| progress((p.min(0.9999), String::default())));
             match res {
                 Ok(_) => {
-
                 ///////////////// Merge .gcsv /////////////////
                 if let Err(e) = (|| -> std::io::Result<()> {
                     use std::fs::File;
@@ -2017,6 +2017,9 @@ impl Controller {
                     ::log::error!("Failed to merge .gcsv files: {:?}", e);
                 }
                 ///////////////// Merge .gcsv /////////////////
+
+                    crate::util::update_file_times(&output_file, &first_path);
+
                     progress((1.0, String::default()))
                 },
                 Err(e) => progress((1.0, e.to_string()))

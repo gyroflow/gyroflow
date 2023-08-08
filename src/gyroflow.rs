@@ -105,6 +105,7 @@ fn entry() {
     });
 
     util::save_exe_location();
+    ::log::debug!("Executable location: {:?}", gyroflow_core::util::get_setting("exeLocation"));
 
     //crate::core::util::rename_calib_videos();
 

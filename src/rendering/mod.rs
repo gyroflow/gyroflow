@@ -615,18 +615,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     }
     progress((1.0, render_frame_count, render_frame_count, true, false));
 
-    // Update file creation time
-    if let Err(e) = || -> std::io::Result<()> {
-        let org_time = filetime_creation::FileTime::from_creation_time(&std::fs::metadata(&input_file.path)?).ok_or(std::io::ErrorKind::Other)?;
-        if cfg!(target_os = "windows") {
-            log::debug!("Updating creation time of {} to {}", render_options.output_path, org_time.to_string());
-            filetime_creation::set_file_ctime(&render_options.output_path, org_time)?;
-        } else {
-            log::debug!("Updating modification time of {} to {}", render_options.output_path, org_time.to_string());
-            filetime_creation::set_file_mtime(&render_options.output_path, org_time)?;
-        }
-        Ok(())
-    }() { log::warn!("Failed to update file times: {e:?}"); }
+    crate::util::update_file_times(&render_options.output_path, &input_file.path);
 
     Ok(())
 }
