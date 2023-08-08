@@ -1940,83 +1940,83 @@ impl Controller {
             let res = mp4_merge::join_files(&file_list, output_file.clone(), |p| progress((p.min(0.9999), String::default())));
             match res {
                 Ok(_) => {
-                ///////////////// Merge .gcsv /////////////////
-                if let Err(e) = (|| -> std::io::Result<()> {
-                    use std::fs::File;
-                    use std::io::{ BufRead, Write, Seek, SeekFrom };
-                    use std::path::Path;
-                    let mut last_diff = 0.0;
-                    let mut last_timestamp = 0.0;
-                    let mut add_timestamp = 0.0;
-                    let mut output_gcsv = None;
-                    let mut first_file = true;
-                    let mut sync_points = Vec::new();
-                    let mut time_scale = 0.001; // default to millisecond
-                    let mut headers_end_position = None;
-                    for x in &file_list {
-                        let path = Path::new(x).with_extension("gcsv");
-                        if path.exists() {
-                            let mut is_data = false;
-                            if let Ok(file) = File::open(path) {
-                                if output_gcsv.is_none() {
-                                    output_gcsv = Some(File::create(Path::new(&output_file).with_extension("gcsv"))?);
+                    ///////////////// Merge .gcsv /////////////////
+                    if let Err(e) = (|| -> std::io::Result<()> {
+                        use std::fs::File;
+                        use std::io::{ BufRead, Write, Seek, SeekFrom };
+                        use std::path::Path;
+                        let mut last_diff = 0.0;
+                        let mut last_timestamp = 0.0;
+                        let mut add_timestamp = 0.0;
+                        let mut output_gcsv = None;
+                        let mut first_file = true;
+                        let mut sync_points = Vec::new();
+                        let mut time_scale = 0.001; // default to millisecond
+                        let mut headers_end_position = None;
+                        for x in &file_list {
+                            let path = Path::new(x).with_extension("gcsv");
+                            if path.exists() {
+                                let mut is_data = false;
+                                if let Ok(file) = File::open(path) {
+                                    if output_gcsv.is_none() {
+                                        output_gcsv = Some(File::create(Path::new(&output_file).with_extension("gcsv"))?);
+                                    }
+                                    for (i, line) in std::io::BufReader::new(file).lines().enumerate() {
+                                        let mut line = line?;
+                                        if i == 0 && !line.contains("GYROFLOW IMU LOG") && !line.contains("CAMERA IMU LOG") {
+                                            return Ok(()); // not a .gcsv file
+                                        }
+                                        if !is_data {
+                                            if line.starts_with("tscale,") {
+                                                if let Ok(ts) = line.strip_prefix("tscale,").unwrap().parse::<f64>() {
+                                                    time_scale = ts;
+                                                }
+                                            }
+                                            if line.starts_with("t,") || line.starts_with("time,") {
+                                                is_data = true;
+                                                if !first_file {
+                                                    sync_points.push((add_timestamp * time_scale - 0.5) * 1000.0);
+                                                    sync_points.push((add_timestamp * time_scale + 0.5) * 1000.0);
+                                                    sync_points.push((add_timestamp * time_scale + 1.0) * 1000.0);
+                                                    sync_points.push((add_timestamp * time_scale + 2.0) * 1000.0);
+                                                    sync_points.push((add_timestamp * time_scale + 2.5) * 1000.0);
+                                                    continue;
+                                                } else {
+                                                    headers_end_position = Some(output_gcsv.as_ref().unwrap().stream_position()?);
+                                                    writeln!(output_gcsv.as_mut().unwrap(), "additional_sync_points,{}", " ".repeat(1024))?; // 1kb of placeholder spaces
+                                                }
+                                            }
+                                        } else if line.contains(',') {
+                                            if let Ok(timestamp) = line.split(',').next().unwrap().parse::<f64>() {
+                                                last_diff = timestamp - last_timestamp;
+                                                last_timestamp = timestamp;
+                                                if timestamp >= add_timestamp {
+                                                    add_timestamp = 0.0;
+                                                }
+                                                let new_timestamp = timestamp + add_timestamp;
+                                                line = [new_timestamp.to_string()].into_iter().chain(line.split(',').skip(1).map(str::to_string)).join(",");
+                                            }
+                                        }
+                                        if first_file || is_data {
+                                            writeln!(output_gcsv.as_mut().unwrap(), "{}", line)?;
+                                        }
+                                    }
                                 }
-                                for (i, line) in std::io::BufReader::new(file).lines().enumerate() {
-                                    let mut line = line?;
-                                    if i == 0 && !line.contains("GYROFLOW IMU LOG") && !line.contains("CAMERA IMU LOG") {
-                                        return Ok(()); // not a .gcsv file
-                                    }
-                                    if !is_data {
-                                        if line.starts_with("tscale,") {
-                                            if let Ok(ts) = line.strip_prefix("tscale,").unwrap().parse::<f64>() {
-                                                time_scale = ts;
-                                            }
-                                        }
-                                        if line.starts_with("t,") || line.starts_with("time,") {
-                                            is_data = true;
-                                            if !first_file {
-                                                sync_points.push((add_timestamp * time_scale - 0.5) * 1000.0);
-                                                sync_points.push((add_timestamp * time_scale + 0.5) * 1000.0);
-                                                sync_points.push((add_timestamp * time_scale + 1.0) * 1000.0);
-                                                sync_points.push((add_timestamp * time_scale + 2.0) * 1000.0);
-                                                sync_points.push((add_timestamp * time_scale + 2.5) * 1000.0);
-                                                continue;
-                                            } else {
-                                                headers_end_position = Some(output_gcsv.as_ref().unwrap().stream_position()?);
-                                                writeln!(output_gcsv.as_mut().unwrap(), "additional_sync_points,{}", " ".repeat(1024))?; // 1kb of placeholder spaces
-                                            }
-                                        }
-                                    } else if line.contains(',') {
-                                        if let Ok(timestamp) = line.split(',').next().unwrap().parse::<f64>() {
-                                            last_diff = timestamp - last_timestamp;
-                                            last_timestamp = timestamp;
-                                            if timestamp >= add_timestamp {
-                                                add_timestamp = 0.0;
-                                            }
-                                            let new_timestamp = timestamp + add_timestamp;
-                                            line = [new_timestamp.to_string()].into_iter().chain(line.split(',').skip(1).map(str::to_string)).join(",");
-                                        }
-                                    }
-                                    if first_file || is_data {
-                                        writeln!(output_gcsv.as_mut().unwrap(), "{}", line)?;
-                                    }
-                                }
+                                add_timestamp += last_timestamp + last_diff;
+                                last_timestamp = 0.0;
                             }
-                            add_timestamp += last_timestamp + last_diff;
-                            last_timestamp = 0.0;
+                            first_file = false;
                         }
-                        first_file = false;
+                        if !sync_points.is_empty() && output_gcsv.is_some() && headers_end_position.is_some() {
+                            let output_gcsv = output_gcsv.as_mut().unwrap();
+                            output_gcsv.seek(SeekFrom::Start(headers_end_position.unwrap()))?;
+                            write!(output_gcsv, "additional_sync_points,{}", sync_points.into_iter().map(|x| format!("{:.3}", x)).join(";"))?;
+                        }
+                        Ok(())
+                    })() {
+                        ::log::error!("Failed to merge .gcsv files: {:?}", e);
                     }
-                    if !sync_points.is_empty() && output_gcsv.is_some() && headers_end_position.is_some() {
-                        let output_gcsv = output_gcsv.as_mut().unwrap();
-                        output_gcsv.seek(SeekFrom::Start(headers_end_position.unwrap()))?;
-                        write!(output_gcsv, "additional_sync_points,{}", sync_points.into_iter().map(|x| format!("{:.3}", x)).join(";"))?;
-                    }
-                    Ok(())
-                })() {
-                    ::log::error!("Failed to merge .gcsv files: {:?}", e);
-                }
-                ///////////////// Merge .gcsv /////////////////
+                    ///////////////// Merge .gcsv /////////////////
 
                     crate::util::update_file_times(&output_file, &first_path);
 
