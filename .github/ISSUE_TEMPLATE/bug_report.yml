@@ -16,6 +16,20 @@ body:
       options:
       - label: I have tried the latest build
         required: true
+  - type: checkboxes
+    attributes:
+      label: Do you have latest GPU drivers installed?
+      description: Make sure to download and install latest drivers for your GPU from manufacturer's website (eg. NVIDIA, AMD or Intel). Drivers installed by the system are not enough.
+      options:
+      - label: I have the latest GPU drivers installed, I'm absolutely sure.
+        required: true
+  - type: checkboxes
+    attributes:
+      label: Have you checked the documentation?
+      description: Make sure to check the [FAQ](https://docs.gyroflow.xyz/app/getting-started/faq) and [Troubleshooting](https://docs.gyroflow.xyz/app/getting-started/troubleshooting) pages before reporting a bug report
+      options:
+      - label: I have read the FAQ and Troubleshooting and didn't find my issue there.
+        required: true
   - type: input
     id: gyroflow-version
     attributes:
