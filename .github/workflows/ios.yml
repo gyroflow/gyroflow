@@ -39,7 +39,7 @@ jobs:
         id: provisioning
         uses: apple-actions/download-provisioning-profiles@v1
         with:
-          bundle-id: 'xyz.Gyroflow'
+          bundle-id: 'xyz.gyroflow'
           profile-type: 'IOS_APP_STORE'
           issuer-id: ${{ secrets.MACOS_ITCONNECT_ISSUER }}
           api-key-id: ${{ secrets.MACOS_ITCONNECT_KEY_ID }}
