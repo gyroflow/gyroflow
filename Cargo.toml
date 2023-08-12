@@ -84,7 +84,7 @@ version = "0.8.4"
 cpp_build = "0.5.8"
 winres = "0.1.12"
 walkdir = "2.3.3"
-cc = "1.0.82"
+cc = "=1.0.79"
 
 [[bin]]
 name = "gyroflow"
