@@ -1179,14 +1179,14 @@ impl RenderQueue {
             (stab.input_file.read().path.clone(), stab.params.read().duration_ms)
         };
 
-        let (has_gyro, has_sync_points) = {
+        let (has_gyro, has_sync_points, has_accurate_timestamps) = {
             let gyro = stab.gyro.read();
-            (!gyro.quaternions.is_empty(), !gyro.get_offsets().is_empty())
+            (!gyro.quaternions.is_empty(), !gyro.get_offsets().is_empty(), gyro.file_metadata.has_accurate_timestamps)
         };
         let fps = stab.params.read().fps;
 
         let sync_settings = stab.lens.read().sync_settings.clone().unwrap_or_default();
-        if has_gyro && !has_sync_points && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
+        if has_gyro && !has_sync_points && !has_accurate_timestamps && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
             // ----------------------------------------------------------------------------
             // --------------------------------- Autosync ---------------------------------
             processing_cb(0.01);
