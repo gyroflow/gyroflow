@@ -1,11 +1,11 @@
-name: Release iOS
+name: iOS
 
 on:
   push:
 
 jobs:
   build:
-    runs-on: macos-13
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - name: Install Rust
@@ -35,14 +35,27 @@ jobs:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
 
+      - name: 'Download Provisioning Profiles'
+        id: provisioning
+        uses: apple-actions/download-provisioning-profiles@v1
+        with:
+          bundle-id: 'xyz.Gyroflow'
+          profile-type: 'IOS_APP_STORE'
+          issuer-id: ${{ secrets.MACOS_ITCONNECT_ISSUER }}
+          api-key-id: ${{ secrets.MACOS_ITCONNECT_KEY_ID }}
+          api-private-key: ${{ secrets.MACOS_ITCONNECT_KEY }}
+
+      - run: echo ${{ steps.provisioning.outputs.profiles }}
+
       - uses: extractions/setup-just@v1
 
       - name: Build Gyroflow (iOS)
         env:
           SIGNING_FINGERPRINT: ${{ secrets.MACOS_CERTIFICATE_FINGERPRINT }}
+          SIGN_KEY: 7F82D6013B8F6D45F88FE547438744BD64750C5B
         run: |
           just ios install-deps
-          just ios deploy
+          just ios build-ipa
           # npx notarize-cli --file ${{ github.workspace }}/_deployment/_binaries/Gyroflow.ipa --bundle-id xyz.gyroflow --asc-provider="${{ secrets.MACOS_TEAM }}" --username="${{ secrets.MACOS_ACCOUNT_USER }}" --password="${{ secrets.MACOS_ACCOUNT_PASS }}"
           xcrun notarytool submit --apple-id ${{ secrets.MACOS_ACCOUNT_USER }} --team-id ${{ secrets.MACOS_TEAM }} --password ${{ secrets.MACOS_ACCOUNT_PASS }} ${{ github.workspace }}/_deployment/_binaries/Gyroflow.ipa
           xcrun stapler staple --verbose ${{ github.workspace }}/_deployment/_binaries/Gyroflow.ipa

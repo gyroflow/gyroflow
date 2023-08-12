@@ -49,6 +49,10 @@ install-deps:
         pip3 install -U pip aqtinstall
         python3 -m aqt install-qt mac desktop {{QtVersionIOS}}
         python3 -m aqt install-qt mac ios {{QtVersionIOS}}
+
+        # Replace the Qt Quick Dialogs file with a patch to fix the file selection bug
+        rm -f {{ExtDir}}/{{QtVersionIOS}}/ios/lib/libQt6QuickDialogs2.a
+        curl -L https://api.gyroflow.xyz/sdk/Qt-ios-6.5.2-libQt6QuickDialogs2.a -o {{ExtDir}}/{{QtVersionIOS}}/ios/lib/libQt6QuickDialogs2.a
     fi
 
     if [ ! -f "{{ExtDir}}/vcpkg/installed/arm64-ios/lib/libopencv_core4.a" ]; then
@@ -76,19 +80,14 @@ run:
     #!/bin/bash
     just --unstable -f {{justfile()}} build-and-package release development
 
-    if codesign -vvvv --deep --strict --verify {{AppBundle}} ; then
-        ios-deploy --bundle {{AppBundle}} --noninteractive
-    fi
+    ios-deploy --bundle {{AppBundle}} --noninteractive
 
 [no-cd]
 debug:
     #!/bin/bash
-
     just --unstable -f {{justfile()}} build-and-package debug development
 
-    if codesign -vvvv --deep --strict --verify {{AppBundle}} ; then
-        ios-deploy --bundle {{AppBundle}} --debug
-    fi
+    ios-deploy --bundle {{AppBundle}} --debug
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Deployment ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -116,12 +115,14 @@ build-and-package profile is_dist:
         cargo build --target aarch64-apple-ios --profile {{profile}}
     fi
 
-    if [ "{{is_dist}}" == "distribution" ]; then
-        SIGN_KEY="{{DistributionCertificateSHA}}"
-        PROVISIONING_PROFILE="{{DistributionProvisioning}}"
-    else
-        SIGN_KEY="{{DevelopmentCertificateSHA}}"
-        PROVISIONING_PROFILE="{{DevelopmentProvisioning}}"
+    if [ -z "$SIGN_KEY" ] && [ -z "$PROVISIONING_PROFILE" ]; then
+        if [ "{{is_dist}}" == "distribution" ]; then
+            SIGN_KEY="{{DistributionCertificateSHA}}"
+            PROVISIONING_PROFILE="{{DistributionProvisioning}}"
+        else
+            SIGN_KEY="{{DevelopmentCertificateSHA}}"
+            PROVISIONING_PROFILE="{{DevelopmentProvisioning}}"
+        fi
     fi
 
     if [ -f "{{ProjectDir}}/target/aarch64-apple-ios/{{profile}}/gyroflow" ]; then
@@ -153,6 +154,8 @@ build-and-package profile is_dist:
 
         codesign -vvvv --force --generate-entitlement-der --preserve-metadata=identifier,flags,runtime --sign $SIGN_KEY --entitlements {{AppBundle}}/../../entitlements.xcent {{AppBundle}}/Frameworks/mdk.framework
         codesign -vvvv --force --generate-entitlement-der --preserve-metadata=identifier,flags,runtime --sign $SIGN_KEY --entitlements {{AppBundle}}/../../entitlements.xcent {{AppBundle}}
+
+        codesign -vvvv --deep --strict --verify {{AppBundle}}
     fi
 
 [no-cd]
@@ -162,61 +165,70 @@ deploy *param:
 
     just --unstable -f {{justfile()}} build-and-package deploy distribution
 
-    if codesign -vvvv --deep --strict --verify {{AppBundle}} ; then
-        pushd {{AppBundle}}/../../
+    pushd {{AppBundle}}/../../
+        zip -r Gyroflow.ipa Payload
+    popd
+    ios-deploy --bundle {{AppBundle}}
+
+    # ---------------------- XCode archive way ----------------------
+    # This shouldn't be normally needed, but if anything changes in the build process in the future, it's more "official" way
+    if false; then
+        if true; then
+            SIGN_KEY="{{DistributionCertificateSHA}}"
+            PROVISIONING_PROFILE="{{DistributionProvisioningName}}"
+        else
+            SIGN_KEY="{{DevelopmentCertificateSHA}}"
+            PROVISIONING_PROFILE="{{DevelopmentProvisioningName}}"
+        fi
+        # For app store
+        TYPE="app-store"
+        # For ad-hoc
+        TYPE="developer-id"
+
+        mkdir -p {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive/Products/Applications
+        cp -rf {{AppBundle}} {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive/Products/Applications/
+
+        # Build Archive.plist
+        ARCHIVE_PLIST={{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive/Info.plist
+        PlistBuddy -x -c "Add :ApplicationProperties dict" $ARCHIVE_PLIST
+        PlistBuddy -x -c "Add :ApplicationProperties:ApplicationPath string Applications/Gyroflow.app" $ARCHIVE_PLIST
+        PlistBuddy -x -c "Add :ApplicationProperties:Architectures array" $ARCHIVE_PLIST
+        PlistBuddy -x -c "Add :ApplicationProperties:Architectures:0 string arm64" $ARCHIVE_PLIST
+        PlistBuddy -x -c "Add :ApplicationProperties:CFBundleIdentifier string {{BundleIdentifier}}" $ARCHIVE_PLIST
+        PlistBuddy -x -c "Add :ApplicationProperties:CFBundleShortVersionString string {{ProjectVersion}}" $ARCHIVE_PLIST
+        PlistBuddy -x -c "Add :ApplicationProperties:CFBundleVersion string {{ProjectVersion}}" $ARCHIVE_PLIST
+        PlistBuddy -x -c "Add :ApplicationProperties:Team string {{TeamID}}" $ARCHIVE_PLIST
+        PlistBuddy -x -c "Add :ArchiveVersion integer 2" $ARCHIVE_PLIST
+        PlistBuddy -x -c "Add :CreationDate date \"`date +'%c'`\"" $ARCHIVE_PLIST
+        PlistBuddy -x -c "Add :Name string Gyroflow" $ARCHIVE_PLIST
+        PlistBuddy -x -c "Add :SchemeName string Gyroflow" $ARCHIVE_PLIST
+
+        # Build Export.plist
+        PlistBuddy -x -c "Add :method string $TYPE" {{AppBundle}}/../../Export.plist
+        PlistBuddy -x -c "Add :teamID string {{TeamID}}" {{AppBundle}}/../../Export.plist
+        PlistBuddy -x -c "Add :signingCertificate string $SIGN_KEY" {{AppBundle}}/../../Export.plist
+        PlistBuddy -x -c "Add :provisioningProfiles dict" {{AppBundle}}/../../Export.plist
+        PlistBuddy -x -c "Add :provisioningProfiles:{{BundleIdentifier}} string $PROVISIONING_PROFILE" {{AppBundle}}/../../Export.plist
+
+        xcodebuild -sdk iphoneos -exportArchive -archivePath {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive -exportPath {{AppBundle}}/../out/Payload -exportOptionsPlist {{AppBundle}}/../../Export.plist
+
+        pushd {{AppBundle}}/../out/
+            rm -f Gyroflow.ipa
+            rm -f Payload/*.plist
+            rm -f Payload/*.log
             zip -r Gyroflow.ipa Payload
         popd
-        ios-deploy --bundle {{AppBundle}}
-
-        # ---------------------- XCode archive way ----------------------
-        # This shouldn't be normally needed, but if anything changes in the build process in the future, it's more "official" way
-        if false; then
-            if true; then
-                SIGN_KEY="{{DistributionCertificateSHA}}"
-                PROVISIONING_PROFILE="{{DistributionProvisioningName}}"
-            else
-                SIGN_KEY="{{DevelopmentCertificateSHA}}"
-                PROVISIONING_PROFILE="{{DevelopmentProvisioningName}}"
-            fi
-            # For app store
-            TYPE="app-store"
-            # For ad-hoc
-            TYPE="developer-id"
-
-            mkdir -p {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive/Products/Applications
-            cp -rf {{AppBundle}} {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive/Products/Applications/
-
-            # Build Archive.plist
-            ARCHIVE_PLIST={{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive/Info.plist
-            PlistBuddy -x -c "Add :ApplicationProperties dict" $ARCHIVE_PLIST
-            PlistBuddy -x -c "Add :ApplicationProperties:ApplicationPath string Applications/Gyroflow.app" $ARCHIVE_PLIST
-            PlistBuddy -x -c "Add :ApplicationProperties:Architectures array" $ARCHIVE_PLIST
-            PlistBuddy -x -c "Add :ApplicationProperties:Architectures:0 string arm64" $ARCHIVE_PLIST
-            PlistBuddy -x -c "Add :ApplicationProperties:CFBundleIdentifier string {{BundleIdentifier}}" $ARCHIVE_PLIST
-            PlistBuddy -x -c "Add :ApplicationProperties:CFBundleShortVersionString string {{ProjectVersion}}" $ARCHIVE_PLIST
-            PlistBuddy -x -c "Add :ApplicationProperties:CFBundleVersion string {{ProjectVersion}}" $ARCHIVE_PLIST
-            PlistBuddy -x -c "Add :ApplicationProperties:Team string {{TeamID}}" $ARCHIVE_PLIST
-            PlistBuddy -x -c "Add :ArchiveVersion integer 2" $ARCHIVE_PLIST
-            PlistBuddy -x -c "Add :CreationDate date \"`date +'%c'`\"" $ARCHIVE_PLIST
-            PlistBuddy -x -c "Add :Name string Gyroflow" $ARCHIVE_PLIST
-            PlistBuddy -x -c "Add :SchemeName string Gyroflow" $ARCHIVE_PLIST
-
-            # Build Export.plist
-            PlistBuddy -x -c "Add :method string $TYPE" {{AppBundle}}/../../Export.plist
-            PlistBuddy -x -c "Add :teamID string {{TeamID}}" {{AppBundle}}/../../Export.plist
-            PlistBuddy -x -c "Add :signingCertificate string $SIGN_KEY" {{AppBundle}}/../../Export.plist
-            PlistBuddy -x -c "Add :provisioningProfiles dict" {{AppBundle}}/../../Export.plist
-            PlistBuddy -x -c "Add :provisioningProfiles:{{BundleIdentifier}} string $PROVISIONING_PROFILE" {{AppBundle}}/../../Export.plist
-
-            xcodebuild -sdk iphoneos -exportArchive -archivePath {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive -exportPath {{AppBundle}}/../out/Payload -exportOptionsPlist {{AppBundle}}/../../Export.plist
-
-            pushd {{AppBundle}}/../out/
-                rm -f Gyroflow.ipa
-                rm -f Payload/*.plist
-                rm -f Payload/*.log
-                zip -r Gyroflow.ipa Payload
-            popd
-            ios-deploy --bundle {{AppBundle}}/../out/Payload/Gyroflow.app
-        fi
-        # ---------------------- XCode archive way ----------------------
+        ios-deploy --bundle {{AppBundle}}/../out/Payload/Gyroflow.app
     fi
+    # ---------------------- XCode archive way ----------------------
+
+[no-cd]
+build-ipa:
+    #!/bin/bash
+    export PATH="/usr/libexec/:$PATH"
+
+    just --unstable -f {{justfile()}} build-and-package deploy distribution
+
+    pushd {{AppBundle}}/../../
+        zip -r Gyroflow.ipa Payload
+    popd
