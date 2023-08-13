@@ -35,7 +35,7 @@ install-deps:
     rustup target add aarch64-apple-ios
     xcode-select --install
     export DYLD_FALLBACK_LIBRARY_PATH=""
-    export MACOSX_DEPLOYMENT_TARGET=""
+    #export MACOSX_DEPLOYMENT_TARGET=""
 
     mkdir -p {{ExtDir}}
     cd {{ExtDir}}
@@ -131,6 +131,12 @@ build-and-package profile is_dist:
         cp -rf {{ProjectDir}}/_deployment/ios/Info.plist {{AppBundle}}/Info.plist
         cp -rf {{ProjectDir}}/_deployment/ios/PkgInfo {{AppBundle}}/PkgInfo
         PlistBuddy -x -c "Set :CFBundleIdentifier {{BundleIdentifier}}" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Set :CFBundleShortVersionString {{ProjectVersion}}" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Set :CFBundleVersion {{ProjectVersion}}" {{AppBundle}}/Info.plist
+        if ! [ -z "$GITHUB_RUN_NUMBER" ]; then
+            PlistBuddy -x -c "Set :CFBundleVersion \"{{ProjectVersion}}.$GITHUB_RUN_NUMBER\"" {{AppBundle}}/Info.plist
+        fi
+        cat {{AppBundle}}/Info.plist
 
         # Generate entitlements
         PlistBuddy -x -c "Add :application-identifier string {{TeamID}}.{{BundleIdentifier}}" {{AppBundle}}/../../entitlements.xcent
@@ -148,7 +154,7 @@ build-and-package profile is_dist:
         ibtool --errors --warnings --notices --module gyroflow --target-device iphone --target-device ipad --minimum-deployment-target 14.0 --output-format human-readable-text --auto-activate-custom-fonts --compilation-directory {{AppBundle}}/../../ {{ProjectDir}}/_deployment/ios/LaunchScreen.storyboard
         ibtool --errors --warnings --notices --module gyroflow --target-device iphone --target-device ipad --minimum-deployment-target 14.0 --output-format human-readable-text --link {{AppBundle}} {{AppBundle}}/../../LaunchScreen.storyboardc
 
-        cp -f $PROVISIONING_PROFILE {{AppBundle}}/embedded.mobileprovision
+        cp -f "$PROVISIONING_PROFILE" {{AppBundle}}/embedded.mobileprovision
         #derq query -f xml -i {{ProjectDir}}/_deployment/ios/Entitlements.plist -o {{AppBundle}}/../../Gyroflow.app.xcent.der --raw
         #dsymutil {{AppBundle}}/gyroflow -o {{AppBundle}}/../../Gyroflow.app.dSYM
 

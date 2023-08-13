@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v3
       - name: Install Rust
@@ -24,20 +24,20 @@ jobs:
           path: '${{ github.workspace }}/ext/'
           key: ${{ runner.os }}-gf-ext-ios-0
 
-      - name: Force qml-video-rs rebuild (UNIX)
-        run: |
-          rm -rf ${{ github.workspace }}/target/*/deploy/build/qml-video-rs*
-          rm -rf ${{ github.workspace }}/target/deploy/build/qml-video-rs*
+      #- name: Force qml-video-rs rebuild (UNIX)
+      #  run: |
+      #    rm -rf ${{ github.workspace }}/target/*/deploy/build/qml-video-rs*
+      #    rm -rf ${{ github.workspace }}/target/deploy/build/qml-video-rs*
 
       - name: Install Mac certificate
         uses: apple-actions/import-codesign-certs@v2
         with:
-          p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
+          p12-file-base64: ${{ secrets.MAC_APPSTORE_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
 
-      - name: 'Download Provisioning Profiles'
+      - name: Download Provisioning Profiles
         id: provisioning
-        uses: apple-actions/download-provisioning-profiles@v1
+        uses: apple-actions/download-provisioning-profiles@v2
         with:
           bundle-id: 'xyz.gyroflow'
           profile-type: 'IOS_APP_STORE'
@@ -51,18 +51,18 @@ jobs:
 
       - name: Build Gyroflow (iOS)
         env:
-          SIGNING_FINGERPRINT: ${{ secrets.MACOS_CERTIFICATE_FINGERPRINT }}
-          SIGN_KEY: 7F82D6013B8F6D45F88FE547438744BD64750C5B
+          SIGN_KEY: 0D16E2582D40EE2F27F8CB49BD0CC8517FE19837
+          PROVISIONING_PROFILE: /Users/runner/Library/MobileDevice/Provisioning Profiles/${{ fromJSON(steps.provisioning.outputs.profiles)[0].udid }}.mobileprovision
         run: |
           just ios install-deps
           just ios build-ipa
           # npx notarize-cli --file ${{ github.workspace }}/_deployment/_binaries/Gyroflow.ipa --bundle-id xyz.gyroflow --asc-provider="${{ secrets.MACOS_TEAM }}" --username="${{ secrets.MACOS_ACCOUNT_USER }}" --password="${{ secrets.MACOS_ACCOUNT_PASS }}"
-          xcrun notarytool submit --apple-id ${{ secrets.MACOS_ACCOUNT_USER }} --team-id ${{ secrets.MACOS_TEAM }} --password ${{ secrets.MACOS_ACCOUNT_PASS }} ${{ github.workspace }}/_deployment/_binaries/Gyroflow.ipa
-          xcrun stapler staple --verbose ${{ github.workspace }}/_deployment/_binaries/Gyroflow.ipa
-          xcrun altool --upload-app -f ${{ github.workspace }}/_deployment/_binaries/Gyroflow.ipa -u ${{ secrets.MACOS_ACCOUNT_USER }} -p ${{ secrets.MACOS_ACCOUNT_PASS }}
+          #xcrun notarytool submit --apple-id ${{ secrets.MACOS_ACCOUNT_USER }} --team-id ${{ secrets.MACOS_TEAM }} --password ${{ secrets.MACOS_ACCOUNT_PASS }} ${{ github.workspace }}/_deployment/_binaries/ios/Gyroflow.ipa
+          #xcrun stapler staple --verbose ${{ github.workspace }}/_deployment/_binaries/ios/Gyroflow.ipa
+          xcrun altool --upload-app -f ${{ github.workspace }}/_deployment/_binaries/ios/Gyroflow.ipa -t iOS -u ${{ secrets.MACOS_ACCOUNT_USER }} -p ${{ secrets.MACOS_ACCOUNT_PASS }}
 
       - name: Save Binaries
         uses: actions/upload-artifact@v3
         with:
-          name: gyroflow
-          path: _deployment/_binaries/*.*
+          name: Gyroflow-ios
+          path: _deployment/_binaries/ios/*.ipa
