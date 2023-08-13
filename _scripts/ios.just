@@ -59,6 +59,8 @@ install-deps:
         echo "Installing OpenCV from vcpkg"
         # Install OpenCV
         ./vcpkg/vcpkg install "opencv4[core]:arm64-ios"
+        rm -rf ./vcpkg/buildtrees
+        rm -rf ./vcpkg/downloads
     fi
 
     if [ ! -d "ffmpeg-master-iOS-gpl-lite" ]; then
@@ -136,6 +138,18 @@ build-and-package profile is_dist:
         if ! [ -z "$GITHUB_RUN_NUMBER" ]; then
             PlistBuddy -x -c "Set :CFBundleVersion \"{{ProjectVersion}}.$GITHUB_RUN_NUMBER\"" {{AppBundle}}/Info.plist
         fi
+
+        DEFAULT_iOS_SDK_VERSION=`defaults read $(xcode-select -p)/Platforms/iPhoneOS.platform/version CFBundleShortVersionString`
+
+        PlistBuddy -x -c "Set :DTCompiler `defaults read $(xcode-select -p)/../info DTCompiler`" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Set :DTPlatformBuild `defaults read $(xcode-select -p)/../info DTPlatformBuild`" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Set :DTPlatformName iphoneos" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Set :DTPlatformVersion $DEFAULT_iOS_SDK_VERSION" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Set :DTSDKBuild `defaults read $(xcode-select -p)/../info DTSDKBuild`" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Set :DTSDKName iphoneos$DEFAULT_iOS_SDK_VERSION" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Set :DTXcode `defaults read $(xcode-select -p)/../info DTXcode`" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Set :DTXcodeBuild `defaults read $(xcode-select -p)/../info DTXcodeBuild`" {{AppBundle}}/Info.plist
+
         cat {{AppBundle}}/Info.plist
 
         # Generate entitlements

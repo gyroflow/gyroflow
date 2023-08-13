@@ -28,6 +28,8 @@ install-deps:
         # Install OpenCV
         ./vcpkg/vcpkg install "opencv4[core]:x64-osx-release"
         ./vcpkg/vcpkg install "opencv4[core]:arm64-osx"
+        rm -rf ./vcpkg/buildtrees
+        rm -rf ./vcpkg/downloads
     fi
 
     if [ ! -d "{{FFmpeg}}" ]; then

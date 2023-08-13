@@ -26,6 +26,8 @@ install-deps:
 
         # Install OpenCV
         {{ExtDir}}/vcpkg/vcpkg install "opencv4[core]:{{VcpkgArch}}"
+        rm -rf {{ExtDir}}/vcpkg/buildtrees
+        rm -rf {{ExtDir}}/vcpkg/downloads
     fi
 
     if [[ ! -d "${LIBCLANG_PATH}" ]]; then

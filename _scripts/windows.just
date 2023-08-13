@@ -50,6 +50,8 @@ install-deps:
         .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
         .\vcpkg\vcpkg install "opencv4[core]:{{VcpkgArch}}"
         .\vcpkg\vcpkg install "opencl:{{VcpkgArch}}"
+        rm -Recurse -Force .\vcpkg\buildtrees
+        rm -Recurse -Force .\vcpkg\downloads
     }
     # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
 

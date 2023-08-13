@@ -30,7 +30,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/ext/'
-          key: ${{ runner.os }}-gf-ext-6
+          key: ${{ runner.os }}-gf-ext-7
 
       - name: Prepare Vulkan SDK
         uses: humbletim/setup-vulkan-sdk@v1.2.0
