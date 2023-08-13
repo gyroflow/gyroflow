@@ -141,14 +141,14 @@ build-and-package profile is_dist:
 
         DEFAULT_iOS_SDK_VERSION=`defaults read $(xcode-select -p)/Platforms/iPhoneOS.platform/version CFBundleShortVersionString`
 
-        PlistBuddy -x -c "Set :DTCompiler `defaults read $(xcode-select -p)/../info DTCompiler`" {{AppBundle}}/Info.plist
-        PlistBuddy -x -c "Set :DTPlatformBuild `defaults read $(xcode-select -p)/../info DTPlatformBuild`" {{AppBundle}}/Info.plist
-        PlistBuddy -x -c "Set :DTPlatformName iphoneos" {{AppBundle}}/Info.plist
-        PlistBuddy -x -c "Set :DTPlatformVersion $DEFAULT_iOS_SDK_VERSION" {{AppBundle}}/Info.plist
-        PlistBuddy -x -c "Set :DTSDKBuild `defaults read $(xcode-select -p)/../info DTSDKBuild`" {{AppBundle}}/Info.plist
-        PlistBuddy -x -c "Set :DTSDKName iphoneos$DEFAULT_iOS_SDK_VERSION" {{AppBundle}}/Info.plist
-        PlistBuddy -x -c "Set :DTXcode `defaults read $(xcode-select -p)/../info DTXcode`" {{AppBundle}}/Info.plist
-        PlistBuddy -x -c "Set :DTXcodeBuild `defaults read $(xcode-select -p)/../info DTXcodeBuild`" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Add :DTCompiler string `defaults read $(xcode-select -p)/../info DTCompiler`" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Add :DTPlatformBuild string `defaults read $(xcode-select -p)/../info DTPlatformBuild`" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Add :DTPlatformName string iphoneos" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Add :DTPlatformVersion string $DEFAULT_iOS_SDK_VERSION" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Add :DTSDKBuild string `defaults read $(xcode-select -p)/../info DTSDKBuild`" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Add :DTSDKName string iphoneos$DEFAULT_iOS_SDK_VERSION" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Add :DTXcode string `defaults read $(xcode-select -p)/../info DTXcode`" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Add :DTXcodeBuild string `defaults read $(xcode-select -p)/../info DTXcodeBuild`" {{AppBundle}}/Info.plist
 
         cat {{AppBundle}}/Info.plist
 
