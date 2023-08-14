@@ -12,7 +12,6 @@
 	<key>CFBundleShortVersionString</key>          <string>1.5.2</string>
 	<key>CFBundleVersion</key>                     <string>1.5.2</string>
 	<key>MinimumOSVersion</key>                    <string>14.0</string>
-	<key>DTPlatformName</key>                      <string>iphoneos</string>
 	<key>UIRequiredDeviceCapabilities</key>        <array><string>arm64</string><string>metal</string></array>
 	<key>CFBundleSupportedPlatforms</key>          <array><string>iPhoneOS</string></array>
 	<key>UIDeviceFamily</key>                      <array><integer>1</integer><integer>2</integer></array>

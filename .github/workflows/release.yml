@@ -10,7 +10,7 @@ jobs:
       matrix:
         targets: [
           { os: ubuntu-latest },
-          { os: macos-13 },
+          { os: macos-latest },
           { os: windows-2022 }
         ]
     runs-on: ${{ matrix.targets.os }}
@@ -24,13 +24,13 @@ jobs:
           override: true
       - uses: Swatinem/rust-cache@v2
         with:
-          key: gf6
+          key: gf0
       - name: Dependencies cache
         id: extcache
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/ext/'
-          key: ${{ runner.os }}-gf-ext-7
+          key: ${{ runner.os }}-gf-ext-0
 
       - name: Prepare Vulkan SDK
         uses: humbletim/setup-vulkan-sdk@v1.2.0
@@ -49,7 +49,7 @@ jobs:
         run: rm -r -force ${{ github.workspace }}/target/deploy/build/qml-video-rs* -ErrorAction SilentlyContinue
 
       - name: Install Mac certificate
-        if: ${{ matrix.targets.os == 'macos-13' }}
+        if: ${{ matrix.targets.os == 'macos-latest' }}
         uses: apple-actions/import-codesign-certs@v2
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
@@ -58,14 +58,14 @@ jobs:
       - uses: extractions/setup-just@v1
 
       - name: Build Gyroflow (macOS)
-        if: ${{ matrix.targets.os == 'macos-13' }}
+        if: ${{ matrix.targets.os == 'macos-latest' }}
         env:
           SIGNING_FINGERPRINT: ${{ secrets.MACOS_CERTIFICATE_FINGERPRINT }}
         run: |
           just install-deps
           just deploy universal
-          # npx notarize-cli --file ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg --bundle-id xyz.gyroflow --asc-provider="${{ secrets.MACOS_TEAM }}" --username="${{ secrets.MACOS_ACCOUNT_USER }}" --password="${{ secrets.MACOS_ACCOUNT_PASS }}"
-          xcrun notarytool submit --apple-id ${{ secrets.MACOS_ACCOUNT_USER }} --team-id ${{ secrets.MACOS_TEAM }} --password ${{ secrets.MACOS_ACCOUNT_PASS }} ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg
+          #npx notarize-cli --file ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg --bundle-id xyz.gyroflow --asc-provider="${{ secrets.MACOS_TEAM }}" --username="${{ secrets.MACOS_ACCOUNT_USER }}" --password="${{ secrets.MACOS_ACCOUNT_PASS }}"
+          xcrun notarytool submit --wait --apple-id ${{ secrets.MACOS_ACCOUNT_USER }} --team-id ${{ secrets.MACOS_TEAM }} --password ${{ secrets.MACOS_ACCOUNT_PASS }} ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg
           xcrun stapler staple --verbose ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg
 
       - name: Build Gyroflow (Linux)

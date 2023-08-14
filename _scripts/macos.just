@@ -315,6 +315,7 @@ deploy *param:
         fi
 
         ln -sf /Applications "$PROJECT_DIR/_deployment/_binaries/mac/Applications"
+        sudo mdutil -a -i off
         hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v{{ProjectVersion}}" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9
 
         if [ "$SIGNING_FINGERPRINT" != "" ]; then
