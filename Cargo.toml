@@ -48,7 +48,7 @@ directories = "5"
 
 qmetaobject = { version = "0.2.9", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.9", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "fb8ea6b" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "9894106" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "6.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
@@ -73,7 +73,7 @@ qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = 
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.51.0"
-features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation",
+features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation", "Win32_System_LibraryLoader",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry" ]
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.metal]

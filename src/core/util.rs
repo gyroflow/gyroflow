@@ -125,6 +125,33 @@ pub fn get_setting(key: &str) -> Option<String> {
     unsafe {
         use windows::Win32::System::Registry::*;
         use windows::core::PCWSTR;
+
+        // If Gyroflow was installed from Microsoft Store, then we need to read from it's sandboxed registry file
+        {
+            let packages_path = format!("{}/Packages/", std::env::var("LOCALAPPDATA").unwrap_or_default()).replace('\\', "/");
+            for e in walkdir::WalkDir::new(&packages_path).into_iter() {
+                if let Ok(entry) = e {
+                    let f_name = entry.file_name().to_string_lossy();
+                    if f_name.starts_with("29160AdrianRoss.Gyroflow") {
+                        if let Ok(buffer) = std::fs::read(format!("{packages_path}{f_name}/SystemAppData/Helium/User.dat")) {
+                            if let Ok(hive) = nt_hive::Hive::new(buffer.as_ref()) {
+                                if let Ok(root) = hive.root_key_node() {
+                                    if let Some(Ok(key_node)) = root.subpath("Software\\Gyroflow\\Gyroflow") {
+                                        if let Some(Ok(key_value)) = key_node.value(key) {
+                                            if let Ok(sz) = key_value.string_data() {
+                                                return Some(sz);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
         let mut hkey = HKEY::default();
         let key_path = "Software\\Gyroflow\\Gyroflow\0".encode_utf16().collect::<Vec<_>>();
         if RegOpenKeyExW(HKEY_CURRENT_USER, PCWSTR::from_raw(key_path.as_ptr()), 0, KEY_READ, &mut hkey).is_ok() {

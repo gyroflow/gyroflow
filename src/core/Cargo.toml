@@ -44,6 +44,7 @@ half = "2.3.1"
 lru = "0.11"
 thiserror = "1.0.46"
 ciborium = "0.2.1"
+nt-hive = "0.2"
 
 dyn-clone = "1.0.12"
 
@@ -92,7 +93,7 @@ version = "0.1.1"
 version = "0.8.4"
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.51.0"
-features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation",
+features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation", "Win32_System_LibraryLoader",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry" ]
 [target.'cfg(target_os = "windows")'.dependencies.winapi]
