@@ -12,8 +12,8 @@ opencv = ["gyroflow-core/use-opencv"]
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 gyroflow-core = { path = "src/core/", features = ["use-opencv", "use-opencl"] }
-keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "0f34aaf" }
-system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", rev = "29ff230" }
+keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "41bc5f9" }
+system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", rev = "c3fc739" }
 breakpad-sys = "0.2.0"
 
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
@@ -21,7 +21,7 @@ gyroflow-core = { path = "src/core/", features = ["use-opencv"] }
 
 [dependencies]
 cstr = "0.2.11"
-cpp = "0.5.8"
+cpp = "0.5.9"
 serde = "1.0"
 serde_json = "1.0"
 bytemuck = "1.13.1"
@@ -34,16 +34,17 @@ rayon = "1.7"
 
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"
-flate2 = "1.0.26"
+flate2 = "1.0.27"
 walkdir = "2.3.3"
 mp4-merge = "0.1.5"
 human-sort = "0.2.2"
-argh = "0.1.11"
+argh = "0.1.12"
 indicatif = "0.17"
 rustfft = "6.1.0"
 crc32fast = "1.3.2"
 rodio = { default-features = false, features = ["vorbis"], version = "0.17.1" }
 filetime_creation = "0.1"
+directories = "5"
 
 qmetaobject = { version = "0.2.9", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.9", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
@@ -71,7 +72,7 @@ qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = 
 qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "98ebed1" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
-version = "0.48.0"
+version = "0.51.0"
 features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry" ]
@@ -81,7 +82,7 @@ version = "0.26.0"
 version = "0.8.4"
 
 [build-dependencies]
-cpp_build = "0.5.8"
+cpp_build = "0.5.9"
 winres = "0.1.12"
 walkdir = "2.3.3"
 cc = "=1.0.79"

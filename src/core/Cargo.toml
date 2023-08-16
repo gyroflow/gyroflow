@@ -37,12 +37,12 @@ time = { version = "0.3.25", features = ["local-offset"] }
 itertools = "0.11.0"
 num = "0.4.1"
 base91 = "0.1.0"
-bitflags = "2.3.3"
+bitflags = "2.4.0"
 enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.3.1"
 lru = "0.11"
-thiserror = "1.0.44"
+thiserror = "1.0.46"
 ciborium = "0.2.1"
 
 dyn-clone = "1.0.12"
@@ -63,16 +63,16 @@ libc = "0.2"
 
 opencv = { version = "0.84", features = ["clang-runtime"], optional = true }
 
-wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "07f92c9", features = ["spirv"] }
-wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "07f92c9" }
-wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "07f92c9" }
+wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "57874e5", features = ["spirv"] }
+wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "57874e5" }
+wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "57874e5" }
 bytemuck = "1.13.1"
 ash = "0.37.3"
-naga = { git = "https://github.com/gfx-rs/naga", rev = "bac2d82a430fbfcf100ee22b7c3bc12f3d593079", version = "0.13.0", features = ["clone", "span", "validate", "spv-in"] }
+naga = { git = "https://github.com/gfx-rs/naga", rev = "7a19f3af909202c7eafd36633b5584bfbb353ecb", version = "0.13.0", features = ["clone", "span", "validate", "spv-in"] }
 
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"
-flate2 = "1.0.26"
+flate2 = "1.0.27"
 walkdir = "2.3.3"
 
 log = "0.4"
@@ -91,8 +91,8 @@ version = "0.1.1"
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.core-foundation-sys]
 version = "0.8.4"
 [target.'cfg(target_os = "windows")'.dependencies.windows]
-version = "0.48.0"
-features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation",
+version = "0.51.0"
+features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry" ]
 [target.'cfg(target_os = "windows")'.dependencies.winapi]

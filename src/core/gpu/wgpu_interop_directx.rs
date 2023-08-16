@@ -47,7 +47,7 @@ impl DirectX11Fence {
 }
 impl Drop for DirectX11Fence {
     fn drop(&mut self) {
-        unsafe { CloseHandle(self.event); }
+        unsafe { let _ = CloseHandle(self.event); }
     }
 }
 
@@ -93,7 +93,7 @@ pub fn get_shared_texture_d3d11(device: &ID3D11Device, texture: &ID3D11Texture2D
         // We need to create a new texture and use texture copy from our original one.
         let mut desc = D3D11_TEXTURE2D_DESC::default();
         texture.GetDesc(&mut desc);
-        desc.MiscFlags |= D3D11_RESOURCE_MISC_SHARED_NTHANDLE | D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX;
+        desc.MiscFlags |= D3D11_RESOURCE_MISC_SHARED_NTHANDLE.0 as u32 | D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX.0 as u32;
 
         let mut new_texture = None;
         device.CreateTexture2D(&desc, None, Some(&mut new_texture))?;

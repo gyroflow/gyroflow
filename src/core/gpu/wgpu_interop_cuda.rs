@@ -156,9 +156,9 @@ pub fn allocate_shared_cuda_memory(size: usize) -> Result<CudaSharedMemory, Box<
 
     #[cfg(target_os = "windows")]
     {
-        use windows::Win32::System::WindowsProgramming::*;
         use windows::Win32::Security::{ *, Authorization::* };
         use windows::Win32::Foundation::*;
+        use windows::Wdk::Foundation::*;
         use windows::core::*;
         std::thread_local! {
             static OBJ_ATTRIBUTES: Option<OBJECT_ATTRIBUTES> = unsafe {
@@ -166,7 +166,7 @@ pub fn allocate_shared_cuda_memory(size: usize) -> Result<CudaSharedMemory, Box<
 
                 let mut sec_desc = PSECURITY_DESCRIPTOR::default();
                 let result = ConvertStringSecurityDescriptorToSecurityDescriptorA(PCSTR::from_raw(SDDL.as_ptr()), SDDL_REVISION_1, &mut sec_desc, None);
-                if result.as_bool() {
+                if result.is_ok() {
                     Some(OBJECT_ATTRIBUTES {
                         Length: std::mem::size_of::<OBJECT_ATTRIBUTES>() as u32,
                         RootDirectory: HANDLE::default(),
@@ -283,7 +283,7 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
                 raw_device.bind_image_memory(raw_image, allocated_memory, 0)?;
 
                 #[cfg(target_os = "windows")]
-                windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(cuda_mem.shared_handle as isize));
+                let _ = windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(cuda_mem.shared_handle as isize));
                 #[cfg(target_os = "linux")]
                 libc::close(cuda_mem.shared_handle as i32);
 
@@ -357,7 +357,7 @@ pub fn create_vk_buffer_backed_by_cuda_memory(device: &wgpu::Device, size: (usiz
                 raw_device.bind_buffer_memory(raw_buffer, allocated_memory, 0)?;
 
                 #[cfg(target_os = "windows")]
-                windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(cuda_mem.shared_handle as isize));
+                let _ = windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(cuda_mem.shared_handle as isize));
                 #[cfg(target_os = "linux")]
                 libc::close(cuda_mem.shared_handle as i32);
 
