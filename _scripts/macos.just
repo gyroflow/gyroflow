@@ -7,14 +7,16 @@
 [no-cd]
 install-deps:
     #!/bin/bash
+    set -e
+
     brew install p7zip python pkg-config
-    xcode-select --install
+    xcode-select --install || true
 
     mkdir -p {{ExtDir}}
     cd {{ExtDir}}
 
     # Install vcpkg
-    git clone --depth 1 https://github.com/Microsoft/vcpkg.git
+    git clone --depth 1 https://github.com/Microsoft/vcpkg.git || true
     ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
     if [ ! -d "{{ExtDir}}/{{QtVersion}}" ]; then
@@ -85,6 +87,7 @@ debug *param:
 [no-cd]
 deploy *param:
     #!/bin/bash
+    set -e
 
     : "${PROJECT_DIR:=$(cd "{{ProjectDir}}"; pwd -P)}"
     : "${CARGO_TARGET:=$PROJECT_DIR/target/release}"
@@ -137,7 +140,7 @@ deploy *param:
         cp -Rf "$PROJECT_DIR/_deployment/mac/Gyroflow.app"    "$PROJECT_DIR/_deployment/_binaries/mac/"
         strip  "$PROJECT_DIR/target/deploy/gyroflow"
         cp -f  "$PROJECT_DIR/target/deploy/gyroflow"          "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS/"
-        cp -Rf "$PROJECT_DIR/target/Frameworks/mdk.framework" "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/"
+        cp -Rf "$PROJECT_DIR/target/Frameworks/mdk.framework" "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/" || true
         cp -Rf "$PROJECT_DIR/target/x86_64-apple-darwin/Frameworks/mdk.framework" "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/"
         cp -Rf "$PROJECT_DIR/resources/camera_presets"        "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Resources/"
     fi
@@ -191,9 +194,9 @@ deploy *param:
 
     cp -f $QT_DIR/qml/QtQml/qmldir                                                                    "$CARGO_TARGET/QtQml/"
     cp -f $QT_DIR/qml/QtQml/libqmlplugin.dylib                                                        "$CARGO_TARGET/QtQml/"
-    cp -f $QT_DIR/qml/QtQml/libqmlmetaplugin.dylib                                                    "$CARGO_TARGET/QtQml/"
-    cp -f $QT_DIR/qml/QtQml/Base/libqmlplugin.dylib                                                   "$CARGO_TARGET/QtQml/Base/"
-    cp -f $QT_DIR/qml/QtQml/Base/qmldir                                                               "$CARGO_TARGET/QtQml/Base/"
+    cp -f $QT_DIR/qml/QtQml/libqmlmetaplugin.dylib                                                    "$CARGO_TARGET/QtQml/" || true
+    cp -f $QT_DIR/qml/QtQml/Base/libqmlplugin.dylib                                                   "$CARGO_TARGET/QtQml/Base/" || true
+    cp -f $QT_DIR/qml/QtQml/Base/qmldir                                                               "$CARGO_TARGET/QtQml/Base/" || true
     cp -f $QT_DIR/qml/QtQml/Models/libmodelsplugin.dylib                                              "$CARGO_TARGET/QtQml/Models/"
     cp -f $QT_DIR/qml/QtQml/Models/qmldir                                                             "$CARGO_TARGET/QtQml/Models/"
     cp -f $QT_DIR/qml/QtQml/WorkerScript/libworkerscriptplugin.dylib                                  "$CARGO_TARGET/QtQml/WorkerScript/"

@@ -1,0 +1,28 @@
+<Project Sdk="WixToolset.Sdk/4.0.1">
+  <PropertyGroup>
+    <OutputName>Gyroflow-setup</OutputName>
+    <OutputType>Package</OutputType>
+    <HarvestSource>$(ProjectDir)..\..\_binaries\win64\</HarvestSource>
+    <DefineConstants>HarvestPath=$(HarvestSource)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Util.wixext" Version="4.0.1" />
+    <PackageReference Include="WixToolset.Heat" Version="4.0.1" />
+    <PackageReference Include="WixToolset.UI.wixext" Version="4.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <HarvestDirectory Include="$(HarvestSource)">
+      <ComponentGroupName>HarvestedComponents</ComponentGroupName>
+      <DirectoryRefId>ApplicationFolder</DirectoryRefId>
+      <PreprocessorVariable>HarvestPath</PreprocessorVariable>
+      <AutogenerateGuids>true</AutogenerateGuids>
+      <SuppressRegistry>true</SuppressRegistry>
+      <SuppressCom>true</SuppressCom>
+      <SuppressRootDirectory>true</SuppressRootDirectory>
+      <KeepEmptyDirectories>true</KeepEmptyDirectories>
+    </HarvestDirectory>
+  </ItemGroup>
+
+</Project>

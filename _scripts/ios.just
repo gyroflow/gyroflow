@@ -31,9 +31,10 @@ export IPHONEOS_DEPLOYMENT_TARGET := "14.0"
 [no-cd]
 install-deps:
     #!/bin/bash
+    set -e
     brew install p7zip python pkg-config ios-deploy
     rustup target add aarch64-apple-ios
-    xcode-select --install
+    xcode-select --install || true
     export DYLD_FALLBACK_LIBRARY_PATH=""
     #export MACOSX_DEPLOYMENT_TARGET=""
 
@@ -41,7 +42,7 @@ install-deps:
     cd {{ExtDir}}
 
     # Install vcpkg
-    git clone --depth 1 https://github.com/Microsoft/vcpkg.git
+    git clone --depth 1 https://github.com/Microsoft/vcpkg.git || true
     ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
     if [ ! -d "{{ExtDir}}/{{QtVersionIOS}}/ios" ] || [ ! -d "{{ExtDir}}/{{QtVersionIOS}}/macos" ]; then
@@ -98,6 +99,7 @@ debug:
 [no-cd]
 build-and-package profile is_dist:
     #!/bin/bash
+    set -e
 
     rm -rf {{ProjectDir}}/_deployment/_binaries/ios/
     rm -f {{ProjectDir}}/target/aarch64-apple-ios/{{profile}}/gyroflow
@@ -181,12 +183,13 @@ build-and-package profile is_dist:
 [no-cd]
 deploy *param:
     #!/bin/bash
+    set -e
     export PATH="/usr/libexec/:$PATH"
 
     just --unstable -f {{justfile()}} build-and-package deploy distribution
 
     pushd {{AppBundle}}/../../
-        zip -r Gyroflow.ipa Payload
+        zip -r ../Gyroflow.ipa Payload
     popd
     ios-deploy --bundle {{AppBundle}}
 
@@ -233,10 +236,10 @@ deploy *param:
         xcodebuild -sdk iphoneos -exportArchive -archivePath {{ProjectDir}}/_deployment/_binaries/ios/Gyroflow.xcarchive -exportPath {{AppBundle}}/../out/Payload -exportOptionsPlist {{AppBundle}}/../../Export.plist
 
         pushd {{AppBundle}}/../out/
-            rm -f Gyroflow.ipa
+            rm -f ../Gyroflow.ipa
             rm -f Payload/*.plist
             rm -f Payload/*.log
-            zip -r Gyroflow.ipa Payload
+            zip -r ../Gyroflow.ipa Payload
         popd
         ios-deploy --bundle {{AppBundle}}/../out/Payload/Gyroflow.app
     fi
@@ -245,10 +248,11 @@ deploy *param:
 [no-cd]
 build-ipa:
     #!/bin/bash
+    set -e
     export PATH="/usr/libexec/:$PATH"
 
     just --unstable -f {{justfile()}} build-and-package deploy distribution
 
     pushd {{AppBundle}}/../../
-        zip -r Gyroflow.ipa Payload
+        zip -r ../Gyroflow.ipa Payload
     popd

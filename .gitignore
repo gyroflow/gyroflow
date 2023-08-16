@@ -9,3 +9,4 @@ ext/*
 gyroflow.log
 .DS_Store
 *.mobileprovision
+*.pfx

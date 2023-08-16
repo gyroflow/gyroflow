@@ -1,7 +1,13 @@
 !include common.just
 
-KeyStore := "D:/programowanie/android_release.keystore"
-KeyStoreAlias := "eddy"
+KeyStore         := env_var_or_default("KEY_STORE_PATH",  "")
+KeyStoreAlias    := env_var_or_default("KEY_STORE_ALIAS", "")
+KeyStorePassword := env_var_or_default("KEY_STORE_PASS",  "")
+
+export ANDROID_NDK_HOME := env_var_or_default("ANDROID_NDK_HOME", "D:\\Programy\\Android\\sdk\\ndk\\android-ndk-r23c")
+export ANDROID_SDK_ROOT := env_var_or_default("ANDROID_SDK_ROOT", "D:\\Programy\\Android\\sdk\\")
+export JAVA_HOME        := env_var_or_default("JAVA_HOME",        "D:\\Programy\\Java\\jdk-14.0.1")
+export BUILD_PROFILE    := env_var_or_default("BUILD_PROFILE",    "release") # use "deploy" for final apk
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -11,6 +17,7 @@ KeyStoreAlias := "eddy"
 install-deps:
     #!powershell
     $ProgressPreference = 'SilentlyContinue'
+    $ErrorActionPreference = 'Stop'
     mkdir "{{ExtDir}}" -ErrorAction SilentlyContinue
     cd {{ExtDir}}
 
@@ -62,6 +69,15 @@ install-deps:
     }
     # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
 
+    # ――――――――――――――――――――――――――――――――――――――― LLVM ――――――――――――――――――――――――――――――――――――――――
+    if (-not (Test-Path -Path "{{LLVMPath}}\libclang.dll")) {
+        echo "Downloading LLVM"
+        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.0/LLVM-16.0.0-win64.exe" -outfile "llvm-win64.exe"
+        7z x -y llvm-win64.exe -ollvm
+        del "llvm-win64.exe"
+    }
+    # ――――――――――――――――――――――――――――――――――――――― LLVM ――――――――――――――――――――――――――――――――――――――――
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Development ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -79,12 +95,9 @@ install-deps:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 [no-cd]
-deploy:
+deploy *param:
     #!powershell
-    $Env:ANDROID_NDK_HOME = "D:\Programy\Android\sdk\ndk\android-ndk-r23c"
-    $Env:ANDROID_SDK_ROOT = "D:\Programy\Android\sdk\"
-    $Env:JAVA_HOME = "D:\Programy\Java\jdk-14.0.1"
-    $BUILD_PROFILE = "deploy" # change to release for testing, it's much faster
+    $ErrorActionPreference = 'Stop'
 
     $ProjectDir = (resolve-path "{{ProjectDir}}").ToString()
     cd $ProjectDir
@@ -104,6 +117,7 @@ deploy:
     $SDK_REPLACED = $Env:ANDROID_SDK_ROOT.replace('\', '/');
     $PROJECT_DIR_UNIX = $ProjectDir.replace('\', '/');
     $Env:BINDGEN_EXTRA_CLANG_ARGS = "-I$CLANG_LIB/clang/16.0.0/include --sysroot=$NDK_REPLACED/toolchains/llvm/prebuilt/windows-x86_64/sysroot"
+    echo $Env:BINDGEN_EXTRA_CLANG_ARGS
 
     Copy-Item -Path "$QT_LIBS\libQt6Core_arm64-v8a.so"           -Destination "$QT_LIBS\libQt6Core.so"           -ErrorAction SilentlyContinue
     Copy-Item -Path "$QT_LIBS\libQt6Gui_arm64-v8a.so"            -Destination "$QT_LIBS\libQt6Gui.so"            -ErrorAction SilentlyContinue
@@ -115,17 +129,17 @@ deploy:
     # Replace [[bin]] with [lib]
     [System.IO.File]::WriteAllText("$ProjectDir\Cargo.toml", [System.IO.File]::ReadAllText("$ProjectDir\Cargo.toml").Replace("[[bin]]", "[lib]`ncrate-type = [""cdylib""]"))
 
-    cargo apk build --profile $BUILD_PROFILE
+    cargo apk build --profile $Env:BUILD_PROFILE
 
     # Restore [[bin]]
     [System.IO.File]::WriteAllText("$ProjectDir\Cargo.toml", [System.IO.File]::ReadAllText("$ProjectDir\Cargo.toml").Replace("[lib]`ncrate-type = [""cdylib""]", "[[bin]]"))
 
     mkdir "$ProjectDir\target\android-build" -ErrorAction SilentlyContinue
     mkdir "$ProjectDir\target\android-build\libs" -ErrorAction SilentlyContinue
-    Copy-Item -Path "$ProjectDir\target\$BUILD_PROFILE\apk\lib\*" -Destination "$ProjectDir\target\android-build\libs\" -Recurse -Force
+    Copy-Item -Path "$ProjectDir\target\$Env:BUILD_PROFILE\apk\lib\*" -Destination "$ProjectDir\target\android-build\libs\" -Recurse -Force
     Copy-Item -Path "$ProjectDir\_deployment\android\src" -Destination "$ProjectDir\target\android-build\" -Recurse -Force
-    Copy-Item -Path "$ProjectDir\target\aarch64-linux-android\$BUILD_PROFILE\libffmpeg.so" -Destination "$ProjectDir\target\android-build\libs\arm64-v8a\" -Force
-    # Copy-Item -Path "$ProjectDir\target\aarch64-linux-android\$BUILD_PROFILE\libqtav-mediacodec.so" -Destination "$ProjectDir\target\android-build\libs\arm64-v8a\" -Force
+    Copy-Item -Path "$ProjectDir\target\aarch64-linux-android\$Env:BUILD_PROFILE\libffmpeg.so" -Destination "$ProjectDir\target\android-build\libs\arm64-v8a\" -Force
+    # Copy-Item -Path "$ProjectDir\target\aarch64-linux-android\$Env:BUILD_PROFILE\libqtav-mediacodec.so" -Destination "$ProjectDir\target\android-build\libs\arm64-v8a\" -Force
     Move-Item -Path "$ProjectDir\target\android-build\libs\arm64-v8a\libgyroflow.so" -Destination "$ProjectDir\target\android-build\libs\arm64-v8a\libgyroflow_arm64-v8a.so" -Force
 
     $qtlibs = @(
@@ -207,7 +221,7 @@ deploy:
         "architectures": {"arm64-v8a":"aarch64-linux-android"},
         "android-min-sdk-version": "26",
         "android-package-source-directory": "$PROJECT_DIR_UNIX/_deployment/android",
-        "android-target-sdk-version": "30",
+        "android-target-sdk-version": "31",
         "qml-importscanner-binary": "$PROJECT_DIR_UNIX/ext/{{QtVersion}}/mingw_64/bin/qmlimportscanner.exe",
         "rcc-binary": "$PROJECT_DIR_UNIX/ext/{{QtVersion}}/mingw_64/bin/rcc.exe",
         "qml-root-path": "$PROJECT_DIR_UNIX/src",
@@ -231,17 +245,27 @@ deploy:
         }
     }
     Get-job | Receive-Job
-    androiddeployqt --input "$ProjectDir\target\android-build\android-deploy.json" `
-                    --output "$ProjectDir\target\android-build" `
-                    --deployment bundled `
-                    --release `
-                    --android-platform android-30 `
-                    --jdk ${Env:JAVA_HOME} `
-                    --sign {{KeyStore}} {{KeyStoreAlias}} `
-                    --gradle
-    Stop-Job $job
-    adb install "$ProjectDir\target\android-build\build\outputs\apk\release\android-build-release-signed.apk"
 
-    # Alternative
-    # cargo install cargo-ndk
-    # cargo ndk -t arm64-v8a --platform 26 -o ./jniLibs build --release
+    $Sign = ""
+    $ApkName = "apk\debug\android-build-debug.apk"
+    if ("{{KeyStore}}" -and "{{KeyStoreAlias}}" -and "{{KeyStorePassword}}") {
+        $Sign = "--release --sign {{KeyStore}} {{KeyStoreAlias}} --storepass {{KeyStorePassword}}"
+        $ApkName = "apk\release\android-build-release-signed.apk"
+    }
+
+    $cmd = "androiddeployqt --input `"$ProjectDir\target\android-build\android-deploy.json`" --output `"$ProjectDir\target\android-build`" --deployment bundled $Sign --android-platform android-31 --jdk ${Env:JAVA_HOME} --gradle"
+
+    iex "$cmd"
+    if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") {
+        iex "$cmd --aab"
+    }
+
+    Stop-Job $job
+
+    New-Item -Type dir "$ProjectDir\_deployment\_binaries\" -ErrorAction SilentlyContinue
+    Copy-Item -Path "$ProjectDir\target\android-build\build\outputs\$ApkName" -Destination "$ProjectDir\_deployment\_binaries\Gyroflow.apk" -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path "$ProjectDir\target\android-build\build\outputs\bundle\release\android-build-release.aab" -Destination "$ProjectDir\_deployment\_binaries\Gyroflow.aab" -Force -ErrorAction SilentlyContinue
+
+    if ("{{param}}" -eq "install") {
+        adb install "$ProjectDir\_deployment\_binaries\Gyroflow.apk"
+    }

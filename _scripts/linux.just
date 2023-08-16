@@ -7,6 +7,8 @@
 [no-cd]
 install-deps:
     #!/bin/bash
+    set -e
+
     sudo apt-get install -y p7zip-full python3-pip clang libclang-dev bison pkg-config gperf curl unzip zip git
     sudo apt-get install -y libc++-dev libva-dev libvdpau-dev libvdpau1 mesa-va-drivers ocl-icd-opencl-dev opencl-headers
     sudo apt-get install -y libpulse-dev libasound-dev libxkbcommon-dev
@@ -20,7 +22,7 @@ install-deps:
         sudo apt-get install -y libx11-dev libxft-dev libxext-dev autoconf libtool libglfw3 libgles2-mesa-dev libxrandr-dev libxi-dev libxcursor-dev libxdamage-dev libxinerama-dev libxxf86vm-dev libdbus-1-dev libxtst-dev libdbus-1-dev libxi-dev libxtst-dev libsystemd-dev
 
         # Install vcpkg
-        git clone --depth 1 https://github.com/Microsoft/vcpkg.git {{ExtDir}}/vcpkg
+        git clone --depth 1 https://github.com/Microsoft/vcpkg.git {{ExtDir}}/vcpkg || true
 
         {{ExtDir}}/vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
@@ -93,13 +95,19 @@ debug *param:
 [no-cd]
 deploy *param:
     #!/bin/bash
+    set -e
+    mkdir -p "{{ProjectDir}}/target/deploy" || true
+
     : "${PROJECT_DIR:=$(readlink -f {{ProjectDir}})}"
     : "${QT_DIR:=$(readlink -f {{QtPath}}/..)}"
     : "${CARGO_TARGET:=$(readlink -f {{ProjectDir}}/target/deploy)}"
     : "${FFMPEG_DIR:=$(readlink -f {{FFMPEG_DIR}})}"
 
+    echo "Cargo target dir: $CARGO_TARGET"
+
     if [ "{{param}}" == "docker" ]; then
         sudo docker run -v $PROJECT_DIR:$PROJECT_DIR -v $HOME/.cargo:/root/.cargo debian:10 bash -c "
+            set -e
             apt update
             echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
             apt install -y sudo dialog apt-utils curl clang
@@ -188,10 +196,10 @@ deploy *param:
     cp -f $QT_DIR/qml/Qt/labs/folderlistmodel/qmldir                                                 "$TARGET/qml/Qt/labs/folderlistmodel/"
     cp -f $QT_DIR/qml/Qt/labs/folderlistmodel/libqmlfolderlistmodelplugin.so                         "$TARGET/qml/Qt/labs/folderlistmodel/"
     cp -f $QT_DIR/qml/QtQml/qmldir                                                                   "$TARGET/qml/QtQml/"
-    cp -f $QT_DIR/qml/QtQml/libqmlmetaplugin.so                                                      "$TARGET/qml/QtQml/"
+    cp -f $QT_DIR/qml/QtQml/libqmlmetaplugin.so                                                      "$TARGET/qml/QtQml/" || true
     cp -f $QT_DIR/qml/QtQml/libqmlplugin.so                                                          "$TARGET/qml/QtQml/"
-    cp -f $QT_DIR/qml/QtQml/Base/libqmlplugin.so                                                     "$TARGET/qml/QtQml/Base/"
-    cp -f $QT_DIR/qml/QtQml/Base/qmldir                                                              "$TARGET/qml/QtQml/Base/"
+    cp -f $QT_DIR/qml/QtQml/Base/libqmlplugin.so                                                     "$TARGET/qml/QtQml/Base/" || true
+    cp -f $QT_DIR/qml/QtQml/Base/qmldir                                                              "$TARGET/qml/QtQml/Base/" || true
     cp -f $QT_DIR/qml/QtQml/Models/libmodelsplugin.so                                                "$TARGET/qml/QtQml/Models/"
     cp -f $QT_DIR/qml/QtQml/Models/qmldir                                                            "$TARGET/qml/QtQml/Models/"
     cp -f $QT_DIR/qml/QtQml/WorkerScript/libworkerscriptplugin.so                                    "$TARGET/qml/QtQml/WorkerScript/"
@@ -261,12 +269,12 @@ deploy *param:
     cp -f "$FFMPEG_DIR/lib/libavutil.so.58"                "$TARGET/lib/"
     cp -f "$FFMPEG_DIR/lib/libswresample.so.4"             "$TARGET/lib/"
     cp -f "$FFMPEG_DIR/lib/libswscale.so.7"                "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/amd64/libavcodec.so.60"         "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/amd64/libavfilter.so.9"         "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/amd64/libavformat.so.60"        "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/amd64/libavutil.so.58"          "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/amd64/libswresample.so.4"       "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/amd64/libswscale.so.7"          "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/amd64/libavcodec.so.60"         "$TARGET/lib/" || true
+    cp -f "$FFMPEG_DIR/lib/amd64/libavfilter.so.9"         "$TARGET/lib/" || true
+    cp -f "$FFMPEG_DIR/lib/amd64/libavformat.so.60"        "$TARGET/lib/" || true
+    cp -f "$FFMPEG_DIR/lib/amd64/libavutil.so.58"          "$TARGET/lib/" || true
+    cp -f "$FFMPEG_DIR/lib/amd64/libswresample.so.4"       "$TARGET/lib/" || true
+    cp -f "$FFMPEG_DIR/lib/amd64/libswscale.so.7"          "$TARGET/lib/" || true
 
     cp -f "$CARGO_TARGET/gyroflow"                         "$TARGET/"
     strip "$TARGET/gyroflow"

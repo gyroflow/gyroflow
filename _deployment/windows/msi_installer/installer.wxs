@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+    <Package Name="Gyroflow" UpgradeCode="b2d7eab9-8110-4779-9ba6-f751be6f4ff2" Scope="perMachine" Compressed="yes" Language="1033" Version="1.5.2" Manufacturer="Gyroflow">
+        <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed."/>
+        <Icon Id="GyroflowIco" SourceFile="..\..\..\resources\app_icon.ico"/>
+        <Property Id="ARPPRODUCTICON" Value="GyroflowIco" />
+		<Property Id="ARPCONTACT" Value="Adrian Ross" />
+		<Property Id="ARPHELPLINK" Value="https://docs.gyroflow.xyz" />
+		<Property Id="ARPURLINFOABOUT" Value="https://gyroflow.xyz" />
+		<Property Id="WIXUI_INSTALLDIR" Value="ApplicationFolder" />
+        <MediaTemplate EmbedCab="yes"/>
+
+        <ui:WixUI Id="WixUI_Minimal" />
+
+        <Feature Id="ProductFeature" Title="Application" Level="1">
+            <ComponentGroupRef Id="HarvestedComponents"/>
+        </Feature>
+
+        <StandardDirectory Id="ProgramFiles64Folder">
+			<Directory Id="ApplicationFolder" Name="Gyroflow" />
+		</StandardDirectory>
+    </Package>
+</Wix>

@@ -8,6 +8,8 @@
 install-deps:
     #!powershell
     $ProgressPreference = 'SilentlyContinue'
+    $ErrorActionPreference = 'Stop'
+
     mkdir "{{ExtDir}}" -ErrorAction SilentlyContinue
     cd {{ExtDir}}
 
@@ -46,6 +48,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "vcpkg/installed/{{VcpkgArch}}/lib/opencv_core4.lib")) {
         echo "Downloading OpenCV"
+        rm -Recurse -Force \vcpkg -ErrorAction SilentlyContinue
         git clone --depth 1 https://github.com/Microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
         .\vcpkg\vcpkg install "opencv4[core]:{{VcpkgArch}}"
@@ -62,7 +65,7 @@ install-deps:
         7z x -y llvm-win64.exe -ollvm
         del "llvm-win64.exe"
     }
-    # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
+    # ――――――――――――――――――――――――――――――――――――――― LLVM ――――――――――――――――――――――――――――――――――――――――
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Development ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -92,6 +95,8 @@ profile *param:
 [no-cd]
 deploy:
     #!powershell
+    $ErrorActionPreference = 'Stop'
+
     $ProjectDir = resolve-path "{{ProjectDir}}"
     cd $ProjectDir
     mkdir "$ProjectDir\_deployment\_binaries\win64" -Force
@@ -207,3 +212,50 @@ deploy:
     xcopy /Y "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\d3dcompiler_47.dll" "$TargetDir\"
 
     7z a $ProjectDir\_deployment\_binaries\Gyroflow-windows64.zip $TargetDir\*
+
+[no-cd]
+bundle:
+    #!powershell
+    $ProgressPreference = 'SilentlyContinue'
+    $ErrorActionPreference = 'Stop'
+    function Invoke-Environment { param([Parameter(Mandatory=$true)] [string] $Command)
+        $Command = "`"" + $Command + "`""
+        cmd /c "$Command > nul 2>&1 && set" | . { process {
+            if ($_ -match '^([^=]+)=(.*)') { [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2]) }
+        }}
+    }
+
+    $TargetDir  = resolve-path "{{ProjectDir}}\_deployment\_binaries\win64"
+    $ProjectDir = resolve-path "{{ProjectDir}}"
+    cd $ProjectDir\_deployment\windows\
+
+    if (-Not (Get-Command "makeappx.exe" -ErrorAction SilentlyContinue)) {
+        $VSPath = "`"${Env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe`" -latest -property installationPath"
+        $VSPath = iex "& $VSPath"
+        Invoke-Environment "$VSPath\VC\Auxiliary\Build\vcvars64.bat"
+    }
+
+    # Generate self-signed key
+    # $cert = New-SelfSignedCertificate -Subject "CN=10F1B828-8298-48D5-8164-662492DBDECB" -DnsName 29160AdrianRoss.Gyroflow -Type CodeSigning -CertStoreLocation Cert:\CurrentUser\My
+    # $CertPassword = ConvertTo-SecureString -String "$Env:MS_STORE_SIGNING_PASS" -Force -AsPlainText
+    # Export-PfxCertificate -Cert "cert:\CurrentUser\My\$($cert.Thumbprint)" -FilePath "msix_signing_key.pfx" -Password $CertPassword
+
+    # Build .msi installer
+    # msbuild.exe /p:Configuration=Release -Restore
+    # MsixPackagingTool.exe create-package --template installer_msix.xml
+
+    # Build .msix
+    Remove-Item -Path "..\_binaries\Gyroflow.msix" -ErrorAction SilentlyContinue
+    mkdir -Force "bundle"
+    cp -Recurse -Force $TargetDir\* bundle\
+    cp -Recurse -Force Assets bundle\Assets
+    cp -Force AppxManifest.xml bundle\
+
+    makepri.exe createconfig /cf priconfig.xml /dq en-us
+    makepri.exe new /pr bundle\Assets\ /cf priconfig.xml /mn bundle\AppxManifest.xml /of bundle\resources.pri /o
+
+    makeappx.exe pack /d bundle /p ..\_binaries\Gyroflow.msix
+    signtool.exe sign /f msix_signing_key.pfx /p $Env:MS_STORE_SIGNING_PASS /fd sha256 ..\_binaries\Gyroflow.msix
+
+    Remove-Item -Path "priconfig.xml" -ErrorAction SilentlyContinue
+    Remove-Item -Path "bundle" -Recurse -ErrorAction SilentlyContinue

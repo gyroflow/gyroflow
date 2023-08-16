@@ -1,0 +1,140 @@
+<MsixPackagingToolTemplate
+    xmlns="http://schemas.microsoft.com/appx/msixpackagingtool/template/2018"
+    xmlns:v2="http://schemas.microsoft.com/msix/msixpackagingtool/template/1904"
+    xmlns:v3="http://schemas.microsoft.com/msix/msixpackagingtool/template/1907"
+    xmlns:v4="http://schemas.microsoft.com/msix/msixpackagingtool/template/1910"
+    xmlns:v5="http://schemas.microsoft.com/msix/msixpackagingtool/template/2001">
+<!--Note: You only need to include xmlns:v2 - xmlns:v5 if you are using one of the features that use those schemas -->
+
+    <Settings
+        AllowTelemetry="true"
+        ApplyAllPrepareComputerFixes="true"
+        GenerateCommandLineFile="true"
+        AllowPromptForPassword="false"
+	    EnforceMicrosoftStoreVersioningRequirements="false"
+        p4:EnforceMicrosoftStoreRequirements="true"
+        v2:ServerPortNumber="1599"
+        v5:AddPackageIntegrity="true"
+        p7:SupportedWindowsVersionForMsixCore="None"
+        xmlns:p7="http://schemas.microsoft.com/msix/msixpackagingtool/template/2004"
+        xmlns:p4="http://schemas.microsoft.com/msix/msixpackagingtool/template/2007"
+        >
+
+	<!--Note: Exclusion items are optional and if declared take precedence over the default tool exclusion items
+        <ExclusionItems>
+            <FileExclusion ExcludePath="[{CryptoKeys}]" />
+            <FileExclusion ExcludePath="[{Common AppData}]\Microsoft\Crypto" />
+            <FileExclusion ExcludePath="[{Common AppData}]\Microsoft\Search\Data" />
+            <FileExclusion ExcludePath="[{Cookies}]" />
+            <FileExclusion ExcludePath="[{History}]" />
+            <FileExclusion ExcludePath="[{Cache}]" />
+            <FileExclusion ExcludePath="[{Personal}]" />
+            <FileExclusion ExcludePath="[{Profile}]\Local Settings" />
+            <FileExclusion ExcludePath="[{Profile}]\NTUSER.DAT.LOG1" />
+            <FileExclusion ExcludePath="[{Profile}]\ NTUSER.DAT.LOG2" />
+            <FileExclusion ExcludePath="[{Recent}]" />
+            <FileExclusion ExcludePath="[{Windows}]\debug" />
+            <FileExclusion ExcludePath="[{Windows}]\Logs\CBS" />
+            <FileExclusion ExcludePath="[{Windows}]\Temp" />
+            <FileExclusion ExcludePath="[{Windows}]\WinSxS\ManifestCache" />
+            <FileExclusion ExcludePath="[{Windows}]\WindowsUpdate.log" />
+	    <FileExclusion ExcludePath="[{Windows}]\Installer" />
+            <FileExclusion ExcludePath="[{AppVPackageDrive}]\$Recycle.Bin " />
+            <FileExclusion ExcludePath="[{AppVPackageDrive}]\System Volume Information" />
+	    <FileExclusion ExcludePath="[{AppVPackageDrive}]\Config.Msi" />
+            <FileExclusion ExcludePath="[{AppData}]\Microsoft\AppV" />
+            <FileExclusion ExcludePath="[{Common AppData}]\Microsoft\Microsoft Security Client" />
+            <FileExclusion ExcludePath="[{Common AppData}]\Microsoft\Microsoft Antimalware" />
+            <FileExclusion ExcludePath="[{Common AppData}]\Microsoft\Windows Defender" />
+            <FileExclusion ExcludePath="[{ProgramFiles}]\Microsoft Security Client" />
+            <FileExclusion ExcludePath="[{ProgramFiles}]\Windows Defender" />
+	    <FileExclusion ExcludePath="[{ProgramFiles}]\WindowsApps" />
+            <FileExclusion ExcludePath="[{Local AppData}]\Temp" />
+	    <FileExclusion ExcludePath="[{Local AppData}]\Microsoft\Windows" />
+	    <FileExclusion ExcludePath="[{Local AppData}]\Packages" />
+
+            <RegistryExclusion ExcludePath= "REGISTRY\MACHINE\SOFTWARE\Wow6432Node\Microsoft\Cryptography" />
+            <RegistryExclusion ExcludePath= "REGISTRY\MACHINE\SOFTWARE\Microsoft\Cryptography" />
+            <RegistryExclusion ExcludePath= "REGISTRY\MACHINE\SOFTWARE\Microsoft\Microsoft Antimalware" />
+            <RegistryExclusion ExcludePath= "REGISTRY\MACHINE\SOFTWARE\Microsoft\Microsoft Antimalware Setup" />
+            <RegistryExclusion ExcludePath= "REGISTRY\MACHINE\SOFTWARE\Microsoft\Microsoft Security Client" />
+            <RegistryExclusion ExcludePath= "REGISTRY\MACHINE\SOFTWARE\Policies\Microsoft\Microsoft Antimalware" />
+            <RegistryExclusion ExcludePath= "REGISTRY\MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" />
+            <RegistryExclusion ExcludePath= "REGISTRY\USER\[{AppVCurrentUserSID}]\Software\Microsoft\Windows\CurrentVersion\Explorer\StreamMRU" />
+            <RegistryExclusion ExcludePath= "REGISTRY\USER\[{AppVCurrentUserSID}]\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\StreamMRU" />
+            <RegistryExclusion ExcludePath= "REGISTRY\USER\[{AppVCurrentUserSID}]\Software\Microsoft\Windows\CurrentVersion\Explorer\Streams" />
+            <RegistryExclusion ExcludePath= "REGISTRY\USER\[{AppVCurrentUserSID}]\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Streams" />
+            <RegistryExclusion ExcludePath= "REGISTRY\MACHINE\SOFTWARE\Microsoft\AppV" />
+            <RegistryExclusion ExcludePath= "REGISTRY\MACHINE\SOFTWARE\Wow6432Node\Microsoft\AppV" />
+            <RegistryExclusion ExcludePath= "REGISTRY\USER\[{AppVCurrentUserSID}]\Software\Microsoft\AppV" />
+            <RegistryExclusion ExcludePath= "REGISTRY\USER\[{AppVCurrentUserSID}]\Software\Wow6432Node\Microsoft\AppV" />
+        </ExclusionItems>
+	-->
+
+    <!--Note: Specifying an installer exit code will allow you to automatically trigger a reboot during your conversion
+      <v2:ValidInstallerExitCodes>
+        <V2:ValidInstallerExitCode ExitCode="3010" V3:Reboot="true"/>
+        <V2:ValidInstallerExitCode ExitCode="1641"/>
+      </v2:ValidInstallerExitCodes>
+    -->
+
+    </Settings>
+
+    <!--Note: this section takes precedence over the Settings::ApplyAllPrepareComputerFixes attribute and is optional
+    <PrepareComputer
+        DisableDefragService="true"
+        DisableWindowsSearchService="true"
+        DisableSmsHostService="true"
+        DisableWindowsUpdateService="true"/>
+    -->
+
+    <SaveLocation
+        PackagePath="Gyroflow.msix"
+        TemplatePath="installer_msix2.xml" />
+
+    <Installer Path=".\bin\x64\Release\Gyroflow-setup.msi" InstallLocation="C:\Program Files\Gyroflow" />
+
+    <!--NOTE: This section specifies that the conversion will be run on a local Virtual Machine. This is optional if you want to change your conversion environment from the default local machine.
+    <VirtualMachine Name="vmname" Username="vmusername"/>
+    -->
+
+    <!--NOTE: This section specifies that the conversion will be run on a remote machine.This is optional if you want to change your conversion environment from the default local machine.
+    <v2:RemoteMachine ComputerName="vmname" Username="vmusername" v3:EnableAutoLogon="true"/>
+    -->
+
+    <PackageInformation
+        PackageName="xyz.gyroflow"
+        PackageDisplayName="Gyroflow"
+        p4:PackageDescription="Video stabilization using gyroscope data"
+        PublisherName="CN=Adrian Ross"
+        PublisherDisplayName="Adrian Ross"
+        Version="1.5.2.0"
+        MainPackageNameForModificationPackage="xyz.gyroflow"
+        xmlns:p4="http://schemas.microsoft.com/msix/msixpackagingtool/template/1910"
+        >
+
+    <!--Note: This is optional, if you want to sign your package with Device Guard signing
+        <v4:SigningInformation>
+            <v4:DeviceGuardSigning
+                Tokenfile="tokenfile.json"
+                TimestampUrl="https://mytimestamp.com"/>
+        </v4:SigningInformation>
+    -->
+
+        <Applications>
+            <Application
+                Id="Gyroflow"
+                Description="Video stabilization using gyroscope data"
+                DisplayName="Gyroflow"
+                ExecutableName="Gyroflow.exe"/>
+        </Applications>
+
+
+	<!--NOTE: This is optional as “runFullTrust” capability is added by default during conversion
+        <Capabilities>
+            <Capability Name="runFullTrust" />
+        </Capabilities>
+	-->
+
+    </PackageInformation>
+</MsixPackagingToolTemplate>
