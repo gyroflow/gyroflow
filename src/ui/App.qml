@@ -162,6 +162,12 @@ Rectangle {
                         anchors.verticalCenter: parent.verticalCenter;
                         anchors.verticalCenterOffset: -2 * dpiScale;
                         width: exportbar.width - parent.children[0].width - exportbar.children[2].width - 75 * dpiScale;
+                        onTextChanged: {
+                            if (exportSettings.item.preserveOutputSettings.checked) {
+                                const outputFolder = Util.getFolder(text);
+                                if (outputFolder) settings.setValue("preservedOutputPath", outputFolder);
+                            }
+                        }
                     }
                 }
 

@@ -421,7 +421,13 @@ Item {
         pathParts.pop();
         if (!isCalibrator) {
             const suffix = window.advanced.defaultSuffix.text;
-            window.outputFile = controller.url_to_path(pathParts.join(".") + suffix + ".mp4").replace(/%0[0-9]+d/, "");
+            const defaultOutputFile = controller.url_to_path(pathParts.join(".") + suffix + ".mp4").replace(/%0[0-9]+d/, "");;
+            const preservedPath = settings.value("preservedOutputPath");
+            if (window.exportSettings.preserveOutputSettings.checked && preservedPath) {
+                window.outputFile = preservedPath + Util.getFilename(defaultOutputFile);
+            } else {
+                window.outputFile = defaultOutputFile;
+            }
             window.exportSettings.updateCodecParams();
         }
         if (!root.pendingGyroflowData) {

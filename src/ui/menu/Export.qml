@@ -96,6 +96,7 @@ MenuItem {
     property alias defaultBitrate: bitrate.defaultValue;
     property alias outGpu: gpu.checked;
     property alias outAudio: audio.checked;
+    property alias preserveOutputSettings: preserveOutputSettings;
     property string outCodecOptions: "";
     property real originalWidth: outWidth;
     property real originalHeight: outHeight;
@@ -590,6 +591,8 @@ MenuItem {
                     if (outputWidth.value  > 0) settings.setValue("preservedWidth",  outputWidth.value);
                     if (outputHeight.value > 0) settings.setValue("preservedHeight", outputHeight.value);
                     if (bitrate.value > 0) settings.setValue("preservedBitrate", bitrate.value);
+                    const outputFolder = Util.getFolder(window.outputFile);
+                    if (outputFolder) settings.setValue("preservedOutputPath", outputFolder);
                 }
             }
         }
