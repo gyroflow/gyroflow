@@ -11,6 +11,36 @@ use std::io::*;
 use std::io;
 use flate2::read::GzDecoder;
 
+lazy_static::lazy_static! {
+    pub static ref SDK_PATH: std::io::Result<std::path::PathBuf> = get_sdk_path();
+}
+
+fn get_sdk_path() -> Result<std::path::PathBuf> {
+    let mut out_dir = std::env::current_exe()?.parent().ok_or_else(|| Error::new(ErrorKind::Other, "Cannot get exe parent"))?.to_path_buf();
+    if cfg!(target_os = "macos") {
+        out_dir.push("../Frameworks/");
+    }
+    if cfg!(target_os = "linux") {
+        out_dir.push("lib/");
+    }
+    /*{
+        let mut test = out_dir.clone();
+        test.push("__tmp_test");
+        let writable = std::fs::File::create(&test).is_ok();
+        let _ = std::fs::remove_file(test);
+        if !writable {
+            // Get writeable path
+            if let Some(new_dir) = directories::ProjectDirs::from("xyz", "Gyroflow", "Gyroflow") {
+                let mut writable_path = new_dir.data_local_dir();
+                if std::fs::create_dir_all(writable_path).is_ok() {
+                    out_dir = writable_path.to_path_buf();
+                }
+            }
+        }
+    }*/
+    Ok(out_dir)
+}
+
 pub fn requires_install(path: &str) -> bool {
     if path.to_lowercase().ends_with(".braw") { return !braw::BrawSdk::is_installed(); }
     if path.to_lowercase().ends_with(".r3d") { return !r3d::REDSdk::is_installed(); }
@@ -41,13 +71,7 @@ pub fn install<F: Fn((f64, &'static str, String)) + Send + Sync + Clone + 'stati
                 let mut buf = Vec::with_capacity(4*1024*1024);
                 io::copy(&mut reader, &mut buf)?;
 
-                let mut out_dir = std::env::current_exe()?.parent().ok_or_else(|| Error::new(ErrorKind::Other, "Cannot get exe parent"))?.to_path_buf();
-                if cfg!(target_os = "macos") {
-                    out_dir.push("../Frameworks/");
-                }
-                if cfg!(target_os = "linux") && sdk_name != "RED SDK" {
-                    out_dir.push("lib/");
-                }
+                let out_dir = SDK_PATH.as_ref().map_err(|e| Error::new(e.kind(), e))?;
                 let size = buf.len().max(1) as f64;
                 let br = ProgressReader::new(Cursor::new(buf), |read| {
                     cb((0.5 + (read as f64 / size) * 0.5, sdk_name, "".into()));

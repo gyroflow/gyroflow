@@ -8,29 +8,27 @@ pub struct REDSdk { }
 
 impl REDSdk {
     pub fn is_installed() -> bool {
-        if let Ok(exe_path) = std::env::current_exe() {
+        if let Ok(path) = super::SDK_PATH.as_ref() {
+            let mut path = path.clone();
+            path.push("_");
             if cfg!(target_os = "windows") {
                 return
-                    exe_path.with_file_name("REDDecoder-x64.dll").exists() &&
-                    exe_path.with_file_name("REDR3D-x64.dll").exists() &&
-                    exe_path.with_file_name("REDOpenCL-x64.dll").exists() &&
-                    exe_path.with_file_name("REDCuda-x64.dll").exists();
+                    path.with_file_name("REDDecoder-x64.dll").exists() &&
+                    path.with_file_name("REDR3D-x64.dll").exists() &&
+                    path.with_file_name("REDOpenCL-x64.dll").exists() &&
+                    path.with_file_name("REDCuda-x64.dll").exists();
             } else if cfg!(target_os = "macos") {
-                if let Some(parent) = exe_path.parent() {
-                    let mut parent = parent.to_path_buf();
-                    parent.push("../Frameworks/_");
                     return
-                        parent.with_file_name("REDDecoder.dylib").exists() &&
-                        parent.with_file_name("REDMetal.dylib").exists() &&
-                        parent.with_file_name("REDOpenCL.dylib").exists() &&
-                        parent.with_file_name("REDR3D.dylib").exists();
-                }
+                    path.with_file_name("REDDecoder.dylib").exists() &&
+                    path.with_file_name("REDMetal.dylib").exists() &&
+                    path.with_file_name("REDOpenCL.dylib").exists() &&
+                    path.with_file_name("REDR3D.dylib").exists();
             } else if cfg!(target_os = "linux") {
                 return
-                    exe_path.with_file_name("REDCuda-x64.so").exists() &&
-                    exe_path.with_file_name("REDDecoder-x64.so").exists() &&
-                    exe_path.with_file_name("REDOpenCL-x64.so").exists() &&
-                    exe_path.with_file_name("REDR3D-x64.so").exists();
+                    path.with_file_name("REDCuda-x64.so").exists() &&
+                    path.with_file_name("REDDecoder-x64.so").exists() &&
+                    path.with_file_name("REDOpenCL-x64.so").exists() &&
+                    path.with_file_name("REDR3D-x64.so").exists();
             }
         }
 

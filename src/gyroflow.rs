@@ -105,7 +105,9 @@ fn entry() {
     });
 
     util::save_exe_location();
-    ::log::debug!("Executable location: {:?}", gyroflow_core::util::get_setting("exeLocation"));
+    let sdk_path = external_sdk::SDK_PATH.as_ref().map(|x| x.to_string_lossy().to_string()).unwrap_or_default();
+    ::log::debug!("Executable path: {:?}", gyroflow_core::util::get_setting("exeLocation"));
+    ::log::debug!("SDK path: {:?}", sdk_path);
 
     //crate::core::util::rename_calib_videos();
 
