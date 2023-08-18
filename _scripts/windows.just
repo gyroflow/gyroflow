@@ -235,6 +235,20 @@ bundle:
         Invoke-Environment "$VSPath\VC\Auxiliary\Build\vcvars64.bat"
     }
 
+    # Bundle BRAW and RED SDK
+    if (-not (Test-Path -Path "$TargetDir\REDR3D-x64.dll")) {
+        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/v1.5.1/RED_SDK_Windows.tar.gz" -OutFile tmp.tar.gz
+        7z x tmp.tar.gz
+        7z x -o"$TargetDir\" tmp.tar
+        Remove-Item -Path tmp.ta* -Force
+    }
+    if (-not (Test-Path -Path "$TargetDir\BlackmagicRawAPI.dll")) {
+        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/v1.5.1/Blackmagic_RAW_SDK_Windows.tar.gz" -OutFile tmp.tar.gz
+        7z x tmp.tar.gz
+        7z x -o"$TargetDir\" tmp.tar
+        Remove-Item -Path tmp.ta* -Force
+    }
+
     # Generate self-signed key
     # $cert = New-SelfSignedCertificate -Subject "CN=10F1B828-8298-48D5-8164-662492DBDECB" -DnsName 29160AdrianRoss.Gyroflow -Type CodeSigning -CertStoreLocation Cert:\CurrentUser\My
     # $CertPassword = ConvertTo-SecureString -String "$Env:MS_STORE_SIGNING_PASS" -Force -AsPlainText

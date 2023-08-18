@@ -221,7 +221,7 @@ deploy *param:
         "architectures": {"arm64-v8a":"aarch64-linux-android"},
         "android-min-sdk-version": "26",
         "android-package-source-directory": "$PROJECT_DIR_UNIX/_deployment/android",
-        "android-target-sdk-version": "31",
+        "android-target-sdk-version": "33",
         "qml-importscanner-binary": "$PROJECT_DIR_UNIX/ext/{{QtVersion}}/mingw_64/bin/qmlimportscanner.exe",
         "rcc-binary": "$PROJECT_DIR_UNIX/ext/{{QtVersion}}/mingw_64/bin/rcc.exe",
         "qml-root-path": "$PROJECT_DIR_UNIX/src",
@@ -233,7 +233,7 @@ deploy *param:
     $androiddeploy | Out-File -encoding utf8 -FilePath "$ProjectDir\target\android-build\android-deploy.json"
 
     $job = Start-Job -Name "Cleanup" -ArgumentList "$ProjectDir\target\android-build\libs\arm64-v8a" -ScriptBlock {
-        for ($num = 1; $num -le 100 ; $num++) {
+        for ($num = 1; $num -le 400 ; $num++) {
             Remove-Item "${args}\*Universal*"
             Remove-Item "${args}\*Imagine*"
             Remove-Item "${args}\*Fusion*"
@@ -241,7 +241,7 @@ deploy *param:
             Remove-Item "${args}\*tooling*"
             Remove-Item "${args}\*qgif*"
             Remove-Item "${args}\*qico*"
-            Start-Sleep -Milliseconds 300;
+            Start-Sleep -Milliseconds 150;
         }
     }
     Get-job | Receive-Job
@@ -253,7 +253,7 @@ deploy *param:
         $ApkName = "apk\release\android-build-release-signed.apk"
     }
 
-    $cmd = "androiddeployqt --input `"$ProjectDir\target\android-build\android-deploy.json`" --output `"$ProjectDir\target\android-build`" --deployment bundled $Sign --android-platform android-31 --jdk ${Env:JAVA_HOME} --gradle"
+    $cmd = "androiddeployqt --input `"$ProjectDir\target\android-build\android-deploy.json`" --output `"$ProjectDir\target\android-build`" --deployment bundled $Sign --android-platform android-33 --jdk ${Env:JAVA_HOME} --gradle"
 
     iex "$cmd"
     if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") {
