@@ -125,6 +125,12 @@ jobs:
           just ios install-deps
           just ios build-ipa
 
+      - name: Save debug symbols
+        if: ${{ matrix.targets.type == 'windows' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Gyroflow-debug-symbols
+          path: ${{ github.workspace }}/target/deploy/deps/gyroflow.pdb
       - name: Save Binaries
         uses: actions/upload-artifact@v3
         with:
