@@ -130,7 +130,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Gyroflow-debug-symbols
-          path: ${{ github.workspace }}/target/deploy/deps/gyroflow.pdb
+          path: |
+            ${{ github.workspace }}/target/deploy/deps/gyroflow.pdb
+            ${{ github.workspace }}/target/deploy/*.pdb
       - name: Save Binaries
         uses: actions/upload-artifact@v3
         with:
