@@ -50,7 +50,7 @@
                 android:value="minimal" />
         </activity>
 
-        <provider
+        <!--provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.qtprovider"
             android:exported="false"
@@ -58,6 +58,6 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/qtprovider_paths"/>
-        </provider>
+        </provider-->
     </application>
 </manifest>
