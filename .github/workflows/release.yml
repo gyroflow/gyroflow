@@ -15,6 +15,7 @@ jobs:
           { os: macos-latest,  type: ios },
           { os: windows-2022,  type: android }
         ]
+    name: Gyroflow for ${{ matrix.targets.type }}
     runs-on: ${{ matrix.targets.os }}
     env:
       BUILD_APP_STORE_BUNDLE: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -28,13 +29,13 @@ jobs:
           override: true
       - uses: Swatinem/rust-cache@v2
         with:
-          key: ${{ matrix.targets.type }}-gyroflow-2
+          key: ${{ matrix.targets.type }}-gyroflow-3
       - name: Dependencies cache
         id: extcache
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/ext/'
-          key: ${{ matrix.targets.type }}-gyroflow-ext-2
+          key: ${{ matrix.targets.type }}-gyroflow-ext-3
 
       - name: Prepare Vulkan SDK
         uses: humbletim/setup-vulkan-sdk@v1.2.0
@@ -110,7 +111,7 @@ jobs:
           KEY_STORE_PATH: ${{ github.workspace }}/android_release.keystore
           KEY_STORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_ALIAS }}
           KEY_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASS }}
-          BUILD_PROFILE: release
+          BUILD_PROFILE: deploy
         run: |
           $Env:JAVA_HOME = $Env:JAVA_HOME_17_X64
           just android install-deps
