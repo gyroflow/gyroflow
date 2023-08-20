@@ -417,6 +417,7 @@ fn setup_defaults(stab: Arc<StabilizationManager>, queue: &mut RenderQueue) -> s
         "H.265/HEVC",
         "ProRes",
         "DNxHD",
+        "CineForm",
         "EXR Sequence",
         "PNG Sequence",
         "AV1",

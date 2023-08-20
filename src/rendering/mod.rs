@@ -128,8 +128,9 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("prores_videotoolbox", true),
                 ("prores_ks", false)
             ],
-            "DNxHD"  => vec![("dnxhd", false)],
-            _        => vec![]
+            "DNxHD"    => vec![("dnxhd", false)],
+            "CineForm" => vec![("cfhd", false)],
+            _          => vec![]
         }
     } else {
         match codec {
@@ -137,6 +138,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
             "H.265/HEVC" => vec![("libx265", false)],
             "ProRes"     => vec![("prores_ks", false)],
             "DNxHD"      => vec![("dnxhd", false)],
+            "CineForm"   => vec![("cfhd", false)],
             "AV1"        => vec![("librav1e", false), ("libaom-av1", false), ("libsvtav1", false)],
             _            => vec![]
         }
@@ -255,6 +257,10 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                 proc.video.encoder_params.options.set("profile", &format!("{}", profile));
                 proc.video.encoder_params.pixel_format = Some(pix_fmts[profile]);
             }
+            proc.video.clone_frames = true;
+        }
+        Some("cfhd") => {
+            proc.video.encoder_params.pixel_format = Some(Pixel::YUV422P10LE);
             proc.video.clone_frames = true;
         }
         Some("png") => {
