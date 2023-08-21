@@ -1912,16 +1912,6 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "1.9.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd070e393353796e801d209ad339e89596eb4c8d430d18ede6a1cced8fafbd99"
-dependencies = [
- "autocfg",
- "hashbrown 0.12.3",
-]
-
-[[package]]
-name = "indexmap"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d5477fe2230a79769d8dc68e0eabf5437907c0457a5614a9e8dddb67f65eb65d"
@@ -2375,7 +2365,7 @@ dependencies = [
  "bitflags 2.4.0",
  "codespan-reporting",
  "hexf-parse",
- "indexmap 2.0.0",
+ "indexmap",
  "log",
  "num-traits 0.2.16",
  "petgraph",
@@ -2917,12 +2907,12 @@ checksum = "9b2a4787296e9989611394c33f193f676704af1686e70b8f8033ab5ba9a35a94"
 
 [[package]]
 name = "petgraph"
-version = "0.6.3"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4dd7d28ee937e54fe3080c91faa1c3a46c06de6252988a7f4592ba2310ef22a4"
+checksum = "e1d3afd2628e69da2be385eb6f2fd57c8ac7977ceeff6dc166ff1657b0e386a9"
 dependencies = [
  "fixedbitset",
- "indexmap 1.9.3",
+ "indexmap",
 ]
 
 [[package]]
@@ -3541,7 +3531,7 @@ version = "1.0.105"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "693151e1ac27563d6dbcec9dee9fbd5da8539b20fa14ad3752b2e6d363ace360"
 dependencies = [
- "indexmap 2.0.0",
+ "indexmap",
  "itoa",
  "ryu",
  "serde",
@@ -3564,7 +3554,7 @@ version = "0.9.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1a49e178e4452f45cb61d0cd8cebc1b0fafd3e41929e996cef79aa3aca91f574"
 dependencies = [
- "indexmap 2.0.0",
+ "indexmap",
  "itoa",
  "ryu",
  "serde",
@@ -3977,7 +3967,7 @@ version = "0.19.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8123f27e969974a3dfba720fdb560be359f57b44302d280ba72e76a74480e8a"
 dependencies = [
- "indexmap 2.0.0",
+ "indexmap",
  "toml_datetime",
  "winnow",
 ]
@@ -4255,7 +4245,7 @@ checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
 [[package]]
 name = "wgpu"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=57874e5#57874e5c540330c8183e19ee87654cf24bb5c250"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=636bef9#636bef9cd54e5cb4a7bbc219433a3a77ea92dae8"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -4278,7 +4268,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=57874e5#57874e5c540330c8183e19ee87654cf24bb5c250"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=636bef9#636bef9cd54e5cb4a7bbc219433a3a77ea92dae8"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4300,7 +4290,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=57874e5#57874e5c540330c8183e19ee87654cf24bb5c250"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=636bef9#636bef9cd54e5cb4a7bbc219433a3a77ea92dae8"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4340,7 +4330,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=57874e5#57874e5c540330c8183e19ee87654cf24bb5c250"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=636bef9#636bef9cd54e5cb4a7bbc219433a3a77ea92dae8"
 dependencies = [
  "bitflags 2.4.0",
  "js-sys",

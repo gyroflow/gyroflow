@@ -46,7 +46,7 @@ thiserror = "1.0.46"
 ciborium = "0.2.1"
 nt-hive = "0.2"
 
-dyn-clone = "1.0.12"
+dyn-clone = "1.0.13"
 
 akaze = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee", features = ["rayon"] }
 eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee" }
@@ -64,9 +64,9 @@ libc = "0.2"
 
 opencv = { version = "0.84", features = ["clang-runtime"], optional = true }
 
-wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "57874e5", features = ["spirv"] }
-wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "57874e5" }
-wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "57874e5" }
+wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "636bef9", features = ["spirv"] }
+wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "636bef9" }
+wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "636bef9" }
 bytemuck = "1.13.1"
 ash = "0.37.3"
 naga = { git = "https://github.com/gfx-rs/naga", rev = "7a19f3af909202c7eafd36633b5584bfbb353ecb", version = "0.13.0", features = ["clone", "span", "validate", "spv-in"] }
