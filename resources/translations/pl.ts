@@ -354,7 +354,7 @@ Update your NVIDIA drivers to the newest version: %1.
 If the issue is still present after driver update, your GPU probably doesn&apos;t support GPU encoding with this format. Disable GPU encoding in this case.</source>
       <translation>Sterownik NVIDIA jest zbyt stary, enkodowanie GPU nie będzie działać dla tego formatu.
 Zaktualizuj sterowniki NVIDIA do najnowszej wersji: %1.
-Jeśli po aktualizacji sterowników problem nadal się pojawia, Twoja karta graficzna prawdopodobnie nie obsługuje enkodowanie GPU w tym formacie. Wyłącz enkodowanie GPU w tym przypadku.</translation>
+Jeśli po aktualizacji sterowników problem nadal się pojawia, Twoja karta graficzna prawdopodobnie nie obsługuje enkodowania GPU w tym formacie. W takim przypadku wyłącz enkodowanie GPU.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="571"/>

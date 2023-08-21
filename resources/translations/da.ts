@@ -612,12 +612,12 @@ Du kan øge skarphedsgrænsen i sektionen Avanceret.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="585"/>
       <source>Preserve export settings</source>
-      <translation type="unfinished">Preserve export settings</translation>
+      <translation>Bevar eksportindstillinger</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="587"/>
       <source>Save output size and bitrate in settings and use it for all files.</source>
-      <translation type="unfinished">Save output size and bitrate in settings and use it for all files.</translation>
+      <translation>Gem outputstørrelse og bitrate i indstillinger og brug det til alle filer.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="363"/>
@@ -688,7 +688,7 @@ Du kan øge skarphedsgrænsen i sektionen Avanceret.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="523"/>
       <source>Audio codec</source>
-      <translation type="unfinished">Audio codec</translation>
+      <translation>Lyd codec</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="535"/>
@@ -1204,12 +1204,12 @@ Vil du indsende din profil?</translation>
       <location filename="../../src/ui/components/OutputPathField.qml" line="40"/>
       <location filename="../../src/ui/components/OutputPathField.qml" line="50"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>Vælg fildestination</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="41"/>
       <source>Video files</source>
-      <translation type="unfinished">Video files</translation>
+      <translation>Videofiler</translation>
     </message>
   </context>
   <context>
@@ -1878,7 +1878,7 @@ Vil du konvertere til et andet understøttet pixelformat eller beholde den oprin
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="115"/>
       <source>Add keyframe</source>
-      <translation type="unfinished">Add keyframe</translation>
+      <translation>Tilføj keyframe</translation>
     </message>
   </context>
   <context>
@@ -2964,7 +2964,7 @@ Hvis du har Gyroflow i C:Program Files, skal du køre Gyroflow som administrator
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="486"/>
       <source>Please enter the output path:</source>
-      <translation type="unfinished">Please enter the output path:</translation>
+      <translation>Indtast venligst output-stien:</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="609"/>

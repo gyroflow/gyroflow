@@ -68,7 +68,7 @@ Notez que ce n'est qu'un indicateur visuel, il n'affecte pas le rendu.</translat
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="224"/>
       <source>Format for R3D conversion</source>
-      <translation type="unfinished">Format for R3D conversion</translation>
+      <translation>Forcer la conversion du format R3D</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="253"/>
@@ -242,18 +242,18 @@ Le workflow recommandé est d'exporter le fichier de projet et d'utiliser un des
 Please check the file bitrate after rendering and if you&apos;re affected by this bug, you can either:
 - Set output bitrate to less than 100 Mbps
 - Use &quot;Custom encoder options&quot;: `-rc cqp -qp_i 28 -qp_p 28`</source>
-      <translation type="unfinished">Some AMD GPU encoders have a bug where it limits the bitrate to 20 Mbps, if the target bitrate is greater than 100 Mbps.
+      <translation>Certains GPU AMD ont un bogue, en encodage, ce qui limite le débit à 20 Mbps si le débit cible est supérieur à 100 Mbps.
 
-Please check the file bitrate after rendering and if you&apos;re affected by this bug, you can either:
-- Set output bitrate to less than 100 Mbps
-- Use &quot;Custom encoder options&quot;: `-rc cqp -qp_i 28 -qp_p 28`</translation>
+Veuillez vérifier le débit de fichier après le rendu, si votre rendu est affecté par ce bug, vous pouvez soit :
+- Définir le débit de sortie à moins de 100 Mbps
+- Utilisez l'"Options d'encodeur personnalisé": `-rc cqp -qp_i 28 -qp_p 28`</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="264"/>
       <source>Due to iOS&apos;s file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to iOS&apos;s file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>En raison des restrictions d'accès aux fichiers iOS, vous devez sélectionner le dossier de destination manuellement.
+Cliquez sur Ok et sélectionnez le dossier de destination.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="325"/>
