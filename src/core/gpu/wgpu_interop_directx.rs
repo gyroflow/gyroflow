@@ -151,7 +151,7 @@ pub fn create_vk_image_from_d3d11_texture(device: &wgpu::Device, d3d11_device: &
 
                 raw_device.bind_image_memory(raw_image, allocated_memory, 0)?;
 
-                CloseHandle(handle);
+                let _ = CloseHandle(handle);
 
                 Ok::<ash::vk::Image, vk::Result>(raw_image)
             })

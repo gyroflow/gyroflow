@@ -122,7 +122,7 @@ pub fn init_device_for_decoding(index: usize, codec: *const ffi::AVCodec, decode
             }
             let type_ = (*config).device_type;
             if type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE {
-                return Ok((0, ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE, String::new(), None));
+                continue;
             }
             ::log::debug!("[dec] codec type {:?} {}", type_, i);
             let mut devices = DEVICES.lock();

@@ -179,7 +179,7 @@ impl Stabilization {
             let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
             transform.kernel_params.pixel_value_limit = T::default_max_value().unwrap_or(f32::MAX);
             // If the pixel format gets converted to normalized 0-1 float in shader
-            if T::default_max_value().is_some() && T::wgpu_format().map(|x| format!("{:?}", x.0).contains("Unorm")).unwrap_or_default() {
+            if self.wgpu.is_some() && T::default_max_value().is_some() && T::wgpu_format().map(|x| format!("{:?}", x.0).contains("Unorm")).unwrap_or_default() {
                 transform.kernel_params.pixel_value_limit = 1.0;
             }
             transform.kernel_params.max_pixel_value = T::default_max_value().unwrap_or(1.0);

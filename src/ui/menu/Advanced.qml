@@ -266,6 +266,7 @@ MenuItem {
                     }
                 }
                 controller.set_preview_pipeline(currentIndex);
+                Qt.callLater(processingDevice.updateController);
                 Qt.callLater(window.videoArea.vid.forceRedraw);
             }
             Component.onCompleted: Qt.callLater(currentIndexChanged);
