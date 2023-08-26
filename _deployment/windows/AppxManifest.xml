@@ -58,6 +58,7 @@
             <uap:SupportedFileTypes>
               <uap:FileType>.gyroflow</uap:FileType>
             </uap:SupportedFileTypes>
+						<uap:Logo>Assets\Square150x150Logo.png</uap:Logo>
           </uap3:FileTypeAssociation>
         </uap:Extension>
       </Extensions>
