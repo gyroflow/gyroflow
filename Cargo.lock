@@ -381,9 +381,9 @@ dependencies = [
 
 [[package]]
 name = "base64"
-version = "0.21.2"
+version = "0.21.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "604178f6c5c21f02dc555784810edfb88d34ac2c73b2eae109655649ee73ce3d"
+checksum = "414dcefbc63d77c526a76b3afcf6fbb9b5e2791c19c3aa2297733208750c6e53"
 
 [[package]]
 name = "base91"
@@ -585,9 +585,9 @@ dependencies = [
 
 [[package]]
 name = "chrono"
-version = "0.4.26"
+version = "0.4.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec837a71355b28f6556dbd569b37b3f363091c0bd4b2e735674521b4c5fd9bc5"
+checksum = "f56b4c72906975ca04becb8a30e102dfecddd0c06181e3e95ddc444be28881f8"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
@@ -595,7 +595,7 @@ dependencies = [
  "num-traits 0.2.16",
  "time 0.1.45",
  "wasm-bindgen",
- "winapi",
+ "windows-targets 0.48.5",
 ]
 
 [[package]]
@@ -1214,9 +1214,9 @@ checksum = "5443807d6dff69373d433ab9ef5378ad8df50ca6298caf15de6e52e24aaf54d5"
 
 [[package]]
 name = "errno"
-version = "0.3.2"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b30f669a7961ef1631673d2766cc92f52d64f7ef354d4fe0ddfd30ed52f0f4f"
+checksum = "136526188508e25c6fef639d7927dfb3e0e3084488bf202267829cf7fc23dbdd"
 dependencies = [
  "errno-dragonfly",
  "libc",
@@ -1740,7 +1740,9 @@ dependencies = [
  "stabilize_spirv",
  "telemetry-parser",
  "thiserror",
- "time 0.3.27",
+ "time 0.3.28",
+ "url",
+ "urlencoding",
  "walkdir",
  "wgpu",
  "wgpu-hal",
@@ -2261,9 +2263,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.5.0"
+version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
+checksum = "f478948fd84d9f8e86967bf432640e46adfb5a4bd4f14ef7e864ab38220534ae"
 
 [[package]]
 name = "memoffset"
@@ -2334,9 +2336,9 @@ dependencies = [
 
 [[package]]
 name = "mp4-merge"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bacddec6d1cd09c30dda5a8332ecdaa364e532504256eff7923918de6e5c95bc"
+checksum = "4c86d5d99a15116fce87baea15314b7d455a3c9689382f6bb36092c11c0a4db7"
 dependencies = [
  "byteorder",
  "log",
@@ -2483,15 +2485,14 @@ dependencies = [
 
 [[package]]
 name = "nix"
-version = "0.26.2"
+version = "0.26.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfdda3d196821d6af13126e40375cdf7da646a96114af134d5f417a9a1dc8e1a"
+checksum = "598beaf3cc6fdd9a5dfb1630c2800c7acd31df7aaf0f565796fba2b53ca1af1b"
 dependencies = [
  "bitflags 1.3.2",
  "cfg-if",
  "libc",
  "memoffset 0.7.1",
- "static_assertions",
 ]
 
 [[package]]
@@ -3127,7 +3128,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=0a405dd#0a405dd22339afcc14a7e8ed1fa94fe48877b449"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=f820e48#f820e48af932a27aef4288b8d6173c4c84e1ccf4"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3285,9 +3286,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.9.3"
+version = "1.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81bc1d4caf89fac26a70747fe603c130093b53c773888797a6329091246d651a"
+checksum = "12de2eff854e5fa4b1295edd650e227e9d8fb0c9e90b12e7f36d6a6811791a29"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -3297,9 +3298,9 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.3.6"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fed1ceff11a1dddaee50c9dc8e4938bd106e9d89ae372f192311e7da498e3b69"
+checksum = "49530408a136e16e5b486e883fbb6ba058e8e4e8ae6621a77b048b314336e629"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -3308,9 +3309,9 @@ dependencies = [
 
 [[package]]
 name = "regex-syntax"
-version = "0.7.4"
+version = "0.7.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5ea92a5b6195c6ef2a0295ea818b312502c6fc94dde986c5553242e18fd4ce2"
+checksum = "dbb5fb1acd8a1a18b3dd5be62d25485eb770e05afb408a9627d14d451bae12da"
 
 [[package]]
 name = "renderdoc-sys"
@@ -3410,9 +3411,9 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.38.9"
+version = "0.38.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9bfe0f2582b4931a45d1fa608f8a8722e8b3c7ac54dd6d5f3b3212791fedef49"
+checksum = "ed6248e1caa625eb708e266e06159f135e8c26f2bb7ceb72dc4b2766d0340964"
 dependencies = [
  "bitflags 2.4.0",
  "errno",
@@ -3423,9 +3424,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.21.6"
+version = "0.21.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d1feddffcfcc0b33f5c6ce9a29e341e4cd59c3f78e7ee45f4a40c038b1d6cbb"
+checksum = "cd8d6c9f025a446bc4d18ad9632e69aec8f287aa84499ee335599fabd20c3fd8"
 dependencies = [
  "log",
  "ring",
@@ -3644,7 +3645,7 @@ checksum = "acee08041c5de3d5048c8b3f6f13fafb3026b24ba43c6a695a0c76179b844369"
 dependencies = [
  "log",
  "termcolor",
- "time 0.3.27",
+ "time 0.3.28",
 ]
 
 [[package]]
@@ -3817,7 +3818,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.2.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=db4a8c3#db4a8c393000b4103ee511f0d316f84d334b0292"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=5b5f8e9#5b5f8e930a47a749cf2bac21b19f3a7410c4d553"
 dependencies = [
  "argh",
  "byteorder",
@@ -3846,7 +3847,7 @@ dependencies = [
  "cfg-if",
  "fastrand 2.0.0",
  "redox_syscall 0.3.5",
- "rustix 0.38.9",
+ "rustix 0.38.10",
  "windows-sys 0.48.0",
 ]
 
@@ -3903,9 +3904,9 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.27"
+version = "0.3.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0bb39ee79a6d8de55f48f2293a830e040392f1c5f16e336bdd1788cd0aadce07"
+checksum = "17f6bb557fd245c28e6411aa56b6403c689ad95061f50e4be16c274e70a17e48"
 dependencies = [
  "deranged",
  "itoa",
@@ -3924,9 +3925,9 @@ checksum = "7300fbefb4dadc1af235a9cef3737cea692a9d97e1b9cbcd4ebdae6f8868e6fb"
 
 [[package]]
 name = "time-macros"
-version = "0.2.13"
+version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "733d258752e9303d392b94b75230d07b0b9c489350c69b851fc6c065fde3e8f9"
+checksum = "1a942f44339478ef67935ab2bbaec2fb0322496cf3cbe84b261e06ac3814c572"
 dependencies = [
  "time-core",
 ]
@@ -4102,14 +4103,20 @@ dependencies = [
 
 [[package]]
 name = "url"
-version = "2.4.0"
+version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50bff7831e19200a85b17131d085c25d7811bc4e186efdaf54bbd132994a88cb"
+checksum = "143b538f18257fac9cad154828a57c6bf5157e1aa604d4816b5995bf6de87ae5"
 dependencies = [
  "form_urlencoded",
  "idna",
  "percent-encoding",
 ]
+
+[[package]]
+name = "urlencoding"
+version = "2.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "daf8dba3b7eb870caf1ddeed7bc9d2a049f3cfdfae7cb521b087cc33ae4c49da"
 
 [[package]]
 name = "vcpkg"
@@ -4245,7 +4252,7 @@ checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
 [[package]]
 name = "wgpu"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=c7e262c#c7e262c5d6fc52e672e5f796d73215e34f683189"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=5c2c840#5c2c840159b129e73ab0f8950394097008097f56"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -4268,7 +4275,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=c7e262c#c7e262c5d6fc52e672e5f796d73215e34f683189"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=5c2c840#5c2c840159b129e73ab0f8950394097008097f56"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4290,7 +4297,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=c7e262c#c7e262c5d6fc52e672e5f796d73215e34f683189"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=5c2c840#5c2c840159b129e73ab0f8950394097008097f56"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4330,7 +4337,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=c7e262c#c7e262c5d6fc52e672e5f796d73215e34f683189"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=5c2c840#5c2c840159b129e73ab0f8950394097008097f56"
 dependencies = [
  "bitflags 2.4.0",
  "js-sys",
@@ -4605,7 +4612,7 @@ version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2769203cd13a0c6015d515be729c526d041e9cf2c0cc478d57faee85f40c6dcd"
 dependencies = [
- "nix 0.26.2",
+ "nix 0.26.4",
  "winapi",
 ]
 
@@ -4639,7 +4646,7 @@ dependencies = [
  "futures-sink",
  "futures-util",
  "hex",
- "nix 0.26.2",
+ "nix 0.26.4",
  "once_cell",
  "ordered-stream",
  "rand",

@@ -29,14 +29,14 @@ nalgebra = "0.32"
 semver = "1.0.18"
 fastrand = "2.0.0"
 itertools = "0.11.0"
-regex = "1.9.3"
+regex = "1.9.4"
 rayon = "1.7"
 
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"
 flate2 = "1.0.27"
 walkdir = "2.3.3"
-mp4-merge = "0.1.5"
+mp4-merge = "0.1.6"
 human-sort = "0.2.2"
 argh = "0.1.12"
 indicatif = "0.17"
@@ -48,7 +48,7 @@ directories = "5"
 
 qmetaobject = { version = "0.2.9", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.9", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "0a405dd" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "f820e48" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "6.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
@@ -59,7 +59,7 @@ simplelog = "0.12.1"
 log = "0.4"
 
 ureq = "2.7.1"
-url = "2.4.0"
+url = "2.4.1"
 whoami = "1.4.1"
 tar = "0.4.40"
 lru = "0.11.0"
@@ -74,7 +74,7 @@ ffmpeg-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg.git" }
 ffmpeg-sys-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg-sys.git" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
-version = "0.51.0"
+version = "0.51.1"
 features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation", "Win32_System_LibraryLoader",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry" ]
