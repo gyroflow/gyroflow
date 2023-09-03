@@ -251,7 +251,7 @@ deploy *param:
         rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS/.empty
         rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/PlugIns/.empty
         rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/.empty
-        rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/mdk.framework/Versions/A/libass.9.dylib
+        rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/mdk.framework/Versions/A/libass.dylib
 
         if [ "$SIGNING_FINGERPRINT" != "" ]; then
 
@@ -259,7 +259,7 @@ deploy *param:
 
             OBJECTS=(
                 "Frameworks/mdk.framework/Versions/A/libffmpeg.6.dylib"
-                #"Frameworks/mdk.framework/Versions/A/libass.9.dylib"
+                #"Frameworks/mdk.framework/Versions/A/libass.dylib"
                 "Frameworks/mdk.framework/Versions/A/libmdk-braw.dylib"
                 "Frameworks/mdk.framework/Versions/A/libmdk-r3d.dylib"
                 "Frameworks/mdk.framework/Versions/A/mdk"
