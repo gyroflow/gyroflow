@@ -29,12 +29,10 @@
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.18362.0" />
     <PackageDependency Name="Microsoft.VCLibs.140.00" MinVersion="14.0.30704.0" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" />
   </Dependencies>
-
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
     <!--rescap:Capability Name="unvirtualizedResources" /-->
   </Capabilities>
-
   <Applications>
     <Application Id="Gyroflow" Executable="Gyroflow.exe" EntryPoint="Windows.FullTrustApplication" uap10:TrustLevel="mediumIL" uap10:RuntimeBehavior="win32App">
       <uap:VisualElements
@@ -48,7 +46,8 @@
           <uap:Rotation Preference="landscape"/>
           <uap:Rotation Preference="portrait"/>
           <uap:Rotation Preference="portraitFlipped"/>
-          <uap:Rotation Preference="landscapeFlipped"/></uap:InitialRotationPreference>
+          <uap:Rotation Preference="landscapeFlipped"/>
+        </uap:InitialRotationPreference>
       </uap:VisualElements>
       <Extensions>
         <desktop:Extension Category="windows.fullTrustProcess" Executable="Gyroflow.exe"/>
@@ -58,7 +57,7 @@
             <uap:SupportedFileTypes>
               <uap:FileType>.gyroflow</uap:FileType>
             </uap:SupportedFileTypes>
-						<uap:Logo>Assets\Square150x150Logo.png</uap:Logo>
+            <uap:Logo>Assets\Square150x150Logo.png</uap:Logo>
           </uap3:FileTypeAssociation>
         </uap:Extension>
       </Extensions>
