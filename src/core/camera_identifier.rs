@@ -197,6 +197,10 @@ impl CameraIdentifier {
         Ok(id)
     }
 
+    pub fn get_identifier_for_autoload(&self) -> String {
+        self.identifier.replace("hero12", "hero11")
+    }
+
     fn get_identifier(&self) -> String {
         if self.brand.is_empty() || self.model.is_empty() || self.lens_info.is_empty() { return String::new(); }
         let fps = match self.brand.as_ref() {

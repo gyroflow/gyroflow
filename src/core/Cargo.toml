@@ -42,7 +42,7 @@ enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.3.1"
 lru = "0.11"
-thiserror = "1.0.47"
+thiserror = "1.0.48"
 ciborium = "0.2.1"
 nt-hive = "0.2"
 
@@ -64,17 +64,17 @@ libc = "0.2"
 
 opencv = { version = "0.84", features = ["clang-runtime"], optional = true }
 
-wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "5c2c840", features = ["spirv"] }
-wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "5c2c840" }
-wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "5c2c840" }
-bytemuck = "1.13.1"
+wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "012304e", features = ["spirv"] }
+wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "012304e" }
+wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "012304e" }
+bytemuck = "1.14.0"
 ash = "0.37.3"
-naga = { git = "https://github.com/gfx-rs/naga", rev = "7a19f3af909202c7eafd36633b5584bfbb353ecb", version = "0.13.0", features = ["clone", "span", "validate", "spv-in"] }
+naga = { git = "https://github.com/gfx-rs/naga", rev = "cc87b8f9eb30bb55d0735b89d3df3e099e1a6e7c", version = "0.13.0", features = ["clone", "span", "validate", "spv-in"] }
 
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"
 flate2 = "1.0.27"
-walkdir = "2.3.3"
+walkdir = "2.4.0"
 url = "2.4.1"
 urlencoding = "2.1.3"
 
@@ -119,3 +119,10 @@ codegen-units = 1
 [profile.profile]
 inherits = "release"
 debug = true
+
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "0.21"
+ndk = { version = "0.7", features = ["media", "api-level-26"] }
+# ndk-glue = { version = "*", features = ["logger"] }
+ndk-sys = { version = "0.4.1" }
+ndk-context = { version = "0.1.1" }

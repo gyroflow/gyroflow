@@ -1118,7 +1118,7 @@ impl RenderQueue {
 
                                 let camera_id = stab.camera_id.read();
 
-                                let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();
+                                let id_str = camera_id.as_ref().map(|v| v.get_identifier_for_autoload()).unwrap_or_default();
                                 if !id_str.is_empty() {
                                     let db = stab.lens_profile_db.read();
                                     if db.contains_id(&id_str) {

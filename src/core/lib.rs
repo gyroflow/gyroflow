@@ -240,7 +240,7 @@ impl StabilizationManager {
         };
         let (width, height, aspect, id, fps) = {
             let params = self.params.read();
-            (params.video_size.0, params.video_size.1, ((params.video_size.0 * 100) as f64 / params.video_size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.identifier.clone()).unwrap_or_default(), (params.fps * 100.0).round() as i32)
+            (params.video_size.0, params.video_size.1, ((params.video_size.0 * 100) as f64 / params.video_size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.get_identifier_for_autoload()).unwrap_or_default(), (params.fps * 100.0).round() as i32)
         };
 
         let mut lens = self.lens.write();
@@ -1344,7 +1344,7 @@ impl StabilizationManager {
 
             let camera_id = self.camera_id.read();
 
-            let id_str = camera_id.as_ref().map(|v| v.identifier.clone()).unwrap_or_default();
+            let id_str = camera_id.as_ref().map(|v| v.get_identifier_for_autoload()).unwrap_or_default();
             if !id_str.is_empty() {
                 let mut db = self.lens_profile_db.read();
                 if !db.loaded {
