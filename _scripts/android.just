@@ -137,7 +137,7 @@ deploy *param:
     mkdir "$ProjectDir\target\android-build" -ErrorAction SilentlyContinue
     mkdir "$ProjectDir\target\android-build\libs" -ErrorAction SilentlyContinue
     Copy-Item -Path "$ProjectDir\target\$Env:BUILD_PROFILE\apk\lib\*" -Destination "$ProjectDir\target\android-build\libs\" -Recurse -Force
-    Copy-Item -Path "$ProjectDir\_deployment\android\src" -Destination "$ProjectDir\target\android-build\" -Recurse -Force
+    # Copy-Item -Path "$ProjectDir\_deployment\android\src" -Destination "$ProjectDir\target\android-build\" -Recurse -Force
     Copy-Item -Path "$ProjectDir\target\aarch64-linux-android\$Env:BUILD_PROFILE\libffmpeg.so" -Destination "$ProjectDir\target\android-build\libs\arm64-v8a\" -Force
     # Copy-Item -Path "$ProjectDir\target\aarch64-linux-android\$Env:BUILD_PROFILE\libqtav-mediacodec.so" -Destination "$ProjectDir\target\android-build\libs\arm64-v8a\" -Force
     Move-Item -Path "$ProjectDir\target\android-build\libs\arm64-v8a\libgyroflow.so" -Destination "$ProjectDir\target\android-build\libs\arm64-v8a\libgyroflow_arm64-v8a.so" -Force
@@ -268,4 +268,7 @@ deploy *param:
 
     if ("{{param}}" -eq "install") {
         adb install "$ProjectDir\_deployment\_binaries\Gyroflow.apk"
+        adb logcat -c
+        adb shell am start -n xyz.gyroflow/org.qtproject.qt.android.bindings.QtActivity
+        adb logcat -s Gyroflow
     }

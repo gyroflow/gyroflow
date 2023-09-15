@@ -163,24 +163,23 @@ Window {
                     batch.runIn(2000, function() {
                         console.log('rms', rms);
                         if (rms < 5) {
-                            let pathParts = batch.currentFile.toString().split(".");
-                            pathParts.pop();
+                            const folder = filesystem.folder_from_url(batch.currentFile);
+                            let filename = filesystem.filename_with_extension(filesystem.filename_from_url(batch.currentFile), "json");
 
-                            let outputFilename = pathParts.join(".") + ".json";
                             if (lensCalib.calibrationInfo.camera_brand && lensCalib.calibrationInfo.camera_model && lensCalib.calibrationInfo.lens_model) {
-                                let parts = batch.currentFile.toString().replace("\\", "/").split("/");
-                                parts.pop();
-                                outputFilename = parts.join("/") + "/" + controller.export_lens_profile_filename(lensCalib.calibrationInfo);
+                                filename = controller.export_lens_profile_filename(lensCalib.calibrationInfo);
                             }
 
-                            let output = outputFilename;
+                            let output = filename;
                             let i = 1;
-                            while (controller.file_exists(output)) {
-                                output = outputFilename.replace(/(_\d+)?\.json/, "_" + i++ + ".json");
+                            while (filesystem.exists_in_folder(folder, output)) {
+                                output = filename.replace(/(_\d+)?\.json/, "_" + i++ + ".json");
                                 if (i > 2000) break;
                             }
 
-                            controller.export_lens_profile(output, lensCalib.calibrationInfo, lensCalib.uploadProfile.checked);
+                            window.getSaveFileUrl(folder, output, function(url) {
+                                controller.export_lens_profile(url, lensCalib.calibrationInfo, lensCalib.uploadProfile.checked);
+                            });
                         }
                         batch.runIn(1000, function() { batch.start(); });
                     });

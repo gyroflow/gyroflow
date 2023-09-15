@@ -16,11 +16,12 @@ pub struct VideoProcessor<'a> {
 }
 
 impl<'a> VideoProcessor<'a> {
-    pub fn from_file(path: &str, gpu_decoding: bool, gpu_decoder_index: usize, decoder_options: Option<Dictionary>) -> Result<Self, FFmpegError> {
-        if path.to_lowercase().ends_with(".braw") || path.to_lowercase().ends_with(".r3d") {
-            Ok(Self { inner: Processor::Mdk(MDKProcessor::from_file(path, decoder_options)) })
+    pub fn from_file(base: &'a gyroflow_core::filesystem::EngineBase, url: &str, gpu_decoding: bool, gpu_decoder_index: usize, decoder_options: Option<Dictionary>) -> Result<Self, FFmpegError> {
+        let filename = gyroflow_core::filesystem::get_filename(url);
+        if filename.to_lowercase().ends_with(".braw") || filename.to_lowercase().ends_with(".r3d") {
+            Ok(Self { inner: Processor::Mdk(MDKProcessor::from_file(url, decoder_options)) })
         } else {
-            Ok(Self { inner: Processor::Ffmpeg(FfmpegProcessor::from_file(path, gpu_decoding, gpu_decoder_index, decoder_options)?) })
+            Ok(Self { inner: Processor::Ffmpeg(FfmpegProcessor::from_file(base, url, gpu_decoding, gpu_decoder_index, decoder_options)?) })
         }
     }
 
@@ -30,9 +31,10 @@ impl<'a> VideoProcessor<'a> {
             Processor::Mdk(x) => x.get_org_dimensions(),
         }
     }
-    pub fn get_video_info(path: &str) -> Result<crate::rendering::ffmpeg_processor::VideoInfo, ffmpeg_next::Error> {
-        if path.to_lowercase().ends_with(".braw") || path.to_lowercase().ends_with(".r3d") {
-            let mut mdk = MDKProcessor::from_file(path, None);
+    pub fn get_video_info(url: &str) -> Result<crate::rendering::ffmpeg_processor::VideoInfo, ffmpeg_next::Error> {
+        let filename = gyroflow_core::filesystem::get_filename(url);
+        if filename.to_lowercase().ends_with(".braw") || filename.to_lowercase().ends_with(".r3d") {
+            let mut mdk = MDKProcessor::from_file(url, None);
 
             let (tx, rx) = futures_intrusive::channel::shared::oneshot_channel();
 
@@ -61,7 +63,7 @@ impl<'a> VideoProcessor<'a> {
             let info = info.borrow().clone();
             Ok(info)
         } else {
-            FfmpegProcessor::get_video_info(&path)
+            FfmpegProcessor::get_video_info(&url)
         }
     }
 

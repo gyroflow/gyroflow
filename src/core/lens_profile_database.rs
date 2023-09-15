@@ -66,14 +66,14 @@ impl LensProfileDatabase {
             if f_name.ends_with(".gyroflow") {
                 let mut profile = LensProfile::default();
                 profile.name = std::path::Path::new(f_name).file_stem().map(|x| x.to_string_lossy().to_string()).unwrap_or_default();
-                profile.filename = f_name.to_string();
-                profile.checksum = Some(format!("{:08x}", crc32fast::hash(profile.filename.as_bytes())));
+                profile.path_to_file = f_name.to_string();
+                profile.checksum = Some(format!("{:08x}", crc32fast::hash(profile.path_to_file.as_bytes())));
                 self.map.insert(f_name.to_string(), profile);
                 return;
             }
             match LensProfile::from_json(data) {
                 Ok(mut v) => {
-                    v.filename = f_name.to_string();
+                    v.path_to_file = f_name.to_string();
                     for mut profile in v.get_all_matching_profiles() {
                         let key = if !profile.identifier.is_empty() {
                             profile.identifier.clone()
@@ -82,7 +82,7 @@ impl LensProfileDatabase {
                         };
                         if self.map.contains_key(&key) {
                             if !self.loaded {
-                                log::warn!("Lens profile already present: {}, filename: {} from {}", key, f_name, self.map.get(&key).unwrap().filename);
+                                log::warn!("Lens profile already present: {}, path_to_file: {} from {}", key, f_name, self.map.get(&key).unwrap().path_to_file);
                             }
                         } else {
                             (|| -> Option<()> {
@@ -156,12 +156,12 @@ impl LensProfileDatabase {
     }
 
     pub fn get_all_info(&self) -> Vec<(String, String, String, bool, f64, i32)> {
-        // (name, filename, crc32, official, rating, aspect_ratio*1000)
+        // (name, path_to_file, crc32, official, rating, aspect_ratio*1000)
         let mut set = HashSet::with_capacity(self.map.len());
         let mut checksum_map = HashMap::with_capacity(self.map.len());
         let mut ret = Vec::with_capacity(self.map.len());
         for (k, v) in &self.map {
-            if v.filename.ends_with(".gyroflow") {
+            if v.path_to_file.ends_with(".gyroflow") {
                 ret.push((v.name.clone(), k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), 0));
             } else if !v.camera_brand.is_empty() && !v.camera_model.is_empty() {
                 if !v.is_copy {
@@ -193,9 +193,9 @@ impl LensProfileDatabase {
                 log::debug!("Unknown camera model: {:?}", v);
             }
             if let Some(dup) = checksum_map.get(&v.checksum) {
-                log::error!("Duplicated lens profile! {} vs {}", dup, v.filename);
+                log::error!("Duplicated lens profile! {} vs {}", dup, v.path_to_file);
             } else {
-                checksum_map.insert(v.checksum.clone(), v.filename.clone());
+                checksum_map.insert(v.checksum.clone(), v.path_to_file.clone());
             }
         }
         ret.sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
@@ -241,7 +241,7 @@ impl LensProfileDatabase {
         if let Some(l) = self.map.get(filename_or_id) {
             Some(l)
         } else {
-            self.map.iter().find(|(_, v)| v.filename.contains(filename_or_id)).map(|(_, v)| v)
+            self.map.iter().find(|(_, v)| v.path_to_file.contains(filename_or_id)).map(|(_, v)| v)
         }
     }
 
@@ -261,10 +261,10 @@ impl LensProfileDatabase {
             if !v.is_copy {
                 let coeffs = format!("{:?}", v.fisheye_params.distortion_coeffs);
                 if coeffs_map.contains_key(&coeffs) {
-                    println!("Duplicate profile:\n{}\n{}\n", coeffs_map[&coeffs], v.filename.replace(&path, ""))
+                    println!("Duplicate profile:\n{}\n{}\n", coeffs_map[&coeffs], v.path_to_file.replace(&path, ""))
                 }
-                coeffs_map.insert(coeffs, v.filename.replace(&path, ""));
-                lines.push(format!("[{:<50}, {:<50}, {:<50}, {:<80}, {}],", q(&v.camera_brand), q(&v.camera_model), q(&v.lens_model), q(&v.camera_setting), q(&v.filename.replace(&path, ""))));
+                coeffs_map.insert(coeffs, v.path_to_file.replace(&path, ""));
+                lines.push(format!("[{:<50}, {:<50}, {:<50}, {:<80}, {}],", q(&v.camera_brand), q(&v.camera_model), q(&v.lens_model), q(&v.camera_setting), q(&v.path_to_file.replace(&path, ""))));
             }
         }
         lines.sort_by(|a, b| a.to_lowercase().trim().cmp(&b.to_lowercase().trim()));

@@ -18,7 +18,7 @@ impl REDSdk {
                     path.with_file_name("REDOpenCL-x64.dll").exists() &&
                     path.with_file_name("REDCuda-x64.dll").exists();
             } else if cfg!(target_os = "macos") {
-                    return
+                return
                     path.with_file_name("REDDecoder.dylib").exists() &&
                     path.with_file_name("REDMetal.dylib").exists() &&
                     path.with_file_name("REDOpenCL.dylib").exists() &&
@@ -48,6 +48,7 @@ impl REDSdk {
         }
     }
 
+    // Assumes regular filesystem
     pub fn find_redline() -> String {
         let locations = if cfg!(target_os = "windows") {
             vec![
@@ -90,10 +91,11 @@ impl REDSdk {
         String::new()
     }
 
-    pub fn convert_r3d<F: FnMut((f64, String, String))>(file: &str, format: i32, force_primary: bool, mut progress: F, cancel_flag: Arc<AtomicBool>) {
+    // Assumes regular filesystem
+    pub fn convert_r3d<F: FnMut((f64, String, String))>(url: &str, format: i32, force_primary: bool, mut progress: F, cancel_flag: Arc<AtomicBool>) {
         let redline = Self::find_redline();
         if !redline.is_empty() {
-            let p = std::path::Path::new(file);
+            let p = std::path::Path::new(&gyroflow_core::filesystem::url_to_path(url)).to_owned();
 
             let output_file = p.with_extension("").to_string_lossy().to_owned().into_owned();
 
@@ -110,7 +112,7 @@ impl REDSdk {
                 { use std::os::windows::process::CommandExt; cmd.creation_flags(0x08000000); } // CREATE_NO_WINDOW
 
                 cmd
-                    .args(["-i", file])
+                    .args(["-i", &p.to_string_lossy()])
                     .args(["-o", &output_file])
                     .args(["--format", "201"])
                     .args(["--PRcodec", &format!("{}", format)])

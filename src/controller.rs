@@ -20,6 +20,7 @@ use crate::core::synchronization::AutosyncProcess;
 use crate::core::stabilization::KernelParamsFlags;
 use crate::core::synchronization;
 use crate::core::keyframes::*;
+use crate::core::filesystem;
 use crate::rendering;
 use crate::util;
 use crate::wrap_simple_method;
@@ -50,9 +51,9 @@ pub struct Controller {
     init_player: qt_method!(fn(&self, player: QJSValue)),
     reset_player: qt_method!(fn(&self, player: QJSValue)),
     load_video: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
-    video_file_loaded: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
+    video_file_loaded: qt_method!(fn(&self, player: QJSValue)),
     load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, sample_index: i32)),
-    load_lens_profile: qt_method!(fn(&mut self, path: String)),
+    load_lens_profile: qt_method!(fn(&mut self, path: QString)),
     load_lens_profile_url: qt_method!(fn(&mut self, url: QUrl)),
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool)),
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
@@ -188,15 +189,18 @@ pub struct Controller {
 
     init_calibrator: qt_method!(fn(&mut self)),
 
-    get_paths_from_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> QStringList),
+    get_urls_from_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> QStringList),
     import_gyroflow_file: qt_method!(fn(&mut self, url: QUrl)),
     import_gyroflow_data: qt_method!(fn(&mut self, data: QString)),
     gyroflow_file_loaded: qt_signal!(obj: QJsonObject),
-    export_gyroflow_file: qt_method!(fn(&self, thin: bool, extended: bool, additional_data: QJsonObject, override_location: QString, overwrite: bool)),
-    export_gyroflow_data: qt_method!(fn(&self, thin: bool, extended: bool, additional_data: QJsonObject) -> QString),
+    export_gyroflow_file: qt_method!(fn(&self, url: QUrl, typ: QString, additional_data: QJsonObject)),
+    export_gyroflow_data: qt_method!(fn(&self, typ: QString, additional_data: QJsonObject) -> QString),
 
-    project_file_path: qt_property!(QString; READ get_project_file_path NOTIFY project_file_path_changed),
-    project_file_path_changed: qt_signal!(),
+    input_file_url: qt_property!(QString; READ get_input_file_url NOTIFY input_file_url_changed),
+    input_file_url_changed: qt_signal!(),
+
+    project_file_url: qt_property!(QString; READ get_project_file_url NOTIFY project_file_url_changed),
+    project_file_url_changed: qt_signal!(),
 
     check_updates: qt_method!(fn(&self)),
     updates_available: qt_signal!(version: QString, changelog: QString),
@@ -214,16 +218,9 @@ pub struct Controller {
     set_digital_lens_name: qt_method!(fn(&self, name: String)),
     set_digital_lens_param: qt_method!(fn(&self, index: usize, value: f64)),
 
-    file_exists: qt_method!(fn(&self, path: QString) -> bool),
-    file_size: qt_method!(fn(&self, path: QString) -> u64),
-    resolve_android_url: qt_method!(fn(&self, url: QString) -> QString),
-    open_file_externally: qt_method!(fn(&self, path: QString)),
     get_username: qt_method!(fn(&self) -> QString),
     clear_settings: qt_method!(fn(&self)),
     copy_to_clipboard: qt_method!(fn(&self, text: QString)),
-
-    url_to_path: qt_method!(fn(&self, url: QUrl) -> QString),
-    path_to_url: qt_method!(fn(&self, path: QString) -> QUrl),
 
     image_to_b64: qt_method!(fn(&self, img: QImage) -> QString),
     export_preset: qt_method!(fn(&self, url: QUrl, data: QJsonObject)),
@@ -231,8 +228,7 @@ pub struct Controller {
     message: qt_signal!(text: QString, arg: QString, callback: QString, id: QString),
     error: qt_signal!(text: QString, arg: QString, callback: QString),
 
-    gyroflow_exists: qt_signal!(path: QString, thin: bool, extended: bool),
-    request_location: qt_signal!(path: QString, thin: bool, extended: bool),
+    request_location: qt_signal!(url: QString, typ: QString),
 
     set_keyframe: qt_method!(fn(&self, typ: String, timestamp_us: i64, value: f64)),
     set_keyframe_easing: qt_method!(fn(&self, typ: String, timestamp_us: i64, easing: String)),
@@ -246,25 +242,18 @@ pub struct Controller {
     keyframe_value_updated: qt_signal!(keyframe: String, value: f64),
     update_keyframe_values: qt_method!(fn(&self, timestamp_ms: f64)),
 
-    check_external_sdk: qt_method!(fn(&self, path: QString) -> bool),
-    install_external_sdk: qt_method!(fn(&self, path: QString)),
-    external_sdk_progress: qt_signal!(percent: f64, sdk_name: QString, error_string: QString, path: QString),
+    check_external_sdk: qt_method!(fn(&self, filename: QString) -> bool),
+    install_external_sdk: qt_method!(fn(&self, url: QString)),
+    external_sdk_progress: qt_signal!(percent: f64, sdk_name: QString, error_string: QString, url: QString),
 
-    mp4_merge: qt_method!(fn(&self, file_list: QStringList, output_path: String)),
-    mp4_merge_progress: qt_signal!(percent: f64, error_string: QString, path: QString),
+    mp4_merge: qt_method!(fn(&self, file_list: QStringList, output_folder: QUrl, output_filename: QString)),
+    mp4_merge_progress: qt_signal!(percent: f64, error_string: QString, url: QString),
 
     // ---------- REDline conversion ----------
     find_redline: qt_method!(fn(&self) -> QString),
-    convert_r3d: qt_method!(fn(&self, file: String, format: i32, force_primary: bool)),
-    convert_r3d_progress: qt_signal!(percent: f64, error_string: QString, path: QString),
     // ---------- REDline conversion ----------
 
     play_sound: qt_method!(fn(&mut self, typ: String)),
-
-    #[cfg(any(target_os = "macos", target_os = "ios"))]
-    start_apple_url_access: qt_method!(fn(&mut self, url: String) -> bool),
-    #[cfg(any(target_os = "macos", target_os = "ios"))]
-    stop_apple_url_access: qt_method!(fn(&mut self, url: String) -> bool),
 
     image_sequence_start: qt_property!(i32),
     image_sequence_fps: qt_property!(f64),
@@ -297,9 +286,11 @@ impl Controller {
 
     fn load_video(&mut self, url: QUrl, player: QJSValue) {
         self.stabilizer.clear();
+        let url_str = QString::from(url.clone()).to_string();
+        let filename = filesystem::get_filename(&url_str);
 
         // Load current (clean) state to the UI
-        if let Ok(current_state) = self.stabilizer.export_gyroflow_data(true, false, "{}") {
+        if let Ok(current_state) = self.stabilizer.export_gyroflow_data(core::GyroflowProjectType::Simple, "{}") {
             if let Ok(current_state) = serde_json::from_str(current_state.as_str()) as serde_json::Result<serde_json::Value> {
                 self.gyroflow_file_loaded(util::serde_json_to_qt_object(&current_state));
             }
@@ -309,14 +300,14 @@ impl Controller {
         self.keyframes_changed();
         self.update_offset_model();
 
-        let file_path = util::url_to_path(url.clone());
         *self.stabilizer.input_file.write() = gyroflow_core::InputFile {
-            path: file_path.clone(),
-            project_file_path: None,
+            url: url_str.clone(),
+            project_file_url: None,
             image_sequence_start: self.image_sequence_start,
             image_sequence_fps: self.image_sequence_fps
         };
-        self.project_file_path_changed();
+        self.input_file_url_changed();
+        self.project_file_url_changed();
 
         let mut custom_decoder = String::new(); // eg. BRAW:format=rgba64le
         if self.image_sequence_start > 0 {
@@ -332,11 +323,11 @@ impl Controller {
             }
         };
 
-        if file_path.to_ascii_lowercase().ends_with("braw") {
+        if filename.to_ascii_lowercase().ends_with("braw") {
             let gpu = if *rendering::GPU_DECODING.read() { "auto" } else { "no" }; // Disable GPU decoding for BRAW
             custom_decoder = format!("BRAW:gpu={}{}", gpu, options);
         }
-        if file_path.to_ascii_lowercase().ends_with("r3d") {
+        if filename.to_ascii_lowercase().ends_with("r3d") {
             custom_decoder = format!("R3D:gpu=auto{}", options);
         }
         if !custom_decoder.is_empty() {
@@ -345,12 +336,18 @@ impl Controller {
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
-            vid.setUrl(url, QString::from(custom_decoder));
+            filesystem::mdk_unloaded_url(&QString::from(vid.url.clone()).to_string());
+            let url = QString::from(url).to_string();
+            let url = filesystem::url_for_mdk(&url);
+            vid.setUrl(QUrl::from(QString::from(url)), QString::from(custom_decoder));
         }
     }
 
-    fn get_project_file_path(&self) -> QString {
-        QString::from(self.stabilizer.input_file.read().project_file_path.as_ref().cloned().unwrap_or_default())
+    fn get_input_file_url(&self) -> QString {
+        QString::from(self.stabilizer.input_file.read().url.clone())
+    }
+    fn get_project_file_url(&self) -> QString {
+        QString::from(self.stabilizer.input_file.read().project_file_url.as_ref().cloned().unwrap_or_default())
     }
 
     fn start_autosync(&mut self, timestamps_fract: String, sync_params: String, mode: String) {
@@ -464,7 +461,8 @@ impl Controller {
 
                 let sync = std::rc::Rc::new(sync);
 
-                match VideoProcessor::from_file(&input_file.path, gpu_decoding, 0, Some(decoder_options)) {
+                let fs_base = gyroflow_core::filesystem::get_engine_base();
+                match VideoProcessor::from_file(&fs_base, &input_file.url, gpu_decoding, 0, Some(decoder_options)) {
                     Ok(mut proc) => {
                         let err2 = err.clone();
                         let sync2 = sync.clone();
@@ -499,7 +497,7 @@ impl Controller {
                     Err(error) => {
                         err(("An error occured: %1".to_string(), error.to_string()));
                     }
-                }
+                };
             });
         } else {
             err(("An error occured: %1".to_string(), "Invalid parameters".to_string()));
@@ -646,8 +644,7 @@ impl Controller {
         })(());
     }
 
-    fn video_file_loaded(&mut self, url: QUrl, player: QJSValue) {
-        let s = util::url_to_path(url);
+    fn video_file_loaded(&mut self, player: QJSValue) {
         let stab = self.stabilizer.clone();
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
@@ -660,17 +657,16 @@ impl Controller {
             self.set_preview_resolution(self.preview_resolution, player);
 
             if duration_ms > 0.0 && fps > 0.0 {
-                if stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size).is_ok() {
-                    stab.set_output_size(video_size.0, video_size.1);
-                }
+                stab.init_from_video_data(duration_ms, fps, frame_count, video_size);
+                stab.set_output_size(video_size.0, video_size.1);
             }
         }
     }
 
     fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue, sample_index: i32) {
-        let s = util::url_to_path(url);
+        let url = QString::from(url).to_string();
         let stab = self.stabilizer.clone();
-        let filename = QString::from(s.split('/').last().unwrap_or_default());
+        let filename = filesystem::get_filename(&url);
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
@@ -713,15 +709,15 @@ impl Controller {
                 this.request_recompute();
             });
             let load_lens = util::qt_queued_callback_mut(self, move |this, path: String| {
-                this.load_lens_profile(path);
+                this.load_lens_profile(path.into());
             });
             let reload_lens = util::qt_queued_callback_mut(self, move |this, _| {
                 let lens = this.stabilizer.lens.read();
-                if this.lens_loaded || !lens.filename.is_empty() {
+                if this.lens_loaded || !lens.path_to_file.is_empty() {
                     this.lens_loaded = true;
                     this.lens_changed();
                     let json = lens.get_json().unwrap_or_default();
-                    this.lens_profile_loaded(QString::from(json), QString::from(lens.filename.as_str()), QString::from(lens.checksum.clone().unwrap_or_default()));
+                    this.lens_profile_loaded(QString::from(json), QString::from(lens.path_to_file.as_str()), QString::from(lens.checksum.clone().unwrap_or_default()));
                 }
             });
             let on_metadata = util::qt_queued_callback_mut(self, move |this, md: core::gyro_source::FileMetadata| {
@@ -741,17 +737,14 @@ impl Controller {
                     let mut additional_data = serde_json::Value::Object(serde_json::Map::new());
                     let additional_obj = additional_data.as_object_mut().unwrap();
                     if is_main_video {
-                        if let Err(e) = stab.init_from_video_data(&s, duration_ms, fps, frame_count, video_size) {
-                            err(("An error occured: %1".to_string(), e.to_string()));
-                        } else {
-                            // Ignore the error here, video file may not contain the telemetry and it's ok
-                            if let Ok(md) = stab.load_gyro_data(&s, is_main_video, &Default::default(), progress, cancel_flag) {
-                                file_metadata = Some(md);
-                            }
+                        stab.init_from_video_data(duration_ms, fps, frame_count, video_size);
+                        // Ignore the error here, video file may not contain the telemetry and it's ok
+                        if let Ok(md) = stab.load_gyro_data(&url, is_main_video, &Default::default(), progress, cancel_flag) {
+                            file_metadata = Some(md);
+                        }
 
-                            if stab.set_output_size(video_size.0, video_size.1) {
-                                stab.recompute_undistortion();
-                            }
+                        if stab.set_output_size(video_size.0, video_size.1) {
+                            stab.recompute_undistortion();
                         }
                     } else {
                         let mut options = gyroflow_core::gyro_source::FileLoadOptions::default();
@@ -759,7 +752,7 @@ impl Controller {
                             options.sample_index = Some(sample_index as usize);
                         }
 
-                        match stab.load_gyro_data(&s, is_main_video, &options, progress, cancel_flag) {
+                        match stab.load_gyro_data(&url, is_main_video, &options, progress, cancel_flag) {
                             Ok(md) => {
                                 file_metadata = Some(md);
                             },
@@ -810,21 +803,21 @@ impl Controller {
                         on_metadata(md);
                     }
 
-                    finished((is_main_video, filename, QString::from(detected.trim()), has_motion, additional_data));
+                    finished((is_main_video, filename.into(), QString::from(detected.trim()), has_motion, additional_data));
                 });
             }
         }
     }
     fn load_lens_profile_url(&mut self, url: QUrl) {
-        self.load_lens_profile(util::url_to_path(url))
+        self.load_lens_profile(QString::from(url))
     }
-    fn load_lens_profile(&mut self, path: String) {
+    fn load_lens_profile(&mut self, url: QString) {
         let (json, filepath, checksum) = {
-            if let Err(e) = self.stabilizer.load_lens_profile(&path) {
+            if let Err(e) = self.stabilizer.load_lens_profile(&url.to_string()) {
                 self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
             }
             let lens = self.stabilizer.lens.read();
-            (lens.get_json().unwrap_or_default(), lens.filename.clone(), lens.checksum.clone().unwrap_or_default())
+            (lens.get_json().unwrap_or_default(), lens.path_to_file.clone(), lens.checksum.clone().unwrap_or_default())
         };
         self.lens_loaded = true;
         self.lens_changed();
@@ -832,9 +825,10 @@ impl Controller {
         self.request_recompute();
     }
     fn load_default_preset(&mut self) {
+        // Assumes regular filesystem
         let local_path = gyroflow_core::lens_profile_database::LensProfileDatabase::get_path().join("default.gyroflow");
         if local_path.exists() {
-            self.import_gyroflow_file(util::path_to_url(QString::from(local_path.to_string_lossy().into_owned())));
+            self.import_gyroflow_file(QUrl::from(QString::from(filesystem::path_to_url(&local_path.to_string_lossy()))));
         }
     }
 
@@ -845,7 +839,7 @@ impl Controller {
 
             // fn aligned_to_8(mut x: u32) -> u32 { if x % 8 != 0 { x += 8 - x % 8; } x }
 
-            if !self.stabilizer.input_file.read().path.is_empty() {
+            if !self.stabilizer.input_file.read().url.is_empty() {
                 let h = if target_height > 0 { target_height as u32 } else { vid.videoHeight };
                 let ratio = vid.videoHeight as f64 / h as f64;
                 let new_w = (vid.videoWidth as f64 / ratio).floor() as u32;
@@ -1177,56 +1171,49 @@ impl Controller {
         self.cancel_flag.store(true, SeqCst);
     }
 
-    fn export_gyroflow_file(&self, thin: bool, extended: bool, additional_data: QJsonObject, override_location: QString, overwrite: bool) {
-        let gf_path = if override_location.is_empty() {
-            let input_file = self.stabilizer.input_file.read();
-            if let Some(project_path) = input_file.project_file_path.as_ref() {
-                project_path.clone()
-            } else {
-                let video_path = std::path::Path::new(&input_file.path);
-                video_path.with_extension("gyroflow").to_string_lossy().into()
+    fn export_gyroflow_file(&self, url: QUrl, typ: QString, additional_data: QJsonObject) {
+        let url = QString::from(url).to_string();
+        let typ_str = typ.clone();
+        let typ = core::GyroflowProjectType::from_str(&typ.to_string()).unwrap();
+
+        util::set_setting("lastProject", &url);
+        let finished = util::qt_queued_callback(self, move |this, (res, arg): (&str, String)| {
+            match res {
+                "ok" => this.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", filesystem::display_url(&arg))), QString::default(), QString::from("gyroflow-exported")),
+                "location" => this.request_location(QString::from(arg), typ_str.clone()),
+                "err" => this.error(QString::from("An error occured: %1"), QString::from(arg), QString::default()),
+                _ => { }
             }
-        } else {
-            override_location.to_string()
-        };
+            this.request_recompute();
+        });
 
-        if !overwrite && std::path::Path::new(&gf_path).exists() {
-            self.gyroflow_exists(QString::from(gf_path), thin, extended);
-        } else {
-            util::set_setting("lastProject", &gf_path);
-            let finished = util::qt_queued_callback(self, move |this, (res, arg)| {
-                match res {
-                    "ok" => this.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", arg)), QString::default(), QString::from("gyroflow-exported")),
-                    "location" => this.request_location(QString::from(arg), thin, extended),
-                    "err" => this.error(QString::from("An error occured: %1"), QString::from(arg), QString::default()),
-                    _ => { }
-                }
-                this.request_recompute();
-            });
-
-            let stab = self.stabilizer.clone();
-            core::run_threaded(move || {
-                match stab.export_gyroflow_file(&gf_path, thin, extended, &additional_data.to_json().to_string()) {
-                    Ok(_) => finished(("ok", gf_path)),
-                    Err(ref e) if e.kind() == std::io::ErrorKind::PermissionDenied => finished(("location", gf_path)),
-                    Err(e) => finished(("err", e.to_string()))
-                }
-            });
-        }
+        let stab = self.stabilizer.clone();
+        core::run_threaded(move || {
+            match stab.export_gyroflow_file(&url, typ, &additional_data.to_json().to_string()) {
+                Ok(_) => finished(("ok", url.to_string())),
+                Err(core::GyroflowCoreError::IOError(ref e)) if e.kind() == std::io::ErrorKind::PermissionDenied => finished(("location", url.to_string())),
+                Err(e) => finished(("err", e.to_string()))
+            }
+        });
     }
 
-    fn export_gyroflow_data(&self, thin: bool, extended: bool, additional_data: QJsonObject) -> QString {
-        QString::from(self.stabilizer.export_gyroflow_data(thin, extended, &additional_data.to_json().to_string()).unwrap_or_default())
+    fn export_gyroflow_data(&self, typ: QString, additional_data: QJsonObject) -> QString {
+        let typ = core::GyroflowProjectType::from_str(&typ.to_string()).unwrap();
+        QString::from(self.stabilizer.export_gyroflow_data(typ, &additional_data.to_json().to_string()).unwrap_or_default())
     }
 
-    fn get_paths_from_gyroflow_file(&mut self, url: QUrl) -> QStringList {
+    fn get_urls_from_gyroflow_file(&mut self, url: QUrl) -> QStringList {
+        let url = QString::from(url).to_string();
         let mut ret = vec![QString::default(); 2];
-        let path = util::url_to_path(url);
-        if let Ok(data) = std::fs::read(&path) {
-            let path = std::path::Path::new(&path).to_path_buf();
-
+        if let Ok(data) = filesystem::read(&url) {
             if let Ok(serde_json::Value::Object(obj)) = serde_json::from_slice(&data) {
-                let org_video_path = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or("").to_string();
+                #[allow(unused_mut)]
+                let mut org_video_url = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or("").to_string();
+                #[cfg(any(target_os = "macos", target_os = "ios"))]
+                if let Some(v) = obj.get("videofile_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
+                    let resolved = filesystem::apple::resolve_bookmark(v);
+                    if !resolved.is_empty() { org_video_url = resolved; }
+                }
 
                 if let Some(seq_start) = obj.get("image_sequence_start").and_then(|x| x.as_i64()) {
                     self.image_sequence_start = seq_start as i32;
@@ -1234,38 +1221,47 @@ impl Controller {
                 if let Some(seq_fps) = obj.get("image_sequence_fps").and_then(|x| x.as_f64()) {
                     self.image_sequence_fps = seq_fps;
                 }
-                if !org_video_path.is_empty() {
-                    let video_path = StabilizationManager::get_new_videofile_path(&org_video_path, Some(path.clone()), self.image_sequence_start as u32);
-                    ret[0] = QString::from(core::util::path_to_str(&video_path));
+                if !org_video_url.is_empty() {
+                    let video_path = StabilizationManager::get_new_videofile_url(&org_video_url, Some(&url), self.image_sequence_start as u32);
+                    ret[0] = QString::from(video_path);
                 }
 
                 if let Some(serde_json::Value::Object(gyro)) = obj.get("gyro_source") {
-                    let gyro_path = gyro.get("filepath").and_then(|x| x.as_str()).unwrap_or("").to_string();
+                    #[allow(unused_mut)]
+                    let mut gyro_url = gyro.get("filepath").and_then(|x| x.as_str()).unwrap_or("").to_string();
+                    #[cfg(any(target_os = "macos", target_os = "ios"))]
+                    if let Some(v) = obj.get("filepath_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
+                        let resolved = filesystem::apple::resolve_bookmark(v);
+                        if !resolved.is_empty() { gyro_url = resolved; }
+                    }
 
-                    if !gyro_path.is_empty() {
-                        let gyro_path = StabilizationManager::get_new_videofile_path(&gyro_path, Some(path), self.image_sequence_start as u32);
-                        ret[1] = QString::from(core::util::path_to_str(&gyro_path));
+                    if !gyro_url.is_empty() {
+                        let gyro_url = StabilizationManager::get_new_videofile_url(&gyro_url, Some(&url), self.image_sequence_start as u32);
+                        ret[1] = QString::from(gyro_url);
                     }
                 }
+            } else {
+                ::log::error!("Failed to parse json: {}", unsafe { std::str::from_utf8_unchecked(&data) });
             }
         }
         QStringList::from_iter(ret.into_iter())
     }
+
     fn import_gyroflow_file(&mut self, url: QUrl) {
-        let path = util::url_to_path(url);
+        let url = QString::from(url).to_string();
         let progress = util::qt_queued_callback_mut(self, move |this, progress: f64| {
             this.loading_gyro_in_progress = progress < 1.0;
             this.loading_gyro_progress(progress);
             this.loading_gyro_in_progress_changed();
         });
-        let finished = util::qt_queued_callback_mut(self, move |this, obj: std::io::Result<serde_json::Value>| {
+        let finished = util::qt_queued_callback_mut(self, move |this, obj: Result<serde_json::Value, gyroflow_core::GyroflowCoreError>| {
             this.loading_gyro_in_progress = false;
             this.loading_gyro_progress(1.0);
             this.loading_gyro_in_progress_changed();
 
             let obj = this.import_gyroflow_internal(obj);
             this.gyroflow_file_loaded(obj);
-            this.project_file_path_changed();
+            this.project_file_url_changed();
         });
 
         let stab = self.stabilizer.clone();
@@ -1277,7 +1273,7 @@ impl Controller {
                 std::thread::sleep(std::time::Duration::from_millis(200));
             }
             cancel_flag.store(false, SeqCst);
-            finished(stab.import_gyroflow_file(&path, false, progress, cancel_flag));
+            finished(stab.import_gyroflow_file(&url, false, progress, cancel_flag));
         });
     }
     fn import_gyroflow_data(&mut self, data: QString) {
@@ -1286,7 +1282,7 @@ impl Controller {
             this.loading_gyro_progress(progress);
             this.loading_gyro_in_progress_changed();
         });
-        let finished = util::qt_queued_callback_mut(self, move |this, obj: std::io::Result<serde_json::Value>| {
+        let finished = util::qt_queued_callback_mut(self, move |this, obj: Result<serde_json::Value, gyroflow_core::GyroflowCoreError>| {
             this.loading_gyro_in_progress = false;
             this.loading_gyro_progress(1.0);
             this.loading_gyro_in_progress_changed();
@@ -1308,7 +1304,7 @@ impl Controller {
             finished(stab.import_gyroflow_data(data.to_string().as_bytes(), false, None, progress, cancel_flag, &mut is_preset));
         });
     }
-    fn import_gyroflow_internal(&mut self, result: std::io::Result<serde_json::Value>) -> QJsonObject {
+    fn import_gyroflow_internal(&mut self, result: Result<serde_json::Value, gyroflow_core::GyroflowCoreError>) -> QJsonObject {
         match result {
             Ok(thin_obj) => {
                 if thin_obj.as_object().unwrap().contains_key("calibration_data") {
@@ -1528,7 +1524,8 @@ impl Controller {
 
                 ::log::debug!("Decoder options: {:?}", decoder_options);
                 let gpu_decoding = *rendering::GPU_DECODING.read();
-                match VideoProcessor::from_file(&input_file.path, gpu_decoding, 0, Some(decoder_options)) {
+                let fs_base = gyroflow_core::filesystem::get_engine_base();
+                match VideoProcessor::from_file(&fs_base, &input_file.url, gpu_decoding, 0, Some(decoder_options)) {
                     Ok(mut proc) => {
                         let progress = progress.clone();
                         let err2 = err.clone();
@@ -1637,8 +1634,6 @@ impl Controller {
     }
 
     fn add_calibration_point(&mut self, timestamp_us: i64, no_marker: bool) {
-        dbg!(timestamp_us);
-
         self.start_autocalibrate(0, 1, 1, 1000.0, timestamp_us as f64 / 1000.0, no_marker);
     }
     fn remove_calibration_point(&mut self, timestamp_us: i64) {
@@ -1690,7 +1685,7 @@ impl Controller {
     }
 
     fn export_lens_profile(&mut self, url: QUrl, info: QJsonObject, upload: bool) {
-        let path = util::url_to_path(url);
+        let url = QString::from(url).to_string();
         let info_json = info.to_json().to_string();
 
         match core::lens_profile::LensProfile::from_json(&info_json) {
@@ -1700,7 +1695,7 @@ impl Controller {
                     profile.set_from_calibrator(cal);
                 }
 
-                match profile.save_to_file(&path) {
+                match profile.save_to_file(&url) {
                     Ok(json) => {
                         ::log::debug!("Lens profile json: {}", json);
                         if upload {
@@ -1831,7 +1826,7 @@ impl Controller {
 
     fn export_preset(&self, url: QUrl, content: QJsonObject) {
         let contents = content.to_json_pretty();
-        if let Err(e) = std::fs::write(util::url_to_path(url), contents.to_slice()) {
+        if let Err(e) = filesystem::write(&QString::from(url).to_string(), contents.to_slice()) {
             self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
         }
     }
@@ -1907,18 +1902,22 @@ impl Controller {
         self.stabilizer.gyro.read().file_metadata.gravity_vectors.as_ref().map(|v| !v.is_empty()).unwrap_or_default()
     }
 
-    fn check_external_sdk(&self, path: QString) -> bool {
-        crate::external_sdk::requires_install(&path.to_string())
+    fn check_external_sdk(&self, filename: QString) -> bool {
+        crate::external_sdk::requires_install(&filename.to_string())
     }
-    fn install_external_sdk(&self, path: QString) {
-        let path_str = path.to_string();
+    fn install_external_sdk(&self, url: QString) {
+        let filename = if url.to_string() == "ffmpeg_gpl" { url.to_string() } else { filesystem::get_filename(&url.to_string()) };
         let progress = util::qt_queued_callback_mut(self, move |this, (percent, sdk_name, error_string): (f64, &'static str, String)| {
-            this.external_sdk_progress(percent, QString::from(sdk_name), QString::from(error_string), path.clone());
+            this.external_sdk_progress(percent, QString::from(sdk_name), QString::from(error_string), QString::from(url.clone()));
         });
-        crate::external_sdk::install(&path_str, progress);
+        crate::external_sdk::install(&filename, progress);
     }
 
-    fn mp4_merge(&self, file_list: QStringList, mut output_file: String) {
+    fn mp4_merge(&self, file_list: QStringList, output_folder: QUrl, output_filename: QString) {
+        let output_folder = QString::from(output_folder).to_string();
+        let output_filename = output_filename.to_string();
+        let output_url = filesystem::url_from_folder_and_file(&output_folder, &output_filename, true);
+
         let mut file_list: Vec<String> = file_list.into_iter().map(QString::to_string).collect();
         file_list.sort_by(|a, b| human_sort::compare(a, b));
 
@@ -1927,98 +1926,37 @@ impl Controller {
             self.mp4_merge_progress(1.0, QString::from("Not enough files!"), QString::default());
             return;
         }
-        let first_path = file_list.first().unwrap().clone();
-        let p = std::path::Path::new(&first_path);
-        if output_file.is_empty() {
-            output_file = p.with_file_name(format!("{}_joined.{}", p.file_stem().unwrap().to_str().unwrap(), p.extension().unwrap().to_str().unwrap())).to_string_lossy().replace('\\', "/");
+        if output_url.is_empty() {
+            self.mp4_merge_progress(1.0, QString::from("Empty output path!"), QString::default());
+            return;
         }
-        let out = output_file.clone();
+        let first_url = file_list.first().unwrap().clone();
+        let out = output_url.clone();
         let progress = util::qt_queued_callback_mut(self, move |this, (percent, error_string): (f64, String)| {
             this.mp4_merge_progress(percent, QString::from(error_string), QString::from(out.as_str()));
         });
         core::run_threaded(move || {
-            let res = mp4_merge::join_files(&file_list, output_file.clone(), |p| progress((p.min(0.9999), String::default())));
+            let base = filesystem::get_engine_base();
+            let mut opened = Vec::with_capacity(file_list.len());
+            for x in &file_list {
+                match filesystem::open_file(&base, &x, false) {
+                    Ok(x) => { opened.push(x); },
+                    Err(e) => { progress((1.0, format!("Failed to open file: {x}: {e:?}"))); return; }
+                }
+            }
+            let mut file_references: Vec<(&mut std::fs::File, usize)> = opened.iter_mut().map(|x| { let s = x.size; (x.get_file(), s) }).collect();
+            let mut opened_output = match filesystem::open_file(&base, &output_url, true) {
+                Ok(x) => { x },
+                Err(e) => { progress((1.0, format!("Failed to create file: {output_url}: {e:?}"))); return; }
+            };
+            let res = mp4_merge::join_file_streams(&mut file_references, opened_output.get_file(), |p| progress((p.min(0.9999), String::default())));
             match res {
                 Ok(_) => {
-                    ///////////////// Merge .gcsv /////////////////
-                    if let Err(e) = (|| -> std::io::Result<()> {
-                        use std::fs::File;
-                        use std::io::{ BufRead, Write, Seek, SeekFrom };
-                        use std::path::Path;
-                        let mut last_diff = 0.0;
-                        let mut last_timestamp = 0.0;
-                        let mut add_timestamp = 0.0;
-                        let mut output_gcsv = None;
-                        let mut first_file = true;
-                        let mut sync_points = Vec::new();
-                        let mut time_scale = 0.001; // default to millisecond
-                        let mut headers_end_position = None;
-                        for x in &file_list {
-                            let path = Path::new(x).with_extension("gcsv");
-                            if path.exists() {
-                                let mut is_data = false;
-                                if let Ok(file) = File::open(path) {
-                                    if output_gcsv.is_none() {
-                                        output_gcsv = Some(File::create(Path::new(&output_file).with_extension("gcsv"))?);
-                                    }
-                                    for (i, line) in std::io::BufReader::new(file).lines().enumerate() {
-                                        let mut line = line?;
-                                        if i == 0 && !line.contains("GYROFLOW IMU LOG") && !line.contains("CAMERA IMU LOG") {
-                                            return Ok(()); // not a .gcsv file
-                                        }
-                                        if !is_data {
-                                            if line.starts_with("tscale,") {
-                                                if let Ok(ts) = line.strip_prefix("tscale,").unwrap().parse::<f64>() {
-                                                    time_scale = ts;
-                                                }
-                                            }
-                                            if line.starts_with("t,") || line.starts_with("time,") {
-                                                is_data = true;
-                                                if !first_file {
-                                                    sync_points.push((add_timestamp * time_scale - 0.5) * 1000.0);
-                                                    sync_points.push((add_timestamp * time_scale + 0.5) * 1000.0);
-                                                    sync_points.push((add_timestamp * time_scale + 1.0) * 1000.0);
-                                                    sync_points.push((add_timestamp * time_scale + 2.0) * 1000.0);
-                                                    sync_points.push((add_timestamp * time_scale + 2.5) * 1000.0);
-                                                    continue;
-                                                } else {
-                                                    headers_end_position = Some(output_gcsv.as_ref().unwrap().stream_position()?);
-                                                    writeln!(output_gcsv.as_mut().unwrap(), "additional_sync_points,{}", " ".repeat(1024))?; // 1kb of placeholder spaces
-                                                }
-                                            }
-                                        } else if line.contains(',') {
-                                            if let Ok(timestamp) = line.split(',').next().unwrap().parse::<f64>() {
-                                                last_diff = timestamp - last_timestamp;
-                                                last_timestamp = timestamp;
-                                                if timestamp >= add_timestamp {
-                                                    add_timestamp = 0.0;
-                                                }
-                                                let new_timestamp = timestamp + add_timestamp;
-                                                line = [new_timestamp.to_string()].into_iter().chain(line.split(',').skip(1).map(str::to_string)).join(",");
-                                            }
-                                        }
-                                        if first_file || is_data {
-                                            writeln!(output_gcsv.as_mut().unwrap(), "{}", line)?;
-                                        }
-                                    }
-                                }
-                                add_timestamp += last_timestamp + last_diff;
-                                last_timestamp = 0.0;
-                            }
-                            first_file = false;
-                        }
-                        if !sync_points.is_empty() && output_gcsv.is_some() && headers_end_position.is_some() {
-                            let output_gcsv = output_gcsv.as_mut().unwrap();
-                            output_gcsv.seek(SeekFrom::Start(headers_end_position.unwrap()))?;
-                            write!(output_gcsv, "additional_sync_points,{}", sync_points.into_iter().map(|x| format!("{:.3}", x)).join(";"))?;
-                        }
-                        Ok(())
-                    })() {
+                    if let Err(e) = Self::merge_gcsv(&file_list, &output_folder, &output_filename) {
                         ::log::error!("Failed to merge .gcsv files: {:?}", e);
                     }
-                    ///////////////// Merge .gcsv /////////////////
 
-                    crate::util::update_file_times(&output_file, &first_path);
+                    crate::util::update_file_times(&output_url, &first_url);
 
                     progress((1.0, String::default()))
                 },
@@ -2026,19 +1964,86 @@ impl Controller {
             }
         });
     }
+    fn merge_gcsv(file_list: &[String], output_folder: &str, output_filename: &str) -> Result<(), gyroflow_core::GyroflowCoreError> {
+        let base = filesystem::get_engine_base();
+
+        use std::io::{ BufRead, Write, Seek, SeekFrom };
+        let mut last_diff = 0.0;
+        let mut last_timestamp = 0.0;
+        let mut add_timestamp = 0.0;
+        let mut output_gcsv = None;
+        let mut first_file = true;
+        let mut sync_points = Vec::new();
+        let mut time_scale = 0.001; // default to millisecond
+        let mut headers_end_position = None;
+        for x in file_list {
+            let filename = filesystem::get_filename(x);
+            let folder = filesystem::get_folder(x);
+            let gcsv_name = filesystem::with_extension(&filename, "gcsv");
+            if filesystem::exists_in_folder(&folder, &gcsv_name) {
+                let mut is_data = false;
+                if let Ok(mut file) = filesystem::open_file(&base, &x, false) {
+                    if output_gcsv.is_none() {
+                        let out_url = filesystem::url_from_folder_and_file(&output_folder, &filesystem::with_extension(output_filename,"gcsv"), true);
+                        output_gcsv = Some(filesystem::open_file(&base, &out_url, true)?);
+                    }
+                    for (i, line) in std::io::BufReader::new(file.get_file()).lines().enumerate() {
+                        let mut line = line?;
+                        if i == 0 && !line.contains("GYROFLOW IMU LOG") && !line.contains("CAMERA IMU LOG") {
+                            return Ok(()); // not a .gcsv file
+                        }
+                        if !is_data {
+                            if line.starts_with("tscale,") {
+                                if let Ok(ts) = line.strip_prefix("tscale,").unwrap().parse::<f64>() {
+                                    time_scale = ts;
+                                }
+                            }
+                            if line.starts_with("t,") || line.starts_with("time,") {
+                                is_data = true;
+                                if !first_file {
+                                    sync_points.push((add_timestamp * time_scale - 0.5) * 1000.0);
+                                    sync_points.push((add_timestamp * time_scale + 0.5) * 1000.0);
+                                    sync_points.push((add_timestamp * time_scale + 1.0) * 1000.0);
+                                    sync_points.push((add_timestamp * time_scale + 2.0) * 1000.0);
+                                    sync_points.push((add_timestamp * time_scale + 2.5) * 1000.0);
+                                    continue;
+                                } else {
+                                    headers_end_position = Some(output_gcsv.as_mut().unwrap().get_file().stream_position()?);
+                                    writeln!(output_gcsv.as_mut().unwrap().get_file(), "additional_sync_points,{}", " ".repeat(1024))?; // 1kb of placeholder spaces
+                                }
+                            }
+                        } else if line.contains(',') {
+                            if let Ok(timestamp) = line.split(',').next().unwrap().parse::<f64>() {
+                                last_diff = timestamp - last_timestamp;
+                                last_timestamp = timestamp;
+                                if timestamp >= add_timestamp {
+                                    add_timestamp = 0.0;
+                                }
+                                let new_timestamp = timestamp + add_timestamp;
+                                line = [new_timestamp.to_string()].into_iter().chain(line.split(',').skip(1).map(str::to_string)).join(",");
+                            }
+                        }
+                        if first_file || is_data {
+                            writeln!(output_gcsv.as_mut().unwrap().get_file(), "{}", line)?;
+                        }
+                    }
+                }
+                add_timestamp += last_timestamp + last_diff;
+                last_timestamp = 0.0;
+            }
+            first_file = false;
+        }
+        if !sync_points.is_empty() && output_gcsv.is_some() && headers_end_position.is_some() {
+            let output_gcsv = &mut output_gcsv.as_mut().unwrap().get_file();
+            output_gcsv.seek(SeekFrom::Start(headers_end_position.unwrap()))?;
+            write!(output_gcsv, "additional_sync_points,{}", sync_points.into_iter().map(|x| format!("{:.3}", x)).join(";"))?;
+        }
+        Ok(())
+    }
 
     // ---------- REDline conversion ----------
     fn find_redline(&self) -> QString {
         QString::from(crate::external_sdk::r3d::REDSdk::find_redline())
-    }
-    fn convert_r3d(&self, file: String, format: i32, force_primary: bool) {
-        let progress = util::qt_queued_callback_mut(self, move |this, (percent, error_string, path): (f64, String, String)| {
-            this.convert_r3d_progress(percent, QString::from(error_string), QString::from(path));
-        });
-        let cancel_flag = self.cancel_flag.clone();
-        core::run_threaded(move || {
-            crate::external_sdk::r3d::REDSdk::convert_r3d(&file, format, force_primary, progress, cancel_flag);
-        });
     }
     // ---------- REDline conversion ----------
 
@@ -2063,19 +2068,46 @@ impl Controller {
     }
 
     // Utilities
-    fn file_exists(&self, path: QString) -> bool { std::path::Path::new(&path.to_string()).exists() }
-    fn file_size(&self, path: QString) -> u64 { std::fs::metadata(path.to_string()).map(|x| x.len()).unwrap_or_default() }
-    fn resolve_android_url(&mut self, url: QString) -> QString { util::resolve_android_url(url) }
-    fn open_file_externally(&self, path: QString) { util::open_file_externally(path); }
     fn get_username(&self) -> QString { let realname = whoami::realname(); QString::from(if realname.is_empty() { whoami::username() } else { realname }) }
-    fn url_to_path(&self, url: QUrl) -> QString { QString::from(util::url_to_path(url)) }
-    fn path_to_url(&self, path: QString) -> QUrl { util::path_to_url(path) }
     fn image_to_b64(&self, img: QImage) -> QString { util::image_to_b64(img) }
     fn clear_settings(&self) { util::clear_settings() }
     fn copy_to_clipboard(&self, text: QString) { util::copy_to_clipboard(text) }
+}
 
-    #[cfg(any(target_os = "macos", target_os = "ios"))]
-    fn start_apple_url_access(&self, url: String) -> bool { util::start_accessing_security_scoped_resource(&url) }
-    #[cfg(any(target_os = "macos", target_os = "ios"))]
-    fn stop_apple_url_access(&self, url: String) -> bool { util::stop_accessing_security_scoped_resource(&url) }
+#[derive(Default, QObject)]
+pub struct Filesystem {
+    base: qt_base_class!(trait QObject),
+
+    exists_in_folder:         qt_method!(fn(&self, folder: QUrl, filename: QString) -> bool),
+    exists:                   qt_method!(fn(&self, url: QUrl) -> bool),
+    filename_from_url:        qt_method!(fn(&self, url: QUrl) -> QString),
+    folder_from_url:          qt_method!(fn(&self, url: QUrl) -> QString),
+    url_with_extension:       qt_method!(fn(&self, url: QUrl, ext: QString) -> QString),
+    filename_with_extension:  qt_method!(fn(&self, filename: QString, ext: QString) -> QString),
+    filename_with_suffix:     qt_method!(fn(&self, filename: QString, suffix: QString) -> QString),
+    open_file_externally:     qt_method!(fn(&self, url: QUrl)),
+    path_to_url:              qt_method!(fn(&self, path: QString) -> QUrl),
+    url_from_folder_and_file: qt_method!(fn(&self, folder: QUrl, filename: String, can_create: bool) -> QUrl),
+    url_to_path:              qt_method!(fn(&self, url: QUrl) -> QString),
+    display_url:              qt_method!(fn(&self, url: QUrl) -> QString),
+    display_folder_filename:  qt_method!(fn(&self, folder: QUrl, filename: QString) -> QString),
+    start_accessing_url:      qt_method!(fn(&self, url: QUrl)),
+    stop_accessing_url:       qt_method!(fn(&self, url: QUrl)),
+}
+impl Filesystem {
+    fn exists_in_folder(&self, folder: QUrl, filename: QString) -> bool { filesystem::exists_in_folder(&QString::from(folder).to_string(), &filename.to_string()) }
+    fn exists(&self, url: QUrl) -> bool { filesystem::exists(&QString::from(url).to_string()) }
+    fn filename_from_url(&self, url: QUrl) -> QString { QString::from(filesystem::get_filename(&QString::from(url).to_string())) }
+    fn folder_from_url(&self, url: QUrl) -> QString { QString::from(filesystem::get_folder(&QString::from(url).to_string())) }
+    fn url_with_extension(&self, url: QUrl, ext: QString) -> QString { QString::from(filesystem::url_with_extension(&QString::from(url).to_string(), &ext.to_string())) }
+    fn filename_with_extension(&self, filename: QString, ext: QString) -> QString { QString::from(filesystem::with_extension(&filename.to_string(), &ext.to_string())) }
+    fn filename_with_suffix(&self, filename: QString, suffix: QString) -> QString { QString::from(filesystem::with_suffix(&filename.to_string(), &suffix.to_string())) }
+    fn open_file_externally(&self, url: QUrl) { util::open_file_externally(url); }
+    fn path_to_url(&self, path: QString) -> QUrl { QUrl::from(QString::from(filesystem::path_to_url(&path.to_string()))) }
+    fn url_from_folder_and_file(&self, folder: QUrl, filename: String, can_create: bool) -> QUrl { QUrl::from(QString::from(filesystem::url_from_folder_and_file(&QString::from(folder).to_string(), &filename, can_create))) }
+    fn url_to_path(&self, url: QUrl) -> QString { QString::from(filesystem::url_to_path(&QString::from(url).to_string())) }
+    fn display_url(&self, url: QUrl) -> QString { QString::from(filesystem::display_url(&QString::from(url).to_string())) }
+    fn display_folder_filename(&self, folder: QUrl, filename: QString) -> QString { QString::from(filesystem::display_folder_filename(&QString::from(folder).to_string(), &filename.to_string())) }
+    fn start_accessing_url(&self, url: QUrl) { filesystem::start_accessing_url(&QString::from(url).to_string()); }
+    fn stop_accessing_url(&self, url: QUrl) { filesystem::stop_accessing_url(&QString::from(url).to_string()); }
 }

@@ -21,7 +21,6 @@
         android:hardwareAccelerated="true"
         android:label="Gyroflow"
         android:icon="@mipmap/icon"
-        android:requestLegacyExternalStorage="true"
         android:allowNativeHeapPointerTagging="false"
         android:allowBackup="true"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">

@@ -1,18 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
-function getFolder(v) {
-    v = v.replace(/\\/g, "/");
-    let idx = v.lastIndexOf("/");
-    if (idx == -1) return "";
-    return v.substring(0, idx + 1);
-}
-function getFilename(v) {
-    v = v.replace(/\\/g, "/");
-    let idx = v.lastIndexOf("/");
-    if (idx == -1) return "";
-    return v.substring(idx + 1);
-}
 function timeToStr(v) {
     const d = Math.floor((v %= 31536000) / 86400),
           h = Math.floor((v %= 86400) / 3600),

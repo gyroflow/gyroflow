@@ -72,7 +72,7 @@ pub struct LensProfile {
     pub global_shutter: bool,
 
     // Skip these fields, make sure to update in `get_json_value`
-    pub filename: String,
+    pub path_to_file: String,
     pub optimal_fov: Option<f64>,
     pub is_copy: bool,
     pub rating: Option<f64>,
@@ -85,21 +85,21 @@ impl LensProfile {
         serde_json::from_str(json)
     }
 
-    pub fn load_from_data(&mut self, data: &str) -> Result<(), serde_json::Error> {
+    pub fn load_from_data(&mut self, data: &str) -> std::result::Result<(), crate::GyroflowCoreError> {
         *self = Self::from_json(&data)?;
 
         // Trust lens profiles loaded from file
         self.official = true;
 
         if self.calibrator_version.is_empty() || self.fisheye_params.camera_matrix.is_empty() || self.calib_dimension.w <= 0 || self.calib_dimension.h <= 0 {
-            return Err(serde_json::Error::io(std::io::ErrorKind::InvalidData.into()));
+            return Err(crate::GyroflowCoreError::InvalidData);
         }
 
         Ok(())
     }
 
-    pub fn load_from_file(&mut self, path: &str) -> Result<(), serde_json::Error> {
-        self.load_from_data(&std::fs::read_to_string(path).map_err(|e| serde_json::Error::io(e))?)
+    pub fn load_from_file(&mut self, url: &str) -> std::result::Result<(), crate::GyroflowCoreError> {
+        self.load_from_data(&crate::filesystem::read_to_string(url)?)
     }
 
     pub fn load_from_json_value(&mut self, v: &serde_json::Value) -> Option<()> {
@@ -140,6 +140,7 @@ impl LensProfile {
         let mut v = serde_json::to_value(&self)?;
         if let Some(obj) = v.as_object_mut() {
             obj.remove("filename");
+            obj.remove("path_to_file");
             obj.remove("optimal_fov");
             obj.remove("is_copy");
             obj.remove("rating");
@@ -204,10 +205,10 @@ impl LensProfile {
         else { "" }
     }
 
-    pub fn save_to_file(&mut self, path: &str) -> std::io::Result<String> {
+    pub fn save_to_file(&mut self, url: &str) -> std::result::Result<String, crate::GyroflowCoreError> {
         let json = self.get_json()?;
 
-        std::fs::write(path, &json)?;
+        crate::filesystem::write(url, json.as_bytes())?;
 
         Ok(json)
     }

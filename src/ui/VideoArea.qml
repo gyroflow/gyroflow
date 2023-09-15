@@ -51,47 +51,46 @@ Item {
             return;
         }
 
-        let paths = null;
+        let urls = null;
 
-        if (obj.toString().startsWith("file")) { // obj is url
-            paths = controller.get_paths_from_gyroflow_file(obj);
+        if (obj.toString() != '[object Object]') { // obj is url
+            urls = controller.get_urls_from_gyroflow_file(obj);
         } else if (obj.project_file) {
-            paths = controller.get_paths_from_gyroflow_file(controller.path_to_url(obj.project_file));
+            urls = controller.get_urls_from_gyroflow_file(obj.project_file);
         } else {
-            paths = [
+            urls = [
                 obj.videofile,
                 obj.gyro_source?.filepath || ""
             ];
         }
 
-        const isCorrectVideoLoaded = paths[0] && vidInfo.filename == Util.getFilename(paths[0]);
-        const isCorrectGyroLoaded  = paths[1] && window.motionData.filename == Util.getFilename(paths[1]);
-        console.log("Video path:", paths[0], "(" + (isCorrectVideoLoaded? "loaded" : "not loaded") + ")", "Gyro path:", paths[1], "(" + (isCorrectGyroLoaded? "loaded" : "not loaded") + ")");
+        const isCorrectVideoLoaded = urls[0] && vidInfo.filename == filesystem.filename_from_url(urls[0]);
+        const isCorrectGyroLoaded  = urls[1] && window.motionData.filename == filesystem.filename_from_url(urls[1]);
+        console.log("Video path:", urls[0], "(" + (isCorrectVideoLoaded? "loaded" : "not loaded") + ")", "Gyro path:", urls[1], "(" + (isCorrectGyroLoaded? "loaded" : "not loaded") + ")");
 
-        if (paths[0] && !isCorrectVideoLoaded) {
+        if (urls[0] && !isCorrectVideoLoaded) {
             root.pendingGyroflowData = obj;
-            console.log("Loading video file", paths[0]);
-            loadFile(controller.path_to_url(paths[0]), false);
+            console.log("Loading video file", urls[0]);
+            loadFile(urls[0], false);
             if (controller.image_sequence_fps > 0) {
                 vid.setFrameRate(controller.image_sequence_fps);
             }
             return;
         }
-        if (paths[1] && !isCorrectGyroLoaded && controller.file_exists(paths[1])) {
+        if (urls[1] && !isCorrectGyroLoaded && filesystem.exists(urls[1])) {
             root.pendingGyroflowData = obj;
-            console.log("Loading gyro file", paths[1]);
-            const url = controller.path_to_url(paths[1])
-            window.motionData.lastSelectedFile = url;
-            controller.load_telemetry(url, paths[0] == paths[1], window.videoArea.vid, -1);
+            console.log("Loading gyro file", urls[1]);
+            window.motionData.lastSelectedFile = urls[1];
+            controller.load_telemetry(urls[1], urls[0] == urls[1], window.videoArea.vid, -1);
             return;
         }
 
         controller.set_prevent_recompute(true);
-        if (obj.toString().startsWith("file")) {
+        if (obj.toString() != '[object Object]') {
             // obj is url
             controller.import_gyroflow_file(obj);
         } else if (obj.project_file) {
-            controller.import_gyroflow_file(controller.path_to_url(obj.project_file));
+            controller.import_gyroflow_file(obj.project_file);
         } else {
             controller.import_gyroflow_data(JSON.stringify(obj));
         }
@@ -149,7 +148,7 @@ Item {
             Qt.callLater(controller.recompute_gyro);
             Qt.callLater(controller.recompute_threaded);
         }
-        function onExternal_sdk_progress(percent: real, sdk_name: string, error_string: string, path: string) {
+        function onExternal_sdk_progress(percent: real, sdk_name: string, error_string: string, url: string) {
             if (externalSdkModal !== null && externalSdkModal.loader !== null) {
                 externalSdkModal.loader.visible = percent < 1;
                 externalSdkModal.loader.active = percent < 1;
@@ -160,10 +159,10 @@ Item {
                     externalSdkModal = null;
                     window.isDialogOpened = false;
                     if (!error_string) {
-                        if (path == "ffmpeg_gpl") {
+                        if (url == "ffmpeg_gpl") {
                             messageBox(Modal.Success, qsTr("Component was installed successfully.\nYou need to restart Gyroflow for changes to take effect.\nYour render queue and current file is saved automatically."), [ { text: qsTr("Ok") } ]);
                         } else {
-                            loadFile(path, false);
+                            loadFile(url, false);
                         }
                     } else {
                         if (Qt.platform.os == "osx") {
@@ -177,38 +176,19 @@ Item {
                 }
             }
         }
-        // ---------- Temporary REDline conversion ----------
-        function onConvert_r3d_progress(percent: real, error_string: string, path: string) {
+
+        function onMp4_merge_progress(percent: real, error_string: string, url: url) {
             if (externalSdkModal !== null && externalSdkModal.loader !== null) {
                 externalSdkModal.loader.visible = percent < 1;
                 externalSdkModal.loader.active = percent < 1;
                 externalSdkModal.loader.progress = percent;
-                externalSdkModal.loader.text = qsTr("Converting to %1 (%2)").arg("<b>" + path + "</b>");
+                externalSdkModal.loader.text = qsTr("Merging files to %1 (%2)").arg("<b>" + filesystem.display_url(url) + "</b>");
                 if (percent >= 1) {
                     externalSdkModal.close();
                     externalSdkModal = null;
                     window.isDialogOpened = false;
                     if (!error_string) {
-                        loadFile(controller.path_to_url(path), true);
-                    } else {
-                        messageBox(Modal.Error, error_string, [ { text: qsTr("Ok") } ]);
-                    }
-                }
-            }
-        }
-        // ---------- Temporary REDline conversion ----------
-        function onMp4_merge_progress(percent: real, error_string: string, path: string) {
-            if (externalSdkModal !== null && externalSdkModal.loader !== null) {
-                externalSdkModal.loader.visible = percent < 1;
-                externalSdkModal.loader.active = percent < 1;
-                externalSdkModal.loader.progress = percent;
-                externalSdkModal.loader.text = qsTr("Merging files to %1 (%2)").arg("<b>" + path + "</b>");
-                if (percent >= 1) {
-                    externalSdkModal.close();
-                    externalSdkModal = null;
-                    window.isDialogOpened = false;
-                    if (!error_string) {
-                        loadFile(controller.path_to_url(path), true);
+                        loadFile(url, true);
                     } else {
                         messageBox(Modal.Error, error_string, [ { text: qsTr("Ok") } ]);
                     }
@@ -295,20 +275,20 @@ Item {
     property Modal externalSdkModal: null;
 
     function loadFile(url: url, skip_detection: bool) {
-        if (Qt.platform.os == "android") {
-            url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
-        }
+        const filename = filesystem.filename_from_url(url);
+        const folder = filesystem.folder_from_url(url);
 
-        if (url.toString().endsWith(".gyroflow")) {
+        if (filename.endsWith(".gyroflow")) {
             return loadGyroflowData(url);
         }
-        if (url.toString().endsWith(".RDC")) {
+        if (filename.endsWith(".RDC")) {
+            // Assumes regular filesystem
             let parts = url.toString().split("/");
-            parts.push(parts[parts.length - 1].replace(".RDC", "_001.R3D"));
+            parts.push(filename.replace(".RDC", "_001.R3D"));
             url = parts.join("/");
         }
 
-        if (url.toString().toLowerCase().endsWith(".r3d") || url.toString().toLowerCase().endsWith(".braw")) {
+        if (filename.toLowerCase().endsWith(".r3d") || filename.toLowerCase().endsWith(".braw")) {
             // Preview resolution to 1080p
             if (isCalibrator && calibrator_window.lensCalib) {
                 if (calibrator_window.lensCalib.previewResolution == 0) {
@@ -323,11 +303,11 @@ Item {
 
         stabEnabledBtn.checked = false;
 
-        if (controller.check_external_sdk(url.toString())) {
+        if (controller.check_external_sdk(filename)) {
             const dlg = messageBox(Modal.Info, qsTr("This format requires an external SDK. Do you want to download it now?"), [
                 { text: qsTr("Yes"), accent: true, clicked: function() {
                     dlg.btnsRow.children[0].enabled = false;
-                    controller.install_external_sdk(url.toString());
+                    controller.install_external_sdk(url);
                     return false;
                 } },
                 { text: qsTr("Cancel"), clicked: function() {
@@ -339,40 +319,10 @@ Item {
             return;
         }
 
-        // ---------- Temporary REDline conversion ----------
-        /*if (url.toString().toLowerCase().endsWith(".r3d")) {
-            const redline = controller.find_redline();
-            if (redline) {
-                const do_convert = (btn, dlg, f) => {
-                    dlg.btnsRow.children[0].enabled = false;
-                    dlg.btnsRow.children[1].enabled = false;
-                    dlg.btnsRow.children[2].enabled = false;
-                    dlg.accentButton = btn;
-                    controller.convert_r3d(controller.url_to_path(url), f, true);
-                    return false;
-                };
-                const dlg = messageBox(Modal.Info, "This format can't be loaded directly at this time.\nDo you want to convert the file to ProRes?", [
-                    { text: "ProRes 422 Proxy", clicked: () => do_convert(0, dlg, 3), accent: true },
-                    { text: "ProRes 422 HQ",    clicked: () => do_convert(1, dlg, 0) },
-                    { text: "ProRes 4444",      clicked: () => do_convert(2, dlg, 4) },
-                    { text: qsTr("Cancel"),     clicked: () => { controller.cancel_current_operation(); externalSdkModal = null; } },
-                ], null, undefined, "convert-r3d");
-                dlg.accentButton = +window.settings.value("dontShowAgain-convert-r3d", 1) - 1;
-                externalSdkModal = dlg;
-                dlg.addLoader();
-            } else {
-                messageBox(Modal.Info, "This format can't be loaded directly at this time and REDline was not found in your system.\nOnce you install REDCINE-X Pro, Gyroflow will be able to convert the file using REDline.", [
-                    { text: qsTr("Close") },
-                ]);
-            }
-            return;
-        }*/
-        // ---------- Temporary REDline conversion ----------
-
         root.loadedFileUrl = url;
-        if (!skip_detection) {
-            let newUrl;
-            if (newUrl = detectImageSequence(url)) {
+        if (!skip_detection && Qt.platform.os != "ios" && Qt.platform.os != "android") {
+            let newFile;
+            if (newFile = detectImageSequence(folder, filename)) {
                 const dlg = messageBox(Modal.Info, qsTr("Image sequence has been detected.\nPlease provide frame rate: "), [
                     { text: qsTr("Ok"), accent: true, clicked: function() {
                         const fps = dlg.mainColumn.children[1].value;
@@ -387,15 +337,13 @@ Item {
                 return;
             }
             let sequenceList;
-            if (sequenceList = detectVideoSequence(url)) {
-                const list = "<b>" + sequenceList.map(x => x.split('/').pop()).join(", ") + "</b>";
+            if (sequenceList = detectVideoSequence(folder, filename)) {
+                const list = "<b>" + sequenceList.join(", ") + "</b>";
                 const dlg = messageBox(Modal.Info, qsTr("Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?").arg(list), [
                     { text: qsTr("Yes"), accent: true, clicked: function() {
                         dlg.btnsRow.children[0].enabled = false;
-                        let path = sequenceList[0];
-                        let output_file = path.substr(0, path.lastIndexOf('.')) + "_joined" + path.substr(path.lastIndexOf('.'));
-                        askForOutputLocation(output_file, false, function(out_path) {
-                            controller.mp4_merge(sequenceList, out_path);
+                        getOutputFile(folder, sequenceList[0], "_joined", "", true, function(outFolder, outFilename, outFullFileUrl) {
+                            controller.mp4_merge(urlsCopy.map(x => x.toString()), outFolder, outFilename);
                         });
                         return false;
                     } },
@@ -417,34 +365,30 @@ Item {
         vid.errorShown = false;
         render_queue.editing_job_id = 0;
         controller.load_video(url, vid);
-        const pathParts = url.toString().split(".");
-        pathParts.pop();
         if (!isCalibrator) {
             const suffix = window.advanced.defaultSuffix.text;
-            const defaultOutputFile = controller.url_to_path(pathParts.join(".") + suffix + ".mp4").replace(/%0[0-9]+d/, "");;
+            window.outputFile.setFilename(filesystem.filename_with_suffix(filename, suffix).replace(/%0[0-9]+d/, ""));
+
             const preservedPath = settings.value("preservedOutputPath");
-            if (window.exportSettings.preserveOutputSettings.checked && preservedPath) {
-                window.outputFile = preservedPath + Util.getFilename(defaultOutputFile);
-            } else {
-                window.outputFile = defaultOutputFile;
+            if (window.exportSettings.preserveOutputPath.checked && preservedPath) {
+                window.outputFile.setFolder(preservedPath);
+            } else if (Qt.platform.os != "android") {
+                window.outputFile.setFolder(folder);
             }
             window.exportSettings.updateCodecParams();
         }
-        if (!root.pendingGyroflowData) {
-            const gfUrl = pathParts.join(".") + ".gyroflow";
-            const gfFile = controller.url_to_path(gfUrl);
-            if (controller.file_exists(gfFile)) {
-                const gfFilename = gfFile.replace(/\\/g, "/").split("/").pop();
+        if (!root.pendingGyroflowData && Qt.platform.os != "ios" && Qt.platform.os != "android") {
+            const gfFilename = filesystem.filename_with_extension(filename, "gyroflow");
+            if (filesystem.exists_in_folder(folder, gfFilename)) {
                 messageBox(Modal.Question, qsTr("There's a %1 file associated with this video, do you want to load it?").arg("<b>" + gfFilename + "</b>"), [
                     { text: qsTr("Yes"), clicked: function() {
-                        Qt.callLater(() => loadFile(gfUrl, true));
+                        Qt.callLater(() => loadFile(filesystem.url_from_folder_and_file(folder, gfFilename, false), true));
                     } },
                     { text: qsTr("No"), accent: true },
                 ]);
             }
         }
 
-        const filename = controller.url_to_path(url).split("/").pop();
         dropText.loadingFile = filename;
         vidInfo.updateEntry("File name", filename);
         vidInfo.updateEntry("Detected camera", "---");
@@ -453,18 +397,10 @@ Item {
         timeline.editingSyncPoint = false;
     }
     function loadMultipleFiles(urls: list<url>, skip_detection: bool) {
-        if (Qt.platform.os == "ios") {
-            for (const url of urls) {
-                controller.start_apple_url_access(url.toString());
-                // TODO: stop access
-            }
-        }
-
         if (urls.length == 1) {
             root.loadFile(urls[0], skip_detection);
         } else if (urls.length > 1) {
             const urlsCopy = [...urls];
-            const paths = urls.map(x => controller.url_to_path(x));
             const dlg = messageBox(Modal.Question, qsTr("You have opened multiple files. What do you want to do?"), [
                 { text: qsTr("Add to render queue"), clicked: () => {
                     queue.item.dt.loadFiles(urlsCopy);
@@ -474,10 +410,10 @@ Item {
                     dlg.btnsRow.children[0].enabled = false;
                     dlg.btnsRow.children[1].enabled = false;
                     dlg.btnsRow.children[2].enabled = false;
-                    let path = paths[0];
-                    let output_file = path.substr(0, path.lastIndexOf('.')) + "_joined" + path.substr(path.lastIndexOf('.'));
-                    askForOutputLocation(output_file, false, function(out_path) {
-                        controller.mp4_merge(paths, out_path);
+                    const filename = filesystem.filename_from_url(urlsCopy[0]);
+                    const folder = filesystem.folder_from_url(urlsCopy[0]);
+                    getOutputFile(folder, filename, "_joined", "", true, function(outFolder, outFilename, outFullFileUrl) {
+                        controller.mp4_merge(urlsCopy.map(x => x.toString()), outFolder, outFilename);
                     });
                     return false;
                 } },
@@ -491,14 +427,15 @@ Item {
         }
     }
 
-    function askForOutputLocation(location: string, choice: bool, cb) {
+    function askForOutputLocation(folder: url, filename: string, choice: bool, cb) {
         const dlg = messageBox(Modal.Question, qsTr("Please enter the output path:"), [
             { text: qsTr("Ok"), accent: true, clicked: function() {
                 if (choice) {
-                    if (dlg.mainColumn.children[1].children[0].checked) { cb(""); }
-                    if (dlg.mainColumn.children[1].children[1].checked) { cb(dlg.mainColumn.children[1].children[3].text); }
+                    if (dlg.mainColumn.children[1].children[0].checked) { cb("", ""); }
+                    if (dlg.mainColumn.children[1].children[1].checked) { const opf = dlg.mainColumn.children[1].children[3]; cb(opf.folderUrl, opf.filename, opf.fullFileUrl); }
                 } else {
-                    cb(dlg.mainColumn.children[1].text);
+                    const opf = dlg.mainColumn.children[1];
+                    cb(opf.folderUrl, opf.filename, opf.fullFileUrl);
                 }
             } },
             { text: qsTr("Cancel") },
@@ -515,39 +452,52 @@ Item {
                 }`, dlg.mainColumn, "dlgRadios");
             col.children[0].text = qsTr("Same as the original file");
             col.children[1].text = qsTr("Custom path");
-            col.children[3].text = location;
+            col.children[3].setFolder(folder);
         } else {
-            Qt.createComponent("components/OutputPathField.qml").createObject(dlg.mainColumn, { text: location });
+            const opf = Qt.createComponent("components/OutputPathField.qml").createObject(dlg.mainColumn, { });
+            opf.setFolder(folder);
+            opf.setFilename(filename);
+        }
+    }
+    function getOutputFile(folder: url, filename: string, suffix: string, extension: string, ask: bool, cb) {
+        if (suffix) filename = filesystem.filename_with_suffix(filename, suffix);
+        if (extension) filename = filesystem.filename_with_extension(filename, extension);
+        if (ask) {
+            askForOutputLocation(folder, filename, false, cb);
+        } else {
+            return [folder, filename];
         }
     }
 
     function detectImageSequence(url: url) {
-        const urlStr = controller.url_to_path(url);
-        if (!urlStr.includes("%0")) {
+        const filename = filesystem.filename_from_url(url);
+        const folder = filesystem.folder_from_url(url);
+        if (!filename.includes("%0")) {
             controller.image_sequence_start = 0;
             controller.image_sequence_fps = 0;
         }
-        if (/\d+\.(png|jpg|exr|dng)$/i.test(urlStr)) {
-            let firstNum = urlStr.match(/(\d+)\.(png|jpg|exr|dng)$/i);
+        if (/\d+\.(png|jpg|exr|dng)$/i.test(filename)) {
+            let firstNum = filename.match(/(\d+)\.(png|jpg|exr|dng)$/i);
             if (firstNum[1]) {
                 const ext = firstNum[2];
                 firstNum = firstNum[1];
                 const firstNumNum = parseInt(firstNum, 10);
                 for (let i = firstNumNum + 1; i < firstNumNum + 5; ++i) { // At least 5 frames
                     const newNum = i.toString().padStart(firstNum.length, '0');
-                    const newPath = urlStr.replace(firstNum + "." + ext, newNum + "." + ext);
-                    if (!controller.file_exists(newPath)) {
+                    const newName = filename.replace(firstNum + "." + ext, newNum + "." + ext);
+                    if (!filesystem.exists_in_folder(folder, newName)) {
                         return false;
                     }
                 }
                 controller.image_sequence_start = firstNumNum;
-                return controller.path_to_url(urlStr.replace(`${firstNum}.${ext}`, `%0${firstNum.length}d.${ext}`));
+                return filesystem.url_from_folder_and_file(folder, filename.replace(`${firstNum}.${ext}`, `%0${firstNum.length}d.${ext}`), false);
             }
         }
         return false;
     }
     function detectVideoSequence(url: url) {
-        const urlStr = controller.url_to_path(url);
+        const filename = filesystem.filename_from_url(url);
+        const folder = filesystem.folder_from_url(url);
 
         // url pattern, new path function, additional condition
         const patterns = [
@@ -561,14 +511,14 @@ Item {
             }],
         ];
         for (const x of patterns) {
-            let match = urlStr.match(x[0]);
+            let match = filename.match(x[0]);
             if (match && match[1]) {
                 let list = [];
                 const firstNum = parseInt(match[2], 10);
                 for (let i = firstNum; i < firstNum + 99; ++i) { // Max 99 parts
-                    const newPath = urlStr.replace(match[1], x[1](match[1], i));
-                    if (controller.file_exists(newPath) && (x[2]? x[2](newPath, list) : true)) {
-                        list.push(newPath);
+                    const newName = filename.replace(match[1], x[1](match[1], i));
+                    if (filesystem.exists_in_folder(folder, newName)) {
+                        list.push(filesystem.url_from_folder_and_file(folder, newName, false));
                     } else {
                         break;
                     }
@@ -657,7 +607,7 @@ Item {
                     timeline.resetTrim();
                     timeline.resetZoom();
 
-                    controller.video_file_loaded(vid.url, vid);
+                    controller.video_file_loaded(vid);
                     window.motionData.filename = "";
 
                     if (root.pendingGyroflowData) {
@@ -768,7 +718,7 @@ Item {
             BasicText {
                 id: dropText;
                 property string loadingFile: "";
-                text: loadingFile? qsTr("Loading %1...").arg(loadingFile) : qsTr("Drop video file here");
+                text: loadingFile? qsTr("Loading %1...").arg(loadingFile) : (Qt.platform.os == "ios" || Qt.platform.os == "android"? qsTr("Click here to open a video file") : qsTr("Drop video file here"));
                 font.pixelSize: 30 * dpiScale;
                 anchors.centerIn: parent;
                 leftPadding: 0;

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
-use std::fs::File;
 use std::io::Result;
 
 #[no_mangle]
@@ -9,14 +8,16 @@ pub static NvOptimusEnablement: i32 = 1;
 #[no_mangle]
 pub static AmdPowerXpressRequestHighPerformance: i32 = 1;
 
-pub fn get_video_metadata(filepath: &str) -> Result<telemetry_parser::util::VideoMetadata> {
+pub fn get_video_metadata(url: &str) -> std::result::Result<telemetry_parser::util::VideoMetadata, crate::GyroflowCoreError> {
+    let filename = crate::filesystem::get_filename(url);
     let extensions = ["mp4", "mov", "braw", "insv", "360", "mxf"];
-    if !extensions.into_iter().any(|ext| filepath.to_ascii_lowercase().ends_with(ext)) {
-        return Err(std::io::ErrorKind::InvalidInput.into());
+    if !extensions.into_iter().any(|ext| filename.to_ascii_lowercase().ends_with(ext)) {
+        return Err(crate::GyroflowCoreError::UnsupportedFormat(filename));
     }
-    let mut stream = File::open(&filepath)?;
-    let filesize = stream.metadata()?.len() as usize;
-    telemetry_parser::util::get_video_metadata(&mut stream, filesize)
+    let base = crate::filesystem::get_engine_base();
+    let mut file = crate::filesystem::open_file(&base, &url, false)?;
+    let filesize = file.size;
+    Ok(telemetry_parser::util::get_video_metadata(file.get_file(), filesize)?)
 }
 
 pub fn compress_to_base91<T>(value: &T) -> Option<String>
@@ -68,11 +69,6 @@ where T: serde::de::DeserializeOwned {
     e.read_to_end(&mut decompressed)?;
     ciborium::from_reader(std::io::Cursor::new(decompressed)).map_err(|x| std::io::Error::new(std::io::ErrorKind::Other, format!("{x:?}")))
 }
-
-pub fn path_to_str(path: &std::path::Path) -> String {
-    path.to_string_lossy().replace("\\", "/")
-}
-
 
 use std::collections::BTreeMap;
 pub trait MapClosest<V> {

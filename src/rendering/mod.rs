@@ -31,7 +31,7 @@ use gyroflow_core::gpu::Buffers;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 enum GpuType {
-    Nvidia, Amd, Intel, AppleSilicon, Unknown
+    Nvidia, Amd, Intel, AppleSilicon, Android, Unknown
 }
 lazy_static::lazy_static! {
     static ref GPU_TYPE: RwLock<GpuType> = RwLock::new(GpuType::Unknown);
@@ -43,6 +43,7 @@ pub fn set_gpu_type_from_name(name: &str) {
     else if name.contains("amd") || name.contains("advanced micro devices") { *GPU_TYPE.write() = GpuType::Amd; }
     else if name.contains("intel") && !name.contains("intel(r) core(tm)") { *GPU_TYPE.write() = GpuType::Intel; }
     else if name.contains("apple m") { *GPU_TYPE.write() = GpuType::AppleSilicon; }
+    else if name.contains("adreno") { *GPU_TYPE.write() = GpuType::Android; }
     else {
         log::warn!("Unknown GPU {}", name);
     }
@@ -54,6 +55,10 @@ pub fn set_gpu_type_from_name(name: &str) {
     #[cfg(target_os = "windows")]
     if gpu_type == GpuType::Amd {
         ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA);
+    }
+    #[cfg(target_os = "android")]
+    {
+        ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_MEDIACODEC);
     }
     #[cfg(any(target_os = "macos", target_os = "ios"))]
     {
@@ -209,7 +214,8 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         decoder_options.set("ndk_codec", "1");
     }
     let gpu_decoding = *GPU_DECODING.read();
-    let mut proc = FfmpegProcessor::from_file(&input_file.path, gpu_decoding && gpu_decoder_index >= 0, gpu_decoder_index as usize, Some(decoder_options))?;
+    let fs_base = gyroflow_core::filesystem::get_engine_base();
+    let mut proc = FfmpegProcessor::from_file(&fs_base, &input_file.url, gpu_decoding && gpu_decoder_index >= 0, gpu_decoder_index as usize, Some(decoder_options))?;
 
     let render_options_dict = render_options.get_encoder_options_dict();
     let hwaccel_device = render_options_dict.get("hwaccel_device");
@@ -608,20 +614,29 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         Ok(())
     });
 
-    if let Some(parent_dir) = std::path::Path::new(&render_options.output_path).parent() {
-        let _ = std::fs::create_dir_all(parent_dir);
+    let filename = &render_options.output_filename;
+    let folder = &render_options.output_folder;
+    if cfg!(not(any(target_os = "android", target_os = "ios"))) && !gyroflow_core::filesystem::exists(&folder) {
+        let path = gyroflow_core::filesystem::url_to_path(&folder);
+        if !path.is_empty() {
+            let _ = std::fs::create_dir_all(path);
+        }
     }
 
-    proc.render(&render_options.output_path, (render_options.output_width as u32, render_options.output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
+    proc.render(&fs_base, &folder, &filename, (render_options.output_width as u32, render_options.output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
+
+    drop(proc);
+
+    let output_url = gyroflow_core::filesystem::url_from_folder_and_file(folder, filename, false);
 
     let re = regex::Regex::new(r#"%[0-9]+d"#).unwrap();
-    if re.is_match(&render_options.output_path) {
-        ::log::debug!("Removing {}", render_options.output_path);
-        let _ = std::fs::remove_file(&render_options.output_path);
+    if re.is_match(&filename) {
+        ::log::debug!("Removing {output_url}");
+        let _ = gyroflow_core::filesystem::remove_file(&output_url);
     }
     progress((1.0, render_frame_count, render_frame_count, true, false));
 
-    crate::util::update_file_times(&render_options.output_path, &input_file.path);
+    crate::util::update_file_times(&output_url, &input_file.url);
 
     Ok(())
 }
@@ -765,7 +780,7 @@ pub fn test() {
 
     let vid = "/Users/eddy/Downloads/colors-GX029349.MP4";
 
-    stab.init_from_video_data(vid, duration_ms, fps, frame_count, video_size).unwrap();
+    stab.init_from_video_data(duration_ms, fps, frame_count, video_size).unwrap();
     stab.load_gyro_data(vid, |_|(), Arc::new(AtomicBool::new(false)));
     {
         let mut gyro = stab.gyro.write();
@@ -797,7 +812,6 @@ pub fn test() {
         &RenderOptions {
             codec: "ProRes".into(),
             codec_options: "Standard".into(),
-            output_path: format!("{}_stab.mov", vid),
             output_width: video_size.0,
             output_height: video_size.1,
             bitrate: 100.0,

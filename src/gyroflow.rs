@@ -54,6 +54,7 @@ fn entry() {
     let _ = util::install_crash_handler();
     util::init_logging();
     util::update_rlimit();
+    util::set_android_context();
     log_panics::init();
 
     cpp!(unsafe [] {
@@ -136,9 +137,12 @@ fn entry() {
     let rq = RefCell::new(rendering::render_queue::RenderQueue::new(ctl.borrow().stabilizer.clone()));
     let rqpinned = unsafe { QObjectPinned::new(&rq) };
 
+    let fs = RefCell::new(controller::Filesystem::default());
+    let fspinned = unsafe { QObjectPinned::new(&fs) };
+
     let mut engine = QmlEngine::new();
     util::catch_qt_file_open(|url| {
-        engine.set_property("openFileOnStart".into(), QString::from(util::url_to_path(url)).into());
+        engine.set_property("openFileOnStart".into(), url.into());
     });
     let mut dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; });
     if cfg!(target_os = "android") { dpi *= 0.85; }
@@ -148,6 +152,7 @@ fn entry() {
     engine.set_object_property("main_controller".into(), ctlpinned);
     engine.set_object_property("ui_tools".into(), ui_tools_pinned);
     engine.set_object_property("render_queue".into(), rqpinned);
+    engine.set_object_property("filesystem".into(), fspinned);
     {
         let mut ui = ui_tools.borrow_mut();
         ui.engine_ptr = Some(&mut engine as *mut _);
@@ -192,6 +197,7 @@ fn entry() {
         #ifdef Q_OS_ANDROID
             QtAndroidPrivate::requestPermission("android.permission.READ_EXTERNAL_STORAGE").result();
             QtAndroidPrivate::requestPermission("android.permission.WRITE_EXTERNAL_STORAGE").result();
+            QtAndroidPrivate::requestPermission("android.permission.READ_MEDIA_VIDEO").result();
         #endif
     });
 
@@ -199,7 +205,7 @@ fn entry() {
 
     rendering::init().unwrap();
 
-    engine.set_property("openFileOnStart".into(), QString::from(open_file).into());
+    engine.set_property("openFileOnStart".into(), QUrl::from(QString::from(gyroflow_core::filesystem::path_to_url(&open_file))).into());
 
     engine.set_property("defaultInitializedDevice".into(), QString::default().into());
     if let Some((name, list_name)) = core::gpu::initialize_contexts() {

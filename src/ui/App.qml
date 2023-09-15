@@ -49,7 +49,7 @@ Rectangle {
     property alias videoArea: videoArea;
     property alias motionData: motionData.item;
     property alias lensProfile: lensProfile.item;
-    property alias outputFile: outputFile.text;
+    property alias outputFile: outputFile;
     property alias sync: sync.item;
     property alias stab: stab.item;
     property alias exportSettings: exportSettings.item;
@@ -74,12 +74,12 @@ Rectangle {
         onAccepted: videoArea.loadMultipleFiles(selectedFiles, false);
     }
 
-    property string pendingOpenFileOrg: openFileOnStart;
-    property string pendingOpenFile: pendingOpenFileOrg;
+    property url pendingOpenFileOrg: openFileOnStart;
+    property url pendingOpenFile: pendingOpenFileOrg;
     onPendingOpenFileOrgChanged: { pendingOpenFile = pendingOpenFileOrg; onItemLoaded(); }
     function onItemLoaded() {
-        if (window.vidInfo && window.stab && window.exportSettings && window.sync && window.motionData && pendingOpenFile) {
-            videoArea.loadFile(controller.path_to_url(pendingOpenFile));
+        if (window.vidInfo && window.stab && window.exportSettings && window.sync && window.motionData && pendingOpenFile.toString()) {
+            videoArea.loadFile(pendingOpenFile);
             pendingOpenFile = "";
         }
     }
@@ -162,9 +162,9 @@ Rectangle {
                         anchors.verticalCenter: parent.verticalCenter;
                         anchors.verticalCenterOffset: -2 * dpiScale;
                         width: exportbar.width - parent.children[0].width - exportbar.children[2].width - 75 * dpiScale;
-                        onTextChanged: {
-                            if (exportSettings.item.preserveOutputSettings.checked) {
-                                const outputFolder = Util.getFolder(text);
+                        onFolderUrlChanged: {
+                            if (exportSettings.item.preserveOutputPath.checked) {
+                                const outputFolder = folderUrl.toString();
                                 if (outputFolder) settings.setValue("preservedOutputPath", outputFolder);
                             }
                         }
@@ -195,11 +195,11 @@ Rectangle {
                             ["export",        isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : (render_queue.editing_job_id > 0? QT_TRANSLATE_NOOP("Popup", "Save") : QT_TRANSLATE_NOOP("Popup", "Add to render queue"))],
                             ["create_preset", QT_TRANSLATE_NOOP("Popup", "Create settings preset")],
                             ["apply_all",     QT_TRANSLATE_NOOP("Popup", "Apply selected settings to all items in the render queue")],
-                            ["export_proj:2", QT_TRANSLATE_NOOP("Popup", "Export project file (including processed gyro data)")],
-                            ["export_proj:1", QT_TRANSLATE_NOOP("Popup", "Export project file (including gyro data)")],
-                            ["export_proj:0", QT_TRANSLATE_NOOP("Popup", "Export project file")]
+                            ["export_proj:WithProcessedData", QT_TRANSLATE_NOOP("Popup", "Export project file (including processed gyro data)")],
+                            ["export_proj:WithGyroData",      QT_TRANSLATE_NOOP("Popup", "Export project file (including gyro data)")],
+                            ["export_proj:Simple",            QT_TRANSLATE_NOOP("Popup", "Export project file")]
                         ];
-                        if (controller.project_file_path) m.push(["save", QT_TRANSLATE_NOOP("Popup", "Save project file")]);
+                        if (controller.project_file_url) m.push(["save", QT_TRANSLATE_NOOP("Popup", "Save project file")]);
                         model   = m.map(x => x[1]);
                         actions = m.map(x => x[0]);
                     }
@@ -209,7 +209,7 @@ Rectangle {
 
                     Connections {
                         target: controller;
-                        function onProject_file_path_changed() { renderBtn.updateModel(); }
+                        function onProject_file_url_changed() { renderBtn.updateModel(); }
                     }
                     Connections {
                         target: render_queue;
@@ -246,10 +246,11 @@ Rectangle {
                             ]);
                             return;
                         }
-                        if ((controller.file_exists(outputFile.text.replace("_%05d", "_00001")) || render_queue.file_exists(outputFile.text)) && !allowFile) {
+                        const exists = filesystem.exists_in_folder(outputFile.folderUrl, outputFile.filename.replace("_%05d", "_00001"));
+                        if ((exists || render_queue.file_exists_in_folder(outputFile.folderUrl, outputFile.filename)) && !allowFile) {
                             messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
                                 { text: qsTr("Yes"), clicked: () => { allowFile = true; renderBtn.render(); } },
-                                { text: qsTr("Rename"), clicked: () => { outputFile.text = window.renameOutput(outputFile.text); render(); } },
+                                { text: qsTr("Rename"), clicked: () => { outputFile.setFilename(window.renameOutput(outputFile.filename, outputFile.folderUrl)); render(); } },
                                 { text: qsTr("No"), accent: true },
                             ]);
                             return;
@@ -266,11 +267,10 @@ Rectangle {
                         }
 
                         videoArea.vid.grabToImage(function(result) {
-                            if (Qt.platform.os == "ios" && (!outputFile.outputFolderDialog.urlString || !window.allowedOutputUrls.includes(outputFile.outputFolderDialog.urlString))) {
-                                messageBox(Modal.Info, qsTr("Due to iOS's file access restrictions, you need to select the destination folder manually.\nClick Ok and select the destination folder."), [
+                            if ((Qt.platform.os == "ios" || Qt.platform.os == "android") && (!outputFile.folderUrl.toString() || !window.allowedOutputUrls.includes(outputFile.folderUrl.toString()))) {
+                                messageBox(Modal.Info, qsTr("Due to file access restrictions, you need to select the destination folder manually.\nClick Ok and select the destination folder."), [
                                     { text: qsTr("Ok"), clicked: () => {
-                                        outputFile.outputFolderDialog.open();
-                                        outputFile.renderAfterSelect = true;
+                                        outputFile.selectFolder(outputFile.folderUrl, renderBtn.btn.clicked);
                                     }},
                                 ]);
                                 return;
@@ -308,11 +308,11 @@ Rectangle {
                                 const el = Qt.createComponent("SettingsSelector.qml").createObject(window, { isPreset: index == 1 });
                                 el.opened = true;
                                 el.onApply.connect((obj) => {
-                                    const allData = JSON.parse(controller.export_gyroflow_data(true, false, window.getAdditionalProjectData()));
+                                    const allData = JSON.parse(controller.export_gyroflow_data("Simple", window.getAdditionalProjectData()));
                                     const finalData = el.getFilteredObject(allData, obj);
 
-                                    if (finalData.hasOwnProperty("output") && finalData.output.output_path) {
-                                        finalData.output.output_path = Util.getFolder(finalData.output.output_path);
+                                    if (finalData.hasOwnProperty("output")) {
+                                        finalData.output.output_filename = ""; // Don't modify filenames, only target folder
                                     }
                                     if (obj.synchronization && obj.synchronization.do_autosync) {
                                         finalData.synchronization.do_autosync = true;
@@ -325,13 +325,12 @@ Rectangle {
                                     }
                                 });
                             break;
-                            case "export_proj:2": // Export project file (including processed gyro data)
-                            case "export_proj:1": // Export project file (including gyro data)
-                            case "export_proj:0": // Export project file
-                                videoArea.videoLoader.show(qsTr("Saving..."), false);
-                                controller.export_gyroflow_file(/*thin*/action == "export_proj:0", /*ext*/action == "export_proj:2", window.getAdditionalProjectData(), "", false);
+                            case "export_proj:WithProcessedData":
+                            case "export_proj:WithGyroData":
+                            case "export_proj:Simple":
+                                window.saveProject(action.substring(12));
                             break;
-                            case "save": window.saveProject(); break;
+                            case "save": window.saveProject(""); break;
                         }
                     }
                 }
@@ -458,42 +457,10 @@ Rectangle {
             const el = messageBox(Modal.Info, heading + changelog, [ { text: qsTr("Download"),accent: true, clicked: () => Qt.openUrlExternally("https://github.com/gyroflow/gyroflow/releases") },{ text: qsTr("Close") }], undefined, Text.MarkdownText);
             el.t.horizontalAlignment = Text.AlignLeft;
         }
-        function onRequest_location(path: string, thin: bool, extended: bool) {
-            gfFileDialog.thin = thin;
-            gfFileDialog.extended = extended;
-            gfFileDialog.currentFolder = controller.path_to_url(path);
+        function onRequest_location(url: string, type: string) {
+            gfFileDialog.projectType = type;
+            gfFileDialog.currentFolder = filesystem.folder_from_url(url);
             gfFileDialog.open();
-        }
-        function onGyroflow_exists(path: string, thin: bool, extended: bool) {
-            messageBox(Modal.Question, qsTr("`.gyroflow` file already exists, what do you want to do?"), [
-                { text: qsTr("Overwrite"), "accent": true, clicked: () => {
-                    videoArea.videoLoader.show(qsTr("Saving..."), false);
-                    controller.export_gyroflow_file(thin, extended, window.getAdditionalProjectData(), path, true);
-                } },
-                { text: qsTr("Rename"), clicked: () => {
-                    let output = path;
-                    let i = 1;
-                    while (controller.file_exists(output)) {
-                        output = path.replace(/(_\d+)?\.([a-z0-9]+)$/i, "_" + i++ + ".$2");
-                        if (i > 1000) break;
-                    }
-
-                    const suffix = advanced.item.defaultSuffix.text;
-                    const newVideoPath = outputFile.text.replace(new RegExp(suffix + "(_\\d+)?\\.([a-z0-9]+)$", "i"), suffix + "_" + (i - 1) + ".$2");
-                    if (!controller.file_exists(newVideoPath)) {
-                        outputFile.text = newVideoPath;
-                    }
-                    videoArea.videoLoader.show(qsTr("Saving..."), false);
-                    controller.export_gyroflow_file(thin, extended, window.getAdditionalProjectData(), output, true);
-                } },
-                { text: qsTr("Choose a different location"), clicked: () => {
-                    gfFileDialog.thin = thin;
-                    gfFileDialog.extended = extended;
-                    gfFileDialog.currentFolder = controller.path_to_url(path);
-                    gfFileDialog.open();
-                } },
-                { text: qsTr("Cancel") }
-            ], undefined, Text.MarkdownText);
         }
     }
     FileDialog {
@@ -502,15 +469,8 @@ Rectangle {
         title: qsTr("Select file destination");
         nameFilters: ["*.gyroflow"];
         type: "output-project";
-        property bool thin: true;
-        property bool extended: true;
-        onAccepted: {
-            if (Qt.platform.os == "ios") controller.start_apple_url_access(selectedFile.toString());
-            // TODO: stop access
-
-            videoArea.videoLoader.show(qsTr("Saving..."), false);
-            controller.export_gyroflow_file(thin, extended, window.getAdditionalProjectData(), controller.url_to_path(selectedFile), true);
-        }
+        property string projectType: "Simple";
+        onAccepted: saveProjectToUrl(selectedFile, projectType);
     }
     FileDialog {
         id: presetFileDialog;
@@ -519,13 +479,7 @@ Rectangle {
         nameFilters: ["*.gyroflow"];
         type: "output-preset";
         property var presetData: ({});
-        onAccepted: {
-            if (Qt.platform.os == "ios") controller.start_apple_url_access(selectedFile.toString());
-
-            controller.export_preset(selectedFile, presetData);
-
-            if (Qt.platform.os == "ios") controller.stop_apple_url_access(selectedFile.toString());
-        }
+        onAccepted: controller.export_preset(selectedFile, presetData);
     }
 
     Component.onCompleted: {
@@ -595,16 +549,17 @@ Rectangle {
         return text.trim();
     }
 
-    function renameOutput(orgOutput: string) {
+    function renameOutput(filename: name, folderUrl: url) {
         const suffix = advanced.item.defaultSuffix.text;
-        let output = orgOutput;
-        let i = 1;
-        while (controller.file_exists(output.replace("_%05d", "_00001")) || render_queue.file_exists(output)) {
-            output = orgOutput.replace(new RegExp(suffix + "(_\\d+)?((?:_%05d)?\\.[a-z0-9]+)$", "i"), suffix + "_" + i++ + "$2");
-            if (i > 1000) break;
+        let newName = filename;
+        for (let i = 1; i < 1000; ++i) {
+            newName = filename.replace(new RegExp(suffix + "(_\\d+)?((?:_%05d)?\\.[a-z0-9]+)$", "i"), suffix + "_" + i + "$2");
+
+            if (!filesystem.exists_in_folder(folderUrl, newName.replace("_%05d", "_00001")) && !render_queue.file_exists_in_folder(folderUrl, newName))
+                break;
         }
 
-        return output;
+        return newName;
     }
 
     function reportProgress(progress: real, type: string) {
@@ -626,9 +581,60 @@ Rectangle {
     }
     function getAdditionalProjectDataJson(): string { return JSON.stringify(getAdditionalProjectData()); }
 
-    function saveProject() {
+    function saveProjectToUrl(url: url, type: string) {
         videoArea.videoLoader.show(qsTr("Saving..."), false);
-        controller.export_gyroflow_file(false, false, window.getAdditionalProjectData(), controller.project_file_path, !!controller.project_file_path);
+        controller.export_gyroflow_file(url, type, window.getAdditionalProjectData());
+    }
+    function saveProject(type: string) {
+        if (!type) type = "WithGyroData";
+
+        if (controller.project_file_url) // Always overwrite
+            return saveProjectToUrl(controller.project_file_url, type);
+
+        const folder = filesystem.folder_from_url(controller.input_file_url);
+        const filename = filesystem.filename_with_extension(filesystem.filename_from_url(controller.input_file_url), "gyroflow");
+
+        if (!filesystem.exists_in_folder(folder, filename)) {
+            getSaveFileUrl(folder, filename, function(url) { saveProjectToUrl(url, type); });
+        } else {
+            messageBox(Modal.Question, qsTr("`.gyroflow` file already exists, what do you want to do?"), [
+                { text: qsTr("Overwrite"), "accent": true, clicked: () => {
+                    getSaveFileUrl(folder, filename, function(url) { saveProjectToUrl(url, type); });
+                } },
+                { text: qsTr("Rename"), clicked: () => {
+                    let newGfFilename = filename;
+                    let i = 1;
+                    while (filesystem.exists_in_folder(folder, newGfFilename)) {
+                        newGfFilename = filename.replace(/(_\d+)?\.([a-z0-9]+)$/i, "_" + i++ + ".$2");
+                        if (i > 1000) break;
+                    }
+
+                    const suffix = advanced.item.defaultSuffix.text;
+                    const newFilename = outputFile.filename.replace(new RegExp(suffix + "(_\\d+)?\\.([a-z0-9]+)$", "i"), suffix + "_" + (i - 1) + ".$2");
+                    if (!filesystem.exists_in_folder(folder, newFilename)) {
+                        outputFile.setFilename(newFilename);
+                    }
+                    getSaveFileUrl(folder, newGfFilename, function(url) { saveProjectToUrl(url, type); });
+                } },
+                { text: qsTr("Choose a different location"), clicked: () => {
+                    gfFileDialog.projectType = type;
+                    gfFileDialog.currentFolder = folder;
+                    gfFileDialog.open();
+                } },
+                { text: qsTr("Cancel") }
+            ], undefined, Text.MarkdownText);
+        }
+    }
+    function getSaveFileUrl(folder: url, filename: string, cb) {
+        if (Qt.platform.os == "ios" || Qt.platform.os == "android") {
+            const opf = Qt.createComponent("components/OutputPathField.qml").createObject(window, { visible: false });
+            opf.selectFolder(folder, function(folder_url) {
+                cb(filesystem.url_from_folder_and_file(folder_url, filename, true));
+                opf.destroy();
+            });
+            return;
+        }
+        cb(filesystem.url_from_folder_and_file(folder, filename, true));
     }
 
     /*Row {

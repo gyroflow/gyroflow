@@ -31,12 +31,6 @@ MenuItem {
         onAccepted: loadFile(selectedFile);
     }
     function loadFile(url: url) {
-        if (Qt.platform.os == "android") {
-            url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
-        } else if (Qt.platform.os == "ios") {
-            controller.start_apple_url_access(url.toString());
-            // TODO: stop access
-        }
         if (!window.videoArea.vid.loaded) {
             messageBox(Modal.Error, qsTr("Video file is not loaded."), [ { text: qsTr("Ok"), accent: true } ]);
             return;

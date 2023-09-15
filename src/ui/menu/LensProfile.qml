@@ -39,12 +39,6 @@ MenuItem {
         onAccepted: loadFile(fileDialog.selectedFile);
     }
     function loadFile(url: url) {
-        if (Qt.platform.os == "android") {
-            url = Qt.resolvedUrl("file://" + controller.resolve_android_url(url.toString()));
-        } else if (Qt.platform.os == "ios") {
-            controller.start_apple_url_access(url.toString());
-            // TODO: stop access
-        }
         controller.load_lens_profile_url(url);
     }
 
@@ -191,9 +185,9 @@ MenuItem {
         onSelected: (item) => {
             const fname = item[1];
             if (fname.endsWith(".gyroflow")) {
-                window.videoArea.loadFile(controller.path_to_url(fname), true);
+                window.videoArea.loadFile(filesystem.path_to_url(fname), true);
             } else {
-                controller.load_lens_profile(fname);
+                controller.load_lens_profile_url(filesystem.path_to_url(fname));
             }
         }
         popup.lv.delegate: LensProfileSearchDelegate {

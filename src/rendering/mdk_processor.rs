@@ -12,6 +12,7 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering::Relaxed;
 use std::sync::atomic::Ordering::SeqCst;
+use qmetaobject::QUrl;
 use qmetaobject::QString;
 use itertools::Itertools;
 
@@ -21,30 +22,38 @@ pub struct MDKProcessor {
     pub custom_decoder: String,
     org_width: Arc<AtomicI32>,
     org_height: Arc<AtomicI32>,
+    url: String,
     pub on_frame_callback: Option<Box<dyn FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter, &mut RateControl) -> Result<(), FFmpegError> + 'static>>,
+}
+impl Drop for MDKProcessor {
+    fn drop(&mut self) {
+        gyroflow_core::filesystem::mdk_unloaded_url(&self.url);
+    }
 }
 
 impl MDKProcessor {
-    pub fn from_file(path: &str, decoder_options: Option<Dictionary>) -> Self {
+    pub fn from_file(url: &str, decoder_options: Option<Dictionary>) -> Self {
         let mut mdk = qml_video_rs::video_item::MDKVideoItem::default();
         let mut custom_decoder = String::new(); // eg. BRAW:format=rgba64le
         let mut format = ffmpeg_next::format::Pixel::RGBA;
+        let filename = gyroflow_core::filesystem::get_filename(url);
 
         let mut options: String = decoder_options.map(|x| x.into_iter().map(|x| format!("{}={}", x.0, x.1)).join(":")).unwrap_or_default();
         if !options.is_empty() { options.insert(0, ':'); }
 
-        if path.to_ascii_lowercase().ends_with("braw") {
+        if filename.to_ascii_lowercase().ends_with("braw") {
             let gpu = if *super::GPU_DECODING.read() { "auto" } else { "no" }; // Disable GPU decoding for BRAW
             custom_decoder = format!("BRAW:gpu={}{}", gpu, options);
         }
-        if path.to_ascii_lowercase().ends_with("r3d") {
+        if filename.to_ascii_lowercase().ends_with("r3d") {
             format = ffmpeg_next::format::Pixel::BGRA;
             custom_decoder = format!("R3D:gpu=auto{}", options);
         }
         ::log::info!("Custom decoder: {custom_decoder}");
-        mdk.setUrl(crate::util::path_to_url(QString::from(path)), QString::from(custom_decoder.clone()));
+        mdk.setUrl(QUrl::from(QString::from(gyroflow_core::filesystem::url_for_mdk(url))), QString::from(custom_decoder.clone()));
         Self {
             mdk,
+            url: url.to_owned(),
             format,
             custom_decoder,
             org_width: Arc::new(AtomicI32::new(-1)),

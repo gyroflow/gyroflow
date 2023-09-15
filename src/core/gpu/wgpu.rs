@@ -182,6 +182,7 @@ impl WgpuWrapper {
                 },
                 _ => {
                     let max_buffer_bits = if cfg!(any(target_os = "android", target_os = "ios")) { 29 } else { 31 };
+                    let max_storage_buffer_bits = if cfg!(any(target_os = "android", target_os = "ios")) { 27 } else { 31 };
                     pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
                         label: None,
                         features: wgpu::Features::empty(),
@@ -189,7 +190,7 @@ impl WgpuWrapper {
                             max_storage_buffers_per_shader_stage: 6,
                             max_storage_textures_per_shader_stage: 4,
                             max_buffer_size: (1 << max_buffer_bits) - 1,
-                            max_storage_buffer_binding_size: (1 << max_buffer_bits) - 1,
+                            max_storage_buffer_binding_size: (1 << max_storage_buffer_bits) - 1,
                             ..wgpu::Limits::default()
                         },
                     }, None)).map_err(|e| WgpuError::RequestDevice(e))?
