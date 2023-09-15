@@ -127,7 +127,7 @@ impl GyroSource {
     pub fn init_from_params(&mut self, stabilization_params: &StabilizationParams) {
         self.duration_ms = stabilization_params.get_scaled_duration_ms();
     }
-    pub fn parse_telemetry_file<F: Fn(f64)>(url: &str, options: &FileLoadOptions, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::result::Result<FileMetadata, crate::GyroflowCoreError> {
+    pub fn parse_telemetry_file<F: Fn(f64)>(url: &str, options: &FileLoadOptions, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Result<FileMetadata, crate::GyroflowCoreError> {
         let base = filesystem::get_engine_base();
         let mut file = filesystem::open_file(&base, url, false)?;
         let filesize = file.size;
@@ -445,7 +445,7 @@ impl GyroSource {
                 }
                 if let Some(rot) = self.imu_rotation {
                     for (_ts, q) in &mut self.quaternions {
-                        *q = Quat64::from_scaled_axis(rot * q.scaled_axis());
+                        *q = rot * *q;
                     }
                 }
             },

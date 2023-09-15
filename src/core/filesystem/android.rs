@@ -11,7 +11,7 @@ pub fn get_jvm() -> jni::JavaVM {
 }
 
 impl<'a> super::FileWrapper<'a> {
-    pub fn open_android(jvm: &'a jni::JavaVM, url: &str, open_mode: &str) -> std::result::Result<Self, FilesystemError> {
+    pub fn open_android(jvm: &'a jni::JavaVM, url: &str, open_mode: &str) -> Result<Self> {
         let android_info = get_url_info(jvm, url)?;
         if let Some(size) = android_info.size {
             let handle = open_file(jvm, url, open_mode)?;
@@ -42,7 +42,7 @@ impl<'a> Drop for AndroidFileHandle<'a> {
     }
 }
 
-pub fn open_file<'a>(jvm: &'a jni::JavaVM, url: &str, open_mode: &str) -> std::result::Result<AndroidFileHandle<'a>, FilesystemError> {
+pub fn open_file<'a>(jvm: &'a jni::JavaVM, url: &str, open_mode: &str) -> Result<AndroidFileHandle<'a>> {
     dbg_call!(url open_mode);
     let mut env = jvm.attach_current_thread()?;
     let context = unsafe { JObject::from_raw(ndk_context::android_context().context().cast()) };
@@ -78,7 +78,7 @@ pub struct AndroidFileInfo {
     pub is_dir: bool
 }
 
-pub fn get_url_info(vm: &jni::JavaVM, url: &str) -> std::result::Result<AndroidFileInfo, FilesystemError> {
+pub fn get_url_info(vm: &jni::JavaVM, url: &str) -> Result<AndroidFileInfo> {
     dbg_call!(url);
     let mut ret = AndroidFileInfo::default();
     if !url.starts_with("content://") {
@@ -142,10 +142,9 @@ pub fn get_url_info(vm: &jni::JavaVM, url: &str) -> std::result::Result<AndroidF
     Ok(ret)
 }
 
-// fn java_string_array(arr: &[&str]) -> std::result::Result<Vec<AndroidFileInfo>, jni::errors::Error>
-
-pub fn list_files(vm: &jni::JavaVM, url: &str) -> std::result::Result<Vec<AndroidFileInfo>, FilesystemError> {
+pub fn list_files(url: &str) -> Result<Vec<AndroidFileInfo>> {
     dbg_call!(url);
+    let vm = get_jvm();
     let mut ret = Vec::new();
     if !url.starts_with("content://") || !is_dir_url(url) {
         return Err(FilesystemError::NotAFolder(url.into()));
@@ -219,9 +218,9 @@ pub fn list_files(vm: &jni::JavaVM, url: &str) -> std::result::Result<Vec<Androi
     Ok(ret)
 }
 
-pub fn create_file(vm: &jni::JavaVM, tree_url: &str, filename: &str, mime_type: &str) -> std::result::Result<String, FilesystemError> {
+pub fn create_file(tree_url: &str, filename: &str, mime_type: &str) -> Result<String> {
     dbg_call!(tree_url filename mime_type);
-    let mut ret = String::new();
+    let vm = get_jvm();
     if !tree_url.starts_with("content://") || !is_dir_url(tree_url) || filename.is_empty() {
         return Err(FilesystemError::InvalidPath(tree_url.into()));
     }
@@ -244,10 +243,11 @@ pub fn create_file(vm: &jni::JavaVM, tree_url: &str, filename: &str, mime_type: 
         JValue::Object(&filename),
     ])?.l()?;
     let new_uri = env.call_method(new_uri, "toString", "()Ljava/lang/String;", &[])?.l()?;
-    Ok(unsafe { env.get_string_unchecked(&new_uri.into())?.into() })
+    let ret = unsafe { env.get_string_unchecked(&new_uri.into())?.into() };
+    Ok(ret)
 }
 
-pub fn remove_file(vm: &jni::JavaVM, url: &str) -> std::result::Result<bool, FilesystemError> {
+pub fn remove_file(vm: &jni::JavaVM, url: &str) -> Result<bool> {
     dbg_call!(url);
     if !url.starts_with("content://") {
         return Err(FilesystemError::NotAFile(url.into()));

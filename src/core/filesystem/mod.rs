@@ -287,7 +287,7 @@ pub fn exists_in_folder(folder_url: &str, filename: &str) -> bool {
 
         #[cfg(target_os = "android")]
         if folder_url.starts_with("content://") && android::is_dir_url(folder_url) {
-            if let Ok(files) = android::list_files(&android::get_jvm(), folder_url) {
+            if let Ok(files) = android::list_files(folder_url) {
                 let cmp = Some(filename.to_owned());
                 for x in files {
                     if x.filename == cmp {
@@ -320,12 +320,12 @@ pub fn get_mime(filename: &str) -> &'static str {
     }
 }
 pub fn url_from_folder_and_file(folder_url: &str, filename: &str, can_create: bool) -> String {
-    fn inner(folder_url: &str, filename: &str, _can_create: bool) -> std::result::Result<String, FilesystemError> {
+    fn inner(folder_url: &str, filename: &str, _can_create: bool) -> Result<String> {
         if folder_url.is_empty() { return Ok(String::new()); }
 
         #[cfg(target_os = "android")]
-        if android::is_dir_url(folder_url) {
-            if let Ok(files) = android::list_files(&android::get_jvm(), folder_url) {
+        if folder_url.starts_with("content://") && android::is_dir_url(folder_url) {
+            if let Ok(files) = android::list_files(folder_url) {
                 let cmp = Some(filename.to_owned());
                 for x in files {
                     if x.filename == cmp {
@@ -335,7 +335,7 @@ pub fn url_from_folder_and_file(folder_url: &str, filename: &str, can_create: bo
                     }
                 }
                 if _can_create {
-                    match android::create_file(&android::get_jvm(), folder_url, filename, get_mime(filename)) {
+                    match android::create_file(folder_url, filename, get_mime(filename)) {
                         Ok(new_url) => return Ok(new_url),
                         Err(e) => { log::error!("android::create_file failed: {e:?}"); }
                     }
@@ -421,7 +421,7 @@ pub fn can_open_file(url: &str) -> bool {
     let base = get_engine_base();
     let x = open_file(&base, url, false).is_ok(); x
 }
-pub fn open_file<'a>(_base: &'a EngineBase, url: &str, writing: bool) -> std::result::Result<FileWrapper<'a>, FilesystemError> {
+pub fn open_file<'a>(_base: &'a EngineBase, url: &str, writing: bool) -> Result<FileWrapper<'a>> {
     dbg_call!(url writing);
     start_accessing_url(url);
 
@@ -439,7 +439,7 @@ pub fn open_file<'a>(_base: &'a EngineBase, url: &str, writing: bool) -> std::re
 }
 
 pub fn path_to_url(path: &str) -> String {
-    fn inner(mut path: &str) -> std::result::Result<String, FilesystemError> {
+    fn inner(mut path: &str) -> Result<String> {
         if path.is_empty() { return Ok(String::new()) }
         if path.starts_with("//?/") { path = &path[4..]; } // Windows extended path
         Ok(url::Url::from_file_path(&path).map_err(|_| FilesystemError::NotAFile(path.into()))?.to_string())
@@ -448,7 +448,7 @@ pub fn path_to_url(path: &str) -> String {
 }
 
 pub fn url_to_path(url: &str) -> String {
-    fn inner(url: &str) -> std::result::Result<String, FilesystemError> {
+    fn inner(url: &str) -> Result<String> {
         if url.is_empty() { return Ok(String::new()) }
         Ok(url_to_pathbuf(url)?.to_string_lossy().to_string())
     }
