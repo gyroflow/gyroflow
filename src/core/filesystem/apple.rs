@@ -136,7 +136,7 @@ pub fn create_bookmark(url: &str, project_url: Option<&str>) -> String {
         }
         if !project_url_ref.is_null() {
             CFRelease(project_url_ref as CFTypeRef);
-            stop_accessing_url(project_url);
+            stop_accessing_url(project_url.unwrap());
         }
     }
     stop_accessing_url(url);
