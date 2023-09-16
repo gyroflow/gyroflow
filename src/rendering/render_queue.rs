@@ -670,7 +670,7 @@ impl RenderQueue {
                 }
                 additional_data = serde_json::to_string(&obj).unwrap_or_default();
             }
-            if let Ok(data) = job.stab.export_gyroflow_data(core::GyroflowProjectType::Simple, &additional_data) {
+            if let Ok(data) = job.stab.export_gyroflow_data(core::GyroflowProjectType::Simple, &additional_data, None) {
                 return QString::from(data);
             }
         }

@@ -75,10 +75,9 @@ fn spawn_close_thread() {
 
 pub fn start_accessing_security_scoped_resource(url: &str) -> bool {
     let mut ok = false;
+    let url = url.as_bytes();
     unsafe {
-        let url_u8 = url.as_bytes();
-        let len = url_u8.len() as isize;
-        let url_ref = CFURLCreateWithBytes(std::ptr::null(), url_u8.as_ptr(), len, kCFStringEncodingUTF8, std::ptr::null());
+        let url_ref = CFURLCreateWithBytes(std::ptr::null(), url.as_ptr(), url.len() as isize, kCFStringEncodingUTF8, std::ptr::null());
         if !url_ref.is_null() {
             ok = CFURLStartAccessingSecurityScopedResource(url_ref) == 1;
             CFRelease(url_ref as CFTypeRef);
@@ -89,10 +88,9 @@ pub fn start_accessing_security_scoped_resource(url: &str) -> bool {
 
 pub fn stop_accessing_security_scoped_resource(url: &str) -> bool {
     let mut ok = false;
+    let url = url.as_bytes();
     unsafe {
-        let url_u8 = url.as_bytes();
-        let len = url_u8.len() as isize;
-        let url_ref = CFURLCreateWithBytes(std::ptr::null(), url_u8.as_ptr(), len, kCFStringEncodingUTF8, ptr::null());
+        let url_ref = CFURLCreateWithBytes(std::ptr::null(), url.as_ptr(), url.len() as isize, kCFStringEncodingUTF8, ptr::null());
         if !url_ref.is_null() {
             CFURLStopAccessingSecurityScopedResource(url_ref);
             ok = true;
@@ -102,18 +100,23 @@ pub fn stop_accessing_security_scoped_resource(url: &str) -> bool {
     ok
 }
 
-pub fn create_bookmark(url: &str) -> String {
+pub fn create_bookmark(url: &str, project_url: Option<&str>) -> String {
     let mut ret = String::new();
     if url.is_empty() { return ret; }
-    dbg_call!(url);
     start_accessing_url(url);
     unsafe {
+        let project_url_ref = if let Some(project_url) = project_url {
+            start_accessing_url(project_url);
+            let project_url = project_url.as_bytes();
+            CFURLCreateWithBytes(std::ptr::null(), project_url.as_ptr(), project_url.len() as isize, kCFStringEncodingUTF8, ptr::null())
+        } else {
+            ptr::null()
+        };
         let url = url.as_bytes();
-        let len = url.len() as isize;
-        let url_ref = CFURLCreateWithBytes(std::ptr::null(), url.as_ptr(), len, kCFStringEncodingUTF8, ptr::null());
+        let url_ref = CFURLCreateWithBytes(std::ptr::null(), url.as_ptr(), url.len() as isize, kCFStringEncodingUTF8, ptr::null());
         if !url_ref.is_null() {
             let mut error = ptr::null_mut();
-            let bookmark_data = CFURLCreateBookmarkData(kCFAllocatorDefault, url_ref, kCFURLBookmarkCreationWithSecurityScope, ptr::null(), ptr::null(), &mut error);
+            let bookmark_data = CFURLCreateBookmarkData(kCFAllocatorDefault, url_ref, kCFURLBookmarkCreationWithSecurityScope, ptr::null(), project_url_ref, &mut error);
             if error.is_null() {
                 if !bookmark_data.is_null() {
                     let len = CFDataGetLength(bookmark_data);
@@ -131,15 +134,19 @@ pub fn create_bookmark(url: &str) -> String {
             }
             CFRelease(url_ref as CFTypeRef);
         }
+        if !project_url_ref.is_null() {
+            CFRelease(project_url_ref as CFTypeRef);
+            stop_accessing_url(project_url);
+        }
     }
     stop_accessing_url(url);
+    dbg_call!(url -> ret);
     ret
 }
 
 pub fn resolve_bookmark(bookmark_data: &str) -> String {
     let mut ret = String::new();
     if bookmark_data.is_empty() { return ret; }
-    dbg_call!(bookmark_data);
     unsafe {
         let compressed = base91::slice_decode(bookmark_data.as_bytes());
         if !compressed.is_empty() {
@@ -168,6 +175,7 @@ pub fn resolve_bookmark(bookmark_data: &str) -> String {
             }
         }
     }
+    dbg_call!(bookmark_data -> ret);
     ret
 }
 

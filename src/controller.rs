@@ -290,7 +290,7 @@ impl Controller {
         let filename = filesystem::get_filename(&url_str);
 
         // Load current (clean) state to the UI
-        if let Ok(current_state) = self.stabilizer.export_gyroflow_data(core::GyroflowProjectType::Simple, "{}") {
+        if let Ok(current_state) = self.stabilizer.export_gyroflow_data(core::GyroflowProjectType::Simple, "{}", None) {
             if let Ok(current_state) = serde_json::from_str(current_state.as_str()) as serde_json::Result<serde_json::Value> {
                 self.gyroflow_file_loaded(util::serde_json_to_qt_object(&current_state));
             }
@@ -1199,7 +1199,7 @@ impl Controller {
 
     fn export_gyroflow_data(&self, typ: QString, additional_data: QJsonObject) -> QString {
         let typ = core::GyroflowProjectType::from_str(&typ.to_string()).unwrap();
-        QString::from(self.stabilizer.export_gyroflow_data(typ, &additional_data.to_json().to_string()).unwrap_or_default())
+        QString::from(self.stabilizer.export_gyroflow_data(typ, &additional_data.to_json().to_string(), None).unwrap_or_default())
     }
 
     fn get_urls_from_gyroflow_file(&mut self, url: QUrl) -> QStringList {
