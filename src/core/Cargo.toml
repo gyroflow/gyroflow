@@ -10,7 +10,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "5b5f8e9" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "b884852" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", rev = "bf7b41d", features = ["field_access"] }
 
@@ -19,7 +19,7 @@ stabilize_spirv = { path = "./gpu/stabilize_spirv" }
 #rs-sync = { path = "../../../rs-sync" }
 rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "b5bca7f" }
 
-mimalloc = { version = "0.1.38", default-features = false }
+mimalloc = { version = "0.1.39", default-features = false }
 nalgebra = { version = "0.32", features = ["serde-serialize"] }
 rayon = "1.7"
 biquad = "0.4.2"
