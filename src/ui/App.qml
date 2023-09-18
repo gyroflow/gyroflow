@@ -269,7 +269,7 @@ Rectangle {
                             if ((Qt.platform.os == "ios" || Qt.platform.os == "android") && (!outputFile.folderUrl.toString() || !window.allowedOutputUrls.includes(outputFile.folderUrl.toString()))) {
                                 messageBox(Modal.Info, qsTr("Due to file access restrictions, you need to select the destination folder manually.\nClick Ok and select the destination folder."), [
                                     { text: qsTr("Ok"), clicked: () => {
-                                        outputFile.selectFolder(outputFile.folderUrl, renderBtn.btn.clicked);
+                                        outputFile.selectFolder(outputFile.folderUrl, function(_) { renderBtn.btn.clicked(); });
                                     }},
                                 ]);
                                 return;
