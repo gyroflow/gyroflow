@@ -839,7 +839,7 @@ impl RenderQueue {
                     }
                     let gf_folder = render_options.output_folder.to_owned();
                     let gf_file = core::filesystem::filename_with_extension(&render_options.output_filename.replace(&default_suffix, ""), "gyroflow");
-                    let gf_url = core::filesystem::url_from_folder_and_file(&gf_folder, &gf_file, true);
+                    let gf_url = core::filesystem::get_file_url(&gf_folder, &gf_file, true);
                     let result = match export_project {
                         1 => stab.export_gyroflow_file(&gf_url, core::GyroflowProjectType::Simple, &additional_data),
                         2 => stab.export_gyroflow_file(&gf_url, core::GyroflowProjectType::WithGyroData, &additional_data),
@@ -859,7 +859,7 @@ impl RenderQueue {
 
                 // Assumes regular filesystem
                 if filename.to_ascii_lowercase().ends_with(".r3d") {
-                    let mov_url = core::filesystem::url_from_folder_and_file(&core::filesystem::get_folder(&input_file.url), &core::filesystem::filename_with_extension(&core::filesystem::get_filename(&input_file.url), "mov"), false);
+                    let mov_url = core::filesystem::get_file_url(&core::filesystem::get_folder(&input_file.url), &core::filesystem::filename_with_extension(&core::filesystem::get_filename(&input_file.url), "mov"), false);
                     if core::filesystem::exists(&mov_url) {
                         input_file.url = mov_url.clone();
                     } else {

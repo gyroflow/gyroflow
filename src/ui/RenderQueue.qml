@@ -143,7 +143,7 @@ Item {
                         const filename = render_queue.get_job_output_filename(job_id);
                         let options = [];
                         if (Qt.platform.os != "ios") {
-                            options.push({ text: qsTr("Open rendered file"), clicked: () => filesystem.open_file_externally(filesystem.url_from_folder_and_file(folder, filename, false)) });
+                            options.push({ text: qsTr("Open rendered file"), clicked: () => filesystem.open_file_externally(filesystem.get_file_url(folder, filename, false)) });
                         }
                         if (Qt.platform.os != "android" && Qt.platform.os != "ios") {
                             options.push({ text: qsTr("Open file location"), clicked: () => filesystem.open_file_externally(folder) });
@@ -541,7 +541,7 @@ Item {
                             icon.width: 25 * dpiScale;
                             icon.height: 25 * dpiScale;
                             tooltip: qsTr("Open rendered file");
-                            onClicked: filesystem.open_file_externally(filesystem.url_from_folder_and_file(output_folder, output_filename, false));
+                            onClicked: filesystem.open_file_externally(filesystem.get_file_url(output_folder, output_filename, false));
                         }
                         IconButton {
                             visible: dlg.isFinished && Qt.platform.os != "android" && Qt.platform.os != "ios";

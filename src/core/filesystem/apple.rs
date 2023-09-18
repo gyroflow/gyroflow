@@ -77,7 +77,7 @@ pub fn start_accessing_security_scoped_resource(url: &str) -> bool {
     let mut ok = false;
     let url = url.as_bytes();
     unsafe {
-        let url_ref = CFURLCreateWithBytes(std::ptr::null(), url.as_ptr(), url.len() as isize, kCFStringEncodingUTF8, std::ptr::null());
+        let url_ref = CFURLCreateWithBytes(ptr::null(), url.as_ptr(), url.len() as isize, kCFStringEncodingUTF8, ptr::null());
         if !url_ref.is_null() {
             ok = CFURLStartAccessingSecurityScopedResource(url_ref) == 1;
             CFRelease(url_ref as CFTypeRef);
@@ -90,7 +90,7 @@ pub fn stop_accessing_security_scoped_resource(url: &str) -> bool {
     let mut ok = false;
     let url = url.as_bytes();
     unsafe {
-        let url_ref = CFURLCreateWithBytes(std::ptr::null(), url.as_ptr(), url.len() as isize, kCFStringEncodingUTF8, ptr::null());
+        let url_ref = CFURLCreateWithBytes(ptr::null(), url.as_ptr(), url.len() as isize, kCFStringEncodingUTF8, ptr::null());
         if !url_ref.is_null() {
             CFURLStopAccessingSecurityScopedResource(url_ref);
             ok = true;
@@ -108,12 +108,12 @@ pub fn create_bookmark(url: &str, project_url: Option<&str>) -> String {
         let project_url_ref = if let Some(project_url) = project_url {
             start_accessing_url(project_url);
             let project_url = project_url.as_bytes();
-            CFURLCreateWithBytes(std::ptr::null(), project_url.as_ptr(), project_url.len() as isize, kCFStringEncodingUTF8, ptr::null())
+            CFURLCreateWithBytes(ptr::null(), project_url.as_ptr(), project_url.len() as isize, kCFStringEncodingUTF8, ptr::null())
         } else {
             ptr::null()
         };
         let url = url.as_bytes();
-        let url_ref = CFURLCreateWithBytes(std::ptr::null(), url.as_ptr(), url.len() as isize, kCFStringEncodingUTF8, ptr::null());
+        let url_ref = CFURLCreateWithBytes(ptr::null(), url.as_ptr(), url.len() as isize, kCFStringEncodingUTF8, ptr::null());
         if !url_ref.is_null() {
             let mut error = ptr::null_mut();
             let bookmark_data = CFURLCreateBookmarkData(kCFAllocatorDefault, url_ref, kCFURLBookmarkCreationWithSecurityScope, ptr::null(), project_url_ref, &mut error);
@@ -147,12 +147,12 @@ pub fn create_bookmark(url: &str, project_url: Option<&str>) -> String {
 pub fn resolve_bookmark(bookmark_data: &str) -> String {
     let mut ret = String::new();
     if bookmark_data.is_empty() { return ret; }
-    unsafe {
-        let compressed = base91::slice_decode(bookmark_data.as_bytes());
-        if !compressed.is_empty() {
-            let mut e = flate2::read::ZlibDecoder::new(&compressed[..]);
-            let mut decompressed = Vec::new();
-            e.read_to_end(&mut decompressed).unwrap();
+    let compressed = base91::slice_decode(bookmark_data.as_bytes());
+    if !compressed.is_empty() {
+        let mut e = flate2::read::ZlibDecoder::new(&compressed[..]);
+        let mut decompressed = Vec::new();
+        e.read_to_end(&mut decompressed).unwrap();
+        unsafe {
             let data_ref = CFDataCreate(kCFAllocatorDefault, decompressed.as_ptr(), decompressed.len() as isize);
             if !data_ref.is_null() {
                 let mut error = ptr::null_mut();

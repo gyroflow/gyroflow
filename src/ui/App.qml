@@ -225,12 +225,6 @@ Rectangle {
                             ]);
                             return;
                         }
-                        if (fname.endsWith('.r3d') && controller.find_redline()) {
-                            messageBox(Modal.Info, "Gyroflow will use REDline to convert .R3D to ProRes before stabilizing in order to export from Gyroflow directly.\nIf you want to work on RAW data instead, export project file (Ctrl+S) and use one of [video editor plugins] (%1).".replace(/\[(.*?)\]/, '<a href="https://gyroflow.xyz/download#plugins"><font color="' + styleTextColor + '">$1</font></a>').arg("DaVinci Resolve, Final Cut Pro"), [
-                                { text: qsTr("Ok"), accent: true }
-                            ], undefined, Text.StyledText, "r3d-conversion" );
-                        }
-
                         if (!controller.lens_loaded && !allowLens) {
                             messageBox(Modal.Warning, qsTr("Lens profile is not loaded, your result will be incorrect. Are you sure you want to render this file?"), [
                                 { text: qsTr("Yes"), clicked: () => { allowLens = true; renderBtn.render(); }},
@@ -254,6 +248,11 @@ Rectangle {
                                 { text: qsTr("No"), accent: true },
                             ]);
                             return;
+                        }
+                        if (fname.endsWith('.r3d') && controller.find_redline()) {
+                            messageBox(Modal.Info, "Gyroflow will use REDline to convert .R3D to ProRes before stabilizing in order to export from Gyroflow directly.\nIf you want to work on RAW data instead, export project file (Ctrl+S) and use one of [video editor plugins] (%1).".replace(/\[(.*?)\]/, '<a href="https://gyroflow.xyz/download#plugins"><font color="' + styleTextColor + '">$1</font></a>').arg("DaVinci Resolve, Final Cut Pro"), [
+                                { text: qsTr("Ok"), accent: true }
+                            ], undefined, Text.StyledText, "r3d-conversion" );
                         }
 
                         const encoder = render_queue.get_default_encoder(window.exportSettings.outCodec, window.exportSettings.outGpu);
@@ -629,12 +628,12 @@ Rectangle {
         if (Qt.platform.os == "ios" || Qt.platform.os == "android") {
             const opf = Qt.createComponent("components/OutputPathField.qml").createObject(window, { visible: false });
             opf.selectFolder(folder, function(folder_url) {
-                cb(filesystem.url_from_folder_and_file(folder_url, filename, true));
+                cb(filesystem.get_file_url(folder_url, filename, true));
                 opf.destroy();
             });
             return;
         }
-        cb(filesystem.url_from_folder_and_file(folder, filename, true));
+        cb(filesystem.get_file_url(folder, filename, true));
     }
 
     /*Row {

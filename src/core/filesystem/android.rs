@@ -271,6 +271,6 @@ impl DocumentsContract {
             JValue::Object(&mime_type),
             JValue::Object(&filename),
         ])?.l()?;
-        Ok(Uri::to_string(env, &new_uri)?)
+        Uri::to_string(env, &new_uri)
     }
 }

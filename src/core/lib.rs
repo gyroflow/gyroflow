@@ -1046,7 +1046,7 @@ impl StabilizationManager {
                 }
             }
             if filesystem::exists_in_folder(&folder, &filename_replaced) {
-                return filesystem::url_from_folder_and_file(&folder, &filename, false);
+                return filesystem::get_file_url(&folder, &filename, false);
             }
         }
         org_video_url.to_string()

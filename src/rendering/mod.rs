@@ -627,7 +627,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
 
     drop(proc);
 
-    let output_url = gyroflow_core::filesystem::url_from_folder_and_file(folder, filename, false);
+    let output_url = gyroflow_core::filesystem::get_file_url(folder, filename, false);
 
     let re = regex::Regex::new(r#"%[0-9]+d"#).unwrap();
     if re.is_match(&filename) {

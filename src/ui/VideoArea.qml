@@ -275,8 +275,8 @@ Item {
     property Modal externalSdkModal: null;
 
     function loadFile(url: url, skip_detection: bool) {
-        const filename = filesystem.get_filename(url);
-        const folder = filesystem.get_folder(url);
+        let filename = filesystem.get_filename(url);
+        let folder = filesystem.get_folder(url);
 
         if (filename.endsWith(".gyroflow")) {
             return loadGyroflowData(url);
@@ -286,6 +286,8 @@ Item {
             let parts = url.toString().split("/");
             parts.push(filename.replace(".RDC", "_001.R3D"));
             url = parts.join("/");
+            filename = filesystem.get_filename(url);
+            folder = filesystem.get_folder(url);
         }
 
         if (filename.toLowerCase().endsWith(".r3d") || filename.toLowerCase().endsWith(".braw")) {
@@ -343,7 +345,7 @@ Item {
                     { text: qsTr("Yes"), accent: true, clicked: function() {
                         dlg.btnsRow.children[0].enabled = false;
                         getOutputFile(folder, sequenceList[0], "_joined", "", true, function(outFolder, outFilename, outFullFileUrl) {
-                            controller.mp4_merge(sequenceList.map(x => filesystem.url_from_folder_and_file(folder, x, false).toString()), outFolder, outFilename);
+                            controller.mp4_merge(sequenceList.map(x => filesystem.get_file_url(folder, x, false).toString()), outFolder, outFilename);
                         });
                         return false;
                     } },
@@ -382,7 +384,7 @@ Item {
             if (filesystem.exists_in_folder(folder, gfFilename)) {
                 messageBox(Modal.Question, qsTr("There's a %1 file associated with this video, do you want to load it?").arg("<b>" + gfFilename + "</b>"), [
                     { text: qsTr("Yes"), clicked: function() {
-                        Qt.callLater(() => loadFile(filesystem.url_from_folder_and_file(folder, gfFilename, false), true));
+                        Qt.callLater(() => loadFile(filesystem.get_file_url(folder, gfFilename, false), true));
                     } },
                     { text: qsTr("No"), accent: true },
                 ]);
@@ -488,7 +490,7 @@ Item {
                     }
                 }
                 controller.image_sequence_start = firstNumNum;
-                return filesystem.url_from_folder_and_file(folder, filename.replace(`${firstNum}.${ext}`, `%0${firstNum.length}d.${ext}`), false);
+                return filesystem.get_file_url(folder, filename.replace(`${firstNum}.${ext}`, `%0${firstNum.length}d.${ext}`), false);
             }
         }
         return false;

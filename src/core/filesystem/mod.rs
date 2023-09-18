@@ -280,7 +280,7 @@ pub fn exists_in_folder(folder_url: &str, filename: &str) -> bool {
                 return false;
             }
         }
-        exists(&url_from_folder_and_file(folder_url, filename, false))
+        exists(&get_file_url(folder_url, filename, false))
     }
 
     let ret = inner(folder_url, filename);
@@ -302,7 +302,7 @@ pub fn get_mime(filename: &str) -> &'static str {
         _          => "application/octet-stream"
     }
 }
-pub fn url_from_folder_and_file(folder_url: &str, filename: &str, can_create: bool) -> String {
+pub fn get_file_url(folder_url: &str, filename: &str, can_create: bool) -> String {
     fn inner(folder_url: &str, filename: &str, _can_create: bool) -> Result<String> {
         if folder_url.is_empty() { return Ok(String::new()); }
 
@@ -447,7 +447,7 @@ pub fn display_url(url: &str) -> String {
 }
 pub fn display_folder_filename(folder: &str, filename: &str) -> String {
     fn inner(folder: &str, filename: &str) -> String {
-        let url = url_from_folder_and_file(folder, filename, false);
+        let url = get_file_url(folder, filename, false);
         if url.is_empty() && cfg!(target_os = "android") { return filename.to_owned(); }
         display_url(&url)
     }

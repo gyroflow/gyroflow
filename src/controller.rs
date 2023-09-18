@@ -1918,7 +1918,7 @@ impl Controller {
     fn mp4_merge(&self, file_list: QStringList, output_folder: QUrl, output_filename: QString) {
         let output_folder = QString::from(output_folder).to_string();
         let output_filename = output_filename.to_string();
-        let output_url = filesystem::url_from_folder_and_file(&output_folder, &output_filename, true);
+        let output_url = filesystem::get_file_url(&output_folder, &output_filename, true);
 
         let mut file_list: Vec<String> = file_list.into_iter().map(QString::to_string).collect();
         file_list.sort_by(|a, b| human_sort::compare(a, b));
@@ -1986,7 +1986,7 @@ impl Controller {
                 let mut is_data = false;
                 if let Ok(mut file) = filesystem::open_file(&base, &x, false) {
                     if output_gcsv.is_none() {
-                        let out_url = filesystem::url_from_folder_and_file(&output_folder, &filesystem::filename_with_extension(output_filename, "gcsv"), true);
+                        let out_url = filesystem::get_file_url(&output_folder, &filesystem::filename_with_extension(output_filename, "gcsv"), true);
                         output_gcsv = Some(filesystem::open_file(&base, &out_url, true)?);
                     }
                     for (i, line) in std::io::BufReader::new(file.get_file()).lines().enumerate() {
@@ -2088,7 +2088,7 @@ pub struct Filesystem {
     filename_with_suffix:     qt_method!(fn(&self, filename: QString, suffix: QString) -> QString),
     open_file_externally:     qt_method!(fn(&self, url: QUrl)),
     path_to_url:              qt_method!(fn(&self, path: QString) -> QUrl),
-    url_from_folder_and_file: qt_method!(fn(&self, folder: QUrl, filename: String, can_create: bool) -> QUrl),
+    get_file_url:             qt_method!(fn(&self, folder: QUrl, filename: String, can_create: bool) -> QUrl),
     url_to_path:              qt_method!(fn(&self, url: QUrl) -> QString),
     display_url:              qt_method!(fn(&self, url: QUrl) -> QString),
     display_folder_filename:  qt_method!(fn(&self, folder: QUrl, filename: QString) -> QString),
@@ -2104,7 +2104,7 @@ impl Filesystem {
     fn filename_with_suffix(&self, filename: QString, suffix: QString) -> QString { QString::from(filesystem::filename_with_suffix(&filename.to_string(), &suffix.to_string())) }
     fn open_file_externally(&self, url: QUrl) { util::open_file_externally(url); }
     fn path_to_url(&self, path: QString) -> QUrl { QUrl::from(QString::from(filesystem::path_to_url(&path.to_string()))) }
-    fn url_from_folder_and_file(&self, folder: QUrl, filename: String, can_create: bool) -> QUrl { QUrl::from(QString::from(filesystem::url_from_folder_and_file(&QString::from(folder).to_string(), &filename, can_create))) }
+    fn get_file_url(&self, folder: QUrl, filename: String, can_create: bool) -> QUrl { QUrl::from(QString::from(filesystem::get_file_url(&QString::from(folder).to_string(), &filename, can_create))) }
     fn url_to_path(&self, url: QUrl) -> QString { QString::from(filesystem::url_to_path(&QString::from(url).to_string())) }
     fn display_url(&self, url: QUrl) -> QString { QString::from(filesystem::display_url(&QString::from(url).to_string())) }
     fn display_folder_filename(&self, folder: QUrl, filename: QString) -> QString { QString::from(filesystem::display_folder_filename(&QString::from(folder).to_string(), &filename.to_string())) }
