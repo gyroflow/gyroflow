@@ -227,14 +227,19 @@ impl StabilizationManager {
     }
 
     pub fn load_lens_profile(&self, url: &str) -> Result<(), crate::GyroflowCoreError> {
+        let url = if (url.contains('/') || url.contains('\\')) && !url.contains("://") && !url.starts_with('{') {
+            crate::filesystem::path_to_url(url)
+        } else {
+            url.to_owned()
+        };
         let db = self.lens_profile_db.read();
-        let (result, from_db) = if let Some(lens) = db.get_by_id(url) {
+        let (result, from_db) = if let Some(lens) = db.get_by_id(&url) {
             *self.lens.write() = lens.clone();
             (Ok(()), true)
         } else if url.starts_with('{') {
-            (self.lens.write().load_from_data(url), false)
+            (self.lens.write().load_from_data(&url), false)
         } else {
-            (self.lens.write().load_from_file(url), false)
+            (self.lens.write().load_from_file(&url), false)
         };
         let (width, height, aspect, id, fps) = {
             let params = self.params.read();

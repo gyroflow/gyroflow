@@ -53,8 +53,7 @@ pub struct Controller {
     load_video: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
     video_file_loaded: qt_method!(fn(&self, player: QJSValue)),
     load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, sample_index: i32)),
-    load_lens_profile: qt_method!(fn(&mut self, path: QString)),
-    load_lens_profile_url: qt_method!(fn(&mut self, url: QUrl)),
+    load_lens_profile: qt_method!(fn(&mut self, url_or_id: QString)),
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool)),
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
 
@@ -808,12 +807,9 @@ impl Controller {
             }
         }
     }
-    fn load_lens_profile_url(&mut self, url: QUrl) {
-        self.load_lens_profile(QString::from(url))
-    }
-    fn load_lens_profile(&mut self, url: QString) {
+    fn load_lens_profile(&mut self, url_or_id: QString) {
         let (json, filepath, checksum) = {
-            if let Err(e) = self.stabilizer.load_lens_profile(&url.to_string()) {
+            if let Err(e) = self.stabilizer.load_lens_profile(&url_or_id.to_string()) {
                 self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
             }
             let lens = self.stabilizer.lens.read();

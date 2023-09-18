@@ -303,7 +303,7 @@ pub fn run(open_file: &mut String) -> bool {
                     // Apply lens profile
                     log::info!("Loading lens profile {}", file);
                     let stab = queue.get_stab_for_job(*job_id).unwrap();
-                    stab.load_lens_profile(&path_to_url(&file)).expect("Loading lens profile");
+                    stab.load_lens_profile(&file).expect("Loading lens profile");
                     stab.recompute_blocking();
                 }
 

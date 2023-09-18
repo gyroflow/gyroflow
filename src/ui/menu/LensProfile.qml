@@ -39,7 +39,7 @@ MenuItem {
         onAccepted: loadFile(fileDialog.selectedFile);
     }
     function loadFile(url: url) {
-        controller.load_lens_profile_url(url);
+        controller.load_lens_profile(url.toString());
     }
 
     Component.onCompleted: {
@@ -183,11 +183,11 @@ MenuItem {
         topPadding: 5 * dpiScale;
         profilesMenu: root;
         onSelected: (item) => {
-            const fname = item[1];
-            if (fname.endsWith(".gyroflow")) {
-                window.videoArea.loadFile(filesystem.path_to_url(fname), true);
+            const lensPathOrId = item[1];
+            if (lensPathOrId.endsWith(".gyroflow")) {
+                window.videoArea.loadFile(lensPathOrId, true);
             } else {
-                controller.load_lens_profile_url(filesystem.path_to_url(fname));
+                controller.load_lens_profile(lensPathOrId);
             }
         }
         popup.lv.delegate: LensProfileSearchDelegate {
@@ -357,14 +357,14 @@ MenuItem {
         sequences: ["F8"];
         onActivated: {
             root.fileno = Math.abs(++fileno % files.length);
-            controller.load_lens_profile_url("file:///d:/lens_review/" + root.files[root.fileno]);
+            controller.load_lens_profile("file:///d:/lens_review/" + root.files[root.fileno]);
         }
     }
     Shortcut {
         sequences: ["F7"];
         onActivated: {
             root.fileno = Math.abs(--fileno % files.length);
-            controller.load_lens_profile_url("file:///d:/lens_review/" + root.files[root.fileno]);
+            controller.load_lens_profile("file:///d:/lens_review/" + root.files[root.fileno]);
         }
     }
     Shortcut {
