@@ -23,10 +23,11 @@ pub fn get_engine_base() -> EngineBase { android::get_jvm() }
 pub fn get_engine_base() -> EngineBase { () }
 
 // Filesystem assumptions:
-// 1. Url can be arbitrary and doesn't have to contain any names
-// 2. We can have access to a folder via url, but we can't assume it's a path
-// 3. We can create new files in a folder and get an url to that file, and that url can be arbitrary
-// 4. We can have access to file data only, without any info about it's location, folder, parent or other files in the same folder
+// 1. All file access should be based on URLs. On Desktop it will be file:///, but on mobile it can be arbitrary
+// 2. URL can be arbitrary and doesn't have to contain any names
+// 3. We can have access to a folder via URL, but we can't assume it's a path
+// 4. We can create new files in a folder and get an URL to that file, and that URL can be arbitrary
+// 5. We can have access to file data only, without any info about it's location, folder, parent or other files in the same folder
 
 // Testing:
 // - Dragging video file
@@ -56,35 +57,17 @@ pub fn get_engine_base() -> EngineBase { () }
 
 #[derive(thiserror::Error, Debug)]
 pub enum FilesystemError {
-    #[error("Invalid url {0:?}")]
-    InvalidUrl((String, url::ParseError)),
-
-    #[error("Not a file url {0}")]
-    NotAFile(String),
-
-    #[error("Not a folder url {0}")]
-    NotAFolder(String),
-
-    #[error("Path doesn't have a parent {0}")]
-    NoParent(String),
-
-    #[error("Invalid path {0}")]
-    InvalidPath(String),
-
-    #[error("Invalid file descriptor {0}")]
-    InvalidFD(i32),
-
-    #[error("Unknown error")]
-    Unknown,
-
-    #[error("IO error")]
-    IOError(#[from] std::io::Error),
-
-    #[error("String error")]
-    Utf8Error(#[from] std::str::Utf8Error),
-
+    #[error("Invalid url {0:?}")]              InvalidUrl((String, url::ParseError)),
+    #[error("Not a file url {0}")]             NotAFile(String),
+    #[error("Not a folder url {0}")]           NotAFolder(String),
+    #[error("Path doesn't have a parent {0}")] NoParent(String),
+    #[error("Invalid path {0}")]               InvalidPath(String),
+    #[error("Invalid file descriptor {0}")]    InvalidFD(i32),
+    #[error("Unknown error")]                  Unknown,
+    #[error("IO error: {0:?}")]                IOError(#[from] std::io::Error),
+    #[error("String error: {0:?}")]            Utf8Error(#[from] std::str::Utf8Error),
     #[cfg(target_os = "android")]
-    #[error("Java exception")]
+    #[error("Java exception: {0:?}")]
     JavaException(#[from] jni::errors::Error)
 }
 #[macro_export]

@@ -513,9 +513,14 @@ impl<'a> FfmpegProcessor<'a> {
 
     pub fn get_video_info(url: &str) -> Result<VideoInfo, ffmpeg_next::Error> {
         let base = filesystem::get_engine_base();
-        let file = FfmpegPathWrapper::new(&base, url, false).map_err(|_| ffmpeg_next::Error::ProtocolNotFound)?;
+        let mut file = FfmpegPathWrapper::new(&base, url, false).map_err(|_| ffmpeg_next::Error::ProtocolNotFound)?;
+        let mut dict = Dictionary::new();
+        if file.path.starts_with("fd:") {
+            dict.set("fd", &file.path[3..]);
+            file.path = "fd:".into();
+        }
 
-        let context = format::input(&file.path)?;
+        let context = format::input_with_dictionary(&file.path, dict)?;
         if let Some(stream) = context.streams().best(media::Type::Video) {
             let codec = codec::context::Context::from_parameters(stream.parameters())?;
             if let Ok(video) = codec.decoder().video() {

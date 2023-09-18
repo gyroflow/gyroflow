@@ -321,8 +321,8 @@ Item {
 
         root.loadedFileUrl = url;
         if (!skip_detection && Qt.platform.os != "ios" && Qt.platform.os != "android") {
-            let newFile;
-            if (newFile = detectImageSequence(folder, filename)) {
+            let newUrl;
+            if (newUrl = detectImageSequence(folder, filename)) {
                 const dlg = messageBox(Modal.Info, qsTr("Image sequence has been detected.\nPlease provide frame rate: "), [
                     { text: qsTr("Ok"), accent: true, clicked: function() {
                         const fps = dlg.mainColumn.children[1].value;
@@ -343,7 +343,7 @@ Item {
                     { text: qsTr("Yes"), accent: true, clicked: function() {
                         dlg.btnsRow.children[0].enabled = false;
                         getOutputFile(folder, sequenceList[0], "_joined", "", true, function(outFolder, outFilename, outFullFileUrl) {
-                            controller.mp4_merge(urlsCopy.map(x => x.toString()), outFolder, outFilename);
+                            controller.mp4_merge(sequenceList.map(x => filesystem.url_from_folder_and_file(folder, x, false).toString()), outFolder, outFilename);
                         });
                         return false;
                     } },
@@ -469,9 +469,7 @@ Item {
         }
     }
 
-    function detectImageSequence(url: url) {
-        const filename = filesystem.filename_from_url(url);
-        const folder = filesystem.folder_from_url(url);
+    function detectImageSequence(folder: url, filename: string) {
         if (!filename.includes("%0")) {
             controller.image_sequence_start = 0;
             controller.image_sequence_fps = 0;
@@ -495,10 +493,7 @@ Item {
         }
         return false;
     }
-    function detectVideoSequence(url: url) {
-        const filename = filesystem.filename_from_url(url);
-        const folder = filesystem.folder_from_url(url);
-
+    function detectVideoSequence(folder: url, filename: string) {
         // url pattern, new path function, additional condition
         const patterns = [
             // GoPro
@@ -518,7 +513,7 @@ Item {
                 for (let i = firstNum; i < firstNum + 99; ++i) { // Max 99 parts
                     const newName = filename.replace(match[1], x[1](match[1], i));
                     if (filesystem.exists_in_folder(folder, newName)) {
-                        list.push(filesystem.url_from_folder_and_file(folder, newName, false));
+                        list.push(newName);
                     } else {
                         break;
                     }
