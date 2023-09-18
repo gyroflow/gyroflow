@@ -1061,9 +1061,13 @@ impl StabilizationManager {
         let mut obj: serde_json::Value = serde_json::from_slice(&data)?;
         if let serde_json::Value::Object(ref mut obj) = obj {
             let mut output_size = None;
-            #[allow(unused_mut)]
             let mut org_video_url = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
-
+            if !org_video_url.is_empty() && !org_video_url.contains("://") {
+                org_video_url = filesystem::path_to_url(&org_video_url);
+                if let Some(videofile) = obj.get_mut("videofile") {
+                    *videofile = serde_json::Value::String(org_video_url.clone());
+                }
+            }
             #[cfg(any(target_os = "macos", target_os = "ios"))]
             if let Some(v) = obj.get("videofile_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
                 let resolved = filesystem::apple::resolve_bookmark(v);
@@ -1096,8 +1100,13 @@ impl StabilizationManager {
                 self.keyframes.write().timestamp_scale = params.fps_scale;
             }
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
-                #[allow(unused_mut)]
                 let mut org_gyro_url = obj.get("filepath").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
+                if !org_gyro_url.is_empty() && !org_gyro_url.contains("://") {
+                    org_gyro_url = filesystem::path_to_url(&org_gyro_url);
+                    if let Some(filepath) = obj.get_mut("filepath") {
+                        *filepath = serde_json::Value::String(org_gyro_url.clone());
+                    }
+                }
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 if let Some(v) = obj.get("filepath_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
                     let resolved = filesystem::apple::resolve_bookmark(v);
@@ -1113,7 +1122,7 @@ impl StabilizationManager {
                 let is_main_video = org_gyro_url == org_video_url;
 
                 // Load IMU data only if it's from another file or the gyro file is not accessible anymore
-                if (!org_gyro_url.is_empty() && org_gyro_url != org_video_url) || !filesystem::exists(&gyro_url) || !filesystem::can_open_file(&gyro_url) {
+                if (!org_gyro_url.is_empty() && org_gyro_url != org_video_url) || !filesystem::can_open_file(&gyro_url) {
                     let mut raw_imu = Vec::new();
                     let mut quaternions = TimeQuat::default();
                     let mut image_orientations = None;

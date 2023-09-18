@@ -1207,8 +1207,10 @@ impl Controller {
         let mut ret = vec![QString::default(); 2];
         if let Ok(data) = filesystem::read(&url) {
             if let Ok(serde_json::Value::Object(obj)) = serde_json::from_slice(&data) {
-                #[allow(unused_mut)]
                 let mut org_video_url = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or("").to_string();
+                if !org_video_url.is_empty() && !org_video_url.contains("://") {
+                    org_video_url = filesystem::path_to_url(&org_video_url);
+                }
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 if let Some(v) = obj.get("videofile_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
                     let resolved = filesystem::apple::resolve_bookmark(v);
@@ -1227,8 +1229,10 @@ impl Controller {
                 }
 
                 if let Some(serde_json::Value::Object(gyro)) = obj.get("gyro_source") {
-                    #[allow(unused_mut)]
                     let mut gyro_url = gyro.get("filepath").and_then(|x| x.as_str()).unwrap_or("").to_string();
+                    if !gyro_url.is_empty() && !gyro_url.contains("://") {
+                        gyro_url = filesystem::path_to_url(&gyro_url);
+                    }
                     #[cfg(any(target_os = "macos", target_os = "ios"))]
                     if let Some(v) = obj.get("filepath_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
                         let resolved = filesystem::apple::resolve_bookmark(v);

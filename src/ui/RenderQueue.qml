@@ -471,7 +471,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter;
                     spacing: 3 * dpiScale;
                     BasicText {
-                        text: output_filename;
+                        text: input_filename;
                         font.bold: true;
                         font.pixelSize: 14 * dpiScale;
                     }

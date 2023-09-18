@@ -395,12 +395,20 @@ pub fn with_suffix(filename: &str, suffix: &str) -> String {
 
 pub fn remove_file(url: &str) -> Result<()> {
     dbg_call!(url);
-    let path = url_to_path(url);
-    Ok(std::fs::remove_file(path)?)
+    #[cfg(target_os = "android")]
+    {
+        return android::remove_file(url).map(|_| ());
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        let path = url_to_path(url);
+        Ok(std::fs::remove_file(path)?)
+    }
 }
 
 pub fn can_open_file(url: &str) -> bool {
     dbg_call!(url);
+    if !exists(url) { return false; }
     let base = get_engine_base();
     let x = open_file(&base, url, false).is_ok(); x
 }

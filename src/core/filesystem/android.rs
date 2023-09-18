@@ -247,11 +247,12 @@ pub fn create_file(tree_url: &str, filename: &str, mime_type: &str) -> Result<St
     Ok(ret)
 }
 
-pub fn remove_file(vm: &jni::JavaVM, url: &str) -> Result<bool> {
+pub fn remove_file(url: &str) -> Result<bool> {
     dbg_call!(url);
     if !url.starts_with("content://") {
         return Err(FilesystemError::NotAFile(url.into()));
     }
+    let vm = get_jvm();
     let mut env = vm.attach_current_thread()?;
 
     let context = unsafe { JObject::from_raw(ndk_context::android_context().context().cast()) };

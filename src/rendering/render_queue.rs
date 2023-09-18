@@ -15,6 +15,7 @@ use regex::Regex;
 pub struct RenderQueueItem {
     pub job_id: u32,
     pub input_file: QString,
+    pub input_filename: QString,
     pub output_filename: QString,
     pub output_folder: QString,
     pub display_output_path: QString,
@@ -139,9 +140,14 @@ impl RenderOptions {
 
             // Backwards compatibility
             if let Some(v) = obj.get("output_path").and_then(|x| x.as_str()) {
-                let new_folder = core::filesystem::path_to_url(&v);
-                if !new_folder.is_empty() {
-                    self.output_folder = new_folder;
+                let url = core::filesystem::path_to_url(&v);
+                let folder = core::filesystem::get_folder(&url);
+                if !folder.is_empty() {
+                    self.output_folder = folder;
+                }
+                let filename = core::filesystem::get_filename(&url);
+                if !filename.is_empty() {
+                    self.output_filename = filename;
                 }
             }
             if let Some(v) = obj.get("output_folder").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
@@ -334,7 +340,8 @@ impl RenderQueue {
 
         if let Ok(obj) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
             if let Some(out) = obj.get("output") {
-                if let Ok(render_options) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
+                if let Ok(mut render_options) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
+                    render_options.update_from_json(out);
                     let project_url = self.stabilizer.input_file.read().project_file_url.clone();
                     if let Some(project_url) = project_url {
                         // Save project file on disk
@@ -386,6 +393,7 @@ impl RenderQueue {
             q.push(RenderQueueItem {
                 job_id,
                 input_file: QString::from(video_url.as_str()),
+                input_filename: QString::from(core::filesystem::get_filename(&video_url)),
                 output_folder: QString::from(render_options.output_folder.as_str()),
                 output_filename: QString::from(render_options.output_filename.as_str()),
                 display_output_path: QString::from(core::filesystem::display_folder_filename(render_options.output_folder.as_str(), render_options.output_filename.as_str())),
@@ -975,6 +983,7 @@ impl RenderQueue {
             }
             if let Some(out) = additional_data.get("output") {
                 if let Ok(mut render_options) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
+                    render_options.update_from_json(out);
                     let (smoothing_name, smoothing_params) = {
                         let smoothing_lock = stabilizer.smoothing.read();
                         let smoothing = smoothing_lock.current();
@@ -1085,7 +1094,8 @@ impl RenderQueue {
                             match result {
                                 Ok(obj) => {
                                     if let Some(out) = obj.get("output") {
-                                        if let Ok(render_options2) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
+                                        if let Ok(mut render_options2) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
+                                            render_options2.update_from_json(out);
                                             loaded(render_options2);
                                         }
                                     }
