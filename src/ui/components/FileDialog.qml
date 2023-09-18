@@ -10,7 +10,7 @@ import "../Util.js" as Util;
 FileDialog {
     id: root;
     property string type: "";
-    onAccepted: window.settings.setValue("folder-" + type, filesystem.folder_from_url(selectedFile).toString());
+    onAccepted: window.settings.setValue("folder-" + type, filesystem.get_folder(selectedFile).toString());
 
     function open2() {
         const savedFolder = window.settings.value("folder-" + type, "");

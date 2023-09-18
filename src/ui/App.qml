@@ -459,7 +459,7 @@ Rectangle {
         }
         function onRequest_location(url: string, type: string) {
             gfFileDialog.projectType = type;
-            gfFileDialog.currentFolder = filesystem.folder_from_url(url);
+            gfFileDialog.currentFolder = filesystem.get_folder(url);
             gfFileDialog.open();
         }
     }
@@ -591,8 +591,8 @@ Rectangle {
         if (controller.project_file_url) // Always overwrite
             return saveProjectToUrl(controller.project_file_url, type);
 
-        const folder = filesystem.folder_from_url(controller.input_file_url);
-        const filename = filesystem.filename_with_extension(filesystem.filename_from_url(controller.input_file_url), "gyroflow");
+        const folder = filesystem.get_folder(controller.input_file_url);
+        const filename = filesystem.filename_with_extension(filesystem.get_filename(controller.input_file_url), "gyroflow");
 
         if (!filesystem.exists_in_folder(folder, filename)) {
             getSaveFileUrl(folder, filename, function(url) { saveProjectToUrl(url, type); });

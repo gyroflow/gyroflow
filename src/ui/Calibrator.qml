@@ -163,8 +163,8 @@ Window {
                     batch.runIn(2000, function() {
                         console.log('rms', rms);
                         if (rms < 5) {
-                            const folder = filesystem.folder_from_url(batch.currentFile);
-                            let filename = filesystem.filename_with_extension(filesystem.filename_from_url(batch.currentFile), "json");
+                            const folder = filesystem.get_folder(batch.currentFile);
+                            let filename = filesystem.filename_with_extension(filesystem.get_filename(batch.currentFile), "json");
 
                             if (lensCalib.calibrationInfo.camera_brand && lensCalib.calibrationInfo.camera_model && lensCalib.calibrationInfo.lens_model) {
                                 filename = controller.export_lens_profile_filename(lensCalib.calibrationInfo);

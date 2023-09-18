@@ -365,16 +365,7 @@ pub fn read_to_string(url: &str) -> Result<String> {
     let data = read(url)?;
     Ok(std::str::from_utf8(&data)?.to_owned())
 }
-
-pub fn url_with_extension(url: &str, ext: &str) -> String {
-    let mut filename = get_filename(url);
-    if let Some(pos) = filename.rfind('.') {
-        filename = format!("{}.{ext}", &filename[0..pos]);
-    }
-    dbg_call!(url ext -> filename);
-    filename
-}
-pub fn with_extension(filename: &str, ext: &str) -> String {
+pub fn filename_with_extension(filename: &str, ext: &str) -> String {
     let new_filename = if let Some(pos) = filename.rfind('.') {
         format!("{}.{ext}", &filename[0..pos])
     } else {
@@ -383,7 +374,7 @@ pub fn with_extension(filename: &str, ext: &str) -> String {
     dbg_call!(filename ext -> new_filename);
     new_filename
 }
-pub fn with_suffix(filename: &str, suffix: &str) -> String {
+pub fn filename_with_suffix(filename: &str, suffix: &str) -> String {
     let new_filename = if let Some(pos) = filename.rfind('.') {
         format!("{}{suffix}{}", &filename[0..pos], &filename[pos..])
     } else {
@@ -432,8 +423,13 @@ pub fn open_file<'a>(_base: &'a EngineBase, url: &str, writing: bool) -> Result<
 pub fn path_to_url(path: &str) -> String {
     fn inner(mut path: &str) -> Result<String> {
         if path.is_empty() { return Ok(String::new()) }
+        if path.contains("://") { return Ok(path.to_owned()); } // Already an url
         if path.starts_with("//?/") { path = &path[4..]; } // Windows extended path
-        Ok(url::Url::from_file_path(&path).map_err(|_| FilesystemError::NotAFile(path.into()))?.to_string())
+        let mut ret = url::Url::from_file_path(&path).map_err(|_| FilesystemError::NotAFile(path.into()))?.to_string();
+        if (path.ends_with('/') || path.ends_with('\\')) && !ret.ends_with('/') {
+            ret.push('/');
+        }
+        Ok(ret)
     }
     result!(inner(path), path)
 }

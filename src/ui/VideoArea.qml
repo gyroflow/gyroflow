@@ -64,8 +64,8 @@ Item {
             ];
         }
 
-        const isCorrectVideoLoaded = urls[0] && vidInfo.filename == filesystem.filename_from_url(urls[0]);
-        const isCorrectGyroLoaded  = urls[1] && window.motionData.filename == filesystem.filename_from_url(urls[1]);
+        const isCorrectVideoLoaded = urls[0] && vidInfo.filename == filesystem.get_filename(urls[0]);
+        const isCorrectGyroLoaded  = urls[1] && window.motionData.filename == filesystem.get_filename(urls[1]);
         console.log("Video path:", urls[0], "(" + (isCorrectVideoLoaded? "loaded" : "not loaded") + ")", "Gyro path:", urls[1], "(" + (isCorrectGyroLoaded? "loaded" : "not loaded") + ")");
 
         if (urls[0] && !isCorrectVideoLoaded) {
@@ -275,8 +275,8 @@ Item {
     property Modal externalSdkModal: null;
 
     function loadFile(url: url, skip_detection: bool) {
-        const filename = filesystem.filename_from_url(url);
-        const folder = filesystem.folder_from_url(url);
+        const filename = filesystem.get_filename(url);
+        const folder = filesystem.get_folder(url);
 
         if (filename.endsWith(".gyroflow")) {
             return loadGyroflowData(url);
@@ -410,8 +410,8 @@ Item {
                     dlg.btnsRow.children[0].enabled = false;
                     dlg.btnsRow.children[1].enabled = false;
                     dlg.btnsRow.children[2].enabled = false;
-                    const filename = filesystem.filename_from_url(urlsCopy[0]);
-                    const folder = filesystem.folder_from_url(urlsCopy[0]);
+                    const filename = filesystem.get_filename(urlsCopy[0]);
+                    const folder = filesystem.get_folder(urlsCopy[0]);
                     getOutputFile(folder, filename, "_joined", "", true, function(outFolder, outFilename, outFullFileUrl) {
                         controller.mp4_merge(urlsCopy.map(x => x.toString()), outFolder, outFilename);
                     });

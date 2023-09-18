@@ -47,8 +47,8 @@ TextField {
 
     function setUrl(url: url) {
         fullFileUrl = url;
-        filename = filesystem.filename_from_url(url);
-        folderUrl = filesystem.folder_from_url(url);
+        filename = filesystem.get_filename(url);
+        folderUrl = filesystem.get_folder(url);
         updateText();
     }
     function setFilename(fname: string) {

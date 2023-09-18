@@ -1979,12 +1979,12 @@ impl Controller {
         for x in file_list {
             let filename = filesystem::get_filename(x);
             let folder = filesystem::get_folder(x);
-            let gcsv_name = filesystem::with_extension(&filename, "gcsv");
+            let gcsv_name = filesystem::filename_with_extension(&filename, "gcsv");
             if filesystem::exists_in_folder(&folder, &gcsv_name) {
                 let mut is_data = false;
                 if let Ok(mut file) = filesystem::open_file(&base, &x, false) {
                     if output_gcsv.is_none() {
-                        let out_url = filesystem::url_from_folder_and_file(&output_folder, &filesystem::with_extension(output_filename,"gcsv"), true);
+                        let out_url = filesystem::url_from_folder_and_file(&output_folder, &filesystem::filename_with_extension(output_filename, "gcsv"), true);
                         output_gcsv = Some(filesystem::open_file(&base, &out_url, true)?);
                     }
                     for (i, line) in std::io::BufReader::new(file.get_file()).lines().enumerate() {
@@ -2080,9 +2080,8 @@ pub struct Filesystem {
 
     exists_in_folder:         qt_method!(fn(&self, folder: QUrl, filename: QString) -> bool),
     exists:                   qt_method!(fn(&self, url: QUrl) -> bool),
-    filename_from_url:        qt_method!(fn(&self, url: QUrl) -> QString),
-    folder_from_url:          qt_method!(fn(&self, url: QUrl) -> QString),
-    url_with_extension:       qt_method!(fn(&self, url: QUrl, ext: QString) -> QString),
+    get_filename:             qt_method!(fn(&self, url: QUrl) -> QString),
+    get_folder:               qt_method!(fn(&self, url: QUrl) -> QString),
     filename_with_extension:  qt_method!(fn(&self, filename: QString, ext: QString) -> QString),
     filename_with_suffix:     qt_method!(fn(&self, filename: QString, suffix: QString) -> QString),
     open_file_externally:     qt_method!(fn(&self, url: QUrl)),
@@ -2097,11 +2096,10 @@ pub struct Filesystem {
 impl Filesystem {
     fn exists_in_folder(&self, folder: QUrl, filename: QString) -> bool { filesystem::exists_in_folder(&QString::from(folder).to_string(), &filename.to_string()) }
     fn exists(&self, url: QUrl) -> bool { filesystem::exists(&QString::from(url).to_string()) }
-    fn filename_from_url(&self, url: QUrl) -> QString { QString::from(filesystem::get_filename(&QString::from(url).to_string())) }
-    fn folder_from_url(&self, url: QUrl) -> QString { QString::from(filesystem::get_folder(&QString::from(url).to_string())) }
-    fn url_with_extension(&self, url: QUrl, ext: QString) -> QString { QString::from(filesystem::url_with_extension(&QString::from(url).to_string(), &ext.to_string())) }
-    fn filename_with_extension(&self, filename: QString, ext: QString) -> QString { QString::from(filesystem::with_extension(&filename.to_string(), &ext.to_string())) }
-    fn filename_with_suffix(&self, filename: QString, suffix: QString) -> QString { QString::from(filesystem::with_suffix(&filename.to_string(), &suffix.to_string())) }
+    fn get_filename(&self, url: QUrl) -> QString { QString::from(filesystem::get_filename(&QString::from(url).to_string())) }
+    fn get_folder(&self, url: QUrl) -> QString { QString::from(filesystem::get_folder(&QString::from(url).to_string())) }
+    fn filename_with_extension(&self, filename: QString, ext: QString) -> QString { QString::from(filesystem::filename_with_extension(&filename.to_string(), &ext.to_string())) }
+    fn filename_with_suffix(&self, filename: QString, suffix: QString) -> QString { QString::from(filesystem::filename_with_suffix(&filename.to_string(), &suffix.to_string())) }
     fn open_file_externally(&self, url: QUrl) { util::open_file_externally(url); }
     fn path_to_url(&self, path: QString) -> QUrl { QUrl::from(QString::from(filesystem::path_to_url(&path.to_string()))) }
     fn url_from_folder_and_file(&self, folder: QUrl, filename: String, can_create: bool) -> QUrl { QUrl::from(QString::from(filesystem::url_from_folder_and_file(&QString::from(folder).to_string(), &filename, can_create))) }

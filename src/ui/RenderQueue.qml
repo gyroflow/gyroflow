@@ -593,7 +593,7 @@ Item {
         }
         onLoadFiles: (urls) => {
             if (!urls.length) return;
-            if (filesystem.filename_from_url(urls[0]).toLowerCase().endsWith(".gyroflow")) {
+            if (filesystem.get_filename(urls[0]).toLowerCase().endsWith(".gyroflow")) {
                 add("", urls);
             } else {
                 window.videoArea.askForOutputLocation(window.outputFile.folderUrl, "", true, function(outFolder, _, __) { add(outFolder, urls); });
