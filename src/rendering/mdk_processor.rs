@@ -27,12 +27,14 @@ pub struct MDKProcessor {
 }
 impl Drop for MDKProcessor {
     fn drop(&mut self) {
-        gyroflow_core::filesystem::mdk_unloaded_url(&self.url);
+        gyroflow_core::filesystem::stop_accessing_url(&self.url);
     }
 }
 
 impl MDKProcessor {
     pub fn from_file(url: &str, decoder_options: Option<Dictionary>) -> Self {
+        gyroflow_core::filesystem::start_accessing_url(url);
+
         let mut mdk = qml_video_rs::video_item::MDKVideoItem::default();
         let mut custom_decoder = String::new(); // eg. BRAW:format=rgba64le
         let mut format = ffmpeg_next::format::Pixel::RGBA;
@@ -50,7 +52,8 @@ impl MDKProcessor {
             custom_decoder = format!("R3D:gpu=auto{}", options);
         }
         ::log::info!("Custom decoder: {custom_decoder}");
-        mdk.setUrl(QUrl::from(QString::from(gyroflow_core::filesystem::url_for_mdk(url))), QString::from(custom_decoder.clone()));
+
+        mdk.setUrl(QUrl::from(QString::from(url)), QString::from(custom_decoder.clone()));
         Self {
             mdk,
             url: url.to_owned(),

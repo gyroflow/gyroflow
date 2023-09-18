@@ -237,17 +237,6 @@ pub fn get_folder(url: &str) -> String {
     result!(inner(url), url)
 }
 
-pub fn mdk_unloaded_url(url: &str) {
-    dbg_call!(url);
-    stop_accessing_url(url);
-}
-pub fn url_for_mdk(url: &str) -> String {
-    start_accessing_url(url);
-    let ret = url.to_string();
-    dbg_call!(url -> ret);
-    ret
-}
-
 pub fn exists(url: &str) -> bool {
     fn inner(url: &str) -> Result<bool> {
         if url.is_empty() { return Ok(false); }

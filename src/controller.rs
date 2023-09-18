@@ -335,8 +335,8 @@ impl Controller {
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
-            filesystem::mdk_unloaded_url(&QString::from(vid.url.clone()).to_string());
-            let url = filesystem::url_for_mdk(&url);
+            filesystem::stop_accessing_url(&QString::from(vid.url.clone()).to_string());
+            filesystem::start_accessing_url(&url);
             vid.setUrl(QUrl::from(QString::from(url)), QString::from(custom_decoder));
         }
     }
