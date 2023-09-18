@@ -95,7 +95,7 @@ pub fn install<F: Fn((f64, &'static str, String)) + Send + Sync + Clone + 'stati
                             let _ = std::fs::rename(&final_path, final_path.with_file_name(&format!("zz-remove-me-{}", final_path.file_name().unwrap().to_str().unwrap())));
                         }
                     }
-                    file.unpack_in(&out_dir)?;
+                    file.unpack_in(out_dir)?;
                 }
                 Ok(())
             })();

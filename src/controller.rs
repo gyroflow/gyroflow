@@ -285,8 +285,8 @@ impl Controller {
 
     fn load_video(&mut self, url: QUrl, player: QJSValue) {
         self.stabilizer.clear();
-        let url_str = QString::from(url.clone()).to_string();
-        let filename = filesystem::get_filename(&url_str);
+        let url = QString::from(url.clone()).to_string();
+        let filename = filesystem::get_filename(&url);
 
         // Load current (clean) state to the UI
         if let Ok(current_state) = self.stabilizer.export_gyroflow_data(core::GyroflowProjectType::Simple, "{}", None) {
@@ -300,7 +300,7 @@ impl Controller {
         self.update_offset_model();
 
         *self.stabilizer.input_file.write() = gyroflow_core::InputFile {
-            url: url_str.clone(),
+            url: url.clone(),
             project_file_url: None,
             image_sequence_start: self.image_sequence_start,
             image_sequence_fps: self.image_sequence_fps
@@ -336,7 +336,6 @@ impl Controller {
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
             filesystem::mdk_unloaded_url(&QString::from(vid.url.clone()).to_string());
-            let url = QString::from(url).to_string();
             let url = filesystem::url_for_mdk(&url);
             vid.setUrl(QUrl::from(QString::from(url)), QString::from(custom_decoder));
         }
@@ -1172,7 +1171,10 @@ impl Controller {
         let typ_str = typ.clone();
         let typ = core::GyroflowProjectType::from_str(&typ.to_string()).unwrap();
 
-        util::set_setting("lastProject", &url);
+        #[cfg(not(any(target_os = "ios", target_os = "android")))]
+        {
+            util::set_setting("lastProject", &filesystem::url_to_path(&url));
+        }
         let finished = util::qt_queued_callback(self, move |this, (res, arg): (&str, String)| {
             match res {
                 "ok" => this.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", filesystem::display_url(&arg))), QString::default(), QString::from("gyroflow-exported")),

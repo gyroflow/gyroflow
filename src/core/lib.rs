@@ -874,7 +874,7 @@ impl StabilizationManager {
 
         Ok(())
     }
-    pub fn export_gyroflow_data(&self, typ: GyroflowProjectType, additional_data: &str, project_url: Option<&str>) -> Result<String, GyroflowCoreError> {
+    pub fn export_gyroflow_data(&self, typ: GyroflowProjectType, additional_data: &str, _project_url: Option<&str>) -> Result<String, GyroflowCoreError> {
         let gyro = self.gyro.read();
         let params = self.params.read();
 
@@ -970,13 +970,13 @@ impl StabilizationManager {
 
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         if let serde_json::Value::Object(ref mut obj) = obj {
-            obj.insert("videofile_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(&input_file.url, project_url)));
+            obj.insert("videofile_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(&input_file.url, _project_url)));
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
-                obj.insert("filepath_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(&gyro.file_url, project_url)));
+                obj.insert("filepath_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(&gyro.file_url, _project_url)));
             }
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("output") {
                 if let Some(output_folder) = obj.get("output_folder").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
-                    obj.insert("output_folder_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(output_folder, project_url)));
+                    obj.insert("output_folder_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(output_folder, _project_url)));
                 }
             }
         }

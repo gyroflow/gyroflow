@@ -204,7 +204,7 @@ pub fn get_filename(url: &str) -> String {
         #[cfg(target_os = "android")]
         if url.starts_with("content://") {
             if android::is_dir_url(url) { return Ok(String::new()); } // no filename
-            return Ok(android::get_url_info(&android::get_jvm(), url).map(|x| x.filename.unwrap_or_default()).unwrap_or_default());
+            return Ok(android::get_url_info(url).map(|x| x.filename.unwrap_or_default()).unwrap_or_default());
         }
 
         let pathbuf = url_to_pathbuf(url)?;
@@ -225,7 +225,7 @@ pub fn get_folder(url: &str) -> String {
                 return Ok(url.to_string());
             }
 
-            log::warn!("Cannot get directory path on android, url: {url}, info: {:?}", android::get_url_info(&android::get_jvm(), url));
+            log::warn!("Cannot get directory path on android, url: {url}, info: {:?}", android::get_url_info(url));
             return Ok(String::new());
         }
         let pathbuf = url_to_pathbuf(url)?;
@@ -254,7 +254,7 @@ pub fn exists(url: &str) -> bool {
 
         #[cfg(target_os = "android")]
         if url.starts_with("content://") {
-            return android::get_url_info(&android::get_jvm(), url).map(|x| x.filename.is_some() && !x.filename.unwrap().is_empty());
+            return android::get_url_info(url).map(|x| x.filename.is_some() && !x.filename.unwrap().is_empty());
         }
 
         start_accessing_url(url);

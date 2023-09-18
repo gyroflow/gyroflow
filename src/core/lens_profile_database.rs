@@ -241,7 +241,8 @@ impl LensProfileDatabase {
         if let Some(l) = self.map.get(filename_or_id) {
             Some(l)
         } else {
-            self.map.iter().find(|(_, v)| v.path_to_file.contains(filename_or_id)).map(|(_, v)| v)
+            let path_normalized = filename_or_id.replace('\\', "/");
+            self.map.iter().find(|(_, v)| v.path_to_file.replace('\\', "/").contains(&path_normalized)).map(|(_, v)| v)
         }
     }
 

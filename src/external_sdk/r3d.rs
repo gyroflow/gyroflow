@@ -97,7 +97,7 @@ impl REDSdk {
         if !redline.is_empty() {
             let p = std::path::Path::new(&gyroflow_core::filesystem::url_to_path(url)).to_owned();
 
-            let output_file = p.with_extension("").to_string_lossy().to_owned().into_owned();
+            let output_file = p.with_extension("").to_string_lossy().into_owned();
 
             cancel_flag.store(false, SeqCst);
 

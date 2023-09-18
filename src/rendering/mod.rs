@@ -616,14 +616,14 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
 
     let filename = &render_options.output_filename;
     let folder = &render_options.output_folder;
-    if cfg!(not(any(target_os = "android", target_os = "ios"))) && !gyroflow_core::filesystem::exists(&folder) {
-        let path = gyroflow_core::filesystem::url_to_path(&folder);
+    if cfg!(not(any(target_os = "android", target_os = "ios"))) && !gyroflow_core::filesystem::exists(folder) {
+        let path = gyroflow_core::filesystem::url_to_path(folder);
         if !path.is_empty() {
             let _ = std::fs::create_dir_all(path);
         }
     }
 
-    proc.render(&fs_base, &folder, &filename, (render_options.output_width as u32, render_options.output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
+    proc.render(&fs_base, folder, filename, (render_options.output_width as u32, render_options.output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
 
     drop(proc);
 

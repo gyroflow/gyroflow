@@ -228,7 +228,7 @@ impl<'a> FfmpegProcessor<'a> {
 
     pub fn render(&mut self, base: &'a EngineBase, output_folder: &str, output_filename: &str, output_size: (u32, u32), bitrate: Option<f64>, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
         let output_url = filesystem::url_from_folder_and_file(output_folder, output_filename, true);
-        let mut file = FfmpegPathWrapper::new(base, &output_url, true).map_err(|e| FFmpegError::CannotOpenInputFile((output_url.to_string(), e)))?;
+        let mut file = FfmpegPathWrapper::new(base, &output_url, true).map_err(|e| FFmpegError::CannotOpenOutputFile((output_url.to_string(), e)))?;
 
         let mut stream_mapping: Vec<isize> = vec![0; self.input_context.nb_streams() as _];
         let mut ist_time_bases = vec![Rational(0, 0); self.input_context.nb_streams() as _];

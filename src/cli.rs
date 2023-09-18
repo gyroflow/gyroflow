@@ -303,7 +303,7 @@ pub fn run(open_file: &mut String) -> bool {
                     // Apply lens profile
                     log::info!("Loading lens profile {}", file);
                     let stab = queue.get_stab_for_job(*job_id).unwrap();
-                    stab.load_lens_profile(&file).expect("Loading lens profile");
+                    stab.load_lens_profile(file).expect("Loading lens profile");
                     stab.recompute_blocking();
                 }
 
@@ -348,7 +348,7 @@ pub fn run(open_file: &mut String) -> bool {
             let mut queue = queue.borrow_mut();
             let gyro_file = opts.gyro_file.unwrap_or_default();
             for file in &videos {
-                queue.add_file(path_to_url(&file), path_to_url(&gyro_file), additional_data.to_string());
+                queue.add_file(path_to_url(file), path_to_url(&gyro_file), additional_data.to_string());
             }
         }
 

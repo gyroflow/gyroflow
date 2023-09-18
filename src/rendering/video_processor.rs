@@ -63,7 +63,7 @@ impl<'a> VideoProcessor<'a> {
             let info = info.borrow().clone();
             Ok(info)
         } else {
-            FfmpegProcessor::get_video_info(&url)
+            FfmpegProcessor::get_video_info(url)
         }
     }
 

@@ -140,7 +140,7 @@ impl RenderOptions {
 
             // Backwards compatibility
             if let Some(v) = obj.get("output_path").and_then(|x| x.as_str()) {
-                let url = core::filesystem::path_to_url(&v);
+                let url = core::filesystem::path_to_url(v);
                 let folder = core::filesystem::get_folder(&url);
                 if !folder.is_empty() {
                     self.output_folder = folder;
@@ -438,7 +438,7 @@ impl RenderQueue {
         let q = self.queue.borrow();
         if let Some(job) = self.jobs.get(&job_id) {
             if job.queue_index < q.row_count() as usize {
-                return QString::from(q[job.queue_index].output_filename.clone());
+                return q[job.queue_index].output_filename.clone();
             }
         }
         QString::default()
@@ -667,7 +667,7 @@ impl RenderQueue {
     pub fn get_gyroflow_data(&self, job_id: u32) -> QString {
         if let Some(job) = self.jobs.get(&job_id) {
             if let Some(url) = job.stab.input_file.read().project_file_url.as_ref() {
-                if core::filesystem::exists(&url) {
+                if core::filesystem::exists(url) {
                     return QString::from(serde_json::json!({ "project_file": url }).to_string());
                 }
             }
@@ -1441,7 +1441,7 @@ impl RenderQueue {
                 }
                 out
             } else {
-                return Vec::new();
+                Vec::new()
             }
         }
 
@@ -1461,7 +1461,7 @@ impl RenderQueue {
     fn update_sync_settings(stab: &StabilizationManager, sync_options: &serde_json::Value) {
         let mut sync_settings = stab.lens.read().sync_settings.clone().unwrap_or(sync_options.clone());
         if sync_settings.is_object() && sync_options.is_object() {
-            crate::core::util::merge_json(&mut sync_settings, &sync_options);
+            crate::core::util::merge_json(&mut sync_settings, sync_options);
         }
         if sync_settings.is_object() && !sync_settings.as_object().unwrap().is_empty() {
             stab.lens.write().sync_settings = Some(sync_settings);
