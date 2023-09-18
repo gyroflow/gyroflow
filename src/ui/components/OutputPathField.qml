@@ -39,6 +39,9 @@ TextField {
         preventChange = true;
         if (Qt.platform.os == "ios" || Qt.platform.os == "android") {
             text = filename;
+            if (!filename && root.folderOnly) {
+                text = root.folderUrl.toString()? qsTr('[Selected folder]') : "";
+            }
         } else {
             text = fullFileUrl.toString()? filesystem.display_url(fullFileUrl) : filesystem.display_folder_filename(folderUrl, filename);
         }

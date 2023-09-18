@@ -152,7 +152,7 @@ impl<'a> FfmpegPathWrapper<'a> {
         #[cfg(target_os = "android")]
         {
             // On android we have to use raw file descriptor, because ffmpeg can't use the content:// urls
-            let file = FileWrapper::open_android(_base, &url, if _write { "w" } else { "r" })?;
+            let file = FileWrapper::open_android(_base, &url, if _write { "wt" } else { "r" })?;
             Ok(Self {
                 org_url: url.to_owned(),
                 path: format!("fd:{}", file.android_handle.fd),
@@ -377,7 +377,7 @@ pub fn remove_file(url: &str) -> Result<()> {
     dbg_call!(url);
     #[cfg(target_os = "android")]
     {
-        return android::remove_file(url).map(|_| ());
+        android::remove_file(url).map(|_| ())
     }
     #[cfg(not(target_os = "android"))]
     {
@@ -398,7 +398,7 @@ pub fn open_file<'a>(_base: &'a EngineBase, url: &str, writing: bool) -> Result<
 
     #[cfg(target_os = "android")]
     {
-        return FileWrapper::open_android(_base, url, if writing { "w" } else { "r" });
+        return FileWrapper::open_android(_base, url, if writing { "wt" } else { "r" });
     }
     #[cfg(not(target_os = "android"))]
     {

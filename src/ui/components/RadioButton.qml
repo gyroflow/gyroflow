@@ -33,6 +33,16 @@ QQC.RadioButton {
             Ease on opacity { }
         }
     }
+    contentItem: Text {
+        text: root.text;
+        font.pixelSize: 13 * dpiScale;
+        font.family: styleFont;
+        color: styleTextColor;
+        opacity: enabled ? 1.0 : 0.3;
+        linkColor: styleAccentColor;
+        leftPadding: root.indicator.width + root.spacing;
+        verticalAlignment: Text.AlignVCenter;
+    }
 
     property alias tooltip: tt.text;
     ToolTip { id: tt; visible: text.length > 0 && cb.hovered; }

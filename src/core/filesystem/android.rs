@@ -36,9 +36,9 @@ pub struct AndroidFileHandle<'a> {
 }
 impl<'a> Drop for AndroidFileHandle<'a> {
     fn drop(&mut self) {
-        log::info!("Android close parcel");
+        log::info!("Closing android parcel");
         if let Err(e) = self.env.call_method(&self.parcel, "close", "()V", &[]) {
-            log::warn!("Failed to close android file: {e:?}");
+            log::warn!("Failed to close android parcel: {e:?}");
         }
     }
 }
