@@ -309,7 +309,7 @@ Item {
             const dlg = messageBox(Modal.Info, qsTr("This format requires an external SDK. Do you want to download it now?"), [
                 { text: qsTr("Yes"), accent: true, clicked: function() {
                     dlg.btnsRow.children[0].enabled = false;
-                    controller.install_external_sdk(url);
+                    controller.install_external_sdk(url.toString());
                     return false;
                 } },
                 { text: qsTr("Cancel"), clicked: function() {
@@ -467,7 +467,7 @@ Item {
         if (ask) {
             askForOutputLocation(folder, filename, false, cb);
         } else {
-            return [folder, filename];
+            cb(folder, filename);
         }
     }
 

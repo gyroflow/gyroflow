@@ -134,7 +134,7 @@ impl REDSdk {
                 for line in reader.lines() {
                     if let Ok(line) = line {
                         if let Some(m) = re_output_name.captures(&line) {
-                            out_filename = Some(m.get(1).unwrap().as_str().to_owned());
+                            out_filename = Some(gyroflow_core::filesystem::path_to_url(m.get(1).unwrap().as_str()));
                         }
                         if let Some(m) = re_progress.captures(&line) {
                             if let Ok(p) = m.get(1).unwrap().as_str().parse::<f64>() {

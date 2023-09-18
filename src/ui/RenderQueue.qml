@@ -582,7 +582,12 @@ Item {
         extensions: fileDialog.extensions;
         function add(outFolder, urls) {
             let additional = window.getAdditionalProjectData();
-            if (outFolder) additional.output.output_folder = outFolder;
+            if (!outFolder) {
+                delete additional.output.output_folder;
+                delete additional.output.output_filename;
+            } else {
+                additional.output.output_folder = outFolder;
+            }
             additional = JSON.stringify(additional);
 
             for (const url of urls) {
