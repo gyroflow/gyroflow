@@ -82,9 +82,9 @@ impl GoProHyperview {
     }
     pub fn wgsl_functions(&self) -> &'static str {
         r#"
-        fn digital_undistort_point(uv: vec2<f32>) -> vec2<f32> {
+        fn digital_undistort_point(_uv: vec2<f32>) -> vec2<f32> {
             let out_c2 = vec2<f32>(f32(params.output_width), f32(params.output_height));
-            var uv = uv;
+            var uv = _uv;
             uv = (uv / out_c2) - 0.5;
 
             uv.x = uv.x * (1.0 - 0.64 * abs(uv.x));
@@ -95,9 +95,9 @@ impl GoProHyperview {
 
             return uv;
         }
-        fn digital_distort_point(uv: vec2<f32>) -> vec2<f32> {
+        fn digital_distort_point(_uv: vec2<f32>) -> vec2<f32> {
             let size = vec2<f32>(f32(params.width), f32(params.height));
-            var uv = uv;
+            var uv = _uv;
             uv = (uv / size) - 0.5;
 
             let xs = uv.x / max(0.000001, abs(uv.x));
