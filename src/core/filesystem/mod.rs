@@ -98,7 +98,7 @@ macro_rules! result {
         dbg_call!($($param )* -> ret);
         match ret {
             Ok(x) => x,
-            Err(e) => panic!("{e:?}") // TODO: log::error!("{e:?}"); String::new()
+            Err(e) => { log::error!("{e:?}"); Default::default() }
         }
     }};
 }
