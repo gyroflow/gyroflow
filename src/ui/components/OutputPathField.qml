@@ -73,6 +73,8 @@ TextField {
             return cb(folder);
         }
         root.cbAfterSelect = cb;
+        if (folder.toString())
+            outputFolderDialog.currentFolder = folder;
         outputFolderDialog.open();
     }
 
