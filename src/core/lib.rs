@@ -131,13 +131,14 @@ impl StabilizationManager {
         self.keyframes.write().clear();
     }
 
-    pub fn load_gyro_data<F: Fn(f64)>(&self, url: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::result::Result<gyro_source::FileMetadata, GyroflowCoreError> {
+    pub fn load_gyro_data<F: Fn(f64)>(&self, url: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::result::Result<(), GyroflowCoreError> {
         {
             let params = self.params.read();
             let mut gyro = self.gyro.write();
             gyro.init_from_params(&params);
             gyro.clear_offsets();
             gyro.file_url = url.to_string();
+            gyro.file_metadata = Default::default();
         }
         self.invalidate_smoothing();
         self.invalidate_zooming();
@@ -214,16 +215,17 @@ impl StabilizationManager {
             log::info!("Not a main video, clearing {} per-frame offsets", md.per_frame_time_offsets.len());
             md.per_frame_time_offsets.clear();
         }
+        let camera_id = md.camera_identifier.clone();
         if !cancel_flag.load(SeqCst) {
             let mut gyro = self.gyro.write();
-            gyro.load_from_telemetry(&md);
+            gyro.load_from_telemetry(md);
             gyro.file_load_options = options.clone();
         }
 
-        if let Some(ref id) = md.camera_identifier {
-            *self.camera_id.write() = Some(id.clone());
+        if let Some(id) = camera_id {
+            *self.camera_id.write() = Some(id);
         }
-        Ok(md)
+        Ok(())
     }
 
     pub fn load_lens_profile(&self, url: &str) -> Result<(), crate::GyroflowCoreError> {
@@ -1191,10 +1193,10 @@ impl StabilizationManager {
                         };
 
                         let mut gyro = self.gyro.write();
-                        gyro.load_from_telemetry(&md);
+                        gyro.load_from_telemetry(md);
                     } else if let Ok(md) = util::decompress_from_base91_cbor(obj.get("file_metadata").and_then(|x| x.as_str()).unwrap_or_default()) as std::io::Result<crate::gyro_source::FileMetadata> {
                         let mut gyro = self.gyro.write();
-                        gyro.load_from_telemetry(&md);
+                        gyro.load_from_telemetry(md);
                     } else if filesystem::exists(&gyro_url) && blocking {
                         if let Err(e) = self.load_gyro_data(&gyro_url, is_main_video, &Default::default(), progress_cb, cancel_flag) {
                             ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_url, e);

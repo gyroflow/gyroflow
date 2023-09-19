@@ -72,7 +72,6 @@ pub struct Controller {
 
     telemetry_loaded: qt_signal!(is_main_video: bool, filename: QString, camera: QString, additional_data: QJsonObject),
     lens_profile_loaded: qt_signal!(lens_json: QString, filepath: QString, checksum: QString),
-    realtime_fps_loaded: qt_signal!(fps: f64),
 
     set_smoothing_method: qt_method!(fn(&self, index: usize) -> QJsonArray),
     get_smoothing_max_angles: qt_method!(fn(&self) -> QJsonArray),
@@ -718,28 +717,17 @@ impl Controller {
                     this.lens_profile_loaded(QString::from(json), QString::from(lens.path_to_file.as_str()), QString::from(lens.checksum.clone().unwrap_or_default()));
                 }
             });
-            let on_metadata = util::qt_queued_callback_mut(self, move |this, md: core::gyro_source::FileMetadata| {
-                if let Some(md_fps) = md.frame_rate {
-                    let fps = this.stabilizer.params.read().fps;
-                    if (md_fps - fps).abs() > 1.0 {
-                        this.realtime_fps_loaded(md_fps);
-                    }
-                }
-            });
 
             if duration_ms > 0.0 && fps > 0.0 {
                 self.loading_gyro_in_progress = true;
                 self.loading_gyro_in_progress_changed();
                 core::run_threaded(move || {
-                    let mut file_metadata = None;
                     let mut additional_data = serde_json::Value::Object(serde_json::Map::new());
                     let additional_obj = additional_data.as_object_mut().unwrap();
                     if is_main_video {
                         stab.init_from_video_data(duration_ms, fps, frame_count, video_size);
                         // Ignore the error here, video file may not contain the telemetry and it's ok
-                        if let Ok(md) = stab.load_gyro_data(&url, is_main_video, &Default::default(), progress, cancel_flag) {
-                            file_metadata = Some(md);
-                        }
+                        let _ = stab.load_gyro_data(&url, is_main_video, &Default::default(), progress, cancel_flag);
 
                         if stab.set_output_size(video_size.0, video_size.1) {
                             stab.recompute_undistortion();
@@ -750,13 +738,8 @@ impl Controller {
                             options.sample_index = Some(sample_index as usize);
                         }
 
-                        match stab.load_gyro_data(&url, is_main_video, &options, progress, cancel_flag) {
-                            Ok(md) => {
-                                file_metadata = Some(md);
-                            },
-                            Err(e) => {
-                                err(("An error occured: %1".to_string(), e.to_string()));
-                            }
+                        if let Err(e) = stab.load_gyro_data(&url, is_main_video, &options, progress, cancel_flag) {
+                            err(("An error occured: %1".to_string(), e.to_string()));
                         }
                     }
                     stab.recompute_smoothness();
@@ -772,11 +755,17 @@ impl Controller {
                     additional_obj.insert("contains_motion".to_owned(),   serde_json::Value::Bool(has_motion));
                     additional_obj.insert("has_accurate_timestamps".to_owned(), serde_json::Value::Bool(gyro.file_metadata.has_accurate_timestamps));
                     additional_obj.insert("sample_rate".to_owned(),       serde_json::to_value(gyroflow_core::gyro_source::GyroSource::get_sample_rate(&gyro.file_metadata)).unwrap());
+                    let has_builtin_profile = gyro.file_metadata.lens_profile.as_ref().and_then(|y| Some(y.is_object())).unwrap_or_default();
+                    let md_data = gyro.file_metadata.additional_data.clone();
+                    if let Some(md_fps) = gyro.file_metadata.frame_rate {
+                        let fps = stab.params.read().fps;
+                        if (md_fps - fps).abs() > 1.0 {
+                            additional_obj.insert("realtime_fps".to_owned(), serde_json::Number::from_f64(md_fps).unwrap().into());
+                        }
+                    }
                     drop(gyro);
 
                     let camera_id = stab.camera_id.read();
-
-                    let has_builtin_profile = file_metadata.as_ref().and_then(|x| x.lens_profile.as_ref().and_then(|y| Some(y.is_object()))).unwrap_or_default();
 
                     let id_str = camera_id.as_ref().map(|v| v.get_identifier_for_autoload()).unwrap_or_default();
                     if is_main_video && !id_str.is_empty() && !has_builtin_profile {
@@ -796,9 +785,8 @@ impl Controller {
                         additional_obj.insert("camera_identifier".to_owned(), serde_json::to_value(cam_id).unwrap());
                     }
 
-                    if let Some(md) = file_metadata {
-                        gyroflow_core::util::merge_json(&mut additional_data, &md.additional_data);
-                        on_metadata(md);
+                    if md_data.is_object() {
+                        gyroflow_core::util::merge_json(&mut additional_data, &md_data);
                     }
 
                     finished((is_main_video, filename.into(), QString::from(detected.trim()), has_motion, additional_data));

@@ -377,7 +377,7 @@ impl GyroSource {
         Ok(md)
     }
 
-    pub fn load_from_telemetry(&mut self, telemetry: &FileMetadata) {
+    pub fn load_from_telemetry(&mut self, telemetry: FileMetadata) {
         if self.duration_ms <= 0.0 {
             ::log::error!("Invalid duration_ms {}", self.duration_ms);
             return;
@@ -395,14 +395,14 @@ impl GyroSource {
 
         self.imu_orientation = telemetry.imu_orientation.clone();
 
-        self.file_metadata = telemetry.clone();
+        self.file_metadata = telemetry;
 
-        if !telemetry.quaternions.is_empty() {
-            self.quaternions = telemetry.quaternions.clone();
+        if !self.file_metadata.quaternions.is_empty() {
+            self.quaternions = self.file_metadata.quaternions.clone();
             self.integration_method = 0;
-            let len = telemetry.quaternions.len() as f64;
-            let first_ts = telemetry.quaternions.iter().next()      .map(|x| *x.0 as f64 / 1000.0).unwrap_or_default();
-            let last_ts  = telemetry.quaternions.iter().next_back() .map(|x| *x.0 as f64 / 1000.0).unwrap_or_default();
+            let len = self.file_metadata.quaternions.len() as f64;
+            let first_ts = self.file_metadata.quaternions.iter().next()      .map(|x| *x.0 as f64 / 1000.0).unwrap_or_default();
+            let last_ts  = self.file_metadata.quaternions.iter().next_back() .map(|x| *x.0 as f64 / 1000.0).unwrap_or_default();
             let imu_duration = (last_ts - first_ts) * ((len + 1.0) / len);
             if (imu_duration - self.duration_ms).abs() > 0.01 {
                 log::warn!("IMU duration {imu_duration} is different than video duration ({})", self.duration_ms);
@@ -412,10 +412,10 @@ impl GyroSource {
             }
         }
 
-        if !telemetry.raw_imu.is_empty() {
-            let len = telemetry.raw_imu.len() as f64;
-            let first_ts = telemetry.raw_imu.first().map(|x| x.timestamp_ms).unwrap_or_default();
-            let last_ts  = telemetry.raw_imu.last() .map(|x| x.timestamp_ms).unwrap_or_default();
+        if !self.file_metadata.raw_imu.is_empty() {
+            let len = self.file_metadata.raw_imu.len() as f64;
+            let first_ts = self.file_metadata.raw_imu.first().map(|x| x.timestamp_ms).unwrap_or_default();
+            let last_ts  = self.file_metadata.raw_imu.last() .map(|x| x.timestamp_ms).unwrap_or_default();
             let imu_duration = (last_ts - first_ts) * ((len + 1.0) / len);
             if (imu_duration - self.duration_ms).abs() > 0.01 {
                 log::warn!("IMU duration {imu_duration} is different than video duration ({})", self.duration_ms);

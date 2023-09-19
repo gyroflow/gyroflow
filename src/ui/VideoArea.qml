@@ -223,6 +223,9 @@ Item {
                 if (additional_data.hasOwnProperty("cam_posture") && Math.abs(+additional_data.cam_posture.replace("CameraRotate", "")) > 0) {
                     vidInfo.updateEntryWithTrigger("Rotation", +additional_data.cam_posture.replace("CameraRotate", ""));
                 }
+                if (additional_data.hasOwnProperty("realtime_fps") && +additional_data.realtime_fps > 0) {
+                    vidInfo.updateEntryWithTrigger("Frame rate", +additional_data.realtime_fps);
+                }
             }
             if (+additional_data.sample_rate > 0.0 && Math.round(+additional_data.sample_rate) < 50) {
                 messageBox(Modal.Warning, qsTr("Motion data sampling rate is too low (%1 Hz).\n50 Hz is an absolute minimum and we recommend at least 200 Hz.").arg(additional_data.sample_rate.toFixed(0)), [ { "text": qsTr("Ok") } ]);
