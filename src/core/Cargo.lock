@@ -1103,7 +1103,7 @@ dependencies = [
  "line_drawing",
  "log",
  "lru",
- "metal 0.26.0 (git+https://github.com/gfx-rs/metal-rs/?rev=d24f1a4)",
+ "metal",
  "mimalloc",
  "naga",
  "nalgebra 0.32.3",
@@ -1136,6 +1136,7 @@ dependencies = [
  "urlencoding",
  "walkdir",
  "wgpu",
+ "wgpu-core",
  "wgpu-hal",
  "wgpu-types",
  "winapi",
@@ -1560,21 +1561,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5a634b1c61a95585bd15607c6ab0c4e5b226e695ff2800ba0cdccddf208c406c"
 dependencies = [
  "autocfg",
-]
-
-[[package]]
-name = "metal"
-version = "0.26.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "623b5e6cefd76e58f774bd3cc0c6f5c7615c58c03a97815245a25c3c9bdee318"
-dependencies = [
- "bitflags 2.4.0",
- "block",
- "core-graphics-types",
- "foreign-types",
- "log",
- "objc",
- "paste",
 ]
 
 [[package]]
@@ -3077,7 +3063,7 @@ dependencies = [
  "libc",
  "libloading 0.8.0",
  "log",
- "metal 0.26.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "metal",
  "naga",
  "objc",
  "parking_lot",

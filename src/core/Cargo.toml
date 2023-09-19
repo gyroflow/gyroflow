@@ -67,6 +67,7 @@ opencv = { version = "0.84", features = ["clang-runtime"], optional = true }
 wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "dc5beac", features = ["spirv"] }
 wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "dc5beac" }
 wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "dc5beac" }
+wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "dc5beac" }
 bytemuck = "1.14.0"
 ash = "0.37.3"
 naga = { git = "https://github.com/gfx-rs/naga", rev = "df8107b7", version = "0.13.0", features = ["clone", "span", "validate", "spv-in"] }
@@ -88,8 +89,7 @@ rustfft = "6.1.0"
 include_dir = { version = "0.7.3", features = ["glob"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.metal]
-git = "https://github.com/gfx-rs/metal-rs/"
-rev = "d24f1a4"
+version = "0.26"
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.objc-foundation]
 version = "0.1.1"
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.core-foundation-sys]
@@ -105,6 +105,9 @@ features = ["profileapi", "libloaderapi", "windef", "winuser", "dcomp"]
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 version = "0.7.0"
 features = ["libloading"]
+
+[patch.crates-io]
+metal = { git = "https://github.com/gfx-rs/metal-rs/", rev = "d24f1a4" }
 
 [features]
 default = []
