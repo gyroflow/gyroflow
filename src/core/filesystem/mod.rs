@@ -234,7 +234,13 @@ pub fn get_folder(url: &str) -> String {
         }
         Ok(path_to_url(&pathbuf.parent().ok_or(FilesystemError::NoParent(url.into()))?.to_string_lossy()))
     }
-    result!(inner(url), url)
+    let mut ret = inner(url);
+    if let Ok(ref mut ret) = ret {
+        if !ret.is_empty() && !ret.ends_with('/') {
+            ret.push('/');
+        }
+    }
+    result!(ret, url)
 }
 
 pub fn exists(url: &str) -> bool {

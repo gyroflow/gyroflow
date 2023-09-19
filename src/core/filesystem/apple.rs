@@ -13,27 +13,29 @@ use crate::{ function_name, dbg_call };
 
 lazy_static::lazy_static! {
     static ref OPENED_URLS: Mutex<HashMap<String, i64>> = Mutex::new(HashMap::new());
-    static ref CLOSE_ID: AtomicUsize = AtomicUsize::new(0);
+    static ref CLOSE_TIMEOUT: AtomicUsize = AtomicUsize::new(0);
 }
 
 pub fn start_accessing_url(url: &str) {
-    if url.is_empty() { return; }
+    if !url.contains("://") { return; }
+    let url = url::Url::parse(url).unwrap().to_string(); // Normalize the url
     dbg_call!(url);
     let mut map = OPENED_URLS.lock();
-    match map.entry(url.to_owned()) {
+    match map.entry(url.clone()) {
         Entry::Occupied(o) => { *o.into_mut() += 1; }
         Entry::Vacant(v) => {
             log::info!("start_accessing_url: {url} - OPEN");
-            start_accessing_security_scoped_resource(url);
+            start_accessing_security_scoped_resource(&url);
             v.insert(1);
         }
     }
 }
 pub fn stop_accessing_url(url: &str) {
-    if url.is_empty() { return; }
+    if !url.contains("://") { return; }
+    let url = url::Url::parse(url).unwrap().to_string(); // Normalize the url
     dbg_call!(url);
     let mut map = OPENED_URLS.lock();
-    match map.entry(url.to_owned()) {
+    match map.entry(url.clone()) {
         Entry::Occupied(mut o) => {
             *o.get_mut() -= 1;
             let v = *o.get();
@@ -49,27 +51,31 @@ pub fn stop_accessing_url(url: &str) {
     }
 }
 
+fn timestamp() -> usize { std::time::SystemTime::now().duration_since(std::time::SystemTime::UNIX_EPOCH).unwrap().as_secs() as usize }
 // We need to defer closing the url for 10 seconds
 // We have a lot of functions which start and stop url access and they happen asynchronously so we need to avoid opening and closing them too often
 fn spawn_close_thread() {
-    let current_id = CLOSE_ID.fetch_add(1, SeqCst) + 1;
+    let is_thread_running = CLOSE_TIMEOUT.load(SeqCst) != 0;
+    CLOSE_TIMEOUT.store(timestamp() + 10, SeqCst); // 10 seconds
 
-    std::thread::spawn(move || {
-        std::thread::sleep(std::time::Duration::from_millis(10000)); // 10 seconds
-        if CLOSE_ID.load(SeqCst) == current_id {
-            let mut to_remove = Vec::new();
-            let mut map = OPENED_URLS.lock();
-            for (url, v) in map.iter() {
-                if *v <= 0 {
-                    log::info!("stop_accessing_url: {url} - CLOSE");
-                    stop_accessing_security_scoped_resource(url);
-                    to_remove.push(url.clone());
-                }
-            }
-            for x in to_remove {
-                map.remove(&x);
+    if is_thread_running { return; }
+    std::thread::spawn(|| {
+        while CLOSE_TIMEOUT.load(SeqCst) > timestamp() {
+            std::thread::sleep(std::time::Duration::from_secs(1));
+        }
+        let mut to_remove = Vec::new();
+        let mut map = OPENED_URLS.lock();
+        for (url, v) in map.iter() {
+            if *v <= 0 {
+                log::info!("stop_accessing_url: {url} - CLOSE");
+                stop_accessing_security_scoped_resource(url);
+                to_remove.push(url.clone());
             }
         }
+        for x in to_remove {
+            map.remove(&x);
+        }
+        CLOSE_TIMEOUT.store(0, SeqCst);
     });
 }
 
@@ -106,6 +112,7 @@ pub fn create_bookmark(url: &str, project_url: Option<&str>) -> String {
     start_accessing_url(url);
     unsafe {
         let project_url_ref = if let Some(project_url) = project_url {
+            if !super::exists(project_url) && !project_url.ends_with('/') { let _ = super::write(project_url, &[]); } // Create empty file if not exists
             start_accessing_url(project_url);
             let project_url = project_url.as_bytes();
             CFURLCreateWithBytes(ptr::null(), project_url.as_ptr(), project_url.len() as isize, kCFStringEncodingUTF8, ptr::null())

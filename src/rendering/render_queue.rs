@@ -656,7 +656,13 @@ impl RenderQueue {
         if let Ok(serde_json::Value::Array(val)) = serde_json::from_str(&json) as serde_json::Result<serde_json::Value> {
             for x in val {
                 if let Some(project) = x.get("project_file").and_then(|x| x.as_str()) {
-                    self.add_file(project.to_string(), String::new(), additional_data.clone());
+                    let mut project = project.to_string();
+                    #[cfg(any(target_os = "macos", target_os = "ios"))]
+                    if let Some(bookmark) = x.get("project_file_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
+                        let resolved = core::filesystem::apple::resolve_bookmark(bookmark);
+                        if !resolved.is_empty() { project = resolved; }
+                    }
+                    self.add_file(project, String::new(), additional_data.clone());
                 } else if let Ok(data) = serde_json::to_string(&x) {
                     self.add_file(data, String::new(), additional_data.clone());
                 }
@@ -668,7 +674,14 @@ impl RenderQueue {
         if let Some(job) = self.jobs.get(&job_id) {
             if let Some(url) = job.stab.input_file.read().project_file_url.as_ref() {
                 if core::filesystem::exists(url) {
-                    return QString::from(serde_json::json!({ "project_file": url }).to_string());
+                    #[cfg(any(target_os = "macos", target_os = "ios"))]
+                    {
+                        return QString::from(serde_json::json!({ "project_file": url, "project_file_bookmark": core::filesystem::apple::create_bookmark(&url, None) }).to_string());
+                    }
+                    #[cfg(not(any(target_os = "macos", target_os = "ios")))]
+                    {
+                        return QString::from(serde_json::json!({ "project_file": url }).to_string());
+                    }
                 }
             }
             let mut additional_data = job.additional_data.clone();

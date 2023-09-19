@@ -1299,6 +1299,7 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("output_folder_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
                     let resolved = filesystem::apple::resolve_bookmark(v);
                     if !resolved.is_empty() {
+                        filesystem::start_accessing_url(&resolved);
                         obj.insert("output_folder".into(), serde_json::Value::String(resolved));
                         obj.insert("output_folder_bookmark".into(), serde_json::Value::String("resolved".into()));
                     }
