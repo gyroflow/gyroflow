@@ -227,7 +227,7 @@ impl StabilizationManager {
     }
 
     pub fn load_lens_profile(&self, url: &str) -> Result<(), crate::GyroflowCoreError> {
-        let url = if (url.contains('/') || url.contains('\\')) && !url.contains("://") && !url.starts_with('{') {
+        let url = if (url.starts_with('/') || url.starts_with('\\') || (url.len() > 3 && &url[1..2] == ":")) && !url.contains("://") && !url.starts_with('{') {
             crate::filesystem::path_to_url(url)
         } else {
             url.to_owned()

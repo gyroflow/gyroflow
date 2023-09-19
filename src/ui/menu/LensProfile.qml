@@ -34,7 +34,7 @@ MenuItem {
         property var extensions: ["json"];
 
         title: qsTr("Choose a lens profile")
-        nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Lens profiles") + " (*.json)"];
+        nameFilters: [qsTr("Lens profiles") + " (*.json" + (Qt.platform.os == "ios"? " *.txt" : "") + ")"];
         type: "lens";
         onAccepted: loadFile(fileDialog.selectedFile);
     }
