@@ -12,11 +12,71 @@ TextField {
     text: "";
     width: parent.width;
 
-    property bool renderAfterSelect: false;
+    property var cbAfterSelect: null;
     property bool folderOnly: false;
+
+    property url fullFileUrl;
+    property url folderUrl;
+    property string filename;
 
     property alias outputFileDialog: outputFileDialog;
     property alias outputFolderDialog: outputFolderDialog;
+
+    property bool preventChange: false;
+
+    onTextChanged: {
+        // When typing manually
+        if (!preventChange) {
+            if (Qt.platform.os == "ios" || Qt.platform.os == "android") {
+                setFilename(text);
+            } else {
+                setUrl(filesystem.path_to_url(text));
+            }
+        }
+    }
+
+    function updateText() {
+        preventChange = true;
+        if (Qt.platform.os == "ios" || Qt.platform.os == "android") {
+            text = filename;
+            if (!filename && root.folderOnly) {
+                text = root.folderUrl.toString()? qsTr('[Selected folder]') : "";
+            }
+        } else {
+            text = fullFileUrl.toString()? filesystem.display_url(fullFileUrl) : filesystem.display_folder_filename(folderUrl, filename);
+        }
+        preventChange = false;
+    }
+
+    function setUrl(url: url) {
+        fullFileUrl = url;
+        filename = filesystem.get_filename(url);
+        folderUrl = filesystem.get_folder(url);
+        updateText();
+    }
+    function setFilename(fname: string) {
+        if (fname != filename) {
+            filename = fname;
+            fullFileUrl = "";
+            updateText();
+        }
+    }
+    function setFolder(folder: url) {
+        folderUrl = folder;
+        if (folder.toString())
+            fullFileUrl = "";
+        updateText();
+    }
+
+    function selectFolder(folder: url, cb) {
+        if (folder.toString() && window.allowedOutputUrls.includes(folder.toString())) {
+            return cb(folder);
+        }
+        root.cbAfterSelect = cb;
+        if (folder.toString())
+            outputFolderDialog.currentFolder = folder;
+        outputFolderDialog.open();
+    }
 
     LinkButton {
         anchors.right: parent.right;
@@ -25,16 +85,16 @@ TextField {
         font.underline: false;
         font.pixelSize: 15 * dpiScale;
         onClicked: {
-            if (Qt.platform.os == "ios" || root.folderOnly) {
+            if (Qt.platform.os == "ios" || Qt.platform.os == "android" || root.folderOnly) {
                 if (root.folderOnly) {
-                    outputFolderDialog.currentFolder = controller.path_to_url(Util.getFolder(root.text));
+                    outputFolderDialog.currentFolder = root.folderUrl;
                 }
                 outputFolderDialog.open();
                 return;
             }
-            outputFileDialog.defaultSuffix = root.text.substring(root.text.length - 3);
-            outputFileDialog.selectedFile = controller.path_to_url(root.text);
-            outputFileDialog.currentFolder = controller.path_to_url(Util.getFolder(root.text));
+            outputFileDialog.defaultSuffix = root.filename.substring(root.filename.length - 3);
+            outputFileDialog.selectedFile = root.filename;
+            outputFileDialog.currentFolder = root.folderUrl;
             outputFileDialog.open();
         }
     }
@@ -45,28 +105,22 @@ TextField {
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*.mp4 *.mov *.png *.exr)"];
         type: "output-video";
         onAccepted: {
-            root.text = controller.url_to_path(outputFileDialog.selectedFile);
+            root.setUrl(outputFileDialog.selectedFile);
             window.exportSettings.updateCodecParams();
         }
     }
     QQD.FolderDialog {
         id: outputFolderDialog;
         title: qsTr("Select file destination");
-        property string urlString: "";
-
         onAccepted: {
-            outputFolderDialog.urlString = selectedFolder.toString();
-            root.text = controller.url_to_path(selectedFolder) + root.text.split('/').slice(-1);
-            window.exportSettings.updateCodecParams();
+            root.folderUrl = selectedFolder;
+            filesystem.start_accessing_url(root.folderUrl); // This will not have equivalent `stop_accessing_url` because we don't know when the access ends
+            updateText();
 
-            if (Qt.platform.os == "ios") {
-                controller.start_apple_url_access(outputFolderDialog.urlString);
-                // TODO: stop access
-                window.allowedOutputUrls.push(outputFolderDialog.urlString);
-                if (root.renderAfterSelect) {
-                    root.renderAfterSelect = false;
-                    window.renderBtn.btn.clicked();
-                }
+            window.allowedOutputUrls.push(root.folderUrl.toString());
+            if (root.cbAfterSelect) {
+                root.cbAfterSelect(root.folderUrl);
+                root.cbAfterSelect = null;
             }
         }
     }

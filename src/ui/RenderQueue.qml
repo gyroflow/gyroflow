@@ -139,15 +139,18 @@ Item {
 
                     if (total_frames > 0 && finished) {
                         render_queue.main_job_id = 0;
-                        const path = render_queue.get_job_output_path(job_id);
+                        const folder = render_queue.get_job_output_folder(job_id);
+                        const filename = render_queue.get_job_output_filename(job_id);
                         let options = [];
+                        if (Qt.platform.os != "ios") {
+                            options.push({ text: qsTr("Open rendered file"), clicked: () => filesystem.open_file_externally(filesystem.get_file_url(folder, filename, false)) });
+                        }
                         if (Qt.platform.os != "android" && Qt.platform.os != "ios") {
-                            options.push({ text: qsTr("Open rendered file"), clicked: () => controller.open_file_externally(path) });
-                            options.push({ text: qsTr("Open file location"), clicked: () => controller.open_file_externally(Util.getFolder(path)) });
+                            options.push({ text: qsTr("Open file location"), clicked: () => filesystem.open_file_externally(folder) });
                         }
                         options.push({ text: qsTr("Ok") });
 
-                        messageBox(Modal.Success, qsTr("Rendering completed. The file was written to: %1.").arg("<br><b>" + path + "</b>"), options);
+                        messageBox(Modal.Success, qsTr("Rendering completed. The file was written to: %1.").arg("<br><b>" + filesystem.display_folder_filename(folder, filename) + "</b>"), options);
                     }
                 }
             }
@@ -391,15 +394,15 @@ Item {
                                     });
                                     btns.model = buttons;
                                 } else if (errorString.startsWith("file_exists:")) {
-                                    const path = errorString.substring(12);
+                                    const data = JSON.parse(errorString.substring(12));
                                     switch (render_queue.overwrite_mode) {
                                         case 1: render_queue.reset_job(job_id); btns.model = []; break; // Overwrite
-                                        case 2: render_queue.set_job_output_path(job_id, window.renameOutput(path), false); btns.model = []; break; // Rename
+                                        case 2: render_queue.set_job_output_filename(job_id, window.renameOutput(data.filename, data.folder), false); btns.model = []; break; // Rename
                                         case 3: render_queue.set_error_string(job_id, qsTr("Output file already exists.")); btns.model = []; break; // Skip
                                         default:
                                             btns.model = [
                                                 { text: qsTr("Yes"),    clicked: () => { render_queue.reset_job(job_id); }, accent: true },
-                                                { text: qsTr("Rename"), clicked: () => { render_queue.set_job_output_path(job_id, window.renameOutput(path), true); } },
+                                                { text: qsTr("Rename"), clicked: () => { render_queue.set_job_output_filename(job_id, window.renameOutput(data.filename, data.folder), true); } },
                                                 { text: qsTr("No"),     clicked: () => { render_queue.set_error_string(job_id, qsTr("Output file already exists.")); btns.model = []; } },
                                             ];
                                         break;
@@ -468,11 +471,11 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter;
                     spacing: 3 * dpiScale;
                     BasicText {
-                        text: Util.getFilename(input_file);
+                        text: input_filename;
                         font.bold: true;
                         font.pixelSize: 14 * dpiScale;
                     }
-                    BasicText { text: qsTr("Save to: %1").arg("<b>" + output_path + "</b>"); }
+                    BasicText { text: qsTr("Save to: %1").arg("<b>" + display_output_path + "</b>"); }
                     BasicText { text: qsTr("Export settings: %1").arg("<b>" + export_settings + "</b>"); }
                 }
 
@@ -533,18 +536,18 @@ Item {
                     Row {
                         id: btnsRowInner;
                         IconButton {
-                            visible: dlg.isFinished;
+                            visible: dlg.isFinished && Qt.platform.os != "ios";
                             iconName: "play";
                             icon.width: 25 * dpiScale;
                             icon.height: 25 * dpiScale;
                             tooltip: qsTr("Open rendered file");
-                            onClicked: controller.open_file_externally(output_path);
+                            onClicked: filesystem.open_file_externally(filesystem.get_file_url(output_folder, output_filename, false));
                         }
                         IconButton {
-                            visible: dlg.isFinished;
+                            visible: dlg.isFinished && Qt.platform.os != "android" && Qt.platform.os != "ios";
                             iconName: "folder";
                             tooltip: qsTr("Open file location");
-                            onClicked: controller.open_file_externally(Util.getFolder(output_path));
+                            onClicked: filesystem.open_file_externally(output_folder);
                         }
                         IconButton {
                             tooltip: qsTr("Remove");
@@ -577,23 +580,28 @@ Item {
         anchors.margins: 0 * dpiScale;
         anchors.topMargin: lv.y;
         extensions: fileDialog.extensions;
-        function add(outPath, urls) {
+        function add(outFolder, urls) {
             let additional = window.getAdditionalProjectData();
-            if (outPath) additional.output.output_path = outPath;
+            if (!outFolder) {
+                delete additional.output.output_folder;
+                delete additional.output.output_filename;
+            } else {
+                additional.output.output_folder = outFolder;
+            }
             additional = JSON.stringify(additional);
 
             for (const url of urls) {
-                const job_id = render_queue.add_file(controller.url_to_path(url), "", additional);
+                const job_id = render_queue.add_file(url.toString(), "", additional);
                 loader.pendingJobs[job_id] = true;
             }
             loader.updateStatus();
         }
         onLoadFiles: (urls) => {
             if (!urls.length) return;
-            if (urls[0].toString().toLowerCase().endsWith(".gyroflow")) {
+            if (filesystem.get_filename(urls[0]).toLowerCase().endsWith(".gyroflow")) {
                 add("", urls);
             } else {
-                window.videoArea.askForOutputLocation(Util.getFolder(window.outputFile), true, function(outPath) { add(outPath, urls); });
+                window.videoArea.askForOutputLocation(window.outputFile.folderUrl, "", true, function(outFolder, _, __) { add(outFolder, urls); });
             }
         }
     }

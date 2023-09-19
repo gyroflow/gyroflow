@@ -43,18 +43,6 @@ pub fn is_opengl() -> bool {
     })
 }
 
-pub fn path_to_url(path: QString) -> QUrl {
-    cpp!(unsafe [path as "QString"] -> QUrl as "QUrl" {
-        return QUrl::fromLocalFile(path);
-    })
-}
-pub fn url_to_path(url: QUrl) -> String {
-    let path = cpp!(unsafe [url as "QUrl"] -> QString as "QString" {
-        return url.toLocalFile();
-    });
-    path.to_string()
-}
-
 pub fn qt_queued_callback<T: QObject + 'static, T2: Send, F: FnMut(&T, T2) + 'static>(qobj: &T, mut cb: F) -> impl Fn(T2) + Send + Sync + Clone {
     let qptr = QPointer::from(qobj);
     qmetaobject::queued_callback(move |arg| {
@@ -126,29 +114,6 @@ cpp! {{
     };
 }}
 
-pub fn resolve_android_url(url: QString) -> QString {
-    cpp!(unsafe [url as "QString"] -> QString as "QString" {
-        #ifdef Q_OS_ANDROID
-            QVariant res = QNativeInterface::QAndroidApplication::runOnAndroidMainThread([url] {
-                QJniObject jniPath = QJniObject::fromString(url);
-                QJniObject jniUri = QJniObject::callStaticObjectMethod("android/net/Uri", "parse", "(Ljava/lang/String;)Landroid/net/Uri;", jniPath.object());
-
-                QJniObject activity(QNativeInterface::QAndroidApplication::context());
-
-                QString url = QJniObject::callStaticObjectMethod("org/ekkescorner/utils/QSharePathResolver",
-                    "getRealPathFromURI",
-                    "(Landroid/content/Context;Landroid/net/Uri;)Ljava/lang/String;",
-                    activity.object(), jniUri.object()
-                ).toString();
-
-                return QVariant::fromValue(url);
-            }).result();
-            return res.toString();
-        #else
-            return url;
-        #endif
-    })
-}
 pub fn catch_qt_file_open<F: FnMut(QUrl)>(cb: F) {
     let func: Box<dyn FnMut(QUrl)> = Box::new(cb);
     let cb_ptr = Box::into_raw(func);
@@ -163,8 +128,8 @@ pub fn catch_qt_file_open<F: FnMut(QUrl)>(cb: F) {
     });
 }
 
-pub fn open_file_externally(path: QString) {
-    cpp!(unsafe [path as "QString"] { QDesktopServices::openUrl(QUrl::fromLocalFile(path)); });
+pub fn open_file_externally(url: QUrl) {
+    cpp!(unsafe [url as "QUrl"] { QDesktopServices::openUrl(url); });
 }
 
 pub fn get_data_location() -> String {
@@ -192,9 +157,29 @@ pub fn update_rlimit() {
     });
 }
 
+pub fn set_android_context() {
+    #[cfg(target_os = "android")]
+    {
+        let jvm = cpp!(unsafe [] -> *mut std::ffi::c_void as "void *" {
+            #ifdef Q_OS_ANDROID
+            return QJniEnvironment::javaVM();
+            #else
+            return nullptr;
+            #endif
+        });
+        let activity = cpp!(unsafe [] -> *mut std::ffi::c_void as "void *" {
+            #ifdef Q_OS_ANDROID
+            return QNativeInterface::QAndroidApplication::context();
+            #else
+            return nullptr;
+            #endif
+        });
+        unsafe { ndk_context::initialize_android_context(jvm, activity); }
+    }
+}
+
 pub fn init_logging() {
     use simplelog::*;
-    use std::path::*;
     let log_config = ConfigBuilder::new()
         .add_filter_ignore_str("mp4parse")
         .add_filter_ignore_str("wgpu")
@@ -219,7 +204,7 @@ pub fn init_logging() {
 
     #[cfg(not(target_os = "android"))]
     {
-        let exe_loc = std::env::current_exe().map(|x| x.with_file_name("gyroflow.log")).unwrap_or_else(|_| PathBuf::from("./gyroflow.log"));
+        let exe_loc = std::env::current_exe().map(|x| x.with_file_name("gyroflow.log")).unwrap_or_else(|_| std::path::PathBuf::from("./gyroflow.log"));
         if let Ok(file_log) = std::fs::File::create(exe_loc) {
             let _ = CombinedLogger::init(vec![
                 TermLogger::new(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto),
@@ -432,40 +417,13 @@ pub fn image_to_b64(img: QImage) -> QString {
     })
 }
 
-#[cfg(any(target_os = "macos", target_os = "ios"))]
-pub fn start_accessing_security_scoped_resource(url: &str) -> bool {
-    use core_foundation_sys::{ base::*, url::*, string::* };
-    let mut ok = false;
-    unsafe {
-        let url_u8 = url.as_bytes();
-        let len = url_u8.len() as isize;
-        let url_ref = CFURLCreateWithBytes(std::ptr::null(), url_u8.as_ptr(), len, kCFStringEncodingUTF8, std::ptr::null());
-        if !url_ref.is_null() {
-            ok = CFURLStartAccessingSecurityScopedResource(url_ref) == 1;
-            CFRelease(url_ref as CFTypeRef);
-        }
-    }
-    ok
-}
-#[cfg(any(target_os = "macos", target_os = "ios"))]
-pub fn stop_accessing_security_scoped_resource(url: &str) -> bool {
-    use core_foundation_sys::{ base::*, url::*, string::* };
-    let mut ok = false;
-    unsafe {
-        let url_u8 = url.as_bytes();
-        let len = url_u8.len() as isize;
-        let url_ref = CFURLCreateWithBytes(std::ptr::null(), url_u8.as_ptr(), len, kCFStringEncodingUTF8, std::ptr::null());
-        if !url_ref.is_null() {
-            CFURLStopAccessingSecurityScopedResource(url_ref);
-            ok = true;
-            CFRelease(url_ref as CFTypeRef);
-        }
-    }
-    ok
-}
-
-pub fn update_file_times<P: AsRef<std::path::Path> + std::fmt::Display>(output_path: P, input_path: P) {
+pub fn update_file_times(output_url: &str, input_url: &str) {
     if let Err(e) = || -> std::io::Result<()> {
+        let input_path = gyroflow_core::filesystem::url_to_path(input_url);
+        let output_path = gyroflow_core::filesystem::url_to_path(output_url);
+        if input_path.is_empty() || output_path.is_empty() {
+            return Err(std::io::Error::new(std::io::ErrorKind::PermissionDenied, format!("Can't get path from url! Input: {input_url} / {input_path}, output: {output_url} / {output_path}")));
+        }
         let org_time = filetime_creation::FileTime::from_creation_time(&std::fs::metadata(&input_path)?).ok_or(std::io::ErrorKind::Other)?;
         if cfg!(target_os = "windows") {
             ::log::debug!("Updating creation time of {} to {}", output_path, org_time.to_string());

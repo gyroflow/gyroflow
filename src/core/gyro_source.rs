@@ -6,16 +6,15 @@ use std::iter::zip;
 use std::collections::BTreeMap;
 use std::collections::btree_map::Entry;
 use std::sync::{ Arc, atomic::AtomicBool };
-use std::fs::File;
 use telemetry_parser::{ Input, util };
 use telemetry_parser::tags_impl::{ GetWithType, GroupId, TagId, TimeQuaternion };
 
 use crate::camera_identifier::CameraIdentifier;
 use crate::keyframes::KeyframeManager;
+use crate::filesystem;
 
 use super::imu_integration::*;
 use super::smoothing::SmoothingAlgorithm;
-use std::io::Result;
 use crate::StabilizationParams;
 
 pub type Quat64 = UnitQuaternion<f64>;
@@ -99,7 +98,7 @@ pub struct GyroSource {
     offsets_linear: BTreeMap<i64, f64>, // <microseconds timestamp, offset in milliseconds> - linear fit
     offsets_adjusted: BTreeMap<i64, f64>, // <timestamp + offset, offset>
 
-    pub file_path: String
+    pub file_url: String
 }
 
 impl GyroSource {
@@ -128,11 +127,11 @@ impl GyroSource {
     pub fn init_from_params(&mut self, stabilization_params: &StabilizationParams) {
         self.duration_ms = stabilization_params.get_scaled_duration_ms();
     }
-    pub fn parse_telemetry_file<F: Fn(f64)>(path: &str, options: &FileLoadOptions, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Result<FileMetadata> {
-        let mut stream = File::open(path)?;
-        let filesize = stream.metadata()?.len() as usize;
-
-        let mut input = Input::from_stream(&mut stream, filesize, &path, progress_cb, cancel_flag)?;
+    pub fn parse_telemetry_file<F: Fn(f64)>(url: &str, options: &FileLoadOptions, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Result<FileMetadata, crate::GyroflowCoreError> {
+        let base = filesystem::get_engine_base();
+        let mut file = filesystem::open_file(&base, url, false)?;
+        let filesize = file.size;
+        let mut input = Input::from_stream(file.get_file(), filesize, &filesystem::url_to_path(url), progress_cb, cancel_flag)?;
 
         let camera_identifier = CameraIdentifier::from_telemetry_parser(&input, size.0, size.1, fps).ok();
 
@@ -777,7 +776,7 @@ impl GyroSource {
         if let Some(v) = &self.imu_rotation_angles { hasher.write_u64(v[0].to_bits()); hasher.write_u64(v[1].to_bits()); hasher.write_u64(v[2].to_bits()); }
         if let Some(v) = &self.acc_rotation_angles { hasher.write_u64(v[0].to_bits()); hasher.write_u64(v[1].to_bits()); hasher.write_u64(v[2].to_bits()); }
         if let Some(v) = &self.gyro_bias { hasher.write_u64(v[0].to_bits()); hasher.write_u64(v[1].to_bits()); hasher.write_u64(v[2].to_bits()); }
-        hasher.write(self.file_path.as_bytes());
+        hasher.write(self.file_url.as_bytes());
         hasher.write_u64(self.duration_ms.to_bits());
         hasher.write_u64(self.imu_lpf.to_bits());
         hasher.write_usize(self.raw_imu.len());

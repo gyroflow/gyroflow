@@ -15,6 +15,7 @@ pub mod keyframes;
 pub mod zooming;
 pub mod smoothing;
 pub mod filtering;
+pub mod filesystem;
 
 pub mod gpu;
 
@@ -22,7 +23,6 @@ pub mod util;
 pub mod stabilization_params;
 
 use std::sync::{ Arc, atomic::{ AtomicU64, AtomicBool, Ordering::SeqCst } };
-use std::path::PathBuf;
 use keyframes::*;
 use parking_lot::{ RwLock, RwLockUpgradableReadGuard };
 use nalgebra::Vector4;
@@ -53,8 +53,8 @@ lazy_static::lazy_static! {
 
 #[derive(Default, Clone, Debug)]
 pub struct InputFile {
-    pub path: String,
-    pub project_file_path: Option<String>,
+    pub url: String,
+    pub project_file_url: Option<String>,
     pub image_sequence_fps: f64,
     pub image_sequence_start: i32
 }
@@ -118,7 +118,7 @@ impl Default for StabilizationManager {
 }
 
 impl StabilizationManager {
-    pub fn init_from_video_data(&self, _path: &str, duration_ms: f64, fps: f64, frame_count: usize, video_size: (usize, usize)) -> std::io::Result<()> {
+    pub fn init_from_video_data(&self, duration_ms: f64, fps: f64, frame_count: usize, video_size: (usize, usize)) {
         {
             let mut params = self.params.write();
             params.fps = fps;
@@ -129,17 +129,15 @@ impl StabilizationManager {
 
         self.pose_estimator.sync_results.write().clear();
         self.keyframes.write().clear();
-
-        Ok(())
     }
 
-    pub fn load_gyro_data<F: Fn(f64)>(&self, path: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<gyro_source::FileMetadata> {
+    pub fn load_gyro_data<F: Fn(f64)>(&self, url: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::result::Result<gyro_source::FileMetadata, GyroflowCoreError> {
         {
             let params = self.params.read();
             let mut gyro = self.gyro.write();
             gyro.init_from_params(&params);
             gyro.clear_offsets();
-            gyro.file_path = path.to_string();
+            gyro.file_url = url.to_string();
         }
         self.invalidate_smoothing();
         self.invalidate_zooming();
@@ -159,7 +157,7 @@ impl StabilizationManager {
         };
 
         let cancel_flag2 = cancel_flag.clone();
-        let mut md = GyroSource::parse_telemetry_file(path, options, size, fps, progress_cb, cancel_flag2)?;
+        let mut md = GyroSource::parse_telemetry_file(url, options, size, fps, progress_cb, cancel_flag2)?;
         if md.detected_source.as_ref().map(|v| v.starts_with("GoPro ")).unwrap_or_default() {
             // If gopro reports rolling shutter value, it already applied it, ie. the video is already corrected
             md.frame_readout_time = None;
@@ -182,7 +180,7 @@ impl StabilizationManager {
                     }
                 } else if lens.is_object() {
                     l.load_from_json_value(lens);
-                    l.filename = path.to_string();
+                    l.path_to_file = filesystem::url_to_path(url);
                     let db = self.lens_profile_db.read();
                     l.resolve_interpolations(&db);
                 }
@@ -228,15 +226,20 @@ impl StabilizationManager {
         Ok(md)
     }
 
-    pub fn load_lens_profile(&self, path: &str) -> Result<(), serde_json::Error> {
+    pub fn load_lens_profile(&self, url: &str) -> Result<(), crate::GyroflowCoreError> {
+        let url = if (url.starts_with('/') || url.starts_with('\\') || (url.len() > 3 && &url[1..2] == ":")) && !url.contains("://") && !url.starts_with('{') {
+            crate::filesystem::path_to_url(url)
+        } else {
+            url.to_owned()
+        };
         let db = self.lens_profile_db.read();
-        let (result, from_db) = if let Some(lens) = db.get_by_id(path) {
+        let (result, from_db) = if let Some(lens) = db.get_by_id(&url) {
             *self.lens.write() = lens.clone();
             (Ok(()), true)
-        } else if path.starts_with('{') {
-            (self.lens.write().load_from_data(path), false)
+        } else if url.starts_with('{') {
+            (self.lens.write().load_from_data(&url), false)
         } else {
-            (self.lens.write().load_from_file(path), false)
+            (self.lens.write().load_from_file(&url), false)
         };
         let (width, height, aspect, id, fps) = {
             let params = self.params.read();
@@ -863,16 +866,15 @@ impl StabilizationManager {
         });
     }
 
-    pub fn export_gyroflow_file(&self, filepath: impl AsRef<std::path::Path>, thin: bool, extended: bool, additional_data: &str) -> std::io::Result<()> {
-        let data = self.export_gyroflow_data(thin, extended, additional_data)?;
-        let path_str = filepath.as_ref().to_string_lossy().to_string();
-        std::fs::write(filepath, data)?;
+    pub fn export_gyroflow_file(&self, url: &str, typ: GyroflowProjectType, additional_data: &str) -> Result<(), GyroflowCoreError> {
+        let data = self.export_gyroflow_data(typ, additional_data, Some(url))?;
+        filesystem::write(url, data.as_bytes())?;
 
-        self.input_file.write().project_file_path = Some(path_str);
+        self.input_file.write().project_file_url = Some(url.to_string());
 
         Ok(())
     }
-    pub fn export_gyroflow_data(&self, thin: bool, extended: bool, additional_data: &str) -> std::io::Result<String> {
+    pub fn export_gyroflow_data(&self, typ: GyroflowProjectType, additional_data: &str, _project_url: Option<&str>) -> Result<String, GyroflowCoreError> {
         let gyro = self.gyro.read();
         let params = self.params.read();
 
@@ -905,7 +907,7 @@ impl StabilizationManager {
             "title": "Gyroflow data file",
             "version": 3,
             "app_version": env!("CARGO_PKG_VERSION").to_string(),
-            "videofile": input_file.path,
+            "videofile": input_file.url,
             "calibration_data": self.lens.read().get_json_value().unwrap_or_else(|_| serde_json::json!({})),
             "date": time::OffsetDateTime::now_local().map(|v| v.date().to_string()).unwrap_or_default(),
 
@@ -946,7 +948,7 @@ impl StabilizationManager {
                 "horizontal_rs":          params.horizontal_rs,
             },
             "gyro_source": {
-                "filepath":           gyro.file_path,
+                "filepath":           gyro.file_url,
                 "lpf":                gyro.imu_lpf,
                 "rotation":           gyro.imu_rotation_angles,
                 "acc_rotation":       gyro.acc_rotation_angles,
@@ -966,8 +968,21 @@ impl StabilizationManager {
 
         util::merge_json(&mut obj, &serde_json::from_str(additional_data).unwrap_or_default());
 
+        #[cfg(any(target_os = "macos", target_os = "ios"))]
+        if let serde_json::Value::Object(ref mut obj) = obj {
+            obj.insert("videofile_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(&input_file.url, _project_url)));
+            if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
+                obj.insert("filepath_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(&gyro.file_url, _project_url)));
+            }
+            if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("output") {
+                if let Some(output_folder) = obj.get("output_folder").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
+                    obj.insert("output_folder_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(output_folder, _project_url)));
+                }
+            }
+        }
+
         if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
-            if thin {
+            if typ == GyroflowProjectType::Simple {
                 let metadata_copy = crate::gyro_source::FileMetadata {
                     raw_imu:                Default::default(),
                     quaternions:            Default::default(),
@@ -988,7 +1003,7 @@ impl StabilizationManager {
                 }
             }
 
-            if extended {
+            if typ == GyroflowProjectType::WithProcessedData {
                 let mut imu_timestamps = Vec::with_capacity(gyro.quaternions.len());
                 let mut imu_timestamps_final = Vec::with_capacity(gyro.quaternions.len());
                 for (t, _) in &gyro.quaternions {
@@ -1011,59 +1026,66 @@ impl StabilizationManager {
         Ok(serde_json::to_string_pretty(&obj)?)
     }
 
-    pub fn get_new_videofile_path(file_path_str: &str, path: Option<std::path::PathBuf>, sequence_start: u32) -> PathBuf {
-        let mut file_path = std::path::Path::new(file_path_str).to_path_buf();
-        let mut replaced = None;
-        if path.is_some() && !file_path.exists() {
-            if let Some(num_pos) = file_path_str.find('%') {
-                if let Some(d_pos) = file_path_str[num_pos+1..].find('d') {
+    pub fn get_new_videofile_url(org_video_url: &str, gf_file_url: Option<&str>, sequence_start: u32) -> String {
+        if gf_file_url.is_some() && !filesystem::exists(org_video_url) {
+            ::log::debug!("get_new_videofile_url: {org_video_url}");
+            let folder = filesystem::get_folder(gf_file_url.unwrap());
+            let filename = filesystem::get_filename(org_video_url);
+            let mut filename_replaced = filename.clone();
+
+            if let Some(num_pos) = filename.find('%') {
+                if let Some(d_pos) = filename[num_pos+1..].find('d') {
                     if d_pos <= 5 {
-                        let num_str = &file_path_str[num_pos+1..num_pos+1+d_pos];
+                        let num_str = &filename[num_pos+1..num_pos+1+d_pos];
                         if let Ok(num) = num_str.parse::<u32>() {
                             let new_num = format!("{:01$}", sequence_start, num as usize);
                             let from = format!("%{}d", num_str);
-                            file_path = std::path::Path::new(&file_path_str.replace(&from, &new_num)).to_path_buf();
-                            replaced = Some((from, new_num));
+                            filename_replaced = filename.replace(&from, &new_num);
                         }
                     }
                 }
             }
-            if let Some(filename) = file_path.file_name() {
-                let new_path = path.as_ref().unwrap().with_file_name(filename);
-                if new_path.exists() {
-                    if let Some((from, to)) = replaced {
-                        file_path = new_path.with_file_name(&filename.to_string_lossy().replace(&to, &from));
-                    } else {
-                        file_path = new_path;
-                    }
-                }
+            if filesystem::exists_in_folder(&folder, &filename_replaced) {
+                return filesystem::get_file_url(&folder, &filename, false);
             }
         }
-        file_path
+        org_video_url.to_string()
     }
 
-    pub fn import_gyroflow_file<F: Fn(f64)>(&self, path: &str, blocking: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::io::Result<serde_json::Value> {
-        let data = std::fs::read(path)?;
+    pub fn import_gyroflow_file<F: Fn(f64)>(&self, url: &str, blocking: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::result::Result<serde_json::Value, GyroflowCoreError> {
+        let data = filesystem::read(url)?;
 
         let mut is_preset = false;
-        let result = self.import_gyroflow_data(&data, blocking, Some(std::path::Path::new(path).to_path_buf()), progress_cb, cancel_flag, &mut is_preset);
+        let result = self.import_gyroflow_data(&data, blocking, Some(url), progress_cb, cancel_flag, &mut is_preset);
         if !is_preset && result.is_ok() {
-            self.input_file.write().project_file_path = Some(path.to_string());
+            self.input_file.write().project_file_url = Some(url.to_string());
         }
         result
     }
-    pub fn import_gyroflow_data<F: Fn(f64)>(&self, data: &[u8], blocking: bool, path: Option<std::path::PathBuf>, progress_cb: F, cancel_flag: Arc<AtomicBool>, is_preset: &mut bool) -> std::io::Result<serde_json::Value> {
+    pub fn import_gyroflow_data<F: Fn(f64)>(&self, data: &[u8], blocking: bool, url: Option<&str>, progress_cb: F, cancel_flag: Arc<AtomicBool>, is_preset: &mut bool) -> std::result::Result<serde_json::Value, GyroflowCoreError> {
         let mut obj: serde_json::Value = serde_json::from_slice(&data)?;
         if let serde_json::Value::Object(ref mut obj) = obj {
             let mut output_size = None;
-            let org_video_path = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
+            let mut org_video_url = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
+            if !org_video_url.is_empty() && !org_video_url.contains("://") {
+                org_video_url = filesystem::path_to_url(&org_video_url);
+                if let Some(videofile) = obj.get_mut("videofile") {
+                    *videofile = serde_json::Value::String(org_video_url.clone());
+                }
+            }
+            #[cfg(any(target_os = "macos", target_os = "ios"))]
+            if let Some(v) = obj.get("videofile_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
+                let resolved = filesystem::apple::resolve_bookmark(v);
+                if !resolved.is_empty() { org_video_url = resolved; }
+            }
+
             let sequence_start = obj.get("image_sequence_start").and_then(|x| x.as_i64()).unwrap_or_default() as u32;
 
-            let video_path = Self::get_new_videofile_path(&org_video_path, path.clone(), sequence_start);
+            let video_url = Self::get_new_videofile_url(&org_video_url, url, sequence_start);
             if let Some(videofile) = obj.get_mut("videofile") {
-                *videofile = serde_json::Value::String(util::path_to_str(&video_path));
+                *videofile = serde_json::Value::String(video_url.clone());
             }
-            *is_preset = org_video_path.is_empty();
+            *is_preset = org_video_url.is_empty();
 
             if let Some(vid_info) = obj.get("video_info") {
                 let mut params = self.params.write();
@@ -1083,18 +1105,29 @@ impl StabilizationManager {
                 self.keyframes.write().timestamp_scale = params.fps_scale;
             }
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
-                let org_gyro_path = obj.get("filepath").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
-                let gyro_path = Self::get_new_videofile_path(&org_gyro_path, path.clone(), sequence_start);
+                let mut org_gyro_url = obj.get("filepath").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
+                if !org_gyro_url.is_empty() && !org_gyro_url.contains("://") {
+                    org_gyro_url = filesystem::path_to_url(&org_gyro_url);
+                    if let Some(filepath) = obj.get_mut("filepath") {
+                        *filepath = serde_json::Value::String(org_gyro_url.clone());
+                    }
+                }
+                #[cfg(any(target_os = "macos", target_os = "ios"))]
+                if let Some(v) = obj.get("filepath_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
+                    let resolved = filesystem::apple::resolve_bookmark(v);
+                    if !resolved.is_empty() { org_gyro_url = resolved; }
+                }
+                let gyro_url = Self::get_new_videofile_url(&org_gyro_url, url.clone(), sequence_start);
                 if let Some(fp) = obj.get_mut("filepath") {
-                    *fp = serde_json::Value::String(util::path_to_str(&gyro_path));
+                    *fp = serde_json::Value::String(gyro_url.clone());
                 }
                 use crate::gyro_source::TimeIMU;
 
                 let is_compressed = obj.get("raw_imu").map(|x| x.is_string()).unwrap_or_default();
-                let is_main_video = org_gyro_path == org_video_path;
+                let is_main_video = org_gyro_url == org_video_url;
 
                 // Load IMU data only if it's from another file or the gyro file is not accessible anymore
-                if (!org_gyro_path.is_empty() && org_gyro_path != org_video_path) || !gyro_path.exists() || std::fs::File::open(&gyro_path).is_err() {
+                if (!org_gyro_url.is_empty() && org_gyro_url != org_video_url) || !filesystem::can_open_file(&gyro_url) {
                     let mut raw_imu = Vec::new();
                     let mut quaternions = TimeQuat::default();
                     let mut image_orientations = None;
@@ -1162,20 +1195,20 @@ impl StabilizationManager {
                     } else if let Ok(md) = util::decompress_from_base91_cbor(obj.get("file_metadata").and_then(|x| x.as_str()).unwrap_or_default()) as std::io::Result<crate::gyro_source::FileMetadata> {
                         let mut gyro = self.gyro.write();
                         gyro.load_from_telemetry(&md);
-                    } else if gyro_path.exists() && blocking {
-                        if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), is_main_video, &Default::default(), progress_cb, cancel_flag) {
-                            ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
+                    } else if filesystem::exists(&gyro_url) && blocking {
+                        if let Err(e) = self.load_gyro_data(&gyro_url, is_main_video, &Default::default(), progress_cb, cancel_flag) {
+                            ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_url, e);
                         }
                     }
-                } else if gyro_path.exists() && blocking {
-                    if let Err(e) = self.load_gyro_data(&util::path_to_str(&gyro_path), is_main_video, &Default::default(), progress_cb, cancel_flag) {
-                        ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_path, e);
+                } else if filesystem::exists(&gyro_url) && blocking {
+                    if let Err(e) = self.load_gyro_data(&gyro_url, is_main_video, &Default::default(), progress_cb, cancel_flag) {
+                        ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_url, e);
                     }
                 }
 
                 let mut gyro = self.gyro.write();
-                if !org_gyro_path.is_empty() {
-                    gyro.file_path = util::path_to_str(&gyro_path);
+                if !org_gyro_url.is_empty() {
+                    gyro.file_url = gyro_url.clone();
                 }
 
                 if let Some(v) = obj.get("lpf").and_then(|x| x.as_f64()) { gyro.imu_lpf = v; }
@@ -1256,10 +1289,19 @@ impl StabilizationManager {
 
                 obj.remove("adaptive_zoom_fovs");
             }
-            if let Some(serde_json::Value::Object(ref obj)) = obj.get("output") {
+            if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("output") {
                 if let Some(w) =  obj.get("output_width").and_then(|x| x.as_u64()) {
                     if let Some(h) =  obj.get("output_height").and_then(|x| x.as_u64()) {
                         output_size = Some((w as usize, h as usize));
+                    }
+                }
+                #[cfg(any(target_os = "macos", target_os = "ios"))]
+                if let Some(v) = obj.get("output_folder_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
+                    let resolved = filesystem::apple::resolve_bookmark(v);
+                    if !resolved.is_empty() {
+                        filesystem::start_accessing_url(&resolved);
+                        obj.insert("output_folder".into(), serde_json::Value::String(resolved));
+                        obj.insert("output_folder_bookmark".into(), serde_json::Value::String("resolved".into()));
                     }
                 }
             }
@@ -1308,8 +1350,8 @@ impl StabilizationManager {
                 if let Some(seq_fps) = obj.get("image_sequence_fps").and_then(|x| x.as_f64()) {
                     input_file.image_sequence_fps = seq_fps;
                 }
-                if !org_video_path.is_empty() && std::fs::File::open(&video_path).is_ok() {
-                    input_file.path = util::path_to_str(&video_path);
+                if !org_video_url.is_empty() && filesystem::can_open_file(&video_url) {
+                    input_file.url = video_url;
                 }
             }
 
@@ -1328,9 +1370,9 @@ impl StabilizationManager {
         Ok(obj)
     }
 
-    pub fn load_video_file(&self, filepath: &str, mut metadata: Option<telemetry_parser::util::VideoMetadata>) -> std::io::Result<telemetry_parser::util::VideoMetadata> {
+    pub fn load_video_file(&self, url: &str, mut metadata: Option<telemetry_parser::util::VideoMetadata>) -> Result<telemetry_parser::util::VideoMetadata, GyroflowCoreError> {
         if metadata.is_none() {
-            metadata = Some(util::get_video_metadata(filepath)?);
+            metadata = Some(util::get_video_metadata(url)?);
         }
         let metadata = metadata.unwrap();
         log::info!("Loading video file: {metadata:?}");
@@ -1339,8 +1381,8 @@ impl StabilizationManager {
             let video_size = (metadata.width as usize, metadata.height as usize);
             let frame_count = (metadata.duration_s * metadata.fps).ceil() as usize;
 
-            self.init_from_video_data(filepath, metadata.duration_s * 1000.0, metadata.fps, frame_count, video_size)?;
-            let _ = self.load_gyro_data(filepath, true, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
+            self.init_from_video_data(metadata.duration_s * 1000.0, metadata.fps, frame_count, video_size);
+            let _ = self.load_gyro_data(url, true, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
 
             let camera_id = self.camera_id.read();
 
@@ -1364,7 +1406,7 @@ impl StabilizationManager {
                         }
                         Err(e) => {
                             log::error!("An error occured: {e:?}");
-                            return Err(std::io::ErrorKind::Other.into());
+                            return Err(e);
                         }
                     }
                 }
@@ -1439,6 +1481,21 @@ pub fn run_threaded<F>(cb: F) where F: FnOnce() + Send + 'static {
     THREAD_POOL.spawn(cb);
 }
 
+use std::str::FromStr;
+#[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
+pub enum GyroflowProjectType {
+    Simple,
+    WithGyroData,
+    WithProcessedData
+}
+impl FromStr for GyroflowProjectType {
+    type Err = serde_json::Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> { serde_json::from_str(&format!("\"{}\"", s)) }
+}
+impl ToString for GyroflowProjectType {
+    fn to_string(&self) -> String { format!("{:?}", self) }
+}
+
 #[derive(thiserror::Error, Debug)]
 pub enum GyroflowCoreError {
     #[error("No stabilization data at {0}. Make sure you called `ensure_ready_for_processing`")]
@@ -1464,6 +1521,21 @@ pub enum GyroflowCoreError {
 
     #[error("Failed to find cached wgpu in process_pixels. Key: {0}")]
     NoCachedWgpuInstance(String),
+
+    #[error("Unsupported file format {0}")]
+    UnsupportedFormat(String),
+
+    #[error("Invalid data")]
+    InvalidData,
+
+    #[error("JSON error {0:?}")]
+    JSONError(#[from] serde_json::Error),
+
+    #[error("Filesystem error {0:?}")]
+    FilesystemError(#[from] crate::filesystem::FilesystemError),
+
+    #[error("IO error {0:?}")]
+    IOError(#[from] std::io::Error),
 
     #[error("Unknown error")]
     Unknown

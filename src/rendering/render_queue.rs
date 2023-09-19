@@ -15,7 +15,10 @@ use regex::Regex;
 pub struct RenderQueueItem {
     pub job_id: u32,
     pub input_file: QString,
-    pub output_path: QString,
+    pub input_filename: QString,
+    pub output_filename: QString,
+    pub output_folder: QString,
+    pub display_output_path: QString,
     pub export_settings: QString,
     pub thumbnail_url: QString,
     pub current_frame: u64,
@@ -62,7 +65,8 @@ pub struct RenderMetadata {
 pub struct RenderOptions {
     pub codec: String,
     pub codec_options: String,
-    pub output_path: String,
+    pub output_folder: String,
+    pub output_filename: String,
     pub output_width: usize,
     pub output_height: usize,
     pub bitrate: f64,
@@ -134,13 +138,23 @@ impl RenderOptions {
                 if let Some(s) = v.get("comment").and_then(|x| x.as_str()) { self.metadata.comment = s.to_string(); }
             }
 
+            // Backwards compatibility
             if let Some(v) = obj.get("output_path").and_then(|x| x.as_str()) {
-                let cur_path = std::path::Path::new(&self.output_path);
-                let mut new_path = std::path::Path::new(v).to_path_buf();
-                if let Some(fname) = cur_path.file_name() {
-                    new_path.push(fname.to_string_lossy().to_string());
-                    self.output_path = new_path.to_string_lossy().replace('\\', "/");
+                let url = core::filesystem::path_to_url(v);
+                let folder = core::filesystem::get_folder(&url);
+                if !folder.is_empty() {
+                    self.output_folder = folder;
                 }
+                let filename = core::filesystem::get_filename(&url);
+                if !filename.is_empty() {
+                    self.output_filename = filename;
+                }
+            }
+            if let Some(v) = obj.get("output_folder").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
+                self.output_folder = v.to_string();
+            }
+            if let Some(v) = obj.get("output_filename").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
+                self.output_filename = v.to_string();
             }
         }
     }
@@ -166,16 +180,17 @@ pub struct RenderQueue {
     reset_job: qt_method!(fn(&self, job_id: u32)),
     get_gyroflow_data: qt_method!(fn(&self, job_id: u32) -> QString),
 
-    add_file: qt_method!(fn(&mut self, path: String, gyro_path: String, additional_data: String) -> u32),
+    add_file: qt_method!(fn(&mut self, url: String, gyro_url: String, additional_data: String) -> u32),
 
-    get_job_output_path: qt_method!(fn(&self, job_id: u32) -> QString),
-    set_job_output_path: qt_method!(fn(&mut self, job_id: u32, new_path: String, start: bool)),
+    get_job_output_filename: qt_method!(fn(&self, job_id: u32) -> QString),
+    get_job_output_folder: qt_method!(fn(&self, job_id: u32) -> QUrl),
+    set_job_output_filename: qt_method!(fn(&mut self, job_id: u32, new_filename: QString, start: bool)),
 
     set_pixel_format: qt_method!(fn(&mut self, job_id: u32, format: String)),
     set_error_string: qt_method!(fn(&mut self, job_id: u32, err: QString)),
     set_processing_resolution: qt_method!(fn(&mut self, target_height: i32)),
 
-    file_exists: qt_method!(fn(&self, path: QString) -> bool),
+    file_exists_in_folder: qt_method!(fn(&self, folder: QUrl, filename: QString) -> bool),
 
     render_queue_json: qt_method!(fn(&self) -> QString),
     restore_render_queue: qt_method!(fn(&mut self, json: String, additional_data: String)),
@@ -290,12 +305,13 @@ impl RenderQueue {
         }
     }
 
-    pub fn set_job_output_path(&mut self, job_id: u32, new_path: String, start: bool) {
+    pub fn set_job_output_filename(&mut self, job_id: u32, new_filename: QString, start: bool) {
         if let Some(job) = self.jobs.get_mut(&job_id) {
-            job.render_options.output_path = new_path.clone();
+            job.render_options.output_filename = new_filename.to_string();
         }
         update_model!(self, job_id, itm {
-            itm.output_path = QString::from(new_path);
+            itm.output_filename = new_filename;
+            itm.display_output_path = QString::from(core::filesystem::display_folder_filename(&itm.output_folder.to_string(), &itm.output_filename.to_string()));
             itm.error_string = QString::default();
             itm.status = JobStatus::Queued;
         });
@@ -324,12 +340,13 @@ impl RenderQueue {
 
         if let Ok(obj) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
             if let Some(out) = obj.get("output") {
-                if let Ok(render_options) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
-                    let project_path = self.stabilizer.input_file.read().project_file_path.clone();
-                    if let Some(project_path) = project_path {
+                if let Ok(mut render_options) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
+                    render_options.update_from_json(out);
+                    let project_url = self.stabilizer.input_file.read().project_file_url.clone();
+                    if let Some(project_url) = project_url {
                         // Save project file on disk
-                        if let Err(e) = self.stabilizer.export_gyroflow_file(&project_path, false, false, &additional_data) {
-                            ::log::warn!("Failed to save project file: {}: {:?}", project_path, e);
+                        if let Err(e) = self.stabilizer.export_gyroflow_file(&project_url, core::GyroflowProjectType::WithGyroData, &additional_data) {
+                            ::log::warn!("Failed to save project file: {}: {:?}", project_url, e);
                         }
                     }
                     let stab = self.stabilizer.get_cloned();
@@ -350,13 +367,15 @@ impl RenderQueue {
 
         let params = stab.params.read();
         let trim_ratio = params.trim_end - params.trim_start;
-        let video_path = stab.input_file.read().path.clone();
+        let video_url = stab.input_file.read().url.clone();
 
         let editing = self.jobs.contains_key(&job_id);
 
         if editing {
             update_model!(self, job_id, itm {
-                itm.output_path = QString::from(render_options.output_path.as_str());
+                itm.output_folder = QString::from(render_options.output_folder.as_str());
+                itm.output_filename = QString::from(render_options.output_filename.as_str());
+                itm.display_output_path = QString::from(core::filesystem::display_folder_filename(render_options.output_folder.as_str(), render_options.output_filename.as_str()));
                 itm.export_settings = QString::from(render_options.settings_string(params.fps));
                 itm.thumbnail_url = thumbnail_url;
                 itm.current_frame = 0;
@@ -373,8 +392,11 @@ impl RenderQueue {
             let mut q = self.queue.borrow_mut();
             q.push(RenderQueueItem {
                 job_id,
-                input_file: QString::from(video_path.as_str()),
-                output_path: QString::from(render_options.output_path.as_str()),
+                input_file: QString::from(video_url.as_str()),
+                input_filename: QString::from(core::filesystem::get_filename(&video_url)),
+                output_folder: QString::from(render_options.output_folder.as_str()),
+                output_filename: QString::from(render_options.output_filename.as_str()),
+                display_output_path: QString::from(core::filesystem::display_folder_filename(render_options.output_folder.as_str(), render_options.output_filename.as_str())),
                 export_settings: QString::from(render_options.settings_string(params.fps)),
                 thumbnail_url,
                 current_frame: 0,
@@ -403,11 +425,20 @@ impl RenderQueue {
         self.added(job_id);
     }
 
-    pub fn get_job_output_path(&self, job_id: u32) -> QString {
+    pub fn get_job_output_folder(&self, job_id: u32) -> QUrl {
         let q = self.queue.borrow();
         if let Some(job) = self.jobs.get(&job_id) {
             if job.queue_index < q.row_count() as usize {
-                return q[job.queue_index].output_path.clone();
+                return QUrl::from(q[job.queue_index].output_folder.clone());
+            }
+        }
+        QUrl::default()
+    }
+    pub fn get_job_output_filename(&self, job_id: u32) -> QString {
+        let q = self.queue.borrow();
+        if let Some(job) = self.jobs.get(&job_id) {
+            if job.queue_index < q.row_count() as usize {
+                return q[job.queue_index].output_filename.clone();
             }
         }
         QString::default()
@@ -625,7 +656,13 @@ impl RenderQueue {
         if let Ok(serde_json::Value::Array(val)) = serde_json::from_str(&json) as serde_json::Result<serde_json::Value> {
             for x in val {
                 if let Some(project) = x.get("project_file").and_then(|x| x.as_str()) {
-                    self.add_file(project.to_string(), String::new(), additional_data.clone());
+                    let mut project = project.to_string();
+                    #[cfg(any(target_os = "macos", target_os = "ios"))]
+                    if let Some(bookmark) = x.get("project_file_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
+                        let resolved = core::filesystem::apple::resolve_bookmark(bookmark);
+                        if !resolved.is_empty() { project = resolved; }
+                    }
+                    self.add_file(project, String::new(), additional_data.clone());
                 } else if let Ok(data) = serde_json::to_string(&x) {
                     self.add_file(data, String::new(), additional_data.clone());
                 }
@@ -635,9 +672,16 @@ impl RenderQueue {
 
     pub fn get_gyroflow_data(&self, job_id: u32) -> QString {
         if let Some(job) = self.jobs.get(&job_id) {
-            if let Some(path) = job.stab.input_file.read().project_file_path.as_ref() {
-                if std::path::Path::new(&path).exists() {
-                    return QString::from(serde_json::json!({ "project_file": path }).to_string());
+            if let Some(url) = job.stab.input_file.read().project_file_url.as_ref() {
+                if core::filesystem::exists(url) {
+                    #[cfg(any(target_os = "macos", target_os = "ios"))]
+                    {
+                        return QString::from(serde_json::json!({ "project_file": url, "project_file_bookmark": core::filesystem::apple::create_bookmark(&url, None) }).to_string());
+                    }
+                    #[cfg(not(any(target_os = "macos", target_os = "ios")))]
+                    {
+                        return QString::from(serde_json::json!({ "project_file": url }).to_string());
+                    }
                 }
             }
             let mut additional_data = job.additional_data.clone();
@@ -647,7 +691,7 @@ impl RenderQueue {
                 }
                 additional_data = serde_json::to_string(&obj).unwrap_or_default();
             }
-            if let Ok(data) = job.stab.export_gyroflow_data(true, false, &additional_data) {
+            if let Ok(data) = job.stab.export_gyroflow_data(core::GyroflowProjectType::Simple, &additional_data, None) {
                 return QString::from(data);
             }
         }
@@ -782,6 +826,7 @@ impl RenderQueue {
             let total_frame_count = params.frame_count;
             drop(params);
             let mut input_file = stab.input_file.read().clone();
+            let filename = core::filesystem::get_filename(&input_file.url);
             let render_options = job.render_options.clone();
 
             progress((0.0, 0, (total_frame_count as f64 * trim_ratio).round() as usize, false, false));
@@ -805,13 +850,15 @@ impl RenderQueue {
                         }
                         additional_data = serde_json::to_string(&obj).unwrap_or_default();
                     }
-                    let path = std::path::Path::new(&render_options.output_path.replace(&default_suffix, "")).with_extension("gyroflow");
+                    let gf_folder = render_options.output_folder.to_owned();
+                    let gf_file = core::filesystem::filename_with_extension(&render_options.output_filename.replace(&default_suffix, ""), "gyroflow");
+                    let gf_url = core::filesystem::get_file_url(&gf_folder, &gf_file, true);
                     let result = match export_project {
-                        1 => stab.export_gyroflow_file(&path, true, false, &additional_data),
-                        2 => stab.export_gyroflow_file(&path, false, false, &additional_data),
-                        3 => stab.export_gyroflow_file(&path, false, true, &additional_data),
-                        4 => stab.export_gyroflow_file(&path, false, false, &additional_data),
-                        _ => { Err(std::io::Error::new(std::io::ErrorKind::Other, "Unknown option")) }
+                        1 => stab.export_gyroflow_file(&gf_url, core::GyroflowProjectType::Simple, &additional_data),
+                        2 => stab.export_gyroflow_file(&gf_url, core::GyroflowProjectType::WithGyroData, &additional_data),
+                        3 => stab.export_gyroflow_file(&gf_url, core::GyroflowProjectType::WithProcessedData, &additional_data),
+                        4 => stab.export_gyroflow_file(&gf_url, core::GyroflowProjectType::WithGyroData, &additional_data),
+                        _ => { Err(gyroflow_core::GyroflowCoreError::Unknown) }
                     };
                     if export_project != 4 {
                         if let Err(e) = result {
@@ -823,20 +870,21 @@ impl RenderQueue {
                     }
                 }
 
-                if input_file.path.to_ascii_lowercase().ends_with(".r3d") {
-                    let mov_path = std::path::Path::new(&input_file.path).with_extension("mov");
-                    if mov_path.exists() {
-                        input_file.path = mov_path.to_string_lossy().to_string();
+                // Assumes regular filesystem
+                if filename.to_ascii_lowercase().ends_with(".r3d") {
+                    let mov_url = core::filesystem::get_file_url(&core::filesystem::get_folder(&input_file.url), &core::filesystem::filename_with_extension(&core::filesystem::get_filename(&input_file.url), "mov"), false);
+                    if core::filesystem::exists(&mov_url) {
+                        input_file.url = mov_url.clone();
                     } else {
-                        let in_file = input_file.path.clone();
+                        let in_file = input_file.url.clone();
 
                         let mut frame = 0;
-                        let r3d_progress = |(percent, error_str, out_path): (f64, String, String)| {
+                        let r3d_progress = |(percent, error_str, out_url): (f64, String, String)| {
                             if !error_str.is_empty() {
                                 err(("An error occured: %1".to_string(), error_str));
                             } else {
                                 progress((percent * 0.98, frame, total_frame_count + 1, false, true));
-                                input_file.path = out_path;
+                                input_file.url = out_url;
                                 frame += 1;
                             }
                         };
@@ -845,7 +893,7 @@ impl RenderQueue {
                         crate::external_sdk::r3d::REDSdk::convert_r3d(&in_file, format, force_primary > 0, r3d_progress, cancel_flag.clone());
                         if cancel_flag.load(SeqCst) {
                             std::thread::sleep(std::time::Duration::from_secs(2));
-                            let _ = std::fs::remove_file(mov_path);
+                            let _ = core::filesystem::remove_file(&mov_url);
                             err(("Conversion cancelled%1".to_string(), "".to_string()));
                             return;
                         }
@@ -883,21 +931,14 @@ impl RenderQueue {
         }
     }
 
-    fn get_output_path(suffix: &str, path: &str, codec: &str, ui_output_path: &str) -> String {
-        use std::path::Path;
-
-        let mut path = Path::new(path).with_extension("");
-
-        if !ui_output_path.is_empty() {
-            // Prefer output path of the currently opened file
-            let org_filename = path.file_name().map(|x| x.to_owned()).unwrap_or_default();
-            path = Path::new(ui_output_path).to_path_buf();
-            if path.is_dir() || ui_output_path.ends_with('/') || ui_output_path.ends_with('\\') {
-                path.push(&org_filename);
-            } else {
-                path = path.with_file_name(&org_filename);
-            }
+    fn get_output_folder(input_url: &str, ui_output_folder: &str) -> String {
+        if !ui_output_folder.is_empty() {
+            return ui_output_folder.to_owned();
         }
+        core::filesystem::get_folder(input_url)
+    }
+    fn get_output_filename(input_url: &str, suffix: &str, codec: &str) -> String {
+        let mut filename = core::filesystem::get_filename(input_url);
 
         let ext = match codec {
             "ProRes"        => ".mov",
@@ -907,16 +948,17 @@ impl RenderQueue {
             "PNG Sequence"  => "_%05d.png",
             _ => ".mp4"
         };
+        if let Some(pos) = filename.rfind('.') {
+            filename = filename[..pos].to_owned();
+        }
 
-        path.set_file_name(format!("{}{}{}", path.file_name().map(|v| v.to_string_lossy()).unwrap_or_default(), suffix, ext));
-
-        path.to_string_lossy().replace('\\', "/")
+        format!("{filename}{suffix}{ext}")
     }
 
-    pub fn add_file(&mut self, path: String, gyro_path: String, additional_data: String) -> u32 {
+    pub fn add_file(&mut self, url: String, gyro_url: String, additional_data: String) -> u32 {
         let job_id = fastrand::u32(1..);
 
-        let is_gf_data = path.starts_with('{');
+        let is_gf_data = url.starts_with('{');
 
         let err = util::qt_queued_callback_mut(self, move |this, (msg, arg): (String, String)| {
             ::log::warn!("[add_file]: {}", arg);
@@ -928,8 +970,8 @@ impl RenderQueue {
         });
         let processing_done = util::qt_queued_callback_mut(self, move |this, _: ()| {
             if let Some(job) = this.jobs.get(&job_id) {
-                if std::path::Path::new(&job.render_options.output_path.replace("_%05d", "_00001")).exists() {
-                    let msg = QString::from(format!("file_exists:{}", job.render_options.output_path));
+                if core::filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
+                    let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
                     update_model!(this, job_id, itm {
                         itm.error_string = msg.clone();
                         itm.status = JobStatus::Error;
@@ -954,6 +996,7 @@ impl RenderQueue {
             }
             if let Some(out) = additional_data.get("output") {
                 if let Ok(mut render_options) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
+                    render_options.update_from_json(out);
                     let (smoothing_name, smoothing_params) = {
                         let smoothing_lock = stabilizer.smoothing.read();
                         let smoothing = smoothing_lock.current();
@@ -977,7 +1020,7 @@ impl RenderQueue {
                             of_method:                 params.of_method,
                             ..Default::default()
                         })),
-                        input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { path: path.clone(), project_file_path: None, image_sequence_start: 0, image_sequence_fps: 0.0 })),
+                        input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { url: if is_gf_data { String::new() } else { url.clone() }, project_file_url: None, image_sequence_start: 0, image_sequence_fps: 0.0 })),
                         lens_profile_db: stabilizer.lens_profile_db.clone(),
                         ..Default::default()
                     };
@@ -1017,10 +1060,11 @@ impl RenderQueue {
                     });
 
                     core::run_threaded(move || {
-                        let fetch_thumb = |video_path: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
+                        let fetch_thumb = |video_url: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
                             let mut fetched = false;
                             if !crate::cli::will_run_in_console() { // Don't fetch thumbs in the CLI
-                                let mut proc = rendering::VideoProcessor::from_file(video_path, false, 0, None)?;
+                                let fs_base = gyroflow_core::filesystem::get_engine_base();
+                                let mut proc = rendering::VideoProcessor::from_file(&fs_base, video_url, false, 0, None)?;
                                 proc.on_frame(move |_timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                                     let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
 
@@ -1036,17 +1080,17 @@ impl RenderQueue {
                             Ok(())
                         };
 
-                        if is_gf_data || path.ends_with(".gyroflow") {
+                        if is_gf_data || core::filesystem::get_filename(&url).ends_with(".gyroflow") {
                             if !is_gf_data {
-                                let video_path = || -> Option<String> {
-                                    let data = std::fs::read(&path).ok()?;
+                                let video_url = || -> Option<String> {
+                                    let data = core::filesystem::read(&url).ok()?;
                                     let obj: serde_json::Value = serde_json::from_slice(&data).ok()?;
                                     Some(obj.get("videofile")?.as_str()?.to_string())
                                 }().unwrap_or_default();
 
-                                if video_path.is_empty() {
+                                if video_url.is_empty() {
                                     // It's a preset
-                                    if let Ok(data) = std::fs::read_to_string(&path) {
+                                    if let Ok(data) = core::filesystem::read_to_string(&url) {
                                         apply_preset((data, 0));
                                     }
                                     return;
@@ -1055,15 +1099,16 @@ impl RenderQueue {
 
                             let result = if is_gf_data {
                                 let mut is_preset = false;
-                                stab.import_gyroflow_data(path.as_bytes(), true, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset)
+                                stab.import_gyroflow_data(url.as_bytes(), true, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset)
                             } else {
-                                stab.import_gyroflow_file(&path, true, |_|(), Arc::new(AtomicBool::new(false)))
+                                stab.import_gyroflow_file(&url, true, |_|(), Arc::new(AtomicBool::new(false)))
                             };
 
                             match result {
                                 Ok(obj) => {
                                     if let Some(out) = obj.get("output") {
-                                        if let Ok(render_options2) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
+                                        if let Ok(mut render_options2) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
+                                            render_options2.update_from_json(out);
                                             loaded(render_options2);
                                         }
                                     }
@@ -1088,16 +1133,17 @@ impl RenderQueue {
                                     processing_done(());
                                 },
                                 Err(e) => {
-                                    err(("An error occured: %1".to_string(), format!("Error loading {}: {:?}", path, e)));
+                                    err(("An error occured: %1".to_string(), format!("Error loading {}: {:?}", url, e)));
                                 }
                             }
-                        } else if let Ok(info) = rendering::VideoProcessor::get_video_info(&path) {
+                        } else if let Ok(info) = rendering::VideoProcessor::get_video_info(&url) {
                             ::log::info!("Loaded {:?}", &info);
 
                             render_options.bitrate = render_options.bitrate.max(info.bitrate);
                             render_options.output_width = info.width as usize;
                             render_options.output_height = info.height as usize;
-                            render_options.output_path = Self::get_output_path(&suffix, &path, &render_options.codec, &render_options.output_path);
+                            render_options.output_folder = Self::get_output_folder(&url, &render_options.output_folder);
+                            render_options.output_filename = Self::get_output_filename(&url, &suffix, &render_options.codec);
 
                             let ratio = info.width as f64 / info.height as f64;
 
@@ -1105,16 +1151,13 @@ impl RenderQueue {
 
                                 let video_size = (info.width as usize, info.height as usize);
 
-                                if let Err(e) = stab.init_from_video_data(&path, info.duration_ms, info.fps, info.frame_count, video_size) {
-                                    err(("An error occured: %1".to_string(), e.to_string()));
-                                    return;
-                                }
+                                stab.init_from_video_data(info.duration_ms, info.fps, info.frame_count, video_size);
 
-                                stab.input_file.write().path = path.clone();
+                                stab.input_file.write().url = url.clone();
 
-                                let is_main_video = gyro_path.is_empty();
-                                let gyro_path = if !gyro_path.is_empty() { &gyro_path } else { &path };
-                                let _ = stab.load_gyro_data(gyro_path, is_main_video, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
+                                let is_main_video = gyro_url.is_empty();
+                                let gyro_url = if !gyro_url.is_empty() { &gyro_url } else { &url };
+                                let _ = stab.load_gyro_data(gyro_url, is_main_video, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
 
                                 let camera_id = stab.camera_id.read();
 
@@ -1157,7 +1200,7 @@ impl RenderQueue {
                                     apply_preset((data, job_id));
                                 }
 
-                                if let Err(e) = fetch_thumb(&path, ratio) {
+                                if let Err(e) = fetch_thumb(&url, ratio) {
                                     err(("An error occured: %1".to_string(), e.to_string()));
                                 }
 
@@ -1176,8 +1219,8 @@ impl RenderQueue {
     }
 
     fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(stab: Arc<StabilizationManager>, processing_cb: F, err: F2, proc_height: i32) {
-        let (path, duration_ms) = {
-            (stab.input_file.read().path.clone(), stab.params.read().duration_ms)
+        let (url, duration_ms) = {
+            (stab.input_file.read().url.clone(), stab.params.read().duration_ms)
         };
 
         let (has_gyro, has_sync_points, has_accurate_timestamps) = {
@@ -1256,7 +1299,8 @@ impl RenderQueue {
                         }
                         ::log::debug!("Decoder options: {:?}", decoder_options);
 
-                        match VideoProcessor::from_file(&path, gpu_decoding, 0, Some(decoder_options)) {
+                        let fs_base = gyroflow_core::filesystem::get_engine_base();
+                        match VideoProcessor::from_file(&fs_base, &url, gpu_decoding, 0, Some(decoder_options)) {
                             Ok(mut proc) => {
                                 let err2 = err.clone();
                                 let sync2 = sync.clone();
@@ -1286,7 +1330,7 @@ impl RenderQueue {
                             Err(error) => {
                                 err(("An error occured: %1".to_string(), error.to_string()));
                             }
-                        }
+                        };
                     } else {
                         err(("An error occured: %1".to_string(), "Invalid parameters".to_string()));
                     }
@@ -1339,11 +1383,14 @@ impl RenderQueue {
                     let job_id = *job_id;
                     if let Some(ref new_output_options) = new_output_options {
                         job.render_options.update_from_json(new_output_options);
-                        job.render_options.output_path = Self::get_output_path(&self.default_suffix.to_string(), &itm.input_file.to_string(), &job.render_options.codec, &job.render_options.output_path);
+                        job.render_options.output_folder = Self::get_output_folder(&itm.input_file.to_string(), &job.render_options.output_folder);
+                        job.render_options.output_filename = Self::get_output_filename(&itm.input_file.to_string(), &self.default_suffix.to_string(), &job.render_options.codec);
                         itm.export_settings = QString::from(job.render_options.settings_string(job.stab.params.read().fps));
-                        itm.output_path = QString::from(job.render_options.output_path.as_str());
-                        if std::path::Path::new(&job.render_options.output_path.replace("_%05d", "_00001")).exists() {
-                            let msg = QString::from(format!("file_exists:{}", job.render_options.output_path));
+                        itm.output_filename = QString::from(job.render_options.output_filename.as_str());
+                        itm.output_folder   = QString::from(job.render_options.output_folder.as_str());
+                        itm.display_output_path = QString::from(core::filesystem::display_folder_filename(job.render_options.output_folder.as_str(), job.render_options.output_filename.as_str()));
+                        if core::filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
+                            let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
                             itm.error_string = msg.clone();
                             itm.status = JobStatus::Error;
                             err((job_id, msg.to_string()));
@@ -1364,11 +1411,11 @@ impl RenderQueue {
         }
     }
 
-    fn file_exists(&self, path: QString) -> bool {
-        let path = std::path::PathBuf::from(path.to_string());
+    fn file_exists_in_folder(&self, folder: QUrl, filename: QString) -> bool {
+        let folder = QString::from(folder).to_string();
+        let filename = filename.to_string();
         for (_id, job) in self.jobs.iter() {
-            let job_path = std::path::Path::new(&job.render_options.output_path);
-            if job_path == path {
+            if job.render_options.output_folder == folder && job.render_options.output_filename == filename {
                 return true;
             }
         }
@@ -1407,7 +1454,7 @@ impl RenderQueue {
                 }
                 out
             } else {
-                return Vec::new();
+                Vec::new()
             }
         }
 
@@ -1427,7 +1474,7 @@ impl RenderQueue {
     fn update_sync_settings(stab: &StabilizationManager, sync_options: &serde_json::Value) {
         let mut sync_settings = stab.lens.read().sync_settings.clone().unwrap_or(sync_options.clone());
         if sync_settings.is_object() && sync_options.is_object() {
-            crate::core::util::merge_json(&mut sync_settings, &sync_options);
+            crate::core::util::merge_json(&mut sync_settings, sync_options);
         }
         if sync_settings.is_object() && !sync_settings.as_object().unwrap().is_empty() {
             stab.lens.write().sync_settings = Some(sync_settings);

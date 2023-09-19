@@ -8,6 +8,7 @@ use std::error;
 
 use ffmpeg_next::{ ffi, codec, encoder, format, frame, media, Dictionary, Rational, Stream, rescale, rescale::Rescale };
 
+use gyroflow_core::filesystem::{ self, EngineBase, FilesystemError, FfmpegPathWrapper };
 use super::*;
 use super::ffmpeg_video::*;
 use super::ffmpeg_audio::*;
@@ -36,6 +37,8 @@ pub struct FfmpegProcessor<'a> {
     pub android_handles: Option<AndroidHWHandles>,
 
     ost_time_bases: Vec<Rational>,
+
+    _file: FfmpegPathWrapper<'a>
 }
 
 #[derive(PartialEq)]
@@ -64,6 +67,8 @@ pub enum FFmpegError {
     PixelFormatNotSupported((format::Pixel, Vec<format::Pixel>)),
     UnknownPixelFormat(format::Pixel),
     InternalError(ffmpeg_next::Error),
+    CannotOpenInputFile((String, FilesystemError)),
+    CannotOpenOutputFile((String, FilesystemError)),
 }
 
 impl std::fmt::Display for FFmpegError {
@@ -87,6 +92,8 @@ impl std::fmt::Display for FFmpegError {
             FFmpegError::UnknownPixelFormat(v) => write!(f, "Unknown pixel format: {:?}", v),
             FFmpegError::PixelFormatNotSupported(v) => write!(f, "Pixel format {:?} is not supported. Supported ones: {:?}", v.0, v.1),
             FFmpegError::InternalError(e)     => write!(f, "ffmpeg error: {:?}", e),
+            FFmpegError::CannotOpenInputFile((url, e))   => write!(f, "Cannot open input file {url}: {e:?}"),
+            FFmpegError::CannotOpenOutputFile((url, e))   => write!(f, "Cannot open output file {url}: {e:?}"),
         }
     }
 }
@@ -113,15 +120,23 @@ pub struct VideoInfo {
 }
 
 impl<'a> FfmpegProcessor<'a> {
-    pub fn from_file(path: &str, mut gpu_decoding: bool, gpu_decoder_index: usize, decoder_options: Option<Dictionary>) -> Result<Self, FFmpegError> {
+    pub fn from_file(base: &'a EngineBase, url: &str, mut gpu_decoding: bool, gpu_decoder_index: usize, mut decoder_options: Option<Dictionary>) -> Result<Self, FFmpegError> {
+        let mut file = FfmpegPathWrapper::new(base, url, false).map_err(|e| FFmpegError::CannotOpenInputFile((url.to_string(), e)))?;
+
         ffmpeg_next::init()?;
         let _ = crate::rendering::init();
 
         let hwaccel_device = decoder_options.as_ref().and_then(|x| x.get("hwaccel_device").map(|x| x.to_string()));
+        if file.path.starts_with("fd:") {
+            match &mut decoder_options {
+                Some(ref mut dict) => { dict.set("fd", &file.path[3..]); file.path = "fd:".into(); }
+                None => { let mut dict = Dictionary::new(); dict.set("fd", &file.path[3..]); file.path = "fd:".into(); decoder_options = Some(dict); }
+            }
+        }
 
-        let mut input_context = decoder_options.map_or_else(|| format::input(&path), |dict| format::input_with_dictionary(&path, dict))?;
+        let mut input_context = decoder_options.map_or_else(|| format::input(&file.path), |dict| format::input_with_dictionary(&file.path, dict))?;
 
-        // format::context::input::dump(&input_context, 0, Some(path));
+        // format::context::input::dump(&input_context, 0, Some(file.path));
 
         let best_video_stream = unsafe {
             let mut decoder: *const ffi::AVCodec = std::ptr::null();
@@ -176,6 +191,7 @@ impl<'a> FfmpegProcessor<'a> {
         gpu_decoding = !hw_backend.is_empty();
 
         Ok(Self {
+            _file: file,
             gpu_decoding,
             gpu_device: if !gpu_decoding { None } else { Some(hw_backend) },
             video_codec: None,
@@ -210,7 +226,10 @@ impl<'a> FfmpegProcessor<'a> {
         })
     }
 
-    pub fn render(&mut self, output_path: &str, output_size: (u32, u32), bitrate: Option<f64>, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
+    pub fn render(&mut self, base: &'a EngineBase, output_folder: &str, output_filename: &str, output_size: (u32, u32), bitrate: Option<f64>, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
+        let output_url = filesystem::get_file_url(output_folder, output_filename, true);
+        let mut file = FfmpegPathWrapper::new(base, &output_url, true).map_err(|e| FFmpegError::CannotOpenOutputFile((output_url.to_string(), e)))?;
+
         let mut stream_mapping: Vec<isize> = vec![0; self.input_context.nb_streams() as _];
         let mut ist_time_bases = vec![Rational(0, 0); self.input_context.nb_streams() as _];
         self.ost_time_bases.resize(self.input_context.nb_streams() as _, Rational(0, 0));
@@ -221,8 +240,14 @@ impl<'a> FfmpegProcessor<'a> {
             let position = (start_ms as i64).rescale((1, 1000), rescale::TIME_BASE);
             self.input_context.seek(position, ..position)?;
         }
+        let mut output_options = Dictionary::new();
+        let output_format = if let Some(pos) = output_filename.rfind('.') { &output_filename[pos+1..] } else { "mp4" };
+        if file.path.starts_with("fd:") {
+            output_options.set("fd", &file.path[3..]);
+            file.path = "fd:".into();
+        }
 
-        let mut octx = format::output(&output_path)?;
+        let mut octx = format::output_as_with(&file.path, output_format, output_options)?;
 
         for (i, stream) in self.input_context.streams().enumerate() {
             let medium = stream.parameters().medium();
@@ -486,8 +511,16 @@ impl<'a> FfmpegProcessor<'a> {
         self.video.on_encoder_initialized = Some(Box::new(cb));
     }
 
-    pub fn get_video_info(path: &str) -> Result<VideoInfo, ffmpeg_next::Error> {
-        let context = format::input(&path)?;
+    pub fn get_video_info(url: &str) -> Result<VideoInfo, ffmpeg_next::Error> {
+        let base = filesystem::get_engine_base();
+        let mut file = FfmpegPathWrapper::new(&base, url, false).map_err(|_| ffmpeg_next::Error::ProtocolNotFound)?;
+        let mut dict = Dictionary::new();
+        if file.path.starts_with("fd:") {
+            dict.set("fd", &file.path[3..]);
+            file.path = "fd:".into();
+        }
+
+        let context = format::input_with_dictionary(&file.path, dict)?;
         if let Some(stream) = context.streams().best(media::Type::Video) {
             let codec = codec::context::Context::from_parameters(stream.parameters())?;
             if let Ok(video) = codec.decoder().video() {

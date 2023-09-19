@@ -10,11 +10,11 @@ import "../Util.js" as Util;
 FileDialog {
     id: root;
     property string type: "";
-    onAccepted: window.settings.setValue("folder-" + type, Util.getFolder(controller.url_to_path(selectedFile)));
+    onAccepted: window.settings.setValue("folder-" + type, filesystem.get_folder(selectedFile).toString());
 
     function open2() {
         const savedFolder = window.settings.value("folder-" + type, "");
-        if (savedFolder && Qt.platform.os != "ios") currentFolder = controller.path_to_url(savedFolder);
+        if (savedFolder && Qt.platform.os != "ios") currentFolder = savedFolder;
         open();
     }
 }

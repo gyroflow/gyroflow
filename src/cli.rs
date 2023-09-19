@@ -12,6 +12,7 @@ use std::collections::HashMap;
 use crate::rendering;
 use crate::rendering::render_queue::*;
 use indicatif::{ProgressBar, MultiProgress, ProgressState, ProgressStyle};
+use gyroflow_core::filesystem::path_to_url;
 
 cpp! {{
     struct TraitObject2 { void *data; void *vtable; };
@@ -189,7 +190,7 @@ pub fn run(open_file: &mut String) -> bool {
                         let queue = unsafe { &mut *queue.as_ptr() };
                         let additional_data2 = additional_data.to_string();
                         qmetaobject::single_shot(std::time::Duration::from_millis(1), move || {
-                            queue.add_file(path.clone(), String::new(), additional_data2.clone());
+                            queue.add_file(path_to_url(&path), String::new(), additional_data2.clone());
                         });
                     }
                 }
@@ -230,7 +231,7 @@ pub fn run(open_file: &mut String) -> bool {
                     if !queue_printed {
                         log::info!("Queue:");
                         for item in qi.iter() {
-                            log::info!("- [{:08x}] {} -> {}, {}, Frames: {}, Status: {:?} {}", item.job_id, item.input_file, item.output_path, item.export_settings, item.total_frames, item.get_status(), item.error_string);
+                            log::info!("- [{:08x}] {} -> {}, {}, Frames: {}, Status: {:?} {}", item.job_id, item.input_file, item.display_output_path, item.export_settings, item.total_frames, item.get_status(), item.error_string);
                         }
                         queue_printed = true;
                     }
@@ -287,8 +288,8 @@ pub fn run(open_file: &mut String) -> bool {
             });
             connect!(queue_ptr, q, added, |job_id: &u32| {
                 let queue = &mut *queue.as_ptr();
-                let fname = std::path::Path::new(&queue.get_job_output_path(*job_id).to_string()).file_name().map(|x| x.to_string_lossy().to_string()).unwrap();
-                //log::info!("[{:08x}] Job added: {}", job_id, q.get_job_output_path(*job_id));
+                let fname = queue.get_job_output_filename(*job_id).to_string();
+                //log::info!("[{:08x}] Job added: {}", job_id, fname);
                 let pb = m.add(ProgressBar::new(1));
                 pb.set_style(sty.clone());
                 pb.set_message(fname);
@@ -306,7 +307,7 @@ pub fn run(open_file: &mut String) -> bool {
                     stab.recompute_blocking();
                 }
 
-                let fname = std::path::Path::new(&queue.get_job_output_path(*job_id).to_string()).file_name().map(|x| x.to_string_lossy().to_string()).unwrap();
+                let fname = queue.get_job_output_filename(*job_id).to_string();
                 pbs.get(job_id).unwrap().set_message(fname);
 
                 queue.jobs_added.remove(job_id);
@@ -347,7 +348,7 @@ pub fn run(open_file: &mut String) -> bool {
             let mut queue = queue.borrow_mut();
             let gyro_file = opts.gyro_file.unwrap_or_default();
             for file in &videos {
-                queue.add_file(file.clone(), gyro_file.clone(), additional_data.to_string());
+                queue.add_file(path_to_url(file), path_to_url(&gyro_file), additional_data.to_string());
             }
         }
 

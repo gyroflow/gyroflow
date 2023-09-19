@@ -56,7 +56,7 @@ Modal {
             "Codec":       ["codec", "codec_options", "bitrate", "use_gpu"],
             "Audio":       ["audio"],
             "Output size": ["output_width", "output_height"],
-            "Output path": ["output_path"],
+            "Output path": ["output_folder", "output_filename"],
             "Advanced":    ["encoder_options", "metadata", "keyframe_distance", "preserve_other_tracks", "pad_with_black", "audio_codec"],
         },
         "Advanced": {

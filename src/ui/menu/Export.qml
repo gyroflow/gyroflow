@@ -23,7 +23,7 @@ MenuItem {
 
     property var exportFormats: {
         let list = [
-            // If changing, make sure it's in sync with render_queue.rs:get_output_path
+            // If changing, make sure it's in sync with render_queue.rs:get_output_url
             { "name": "H.264/AVC",     "max_size": [4096, 2160],   "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
             { "name": "H.265/HEVC",    "max_size": [8192, 8192],   "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
             { "name": "ProRes",        "max_size": [16384, 16384], "extension": ".mov",      "gpu": isOsx, "audio": true,  "variants": ["Proxy", "LT", "Standard", "HQ", "4444", "4444XQ"] },
@@ -32,7 +32,10 @@ MenuItem {
             { "name": "EXR Sequence",  "max_size": false,          "extension": "_%05d.exr", "gpu": false, "audio": false, "variants": [] },
             { "name": "PNG Sequence",  "max_size": false,          "extension": "_%05d.png", "gpu": false, "audio": false, "variants": ["8-bit", "16-bit"] },
         ];
-        // if (Qt.platform.os == "windows" || Qt.platform.os == "linux") {
+        if (Qt.platform.os == "android") { // We can't render sequences on Android because of file system restrictions
+            list = list.filter(x => !x.name.includes("Sequence"));
+        }
+        // if (Qt.platform.os == "windows" || Qt.platform.os == "linux" || Qt.platform.os == "android") {
         //     list.push({ "name": "AV1", "max_size": [8192, 8192], "extension": ".mp4", "gpu": true, "audio": true, "variants": [ ] });
         // }
         return list;
@@ -84,6 +87,7 @@ MenuItem {
         property alias metadataComment: metadataComment.text;
         property alias audioCodec: audioCodec.currentIndex;
         property alias preserveOutputSettings: preserveOutputSettings.checked;
+        property alias preserveOutputPath: preserveOutputPath.checked;
     }
 
     property real aspectRatio: 1.0;
@@ -98,6 +102,7 @@ MenuItem {
     property alias outGpu: gpu.checked;
     property alias outAudio: audio.checked;
     property alias preserveOutputSettings: preserveOutputSettings;
+    property alias preserveOutputPath: preserveOutputPath;
     property string outCodecOptions: "";
     property real originalWidth: outWidth;
     property real originalHeight: outHeight;
@@ -110,7 +115,8 @@ MenuItem {
         return {
             codec:          root.outCodec,
             codec_options:  root.outCodecOptions,
-            output_path:    window.outputFile,
+            output_folder:    window.outputFile.folderUrl.toString(),
+            output_filename:  window.outputFile.filename,
             output_width:   root.outWidth,
             output_height:  root.outHeight,
             bitrate:        root.outBitrate,
@@ -182,12 +188,22 @@ MenuItem {
         const output = obj.output || { };
         if (output && Object.keys(output).length > 0) {
             if (output.output_path) {
-                if (window.outputFile && output.output_path.endsWith("/") || output.output_path.endsWith("\\")) {
+                // Backwards compatibility
+                if (window.outputFile.filename && output.output_path.endsWith("/") || output.output_path.endsWith("\\")) {
                     // It's a folder, so adjust current file
-                    window.outputFile = output.output_path + Util.getFilename(window.outputFile);
+                    window.outputFile.setFolder(filesystem.path_to_url(output.output_path));
                 } else {
-                    window.outputFile = output.output_path;
+                    window.outputFile.setUrl(filesystem.path_to_url(output.output_path));
                 }
+            }
+            if (output.output_folder_bookmark == "resolved" && output.output_folder) {
+                window.allowedOutputUrls.push(Qt.resolvedUrl(output.output_folder));
+            }
+            if (output.output_folder) {
+                window.outputFile.setFolder(output.output_folder);
+            }
+            if (output.output_filename) {
+                window.outputFile.setFilename(output.output_filename);
             }
 
             if (output.codec)         Util.setComboValue(codec,        output.codec);
@@ -219,7 +235,7 @@ MenuItem {
         width: parent.width;
         currentIndex: 1;
         function updateExtension(ext: string) {
-            window.outputFile = window.outputFile.replace(/(_%[0-9d]+)?\.[a-z0-9]+$/i, ext);
+            window.outputFile.setFilename(window.outputFile.filename.replace(/(_%[0-9d]+)?\.[a-z0-9]+$/i, ext));
         }
         function updateGpuStatus() {
             const format = exportFormats[currentIndex];
@@ -592,7 +608,17 @@ MenuItem {
                     if (outputWidth.value  > 0) settings.setValue("preservedWidth",  outputWidth.value);
                     if (outputHeight.value > 0) settings.setValue("preservedHeight", outputHeight.value);
                     if (bitrate.value > 0) settings.setValue("preservedBitrate", bitrate.value);
-                    const outputFolder = Util.getFolder(window.outputFile);
+                }
+            }
+        }
+        CheckBox {
+            id: preserveOutputPath;
+            text: qsTr("Preserve export path");
+            checked: false;
+            tooltip: qsTr("Save output path in settings and use it for all files.");
+            onCheckedChanged: {
+                if (checked) {
+                    const outputFolder = window.outputFile.folderUrl.toString();
                     if (outputFolder) settings.setValue("preservedOutputPath", outputFolder);
                 }
             }
