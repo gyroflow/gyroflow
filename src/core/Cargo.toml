@@ -88,7 +88,8 @@ rustfft = "6.1.0"
 include_dir = { version = "0.7.3", features = ["glob"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.metal]
-version = "0.26.0"
+git = "https://github.com/gfx-rs/metal-rs/"
+rev = "d24f1a4"
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.objc-foundation]
 version = "0.1.1"
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.core-foundation-sys]
