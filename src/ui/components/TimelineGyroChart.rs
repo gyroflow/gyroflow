@@ -11,10 +11,10 @@ use qmetaobject::*;
 use crate::core::gyro_source::{ GyroSource, TimeIMU, TimeQuat };
 use crate::util;
 
-#[derive(Default, Debug, Clone)]
-pub struct ChartData {
+#[derive(Debug, Clone)]
+pub struct ChartData<const I: usize> {
     pub timestamp_us: i64,
-    pub values: [f64; 4]
+    pub values: [f64; I]
 }
 
 #[derive(Default)]
@@ -56,17 +56,17 @@ pub struct TimelineGyroChart {
 
     sync_points: BTreeMap<i64, (f64, f64)>, // timestamp, (offset, fitted offset)
 
-    gyro: Vec<ChartData>,
-    accl: Vec<ChartData>,
-    magn: Vec<ChartData>,
-    quats: Vec<ChartData>,
-    fovs: Vec<ChartData>,
-    minimal_fovs: Vec<ChartData>,
-    smoothed_quats: Vec<ChartData>,
-    sync_results: Vec<ChartData>,
-    org_sync_results: Vec<ChartData>,
-    sync_quats: Vec<ChartData>,
-    org_sync_quats: Vec<ChartData>,
+    gyro: Vec<ChartData<3>>,
+    accl: Vec<ChartData<3>>,
+    magn: Vec<ChartData<3>>,
+    quats: Vec<ChartData<4>>,
+    fovs: Vec<ChartData<1>>,
+    minimal_fovs: Vec<ChartData<1>>,
+    smoothed_quats: Vec<ChartData<4>>,
+    sync_results: Vec<ChartData<3>>,
+    org_sync_results: Vec<ChartData<3>>,
+    sync_quats: Vec<ChartData<4>>,
+    org_sync_quats: Vec<ChartData<4>>,
 
     gyro_max: Option<f64>,
     duration_ms: f64,
@@ -296,7 +296,7 @@ impl TimelineGyroChart {
                 if let Some(g) = x.gyro.as_ref() {
                     self.sync_results.push(ChartData {
                         timestamp_us: *k,
-                        values: [g[0], g[1], g[2], 0.0]
+                        values: [g[0], g[1], g[2]]
                     });
                 }
             }
@@ -341,7 +341,7 @@ impl TimelineGyroChart {
                     if let Some(g) = x.gyro.as_ref() {
                         self.gyro.push(ChartData {
                             timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
-                            values: [g[0], g[1], g[2], 0.0]
+                            values: [g[0], g[1], g[2]]
                         });
                     }
                 }
@@ -349,7 +349,7 @@ impl TimelineGyroChart {
                     if let Some(a) = x.accl.as_ref() {
                         self.accl.push(ChartData {
                             timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
-                            values: [a[0], a[1], a[2], 0.0]
+                            values: [a[0], a[1], a[2]]
                         });
                     }
                 }
@@ -357,7 +357,7 @@ impl TimelineGyroChart {
                     if let Some(m) = x.magn.as_ref() {
                         self.magn.push(ChartData {
                             timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
-                            values: [m[0], m[1], m[2], 0.0]
+                            values: [m[0], m[1], m[2]]
                         });
                     }
                 }
@@ -366,7 +366,7 @@ impl TimelineGyroChart {
             if self.viewMode == 3 {
                 self.quats = Vec::with_capacity(gyro.quaternions.len());
                 self.smoothed_quats = Vec::with_capacity(gyro.smoothed_quaternions.len());
-                let add_quats = |quats: &TimeQuat, out_quats: &mut Vec<ChartData>| {
+                let add_quats = |quats: &TimeQuat, out_quats: &mut Vec<ChartData<4>>| {
                     for x in quats {
                         let mut ts = *x.0 as f64 / 1000.0;
                         ts += gyro.offset_at_gyro_timestamp(ts);
@@ -400,7 +400,7 @@ impl TimelineGyroChart {
             let max = *params.fovs.iter().max_by(|a, b| a.total_cmp(b)).unwrap_or(&1.0);
             self.fovs = params.fovs.iter().enumerate().map(|(i, x)| ChartData {
                 timestamp_us: (gyroflow_core::timestamp_at_frame(i as i32, fps) * 1000.0).round() as i64,
-                values: [max - *x, 0.0, 0.0, 0.0]
+                values: [max - *x]
             }).collect();
             Self::normalize_height(&mut self.fovs, None);
 
@@ -411,14 +411,14 @@ impl TimelineGyroChart {
 
                 ChartData {
                     timestamp_us,
-                    values: [min_fov / (fov * fov_scale), 0.0, 0.0, 0.0]
+                    values: [min_fov / (fov * fov_scale)]
                 }
             }).collect();
         }
 
         self.update_data(series);
     }
-    fn get_serie_vector(vec: &[ChartData], i: usize) -> BTreeMap<i64, f64> {
+    fn get_serie_vector<const I: usize>(vec: &[ChartData<I>], i: usize) -> BTreeMap<i64, f64> {
         let mut ret = BTreeMap::new();
         for x in vec {
             ret.insert(x.timestamp_us, x.values[i]);
@@ -482,11 +482,11 @@ impl TimelineGyroChart {
         self.update();
     }
 
-    fn normalize_height(data: &mut [ChartData], max: Option<f64>) -> Option<f64> {
+    fn normalize_height<const I: usize>(data: &mut [ChartData<I>], max: Option<f64>) -> Option<f64> {
         let max = max.unwrap_or_else(|| {
             let mut max = 0.0;
             for x in data.iter() {
-                for i in 0..4 {
+                for i in 0..I {
                     if x.values[i].abs() > max { max = x.values[i].abs(); }
                 }
             }
@@ -494,7 +494,7 @@ impl TimelineGyroChart {
         });
         if max > 0.0 {
             for x in data.iter_mut() {
-                for i in 0..4 {
+                for i in 0..I {
                     x.values[i] /= max;
                 }
             }
