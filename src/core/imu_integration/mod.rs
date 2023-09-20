@@ -136,7 +136,8 @@ impl GyroIntegrator for VQFIntegrator {
             tau_mag: 40.0,
             ..Default::default()
         };
-        vqf::offline_vqf(gyr, acc, Some(mag), num_samples, sample_time, params, None, Some(&mut quat), None, None, None, None, None);
+        vqf::offline_vqf(&gyr, &acc, Some(&mag), num_samples, sample_time, params, &mut Vec::new(), Some(&mut quat), Some(&mut Vec::new()), &mut Vec::new(), None, None, Some(&mut Vec::new()));
+        drop(gyr); drop(acc); drop(mag);
         for (i, v) in imu_data.iter().enumerate() {
             out_quats.insert((v.timestamp_ms * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(quat[i*4], Vector3::new(quat[i*4+1], quat[i*4+2], quat[i*4+3]))));
         }
