@@ -323,12 +323,18 @@ impl TimelineGyroChart {
 
     pub fn setFromGyroSource(&mut self, gyro: &GyroSource, params: &StabilizationParams, keyframes: &KeyframeManager, series: &str) {
         if series.is_empty() {
-            self.gyro = Vec::with_capacity(gyro.raw_imu.len());
-            self.accl = Vec::with_capacity(gyro.raw_imu.len());
-            self.magn = Vec::with_capacity(gyro.raw_imu.len());
-            self.quats = Vec::with_capacity(gyro.quaternions.len());
-            self.smoothed_quats = Vec::with_capacity(gyro.smoothed_quaternions.len());
+            self.gyro.clear();
+            self.accl.clear();
+            self.magn.clear();
+            self.quats.clear();
+            self.smoothed_quats.clear();
             self.sync_points = gyro.get_offsets_plus_linear();
+
+            if let Some(x) = gyro.raw_imu.first() {
+                if self.viewMode == 0 && x.gyro.is_some() { self.gyro = Vec::with_capacity(gyro.raw_imu.len()); }
+                if self.viewMode == 1 && x.accl.is_some() { self.accl = Vec::with_capacity(gyro.raw_imu.len()); }
+                if self.viewMode == 2 && x.magn.is_some() { self.magn = Vec::with_capacity(gyro.raw_imu.len()); }
+            }
 
             for x in &gyro.raw_imu {
                 if self.viewMode == 0 {
@@ -358,6 +364,8 @@ impl TimelineGyroChart {
             }
 
             if self.viewMode == 3 {
+                self.quats = Vec::with_capacity(gyro.quaternions.len());
+                self.smoothed_quats = Vec::with_capacity(gyro.smoothed_quaternions.len());
                 let add_quats = |quats: &TimeQuat, out_quats: &mut Vec<ChartData>| {
                     for x in quats {
                         let mut ts = *x.0 as f64 / 1000.0;

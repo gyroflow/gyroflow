@@ -83,7 +83,7 @@ run:
     #!/bin/bash
     just --unstable -f {{justfile()}} build-and-package release development
 
-    ios-deploy --bundle {{AppBundle}} --noninteractive
+    ios-deploy --bundle {{AppBundle}} -d -W
 
 [no-cd]
 debug:
