@@ -283,7 +283,7 @@ pub fn exists_in_folder(folder_url: &str, filename: &str) -> bool {
     ret
 }
 pub fn get_mime(filename: &str) -> &'static str {
-    if filename.is_empty() || !filename.contains('.') { return ""; }
+    if filename.is_empty() || !filename.contains('.') { return "application/octet-stream"; }
     let pos = filename.rfind('.').unwrap();
     let ext = filename[pos+1..].to_ascii_lowercase();
     match ext.as_str() {

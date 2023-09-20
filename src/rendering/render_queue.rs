@@ -937,17 +937,17 @@ impl RenderQueue {
         }
         core::filesystem::get_folder(input_url)
     }
-    fn get_output_filename(input_url: &str, suffix: &str, codec: &str) -> String {
+    fn get_output_filename(input_url: &str, suffix: &str, codec: &str, override_ext: Option<&str>) -> String {
         let mut filename = core::filesystem::get_filename(input_url);
 
-        let ext = match codec {
+        let ext = override_ext.unwrap_or(match codec {
             "ProRes"        => ".mov",
             "DNxHD"         => ".mov",
             "CineForm"      => ".mov",
             "EXR Sequence"  => "_%05d.exr",
             "PNG Sequence"  => "_%05d.png",
             _ => ".mp4"
-        };
+        });
         if let Some(pos) = filename.rfind('.') {
             filename = filename[..pos].to_owned();
         }
@@ -995,6 +995,7 @@ impl RenderQueue {
                 sync_options = sync.clone();
             }
             if let Some(out) = additional_data.get("output") {
+                let override_ext = out.get("output_extension").and_then(|x| x.as_str()).map(|x| x.to_owned());
                 if let Ok(mut render_options) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
                     render_options.update_from_json(out);
                     let (smoothing_name, smoothing_params) = {
@@ -1143,7 +1144,7 @@ impl RenderQueue {
                             render_options.output_width = info.width as usize;
                             render_options.output_height = info.height as usize;
                             render_options.output_folder = Self::get_output_folder(&url, &render_options.output_folder);
-                            render_options.output_filename = Self::get_output_filename(&url, &suffix, &render_options.codec);
+                            render_options.output_filename = Self::get_output_filename(&url, &suffix, &render_options.codec, override_ext.as_deref());
 
                             let ratio = info.width as f64 / info.height as f64;
 
@@ -1382,9 +1383,10 @@ impl RenderQueue {
                     }
                     let job_id = *job_id;
                     if let Some(ref new_output_options) = new_output_options {
+                        let override_ext = new_output_options.get("output_extension").and_then(|x| x.as_str());
                         job.render_options.update_from_json(new_output_options);
                         job.render_options.output_folder = Self::get_output_folder(&itm.input_file.to_string(), &job.render_options.output_folder);
-                        job.render_options.output_filename = Self::get_output_filename(&itm.input_file.to_string(), &self.default_suffix.to_string(), &job.render_options.codec);
+                        job.render_options.output_filename = Self::get_output_filename(&itm.input_file.to_string(), &self.default_suffix.to_string(), &job.render_options.codec, override_ext);
                         itm.export_settings = QString::from(job.render_options.settings_string(job.stab.params.read().fps));
                         itm.output_filename = QString::from(job.render_options.output_filename.as_str());
                         itm.output_folder   = QString::from(job.render_options.output_folder.as_str());
