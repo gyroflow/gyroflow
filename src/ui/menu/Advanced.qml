@@ -28,6 +28,9 @@ MenuItem {
         property alias playSounds: playSounds.checked;
         property alias r3dConvertFormat: r3dConvertFormat.currentIndex;
         property alias r3dColorMode: r3dColorMode.currentIndex;
+        property alias r3dGammaCurve: r3dGammaCurve.currentIndex;
+        property alias r3dColorSpace: r3dColorSpace.currentIndex;
+        property alias r3dRedlineParams: r3dRedlineParams.text;
         property string lang: ui_tools.get_default_language();
     }
     property alias defaultSuffix: defaultSuffix;
@@ -245,6 +248,39 @@ MenuItem {
             id: r3dColorMode;
             model: ["Fully graded in REDCINE-X", "Primary development only"];
             font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+        }
+    }
+    Label {
+        position: Label.LeftPosition;
+        text: "Gamma curve for R3D conversion";
+        visible: r3dConvertFormatLabel.visible;
+        ComboBox {
+            id: r3dGammaCurve;
+            model: ["Linear", "BT.709", "sRGB", "REDlog", "PDLog985", "PDLog685", "PDLogCustom", "REDspace", "REDgamma", "REDLogFilm", "REDgamma2", "REDgamma3", "REDgamma4", "ST 2084", "BT.1886", "Log3G12", "Log3G10", "Hybrid Log-Gamma", "Gamma 2.2", "Gamma 2.6"];
+            currentIndex: 7;
+            font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+        }
+    }
+    Label {
+        position: Label.LeftPosition;
+        text: "Color space for R3D conversion";
+        visible: r3dConvertFormatLabel.visible;
+        ComboBox {
+            id: r3dColorSpace;
+            model: [ "REDspace", "CameraRGB", "BT.709", "REDcolor", "sRGB", "Adobe1998", "REDcolor2", "REDcolor3", "DRAGONcolor", "XYZ", "REDcolor4", "DRAGONcolor2", "BT.2020", "REDWideGamutRGB", "DCI-P3", "DCI-P3 D65"];
+            currentIndex: 0;
+            font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+        }
+    }
+    Label {
+        position: Label.LeftPosition;
+        text: "Additional REDline params";
+        visible: r3dConvertFormatLabel.visible;
+        TextField {
+            id: r3dRedlineParams;
             width: parent.width;
         }
     }

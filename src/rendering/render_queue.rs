@@ -890,7 +890,13 @@ impl RenderQueue {
                         };
                         let format = crate::util::get_setting("r3dConvertFormat").parse::<i32>().unwrap_or(0);
                         let force_primary = crate::util::get_setting("r3dColorMode").parse::<i32>().unwrap_or(0);
-                        crate::external_sdk::r3d::REDSdk::convert_r3d(&in_file, format, force_primary > 0, r3d_progress, cancel_flag.clone());
+
+                        let gamma_curves = [-1, 1, 2, 3, 4, 5, 6, 14, 15, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37];
+                        let color_spaces = [2, 0, 1, 14, 15, 5, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27];
+                        let gamma = gamma_curves[crate::util::get_setting("r3dGammaCurve").parse::<usize>().unwrap_or(7)];
+                        let space = color_spaces[crate::util::get_setting("r3dColorSpace").parse::<usize>().unwrap_or(0)];
+                        let additional_params = crate::util::get_setting("r3dRedlineParams");
+                        crate::external_sdk::r3d::REDSdk::convert_r3d(&in_file, format, force_primary > 0, gamma, space, &additional_params, r3d_progress, cancel_flag.clone());
                         if cancel_flag.load(SeqCst) {
                             std::thread::sleep(std::time::Duration::from_secs(2));
                             let _ = core::filesystem::remove_file(&mov_url);
