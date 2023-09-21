@@ -377,21 +377,25 @@ impl GyroSource {
         Ok(md)
     }
 
+    pub fn clear(&mut self) {
+        self.quaternions.clear();
+        self.smoothed_quaternions.clear();
+        self.org_smoothed_quaternions.clear();
+        self.raw_imu.clear();
+        self.imu_rotation = None;
+        self.acc_rotation = None;
+        self.imu_lpf = 0.0;
+        self.file_metadata = Default::default();
+        self.clear_offsets();
+    }
+
     pub fn load_from_telemetry(&mut self, telemetry: FileMetadata) {
         if self.duration_ms <= 0.0 {
             ::log::error!("Invalid duration_ms {}", self.duration_ms);
             return;
         }
 
-        self.quaternions.clear();
-        self.smoothed_quaternions.clear();
-        self.org_smoothed_quaternions.clear();
-        self.offsets.clear();
-        self.offsets_adjusted.clear();
-        self.raw_imu.clear();
-        self.imu_rotation = None;
-        self.acc_rotation = None;
-        self.imu_lpf = 0.0;
+        self.clear();
 
         self.imu_orientation = telemetry.imu_orientation.clone();
 

@@ -136,7 +136,7 @@ impl StabilizationManager {
             let params = self.params.read();
             let mut gyro = self.gyro.write();
             gyro.init_from_params(&params);
-            gyro.clear_offsets();
+            gyro.clear();
             gyro.file_url = url.to_string();
             gyro.file_metadata = Default::default();
         }
