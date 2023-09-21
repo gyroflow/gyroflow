@@ -20,6 +20,25 @@ Window {
     minimumWidth: 900 * dpiScale;
     minimumHeight: 400 * dpiScale;
 
+    property bool isLandscape: width > height;
+    onIsLandscapeChanged: {
+        if (isLandscape) {
+            // Landscape layout
+            leftPanel.y = 0;
+            videoAreaCol.x = Qt.binding(() => leftPanel.width);
+            videoAreaCol.width = Qt.binding(() => mainLayout.width - videoAreaCol.x);
+            videoAreaCol.height = Qt.binding(() => mainLayout.height);
+            leftPanel.fixedWidth = 0;
+        } else {
+            // Portrait layout
+            videoAreaCol.x = 0;
+            videoAreaCol.width = Qt.binding(() => calibrator_window.width);
+            videoAreaCol.height = Qt.binding(() => calibrator_window.height * 0.5);
+            leftPanel.fixedWidth = Qt.binding(() => calibrator_window.width);
+            leftPanel.y = Qt.binding(() => videoAreaCol.height);
+        }
+    }
+
     property QtObject controller: calib_controller;
 
     property alias videoArea: videoArea;
@@ -36,6 +55,9 @@ Window {
             calibrator_window.width = calibrator_window.width + 1;
             calibrator_window.height = calibrator_window.height;
         });
+        if (Qt.platform.os == "android" || Qt.platform.os == "ios") {
+            flags = Qt.WindowStaysOnTopHint;
+        }
     }
 
     function messageBox(type: int, text: string, buttons: list, parent: QtObject, textFormat: int, identifier: string): Modal {
@@ -194,7 +216,7 @@ Window {
     }
     // --------- Batch processing ---------
 
-    Row {
+    Item {
         id: mainLayout;
         width: parent.width;
         height: parent.height - y;
@@ -222,8 +244,9 @@ Window {
 
         Column {
             id: videoAreaCol;
-            width: parent? parent.width - leftPanel.width : 0;
-            height: parent? parent.height : 0;
+            x: leftPanel.width;
+            width: mainLayout.width - x;
+            height: mainLayout.height;
             VideoArea {
                 id: videoArea;
                 height: parent.height;
@@ -271,4 +294,6 @@ Window {
             closeConfirmationModal = true;
         }
     }
+
+    WindowCloseButton { onClicked: calibrator_window.close(); }
 }

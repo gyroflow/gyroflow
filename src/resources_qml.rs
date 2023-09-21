@@ -68,5 +68,6 @@ qrc!(pub rsrc_qml,
         "src/ui/components/InfoMessage.qml",
         "src/ui/components/InfoMessageSmall.qml",
         "src/ui/components/ItemLoader.qml",
+        "src/ui/components/WindowCloseButton.qml",
     }
 );

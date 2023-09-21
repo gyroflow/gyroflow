@@ -4,6 +4,8 @@
 import QtQuick
 import QtQuick.Window
 
+import "components/"
+
 Window {
     id: root;
     width: 1000;
@@ -20,8 +22,12 @@ Window {
 
     title: qsTr("Calibration target") + ` (${columns} x ${rows})`;
 
-    Component.onCompleted: ui_tools.set_icon(root);
-
+    Component.onCompleted: {
+        ui_tools.set_icon(root);
+        if (Qt.platform.os == "android" || Qt.platform.os == "ios") {
+            flags = Qt.WindowStaysOnTopHint;
+        }
+    }
     Column {
         anchors.centerIn: parent;
         Repeater {
@@ -58,4 +64,6 @@ Window {
             }
         }
     }
+
+    WindowCloseButton { onClicked: root.close(); }
 }

@@ -13,6 +13,7 @@ macro_rules! check_exception {
             $block
         })();
         if res.is_err() {
+            $env.exception_describe()?;
             $env.exception_clear()?;
         }
         res
@@ -51,6 +52,7 @@ impl<'a> Drop for AndroidFileHandle<'a> {
         log::info!("Closing android parcel");
         if let Err(e) = self.env.call_method(&self.parcel, "close", "()V", &[]) {
             log::warn!("Failed to close android parcel: {e:?}");
+            let _ = self.env.exception_describe();
             let _ = self.env.exception_clear();
         }
     }
