@@ -2082,6 +2082,8 @@ pub struct Filesystem {
     display_folder_filename:  qt_method!(fn(&self, folder: QUrl, filename: QString) -> QString),
     start_accessing_url:      qt_method!(fn(&self, url: QUrl)),
     stop_accessing_url:       qt_method!(fn(&self, url: QUrl)),
+    catch_url_open:           qt_method!(fn(&self, url: QUrl)),
+    url_opened:               qt_signal!(url: QUrl),
 }
 impl Filesystem {
     fn exists_in_folder(&self, folder: QUrl, filename: QString) -> bool { filesystem::exists_in_folder(&QString::from(folder).to_string(), &filename.to_string()) }
@@ -2098,4 +2100,5 @@ impl Filesystem {
     fn display_folder_filename(&self, folder: QUrl, filename: QString) -> QString { QString::from(filesystem::display_folder_filename(&QString::from(folder).to_string(), &filename.to_string())) }
     fn start_accessing_url(&self, url: QUrl) { filesystem::start_accessing_url(&QString::from(url).to_string()); }
     fn stop_accessing_url(&self, url: QUrl) { filesystem::stop_accessing_url(&QString::from(url).to_string()); }
+    fn catch_url_open(&self, url: QUrl) { util::dispatch_url_event(url.clone()); self.url_opened(url); }
 }

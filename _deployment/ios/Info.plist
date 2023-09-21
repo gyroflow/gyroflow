@@ -44,5 +44,53 @@
 			<string>AppIcon</string>
 		</dict>
 	</dict>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key><array><string>gyroflow</string></array>
+			<key>CFBundleTypeIconFile</key>  <string>GyroflowDocument</string>
+			<key>CFBundleTypeName</key>      <string>Gyroflow Project</string>
+			<key>CFBundleTypeRole</key>      <string>Editor</string>
+			<key>LSHandlerRank</key>         <string>Owner</string>
+			<key>LSItemContentTypes</key>    <array><string>xyz.gyroflow.project</string></array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>  <string>mp4</string>
+			<key>CFBundleTypeRole</key>  <string>Viewer</string>
+			<key>LSHandlerRank</key>     <string>None</string>
+			<key>LSItemContentTypes</key><array><string>public.mpeg-4</string></array>
+			<key>LSTypeIsPackage</key>   <integer>0</integer>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>  <string>qt movie</string>
+			<key>CFBundleTypeRole</key>  <string>Viewer</string>
+			<key>LSHandlerRank</key>     <string>None</string>
+			<key>LSItemContentTypes</key><array><string>com.apple.quicktime-movie</string></array>
+			<key>LSTypeIsPackage</key>   <integer>0</integer>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key><array><string>MXF</string></array>
+			<key>CFBundleTypeName</key>      <string>MXF</string>
+			<key>CFBundleTypeRole</key>      <string>Viewer</string>
+			<key>LSHandlerRank</key>         <string>None</string>
+		</dict>
+	</array>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>      <array><string>public.data</string></array>
+			<key>UTTypeDescription</key>     <string>Gyroflow Project</string>
+			<key>UTTypeIconFile</key>        <string>GyroflowDocument</string>
+			<key>UTTypeIcons</key>           <dict/>
+			<key>UTTypeIdentifier</key>      <string>xyz.gyroflow.project</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>gyroflow</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

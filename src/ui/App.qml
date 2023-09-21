@@ -77,6 +77,10 @@ Rectangle {
     property url pendingOpenFileOrg: openFileOnStart;
     property url pendingOpenFile: pendingOpenFileOrg;
     onPendingOpenFileOrgChanged: { pendingOpenFile = pendingOpenFileOrg; onItemLoaded(); }
+    Connections {
+        target: filesystem;
+        function onUrl_opened(url: url) { pendingOpenFileOrg = ""; pendingOpenFileOrg = url; }
+    }
     function onItemLoaded() {
         if (window.vidInfo && window.stab && window.exportSettings && window.sync && window.motionData && pendingOpenFile.toString()) {
             videoArea.loadFile(pendingOpenFile);

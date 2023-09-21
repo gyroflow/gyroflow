@@ -101,6 +101,8 @@ cpp! {{
     #   include <sys/resource.h>
     #endif
 
+    static QObject *globalUrlCatcherPtr = nullptr;
+
     class QtEventFilter : public QObject {
     public:
         QtEventFilter(std::function<void(QUrl)> cb) : m_cb(cb) { }
@@ -114,6 +116,31 @@ cpp! {{
     };
 }}
 
+pub fn set_url_catcher(ctlptr: *mut std::ffi::c_void) {
+    cpp!(unsafe [ctlptr as "QObject *"] { globalUrlCatcherPtr = ctlptr; });
+}
+pub fn register_url_handlers() {
+    cpp!(unsafe [] {
+        #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+            QDesktopServices::setUrlHandler("content", globalUrlCatcherPtr, "catch_url_open");
+            QDesktopServices::setUrlHandler("file",    globalUrlCatcherPtr, "catch_url_open");
+        #endif
+    });
+}
+pub fn unregister_url_handlers() {
+    cpp!(unsafe [] {
+        #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+            QDesktopServices::unsetUrlHandler("content");
+            QDesktopServices::unsetUrlHandler("file");
+        #endif
+    });
+}
+pub fn dispatch_url_event(url: QUrl) {
+    cpp!(unsafe [url as "QUrl"] {
+        QFileOpenEvent evt(url);
+        qGuiApp->sendEvent(qGuiApp, &evt);
+    });
+}
 pub fn catch_qt_file_open<F: FnMut(QUrl)>(cb: F) {
     let func: Box<dyn FnMut(QUrl)> = Box::new(cb);
     let cb_ptr = Box::into_raw(func);
@@ -129,7 +156,9 @@ pub fn catch_qt_file_open<F: FnMut(QUrl)>(cb: F) {
 }
 
 pub fn open_file_externally(url: QUrl) {
+    unregister_url_handlers();
     cpp!(unsafe [url as "QUrl"] { QDesktopServices::openUrl(url); });
+    register_url_handlers();
 }
 
 pub fn get_data_location() -> String {
@@ -162,16 +191,16 @@ pub fn set_android_context() {
     {
         let jvm = cpp!(unsafe [] -> *mut std::ffi::c_void as "void *" {
             #ifdef Q_OS_ANDROID
-            return QJniEnvironment::javaVM();
+                return QJniEnvironment::javaVM();
             #else
-            return nullptr;
+                return nullptr;
             #endif
         });
         let activity = cpp!(unsafe [] -> *mut std::ffi::c_void as "void *" {
             #ifdef Q_OS_ANDROID
-            return QNativeInterface::QAndroidApplication::context();
+                return QNativeInterface::QAndroidApplication::context();
             #else
-            return nullptr;
+                return nullptr;
             #endif
         });
         unsafe { ndk_context::initialize_android_context(jvm, activity); }

@@ -35,18 +35,38 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
 
-          <meta-data
-                android:name="android.app.lib_name"
-                android:value="gyroflow" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.OPENABLE" />
 
-          <meta-data
-                android:name="android.app.arguments"
-                android:value="" />
+                <data android:host="*" />
+                <data android:port="*" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.gyroflow" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.gyroflow" />
+                <data android:pathPattern=".*\\..*\\..*\\.gyroflow" />
+                <data android:pathPattern=".*\\..*\\.gyroflow" />
+                <data android:pathPattern=".*\\.gyroflow" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.OPENABLE" />
 
-            <meta-data
-                android:name="android.app.extract_android_style"
-                android:value="minimal" />
+                <data android:mimeType="video/mp4" />
+                <data android:mimeType="video/quicktime" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+            </intent-filter>
+
+            <meta-data android:name="android.app.lib_name" android:value="gyroflow" />
+            <meta-data android:name="android.app.arguments" android:value="" />
+            <meta-data android:name="android.app.extract_android_style" android:value="minimal" />
         </activity>
 
         <!--provider

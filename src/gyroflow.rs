@@ -140,6 +140,9 @@ fn entry() {
     let fs = RefCell::new(controller::Filesystem::default());
     let fspinned = unsafe { QObjectPinned::new(&fs) };
 
+    util::set_url_catcher(fspinned.get_or_create_cpp_object());
+    util::register_url_handlers();
+
     let mut engine = QmlEngine::new();
     util::catch_qt_file_open(|url| {
         engine.set_property("openFileOnStart".into(), url.into());
@@ -214,6 +217,8 @@ fn entry() {
     }
 
     engine.exec();
+
+    util::unregister_url_handlers();
 }
 
 
