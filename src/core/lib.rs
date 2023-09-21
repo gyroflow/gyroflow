@@ -364,10 +364,7 @@ impl StabilizationManager {
             let params = params.read();
             (params.frame_count, params.get_scaled_fps(), params.adaptive_zoom_method)
         };
-        let mut timestamps = Vec::with_capacity(frames);
-        for i in 0..frames {
-            timestamps.push(i as f64 * 1000.0 / fps);
-        }
+        let timestamps = (0..frames).map(|i| i as f64 * 1000.0 / fps).collect::<Vec<f64>>();
 
         let fovs = zoom.compute(&timestamps, &keyframes, method.into());
 
