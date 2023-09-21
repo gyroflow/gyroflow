@@ -46,30 +46,23 @@ Rectangle {
             anchors.verticalCenterOffset: -3 * dpiScale;
             rotation: 45;
         }
-        MouseArea {
+        ContextMenuMouseArea {
             id: ma;
             hoverEnabled: true;
-            anchors.fill: parent;
             anchors.margins: -15 * dpiScale;
+            acceptedButtons: Qt.LeftButton | Qt.RightButton;
             cursorShape: Qt.PointingHandCursor;
+            underlyingItem: ma;
+            onContextMenu: () => {
+                if (menuLoader.item) menuLoader.item.popup();
+                menuLoader.active = true;
+            }
             onClicked: (mouse) => {
                 if (mouse.button === Qt.LeftButton) {
                     root.edit(root.org_timestamp_us, root.value);
-                } else {
-                    if (menuLoader.item) menuLoader.item.popup();
-                    menuLoader.active = true;
-                }
-            }
-            onPressAndHold: (mouse) => {
-                if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
-                    if (menuLoader.item) menuLoader.item.popup();
-                    menuLoader.active = true;
-                } else {
-                    mouse.accepted = false;
                 }
             }
             onDoubleClicked: root.zoomIn(root.org_timestamp_us + root.value * 1000.0);
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
         }
         BasicText {
             id: t;

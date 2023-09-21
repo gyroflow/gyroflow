@@ -294,15 +294,8 @@ Item {
                 }
             }
 
-            MouseArea {
-                anchors.fill: parent;
-                acceptedButtons: Qt.LeftButton | Qt.RightButton;
-                onPressAndHold: (mouse) => {
-                    if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
-                        contextMenu.popup()
-                    }
-                }
-                onClicked: (mouse) => { if (mouse.button === Qt.RightButton) contextMenu.popup(); }
+            ContextMenuMouseArea {
+                onContextMenu: () => contextMenu.popup()
             }
             Menu {
                 id: contextMenu;

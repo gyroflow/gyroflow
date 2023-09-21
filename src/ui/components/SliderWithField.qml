@@ -52,36 +52,12 @@ Row {
         unit: field.unit;
         precision: field.precision;
 
-        MouseArea {
-            id: ma;
-            anchors.fill: parent;
-            hoverEnabled: true;
-            acceptedButtons: Qt.LeftButton | Qt.RightButton;
-            propagateComposedEvents: true;
-            preventStealing: true;
-
-            onPressAndHold: (mouse) => {
-                if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
-                    if (menuLoader.item) menuLoader.item.popup();
-                    menuLoader.active = true;
-                    mouse.accepted = true;
-                } else {
-                    mouse.accepted = false;
-                }
+        ContextMenuMouseArea {
+            underlyingItem: slider;
+            onContextMenu: () => {
+                if (menuLoader.item) menuLoader.item.popup();
+                menuLoader.active = true;
             }
-
-            function _onClicked(mouse) {
-                if (mouse.button === Qt.RightButton) {
-                    if (menuLoader.item) menuLoader.item.popup();
-                    menuLoader.active = true;
-                    mouse.accepted = true;
-                } else {
-                    mouse.accepted = false;
-                }
-            }
-
-            onClicked: (mouse) => _onClicked(mouse);
-            onPressed: (mouse) => _onClicked(mouse);
         }
 
         Component {

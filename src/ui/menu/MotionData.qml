@@ -207,6 +207,11 @@ MenuItem {
                 controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
                 Qt.callLater(controller.recompute_gyro);
             }
+            ContextMenuMouseArea {
+                parent: rot.cb;
+                cursorShape: Qt.PointingHandCursor;
+                onContextMenu: (isHold) => { contextMenu.popup(); }
+            }
 
             Flow {
                 width: parent.width;
@@ -236,33 +241,6 @@ MenuItem {
                     NumberField { id: y; unit: "°"; precision: 1; from: -360; to: 360; width: 50 * dpiScale; onValueChanged: rot.update_rotation(); }
                 }
             }
-        }
-        MouseArea {
-            anchors.fill: parent;
-            acceptedButtons: Qt.LeftButton | Qt.RightButton;
-            propagateComposedEvents: true;
-            cursorShape: Qt.PointingHandCursor;
-
-            onPressAndHold: (mouse) => {
-                if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
-                    contextMenu.popup();
-                    mouse.accepted = true;
-                } else {
-                    mouse.accepted = false;
-                }
-            }
-
-            function _onClicked(mouse) {
-                if (mouse.button === Qt.RightButton) {
-                    contextMenu.popup();
-                    mouse.accepted = true;
-                } else {
-                    mouse.accepted = false;
-                }
-            }
-
-            onClicked: (mouse) => _onClicked(mouse);
-            onPressed: (mouse) => _onClicked(mouse);
         }
         Menu {
             id: contextMenu;

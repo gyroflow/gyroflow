@@ -673,10 +673,9 @@ Item {
                 spacing: 5 * dpiScale;
                 visible: children.length > 0;
             }
-            MouseArea {
-                anchors.fill: parent;
-                onClicked: timeline.focus = true;
-                onDoubleClicked: root.fullScreen = root.fullScreen? 0 : 1;
+            TapHandler {
+                onTapped: timeline.focus = true;
+                onDoubleTapped: root.fullScreen = root.fullScreen? 0 : 1;
             }
             Item {
                 id: gridGuide;
@@ -898,19 +897,12 @@ Item {
                     tooltip: checked? qsTr("Mute") : qsTr("Unmute");
                     checked: !vid.muted;
 
-                    MouseArea {
-                        anchors.fill: parent;
-                        acceptedButtons: Qt.LeftButton | Qt.RightButton;
-                        propagateComposedEvents: true;
+                    ContextMenuMouseArea {
+                        underlyingItem: muteBtn;
                         cursorShape: Qt.PointingHandCursor;
-                        onClicked: mouse => {
-                            if (mouse.button === Qt.RightButton) {
-                                volumePopup.open();
-                            } else {
-                                vid.muted = !vid.muted;
-                            }
-                        }
+                        onContextMenu: (isHold) => { volumePopup.open(); if (isHold) vid.muted = !vid.muted; }
                     }
+                    onClicked: () => { vid.muted = !vid.muted; }
                     Popup {
                         id: volumePopup;
                         width: volumeLabel.width + 25 * dpiScale;

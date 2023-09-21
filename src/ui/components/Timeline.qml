@@ -267,6 +267,7 @@ Item {
                         visibleAreaRight: root.visibleAreaRight;
                         anchors.topMargin: (root.fullScreen? 0 : 5) * dpiScale;
                         anchors.bottomMargin: (root.fullScreen? 0 : 5) * dpiScale;
+                        property Menu ctxMenu: keyframeContextMenu;
                         function handleMouseMove(x: real, y: real, pressed: bool, pressedButtons: int): bool {
                             const pt = ma.mapToItem(keyframesInner, x, y);
                             const kf = keyframesInner.keyframeAtXY(pt.x, pt.y);
@@ -462,6 +463,9 @@ Item {
             }
             onPressAndHold: (mouse) => {
                 if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
+                    if (keyframes.item.handleMouseMove(mouse.x, mouse.y, true, Qt.RightButton))
+                        return;
+
                     if (menuLoader.item) menuLoader.item.popup();
                     menuLoader.active = true;
                 } else {
