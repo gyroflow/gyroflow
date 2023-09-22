@@ -356,10 +356,14 @@ impl GyroSource {
                             use telemetry_parser::tags_impl::TimeScalar;
                             let exp = (tag_map.get(&GroupId::Exposure)?.get_t(TagId::Data) as Option<&Vec<TimeScalar<f64>>>)?;
 
+                            let mut video_ts = 0.0;
                             for x in exp {
                                 if x.t >= 0.0 {
                                     // The additional 0.9 ms is a mystery
-                                    md.per_frame_time_offsets.push(-(x.v * 1000.0 / 2.0) - 0.9);
+                                    let diff = (video_ts - x.t) * 1000.0;
+                                    md.per_frame_time_offsets.push(-(x.v * 1000.0 / 2.0) - 0.9 - diff);
+
+                                    video_ts += 1.0 / fps;
                                 }
                             }
                         });
