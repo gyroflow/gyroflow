@@ -158,7 +158,6 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="227"/>
-      <location filename="../../src/ui/App.qml" line="414"/>
       <source>Export</source>
       <translation>Esporta</translation>
     </message>
@@ -296,16 +295,6 @@ Controlla il bitrate del file dopo il rendering e se riscontri questo bug, puoi:
 Click Ok and select the destination folder.</source>
       <translation>A causa delle restrizioni di accesso ai file, è necessario selezionare manualmente la cartella di destinazione.
 Fare clic su Ok e selezionare la cartella di destinazione.</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="414"/>
-      <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="414"/>
-      <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="550"/>
@@ -2505,6 +2494,24 @@ Assicurati di avere un corretto valore impostato per il rolling shutter prima de
       <location filename="../../src/ui/Calibrator.qml" line="90"/>
       <source>Average pattern sharpness</source>
       <translation>Nitidezza media del modello</translation>
+    </message>
+  </context>
+  <context>
+    <name>Tabs</name>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Inputs</source>
+      <translation type="unfinished">Inputs</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Parameters</source>
+      <translation type="unfinished">Parameters</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Export</source>
+      <translation type="unfinished">Export</translation>
     </message>
   </context>
   <context>

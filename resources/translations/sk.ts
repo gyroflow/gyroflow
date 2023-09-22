@@ -158,7 +158,6 @@ Je to len vizuálny indikátor - neovplyvňuje výsledný render.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="227"/>
-      <location filename="../../src/ui/App.qml" line="414"/>
       <source>Export</source>
       <translation>Exportovať</translation>
     </message>
@@ -296,16 +295,6 @@ Prosím skontroluj dátový tok po renderovaní, či sa táto chyba prejavila, p
 Click Ok and select the destination folder.</source>
       <translation>Kôli obmadzeniu prístupu k súborom, je potrebné vybrať cieľovú zložku manuálne.
 Klikni na OK pre výber cieľovej zložky.</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="414"/>
-      <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="414"/>
-      <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="550"/>
@@ -2508,6 +2497,24 @@ Pred synchronizáciou sa uisti, že je nastavená správna hodnota rolling-shutt
       <location filename="../../src/ui/Calibrator.qml" line="90"/>
       <source>Average pattern sharpness</source>
       <translation>Priemerná ostrosť vzorku</translation>
+    </message>
+  </context>
+  <context>
+    <name>Tabs</name>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Inputs</source>
+      <translation type="unfinished">Inputs</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Parameters</source>
+      <translation type="unfinished">Parameters</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Export</source>
+      <translation type="unfinished">Export</translation>
     </message>
   </context>
   <context>

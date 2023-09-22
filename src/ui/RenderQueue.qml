@@ -483,15 +483,16 @@ Item {
                         font.bold: true;
                         font.pixelSize: 14 * dpiScale;
                     }
-                    BasicText { text: qsTr("Save to: %1").arg("<b>" + display_output_path + "</b>"); font.pixelSize: basicTextSize; }
-                    BasicText { text: qsTr("Export settings: %1").arg("<b>" + export_settings + "</b>"); font.pixelSize: basicTextSize; }
                     BasicText {
                         visible: window.isMobileLayout;
                         font.pixelSize: basicTextSize;
-                        property string eta: qsTr("ETA %1").arg(statusBg.shown? "---" : time.remaining);
+                        property string remainingText: statusBg.shown? "---" : time.remaining;
+                        property string eta: remainingText != "---"? (", " + qsTr("ETA %1").arg(remainingText)) : "";
                         text: isProcessing? qsTr("Synchronizing: %1").arg(`<b>${(processing_progress*100).toFixed(2)}%</b>`)
-                                          : qsTr("Rendering: %1").arg(`<b>${(dlg.progress*100).toFixed(2)}%</b> <small>(${current_frame}/${total_frames}${time.fpsText}, ${eta})</small>`);
+                                          : qsTr("Rendering: %1").arg(`<b>${(dlg.progress*100).toFixed(2)}%</b> <small>(${current_frame}/${total_frames}${time.fpsText}${eta})</small>`);
                     }
+                    BasicText { text: qsTr("Save to: %1").arg("<b>" + display_output_path + "</b>"); font.pixelSize: basicTextSize; }
+                    BasicText { text: qsTr("Export settings: %1").arg("<b>" + export_settings + "</b>"); font.pixelSize: basicTextSize; }
                 }
 
                 Column {

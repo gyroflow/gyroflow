@@ -157,7 +157,6 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="227"/>
-      <location filename="../../src/ui/App.qml" line="414"/>
       <source>Export</source>
       <translation>Export</translation>
     </message>
@@ -295,16 +294,6 @@ Bitte überprüfe die Bitrate nach dem Export - sollte diese zu niedrig sein, he
 Click Ok and select the destination folder.</source>
       <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="414"/>
-      <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="414"/>
-      <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="550"/>
@@ -2508,6 +2497,24 @@ Setzt voraus, dass vor dem Synchronisieren ein korrekter Wert für Rolling-Shutt
       <location filename="../../src/ui/Calibrator.qml" line="90"/>
       <source>Average pattern sharpness</source>
       <translation>Durchschnittliche Bildschärfe des Musters</translation>
+    </message>
+  </context>
+  <context>
+    <name>Tabs</name>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Inputs</source>
+      <translation type="unfinished">Inputs</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Parameters</source>
+      <translation type="unfinished">Parameters</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Export</source>
+      <translation type="unfinished">Export</translation>
     </message>
   </context>
   <context>

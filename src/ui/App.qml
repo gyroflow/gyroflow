@@ -411,7 +411,7 @@ Rectangle {
                 id: tabs;
                 Component.onCompleted: { parent = rightPanel; currentIndex = 0; }
                 visible: isMobileLayout;
-                tabs: [QT_TR_NOOP("Inputs"), QT_TR_NOOP("Parameters"), QT_TR_NOOP("Export")];
+                tabs: [QT_TRANSLATE_NOOP("Tabs", "Inputs"), QT_TRANSLATE_NOOP("Tabs", "Parameters"), QT_TRANSLATE_NOOP("Tabs", "Export")];
                 tabsIcons: ["video", "settings", "save"];
                 tabsIconsSize: [20, 24, 24];
 

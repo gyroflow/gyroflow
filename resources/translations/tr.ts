@@ -158,7 +158,6 @@ Not: Bu yalnızca görsel bir işarettir, render işlemini etkilemez.</translati
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="227"/>
-      <location filename="../../src/ui/App.qml" line="414"/>
       <source>Export</source>
       <translation>Dışarı aktar</translation>
     </message>
@@ -295,16 +294,6 @@ Lütfen render işlemi sonrası dosyanızın bitrate'ini kontrol edin ve bu bug'
 Click Ok and select the destination folder.</source>
       <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="414"/>
-      <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="414"/>
-      <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="550"/>
@@ -2503,6 +2492,24 @@ Senkronize etmeden önce uygun jöle etkisi değerini ayarladığınızdan emin 
       <location filename="../../src/ui/Calibrator.qml" line="90"/>
       <source>Average pattern sharpness</source>
       <translation>Ortalama patern keskinliği</translation>
+    </message>
+  </context>
+  <context>
+    <name>Tabs</name>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Inputs</source>
+      <translation type="unfinished">Inputs</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Parameters</source>
+      <translation type="unfinished">Parameters</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Export</source>
+      <translation type="unfinished">Export</translation>
     </message>
   </context>
   <context>

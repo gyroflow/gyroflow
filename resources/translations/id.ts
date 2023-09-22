@@ -159,7 +159,6 @@ Sebagai catatan, ini hanya indikator visual, tidak akan berpengaruh pada renderi
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="227"/>
-      <location filename="../../src/ui/App.qml" line="414"/>
       <source>Export</source>
       <translation>Ekspor</translation>
     </message>
@@ -297,16 +296,6 @@ Harap periksa kecepatan bit file setelah perenderan dan jika Anda terpengaruh ol
 Click Ok and select the destination folder.</source>
       <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="414"/>
-      <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="414"/>
-      <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="550"/>
@@ -2504,6 +2493,24 @@ Pastikan Anda mengatur nilai Rolling shutter yang tepat sebelum menyinkronkan.</
       <location filename="../../src/ui/Calibrator.qml" line="90"/>
       <source>Average pattern sharpness</source>
       <translation type="unfinished">Average pattern sharpness</translation>
+    </message>
+  </context>
+  <context>
+    <name>Tabs</name>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Inputs</source>
+      <translation type="unfinished">Inputs</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Parameters</source>
+      <translation type="unfinished">Parameters</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Export</source>
+      <translation type="unfinished">Export</translation>
     </message>
   </context>
   <context>

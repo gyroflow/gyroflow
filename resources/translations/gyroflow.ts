@@ -157,7 +157,6 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     </message>
     <message>
         <location filename="../../src/ui/App.qml" line="227"/>
-        <location filename="../../src/ui/App.qml" line="414"/>
         <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
@@ -288,16 +287,6 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
         <location filename="../../src/ui/App.qml" line="318"/>
         <source>Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/App.qml" line="414"/>
-        <source>Inputs</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/App.qml" line="414"/>
-        <source>Parameters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2479,6 +2468,24 @@ Make sure you have proper rolling shutter value set before syncing.</source>
     <message>
         <location filename="../../src/ui/Calibrator.qml" line="90"/>
         <source>Average pattern sharpness</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Tabs</name>
+    <message>
+        <location filename="../../src/ui/App.qml" line="414"/>
+        <source>Inputs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/App.qml" line="414"/>
+        <source>Parameters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/App.qml" line="414"/>
+        <source>Export</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

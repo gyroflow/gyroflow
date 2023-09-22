@@ -158,7 +158,6 @@ Ten obszar jest tylko wizualizacją i nie wpływa na końcowy render.</translati
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="227"/>
-      <location filename="../../src/ui/App.qml" line="414"/>
       <source>Export</source>
       <translation>Eksportuj</translation>
     </message>
@@ -296,16 +295,6 @@ Sprawdź bitrate pliku po wyrenderowaniu i jeśli trafiłeś na ten błąd, moż
 Click Ok and select the destination folder.</source>
       <translation>Ze względu na ograniczenia dostępu do plików musisz wybrać folder docelowy ręcznie.
 Kliknij Ok i wybierz folder docelowy.</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="414"/>
-      <source>Inputs</source>
-      <translation>Pliki</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/App.qml" line="414"/>
-      <source>Parameters</source>
-      <translation>Parametry</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="550"/>
@@ -2508,6 +2497,24 @@ Upewnij się, że masz ustawiony poprawny czas odczytu klatki.</translation>
       <location filename="../../src/ui/Calibrator.qml" line="90"/>
       <source>Average pattern sharpness</source>
       <translation>Średnia ostrość wzoru</translation>
+    </message>
+  </context>
+  <context>
+    <name>Tabs</name>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Inputs</source>
+      <translation>Pliki</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Parameters</source>
+      <translation>Parametry</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="414"/>
+      <source>Export</source>
+      <translation>Eksportuj</translation>
     </message>
   </context>
   <context>
