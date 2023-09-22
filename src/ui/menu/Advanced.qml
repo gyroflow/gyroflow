@@ -15,7 +15,6 @@ MenuItem {
     Settings {
         id: settings;
         property alias previewPipeline: previewPipeline.currentIndex;
-        property alias previewResolution: previewResolution.currentIndex;
         property alias renderBackground: renderBackground.text;
         property alias theme: themeList.currentIndex;
         property alias uiScaling: uiScaling.currentIndex;
@@ -53,6 +52,10 @@ MenuItem {
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
             currentIndex: 0;
+            Component.onCompleted: {
+                if (settings.value("previewResolution", -1) != -1)
+                    currentIndex = +settings.value("previewResolution", -1);
+            }
             onCurrentIndexChanged: {
                 let target_height = -1; // Full
                 switch (currentIndex) {
@@ -64,6 +67,7 @@ MenuItem {
                 }
 
                 controller.set_preview_resolution(target_height, window.videoArea.vid);
+                settings.setValue("previewResolution", currentIndex);
             }
         }
     }
