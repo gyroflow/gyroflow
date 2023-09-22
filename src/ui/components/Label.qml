@@ -13,6 +13,7 @@ Grid {
     property alias text: t.text;
     property alias inner: inner;
     property alias t: t;
+    onPositionChanged: t.height = root.position === Label.TopPosition? undefined : Qt.binding(() => inner.height);
 
     rows:    position === Label.TopPosition? 2 : 1;
     columns: position === Label.TopPosition? 1 : 2;

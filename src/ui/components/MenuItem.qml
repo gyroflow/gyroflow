@@ -15,6 +15,7 @@ Item {
     property alias loaderProgress: loader.progress;
     property alias spacing: col.spacing;
     property alias innerItem: innerItem;
+    property bool showBtn: true;
     default property alias data: col.data;
     property string iconName;
     property bool canEnsureVisible: false;
@@ -26,13 +27,13 @@ Item {
 
     function ensureVisible() {
         const flick = parent.parent.parent.parent;
-        if (canEnsureVisible && opened && anim.enabled && (parent.y + height > flick.height)) {
+        if (canEnsureVisible && (opened || !root.showBtn) && anim.enabled && (parent.y + height > flick.height)) {
             flick.contentY = parent.y;
         }
     }
 
     width: parent.width;
-    height: btn.height + (opened? col.height : 0);
+    height: btn.height + (opened || !root.showBtn? col.height : 0);
     Ease on height { id: anim; }
     onHeightChanged: Qt.callLater(root.ensureVisible);
     clip: true;
@@ -48,6 +49,8 @@ Item {
 
     QQC.Button {
         id: btn;
+
+        visible: root.showBtn;
 
         icon.name: iconName || "";
         icon.source: iconName ? "qrc:/resources/icons/svg/" + iconName + ".svg" : "";
@@ -82,8 +85,8 @@ Item {
                 height: parent.height * 0.45;
                 width: 3 * dpiScale;
                 radius: width;
-                opacity: root.opened? 1 : 0;
-                y: root.opened? (parent.height - height) / 2 : -height;
+                opacity: root.opened || !root.showBtn? 1 : 0;
+                y: root.opened || !root.showBtn? (parent.height - height) / 2 : -height;
 
                 Ease on opacity { }
                 Ease on y { }
@@ -116,9 +119,9 @@ Item {
         height: col.height;
         Column {
             id: col;
-            y: btn.height;
+            y: btn.visible? btn.height : 0;
             x: 15 * dpiScale;
-            opacity: root.opened? 1 : 0;
+            opacity: root.opened || !root.showBtn? 1 : 0;
             Ease on opacity { }
             visible: opacity > 0;
             width: root.width - 2*x;

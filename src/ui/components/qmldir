@@ -37,6 +37,8 @@ SliderWithField 1.0 SliderWithField.qml
 SplitButton 1.0 SplitButton.qml
 TabbedPopup 1.0 TabbedPopup.qml
 TableList 1.0 TableList.qml
+Tabs 1.0 Tabs.qml
+TabColumn 1.0 TabColumn.qml
 TextArea 1.0 TextArea.qml
 TextField 1.0 TextField.qml
 Timeline 1.0 Timeline.qml

@@ -165,7 +165,7 @@ Item {
     focus: true;
 
     Column {
-        visible: !root.fullScreen;
+        visible: !root.fullScreen && !window.isMobileLayout;
         x: 3 * dpiScale;
         y: 50 * dpiScale;
         spacing: 3 * dpiScale;
@@ -176,7 +176,7 @@ Item {
         TimelineAxisButton { id: a8; text: "Z"; onCheckedChanged: chart.setAxisVisible(8, checked); checked: chart.getAxisVisible(8); tooltip: qsTr("Zooming"); }
     }
     Column {
-        visible: !root.fullScreen;
+        visible: !root.fullScreen && !window.isMobileLayout;
         anchors.right: parent.right;
         anchors.rightMargin: 3 * dpiScale;
         y: 50 * dpiScale;
@@ -190,17 +190,17 @@ Item {
 
     Item {
         id: inner;
-        x: (root.fullScreen? 10 : 33) * dpiScale;
+        x: (root.fullScreen || window.isMobileLayout? 10 : 33) * dpiScale;
         y: 15 * dpiScale;
-        width: parent.width - x - (root.fullScreen? 10 : 33) * dpiScale;
-        height: parent.height - y - 30 * dpiScale - parent.additionalHeight;
+        width: parent.width - x - (root.fullScreen || window.isMobileLayout? 10 : 33) * dpiScale;
+        height: parent.height - y - (root.fullScreen || window.isMobileLayout? (root.editingSyncPoint || offsetsRepeater.count > 0? 20 : 0) : 30) * dpiScale - parent.additionalHeight;
 
         Rectangle {
             x: 0;
-            y: (root.fullScreen? 0 : 35) * dpiScale;
+            y: (root.fullScreen || window.isMobileLayout? 0 : 35) * dpiScale;
             width: parent.width
             radius: 4 * dpiScale;
-            color: root.fullScreen? "transparent" : Qt.lighter(styleButtonColor, 1.1)
+            color: root.fullScreen || window.isMobileLayout? "transparent" : Qt.lighter(styleButtonColor, 1.1)
             height: parent.height - y;
             opacity: root.trimActive? 0.9 : 1.0;
 
@@ -209,8 +209,8 @@ Item {
                 visibleAreaLeft: root.visibleAreaLeft;
                 visibleAreaRight: root.visibleAreaRight;
                 anchors.fill: parent;
-                anchors.topMargin: (root.fullScreen? 0 : 5) * dpiScale;
-                anchors.bottomMargin: (root.fullScreen? 0 : 5) * dpiScale;
+                anchors.topMargin: (root.fullScreen || window.isMobileLayout? 0 : 5) * dpiScale;
+                anchors.bottomMargin: (root.fullScreen || window.isMobileLayout? 0 : 5) * dpiScale;
                 opacity: root.trimActive? 0.9 : 1.0;
                 theme: style;
                 onViewModeChanged: {
@@ -265,8 +265,8 @@ Item {
                         videoTimestamp: vid.timestamp;
                         visibleAreaLeft: root.visibleAreaLeft;
                         visibleAreaRight: root.visibleAreaRight;
-                        anchors.topMargin: (root.fullScreen? 0 : 5) * dpiScale;
-                        anchors.bottomMargin: (root.fullScreen? 0 : 5) * dpiScale;
+                        anchors.topMargin: (root.fullScreen || window.isMobileLayout? 0 : 5) * dpiScale;
+                        anchors.bottomMargin: (root.fullScreen || window.isMobileLayout? 0 : 5) * dpiScale;
                         property Menu ctxMenu: keyframeContextMenu;
                         function handleMouseMove(x: real, y: real, pressed: bool, pressedButtons: int): bool {
                             const pt = ma.mapToItem(keyframesInner, x, y);
@@ -365,7 +365,7 @@ Item {
         // TODO QQuickPaintedItem
         Column {
             width: parent.width;
-            visible: !root.fullScreen;
+            visible: !root.fullScreen && !window.isMobileLayout;
             Row {
                 width: parent.width;
                 spacing: (100 * dpiScale) - children[0].width;
@@ -423,8 +423,8 @@ Item {
             anchors.fill: parent;
             hoverEnabled: true;
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton;
-            anchors.topMargin: (root.fullScreen? -8 : 0) * dpiScale;
-            anchors.bottomMargin: (root.fullScreen? -10 : 0) * dpiScale;
+            anchors.topMargin: (root.fullScreen || window.isMobileLayout? -8 : 0) * dpiScale;
+            anchors.bottomMargin: (root.fullScreen || window.isMobileLayout? -10 : 0) * dpiScale;
 
             property var panInit: ({ x: 0.0, y: 0.0, visibleAreaLeft: 0.0, visibleAreaWidth: 1.0 });
 
@@ -462,7 +462,7 @@ Item {
                 panInit.visibleAreaWidth = root.visibleAreaRight - root.visibleAreaLeft;
             }
             onPressAndHold: (mouse) => {
-                if ((Qt.platform.os == "android" || Qt.platform.os == "ios") && mouse.button !== Qt.RightButton) {
+                if (isMobile && mouse.button !== Qt.RightButton) {
                     if (keyframes.item.handleMouseMove(mouse.x, mouse.y, true, Qt.RightButton))
                         return;
 
@@ -604,7 +604,7 @@ Item {
             TimelineRangeIndicator {
                 trimStart: root.trimStart;
                 trimEnd: root.trimEnd;
-                y: (root.fullScreen? 0 : 35) * dpiScale;
+                y: (root.fullScreen || window.isMobileLayout? 0 : 35) * dpiScale;
                 height: parent.height - y;
 
                 onActiveChanged: if (active) vid.setPlaybackRange(0, vid.duration);
@@ -686,7 +686,7 @@ Item {
             model: [];
 
             TimelineSyncPoint {
-                y: (root.fullScreen? 0 : 35) * dpiScale;
+                y: (root.fullScreen || window.isMobileLayout? 0 : 35) * dpiScale;
                 timeline: root;
                 org_timestamp_us: timestamp_us;
                 position: (timestamp_us + offset_ms * 1000) / (root.durationMs * 1000.0); // TODO: Math.round?
@@ -733,7 +733,7 @@ Item {
             model: [];
 
             TimelineSyncPoint {
-                y: (root.fullScreen? 0 : 35) * dpiScale;
+                y: (root.fullScreen || window.isMobileLayout? 0 : 35) * dpiScale;
                 timeline: root;
                 color: is_forced? "#53ddff" : "#15a3d6";
                 org_timestamp_us: timestamp_us;
@@ -754,7 +754,7 @@ Item {
         QQC.ScrollBar {
             id: scrollbar;
             hoverEnabled: true;
-            visible: !root.fullScreen && size < 1.0;
+            visible: !root.fullScreen && !window.isMobileLayout && size < 1.0;
             active: hovered || pressed;
             orientation: Qt.Horizontal;
             size: root.visibleAreaRight - root.visibleAreaLeft;

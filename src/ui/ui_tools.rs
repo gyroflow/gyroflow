@@ -122,7 +122,10 @@ impl UITools {
     pub fn set_scaling(&self, dpi_scale: f64) {
         if let Some(engine) = self.engine_ptr {
             let engine = unsafe { &mut *(engine) };
-            let dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; }) * dpi_scale;
+            let mut dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; }) * dpi_scale;
+            if cfg!(any(target_os = "android", target_os = "ios")) {
+                dpi *= 1.2;
+            }
             engine.set_property("dpiScale".into(), QVariant::from(dpi));
         }
     }

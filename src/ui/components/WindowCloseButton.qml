@@ -5,7 +5,7 @@ import QtQuick
 import "."
 
 LinkButton {
-    visible: Qt.platform.os == "android" || Qt.platform.os == "ios";
+    visible: isMobile;
     width: 60 * dpiScale;
     height: width;
     anchors.right: parent.right;

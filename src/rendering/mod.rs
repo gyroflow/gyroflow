@@ -86,7 +86,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("h264_nvenc",        true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("h264_amf",          true),
-                #[cfg(target_os = "linux")]
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("h264_vaapi",        true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("h264_qsv",          true),
@@ -105,7 +105,7 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("hevc_nvenc",        true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("hevc_amf",          true),
-                #[cfg(target_os = "linux")]
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("hevc_vaapi",        true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("hevc_qsv",          true),
@@ -124,6 +124,8 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("av1_amf",          true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("av1_qsv",          true),
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
+                ("av1_vaapi",         true),
                 ("librav1e",         false),
                 ("libaom-av1",       false),
                 ("libsvtav1",        false),

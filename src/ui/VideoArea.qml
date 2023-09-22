@@ -533,7 +533,7 @@ Item {
     Item {
         id: vidParentParent;
         width: parent.width;
-        height: parent.height - (root.fullScreen? 0 : tlcol.height);
+        height: parent.height - (root.fullScreen || window.isMobileLayout? 0 : tlcol.height);
         Item {
             id: vidParent;
             property real orgW: root.outWidth || vid.videoWidth;
@@ -718,7 +718,7 @@ Item {
                 id: dropText;
                 property string loadingFile: "";
                 text: loadingFile? qsTr("Loading %1...").arg(loadingFile) : (Qt.platform.os == "ios" || Qt.platform.os == "android"? qsTr("Click here to open a video file") : qsTr("Drop video file here"));
-                font.pixelSize: 30 * dpiScale;
+                font.pixelSize: (window.isMobileLayout? 23 : 30) * dpiScale;
                 anchors.centerIn: parent;
                 leftPadding: 0;
                 scale: dropText.contentWidth > (parent.width - 50 * dpiScale)? (parent.width - 50 * dpiScale) / dropText.contentWidth : 1.0;
@@ -778,45 +778,46 @@ Item {
             }
         }
     }
-    Loader {
-        id: queue;
-        asynchronous: true;
-        anchors.fill: vidParentParent;
-        anchors.margins: 10 * dpiScale;
-        sourceComponent: Component {
-            RenderQueue {
-                onShownChanged: if (statistics.item) statistics.item.shown &= !shown;
-            }
-        }
-    }
-    Loader {
-        id: statistics;
-        asynchronous: true;
-        active: false;
-        anchors.fill: vidParentParent;
-        anchors.margins: 10 * dpiScale;
-        onStatusChanged: if (status == Loader.Ready) statistics.item.shown = true;
-        sourceComponent: Component {
-            Statistics {
-                onShownChanged: queue.item.shown &= !shown;
-            }
-        }
-    }
 
     Column {
         id: tlcol;
         width: parent.width;
         anchors.horizontalCenter: parent.horizontalCenter;
         anchors.bottom: parent.bottom;
+        anchors.bottomMargin: areButtonsUp? 0 : 5 * dpiScale;
+        spacing: root.fullScreen || window.isMobileLayout? 0 : 10 * dpiScale;
+        property bool areButtonsUp: !window.isMobileLayout;
+        onAreButtonsUpChanged: {
+            buttonsArea.parent = null;
+            bottomPanel.parent = null;
+            if (areButtonsUp) {
+                buttonsArea.parent = tlcol;
+                bottomPanel.parent = tlcol;
+            } else {
+                bottomPanel.parent = tlcol;
+                buttonsArea.parent = tlcol;
+            }
+        }
+        Component.onCompleted: areButtonsUpChanged();
 
         Item {
-            width: parent.width;
+            id: buttonsArea;
+            width: parent? parent.width : 0;
             height: 40 * dpiScale;
             visible: !root.fullScreen;
 
+            Rectangle {
+                visible: window.isMobileLayout || !middleButtons.willFit;
+                color: styleButtonColor;
+                opacity: 0.8;
+                radius: 5 * dpiScale;
+                anchors.fill: textCol;
+                anchors.margins: -7 * dpiScale;
+            }
             Column {
+                id: textCol;
                 enabled: vid.loaded;
-                anchors.verticalCenter: parent.verticalCenter;
+                y: middleButtons.willFit? ((parent.height - height) / 2) : -buttonsArea.y - tlcol.y + 7 * dpiScale;
                 anchors.left: parent.left;
                 anchors.leftMargin: 10 * dpiScale;
                 spacing: 3 * dpiScale;
@@ -841,26 +842,44 @@ Item {
                 }
             }
 
-            Row {
-                anchors.centerIn: parent;
-                spacing: 5 * dpiScale;
-                enabled: vid.loaded;
-                Button { text: "["; font.bold: true; onClicked: timeline.setTrim(timeline.position, timeline.trimEnd); tooltip: qsTr("Trim start"); }
-                Button { iconName: "chevron-left"; tooltip: qsTr("Previous frame"); onClicked: vid.currentFrame -= 1; }
-                Button {
-                    onClicked: if (vid.playing) vid.pause(); else vid.play();
-                    tooltip: vid.playing? qsTr("Pause") : qsTr("Play");
-                    iconName: vid.playing? "pause" : "play";
+            Item {
+                id: middleButtons;
+                property real availableWidth: parent.width - textCol.width - rightButtons.width - 40 * dpiScale;
+                width: parent.width - (willFit? textCol.width + rightButtons.width + 40 * dpiScale : 0);
+                height: parent.height;
+                x: willFit? textCol.x + textCol.width + 10 * dpiScale : 0;
+                property bool willFit: availableWidth > children[0].width;
+                Row {
+                    anchors.centerIn: parent;
+                    spacing: 5 * dpiScale;
+                    enabled: vid.loaded;
+                    Button { text: "["; font.bold: true; onClicked: timeline.setTrim(timeline.position, timeline.trimEnd); tooltip: qsTr("Trim start"); transparentOnMobile: true; }
+                    Button { iconName: "chevron-left"; tooltip: qsTr("Previous frame"); onClicked: vid.currentFrame -= 1; transparentOnMobile: true; }
+                    Button {
+                        onClicked: { if (vid.playing) vid.pause(); else vid.play(); }
+                        tooltip: vid.playing? qsTr("Pause") : qsTr("Play");
+                        iconName: vid.playing? "pause" : "play";
+                        transparentOnMobile: true;
+                    }
+                    Button { iconName: "chevron-right"; tooltip: qsTr("Next frame"); onClicked: vid.currentFrame += 1; transparentOnMobile: true; }
+                    Button { text: "]"; font.bold: true; onClicked: timeline.setTrim(timeline.trimStart, timeline.position); tooltip: qsTr("Trim end"); transparentOnMobile: true; }
                 }
-                Button { iconName: "chevron-right"; tooltip: qsTr("Next frame"); onClicked: vid.currentFrame += 1; }
-                Button { text: "]"; font.bold: true; onClicked: timeline.setTrim(timeline.trimStart, timeline.position); tooltip: qsTr("Trim end"); }
+            }
+            Rectangle {
+                visible: window.isMobileLayout || !middleButtons.willFit;
+                color: styleButtonColor;
+                opacity: 0.8;
+                radius: 5 * dpiScale;
+                anchors.fill: rightButtons;
+                anchors.margins: -7 * dpiScale;
             }
             Row {
+                id: rightButtons;
                 enabled: vid.loaded;
                 spacing: 5 * dpiScale;
+                y: middleButtons.willFit? ((parent.height - height) / 2) : -buttonsArea.y - tlcol.y + 7 * dpiScale;
                 anchors.right: parent.right;
                 anchors.rightMargin: 10 * dpiScale;
-                anchors.verticalCenter: parent.verticalCenter;
                 height: parent.height;
 
                 component SmallLinkButton: LinkButton {
@@ -947,15 +966,13 @@ Item {
             }
         }
 
-        Item { width: 1; height: 10 * dpiScale; visible: !root.fullScreen; }
-
         ResizablePanel {
             id: bottomPanel;
             direction: ResizablePanel.HandleUp;
-            width: parent.width;
+            width: parent? parent.width : 0;
             color: "transparent";
             hr.height: 30 * dpiScale;
-            hr.opacity: root.fullScreen? 0.1 : 1.0;
+            hr.opacity: root.fullScreen || window.isMobileLayout? 0.1 : 1.0;
             additionalHeight: timeline.additionalHeight;
             defaultHeight: 165 * dpiScale;
             minHeight: (root.fullScreen? 50 : 100) * dpiScale;
@@ -980,6 +997,7 @@ Item {
                 scaledFps: vid.frameRate;
                 anchors.fill: parent;
                 fullScreen: root.fullScreen;
+                visible: vid.loaded || !window.isMobileLayout;
 
                 onTrimStartChanged: {
                     controller.set_trim_start(trimStart);
@@ -989,6 +1007,30 @@ Item {
                     controller.set_trim_end(trimEnd);
                     vid.setPlaybackRange(trimStart * vid.duration, trimEnd * vid.duration);
                 }
+            }
+        }
+    }
+    Loader {
+        id: queue;
+        asynchronous: true;
+        anchors.fill: vidParentParent;
+        anchors.margins: 10 * dpiScale;
+        sourceComponent: Component {
+            RenderQueue {
+                onShownChanged: if (statistics.item) statistics.item.shown &= !shown;
+            }
+        }
+    }
+    Loader {
+        id: statistics;
+        asynchronous: true;
+        active: false;
+        anchors.fill: vidParentParent;
+        anchors.margins: 10 * dpiScale;
+        onStatusChanged: if (status == Loader.Ready) statistics.item.shown = true;
+        sourceComponent: Component {
+            Statistics {
+                onShownChanged: queue.item.shown &= !shown;
             }
         }
     }

@@ -25,10 +25,10 @@ Rectangle {
         if (isLandscape) {
             // Landscape layout
             leftPanel.y = 0;
-            rightPanel.x = Qt.binding(() => leftPanel.width + videoAreaCol.width);
+            rightPanel.x = Qt.binding(() => (window.isMobileLayout? 0 : leftPanel.width) + videoAreaCol.width);
             rightPanel.y = 0;
-            videoAreaCol.x = Qt.binding(() => (videoArea.fullScreen? 0 : leftPanel.width));
-            videoAreaCol.width = Qt.binding(() => mainLayout.width - (videoArea.fullScreen? 0 : leftPanel.width + rightPanel.width));
+            videoAreaCol.x = Qt.binding(() => (videoArea.fullScreen || window.isMobileLayout? 0 : leftPanel.width));
+            videoAreaCol.width = Qt.binding(() => mainLayout.width - (videoArea.fullScreen? 0 : (window.isMobileLayout? 0 : leftPanel.width) + rightPanel.width));
             videoAreaCol.height = Qt.binding(() => mainLayout.height);
             leftPanel.fixedWidth = 0;
             rightPanel.fixedWidth = 0;
@@ -37,13 +37,51 @@ Rectangle {
             videoAreaCol.y = 0;
             videoAreaCol.x = 0;
             videoAreaCol.width = Qt.binding(() => window.width);
-            videoAreaCol.height = Qt.binding(() => window.height * (videoArea.fullScreen? 1 : 0.5));
+            videoAreaCol.height = Qt.binding(() => window.height * (videoArea.fullScreen? 1 : (window.isMobileLayout? 0.35 : 0.5)));
             leftPanel.fixedWidth = Qt.binding(() => window.width * 0.4);
-            rightPanel.fixedWidth = Qt.binding(() => window.width * 0.6);
+            rightPanel.fixedWidth = Qt.binding(() => window.width * (window.isMobileLayout? 1.0 : 0.6));
             leftPanel.y = Qt.binding(() => videoAreaCol.height);
-            rightPanel.x = Qt.binding(() => leftPanel.width);
+            rightPanel.x = Qt.binding(() => window.isMobileLayout? 0 : leftPanel.width);
             rightPanel.y = Qt.binding(() => videoAreaCol.height);
         }
+    }
+    // property bool isMobileLayout: width < (1500 * dpiScale);
+    property bool isMobileLayout: isMobile && screenSize < 7.0;
+    onIsMobileLayoutChanged: {
+        if (isMobileLayout) {
+            vidInfo      .parent = inputsTab.inner;
+            vidInfoHr    .parent = inputsTab.inner;
+            lensProfile  .parent = inputsTab.inner;
+            lensProfileHr.parent = inputsTab.inner;
+            motionData   .parent = inputsTab.inner;
+
+            sync    .parent = paramsTab.inner;
+            syncHr  .parent = paramsTab.inner;
+            stab    .parent = paramsTab.inner;
+            stabHr  .parent = paramsTab.inner;
+            advanced.parent = paramsTab.inner;
+
+            outputPathLabel.parent = exportTab.inner;
+            renderBtnRow   .parent = exportTab.inner;
+            exportSettings .parent = exportTab.inner;
+        }/* else {
+            vidInfo      .parent = leftPanel.col;
+            vidInfoHr    .parent = leftPanel.col;
+            lensProfile  .parent = leftPanel.col;
+            lensProfileHr.parent = leftPanel.col;
+            motionData   .parent = leftPanel.col;
+
+            sync          .parent = rightPanel.col;
+            syncHr        .parent = rightPanel.col;
+            stab          .parent = rightPanel.col;
+            stabHr        .parent = rightPanel.col;
+            exportSettings.parent = rightPanel.col;
+            exportHr      .parent = rightPanel.col;
+            advanced      .parent = rightPanel.col;
+
+            outputPathLabel.parent = exportbar;
+            renderBtnRow   .parent = exportbar;
+        }*/
     }
     property alias vidInfo: vidInfo.item;
     property alias videoArea: videoArea;
@@ -86,6 +124,7 @@ Rectangle {
             videoArea.loadFile(pendingOpenFile);
             pendingOpenFile = "";
         }
+        tabs.updateHeights();
     }
 
     Item {
@@ -97,7 +136,7 @@ Rectangle {
             id: leftPanel;
             direction: SidePanel.HandleRight;
             topPadding: gflogo.height;
-            visible: !videoArea.fullScreen;
+            visible: !videoArea.fullScreen && !isMobileLayout;
             maxWidth: parent.width - rightPanel.width - 50 * dpiScale;
             implicitWidth: settings.value("leftPanelSize", defaultWidth);
             onWidthChanged: settings.setValue("leftPanelSize", width);
@@ -123,11 +162,11 @@ Rectangle {
                     onSelectFileRequest: fileDialog.open2();
                 }
             } }
-            Hr { }
+            Hr { id: vidInfoHr; }
             ItemLoader { id: lensProfile; sourceComponent: Component {
                 Menu.LensProfile { }
             } }
-            Hr { }
+            Hr { id: lensProfileHr; }
             ItemLoader { id: motionData; sourceComponent: Component {
                 Menu.MotionData { }
             } }
@@ -141,7 +180,7 @@ Rectangle {
             height: parent? parent.height : 0;
             VideoArea {
                 id: videoArea;
-                height: parent.height - (videoArea.fullScreen? 0 : exportbar.height);
+                height: parent.height - (videoArea.fullScreen || isMobileLayout? 0 : exportbar.height);
                 vidInfo: vidInfo.item;
             }
 
@@ -151,21 +190,20 @@ Rectangle {
                 width: parent.width;
                 height: 60 * dpiScale;
                 color: styleBackground2;
+                visible: !isMobileLayout;
 
                 Hr { width: parent.width; }
 
-                Row {
-                    height: parent.height;
-                    spacing: 10 * dpiScale;
-                    BasicText {
-                        text: qsTr("Output path:");
-                        anchors.verticalCenter: parent.verticalCenter;
-                    }
+                Label {
+                    id: outputPathLabel;
+                    anchors.verticalCenter: (isMobileLayout? undefined : parent.verticalCenter);
+                    anchors.horizontalCenter: (isMobileLayout? parent.horizontalCenter : undefined);
+                    anchors.verticalCenterOffset: -1 * dpiScale;
+                    text: qsTr("Output path:");
+                    position: isMobileLayout? Label.TopPosition : Label.LeftPosition;
+                    width: parent.width - (isMobileLayout? 0 : renderBtnRow.width + 10 * dpiScale) - 20 * dpiScale;
                     OutputPathField {
                         id: outputFile;
-                        anchors.verticalCenter: parent.verticalCenter;
-                        anchors.verticalCenterOffset: -2 * dpiScale;
-                        width: exportbar.width - parent.children[0].width - exportbar.children[2].width - 75 * dpiScale;
                         onFolderUrlChanged: {
                             if (exportSettings.item.preserveOutputPath.checked) {
                                 const outputFolder = folderUrl.toString();
@@ -175,180 +213,186 @@ Rectangle {
                     }
                 }
 
-                SplitButton {
-                    id: renderBtn;
-                    btn.accent: true;
-                    anchors.right: parent.right;
-                    anchors.rightMargin: 55 * dpiScale;
-                    anchors.verticalCenter: parent.verticalCenter;
-                    text: isAddToQueue? (render_queue.editing_job_id > 0? qsTr("Save") : qsTr("Add to render queue")) : qsTr("Export");
-                    iconName: "video";
-                    property bool isAddToQueue: false;
-                    property bool allowFile: false;
-                    property bool allowLens: false;
-                    property bool allowSync: false;
-                    onIsAddToQueueChanged: updateModel();
-                    enabled: window.videoArea.vid.loaded;
+                Row {
+                    id: renderBtnRow;
+                    anchors.right: (isMobileLayout? undefined : parent.right);
+                    anchors.rightMargin: 5 * dpiScale;
+                    spacing: 5 * dpiScale;
+                    anchors.verticalCenter: (isMobileLayout? undefined : parent.verticalCenter);
+                    anchors.horizontalCenter: (isMobileLayout? parent.horizontalCenter : undefined);
+                    anchors.horizontalCenterOffset: (queueBtn.width + spacing) / 2;
+                    SplitButton {
+                        id: renderBtn;
+                        btn.accent: true;
+                        text: isAddToQueue? (render_queue.editing_job_id > 0? qsTr("Save") : qsTr("Add to render queue")) : qsTr("Export");
+                        iconName: "video";
+                        isDown: isMobileLayout;
+                        property bool isAddToQueue: false;
+                        property bool allowFile: false;
+                        property bool allowLens: false;
+                        property bool allowSync: false;
+                        onIsAddToQueueChanged: updateModel();
+                        enabled: window.videoArea.vid.loaded;
 
-                    property bool enabled2: window.videoArea.vid.loaded && exportSettings.item && exportSettings.item.canExport && !videoArea.videoLoader.active;
-                    onEnabled2Changed: et.start();
-                    Timer { id: et; interval: 200; onTriggered: renderBtn.btn.enabled = renderBtn.enabled2; }
+                        property bool enabled2: window.videoArea.vid.loaded && exportSettings.item && exportSettings.item.canExport && !videoArea.videoLoader.active;
+                        onEnabled2Changed: et.start();
+                        Timer { id: et; interval: 200; onTriggered: renderBtn.btn.enabled = renderBtn.enabled2; }
 
-                    function updateModel() {
-                        let m = [
-                            ["export",        isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : (render_queue.editing_job_id > 0? QT_TRANSLATE_NOOP("Popup", "Save") : QT_TRANSLATE_NOOP("Popup", "Add to render queue"))],
-                            ["create_preset", QT_TRANSLATE_NOOP("Popup", "Create settings preset")],
-                            ["apply_all",     QT_TRANSLATE_NOOP("Popup", "Apply selected settings to all items in the render queue")],
-                            ["export_proj:WithProcessedData", QT_TRANSLATE_NOOP("Popup", "Export project file (including processed gyro data)")],
-                            ["export_proj:WithGyroData",      QT_TRANSLATE_NOOP("Popup", "Export project file (including gyro data)")],
-                            ["export_proj:Simple",            QT_TRANSLATE_NOOP("Popup", "Export project file")]
-                        ];
-                        if (controller.project_file_url) m.push(["save", QT_TRANSLATE_NOOP("Popup", "Save project file")]);
-                        model   = m.map(x => x[1]);
-                        actions = m.map(x => x[0]);
-                    }
-
-                    model: [];
-                    property list<string> actions: [];
-
-                    Connections {
-                        target: controller;
-                        function onProject_file_url_changed() { renderBtn.updateModel(); }
-                    }
-                    Connections {
-                        target: render_queue;
-                        function onQueue_changed() { renderBtn.updateModel(); }
-                    }
-                    Component.onCompleted: updateModel();
-
-                    function render() {
-                        const fname = vidInfo.item.filename.toLowerCase();
-                        if (fname.endsWith('.braw') || (fname.endsWith('.r3d') && !controller.find_redline()) || fname.endsWith('.dng')) {
-                            messageBox(Modal.Info, qsTr("This format is not available for rendering.\nThe recommended workflow is to export project file and use one of [video editor plugins] (%1).").replace(/\[(.*?)\]/, '<a href="https://gyroflow.xyz/download#plugins"><font color="' + styleTextColor + '">$1</font></a>').arg("DaVinci Resolve, Final Cut Pro"), [
-                                { text: qsTr("Ok"), accent: true }
-                            ]);
-                            return;
-                        }
-                        if (!controller.lens_loaded && !allowLens) {
-                            messageBox(Modal.Warning, qsTr("Lens profile is not loaded, your result will be incorrect. Are you sure you want to render this file?"), [
-                                { text: qsTr("Yes"), clicked: () => { allowLens = true; renderBtn.render(); }},
-                                { text: qsTr("No"), accent: true },
-                            ]);
-                            return;
-                        }
-                        const usesQuats = ((motionData.item.hasQuaternions && motionData.item.integrationMethod === 0) || motionData.item.hasAccurateTimestamps) && motionData.item.filename == vidInfo.item.filename;
-                        if (!usesQuats && controller.offsets_model.rowCount() == 0 && !allowSync) {
-                            messageBox(Modal.Warning, qsTr("There are no sync points present, your result will be incorrect. Are you sure you want to render this file?"), [
-                                { text: qsTr("Yes"), clicked: () => { allowSync = true; renderBtn.render(); }},
-                                { text: qsTr("No"), accent: true },
-                            ]);
-                            return;
-                        }
-                        const exists = filesystem.exists_in_folder(outputFile.folderUrl, outputFile.filename.replace("_%05d", "_00001"));
-                        if ((exists || render_queue.file_exists_in_folder(outputFile.folderUrl, outputFile.filename)) && !allowFile) {
-                            messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
-                                { text: qsTr("Yes"), clicked: () => { allowFile = true; renderBtn.render(); } },
-                                { text: qsTr("Rename"), clicked: () => { outputFile.setFilename(window.renameOutput(outputFile.filename, outputFile.folderUrl)); render(); } },
-                                { text: qsTr("No"), accent: true },
-                            ]);
-                            return;
-                        }
-                        if (fname.endsWith('.r3d') && controller.find_redline()) {
-                            messageBox(Modal.Info, "Gyroflow will use REDline to convert .R3D to ProRes before stabilizing in order to export from Gyroflow directly.\nIf you want to work on RAW data instead, export project file (Ctrl+S) and use one of [video editor plugins] (%1).".replace(/\[(.*?)\]/, '<a href="https://gyroflow.xyz/download#plugins"><font color="' + styleTextColor + '">$1</font></a>').arg("DaVinci Resolve, Final Cut Pro"), [
-                                { text: qsTr("Ok"), accent: true }
-                            ], undefined, Text.StyledText, "r3d-conversion" );
+                        function updateModel() {
+                            let m = [
+                                ["export",        isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : (render_queue.editing_job_id > 0? QT_TRANSLATE_NOOP("Popup", "Save") : QT_TRANSLATE_NOOP("Popup", "Add to render queue"))],
+                                ["create_preset", QT_TRANSLATE_NOOP("Popup", "Create settings preset")],
+                                ["apply_all",     QT_TRANSLATE_NOOP("Popup", "Apply selected settings to all items in the render queue")],
+                                ["export_proj:WithProcessedData", QT_TRANSLATE_NOOP("Popup", "Export project file (including processed gyro data)")],
+                                ["export_proj:WithGyroData",      QT_TRANSLATE_NOOP("Popup", "Export project file (including gyro data)")],
+                                ["export_proj:Simple",            QT_TRANSLATE_NOOP("Popup", "Export project file")]
+                            ];
+                            if (controller.project_file_url) m.push(["save", QT_TRANSLATE_NOOP("Popup", "Save project file")]);
+                            model   = m.map(x => x[1]);
+                            actions = m.map(x => x[0]);
                         }
 
-                        const encoder = render_queue.get_default_encoder(window.exportSettings.outCodec, window.exportSettings.outGpu);
-                        if ((encoder + "").endsWith("_amf") && window.exportSettings.outBitrate > 100) {
-                            messageBox(Modal.Info, qsTr("Some AMD GPU encoders have a bug where it limits the bitrate to 20 Mbps, if the target bitrate is greater than 100 Mbps.\n\n" +
-                                                        "Please check the file bitrate after rendering and if you're affected by this bug, you can either:\n" +
-                                                        "- Set output bitrate to less than 100 Mbps\n" +
-                                                        "- Use \"Custom encoder options\": `-rc cqp -qp_i 28 -qp_p 28`"), [
-                                { text: qsTr("Ok") },
-                            ], undefined, Text.MarkdownText, "amd-bitrate-warning");
-                        }
+                        model: [];
+                        property list<string> actions: [];
 
-                        videoArea.vid.grabToImage(function(result) {
-                            if ((Qt.platform.os == "ios" || Qt.platform.os == "android") && (!outputFile.folderUrl.toString() || !window.allowedOutputUrls.includes(outputFile.folderUrl.toString()))) {
-                                messageBox(Modal.Info, qsTr("Due to file access restrictions, you need to select the destination folder manually.\nClick Ok and select the destination folder."), [
-                                    { text: qsTr("Ok"), clicked: () => {
-                                        outputFile.selectFolder(outputFile.folderUrl, function(_) { renderBtn.btn.clicked(); });
-                                    }},
+                        Connections {
+                            target: controller;
+                            function onProject_file_url_changed() { renderBtn.updateModel(); }
+                        }
+                        Connections {
+                            target: render_queue;
+                            function onQueue_changed() { renderBtn.updateModel(); }
+                        }
+                        Component.onCompleted: updateModel();
+
+                        function render() {
+                            const fname = vidInfo.item.filename.toLowerCase();
+                            if (fname.endsWith('.braw') || (fname.endsWith('.r3d') && !controller.find_redline()) || fname.endsWith('.dng')) {
+                                messageBox(Modal.Info, qsTr("This format is not available for rendering.\nThe recommended workflow is to export project file and use one of [video editor plugins] (%1).").replace(/\[(.*?)\]/, '<a href="https://gyroflow.xyz/download#plugins"><font color="' + styleTextColor + '">$1</font></a>').arg("DaVinci Resolve, Final Cut Pro"), [
+                                    { text: qsTr("Ok"), accent: true }
                                 ]);
                                 return;
                             }
-
-                            const job_id = render_queue.add(window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
-                            if (renderBtn.isAddToQueue) {
-                                // Add to queue
-                                if (+settings.value("showQueueWhenAdding", "1"))
-                                    videoArea.queue.shown = true;
-                            } else {
-                                // Export now
-                                render_queue.main_job_id = job_id;
-                                render_queue.render_job(job_id);
+                            if (!controller.lens_loaded && !allowLens) {
+                                messageBox(Modal.Warning, qsTr("Lens profile is not loaded, your result will be incorrect. Are you sure you want to render this file?"), [
+                                    { text: qsTr("Yes"), clicked: () => { allowLens = true; renderBtn.render(); }},
+                                    { text: qsTr("No"), accent: true },
+                                ]);
+                                return;
                             }
-                        }, Qt.size(50 * dpiScale * videoArea.vid.parent.ratio, 50 * dpiScale));
-                    }
-                    btn.onClicked: {
-                        allowFile = false;
-                        allowLens = false;
-                        allowSync = false;
-                        window.videoArea.vid.pause();
-                        render();
-                    }
-                    popup.onClicked: (index) => {
-                        const action = actions[index];
-                        switch (action) {
-                            case "export": // Add to render queue or Export
-                                renderBtn.isAddToQueue = !renderBtn.isAddToQueue;
-                                popup.close();
-                                renderBtn.btn.clicked();
-                            break;
-                            case "create_preset": // Create preset
-                            case "apply_all": // Apply settings to render queue
-                                const el = Qt.createComponent("SettingsSelector.qml").createObject(window, { isPreset: index == 1 });
-                                el.opened = true;
-                                el.onApply.connect((obj) => {
-                                    const allData = JSON.parse(controller.export_gyroflow_data("Simple", window.getAdditionalProjectData()));
-                                    const finalData = el.getFilteredObject(allData, obj);
+                            const usesQuats = ((motionData.item.hasQuaternions && motionData.item.integrationMethod === 0) || motionData.item.hasAccurateTimestamps) && motionData.item.filename == vidInfo.item.filename;
+                            if (!usesQuats && controller.offsets_model.rowCount() == 0 && !allowSync) {
+                                messageBox(Modal.Warning, qsTr("There are no sync points present, your result will be incorrect. Are you sure you want to render this file?"), [
+                                    { text: qsTr("Yes"), clicked: () => { allowSync = true; renderBtn.render(); }},
+                                    { text: qsTr("No"), accent: true },
+                                ]);
+                                return;
+                            }
+                            const exists = filesystem.exists_in_folder(outputFile.folderUrl, outputFile.filename.replace("_%05d", "_00001"));
+                            if ((exists || render_queue.file_exists_in_folder(outputFile.folderUrl, outputFile.filename)) && !allowFile) {
+                                messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
+                                    { text: qsTr("Yes"), clicked: () => { allowFile = true; renderBtn.render(); } },
+                                    { text: qsTr("Rename"), clicked: () => { outputFile.setFilename(window.renameOutput(outputFile.filename, outputFile.folderUrl)); render(); } },
+                                    { text: qsTr("No"), accent: true },
+                                ]);
+                                return;
+                            }
+                            if (fname.endsWith('.r3d') && controller.find_redline()) {
+                                messageBox(Modal.Info, "Gyroflow will use REDline to convert .R3D to ProRes before stabilizing in order to export from Gyroflow directly.\nIf you want to work on RAW data instead, export project file (Ctrl+S) and use one of [video editor plugins] (%1).".replace(/\[(.*?)\]/, '<a href="https://gyroflow.xyz/download#plugins"><font color="' + styleTextColor + '">$1</font></a>').arg("DaVinci Resolve, Final Cut Pro"), [
+                                    { text: qsTr("Ok"), accent: true }
+                                ], undefined, Text.StyledText, "r3d-conversion" );
+                            }
 
-                                    if (finalData.hasOwnProperty("output")) {
-                                        finalData.output.output_filename = ""; // Don't modify filenames, only target folder
-                                    }
-                                    if (obj.synchronization && obj.synchronization.do_autosync) {
-                                        finalData.synchronization.do_autosync = true;
-                                    }
-                                    if (action == "create_preset") { // Preset
-                                        presetFileDialog.presetData = finalData;
-                                        presetFileDialog.open2();
-                                    } else { // Apply
-                                        render_queue.apply_to_all(JSON.stringify(finalData), window.getAdditionalProjectDataJson(), 0);
-                                    }
-                                });
-                            break;
-                            case "export_proj:WithProcessedData":
-                            case "export_proj:WithGyroData":
-                            case "export_proj:Simple":
-                                window.saveProject(action.substring(12));
-                            break;
-                            case "save": window.saveProject(""); break;
+                            const encoder = render_queue.get_default_encoder(window.exportSettings.outCodec, window.exportSettings.outGpu);
+                            if ((encoder + "").endsWith("_amf") && window.exportSettings.outBitrate > 100) {
+                                messageBox(Modal.Info, qsTr("Some AMD GPU encoders have a bug where it limits the bitrate to 20 Mbps, if the target bitrate is greater than 100 Mbps.\n\n" +
+                                                            "Please check the file bitrate after rendering and if you're affected by this bug, you can either:\n" +
+                                                            "- Set output bitrate to less than 100 Mbps\n" +
+                                                            "- Use \"Custom encoder options\": `-rc cqp -qp_i 28 -qp_p 28`"), [
+                                    { text: qsTr("Ok") },
+                                ], undefined, Text.MarkdownText, "amd-bitrate-warning");
+                            }
+
+                            videoArea.vid.grabToImage(function(result) {
+                                if ((Qt.platform.os == "ios" || Qt.platform.os == "android") && (!outputFile.folderUrl.toString() || !window.allowedOutputUrls.includes(outputFile.folderUrl.toString()))) {
+                                    messageBox(Modal.Info, qsTr("Due to file access restrictions, you need to select the destination folder manually.\nClick Ok and select the destination folder."), [
+                                        { text: qsTr("Ok"), clicked: () => {
+                                            outputFile.selectFolder(outputFile.folderUrl, function(_) { renderBtn.btn.clicked(); });
+                                        }},
+                                    ]);
+                                    return;
+                                }
+
+                                const job_id = render_queue.add(window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
+                                if (renderBtn.isAddToQueue) {
+                                    // Add to queue
+                                    if (+settings.value("showQueueWhenAdding", "1"))
+                                        videoArea.queue.shown = true;
+                                } else {
+                                    // Export now
+                                    render_queue.main_job_id = job_id;
+                                    render_queue.render_job(job_id);
+                                }
+                            }, Qt.size(50 * dpiScale * videoArea.vid.parent.ratio, 50 * dpiScale));
+                        }
+                        btn.onClicked: {
+                            allowFile = false;
+                            allowLens = false;
+                            allowSync = false;
+                            window.videoArea.vid.pause();
+                            render();
+                        }
+                        popup.onClicked: (index) => {
+                            const action = actions[index];
+                            switch (action) {
+                                case "export": // Add to render queue or Export
+                                    renderBtn.isAddToQueue = !renderBtn.isAddToQueue;
+                                    popup.close();
+                                    renderBtn.btn.clicked();
+                                break;
+                                case "create_preset": // Create preset
+                                case "apply_all": // Apply settings to render queue
+                                    const el = Qt.createComponent("SettingsSelector.qml").createObject(window, { isPreset: index == 1 });
+                                    el.opened = true;
+                                    el.onApply.connect((obj) => {
+                                        const allData = JSON.parse(controller.export_gyroflow_data("Simple", window.getAdditionalProjectData()));
+                                        const finalData = el.getFilteredObject(allData, obj);
+
+                                        if (finalData.hasOwnProperty("output")) {
+                                            finalData.output.output_filename = ""; // Don't modify filenames, only target folder
+                                        }
+                                        if (obj.synchronization && obj.synchronization.do_autosync) {
+                                            finalData.synchronization.do_autosync = true;
+                                        }
+                                        if (action == "create_preset") { // Preset
+                                            presetFileDialog.presetData = finalData;
+                                            presetFileDialog.open2();
+                                        } else { // Apply
+                                            render_queue.apply_to_all(JSON.stringify(finalData), window.getAdditionalProjectDataJson(), 0);
+                                        }
+                                    });
+                                break;
+                                case "export_proj:WithProcessedData":
+                                case "export_proj:WithGyroData":
+                                case "export_proj:Simple":
+                                    window.saveProject(action.substring(12));
+                                break;
+                                case "save": window.saveProject(""); break;
+                            }
                         }
                     }
-                }
-                LinkButton {
-                    anchors.right: parent.right;
-                    anchors.rightMargin: 5 * dpiScale;
-                    leftPadding: 10 * dpiScale;
-                    rightPadding: 10 * dpiScale;
-                    icon.width: 25 * dpiScale;
-                    icon.height: 25 * dpiScale;
-                    // textColor: styleTextColor;
-                    anchors.verticalCenter: parent.verticalCenter;
-                    iconName: "queue";
-                    tooltip: qsTr("Render queue");
-                    onClicked: videoArea.queue.shown = !videoArea.queue.shown;
+                    LinkButton {
+                        id: queueBtn;
+                        leftPadding: 10 * dpiScale;
+                        rightPadding: 10 * dpiScale;
+                        icon.width: 25 * dpiScale;
+                        icon.height: 25 * dpiScale;
+                        // textColor: styleTextColor;
+                        anchors.verticalCenter: parent.verticalCenter;
+                        iconName: "queue";
+                        tooltip: qsTr("Render queue");
+                        onClicked: videoArea.queue.shown = !videoArea.queue.shown;
+                    }
                 }
             }
         }
@@ -361,12 +405,27 @@ Rectangle {
             maxWidth: parent.width - leftPanel.width - 50 * dpiScale;
             implicitWidth: settings.value("rightPanelSize", defaultWidth);
             onWidthChanged: settings.setValue("rightPanelSize", width);
+            col.visible: !isMobileLayout;
+
+            Tabs {
+                id: tabs;
+                Component.onCompleted: parent = rightPanel;
+                visible: isMobileLayout;
+                tabs: [QT_TR_NOOP("Inputs"), QT_TR_NOOP("Parameters"), QT_TR_NOOP("Export")];
+                tabsIcons: ["video", "settings", "save"];
+                tabsIconsSize: [20, 24, 24];
+
+                TabColumn { id: inputsTab; parentHeight: rightPanel.height; }
+                TabColumn { id: paramsTab; parentHeight: rightPanel.height; }
+                TabColumn { id: exportTab; parentHeight: rightPanel.height; inner.spacing: 10 * dpiScale; }
+            }
+
             ItemLoader { id: sync; sourceComponent: Component { Menu.Synchronization { } } }
-            Hr { }
+            Hr { id: syncHr; }
             ItemLoader { id: stab; sourceComponent: Component { Menu.Stabilization { } } }
-            Hr { }
-            ItemLoader { id: exportSettings; sourceComponent: Component { Menu.Export { } } }
-            Hr { }
+            Hr { id: stabHr; }
+            ItemLoader { id: exportSettings; sourceComponent: Component { Menu.Export { showBtn: !window.isMobileLayout; } } }
+            Hr { id: exportHr; visible: !isMobileLayout; }
             ItemLoader { id: advanced; sourceComponent: Component { Menu.Advanced { } } }
         }
     }
@@ -497,6 +556,7 @@ Rectangle {
         if (!isLandscape) {
             isLandscapeChanged();
         }
+        isMobileLayoutChanged();
     }
 
     function getReadableError(text: string): string {

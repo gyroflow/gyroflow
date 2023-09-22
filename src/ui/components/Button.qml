@@ -10,6 +10,7 @@ QQC.Button {
     id: root;
 
     property bool accent: false;
+    property bool transparentOnMobile: false;
     property color accentColor: styleAccentColor;
     property color textColor: root.accent? styleTextColorOnAccent : styleTextColor;
     QQCM.Material.foreground: textColor;
@@ -36,7 +37,7 @@ QQC.Button {
 
     background: Rectangle {
         color: root.accent? root.hovered || root.activeFocus? Qt.lighter(accentColor, 1.1) : accentColor : root.hovered || root.activeFocus? Qt.lighter(styleButtonColor, 1.2) : styleButtonColor;
-        opacity: !parent.enabled && fadeWhenDisabled? 0.75 : root.down? 0.75 : 1.0;
+        opacity: (!parent.enabled && fadeWhenDisabled? 0.75 : root.down? 0.75 : 1.0) * (transparentOnMobile && window.isMobileLayout? 0.8 : 1.0);
         Ease on opacity { duration: 100; }
         radius: 6 * dpiScale;
         anchors.fill: parent;

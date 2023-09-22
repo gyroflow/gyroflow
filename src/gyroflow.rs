@@ -147,7 +147,12 @@ fn entry() {
     util::catch_qt_file_open(|url| {
         engine.set_property("openFileOnStart".into(), url.into());
     });
+    let screen_size_inch = cpp!(unsafe[] -> f64 as "double" { auto size = QGuiApplication::primaryScreen()->physicalSize(); return std::sqrt(std::pow(size.width(), 2.0) + std::pow(size.height(), 2.0)) / (2.54 * 10.0); });
     let mut dpi = cpp!(unsafe[] -> f64 as "double" { return QGuiApplication::primaryScreen()->logicalDotsPerInch() / 96.0; });
+    if cfg!(any(target_os = "android", target_os = "ios")) {
+        dpi *= 1.2;
+    }
+    engine.set_property("screenSize".into(), QVariant::from(screen_size_inch));
     engine.set_property("dpiScale".into(), QVariant::from(dpi));
     engine.set_property("version".into(), QString::from(util::get_version()).into());
     engine.set_property("graphics_api".into(), util::qt_graphics_api().into());

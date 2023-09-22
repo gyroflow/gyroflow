@@ -28,7 +28,7 @@ Item {
 
     Rectangle {
         color: styleBackground2
-        opacity: 0.8;
+        opacity: 0.85;
         anchors.fill: parent;
         radius: 5 * dpiScale;
         border.width: 1;
@@ -268,6 +268,7 @@ Item {
             property bool isInProgress: (!isFinished && !isError && !isQuestion && total_frames > 0) && (current_frame > 0 || isProcessing);
             property bool isProcessing: processing_progress > 0.0 && processing_progress < 1.0;
             property string errorString: error_string;
+            property real basicTextSize: (window.isMobileLayout? 10 : 12) * dpiScale;
             onProgressChanged: {
                 const times = Util.calculateTimesAndFps(progress, current_frame, start_timestamp);
                 if (times !== false) {
@@ -333,6 +334,19 @@ Item {
                 opacity: 0.2;
                 radius: 5 * dpiScale;
             }
+            Item {
+                visible: window.isMobileLayout && !statusBg.shown;
+                height: parent.height;
+                width: ipb.value * parent.width;
+                clip: true;
+                Rectangle {
+                    width: parent.parent.width;
+                    height: parent.height;
+                    radius: 5 * dpiScale;
+                    color: "#70e574";
+                    opacity: 0.35;
+                }
+            }
             Rectangle {
                 id: statusBg;
                 anchors.fill: parent;
@@ -362,6 +376,7 @@ Item {
                             id: messageAreaText;
                             textFormat: Text.RichText;
                             leftPadding: 0;
+                            font.pixelSize: basicTextSize;
                         }
                         Flow {
                             id: messageBtns;
@@ -439,7 +454,7 @@ Item {
                 id: innerItm;
                 x: 5 * dpiScale;
                 width: parent.width - 2*x;
-                height: 70 * dpiScale;
+                height: (window.isMobileLayout? 80 : 70) * dpiScale;
                 Image {
                     x: 5 * dpiScale;
                     source: thumbnail_url
@@ -468,8 +483,15 @@ Item {
                         font.bold: true;
                         font.pixelSize: 14 * dpiScale;
                     }
-                    BasicText { text: qsTr("Save to: %1").arg("<b>" + display_output_path + "</b>"); }
-                    BasicText { text: qsTr("Export settings: %1").arg("<b>" + export_settings + "</b>"); }
+                    BasicText { text: qsTr("Save to: %1").arg("<b>" + display_output_path + "</b>"); font.pixelSize: basicTextSize; }
+                    BasicText { text: qsTr("Export settings: %1").arg("<b>" + export_settings + "</b>"); font.pixelSize: basicTextSize; }
+                    BasicText {
+                        visible: window.isMobileLayout;
+                        font.pixelSize: basicTextSize;
+                        property string eta: qsTr("ETA %1").arg(statusBg.shown? "---" : time.remaining);
+                        text: isProcessing? qsTr("Synchronizing: %1").arg(`<b>${(processing_progress*100).toFixed(2)}%</b>`)
+                                          : qsTr("Rendering: %1").arg(`<b>${(dlg.progress*100).toFixed(2)}%</b> <small>(${current_frame}/${total_frames}${time.fpsText}, ${eta})</small>`);
+                    }
                 }
 
                 Column {
@@ -477,6 +499,7 @@ Item {
                     anchors.rightMargin: 10 * dpiScale;
                     spacing: 6 * dpiScale;
                     anchors.verticalCenter: parent.verticalCenter;
+                    visible: !window.isMobileLayout;
 
                     BasicText {
                         leftPadding: 0;
@@ -487,6 +510,7 @@ Item {
                                             `<b>${(dlg.progress*100).toFixed(2)}%</b> <small>(${current_frame}/${total_frames}${time.fpsText})</small>`;
                     }
                     QQC.ProgressBar {
+                        id: ipb;
                         width: 200 * dpiScale;
                         value: isProcessing? processing_progress : current_frame / total_frames;
                     }
@@ -600,6 +624,7 @@ Item {
     }
 
     LinkButton {
+        visible: !isMobile;
         anchors.left: parent.left;
         anchors.bottom: parent.bottom;
         anchors.margins: 5 * dpiScale;

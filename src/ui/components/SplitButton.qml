@@ -15,6 +15,8 @@ Rectangle {
     property alias btn: mainbtn;
     property alias splitbtn: splitbtn;
 
+    property bool isDown: false;
+
     width: mainbtn.width;
     height: mainbtn.height;
     layer.enabled: true;
@@ -24,6 +26,13 @@ Rectangle {
     border.color: Qt.darker(styleAccentColor, 1.5);
     radius: 6 * dpiScale;
     color: "transparent";
+
+    function open() {
+        const pt = window.mapFromItem(root, 0, 0);
+        popup.x = pt.x - popup.width + width;
+        popup.y = pt.y + (isDown? height : -popup.height);
+        popup.open();
+    }
 
     Button {
         id: mainbtn;
@@ -45,7 +54,7 @@ Rectangle {
         fadeWhenDisabled: root.enabled;
 
         DropdownChevron { opened: popup.visible; color: mainbtn.textColor; anchors.centerIn: parent; }
-        onClicked: popup.open();
+        onClicked: root.open();
     }
     Rectangle {
         anchors.left: splitbtn.left;
@@ -55,6 +64,7 @@ Rectangle {
     }
     Popup {
         id: popup;
+        parent: window;
         x: -width + root.width;
         y: -height - 5 * dpiScale;
         width: Math.max(root.width, popup.maxItemWidth + 10 * dpiScale);

@@ -11,12 +11,13 @@ import "components/"
 
 Window {
     id: main_window;
-    width: Math.min(Screen.width, 1650 * dpiScale);
-    height: Math.min(Screen.height, 950 * dpiScale);
+    width:  isMobile? Screen.desktopAvailableWidth  : Math.min(Screen.width, 1650 * dpiScale);
+    height: isMobile? Screen.desktopAvailableHeight : Math.min(Screen.height, 950 * dpiScale);
     minimumWidth: 900 * dpiScale;
     minimumHeight: 400 * dpiScale;
     visible: true;
     color: styleBackground;
+    property bool isMobile: Qt.platform.os == "android" || Qt.platform.os == "ios";
 
     title: "Gyroflow v" + version;
 
@@ -50,26 +51,18 @@ Window {
 
     Component.onCompleted: {
         ui_tools.set_icon(main_window);
-        const isMobile = Qt.platform.os == "android" || Qt.platform.os == "ios";
              if (!isMobile && sett.visibility == Window.FullScreen) main_window.showFullScreen();
         else if (!isMobile && sett.visibility == Window.Maximized)  main_window.showMaximized();
-        else {
+        else if (!isMobile) {
             Qt.callLater(() => {
                 width = width + 1;
                 height = height;
             });
+        } else {
+            Qt.callLater(() => { main_window.showFullScreen(); });
         }
     }
     property bool isLandscape: width > height;
-    onIsLandscapeChanged: {
-        if (Qt.platform.os == "android" || Qt.platform.os == "ios") {
-            Qt.callLater(() => {
-                main_window.width = main_window.width + 1;
-                main_window.height = main_window.height + 1;
-                main_window.showFullScreen();
-            });
-        }
-    }
 
     property bool closeConfirmationModal: false;
     property bool closeConfirmed: false;
