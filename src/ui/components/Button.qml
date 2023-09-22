@@ -54,6 +54,8 @@ QQC.Button {
     property string iconName;
     icon.name: iconName || "";
     icon.source: iconName ? "qrc:/resources/icons/svg/" + iconName + ".svg" : "";
+    icon.width: 24 * dpiScale;
+    icon.height: 24 * dpiScale;
 
     Keys.onPressed: (e) => {
         if (e.key == Qt.Key_Enter || e.key == Qt.Key_Return) {

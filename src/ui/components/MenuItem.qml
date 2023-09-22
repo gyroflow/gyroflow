@@ -51,6 +51,8 @@ Item {
 
         icon.name: iconName || "";
         icon.source: iconName ? "qrc:/resources/icons/svg/" + iconName + ".svg" : "";
+        icon.width: 24 * dpiScale;
+        icon.height: 24 * dpiScale;
 
         width: parent.width;
         height: 36 * dpiScale;
