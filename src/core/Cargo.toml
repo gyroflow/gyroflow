@@ -21,7 +21,7 @@ rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "b5bca7f" }
 
 mimalloc = { version = "0.1.39", default-features = false }
 nalgebra = { version = "0.32", features = ["serde-serialize"] }
-rayon = "1.7"
+rayon = "1.8"
 biquad = "0.4.2"
 fastrand = "2.0.0"
 lazy_static = "1.4.0"

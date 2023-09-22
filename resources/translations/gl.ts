@@ -292,8 +292,8 @@ Comprobe a taxa de bits do ficheiro despois da renderización e se &apos;está a
       <location filename="../../src/ui/App.qml" line="270"/>
       <source>Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>Debido ás restricións de acceso aos ficheiros, cómpre seleccionar manualmente o cartafol de destino.
+Faga clic en Aceptar e seleccione o cartafol de destino.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="487"/>
@@ -616,12 +616,12 @@ Pode aumentar o límite de nitidez na sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="616"/>
       <source>Preserve export path</source>
-      <translation type="unfinished">Preserve export path</translation>
+      <translation>Conservar o camiño de exportación</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="618"/>
       <source>Save output path in settings and use it for all files.</source>
-      <translation type="unfinished">Save output path in settings and use it for all files.</translation>
+      <translation>Garda o camiño de saída na configuración e utilízao para tódolos ficheiros.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="381"/>
@@ -1035,7 +1035,7 @@ Quere envialo seu perfil?</translation>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="164"/>
       <source>Troubleshooting</source>
-      <translation type="unfinished">Troubleshooting</translation>
+      <translation>Solución de problemas</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="176"/>
@@ -1212,7 +1212,7 @@ Quere envialo seu perfil?</translation>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="43"/>
       <source>[Selected folder]</source>
-      <translation type="unfinished">[Selected folder]</translation>
+      <translation>[Cartafol seleccionado]</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="104"/>
@@ -2685,7 +2685,7 @@ Está seguro de que quere continuar?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="839"/>
       <source>Option+Scroll</source>
-      <translation type="unfinished">Option+Scroll</translation>
+      <translation>Opción+Scroll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="840"/>
@@ -2988,7 +2988,7 @@ Se ten Gyroflow en "C:Arquivos de programas", terá&apos; que executar Gyroflow 
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="721"/>
       <source>Click here to open a video file</source>
-      <translation type="unfinished">Click here to open a video file</translation>
+      <translation>Faga clic aquí para abrir un ficheiro de vídeo</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="849"/>

@@ -293,8 +293,8 @@ Prosím skontroluj dátový tok po renderovaní, či sa táto chyba prejavila, p
       <location filename="../../src/ui/App.qml" line="270"/>
       <source>Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>Kôli obmadzeniu prístupu k súborom, je potrebné vybrať cieľovú zložku manuálne.
+Klikni na OK pre výber cieľovej zložky.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="487"/>
@@ -618,12 +618,12 @@ Môžeš zvýšit ostrosť vzorku v pokročilých nastaveniach.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="616"/>
       <source>Preserve export path</source>
-      <translation type="unfinished">Preserve export path</translation>
+      <translation>Zachovať cestu k exportu</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="618"/>
       <source>Save output path in settings and use it for all files.</source>
-      <translation type="unfinished">Save output path in settings and use it for all files.</translation>
+      <translation>Uložiť výstupnú cestu v nastaveniach a použiť ich pre všetky súbory.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="381"/>
@@ -1037,7 +1037,7 @@ Chceš nahrať tvoj profil?</translation>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="164"/>
       <source>Troubleshooting</source>
-      <translation type="unfinished">Troubleshooting</translation>
+      <translation>Riešenie problémov</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="176"/>
@@ -1214,7 +1214,7 @@ Chceš nahrať tvoj profil?</translation>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="43"/>
       <source>[Selected folder]</source>
-      <translation type="unfinished">[Selected folder]</translation>
+      <translation>[Zvolený priečinok]</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="104"/>
@@ -2685,7 +2685,7 @@ Chceš pokračovať?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="839"/>
       <source>Option+Scroll</source>
-      <translation type="unfinished">Option+Scroll</translation>
+      <translation>Nastavenie+Skrolovanie</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="840"/>
@@ -2988,7 +2988,7 @@ Ak je Gyroflow umiestnený v "C:\Program Files" je potrebné ho spustiť ako Adm
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="721"/>
       <source>Click here to open a video file</source>
-      <translation type="unfinished">Click here to open a video file</translation>
+      <translation>Klikni sem pre otvorenie video súboru</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="849"/>

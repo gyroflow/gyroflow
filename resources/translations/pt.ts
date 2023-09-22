@@ -68,7 +68,7 @@ Isto é apenas um indicador visual, não afeta a renderização.</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="224"/>
       <source>Format for R3D conversion</source>
-      <translation type="unfinished">Format for R3D conversion</translation>
+      <translation>Formato para conversão R3D</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="253"/>
@@ -78,7 +78,7 @@ Isto é apenas um indicador visual, não afeta a renderização.</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="277"/>
       <source>Device for video processing</source>
-      <translation type="unfinished">Device for video processing</translation>
+      <translation>Dispositivo para processamento de vídeo</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="291"/>
@@ -93,7 +93,7 @@ Isto é apenas um indicador visual, não afeta a renderização.</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="344"/>
       <source>Notification sounds</source>
-      <translation type="unfinished">Notification sounds</translation>
+      <translation>Sons de notificação</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="349"/>
@@ -293,8 +293,8 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="270"/>
       <source>Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>Devido a restrições de acesso ao ficheiro, precisa selecionar a pasta de destino manualmente.
+Clique em Ok e selecione a pasta de destino.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="487"/>
@@ -618,12 +618,12 @@ You can increase the sharpness limit in the Advanced section.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="616"/>
       <source>Preserve export path</source>
-      <translation type="unfinished">Preserve export path</translation>
+      <translation>Preservar caminho de exportação</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="618"/>
       <source>Save output path in settings and use it for all files.</source>
-      <translation type="unfinished">Save output path in settings and use it for all files.</translation>
+      <translation>Guarde o caminho de saída nas configurações e utilize-o para todos os arquivos.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="381"/>
@@ -694,7 +694,7 @@ You can increase the sharpness limit in the Advanced section.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="541"/>
       <source>Audio codec</source>
-      <translation type="unfinished">Audio codec</translation>
+      <translation>Codec de áudio</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="553"/>
@@ -835,7 +835,7 @@ Deseja enviar o seu perfil?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="511"/>
       <source>Focal length</source>
-      <translation type="unfinished">Focal length</translation>
+      <translation>Comprimento focal</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="513"/>
@@ -1037,7 +1037,7 @@ Deseja enviar o seu perfil?</translation>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="164"/>
       <source>Troubleshooting</source>
-      <translation type="unfinished">Troubleshooting</translation>
+      <translation>Resolução de problemas</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="176"/>
@@ -1214,7 +1214,7 @@ Deseja enviar o seu perfil?</translation>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="43"/>
       <source>[Selected folder]</source>
-      <translation type="unfinished">[Selected folder]</translation>
+      <translation>[Pasta selecionada]</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="104"/>
@@ -2686,7 +2686,7 @@ Tem a certeza que pretende continuar?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="839"/>
       <source>Option+Scroll</source>
-      <translation type="unfinished">Option+Scroll</translation>
+      <translation>Option+Scroll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="840"/>
@@ -2989,7 +2989,7 @@ Se você tiver o Gyroflow em C:\Program Files, então você precisará de execut
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="721"/>
       <source>Click here to open a video file</source>
-      <translation type="unfinished">Click here to open a video file</translation>
+      <translation>Clique aqui para abrir um ficheiro de vídeo</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="849"/>
