@@ -197,7 +197,13 @@ pub fn is_dir_url(url: &str) -> bool {
 struct Uri;
 impl Uri {
     pub fn parse<'a>(env: &mut jni::JNIEnv<'a>, url: &str) -> Result<JObject<'a>> {
-        let url = env.new_string(url)?;
+        let url = if url.contains(' ') {
+            url.replace(' ', "%20")
+        } else {
+            url.to_owned()
+        };
+
+        let url = env.new_string(&url)?;
         Ok(env.call_static_method("android/net/Uri", "parse", "(Ljava/lang/String;)Landroid/net/Uri;", &[JValue::Object(&url.into())])?.l()?)
     }
     pub fn to_string<'a>(env: &mut jni::JNIEnv<'a>, uri: &JObject<'a>) -> Result<String> {

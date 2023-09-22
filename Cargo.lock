@@ -3132,7 +3132,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=f820e48#f820e48af932a27aef4288b8d6173c4c84e1ccf4"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=d33bfef#d33bfef999191269b07c27377f34017ee85c1dd9"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3504,9 +3504,9 @@ dependencies = [
 
 [[package]]
 name = "semver"
-version = "1.0.18"
+version = "1.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0293b4b29daaf487284529cc2f5675b8e57c61f70167ba415a463651fd6a918"
+checksum = "ad977052201c6de01a8ef2aa3378c4bd23217a056337d1d6da40468d267a4fb0"
 
 [[package]]
 name = "serde"
