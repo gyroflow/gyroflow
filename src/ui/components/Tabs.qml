@@ -15,6 +15,7 @@ Column {
     property var tabsIconsSize: [];
     function updateHeights() { Qt.callLater(stackLayout.updateHeights); }
     onWidthChanged: root.updateHeights();
+    property alias currentIndex: tabBar.currentIndex;
     QQC.TabBar {
         id: tabBar;
         width: parent.width;
@@ -52,7 +53,7 @@ Column {
         currentIndex: tabBar.currentIndex;
         visible: tabBar.visible;
         function updateHeights() {
-            for (let i = 0; i < children.length; ++i) children[i].updateHeight();
+            for (let i = 0; i < children.length; ++i) children[i].updateHeight(tabBar.height);
         }
     }
 }

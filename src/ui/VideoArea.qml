@@ -974,8 +974,8 @@ Item {
             hr.height: 30 * dpiScale;
             hr.opacity: root.fullScreen || window.isMobileLayout? 0.1 : 1.0;
             additionalHeight: timeline.additionalHeight;
-            defaultHeight: 165 * dpiScale;
-            minHeight: (root.fullScreen? 50 : 100) * dpiScale;
+            defaultHeight: (window.isMobileLayout? 80 : 165) * dpiScale;
+            minHeight: (root.fullScreen || window.isMobileLayout? 50 : 100) * dpiScale;
             lastHeight: window.settings.value("bottomPanelSize" + (root.fullScreen? "-full" : ""), defaultHeight);
             onHeightAdjusted: window.settings.setValue("bottomPanelSize" + (root.fullScreen? "-full" : ""), height);
             Connections {
