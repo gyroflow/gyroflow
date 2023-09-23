@@ -319,7 +319,7 @@ Rectangle {
                                         { text: qsTr("Ok"), clicked: () => {
                                             outputFile.selectFolder(outputFile.folderUrl, function(_) { renderBtn.btn.clicked(); });
                                         }},
-                                    ]);
+                                    ], undefined, Text.AutoText, "file-access-restriction");
                                     return;
                                 }
 

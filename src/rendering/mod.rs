@@ -126,6 +126,8 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("av1_qsv",          true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("av1_vaapi",         true),
+                #[cfg(target_os = "android")]
+                ("av1_mediacodec",   true),
                 ("librav1e",         false),
                 ("libaom-av1",       false),
                 ("libsvtav1",        false),
