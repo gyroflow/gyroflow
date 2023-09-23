@@ -335,10 +335,12 @@ Item {
                 radius: 5 * dpiScale;
             }
             Item {
-                visible: window.isMobileLayout && !statusBg.shown;
                 height: parent.height;
                 width: ipb.value * parent.width;
                 clip: true;
+                visible: opacity > 0;
+                opacity: window.isMobileLayout && !statusBg.shown? 1 : 0;
+                Ease on opacity { }
                 Rectangle {
                     width: parent.parent.width;
                     height: parent.height;
