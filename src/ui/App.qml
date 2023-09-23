@@ -315,11 +315,14 @@ Rectangle {
 
                             videoArea.vid.grabToImage(function(result) {
                                 if ((Qt.platform.os == "ios" || Qt.platform.os == "android") && (!outputFile.folderUrl.toString() || !window.allowedOutputUrls.includes(outputFile.folderUrl.toString()))) {
-                                    messageBox(Modal.Info, qsTr("Due to file access restrictions, you need to select the destination folder manually.\nClick Ok and select the destination folder."), [
+                                    let el = messageBox(Modal.Info, qsTr("Due to file access restrictions, you need to select the destination folder manually.\nClick Ok and select the destination folder."), [
                                         { text: qsTr("Ok"), clicked: () => {
                                             outputFile.selectFolder(outputFile.folderUrl, function(_) { renderBtn.btn.clicked(); });
                                         }},
                                     ], undefined, Text.AutoText, "file-access-restriction");
+                                    if (!el) { // Don't show again triggered
+                                        outputFile.selectFolder(outputFile.folderUrl, function(_) { renderBtn.btn.clicked(); });
+                                    }
                                     return;
                                 }
 
@@ -454,7 +457,7 @@ Rectangle {
                     im.height = -5 * dpiScale;
                     im.destroy(700);
                 });
-                return;
+                return null;
             } else {
                 console.log("previously clicked", clickedButton);
                 if (clickedButton != buttons.length - 1) { // Don't auto-click the last button (it's always Cancel/Close)
