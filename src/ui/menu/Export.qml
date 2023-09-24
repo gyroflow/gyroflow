@@ -109,16 +109,7 @@ MenuItem {
 
     property bool canExport: !resolutionWarning.visible && !resolutionWarning2.visible;
 
-    function alignedTo16(x: real): real { if ((x % 16) != 0) { x += 16 - x % 16; } return x; }
     function getExportOptions() {
-        let w = root.outWidth;
-        let h = root.outHeight;
-        if (Qt.platform.os == "android" && root.outGpu) {
-            // Workaround for MediaCodec alignment requirement, until more proper fix is found
-            // TODO: investigate and find proper fix in the MediaCodec encoder
-            w = alignedTo16(w);
-            h = alignedTo16(h);
-        }
         let encoderOpts = encoderOptions.text.replace("-qscale:v", "-qscale")
                                              .replace("-q:v", "-qscale");
         return {
@@ -126,8 +117,8 @@ MenuItem {
             codec_options:  root.outCodecOptions,
             output_folder:    window.outputFile.folderUrl.toString(),
             output_filename:  window.outputFile.filename,
-            output_width:   w,
-            output_height:  h,
+            output_width:   root.outWidth,
+            output_height:  root.outHeight,
             bitrate:        root.outBitrate,
             use_gpu:        root.outGpu,
             audio:          root.outAudio,

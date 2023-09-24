@@ -1257,7 +1257,7 @@ impl RenderQueue {
                         timestamps_fract = v.into_iter().filter(|v| *v <= duration_ms).map(|v| v / duration_ms).collect();
                     }
 
-                    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+                    #[cfg(not(target_os = "ios"))]
                     let _prevent_system_sleep = keep_awake::inhibit_system("Gyroflow", "Autosyncing");
 
                     let cancel_flag = Arc::new(AtomicBool::new(false));

@@ -185,8 +185,21 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
 
     let mut pixel_format = render_options.pixel_format.clone();
 
-    #[cfg(not(any(target_os = "android", target_os = "ios")))]
-    let _prevent_system_sleep = keep_awake::inhibit_system("Gyroflow", "Rendering video");
+    #[cfg(not(target_os = "ios"))]
+    let _prevent_system_sleep = keep_awake::inhibit_system("Gyroflow", "Rendering video").unwrap();
+    // #[cfg(target_os = "ios")]
+    // let _prevent_system_sleep = keep_awake::inhibit_display("Gyroflow", "Rendering video");
+
+    let mut output_width = render_options.output_width;
+    let mut output_height = render_options.output_height;
+
+    fn aligned_to_16(mut x: usize) -> usize { if (x % 16) != 0 { x += 16 - x % 16; } x }
+    if cfg!(target_os = "android") {
+        // Workaround for MediaCodec alignment requirement, until more proper fix is found
+        // TODO: investigate and find proper fix in the MediaCodec encoder
+        output_width = aligned_to_16(output_width);
+        output_height = aligned_to_16(output_height);
+    }
 
     let duration_ms = params.duration_ms;
     let fps = params.fps;
@@ -627,7 +640,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         }
     }
 
-    proc.render(&fs_base, folder, filename, (render_options.output_width as u32, render_options.output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
+    proc.render(&fs_base, folder, filename, (output_width as u32, output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
 
     drop(proc);
 
