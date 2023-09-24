@@ -37,7 +37,7 @@ Rectangle {
             videoAreaCol.y = 0;
             videoAreaCol.x = 0;
             videoAreaCol.width = Qt.binding(() => window.width);
-            videoAreaCol.height = Qt.binding(() => window.height * (videoArea.fullScreen? 1 : (window.isMobileLayout? 0.4 : 0.5)));
+            videoAreaCol.height = Qt.binding(() => window.height * (videoArea.fullScreen? 1 : (window.isMobileLayout? (window.videoArea.vid.loaded && window.videoArea.vid.height > window.videoArea.vid.width? 0.6 : 0.4) : 0.5)));
             leftPanel.fixedWidth = Qt.binding(() => window.width * 0.4);
             rightPanel.fixedWidth = Qt.binding(() => window.width * (window.isMobileLayout? 1.0 : 0.6));
             leftPanel.y = Qt.binding(() => videoAreaCol.height);

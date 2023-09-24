@@ -21,6 +21,8 @@ cpp! {{
     #include <QTimer>
     #include <QDirIterator>
     #include <QMap>
+
+    QCoreApplication *globalApp = nullptr;
 }}
 macro_rules! connect {
     ($obj_ptr:ident, $obj_borrowed:ident, $signal:ident, $cb:expr) => {
@@ -355,7 +357,9 @@ pub fn run(open_file: &mut String) -> bool {
         // Run the event loop
         cpp!(unsafe [] {
             int argc = 0;
-            QCoreApplication(argc, nullptr).exec();
+            if (!globalApp) globalApp = new QCoreApplication(argc, nullptr);
+            globalApp->exec();
+            delete globalApp;
         });
 
         log::info!("Done in {:.3}s", time.elapsed().as_millis() as f64 / 1000.0);
@@ -502,6 +506,9 @@ fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> bool {
     let func: Box<dyn FnMut(String)> = Box::new(cb);
     let cb_ptr = Box::into_raw(func);
     cpp!(unsafe [path as "QString", cb_ptr as "TraitObject2"] -> bool as "bool" {
+        int argc = 0;
+        globalApp = new QCoreApplication(argc, nullptr);
+
         auto w = new QFileSystemWatcher();
         auto existing = new QStringList();
         auto paths = new QMap<QString, QMap<QString, qint64> >();
