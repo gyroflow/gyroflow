@@ -1970,9 +1970,10 @@ impl Controller {
             let filename = filesystem::get_filename(x);
             let folder = filesystem::get_folder(x);
             let gcsv_name = filesystem::filename_with_extension(&filename, "gcsv");
+            let gcsv_url = filesystem::get_file_url(&folder, &gcsv_name, false);
             if filesystem::exists_in_folder(&folder, &gcsv_name) {
                 let mut is_data = false;
-                if let Ok(mut file) = filesystem::open_file(&base, &x, false) {
+                if let Ok(mut file) = filesystem::open_file(&base, &gcsv_url, false) {
                     if output_gcsv.is_none() {
                         let out_url = filesystem::get_file_url(&output_folder, &filesystem::filename_with_extension(output_filename, "gcsv"), true);
                         output_gcsv = Some(filesystem::open_file(&base, &out_url, true)?);
