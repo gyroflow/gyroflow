@@ -144,7 +144,7 @@ jobs:
   github_release:
     name: Create GitHub release
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
