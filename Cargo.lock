@@ -1095,6 +1095,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "dispatch"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd0c93bb4b0c6d9b77f4435b0ae98c24d17f1c45b2ff844c6151a07256ca923b"
+
+[[package]]
 name = "displaydoc"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2090,9 +2096,10 @@ dependencies = [
 [[package]]
 name = "keep-awake"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/keep-awake-rs.git?rev=a42dfe4#a42dfe442e4f38f06a340c14c4e1e17cfd39cdae"
+source = "git+https://github.com/AdrianEddy/keep-awake-rs.git?rev=e38983d#e38983d4e6886abde539e2d720ed5334d3b5a15f"
 dependencies = [
  "core-foundation",
+ "dispatch",
  "jni 0.21.1",
  "libc",
  "log",

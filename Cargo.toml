@@ -65,7 +65,7 @@ lru = "0.11.1"
 
 log-panics = { version = "2.1", features = ["with-backtrace"] }
 
-keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "a42dfe4" }
+keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "e38983d" }
 
 [patch.crates-io]
 fc-blackbox = { git = "https://github.com/AdrianEddy/fc-blackbox.git",    rev = "4e9e4e6" }
