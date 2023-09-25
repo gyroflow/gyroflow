@@ -119,6 +119,10 @@ deploy *param:
     $Env:BINDGEN_EXTRA_CLANG_ARGS = "-I$CLANG_LIB/clang/16.0.0/include --sysroot=$NDK_REPLACED/toolchains/llvm/prebuilt/windows-x86_64/sysroot"
     echo $Env:BINDGEN_EXTRA_CLANG_ARGS
 
+    if ("$Env:GITHUB_RUN_NUMBER") {
+        (Get-Content $ProjectDir\_deployment\android\AndroidManifest.xml) -replace 'versionCode="[0-9]+"', "versionCode=`"$Env:GITHUB_RUN_NUMBER`"" | Out-File $ProjectDir\_deployment\android\AndroidManifest.xml -Encoding Utf8
+    }
+
     Copy-Item -Path "$QT_LIBS\libQt6Core_arm64-v8a.so"           -Destination "$QT_LIBS\libQt6Core.so"           -ErrorAction SilentlyContinue
     Copy-Item -Path "$QT_LIBS\libQt6Gui_arm64-v8a.so"            -Destination "$QT_LIBS\libQt6Gui.so"            -ErrorAction SilentlyContinue
     Copy-Item -Path "$QT_LIBS\libQt6Widgets_arm64-v8a.so"        -Destination "$QT_LIBS\libQt6Widgets.so"        -ErrorAction SilentlyContinue
