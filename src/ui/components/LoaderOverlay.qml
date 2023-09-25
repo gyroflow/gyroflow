@@ -26,6 +26,7 @@ Item {
     property bool canHide: false;
     property alias infoMessage: infoMessage;
     property alias pb: pb;
+    property real verticalOffset: 0;
 
     //onActiveChanged: parent.opacity = Qt.binding(() => (1.5 - opacity));
     onActiveChanged: {
@@ -76,8 +77,8 @@ Item {
     }
 
     anchors.fill: parent;
-    QQC.ProgressBar { id: pb; anchors.centerIn: parent; value: parent.progress; visible: parent.progress != -1 && !root.canceled; }
-    QQC.BusyIndicator { id: bi; anchors.centerIn: parent; visible: parent.active && (parent.progress == -1 || root.canceled); running: visible; }
+    QQC.ProgressBar { id: pb; anchors.centerIn: parent; anchors.verticalCenterOffset: root.verticalOffset; value: parent.progress; visible: parent.progress != -1 && !root.canceled; }
+    QQC.BusyIndicator { id: bi; anchors.centerIn: parent; anchors.verticalCenterOffset: root.verticalOffset; visible: parent.active && (parent.progress == -1 || root.canceled); running: visible; }
 
     Column {
         id: col;

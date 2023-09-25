@@ -763,6 +763,7 @@ Item {
         LoaderOverlay {
             id: videoLoader;
             background: styleBackground;
+            verticalOffset: window.isMobileLayout? -bottomPanel.height / 2 : 0;
             onActiveChanged: { vid.forceRedraw(); vid.fovChanged(); }
             canHide: render_queue.main_job_id > 0;
             onCancel: {
