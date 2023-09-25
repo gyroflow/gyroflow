@@ -10,7 +10,7 @@ import "Util.js" as Util;
 Modal {
     id: root;
     isWide: true;
-    widthRatio: 0.6;
+    widthRatio: isMobile? (isLandscape? 0.8 : 0.95) : 0.6;
     iconType: Modal.NoIcon;
 
     property bool isPreset: true;
