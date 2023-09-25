@@ -16,6 +16,7 @@
 	<key>CFBundleSupportedPlatforms</key>          <array><string>iPhoneOS</string></array>
 	<key>UIDeviceFamily</key>                      <array><integer>1</integer><integer>2</integer></array>
 	<key>LSRequiresIPhoneOS</key>                  <true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>   <true/>
 	<key>NSPhotoLibraryUsageDescription</key>      <string>Permission needed to open file in Gyroflow</string>
 	<key>NSDownloadsFolderUsageDescription</key>   <string>Permission needed to open file in Gyroflow</string>
 	<key>NSDocumentsFolderUsageDescription</key>   <string>Permission needed to open file in Gyroflow</string>
