@@ -98,7 +98,7 @@ Isto é apenas um indicador visual, não afeta a renderização.</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="385"/>
       <source>Reset all settings to default</source>
-      <translation type="unfinished">Reset all settings to default</translation>
+      <translation>Reverter as configurações para a predefinição</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="389"/>
@@ -1559,17 +1559,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="491"/>
       <source>ETA %1</source>
-      <translation type="unfinished">ETA %1</translation>
+      <translation>ETA %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="492"/>
       <source>Synchronizing: %1</source>
-      <translation type="unfinished">Synchronizing: %1</translation>
+      <translation>Sincronizando: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="493"/>
       <source>Rendering: %1</source>
-      <translation type="unfinished">Rendering: %1</translation>
+      <translation>Processando: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="663"/>
@@ -2504,17 +2504,17 @@ Make sure you have proper rolling shutter value set before syncing.</translation
     <message>
       <location filename="../../src/ui/App.qml" line="414"/>
       <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
+      <translation>Entradas</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="414"/>
       <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
+      <translation>Parâmetros</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="414"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>Exportar</translation>
     </message>
   </context>
   <context>

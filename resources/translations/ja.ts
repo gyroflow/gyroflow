@@ -1560,17 +1560,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="491"/>
       <source>ETA %1</source>
-      <translation type="unfinished">ETA %1</translation>
+      <translation>残り：%1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="492"/>
       <source>Synchronizing: %1</source>
-      <translation type="unfinished">Synchronizing: %1</translation>
+      <translation>同期中: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="493"/>
       <source>Rendering: %1</source>
-      <translation type="unfinished">Rendering: %1</translation>
+      <translation>レンダリング中 %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="663"/>
@@ -2506,17 +2506,17 @@ Make sure you have proper rolling shutter value set before syncing.</source>
     <message>
       <location filename="../../src/ui/App.qml" line="414"/>
       <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
+      <translation>入力</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="414"/>
       <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
+      <translation>パラメータ</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="414"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>エクスポート</translation>
     </message>
   </context>
   <context>

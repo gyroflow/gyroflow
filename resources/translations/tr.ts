@@ -292,8 +292,7 @@ Lütfen render işlemi sonrası dosyanızın bitrate'ini kontrol edin ve bu bug'
       <location filename="../../src/ui/App.qml" line="318"/>
       <source>Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>Dosya erişim sınırlamaları sebebiyle hedef klasörü manuel olarak ayarlamanız gerekiyor. Tamam'a tıklayıp hedef klasörü seçin.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="550"/>
@@ -615,12 +614,12 @@ Gelişmiş kısmında keskinlik sınırını artırabilirsiniz.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="616"/>
       <source>Preserve export path</source>
-      <translation type="unfinished">Preserve export path</translation>
+      <translation>Dışa aktarma yolunu tut</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="618"/>
       <source>Save output path in settings and use it for all files.</source>
-      <translation type="unfinished">Save output path in settings and use it for all files.</translation>
+      <translation>Çıktı yolunu kaydet ve tüm dosyalar için kullan.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="381"/>
@@ -1034,7 +1033,7 @@ Profilinizi yüklemek istiyor musunuz?</translation>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="164"/>
       <source>Troubleshooting</source>
-      <translation type="unfinished">Troubleshooting</translation>
+      <translation>Sorun çözme</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="176"/>
@@ -1211,7 +1210,7 @@ Profilinizi yüklemek istiyor musunuz?</translation>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="43"/>
       <source>[Selected folder]</source>
-      <translation type="unfinished">[Selected folder]</translation>
+      <translation>[Seçili klasör]</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="104"/>
@@ -1555,17 +1554,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="491"/>
       <source>ETA %1</source>
-      <translation type="unfinished">ETA %1</translation>
+      <translation>Tahmini bitiş süresi %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="492"/>
       <source>Synchronizing: %1</source>
-      <translation type="unfinished">Synchronizing: %1</translation>
+      <translation>Senkronize ediliyor: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="493"/>
       <source>Rendering: %1</source>
-      <translation type="unfinished">Rendering: %1</translation>
+      <translation>Render ediliyor: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="663"/>
@@ -2499,17 +2498,17 @@ Senkronize etmeden önce uygun jöle etkisi değerini ayarladığınızdan emin 
     <message>
       <location filename="../../src/ui/App.qml" line="414"/>
       <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
+      <translation>Girdiler</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="414"/>
       <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
+      <translation>Parametreler</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="414"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>Dışa aktar</translation>
     </message>
   </context>
   <context>
@@ -2712,7 +2711,7 @@ Bu özellik deneyseldir, sonuçlar hiç düzgün görünmeyebilir. Devam etmek i
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="843"/>
       <source>Option+Scroll</source>
-      <translation type="unfinished">Option+Scroll</translation>
+      <translation>Option+Scroll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="844"/>
@@ -3013,7 +3012,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="720"/>
       <source>Click here to open a video file</source>
-      <translation type="unfinished">Click here to open a video file</translation>
+      <translation>Bir video dosyası açmak için buraya tıkla</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="856"/>
