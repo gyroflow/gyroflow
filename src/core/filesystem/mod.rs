@@ -438,7 +438,11 @@ pub fn url_to_path(url: &str) -> String {
 }
 pub fn display_url(url: &str) -> String {
     dbg_call!(url);
-    url_to_path(url)
+    let path = url_to_path(url);
+    if cfg!(target_os = "ios") && path.contains("/File Provider Storage/") {
+        return path.split("/File Provider Storage/").last().unwrap().to_owned();
+    }
+    path
 }
 pub fn display_folder_filename(folder: &str, filename: &str) -> String {
     fn inner(folder: &str, filename: &str) -> String {
