@@ -32,6 +32,7 @@ cpp! {{
     #include <QQmlContext>
     #include <QtGui/QGuiApplication>
     #include <QIcon>
+    #include <QSettings>
 
     #include "src/ui_live_reload.cpp"
 
@@ -99,6 +100,12 @@ fn entry() {
             // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
             int av_jni_set_java_vm(void *vm, void *log_ctx);
             av_jni_set_java_vm(QJniEnvironment::javaVM(), nullptr);
+        #endif
+
+        #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+            QSettings sett;
+            if (!sett.contains("defaultCodec"))
+                sett.setValue("defaultCodec", 0); // default to H.264 on mobile
         #endif
 
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
