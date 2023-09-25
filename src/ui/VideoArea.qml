@@ -821,6 +821,7 @@ Item {
                 anchors.left: parent.left;
                 anchors.leftMargin: 10 * dpiScale;
                 spacing: 3 * dpiScale;
+                property real widthPadded: Math.ceil(width / (20 * dpiScale)) * (20 * dpiScale);
                 Row {
                     BasicText {
                         text: timeline.timeAtPosition((vid.currentFrame + 1) / Math.max(1, vid.frameCount));
@@ -844,10 +845,10 @@ Item {
 
             Item {
                 id: middleButtons;
-                property real availableWidth: parent.width - textCol.width - rightButtons.width - 40 * dpiScale;
-                width: parent.width - (willFit? textCol.width + rightButtons.width + 40 * dpiScale : 0);
+                property real availableWidth: parent.width - textCol.widthPadded - rightButtons.width - 40 * dpiScale;
+                width: parent.width - (willFit? textCol.widthPadded + rightButtons.width + 40 * dpiScale : 0);
                 height: parent.height;
-                x: willFit? textCol.x + textCol.width + 10 * dpiScale : 0;
+                x: willFit? textCol.x + textCol.widthPadded + 10 * dpiScale : 0;
                 property bool willFit: availableWidth > children[0].width;
                 Row {
                     anchors.centerIn: parent;
