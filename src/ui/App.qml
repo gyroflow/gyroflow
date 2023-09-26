@@ -120,10 +120,20 @@ Rectangle {
     }
     function onItemLoaded() {
         if (window.vidInfo && window.stab && window.exportSettings && window.sync && window.motionData && pendingOpenFile.toString()) {
-            videoArea.loadFile(pendingOpenFile);
-            pendingOpenFile = "";
+            pendingFileLoadTimer.start();
         }
         tabs.updateHeights();
+    }
+    Timer {
+        id: pendingFileLoadTimer;
+        interval: 250;
+        running: false;
+        onTriggered: {
+            if (pendingOpenFile.toString()) {
+                videoArea.loadFile(pendingOpenFile);
+                pendingOpenFile = "";
+            }
+        }
     }
 
     Item {

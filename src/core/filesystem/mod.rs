@@ -496,6 +496,9 @@ pub fn path_to_url(path: &str) -> String {
 pub fn url_to_path(url: &str) -> String {
     fn inner(url: &str) -> Result<String> {
         if url.is_empty() { return Ok(String::new()) }
+        if cfg!(target_os = "android") {
+            return Ok(get_filename(url));
+        }
         Ok(url_to_pathbuf(url)?.to_string_lossy().to_string())
     }
     result!(inner(url), url)
