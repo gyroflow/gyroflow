@@ -191,9 +191,6 @@ impl<'a> Drop for FfmpegPathWrapper<'a> {
 }
 
 fn url_to_pathbuf(mut url: &str) -> Result<PathBuf> {
-    if cfg!(target_os = "android") {
-        return Ok(Path::new(&get_filename(url)).to_path_buf());
-    }
     Ok(if url.contains("://") { // It's an url
         url::Url::parse(url).map_err(|e| FilesystemError::InvalidUrl((url.into(), e)))?.to_file_path().map_err(|_| FilesystemError::NotAFile(url.into()))?
     } else {
@@ -211,6 +208,8 @@ pub fn get_filename(url: &str) -> String {
         if url.starts_with("content://") {
             if android::is_dir_url(url) { return Ok(String::new()); } // no filename
             return Ok(android::get_url_info(url).map(|x| x.filename.unwrap_or_default()).unwrap_or_default());
+        } else {
+            log::error!("Unknown android url scheme: {url}");
         }
 
         let pathbuf = url_to_pathbuf(url)?;
@@ -563,7 +562,9 @@ pub fn folder_access_granted(folder_url: &str) {
     let folder_url = normalize_url(folder_url, true);
     dbg_call!(folder_url);
     start_accessing_url(&folder_url, true); // This will not have equivalent `stop_accessing_url` because we don't know when the access ends
-    {
+    let already_allowed = ALLOWED_FOLDERS.read().contains(&folder_url);
+
+    if !already_allowed {
         let mut lock = ALLOWED_FOLDERS.write();
         lock.insert(folder_url);
     }
@@ -590,7 +591,7 @@ pub fn get_allowed_folders() -> Vec<String> {
         for x in lock.into_iter() {
             #[cfg(target_os = "ios")]
             {
-                let bookmark = apple::create_bookmark(x, true, None);
+                let bookmark = apple::create_bookmark(&x, true, None);
                 if !bookmark.is_empty() {
                     ret.push(bookmark);
                 }
