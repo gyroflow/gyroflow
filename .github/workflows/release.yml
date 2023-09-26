@@ -169,4 +169,3 @@ jobs:
           packageName: xyz.gyroflow
           releaseFiles: ./Gyroflow-android/Gyroflow.aab
           track: production
-          changesNotSentForReview: true
