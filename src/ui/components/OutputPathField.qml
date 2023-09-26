@@ -28,7 +28,7 @@ TextField {
         // When typing manually
         if (!preventChange) {
             if (Qt.platform.os == "ios" || Qt.platform.os == "android") {
-                setFilename(text);
+                setFilename(text.replace(/^.+\//, ""));
             } else {
                 setUrl(filesystem.path_to_url(text));
             }
@@ -37,11 +37,8 @@ TextField {
 
     function updateText() {
         preventChange = true;
-        if (Qt.platform.os == "ios" || Qt.platform.os == "android") {
-            text = filename;
-            if (!filename && root.folderOnly) {
-                text = root.folderUrl.toString()? qsTr('[Selected folder]') : "";
-            }
+        if (!filename && root.folderOnly) {
+            text = root.folderUrl.toString()? qsTr('[Selected folder]') : "";
         } else {
             text = fullFileUrl.toString()? filesystem.display_url(fullFileUrl) : filesystem.display_folder_filename(folderUrl, filename);
         }
@@ -68,10 +65,7 @@ TextField {
         updateText();
     }
 
-    function selectFolder(folder: url, cb, force: bool) {
-        if (!force && folder.toString() && window.allowedOutputUrls.includes(folder.toString())) {
-            return cb(folder);
-        }
+    function selectFolder(folder: url, cb) {
         root.cbAfterSelect = cb;
         if (folder.toString())
             outputFolderDialog.currentFolder = folder;
@@ -114,10 +108,10 @@ TextField {
         title: qsTr("Select file destination");
         onAccepted: {
             root.folderUrl = selectedFolder;
-            filesystem.start_accessing_url(root.folderUrl); // This will not have equivalent `stop_accessing_url` because we don't know when the access ends
+            filesystem.folder_access_granted(selectedFolder);
+            Qt.callLater(filesystem.save_allowed_folders);
             updateText();
 
-            window.allowedOutputUrls.push(root.folderUrl.toString());
             if (root.cbAfterSelect) {
                 root.cbAfterSelect(root.folderUrl);
                 root.cbAfterSelect = null;

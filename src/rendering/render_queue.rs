@@ -659,7 +659,7 @@ impl RenderQueue {
                     let mut project = project.to_string();
                     #[cfg(any(target_os = "macos", target_os = "ios"))]
                     if let Some(bookmark) = x.get("project_file_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
-                        let resolved = core::filesystem::apple::resolve_bookmark(bookmark);
+                        let (resolved, _is_stale) = core::filesystem::apple::resolve_bookmark(bookmark);
                         if !resolved.is_empty() { project = resolved; }
                     }
                     self.add_file(project, String::new(), additional_data.clone());
@@ -676,7 +676,7 @@ impl RenderQueue {
                 if core::filesystem::exists(url) {
                     #[cfg(any(target_os = "macos", target_os = "ios"))]
                     {
-                        return QString::from(serde_json::json!({ "project_file": url, "project_file_bookmark": core::filesystem::apple::create_bookmark(&url, None) }).to_string());
+                        return QString::from(serde_json::json!({ "project_file": url, "project_file_bookmark": core::filesystem::apple::create_bookmark(&url, false, None) }).to_string());
                     }
                     #[cfg(not(any(target_os = "macos", target_os = "ios")))]
                     {

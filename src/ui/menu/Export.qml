@@ -196,9 +196,6 @@ MenuItem {
                     window.outputFile.setUrl(filesystem.path_to_url(output.output_path));
                 }
             }
-            if (output.output_folder_bookmark == "resolved" && output.output_folder) {
-                window.allowedOutputUrls.push(Qt.resolvedUrl(output.output_folder));
-            }
             if (output.output_folder) {
                 window.outputFile.setFolder(output.output_folder);
             }

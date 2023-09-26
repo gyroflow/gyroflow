@@ -325,7 +325,7 @@ Item {
         }
 
         root.loadedFileUrl = url;
-        if (!skip_detection && Qt.platform.os != "ios" && Qt.platform.os != "android") {
+        if (!skip_detection) {
             let newUrl;
             if (newUrl = detectImageSequence(folder, filename)) {
                 const dlg = messageBox(Modal.Info, qsTr("Image sequence has been detected.\nPlease provide frame rate: "), [
@@ -377,12 +377,12 @@ Item {
             const preservedPath = settings.value("preservedOutputPath");
             if (window.exportSettings.preserveOutputPath.checked && preservedPath) {
                 window.outputFile.setFolder(preservedPath);
-            } else if (Qt.platform.os != "android") {
+            } else {
                 window.outputFile.setFolder(folder);
             }
             window.exportSettings.updateCodecParams();
         }
-        if (!root.pendingGyroflowData && Qt.platform.os != "ios" && Qt.platform.os != "android") {
+        if (!root.pendingGyroflowData) {
             const gfFilename = filesystem.filename_with_extension(filename, "gyroflow");
             if (filesystem.exists_in_folder(folder, gfFilename)) {
                 messageBox(Modal.Question, qsTr("There's a %1 file associated with this video, do you want to load it?").arg("<b>" + gfFilename + "</b>"), [

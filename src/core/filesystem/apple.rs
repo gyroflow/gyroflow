@@ -9,6 +9,7 @@ use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::SeqCst;
+use super::normalize_url;
 use crate::{ function_name, dbg_call };
 
 lazy_static::lazy_static! {
@@ -16,9 +17,9 @@ lazy_static::lazy_static! {
     static ref CLOSE_TIMEOUT: AtomicUsize = AtomicUsize::new(0);
 }
 
-pub fn start_accessing_url(url: &str) {
+pub fn start_accessing_url(url: &str, is_folder: bool) {
     if !url.contains("://") { return; }
-    let url = url::Url::parse(url).unwrap().to_string(); // Normalize the url
+    let url = normalize_url(url, is_folder);
     dbg_call!(url);
     let mut map = OPENED_URLS.lock();
     match map.entry(url.clone()) {
@@ -30,9 +31,9 @@ pub fn start_accessing_url(url: &str) {
         }
     }
 }
-pub fn stop_accessing_url(url: &str) {
+pub fn stop_accessing_url(url: &str, is_folder: bool) {
     if !url.contains("://") { return; }
-    let url = url::Url::parse(url).unwrap().to_string(); // Normalize the url
+    let url = normalize_url(url, is_folder);
     dbg_call!(url);
     let mut map = OPENED_URLS.lock();
     match map.entry(url.clone()) {
@@ -106,14 +107,14 @@ pub fn stop_accessing_security_scoped_resource(url: &str) -> bool {
     ok
 }
 
-pub fn create_bookmark(url: &str, project_url: Option<&str>) -> String {
+pub fn create_bookmark(url: &str, is_folder: bool, project_url: Option<&str>) -> String {
     let mut ret = String::new();
     if url.is_empty() { return ret; }
-    start_accessing_url(url);
+    start_accessing_url(url, is_folder);
     unsafe {
         let project_url_ref = if let Some(project_url) = project_url {
             if !super::exists(project_url) && !project_url.ends_with('/') { let _ = super::write(project_url, &[]); } // Create empty file if not exists
-            start_accessing_url(project_url);
+            start_accessing_url(project_url, false);
             let project_url = project_url.as_bytes();
             CFURLCreateWithBytes(ptr::null(), project_url.as_ptr(), project_url.len() as isize, kCFStringEncodingUTF8, ptr::null())
         } else {
@@ -143,17 +144,18 @@ pub fn create_bookmark(url: &str, project_url: Option<&str>) -> String {
         }
         if !project_url_ref.is_null() {
             CFRelease(project_url_ref as CFTypeRef);
-            stop_accessing_url(project_url.unwrap());
+            stop_accessing_url(project_url.unwrap(), false);
         }
     }
-    stop_accessing_url(url);
+    stop_accessing_url(url, is_folder);
     dbg_call!(url -> ret);
     ret
 }
 
-pub fn resolve_bookmark(bookmark_data: &str) -> String {
+pub fn resolve_bookmark(bookmark_data: &str) -> (String, bool) {
     let mut ret = String::new();
-    if bookmark_data.is_empty() { return ret; }
+    let mut is_stale = false;
+    if bookmark_data.is_empty() { return (ret, is_stale); }
     let compressed = base91::slice_decode(bookmark_data.as_bytes());
     if !compressed.is_empty() {
         let mut e = flate2::read::ZlibDecoder::new(&compressed[..]);
@@ -164,7 +166,7 @@ pub fn resolve_bookmark(bookmark_data: &str) -> String {
             if !data_ref.is_null() {
                 let mut error = ptr::null_mut();
                 let opts: CFURLBookmarkResolutionOptions = 0;
-                let is_stale: Boolean = 0;
+                let is_stale_cf: Boolean = 0;
                 let url = CFURLCreateByResolvingBookmarkData(kCFAllocatorDefault, data_ref, opts, ptr::null(), ptr::null(), is_stale as *mut Boolean, &mut error);
                 if error.is_null() {
                     if !url.is_null() {
@@ -178,12 +180,15 @@ pub fn resolve_bookmark(bookmark_data: &str) -> String {
                     log::error!("Failed to resolve bookmark: {}", get_error(error));
                     CFRelease(error as CFTypeRef);
                 }
+                if is_stale_cf != 0 {
+                    is_stale = true;
+                }
                 CFRelease(data_ref as CFTypeRef);
             }
         }
     }
     dbg_call!(bookmark_data -> ret);
-    ret
+    (ret, is_stale)
 }
 
 unsafe fn get_error(err: CFErrorRef) -> String {

@@ -27,13 +27,13 @@ pub struct MDKProcessor {
 }
 impl Drop for MDKProcessor {
     fn drop(&mut self) {
-        gyroflow_core::filesystem::stop_accessing_url(&self.url);
+        gyroflow_core::filesystem::stop_accessing_url(&self.url, false);
     }
 }
 
 impl MDKProcessor {
     pub fn from_file(url: &str, decoder_options: Option<Dictionary>) -> Self {
-        gyroflow_core::filesystem::start_accessing_url(url);
+        gyroflow_core::filesystem::start_accessing_url(url, false);
 
         let mut mdk = qml_video_rs::video_item::MDKVideoItem::default();
         let mut custom_decoder = String::new(); // eg. BRAW:format=rgba64le

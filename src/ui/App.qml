@@ -97,7 +97,6 @@ Rectangle {
 
     readonly property bool wasModified: window.videoArea.vid.loaded;
     property bool isDialogOpened: false;
-    property list<string> allowedOutputUrls: [];
 
     Settings { id: settings; }
 
@@ -232,7 +231,7 @@ Rectangle {
                         property bool allowLens: false;
                         property bool allowSync: false;
                         onIsAddToQueueChanged: updateModel();
-                        enabled: window.videoArea.vid.loaded;
+                        enabled: window.videoArea.vid.loaded && outputFile.filename.length > 3;
 
                         property bool enabled2: window.videoArea.vid.loaded && exportSettings.item && exportSettings.item.canExport && !videoArea.videoLoader.active;
                         onEnabled2Changed: et.start();
@@ -314,22 +313,17 @@ Rectangle {
                             }
 
                             videoArea.vid.grabToImage(function(result) {
-                                if ((Qt.platform.os == "ios" || Qt.platform.os == "android") && (!outputFile.folderUrl.toString() || !window.allowedOutputUrls.includes(outputFile.folderUrl.toString()))) {
+                                if ((Qt.platform.os == "ios" || Qt.platform.os == "android") && (!outputFile.folderUrl.toString() || !filesystem.can_create_file(outputFile.folderUrl, outputFile.filename))) {
                                     let el = messageBox(Modal.Info, qsTr("Due to file access restrictions, you need to select the destination folder manually.\nClick Ok and select the destination folder."), [
                                         { text: qsTr("Ok"), clicked: () => {
-                                            outputFile.selectFolder(outputFile.folderUrl, function(_) { renderBtn.btn.clicked(); }, false);
+                                            outputFile.selectFolder(outputFile.folderUrl, function(_) { renderBtn.btn.clicked(); });
                                         }},
                                     ], undefined, Text.AutoText, "file-access-restriction");
                                     if (!el) { // Don't show again triggered
-                                        outputFile.selectFolder(outputFile.folderUrl, function(_) { renderBtn.btn.clicked(); }, false);
+                                        outputFile.selectFolder(outputFile.folderUrl, function(_) { renderBtn.btn.clicked(); });
                                     }
                                     return;
                                 }
-
-                                // if (outputFile.folderUrl.toString() && outputFile.filename && !filesystem.can_create_file(outputFile.folderUrl, outputFile.filename)) {
-                                //     outputFile.selectFolder(outputFile.folderUrl, function(_) { renderBtn.btn.clicked(); }, true);
-                                //     return;
-                                // }
 
                                 const job_id = render_queue.add(window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
                                 if (renderBtn.isAddToQueue) {
@@ -565,6 +559,8 @@ Rectangle {
             isLandscapeChanged();
         }
         isMobileLayoutChanged();
+
+        Qt.callLater(filesystem.restore_allowed_folders);
     }
 
     function getReadableError(text: string): string {
@@ -702,7 +698,7 @@ Rectangle {
             opf.selectFolder(folder, function(folder_url) {
                 cb(filesystem.get_file_url(folder_url, filename, true));
                 opf.destroy();
-            }, false);
+            });
             return;
         }
         cb(filesystem.get_file_url(folder, filename, true));

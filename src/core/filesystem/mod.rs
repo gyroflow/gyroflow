@@ -9,6 +9,8 @@ pub mod apple;
 use std::fs::*;
 use std::io::{ Read, Write };
 use std::path::*;
+use std::collections::HashSet;
+use parking_lot::RwLock;
 
 pub type Result<T> = std::result::Result<T, FilesystemError>;
 
@@ -54,6 +56,10 @@ pub fn get_engine_base() -> EngineBase { () }
 // - Detecting mp4 sequence
 // - Rendering r3d with conversion
 // - Using CLI
+
+lazy_static::lazy_static! {
+    static ref ALLOWED_FOLDERS: RwLock<HashSet<String>> = RwLock::new(HashSet::new());
+}
 
 #[derive(thiserror::Error, Debug)]
 pub enum FilesystemError {
@@ -102,13 +108,13 @@ macro_rules! result {
         }
     }};
 }
-pub fn start_accessing_url(_url: &str) {
+pub fn start_accessing_url(_url: &str, _is_folder: bool) {
     #[cfg(any(target_os = "macos", target_os = "ios"))]
-    apple::start_accessing_url(_url);
+    apple::start_accessing_url(_url, _is_folder);
 }
-pub fn stop_accessing_url(_url: &str) {
+pub fn stop_accessing_url(_url: &str, _is_folder: bool) {
     #[cfg(any(target_os = "macos", target_os = "ios"))]
-    apple::stop_accessing_url(_url);
+    apple::stop_accessing_url(_url, _is_folder);
 }
 
 pub struct FileWrapper<'a> {
@@ -136,7 +142,7 @@ impl<'a> Drop for FileWrapper<'a> {
             // It will be closed in Drop for AndroidFileHandle.
             std::mem::forget(f);
         }
-        stop_accessing_url(&self.url);
+        stop_accessing_url(&self.url, false);
     }
 }
 pub struct FfmpegPathWrapper<'a> {
@@ -162,7 +168,7 @@ impl<'a> FfmpegPathWrapper<'a> {
         }
         #[cfg(not(target_os = "android"))]
         {
-            start_accessing_url(url);
+            start_accessing_url(url, false);
             let mut path = url.to_owned();
             if path.starts_with("file://") {
                 path = url_to_path(&path);
@@ -180,7 +186,7 @@ impl<'a> FfmpegPathWrapper<'a> {
 impl<'a> Drop for FfmpegPathWrapper<'a> {
     fn drop(&mut self) {
         log::debug!("FfmpegPathWrapper::drop {}", self.org_url);
-        stop_accessing_url(&self.org_url);
+        stop_accessing_url(&self.org_url, false);
     }
 }
 
@@ -218,16 +224,46 @@ pub fn get_filename(url: &str) -> String {
 pub fn get_folder(url: &str) -> String {
     fn inner(url: &str) -> Result<String> {
         if url.is_empty() { return Ok(String::new()) }
+        if url.ends_with("/") { // it's already a directory url
+            return Ok(url.to_string());
+        }
 
         #[cfg(target_os = "android")]
         if url.starts_with("content://") {
             if android::is_dir_url(url) { // it's already a directory url
                 return Ok(url.to_string());
             }
+            // Try to find the folder in the allowed list
+            if let Some(doc_pos) = url.find("/document/") {
+                let tree_part = if url.contains("/tree/") {
+                    url[..doc_pos + 1].to_string()
+                } else if let Some(pos2) = url.rfind("%2F") {
+                    url[..pos2].replace("/document/", "/tree/")
+                } else {
+                    url.to_string()
+                };
+                let lock = ALLOWED_FOLDERS.read();
+                for x in lock.iter() {
+                    if tree_part.trim_end_matches('/') == x.trim_end_matches('/') {
+                        return Ok(x.clone());
+                    }
+                }
+            }
 
             log::warn!("Cannot get directory path on android, url: {url}, info: {:?}", android::get_url_info(url));
             return Ok(String::new());
         }
+        #[cfg(target_os = "ios")]
+        {
+            if let Some(pos) = url.rfind('/') {
+                let folder = &url[0..pos + 1];
+                if ALLOWED_FOLDERS.read().contains(&normalize_url(folder, true)) {
+                    return Ok(folder.to_string());
+                }
+            }
+            return Ok(String::new());
+        }
+
         let pathbuf = url_to_pathbuf(url)?;
         if pathbuf.is_dir() {
             return Ok(path_to_url(&pathbuf.to_string_lossy()));
@@ -252,9 +288,9 @@ pub fn exists(url: &str) -> bool {
             return android::get_url_info(url).map(|x| x.filename.is_some() && !x.filename.unwrap().is_empty());
         }
 
-        start_accessing_url(url);
+        start_accessing_url(url, false);
         let exists = url_to_pathbuf(url).map(|x| x.exists());
-        stop_accessing_url(url);
+        stop_accessing_url(url, false);
         exists
     }
     result!(inner(url), url)
@@ -318,7 +354,7 @@ pub fn get_file_url(folder_url: &str, filename: &str, can_create: bool) -> Strin
                         Err(e) => { log::error!("android::create_file failed: {e:?}"); }
                     }
                 }
-                return Ok(format!("{filename}"));
+                return Ok(String::new());
             }
         }
 
@@ -333,7 +369,7 @@ pub fn get_file_url(folder_url: &str, filename: &str, can_create: bool) -> Strin
 }
 pub fn read(url: &str) -> Result<Vec<u8>> {
     dbg_call!(url);
-    start_accessing_url(url);
+    start_accessing_url(url, false);
     let buf = {
         let base = get_engine_base();
         let mut f = open_file(&base, &url, false)?;
@@ -341,18 +377,18 @@ pub fn read(url: &str) -> Result<Vec<u8>> {
         f.get_file().read_to_end(&mut buf)?;
         buf
     };
-    stop_accessing_url(url);
+    stop_accessing_url(url, false);
     Ok(buf)
 }
 pub fn write(url: &str, data: &[u8]) -> Result<()> {
     dbg_call!(url);
-    start_accessing_url(url);
+    start_accessing_url(url, false);
     {
         let base = get_engine_base();
         let mut f = open_file(&base, &url, true)?;
         f.get_file().write(data)?;
     }
-    stop_accessing_url(url);
+    stop_accessing_url(url, false);
     Ok(())
 }
 pub fn read_to_string(url: &str) -> Result<String> {
@@ -401,6 +437,13 @@ pub fn can_open_file(url: &str) -> bool {
 pub fn can_create_file(folder: &str, filename: &str) -> bool {
     if folder.is_empty() || filename.is_empty() { return false; }
     fn inner(folder: &str, filename: &str) -> bool {
+        if folder.contains("://") {
+            let lock = ALLOWED_FOLDERS.read();
+            if !lock.contains(&normalize_url(folder, true)) {
+                return false; // Access not allowed
+            }
+        }
+
         let already_exists = exists(&get_file_url(folder, filename, false));
 
         let url = get_file_url(folder, filename, true);
@@ -422,7 +465,7 @@ pub fn can_create_file(folder: &str, filename: &str) -> bool {
 
 pub fn open_file<'a>(_base: &'a EngineBase, url: &str, writing: bool) -> Result<FileWrapper<'a>> {
     dbg_call!(url writing);
-    start_accessing_url(url);
+    start_accessing_url(url, false);
 
     #[cfg(target_os = "android")]
     {
@@ -460,6 +503,16 @@ pub fn url_to_path(url: &str) -> String {
 }
 pub fn display_url(url: &str) -> String {
     dbg_call!(url);
+
+    if cfg!(target_os = "android") && url.contains("/document/") && url.contains("%3A") {
+        let parts = url.split("/document/").last().unwrap();
+        if let Ok(decoded) = urlencoding::decode(parts) {
+            if let Some(pos) = decoded.find(':') {
+                return decoded[pos + 1..].trim_start_matches('/').to_string();
+            }
+        }
+    }
+
     let path = url_to_path(url);
     if cfg!(target_os = "ios") && path.contains("/File Provider Storage/") {
         return path.split("/File Provider Storage/").last().unwrap().to_owned();
@@ -468,12 +521,84 @@ pub fn display_url(url: &str) -> String {
 }
 pub fn display_folder_filename(folder: &str, filename: &str) -> String {
     fn inner(folder: &str, filename: &str) -> String {
+        if folder.is_empty() && !filename.is_empty() { return filename.to_string(); }
+
         let url = get_file_url(folder, filename, false);
-        if url.is_empty() && cfg!(target_os = "android") { return filename.to_owned(); }
+        if cfg!(target_os = "android") {
+            if url.contains("/document/") && url.contains("%3A") {
+                return display_url(&url);
+            } else if folder.contains("/tree/") {
+                let parts = folder.split("/tree/").last().unwrap();
+                if let Ok(decoded) = urlencoding::decode(parts) {
+                    if let Some(pos) = decoded.find(':') {
+                        return format!("{}/{filename}", &decoded[pos + 1..].trim_end_matches('/'));
+                    }
+                }
+            }
+            return filename.to_owned();
+        }
         display_url(&url)
     }
     let ret = inner(folder, filename);
     dbg_call!(folder filename -> ret);
+    ret
+}
+
+pub fn normalize_url(url: &str, is_folder: bool) -> String {
+    if !url.contains("://") { return String::new(); }
+    if let Ok(url) = url::Url::parse(url) {
+        let mut url = url.to_string();
+        if is_folder && !url.ends_with('/') {
+            url.push('/');
+        }
+        url
+    } else {
+        String::new()
+    }
+}
+
+pub fn folder_access_granted(folder_url: &str) {
+    if folder_url.is_empty() || !folder_url.contains("://") { return; }
+
+    let folder_url = normalize_url(folder_url, true);
+    dbg_call!(folder_url);
+    start_accessing_url(&folder_url, true); // This will not have equivalent `stop_accessing_url` because we don't know when the access ends
+    {
+        let mut lock = ALLOWED_FOLDERS.write();
+        lock.insert(folder_url);
+    }
+}
+
+pub fn restore_allowed_folders(list: &[String]) {
+    for x in list {
+        #[cfg(target_os = "ios")]
+        {
+            let (url, is_stale) = apple::resolve_bookmark(&x);
+            if !url.is_empty() && url.contains("://") && !is_stale {
+                folder_access_granted(&url);
+            }
+            continue;
+        }
+        folder_access_granted(x);
+    }
+}
+
+pub fn get_allowed_folders() -> Vec<String> {
+    let mut ret = Vec::new();
+    {
+        let lock = ALLOWED_FOLDERS.read().clone();
+        for x in lock.into_iter() {
+            #[cfg(target_os = "ios")]
+            {
+                let bookmark = apple::create_bookmark(x, true, None);
+                if !bookmark.is_empty() {
+                    ret.push(bookmark);
+                }
+                continue;
+            }
+            ret.push(x);
+        }
+    }
     ret
 }
 

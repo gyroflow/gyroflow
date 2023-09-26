@@ -334,8 +334,8 @@ impl Controller {
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
-            filesystem::stop_accessing_url(&QString::from(vid.url.clone()).to_string());
-            filesystem::start_accessing_url(&url);
+            filesystem::stop_accessing_url(&QString::from(vid.url.clone()).to_string(), false);
+            filesystem::start_accessing_url(&url, false);
             vid.setUrl(QUrl::from(QString::from(url)), QString::from(custom_decoder));
         }
     }
@@ -1199,7 +1199,7 @@ impl Controller {
                 }
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 if let Some(v) = obj.get("videofile_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
-                    let resolved = filesystem::apple::resolve_bookmark(v);
+                    let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v);
                     if !resolved.is_empty() { org_video_url = resolved; }
                 }
 
@@ -1221,7 +1221,7 @@ impl Controller {
                     }
                     #[cfg(any(target_os = "macos", target_os = "ios"))]
                     if let Some(v) = obj.get("filepath_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
-                        let resolved = filesystem::apple::resolve_bookmark(v);
+                        let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v);
                         if !resolved.is_empty() { gyro_url = resolved; }
                     }
 
@@ -2082,9 +2082,10 @@ pub struct Filesystem {
     url_to_path:              qt_method!(fn(&self, url: QUrl) -> QString),
     display_url:              qt_method!(fn(&self, url: QUrl) -> QString),
     display_folder_filename:  qt_method!(fn(&self, folder: QUrl, filename: QString) -> QString),
-    start_accessing_url:      qt_method!(fn(&self, url: QUrl)),
-    stop_accessing_url:       qt_method!(fn(&self, url: QUrl)),
     catch_url_open:           qt_method!(fn(&self, url: QUrl)),
+    folder_access_granted:    qt_method!(fn(&self, url: QUrl)),
+    save_allowed_folders:     qt_method!(fn(&self)),
+    restore_allowed_folders:  qt_method!(fn(&self)),
     url_opened:               qt_signal!(url: QUrl),
 }
 impl Filesystem {
@@ -2101,7 +2102,22 @@ impl Filesystem {
     fn url_to_path(&self, url: QUrl) -> QString { QString::from(filesystem::url_to_path(&QString::from(url).to_string())) }
     fn display_url(&self, url: QUrl) -> QString { QString::from(filesystem::display_url(&QString::from(url).to_string())) }
     fn display_folder_filename(&self, folder: QUrl, filename: QString) -> QString { QString::from(filesystem::display_folder_filename(&QString::from(folder).to_string(), &filename.to_string())) }
-    fn start_accessing_url(&self, url: QUrl) { filesystem::start_accessing_url(&QString::from(url).to_string()); }
-    fn stop_accessing_url(&self, url: QUrl) { filesystem::stop_accessing_url(&QString::from(url).to_string()); }
     fn catch_url_open(&self, url: QUrl) { util::dispatch_url_event(url.clone()); self.url_opened(url); }
+    fn folder_access_granted(&self, url: QUrl) { filesystem::folder_access_granted(&QString::from(url).to_string()); }
+    fn save_allowed_folders(&self) {
+        let list = filesystem::get_allowed_folders();
+        if !list.is_empty() {
+            if let Ok(serialized) = serde_json::to_string((&list).into()) {
+                util::set_setting("allowedUrls", &serialized);
+            }
+        }
+    }
+    fn restore_allowed_folders(&self) {
+        let saved = util::get_setting("allowedUrls");
+        if !saved.is_empty() {
+            if let Ok(deserialized) = serde_json::from_str::<Vec<String>>(&saved) {
+                filesystem::restore_allowed_folders(&deserialized);
+            }
+        }
+    }
 }
