@@ -167,7 +167,7 @@ pub fn resolve_bookmark(bookmark_data: &str) -> (String, bool) {
                 let mut error = ptr::null_mut();
                 let opts: CFURLBookmarkResolutionOptions = 0;
                 let is_stale_cf: Boolean = 0;
-                let url = CFURLCreateByResolvingBookmarkData(kCFAllocatorDefault, data_ref, opts, ptr::null(), ptr::null(), is_stale as *mut Boolean, &mut error);
+                let url = CFURLCreateByResolvingBookmarkData(kCFAllocatorDefault, data_ref, opts, ptr::null(), ptr::null(), is_stale_cf as *mut Boolean, &mut error);
                 if error.is_null() {
                     if !url.is_null() {
                         let len = CFURLGetBytes(url, ptr::null_mut(), 0);
