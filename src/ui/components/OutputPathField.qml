@@ -68,8 +68,8 @@ TextField {
         updateText();
     }
 
-    function selectFolder(folder: url, cb) {
-        if (folder.toString() && window.allowedOutputUrls.includes(folder.toString())) {
+    function selectFolder(folder: url, cb, force: bool) {
+        if (!force && folder.toString() && window.allowedOutputUrls.includes(folder.toString())) {
             return cb(folder);
         }
         root.cbAfterSelect = cb;

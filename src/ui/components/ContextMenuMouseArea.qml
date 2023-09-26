@@ -8,15 +8,15 @@ MouseArea {
     anchors.fill: parent;
     acceptedButtons: Qt.RightButton;
     propagateComposedEvents: true;
-    signal contextMenu(bool isHold);
+    signal contextMenu(bool isHold, real x, real y);
 
     property Item underlyingItem: null;
 
-    onClicked: mouse => { if (mouse.button === Qt.RightButton) root.contextMenu(false); }
+    onClicked: mouse => { if (mouse.button === Qt.RightButton) root.contextMenu(false, mouse.x, mouse.y); }
 
     TapHandler {
         parent: root.underlyingItem || root.parent;
         acceptedDevices: PointerDevice.TouchScreen;
-        onLongPressed: root.contextMenu(true);
+        onLongPressed: root.contextMenu(true, point.position.x, point.position.y);
     }
 }

@@ -210,7 +210,7 @@ MenuItem {
             ContextMenuMouseArea {
                 parent: rot.cb;
                 cursorShape: Qt.PointingHandCursor;
-                onContextMenu: (isHold) => { contextMenu.popup(); }
+                onContextMenu: (isHold, x, y) => { contextMenu.popup(rot, x, y); }
             }
 
             Flow {

@@ -86,10 +86,7 @@ TextField {
     ContextMenuMouseArea {
         cursorShape: Qt.ibeam;
         underlyingItem: root;
-        onContextMenu: () => {
-            if (menuLoader.item) menuLoader.item.popup();
-            menuLoader.active = true;
-        }
+        onContextMenu: (isHold, x, y) =>  menuLoader.popup(root, x, y);
     }
 
     Component {
@@ -117,11 +114,8 @@ TextField {
             }
         }
     }
-    Loader {
+    ContextMenuLoader {
         id: menuLoader;
-        active: false;
-        asynchronous: true;
-        onStatusChanged: if (status == Loader.Ready) menuLoader.item.popup();
         sourceComponent: defaultMenu
     }
 

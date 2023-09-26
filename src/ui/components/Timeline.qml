@@ -277,7 +277,7 @@ Item {
                                     keyframeContextMenu.pressedKeyframe = keyframe;
                                     keyframeContextMenu.pressedKeyframeTs = timestamp;
                                     keyframeContextMenu.updateEasingMenu();
-                                    keyframeContextMenu.popup();
+                                    keyframeContextMenu.popup(ma, x, y);
                                     return true;
                                 }
                                 if (pressed && (pressedButtons & Qt.LeftButton)) {
@@ -466,8 +466,7 @@ Item {
                     if (keyframes.item.handleMouseMove(mouse.x, mouse.y, true, Qt.RightButton))
                         return;
 
-                    if (menuLoader.item) menuLoader.item.popup();
-                    menuLoader.active = true;
+                    menuLoader.popup(ma, mouse.x, mouse.y);
                 } else {
                     mouse.accepted = false;
                 }
@@ -476,8 +475,7 @@ Item {
                 if (keyframes.item.handleMouseMove(mouse.x, mouse.y, true, mouse.button))
                     return;
                 if (mouse.button === Qt.RightButton) {
-                    if (menuLoader.item) menuLoader.item.popup();
-                    menuLoader.active = true;
+                    menuLoader.popup(ma, mouse.x, mouse.y);
                 }
                 root.focus = true;
             }
@@ -590,11 +588,8 @@ Item {
                 }
             }
         }
-        Loader {
+        ContextMenuLoader {
             id: menuLoader;
-            active: false;
-            asynchronous: true;
-            onStatusChanged: if (status == Loader.Ready) menuLoader.item.popup();
             sourceComponent: timelineContextMenu;
         }
 

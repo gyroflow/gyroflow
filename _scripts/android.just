@@ -207,6 +207,9 @@ deploy *param:
     # Strip all libs
     . "$Env:ANDROID_NDK_HOME\toolchains\llvm\prebuilt\windows-x86_64\bin\llvm-strip.exe" "$ProjectDir\target\android-build\libs\arm64-v8a\*.so"
 
+    # Copy unstripped libgyroflow.so
+    Copy-Item -Path "$ProjectDir\target\$Env:BUILD_PROFILE\apk\lib\arm64-v8a\libgyroflow.so" -Destination "$ProjectDir\target\android-build\libs\arm64-v8a\libgyroflow_arm64-v8a.so" -Force
+
     $androiddeploy = @"
     {
         "description": "",

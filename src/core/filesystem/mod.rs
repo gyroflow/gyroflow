@@ -398,6 +398,28 @@ pub fn can_open_file(url: &str) -> bool {
     let base = get_engine_base();
     let x = open_file(&base, url, false).is_ok(); x
 }
+pub fn can_create_file(folder: &str, filename: &str) -> bool {
+    if folder.is_empty() || filename.is_empty() { return false; }
+    fn inner(folder: &str, filename: &str) -> bool {
+        let already_exists = exists(&get_file_url(folder, filename, false));
+
+        let url = get_file_url(folder, filename, true);
+        if !url.is_empty() {
+            let base = get_engine_base();
+            if open_file(&base, &url, true).is_ok() {
+                if !already_exists {
+                    let _ = remove_file(&url);
+                }
+                return true;
+            }
+        }
+        false
+    }
+    let ret = inner(folder, filename);
+    dbg_call!(folder filename -> ret);
+    ret
+}
+
 pub fn open_file<'a>(_base: &'a EngineBase, url: &str, writing: bool) -> Result<FileWrapper<'a>> {
     dbg_call!(url writing);
     start_accessing_url(url);

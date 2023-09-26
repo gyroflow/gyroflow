@@ -296,7 +296,7 @@ Item {
             }
 
             ContextMenuMouseArea {
-                onContextMenu: () => contextMenu.popup()
+                onContextMenu: (isHold, x, y) => contextMenu.popup(dlg, x, y)
             }
             Menu {
                 id: contextMenu;
@@ -330,9 +330,11 @@ Item {
 
             Rectangle {
                 anchors.fill: parent;
-                color: styleBackground2
+                color: styleBackground2;
                 opacity: 0.2;
                 radius: 5 * dpiScale;
+                border.width: window.isMobileLayout && !statusBg.shown? 1 * dpiScale : 0;
+                border.color: "#70ffffff";
             }
             Item {
                 height: parent.height;
@@ -664,7 +666,7 @@ Item {
         anchors.margins: 5 * dpiScale;
         leftPadding: 5 * dpiScale; rightPadding: 5 * dpiScale;
         text: qsTr("Queue settings");
-        onClicked: queueSettingsMenu.popup();
+        onClicked: queueSettingsMenu.popup(queueSettings, 0, height);
 
         function setParallelRenders(v: int, menuItem: Menu) {
             v = Math.min(6, Math.max(v, 1));

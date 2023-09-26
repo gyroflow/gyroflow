@@ -53,10 +53,7 @@ Rectangle {
             acceptedButtons: Qt.LeftButton | Qt.RightButton;
             cursorShape: Qt.PointingHandCursor;
             underlyingItem: ma;
-            onContextMenu: () => {
-                if (menuLoader.item) menuLoader.item.popup();
-                menuLoader.active = true;
-            }
+            onContextMenu: (isHold, x, y) => menuLoader.popup(ma, x, y)
             onClicked: (mouse) => {
                 if (mouse.button === Qt.LeftButton) {
                     root.edit(root.org_timestamp_us, root.value);
@@ -109,11 +106,8 @@ Rectangle {
                 }
             }
         }
-        Loader {
+        ContextMenuLoader {
             id: menuLoader;
-            active: false;
-            asynchronous: true;
-            onStatusChanged: if (status == Loader.Ready) menuLoader.item.popup();
             sourceComponent: menu
         }
     }

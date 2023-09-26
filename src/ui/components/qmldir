@@ -7,6 +7,7 @@ CheckBox 1.0 CheckBox.qml
 CheckBoxWithContent 1.0 CheckBoxWithContent.qml
 ComboBox 1.0 ComboBox.qml
 ContextMenuMouseArea 1.0 ContextMenuMouseArea.qml
+ContextMenuLoader 1.0 ContextMenuLoader.qml
 DropdownChevron 1.0 DropdownChevron.qml
 DropTarget 1.0 DropTarget.qml
 DropTargetRect 1.0 DropTargetRect.qml

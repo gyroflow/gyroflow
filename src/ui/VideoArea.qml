@@ -921,7 +921,7 @@ Item {
                     ContextMenuMouseArea {
                         underlyingItem: muteBtn;
                         cursorShape: Qt.PointingHandCursor;
-                        onContextMenu: (isHold) => { volumePopup.open(); if (isHold) vid.muted = !vid.muted; }
+                        onContextMenu: (isHold, x, y) => { volumePopup.open(); if (isHold) vid.muted = !vid.muted; }
                     }
                     onClicked: () => { vid.muted = !vid.muted; }
                     Popup {

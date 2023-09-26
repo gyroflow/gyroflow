@@ -2070,6 +2070,7 @@ pub struct Filesystem {
     base: qt_base_class!(trait QObject),
 
     exists_in_folder:         qt_method!(fn(&self, folder: QUrl, filename: QString) -> bool),
+    can_create_file:          qt_method!(fn(&self, folder: QUrl, filename: QString) -> bool),
     exists:                   qt_method!(fn(&self, url: QUrl) -> bool),
     get_filename:             qt_method!(fn(&self, url: QUrl) -> QString),
     get_folder:               qt_method!(fn(&self, url: QUrl) -> QString),
@@ -2088,6 +2089,7 @@ pub struct Filesystem {
 }
 impl Filesystem {
     fn exists_in_folder(&self, folder: QUrl, filename: QString) -> bool { filesystem::exists_in_folder(&QString::from(folder).to_string(), &filename.to_string()) }
+    fn can_create_file(&self, folder: QUrl, filename: QString) -> bool { filesystem::can_create_file(&QString::from(folder).to_string(), &filename.to_string()) }
     fn exists(&self, url: QUrl) -> bool { filesystem::exists(&QString::from(url).to_string()) }
     fn get_filename(&self, url: QUrl) -> QString { QString::from(filesystem::get_filename(&QString::from(url).to_string())) }
     fn get_folder(&self, url: QUrl) -> QString { QString::from(filesystem::get_folder(&QString::from(url).to_string())) }

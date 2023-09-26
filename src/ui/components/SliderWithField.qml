@@ -54,10 +54,7 @@ Row {
 
         ContextMenuMouseArea {
             underlyingItem: slider;
-            onContextMenu: () => {
-                if (menuLoader.item) menuLoader.item.popup();
-                menuLoader.active = true;
-            }
+            onContextMenu: (isHold, x, y) => menuLoader.popup(slider, x, y);
         }
 
         Component {
@@ -93,11 +90,8 @@ Row {
                 }
             }
         }
-        Loader {
+        ContextMenuLoader {
             id: menuLoader;
-            active: false;
-            asynchronous: true;
-            onStatusChanged: if (status == Loader.Ready) menuLoader.item.popup();
             sourceComponent: defaultMenu
         }
     }
