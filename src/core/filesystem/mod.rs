@@ -575,7 +575,7 @@ pub fn folder_access_granted(folder_url: &str) {
 
 pub fn restore_allowed_folders(list: &[String]) {
     for x in list {
-        #[cfg(target_os = "ios")]
+        #[cfg(any(target_os = "macos", target_os = "ios"))]
         {
             let (url, is_stale) = apple::resolve_bookmark(&x);
             if !url.is_empty() && url.contains("://") && !is_stale {
@@ -592,7 +592,7 @@ pub fn get_allowed_folders() -> Vec<String> {
     {
         let lock = ALLOWED_FOLDERS.read().clone();
         for x in lock.into_iter() {
-            #[cfg(target_os = "ios")]
+            #[cfg(any(target_os = "macos", target_os = "ios"))]
             {
                 let bookmark = apple::create_bookmark(&x, true, None);
                 if !bookmark.is_empty() {
