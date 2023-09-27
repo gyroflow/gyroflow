@@ -19,7 +19,7 @@ TextField {
         y: parent.height + 2 * dpiScale;
         font.pixelSize: 12 * dpiScale;
         itemHeight: 25 * dpiScale;
-        width: Math.max(parent.width * 1.5, Math.min(window.width * 0.8, maxItemWidth + 10 * dpiScale));
+        width: window.isMobileLayout? parent.width : Math.max(parent.width * 1.5, Math.min(window.width * 0.8, maxItemWidth + 10 * dpiScale));
         onClicked: (index) => {
             root.selected(model[index]);
             popup.close();

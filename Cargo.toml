@@ -73,17 +73,16 @@ qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = 
 qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "98ebed1" }
 ffmpeg-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg.git" }
 ffmpeg-sys-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg-sys.git" }
-metal       = { git = "https://github.com/gfx-rs/metal-rs/", rev = "d24f1a4" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.51.1"
 features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation", "Win32_System_LibraryLoader",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry" ]
-[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.metal]
-version = "0.26"
-[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.core-foundation-sys]
-version = "0.8.4"
+
+[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
+metal = { git = "https://github.com/gfx-rs/metal-rs/", rev = "d24f1a4" }
+core-foundation-sys = "0.8.4"
 
 [build-dependencies]
 cpp_build = "0.5.9"
@@ -116,14 +115,10 @@ build_targets = [ "aarch64-linux-android" ]
 
 [package.metadata.android.sdk]
 min_sdk_version = 26
-target_sdk_version = 30
-
-[[package.metadata.android.uses_permission]]
-name = "android.permission.WRITE_EXTERNAL_STORAGE"
+target_sdk_version = 33
 
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "0.21"
 ndk = { version = "0.7", features = ["media", "api-level-26"] }
-# ndk-glue = { version = "*", features = ["logger"] }
 ndk-sys = { version = "0.4.1" }
 ndk-context = "0.1.1"

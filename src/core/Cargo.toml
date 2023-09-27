@@ -42,7 +42,7 @@ enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.3.1"
 lru = "0.11"
-thiserror = "1.0.48"
+thiserror = "=1.0.48"
 ciborium = "0.2.1"
 nt-hive = "0.2"
 
@@ -64,10 +64,10 @@ libc = "0.2"
 
 opencv = { version = "0.84", features = ["clang-runtime"], optional = true }
 
-wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "dc5beac", features = ["spirv"] }
-wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "dc5beac" }
-wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "dc5beac" }
-wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "dc5beac" }
+wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "57f8757", features = ["spirv"] }
+wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "57f8757" }
+wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "57f8757" }
+wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "57f8757" }
 bytemuck = "1.14.0"
 ash = "0.37.3"
 naga = { git = "https://github.com/gfx-rs/naga", rev = "df8107b7", version = "0.13.0", features = ["clone", "span", "validate", "spv-in"] }
@@ -88,12 +88,11 @@ rustfft = "6.1.0"
 
 include_dir = { version = "0.7.3", features = ["glob"] }
 
-[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.metal]
-version = "0.26"
-[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.objc-foundation]
-version = "0.1.1"
-[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies.core-foundation-sys]
-version = "0.8.4"
+[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
+metal = { git = "https://github.com/gfx-rs/metal-rs/", rev = "d24f1a4" }
+objc-foundation = "0.1.1"
+core-foundation-sys = "0.8.4"
+
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.51.1"
 features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation", "Win32_System_LibraryLoader",
@@ -105,9 +104,6 @@ features = ["profileapi", "libloaderapi", "windef", "winuser", "dcomp"]
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 version = "0.7.0"
 features = ["libloading"]
-
-[patch.crates-io]
-metal = { git = "https://github.com/gfx-rs/metal-rs/", rev = "d24f1a4" }
 
 [features]
 default = []
@@ -127,6 +123,5 @@ debug = true
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "0.21"
 ndk = { version = "0.7", features = ["media", "api-level-26"] }
-# ndk-glue = { version = "*", features = ["logger"] }
 ndk-sys = { version = "0.4.1" }
 ndk-context = { version = "0.1.1" }
