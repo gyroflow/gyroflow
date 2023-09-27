@@ -37,8 +37,9 @@ TextField {
 
     function updateText() {
         preventChange = true;
-        if (!filename && root.folderOnly) {
-            text = root.folderUrl.toString()? qsTr('[Selected folder]') : "";
+        if (!filename && root.folderOnly && root.folderUrl.toString()) {
+            text = filesystem.display_folder_filename(root.folderUrl, filename);
+            if (!text && root.folderUrl.toString()) text = qsTr('[Selected folder]');
         } else {
             text = fullFileUrl.toString()? filesystem.display_url(fullFileUrl) : filesystem.display_folder_filename(folderUrl, filename);
         }
