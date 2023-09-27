@@ -943,10 +943,10 @@ impl RenderQueue {
         }
         core::filesystem::get_folder(input_url)
     }
-    fn get_output_filename(input_url: &str, suffix: &str, codec: &str, override_ext: Option<&str>) -> String {
+    fn get_output_filename(input_url: &str, suffix: &str, render_options: &RenderOptions, override_ext: Option<&str>) -> String {
         let mut filename = core::filesystem::get_filename(input_url);
 
-        let ext = override_ext.unwrap_or(match codec {
+        let mut ext = override_ext.unwrap_or(match render_options.codec.as_ref() {
             "ProRes"        => ".mov",
             "DNxHD"         => ".mov",
             "CineForm"      => ".mov",
@@ -954,6 +954,9 @@ impl RenderQueue {
             "PNG Sequence"  => "_%05d.png",
             _ => ".mp4"
         });
+        if ext == ".mp4" && render_options.preserve_other_tracks {
+            ext = ".mov";
+        }
         if let Some(pos) = filename.rfind('.') {
             filename = filename[..pos].to_owned();
         }
@@ -1150,7 +1153,7 @@ impl RenderQueue {
                             render_options.output_width = info.width as usize;
                             render_options.output_height = info.height as usize;
                             render_options.output_folder = Self::get_output_folder(&url, &render_options.output_folder);
-                            render_options.output_filename = Self::get_output_filename(&url, &suffix, &render_options.codec, override_ext.as_deref());
+                            render_options.output_filename = Self::get_output_filename(&url, &suffix, &render_options, override_ext.as_deref());
 
                             let ratio = info.width as f64 / info.height as f64;
 
@@ -1392,7 +1395,7 @@ impl RenderQueue {
                         let override_ext = new_output_options.get("output_extension").and_then(|x| x.as_str());
                         job.render_options.update_from_json(new_output_options);
                         job.render_options.output_folder = Self::get_output_folder(&itm.input_file.to_string(), &job.render_options.output_folder);
-                        job.render_options.output_filename = Self::get_output_filename(&itm.input_file.to_string(), &self.default_suffix.to_string(), &job.render_options.codec, override_ext);
+                        job.render_options.output_filename = Self::get_output_filename(&itm.input_file.to_string(), &self.default_suffix.to_string(), &job.render_options, override_ext);
                         itm.export_settings = QString::from(job.render_options.settings_string(job.stab.params.read().fps));
                         itm.output_filename = QString::from(job.render_options.output_filename.as_str());
                         itm.output_folder   = QString::from(job.render_options.output_folder.as_str());
