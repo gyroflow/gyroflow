@@ -30,13 +30,13 @@ jobs:
           override: true
       - uses: Swatinem/rust-cache@v2
         with:
-          key: ${{ matrix.targets.type }}-gyroflow-3
+          key: ${{ matrix.targets.type }}-gyroflow-4
       - name: Dependencies cache
         id: extcache
         uses: actions/cache@v3
         with:
           path: '${{ github.workspace }}/ext/'
-          key: ${{ matrix.targets.type }}-gyroflow-ext-3
+          key: ${{ matrix.targets.type }}-gyroflow-ext-4
 
       - name: Prepare Vulkan SDK
         uses: humbletim/setup-vulkan-sdk@v1.2.0

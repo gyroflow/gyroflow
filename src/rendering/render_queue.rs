@@ -656,6 +656,7 @@ impl RenderQueue {
         if let Ok(serde_json::Value::Array(val)) = serde_json::from_str(&json) as serde_json::Result<serde_json::Value> {
             for x in val {
                 if let Some(project) = x.get("project_file").and_then(|x| x.as_str()) {
+                    #[allow(unused_mut)]
                     let mut project = project.to_string();
                     #[cfg(any(target_os = "macos", target_os = "ios"))]
                     if let Some(bookmark) = x.get("project_file_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
