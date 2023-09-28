@@ -526,9 +526,21 @@ Rectangle {
         function onRequest_recompute() {
             Qt.callLater(controller.recompute_threaded);
         }
+        function openUpdatePage() {
+            if (Qt.platform.os == "android") {
+                Qt.openUrlExternally("https://play.google.com/store/apps/details?id=xyz.gyroflow");
+            } else if (Qt.platform.os == "ios") {
+                Qt.openUrlExternally("https://apps.apple.com/us/app/gyroflow/id6447994244");
+            } else if (isWindowsMSIX) {
+                // https://apps.microsoft.com/store/detail/gyroflow/9NZG7T0JCG9H
+                Qt.openUrlExternally("ms-windows-store://pdp/?ProductId=9NZG7T0JCG9H");
+            } else {
+                Qt.openUrlExternally("https://github.com/gyroflow/gyroflow/releases");
+            }
+        }
         function onUpdates_available(version: string, changelog: string) {
             const heading = "<p align=\"center\">" + qsTr("There's a newer version available: %1.").arg("<b>" + version + "</b>") + "</p>\n\n";
-            const el = messageBox(Modal.Info, heading + changelog, [ { text: qsTr("Download"),accent: true, clicked: () => Qt.openUrlExternally("https://github.com/gyroflow/gyroflow/releases") },{ text: qsTr("Close") }], undefined, Text.MarkdownText);
+            const el = messageBox(Modal.Info, heading + changelog, [ { text: qsTr("Download"),accent: true, clicked: () => openUpdatePage() },{ text: qsTr("Close") }], undefined, Text.MarkdownText);
             el.t.horizontalAlignment = Text.AlignLeft;
         }
         function onRequest_location(url: string, type: string) {
