@@ -173,8 +173,8 @@ build-and-package profile is_dist:
         cp -f "$PROVISIONING_PROFILE" {{AppBundle}}/embedded.mobileprovision
         #derq query -f xml -i {{ProjectDir}}/_deployment/ios/Entitlements.plist -o {{AppBundle}}/../../Gyroflow.app.xcent.der --raw
         dsymutil {{AppBundle}}/gyroflow -o {{AppBundle}}/../../../Gyroflow.app.dSYM
-        mkdir -p {{AppBundle}}/../../Symbols/Gyroflow.symbols
-        xcrun symbols -noTextInSOD -noDaemon -arch all -symbolsPackageDir {{AppBundle}}/../../Symbols/Gyroflow.symbols {{AppBundle}}/../../../Gyroflow.app.dSYM
+        mkdir -p {{AppBundle}}/../../Symbols
+        xcrun symbols -noTextInSOD -noDaemon -arch all -symbolsPackageDir {{AppBundle}}/../../Symbols {{AppBundle}}/../../../Gyroflow.app.dSYM
 
         codesign -vvvv --force --generate-entitlement-der --preserve-metadata=identifier,flags,runtime --sign $SIGN_KEY {{AppBundle}}/Frameworks/mdk.framework
         codesign -vvvv --force --generate-entitlement-der --preserve-metadata=identifier,flags,runtime --sign $SIGN_KEY --entitlements {{AppBundle}}/../../entitlements.xcent {{AppBundle}}
