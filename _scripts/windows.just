@@ -265,8 +265,10 @@ bundle:
     cp -Recurse -Force Assets bundle\Assets
     cp -Force AppxManifest.xml bundle\
 
+    # Apps are not allowed to have a Version with a revision number other than zero specified in the app manifest.
     if ("$Env:GITHUB_RUN_NUMBER") {
-        (Get-Content bundle\AppxManifest.xml) -replace 'Identity Version="[0-9\.]+"', "Identity Version=`"{{ProjectVersion}}.$Env:GITHUB_RUN_NUMBER`"" | Out-File bundle\AppxManifest.xml -Encoding Utf8
+        $VersionNoDots = "{{ProjectVersion}}" -replace "[^0-9\.]", '' -replace "\.([0-9]+)$", '$1'
+        (Get-Content bundle\AppxManifest.xml) -replace 'Identity Version="[0-9\.]+"', "Identity Version=`"$VersionNoDots.$Env:GITHUB_RUN_NUMBER.0`"" | Out-File bundle\AppxManifest.xml -Encoding Utf8
     }
 
     makepri.exe createconfig /cf priconfig.xml /dq en-us
