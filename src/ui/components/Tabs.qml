@@ -38,6 +38,7 @@ Column {
                 font: tabBar.font;
                 implicitHeight: tabBar.implicitHeight;
                 icon.name: root.tabsIcons[index];
+                icon.source: root.tabsIcons[index] ? "qrc:/resources/icons/svg/" + root.tabsIcons[index] + ".svg" : "";
                 icon.width: root.tabsIconsSize[index] * dpiScale;
                 icon.height: root.tabsIconsSize[index] * dpiScale;
                 padding: 0;
