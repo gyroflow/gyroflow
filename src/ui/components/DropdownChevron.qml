@@ -16,6 +16,7 @@ QQCI.IconImage {
     height: 15 * dpiScale;
     anchors.verticalCenter: parent.verticalCenter;
     name: "chevron-down";
+    source: "qrc:/resources/icons/svg/chevron-down.svg";
     color: styleTextColor;
     layer.enabled: true;
     layer.textureSize: Qt.size(height*2, height*2);

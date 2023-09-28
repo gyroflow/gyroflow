@@ -30,6 +30,7 @@ TextField {
     rightPadding: 30 * dpiScale;
     QQCI.IconImage {
         name: "search";
+        source: "qrc:/resources/icons/svg/search.svg";
         color: styleTextColor;
         anchors.right: parent.right
         anchors.rightMargin: 5 * dpiScale;

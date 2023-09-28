@@ -226,16 +226,7 @@ fn entry() {
         rendering::set_gpu_type_from_name(&name);
         engine.set_property("defaultInitializedDevice".into(), QString::from(list_name).into());
     }
-    let mut is_windows_msix = false;
-    #[cfg(target_os = "windows")]
-    unsafe {
-        let mut len = 0;
-        let _ = windows::Win32::Storage::Packaging::Appx::GetCurrentPackageFullName(&mut len, windows::core::PWSTR::null());
-        if len > 0 {
-            is_windows_msix = true;
-        }
-    }
-    engine.set_property("isWindowsMSIX".into(), is_windows_msix.into());
+    engine.set_property("isStorePackage".into(), util::is_store_package().into());
 
     engine.exec();
 

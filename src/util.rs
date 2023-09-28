@@ -464,3 +464,15 @@ pub fn update_file_times(output_url: &str, input_url: &str) {
         Ok(())
     }() { ::log::warn!("Failed to update file times: {e:?}"); }
 }
+
+pub fn is_store_package() -> bool {
+    #[cfg(target_os = "windows")]
+    unsafe {
+        let mut len = 0;
+        let _ = windows::Win32::Storage::Packaging::Appx::GetCurrentPackageFullName(&mut len, windows::core::PWSTR::null());
+        if len > 0 {
+            return true;
+        }
+    }
+    false
+}

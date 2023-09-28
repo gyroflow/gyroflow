@@ -57,11 +57,11 @@ Rectangle {
     onVisibleChanged: {
         if (visible && iconType != Modal.NoIcon) {
             switch (iconType) {
-                case Modal.Info:     icon.name = "info";      icon.color = styleAccentColor; break;
-                case Modal.Warning:  icon.name = "warning";   icon.color = "#f6a10c"; break;
-                case Modal.Error:    icon.name = "error";     icon.color = "#d82626"; break;
-                case Modal.Success:  icon.name = "confirmed"; icon.color = "#3cc42f"; break;
-                case Modal.Question: icon.name = "question";  icon.color = styleAccentColor; break;
+                case Modal.Info:     icon.iconName = "info";      icon.color = styleAccentColor; break;
+                case Modal.Warning:  icon.iconName = "warning";   icon.color = "#f6a10c"; break;
+                case Modal.Error:    icon.iconName = "error";     icon.color = "#d82626"; break;
+                case Modal.Success:  icon.iconName = "confirmed"; icon.color = "#3cc42f"; break;
+                case Modal.Question: icon.iconName = "question";  icon.color = styleAccentColor; break;
             }
             icon.visible = true;
             ease.enabled = false;
@@ -94,12 +94,14 @@ Rectangle {
 
             QQCI.IconImage {
                 id: icon;
+                property string iconName: "";
                 visible: false;
                 color: styleTextColor;
                 height: 70 * dpiScale;
                 width: height;
                 anchors.horizontalCenter: parent.horizontalCenter;
-                source: name? "qrc:/resources/icons/svg/" + name + ".svg" : "";
+                source: iconName? "qrc:/resources/icons/svg/" + iconName + ".svg" : "";
+                name: iconName;
                 layer.enabled: true;
                 layer.textureSize: Qt.size(height*2, height*2);
                 layer.smooth: true;

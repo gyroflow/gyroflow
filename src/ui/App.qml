@@ -531,7 +531,7 @@ Rectangle {
                 Qt.openUrlExternally("https://play.google.com/store/apps/details?id=xyz.gyroflow");
             } else if (Qt.platform.os == "ios") {
                 Qt.openUrlExternally("https://apps.apple.com/us/app/gyroflow/id6447994244");
-            } else if (isWindowsMSIX) {
+            } else if (Qt.platform.os == "windows" && isStorePackage) {
                 // https://apps.microsoft.com/store/detail/gyroflow/9NZG7T0JCG9H
                 Qt.openUrlExternally("ms-windows-store://pdp/?ProductId=9NZG7T0JCG9H");
             } else {
