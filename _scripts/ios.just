@@ -172,7 +172,9 @@ build-and-package profile is_dist:
 
         cp -f "$PROVISIONING_PROFILE" {{AppBundle}}/embedded.mobileprovision
         #derq query -f xml -i {{ProjectDir}}/_deployment/ios/Entitlements.plist -o {{AppBundle}}/../../Gyroflow.app.xcent.der --raw
-        #dsymutil {{AppBundle}}/gyroflow -o {{AppBundle}}/../../Gyroflow.app.dSYM
+        dsymutil {{AppBundle}}/gyroflow -o {{AppBundle}}/../../../Gyroflow.app.dSYM
+        mkdir -p {{AppBundle}}/../../Symbols/Gyroflow.symbols
+        xcrun symbols -noTextInSOD -noDaemon -arch all -symbolsPackageDir {{AppBundle}}/../../Symbols/Gyroflow.symbols {{AppBundle}}/../../../Gyroflow.app.dSYM
 
         codesign -vvvv --force --generate-entitlement-der --preserve-metadata=identifier,flags,runtime --sign $SIGN_KEY {{AppBundle}}/Frameworks/mdk.framework
         codesign -vvvv --force --generate-entitlement-der --preserve-metadata=identifier,flags,runtime --sign $SIGN_KEY --entitlements {{AppBundle}}/../../entitlements.xcent {{AppBundle}}
@@ -189,7 +191,7 @@ deploy *param:
     just --unstable -f {{justfile()}} build-and-package deploy distribution
 
     pushd {{AppBundle}}/../../
-        zip -r ../Gyroflow.ipa Payload
+        zip -r ../Gyroflow.ipa Payload Symbols
     popd
     ios-deploy --bundle {{AppBundle}}
 
@@ -230,6 +232,7 @@ deploy *param:
         PlistBuddy -x -c "Add :method string $TYPE" {{AppBundle}}/../../Export.plist
         PlistBuddy -x -c "Add :teamID string {{TeamID}}" {{AppBundle}}/../../Export.plist
         PlistBuddy -x -c "Add :signingCertificate string $SIGN_KEY" {{AppBundle}}/../../Export.plist
+        PlistBuddy -x -c "Add :uploadSymbols bool true" {{AppBundle}}/../../Export.plist
         PlistBuddy -x -c "Add :provisioningProfiles dict" {{AppBundle}}/../../Export.plist
         PlistBuddy -x -c "Add :provisioningProfiles:{{BundleIdentifier}} string $PROVISIONING_PROFILE" {{AppBundle}}/../../Export.plist
 
@@ -239,7 +242,7 @@ deploy *param:
             rm -f ../Gyroflow.ipa
             rm -f Payload/*.plist
             rm -f Payload/*.log
-            zip -r ../Gyroflow.ipa Payload
+            zip -r ../Gyroflow.ipa Payload Symbols
         popd
         ios-deploy --bundle {{AppBundle}}/../out/Payload/Gyroflow.app
     fi
@@ -254,5 +257,5 @@ build-ipa:
     just --unstable -f {{justfile()}} build-and-package deploy distribution
 
     pushd {{AppBundle}}/../../
-        zip -r ../Gyroflow.ipa Payload
+        zip -r ../Gyroflow.ipa Payload Symbols
     popd
