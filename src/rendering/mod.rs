@@ -730,6 +730,11 @@ unsafe fn to_str<'a>(ptr: *const c_char) -> std::borrow::Cow<'a, str> {
     std::ffi::CStr::from_ptr(ptr).to_string_lossy()
 }
 unsafe fn codec_options(c: *const ffi::AVCodec) {
+    if c.is_null() {
+        log::warn!("Null pointer to encoder.");
+        return;
+    }
+
     use std::fmt::Write;
     let mut ret = String::new();
     let _ = writeln!(ret, "{} **{}**:\n", ["Decoder", "Encoder"][ffi::av_codec_is_encoder(c) as usize], to_str((*c).name));
@@ -737,7 +742,9 @@ unsafe fn codec_options(c: *const ffi::AVCodec) {
     if !(*c).pix_fmts.is_null() {
         ret.push_str("Supported pixel formats (-pix_fmt): ");
         for i in 0..100 {
-            let p = *(*c).pix_fmts.offset(i);
+            let fmt = (*c).pix_fmts.offset(i);
+            if fmt.is_null() { break; }
+            let p = *fmt;
             if p == ffi::AVPixelFormat::AV_PIX_FMT_NONE {
                 break;
             }
@@ -780,8 +787,10 @@ pub fn get_encoder_options(name: &str) -> String {
         ffi::av_log_set_callback(Some(ffmpeg_log));
     }
     clear_log();
-    let encoder = ffmpeg_next::encoder::find_by_name(name).unwrap();
-    unsafe { codec_options(encoder.as_ptr()); }
+    match ffmpeg_next::encoder::find_by_name(name) {
+        Some(encoder) => { unsafe { codec_options(encoder.as_ptr()); } },
+        None => log::warn!("Failed to find codec by name: {name}")
+    }
     let ret = get_log().replace("E..V.......", "");
     clear_log();
     ret
