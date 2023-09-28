@@ -312,12 +312,11 @@ impl Stabilization {
 
                             ///////////////////////////////////////////////////////////////////
                             // Calculate source `y` for rolling shutter
-                            let mut sy = 0;
-                            if (params.flags & 16) == 16 { // Horizontal RS
-                                sy = (out_pos.0.round() as i32).min(params.width).max(0) as usize;
+                            let mut sy = if (params.flags & 16) == 16 { // Horizontal RS
+                                (out_pos.0.round() as i32).min(params.width).max(0) as usize
                             } else {
-                                sy = (out_pos.1.round() as i32).min(params.height).max(0) as usize;
-                            }
+                                (out_pos.1.round() as i32).min(params.height).max(0) as usize
+                            };
                             if params.matrix_count > 1 {
                                 let idx = params.matrix_count as usize / 2;
                                 if let Some(pt) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit) {

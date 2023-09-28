@@ -231,7 +231,9 @@ fn entry() {
     unsafe {
         let mut len = 0;
         let _ = windows::Win32::Storage::Packaging::Appx::GetCurrentPackageFullName(&mut len, windows::core::PWSTR::null());
-        is_windows_msix = len > 0;
+        if len > 0 {
+            is_windows_msix = true;
+        }
     }
     engine.set_property("isWindowsMSIX".into(), is_windows_msix.into());
 

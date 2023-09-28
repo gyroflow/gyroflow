@@ -237,13 +237,13 @@ bundle:
 
     # Bundle BRAW and RED SDK
     if (-not (Test-Path -Path "$TargetDir\REDR3D-x64.dll")) {
-        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/v1.5.1/RED_SDK_Windows.tar.gz" -OutFile tmp.tar.gz
+        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/RED_SDK_Windows_8.4.0.tar.gz" -OutFile tmp.tar.gz
         7z x tmp.tar.gz
         7z x -o"$TargetDir\" tmp.tar
         Remove-Item -Path tmp.ta* -Force
     }
     if (-not (Test-Path -Path "$TargetDir\BlackmagicRawAPI.dll")) {
-        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/v1.5.1/Blackmagic_RAW_SDK_Windows.tar.gz" -OutFile tmp.tar.gz
+        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_Windows_3.3.tar.gz" -OutFile tmp.tar.gz
         7z x tmp.tar.gz
         7z x -o"$TargetDir\" tmp.tar
         Remove-Item -Path tmp.ta* -Force
