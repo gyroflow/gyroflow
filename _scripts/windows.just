@@ -265,6 +265,10 @@ bundle:
     cp -Recurse -Force Assets bundle\Assets
     cp -Force AppxManifest.xml bundle\
 
+    if ("$Env:GITHUB_RUN_NUMBER") {
+        (Get-Content bundle\AppxManifest.xml) -replace 'Identity Version="[0-9\.]+"', "Identity Version=`"{{ProjectVersion}}.$Env:GITHUB_RUN_NUMBER`"" | Out-File bundle\AppxManifest.xml -Encoding Utf8
+    }
+
     makepri.exe createconfig /cf priconfig.xml /dq en-us
     makepri.exe new /pr bundle\Assets\ /cf priconfig.xml /mn bundle\AppxManifest.xml /of bundle\resources.pri /o
 

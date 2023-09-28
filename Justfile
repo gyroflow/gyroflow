@@ -42,7 +42,7 @@ publish version:
     sed -i'' -E "0,/versionName=\"[0-9\.a-z-]+\"/s//versionName=\"{{version}}\"/" _deployment/android/AndroidManifest.xml
     sed -i'' -E "/<key>CFBundleShortVersionString<.key>/ s/<string>[0-9\.a-z-]+<.string>/<string>{{version}}<\/string>/" _deployment/ios/Info.plist
     sed -i'' -E "/<key>CFBundleVersion<.key>/ s/<string>[0-9\.a-z-]+<.string>/<string>{{version}}<\/string>/" _deployment/ios/Info.plist
-    sed -i'' -E "0,/Version=\"[0-9\.a-z-]+\"/s//Version=\"{{version}}.0\"/" _deployment/windows/AppxManifest.xml
+    sed -i'' -E "0,/Identity Version=\"[0-9\.a-z-]+\"/s//Identity Version=\"{{version}}.0\"/" _deployment/windows/AppxManifest.xml
     git commit -a -m "Release v{{version}}"
     git tag -a "v{{version}}" -m "Release v{{version}}"
     git push origin
