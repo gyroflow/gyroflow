@@ -775,6 +775,10 @@ pub fn get_default_encoder(codec: &str, gpu: bool) -> String {
     encoder.0.to_string()
 }
 pub fn get_encoder_options(name: &str) -> String {
+	unsafe {
+        ffi::av_log_set_level(ffi::AV_LOG_INFO);
+        ffi::av_log_set_callback(Some(ffmpeg_log));
+    }
     clear_log();
     let encoder = ffmpeg_next::encoder::find_by_name(name).unwrap();
     unsafe { codec_options(encoder.as_ptr()); }
