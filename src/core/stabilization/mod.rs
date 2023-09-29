@@ -211,7 +211,7 @@ impl Stabilization {
         transform
     }
 
-    pub fn ensure_stab_data_at_timestamp<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers, is_rhi: bool) {
+    pub fn ensure_stab_data_at_timestamp<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers) {
         let mut insert = true;
         if let Some(itm) = self.stab_data.get(&timestamp_us) {
             insert = false;
@@ -408,7 +408,7 @@ impl Stabilization {
             self.update_device(dev, buffers);
         }
 
-        self.ensure_stab_data_at_timestamp::<T>(timestamp_us, buffers, false);
+        self.ensure_stab_data_at_timestamp::<T>(timestamp_us, buffers);
         self.init_backends::<T>(timestamp_us, buffers);
 
         if self.share_wgpu_instances && self.wgpu_ever_cached {
