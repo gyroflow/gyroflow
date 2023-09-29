@@ -809,11 +809,11 @@ Item {
 
             Rectangle {
                 visible: window.isMobileLayout || !middleButtons.willFit;
-                color: styleButtonColor;
+                color: styleBackground;
                 opacity: 0.8;
                 radius: 5 * dpiScale;
                 anchors.fill: textCol;
-                anchors.margins: -7 * dpiScale;
+                anchors.margins: -4 * dpiScale;
             }
             Column {
                 id: textCol;
@@ -869,11 +869,11 @@ Item {
             }
             Rectangle {
                 visible: window.isMobileLayout || !middleButtons.willFit;
-                color: styleButtonColor;
+                color: styleBackground;
                 opacity: 0.8;
                 radius: 5 * dpiScale;
                 anchors.fill: rightButtons;
-                anchors.margins: -7 * dpiScale;
+                anchors.margins: -4 * dpiScale;
             }
             Row {
                 id: rightButtons;

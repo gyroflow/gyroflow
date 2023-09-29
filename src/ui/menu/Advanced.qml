@@ -350,6 +350,7 @@ MenuItem {
                 Qt.callLater(processingDevice.updateController);
             }
             function updateController() {
+                if (model.length == 0) return;
                 if (currentIndex == model.length - 1) {
                     controller.set_device(-1);
                 } else {
