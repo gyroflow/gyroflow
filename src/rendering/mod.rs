@@ -456,6 +456,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                     }
                     let mut plane = Stabilization::default();
                     plane.interpolation = Interpolation::Lanczos4;
+                    plane.share_wgpu_instances = true;
                     plane.set_device(stab.params.read().current_device as isize);
 
                     // Workaround for a bug in prores videotoolbox encoder
@@ -480,14 +481,15 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                             output: get_plane_buffer(out_frame_data, out_size, plane_index, &mut g, wgpu_format)
                         };
 
-                        plane.ensure_ready_for_processing::<$t>(timestamp_us, &mut buffers);
-                        if let Some(transform) = plane.stab_data.get_mut(&timestamp_us) {
-                            transform.kernel_params.max_pixel_value = $max_val;
-                            if fill_with_background {
-                                transform.kernel_params.flags |= KernelParamsFlags::FILL_WITH_BACKGROUND.bits();
-                            }
+                        if plane.backend_initialized.is_none() {
+                            plane.ensure_ready_for_processing::<$t>(timestamp_us, &mut buffers);
                         }
-                        if let Err(e) = plane.process_pixels::<$t>(timestamp_us, &mut buffers) {
+                        let mut transform = plane.get_frame_transform_at::<$t>(timestamp_us, &mut buffers);
+                        transform.kernel_params.max_pixel_value = $max_val;
+                        if fill_with_background {
+                            transform.kernel_params.flags |= KernelParamsFlags::FILL_WITH_BACKGROUND.bits();
+                        }
+                        if let Err(e) = plane.process_pixels::<$t>(timestamp_us, &mut buffers, Some(&transform)) {
                             ::log::error!("Failed to process pixels: {e:?}");
                         }
                     }));

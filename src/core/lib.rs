@@ -592,7 +592,7 @@ impl StabilizationManager {
         }
 
         let undist = self.stabilization.read();
-        undist.process_pixels::<T>(timestamp_us, buffers)
+        undist.process_pixels::<T>(timestamp_us, buffers, None)
     }
 
     pub fn set_video_rotation(&self, v: f64) { self.params.write().video_rotation = v; self.invalidate_smoothing(); }

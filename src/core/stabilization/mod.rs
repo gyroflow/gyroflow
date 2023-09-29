@@ -109,7 +109,7 @@ pub struct Stabilization {
 
     wgpu: Option<wgpu::WgpuWrapper>,
 
-    backend_initialized: Option<u32>,
+    pub backend_initialized: Option<u32>,
     wgpu_ever_cached: bool,
 
     compute_params: ComputeParams,
@@ -152,24 +152,7 @@ impl Stabilization {
         ret
     }
 
-    pub fn ensure_stab_data_at_timestamp<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers) {
-        let mut insert = true;
-        if let Some(itm) = self.stab_data.get(&timestamp_us) {
-            insert = false;
-            if itm.kernel_params.stride        != buffers.input.size.2 as i32 ||
-               itm.kernel_params.output_stride != buffers.output.size.2 as i32 {
-                log::warn!("Stride mismatch ({} != {} || {} != {})", itm.kernel_params.stride, buffers.input.size.2, itm.kernel_params.output_stride, buffers.output.size.2);
-                insert = true;
-            }
-            if itm.kernel_params.input_rotation != buffers.input.rotation.unwrap_or(0.0) ||
-               itm.kernel_params.output_rotation != buffers.output.rotation.unwrap_or(0.0) ||
-               itm.kernel_params.source_rect != Self::get_rect(&buffers.input) ||
-               itm.kernel_params.output_rect != Self::get_rect(&buffers.output) {
-                log::warn!("Updating stab params at {timestamp_us}");
-                insert = true;
-            }
-        }
-        if insert {
+    pub fn get_frame_transform_at<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers) -> FrameTransform {
             let timestamp_ms = (timestamp_us as f64) / 1000.0;
             let frame = crate::frame_at_timestamp(timestamp_ms, self.compute_params.scaled_fps) as usize; // Only for FOVs
 
@@ -225,7 +208,28 @@ impl Stabilization {
             transform.kernel_params.source_rect = Self::get_rect(&buffers.input);
             transform.kernel_params.output_rect = Self::get_rect(&buffers.output);
 
+        transform
+    }
 
+    pub fn ensure_stab_data_at_timestamp<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers, is_rhi: bool) {
+        let mut insert = true;
+        if let Some(itm) = self.stab_data.get(&timestamp_us) {
+            insert = false;
+            if itm.kernel_params.stride        != buffers.input.size.2 as i32 ||
+               itm.kernel_params.output_stride != buffers.output.size.2 as i32 {
+                log::warn!("Stride mismatch ({} != {} || {} != {})", itm.kernel_params.stride, buffers.input.size.2, itm.kernel_params.output_stride, buffers.output.size.2);
+                insert = true;
+            }
+            if itm.kernel_params.input_rotation != buffers.input.rotation.unwrap_or(0.0) ||
+               itm.kernel_params.output_rotation != buffers.output.rotation.unwrap_or(0.0) ||
+               itm.kernel_params.source_rect != Self::get_rect(&buffers.input) ||
+               itm.kernel_params.output_rect != Self::get_rect(&buffers.output) {
+                log::warn!("Updating stab params at {timestamp_us}");
+                insert = true;
+            }
+        }
+        if insert {
+            let transform = self.get_frame_transform_at::<T>(timestamp_us, buffers);
             self.stab_data.insert(timestamp_us, transform);
         }
     }
@@ -404,7 +408,7 @@ impl Stabilization {
             self.update_device(dev, buffers);
         }
 
-        self.ensure_stab_data_at_timestamp::<T>(timestamp_us, buffers);
+        self.ensure_stab_data_at_timestamp::<T>(timestamp_us, buffers, false);
         self.init_backends::<T>(timestamp_us, buffers);
 
         if self.share_wgpu_instances && self.wgpu_ever_cached {
@@ -417,17 +421,17 @@ impl Stabilization {
             }
         }
     }
-    pub fn process_pixels<T: PixelType>(&self, timestamp_us: i64, buffers: &mut Buffers) -> Result<ProcessedInfo, GyroflowCoreError> {
+    pub fn process_pixels<T: PixelType>(&self, timestamp_us: i64, buffers: &mut Buffers, frame_transform: Option<&FrameTransform>) -> Result<ProcessedInfo, GyroflowCoreError> {
         if /*self.size != buffers.input.size || */buffers.input.size.1 < 4 || buffers.output.size.1 < 4 { return Err(GyroflowCoreError::SizeTooSmall); }
 
         let mut _last_frame_data = None;
 
-        let itm = if self.stab_data.contains_key(&timestamp_us) {
+        let itm = frame_transform.map(|x| Some(x)).unwrap_or_else(|| if self.stab_data.contains_key(&timestamp_us) {
             self.stab_data.get(&timestamp_us)
         } else {
             _last_frame_data = Some(self.last_frame_data.borrow().clone());
             _last_frame_data.as_ref()
-        };
+        });
 
         if let Some(itm) = itm {
             let mut ret = ProcessedInfo {
