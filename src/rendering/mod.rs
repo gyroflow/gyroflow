@@ -483,6 +483,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
 
                         if plane.backend_initialized.is_none() {
                             plane.ensure_ready_for_processing::<$t>(timestamp_us, &mut buffers);
+                            plane.stab_data.clear();
                         }
                         let mut transform = plane.get_frame_transform_at::<$t>(timestamp_us, &mut buffers);
                         transform.kernel_params.max_pixel_value = $max_val;
