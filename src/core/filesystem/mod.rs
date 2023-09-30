@@ -564,7 +564,7 @@ pub fn folder_access_granted(folder_url: &str) {
 
     let folder_url = normalize_url(folder_url, true);
     dbg_call!(folder_url);
-    start_accessing_url(&folder_url, true); // This will not have equivalent `stop_accessing_url` because we don't know when the access ends
+    start_accessing_url(&folder_url, true); // This will not have an equivalent `stop_accessing_url` because we don't know when the access ends
     let already_allowed = ALLOWED_FOLDERS.read().contains(&folder_url);
 
     if !already_allowed {
@@ -581,9 +581,11 @@ pub fn restore_allowed_folders(list: &[String]) {
             if !url.is_empty() && url.contains("://") && !is_stale {
                 folder_access_granted(&url);
             }
-            continue;
         }
-        folder_access_granted(x);
+        #[cfg(not(any(target_os = "macos", target_os = "ios")))]
+        {
+            folder_access_granted(x);
+        }
     }
 }
 

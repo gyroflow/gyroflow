@@ -18,6 +18,7 @@ MenuItem {
     property string filename: "";
     property bool isCalibrator: false;
     property string pixelFormat: "";
+    property bool hasAccessToInputDirectory: true;
 
     Component.onCompleted: {
         const fields = [
@@ -115,6 +116,22 @@ MenuItem {
         const rate = md["stream.audio[0].codec.sample_rate"]? (md["stream.audio[0].codec.sample_rate"] + " Hz") : "";
 
         return format + (format? " " : "") + rate;
+    }
+
+    InfoMessageSmall {
+        show: !root.hasAccessToInputDirectory;
+        type: InfoMessage.Info;
+        text: qsTr("In order to detect project files, video sequences or image sequences, click here and select the directory with input files.");
+        OutputPathField { id: opf; visible: false; }
+        MouseArea {
+            anchors.fill: parent;
+            cursorShape: Qt.PointingHandCursor;
+            onClicked: {
+                opf.selectFolder(window.outputFile.folderUrl, function(_) {
+                    window.videoArea.loadFile(window.videoArea.loadedFileUrl);
+                });
+            }
+        }
     }
 
     Button {

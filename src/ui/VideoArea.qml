@@ -362,6 +362,8 @@ Item {
                 return;
             }
         }
+        vidInfo.hasAccessToInputDirectory = folder.toString().length > 3;
+
         window.stab.fovSlider.value = 1.0;
         vid.loaded = false;
         videoLoader.active = true;
