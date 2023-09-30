@@ -4,10 +4,10 @@
 use ndk::media::image_reader::*;
 use ndk::hardware_buffer::*;
 use ndk::native_window::*;
-use jni::{ objects::{ GlobalRef, JObject }, JNIEnv, JavaVM };
+use jni::{ objects::{ GlobalRef, JObject }, JavaVM };
 use std::ffi::*;
 use ffmpeg_next::ffi;
-use std::sync::mpsc::{ Sender, Receiver, channel };
+use std::sync::mpsc::{ Receiver, channel };
 
 extern "C" {
     fn av_mediacodec_release_buffer(buffer: *mut c_void, render: c_int) -> c_int;

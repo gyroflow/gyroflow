@@ -16,7 +16,6 @@ MenuItem {
         id: settings;
         property alias previewPipeline: previewPipeline.currentIndex;
         property alias renderBackground: renderBackground.text;
-        property alias theme: themeList.currentIndex;
         property alias uiScaling: uiScaling.currentIndex;
         property alias safeAreaGuide: safeAreaGuide.checked;
         property alias gpudecode: gpudecode.checked;
@@ -138,13 +137,24 @@ MenuItem {
 
         ComboBox {
             id: themeList;
-            model: [QT_TRANSLATE_NOOP("Popup", "Light"), QT_TRANSLATE_NOOP("Popup", "Dark")];
+            model: [];
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
-            currentIndex: 1;
+            Component.onCompleted: {
+                const savedTheme = +settings.value("theme", 1);
+                let m = [QT_TRANSLATE_NOOP("Popup", "Light"), QT_TRANSLATE_NOOP("Popup", "Dark")];
+                if (!(isMobile && screenSize < 7.0)) {
+                    m.push(QT_TRANSLATE_NOOP("Popup", "Mobile Light"));
+                    m.push(QT_TRANSLATE_NOOP("Popup", "Mobile Dark"));
+                }
+                model = m;
+                currentIndex = savedTheme;
+            }
             onCurrentIndexChanged: {
-                const themes = ["light", "dark"];
-                ui_tools.set_theme(themes[currentIndex]);
+                const themes = ["light", "dark", "mobile_light", "mobile_dark"];
+                let theme = themes[currentIndex];
+                ui_tools.set_theme(theme);
+                settings.setValue("theme", currentIndex);
             }
         }
     }

@@ -18,6 +18,14 @@ Window {
     visible: true;
     color: styleBackground;
     property bool isMobile: Qt.platform.os == "android" || Qt.platform.os == "ios";
+    property var safeAreaMargins: ({});
+    onWidthChanged: updateMargins.start();
+    onHeightChanged: updateMargins.start();
+    Timer {
+        id: updateMargins;
+        interval: 100;
+        onTriggered: main_window.safeAreaMargins = ui_tools.get_safe_area_margins(main_window);
+    }
 
     title: "Gyroflow v" + version;
 
@@ -61,6 +69,7 @@ Window {
         } else {
             Qt.callLater(() => { main_window.showFullScreen(); });
         }
+        updateMargins.start();
     }
     property bool isLandscape: width > height;
 

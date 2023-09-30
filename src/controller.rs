@@ -1735,6 +1735,7 @@ impl Controller {
         });
     }
 
+    #[allow(unreachable_code)]
     fn fetch_profiles_from_github(&self) {
         #[cfg(any(target_os = "android", target_os = "ios"))]
         {

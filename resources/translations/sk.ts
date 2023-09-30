@@ -1559,17 +1559,17 @@ Chceš ho zmeniť na iný podporovaný typ, alebo ho chceš zachovať a vyrendro
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="491"/>
       <source>ETA %1</source>
-      <translation type="unfinished">ETA %1</translation>
+      <translation>ETA %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="492"/>
       <source>Synchronizing: %1</source>
-      <translation type="unfinished">Synchronizing: %1</translation>
+      <translation>Synchronizácia: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="493"/>
       <source>Rendering: %1</source>
-      <translation type="unfinished">Rendering: %1</translation>
+      <translation>Renderuje sa: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="663"/>
@@ -2504,17 +2504,17 @@ Pred synchronizáciou sa uisti, že je nastavená správna hodnota rolling-shutt
     <message>
       <location filename="../../src/ui/App.qml" line="414"/>
       <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
+      <translation>Vstupy</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="414"/>
       <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
+      <translation>Parametre</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="414"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>Exportovať</translation>
     </message>
   </context>
   <context>

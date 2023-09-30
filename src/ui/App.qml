@@ -46,7 +46,7 @@ Rectangle {
         }
     }
     // property bool isMobileLayout: width < (1500 * dpiScale);
-    property bool isMobileLayout: isMobile && screenSize < 7.0;
+    property bool isMobileLayout: ((isMobile && screenSize < 7.0) || forceMobileLayout) && !forceDesktopLayout;
     onIsMobileLayoutChanged: {
         if (isMobileLayout) {
             vidInfo      .parent = inputsTab.inner;
@@ -64,7 +64,7 @@ Rectangle {
             outputPathLabel.parent = exportTab.inner;
             renderBtnRow   .parent = exportTab.inner;
             exportSettings .parent = exportTab.inner;
-        }/* else {
+        } else {
             vidInfo      .parent = leftPanel.col;
             vidInfoHr    .parent = leftPanel.col;
             lensProfile  .parent = leftPanel.col;
@@ -81,7 +81,7 @@ Rectangle {
 
             outputPathLabel.parent = exportbar;
             renderBtnRow   .parent = exportbar;
-        }*/
+        }
     }
     property alias vidInfo: vidInfo.item;
     property alias videoArea: videoArea;

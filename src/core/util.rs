@@ -116,7 +116,7 @@ pub fn merge_json(a: &mut serde_json::Value, b: &serde_json::Value) {
     }
 }
 
-pub fn get_setting(key: &str) -> Option<String> {
+pub fn get_setting(_key: &str) -> Option<String> {
     #[cfg(target_os = "windows")]
     unsafe {
         use windows::Win32::System::Registry::*;
@@ -133,7 +133,7 @@ pub fn get_setting(key: &str) -> Option<String> {
                             if let Ok(hive) = nt_hive::Hive::new(buffer.as_ref()) {
                                 if let Ok(root) = hive.root_key_node() {
                                     if let Some(Ok(key_node)) = root.subpath("Software\\Gyroflow\\Gyroflow") {
-                                        if let Some(Ok(key_value)) = key_node.value(key) {
+                                        if let Some(Ok(key_value)) = key_node.value(_key) {
                                             if let Ok(sz) = key_value.string_data() {
                                                 return Some(sz);
                                             }
@@ -151,7 +151,7 @@ pub fn get_setting(key: &str) -> Option<String> {
         let mut hkey = HKEY::default();
         let key_path = "Software\\Gyroflow\\Gyroflow\0".encode_utf16().collect::<Vec<_>>();
         if RegOpenKeyExW(HKEY_CURRENT_USER, PCWSTR::from_raw(key_path.as_ptr()), 0, KEY_READ, &mut hkey).is_ok() {
-            let key = format!("{}\0", key).encode_utf16().collect::<Vec<_>>();
+            let key = format!("{}\0", _key).encode_utf16().collect::<Vec<_>>();
             let key = PCWSTR::from_raw(key.as_ptr());
             let mut size: u32 = 0;
             let mut typ = REG_VALUE_TYPE::default();
@@ -182,7 +182,7 @@ pub fn get_setting(key: &str) -> Option<String> {
         unsafe fn cfstr(v: &str) -> CFStringRef {
             CFStringCreateWithBytes(kCFAllocatorDefault, v.as_ptr(), v.len() as CFIndex, kCFStringEncodingUTF8, false as Boolean)
         }
-        let key = cfstr(key);
+        let key = cfstr(_key);
         let app = cfstr("com.gyroflow-xyz.Gyroflow");
         let user = cfstr("kCFPreferencesCurrentUser");
         let host = cfstr("kCFPreferencesAnyHost");
@@ -209,7 +209,7 @@ pub fn get_setting(key: &str) -> Option<String> {
     }
     #[cfg(target_os = "linux")]
     {
-        let key = format!("{}=", key);
+        let key = format!("{}=", _key);
         if let Ok(home) = std::env::var("HOME") {
             if let Ok(contents) = std::fs::read_to_string(format!("{home}/.config/Gyroflow/Gyroflow.conf")) {
                 for line in contents.lines()  {

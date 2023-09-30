@@ -12,6 +12,8 @@ use windows::Win32::{ Foundation::HWND, UI::Shell::{ ITaskbarList4, TaskbarList 
 
 cpp! {{
     #include <QTranslator>
+    #include <QJsonObject>
+    #include <qpa/qplatformwindow.h>
 }}
 
 #[derive(Default, QObject)]
@@ -23,6 +25,7 @@ pub struct UITools {
     set_scaling: qt_method!(fn(&self, dpiScale: f64)),
     init_calibrator: qt_method!(fn(&mut self)),
     set_icon: qt_method!(fn(&mut self, wnd: QJSValue)),
+    get_safe_area_margins: qt_method!(fn(&mut self, wnd: QJSValue) -> QJsonObject),
     set_progress: qt_method!(fn(&self, progress: f64)),
     closing: qt_method!(fn(&mut self)),
 
@@ -80,8 +83,15 @@ impl UITools {
             cpp!(unsafe [] { auto f = QGuiApplication::font(); f.setFamily("Arial"); QGuiApplication::setFont(f); });
             engine.set_property("styleFont".into(), QString::from("Arial").into());
 
-            match theme.as_str() {
-                "dark" => {
+            let force_mobile = theme.starts_with("mobile_");
+            let force_destop = theme.starts_with("desktop_");
+            engine.set_property("forceMobileLayout".into(), force_mobile.into());
+            engine.set_property("forceDesktopLayout".into(), force_destop.into());
+
+            self.is_dark = theme.contains("dark");
+
+            match self.is_dark {
+                true => {
                     engine.set_property("style"                 .into(), QString::from("dark").into());
                     engine.set_property("styleBackground"       .into(), QString::from("#272727").into());
                     engine.set_property("styleBackground2"      .into(), QString::from("#202020").into());
@@ -95,9 +105,8 @@ impl UITools {
                     engine.set_property("styleSliderHandle"     .into(), QString::from("#454545").into());
                     engine.set_property("styleSliderBackground" .into(), QString::from("#9a9a9a").into());
                     engine.set_property("styleHighlightColor"   .into(), QString::from("#10ffffff").into());
-                    self.is_dark = true;
                 },
-                "light" => {
+                false => {
                     engine.set_property("style"                 .into(), QString::from("light").into());
                     engine.set_property("styleBackground"       .into(), QString::from("#f9f9f9").into());
                     engine.set_property("styleBackground2"      .into(), QString::from("#f3f3f3").into());
@@ -111,9 +120,7 @@ impl UITools {
                     engine.set_property("styleSliderHandle"     .into(), QString::from("#c2c2c2").into());
                     engine.set_property("styleSliderBackground" .into(), QString::from("#cdcdcd").into());
                     engine.set_property("styleHighlightColor"   .into(), QString::from("#10000000").into());
-                    self.is_dark = false;
-                },
-                _ => { }
+                }
             }
             self.update_dark_mode(0);
         }
@@ -128,6 +135,20 @@ impl UITools {
             }
             engine.set_property("dpiScale".into(), QVariant::from(dpi));
         }
+    }
+
+    pub fn get_safe_area_margins(&mut self, wnd: QJSValue) -> QJsonObject {
+        cpp!(unsafe [wnd as "QJSValue"] -> QJsonObject as "QJsonObject" {
+            auto obj = qobject_cast<QQuickWindow *>(wnd.toQObject());
+            QPlatformWindow *pWin = qobject_cast<QWindow *>(obj)->handle();
+            QMargins safeArea = pWin->safeAreaMargins();
+            return QJsonObject {
+                { "top",    safeArea.top() },
+                { "bottom", safeArea.bottom() },
+                { "right",  safeArea.right() },
+                { "left",   safeArea.left() }
+            };
+        })
     }
 
     pub fn set_icon(&mut self, wnd: QJSValue) {

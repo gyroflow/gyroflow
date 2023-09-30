@@ -57,7 +57,7 @@ parking_lot = "0.12.1"
 simplelog = "0.12.1"
 log = "0.4"
 
-ureq = "2.7.1"
+ureq = "2.8.0"
 url = "2.4.1"
 whoami = "1.4.1"
 tar = "0.4.40"

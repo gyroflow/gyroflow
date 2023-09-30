@@ -818,7 +818,7 @@ Item {
             Column {
                 id: textCol;
                 enabled: vid.loaded;
-                y: middleButtons.willFit? ((parent.height - height) / 2) : -buttonsArea.y - tlcol.y + 7 * dpiScale;
+                y: middleButtons.willFit? ((parent.height - height) / 2) : -buttonsArea.y - tlcol.y + 7 * dpiScale + (main_window.safeAreaMargins.top || 0);
                 anchors.left: parent.left;
                 anchors.leftMargin: 10 * dpiScale;
                 spacing: 3 * dpiScale;
@@ -879,7 +879,7 @@ Item {
                 id: rightButtons;
                 enabled: vid.loaded;
                 spacing: 5 * dpiScale;
-                y: middleButtons.willFit? ((parent.height - height) / 2) : -buttonsArea.y - tlcol.y + 7 * dpiScale;
+                y: middleButtons.willFit? ((parent.height - height) / 2) : -buttonsArea.y - tlcol.y + (main_window.safeAreaMargins.top || 0);
                 anchors.right: parent.right;
                 anchors.rightMargin: 10 * dpiScale;
                 height: parent.height;

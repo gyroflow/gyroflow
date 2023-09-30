@@ -60,7 +60,7 @@ impl<'a> Drop for AndroidFileHandle<'a> {
 
 pub fn open_file<'a>(jvm: &'a jni::JavaVM, url: &str, open_mode: &str) -> Result<AndroidFileHandle<'a>> {
     dbg_call!(url open_mode);
-    let mut env = jvm.attach_current_thread_permanently()?;
+    let env = jvm.attach_current_thread_permanently()?;
     check_exception!(env, AndroidFileHandle<'a>; {
         let mut env = jvm.attach_current_thread_permanently()?;
         let open_mode = env.new_string(open_mode)?;
