@@ -38,6 +38,7 @@ Item {
 
     property int fullScreen: 0;
     property string detectedCamera: "";
+    property real additionalTopMargin: 0;
 
     property Menu.VideoInformation vidInfo: null;
 
@@ -668,12 +669,14 @@ Item {
                 type: InfoMessage.Warning;
                 visible: vid.loaded && !controller.lens_loaded && !isCalibrator;
                 text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.");
+                y: Math.max(0, root.additionalTopMargin - vidParent.y);
             }
             Column {
                 id: infoMessages;
                 width: vid.width;
                 spacing: 5 * dpiScale;
                 visible: children.length > 0;
+                y: Math.max(0, root.additionalTopMargin - vidParent.y);
             }
             TapHandler {
                 onTapped: timeline.focus = true;
@@ -820,7 +823,7 @@ Item {
             Column {
                 id: textCol;
                 enabled: vid.loaded;
-                y: middleButtons.willFit? ((parent.height - height) / 2) : -buttonsArea.y - tlcol.y + 7 * dpiScale + (main_window.safeAreaMargins.top || 0);
+                y: middleButtons.willFit? ((parent.height - height) / 2) : -buttonsArea.y - tlcol.y + 7 * dpiScale + ((main_window.safeAreaMargins.top || 0) * 0.8);
                 anchors.left: parent.left;
                 anchors.leftMargin: 10 * dpiScale;
                 spacing: 3 * dpiScale;
@@ -867,6 +870,7 @@ Item {
                     }
                     Button { iconName: "chevron-right"; tooltip: qsTr("Next frame"); onClicked: vid.currentFrame += 1; transparentOnMobile: true; }
                     Button { text: "]"; font.bold: true; onClicked: timeline.setTrim(timeline.trimStart, timeline.position); tooltip: qsTr("Trim end"); transparentOnMobile: true; }
+                    Button { visible: isMobile; iconName: "menu"; onClicked: timeline.showContextMenu(); tooltip: qsTr("Show timeline menu"); transparentOnMobile: true; leftPadding: 10 * dpiScale; rightPadding: 10 * dpiScale; }
                 }
             }
             Rectangle {
@@ -881,7 +885,8 @@ Item {
                 id: rightButtons;
                 enabled: vid.loaded;
                 spacing: 5 * dpiScale;
-                y: middleButtons.willFit? ((parent.height - height) / 2) : -buttonsArea.y - tlcol.y + (main_window.safeAreaMargins.top || 0);
+                y: middleButtons.willFit? ((parent.height - height) / 2) : -buttonsArea.y - tlcol.y + ((main_window.safeAreaMargins.top || 0) * 0.8);
+                onYChanged: root.additionalTopMargin = middleButtons.willFit? 0 : Math.max(height, textCol.height) + 2*4 * dpiScale + ((main_window.safeAreaMargins.top || 0) * 0.8);
                 anchors.right: parent.right;
                 anchors.rightMargin: 10 * dpiScale;
                 height: parent.height;
@@ -978,7 +983,7 @@ Item {
             hr.height: 30 * dpiScale;
             hr.opacity: root.fullScreen || window.isMobileLayout? 0.1 : 1.0;
             additionalHeight: timeline.additionalHeight;
-            defaultHeight: (window.isMobileLayout? 80 : 165) * dpiScale;
+            defaultHeight: (window.isMobileLayout? 50 : 165) * dpiScale;
             minHeight: (root.fullScreen || window.isMobileLayout? 50 : 100) * dpiScale;
             lastHeight: window.settings.value("bottomPanelSize" + (root.fullScreen? "-full" : ""), defaultHeight);
             onHeightAdjusted: window.settings.setValue("bottomPanelSize" + (root.fullScreen? "-full" : ""), height);

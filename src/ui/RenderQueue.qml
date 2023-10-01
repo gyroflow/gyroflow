@@ -458,7 +458,7 @@ Item {
                 id: innerItm;
                 x: 5 * dpiScale;
                 width: parent.width - 2*x;
-                height: (window.isMobileLayout? 80 : 70) * dpiScale;
+                height: textColumn.height + 20 * dpiScale;
                 Image {
                     x: 5 * dpiScale;
                     source: thumbnail_url
@@ -479,24 +479,30 @@ Item {
                 }
 
                 Column {
+                    id: textColumn;
                     x: 55 * dpiScale;
                     anchors.verticalCenter: parent.verticalCenter;
                     spacing: 3 * dpiScale;
+                    width: parent.width - x - btnsRow.width - 10 * dpiScale;
                     BasicText {
                         text: input_filename;
                         font.bold: true;
                         font.pixelSize: 14 * dpiScale;
+                        width: parent.width;
+                        wrapMode: Text.WordWrap;
                     }
                     BasicText {
                         visible: window.isMobileLayout;
+                        width: parent.width;
+                        wrapMode: Text.WordWrap;
                         font.pixelSize: basicTextSize;
                         property string remainingText: statusBg.shown? "---" : time.remaining;
                         property string eta: remainingText != "---"? (", " + qsTr("ETA %1").arg(remainingText)) : "";
                         text: isProcessing? qsTr("Synchronizing: %1").arg(`<b>${(processing_progress*100).toFixed(2)}%</b>`)
                                           : qsTr("Rendering: %1").arg(`<b>${(dlg.progress*100).toFixed(2)}%</b> <small>(${current_frame}/${total_frames}${time.fpsText}${eta})</small>`);
                     }
-                    BasicText { text: qsTr("Save to: %1").arg("<b>" + display_output_path + "</b>"); font.pixelSize: basicTextSize; }
-                    BasicText { text: qsTr("Export settings: %1").arg("<b>" + export_settings + "</b>"); font.pixelSize: basicTextSize; }
+                    BasicText { text: qsTr("Save to: %1").arg("<b>" + display_output_path + "</b>"); font.pixelSize: basicTextSize; width: parent.width; wrapMode: Text.WordWrap; }
+                    BasicText { text: qsTr("Export settings: %1").arg("<b>" + export_settings + "</b>"); font.pixelSize: basicTextSize; width: parent.width; wrapMode: Text.WordWrap; }
                 }
 
                 Column {

@@ -252,8 +252,8 @@ pub fn get_folder(url: &str) -> String {
             log::warn!("Cannot get directory path on android, url: {url}, info: {:?}", android::get_url_info(url));
             return Ok(String::new());
         }
-        #[cfg(target_os = "ios")]
-        {
+        #[cfg(any(target_os = "macos", target_os = "ios"))]
+        if is_sandboxed() {
             if let Some(pos) = url.rfind('/') {
                 let folder = &url[0..pos + 1];
                 if ALLOWED_FOLDERS.read().contains(&normalize_url(folder, true)) {
@@ -516,7 +516,7 @@ pub fn display_url(url: &str) -> String {
     }
 
     let path = url_to_path(url);
-    if cfg!(target_os = "ios") && path.contains("/File Provider Storage/") {
+    if cfg!(any(target_os = "macos", target_os = "ios")) && path.contains("/File Provider Storage/") {
         return path.split("/File Provider Storage/").last().unwrap().to_owned();
     }
     path
@@ -608,3 +608,12 @@ pub fn get_allowed_folders() -> Vec<String> {
     ret
 }
 
+pub fn is_sandboxed() -> bool {
+    if cfg!(any(target_os = "android", target_os = "ios")) {
+        return true;
+    }
+    if cfg!(target_os = "macos") && std::env::var("APP_SANDBOX_CONTAINER_ID").is_ok() {
+        return true;
+    }
+    false
+}

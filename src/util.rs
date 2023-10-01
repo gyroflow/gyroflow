@@ -474,5 +474,11 @@ pub fn is_store_package() -> bool {
             return true;
         }
     }
+
+    // Only the app from App Store is sandboxed on MacOS
+    if cfg!(target_os = "macos") && gyroflow_core::filesystem::is_sandboxed() {
+        return true;
+    }
+
     false
 }

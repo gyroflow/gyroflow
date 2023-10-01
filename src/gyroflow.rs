@@ -173,6 +173,10 @@ fn entry() {
         ui.set_theme("dark".into());
     }
 
+    engine.set_property("isStorePackage".into(), util::is_store_package().into());
+    engine.set_property("isMobile".into(), cfg!(any(target_os = "android", target_os = "ios")).into());
+    engine.set_property("isSandboxed".into(), gyroflow_core::filesystem::is_sandboxed().into());
+
     // Get smoothing algorithms
     engine.set_property("smoothingAlgorithms".into(), QVariant::from(ctl.borrow().get_smoothing_algs()));
 
@@ -226,7 +230,6 @@ fn entry() {
         rendering::set_gpu_type_from_name(&name);
         engine.set_property("defaultInitializedDevice".into(), QString::from(list_name).into());
     }
-    engine.set_property("isStorePackage".into(), util::is_store_package().into());
 
     engine.exec();
 

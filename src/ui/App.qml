@@ -323,7 +323,7 @@ Rectangle {
                             }
 
                             videoArea.vid.grabToImage(function(result) {
-                                if ((Qt.platform.os == "ios" || Qt.platform.os == "android") && (!outputFile.folderUrl.toString() || !filesystem.can_create_file(outputFile.folderUrl, outputFile.filename))) {
+                                if (isSandboxed && (!outputFile.folderUrl.toString() || !filesystem.can_create_file(outputFile.folderUrl, outputFile.filename))) {
                                     let el = messageBox(Modal.Info, qsTr("Due to file access restrictions, you need to select the destination folder manually.\nClick Ok and select the destination folder."), [
                                         { text: qsTr("Ok"), clicked: () => {
                                             outputFile.selectFolder(outputFile.folderUrl, function(_) { renderBtn.btn.clicked(); });
@@ -531,6 +531,8 @@ Rectangle {
                 Qt.openUrlExternally("https://play.google.com/store/apps/details?id=xyz.gyroflow");
             } else if (Qt.platform.os == "ios") {
                 Qt.openUrlExternally("https://apps.apple.com/us/app/gyroflow/id6447994244");
+            } else if (Qt.platform.os == "macos" && isStorePackage) {
+                Qt.openUrlExternally("https://apps.apple.com/us/app/gyroflow/id6447994244");
             } else if (Qt.platform.os == "windows" && isStorePackage) {
                 // https://apps.microsoft.com/store/detail/gyroflow/9NZG7T0JCG9H
                 Qt.openUrlExternally("ms-windows-store://pdp/?ProductId=9NZG7T0JCG9H");
@@ -715,7 +717,7 @@ Rectangle {
         }
     }
     function getSaveFileUrl(folder: url, filename: string, cb) {
-        if (Qt.platform.os == "ios" || Qt.platform.os == "android") {
+        if (isSandboxed) {
             const opf = Qt.createComponent("components/OutputPathField.qml").createObject(window, { visible: false });
             opf.selectFolder(folder, function(folder_url) {
                 cb(filesystem.get_file_url(folder_url, filename, true));

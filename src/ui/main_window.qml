@@ -17,7 +17,6 @@ Window {
     minimumHeight: 400 * dpiScale;
     visible: true;
     color: styleBackground;
-    property bool isMobile: Qt.platform.os == "android" || Qt.platform.os == "ios";
     property var safeAreaMargins: ({});
     onWidthChanged: updateMargins.start();
     onHeightChanged: updateMargins.start();

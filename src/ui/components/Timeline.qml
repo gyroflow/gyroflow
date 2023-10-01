@@ -158,6 +158,10 @@ Item {
         });
     }
 
+    function showContextMenu() {
+        menuLoader.popup(handle, 0, 0);
+    }
+
     Settings {
         property alias timelineChart: chart.viewMode;
     }
@@ -626,6 +630,7 @@ Item {
 
         // Handle
         Rectangle {
+            id: handle;
             x: Math.max(0, (root.mapToVisibleArea(root.position) * parent.width) - width / 2)
             y: (parent.height - height) / 2
             radius: width;

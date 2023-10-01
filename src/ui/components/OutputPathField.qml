@@ -27,7 +27,7 @@ TextField {
     onTextChanged: {
         // When typing manually
         if (!preventChange) {
-            if (Qt.platform.os == "ios" || Qt.platform.os == "android") {
+            if (isSandboxed) {
                 setFilename(text.replace(/^.+\//, ""));
             } else {
                 setUrl(filesystem.path_to_url(text));
@@ -80,7 +80,7 @@ TextField {
         font.underline: false;
         font.pixelSize: 15 * dpiScale;
         onClicked: {
-            if (Qt.platform.os == "ios" || Qt.platform.os == "android" || root.folderOnly) {
+            if (isSandboxed || root.folderOnly) {
                 if (root.folderOnly) {
                     outputFolderDialog.currentFolder = root.folderUrl;
                 }
