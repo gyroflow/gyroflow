@@ -44,6 +44,7 @@ pub use telemetry_parser;
 #[cfg(feature = "opencv")]
 use calibration::LensCalibrator;
 
+#[cfg(not(taret_os = "ios"))]
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
