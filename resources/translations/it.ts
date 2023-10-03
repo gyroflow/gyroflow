@@ -1314,12 +1314,12 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="147"/>
       <source>Mobile Light</source>
-      <translation type="unfinished">Mobile Light</translation>
+      <translation>Mobile Chiaro</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="148"/>
       <source>Mobile Dark</source>
-      <translation type="unfinished">Mobile Dark</translation>
+      <translation>Mobile Scuro</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="167"/>
@@ -1571,12 +1571,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="501"/>
       <source>Synchronizing: %1</source>
-      <translation type="unfinished">Synchronizing: %1</translation>
+      <translation>Sincronizzazione: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="502"/>
       <source>Rendering: %1</source>
-      <translation type="unfinished">Rendering: %1</translation>
+      <translation>Rendering: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="674"/>
@@ -1856,17 +1856,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="234"/>
       <source>Save to lens profile directory</source>
-      <translation type="unfinished">Save to lens profile directory</translation>
+      <translation>Salva nella directory del profilo dell'obiettivo</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="235"/>
       <source>Save as default preset</source>
-      <translation type="unfinished">Save as default preset</translation>
+      <translation>Salva come preimpostazione predefinita</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="236"/>
       <source>Save to file</source>
-      <translation type="unfinished">Save to file</translation>
+      <translation>Salva su file</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
@@ -2526,17 +2526,17 @@ Assicurati di avere un corretto valore impostato per il rolling shutter prima de
     <message>
       <location filename="../../src/ui/App.qml" line="426"/>
       <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
+      <translation>Input</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="426"/>
       <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
+      <translation>Parametri</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="426"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>Esporta</translation>
     </message>
   </context>
   <context>
@@ -3079,7 +3079,7 @@ Se hai Gyroflow in C:File programma, allora devi eseguire Gyroflow come amminist
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="873"/>
       <source>Show timeline menu</source>
-      <translation type="unfinished">Show timeline menu</translation>
+      <translation>Mostra il menu della sequenza temporale</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="912"/>
@@ -3122,7 +3122,7 @@ Se hai Gyroflow in C:File programma, allora devi eseguire Gyroflow come amminist
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="124"/>
       <source>In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</source>
-      <translation type="unfinished">In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</translation>
+      <translation>Per rilevare file di progetto, sequenze video o sequenze di immagini, fare clic qui e selezionare la directory con i file di input.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="138"/>

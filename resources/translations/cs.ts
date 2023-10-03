@@ -1316,12 +1316,12 @@ Chcete odeslat svůj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="147"/>
       <source>Mobile Light</source>
-      <translation type="unfinished">Mobile Light</translation>
+      <translation/>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="148"/>
       <source>Mobile Dark</source>
-      <translation type="unfinished">Mobile Dark</translation>
+      <translation>Mobil tmavý</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="167"/>
@@ -1859,17 +1859,17 @@ Chcete převést na jiný podporovaný formát nebo zachovat originální a vykr
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="234"/>
       <source>Save to lens profile directory</source>
-      <translation type="unfinished">Save to lens profile directory</translation>
+      <translation>Uložit do adresáře s profilem</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="235"/>
       <source>Save as default preset</source>
-      <translation type="unfinished">Save as default preset</translation>
+      <translation>Uložit jako výchozí předvolbu</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="236"/>
       <source>Save to file</source>
-      <translation type="unfinished">Save to file</translation>
+      <translation>Uložit do souboru</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
@@ -3081,7 +3081,7 @@ Pokud máte Gyroflow v C: Program Files, pak budete muset spustit Gyroflow jako 
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="873"/>
       <source>Show timeline menu</source>
-      <translation type="unfinished">Show timeline menu</translation>
+      <translation>Zobrazit menu časové osy</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="912"/>
@@ -3124,7 +3124,7 @@ Pokud máte Gyroflow v C: Program Files, pak budete muset spustit Gyroflow jako 
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="124"/>
       <source>In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</source>
-      <translation type="unfinished">In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</translation>
+      <translation>Pro detekci projektů, videosekvencí nebo sekvencí obrázků, klikněte zde a vyberte adresář se vstupními soubory.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="138"/>

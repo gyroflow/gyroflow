@@ -1317,12 +1317,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="147"/>
       <source>Mobile Light</source>
-      <translation type="unfinished">Mobile Light</translation>
+      <translation>モバイル ライト</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="148"/>
       <source>Mobile Dark</source>
-      <translation type="unfinished">Mobile Dark</translation>
+      <translation>モバイル ダーク</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="167"/>
@@ -1860,17 +1860,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="234"/>
       <source>Save to lens profile directory</source>
-      <translation type="unfinished">Save to lens profile directory</translation>
+      <translation>レンズプロファイルディレクトリに保存する</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="235"/>
       <source>Save as default preset</source>
-      <translation type="unfinished">Save as default preset</translation>
+      <translation>既定のプリセットとして保存</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="236"/>
       <source>Save to file</source>
-      <translation type="unfinished">Save to file</translation>
+      <translation>ファイルへ保存</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
@@ -3084,7 +3084,7 @@ GyroflowがC:Program Filesにある場合、SDKをGyroflowフォルダに展開�
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="873"/>
       <source>Show timeline menu</source>
-      <translation type="unfinished">Show timeline menu</translation>
+      <translation>タイムラインメニューの表示</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="912"/>
@@ -3127,7 +3127,7 @@ GyroflowがC:Program Filesにある場合、SDKをGyroflowフォルダに展開�
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="124"/>
       <source>In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</source>
-      <translation type="unfinished">In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</translation>
+      <translation>プロジェクトファイル、ビデオシーケンス、画像シーケンスを検出するには、ここをクリックして、入力ファイルのあるディレクトリを選択します。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="138"/>
