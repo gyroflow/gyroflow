@@ -157,6 +157,7 @@ build-and-package profile is_dist:
         # Generate entitlements
         PlistBuddy -x -c "Add :application-identifier string {{TeamID}}.{{BundleIdentifier}}" {{AppBundle}}/../../entitlements.xcent
         PlistBuddy -x -c "Add :com.apple.developer.team-identifier string {{TeamID}}" {{AppBundle}}/../../entitlements.xcent
+        PlistBuddy -x -c "Add :com.apple.developer.kernel.increased-memory-limit bool true" {{AppBundle}}/../../entitlements.xcent
         if [ "{{is_dist}}" == "distribution" ]; then
             PlistBuddy -x -c "Add :get-task-allow bool false" {{AppBundle}}/../../entitlements.xcent
         else

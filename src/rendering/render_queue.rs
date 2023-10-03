@@ -1263,6 +1263,8 @@ impl RenderQueue {
 
                     #[cfg(not(target_os = "ios"))]
                     let _prevent_system_sleep = keep_awake::inhibit_system("Gyroflow", "Autosyncing");
+                    #[cfg(target_os = "ios")]
+                    let _prevent_system_sleep = keep_awake::inhibit_display("Gyroflow", "Autosyncing");
 
                     let cancel_flag = Arc::new(AtomicBool::new(false));
                     sync_params.initial_offset     *= 1000.0; // s to ms
