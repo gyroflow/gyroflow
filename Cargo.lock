@@ -964,9 +964,9 @@ dependencies = [
 
 [[package]]
 name = "csv"
-version = "1.2.2"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "626ae34994d3d8d668f4269922248239db4ae42d538b14c398b74a52208e8086"
+checksum = "ac574ff4d437a7b5ad237ef331c17ccca63c46479e5b5453eb8e10bb99a759fe"
 dependencies = [
  "csv-core",
  "itoa",
@@ -976,9 +976,9 @@ dependencies = [
 
 [[package]]
 name = "csv-core"
-version = "0.1.10"
+version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b2466559f260f48ad25fe6317b3c8dac77b5bdb5763ac7d9d6103530663bc90"
+checksum = "5efa2b3d7902f4b634a20cae3c9c4e6209dc4779feb6863329607560143efa70"
 dependencies = [
  "memchr",
 ]
@@ -1604,15 +1604,16 @@ dependencies = [
 
 [[package]]
 name = "gpu-allocator"
-version = "0.22.0"
+version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce95f9e2e11c2c6fadfce42b5af60005db06576f231f5c92550fdded43c423e8"
+checksum = "40fe17c8a05d60c38c0a4e5a3c802f2f1ceb66b76c67d96ffb34bef0475a7fad"
 dependencies = [
  "backtrace",
  "log",
+ "presser",
  "thiserror",
  "winapi",
- "windows 0.44.0",
+ "windows 0.51.1",
 ]
 
 [[package]]
@@ -2377,7 +2378,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.13.0"
-source = "git+https://github.com/gfx-rs/naga?rev=df8107b7#df8107b78812cc2b1e3d5de35279cedc1f0da3fb"
+source = "git+https://github.com/gfx-rs/naga?rev=6668d0694cc51ee66c71c2ca3a1ab1081956299b#6668d0694cc51ee66c71c2ca3a1ab1081956299b"
 dependencies = [
  "bit-set",
  "bitflags 2.4.0",
@@ -3029,6 +3030,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 
 [[package]]
+name = "presser"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8cf8e6a8aa66ce33f63993ffc4ea4271eb5b0530a9002db8455ea6050c77bfa"
+
+[[package]]
 name = "pretty-hex"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3155,7 +3162,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=d33bfef#d33bfef999191269b07c27377f34017ee85c1dd9"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=7c52186#7c521863752eca7be2e33da736af46f9e2f1978e"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3372,7 +3379,7 @@ dependencies = [
 [[package]]
 name = "rs-sync"
 version = "0.1.0"
-source = "git+https://github.com/gyroflow/rs-sync.git?rev=b5bca7f#b5bca7f58f16e52b031d6fec7dfb964c4ae32d5b"
+source = "git+https://github.com/gyroflow/rs-sync.git?rev=c73bf47#c73bf478e2f6442e5935bd6314d0cfc56239f7b5"
 dependencies = [
  "argmin",
  "argmin-math",
@@ -3833,7 +3840,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.2.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=7eaeaca#7eaeaca3ab2c79f9ef2bad9123bf8fde7a6536b3"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=40ba95a#40ba95afe81cd3dc06e18689eb25e75e95e328bc"
 dependencies = [
  "argh",
  "byteorder",
@@ -4247,7 +4254,7 @@ checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
 [[package]]
 name = "wgpu"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=57f8757#57f8757fadf36b833714488fea8663ef8b0257eb"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=e63b0f6#e63b0f6f17f84ef92890d069361add5cfbdd86c3"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -4270,7 +4277,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=57f8757#57f8757fadf36b833714488fea8663ef8b0257eb"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=e63b0f6#e63b0f6f17f84ef92890d069361add5cfbdd86c3"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4292,7 +4299,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=57f8757#57f8757fadf36b833714488fea8663ef8b0257eb"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=e63b0f6#e63b0f6f17f84ef92890d069361add5cfbdd86c3"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4310,7 +4317,7 @@ dependencies = [
  "js-sys",
  "khronos-egl",
  "libc",
- "libloading 0.8.1",
+ "libloading 0.7.4",
  "log",
  "metal",
  "naga",
@@ -4332,7 +4339,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=57f8757#57f8757fadf36b833714488fea8663ef8b0257eb"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=e63b0f6#e63b0f6f17f84ef92890d069361add5cfbdd86c3"
 dependencies = [
  "bitflags 2.4.0",
  "js-sys",
@@ -4395,15 +4402,6 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
-
-[[package]]
-name = "windows"
-version = "0.44.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e745dab35a0c4c77aa3ce42d595e13d2003d6902d6b08c9ef5fc326d08da12b"
-dependencies = [
- "windows-targets 0.42.2",
-]
 
 [[package]]
 name = "windows"

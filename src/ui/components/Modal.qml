@@ -71,7 +71,7 @@ Rectangle {
         }
     }
 
-    MouseArea { visible: root.opened; anchors.fill: parent; preventStealing: true; hoverEnabled: true; }
+    MouseArea { visible: root.opened; anchors.fill: parent; preventStealing: true; hoverEnabled: true; onClicked: Qt.inputMethod.hide(); }
     Rectangle {
         id: pp;
         anchors.centerIn: parent;

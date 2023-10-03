@@ -272,7 +272,7 @@ The project also supports UI live reload, it's a super quick way of working with
 
 ### Profiling on Windows
 1. Install and run `Visual Studio Community Edition`
-2. Compile and run Gyroflow with the `profile` profile: `cargo run --profile profile`
+2. Compile and run Gyroflow with the `profile` profile: `just profile`
 3. In Visual Studio, go to `Debug -> Performance Profiler...`
     - Under `Target`, open `Change Target` and select `Running Process...`, select the running `gyroflow.exe` process
 

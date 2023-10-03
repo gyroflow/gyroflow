@@ -52,6 +52,28 @@ pub struct FileMetadata {
     pub per_frame_time_offsets: Vec<f64>,
     pub per_frame_data:      Vec<serde_json::Value>,
 }
+impl FileMetadata {
+    pub fn thin(&self) -> Self {
+        Self {
+            imu_orientation:         self.imu_orientation.clone(),
+            raw_imu:                 Default::default(),
+            quaternions:             Default::default(),
+            gravity_vectors:         Default::default(),
+            image_orientations:      Default::default(),
+            detected_source:         self.detected_source.clone(),
+            frame_readout_time:      self.frame_readout_time.clone(),
+            frame_rate:              self.frame_rate.clone(),
+            camera_identifier:       self.camera_identifier.clone(),
+            lens_profile:            self.lens_profile.clone(),
+            lens_positions:          Default::default(),
+            lens_params:             Default::default(),
+            has_accurate_timestamps: self.has_accurate_timestamps.clone(),
+            additional_data:         self.additional_data.clone(),
+            per_frame_time_offsets:  Default::default(),
+            per_frame_data:          Default::default(),
+        }
+    }
+}
 
 #[derive(Default, Clone)]
 pub struct FileLoadOptions {

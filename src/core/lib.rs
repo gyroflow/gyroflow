@@ -44,7 +44,6 @@ pub use telemetry_parser;
 #[cfg(feature = "opencv")]
 use calibration::LensCalibrator;
 
-#[cfg(not(taret_os = "ios"))]
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
@@ -88,6 +87,7 @@ pub struct StabilizationManager {
 
 impl Default for StabilizationManager {
     fn default() -> Self {
+        std::env::set_var("IS_GYROFLOW", "1");
         Self {
             smoothing: Arc::new(RwLock::new(Smoothing::default())),
 
@@ -983,18 +983,7 @@ impl StabilizationManager {
 
         if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
             if typ == GyroflowProjectType::Simple {
-                let metadata_copy = crate::gyro_source::FileMetadata {
-                    raw_imu:                Default::default(),
-                    quaternions:            Default::default(),
-                    image_orientations:     Default::default(),
-                    gravity_vectors:        Default::default(),
-                    lens_positions:         Default::default(),
-                    lens_params:            Default::default(),
-                    per_frame_time_offsets: Default::default(),
-                    per_frame_data:         Default::default(),
-                    ..gyro.file_metadata.clone()
-                };
-                if let Ok(val) = serde_json::to_value(metadata_copy) {
+                if let Ok(val) = serde_json::to_value(gyro.file_metadata.thin()) {
                     obj.insert("file_metadata".into(), val);
                 }
             } else {

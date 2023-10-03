@@ -10,14 +10,14 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "7eaeaca" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "40ba95a" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", rev = "bf7b41d", features = ["field_access"] }
 
 stabilize_spirv = { path = "./gpu/stabilize_spirv" }
 
 #rs-sync = { path = "../../../rs-sync" }
-rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "b5bca7f" }
+rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "c73bf47" }
 
 mimalloc = { version = "0.1.39", default-features = false }
 nalgebra = { version = "0.32", features = ["serde-serialize"] }
@@ -64,13 +64,13 @@ libc = "0.2"
 
 opencv = { version = "0.84", features = ["clang-runtime"], optional = true }
 
-wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "57f8757", features = ["spirv"] }
-wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "57f8757" }
-wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "57f8757" }
-wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "57f8757" }
+wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "e63b0f6", features = ["spirv"] }
+wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "e63b0f6" }
+wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "e63b0f6" }
+wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "e63b0f6" }
 bytemuck = "1.14.0"
 ash = "0.37.3"
-naga = { git = "https://github.com/gfx-rs/naga", rev = "df8107b7", version = "0.13.0", features = ["clone", "span", "validate", "spv-in"] }
+naga = { git = "https://github.com/gfx-rs/naga", rev = "6668d0694cc51ee66c71c2ca3a1ab1081956299b", version = "0.13.0", features = ["clone", "span", "validate", "spv-in"] }
 
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"

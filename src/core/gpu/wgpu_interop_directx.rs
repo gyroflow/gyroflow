@@ -353,6 +353,7 @@ pub fn format_dxgi_to_wgpu(format: DXGI_FORMAT) -> TextureFormat {
         DXGI_FORMAT_R8G8B8A8_UINT => TextureFormat::Rgba8Uint,
         DXGI_FORMAT_R8G8B8A8_SINT => TextureFormat::Rgba8Sint,
         DXGI_FORMAT_R10G10B10A2_UNORM => TextureFormat::Rgb10a2Unorm,
+        DXGI_FORMAT_R10G10B10A2_UINT => TextureFormat::Rgb10a2Uint,
         DXGI_FORMAT_R11G11B10_FLOAT => TextureFormat::Rg11b10Float,
         DXGI_FORMAT_R32G32_UINT => TextureFormat::Rg32Uint,
         DXGI_FORMAT_R32G32_SINT => TextureFormat::Rg32Sint,

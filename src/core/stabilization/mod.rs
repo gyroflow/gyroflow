@@ -153,60 +153,60 @@ impl Stabilization {
     }
 
     pub fn get_frame_transform_at<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers) -> FrameTransform {
-            let timestamp_ms = (timestamp_us as f64) / 1000.0;
-            let frame = crate::frame_at_timestamp(timestamp_ms, self.compute_params.scaled_fps) as usize; // Only for FOVs
+        let timestamp_ms = (timestamp_us as f64) / 1000.0;
+        let frame = crate::frame_at_timestamp(timestamp_ms, self.compute_params.scaled_fps) as usize; // Only for FOVs
 
-            self.kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, self.compute_params.digital_lens.is_some());
-            self.kernel_flags.set(KernelParamsFlags::HORIZONTAL_RS, self.compute_params.horizontal_rs);
+        self.kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, self.compute_params.digital_lens.is_some());
+        self.kernel_flags.set(KernelParamsFlags::HORIZONTAL_RS, self.compute_params.horizontal_rs);
 
-            let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
-            transform.kernel_params.pixel_value_limit = T::default_max_value().unwrap_or(f32::MAX);
-            // If the pixel format gets converted to normalized 0-1 float in shader
-            if self.wgpu.is_some() && T::default_max_value().is_some() && T::wgpu_format().map(|x| format!("{:?}", x.0).contains("Unorm")).unwrap_or_default() {
-                transform.kernel_params.pixel_value_limit = 1.0;
-            }
-            transform.kernel_params.max_pixel_value = T::default_max_value().unwrap_or(1.0);
-            transform.kernel_params.interpolation = self.interpolation as i32;
-            transform.kernel_params.width  = self.size.0 as i32;
-            transform.kernel_params.height = self.size.1 as i32;
-            transform.kernel_params.output_width  = self.output_size.0 as i32;
-            transform.kernel_params.output_height = self.output_size.1 as i32;
-            transform.kernel_params.background = [self.compute_params.background[0], self.compute_params.background[1], self.compute_params.background[2], self.compute_params.background[3]];
-            transform.kernel_params.bytes_per_pixel = (T::COUNT * T::SCALAR_BYTES) as i32;
-            transform.kernel_params.pix_element_count = T::COUNT as i32;
-            transform.kernel_params.canvas_scale = self.drawing.scale as f32;
-            transform.kernel_params.flags = self.kernel_flags.bits();
+        let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
+        transform.kernel_params.pixel_value_limit = T::default_max_value().unwrap_or(f32::MAX);
+        // If the pixel format gets converted to normalized 0-1 float in shader
+        if self.wgpu.is_some() && T::default_max_value().is_some() && T::wgpu_format().map(|x| format!("{:?}", x.0).contains("Unorm")).unwrap_or_default() {
+            transform.kernel_params.pixel_value_limit = 1.0;
+        }
+        transform.kernel_params.max_pixel_value = T::default_max_value().unwrap_or(1.0);
+        transform.kernel_params.interpolation = self.interpolation as i32;
+        transform.kernel_params.width  = self.size.0 as i32;
+        transform.kernel_params.height = self.size.1 as i32;
+        transform.kernel_params.output_width  = self.output_size.0 as i32;
+        transform.kernel_params.output_height = self.output_size.1 as i32;
+        transform.kernel_params.background = [self.compute_params.background[0], self.compute_params.background[1], self.compute_params.background[2], self.compute_params.background[3]];
+        transform.kernel_params.bytes_per_pixel = (T::COUNT * T::SCALAR_BYTES) as i32;
+        transform.kernel_params.pix_element_count = T::COUNT as i32;
+        transform.kernel_params.canvas_scale = self.drawing.scale as f32;
+        transform.kernel_params.flags = self.kernel_flags.bits();
 
-            transform.kernel_params.stride        = buffers.input.size.2 as i32;
-            transform.kernel_params.output_stride = buffers.output.size.2 as i32;
+        transform.kernel_params.stride        = buffers.input.size.2 as i32;
+        transform.kernel_params.output_stride = buffers.output.size.2 as i32;
 
-            let sa_fov =
-                if self.compute_params.show_safe_area || self.compute_params.fov_overview  {
-                    let fov = self.compute_params.keyframes.value_at_video_timestamp(&crate::keyframes::KeyframeType::Fov, timestamp_ms).unwrap_or(self.compute_params.fov_scale) as f32;
-                    if self.compute_params.fov_overview {
-                        (if self.compute_params.adaptive_zoom_window == 0.0 { 1.0 } else { 1.0 / fov }) + 1.0
-                    } else {
-                        fov / (if self.compute_params.adaptive_zoom_window == 0.0 { transform.minimal_fov as f32 } else { 1.0 })
-                    }
+        let sa_fov =
+            if self.compute_params.show_safe_area || self.compute_params.fov_overview  {
+                let fov = self.compute_params.keyframes.value_at_video_timestamp(&crate::keyframes::KeyframeType::Fov, timestamp_ms).unwrap_or(self.compute_params.fov_scale) as f32;
+                if self.compute_params.fov_overview {
+                    (if self.compute_params.adaptive_zoom_window == 0.0 { 1.0 } else { 1.0 / fov }) + 1.0
                 } else {
-                    1.0
-                };
-            let pos_x = (self.output_size.0 as f32 - (self.output_size.0 as f32 / sa_fov)) / 2.0;
-            let pos_y = (self.output_size.1 as f32 - (self.output_size.1 as f32 / sa_fov)) / 2.0;
-            transform.kernel_params.safe_area_rect[0] = pos_x;
-            transform.kernel_params.safe_area_rect[1] = pos_y;
-            transform.kernel_params.safe_area_rect[2] = self.output_size.0 as f32 - pos_x;
-            transform.kernel_params.safe_area_rect[3] = self.output_size.1 as f32 - pos_y;
+                    fov / (if self.compute_params.adaptive_zoom_window == 0.0 { transform.minimal_fov as f32 } else { 1.0 })
+                }
+            } else {
+                1.0
+            };
+        let pos_x = (self.output_size.0 as f32 - (self.output_size.0 as f32 / sa_fov)) / 2.0;
+        let pos_y = (self.output_size.1 as f32 - (self.output_size.1 as f32 / sa_fov)) / 2.0;
+        transform.kernel_params.safe_area_rect[0] = pos_x;
+        transform.kernel_params.safe_area_rect[1] = pos_y;
+        transform.kernel_params.safe_area_rect[2] = self.output_size.0 as f32 - pos_x;
+        transform.kernel_params.safe_area_rect[3] = self.output_size.1 as f32 - pos_y;
 
-            if let Some(r) = buffers.input.rotation {
-                transform.kernel_params.input_rotation = r;
-            }
-            if let Some(r) = buffers.output.rotation {
-                transform.kernel_params.output_rotation = r;
-            }
+        if let Some(r) = buffers.input.rotation {
+            transform.kernel_params.input_rotation = r;
+        }
+        if let Some(r) = buffers.output.rotation {
+            transform.kernel_params.output_rotation = r;
+        }
 
-            transform.kernel_params.source_rect = Self::get_rect(&buffers.input);
-            transform.kernel_params.output_rect = Self::get_rect(&buffers.output);
+        transform.kernel_params.source_rect = Self::get_rect(&buffers.input);
+        transform.kernel_params.output_rect = Self::get_rect(&buffers.output);
 
         transform
     }
@@ -339,10 +339,12 @@ impl Stabilization {
         let hash = self.get_current_checksum(buffers);
 
         if self.backend_initialized.is_none() || self.backend_initialized.unwrap() != hash {
+            #[allow(unused_mut)]
             let mut gpu_initialized = false;
             if let Some(itm) = self.stab_data.get(&timestamp_us) {
                 let params = itm.kernel_params;
                 let canvas_len = self.drawing.get_buffer_len();
+                #[allow(unused_mut)]
                 let mut next_backend = self.next_backend.take().unwrap_or_default();
 
                 #[cfg(feature = "use-opencl")]
@@ -441,8 +443,10 @@ impl Stabilization {
                 backend: ""
             };
             let drawing_buffer = self.drawing.get_buffer();
-            if let Ok(mut last_frame_data) = self.last_frame_data.try_borrow_mut() {
-                *last_frame_data = itm.clone();
+            if frame_transform.is_none() {
+                if let Ok(mut last_frame_data) = self.last_frame_data.try_borrow_mut() {
+                    *last_frame_data = itm.clone();
+                }
             }
 
             if self.size        != (itm.kernel_params.width        as usize, itm.kernel_params.height        as usize) { return Err(GyroflowCoreError::SizeMismatch(self.size, (itm.kernel_params.width        as usize, itm.kernel_params.height        as usize))); }

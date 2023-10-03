@@ -367,10 +367,10 @@ impl SmoothingAlgorithm for DefaultAlgo {
 
         // Reverse pass
         let mut q = *smoothed1.iter().next_back().unwrap().1;
-        let smoothed2: TimeQuat = smoothed1.iter().rev().map(|(ts, x)| {
-            let alpha_smoothness = alpha_smoothness_per_timestamp.get(ts).unwrap_or(&alpha_smoothness);
-            let alpha_0_1s = alpha_0_1s_per_timestamp.get(ts).unwrap_or(&alpha_0_1s);
-            let ratio = velocity[ts];
+        let smoothed2: TimeQuat = smoothed1.into_iter().rev().map(|(ts, x)| {
+            let alpha_smoothness = alpha_smoothness_per_timestamp.get(&ts).unwrap_or(&alpha_smoothness);
+            let alpha_0_1s = alpha_0_1s_per_timestamp.get(&ts).unwrap_or(&alpha_0_1s);
+            let ratio = velocity[&ts];
             if self.per_axis {
                 let pitch_factor = alpha_smoothness * (1.0 - ratio[0]) + alpha_0_1s * ratio[0];
                 let yaw_factor = alpha_smoothness * (1.0 - ratio[1]) + alpha_0_1s * ratio[1];
@@ -386,9 +386,9 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 q *= quat_rot;
             } else {
                 let val = alpha_smoothness * (1.0 - ratio[0]) + alpha_0_1s * ratio[0];
-                q = q.slerp(x, val.min(1.0));
+                q = q.slerp(&x, val.min(1.0));
             }
-            (*ts, q)
+            (ts, q)
         }).collect();
 
         if !self.second_pass {
@@ -464,11 +464,11 @@ impl SmoothingAlgorithm for DefaultAlgo {
         // Plain 3D smoothing with varying alpha
         // Forward pass
         let mut q = *smoothed2.iter().next().unwrap().1;
-        let smoothed1: TimeQuat = smoothed2.iter().map(|(ts, x)| {
-            let alpha_smoothness = alpha_smoothness_per_timestamp.get(ts).unwrap_or(&alpha_smoothness);
-            let alpha_0_1s = alpha_0_1s_per_timestamp.get(ts).unwrap_or(&alpha_0_1s);
-            let vel_ratio = velocity[ts];
-            let dist_ratio = distance[ts];
+        let smoothed1: TimeQuat = smoothed2.into_iter().map(|(ts, x)| {
+            let alpha_smoothness = alpha_smoothness_per_timestamp.get(&ts).unwrap_or(&alpha_smoothness);
+            let alpha_0_1s = alpha_0_1s_per_timestamp.get(&ts).unwrap_or(&alpha_0_1s);
+            let vel_ratio = velocity[&ts];
+            let dist_ratio = distance[&ts];
             if self.per_axis {
                 let pitch_factor = alpha_smoothness * (1.0 - vel_ratio[0] * dist_ratio[0]) + alpha_0_1s * vel_ratio[0] * dist_ratio[0];
                 let yaw_factor = alpha_smoothness * (1.0 - vel_ratio[1] * dist_ratio[1]) + alpha_0_1s * vel_ratio[1] * dist_ratio[1];
@@ -484,18 +484,18 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 q *= quat_rot;
             } else {
                 let val = alpha_smoothness * (1.0 - vel_ratio[0] * dist_ratio[0]) + alpha_0_1s * vel_ratio[0] * dist_ratio[0];
-                q = q.slerp(x, val.min(1.0));
+                q = q.slerp(&x, val.min(1.0));
             }
-            (*ts, q)
+            (ts, q)
         }).collect();
 
         // Reverse pass
         let mut q = *smoothed1.iter().next_back().unwrap().1;
-        smoothed1.iter().rev().map(|(ts, x)| {
-            let alpha_smoothness = alpha_smoothness_per_timestamp.get(ts).unwrap_or(&alpha_smoothness);
-            let alpha_0_1s = alpha_0_1s_per_timestamp.get(ts).unwrap_or(&alpha_0_1s);
-            let vel_ratio = velocity[ts];
-            let dist_ratio = distance[ts];
+        smoothed1.into_iter().rev().map(|(ts, x)| {
+            let alpha_smoothness = alpha_smoothness_per_timestamp.get(&ts).unwrap_or(&alpha_smoothness);
+            let alpha_0_1s = alpha_0_1s_per_timestamp.get(&ts).unwrap_or(&alpha_0_1s);
+            let vel_ratio = velocity[&ts];
+            let dist_ratio = distance[&ts];
             if self.per_axis {
                 let pitch_factor = alpha_smoothness * (1.0 - vel_ratio[0] * dist_ratio[0]) + alpha_0_1s * vel_ratio[0] * dist_ratio[0];
                 let yaw_factor = alpha_smoothness * (1.0 - vel_ratio[1] * dist_ratio[1]) + alpha_0_1s * vel_ratio[1] * dist_ratio[1];
@@ -511,9 +511,9 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 q *= quat_rot;
             } else {
                 let val = alpha_smoothness * (1.0 - vel_ratio[0] * dist_ratio[0]) + alpha_0_1s * vel_ratio[0] * dist_ratio[0];
-                q = q.slerp(x, val.min(1.0));
+                q = q.slerp(&x, val.min(1.0));
             }
-            (*ts, q)
+            (ts, q)
         }).collect()
     }
 }

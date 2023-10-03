@@ -158,8 +158,8 @@ Item {
         });
     }
 
-    function showContextMenu() {
-        menuLoader.popup(handle, 0, 0);
+    function showContextMenu(el: Item) {
+        menuLoader.popup(el, 0, el.height);
     }
 
     Settings {
