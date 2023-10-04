@@ -10,6 +10,7 @@ use std::fs::*;
 use std::io::{ Read, Write };
 use std::path::*;
 use std::collections::HashSet;
+use itertools::Itertools;
 use parking_lot::RwLock;
 
 pub type Result<T> = std::result::Result<T, FilesystemError>;
@@ -516,8 +517,16 @@ pub fn display_url(url: &str) -> String {
     }
 
     let path = url_to_path(url);
-    if cfg!(any(target_os = "macos", target_os = "ios")) && path.contains("/File Provider Storage/") {
-        return path.split("/File Provider Storage/").last().unwrap().to_owned();
+    if cfg!(any(target_os = "macos", target_os = "ios")) {
+        if path.contains("/File Provider Storage/") {
+            return path.split("/File Provider Storage/").last().unwrap().to_owned();
+        } else if path.contains("/com~apple~CloudDocs/") {
+            return format!("iCloud/{}", path.split("/com~apple~CloudDocs/").last().unwrap().to_owned());
+        } else if path.contains("/Data/Application/") {
+            return path.split("/Data/Application/").last().unwrap().split('/').skip(1).join("/").to_owned();
+        } else if path.contains("/com.apple.filesystems.userfsd/") {
+            return path.split("/com.apple.filesystems.userfsd/").last().unwrap().split('/').skip(1).join("/").to_owned();
+        }
     }
     path
 }

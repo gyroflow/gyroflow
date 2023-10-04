@@ -466,6 +466,7 @@ Item {
                 panInit.visibleAreaWidth = root.visibleAreaRight - root.visibleAreaLeft;
             }
             onPressAndHold: (mouse) => {
+                if (Math.abs(panInit.x - mouse.x) > 15 * dpiScale) return;
                 if (isMobile && mouse.button !== Qt.RightButton) {
                     if (keyframes.item.handleMouseMove(mouse.x, mouse.y, true, Qt.RightButton))
                         return;

@@ -765,24 +765,6 @@ Item {
                 }
             }
         }
-        LoaderOverlay {
-            id: videoLoader;
-            background: styleBackground;
-            verticalOffset: window.isMobileLayout? -bottomPanel.height / 2 : 0;
-            onActiveChanged: { vid.forceRedraw(); vid.fovChanged(); }
-            canHide: render_queue.main_job_id > 0;
-            onCancel: {
-                if (render_queue.main_job_id > 0) {
-                    render_queue.cancel_job(render_queue.main_job_id);
-                } else {
-                    controller.cancel_current_operation();
-                }
-            }
-            onHide: {
-                render_queue.main_job_id = 0;
-                videoLoader.active = false;
-            }
-        }
     }
 
     Column {
@@ -1016,6 +998,28 @@ Item {
                     controller.set_trim_end(trimEnd);
                     vid.setPlaybackRange(trimStart * vid.duration, trimEnd * vid.duration);
                 }
+            }
+        }
+    }
+    Item {
+        width: vidParentParent.width;
+        height: vidParentParent.height;
+        LoaderOverlay {
+            id: videoLoader;
+            background: styleBackground;
+            verticalOffset: window.isMobileLayout? -bottomPanel.height / 2 : 0;
+            onActiveChanged: { vid.forceRedraw(); vid.fovChanged(); }
+            canHide: render_queue.main_job_id > 0;
+            onCancel: {
+                if (render_queue.main_job_id > 0) {
+                    render_queue.cancel_job(render_queue.main_job_id);
+                } else {
+                    controller.cancel_current_operation();
+                }
+            }
+            onHide: {
+                render_queue.main_job_id = 0;
+                videoLoader.active = false;
             }
         }
     }
