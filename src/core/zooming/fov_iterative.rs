@@ -6,7 +6,7 @@ use crate::stabilization::undistort_points_with_rolling_shutter;
 use crate::keyframes::*;
 use std::collections::BTreeMap;
 use parking_lot::RwLock;
-use rayon::iter::{ ParallelIterator, IntoParallelIterator, IndexedParallelIterator };
+use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 
 /*
 Iterative FOV calculation:
@@ -17,41 +17,45 @@ Iterative FOV calculation:
     - repeat shrinking the rectangle
 */
 
-pub struct FovIterative {
+pub struct FovIterative<'a> {
     input_dim: (f32, f32),
     output_dim: (f32, f32),
     output_inv_aspect: f32,
-    compute_params: ComputeParams,
+    compute_params: &'a ComputeParams,
     debug_points: RwLock<BTreeMap<i64, Vec<(f64, f64)>>>,
 }
-impl FieldOfViewAlgorithm for FovIterative {
+impl FieldOfViewAlgorithm for FovIterative<'_> {
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> {
         self.debug_points.read().clone()
     }
 
-    fn compute(&self, timestamps: &[f64], range: (f64, f64)) -> (Vec<f64>, Vec<Point2D>) {
+    fn compute(&self, timestamps: &[f64], range: (f64, f64)) -> Vec<f64> {
         if timestamps.is_empty() {
-            return (Vec::new(), Vec::new());
+            return Vec::new();
         }
         let l = (timestamps.len() - 1) as f64;
+        let keyframes = &self.compute_params.keyframes;
 
         let rect = points_around_rect(self.input_dim.0, self.input_dim.1, 31, 31);
 
         let cp = Point2D(self.input_dim.0 / 2.0, self.input_dim.1 / 2.0);
-        let center_positions: Vec<Point2D> = timestamps.iter().map(|_| cp).collect();
-        let keyframe_values: Vec<(f64, f64, f64)> = timestamps.iter().map(|ts| {
-            let adaptive_zoom_center_x = self.compute_params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterX, *ts).unwrap_or(self.compute_params.adaptive_zoom_center_offset.0);
-            let adaptive_zoom_center_y = self.compute_params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterY, *ts).unwrap_or(self.compute_params.adaptive_zoom_center_offset.1);
-            let lens_correction_amount = self.compute_params.keyframes.value_at_video_timestamp(&KeyframeType::LensCorrectionStrength, *ts).unwrap_or(self.compute_params.lens_correction_amount);
+        let mut fov_values: Vec<f64> = if keyframes.is_keyframed(&KeyframeType::ZoomingCenterX) || keyframes.is_keyframed(&KeyframeType::ZoomingCenterY) || keyframes.is_keyframed(&KeyframeType::LensCorrectionStrength) {
+            timestamps.into_par_iter()
+                .map(|&ts| {
+                    let adaptive_zoom_center_x = self.compute_params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterX, ts).unwrap_or(self.compute_params.adaptive_zoom_center_offset.0);
+                    let adaptive_zoom_center_y = self.compute_params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterY, ts).unwrap_or(self.compute_params.adaptive_zoom_center_offset.1);
+                    let lens_correction_amount = self.compute_params.keyframes.value_at_video_timestamp(&KeyframeType::LensCorrectionStrength, ts).unwrap_or(self.compute_params.lens_correction_amount);
 
-            (adaptive_zoom_center_x, adaptive_zoom_center_y, lens_correction_amount)
-        }).collect();
-
-        let mut fov_values: Vec<f64> = timestamps.into_par_iter()
-            .zip(&center_positions)
-            .zip(&keyframe_values)
-            .map(|((&ts, center), kv)| self.find_fov(&rect, ts, center, kv))
-            .collect();
+                    let kv = (adaptive_zoom_center_x, adaptive_zoom_center_y, lens_correction_amount);
+                    self.find_fov(&rect, ts, &cp, &kv)
+                })
+                .collect()
+        } else {
+            let kv = (self.compute_params.adaptive_zoom_center_offset.0, self.compute_params.adaptive_zoom_center_offset.1, self.compute_params.lens_correction_amount);
+            timestamps.into_par_iter()
+                .map(|&ts| self.find_fov(&rect, ts, &cp, &kv))
+                .collect()
+        };
 
         if range.0 > 0.0 || range.1 < 1.0 {
             // Only within render range.
@@ -67,12 +71,12 @@ impl FieldOfViewAlgorithm for FovIterative {
             }
         }
 
-        (fov_values, center_positions)
+        fov_values
     }
 }
 
-impl FovIterative {
-    pub fn new(compute_params: ComputeParams) -> Self {
+impl<'a>  FovIterative<'a> {
+    pub fn new(compute_params: &'a ComputeParams) -> Self {
         let ratio = compute_params.video_width as f32 / compute_params.video_output_width.max(1) as f32;
         let input_dim = (compute_params.video_width as f32, compute_params.video_height as f32);
         let output_dim = (compute_params.video_output_width as f32 * ratio, compute_params.video_output_height as f32 * ratio);

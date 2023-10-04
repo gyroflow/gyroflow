@@ -65,7 +65,7 @@ QQC.Popup {
                 implicitHeight: popup.itemHeight;
                 padding: 0;
                 MouseArea { anchors.fill: parent; acceptedButtons: Qt.NoButton; cursorShape: Qt.PointingHandCursor; }
-                ToolTip {visible: text.length > 0 && parent.hovered; text: popup.editTooltip; }
+                ToolTip {visible: !isMobile && text.length > 0 && parent.hovered; text: popup.editTooltip; }
 
                 QQCM.Material.foreground: styleAccentColor;
                 icon.name: "pencil";

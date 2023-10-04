@@ -2,14 +2,7 @@
 // Copyright © 2021 Marc Roeschlin, Adrian, Maik
 
 use super::*;
-use std::collections::BTreeMap;
 use crate::keyframes::*;
-
-pub struct ZoomDynamic {
-    window: f64,
-    fov_estimator: Box<dyn FieldOfViewAlgorithm>,
-    compute_params: ComputeParams,
-}
 
 struct DataPerTimestamp {
     fps: f64,
@@ -19,103 +12,77 @@ struct DataPerTimestamp {
     gaussian_window: Vec<f64>
 }
 
-impl ZoomingAlgorithm for ZoomDynamic {
-    fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> { self.fov_estimator.get_debug_points() }
+pub fn compute(compute_params: &ComputeParams, mut fov_values: Vec<f64>, timestamps: &[f64], keyframes: &KeyframeManager, method: ZoomMethod) -> (Vec<f64>, Vec<f64>) {
+    let window = compute_params.adaptive_zoom_window;
 
-    fn compute(&self, timestamps: &[f64], keyframes: &KeyframeManager, method: ZoomMethod) -> Vec<((f64, f64), Point2D)> {
-        if timestamps.is_empty() {
-            return Vec::new();
-        }
+    let fov_minimal = fov_values.clone();
 
-        let (mut fov_values, center_position) = self.fov_estimator.compute(timestamps, (self.compute_params.trim_start, self.compute_params.trim_end));
-
-        let fov_minimal = fov_values.clone();
-
-        if keyframes.is_keyframed(&KeyframeType::ZoomingSpeed) || (self.compute_params.video_speed_affects_zooming && (self.compute_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed))) {
-            // Keyframed window
-            let mut max_window = 0;
-            let data_per_timestamp = timestamps.iter().map(|ts| {
-                let mut window = keyframes.value_at_video_timestamp(&KeyframeType::ZoomingSpeed, *ts).unwrap_or(self.window);
-                if self.compute_params.video_speed_affects_zooming {
-                    let vid_speed = keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, *ts).unwrap_or(self.compute_params.video_speed);
-                    window *= vid_speed;
-                }
-                let frames = self.get_frames_per_window(window);
-                if frames > max_window { max_window = frames; }
-                DataPerTimestamp {
-                    window,
-                    fps: self.compute_params.scaled_fps,
-                    frames,
-                    half_frames: (frames / 2) as isize,
-                    gaussian_window: gaussian_window_normalized(frames, frames as f64 / 6.0)
-                }
-            }).collect::<Vec<_>>();
-
-            match method {
-                ZoomMethod::GaussianFilter => {
-                    let max_window_half = max_window / 2;
-                    let fov_values_pad = pad_edge(&fov_values, (max_window_half, max_window_half));
-                    let fov_min = min_rolling_dynamic(&fov_values_pad, max_window_half as isize, &data_per_timestamp);
-                    let fov_min_pad = pad_edge(&fov_min, (max_window_half, max_window_half));
-                    fov_values = convolve_dynamic(&fov_min_pad, max_window_half as isize, &data_per_timestamp);
-                },
-                ZoomMethod::EnvelopeFollower => {
-                    let second_pass_alpha = 1.0 - (-(1.0 / self.compute_params.scaled_fps) / 0.2).exp();
-                    fov_values = envelope_follower(&fov_values, &data_per_timestamp, None);
-                    fov_values = envelope_follower(&fov_values, &data_per_timestamp, Some(second_pass_alpha));
-                }
+    if keyframes.is_keyframed(&KeyframeType::ZoomingSpeed) || (compute_params.video_speed_affects_zooming && (compute_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed))) {
+        // Keyframed window
+        let mut max_window = 0;
+        let data_per_timestamp = timestamps.iter().map(|ts| {
+            let mut window = keyframes.value_at_video_timestamp(&KeyframeType::ZoomingSpeed, *ts).unwrap_or(window);
+            if compute_params.video_speed_affects_zooming {
+                let vid_speed = keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, *ts).unwrap_or(compute_params.video_speed);
+                window *= vid_speed;
             }
-        } else {
-            match method {
-                ZoomMethod::GaussianFilter => {
-                    // Static window
-                    let frames = self.get_frames_per_window(self.window);
+            let frames = get_frames_per_window(compute_params);
+            if frames > max_window { max_window = frames; }
+            DataPerTimestamp {
+                window,
+                fps: compute_params.scaled_fps,
+                frames,
+                half_frames: (frames / 2) as isize,
+                gaussian_window: gaussian_window_normalized(frames, frames as f64 / 6.0)
+            }
+        }).collect::<Vec<_>>();
 
-                    let fov_values_pad = pad_edge(&fov_values, (frames / 2, frames / 2));
-                    let fov_min = min_rolling(&fov_values_pad, frames);
-                    let fov_min_pad = pad_edge(&fov_min, (frames / 2, frames / 2));
-
-                    let gaussian = gaussian_window_normalized(frames, frames as f64 / 6.0);
-                    fov_values = convolve(&fov_min_pad, &gaussian);
-                },
-                ZoomMethod::EnvelopeFollower => {
-                    let first_pass_alpha  = 1.0 - (-(1.0 / self.compute_params.scaled_fps) / self.window).exp();
-                    let second_pass_alpha = 1.0 - (-(1.0 / self.compute_params.scaled_fps) / 0.2).exp();
-
-                    fov_values = envelope_follower(&fov_values, &[], Some(first_pass_alpha));
-                    fov_values = envelope_follower(&fov_values, &[], Some(second_pass_alpha));
-                }
+        match method {
+            ZoomMethod::GaussianFilter => {
+                let max_window_half = max_window / 2;
+                let fov_values_pad = pad_edge(&fov_values, (max_window_half, max_window_half));
+                let fov_min = min_rolling_dynamic(&fov_values_pad, max_window_half as isize, &data_per_timestamp);
+                let fov_min_pad = pad_edge(&fov_min, (max_window_half, max_window_half));
+                fov_values = convolve_dynamic(&fov_min_pad, max_window_half as isize, &data_per_timestamp);
+            },
+            ZoomMethod::EnvelopeFollower => {
+                let second_pass_alpha = 1.0 - (-(1.0 / compute_params.scaled_fps) / 0.2).exp();
+                fov_values = envelope_follower(&fov_values, &data_per_timestamp, None);
+                fov_values = envelope_follower(&fov_values, &data_per_timestamp, Some(second_pass_alpha));
             }
         }
+    } else {
+        match method {
+            ZoomMethod::GaussianFilter => {
+                // Static window
+                let frames = get_frames_per_window(compute_params);
 
-        fov_values.into_iter().zip(fov_minimal.into_iter()).zip(center_position.into_iter()).collect()
+                let fov_values_pad = pad_edge(&fov_values, (frames / 2, frames / 2));
+                let fov_min = min_rolling(&fov_values_pad, frames);
+                let fov_min_pad = pad_edge(&fov_min, (frames / 2, frames / 2));
+
+                let gaussian = gaussian_window_normalized(frames, frames as f64 / 6.0);
+                fov_values = convolve(&fov_min_pad, &gaussian);
+            },
+            ZoomMethod::EnvelopeFollower => {
+                let first_pass_alpha  = 1.0 - (-(1.0 / compute_params.scaled_fps) / window).exp();
+                let second_pass_alpha = 1.0 - (-(1.0 / compute_params.scaled_fps) / 0.2).exp();
+
+                fov_values = envelope_follower(&fov_values, &[], Some(first_pass_alpha));
+                fov_values = envelope_follower(&fov_values, &[], Some(second_pass_alpha));
+            }
+        }
     }
 
-    fn compute_params(&self) -> &ComputeParams {
-        &self.compute_params
-    }
-
-    fn hash(&self, hasher: &mut dyn Hasher) {
-        hasher.write_u64(self.window.to_bits());
-    }
+    (fov_values, fov_minimal)
 }
 
-impl ZoomDynamic {
-    pub fn new(window: f64, fov_estimator: Box<dyn FieldOfViewAlgorithm>, compute_params: ComputeParams) -> Self {
-        Self {
-            window,
-            fov_estimator,
-            compute_params,
-        }
+fn get_frames_per_window(compute_params: &ComputeParams) -> usize {
+    let mut frames = (compute_params.adaptive_zoom_window * compute_params.scaled_fps).floor() as usize;
+    if frames % 2 == 0 {
+        frames += 1;
     }
-
-    fn get_frames_per_window(&self, window: f64) -> usize {
-        let mut frames = (window * self.compute_params.scaled_fps).floor() as usize;
-        if frames % 2 == 0 {
-            frames += 1;
-        }
-        frames
-    }
+    frames
 }
 
 fn min_rolling(a: &[f64], window: usize) -> Vec<f64> {

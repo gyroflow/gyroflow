@@ -50,7 +50,7 @@ QQC.Button {
     font.capitalization: Font.Normal;
 
     property alias tooltip: tt.text;
-    ToolTip { id: tt; visible: text.length > 0 && root.hovered; }
+    ToolTip { id: tt; visible: !isMobile && text.length > 0 && root.hovered; }
 
     property string iconName;
     icon.name: iconName || "";

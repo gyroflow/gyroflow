@@ -50,7 +50,7 @@ QQC.Slider {
     ToolTip {
         delay: 0;
         parent: handle;
-        visible: slider.pressed;
+        visible: !isMobile && slider.pressed;
         text: slider.valueAt(slider.position).toFixed(slider.precision) + (slider.unit? " " + slider.unit : "");
         bottomMargin: 5 * dpiScale;
     }

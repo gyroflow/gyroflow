@@ -35,7 +35,7 @@ QQC.Button {
     MouseArea { anchors.fill: parent; acceptedButtons: Qt.NoButton; cursorShape: Qt.PointingHandCursor; }
 
     property alias tooltip: tt.text;
-    ToolTip { id: tt; visible: text.length > 0 && root.hovered; }
+    ToolTip { id: tt; visible: !isMobile && text.length > 0 && root.hovered; }
 
     property string iconName;
     icon.name: iconName || "";

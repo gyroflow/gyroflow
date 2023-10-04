@@ -54,5 +54,5 @@ Flickable {
             }
         }
     }
-    ToolTip { id: tt; visible: text.length > 0 && ta.hovered; }
+    ToolTip { id: tt; visible: !isMobile && text.length > 0 && ta.hovered; }
 }

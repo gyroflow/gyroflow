@@ -23,6 +23,7 @@ pub mod util;
 pub mod stabilization_params;
 
 use std::sync::{ Arc, atomic::{ AtomicU64, AtomicBool, Ordering::SeqCst } };
+use std::collections::BTreeMap;
 use keyframes::*;
 use parking_lot::{ RwLock, RwLockUpgradableReadGuard };
 use nalgebra::Vector4;
@@ -31,8 +32,7 @@ use stabilization_params::StabilizationParams;
 use lens_profile::LensProfile;
 use lens_profile_database::LensProfileDatabase;
 use smoothing::Smoothing;
-use stabilization::{ Stabilization, KernelParamsFlags };
-use zooming::ZoomingAlgorithm;
+use stabilization::{ Stabilization, KernelParamsFlags, ComputeParams };
 use camera_identifier::CameraIdentifier;
 pub use stabilization::PixelType;
 pub use wgpu::TextureFormat as WgpuTextureFormat;
@@ -360,27 +360,24 @@ impl StabilizationManager {
         false
     }
 
-    pub fn recompute_adaptive_zoom_static(zoom: &Box<dyn ZoomingAlgorithm>, params: &RwLock<StabilizationParams>, keyframes: &KeyframeManager) -> (Vec<f64>, Vec<f64>) {
+    pub fn recompute_adaptive_zoom_static(compute_params: &ComputeParams, params: &RwLock<StabilizationParams>, keyframes: &KeyframeManager) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>) {
         let (frames, fps, method) = {
             let params = params.read();
             (params.frame_count, params.get_scaled_fps(), params.adaptive_zoom_method)
         };
         let timestamps = (0..frames).map(|i| i as f64 * 1000.0 / fps).collect::<Vec<f64>>();
 
-        let fovs = zoom.compute(&timestamps, &keyframes, method.into());
-
-        fovs.iter().map(|v| v.0).unzip()
+        zooming::calculate_fovs(compute_params, &timestamps, &keyframes, method.into())
     }
     pub fn recompute_adaptive_zoom(&self) {
         let params = stabilization::ComputeParams::from_manager(self, false);
         let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
-        let mut zoom = zooming::from_compute_params(params);
-        let (fovs, minimal_fovs) = Self::recompute_adaptive_zoom_static(&mut zoom, &self.params, &self.keyframes.read());
+        let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &self.params, &self.keyframes.read());
 
         let mut stab_params = self.params.write();
         stab_params.set_fovs(fovs, lens_fov_adjustment);
         stab_params.minimal_fovs = minimal_fovs;
-        stab_params.zooming_debug_points = zoom.get_debug_points();
+        stab_params.zooming_debug_points = debug_points;
     }
 
     pub fn recompute_smoothness(&self) {
@@ -458,9 +455,8 @@ impl StabilizationManager {
 
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
-            let mut zoom = zooming::from_compute_params(params.clone());
-            if smoothing_changed || zooming::get_checksum(&zoom) != zooming_checksum.load(SeqCst) {
-                let (fovs, minimal_fovs) = Self::recompute_adaptive_zoom_static(&mut zoom, &stabilization_params, &keyframes);
+            if smoothing_changed || zooming::get_checksum(&params) != zooming_checksum.load(SeqCst) {
+                let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params, &keyframes);
                 params.fovs = fovs;
                 params.minimal_fovs = minimal_fovs;
 
@@ -469,15 +465,16 @@ impl StabilizationManager {
                 let mut stab_params = stabilization_params.write();
                 stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                 stab_params.minimal_fovs = params.minimal_fovs.clone();
-                stab_params.zooming_debug_points = zoom.get_debug_points();
+                stab_params.zooming_debug_points = debug_points;
             }
 
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
+            smoothing_checksum.store(smoothing.read().get_state_checksum(gyro_checksum), SeqCst);
+            zooming_checksum.store(zooming::get_checksum(&params), SeqCst);
+
             stabilization.write().set_compute_params(params);
 
-            smoothing_checksum.store(smoothing.read().get_state_checksum(gyro_checksum), SeqCst);
-            zooming_checksum.store(zooming::get_checksum(&zoom), SeqCst);
             cb((compute_id, false));
         });
         compute_id

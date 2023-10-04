@@ -32,5 +32,4 @@ QQC.ToolTip {
     rightPadding: 8 * dpiScale;
     bottomPadding: topPadding;
     leftPadding: rightPadding;
-    enabled: !isMobile;
 }

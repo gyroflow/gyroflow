@@ -90,5 +90,5 @@ QQC.CheckBox {
     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; acceptedButtons: Qt.NoButton; }
 
     property alias tooltip: tt.text;
-    ToolTip { id: tt; visible: text.length > 0 && cb.hovered; }
+    ToolTip { id: tt; visible: !isMobile && text.length > 0 && cb.hovered; }
 }

@@ -293,7 +293,7 @@ Item {
                                     kftt.x       = pt.x + 10 * dpiScale;
                                     kftt.offsetY = pt.y + 10 * dpiScale + kftt.height;
                                     kftt.text = qsTr(name) + " - " + value;
-                                    kftt.visible = true;
+                                    kftt.visible = !isMobile;
                                 }
                             } else {
                                 ma.cursorShape = Qt.ArrowCursor;
@@ -842,7 +842,7 @@ Item {
                     .arg("<b>" + qsTr("Scroll") + "</b>")
                     .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Option+Scroll") : qsTr("Alt+Scroll")) + "</b>")
                     .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Command+Scroll") : qsTr("Ctrl+Scroll")) + "</b>");
-            visible: ma.containsMouse;
+            visible: !isMobile && ma.containsMouse;
             delay: 2000;
         }
     }
