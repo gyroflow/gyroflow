@@ -118,6 +118,13 @@ MenuItem {
         return format + (format? " " : "") + rate;
     }
 
+    Button {
+        text: qsTr("Open file");
+        iconName: "video"
+        anchors.horizontalCenter: parent.horizontalCenter;
+        onClicked: root.selectFileRequest();
+    }
+
     InfoMessageSmall {
         show: !root.hasAccessToInputDirectory;
         type: InfoMessage.Info;
@@ -132,13 +139,6 @@ MenuItem {
                 });
             }
         }
-    }
-
-    Button {
-        text: qsTr("Open file");
-        iconName: "video"
-        anchors.horizontalCenter: parent.horizontalCenter;
-        onClicked: root.selectFileRequest();
     }
 
     TableList {
