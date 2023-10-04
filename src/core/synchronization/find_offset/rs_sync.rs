@@ -17,7 +17,7 @@ use std::sync::{
 pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64, i64)], sync_params: &SyncParams, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     // Try essential matrix first, because it's much faster
     let mut sync_params = sync_params.clone();
-    if sync_params.calc_initial_fast && !ranges.is_empty() && !params.gyro.raw_imu.is_empty() {
+    if sync_params.calc_initial_fast && !ranges.is_empty() && !params.gyro.read().raw_imu.is_empty() {
         fn median(mut v: Vec<f64>) -> f64 {
             v.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
             let len = v.len();
@@ -44,7 +44,7 @@ pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64
 
 pub struct FindOffsetsRssync<'a> {
     sync: SyncProblem<'a>,
-    gyro_source: &'a GyroSource,
+    gyro_source: Arc<RwLock<GyroSource>>,
     frame_readout_time: f64,
     sync_points: Vec::<(i64, i64)>,
     sync_params: &'a SyncParams,
@@ -76,7 +76,7 @@ impl FindOffsetsRssync<'_> {
 
         let mut ret = FindOffsetsRssync {
             sync: SyncProblem::new(),
-            gyro_source: &params.gyro,
+            gyro_source: params.gyro.clone(),
             frame_readout_time: frame_readout_time,
             sync_points: Vec::new(),
             sync_params,
@@ -148,7 +148,10 @@ impl FindOffsetsRssync<'_> {
         self.is_guess_orient.store(false, SeqCst);
 
         let mut offsets = Vec::new();
-        set_quats(&mut self.sync, &self.gyro_source.quaternions);
+        {
+            let gyro = self.gyro_source.read();
+            set_quats(&mut self.sync, &gyro.quaternions);
+        }
 
         for (from_ts, to_ts) in &self.sync_points {
 
@@ -181,7 +184,7 @@ impl FindOffsetsRssync<'_> {
     pub fn guess_orient(&mut self) -> Option<(String, f64)> {
         self.is_guess_orient.store(true, SeqCst);
 
-        let mut clone_source = self.gyro_source.clone();
+        let mut clone_source = self.gyro_source.read().clone();
 
         let possible_orientations = [
             "YxZ", "Xyz", "XZy", "Zxy", "zyX", "yxZ", "ZXY", "zYx", "ZYX", "yXz", "YZX", "XyZ",

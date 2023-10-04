@@ -76,11 +76,8 @@ impl AutosyncProcess {
         estimator.offset_method.store(sync_params.offset_method as u32, SeqCst);
         estimator.pose_method.store(sync_params.pose_method as u32, SeqCst);
 
-        let mut comp_params = ComputeParams::from_manager(stab, true);
+        let mut comp_params = ComputeParams::from_manager(stab);
         comp_params.keyframes.clear();
-        if mode == "synchronize" {
-            comp_params.gyro.clear_offsets();
-        }
         // Make sure we apply full correction for autosync
         comp_params.lens_correction_amount = 1.0;
 
@@ -145,7 +142,7 @@ impl AutosyncProcess {
         {
             let compute_params = compute_params.read();
             let frame = crate::frame_at_timestamp(timestamp_us as f64 / 1000.0, compute_params.scaled_fps) as usize;
-            timestamp_us += (compute_params.gyro.file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0) * 1000.0).round() as i64;
+            timestamp_us += (compute_params.gyro.read().file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0) * 1000.0).round() as i64;
         }
 
         if let Some(_current_range) = self.scaled_ranges_us.iter().find(|(from, to)| (*from..*to).contains(&timestamp_us)).copied() {

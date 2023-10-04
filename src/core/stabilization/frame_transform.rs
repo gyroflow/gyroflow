@@ -54,9 +54,10 @@ impl FrameTransform {
 
     pub fn get_lens_data_at_timestamp(params: &ComputeParams, timestamp_ms: f64) -> (Matrix3<f64>, [f64; 12], f64, f64, f64, Option<f64>) {
         let mut interpolated_lens = None;
-        if !params.gyro.file_metadata.lens_positions.is_empty() {
+        let gyro = params.gyro.read();
+        if !gyro.file_metadata.lens_positions.is_empty() {
             use crate::util::MapClosest;
-            if let Some(val) = params.gyro.file_metadata.lens_positions.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
+            if let Some(val) = gyro.file_metadata.lens_positions.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
                 interpolated_lens = Some(params.lens.get_interpolated_lens_at(*val));
             }
         }
@@ -68,9 +69,9 @@ impl FrameTransform {
 
         let mut stretch_lens = true;
 
-        if !params.gyro.file_metadata.lens_params.is_empty() && lens.fisheye_params.distortion_coeffs.len() < 4 {
+        if !gyro.file_metadata.lens_params.is_empty() && lens.fisheye_params.distortion_coeffs.len() < 4 {
             use crate::util::MapClosest;
-            if let Some(val) = params.gyro.file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
+            if let Some(val) = gyro.file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
                 let pixel_focal_length = val.pixel_focal_length.map(|x| x as f64 * params.plane_scale).or_else(|| {
                     focal_length = Some(val.focal_length? as f64);
                     Some((val.focal_length? as f64 / ((val.pixel_pitch?.1 as f64 / 1000000.0) * val.capture_area_size?.1 as f64)) * params.video_height as f64)
@@ -85,6 +86,7 @@ impl FrameTransform {
                 }
             }
         }
+        drop(gyro);
 
         let radial_distortion_limit = lens.fisheye_params.radial_distortion_limit.unwrap_or_default();
 
@@ -141,18 +143,22 @@ impl FrameTransform {
         let scaled_k = camera_matrix * img_dim_ratio;
         let new_k = Self::get_new_k(&params, &camera_matrix, fov);
 
+
+        let gyro = params.gyro.read();
+
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(&params, true);
 
         let row_readout_time = frame_readout_time / if params.horizontal_rs { params.width } else { params.height } as f64;
-        let timestamp_ms = timestamp_ms + params.gyro.file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
+        let timestamp_ms = timestamp_ms + gyro.file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
 
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
-        let quat1 = params.gyro.org_quat_at_timestamp(timestamp_ms).inverse();
-        let smoothed_quat1 = params.gyro.smoothed_quat_at_timestamp(timestamp_ms);
+
+        let quat1 = gyro.org_quat_at_timestamp(timestamp_ms).inverse();
+        let smoothed_quat1 = gyro.smoothed_quat_at_timestamp(timestamp_ms);
 
         // Only compute 1 matrix if not using rolling shutter correction
         let rows = if frame_readout_time.abs() > 0.0 { if params.horizontal_rs { params.width } else { params.height } } else { 1 };
@@ -165,7 +171,8 @@ impl FrameTransform {
             };
             let quat = smoothed_quat1
                      * quat1
-                     * params.gyro.org_quat_at_timestamp(quat_time);
+                     * gyro.org_quat_at_timestamp(quat_time);
+
 
             let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
             if params.framebuffer_inverted {
@@ -188,6 +195,7 @@ impl FrameTransform {
                 0.0, 0.0, 0.0
             ]
         }).collect::<Vec<[f32; 12]>>();
+        drop(gyro);
 
         let mut digital_lens_params = [0f32; 4];
         if let Some(p) = &params.digital_lens_params {
@@ -242,18 +250,20 @@ impl FrameTransform {
         let scaled_k = camera_matrix * img_dim_ratio;
         let new_k = Self::get_new_k(params, &camera_matrix, fov);
 
+        let gyro = params.gyro.read();
+
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(params, false);
 
         let row_readout_time = frame_readout_time / if params.horizontal_rs { params.width } else { params.height } as f64;
-        let timestamp_ms = timestamp_ms + params.gyro.file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
+        let timestamp_ms = timestamp_ms + gyro.file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
 
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
-        let quat1 = params.gyro.org_quat_at_timestamp(timestamp_ms).inverse();
-        let smoothed_quat1 = params.gyro.smoothed_quat_at_timestamp(timestamp_ms);
+        let quat1 = gyro.org_quat_at_timestamp(timestamp_ms).inverse();
+        let smoothed_quat1 = gyro.smoothed_quat_at_timestamp(timestamp_ms);
 
         // Only compute 1 matrix if not using rolling shutter correction
         let points_iter = if frame_readout_time.abs() > 0.0 { points } else { &[(0.0, 0.0)] };
@@ -266,7 +276,7 @@ impl FrameTransform {
             };
             let quat = smoothed_quat1
                      * quat1
-                     * params.gyro.org_quat_at_timestamp(quat_time);
+                     * gyro.org_quat_at_timestamp(quat_time);
 
             let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
             r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;

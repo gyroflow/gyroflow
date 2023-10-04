@@ -489,24 +489,26 @@ impl GyroSource {
         }
     }
 
-    pub fn recompute_smoothness(&mut self, alg: &dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) {
+    pub fn recompute_smoothness(&self, alg: &dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> (TimeQuat, TimeQuat, (f64, f64, f64)) {
+        let mut smoothed_quaternions = self.quaternions.clone();
         if true {
             // Lock horizon, then smooth
-            self.smoothed_quaternions = horizon_lock.lock(&self.quaternions, &self.quaternions, &self.file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes, stabilization_params);
-            self.smoothed_quaternions = alg.smooth(&self.smoothed_quaternions, self.duration_ms, stabilization_params, keyframes);
+            horizon_lock.lock(&mut smoothed_quaternions, &self.quaternions, &self.file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes, stabilization_params);
+            smoothed_quaternions = alg.smooth(&smoothed_quaternions, self.duration_ms, stabilization_params, keyframes);
         } else {
             // Smooth, then lock horizon
-            self.smoothed_quaternions = alg.smooth(&self.quaternions, self.duration_ms, stabilization_params, keyframes);
-            self.smoothed_quaternions = horizon_lock.lock(&self.smoothed_quaternions, &self.quaternions, &self.file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes, stabilization_params);
+            smoothed_quaternions = alg.smooth(&smoothed_quaternions, self.duration_ms, stabilization_params, keyframes);
+            horizon_lock.lock(&mut smoothed_quaternions, &self.quaternions, &self.file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes, stabilization_params);
         }
 
-        self.max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &self.smoothed_quaternions, stabilization_params);
-        self.org_smoothed_quaternions = self.smoothed_quaternions.clone();
+        let max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &smoothed_quaternions, stabilization_params);
 
-        for (sq, q) in self.smoothed_quaternions.iter_mut().zip(self.quaternions.iter()) {
+        let org_smoothed_quaternions = smoothed_quaternions.clone();
+        for (sq, q) in smoothed_quaternions.iter_mut().zip(self.quaternions.iter()) {
             // rotation quaternion from smooth motion -> raw motion to counteract it
             *sq.1 = sq.1.inverse() * q.1;
         }
+        (smoothed_quaternions, org_smoothed_quaternions, max_angles)
     }
 
     pub fn set_offset(&mut self, timestamp_us: i64, offset_ms: f64) {
@@ -821,6 +823,22 @@ impl GyroSource {
         for (ts, v) in &self.offsets {
             hasher.write_i64(*ts);
             hasher.write_u64(v.to_bits());
+        }
+        if let Some((ts, q)) = self.quaternions.first_key_value() {
+            let v = q.as_vector();
+            hasher.write_i64(*ts);
+            hasher.write_u64(v[0].to_bits());
+            hasher.write_u64(v[1].to_bits());
+            hasher.write_u64(v[2].to_bits());
+            hasher.write_u64(v[3].to_bits());
+        }
+        if let Some((ts, q)) = self.quaternions.last_key_value() {
+            let v = q.as_vector();
+            hasher.write_i64(*ts);
+            hasher.write_u64(v[0].to_bits());
+            hasher.write_u64(v[1].to_bits());
+            hasher.write_u64(v[2].to_bits());
+            hasher.write_u64(v[3].to_bits());
         }
 
         hasher.finish()

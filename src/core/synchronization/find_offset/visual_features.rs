@@ -5,8 +5,15 @@ use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use crate::{ stabilization, stabilization::ComputeParams };
 use std::sync::{ Arc, atomic::{ AtomicBool, Ordering::Relaxed } };
 use super::super::{ PoseEstimator, SyncParams };
+use parking_lot::RwLock;
 
-pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64, i64)], sync_params: &SyncParams, params: &ComputeParams, for_rs: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64, i64)], sync_params: &SyncParams, params_arg: &ComputeParams, for_rs: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
+    let mut params = params_arg.clone();
+    params.gyro = Arc::new(RwLock::new(params_arg.gyro.read().clone()));
+    if !for_rs {
+        params.gyro.write().clear_offsets();
+    }
+
     let (w, h) = (params.width as i32, params.height as i32);
 
     let mut final_offsets = Vec::new();
@@ -41,7 +48,7 @@ pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64
 
         let calculate_distance = |offs, rs: Option<f64>| -> f64 {
             let mut total_dist = 0.0;
-            let mut params_ref = params;
+            let mut params_ref = &params;
             let mut _params2 = None;
             if let Some(rs) = rs {
                 _params2 = Some(params.clone());

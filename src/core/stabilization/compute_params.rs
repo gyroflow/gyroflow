@@ -6,10 +6,12 @@ use super::distortion_models::DistortionModel;
 use crate::GyroSource;
 use crate::keyframes::KeyframeManager;
 use crate::lens_profile::LensProfile;
+use std::sync::Arc;
+use parking_lot::RwLock;
 
 #[derive(Default, Clone)]
 pub struct ComputeParams {
-    pub gyro: GyroSource,
+    pub gyro: Arc<RwLock<GyroSource>>,
     pub fovs: Vec<f64>,
     pub minimal_fovs: Vec<f64>,
     pub keyframes: KeyframeManager,
@@ -54,7 +56,7 @@ pub struct ComputeParams {
     pub digital_lens_params: Option<Vec<f64>>
 }
 impl ComputeParams {
-    pub fn from_manager(mgr: &StabilizationManager, full_gyro: bool) -> Self {
+    pub fn from_manager(mgr: &StabilizationManager) -> Self {
         let params = mgr.params.read();
 
         let lens = mgr.lens.read();
@@ -63,7 +65,7 @@ impl ComputeParams {
         let digital_lens = lens.digital_lens.as_ref().map(|x| DistortionModel::from_name(&x));
 
         Self {
-            gyro: if full_gyro { mgr.gyro.read().clone() } else { mgr.gyro.read().clone_quaternions() },
+            gyro: mgr.gyro.clone(),
             lens: lens.clone(),
 
             frame_count: params.frame_count,
@@ -113,14 +115,15 @@ impl ComputeParams {
 
 impl std::fmt::Debug for ComputeParams {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let gyro = self.gyro.read();
         f.debug_struct("ComputeParams")
-         .field("gyro.imu_orientation", &self.gyro.imu_orientation)
-         .field("gyro.imu_rotation", &self.gyro.imu_rotation_angles)
-         .field("gyro.acc_rotation", &self.gyro.acc_rotation_angles)
-         .field("gyro.duration_ms", &self.gyro.duration_ms)
-         .field("gyro.imu_lpf", &self.gyro.imu_lpf)
-         .field("gyro.gyro_bias", &self.gyro.gyro_bias)
-         .field("gyro.integration_method", &self.gyro.integration_method)
+         .field("gyro.imu_orientation", &gyro.imu_orientation)
+         .field("gyro.imu_rotation", &gyro.imu_rotation_angles)
+         .field("gyro.acc_rotation", &gyro.acc_rotation_angles)
+         .field("gyro.duration_ms", &gyro.duration_ms)
+         .field("gyro.imu_lpf", &gyro.imu_lpf)
+         .field("gyro.gyro_bias", &gyro.gyro_bias)
+         .field("gyro.integration_method", &gyro.integration_method)
          .field("fovs.len", &self.fovs.len())
          .field("keyframed", &self.keyframes.get_all_keys())
 

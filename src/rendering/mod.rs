@@ -464,7 +464,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                         plane.kernel_flags.set(KernelParamsFlags::FIX_COLOR_RANGE, true);
                     }
 
-                    let mut compute_params = ComputeParams::from_manager(&stab, false);
+                    let mut compute_params = ComputeParams::from_manager(&stab);
 
                     let is_limited_range = $out_frame.color_range() == ffmpeg_next::util::color::Range::MPEG;
                     compute_params.background = <$t as PixelType>::from_rgb_color(compute_params.background, &$yuvi, is_limited_range);

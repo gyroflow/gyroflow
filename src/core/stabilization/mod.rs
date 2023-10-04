@@ -350,8 +350,10 @@ impl Stabilization {
                 #[cfg(feature = "use-opencl")]
                 if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() && next_backend != "wgpu" && opencl::is_buffer_supported(buffers) {
                     self.cl = None;
+                    let distortion_model = self.compute_params.distortion_model.clone();
+                    let digital_lens = self.compute_params.digital_lens.clone();
                     let cl = std::panic::catch_unwind(|| {
-                        opencl::OclWrapper::new(&params, T::ocl_names(), &self.compute_params, buffers, canvas_len)
+                        opencl::OclWrapper::new(&params, T::ocl_names(), distortion_model, digital_lens, buffers, canvas_len)
                     });
                     match cl {
                         Ok(Ok(cl)) => { self.cl = Some(cl); gpu_initialized = true; log::info!("Initialized OpenCL for {:?} -> {:?}", buffers.input.size, buffers.output.size); },
@@ -371,8 +373,10 @@ impl Stabilization {
                 if !gpu_initialized && T::wgpu_format().is_some() && next_backend != "opencl" && std::env::var("NO_WGPU").unwrap_or_default().is_empty() && wgpu::is_buffer_supported(buffers) {
                     if !self.share_wgpu_instances || CACHED_WGPU.with(|x| x.borrow_mut().get(&hash).is_none()) {
                         self.wgpu = None;
+                        let distortion_model = self.compute_params.distortion_model.clone();
+                        let digital_lens = self.compute_params.digital_lens.clone();
                         let wgpu = std::panic::catch_unwind(|| {
-                            wgpu::WgpuWrapper::new(&params, T::wgpu_format().unwrap(), &self.compute_params, buffers, canvas_len)
+                            wgpu::WgpuWrapper::new(&params, T::wgpu_format().unwrap(), distortion_model, digital_lens, buffers, canvas_len)
                         });
                         match wgpu {
                             Ok(Ok(wgpu)) => {

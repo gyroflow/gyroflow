@@ -6,7 +6,8 @@ use ocl::core::{ ImageDescriptor, MemObjectType, GlTextureTarget };
 use parking_lot::RwLock;
 use std::ops::DerefMut;
 use super::*;
-use crate::stabilization::{KernelParams, ComputeParams};
+use crate::stabilization::distortion_models::DistortionModel;
+use crate::stabilization::KernelParams;
 
 pub struct OclWrapper {
     kernel: Kernel,
@@ -173,16 +174,16 @@ impl OclWrapper {
         Ok((name, list_name))
     }
 
-    pub fn new(params: &KernelParams, ocl_names: (&str, &str, &str, &str), compute_params: &ComputeParams, buffers: &Buffers, drawing_len: usize) -> ocl::Result<Self> {
+    pub fn new(params: &KernelParams, ocl_names: (&str, &str, &str, &str), distortion_model: DistortionModel, digital_lens: Option<DistortionModel>, buffers: &Buffers, drawing_len: usize) -> ocl::Result<Self> {
         if params.height < 4 || params.output_height < 4 || params.stride < 1 { return Err(ocl::BufferCmdError::AlreadyMapped.into()); }
 
         let mut kernel = include_str!("opencl_undistort.cl").to_string();
         // let mut kernel = std::fs::read_to_string("D:/programowanie/projekty/Rust/gyroflow/src/core/gpu/opencl_undistort.cl").unwrap();
 
-        let mut lens_model_functions = compute_params.distortion_model.opencl_functions().to_string();
+        let mut lens_model_functions = distortion_model.opencl_functions().to_string();
         let default_digital_lens = "float2 digital_undistort_point(float2 uv, __global KernelParams *p) { return uv; }
                                         float2 digital_distort_point(float2 uv, __global KernelParams *p) { return uv; }";
-        lens_model_functions.push_str(compute_params.digital_lens.as_ref().map(|x| x.opencl_functions()).unwrap_or(default_digital_lens));
+        lens_model_functions.push_str(digital_lens.as_ref().map(|x| x.opencl_functions()).unwrap_or(default_digital_lens));
 
         kernel = kernel.replace("LENS_MODEL_FUNCTIONS;", &lens_model_functions)
                        .replace("DATA_CONVERTF", ocl_names.3)

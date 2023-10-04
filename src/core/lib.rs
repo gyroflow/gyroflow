@@ -370,7 +370,7 @@ impl StabilizationManager {
         zooming::calculate_fovs(compute_params, &timestamps, &keyframes, method.into())
     }
     pub fn recompute_adaptive_zoom(&self) {
-        let params = stabilization::ComputeParams::from_manager(self, false);
+        let params = stabilization::ComputeParams::from_manager(self);
         let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
         let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &self.params, &self.keyframes.read());
 
@@ -381,17 +381,20 @@ impl StabilizationManager {
     }
 
     pub fn recompute_smoothness(&self) {
-        let mut gyro = self.gyro.write();
         let params = self.params.read();
         let keyframes = self.keyframes.read().clone();
         let smoothing = self.smoothing.read();
         let horizon_lock = smoothing.horizon_lock.clone();
 
-        gyro.recompute_smoothness(smoothing.current().as_ref(), horizon_lock, &params, &keyframes);
+        let (quats, org_quats, max_angles) = self.gyro.read().recompute_smoothness(smoothing.current().as_ref(), horizon_lock, &params, &keyframes);
+        let mut gyro = self.gyro.write();
+        gyro.max_angles = max_angles;
+        gyro.org_smoothed_quaternions = org_quats;
+        gyro.smoothed_quaternions = quats;
     }
 
     pub fn recompute_undistortion(&self) {
-        let params = stabilization::ComputeParams::from_manager(self, false);
+        let params = stabilization::ComputeParams::from_manager(self);
         self.stabilization.write().set_compute_params(params);
     }
 
@@ -408,7 +411,7 @@ impl StabilizationManager {
     pub fn recompute_threaded<F: Fn((u64, bool)) + Send + Sync + Clone + 'static>(&self, cb: F) -> u64 {
         //self.recompute_smoothness();
         //self.recompute_adaptive_zoom();
-        let mut params = stabilization::ComputeParams::from_manager(self, false);
+        let mut params = stabilization::ComputeParams::from_manager(self);
 
         let smoothing = self.smoothing.clone();
         let stabilization_params = self.params.clone();
@@ -417,6 +420,8 @@ impl StabilizationManager {
 
         let compute_id = fastrand::u64(..);
         self.current_compute_id.store(compute_id, SeqCst);
+
+        let mut gyro_checksum = gyro.read().get_checksum();
 
         let prevent_recompute = self.prevent_recompute.clone();
         let current_compute_id = self.current_compute_id.clone();
@@ -430,28 +435,25 @@ impl StabilizationManager {
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
             let mut smoothing_changed = false;
-            let mut gyro_checksum = gyro.read().get_checksum();
             if smoothing.read().get_state_checksum(gyro_checksum) != smoothing_checksum.load(SeqCst) {
                 let (mut smoothing, horizon_lock) = {
                     let lock = smoothing.read();
                     (lock.current().clone(), lock.horizon_lock.clone())
                 };
-                params.gyro.recompute_smoothness(smoothing.as_mut(), horizon_lock, &stabilization_params.read(), &keyframes);
+                let (quats, org_quats, max_angles) = gyro.read().recompute_smoothness(smoothing.as_mut(), horizon_lock, &stabilization_params.read(), &keyframes);
 
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
+                if gyro_checksum != gyro.read().get_checksum() { return cb((compute_id, true)); }
 
                 let mut lib_gyro = gyro.write();
-                if lib_gyro.quaternions != params.gyro.quaternions {
-                    // This computation was for different input quaternions (outdated)
-                    return cb((compute_id, true));
-                }
-                lib_gyro.smoothed_quaternions = params.gyro.smoothed_quaternions.clone();
-                lib_gyro.max_angles = params.gyro.max_angles;
-                lib_gyro.org_smoothed_quaternions = params.gyro.org_smoothed_quaternions.clone();
+                lib_gyro.max_angles = max_angles;
+                lib_gyro.org_smoothed_quaternions = org_quats;
+                lib_gyro.smoothed_quaternions = quats;
                 lib_gyro.smoothing_status = smoothing.get_status_json();
                 gyro_checksum = lib_gyro.get_checksum();
                 smoothing_changed = true;
             }
+            smoothing_checksum.store(smoothing.read().get_state_checksum(gyro_checksum), SeqCst);
 
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
@@ -466,12 +468,10 @@ impl StabilizationManager {
                 stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                 stab_params.minimal_fovs = params.minimal_fovs.clone();
                 stab_params.zooming_debug_points = debug_points;
+                zooming_checksum.store(zooming::get_checksum(&params), SeqCst);
             }
 
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
-
-            smoothing_checksum.store(smoothing.read().get_state_checksum(gyro_checksum), SeqCst);
-            zooming_checksum.store(zooming::get_checksum(&params), SeqCst);
 
             stabilization.write().set_compute_params(params);
 
@@ -648,8 +648,8 @@ impl StabilizationManager {
     pub fn get_scaling_ratio(&self) -> f64 { let params = self.params.read(); params.video_size.0 as f64 / params.video_output_size.0 as f64 }
     pub fn get_min_fov      (&self) -> f64 { self.params.read().min_fov }
 
-    pub fn invalidate_smoothing(&self) { self.smoothing_checksum.store(0, SeqCst); self.invalidate_zooming(); }
-    pub fn invalidate_zooming(&self) { self.zooming_checksum.store(0, SeqCst); }
+    pub fn invalidate_smoothing(&self) { self.invalidate_ongoing_computations(); self.smoothing_checksum.store(0, SeqCst); self.invalidate_zooming(); }
+    pub fn invalidate_zooming(&self) { self.invalidate_ongoing_computations(); self.zooming_checksum.store(0, SeqCst); }
 
     pub fn set_digital_lens_name(&self, v: String) {
         self.lens.write().digital_lens =  if !v.is_empty() { Some(v.clone()) } else { None };
@@ -844,7 +844,7 @@ impl StabilizationManager {
         }
 
         if recompute {
-            self.stabilization.write().set_compute_params(stabilization::ComputeParams::from_manager(self, false));
+            self.stabilization.write().set_compute_params(stabilization::ComputeParams::from_manager(self));
 
             self.invalidate_smoothing();
         }

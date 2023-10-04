@@ -14,7 +14,7 @@ pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64
     let estimated_gyro = estimator.estimated_gyro.read().clone();
 
     let mut offsets = Vec::new();
-    let gyro = &params.gyro;
+    let gyro = params.gyro.read();
     let ranges_len = ranges.len() as f64;
     if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && !gyro.raw_imu.is_empty() {
         for (i, (from_ts, to_ts)) in ranges.iter().enumerate() {
