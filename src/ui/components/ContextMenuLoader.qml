@@ -25,4 +25,11 @@ Loader {
             root.active = true;
         }
     }
+    function toggle(parentItem: Item, x: real, y: real) {
+        if (root.item && root.item.visible) {
+            root.item.close();
+        } else {
+            root.popup(parentItem, x, y);
+        }
+    }
 }

@@ -651,7 +651,7 @@ Item {
             QT_TRANSLATE_NOOP("Popup", "Close Gyroflow")
         ];
         text: qsTr("When rendering is finished: %1").arg(qsTranslate("Popup", options[currentOption])).trim();
-        onClicked: p0.open();
+        onClicked: if (p0.visible) { p0.close(); } else { p0.open(); }
         onCurrentOptionChanged: render_queue.when_done = currentOption;
         Popup {
             id: p0;
@@ -672,7 +672,7 @@ Item {
         anchors.margins: 5 * dpiScale;
         leftPadding: 5 * dpiScale; rightPadding: 5 * dpiScale;
         text: qsTr("Queue settings");
-        onClicked: queueSettingsMenu.popup(queueSettings, 0, height);
+        onClicked: if (queueSettingsMenu.visible) { queueSettingsMenu.dismiss(); } else { queueSettingsMenu.popup(queueSettings, 0, height); }
 
         function setParallelRenders(v: int, menuItem: Menu) {
             v = Math.min(6, Math.max(v, 1));

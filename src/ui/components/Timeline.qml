@@ -158,8 +158,8 @@ Item {
         });
     }
 
-    function showContextMenu(el: Item) {
-        menuLoader.popup(el, 0, el.height);
+    function toggleContextMenu(el: Item) {
+        menuLoader.toggle(el, 0, el.height);
     }
 
     Settings {
@@ -466,7 +466,7 @@ Item {
                 panInit.visibleAreaWidth = root.visibleAreaRight - root.visibleAreaLeft;
             }
             onPressAndHold: (mouse) => {
-                if (Math.abs(panInit.x - mouse.x) > 15 * dpiScale) return;
+                if (Math.abs(panInit.x - mouse.x) > 15 * dpiScale) { mouse.accepted = false; return; }
                 if (isMobile && mouse.button !== Qt.RightButton) {
                     if (keyframes.item.handleMouseMove(mouse.x, mouse.y, true, Qt.RightButton))
                         return;
