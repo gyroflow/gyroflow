@@ -125,6 +125,7 @@ TextField {
 
             if (window.videoArea.loadedFileUrl.toString() && !window.vidInfo.hasAccessToInputDirectory && Qt.resolvedUrl(filesystem.get_folder(window.videoArea.loadedFileUrl)) == Qt.resolvedUrl(selectedFolder)) {
                 window.vidInfo.hasAccessToInputDirectory = true;
+                window.settings.setValue("folder-video", filesystem.get_folder(window.videoArea.loadedFileUrl).toString());
             }
 
             if (root.cbAfterSelect) {
