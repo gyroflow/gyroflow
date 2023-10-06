@@ -83,16 +83,21 @@ Rectangle {
         width: Math.min(window.width * 0.95, Math.max(btnsRow.width + 100 * dpiScale, root.isWide? parent.width * (isMobileLayout && !isLandscape? 0.99 : root.widthRatio) : 400 * dpiScale));
         height: col.height;
         property real offs: 0;
+        BorderImage {
+            anchors.fill: bg;
+            anchors.margins: -28;
+            border { left: 77; top: 77; right: 77; bottom: 77; }
+            horizontalTileMode: BorderImage.Repeat;
+            verticalTileMode: BorderImage.Repeat;
+            source: "qrc:/resources/shadow.png";
+        }
         Rectangle {
             id: bg;
             anchors.fill: parent;
             color: styleBackground2;
             radius: 5 * dpiScale;
+            // Replace BorderImage with MultiEffect once Qt is upgraded to 6.5.4 or 6.6.0 (https://bugreports.qt.io/browse/QTBUG-117830)
             // layer.enabled: true; layer.effect: MultiEffect { shadowEnabled: true; }
-            Component.onCompleted: {
-                // Change to layer.effect as above, when Qt is upgraded to 6.5.3 on MacOS
-                Qt.createQmlObject("import QtQuick.Effects; MultiEffect { anchors.fill: bg; source: bg; shadowEnabled: true; z: -1; }", pp, "modalShadow")
-            }
         }
 
         Column {
