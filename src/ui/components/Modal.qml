@@ -4,6 +4,7 @@
 import QtQuick
 import QtQuick.Controls as QQC
 import QtQuick.Controls.impl as QQCI
+// import QtQuick.Effects
 
 Rectangle {
     id: root;
@@ -51,7 +52,7 @@ Rectangle {
     }
 
     anchors.fill: parent;
-    color: "#80000000";
+    color: "#60000000";
     opacity: pp.opacity;
     visible: opacity > 0;
     onVisibleChanged: {
@@ -72,25 +73,33 @@ Rectangle {
     }
 
     MouseArea { visible: root.opened; anchors.fill: parent; preventStealing: true; hoverEnabled: true; onClicked: Qt.inputMethod.hide(); }
-    Rectangle {
+    Item {
         id: pp;
         anchors.centerIn: parent;
         anchors.verticalCenterOffset: root.opened? 0 : -50 * dpiScale;
         Ease on anchors.verticalCenterOffset { }
         Ease on opacity { }
         opacity: root.opened? 1 : 0;
-        width: Math.min(window.width * 0.95, Math.max(btnsRow.width + 100 * dpiScale, root.isWide? parent.width * root.widthRatio : 400 * dpiScale));
-        height: col.height + 30 * dpiScale;
+        width: Math.min(window.width * (isMobileLayout && !isLandscape? 0.99 : 0.95), Math.max(btnsRow.width + 100 * dpiScale, root.isWide? parent.width * root.widthRatio : 400 * dpiScale));
+        height: col.height;
         property real offs: 0;
-        color: styleBackground2;
-        radius: 7 * dpiScale;
-        border.width: 1 * dpiScale;
-        border.color: styleSliderHandle;
+        Rectangle {
+            id: bg;
+            anchors.fill: parent;
+            color: styleBackground2;
+            radius: 5 * dpiScale;
+            // layer.enabled: true; layer.effect: MultiEffect { shadowEnabled: true; }
+            Component.onCompleted: {
+                // Change to layer.effect as above, when Qt is upgraded to 6.5.3 on MacOS
+                Qt.createQmlObject("import QtQuick.Effects; MultiEffect { anchors.fill: bg; source: bg; shadowEnabled: true; z: -1; }", pp, "modalShadow")
+            }
+        }
 
         Column {
             id: col;
             width: parent.width;
             anchors.centerIn: parent;
+            Item { height: 15 * dpiScale; width: 1; }
 
             QQCI.IconImage {
                 id: icon;
@@ -137,46 +146,60 @@ Rectangle {
                 }
             }
             Item { height: 25 * dpiScale; width: 1; }
-            Flow {
-                id: btnsRow;
-                anchors.horizontalCenter: parent.horizontalCenter;
-                spacing: 10 * dpiScale;
-                onWidthChanged: {
-                    Qt.callLater(() => {
-                        if (btnsRow.width > parent.width - 20 * dpiScale) {
-                            btnsRow.width = parent.width - 20 * dpiScale;
+
+            Rectangle {
+                width: parent.width;
+                height: btnsCol.height + 30 * dpiScale;
+                color: "#B0" + stylePopupBorder.substring(1);
+                radius: 5 * dpiScale;
+
+                Column {
+                    id: btnsCol;
+                    width: parent.width;
+                    anchors.centerIn: parent;
+                    Flow {
+                        id: btnsRow;
+                        anchors.horizontalCenter: parent.horizontalCenter;
+                        spacing: 10 * dpiScale;
+                        onWidthChanged: {
+                            Qt.callLater(() => {
+                                if (btnsRow.width > col.width - 20 * dpiScale) {
+                                    btnsRow.width = col.width - 20 * dpiScale;
+                                }
+                            });
                         }
-                    });
-                }
-                Repeater {
-                    id: btns;
-                    Button {
-                        text: modelData;
-                        onClicked: root.clicked(index, dontShowAgain.checked);
-                        leftPadding: 20 * dpiScale;
-                        rightPadding: 20 * dpiScale;
-                        accent: root.accentButton === index;
+                        Repeater {
+                            id: btns;
+                            Button {
+                                text: modelData;
+                                onClicked: root.clicked(index, dontShowAgain.checked);
+                                leftPadding: 20 * dpiScale;
+                                rightPadding: 20 * dpiScale;
+                                height: 32 * dpiScale;
+                                accent: root.accentButton === index;
+                            }
+                        }
+                    }
+                    Item { visible: root.iconType == Modal.Error; height: 15 * dpiScale; width: 1; }
+                    LinkButton {
+                        visible: root.iconType == Modal.Error;
+                        anchors.horizontalCenter: parent.horizontalCenter;
+                        text: qsTr("Troubleshooting");
+                        icon.width: 14 * dpiScale;
+                        icon.height: 14 * dpiScale;
+                        iconName: "external_link";
+                        onClicked: Qt.openUrlExternally("https://docs.gyroflow.xyz/app/getting-started/troubleshooting")
+                    }
+                    Item { visible: root.modalIdentifier; height: 15 * dpiScale; width: 1; }
+                    CheckBox {
+                        anchors.horizontalCenter: parent.horizontalCenter;
+                        x: 20 * dpiScale;
+                        id: dontShowAgain;
+                        visible: root.modalIdentifier;
+                        text: btns.model?.length == 1? qsTr("Don't show again") : qsTr("Remember this choice");
+                        checked: false;
                     }
                 }
-            }
-            Item { visible: root.iconType == Modal.Error; height: 15 * dpiScale; width: 1; }
-            LinkButton {
-                visible: root.iconType == Modal.Error;
-                anchors.horizontalCenter: parent.horizontalCenter;
-                text: qsTr("Troubleshooting");
-                icon.width: 14 * dpiScale;
-                icon.height: 14 * dpiScale;
-                iconName: "external_link";
-                onClicked: Qt.openUrlExternally("https://docs.gyroflow.xyz/app/getting-started/troubleshooting")
-            }
-            Item { visible: root.modalIdentifier; height: 15 * dpiScale; width: 1; }
-            CheckBox {
-                anchors.horizontalCenter: parent.horizontalCenter;
-                x: 20 * dpiScale;
-                id: dontShowAgain;
-                visible: root.modalIdentifier;
-                text: btns.model?.length == 1? qsTr("Don't show again") : qsTr("Remember this choice");
-                checked: false;
             }
         }
     }

@@ -160,6 +160,7 @@ deploy *param:
     cp -af "$QT_DIR/lib/QtQuickDialogs2.framework"            "$CARGO_TARGET/../Frameworks/"
     cp -af "$QT_DIR/lib/QtQuickDialogs2QuickImpl.framework"   "$CARGO_TARGET/../Frameworks/"
     cp -af "$QT_DIR/lib/QtQuickDialogs2Utils.framework"       "$CARGO_TARGET/../Frameworks/"
+    cp -af "$QT_DIR/lib/QtQuickEffects.framework"             "$CARGO_TARGET/../Frameworks/" || true
     cp -af "$QT_DIR/lib/QtQuickTemplates2.framework"          "$CARGO_TARGET/../Frameworks/"
     cp -af "$QT_DIR/lib/QtQuickLayouts.framework"             "$CARGO_TARGET/../Frameworks/"
     cp -af "$QT_DIR/lib/QtSvg.framework"                      "$CARGO_TARGET/../Frameworks/"
@@ -233,6 +234,7 @@ deploy *param:
     cp -f $QT_DIR/qml/QtQuick/Dialogs/quickimpl/qml/*.qml                                             "$CARGO_TARGET/QtQuick/Dialogs/quickimpl/qml/"
     cp -f $QT_DIR/qml/QtQuick/Dialogs/quickimpl/qml/+Material/*.qml                                   "$CARGO_TARGET/QtQuick/Dialogs/quickimpl/qml/+Material/"
     cp -f $QT_DIR/qml/QtQuick/Dialogs/quickimpl/libqtquickdialogs2quickimplplugin.dylib               "$CARGO_TARGET/QtQuick/Dialogs/quickimpl/"
+    cp -f $QT_DIR/qml/QtQuick/Effects/libqtquickeffectsplugin.dylib                                   "$CARGO_TARGET/QtQuick/Effects/" || true
 
     if [ "{{param}}" == "local" ] || [ "{{param}}" == "universal" ]; then
         CARGO_TARGET="$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/PlugIns"
@@ -279,6 +281,7 @@ deploy *param:
                 "Frameworks/QtQuickDialogs2.framework/Versions/A/QtQuickDialogs2"
                 "Frameworks/QtQuickDialogs2QuickImpl.framework/Versions/A/QtQuickDialogs2QuickImpl"
                 "Frameworks/QtQuickDialogs2Utils.framework/Versions/A/QtQuickDialogs2Utils"
+                "Frameworks/QtQuickEffects.framework/Versions/A/QtQuickEffects"
                 "Frameworks/QtQuickTemplates2.framework/Versions/A/QtQuickTemplates2"
                 "Frameworks/QtQuickLayouts.framework/Versions/A/QtQuickLayouts"
                 "Frameworks/QtSvg.framework/Versions/A/QtSvg"
@@ -289,6 +292,8 @@ deploy *param:
                 "PlugIns/platforms/libqcocoa.dylib"
                 "Resources/qml/Qt/labs/settings/libqmlsettingsplugin.dylib"
                 "Resources/qml/QtQml/libqmlplugin.dylib"
+                "Resources/qml/QtQml/libqmlmetaplugin.dylib"
+                "Resources/qml/QtQml/Base/libqmlplugin.dylib"
                 "Resources/qml/QtQml/Models/libmodelsplugin.dylib"
                 "Resources/qml/QtQml/WorkerScript/libworkerscriptplugin.dylib"
                 "Resources/qml/QtCore/libqtqmlcoreplugin.dylib"
@@ -302,6 +307,7 @@ deploy *param:
                 "Resources/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.dylib"
                 "Resources/qml/QtQuick/Dialogs/libqtquickdialogsplugin.dylib"
                 "Resources/qml/QtQuick/Dialogs/quickimpl/libqtquickdialogs2quickimplplugin.dylib"
+                "Resources/qml/QtQuick/Effects/libqtquickeffectsplugin.dylib"
                 "Resources/qml/QtQuick/Layouts/libqquicklayoutsplugin.dylib"
                 "Resources/qml/QtQuick/Templates/libqtquicktemplates2plugin.dylib"
                 "Resources/qml/QtQuick/Window/libquickwindowplugin.dylib"
@@ -309,7 +315,7 @@ deploy *param:
             )
             for i in "${OBJECTS[@]}"
             do
-                codesign -vvvv --strict --options=runtime --timestamp --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/$i
+                codesign -vvvv --strict --options=runtime --timestamp --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/$i || true
             done
 
             codesign -vvvv --strict --options=runtime --timestamp --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app

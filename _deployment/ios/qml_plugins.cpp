@@ -24,5 +24,6 @@ Q_IMPORT_PLUGIN(QtQuickLayoutsPlugin)
 //Q_IMPORT_PLUGIN(QtQmlCorePlugin)
 Q_IMPORT_PLUGIN(QtQuickDialogsPlugin)
 Q_IMPORT_PLUGIN(QmlSettingsPlugin)
+Q_IMPORT_PLUGIN(QtQuickEffectsPlugin)
 
 // Q_IMPORT_PLUGIN(QIosOptionalPlugin_NSPhotoLibrary)
