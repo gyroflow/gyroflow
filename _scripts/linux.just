@@ -154,7 +154,7 @@ deploy *param:
     cp -f "$QT_DIR/lib/libQt6QuickDialogs2.so.6"           "$TARGET/lib/"
     cp -f "$QT_DIR/lib/libQt6QuickDialogs2QuickImpl.so.6"  "$TARGET/lib/"
     cp -f "$QT_DIR/lib/libQt6QuickDialogs2Utils.so.6"      "$TARGET/lib/"
-    cp -f "$QT_DIR/lib/libQt6QuickEffects.so.6"            "$TARGET/lib/"
+    cp -f "$QT_DIR/lib/libQt6QuickEffects.so.6"            "$TARGET/lib/" || true
     cp -f "$QT_DIR/lib/libQt6QuickLayouts.so.6"            "$TARGET/lib/"
     cp -f "$QT_DIR/lib/libQt6Svg.so.6"                     "$TARGET/lib/"
     cp -f "$QT_DIR/lib/libQt6DBus.so.6"                    "$TARGET/lib/"
@@ -234,7 +234,7 @@ deploy *param:
     cp -f $QT_DIR/qml/QtQuick/Dialogs/quickimpl/qml/*.qml                                            "$TARGET/qml/QtQuick/Dialogs/quickimpl/qml/"
     cp -f $QT_DIR/qml/QtQuick/Dialogs/quickimpl/qml/+Material/*.qml                                  "$TARGET/qml/QtQuick/Dialogs/quickimpl/qml/+Material/"
     cp -f $QT_DIR/qml/QtQuick/Dialogs/quickimpl/libqtquickdialogs2quickimplplugin.so                 "$TARGET/qml/QtQuick/Dialogs/quickimpl/"
-    cp -f $QT_DIR/qml/QtQuick/Effects/libqtquickeffectsplugin.so                                     "$TARGET/qml/QtQuick/Effects/"
+    cp -f $QT_DIR/qml/QtQuick/Effects/libqtquickeffectsplugin.so                                     "$TARGET/qml/QtQuick/Effects/" || true
 
     mkdir -p "$TARGET/plugins/iconengines/"
     mkdir -p "$TARGET/plugins/imageformats/"
