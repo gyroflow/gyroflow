@@ -334,6 +334,11 @@ Rectangle {
                                     }
                                     return;
                                 }
+                                if (isMobile) {
+                                    messageBox(Modal.Info, qsTr("Keep this app in the foreground and don't lock the screen.\nDue to limitations of the system video encoders, rendering in the background is not supported."), [
+                                        { text: qsTr("Ok") },
+                                    ], undefined, Text.AutoText, "keep-in-foreground");
+                                }
 
                                 const job_id = render_queue.add(window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
                                 if (renderBtn.isAddToQueue) {
@@ -461,7 +466,7 @@ Rectangle {
                 });
                 im.t.textFormat = textFormat;
                 im.opacity = 1;
-                Qt.createQmlObject("import QtQuick; Timer { interval: 2000; running: true; }", im, "t1").onTriggered.connect(() => {
+                Qt.createQmlObject("import QtQuick; Timer { interval: 5000; running: true; }", im, "t1").onTriggered.connect(() => {
                     im.opacity = 0;
                     im.height = -5 * dpiScale;
                     im.destroy(700);

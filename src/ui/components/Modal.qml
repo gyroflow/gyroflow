@@ -23,7 +23,7 @@ Rectangle {
     property string modalIdentifier: "";
     default property alias data: mainColumn.data;
     onTextChanged: {
-        if (text.indexOf("<") > -1 && textFormat != Text.MarkdownText) {
+        if (text.indexOf("<") > -1 && text.indexOf("\n") > -1 && textFormat != Text.MarkdownText) {
             text = text.replace(/\n/g, "<br>");
             textFormat = Text.StyledText;
         }
@@ -80,7 +80,7 @@ Rectangle {
         Ease on anchors.verticalCenterOffset { }
         Ease on opacity { }
         opacity: root.opened? 1 : 0;
-        width: Math.min(window.width * (isMobileLayout && !isLandscape? 0.99 : 0.95), Math.max(btnsRow.width + 100 * dpiScale, root.isWide? parent.width * root.widthRatio : 400 * dpiScale));
+        width: Math.min(window.width * 0.95, Math.max(btnsRow.width + 100 * dpiScale, root.isWide? parent.width * (isMobileLayout && !isLandscape? 0.99 : root.widthRatio) : 400 * dpiScale));
         height: col.height;
         property real offs: 0;
         Rectangle {
@@ -119,10 +119,13 @@ Rectangle {
 
             Item { height: 10 * dpiScale; width: 1; }
             Flickable {
+                id: flick;
                 width: parent.width;
                 height: Math.min(contentHeight, root.height - icon.height - btnsRow.height - 150 * dpiScale);
+                boundsBehavior: Flickable.StopAtBounds;
                 contentWidth: width;
-                contentHeight: mainColumn.height;
+                contentHeight: mainColumn.height + 25 * dpiScale;
+                onWidthChanged: contentWidth = Math.max(t.paintedWidth + 30 * dpiScale, width);
                 clip: true;
                 QQC.ScrollBar.vertical: QQC.ScrollBar { }
                 Column {
@@ -135,7 +138,13 @@ Rectangle {
                         width: parent.width;
                         horizontalAlignment: Text.AlignHCenter;
                         wrapMode: Text.WordWrap;
-                        font.pixelSize: 14 * dpiScale;
+                        font.pixelSize: (root.isWide && screenSize < 7.0? 12 : 14) * dpiScale;
+                        rightPadding: 10 * dpiScale;
+                        onPaintedWidthChanged: {
+                            if (paintedWidth > width) {
+                                flick.contentWidth = paintedWidth + 30 * dpiScale;
+                            }
+                        }
 
                         MouseArea {
                             anchors.fill: parent;
@@ -145,7 +154,6 @@ Rectangle {
                     }
                 }
             }
-            Item { height: 25 * dpiScale; width: 1; }
 
             Rectangle {
                 width: parent.width;
@@ -157,13 +165,14 @@ Rectangle {
                     id: btnsCol;
                     width: parent.width;
                     anchors.centerIn: parent;
+                    onWidthChanged: btnsRow.width = undefined;
                     Flow {
                         id: btnsRow;
                         anchors.horizontalCenter: parent.horizontalCenter;
                         spacing: 10 * dpiScale;
                         function updateWidth() {
-                            if (btnsRow.width > col.width - 20 * dpiScale) {
-                                btnsRow.width = col.width - 20 * dpiScale;
+                            if (btnsRow.width > btnsCol.width - 20 * dpiScale) {
+                                btnsRow.width = btnsCol.width - 20 * dpiScale;
                             }
                         }
                         onWidthChanged: Qt.callLater(btnsRow.updateWidth);

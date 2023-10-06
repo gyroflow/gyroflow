@@ -492,7 +492,7 @@ MenuItem {
                 tooltip: qsTr("Show available options");
                 onClicked: {
                     const text = render_queue.get_encoder_options(render_queue.get_default_encoder(root.outCodec, root.outGpu));
-                    const el = window.messageBox(Modal.Info, text, [ { text: qsTr("Ok") } ], undefined, Text.MarkdownText);
+                    const el = window.messageBox(Modal.Info, text, [ { text: qsTr("Ok") } ], undefined, Text.RichText);
                     el.t.horizontalAlignment = Text.AlignLeft;
                 }
             }

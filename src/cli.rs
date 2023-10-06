@@ -158,7 +158,7 @@ pub fn run(open_file: &mut String) -> bool {
 
         let mut queue = RenderQueue::new(stab.clone());
 
-        rendering::init().unwrap();
+        rendering::init_log();
         if let Some((name, _list_name)) = gyroflow_core::gpu::initialize_contexts() {
             rendering::set_gpu_type_from_name(&name);
         }

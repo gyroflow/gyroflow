@@ -124,7 +124,7 @@ impl<'a> FfmpegProcessor<'a> {
         let mut file = FfmpegPathWrapper::new(base, url, false).map_err(|e| FFmpegError::CannotOpenInputFile((url.to_string(), e)))?;
 
         ffmpeg_next::init()?;
-        let _ = crate::rendering::init();
+        crate::rendering::init_log();
 
         let hwaccel_device = decoder_options.as_ref().and_then(|x| x.get("hwaccel_device").map(|x| x.to_string()));
         if file.path.starts_with("fd:") {

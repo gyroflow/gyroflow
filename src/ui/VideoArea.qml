@@ -664,20 +664,6 @@ Item {
                 }
             }
 
-            InfoMessage {
-                width: vid.width;
-                type: InfoMessage.Warning;
-                visible: vid.loaded && !controller.lens_loaded && !isCalibrator;
-                text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.");
-                y: Math.max(0, root.additionalTopMargin - vidParent.y);
-            }
-            Column {
-                id: infoMessages;
-                width: vid.width;
-                spacing: 5 * dpiScale;
-                visible: children.length > 0;
-                y: Math.max(0, root.additionalTopMargin - vidParent.y);
-            }
             TapHandler {
                 onTapped: timeline.focus = true;
                 onDoubleTapped: root.fullScreen = root.fullScreen? 0 : 1;
@@ -1020,6 +1006,18 @@ Item {
             onHide: {
                 render_queue.main_job_id = 0;
                 videoLoader.active = false;
+            }
+        }
+        Column {
+            id: infoMessages;
+            width: parent.width;
+            spacing: 5 * dpiScale;
+            visible: children.length > 0;
+            y: Math.max(0, root.additionalTopMargin - vidParent.y);
+            InfoMessage {
+                type: InfoMessage.Warning;
+                visible: vid.loaded && !controller.lens_loaded && !isCalibrator;
+                text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.");
             }
         }
     }

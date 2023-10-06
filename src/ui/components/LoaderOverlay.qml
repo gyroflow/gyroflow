@@ -140,6 +140,7 @@ Item {
                 onClicked: root.hide();
             }
         }
+        Item { width: 1; height: 5 * dpiScale; visible: infoMessage.show; }
         InfoMessageSmall {
             id: infoMessage;
             anchors.horizontalCenter: parent.horizontalCenter;

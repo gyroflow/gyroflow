@@ -660,13 +660,11 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     Ok(())
 }
 
-pub fn init() -> Result<(), Error> {
+pub fn init_log() {
 	unsafe {
         ffi::av_log_set_level(ffi::AV_LOG_INFO);
         ffi::av_log_set_callback(Some(ffmpeg_log));
     }
-
-    Ok(())
 }
 
 pub fn fps_to_rational(fps: f64) -> ffmpeg_next::Rational {
@@ -740,7 +738,7 @@ unsafe fn codec_options(c: *const ffi::AVCodec) {
 
     use std::fmt::Write;
     let mut ret = String::new();
-    let _ = writeln!(ret, "{} **{}**:\n", ["Decoder", "Encoder"][ffi::av_codec_is_encoder(c) as usize], to_str((*c).name));
+    let _ = writeln!(ret, "{} <b>{}</b>:\n", ["Decoder", "Encoder"][ffi::av_codec_is_encoder(c) as usize], to_str((*c).name));
 
     if !(*c).pix_fmts.is_null() {
         ret.push_str("Supported pixel formats (-pix_fmt): ");
@@ -754,14 +752,13 @@ unsafe fn codec_options(c: *const ffi::AVCodec) {
             if i > 0 { ret.push_str(", "); }
             ret.push_str(&to_str(ffi::av_get_pix_fmt_name(p)));
         }
-        ret.push('\n');
     }
 
     if !(*c).priv_class.is_null() {
-        ret.push_str("```\n");
+        ret.push_str("<pre>");
         FFMPEG_LOG.write().push_str(&ret);
         show_help_children((*c).priv_class, ffi::AV_OPT_FLAG_ENCODING_PARAM | ffi::AV_OPT_FLAG_DECODING_PARAM);
-        FFMPEG_LOG.write().push_str("\n```\nAdditional supported flags:\n\n```\n-hwaccel_device\n-qscale\n```");
+        FFMPEG_LOG.write().push_str("</pre>Additional supported flags:<pre>-hwaccel_device\n-qscale</pre>");
     }
 }
 
@@ -785,16 +782,13 @@ pub fn get_default_encoder(codec: &str, gpu: bool) -> String {
     encoder.0.to_string()
 }
 pub fn get_encoder_options(name: &str) -> String {
-	unsafe {
-        ffi::av_log_set_level(ffi::AV_LOG_INFO);
-        ffi::av_log_set_callback(Some(ffmpeg_log));
-    }
+	init_log();
     clear_log();
     match ffmpeg_next::encoder::find_by_name(name) {
         Some(encoder) => { unsafe { codec_options(encoder.as_ptr()); } },
         None => log::warn!("Failed to find codec by name: {name}")
     }
-    let ret = get_log().replace("E..V.......", "");
+    let ret = get_log().replace("E..V.......", "").replace("\n", "<br>");
     clear_log();
     ret
 }

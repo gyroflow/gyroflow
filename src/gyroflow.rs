@@ -221,7 +221,7 @@ fn entry() {
 
     ctl.borrow_mut().stabilizer.params.write().framebuffer_inverted = util::is_opengl();
 
-    rendering::init().unwrap();
+    rendering::init_log();
 
     engine.set_property("openFileOnStart".into(), QUrl::from(QString::from(gyroflow_core::filesystem::path_to_url(&open_file))).into());
 
