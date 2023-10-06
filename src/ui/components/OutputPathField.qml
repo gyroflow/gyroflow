@@ -68,8 +68,13 @@ TextField {
 
     function selectFolder(folder: url, cb) {
         root.cbAfterSelect = cb;
-        if (folder.toString())
+        if (folder.toString()) {
             outputFolderDialog.currentFolder = folder;
+        } else if (window.videoArea.loadedFileUrl.toString()) {
+            let parts = window.videoArea.loadedFileUrl.toString().split('/');
+            parts.pop();
+            outputFolderDialog.currentFolder = parts.join('/');
+        }
         outputFolderDialog.open();
     }
 

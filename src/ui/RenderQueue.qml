@@ -65,7 +65,6 @@ Item {
         Column {
             id: topCol;
             spacing: 5 * dpiScale;
-            height: parent.height;
             width: parent.parent.width - x - mainBtn.width - 3 * parent.spacing;
             property real progress: Math.max(0, Math.min(1, render_queue.current_frame / Math.max(1, render_queue.total_frames)));
             onProgressChanged: {
@@ -83,26 +82,40 @@ Item {
 
             Item {
                 width: parent.width;
-                height: 20 * dpiScale;
+                height: (twoLines? 35 : 20) * dpiScale;
                 id: totalTime;
                 property string elapsed: "---";
                 property string remaining: "---";
                 property real fps: 0;
                 property string fpsText: topCol.progress > 0? qsTr(" @ %1fps").arg(fps.toFixed(1)) : "";
+                onWidthChanged: Qt.callLater(totalTime.updateLayout);
+                property bool twoLines: false;
+                function updateLayout() {
+                    const totalTextSize = progressText1.width + progressText2.width + progressText3.width + 25 * dpiScale;
+                    twoLines = totalTextSize > totalTime.width;
+                }
+
                 BasicText {
+                    id: progressText1;
                     leftPadding: 0;
                     text: qsTr("Elapsed: %1").arg("<b>" + totalTime.elapsed + "</b>");
+                    onWidthChanged: Qt.callLater(totalTime.updateLayout);
                 }
                 BasicText {
+                    id: progressText2;
                     leftPadding: 0;
                     anchors.horizontalCenter: parent.horizontalCenter;
                     textFormat: Text.RichText;
                     text: `<b>${(topCol.progress*100).toFixed(2)}%</b> <small>(${render_queue.current_frame}/${render_queue.total_frames}${totalTime.fpsText})</small>`;
+                    y: totalTime.twoLines? progressText1.height + 5 * dpiScale : 0;
+                    onWidthChanged: Qt.callLater(totalTime.updateLayout);
                 }
                 BasicText {
+                    id: progressText3;
                     leftPadding: 0;
                     anchors.right: parent.right;
                     text: qsTr("Remaining: %1").arg("<b>" + (render_queue.status == "active"? totalTime.remaining : "---") + "</b>");
+                    onWidthChanged: Qt.callLater(totalTime.updateLayout);
                 }
             }
             QQC.ProgressBar {
@@ -207,6 +220,7 @@ Item {
             topPadding: 3 * dpiScale;
             bottomPadding: 3 * dpiScale;
             font.pixelSize: 12 * dpiScale;
+            anchors.verticalCenter: parent.verticalCenter;
             Component.onCompleted: contentItem.children[1].elide = Text.ElideNone;
             clip: true;
             Ease on implicitWidth { }
