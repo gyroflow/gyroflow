@@ -6,7 +6,7 @@ import "."
 
 LinkButton {
     visible: isMobile;
-    width: 60 * dpiScale;
+    width: 50 * dpiScale;
     height: width;
     anchors.right: parent.right;
     anchors.top: parent.top;
@@ -17,5 +17,5 @@ LinkButton {
     leftPadding: 0;
     rightPadding: 0;
     topPadding: 10 * dpiScale;
-    Component.onCompleted: { background.color = "#80000000"; background.radius = 10 * dpiScale; }
+    Component.onCompleted: { background.color = "#80000000"; background.radius = 5 * dpiScale; }
 }

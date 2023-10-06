@@ -51,12 +51,14 @@ Window {
 
     Component.onCompleted: {
         ui_tools.set_icon(calibrator_window);
-        Qt.callLater(() => {
-            calibrator_window.width = calibrator_window.width + 1;
-            calibrator_window.height = calibrator_window.height;
-        });
-        if (Qt.platform.os == "android" || Qt.platform.os == "ios") {
+        if (!isMobile) {
+            Qt.callLater(() => {
+                width = width + 1;
+                height = height;
+            });
+        } else {
             flags = Qt.WindowStaysOnTopHint;
+            Qt.callLater(() => { width = width + 1; calibrator_window.showFullScreen(); });
         }
     }
 

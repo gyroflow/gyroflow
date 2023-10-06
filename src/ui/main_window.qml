@@ -66,7 +66,7 @@ Window {
                 height = height;
             });
         } else {
-            Qt.callLater(() => { main_window.showFullScreen(); });
+            Qt.callLater(() => { width = width + 1; main_window.showFullScreen(); });
         }
         updateMargins.start();
     }

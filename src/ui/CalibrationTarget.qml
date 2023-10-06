@@ -24,8 +24,14 @@ Window {
 
     Component.onCompleted: {
         ui_tools.set_icon(root);
-        if (Qt.platform.os == "android" || Qt.platform.os == "ios") {
+        if (!isMobile) {
+            Qt.callLater(() => {
+                width = width + 1;
+                height = height;
+            });
+        } else {
             flags = Qt.WindowStaysOnTopHint;
+            Qt.callLater(() => { width = width + 1; root.showFullScreen(); });
         }
     }
     Column {
