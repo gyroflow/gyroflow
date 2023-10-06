@@ -161,13 +161,12 @@ Rectangle {
                         id: btnsRow;
                         anchors.horizontalCenter: parent.horizontalCenter;
                         spacing: 10 * dpiScale;
-                        onWidthChanged: {
-                            Qt.callLater(() => {
-                                if (btnsRow.width > col.width - 20 * dpiScale) {
-                                    btnsRow.width = col.width - 20 * dpiScale;
-                                }
-                            });
+                        function updateWidth() {
+                            if (btnsRow.width > col.width - 20 * dpiScale) {
+                                btnsRow.width = col.width - 20 * dpiScale;
+                            }
                         }
+                        onWidthChanged: Qt.callLater(btnsRow.updateWidth);
                         Repeater {
                             id: btns;
                             Button {
