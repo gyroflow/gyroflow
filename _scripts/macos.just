@@ -186,6 +186,7 @@ deploy *param:
     mkdir -p "$CARGO_TARGET/QtQuick/Controls/Basic/impl/"
     mkdir -p "$CARGO_TARGET/QtQuick/Controls/Material/impl/"
     mkdir -p "$CARGO_TARGET/QtQuick/Layouts/"
+    mkdir -p "$CARGO_TARGET/QtQuick/Effects/"
     mkdir -p "$CARGO_TARGET/QtQuick/Window/"
     mkdir -p "$CARGO_TARGET/QtQuick/Templates/"
     mkdir -p "$CARGO_TARGET/QtQuick/Dialogs/quickimpl/qml/+Material/"
@@ -234,7 +235,8 @@ deploy *param:
     cp -f $QT_DIR/qml/QtQuick/Dialogs/quickimpl/qml/*.qml                                             "$CARGO_TARGET/QtQuick/Dialogs/quickimpl/qml/"
     cp -f $QT_DIR/qml/QtQuick/Dialogs/quickimpl/qml/+Material/*.qml                                   "$CARGO_TARGET/QtQuick/Dialogs/quickimpl/qml/+Material/"
     cp -f $QT_DIR/qml/QtQuick/Dialogs/quickimpl/libqtquickdialogs2quickimplplugin.dylib               "$CARGO_TARGET/QtQuick/Dialogs/quickimpl/"
-    cp -f $QT_DIR/qml/QtQuick/Effects/libqtquickeffectsplugin.dylib                                   "$CARGO_TARGET/QtQuick/Effects/" || true
+    cp -f $QT_DIR/qml/QtQuick/Effects/libeffectsplugin.dylib                                          "$CARGO_TARGET/QtQuick/Effects/" || true
+    cp -f $QT_DIR/qml/QtQuick/Effects/qmldir                                                          "$CARGO_TARGET/QtQuick/Effects/" || true
 
     if [ "{{param}}" == "local" ] || [ "{{param}}" == "universal" ]; then
         CARGO_TARGET="$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/PlugIns"
@@ -307,7 +309,7 @@ deploy *param:
                 "Resources/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.dylib"
                 "Resources/qml/QtQuick/Dialogs/libqtquickdialogsplugin.dylib"
                 "Resources/qml/QtQuick/Dialogs/quickimpl/libqtquickdialogs2quickimplplugin.dylib"
-                "Resources/qml/QtQuick/Effects/libqtquickeffectsplugin.dylib"
+                "Resources/qml/QtQuick/Effects/libeffectsplugin.dylib"
                 "Resources/qml/QtQuick/Layouts/libqquicklayoutsplugin.dylib"
                 "Resources/qml/QtQuick/Templates/libqtquicktemplates2plugin.dylib"
                 "Resources/qml/QtQuick/Window/libquickwindowplugin.dylib"

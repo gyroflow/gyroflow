@@ -31,7 +31,7 @@ Window {
             });
         } else {
             flags = Qt.WindowStaysOnTopHint;
-            Qt.callLater(() => { width = width + 1; root.showFullScreen(); });
+            Qt.callLater(() => { root.showFullScreen(); });
         }
     }
     Column {

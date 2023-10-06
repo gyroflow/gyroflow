@@ -584,11 +584,6 @@ Rectangle {
         QT_TRANSLATE_NOOP("App", "Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.");
         QT_TRANSLATE_NOOP("App", "Gyroflow will reboot the computer in 60 seconds because all tasks have been completed.");
 
-        if (!isLandscape) {
-            isLandscapeChanged();
-        }
-        isMobileLayoutChanged();
-
         Qt.callLater(filesystem.restore_allowed_folders);
     }
 

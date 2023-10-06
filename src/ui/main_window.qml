@@ -66,7 +66,7 @@ Window {
                 height = height;
             });
         } else {
-            Qt.callLater(() => { width = width + 1; main_window.showFullScreen(); });
+            Qt.callLater(() => { main_window.showFullScreen(); });
         }
         updateMargins.start();
     }
@@ -128,6 +128,12 @@ Window {
         anchors.fill: parent;
         asynchronous: true;
         opacity: appLoader.status == Loader.Ready? 1 : 0.5;
+        onStatusChanged: {
+            if (status == Loader.Ready) {
+                Qt.callLater(item.isMobileLayoutChanged);
+                Qt.callLater(item.isLandscapeChanged);
+            }
+        }
         Ease on opacity { }
         sourceComponent: Component {
             App { objectName: "App"; }

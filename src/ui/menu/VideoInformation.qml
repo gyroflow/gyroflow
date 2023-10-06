@@ -134,7 +134,7 @@ MenuItem {
             anchors.fill: parent;
             cursorShape: Qt.PointingHandCursor;
             onClicked: {
-                opf.selectFolder(window.outputFile.folderUrl, function(_) {
+                opf.selectFolder("", function(_) {
                     window.videoArea.loadFile(window.videoArea.loadedFileUrl);
                 });
             }

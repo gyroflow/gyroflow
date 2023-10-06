@@ -130,6 +130,9 @@ deploy *param:
     Copy-Item -Path "$QT_LIBS\libQt6Qml_arm64-v8a.so"            -Destination "$QT_LIBS\libQt6Qml.so"            -ErrorAction SilentlyContinue
     Copy-Item -Path "$QT_LIBS\libQt6QuickControls2_arm64-v8a.so" -Destination "$QT_LIBS\libQt6QuickControls2.so" -ErrorAction SilentlyContinue
 
+    # Make sure qmlimportscanner finds QtQuick.Effects
+    [System.IO.File]::WriteAllText("$ProjectDir\src\ui\components\Modal.qml", [System.IO.File]::ReadAllText("$ProjectDir\src\ui\components\Modal.qml").Replace("`n// import QtQuick.Effects", "`nimport QtQuick.Effects"))
+
     # Replace [[bin]] with [lib]
     [System.IO.File]::WriteAllText("$ProjectDir\Cargo.toml", [System.IO.File]::ReadAllText("$ProjectDir\Cargo.toml").Replace("[[bin]]", "[lib]`ncrate-type = [""cdylib""]"))
 
@@ -242,7 +245,7 @@ deploy *param:
     $androiddeploy | Out-File -encoding utf8 -FilePath "$ProjectDir\target\android-build\android-deploy.json"
 
     $job = Start-Job -Name "Cleanup" -ArgumentList "$ProjectDir\target\android-build\libs\arm64-v8a" -ScriptBlock {
-        for ($num = 1; $num -le 400 ; $num++) {
+        for ($num = 1; $num -le 800 ; $num++) {
             Remove-Item "${args}\*Universal*"
             Remove-Item "${args}\*Imagine*"
             Remove-Item "${args}\*Fusion*"
@@ -268,6 +271,8 @@ deploy *param:
     if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") {
         iex "$cmd --aab"
     }
+
+    [System.IO.File]::WriteAllText("$ProjectDir\src\ui\components\Modal.qml", [System.IO.File]::ReadAllText("$ProjectDir\src\ui\components\Modal.qml").Replace("`nimport QtQuick.Effects", "`n// import QtQuick.Effects"))
 
     Stop-Job $job
 

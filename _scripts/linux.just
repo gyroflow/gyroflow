@@ -188,6 +188,7 @@ deploy *param:
     mkdir -p "$TARGET/qml/QtQuick/Controls/Basic/impl/"
     mkdir -p "$TARGET/qml/QtQuick/Controls/Material/impl/"
     mkdir -p "$TARGET/qml/QtQuick/Layouts/"
+    mkdir -p "$TARGET/qml/QtQuick/Effects/"
     mkdir -p "$TARGET/qml/QtQuick/Window/"
     mkdir -p "$TARGET/qml/QtQuick/Templates/"
     mkdir -p "$TARGET/qml/QtQuick/Dialogs/quickimpl/qml/+Material/"
@@ -234,7 +235,8 @@ deploy *param:
     cp -f $QT_DIR/qml/QtQuick/Dialogs/quickimpl/qml/*.qml                                            "$TARGET/qml/QtQuick/Dialogs/quickimpl/qml/"
     cp -f $QT_DIR/qml/QtQuick/Dialogs/quickimpl/qml/+Material/*.qml                                  "$TARGET/qml/QtQuick/Dialogs/quickimpl/qml/+Material/"
     cp -f $QT_DIR/qml/QtQuick/Dialogs/quickimpl/libqtquickdialogs2quickimplplugin.so                 "$TARGET/qml/QtQuick/Dialogs/quickimpl/"
-    cp -f $QT_DIR/qml/QtQuick/Effects/libqtquickeffectsplugin.so                                     "$TARGET/qml/QtQuick/Effects/" || true
+    cp -f $QT_DIR/qml/QtQuick/Effects/libeffectsplugin.so                                            "$TARGET/qml/QtQuick/Effects/" || true
+    cp -f $QT_DIR/qml/QtQuick/Effects/qmldir                                                         "$TARGET/qml/QtQuick/Effects/" || true
 
     mkdir -p "$TARGET/plugins/iconengines/"
     mkdir -p "$TARGET/plugins/imageformats/"

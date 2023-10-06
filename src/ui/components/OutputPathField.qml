@@ -121,6 +121,10 @@ TextField {
             Qt.callLater(filesystem.save_allowed_folders);
             updateText();
 
+            if (window.videoArea.loadedFileUrl.toString() && !window.vidInfo.hasAccessToInputDirectory && Qt.resolvedUrl(filesystem.get_folder(window.videoArea.loadedFileUrl)) == Qt.resolvedUrl(selectedFolder)) {
+                window.vidInfo.hasAccessToInputDirectory = true;
+            }
+
             if (root.cbAfterSelect) {
                 root.cbAfterSelect(root.folderUrl);
                 root.cbAfterSelect = null;

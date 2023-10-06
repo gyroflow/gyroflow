@@ -58,7 +58,7 @@ Window {
             });
         } else {
             flags = Qt.WindowStaysOnTopHint;
-            Qt.callLater(() => { width = width + 1; calibrator_window.showFullScreen(); });
+            Qt.callLater(() => { calibrator_window.showFullScreen(); });
         }
     }
 

@@ -197,7 +197,7 @@ Item {
         x: (root.fullScreen || window.isMobileLayout? 10 : 33) * dpiScale;
         y: 15 * dpiScale;
         width: parent.width - x - (root.fullScreen || window.isMobileLayout? 10 : 33) * dpiScale;
-        height: parent.height - y - (root.fullScreen || window.isMobileLayout? (root.editingSyncPoint || offsetsRepeater.count > 0? 20 : 0) : 30) * dpiScale - parent.additionalHeight;
+        height: parent.height - y - (root.fullScreen || window.isMobileLayout? (root.editingSyncPoint || offsetsRepeater.count > 0? 30 : 0) : 30) * dpiScale - parent.additionalHeight;
 
         Rectangle {
             x: 0;
