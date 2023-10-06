@@ -1013,7 +1013,7 @@ Item {
             width: parent.width;
             spacing: 5 * dpiScale;
             visible: children.length > 0;
-            y: Math.max(0, root.additionalTopMargin - vidParent.y);
+            y: root.additionalTopMargin;
             InfoMessage {
                 type: InfoMessage.Warning;
                 visible: vid.loaded && !controller.lens_loaded && !isCalibrator;

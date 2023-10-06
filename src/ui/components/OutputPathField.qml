@@ -66,15 +66,20 @@ TextField {
         updateText();
     }
 
-    function selectFolder(folder: url, cb) {
-        root.cbAfterSelect = cb;
+    function getFolderForDialog(folder: url): url {
         if (folder.toString()) {
-            outputFolderDialog.currentFolder = folder;
+            return folder;
         } else if (window.videoArea.loadedFileUrl.toString()) {
             let parts = window.videoArea.loadedFileUrl.toString().split('/');
             parts.pop();
-            outputFolderDialog.currentFolder = parts.join('/');
+            return parts.join('/') + '/';
         }
+        return "";
+    }
+
+    function selectFolder(folder: url, cb) {
+        root.cbAfterSelect = cb;
+        outputFolderDialog.currentFolder = root.getFolderForDialog(folder);
         outputFolderDialog.open();
     }
 
@@ -86,15 +91,13 @@ TextField {
         font.pixelSize: 15 * dpiScale;
         onClicked: {
             if (isSandboxed || root.folderOnly) {
-                if (root.folderOnly) {
-                    outputFolderDialog.currentFolder = root.folderUrl;
-                }
+                outputFolderDialog.currentFolder = root.getFolderForDialog(root.folderUrl);
                 outputFolderDialog.open();
                 return;
             }
             outputFileDialog.defaultSuffix = root.filename.substring(root.filename.length - 3);
             outputFileDialog.selectedFile = root.filename;
-            outputFileDialog.currentFolder = root.folderUrl;
+            outputFileDialog.currentFolder = root.getFolderForDialog(root.folderUrl);
             outputFileDialog.open();
         }
     }

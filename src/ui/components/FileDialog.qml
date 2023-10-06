@@ -14,7 +14,7 @@ FileDialog {
 
     function open2() {
         const savedFolder = window.settings.value("folder-" + type, "");
-        if (savedFolder && Qt.platform.os != "ios") currentFolder = savedFolder;
+        if (savedFolder) currentFolder = savedFolder;
         open();
     }
 }
