@@ -11,6 +11,7 @@ TextField {
     id: root;
     text: "";
     width: parent.width;
+    rightPadding: linkBtn.width;
 
     property var cbAfterSelect: null;
     property bool folderOnly: false;
@@ -84,6 +85,7 @@ TextField {
     }
 
     LinkButton {
+        id: linkBtn;
         anchors.right: parent.right;
         height: parent.height - 1 * dpiScale;
         text: "...";
