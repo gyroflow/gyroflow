@@ -1373,12 +1373,12 @@ dependencies = [
 
 [[package]]
 name = "khronos-egl"
-version = "4.1.0"
+version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c2352bd1d0bceb871cb9d40f24360c8133c11d7486b68b5381c1dd1a32015e3"
+checksum = "6aae1df220ece3c0ada96b8153459b67eebe9ae9212258bb0134ae60416fdf76"
 dependencies = [
  "libc",
- "libloading 0.7.4",
+ "libloading 0.8.1",
  "pkg-config",
 ]
 
@@ -2967,7 +2967,7 @@ checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
 [[package]]
 name = "wgpu"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e63b0f6#e63b0f6f17f84ef92890d069361add5cfbdd86c3"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=c85cbea#c85cbea39ef9133f52625b473bfffcced6b44a1e"
 dependencies = [
  "arrayvec 0.7.4",
  "cfg-if",
@@ -2990,7 +2990,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e63b0f6#e63b0f6f17f84ef92890d069361add5cfbdd86c3"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=c85cbea#c85cbea39ef9133f52625b473bfffcced6b44a1e"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-vec",
@@ -3012,7 +3012,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e63b0f6#e63b0f6f17f84ef92890d069361add5cfbdd86c3"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=c85cbea#c85cbea39ef9133f52625b473bfffcced6b44a1e"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.4",
@@ -3052,7 +3052,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e63b0f6#e63b0f6f17f84ef92890d069361add5cfbdd86c3"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=c85cbea#c85cbea39ef9133f52625b473bfffcced6b44a1e"
 dependencies = [
  "bitflags 2.4.0",
  "js-sys",
