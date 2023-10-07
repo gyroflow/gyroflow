@@ -246,7 +246,7 @@ pub fn init_logging() {
 
     qmetaobject::log::init_qt_to_rust();
 
-    qml_video_rs::video_item::MDKVideoItem::setLogHandler(|level: i32, text: String| {
+    qml_video_rs::video_item::MDKVideoItem::setLogHandler(|level: i32, text: &str| {
         match level {
             1 => { ::log::error!(target: "mdk", "[MDK] {}", text.trim()); },
             2 => { ::log::warn!(target: "mdk", "[MDK] {}", text.trim()); },

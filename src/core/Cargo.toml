@@ -64,10 +64,10 @@ libc = "0.2"
 
 opencv = { version = "0.84", features = ["clang-runtime"], optional = true }
 
-wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "c85cbea", features = ["spirv"] }
-wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "c85cbea" }
-wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "c85cbea" }
-wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "c85cbea" }
+wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "e63b0f6", features = ["spirv"] }
+wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "e63b0f6" }
+wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "e63b0f6" }
+wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "e63b0f6" }
 bytemuck = "1.14.0"
 ash = "0.37.3"
 naga = { git = "https://github.com/gfx-rs/naga", rev = "6668d0694cc51ee66c71c2ca3a1ab1081956299b", version = "0.13.0", features = ["clone", "span", "validate", "spv-in"] }
