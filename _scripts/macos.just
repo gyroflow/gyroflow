@@ -1,5 +1,13 @@
 !include common.just
 
+TeamID                        := "RR3ZC2L4DF"
+BundleIdentifier              := "xyz.gyroflow"
+DistributionCertificateSHA    := "7F82D6013B8F6D45F88FE547438744BD64750C5B"
+DistributionMacInstallerSHA   := "DC70831576E7B2345E78A516BEA2FC34D18F42F5"
+DistributionProvisioning      := ProjectDir / "_deployment/mac/Gyroflow_mac_app_store.provisionprofile"
+
+AppBundle := ProjectDir / "_deployment/_binaries/mac/Gyroflow.app"
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -118,7 +126,7 @@ deploy *param:
         export OPENCV_INCLUDE_PATHS=$OPENCV_DIR/x64-osx-release/include/
         rustup target add x86_64-apple-darwin
         cargo build --target x86_64-apple-darwin --profile deploy
-        strip $PROJECT_DIR/target/x86_64-apple-darwin/deploy/gyroflow
+        #strip $PROJECT_DIR/target/x86_64-apple-darwin/deploy/gyroflow
 
         export OPENCV_LINK_LIBS="$OPENCV_LINK_LIBS,tegra_hal"
         export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-arm64
@@ -127,19 +135,36 @@ deploy *param:
         export MACOSX_DEPLOYMENT_TARGET="11.0"
         rustup target add aarch64-apple-darwin
         cargo build --target aarch64-apple-darwin --profile deploy
-        strip $PROJECT_DIR/target/aarch64-apple-darwin/deploy/gyroflow
+        #strip $PROJECT_DIR/target/aarch64-apple-darwin/deploy/gyroflow
 
         lipo $PROJECT_DIR/target/{x86_64,aarch64}-apple-darwin/deploy/gyroflow -create -output $PROJECT_DIR/target/deploy/gyroflow
 
         popd
     fi
 
+    ICON=$PROJECT_DIR/resources/icon_1080_rounded.png
+    ICON_OUT=$PROJECT_DIR/_deployment/mac/Gyroflow.app/Contents/Resources/Images.xcassets/AppIcon.appiconset
+    sips -z 16 16      $ICON --out $ICON_OUT/icon_16x16.png
+    sips -z 32 32      $ICON --out $ICON_OUT/icon_16x16@2x.png
+    sips -z 32 32      $ICON --out $ICON_OUT/icon_32x32.png
+    sips -z 64 64      $ICON --out $ICON_OUT/icon_32x32@2x.png
+    sips -z 128 128    $ICON --out $ICON_OUT/icon_128x128.png
+    sips -z 256 256    $ICON --out $ICON_OUT/icon_128x128@2x.png
+    sips -z 256 256    $ICON --out $ICON_OUT/icon_256x256.png
+    sips -z 512 512    $ICON --out $ICON_OUT/icon_256x256@2x.png
+    sips -z 512 512    $ICON --out $ICON_OUT/icon_512x512.png
+    sips -z 1024 1024  $ICON --out $ICON_OUT/icon_512x512@2x.png
+    mkdir -p $ICON_OUT/../AppIcon.iconset/
+    cp -f $ICON_OUT/*.png $ICON_OUT/../AppIcon.iconset/
+    iconutil -c icns $ICON_OUT/../AppIcon.iconset --output $PROJECT_DIR/_deployment/mac/Gyroflow.app/Contents/Resources/AppIcon.icns
+    rm -rf $ICON_OUT/../AppIcon.iconset
+
     if [ "{{param}}" == "local" ] || [ "{{param}}" == "universal" ]; then
         mkdir -p "$PROJECT_DIR/_deployment/_binaries/mac"
         CARGO_TARGET="$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS"
         cp -Rf "$PROJECT_DIR/_deployment/mac/Gyroflow.app"    "$PROJECT_DIR/_deployment/_binaries/mac/"
-        strip  "$PROJECT_DIR/target/deploy/gyroflow"
         cp -f  "$PROJECT_DIR/target/deploy/gyroflow"          "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS/"
+        strip "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS/gyroflow"
         cp -Rf "$PROJECT_DIR/target/Frameworks/mdk.framework" "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/" || true
         cp -Rf "$PROJECT_DIR/target/x86_64-apple-darwin/Frameworks/mdk.framework" "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/"
         cp -Rf "$PROJECT_DIR/resources/camera_presets"        "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Resources/"
@@ -251,76 +276,20 @@ deploy *param:
 
     if [ "{{param}}" == "local" ] || [ "{{param}}" == "universal" ]; then
         xattr -c $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Info.plist
-        xattr -c $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Resources/icon.icns
+        xattr -c $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Resources/AppIcon.icns
         rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS/.empty
         rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/PlugIns/.empty
         rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/.empty
         rm -f $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/mdk.framework/Versions/A/libass.dylib
 
         if [ "$SIGNING_FINGERPRINT" != "" ]; then
-
             # Certificate needs to be "Developer ID Application"
 
-            OBJECTS=(
-                "Frameworks/mdk.framework/Versions/A/libffmpeg.6.dylib"
-                #"Frameworks/mdk.framework/Versions/A/libass.dylib"
-                "Frameworks/mdk.framework/Versions/A/libmdk-braw.dylib"
-                "Frameworks/mdk.framework/Versions/A/libmdk-r3d.dylib"
-                "Frameworks/mdk.framework/Versions/A/mdk"
-                "Frameworks/QtCore.framework/Versions/A/QtCore"
-                "Frameworks/QtDBus.framework/Versions/A/QtDBus"
-                "Frameworks/QtGui.framework/Versions/A/QtGui"
-                "Frameworks/QtLabsSettings.framework/Versions/A/QtLabsSettings"
-                "Frameworks/QtNetwork.framework/Versions/A/QtNetwork"
-                "Frameworks/QtOpenGL.framework/Versions/A/QtOpenGL"
-                "Frameworks/QtQml.framework/Versions/A/QtQml"
-                "Frameworks/QtQmlCore.framework/Versions/A/QtQmlCore"
-                "Frameworks/QtQmlModels.framework/Versions/A/QtQmlModels"
-                "Frameworks/QtQmlWorkerScript.framework/Versions/A/QtQmlWorkerScript"
-                "Frameworks/QtQuick.framework/Versions/A/QtQuick"
-                "Frameworks/QtQuickControls2.framework/Versions/A/QtQuickControls2"
-                "Frameworks/QtQuickControls2Impl.framework/Versions/A/QtQuickControls2Impl"
-                "Frameworks/QtQuickDialogs2.framework/Versions/A/QtQuickDialogs2"
-                "Frameworks/QtQuickDialogs2QuickImpl.framework/Versions/A/QtQuickDialogs2QuickImpl"
-                "Frameworks/QtQuickDialogs2Utils.framework/Versions/A/QtQuickDialogs2Utils"
-                "Frameworks/QtQuickEffects.framework/Versions/A/QtQuickEffects"
-                "Frameworks/QtQuickTemplates2.framework/Versions/A/QtQuickTemplates2"
-                "Frameworks/QtQuickLayouts.framework/Versions/A/QtQuickLayouts"
-                "Frameworks/QtSvg.framework/Versions/A/QtSvg"
-                "Frameworks/QtWidgets.framework/Versions/A/QtWidgets"
-                "PlugIns/iconengines/libqsvgicon.dylib"
-                "PlugIns/imageformats/libqsvg.dylib"
-                "PlugIns/imageformats/libqjpeg.dylib"
-                "PlugIns/platforms/libqcocoa.dylib"
-                "Resources/qml/Qt/labs/settings/libqmlsettingsplugin.dylib"
-                "Resources/qml/QtQml/libqmlplugin.dylib"
-                "Resources/qml/QtQml/libqmlmetaplugin.dylib"
-                "Resources/qml/QtQml/Base/libqmlplugin.dylib"
-                "Resources/qml/QtQml/Models/libmodelsplugin.dylib"
-                "Resources/qml/QtQml/WorkerScript/libworkerscriptplugin.dylib"
-                "Resources/qml/QtCore/libqtqmlcoreplugin.dylib"
-                "Resources/qml/QtQuick/libqtquick2plugin.dylib"
-                "Resources/qml/QtQuick/Controls/libqtquickcontrols2plugin.dylib"
-                "Resources/qml/QtQuick/Controls/Basic/libqtquickcontrols2basicstyleplugin.dylib"
-                "Resources/qml/QtQuick/Controls/Basic/impl/libqtquickcontrols2basicstyleimplplugin.dylib"
-                "Resources/qml/QtQuick/Controls/impl/libqtquickcontrols2implplugin.dylib"
-                "Resources/qml/QtQuick/Controls/macOS/libqtquickcontrols2macosstyleplugin.dylib"
-                "Resources/qml/QtQuick/Controls/Material/libqtquickcontrols2materialstyleplugin.dylib"
-                "Resources/qml/QtQuick/Controls/Material/impl/libqtquickcontrols2materialstyleimplplugin.dylib"
-                "Resources/qml/QtQuick/Dialogs/libqtquickdialogsplugin.dylib"
-                "Resources/qml/QtQuick/Dialogs/quickimpl/libqtquickdialogs2quickimplplugin.dylib"
-                "Resources/qml/QtQuick/Effects/libeffectsplugin.dylib"
-                "Resources/qml/QtQuick/Layouts/libqquicklayoutsplugin.dylib"
-                "Resources/qml/QtQuick/Templates/libqtquicktemplates2plugin.dylib"
-                "Resources/qml/QtQuick/Window/libquickwindowplugin.dylib"
-                "MacOS/gyroflow"
-            )
-            for i in "${OBJECTS[@]}"
-            do
-                codesign -vvvv --strict --options=runtime --timestamp --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/$i || true
-            done
+            find $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/ -name '*.dylib' -or -name 'gyroflow' -or -path '*/Versions/A/*' \
+                -not -path "*/Headers/*" -not -path "*/Resources/*" -not -name "CodeResources" -not -name "module.modulemap" -type f \
+                -exec codesign -vvvv --strict --options runtime --timestamp --force -s $SIGNING_FINGERPRINT {} || true \;
 
-            codesign -vvvv --strict --options=runtime --timestamp --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
+            codesign -vvvv --strict --options runtime --timestamp --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
 
             codesign -vvvv --deep --verify $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
         fi
@@ -330,7 +299,88 @@ deploy *param:
         hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v{{ProjectVersion}}" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9
 
         if [ "$SIGNING_FINGERPRINT" != "" ]; then
-            codesign -vvvv --strict --options=runtime --timestamp --force -s $SIGNING_FINGERPRINT "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"
+            codesign -vvvv --strict --options runtime --timestamp --force -s $SIGNING_FINGERPRINT "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"
             codesign -vvvv --deep --verify "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"
         fi
     fi
+
+[no-cd]
+bundle *param:
+    #!/bin/bash
+    set -e
+
+    : "${PROJECT_DIR:=$(cd "{{ProjectDir}}"; pwd -P)}"
+    export PATH="/usr/libexec/:$PATH"
+
+    cp -f "$PROJECT_DIR/_deployment/mac/Gyroflow.app/Contents/Info.plist" {{AppBundle}}/Contents/Info.plist
+    cp -f "$PROJECT_DIR/target/deploy/gyroflow" "{{AppBundle}}/Contents/MacOS/"
+
+    if ! [ -z "$GITHUB_RUN_NUMBER" ]; then
+        PlistBuddy -x -c "Set :CFBundleVersion \"`echo "{{ProjectVersion}}" | sed -E 's/[^0-9\.]//' | sed -E 's/\.([0-9]+)$/\1/'`.$GITHUB_RUN_NUMBER\"" {{AppBundle}}/Contents/Info.plist
+    fi
+
+    DEFAULT_SDK_VERSION=`xcrun --sdk macosx --show-sdk-version`
+    PlistBuddy -x -c "Add :BuildMachineOSBuild string `sw_vers -buildVersion`" {{AppBundle}}/Contents/Info.plist
+    PlistBuddy -x -c "Add :DTCompiler string `defaults read $(xcode-select -p)/../info DTCompiler`" {{AppBundle}}/Contents/Info.plist
+    PlistBuddy -x -c "Add :DTPlatformBuild string `xcrun --sdk macosx --show-sdk-build-version`" {{AppBundle}}/Contents/Info.plist
+    PlistBuddy -x -c "Add :DTPlatformName string macosx" {{AppBundle}}/Contents/Info.plist
+    PlistBuddy -x -c "Add :DTPlatformVersion string $DEFAULT_SDK_VERSION" {{AppBundle}}/Contents/Info.plist
+    PlistBuddy -x -c "Add :DTSDKBuild string `xcrun --sdk macosx --show-sdk-build-version`" {{AppBundle}}/Contents/Info.plist
+    PlistBuddy -x -c "Add :DTSDKName string macosx$DEFAULT_SDK_VERSION" {{AppBundle}}/Contents/Info.plist
+    PlistBuddy -x -c "Add :DTXcode string `defaults read $(xcode-select -p)/../info DTXcode`" {{AppBundle}}/Contents/Info.plist
+    PlistBuddy -x -c "Add :DTXcodeBuild string `xcodebuild -version | grep 'Build version' | sed 's/^Build version //'`" {{AppBundle}}/Contents/Info.plist
+
+    # Bundle BRAW and RED SDK
+    FrameworksDir=$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks
+    if [ ! -f "$FrameworksDir/REDR3D.dylib" ]; then
+        curl -L https://api.gyroflow.xyz/sdk/RED_SDK_MacOS_8.4.0.tar.gz -o tmp.tar.gz
+        7z x -aoa tmp.tar.gz
+        7z x -o"$FrameworksDir/" tmp.tar
+        rm tmp.tar tmp.tar.gz
+    fi
+    if [ ! -f "$FrameworksDir/BlackmagicRawAPI.framework/Versions/A/BlackmagicRawAPI" ]; then
+        curl -L https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_MacOS_3.3.tar.gz -o tmp.tar.gz
+        7z x -aoa tmp.tar.gz
+        7z x -o"$FrameworksDir/" tmp.tar
+        rm tmp.tar tmp.tar.gz
+    fi
+    chmod -R 0755 $FrameworksDir/*
+
+    # Generate entitlements
+    rm -f {{AppBundle}}/../entitlements.xcent
+    PlistBuddy -x -c "Add :com.apple.security.app-sandbox bool true" {{AppBundle}}/../entitlements.xcent
+    PlistBuddy -x -c "Add :com.apple.security.network.client bool true" {{AppBundle}}/../entitlements.xcent
+    PlistBuddy -x -c "Add :com.apple.security.files.user-selected.read-write bool true" {{AppBundle}}/../entitlements.xcent
+    PlistBuddy -x -c "Add :com.apple.security.files.bookmarks.app-scope bool true" {{AppBundle}}/../entitlements.xcent
+    PlistBuddy -x -c "Add :com.apple.security.files.bookmarks.document-scope bool true" {{AppBundle}}/../entitlements.xcent
+    PlistBuddy -x -c "Add :com.apple.security.get-task-allow bool false" {{AppBundle}}/../entitlements.xcent
+
+    actool {{ProjectDir}}/_deployment/ios/Resources/Images.xcassets --compile {{AppBundle}}/Contents --platform macosx --minimum-deployment-target 10.14 --app-icon AppIcon --output-partial-info-plist {{AppBundle}}/../AppIcon.plist
+
+    dsymutil {{AppBundle}}/Contents/MacOS/gyroflow -o {{AppBundle}}/../../Gyroflow.app.dSYM
+    mkdir -p {{AppBundle}}/../Symbols
+    xcrun symbols -noTextInSOD -noDaemon -arch all -symbolsPackageDir {{AppBundle}}/../Symbols {{AppBundle}}/../../Gyroflow.app.dSYM
+
+    if [ -z "$SIGN_KEY" ] || [ -z "$PKG_SIGN_KEY" ] || [ -z "$PROVISIONING_PROFILE" ]; then
+        SIGN_KEY="{{DistributionCertificateSHA}}"
+        PKG_SIGN_KEY="{{DistributionMacInstallerSHA}}"
+        PROVISIONING_PROFILE="{{DistributionProvisioning}}"
+    fi
+
+    cp -f $PROVISIONING_PROFILE {{AppBundle}}/Contents/embedded.provisionprofile
+
+    find $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/ -name '*.dylib' -or -name 'gyroflow' -or -path '*/Versions/A/*' \
+        -not -path "*/Headers/*" -not -path "*/Resources/*" -not -name "CodeResources" -not -name "module.modulemap" -type f \
+        -exec codesign -vvvv --strict --options runtime --timestamp --force -s $SIGN_KEY --entitlements {{AppBundle}}/../entitlements.xcent {} \;
+
+    codesign -vvvv --deep --strict --options runtime --timestamp --force -s $SIGN_KEY --entitlements {{AppBundle}}/../entitlements.xcent {{AppBundle}}
+
+    PlistBuddy -x -c "Add :com.apple.application-identifier string {{TeamID}}.{{BundleIdentifier}}" {{AppBundle}}/../entitlements.xcent
+    PlistBuddy -x -c "Add :com.apple.developer.team-identifier string {{TeamID}}" {{AppBundle}}/../entitlements.xcent
+    codesign -vvvv --strict --options runtime --timestamp --force -s $SIGN_KEY --entitlements {{AppBundle}}/../entitlements.xcent {{AppBundle}}
+
+    codesign -vvvv --deep --verify $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
+
+    xcrun productbuild --symbolication {{AppBundle}}/../Symbols --component {{AppBundle}} "/Applications" --sign $PKG_SIGN_KEY "{{AppBundle}}/../../Gyroflow.pkg"
+
+    xcrun altool --validate-app -f "{{AppBundle}}/../../Gyroflow.pkg" -t macos -u "sfhmechan+itunes@gmail.com" -p "afsm-titm-giyf-nfio"

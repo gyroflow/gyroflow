@@ -72,6 +72,16 @@ jobs:
           issuer-id: ${{ secrets.MACOS_ITCONNECT_ISSUER }}
           api-key-id: ${{ secrets.MACOS_ITCONNECT_KEY_ID }}
           api-private-key: ${{ secrets.MACOS_ITCONNECT_KEY }}
+      - name: Download Provisioning Profiles
+        if: ${{ matrix.targets.type == 'macos' }}
+        id: provisioning_mac
+        uses: apple-actions/download-provisioning-profiles@v2
+        with:
+          bundle-id: 'xyz.gyroflow'
+          profile-type: 'MAC_APP_STORE'
+          issuer-id: ${{ secrets.MACOS_ITCONNECT_ISSUER }}
+          api-key-id: ${{ secrets.MACOS_ITCONNECT_KEY_ID }}
+          api-private-key: ${{ secrets.MACOS_ITCONNECT_KEY }}
 
       - name: Save keystore to file
         if: ${{ matrix.targets.os == 'windows-2022' }}
@@ -87,11 +97,19 @@ jobs:
         if: ${{ matrix.targets.type == 'macos' }}
         env:
           SIGNING_FINGERPRINT: ${{ secrets.MACOS_CERTIFICATE_FINGERPRINT }}
+          # For Mac App Store
+          SIGN_KEY: 7F82D6013B8F6D45F88FE547438744BD64750C5B
+          PKG_SIGN_KEY: DC70831576E7B2345E78A516BEA2FC34D18F42F5
+          PROVISIONING_PROFILE: /Users/runner/Library/MobileDevice/Provisioning Profiles/${{ matrix.targets.type == 'macos' && fromJSON(steps.provisioning_mac.outputs.profiles)[0].udid || '' }}.provisionprofile
         run: |
+          ls -l /Users/runner/Library/MobileDevice/Provisioning Profiles/
           just install-deps
           just deploy universal
           xcrun notarytool submit --wait --apple-id ${{ secrets.MACOS_ACCOUNT_USER }} --team-id ${{ secrets.MACOS_TEAM }} --password ${{ secrets.MACOS_ACCOUNT_PASS }} ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg
           xcrun stapler staple --verbose ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg
+          if [ "$BUILD_APP_STORE_BUNDLE" == "true" ]; then
+              just bundle
+          fi
 
       - name: Build Gyroflow (Linux)
         if: ${{ matrix.targets.type == 'linux' }}
@@ -159,7 +177,9 @@ jobs:
 
       - name: Upload to App Store
         #if: startsWith(github.ref, 'refs/tags/')
-        run: xcrun altool --upload-app -f ./Gyroflow-ios/Gyroflow.ipa -t iOS -u ${{ secrets.MACOS_ACCOUNT_USER }} -p ${{ secrets.MACOS_ACCOUNT_PASS }}
+        run: |
+          xcrun altool --upload-app -f ./Gyroflow-ios/Gyroflow.ipa -t iOS -u ${{ secrets.MACOS_ACCOUNT_USER }} -p ${{ secrets.MACOS_ACCOUNT_PASS }}
+          xcrun altool --upload-app -f ./Gyroflow-macos/Gyroflow.pkg -t macos -u ${{ secrets.MACOS_ACCOUNT_USER }} -p ${{ secrets.MACOS_ACCOUNT_PASS }}
 
       - name: Upload to Google Play
         uses: r0adkll/upload-google-play@v1

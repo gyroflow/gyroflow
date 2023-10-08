@@ -5,7 +5,7 @@
     <key>CFBundleDevelopmentRegion</key>           <string>en</string>
     <key>CFBundleDisplayName</key>                 <string>Gyroflow</string>
     <key>CFBundleExecutable</key>                  <string>gyroflow</string>
-    <key>CFBundleIconFile</key>                    <string>icon.icns</string>
+    <key>CFBundleIconFile</key>                    <string>AppIcon.icns</string>
     <key>CFBundleIdentifier</key>                  <string>xyz.gyroflow</string>
     <key>CFBundleInfoDictionaryVersion</key>       <string>6.0</string>
     <key>CFBundleName</key>                        <string>Gyroflow</string>
@@ -17,9 +17,11 @@
     <key>LSMinimumSystemVersion</key>              <string>10.14</string>
     <key>LSRequiresNativeExecution</key>           <true/>
     <key>NSHighResolutionCapable</key>             <true/>
+    <key>ITSAppUsesNonExemptEncryption</key>       <false/>
     <key>NSMainNibFile</key>                       <string></string>
     <key>NSRequiresAquaSystemAppearance</key>      <string>NO</string>
     <key>NSSupportsAutomaticGraphicsSwitching</key><true/>
+    <key>LSApplicationCategoryType</key>           <string>public.app-category.video</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -72,7 +74,7 @@
 			<key>CFBundleTypeExtensions</key><array><string>M2T</string><string>M2TS</string></array>
 			<key>CFBundleTypeName</key>      <string>M2T(s)</string>
 			<key>CFBundleTypeRole</key>      <string>Viewer</string>
-			<key>LSHandlerRank</key>         <string>Name</string>
+			<key>LSHandlerRank</key>         <string>None</string>
 		</dict>
 	</array>
 	<key>UTExportedTypeDeclarations</key>

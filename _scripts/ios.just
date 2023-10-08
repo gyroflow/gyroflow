@@ -141,6 +141,30 @@ build-and-package profile is_dist:
             PlistBuddy -x -c "Set :CFBundleVersion \"{{ProjectVersion}}.$GITHUB_RUN_NUMBER\"" {{AppBundle}}/Info.plist
         fi
 
+        ICON=$PROJECT_DIR/resources/icon_1080.png
+        ICON_OUT={{ProjectDir}}/_deployment/ios/Resources/Images.xcassets/AppIcon.appiconset
+        sips -z 40 40     $ICON --out $ICON_OUT/AppIcon-20@2x.png
+        sips -z 40 40     $ICON --out $ICON_OUT/AppIcon-20@2x~ipad.png
+        sips -z 60 60     $ICON --out $ICON_OUT/AppIcon-20@3x.png
+        sips -z 20 20     $ICON --out $ICON_OUT/AppIcon-20~ipad.png
+        sips -z 29 29     $ICON --out $ICON_OUT/AppIcon-29.png
+        sips -z 58 58     $ICON --out $ICON_OUT/AppIcon-29@2x.png
+        sips -z 58 58     $ICON --out $ICON_OUT/AppIcon-29@2x~ipad.png
+        sips -z 87 87     $ICON --out $ICON_OUT/AppIcon-29@3x.png
+        sips -z 29 29     $ICON --out $ICON_OUT/AppIcon-29~ipad.png
+        sips -z 80 80     $ICON --out $ICON_OUT/AppIcon-40@2x.png
+        sips -z 80 80     $ICON --out $ICON_OUT/AppIcon-40@2x~ipad.png
+        sips -z 120 120   $ICON --out $ICON_OUT/AppIcon-40@3x.png
+        sips -z 40 40     $ICON --out $ICON_OUT/AppIcon-40~ipad.png
+        sips -z 120 120   $ICON --out $ICON_OUT/AppIcon-60@2x~car.png
+        sips -z 180 180   $ICON --out $ICON_OUT/AppIcon-60@3x~car.png
+        sips -z 167 167   $ICON --out $ICON_OUT/AppIcon-83.5@2x~ipad.png
+        sips -z 120 120   $ICON --out $ICON_OUT/AppIcon@2x.png
+        sips -z 152 152   $ICON --out $ICON_OUT/AppIcon@2x~ipad.png
+        sips -z 180 180   $ICON --out $ICON_OUT/AppIcon@3x.png
+        sips -z 1024 1024 $ICON --out $ICON_OUT/AppIcon~ios-marketing.png
+        sips -z 76 76     $ICON --out $ICON_OUT/AppIcon~ipad.png
+
         DEFAULT_iOS_SDK_VERSION=`xcrun --sdk iphoneos --show-sdk-version`
         PlistBuddy -x -c "Add :BuildMachineOSBuild string `sw_vers -buildVersion`" {{AppBundle}}/Info.plist
         PlistBuddy -x -c "Add :DTCompiler string `defaults read $(xcode-select -p)/../info DTCompiler`" {{AppBundle}}/Info.plist
