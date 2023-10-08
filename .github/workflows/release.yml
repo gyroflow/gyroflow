@@ -100,9 +100,8 @@ jobs:
           # For Mac App Store
           SIGN_KEY: 7F82D6013B8F6D45F88FE547438744BD64750C5B
           PKG_SIGN_KEY: DC70831576E7B2345E78A516BEA2FC34D18F42F5
-          PROVISIONING_PROFILE: /Users/runner/Library/MobileDevice/Provisioning Profiles/${{ matrix.targets.type == 'macos' && fromJSON(steps.provisioning_mac.outputs.profiles)[0].udid || '' }}.provisionprofile
+          PROVISIONING_PROFILE: /Users/runner/Library/MobileDevice/Provisioning Profiles/${{ matrix.targets.type == 'macos' && fromJSON(steps.provisioning_mac.outputs.profiles)[0].udid || '' }}.mobileprovision
         run: |
-          ls -l /Users/runner/Library/MobileDevice/Provisioning Profiles/
           just install-deps
           just deploy universal
           xcrun notarytool submit --wait --apple-id ${{ secrets.MACOS_ACCOUNT_USER }} --team-id ${{ secrets.MACOS_TEAM }} --password ${{ secrets.MACOS_ACCOUNT_PASS }} ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg
