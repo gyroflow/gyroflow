@@ -141,7 +141,7 @@ build-and-package profile is_dist:
             PlistBuddy -x -c "Set :CFBundleVersion \"{{ProjectVersion}}.$GITHUB_RUN_NUMBER\"" {{AppBundle}}/Info.plist
         fi
 
-        ICON=$PROJECT_DIR/resources/icon_1080.png
+        ICON={{ProjectDir}}/resources/icon_1080.png
         ICON_OUT={{ProjectDir}}/_deployment/ios/Resources/Images.xcassets/AppIcon.appiconset
         sips -z 40 40     $ICON --out $ICON_OUT/AppIcon-20@2x.png
         sips -z 40 40     $ICON --out $ICON_OUT/AppIcon-20@2x~ipad.png
