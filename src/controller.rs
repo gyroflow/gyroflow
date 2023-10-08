@@ -624,7 +624,7 @@ impl Controller {
         if let Some(view) = view.to_qobject::<TimelineKeyframesView>() {
             let view = unsafe { &mut *view.as_ptr() }; // _self.borrow_mut();
 
-            view.setKeyframes(&*self.stabilizer.keyframes.read());
+            view.setKeyframes(&self.stabilizer.keyframes.read());
         }
     }
 
@@ -755,7 +755,7 @@ impl Controller {
                     additional_obj.insert("contains_motion".to_owned(),   serde_json::Value::Bool(has_motion));
                     additional_obj.insert("has_accurate_timestamps".to_owned(), serde_json::Value::Bool(gyro.file_metadata.has_accurate_timestamps));
                     additional_obj.insert("sample_rate".to_owned(),       serde_json::to_value(gyroflow_core::gyro_source::GyroSource::get_sample_rate(&gyro.file_metadata)).unwrap());
-                    let has_builtin_profile = gyro.file_metadata.lens_profile.as_ref().and_then(|y| Some(y.is_object())).unwrap_or_default();
+                    let has_builtin_profile = gyro.file_metadata.lens_profile.as_ref().map(|y| y.is_object()).unwrap_or_default();
                     let md_data = gyro.file_metadata.additional_data.clone();
                     if let Some(md_fps) = gyro.file_metadata.frame_rate {
                         let fps = stab.params.read().fps;
@@ -1611,7 +1611,7 @@ impl Controller {
 
             let used_points = cal.read().as_ref().map(|x| x.used_points.clone()).unwrap_or_default();
 
-            self.calib_model = RefCell::new(used_points.iter().map(|(_k, v)| CalibrationItem {
+            self.calib_model = RefCell::new(used_points.values().map(|v| CalibrationItem {
                 timestamp_us: v.timestamp_us,
                 sharpness: v.avg_sharpness,
                 is_forced: v.is_forced

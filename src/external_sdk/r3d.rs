@@ -136,22 +136,20 @@ impl REDSdk {
                 let mut out_filename = None;
                 let mut any_progress = false;
 
-                for line in reader.lines() {
-                    if let Ok(line) = line {
-                        if let Some(m) = re_output_name.captures(&line) {
-                            out_filename = Some(gyroflow_core::filesystem::path_to_url(m.get(1).unwrap().as_str()));
+                for line in reader.lines().flatten() {
+                    if let Some(m) = re_output_name.captures(&line) {
+                        out_filename = Some(gyroflow_core::filesystem::path_to_url(m.get(1).unwrap().as_str()));
+                    }
+                    if let Some(m) = re_progress.captures(&line) {
+                        if let Ok(p) = m.get(1).unwrap().as_str().parse::<f64>() {
+                            progress((p, String::new(), out_filename.clone().unwrap_or_default()));
+                            any_progress = true;
                         }
-                        if let Some(m) = re_progress.captures(&line) {
-                            if let Ok(p) = m.get(1).unwrap().as_str().parse::<f64>() {
-                                progress((p, String::new(), out_filename.clone().unwrap_or_default()));
-                                any_progress = true;
-                            }
-                        }
-                        ::log::debug!("REDline: {}", line);
-                        if cancel_flag.load(SeqCst) {
-                            child.kill()?;
-                            break;
-                        }
+                    }
+                    ::log::debug!("REDline: {}", line);
+                    if cancel_flag.load(SeqCst) {
+                        child.kill()?;
+                        break;
                     }
                 }
                 if !any_progress || out_filename.is_none() {

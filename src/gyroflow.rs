@@ -47,7 +47,7 @@ fn entry() {
     #[cfg(target_os = "windows")]
     unsafe {
         use windows::Win32::System::Console::*;
-        if !AttachConsole(ATTACH_PARENT_PROCESS).is_ok() && cli::will_run_in_console() {
+        if AttachConsole(ATTACH_PARENT_PROCESS).is_err() && cli::will_run_in_console() {
             let _ = AllocConsole();
         }
     }

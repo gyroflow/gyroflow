@@ -287,7 +287,7 @@ deploy *param:
 
             find $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/ -name '*.dylib' -or -name 'gyroflow' -or -path '*/Versions/A/*' \
                 -not -path "*/Headers/*" -not -path "*/Resources/*" -not -name "CodeResources" -not -name "module.modulemap" -type f \
-                -exec codesign -vvvv --strict --options runtime --timestamp --force -s $SIGNING_FINGERPRINT {} || true \;
+                -exec codesign -vvvv --strict --options runtime --timestamp --force -s $SIGNING_FINGERPRINT {} \;
 
             codesign -vvvv --strict --options runtime --timestamp --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
 

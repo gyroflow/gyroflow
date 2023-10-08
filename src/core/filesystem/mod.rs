@@ -600,17 +600,17 @@ pub fn restore_allowed_folders(list: &[String]) {
 
 pub fn get_allowed_folders() -> Vec<String> {
     let mut ret = Vec::new();
-    {
-        let lock = ALLOWED_FOLDERS.read().clone();
-        for x in lock.into_iter() {
-            #[cfg(any(target_os = "macos", target_os = "ios"))]
-            {
-                let bookmark = apple::create_bookmark(&x, true, None);
-                if !bookmark.is_empty() {
-                    ret.push(bookmark);
-                }
-                continue;
+    let folders = ALLOWED_FOLDERS.read().clone();
+    for x in folders.into_iter() {
+        #[cfg(any(target_os = "macos", target_os = "ios"))]
+        {
+            let bookmark = apple::create_bookmark(&x, true, None);
+            if !bookmark.is_empty() {
+                ret.push(bookmark);
             }
+        }
+        #[cfg(not(any(target_os = "macos", target_os = "ios")))]
+        {
             ret.push(x);
         }
     }

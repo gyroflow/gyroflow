@@ -411,9 +411,6 @@ pub fn save_exe_location() {
                     }
                 }
             }
-        } else if cfg!(target_os = "linux") {
-            // TODO: AppImage
-            set_setting("exeLocation", &exe_path.to_string_lossy());
         } else {
             set_setting("exeLocation", &exe_path.to_string_lossy());
         }

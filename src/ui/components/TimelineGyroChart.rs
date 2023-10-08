@@ -250,7 +250,7 @@ impl TimelineGyroChart {
 
         let mut min =  999999999.0f64;
         let mut max = -999999999.0f64;
-        for (_, &(offset, _linear_offset)) in &self.sync_points {
+        for &(offset, _linear_offset) in self.sync_points.values() {
             min = min.min(offset);
             max = max.max(offset);
         }

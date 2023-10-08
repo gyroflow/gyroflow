@@ -649,7 +649,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     let output_url = gyroflow_core::filesystem::get_file_url(folder, filename, false);
 
     let re = regex::Regex::new(r#"%[0-9]+d"#).unwrap();
-    if re.is_match(&filename) {
+    if re.is_match(filename) {
         ::log::debug!("Removing {output_url}");
         let _ = gyroflow_core::filesystem::remove_file(&output_url);
     }
@@ -788,7 +788,7 @@ pub fn get_encoder_options(name: &str) -> String {
         Some(encoder) => { unsafe { codec_options(encoder.as_ptr()); } },
         None => log::warn!("Failed to find codec by name: {name}")
     }
-    let ret = get_log().replace("E..V.......", "").replace("\n", "<br>");
+    let ret = get_log().replace("E..V.......", "").replace('\n', "<br>");
     clear_log();
     ret
 }
