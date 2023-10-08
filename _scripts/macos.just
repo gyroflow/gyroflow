@@ -369,7 +369,7 @@ bundle *param:
         PROVISIONING_PROFILE="{{DistributionProvisioning}}"
     fi
 
-    cp -f $PROVISIONING_PROFILE {{AppBundle}}/Contents/embedded.provisionprofile
+    cp -f "$PROVISIONING_PROFILE" {{AppBundle}}/Contents/embedded.provisionprofile
 
     find {{AppBundle}}/Contents \( -name "*.dylib" -or -path "*/Versions/A/*" \) -and ! \( \
         -path "*/Headers/*" -or -path "*/A/Resources/*" -or -name "CodeResources" -or -name "module.modulemap" \) -type f | sort | xargs -r \
