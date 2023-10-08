@@ -60,7 +60,19 @@ jobs:
         if: ${{ matrix.targets.os == 'macos-latest' }}
         uses: apple-actions/import-codesign-certs@v2
         with:
-          p12-file-base64: ${{ matrix.targets.type == 'ios' && secrets.MAC_APPSTORE_CERTIFICATE || secrets.MACOS_CERTIFICATE }}
+          p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
+          p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+      - name: Install Mac certificate 2
+        if: ${{ matrix.targets.os == 'macos-latest' }}
+        uses: apple-actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.MAC_APPSTORE_CERTIFICATE }}
+          p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+      - name: Install Mac certificate 3
+        if: ${{ matrix.targets.os == 'macos-latest' }}
+        uses: apple-actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.MAC_APPSTOREINSTALLER_CERTIFICATE }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
       - name: Download Provisioning Profiles
         if: ${{ matrix.targets.type == 'ios' }}
