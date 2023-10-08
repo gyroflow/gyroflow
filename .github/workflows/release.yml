@@ -56,23 +56,11 @@ jobs:
           rm -r -force ${{ github.workspace }}/target/deploy/build/qml-video-rs* -ErrorAction SilentlyContinue
           rm -r -force ${{ github.workspace }}/target/release/build/qml-video-rs* -ErrorAction SilentlyContinue
 
-      - name: Install Mac certificate
+      - name: Install Mac certificates
         if: ${{ matrix.targets.os == 'macos-latest' }}
         uses: apple-actions/import-codesign-certs@v2
         with:
-          p12-file-base64: ${{ secrets.MACOS_CERTIFICATE }}
-          p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
-      - name: Install Mac certificate 2
-        if: ${{ matrix.targets.os == 'macos-latest' }}
-        uses: apple-actions/import-codesign-certs@v2
-        with:
-          p12-file-base64: ${{ secrets.MAC_APPSTORE_CERTIFICATE }}
-          p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
-      - name: Install Mac certificate 3
-        if: ${{ matrix.targets.os == 'macos-latest' }}
-        uses: apple-actions/import-codesign-certs@v2
-        with:
-          p12-file-base64: ${{ secrets.MAC_APPSTOREINSTALLER_CERTIFICATE }}
+          p12-file-base64: ${{ secrets.MACOS_CERTIFICATES }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}
       - name: Download Provisioning Profiles
         if: ${{ matrix.targets.type == 'ios' }}
