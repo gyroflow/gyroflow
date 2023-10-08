@@ -285,9 +285,11 @@ deploy *param:
         if [ "$SIGNING_FINGERPRINT" != "" ]; then
             # Certificate needs to be "Developer ID Application"
 
-            find $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/ -name '*.dylib' -or -name 'gyroflow' -or -path '*/Versions/A/*' \
-                -not -path "*/Headers/*" -not -path "*/Resources/*" -not -name "CodeResources" -not -name "module.modulemap" -type f \
-                -exec codesign -vvvv --strict --options runtime --timestamp --force -s $SIGNING_FINGERPRINT {} \;
+            find $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents \( -name "*.dylib" -or -path "*/Versions/A/*" \) -and ! \( \
+                -path "*/Headers/*" -or -path "*/Resources/*" -or -name "CodeResources" -or -name "module.modulemap" \) -type f | sort | xargs -r \
+                codesign -vvvv --strict --options runtime --timestamp --force -s $SIGNING_FINGERPRINT
+
+            codesign -vvvv --strict --options runtime --timestamp --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS/gyroflow
 
             codesign -vvvv --strict --options runtime --timestamp --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
 
@@ -331,7 +333,7 @@ bundle *param:
     PlistBuddy -x -c "Add :DTXcodeBuild string `xcodebuild -version | grep 'Build version' | sed 's/^Build version //'`" {{AppBundle}}/Contents/Info.plist
 
     # Bundle BRAW and RED SDK
-    FrameworksDir=$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks
+    FrameworksDir={{AppBundle}}/Contents/Frameworks
     if [ ! -f "$FrameworksDir/REDR3D.dylib" ]; then
         curl -L https://api.gyroflow.xyz/sdk/RED_SDK_MacOS_8.4.0.tar.gz -o tmp.tar.gz
         7z x -aoa tmp.tar.gz
@@ -369,18 +371,17 @@ bundle *param:
 
     cp -f $PROVISIONING_PROFILE {{AppBundle}}/Contents/embedded.provisionprofile
 
-    find $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/ -name '*.dylib' -or -name 'gyroflow' -or -path '*/Versions/A/*' \
-        -not -path "*/Headers/*" -not -path "*/Resources/*" -not -name "CodeResources" -not -name "module.modulemap" -type f \
-        -exec codesign -vvvv --strict --options runtime --timestamp --force -s $SIGN_KEY --entitlements {{AppBundle}}/../entitlements.xcent {} \;
+    find {{AppBundle}}/Contents \( -name "*.dylib" -or -path "*/Versions/A/*" \) -and ! \( \
+        -path "*/Headers/*" -or -path "*/Resources/*" -or -name "CodeResources" -or -name "module.modulemap" \) -type f | sort | xargs -r \
+        codesign -vvvv --strict --options runtime --timestamp --force -s $SIGN_KEY --entitlements {{AppBundle}}/../entitlements.xcent
 
+    codesign -vvvv --deep --strict --options runtime --timestamp --force -s $SIGN_KEY --entitlements {{AppBundle}}/../entitlements.xcent {{AppBundle}}/Contents/MacOS/gyroflow
     codesign -vvvv --deep --strict --options runtime --timestamp --force -s $SIGN_KEY --entitlements {{AppBundle}}/../entitlements.xcent {{AppBundle}}
 
     PlistBuddy -x -c "Add :com.apple.application-identifier string {{TeamID}}.{{BundleIdentifier}}" {{AppBundle}}/../entitlements.xcent
     PlistBuddy -x -c "Add :com.apple.developer.team-identifier string {{TeamID}}" {{AppBundle}}/../entitlements.xcent
     codesign -vvvv --strict --options runtime --timestamp --force -s $SIGN_KEY --entitlements {{AppBundle}}/../entitlements.xcent {{AppBundle}}
 
-    codesign -vvvv --deep --verify $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
+    codesign -vvvv --deep --verify {{AppBundle}}
 
     xcrun productbuild --symbolication {{AppBundle}}/../Symbols --component {{AppBundle}} "/Applications" --sign $PKG_SIGN_KEY "{{AppBundle}}/../../Gyroflow.pkg"
-
-    xcrun altool --validate-app -f "{{AppBundle}}/../../Gyroflow.pkg" -t macos -u "sfhmechan+itunes@gmail.com" -p "afsm-titm-giyf-nfio"
