@@ -175,7 +175,7 @@ The recommended workflow is to export project file and use one of [video editor 
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="302"/>
-      <location filename="../../src/ui/App.qml" line="625"/>
+      <location filename="../../src/ui/App.qml" line="630"/>
       <source>Output file already exists, do you want to overwrite it?</source>
       <translation>匯出檔案已經存在。您是否要覆寫它?</translation>
     </message>
@@ -188,7 +188,7 @@ The recommended workflow is to export project file and use one of [video editor 
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="304"/>
-      <location filename="../../src/ui/App.qml" line="695"/>
+      <location filename="../../src/ui/App.qml" line="700"/>
       <source>Rename</source>
       <translation>重命名</translation>
     </message>
@@ -200,8 +200,8 @@ The recommended workflow is to export project file and use one of [video editor 
       <translation>否</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="557"/>
-      <location filename="../../src/ui/App.qml" line="566"/>
+      <location filename="../../src/ui/App.qml" line="562"/>
+      <location filename="../../src/ui/App.qml" line="571"/>
       <source>Select file destination</source>
       <translation>選擇檔案目的地</translation>
     </message>
@@ -221,7 +221,7 @@ The recommended workflow is to export project file and use one of [video editor 
       <translation>不存在同步點，您的結果將不正確。您確定要渲染此檔案嗎？</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="405"/>
+      <location filename="../../src/ui/App.qml" line="410"/>
       <source>Render queue</source>
       <translation>渲染列</translation>
     </message>
@@ -230,8 +230,9 @@ The recommended workflow is to export project file and use one of [video editor 
       <location filename="../../src/ui/App.qml" line="311"/>
       <location filename="../../src/ui/App.qml" line="321"/>
       <location filename="../../src/ui/App.qml" line="328"/>
-      <location filename="../../src/ui/App.qml" line="521"/>
-      <location filename="../../src/ui/App.qml" line="524"/>
+      <location filename="../../src/ui/App.qml" line="339"/>
+      <location filename="../../src/ui/App.qml" line="526"/>
+      <location filename="../../src/ui/App.qml" line="529"/>
       <source>Ok</source>
       <translation>確定</translation>
     </message>
@@ -249,43 +250,43 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
 - 使用 &quot;自定義編碼器選項&quot;： `-rc cqp -qp_i 28 -qp_p 28`</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="676"/>
+      <location filename="../../src/ui/App.qml" line="681"/>
       <source>Saving...</source>
       <translation>儲存中...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="544"/>
+      <location filename="../../src/ui/App.qml" line="549"/>
       <source>There&apos;s a newer version available: %1.</source>
       <translation>發現新版本 %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="545"/>
+      <location filename="../../src/ui/App.qml" line="550"/>
       <source>Download</source>
       <translation>下載</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="545"/>
+      <location filename="../../src/ui/App.qml" line="550"/>
       <source>Close</source>
       <translation>關閉</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="691"/>
+      <location filename="../../src/ui/App.qml" line="696"/>
       <source>`.gyroflow` file already exists, what do you want to do?</source>
       <translation>`.gyroflow` 文檔已經存在，您想干什麽？</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="692"/>
+      <location filename="../../src/ui/App.qml" line="697"/>
       <source>Overwrite</source>
       <translation>覆蓋</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="710"/>
+      <location filename="../../src/ui/App.qml" line="715"/>
       <source>Choose a different location</source>
       <translation>選擇其他路徑</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="602"/>
-      <location filename="../../src/ui/App.qml" line="715"/>
+      <location filename="../../src/ui/App.qml" line="607"/>
+      <location filename="../../src/ui/App.qml" line="720"/>
       <source>Cancel</source>
       <translation>取消</translation>
     </message>
@@ -293,49 +294,56 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="327"/>
       <source>Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>由於檔案存取限制，您需要手動選擇目標資料夾。
+按一下確定並選擇目標資料夾。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="576"/>
+      <location filename="../../src/ui/App.qml" line="338"/>
+      <source>Keep this app in the foreground and don&apos;t lock the screen.
+Due to limitations of the system video encoders, rendering in the background is not supported.</source>
+      <translation>將此 APP 保持在前台運行並不要鎖定螢幕。
+受限於系統視訊編碼器，不支援後台渲染。</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/App.qml" line="581"/>
       <source>An error occured: %1</source>
       <translation>發生錯誤：%1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="577"/>
+      <location filename="../../src/ui/App.qml" line="582"/>
       <source>Gyroflow file exported to %1.</source>
       <translation>Gyroflow 檔案匯出至 %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="578"/>
+      <location filename="../../src/ui/App.qml" line="583"/>
       <source>--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--</source>
       <comment>Translate this to the native name of your language</comment>
       <translation>繁體中文</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="579"/>
+      <location filename="../../src/ui/App.qml" line="584"/>
       <source>Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.</source>
       <translation>由於所有任務都已完成，Gyroflow 將在 60 秒內關閉計算機。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="580"/>
+      <location filename="../../src/ui/App.qml" line="585"/>
       <source>Gyroflow will reboot the computer in 60 seconds because all tasks have been completed.</source>
       <translation>由於所有任務都已完成，Gyroflow 將在 60 秒內重啟計算機。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="596"/>
+      <location filename="../../src/ui/App.qml" line="601"/>
       <source>This encoder requires an external library licensed as GPL.
 Do you agree with the [GPL license] and want to download the additional codec?</source>
       <translation>此編碼器需要使用 GPL 授權的外部庫。
 您是否同意 [GPL 許可證] 並下載額外的編解碼器？</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="597"/>
+      <location filename="../../src/ui/App.qml" line="602"/>
       <source>Yes, I agree</source>
       <translation>好的，我同意</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="612"/>
+      <location filename="../../src/ui/App.qml" line="617"/>
       <source>Permission denied. Unable to create or write file.
 Change the output path or run the program as administrator.
 Make sure you have write permissions to the target directory and make sure target file is not used by any other application.</source>
@@ -344,7 +352,7 @@ Make sure you have write permissions to the target directory and make sure targe
 請確保您擁有目標路徑的寫入權限，並確保目標檔案沒有被任何其他應用程式佔用。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="613"/>
+      <location filename="../../src/ui/App.qml" line="618"/>
       <source>NVIDIA GPU driver is too old, GPU encoding will not work for this format.
 Update your NVIDIA drivers to the newest version: %1.
 If the issue is still present after driver update, your GPU probably doesn&apos;t support GPU encoding with this format. Disable GPU encoding in this case.</source>
@@ -353,31 +361,31 @@ If the issue is still present after driver update, your GPU probably doesn&apos;
 若更新驅動後仍存在該問題，那麼您的顯卡或許不支持對當前格式進行 GPU 編碼。請關閉 GPU 編碼。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="622"/>
+      <location filename="../../src/ui/App.qml" line="627"/>
       <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
 Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
       <translation>GPU 加速編碼器不支援該像素格式 (%1)。
 你是否希望將其轉換為其他受支援的像素格式，或是保留原始格式並使用 CPU 渲染？</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="628"/>
+      <location filename="../../src/ui/App.qml" line="633"/>
       <source>GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.
 If you have a modern device, latest GPU drivers and you think this shouldn&apos;t happen, report this on GitHub including gyroflow.log file.</source>
       <translation>GPU 編碼器未能初始化，渲染在速度慢得多的 CPU 上完成。
 如果你的設備比較新，安裝了最新的 GPU 驅動器並且你認為這種情況不應發生，請在 GitHub 上連帶您的 gyroflow.log 文件向我們報告這個問題。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="631"/>
+      <location filename="../../src/ui/App.qml" line="636"/>
       <source>Your GPU doesn&apos;t support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.</source>
       <translation>您的 GPU 不支持 H.265/HEVC 編碼，請嘗試使用 H.264/AVC 或在匯出選項中禁用 GPU 編碼。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="634"/>
+      <location filename="../../src/ui/App.qml" line="639"/>
       <source>Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</source>
       <translation>請確保您的輸出擴展名支持所選中的編解碼。 &quot;.mov&quot; 在大多數情況下都可用。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="637"/>
+      <location filename="../../src/ui/App.qml" line="642"/>
       <source>Audio encoder couldn&apos;t process the input data. Try unchecking &quot;Export audio&quot; in Export settings.</source>
       <translation>音頻編碼器無法處理輸入數據。請嘗試在匯出設置中取消 &quot;導出音頻&quot;。</translation>
     </message>
@@ -618,12 +626,12 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="613"/>
       <source>Preserve export path</source>
-      <translation type="unfinished">Preserve export path</translation>
+      <translation>保留匯出路徑</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="615"/>
       <source>Save output path in settings and use it for all files.</source>
-      <translation type="unfinished">Save output path in settings and use it for all files.</translation>
+      <translation>在設定中儲存輸出路徑，並將其用於所有檔案。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="378"/>
@@ -634,7 +642,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="359"/>
       <source>Edit sizes</source>
-      <translation type="unfinished">Edit sizes</translation>
+      <translation>編輯大小</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="362"/>
@@ -644,7 +652,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="370"/>
       <source>You can edit the output size presets here:</source>
-      <translation type="unfinished">You can edit the output size presets here:</translation>
+      <translation>您可以在此處編輯輸出大小預設:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="371"/>
@@ -664,7 +672,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="502"/>
       <source>Metadata comment</source>
-      <translation type="unfinished">Metadata comment</translation>
+      <translation>元資料註釋</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="510"/>
@@ -694,7 +702,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="538"/>
       <source>Audio codec</source>
-      <translation type="unfinished">Audio codec</translation>
+      <translation>音訊編解碼器</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="550"/>
@@ -1035,17 +1043,17 @@ Do you want to submit your profile?</source>
   <context>
     <name>Modal</name>
     <message>
-      <location filename="../../src/ui/components/Modal.qml" line="166"/>
+      <location filename="../../src/ui/components/Modal.qml" line="195"/>
       <source>Troubleshooting</source>
-      <translation type="unfinished">Troubleshooting</translation>
+      <translation>故障排除</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Modal.qml" line="178"/>
+      <location filename="../../src/ui/components/Modal.qml" line="207"/>
       <source>Don&apos;t show again</source>
       <translation>不再顯示</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Modal.qml" line="178"/>
+      <location filename="../../src/ui/components/Modal.qml" line="207"/>
       <source>Remember this choice</source>
       <translation>記住這個選擇</translation>
     </message>
@@ -1214,16 +1222,16 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="42"/>
       <source>[Selected folder]</source>
-      <translation type="unfinished">[Selected folder]</translation>
+      <translation>[選定的資料夾]</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/OutputPathField.qml" line="99"/>
-      <location filename="../../src/ui/components/OutputPathField.qml" line="109"/>
+      <location filename="../../src/ui/components/OutputPathField.qml" line="104"/>
+      <location filename="../../src/ui/components/OutputPathField.qml" line="114"/>
       <source>Select file destination</source>
       <translation>選擇檔案目的地</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/OutputPathField.qml" line="100"/>
+      <location filename="../../src/ui/components/OutputPathField.qml" line="105"/>
       <source>Video files</source>
       <translation>影片檔案</translation>
     </message>
@@ -1316,12 +1324,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="147"/>
       <source>Mobile Light</source>
-      <translation type="unfinished">Mobile Light</translation>
+      <translation>行動端亮色</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="148"/>
       <source>Mobile Dark</source>
-      <translation type="unfinished">Mobile Dark</translation>
+      <translation>行動端暗色</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="167"/>
@@ -1384,37 +1392,37 @@ Do you want to submit your profile?</source>
       <translation>視覺功能</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="645"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="659"/>
       <source>Do nothing</source>
       <translation>不進行任何操作</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="646"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="660"/>
       <source>Shut down the computer</source>
       <translation>關閉電腦</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="647"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="661"/>
       <source>Restart the computer</source>
       <translation>重啟電腦</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="648"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="662"/>
       <source>Sleep</source>
       <translation>睡眠</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="649"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="663"/>
       <source>Hibernate</source>
       <translation>休眠</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="650"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="664"/>
       <source>Logout</source>
       <translation>注销</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="651"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="665"/>
       <source>Close Gyroflow</source>
       <translation>關閉 Gyroflow</translation>
     </message>
@@ -1422,7 +1430,7 @@ Do you want to submit your profile?</source>
   <context>
     <name>RenderQueue</name>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="197"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="210"/>
       <source>Pause</source>
       <translation>暫停</translation>
     </message>
@@ -1432,263 +1440,263 @@ Do you want to submit your profile?</source>
       <translation>渲染列</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="653"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="667"/>
       <source>When rendering is finished: %1</source>
       <translation>當渲染完成時: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="91"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="533"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="90"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="547"/>
       <source> @ %1fps</source>
       <translation> @ %1fps</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="94"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="101"/>
       <source>Elapsed: %1</source>
       <translation>耗時: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="105"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="117"/>
       <source>Remaining: %1</source>
       <translation>剩餘: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="124"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="151"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="240"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="137"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="164"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="254"/>
       <source>Ok</source>
       <translation>確定</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="135"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="148"/>
       <source>Rendering %1...</source>
       <translation>渲染中 %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="135"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="148"/>
       <source>Converting to %1 %2...</source>
       <translation>轉換為 %1 %2...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="153"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="166"/>
       <source>Rendering completed. The file was written to: %1.</source>
       <translation>渲染完成。檔案已寫入: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="146"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="571"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="159"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="585"/>
       <source>Open rendered file</source>
       <translation>打開已渲染檔案</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="149"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="577"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="162"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="591"/>
       <source>Open file location</source>
       <translation>開啟檔案所在位置</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="167"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="403"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="180"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="417"/>
       <source>Render using CPU</source>
       <translation>使用 CPU 渲染</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="174"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="187"/>
       <source>Cancel</source>
       <translation>取消</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="176"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="189"/>
       <source>GPU accelerated encoder doesn&apos;t support this pixel format (%1).
 Do you want to convert to a different supported pixel format or keep the original one and render on the CPU?</source>
       <translation>GPU 加速編碼器不支援該像素格式 (%1)。
 你是否希望將其轉換為其他受支援的像素格式，或是保留原始格式並使用 CPU 渲染？</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="195"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="208"/>
       <source>Start exporting</source>
       <translation>開始匯出</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="196"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="209"/>
       <source>Resume</source>
       <translation>恢復</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="236"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="250"/>
       <source>You have unfinished tasks in the render queue.</source>
       <translation>在渲染佇列中有未完成的任務。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="237"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="251"/>
       <source>Open render queue</source>
       <translation>開啟渲染佇列</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="306"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="320"/>
       <source>Render now</source>
       <translation>立刻渲染</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="312"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="326"/>
       <source>Edit</source>
       <translation>編輯</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="325"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="339"/>
       <source>Reset status</source>
       <translation>重置狀態</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="325"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="339"/>
       <source>Stop</source>
       <translation>停止</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="393"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="407"/>
       <source>Missing required components.</source>
       <translation>缺少依賴組件。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="416"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="746"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="430"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="760"/>
       <source>Yes</source>
       <translation>是</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="417"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="431"/>
       <source>Rename</source>
       <translation>重命名</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="418"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="747"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="432"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="761"/>
       <source>No</source>
       <translation>否</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="500"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="514"/>
       <source>ETA %1</source>
-      <translation type="unfinished">ETA %1</translation>
+      <translation>剩餘時間 %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="501"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="515"/>
       <source>Synchronizing: %1</source>
-      <translation type="unfinished">Synchronizing: %1</translation>
+      <translation>正在同步: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="502"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="516"/>
       <source>Rendering: %1</source>
-      <translation type="unfinished">Rendering: %1</translation>
+      <translation>渲染中: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="674"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="688"/>
       <source>Queue settings</source>
       <translation>佇列設定值</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="713"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="727"/>
       <source>Number of parallel renders</source>
       <translation>並行渲染數</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="724"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="738"/>
       <source>Default overwrite action</source>
       <translation>默認覆蓋動作</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="725"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="739"/>
       <source>Ask</source>
       <translation>詢問</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="727"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="741"/>
       <source>Overwrite file</source>
       <translation>覆蓋檔案</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="728"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="742"/>
       <source>Rename file</source>
       <translation>重命名檔案</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="729"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="743"/>
       <source>Skip file</source>
       <translation>略過檔案</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="734"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="748"/>
       <source>Export mode</source>
       <translation>匯出模式</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="735"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="749"/>
       <source>Stabilized video</source>
       <translation>穩定視頻</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="736"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="750"/>
       <source>Project file</source>
       <translation>專案檔</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="737"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="751"/>
       <source>Project file (including gyro data)</source>
       <translation>導出項目檔案 (包括陀螺數據)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="738"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="752"/>
       <source>Project file (including processed gyro data)</source>
       <translation>導出項目檔案 (包括處理過的陀螺數據)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="739"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="753"/>
       <source>Stabilized video + Project file with gyro data</source>
-      <translation type="unfinished">Stabilized video + Project file with gyro data</translation>
+      <translation>增穩的影片 + 帶有陀螺資料的專案文件</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="743"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="757"/>
       <source>Show queue when adding an item</source>
       <translation>添加項目時顯示隊列</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="744"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="758"/>
       <source>Clear render queue</source>
       <translation>清除渲染佇列</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="745"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="759"/>
       <source>Are you sure you want to remove all items from the render queue?</source>
       <translation>您確定您想要清除渲染佇列中的所有項目嗎？</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="413"/>
-      <location filename="../../src/ui/RenderQueue.qml" line="418"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="427"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="432"/>
       <source>Output file already exists.</source>
       <translation>匯出檔案已存在。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="537"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="551"/>
       <source>Synchronizing...</source>
       <translation>正在同步...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="538"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="552"/>
       <source>Elapsed: %1. Remaining: %2</source>
       <translation>耗時: %1。剩餘: %2</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="581"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="595"/>
       <source>Remove</source>
       <translation>移除</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="504"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="518"/>
       <source>Save to: %1</source>
       <translation>儲存至: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/RenderQueue.qml" line="505"/>
+      <location filename="../../src/ui/RenderQueue.qml" line="519"/>
       <source>Export settings: %1</source>
       <translation>匯出設定: %1</translation>
     </message>
@@ -1859,17 +1867,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="234"/>
       <source>Save to lens profile directory</source>
-      <translation type="unfinished">Save to lens profile directory</translation>
+      <translation>儲存到鏡頭設定檔目錄</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="235"/>
       <source>Save as default preset</source>
-      <translation type="unfinished">Save as default preset</translation>
+      <translation>儲存為預設預設</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="236"/>
       <source>Save to file</source>
-      <translation type="unfinished">Save to file</translation>
+      <translation>儲存至檔案</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
@@ -2066,7 +2074,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="391"/>
       <source>IMU integration method for keeping track of the horizon and adjust built-in quaternions</source>
-      <translation type="unfinished">IMU integration method for keeping track of the horizon and adjust built-in quaternions</translation>
+      <translation>追蹤地平線並調整內建四元數的 IMU 積分方法</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="400"/>
@@ -2527,40 +2535,40 @@ Make sure you have proper rolling shutter value set before syncing.</source>
   <context>
     <name>Tabs</name>
     <message>
-      <location filename="../../src/ui/App.qml" line="426"/>
+      <location filename="../../src/ui/App.qml" line="431"/>
       <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
+      <translation>輸入</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="426"/>
+      <location filename="../../src/ui/App.qml" line="431"/>
       <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
+      <translation>參數</translation>
     </message>
     <message>
-      <location filename="../../src/ui/App.qml" line="426"/>
+      <location filename="../../src/ui/App.qml" line="431"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>匯出</translation>
     </message>
   </context>
   <context>
     <name>Timeline</name>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="530"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="531"/>
       <source>Auto sync here</source>
       <translation>在此自動同步</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="535"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="536"/>
       <source>Add manual sync point here</source>
       <translation>在此處添加手動同步點</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="548"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="549"/>
       <source>Estimate rolling shutter here</source>
       <translation>在此估算滾動快門</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="552"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="553"/>
       <source>Your video needs to be already synced properly and you should use this function
 on a part of your video with significant camera motion (ideally horizontal).
 
@@ -2573,17 +2581,17 @@ Are you sure you want to continue?</source>
 您確定要繼續嗎？</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="556"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="557"/>
       <source>Yes</source>
       <translation>是</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="559"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="560"/>
       <source>No</source>
       <translation>否</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="521"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="522"/>
       <source>Add calibration point</source>
       <translation>添加校準點</translation>
     </message>
@@ -2697,67 +2705,67 @@ Are you sure you want to continue?</source>
       <translation>平滑度</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="540"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="541"/>
       <source>Guess IMU orientation here</source>
       <translation>在此推測 IMU 方向</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="565"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="566"/>
       <source>Estimate gyro bias here</source>
       <translation>在此估算陀螺儀偏差</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="570"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="571"/>
       <source>Delete all sync points</source>
       <translation>刪除全部同步點</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="579"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="580"/>
       <source>Chart display mode</source>
       <translation>圖表顯示模式</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="580"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="581"/>
       <source>Gyroscope</source>
       <translation>陀螺儀</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="581"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="582"/>
       <source>Accelerometer</source>
       <translation>加速度計</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="582"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="583"/>
       <source>Magnetometer</source>
       <translation>磁力計</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="583"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="584"/>
       <source>Quaternions</source>
       <translation>四元數</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="742"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="743"/>
       <source>px</source>
       <translation>像素 (px)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="843"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="844"/>
       <source>Option+Scroll</source>
-      <translation type="unfinished">Option+Scroll</translation>
+      <translation>選項+滾輪</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="844"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="845"/>
       <source>Command+Scroll</source>
       <translation>命令+滾輪</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="844"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="845"/>
       <source>Ctrl+Scroll</source>
       <translation>Ctrl+滾輪</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="841"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="842"/>
       <source>%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</source>
       <translation>%1 水平縮放，%2 垂直縮放，%3 平鋪，雙擊重置縮放。</translation>
     </message>
@@ -2782,24 +2790,24 @@ Are you sure you want to continue?</source>
       <translation>Yaw 平滑度</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="842"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="843"/>
       <source>Scroll</source>
       <translation>滾輪中鍵</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="843"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="844"/>
       <source>Alt+Scroll</source>
       <translation>Alt+滾輪</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="694"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="795"/>
-      <location filename="../../src/ui/components/Timeline.qml" line="802"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="695"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="796"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="803"/>
       <source>ms</source>
       <translation>毫秒</translation>
     </message>
     <message>
-      <location filename="../../src/ui/components/Timeline.qml" line="822"/>
+      <location filename="../../src/ui/components/Timeline.qml" line="823"/>
       <source>Save</source>
       <translation>保存</translation>
     </message>
@@ -2981,17 +2989,17 @@ The camera probably doesn&apos;t record motion data in this particular shooting 
 50 Hz 是一個最小值，我們建議至少 200 Hz。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="671"/>
+      <location filename="../../src/ui/VideoArea.qml" line="1020"/>
       <source>Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.</source>
       <translation>鏡頭檔案并未加載，結果看起來可能會不正塙。請爲您的攝像機加載鏡頭檔案。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="725"/>
+      <location filename="../../src/ui/VideoArea.qml" line="711"/>
       <source>Loading %1...</source>
       <translation>加載中 %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="725"/>
+      <location filename="../../src/ui/VideoArea.qml" line="711"/>
       <source>Drop video file here</source>
       <translation>將影片檔案拖曳至此處</translation>
     </message>
@@ -3045,72 +3053,72 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
       <translation>全畫幅等效焦距: %1 毫米</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="725"/>
+      <location filename="../../src/ui/VideoArea.qml" line="711"/>
       <source>Click here to open a video file</source>
-      <translation type="unfinished">Click here to open a video file</translation>
+      <translation>點擊這裡打開一個影片文件</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="863"/>
+      <location filename="../../src/ui/VideoArea.qml" line="831"/>
       <source>Trim start</source>
       <translation>修剪開始</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="864"/>
+      <location filename="../../src/ui/VideoArea.qml" line="832"/>
       <source>Previous frame</source>
       <translation>前一個影格</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="867"/>
+      <location filename="../../src/ui/VideoArea.qml" line="835"/>
       <source>Pause</source>
       <translation>暫停</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="867"/>
+      <location filename="../../src/ui/VideoArea.qml" line="835"/>
       <source>Play</source>
       <translation>播放</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="871"/>
+      <location filename="../../src/ui/VideoArea.qml" line="839"/>
       <source>Next frame</source>
       <translation>下一個影格</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="872"/>
+      <location filename="../../src/ui/VideoArea.qml" line="840"/>
       <source>Trim end</source>
       <translation>修剪結尾</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="873"/>
+      <location filename="../../src/ui/VideoArea.qml" line="841"/>
       <source>Show timeline menu</source>
-      <translation type="unfinished">Show timeline menu</translation>
+      <translation>顯示時間軸選單</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="912"/>
+      <location filename="../../src/ui/VideoArea.qml" line="880"/>
       <source>Toggle stabilization overview</source>
       <translation>切換穩定概覽</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="919"/>
+      <location filename="../../src/ui/VideoArea.qml" line="887"/>
       <source>Toggle stabilization</source>
       <translation>切換穩定</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="925"/>
+      <location filename="../../src/ui/VideoArea.qml" line="893"/>
       <source>Mute</source>
       <translation>靜音</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="925"/>
+      <location filename="../../src/ui/VideoArea.qml" line="893"/>
       <source>Unmute</source>
       <translation>取消靜音</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="943"/>
+      <location filename="../../src/ui/VideoArea.qml" line="911"/>
       <source>Volume</source>
       <translation>音量</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="973"/>
+      <location filename="../../src/ui/VideoArea.qml" line="941"/>
       <source>Playback speed</source>
       <translation>播放速度</translation>
     </message>
@@ -3123,12 +3131,12 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
       <translation>影片資訊</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/VideoInformation.qml" line="124"/>
+      <location filename="../../src/ui/menu/VideoInformation.qml" line="131"/>
       <source>In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</source>
-      <translation type="unfinished">In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</translation>
+      <translation>若要偵測項目檔案、影片序列或影像序列，請點選此處選擇具有輸入檔案的目錄。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/VideoInformation.qml" line="138"/>
+      <location filename="../../src/ui/menu/VideoInformation.qml" line="122"/>
       <source>Open file</source>
       <translation>打開檔案</translation>
     </message>
