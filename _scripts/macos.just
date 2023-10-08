@@ -286,7 +286,7 @@ deploy *param:
             # Certificate needs to be "Developer ID Application"
 
             find $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents \( -name "*.dylib" -or -path "*/Versions/A/*" \) -and ! \( \
-                -path "*/Headers/*" -or -path "*/Resources/*" -or -name "CodeResources" -or -name "module.modulemap" \) -type f | sort | xargs -r \
+                -path "*/Headers/*" -or -path "*/A/Resources/*" -or -name "CodeResources" -or -name "module.modulemap" \) -type f | sort | xargs -r \
                 codesign -vvvv --strict --options runtime --timestamp --force -s $SIGNING_FINGERPRINT
 
             codesign -vvvv --strict --options runtime --timestamp --force -s $SIGNING_FINGERPRINT $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/MacOS/gyroflow
@@ -372,7 +372,7 @@ bundle *param:
     cp -f $PROVISIONING_PROFILE {{AppBundle}}/Contents/embedded.provisionprofile
 
     find {{AppBundle}}/Contents \( -name "*.dylib" -or -path "*/Versions/A/*" \) -and ! \( \
-        -path "*/Headers/*" -or -path "*/Resources/*" -or -name "CodeResources" -or -name "module.modulemap" \) -type f | sort | xargs -r \
+        -path "*/Headers/*" -or -path "*/A/Resources/*" -or -name "CodeResources" -or -name "module.modulemap" \) -type f | sort | xargs -r \
         codesign -vvvv --strict --options runtime --timestamp --force -s $SIGN_KEY --entitlements {{AppBundle}}/../entitlements.xcent
 
     codesign -vvvv --deep --strict --options runtime --timestamp --force -s $SIGN_KEY --entitlements {{AppBundle}}/../entitlements.xcent {{AppBundle}}/Contents/MacOS/gyroflow
