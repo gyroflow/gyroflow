@@ -10,3 +10,4 @@ gyroflow.log
 .DS_Store
 *.mobileprovision
 *.pfx
+resources/camera_presets
