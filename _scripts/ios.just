@@ -75,7 +75,7 @@ install-deps:
     fi
 
     # ――――――――――――――――――――――――――――――――――― Lens profiles ―――――――――――――――――――――――――――――――――――
-    git clone https://github.com/gyroflow/lens_profiles.git {{ProjectDir}}/resources/camera_presets || true
+    git clone --depth 1 https://github.com/gyroflow/lens_profiles.git {{ProjectDir}}/resources/camera_presets || true
     git -C {{ProjectDir}}/resources/camera_presets pull
     # ――――――――――――――――――――――――――――――――――― Lens profiles ―――――――――――――――――――――――――――――――――――
 

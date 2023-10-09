@@ -77,7 +77,7 @@ install-deps:
     fi
 
     # ――――――――――――――――――――――――――――――――――― Lens profiles ―――――――――――――――――――――――――――――――――――
-    git clone https://github.com/gyroflow/lens_profiles.git {{ProjectDir}}/resources/camera_presets || true
+    git clone --depth 1 https://github.com/gyroflow/lens_profiles.git {{ProjectDir}}/resources/camera_presets || true
     git -C {{ProjectDir}}/resources/camera_presets pull
     # ――――――――――――――――――――――――――――――――――― Lens profiles ―――――――――――――――――――――――――――――――――――
 
@@ -173,6 +173,7 @@ deploy *param:
         cp -Rf "$PROJECT_DIR/target/Frameworks/mdk.framework" "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/" || true
         cp -Rf "$PROJECT_DIR/target/x86_64-apple-darwin/Frameworks/mdk.framework" "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Frameworks/"
         cp -Rf "$PROJECT_DIR/resources/camera_presets"        "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Resources/"
+        rm -rf "$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Resources/camera_presets/.git"
     fi
 
     cp -af "$QT_DIR/lib/QtCore.framework"                     "$CARGO_TARGET/../Frameworks/"
@@ -301,9 +302,11 @@ deploy *param:
             codesign -vvvv --deep --verify $PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app
         fi
 
-        ln -sf /Applications "$PROJECT_DIR/_deployment/_binaries/mac/Applications"
-        sudo mdutil -a -i off
-        hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v{{ProjectVersion}}" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9
+        if [ -z "$DONT_BUILD_DMG" ]; then
+            ln -sf /Applications "$PROJECT_DIR/_deployment/_binaries/mac/Applications"
+            sudo mdutil -a -i off
+            hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v{{ProjectVersion}}" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9
+        fi
 
         if [ "$SIGNING_FINGERPRINT" != "" ]; then
             codesign -vvvv --strict --options runtime --timestamp --force -s $SIGNING_FINGERPRINT "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"

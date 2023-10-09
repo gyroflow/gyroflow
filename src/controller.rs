@@ -1755,8 +1755,8 @@ impl Controller {
                     for obj in v.get("tree")?.as_array()? {
                         let obj = obj.as_object()?;
                         let path = obj.get("path")?.as_str()?;
-                        if path.contains("/camera_presets/") && (path.contains(".json") || path.contains(".gyroflow")) {
-                            let local_path = LensProfileDatabase::get_path().join(path.replace("resources/camera_presets/", ""));
+                        if path.ends_with(".json") || path.ends_with(".gyroflow") {
+                            let local_path = LensProfileDatabase::get_path().join(path);
                             if !local_path.exists() {
                                 ::log::info!("Downloading lens profile {:?}", local_path.file_name()?);
 

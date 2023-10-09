@@ -30,9 +30,9 @@ dependencies = [
 
 [[package]]
 name = "aho-corasick"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea5d730647d4fadd988536d06fecce94b7b4f2a7efdae548f1cf4b63205518ab"
+checksum = "b2969dcb958b36655471fc61f7e416fa76033bdd4bfed0678d8fee1e2d07a1f0"
 dependencies = [
  "memchr",
 ]
@@ -1588,7 +1588,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.13.0"
-source = "git+https://github.com/gfx-rs/naga?rev=6668d0694cc51ee66c71c2ca3a1ab1081956299b#6668d0694cc51ee66c71c2ca3a1ab1081956299b"
+source = "git+https://github.com/gfx-rs/naga?rev=3c7dbc4016b84a35c69b30305b12abaeefc21fd9#3c7dbc4016b84a35c69b30305b12abaeefc21fd9"
 dependencies = [
  "bit-set",
  "bitflags 2.4.0",
@@ -2967,7 +2967,7 @@ checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
 [[package]]
 name = "wgpu"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=c85cbea#c85cbea39ef9133f52625b473bfffcced6b44a1e"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=2664da8#2664da88b0c7e5090a4f6d40dea834ae79005560"
 dependencies = [
  "arrayvec 0.7.4",
  "cfg-if",
@@ -2990,7 +2990,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=c85cbea#c85cbea39ef9133f52625b473bfffcced6b44a1e"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=2664da8#2664da88b0c7e5090a4f6d40dea834ae79005560"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-vec",
@@ -3012,7 +3012,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=c85cbea#c85cbea39ef9133f52625b473bfffcced6b44a1e"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=2664da8#2664da88b0c7e5090a4f6d40dea834ae79005560"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.4",
@@ -3052,7 +3052,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=c85cbea#c85cbea39ef9133f52625b473bfffcced6b44a1e"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=2664da8#2664da88b0c7e5090a4f6d40dea834ae79005560"
 dependencies = [
  "bitflags 2.4.0",
  "js-sys",
