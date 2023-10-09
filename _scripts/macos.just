@@ -220,7 +220,7 @@ deploy *param:
     cp -f $QT_DIR/qml/QtCore/libqtqmlcoreplugin.dylib                                                 "$CARGO_TARGET/QtCore/"
 
     cp -f $QT_DIR/qml/QtQml/qmldir                                                                    "$CARGO_TARGET/QtQml/"
-    cp -f $QT_DIR/qml/QtQml/libqmlplugin.dylib                                                        "$CARGO_TARGET/QtQml/"
+    cp -f $QT_DIR/qml/QtQml/libqmlplugin.dylib                                                        "$CARGO_TARGET/QtQml/" || true
     cp -f $QT_DIR/qml/QtQml/libqmlmetaplugin.dylib                                                    "$CARGO_TARGET/QtQml/" || true
     cp -f $QT_DIR/qml/QtQml/Base/libqmlplugin.dylib                                                   "$CARGO_TARGET/QtQml/Base/" || true
     cp -f $QT_DIR/qml/QtQml/Base/qmldir                                                               "$CARGO_TARGET/QtQml/Base/" || true

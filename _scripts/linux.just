@@ -199,7 +199,7 @@ deploy *param:
     cp -f $QT_DIR/qml/Qt/labs/folderlistmodel/libqmlfolderlistmodelplugin.so                         "$TARGET/qml/Qt/labs/folderlistmodel/"
     cp -f $QT_DIR/qml/QtQml/qmldir                                                                   "$TARGET/qml/QtQml/"
     cp -f $QT_DIR/qml/QtQml/libqmlmetaplugin.so                                                      "$TARGET/qml/QtQml/" || true
-    cp -f $QT_DIR/qml/QtQml/libqmlplugin.so                                                          "$TARGET/qml/QtQml/"
+    cp -f $QT_DIR/qml/QtQml/libqmlplugin.so                                                          "$TARGET/qml/QtQml/" || true
     cp -f $QT_DIR/qml/QtQml/Base/libqmlplugin.so                                                     "$TARGET/qml/QtQml/Base/" || true
     cp -f $QT_DIR/qml/QtQml/Base/qmldir                                                              "$TARGET/qml/QtQml/Base/" || true
     cp -f $QT_DIR/qml/QtQml/Models/libmodelsplugin.so                                                "$TARGET/qml/QtQml/Models/"
