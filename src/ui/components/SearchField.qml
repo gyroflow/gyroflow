@@ -60,6 +60,7 @@ TextField {
             .replace("a74",      "a7iv")
             .replace("a7r3",     "a7riii")
             .replace("a7r4",     "a7riv")
+            .replace("a7r5",     "a7rv")
             .replace("a7s2",     "a7sii")
             .replace("a7s3",     "a7siii");
 

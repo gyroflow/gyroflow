@@ -83,6 +83,11 @@ impl LensProfileDatabase {
                         if self.map.contains_key(&key) {
                             if !self.loaded {
                                 log::warn!("Lens profile already present: {}, path_to_file: {} from {}", key, f_name, self.map.get(&key).unwrap().path_to_file);
+
+                                // let prof = std::fs::read(&f_name).unwrap();
+                                // let mut prof: serde_json::Value = serde_json::from_slice(&prof).unwrap();
+                                // *prof.get_mut("identifier").unwrap() = serde_json::Value::String(String::new());
+                                // std::fs::write(f_name, serde_json::to_string_pretty(&prof).unwrap()).unwrap();
                             }
                         } else {
                             (|| -> Option<()> {

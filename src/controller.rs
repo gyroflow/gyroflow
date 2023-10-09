@@ -1749,7 +1749,7 @@ impl Controller {
         });
 
         core::run_threaded(move || {
-            if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/gyroflow/git/trees/master?recursive=1").call().map(|x| x.into_string()) {
+            if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/lens_profiles/git/trees/main?recursive=1").call().map(|x| x.into_string()) {
                 (|| -> Option<()> {
                     let v: serde_json::Value = serde_json::from_str(&body).ok()?;
                     for obj in v.get("tree")?.as_array()? {
@@ -2105,7 +2105,7 @@ impl Filesystem {
     fn display_url(&self, url: QUrl) -> QString { QString::from(filesystem::display_url(&QString::from(url).to_string())) }
     fn display_folder_filename(&self, folder: QUrl, filename: QString) -> QString { QString::from(filesystem::display_folder_filename(&QString::from(folder).to_string(), &filename.to_string())) }
     fn catch_url_open(&self, url: QUrl) { util::dispatch_url_event(url.clone()); self.url_opened(url); }
-    fn remove_file(&self, url: QUrl) { filesystem::remove_file(&QString::from(url).to_string()); }
+    fn remove_file(&self, url: QUrl) { let _ = filesystem::remove_file(&QString::from(url).to_string()); }
     fn folder_access_granted(&self, url: QUrl) { filesystem::folder_access_granted(&QString::from(url).to_string()); }
     fn save_allowed_folders(&self) {
         let list = filesystem::get_allowed_folders();
