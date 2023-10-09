@@ -2084,6 +2084,7 @@ pub struct Filesystem {
     display_url:              qt_method!(fn(&self, url: QUrl) -> QString),
     display_folder_filename:  qt_method!(fn(&self, folder: QUrl, filename: QString) -> QString),
     catch_url_open:           qt_method!(fn(&self, url: QUrl)),
+    remove_file:              qt_method!(fn(&self, url: QUrl)),
     folder_access_granted:    qt_method!(fn(&self, url: QUrl)),
     save_allowed_folders:     qt_method!(fn(&self)),
     restore_allowed_folders:  qt_method!(fn(&self)),
@@ -2104,6 +2105,7 @@ impl Filesystem {
     fn display_url(&self, url: QUrl) -> QString { QString::from(filesystem::display_url(&QString::from(url).to_string())) }
     fn display_folder_filename(&self, folder: QUrl, filename: QString) -> QString { QString::from(filesystem::display_folder_filename(&QString::from(folder).to_string(), &filename.to_string())) }
     fn catch_url_open(&self, url: QUrl) { util::dispatch_url_event(url.clone()); self.url_opened(url); }
+    fn remove_file(&self, url: QUrl) { filesystem::remove_file(&QString::from(url).to_string()); }
     fn folder_access_granted(&self, url: QUrl) { filesystem::folder_access_granted(&QString::from(url).to_string()); }
     fn save_allowed_folders(&self) {
         let list = filesystem::get_allowed_folders();

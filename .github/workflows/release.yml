@@ -11,6 +11,7 @@ jobs:
         targets: [
           { os: ubuntu-latest, type: linux },
           { os: macos-latest,  type: macos },
+          { os: macos-latest,  type: macstore },
           { os: windows-2022,  type: windows },
           { os: macos-latest,  type: ios },
           { os: windows-2022,  type: android }
@@ -73,7 +74,7 @@ jobs:
           api-key-id: ${{ secrets.MACOS_ITCONNECT_KEY_ID }}
           api-private-key: ${{ secrets.MACOS_ITCONNECT_KEY }}
       - name: Download Provisioning Profiles
-        if: ${{ matrix.targets.type == 'macos' }}
+        if: ${{ matrix.targets.type == 'macstore' }}
         id: provisioning_mac
         uses: apple-actions/download-provisioning-profiles@v2
         with:
@@ -97,16 +98,26 @@ jobs:
         if: ${{ matrix.targets.type == 'macos' }}
         env:
           SIGNING_FINGERPRINT: ${{ secrets.MACOS_CERTIFICATE_FINGERPRINT }}
-          # For Mac App Store
-          SIGN_KEY: 7F82D6013B8F6D45F88FE547438744BD64750C5B
-          PKG_SIGN_KEY: DC70831576E7B2345E78A516BEA2FC34D18F42F5
-          PROVISIONING_PROFILE: /Users/runner/Library/MobileDevice/Provisioning Profiles/${{ matrix.targets.type == 'macos' && fromJSON(steps.provisioning_mac.outputs.profiles)[0].udid || '' }}.mobileprovision
         run: |
           just install-deps
           just deploy universal
           xcrun notarytool submit --wait --apple-id ${{ secrets.MACOS_ACCOUNT_USER }} --team-id ${{ secrets.MACOS_TEAM }} --password ${{ secrets.MACOS_ACCOUNT_PASS }} ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg
           xcrun stapler staple --verbose ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg
+
+      - name: Build Gyroflow (macOS App Store)
+        if: ${{ matrix.targets.type == 'macstore' }}
+        env:
+          SIGNING_FINGERPRINT: ${{ secrets.MACOS_CERTIFICATE_FINGERPRINT }}
+          # For Mac App Store
+          SIGN_KEY: 7F82D6013B8F6D45F88FE547438744BD64750C5B
+          PKG_SIGN_KEY: DC70831576E7B2345E78A516BEA2FC34D18F42F5
+          PROVISIONING_PROFILE: /Users/runner/Library/MobileDevice/Provisioning Profiles/${{ matrix.targets.type == 'macstore' && fromJSON(steps.provisioning_mac.outputs.profiles)[0].udid || '' }}.mobileprovision
+          FORCE_QT_VERSION: 6.5.3
+        run: |
           if [ "$BUILD_APP_STORE_BUNDLE" == "true" ]; then
+              /usr/libexec/PlistBuddy -x -c "Set :LSMinimumSystemVersion \"11.0\"" ${{ github.workspace }}/_deployment/mac/Gyroflow.app/Contents/Info.plist
+              just install-deps
+              just deploy universal
               just bundle
           fi
 
@@ -178,7 +189,7 @@ jobs:
         #if: startsWith(github.ref, 'refs/tags/')
         run: |
           xcrun altool --upload-app -f ./Gyroflow-ios/Gyroflow.ipa -t iOS -u ${{ secrets.MACOS_ACCOUNT_USER }} -p ${{ secrets.MACOS_ACCOUNT_PASS }}
-          xcrun altool --upload-app -f ./Gyroflow-macos/Gyroflow.pkg -t macos -u ${{ secrets.MACOS_ACCOUNT_USER }} -p ${{ secrets.MACOS_ACCOUNT_PASS }}
+          xcrun altool --upload-app -f ./Gyroflow-macstore/Gyroflow.pkg -t macos -u ${{ secrets.MACOS_ACCOUNT_USER }} -p ${{ secrets.MACOS_ACCOUNT_PASS }}
 
       - name: Upload to Google Play
         uses: r0adkll/upload-google-play@v1

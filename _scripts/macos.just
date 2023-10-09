@@ -359,9 +359,9 @@ bundle *param:
 
     actool {{ProjectDir}}/_deployment/ios/Resources/Images.xcassets --compile {{AppBundle}}/Contents --platform macosx --minimum-deployment-target 10.14 --app-icon AppIcon --output-partial-info-plist {{AppBundle}}/../AppIcon.plist
 
-    dsymutil {{AppBundle}}/Contents/MacOS/gyroflow -o {{AppBundle}}/../../Gyroflow.app.dSYM
+    dsymutil {{AppBundle}}/Contents/MacOS/gyroflow -o {{AppBundle}}/../Gyroflow.app.dSYM
     mkdir -p {{AppBundle}}/../Symbols
-    xcrun symbols -noTextInSOD -noDaemon -arch all -symbolsPackageDir {{AppBundle}}/../Symbols {{AppBundle}}/../../Gyroflow.app.dSYM
+    xcrun symbols -noTextInSOD -noDaemon -arch all -symbolsPackageDir {{AppBundle}}/../Symbols {{AppBundle}}/../Gyroflow.app.dSYM
 
     if [ -z "$SIGN_KEY" ] || [ -z "$PKG_SIGN_KEY" ] || [ -z "$PROVISIONING_PROFILE" ]; then
         SIGN_KEY="{{DistributionCertificateSHA}}"

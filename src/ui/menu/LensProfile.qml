@@ -357,6 +357,7 @@ MenuItem {
         sequences: ["F8"];
         onActivated: {
             root.fileno = Math.abs(++fileno % files.length);
+            console.log(root.fileno);
             controller.load_lens_profile("file:///d:/lens_review/" + root.files[root.fileno]);
         }
     }
@@ -364,12 +365,16 @@ MenuItem {
         sequences: ["F7"];
         onActivated: {
             root.fileno = Math.abs(--fileno % files.length);
+            console.log(root.fileno);
             controller.load_lens_profile("file:///d:/lens_review/" + root.files[root.fileno]);
         }
     }
     Shortcut {
         sequences: ["Delete"];
-        onActivated: console.log("del \"" + root.files[root.fileno] + "\"");
+        onActivated: {
+            console.log("deleting " + root.files[root.fileno]);
+            filesystem.remove_file("file:///d:/lens_review/" + root.files[root.fileno]);
+        }
     }
     */
 }
