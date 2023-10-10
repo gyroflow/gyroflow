@@ -178,6 +178,11 @@ MenuItem {
         outBitrate     = br;
         defaultBitrate = br;
 
+        // Change to HEVC if the video is 10-bit
+        if (codec.currentIndex == 0 && window.vidInfo && window.vidInfo.pixelFormat.includes("10 bit")) {
+            codec.currentIndex = 1;
+        }
+
         codec.updateGpuStatus();
     }
     function lensProfileLoaded(w: real, h: real) {
