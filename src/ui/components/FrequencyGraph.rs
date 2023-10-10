@@ -6,7 +6,7 @@
 use rustfft::algorithm::Radix4;
 use nalgebra::ComplexField;
 use rustfft::{num_complex::Complex, Fft, FftDirection};
-use std::{f32::consts::PI};
+use std::f32::consts::PI;
 
 use qmetaobject::*;
 use crate::util;
@@ -23,7 +23,7 @@ struct Series {
 #[derive(Default, QObject)]
 pub struct FrequencyGraph {
     base: qt_base_class!(trait QQuickPaintedItem),
-    
+
     color: qt_property!(QColor; WRITE setColor  ),
     lineWidth: qt_property!(f64; WRITE setLineWidth),
     logY: qt_property!(bool; WRITE setLogY),
@@ -49,7 +49,7 @@ impl FrequencyGraph {
             (this as &dyn QQuickItem).update();
         })(());
     }
-    
+
     pub fn setData(&mut self, vec: &[f64], sr: f64) {
         self.series.data = vec.to_vec();
         if self.samplerate != sr {
@@ -62,7 +62,7 @@ impl FrequencyGraph {
 
     fn analyze_spectrum(&mut self) {
         self.series.spectrum.clear();
-        
+
         let fft_size = self.series.data.len();
         if fft_size == 0 { return; }
 
@@ -103,7 +103,7 @@ impl FrequencyGraph {
 
     fn calculate_lines(&mut self) {
         self.series.line.clear();
-        
+
         if self.series.spectrum.is_empty() { return; }
 
         let rect = (self as &dyn QQuickItem).bounding_rect();
@@ -145,7 +145,7 @@ impl QQuickPaintedItem for FrequencyGraph {
     fn paint(&mut self, p: &mut QPainter) {
         if !self.series.line.is_empty() {
             let mut pen = QPen::from_color(self.color);
-            pen.set_width_f(self.lineWidth); 
+            pen.set_width_f(self.lineWidth);
 
             p.set_pen(pen);
             p.set_render_hint(QPainterRenderHint::Antialiasing, true);

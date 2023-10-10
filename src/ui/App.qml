@@ -641,10 +641,9 @@ Rectangle {
     }
 
     function renameOutput(filename: name, folderUrl: url) {
-        const suffix = advanced.item.defaultSuffix.text;
         let newName = filename;
         for (let i = 1; i < 1000; ++i) {
-            newName = filename.replace(new RegExp(suffix + "(_\\d+)?((?:_%05d)?\\.[a-z0-9]+)$", "i"), suffix + "_" + i + "$2");
+            newName = filename.replace(/(_\d+)?((?:_%05d)?\.[a-z0-9]+)$/i, "_" + i + "$2");
 
             if (!filesystem.exists_in_folder(folderUrl, newName.replace("_%05d", "_00001")) && !render_queue.file_exists_in_folder(folderUrl, newName))
                 break;
