@@ -17,7 +17,7 @@ DistributionProvisioningName  := "Gyroflow dist"
 
 AppBundle := ProjectDir / "_deployment/_binaries/ios/Payload/Gyroflow.app"
 
-QtVersionIOS := "6.5.3"
+QtVersionIOS := "6.6.0"
 
 IPHONESDK := `xcode-select -p` + "/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 export BINDGEN_EXTRA_CLANG_ARGS_aarch64_apple_ios := "--target=arm64-apple-ios -arch arm64 -miphoneos-version-min=14 -isysroot " + IPHONESDK
@@ -53,7 +53,7 @@ install-deps:
 
         # Replace the Qt Quick Dialogs file with a patch to fix the file selection bug
         rm -f {{ExtDir}}/{{QtVersionIOS}}/ios/lib/libQt6QuickDialogs2.a
-        curl -L https://api.gyroflow.xyz/sdk/Qt-ios-6.5.3-libQt6QuickDialogs2.a -o {{ExtDir}}/{{QtVersionIOS}}/ios/lib/libQt6QuickDialogs2.a
+        curl -L https://api.gyroflow.xyz/sdk/Qt-ios-{{QtVersionIOS}}-libQt6QuickDialogs2.a -o {{ExtDir}}/{{QtVersionIOS}}/ios/lib/libQt6QuickDialogs2.a
     fi
 
     if [ ! -f "{{ExtDir}}/vcpkg/installed/arm64-ios/lib/libopencv_core4.a" ]; then

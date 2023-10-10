@@ -104,7 +104,7 @@ fn main() {
         let frameworks = [
             "AudioToolbox", "AVFoundation", "CoreAudio", "CoreFoundation",
             "CoreGraphics", "CoreMedia", "CoreServices", "CoreText",
-            "CoreVideo", "Foundation", "ImageIO", "IOKit",
+            "CoreVideo", "Foundation", "ImageIO", "IOKit", "CFNetwork",
             "OpenGLES", "QuartzCore", "Security", "SystemConfiguration",
             "UIKit", "UniformTypeIdentifiers", "VideoToolbox", "Photos"
         ];
@@ -156,6 +156,7 @@ fn main() {
         println!("cargo:rustc-link-lib=framework=CoreFoundation");
         println!("cargo:rustc-link-lib=framework=AppKit");
         println!("cargo:rustc-link-lib=framework=OpenGL");
+        println!("cargo:rustc-link-lib=framework=CFNetwork");
     }
 
     let mut public_include = |name| {

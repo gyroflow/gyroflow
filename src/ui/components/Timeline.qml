@@ -391,14 +391,9 @@ Item {
                 height: 15 * dpiScale;
                 Canvas {
                     id: linesCanvas;
-                    width: parent.width*2;
-                    height: parent.height*2;
-                    scale: 0.5;
-                    anchors.centerIn: parent;
-                    transformOrigin: Item.Center;
+                    anchors.fill: parent;
                     contextType: "2d";
-                    layer.enabled: true;
-                    property int lines: width / (20 * dpiScale);
+                    property int lines: width / (10 * dpiScale);
                     property int bigLines: lines / 10;
 
                     onPaint: {
@@ -406,14 +401,12 @@ Item {
                         if (ctx) {
                             ctx.reset();
                             for (let j = 0; j < lines; j++) {
-                                const x = Math.round(j * 20 * dpiScale);
-                                ctx.beginPath();
-                                ctx.moveTo(x, (j % 10 == 0)? 0 : height / 2);
-                                ctx.lineTo(x, height);
-                                ctx.strokeStyle = "#444444";
+                                const x = Math.round(j * 10 * dpiScale);
                                 ctx.lineWidth = 1;
-                                ctx.closePath();
-                                ctx.lineCap = "round";
+                                ctx.strokeStyle = "#CC444444";
+                                ctx.beginPath();
+                                ctx.moveTo(x + 0.5, (j % 10 == 0)? 0 : height / 2);
+                                ctx.lineTo(x + 0.5, height);
                                 ctx.stroke();
                             }
                         }

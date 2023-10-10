@@ -138,7 +138,7 @@ deploy:
     xcopy /Y "$QtDir\bin\Qt6QuickLayouts.dll"                                                        "$TargetDir\"
     xcopy /Y "$QtDir\bin\Qt6Svg.dll"                                                                 "$TargetDir\"
 
-    # Remove once moved to Qt 6.5.3
+    # Remove once moved to Qt 6.6.0
     xcopy /Y "$QtDir\bin\Qt6LabsSettings.dll"                                                        "$TargetDir\"
     xcopy /Y "$QtDir\qml\Qt\labs\settings\qmldir"                                                    "$TargetDir\Qt\labs\settings\"
     xcopy /Y "$QtDir\qml\Qt\labs\settings\qmlsettingsplugin.dll"                                     "$TargetDir\Qt\labs\settings\"
