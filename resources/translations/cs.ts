@@ -301,8 +301,8 @@ Click Ok and select the destination folder.</translation>
       <location filename="../../src/ui/App.qml" line="338"/>
       <source>Keep this app in the foreground and don&apos;t lock the screen.
 Due to limitations of the system video encoders, rendering in the background is not supported.</source>
-      <translation type="unfinished">Keep this app in the foreground and don&apos;t lock the screen.
-Due to limitations of the system video encoders, rendering in the background is not supported.</translation>
+      <translation>Ponechte tuto aplikaci v popředí a nezamykejte obrazovku.
+Z důvodu omezení systémových kodérů není vykreslování na pozadí podporováno.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="581"/>

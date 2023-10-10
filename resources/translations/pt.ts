@@ -301,8 +301,8 @@ Clique em Ok e selecione a pasta de destino.</translation>
       <location filename="../../src/ui/App.qml" line="338"/>
       <source>Keep this app in the foreground and don&apos;t lock the screen.
 Due to limitations of the system video encoders, rendering in the background is not supported.</source>
-      <translation type="unfinished">Keep this app in the foreground and don&apos;t lock the screen.
-Due to limitations of the system video encoders, rendering in the background is not supported.</translation>
+      <translation>Manter esta aplicação em primeiro plano e não bloquear o ecrã.
+Devido a limitações dos codificadores de vídeo do sistema, a renderização em segundo plano não é suportada.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="581"/>
@@ -1877,7 +1877,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="236"/>
       <source>Save to file</source>
-      <translation type="unfinished">Save to file</translation>
+      <translation>Gravar para ficheiro</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>

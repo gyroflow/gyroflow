@@ -65,13 +65,13 @@ libc = "0.2"
 
 opencv = { version = "0.84", features = ["clang-runtime"], optional = true }
 
-wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "2664da8", features = ["spirv"] }
-wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "2664da8" }
-wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "2664da8" }
-wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "2664da8" }
+wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "35ebd4a", features = ["spirv"] }
+wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "35ebd4a" }
+wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "35ebd4a" }
+wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "35ebd4a" }
 bytemuck = "1.14.0"
 ash = "0.37.3"
-naga = { git = "https://github.com/gfx-rs/naga", rev = "3c7dbc4016b84a35c69b30305b12abaeefc21fd9", version = "0.13.0", features = ["clone", "span", "validate", "spv-in"] }
+naga = { git = "https://github.com/gfx-rs/naga", rev = "33b75a27d93c6574b11b4dd4492b85b5783d6c52", version = "0.13.0", features = ["clone", "span", "validate", "spv-in"] }
 
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"

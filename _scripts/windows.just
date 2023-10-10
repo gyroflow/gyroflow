@@ -251,7 +251,7 @@ bundle:
         Remove-Item -Path tmp.ta* -Force
     }
     if (-not (Test-Path -Path "$TargetDir\BlackmagicRawAPI.dll")) {
-        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_Windows_3.3.tar.gz" -OutFile tmp.tar.gz
+        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_Windows_3.4.tar.gz" -OutFile tmp.tar.gz
         7z x tmp.tar.gz
         7z x -o"$TargetDir\" tmp.tar
         Remove-Item -Path tmp.ta* -Force
