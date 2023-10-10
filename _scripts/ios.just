@@ -18,6 +18,7 @@ DistributionProvisioningName  := "Gyroflow dist"
 AppBundle := ProjectDir / "_deployment/_binaries/ios/Payload/Gyroflow.app"
 
 QtVersionIOS := "6.6.0"
+ProjectVersionIOS := "1.5.3" # temporary
 
 IPHONESDK := `xcode-select -p` + "/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 export BINDGEN_EXTRA_CLANG_ARGS_aarch64_apple_ios := "--target=arm64-apple-ios -arch arm64 -miphoneos-version-min=14 -isysroot " + IPHONESDK
@@ -140,10 +141,10 @@ build-and-package profile is_dist:
         cp -rf {{ProjectDir}}/_deployment/ios/Info.plist {{AppBundle}}/Info.plist
         cp -rf {{ProjectDir}}/_deployment/ios/PkgInfo {{AppBundle}}/PkgInfo
         PlistBuddy -x -c "Set :CFBundleIdentifier {{BundleIdentifier}}" {{AppBundle}}/Info.plist
-        PlistBuddy -x -c "Set :CFBundleShortVersionString {{ProjectVersion}}" {{AppBundle}}/Info.plist
-        PlistBuddy -x -c "Set :CFBundleVersion {{ProjectVersion}}" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Set :CFBundleShortVersionString {{ProjectVersionIOS}}" {{AppBundle}}/Info.plist
+        PlistBuddy -x -c "Set :CFBundleVersion {{ProjectVersionIOS}}" {{AppBundle}}/Info.plist
         if ! [ -z "$GITHUB_RUN_NUMBER" ]; then
-            PlistBuddy -x -c "Set :CFBundleVersion \"{{ProjectVersion}}.$GITHUB_RUN_NUMBER\"" {{AppBundle}}/Info.plist
+            PlistBuddy -x -c "Set :CFBundleVersion \"{{ProjectVersionIOS}}.$GITHUB_RUN_NUMBER\"" {{AppBundle}}/Info.plist
         fi
 
         ICON={{ProjectDir}}/resources/icon_1080.png
@@ -250,8 +251,8 @@ deploy *param:
         PlistBuddy -x -c "Add :ApplicationProperties:Architectures array" $ARCHIVE_PLIST
         PlistBuddy -x -c "Add :ApplicationProperties:Architectures:0 string arm64" $ARCHIVE_PLIST
         PlistBuddy -x -c "Add :ApplicationProperties:CFBundleIdentifier string {{BundleIdentifier}}" $ARCHIVE_PLIST
-        PlistBuddy -x -c "Add :ApplicationProperties:CFBundleShortVersionString string {{ProjectVersion}}" $ARCHIVE_PLIST
-        PlistBuddy -x -c "Add :ApplicationProperties:CFBundleVersion string {{ProjectVersion}}" $ARCHIVE_PLIST
+        PlistBuddy -x -c "Add :ApplicationProperties:CFBundleShortVersionString string {{ProjectVersionIOS}}" $ARCHIVE_PLIST
+        PlistBuddy -x -c "Add :ApplicationProperties:CFBundleVersion string {{ProjectVersionIOS}}" $ARCHIVE_PLIST
         PlistBuddy -x -c "Add :ApplicationProperties:Team string {{TeamID}}" $ARCHIVE_PLIST
         PlistBuddy -x -c "Add :ArchiveVersion integer 2" $ARCHIVE_PLIST
         PlistBuddy -x -c "Add :CreationDate date \"`date +'%c'`\"" $ARCHIVE_PLIST
