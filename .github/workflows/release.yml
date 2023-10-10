@@ -19,8 +19,7 @@ jobs:
     name: Gyroflow for ${{ matrix.targets.type }}
     runs-on: ${{ matrix.targets.os }}
     env:
-      #BUILD_APP_STORE_BUNDLE: ${{ startsWith(github.ref, 'refs/tags/') }}
-      BUILD_APP_STORE_BUNDLE: true
+      BUILD_APP_STORE_BUNDLE: ${{ startsWith(github.ref, 'refs/tags/') }}
     steps:
       - uses: actions/checkout@v3
       - name: Install Rust
@@ -105,7 +104,7 @@ jobs:
           xcrun stapler staple --verbose ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg
 
       - name: Build Gyroflow (macOS App Store)
-        if: ${{ matrix.targets.type == 'macstore' }}
+        if: ${{ matrix.targets.type == 'macstore' && startsWith(github.ref, 'refs/tags/') }}
         env:
           SIGNING_FINGERPRINT: ${{ secrets.MACOS_CERTIFICATE_FINGERPRINT }}
           # For Mac App Store
@@ -115,13 +114,11 @@ jobs:
           FORCE_QT_VERSION: 6.6.0
           DONT_BUILD_DMG: true
         run: |
-          if [ "$BUILD_APP_STORE_BUNDLE" == "true" ]; then
-              /usr/libexec/PlistBuddy -x -c "Set :LSMinimumSystemVersion \"11.0\"" ${{ github.workspace }}/_deployment/mac/Gyroflow.app/Contents/Info.plist
-              sed -i -e 's/"10.11"/"11.0"/' ${{ github.workspace }}/_scripts/macos.just
-              just install-deps
-              just deploy universal
-              just bundle
-          fi
+          /usr/libexec/PlistBuddy -x -c "Set :LSMinimumSystemVersion \"11.0\"" ${{ github.workspace }}/_deployment/mac/Gyroflow.app/Contents/Info.plist
+          sed -i -e 's/"10.11"/"11.0"/' ${{ github.workspace }}/_scripts/macos.just
+          just install-deps
+          just deploy universal
+          just bundle
 
       - name: Build Gyroflow (Linux)
         if: ${{ matrix.targets.type == 'linux' }}
@@ -188,14 +185,14 @@ jobs:
          files: ./*
 
       - name: Upload to App Store
-        #if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           xcrun altool --upload-app -f ./Gyroflow-ios/Gyroflow.ipa -t iOS -u ${{ secrets.MACOS_ACCOUNT_USER }} -p ${{ secrets.MACOS_ACCOUNT_PASS }}
           xcrun altool --upload-app -f ./Gyroflow-macstore/Gyroflow.pkg -t macos -u ${{ secrets.MACOS_ACCOUNT_USER }} -p ${{ secrets.MACOS_ACCOUNT_PASS }}
 
       - name: Upload to Google Play
         uses: r0adkll/upload-google-play@v1
-        #if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON }}
           packageName: xyz.gyroflow

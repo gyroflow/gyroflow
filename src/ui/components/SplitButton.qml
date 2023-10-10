@@ -28,6 +28,9 @@ Rectangle {
     color: "transparent";
 
     function open() {
+        if (popup.visible)
+            return popup.close();
+
         const pt = window.mapFromItem(root, 0, 0);
         popup.x = pt.x - popup.width + width;
         popup.y = pt.y + (isDown? height : -popup.height);
