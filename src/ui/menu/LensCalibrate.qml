@@ -158,7 +158,7 @@ MenuItem {
     }
     TableList {
         id: infoList;
-        spacing: 10 * dpiScale;
+        columnSpacing: 10 * dpiScale;
         property real rms: 0;
         onModelChanged: {
             Qt.callLater(() => {
@@ -195,7 +195,7 @@ MenuItem {
 
     TableList {
         id: list;
-        spacing: 10 * dpiScale;
+        columnSpacing: 10 * dpiScale;
         editableFields: ({
             "Camera brand": {
                 "type": "text",

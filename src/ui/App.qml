@@ -204,13 +204,13 @@ Rectangle {
                 Hr { width: parent.width; }
 
                 Label {
+                    x: 10 * dpiScale;
                     id: outputPathLabel;
                     anchors.verticalCenter: (isMobileLayout? undefined : parent.verticalCenter);
-                    anchors.horizontalCenter: (isMobileLayout? parent.horizontalCenter : undefined);
                     anchors.verticalCenterOffset: -1 * dpiScale;
                     text: qsTr("Output path:");
                     position: isMobileLayout? Label.TopPosition : Label.LeftPosition;
-                    width: parent.width - (isMobileLayout? 0 : renderBtnRow.width + 10 * dpiScale) - 20 * dpiScale;
+                    width: parent.width - (isMobileLayout? 0 : renderBtnRow.width + 10 * dpiScale) - 2*x;
                     OutputPathField {
                         id: outputFile;
                         onFolderUrlChanged: {

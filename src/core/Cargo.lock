@@ -415,8 +415,9 @@ dependencies = [
 
 [[package]]
 name = "cl-sys"
-version = "0.4.2"
-source = "git+https://github.com/cogciprocate/ocl#3d0c52bfa75146a14b16c55e799825ad52f1f19e"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4febd824a957638c066180fbf72b2bed5bcee33740773f3dc59fe91f0a3e6595"
 dependencies = [
  "libc",
 ]
@@ -1908,8 +1909,9 @@ dependencies = [
 
 [[package]]
 name = "ocl"
-version = "0.19.4"
-source = "git+https://github.com/cogciprocate/ocl#3d0c52bfa75146a14b16c55e799825ad52f1f19e"
+version = "0.19.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b47a52c4363adf29304408df28547ac48eabed250fd7bedca632d682b47ce144"
 dependencies = [
  "futures",
  "nodrop",
@@ -1921,8 +1923,9 @@ dependencies = [
 
 [[package]]
 name = "ocl-core"
-version = "0.11.3"
-source = "git+https://github.com/cogciprocate/ocl#3d0c52bfa75146a14b16c55e799825ad52f1f19e"
+version = "0.11.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c145dd9f205b86611a5df15eb89517417b03005441cf6cec245c65a4b9248c52"
 dependencies = [
  "bitflags 1.3.2",
  "cl-sys",
@@ -1937,15 +1940,17 @@ dependencies = [
 [[package]]
 name = "ocl-core-vector"
 version = "0.1.1"
-source = "git+https://github.com/cogciprocate/ocl#3d0c52bfa75146a14b16c55e799825ad52f1f19e"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f562279e046ca160aeed5eaf6f7c4eb9fa56cb8fd9d038dbdbf56225caeb8074"
 dependencies = [
  "num-traits 0.2.17",
 ]
 
 [[package]]
 name = "ocl-interop"
-version = "0.1.5"
-source = "git+https://github.com/cogciprocate/ocl#3d0c52bfa75146a14b16c55e799825ad52f1f19e"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e69e4b0cb245a6233d6ebd19dd920e2390a9b057e7b5031c3096a572256e026"
 dependencies = [
  "cgl",
  "gl_generator",
@@ -2315,9 +2320,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.9.6"
+version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ebee201405406dbf528b8b672104ae6d6d63e6d118cb10e4d51abbc7b58044ff"
+checksum = "d119d7c7ca818f8a53c300863d4f87566aac09943aef5b355bb83969dae75d87"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2327,9 +2332,9 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.3.9"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59b23e92ee4318893fa3fe3e6fb365258efbfe6ac6ab30f090cdcbb7aa37efa9"
+checksum = "465c6fc0621e4abc4187a2bda0937bfd4f722c2730b29562e19689ea796c9a4b"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2338,9 +2343,9 @@ dependencies = [
 
 [[package]]
 name = "regex-syntax"
-version = "0.7.5"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbb5fb1acd8a1a18b3dd5be62d25485eb770e05afb408a9627d14d451bae12da"
+checksum = "c3cbb081b9784b07cceb8824c8583f86db4814d172ab043f3c23f7dc600bf83d"
 
 [[package]]
 name = "renderdoc-sys"
@@ -2437,9 +2442,9 @@ checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
 name = "semver"
-version = "1.0.19"
+version = "1.0.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ad977052201c6de01a8ef2aa3378c4bd23217a056337d1d6da40468d267a4fb0"
+checksum = "836fa6a3e1e547f9a2c4040802ec865b5d85f4014efe00555d7090a3dcaa1090"
 
 [[package]]
 name = "serde"

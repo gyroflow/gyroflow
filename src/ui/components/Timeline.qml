@@ -402,7 +402,7 @@ Item {
                     property int bigLines: lines / 10;
 
                     onPaint: {
-                        let ctx = context;
+                        let ctx = getContext("2d");
                         if (ctx) {
                             ctx.reset();
                             for (let j = 0; j < lines; j++) {

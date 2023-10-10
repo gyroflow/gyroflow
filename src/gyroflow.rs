@@ -92,6 +92,7 @@ fn entry() {
         QString::from(":/resources/icons/")
     };
     cpp!(unsafe [icons_path as "QString"] {
+        qputenv("QT_QUICK_FLICKABLE_WHEEL_DECELERATION", "5000");
         QQuickStyle::setStyle("Material");
         QIcon::setThemeName(QStringLiteral("Gyroflow"));
         QIcon::setThemeSearchPaths(QStringList() << icons_path);

@@ -22,7 +22,7 @@ Canvas {
         ctx.closePath();
     }
     onPaint: {
-        const ctx = context;
+        const ctx = getContext("2d");
         if (ctx) {
             ctx.setLineDash([2, 5]);
             roundRect(ctx, 5, 5, width - 10, height - 10, 10 * dpiScale);

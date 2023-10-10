@@ -143,7 +143,7 @@ MenuItem {
 
     TableList {
         id: list;
-        spacing: 6 * dpiScale;
+        columnSpacing: 6 * dpiScale;
         editableFields: isCalibrator? ({}) : ({
             "Rotation": {
                 "unit": "°",

@@ -10,7 +10,7 @@ Row {
     property alias col1: col1;
     property alias col2: col2;
     width: parent.width;
-    property real spacing: 8 * dpiScale;
+    property real columnSpacing: 8 * dpiScale;
     property bool copyable: false;
 
     property var editableFields: ({});
@@ -35,7 +35,7 @@ Row {
     }
     Column {
         id: col1;
-        spacing: tl.spacing;
+        spacing: tl.columnSpacing;
         property var keys: Object.keys(tl.model);
         Repeater {
             model: col1.keys;
@@ -50,7 +50,7 @@ Row {
     }
     Column {
         id: col2;
-        spacing: tl.spacing;
+        spacing: tl.columnSpacing;
         Repeater {
             model: Object.values(tl.model);
             Row {

@@ -7,7 +7,6 @@ import QtQuick.Controls as QQC
 Column {
     default property alias data: col.data;
     property alias text: cb.text;
-    property alias spacing: col.spacing;
     property alias inner: inner;
     property alias checked: cb.checked;
 
