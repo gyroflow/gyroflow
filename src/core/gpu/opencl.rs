@@ -14,10 +14,10 @@ pub struct OclWrapper {
     src: Buffer<u8>,
     dst: Buffer<u8>,
 
-    // queue: Queue,
+    queue: Queue,
 
-    image_src: Option<ocl::Image::<u8>>,
-    image_dst: Option<ocl::Image::<u8>>,
+    image_src: Option<(ocl::Image::<u8>, u64)>,
+    image_dst: Option<(ocl::Image::<u8>, u64)>,
 
     buf_params: Buffer<u8>,
     buf_drawing: Buffer<u8>,
@@ -212,7 +212,7 @@ impl OclWrapper {
             let in_desc  = ImageDescriptor::new(MemObjectType::Image2d, buffers.input.size.0,  buffers.input.size.1,  1, 1, buffers.input.size.2,  0, None);
             let out_desc = ImageDescriptor::new(MemObjectType::Image2d, buffers.output.size.0, buffers.output.size.1, 1, 1, buffers.output.size.2, 0, None);
 
-            let mut resolve_texture = |buf: &BufferDescription, is_in: bool, ocl_queue: &mut Queue, desc: ImageDescriptor, _other_img: Option<&ocl::Image<u8>>| -> ocl::Result<(Buffer<u8>, Option<ocl::Image<u8>>)> {
+            let mut resolve_texture = |buf: &BufferDescription, is_in: bool, ocl_queue: &mut Queue, desc: ImageDescriptor, _other_img: Option<&(ocl::Image<u8>, u64)>| -> ocl::Result<(Buffer<u8>, Option<(ocl::Image<u8>, u64)>)> {
                 match &buf.data {
                     BufferSource::Cpu { buffer } => {
                         let flags = if is_in { MemFlags::new().read_only().host_write_only() }
@@ -243,21 +243,21 @@ impl OclWrapper {
                         let flags = if is_in { MemFlags::new().read_only().host_no_access() }
                                            else     { MemFlags::new().read_write().host_no_access() };
 
-                        Ok((Buffer::builder().queue(ocl_queue.clone()).len(buf.size.1 * buf.size.2).flags(flags).build()?, Some(img)))
+                        Ok((Buffer::builder().queue(ocl_queue.clone()).len(buf.size.1 * buf.size.2).flags(flags).build()?, Some((img, *texture as u64))))
                     },
                     #[cfg(target_os = "windows")]
                     BufferSource::DirectX11 { texture, .. } => {
                         if is_in {
                             let img = Image::from_d3d11_texture2d(ocl_queue.clone(), MemFlags::new().read_only(), desc, *texture, 0)?;
-                            Ok((Buffer::builder().queue(ocl_queue.clone()).len(img.pixel_count() * params.bytes_per_pixel as usize).flags(MemFlags::new().read_only().host_no_access()).build()?, Some(img)))
+                            Ok((Buffer::builder().queue(ocl_queue.clone()).len(img.pixel_count() * params.bytes_per_pixel as usize).flags(MemFlags::new().read_only().host_no_access()).build()?, Some((img, *texture as u64))))
                         } else {
                             let img = match &buffers.input.data {
                                 BufferSource::DirectX11 { texture: in_texture, .. } if *texture == *in_texture => {
-                                    Some(_other_img.unwrap().clone())
+                                    Some((_other_img.unwrap().0.clone(), *texture as u64))
                                 },
-                                _ => Some(Image::from_d3d11_texture2d(ocl_queue.clone(), MemFlags::new().write_only(), desc, *texture, 0)?)
+                                _ => Some((Image::from_d3d11_texture2d(ocl_queue.clone(), MemFlags::new().write_only(), desc, *texture, 0)?, *texture as u64))
                             };
-                            Ok((Buffer::builder().queue(ocl_queue.clone()).len(img.as_ref().unwrap().pixel_count() * params.bytes_per_pixel as usize).flags(MemFlags::new().read_write().host_no_access()).build()?, img))
+                            Ok((Buffer::builder().queue(ocl_queue.clone()).len(img.as_ref().unwrap().0.pixel_count() * params.bytes_per_pixel as usize).flags(MemFlags::new().read_write().host_no_access()).build()?, img))
                         }
                     },
                     _ => panic!("Unsupported buffer {:?}", buf.data)
@@ -294,7 +294,7 @@ impl OclWrapper {
 
             Ok(Self {
                 kernel,
-                // queue: ocl_queue,
+                queue: ocl_queue,
                 src: source_buffer,
                 dst: dest_buffer,
                 image_src,
@@ -311,14 +311,17 @@ impl OclWrapper {
     pub fn undistort_image(&self, buffers: &mut Buffers, itm: &crate::stabilization::FrameTransform, drawing_buffer: &[u8]) -> ocl::Result<()> {
         let matrices = unsafe { std::slice::from_raw_parts(itm.matrices.as_ptr() as *const f32, itm.matrices.len() * 12 ) };
 
+        let mut _temp1 = None;
+        let mut _temp2 = None;
+
         if self.buf_matrices.len() < matrices.len() { log::error!("Buffer size mismatch matrices! {} vs {}", self.buf_matrices.len(), matrices.len()); return Ok(()); }
 
         if let Some(ref tex) = self.image_src {
-            let len = tex.pixel_count() * itm.kernel_params.bytes_per_pixel as usize;
+            let len = tex.0.pixel_count() * itm.kernel_params.bytes_per_pixel as usize;
             if len != self.src.len() { log::error!("Buffer size mismatch image_src! {} vs {}", self.src.len(), len);  return Ok(()); }
         }
         if let Some(ref tex) = self.image_dst {
-            let len = tex.pixel_count() * itm.kernel_params.bytes_per_pixel as usize;
+            let len = tex.0.pixel_count() * itm.kernel_params.bytes_per_pixel as usize;
             if len != self.dst.len() { log::error!("Buffer size mismatch image_dst! {} vs {}", self.dst.len(), len);  return Ok(()); }
         }
 
@@ -338,19 +341,25 @@ impl OclWrapper {
                     self.kernel.set_arg_unchecked(0, core::ArgVal::from_raw(siz, &texture as *const _ as *const std::ffi::c_void, true))?;
                 }
             },
-            BufferSource::OpenGL { .. } => {
+            BufferSource::OpenGL { texture, .. } => {
                 if let Some(ref tex) = self.image_src {
-                    tex.cmd().gl_acquire().enq()?;
-                    let _ = tex.cmd().copy_to_buffer(&self.src, 0).enq();
-                    tex.cmd().gl_release().enq()?;
+                    let mut img = &tex.0;
+                    if tex.1 != texture as u64 {
+                        let desc = ImageDescriptor::new(MemObjectType::Image2d, buffers.input.size.0,  buffers.input.size.1,  1, 1, buffers.input.size.2,  0, None);
+                        _temp1 = Some(Image::<u8>::from_gl_texture(self.queue.clone(), MemFlags::new().read_only(), desc, GlTextureTarget::GlTexture2d, 0, texture)?);
+                        img = _temp1.as_ref().unwrap();
+                    }
+                    img.cmd().gl_acquire().enq()?;
+                    let _ = img.cmd().copy_to_buffer(&self.src, 0).enq();
+                    img.cmd().gl_release().enq()?;
                 }
             },
             #[cfg(target_os = "windows")]
             BufferSource::DirectX11 { .. } => {
                 if let Some(ref tex) = self.image_src {
-                    tex.cmd().d3d11_acquire().enq()?;
-                    let _ = tex.cmd().copy_to_buffer(&self.src, 0).enq();
-                    tex.cmd().d3d11_release().enq()?;
+                    tex.0.cmd().d3d11_acquire().enq()?;
+                    let _ = tex.0.cmd().copy_to_buffer(&self.src, 0).enq();
+                    tex.0.cmd().d3d11_release().enq()?;
                 }
             },
             _ => panic!("Unsupported input buffer {:?}", buffers.input.data)
@@ -375,23 +384,31 @@ impl OclWrapper {
             BufferSource::Cpu { buffer, .. } => {
                 self.dst.read(&mut **buffer).enq()?;
             },
-            BufferSource::OpenGL { .. } => {
+            BufferSource::OpenGL { texture, .. } => {
                 if let Some(ref tex) = self.image_dst {
-                    tex.cmd().gl_acquire().enq()?;
-                    if let SpatialDims::Three(w, h, d) = tex.dims() {
-                        let _ = self.dst.cmd().copy_to_image(&tex, [0, 0, 0], [*w, *h, *d]).enq();
+                    let mut img = &tex.0;
+                    if tex.1 != *texture as u64 {
+                        let desc = ImageDescriptor::new(MemObjectType::Image2d, buffers.output.size.0,  buffers.output.size.1,  1, 1, buffers.output.size.2,  0, None);
+                        _temp2 = Some(Image::<u8>::from_gl_texture(self.queue.clone(), MemFlags::new().write_only(), desc, GlTextureTarget::GlTexture2d, 0, *texture)?);
+                        img = _temp2.as_ref().unwrap();
                     }
-                    tex.cmd().gl_release().enq()?;
+
+                    img.cmd().gl_acquire().enq()?;
+                    if let SpatialDims::Three(w, h, d) = img.dims() {
+                        let _ = self.dst.cmd().copy_to_image(&img, [0, 0, 0], [*w, *h, *d]).enq();
+                    }
+                    img.cmd().gl_release().enq()?;
+
                 }
             },
             #[cfg(target_os = "windows")]
             BufferSource::DirectX11 { .. } => {
                 if let Some(ref tex) = self.image_dst {
-                    tex.cmd().d3d11_acquire().enq()?;
-                    if let SpatialDims::Three(w, h, d) = tex.dims() {
-                        let _ = self.dst.cmd().copy_to_image(&tex, [0, 0, 0], [*w, *h, *d]).enq();
+                    tex.0.cmd().d3d11_acquire().enq()?;
+                    if let SpatialDims::Three(w, h, d) = tex.0.dims() {
+                        let _ = self.dst.cmd().copy_to_image(&tex.0, [0, 0, 0], [*w, *h, *d]).enq();
                     }
-                    tex.cmd().d3d11_release().enq()?;
+                    tex.0.cmd().d3d11_release().enq()?;
                 }
             }
             _ => { }
