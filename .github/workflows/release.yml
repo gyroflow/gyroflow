@@ -18,7 +18,8 @@ jobs:
           { os: windows-2022,  type: android }
         ]
         exclude:
-          - targets.type: ${{ (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') && 'dummy' || 'macstore' }}
+          - targets:
+            type: ${{ (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') && 'dummy' || 'macstore' }}
     name: Gyroflow for ${{ matrix.targets.type }}
     runs-on: ${{ matrix.targets.os }}
     env:
