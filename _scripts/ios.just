@@ -205,6 +205,7 @@ build-and-package profile is_dist:
         dsymutil {{AppBundle}}/gyroflow -o {{AppBundle}}/../../../Gyroflow.app.dSYM
         mkdir -p {{AppBundle}}/../../Symbols
         xcrun symbols -noTextInSOD -noDaemon -arch all -symbolsPackageDir {{AppBundle}}/../../Symbols {{AppBundle}}/../../../Gyroflow.app.dSYM
+        rm -rf {{AppBundle}}/../../../Gyroflow.app.dSYM
 
         codesign -vvvv --force --generate-entitlement-der --preserve-metadata=identifier,flags,runtime --sign $SIGN_KEY {{AppBundle}}/Frameworks/mdk.framework
         codesign -vvvv --force --generate-entitlement-der --preserve-metadata=identifier,flags,runtime --sign $SIGN_KEY --entitlements {{AppBundle}}/../../entitlements.xcent {{AppBundle}}
