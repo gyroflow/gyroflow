@@ -176,13 +176,13 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v3
 
-      - run: ls -l
+      - run: tree
 
       - name: Publish
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-         files: ./*
+         files: ./**/*
 
       - name: Upload to App Store
         if: startsWith(github.ref, 'refs/tags/')
