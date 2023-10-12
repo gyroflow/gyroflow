@@ -309,6 +309,7 @@ deploy *param:
 
     # Try to fix AppImage permissions
     ./Gyroflow-${APP_VERSION}-x86_64.AppImage --appimage-extract
+    rm -f Gyroflow-${APP_VERSION}-x86_64.AppImage
     sudo chmod 755 squashfs-root
     find ./squashfs-root -type d -exec sudo chmod 755 {} \;
     mv squashfs-root Gyroflow.AppDir
