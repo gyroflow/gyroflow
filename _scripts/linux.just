@@ -306,7 +306,15 @@ deploy *param:
     cp -rf $TARGET/* $APP_DIR/
     appimage-builder --recipe $PROJECT_DIR/_deployment/linux/AppImageBuilder.yml
     chmod +x Gyroflow-${APP_VERSION}-x86_64.AppImage
-    mv Gyroflow-${APP_VERSION}-x86_64.AppImage Gyroflow-linux64.AppImage
+
+    # Try to fix AppImage permissions
+    ./Gyroflow-${APP_VERSION}-x86_64.AppImage --appimage-extract
+    sudo chmod 755 squashfs-root
+    find ./squashfs-root -type d -exec sudo chmod 755 {} \;
+    mv squashfs-root Gyroflow.AppDir
+    ARCH=x86_64 appimagetool ./Gyroflow.AppDir
+
+    mv Gyroflow-x86_64.AppImage Gyroflow-linux64.AppImage
     # ---- Build AppImage ----
 
     rm -rf $APP_DIR
