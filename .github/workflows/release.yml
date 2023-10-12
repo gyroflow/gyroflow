@@ -74,7 +74,7 @@ jobs:
           api-key-id: ${{ secrets.MACOS_ITCONNECT_KEY_ID }}
           api-private-key: ${{ secrets.MACOS_ITCONNECT_KEY }}
       - name: Download Provisioning Profiles
-        if: ${{ matrix.targets.type == 'macstore' }}
+        if: ${{ matrix.targets.type == 'macstore' && (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') }}
         id: provisioning_mac
         uses: apple-actions/download-provisioning-profiles@v2
         with:
