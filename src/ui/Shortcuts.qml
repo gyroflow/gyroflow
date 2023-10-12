@@ -64,6 +64,11 @@ Item {
             videoArea.timeline.setTrim(videoArea.timeline.trimStart, videoArea.timeline.position);
         }
     }
+    // Clear trim range
+    Shortcut {
+        sequence: "c";
+        onActivated: videoArea.timeline.resetTrim();
+    }
     // Mute on/off
     Shortcut {
         sequence: "m";

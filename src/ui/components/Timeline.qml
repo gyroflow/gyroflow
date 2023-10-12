@@ -567,6 +567,13 @@ Item {
                         controller.clear_offsets();
                     }
                 }
+                Action {
+                    id: clearTrimAction;
+                    enabled: root.trimActive;
+                    iconName: "loop";
+                    text: qsTr("Clear trim range");
+                    onTriggered: root.resetTrim();
+                }
                 QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
                 Menu {
                     font.pixelSize: 11.5 * dpiScale;
