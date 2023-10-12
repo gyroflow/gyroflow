@@ -313,6 +313,7 @@ deploy *param:
     find ./squashfs-root -type d -exec sudo chmod 755 {} \;
     mv squashfs-root Gyroflow.AppDir
     ARCH=x86_64 appimagetool ./Gyroflow.AppDir
+    rm -rf Gyroflow.AppDir
 
     mv Gyroflow-x86_64.AppImage Gyroflow-linux64.AppImage
     # ---- Build AppImage ----
