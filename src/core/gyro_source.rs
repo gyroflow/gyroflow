@@ -379,11 +379,16 @@ impl GyroSource {
                             let exp = (tag_map.get(&GroupId::Exposure)?.get_t(TagId::Data) as Option<&Vec<TimeScalar<f64>>>)?;
 
                             let mut video_ts = 0.0;
+                            let mut zero_ref = None;
                             for x in exp {
                                 if x.t >= 0.0 {
+                                    if zero_ref.is_none() {
+                                        zero_ref = Some(x.t * 1000.0);
+                                        log::debug!("Insta360 first frame reference time: {:.4}", x.t * 1000.0);
+                                    }
                                     // The additional 0.9 ms is a mystery
                                     let diff = (video_ts - x.t) * 1000.0;
-                                    md.per_frame_time_offsets.push(-(x.v * 1000.0 / 2.0) - 0.9 - diff);
+                                    md.per_frame_time_offsets.push(-(x.v * 1000.0 / 2.0) - 0.9 - diff - zero_ref.unwrap());
 
                                     video_ts += 1.0 / fps;
                                 }
