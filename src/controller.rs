@@ -284,7 +284,7 @@ impl Controller {
 
     fn load_video(&mut self, url: QUrl, player: QJSValue) {
         self.stabilizer.clear();
-        let url = QString::from(url.clone()).to_string();
+        let url = util::qurl_to_encoded(url.clone());
         let filename = filesystem::get_filename(&url);
 
         // Load current (clean) state to the UI
@@ -334,7 +334,7 @@ impl Controller {
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
-            filesystem::stop_accessing_url(&QString::from(vid.url.clone()).to_string(), false);
+            filesystem::stop_accessing_url(&util::qurl_to_encoded(vid.url.clone()), false);
             filesystem::start_accessing_url(&url, false);
             vid.setUrl(QUrl::from(QString::from(url)), QString::from(custom_decoder));
         }
@@ -661,7 +661,7 @@ impl Controller {
     }
 
     fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue, sample_index: i32) {
-        let url = QString::from(url).to_string();
+        let url = util::qurl_to_encoded(url);
         let stab = self.stabilizer.clone();
         let filename = filesystem::get_filename(&url);
 
@@ -1155,7 +1155,7 @@ impl Controller {
     }
 
     fn export_gyroflow_file(&self, url: QUrl, typ: QString, additional_data: QJsonObject) {
-        let url = QString::from(url).to_string();
+        let url = util::qurl_to_encoded(url);
         let typ_str = typ.clone();
         let typ = core::GyroflowProjectType::from_str(&typ.to_string()).unwrap();
 
@@ -1189,7 +1189,7 @@ impl Controller {
     }
 
     fn get_urls_from_gyroflow_file(&mut self, url: QUrl) -> QStringList {
-        let url = QString::from(url).to_string();
+        let url = util::qurl_to_encoded(url);
         let mut ret = vec![QString::default(); 2];
         if let Ok(data) = filesystem::read(&url) {
             if let Ok(serde_json::Value::Object(obj)) = serde_json::from_slice(&data) {
@@ -1238,7 +1238,7 @@ impl Controller {
     }
 
     fn import_gyroflow_file(&mut self, url: QUrl) {
-        let url = QString::from(url).to_string();
+        let url = util::qurl_to_encoded(url);
         let progress = util::qt_queued_callback_mut(self, move |this, progress: f64| {
             this.loading_gyro_in_progress = progress < 1.0;
             this.loading_gyro_progress(progress);
@@ -1675,7 +1675,7 @@ impl Controller {
     }
 
     fn export_lens_profile(&mut self, url: QUrl, info: QJsonObject, upload: bool) {
-        let url = QString::from(url).to_string();
+        let url = util::qurl_to_encoded(url);
         let info_json = info.to_json().to_string();
 
         match core::lens_profile::LensProfile::from_json(&info_json) {
@@ -1817,7 +1817,7 @@ impl Controller {
 
     fn export_preset(&self, url: QUrl, content: QJsonObject) {
         let contents = content.to_json_pretty();
-        if let Err(e) = filesystem::write(&QString::from(url).to_string(), contents.to_slice()) {
+        if let Err(e) = filesystem::write(&util::qurl_to_encoded(url), contents.to_slice()) {
             self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
         }
     }
@@ -1905,7 +1905,7 @@ impl Controller {
     }
 
     fn mp4_merge(&self, file_list: QStringList, output_folder: QUrl, output_filename: QString) {
-        let output_folder = QString::from(output_folder).to_string();
+        let output_folder = util::qurl_to_encoded(output_folder);
         let output_filename = output_filename.to_string();
         let output_url = filesystem::get_file_url(&output_folder, &output_filename, true);
 
@@ -2091,22 +2091,22 @@ pub struct Filesystem {
     url_opened:               qt_signal!(url: QUrl),
 }
 impl Filesystem {
-    fn exists_in_folder(&self, folder: QUrl, filename: QString) -> bool { filesystem::exists_in_folder(&QString::from(folder).to_string(), &filename.to_string()) }
-    fn can_create_file(&self, folder: QUrl, filename: QString) -> bool { filesystem::can_create_file(&QString::from(folder).to_string(), &filename.to_string()) }
-    fn exists(&self, url: QUrl) -> bool { filesystem::exists(&QString::from(url).to_string()) }
-    fn get_filename(&self, url: QUrl) -> QString { QString::from(filesystem::get_filename(&QString::from(url).to_string())) }
-    fn get_folder(&self, url: QUrl) -> QString { QString::from(filesystem::get_folder(&QString::from(url).to_string())) }
+    fn exists_in_folder(&self, folder: QUrl, filename: QString) -> bool { filesystem::exists_in_folder(&util::qurl_to_encoded(folder), &filename.to_string()) }
+    fn can_create_file(&self, folder: QUrl, filename: QString) -> bool { filesystem::can_create_file(&util::qurl_to_encoded(folder), &filename.to_string()) }
+    fn exists(&self, url: QUrl) -> bool { filesystem::exists(&util::qurl_to_encoded(url)) }
+    fn get_filename(&self, url: QUrl) -> QString { QString::from(filesystem::get_filename(&util::qurl_to_encoded(url))) }
+    fn get_folder(&self, url: QUrl) -> QString { QString::from(filesystem::get_folder(&util::qurl_to_encoded(url))) }
     fn filename_with_extension(&self, filename: QString, ext: QString) -> QString { QString::from(filesystem::filename_with_extension(&filename.to_string(), &ext.to_string())) }
     fn filename_with_suffix(&self, filename: QString, suffix: QString) -> QString { QString::from(filesystem::filename_with_suffix(&filename.to_string(), &suffix.to_string())) }
     fn open_file_externally(&self, url: QUrl) { util::open_file_externally(url); }
     fn path_to_url(&self, path: QString) -> QUrl { QUrl::from(QString::from(filesystem::path_to_url(&path.to_string()))) }
-    fn get_file_url(&self, folder: QUrl, filename: String, can_create: bool) -> QUrl { QUrl::from(QString::from(filesystem::get_file_url(&QString::from(folder).to_string(), &filename, can_create))) }
-    fn url_to_path(&self, url: QUrl) -> QString { QString::from(filesystem::url_to_path(&QString::from(url).to_string())) }
-    fn display_url(&self, url: QUrl) -> QString { QString::from(filesystem::display_url(&QString::from(url).to_string())) }
-    fn display_folder_filename(&self, folder: QUrl, filename: QString) -> QString { QString::from(filesystem::display_folder_filename(&QString::from(folder).to_string(), &filename.to_string())) }
+    fn get_file_url(&self, folder: QUrl, filename: String, can_create: bool) -> QUrl { QUrl::from(QString::from(filesystem::get_file_url(&util::qurl_to_encoded(folder), &filename, can_create))) }
+    fn url_to_path(&self, url: QUrl) -> QString { QString::from(filesystem::url_to_path(&util::qurl_to_encoded(url))) }
+    fn display_url(&self, url: QUrl) -> QString { QString::from(filesystem::display_url(&util::qurl_to_encoded(url))) }
+    fn display_folder_filename(&self, folder: QUrl, filename: QString) -> QString { QString::from(filesystem::display_folder_filename(&util::qurl_to_encoded(folder), &filename.to_string())) }
     fn catch_url_open(&self, url: QUrl) { util::dispatch_url_event(url.clone()); self.url_opened(url); }
-    fn remove_file(&self, url: QUrl) { let _ = filesystem::remove_file(&QString::from(url).to_string()); }
-    fn folder_access_granted(&self, url: QUrl) { filesystem::folder_access_granted(&QString::from(url).to_string()); }
+    fn remove_file(&self, url: QUrl) { let _ = filesystem::remove_file(&util::qurl_to_encoded(url)); }
+    fn folder_access_granted(&self, url: QUrl) { filesystem::folder_access_granted(&util::qurl_to_encoded(url)); }
     fn save_allowed_folders(&self) {
         let list = filesystem::get_allowed_folders();
         if !list.is_empty() {

@@ -141,6 +141,11 @@ pub fn dispatch_url_event(url: QUrl) {
         qGuiApp->sendEvent(qGuiApp, &evt);
     });
 }
+pub fn qurl_to_encoded(url: QUrl) -> String {
+    cpp!(unsafe [url as "QUrl"] -> QString as "QString" {
+        return QString(url.toEncoded());
+    }).to_string()
+}
 pub fn catch_qt_file_open<F: FnMut(QUrl)>(cb: F) {
     let func: Box<dyn FnMut(QUrl)> = Box::new(cb);
     let cb_ptr = Box::into_raw(func);
