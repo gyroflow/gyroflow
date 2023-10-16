@@ -301,8 +301,8 @@ Klikni na OK pre výber cieľovej zložky.</translation>
       <location filename="../../src/ui/App.qml" line="338"/>
       <source>Keep this app in the foreground and don&apos;t lock the screen.
 Due to limitations of the system video encoders, rendering in the background is not supported.</source>
-      <translation type="unfinished">Keep this app in the foreground and don&apos;t lock the screen.
-Due to limitations of the system video encoders, rendering in the background is not supported.</translation>
+      <translation>Udržuj apku zapnutú v popredí a nezamykaj obrazovku.
+Kôli limitácii video enkodéra, renderovanie na pozadí nieje podporované.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="581"/>
@@ -1324,12 +1324,12 @@ Chceš nahrať tvoj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="147"/>
       <source>Mobile Light</source>
-      <translation type="unfinished">Mobile Light</translation>
+      <translation>Mobil Svetlý</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="148"/>
       <source>Mobile Dark</source>
-      <translation type="unfinished">Mobile Dark</translation>
+      <translation>Mobil tmavý</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="167"/>
@@ -1867,17 +1867,17 @@ Chceš ho zmeniť na iný podporovaný typ, alebo ho chceš zachovať a vyrendro
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="234"/>
       <source>Save to lens profile directory</source>
-      <translation type="unfinished">Save to lens profile directory</translation>
+      <translation>Uložiť do adresára s profilom objektívov</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="235"/>
       <source>Save as default preset</source>
-      <translation type="unfinished">Save as default preset</translation>
+      <translation>Uložiť ako predvolené</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="236"/>
       <source>Save to file</source>
-      <translation type="unfinished">Save to file</translation>
+      <translation>Uložiť do súboru</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
@@ -3089,7 +3089,7 @@ Ak je Gyroflow umiestnený v "C:\Program Files" je potrebné ho spustiť ako Adm
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="841"/>
       <source>Show timeline menu</source>
-      <translation type="unfinished">Show timeline menu</translation>
+      <translation>Zobraziť menu časovej osy</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="880"/>
@@ -3132,7 +3132,7 @@ Ak je Gyroflow umiestnený v "C:\Program Files" je potrebné ho spustiť ako Adm
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="131"/>
       <source>In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</source>
-      <translation type="unfinished">In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</translation>
+      <translation>Aby sa mohli nájsť projektové súbory, video, alebo obrázkové sekvencie, kliknite sem a vyberte adresár so vstupnými súbormi.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="122"/>

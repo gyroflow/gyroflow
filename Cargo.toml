@@ -25,15 +25,15 @@ serde = "1.0"
 serde_json = "1.0"
 bytemuck = "1.14.0"
 nalgebra = "0.32"
-semver = "1.0.19"
+semver = "1.0.20"
 fastrand = "2.0.1"
 itertools = "0.11.0"
-regex = "1.9.6"
+regex = "1.10.1"
 rayon = "1.8"
 
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"
-flate2 = "1.0.27"
+flate2 = "1.0.28"
 walkdir = "2.4.0"
 mp4-merge = "0.1.6"
 human-sort = "0.2.2"
@@ -120,6 +120,6 @@ target_sdk_version = 33
 
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "0.21"
-ndk = { version = "0.7", features = ["media", "api-level-26"] }
-ndk-sys = { version = "0.4.1" }
+ndk = { version = "0.8", features = ["media", "api-level-26"] }
+ndk-sys = { version = "0.5.0" }
 ndk-context = "0.1.1"

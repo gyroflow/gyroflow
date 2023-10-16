@@ -34,11 +34,11 @@ crc32fast = "1.3.2"
 byteorder = "1.5.0"
 line_drawing = "1.0.0"
 rand = "0.8.5"
-time = { version = "0.3.29", features = ["local-offset"] }
+time = { version = "0.3.30", features = ["local-offset"] }
 itertools = "0.11.0"
 num = "0.4.1"
 base91 = "0.1.0"
-bitflags = "2.4.0"
+bitflags = "2.4.1"
 enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.3.1"
@@ -63,19 +63,19 @@ enterpolation = "0.2.1"
 libloading = "0.8"
 libc = "0.2"
 
-opencv = { version = "0.84", features = ["clang-runtime"], optional = true }
+opencv = { version = "0.85.1", features = ["clang-runtime"], optional = true }
 
-wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "35ebd4a", features = ["spirv"] }
-wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "35ebd4a" }
-wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "35ebd4a" }
-wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "35ebd4a" }
+wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "5034756", features = ["spirv"] }
+wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "5034756" }
+wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "5034756" }
+wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "5034756" }
 bytemuck = "1.14.0"
 ash = "0.37.3"
-naga = { git = "https://github.com/gfx-rs/naga", rev = "33b75a27d93c6574b11b4dd4492b85b5783d6c52", version = "0.13.0", features = ["clone", "span", "validate", "spv-in"] }
+naga = { git = "https://github.com/gfx-rs/naga", rev = "9eb3a1dc8a522e627b266f9157442f0fe8b65ec9", version = "0.13.0", features = ["clone", "span", "validate", "spv-in", "compact"] }
 
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"
-flate2 = "1.0.27"
+flate2 = "1.0.28"
 walkdir = "2.4.0"
 url = "2.4.1"
 urlencoding = "2.1.3"
@@ -123,11 +123,11 @@ debug = true
 
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "0.21"
-ndk = { version = "0.7", features = ["media", "api-level-26"] }
-ndk-sys = { version = "0.4.1" }
+ndk = { version = "0.8", features = ["media", "api-level-26"] }
+ndk-sys = { version = "0.5.0" }
 ndk-context = { version = "0.1.1" }
 
 [build-dependencies]
 ureq = "2.8.0"
-flate2 = "1.0.27"
+flate2 = "1.0.28"
 tar = "0.4.40"

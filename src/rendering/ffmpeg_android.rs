@@ -38,15 +38,15 @@ impl AndroidHWHandles {
         image_reader.set_image_listener(Box::new(move |image_reader| {
             match &mut image_reader.acquire_next_image() {
                 Ok(Some(image)) => {
-                    let timestamp = std::time::Duration::from_nanos(image.get_timestamp().unwrap() as u64);
+                    let timestamp = std::time::Duration::from_nanos(image.timestamp().unwrap() as u64);
 
                     // TODO import AHardwareBuffer to wgpu Vulkan
                     // The problem with the hardware buffer is that it can be in arbitrary vendor-specific pixel format
                     // One way to tackle that is to use vk::SamplerYcbcrConversion from Vulkan and draw over Vulkan RGB8 texture, but it's a lot of work ( https://github.com/korejan/ALVR/blob/master/alvr/experiments/client/src/video_decoder/mediacodec.rs )
                     // Another way is to draw RGBA in an OpenGL context using Surface https://docs.rs/ndk/latest/ndk/surface_texture/struct.SurfaceTexture.html and update_tex_image
                     // We may need to enable Gl backend in wgpu for that
-                    let hw_buffer = image.get_hardware_buffer().unwrap();
-                    ::log::debug!("AHardwareBuffer: {:?} ({}x{} {:?} {:?})", hw_buffer.as_ptr(), image.get_width().unwrap(), image.get_height().unwrap(), image.get_format().unwrap(), timestamp);
+                    let hw_buffer = image.hardware_buffer().unwrap();
+                    ::log::debug!("AHardwareBuffer: {:?} ({}x{} {:?} {:?})", hw_buffer.as_ptr(), image.width().unwrap(), image.height().unwrap(), image.format().unwrap(), timestamp);
 
                     sender.send(hw_buffer.acquire()).unwrap();
                 }
@@ -80,7 +80,7 @@ impl AndroidHWHandles {
                 if media_codec_device_ctx.is_null() { return Err("media_codec_device_ctx is null"); }
             }
 
-            window = image_reader.get_window().unwrap(); // TODO: unwrap
+            window = image_reader.window().unwrap(); // TODO: unwrap
             surface = env.new_global_ref(JObject::from_raw(window.to_surface(env.get_raw()))).unwrap(); // TODO: unwrap
 
             (*media_codec_device_ctx).surface = surface.as_raw() as *mut _;
