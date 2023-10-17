@@ -185,7 +185,17 @@ impl OclWrapper {
                                         float2 digital_distort_point(float2 uv, __global KernelParams *p) { return uv; }";
         lens_model_functions.push_str(digital_lens.as_ref().map(|x| x.opencl_functions()).unwrap_or(default_digital_lens));
 
+        let mut extensions = String::new();
+        if ocl_names.1 == "convert_half4" {
+            extensions.push_str(r#"
+                #pragma OPENCL EXTENSION cl_khr_fp16 : enable
+                half4 convert_half4(float4 v) { half4 out = 0.0; vstore_half4_rte(v, 0, (half *)&out); return out; }
+                float4 convert_half4_to_float4(half4 v) { return vload_half4(0, (half*)&v); }
+            "#);
+        }
+
         kernel = kernel.replace("LENS_MODEL_FUNCTIONS;", &lens_model_functions)
+                       .replace("EXTENSIONS;", &extensions)
                        .replace("DATA_CONVERTF", ocl_names.3)
                        .replace("DATA_TYPEF", ocl_names.2)
                        .replace("DATA_CONVERT", ocl_names.1)

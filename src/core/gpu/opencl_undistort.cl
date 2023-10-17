@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
+EXTENSIONS;
+
 enum {
     INTER_BITS = 5,
     INTER_TAB_SIZE = 1 << INTER_BITS
 };
-// #ifdef cl_amd_fp64
-// #pragma OPENCL EXTENSION cl_amd_fp64:enable
-// #elif defined (cl_khr_fp64)
-// #pragma OPENCL EXTENSION cl_khr_fp64:enable
-// #endif
 
 typedef struct {
     int width;         // 4

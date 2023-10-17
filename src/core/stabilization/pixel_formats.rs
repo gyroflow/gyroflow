@@ -242,7 +242,7 @@ impl PixelType for RGBAf16 {
     #[inline] fn to_float(v: Self) -> Vector4<f32> { Vector4::new(v.0.0.to_f32(), v.1.0.to_f32(), v.2.0.to_f32(), v.3.0.to_f32()) }
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(Ff16(half::f16::from_f32(v[0])), Ff16(half::f16::from_f32(v[1])), Ff16(half::f16::from_f32(v[2])), Ff16(half::f16::from_f32(v[3]))) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _is_limited: bool) -> Vector4<f32> { v }
-    #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("half4", "convert_half4", "float4", "convert_float4") }
+    #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("half4", "convert_half4", "float4", "convert_half4_to_float4") }
     #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::Rgba16Float, "f32", 255.0)) }
     #[inline] fn default_max_value() -> Option<f32> { None }
 }
