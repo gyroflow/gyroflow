@@ -45,7 +45,10 @@ Item {
         return vid.timestamp * 1000;
     }
     function setPosition(pos: real) {
-        vid.currentFrame = frameAtPosition(pos);
+        const frame = frameAtPosition(pos);
+        if (frame != vid.currentFrame) {
+            vid.seekToFrame(frame, false);
+        }
     }
     function frameAtPosition(pos: real): int {
         return Math.floor(pos * (vid.frameCount - 1));

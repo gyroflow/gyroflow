@@ -242,9 +242,9 @@ dependencies = [
 
 [[package]]
 name = "async-executor"
-version = "1.5.4"
+version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c1da3ae8dabd9c00f453a329dfe1fb28da3c0a72e2478cdcd93171740c20499"
+checksum = "4b0c4a4f319e45986f347ee47fef8bf5e81c9abc3f6f58dc2391439f30df65f0"
 dependencies = [
  "async-lock",
  "async-task",
@@ -1872,16 +1872,16 @@ checksum = "140a09c9305e6d5e557e2ed7cbc68e05765a7d4213975b87cb04920689cc6219"
 
 [[package]]
 name = "iana-time-zone"
-version = "0.1.57"
+version = "0.1.58"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2fad5b825842d2b38bd206f3e81d6957625fd7f0a361e345c30e01a0ae2dd613"
+checksum = "8326b86b6cff230b97d0d312a6c40a60726df3332e721f72a1b035f451663b20"
 dependencies = [
  "android_system_properties",
  "core-foundation-sys",
  "iana-time-zone-haiku",
  "js-sys",
  "wasm-bindgen",
- "windows 0.48.0",
+ "windows-core",
 ]
 
 [[package]]
@@ -3234,7 +3234,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=ff63d30#ff63d30731022d410ee71dc2b34ff7ef2d74de71"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=179bb35#179bb3510eeae509c379dd76bfeaf4d95245d5c2"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3446,9 +3446,9 @@ dependencies = [
 
 [[package]]
 name = "rodio"
-version = "0.17.1"
+version = "0.17.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bdf1d4dea18dff2e9eb6dca123724f8b60ef44ad74a9ad283cdfe025df7e73fa"
+checksum = "79a48a12b54a6db15f566f5edfcd498eafa07ed98defdb3660e28ab8b0231d35"
 dependencies = [
  "cpal",
  "lewton",
@@ -4426,9 +4426,9 @@ dependencies = [
 
 [[package]]
 name = "wide"
-version = "0.7.12"
+version = "0.7.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ebecebefc38ff1860b4bc47550bbfa63af5746061cf0d29fcd7fa63171602598"
+checksum = "c68938b57b33da363195412cfc5fc37c9ed49aa9cfe2156fde64b8d2c9498242"
 dependencies = [
  "bytemuck",
  "safe_arch",
@@ -4478,15 +4478,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cdacb41e6a96a052c6cb63a144f24900236121c6f63f4f8219fef5977ecb0c25"
 dependencies = [
  "windows-targets 0.42.2",
-]
-
-[[package]]
-name = "windows"
-version = "0.48.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e686886bc078bc1b0b600cac0147aadb815089b6e4da64016cbd754b6342700f"
-dependencies = [
- "windows-targets 0.48.5",
 ]
 
 [[package]]
