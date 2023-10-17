@@ -132,6 +132,9 @@ impl GyroSource {
             ..Default::default()
         }
     }
+    pub fn has_motion(&self) -> bool {
+        !self.file_metadata.raw_imu.is_empty() || !self.file_metadata.quaternions.is_empty()
+    }
     pub fn set_use_gravity_vectors(&mut self, v: bool) {
         if self.use_gravity_vectors != v {
             self.use_gravity_vectors = v;

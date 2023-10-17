@@ -3,6 +3,7 @@
 
 use std::sync::atomic::{ AtomicBool, AtomicUsize, Ordering::Relaxed, Ordering::SeqCst };
 use std::sync::Arc;
+use std::borrow::Cow;
 use itertools::Either;
 use parking_lot::RwLock;
 
@@ -57,13 +58,19 @@ impl AutosyncProcess {
 
         if duration_ms < 10.0 || frame_count < 2 || time_per_syncpoint < 10.0 || search_size < 10.0 { return Err(()); }
 
-        let ranges_us: Vec<(i64, i64)> = timestamps_fract.iter().map(|x| {
+        let mut ranges_us: Vec<(i64, i64)> = timestamps_fract.iter().map(|x| {
             let range = (
                 ((x * org_duration_ms) - (time_per_syncpoint / 2.0)).max(0.0),
                 ((x * org_duration_ms) + (time_per_syncpoint / 2.0)).min(org_duration_ms)
             );
             ((range.0 * 1000.0).round() as i64, (range.1 * 1000.0).round() as i64)
         }).collect();
+
+        if mode == "synchronize" && !stab.gyro.read().has_motion() {
+            // If no gyro data in file, analyze the entire video
+            ranges_us.clear();
+            ranges_us.push((0, (org_duration_ms * 1000.0).round() as i64));
+        }
 
         let scaled_ranges_us = ranges_us.iter().map(|(f, t)| (
             (*f as f64 / fps_scale.unwrap_or(1.0)) as i64,
@@ -188,6 +195,24 @@ impl AutosyncProcess {
         self.estimator.cache_optical_flow(if offset_method == 1 { 2 } else { 1 });
         self.estimator.cleanup();
 
+        let mut scaled_ranges_us = Cow::Borrowed(&self.scaled_ranges_us);
+
+        if self.mode == "synchronize" && !self.compute_params.read().gyro.read().has_motion() {
+            // If no gyro data in file, set the computed optical flow as gyro data
+            let mut compute_params = self.compute_params.write();
+            let mut gyro = compute_params.gyro.write();
+            gyro.file_metadata.raw_imu = self.estimator.estimated_gyro.read().values().cloned().collect::<Vec<_>>();
+            gyro.apply_transforms();
+
+            let timestamps_fract = [0.5];
+            let time_per_syncpoint = 500.0;
+
+            scaled_ranges_us = Cow::Owned(timestamps_fract.into_iter().map(|x| (
+                (((x * gyro.duration_ms) - (time_per_syncpoint / 2.0)).max(0.0)              * 1000.0 / self.fps_scale.unwrap_or(1.0)).round() as i64,
+                (((x * gyro.duration_ms) + (time_per_syncpoint / 2.0)).min(gyro.duration_ms) * 1000.0 / self.fps_scale.unwrap_or(1.0)).round() as i64
+            )).collect());
+        }
+
         if let Some(cb) = &progress_cb {
             let d = self.total_detected_frames.load(SeqCst);
             let t = self.total_read_frames.load(SeqCst);
@@ -213,21 +238,21 @@ impl AutosyncProcess {
         if let Some(cb) = &self.finished_cb {
             if self.mode == "estimate_rolling_shutter" {
                 use super::find_offset::visual_features::find_offsets;
-                cb(Either::Left(find_offsets(&self.estimator, &self.scaled_ranges_us, &self.sync_params, &self.compute_params.read(), true, progress_cb2, self.cancel_flag.clone())));
+                cb(Either::Left(find_offsets(&self.estimator, &scaled_ranges_us, &self.sync_params, &self.compute_params.read(), true, progress_cb2, self.cancel_flag.clone())));
             } else if self.mode == "guess_imu_orientation" {
                 use super::find_offset::rs_sync::FindOffsetsRssync;
-                let guessed = FindOffsetsRssync::new(&self.scaled_ranges_us, self.estimator.sync_results.clone(), &self.sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone()).guess_orient();
+                let guessed = FindOffsetsRssync::new(&scaled_ranges_us, self.estimator.sync_results.clone(), &self.sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone()).guess_orient();
                 if !self.cancel_flag.load(SeqCst) {
                     cb(Either::Right(guessed));
                 }
             } else {
-                let offsets = self.estimator.find_offsets(&self.scaled_ranges_us, &self.sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone());
+                let offsets = self.estimator.find_offsets(&scaled_ranges_us, &self.sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone());
                 if check_negative {
                     for_negative.store(true, SeqCst);
                     // Try also negative rough offset
                     let mut sync_params = self.sync_params.clone();
                     sync_params.initial_offset = -sync_params.initial_offset;
-                    let offsets2 = self.estimator.find_offsets(&self.scaled_ranges_us, &sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone());
+                    let offsets2 = self.estimator.find_offsets(&scaled_ranges_us, &sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone());
                     if offsets2.len() > offsets.len() {
                         cb(Either::Left(offsets2));
                     } else if offsets2.len() == offsets.len() {

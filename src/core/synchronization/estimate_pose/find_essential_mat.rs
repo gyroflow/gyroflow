@@ -34,13 +34,13 @@ impl EstimatePoseTrait for PoseFindEssentialMat {
             let identity = Mat::eye(3, 3, opencv::core::CV_64F)?;
 
             let mut mask = Mat::default();
-            let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &identity, opencv::calib3d::RANSAC, 0.999, 0.0005, 2000, &mut mask)?;
+            let e = opencv::calib3d::find_essential_mat(&a1_pts, &a2_pts, &identity, opencv::calib3d::LMEDS, 0.999, 0.00001, 4000, &mut mask)?;
 
             let mut r1 = Mat::default();
             let mut t = Mat::default();
 
             let inliers = opencv::calib3d::recover_pose_triangulated(&e, &a1_pts, &a2_pts, &identity, &mut r1, &mut t, 100000.0, &mut mask, &mut Mat::default())?;
-            if inliers < 20 {
+            if inliers < 10 {
                 return Err(opencv::Error::new(0, "Model not found".to_string()));
             }
 
