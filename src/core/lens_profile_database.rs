@@ -123,8 +123,11 @@ impl LensProfileDatabase {
 
         #[cfg(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles"))]
         for entry in LENS_PROFILES_STATIC.find("**/*").unwrap() {
-            if let Some(data) = entry.as_file().and_then(|x| x.contents_utf8()) {
-                load(data, &entry.path().display().to_string());
+            let filename = entry.path().file_name().unwrap().to_string_lossy();
+            if filename.ends_with(".json") || filename.ends_with(".gyroflow") {
+                if let Some(data) = entry.as_file().and_then(|x| x.contents_utf8()) {
+                    load(data, &entry.path().display().to_string());
+                }
             }
         }
 

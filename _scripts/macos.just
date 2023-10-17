@@ -76,11 +76,6 @@ install-deps:
         cp -R include ../ffmpeg-arm64/include
     fi
 
-    # ――――――――――――――――――――――――――――――――――― Lens profiles ―――――――――――――――――――――――――――――――――――
-    git clone --depth 1 https://github.com/gyroflow/lens_profiles.git {{ProjectDir}}/resources/camera_presets || true
-    git -C {{ProjectDir}}/resources/camera_presets pull
-    # ――――――――――――――――――――――――――――――――――― Lens profiles ―――――――――――――――――――――――――――――――――――
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Development ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
