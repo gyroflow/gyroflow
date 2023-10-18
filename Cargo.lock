@@ -343,9 +343,9 @@ dependencies = [
 
 [[package]]
 name = "async-task"
-version = "4.4.1"
+version = "4.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9441c6b2fe128a7c2bf680a44c34d0df31ce09e5b7e401fcca3faa483dbc921"
+checksum = "b4eb2cdb97421e01129ccb49169d8279ed21e829929144f4a22a6e54ac549ca1"
 
 [[package]]
 name = "async-trait"
@@ -1766,6 +1766,7 @@ dependencies = [
  "rand",
  "rand_xoshiro",
  "rayon",
+ "regex",
  "rs-sync",
  "rustfft",
  "sample-consensus",
@@ -2226,9 +2227,9 @@ checksum = "da2479e8c062e40bf0066ffa0bc823de0a9368974af99c9f6df941d2c231e03f"
 
 [[package]]
 name = "lock_api"
-version = "0.4.10"
+version = "0.4.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c1cc9717a20b1bb222f333e6a92fd32f7d8a18ddc5a3191a11af45dcbf4dcd16"
+checksum = "3c168f8615b12bc01f9c17e2eb0cc07dcae1940121185446edc3744920e8ef45"
 dependencies = [
  "autocfg",
  "scopeguard",
@@ -2395,7 +2396,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.13.0"
-source = "git+https://github.com/gfx-rs/naga?rev=9eb3a1dc8a522e627b266f9157442f0fe8b65ec9#9eb3a1dc8a522e627b266f9157442f0fe8b65ec9"
+source = "git+https://github.com/gfx-rs/naga?rev=6854b0ab4f105131bfb87704927abec3fe366ef9#6854b0ab4f105131bfb87704927abec3fe366ef9"
 dependencies = [
  "bit-set",
  "bitflags 2.4.1",
@@ -2944,9 +2945,9 @@ dependencies = [
 
 [[package]]
 name = "parking"
-version = "2.1.1"
+version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e52c774a4c39359c1d1c52e43f73dd91a75a614652c825408eec30c95a9b2067"
+checksum = "bb813b8af86854136c6922af0598d719255ecb2179515e6e7730d468f05c9cae"
 
 [[package]]
 name = "parking_lot"
@@ -2960,13 +2961,13 @@ dependencies = [
 
 [[package]]
 name = "parking_lot_core"
-version = "0.9.8"
+version = "0.9.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93f00c865fe7cabf650081affecd3871070f26767e7b2070a3ffae14c654b447"
+checksum = "4c42a9226546d68acdd9c0a280d17ce19bfe27a46bf68784e4066115788d008e"
 dependencies = [
  "cfg-if",
  "libc",
- "redox_syscall 0.3.5",
+ "redox_syscall 0.4.1",
  "smallvec",
  "windows-targets 0.48.5",
 ]
@@ -3379,6 +3380,15 @@ name = "redox_syscall"
 version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "567664f262709473930a4bf9e51bf2ebf3348f2e748ccc50dea20646858f8f29"
+dependencies = [
+ "bitflags 1.3.2",
+]
+
+[[package]]
+name = "redox_syscall"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4722d768eff46b75989dd134e5c353f0d6296e5aaa3132e776cbdb56be7731aa"
 dependencies = [
  "bitflags 1.3.2",
 ]
@@ -4322,7 +4332,7 @@ checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
 [[package]]
 name = "wgpu"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=5034756#5034756948da6e11603f962e12a7074ae607f139"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=da0b3fe#da0b3fe6854ce22f37239202e4ab117bc06e1fb2"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -4345,7 +4355,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=5034756#5034756948da6e11603f962e12a7074ae607f139"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=da0b3fe#da0b3fe6854ce22f37239202e4ab117bc06e1fb2"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4367,7 +4377,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=5034756#5034756948da6e11603f962e12a7074ae607f139"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=da0b3fe#da0b3fe6854ce22f37239202e4ab117bc06e1fb2"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4407,7 +4417,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=5034756#5034756948da6e11603f962e12a7074ae607f139"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=da0b3fe#da0b3fe6854ce22f37239202e4ab117bc06e1fb2"
 dependencies = [
  "bitflags 2.4.1",
  "js-sys",

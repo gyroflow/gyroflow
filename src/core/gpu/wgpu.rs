@@ -183,17 +183,39 @@ impl WgpuWrapper {
                 _ => {
                     let max_buffer_bits = if cfg!(any(target_os = "android", target_os = "ios")) { 29 } else { 31 };
                     let max_storage_buffer_bits = if cfg!(any(target_os = "android", target_os = "ios")) { 27 } else { 31 };
-                    pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
-                        label: None,
-                        features: wgpu::Features::empty(),
-                        limits: wgpu::Limits {
-                            max_storage_buffers_per_shader_stage: 6,
-                            max_storage_textures_per_shader_stage: 4,
-                            max_buffer_size: (1 << max_buffer_bits) - 1,
-                            max_storage_buffer_binding_size: (1 << max_storage_buffer_bits) - 1,
-                            ..wgpu::Limits::default()
-                        },
-                    }, None)).map_err(|e| WgpuError::RequestDevice(e))?
+                    let mut limits = wgpu::Limits {
+                        max_storage_buffers_per_shader_stage: 6,
+                        max_storage_textures_per_shader_stage: 4,
+                        max_buffer_size: (1 << max_buffer_bits) - 1,
+                        max_storage_buffer_binding_size: (1 << max_storage_buffer_bits) - 1,
+                        ..wgpu::Limits::default()
+                    };
+                    let mut result = Err(WgpuError::NoAvailableAdapter);
+                    for _ in 0..4 {
+                        let device = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
+                            label: None,
+                            features: wgpu::Features::empty(),
+                            limits: limits.clone(),
+                        }, None));
+                        if let Err(e) = &device {
+                            let e_str = format!("{e:?}");
+                            let re = regex::Regex::new("FailedLimit \\{ name: \"(.*?)\", requested: [0-9]+, allowed: ([0-9]+)").unwrap();
+                            if let Some(captures) = re.captures(&e_str) {
+                                log::debug!("Catching wgpu limit error: {e_str}");
+                                let (_, [name, allowed]) = captures.extract();
+                                match name {
+                                    "max_storage_buffers_per_shader_stage"  => { limits.max_storage_buffers_per_shader_stage  = allowed.parse().unwrap(); continue; },
+                                    "max_storage_textures_per_shader_stage" => { limits.max_storage_textures_per_shader_stage = allowed.parse().unwrap(); continue; },
+                                    "max_buffer_size"                       => { limits.max_buffer_size                       = allowed.parse().unwrap(); continue; },
+                                    "max_storage_buffer_binding_size"       => { limits.max_storage_buffer_binding_size       = allowed.parse().unwrap(); continue; },
+                                    _ => { }
+                                }
+                            }
+                        }
+                        result = device.map_err(|e| WgpuError::RequestDevice(e));
+                        break;
+                    }
+                    result?
                 }
             };
 
