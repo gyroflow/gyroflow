@@ -323,6 +323,9 @@ bundle *param:
     if ! [ -z "$GITHUB_RUN_NUMBER" ]; then
         PlistBuddy -x -c "Set :CFBundleVersion \"`echo "{{ProjectVersion}}" | sed -E 's/[^0-9\.]//' | sed -E 's/\.([0-9]+)$/\1/'`.$GITHUB_RUN_NUMBER\"" {{AppBundle}}/Contents/Info.plist
     fi
+    if ! [ -z "$IS_MANUAL_DISPATCH" ]; then
+        PlistBuddy -x -c "Set :CFBundleShortVersionString \"`echo "{{ProjectVersion}}" | sed -E 's/[^0-9\.]//' | sed -E 's/\.([0-9]+)$/\1/'`.0\"" {{AppBundle}}/Contents/Info.plist
+    fi
 
     DEFAULT_SDK_VERSION=`xcrun --sdk macosx --show-sdk-version`
     PlistBuddy -x -c "Add :BuildMachineOSBuild string `sw_vers -buildVersion`" {{AppBundle}}/Contents/Info.plist
