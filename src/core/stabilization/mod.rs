@@ -110,7 +110,6 @@ pub struct Stabilization {
     wgpu: Option<wgpu::WgpuWrapper>,
 
     pub backend_initialized: Option<u32>,
-    wgpu_ever_cached: bool,
 
     compute_params: ComputeParams,
 
@@ -304,6 +303,7 @@ impl Stabilization {
             #[cfg(feature = "use-opencl")]
             { self.cl = None; }
             self.wgpu = None;
+            CACHED_WGPU.with(|x| x.borrow_mut().clear());
             self.backend_initialized = Some(hash);
             return true;
         }
@@ -381,7 +381,6 @@ impl Stabilization {
                         match wgpu {
                             Ok(Ok(wgpu)) => {
                                 if self.share_wgpu_instances {
-                                    self.wgpu_ever_cached = true;
                                     CACHED_WGPU.with(|x| x.borrow_mut().put(hash, wgpu));
                                 } else {
                                     self.wgpu = Some(wgpu);
@@ -417,7 +416,7 @@ impl Stabilization {
         self.ensure_stab_data_at_timestamp::<T>(timestamp_us, buffers);
         self.init_backends::<T>(timestamp_us, buffers);
 
-        if self.share_wgpu_instances && self.wgpu_ever_cached {
+        if self.share_wgpu_instances && CACHED_WGPU.with(|x| !x.borrow().is_empty()) {
             let hash = self.get_current_checksum(buffers);
             let has_cached = CACHED_WGPU.with(|x| x.borrow().contains(&hash));
             if !has_cached {
@@ -476,16 +475,19 @@ impl Stabilization {
             if wgpu::is_buffer_supported(buffers) {
                 if self.share_wgpu_instances {
                     let hash = self.get_current_checksum(buffers);
-                    return CACHED_WGPU.with(|x| {
-                        let mut cached = x.borrow_mut();
-                        if let Some(wgpu) = cached.get(&hash) {
-                            wgpu.undistort_image(buffers, &itm, drawing_buffer);
-                            ret.backend = "wgpu";
-                            Ok(ret)
-                        } else {
-                            Err(GyroflowCoreError::NoCachedWgpuInstance(self.get_current_key(buffers)))
-                        }
-                    });
+                    let has_any_cache = CACHED_WGPU.with(|x| !x.borrow().is_empty());
+                    if has_any_cache {
+                        return CACHED_WGPU.with(|x| {
+                            let mut cached = x.borrow_mut();
+                            if let Some(wgpu) = cached.get(&hash) {
+                                wgpu.undistort_image(buffers, &itm, drawing_buffer);
+                                ret.backend = "wgpu";
+                                Ok(ret)
+                            } else {
+                                Err(GyroflowCoreError::NoCachedWgpuInstance(self.get_current_key(buffers)))
+                            }
+                        });
+                    }
                 } else {
                     if let Some(ref wgpu) = self.wgpu {
                         wgpu.undistort_image(buffers, &itm, drawing_buffer);
