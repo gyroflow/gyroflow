@@ -142,7 +142,7 @@ deploy *param:
         popd
     fi
 
-    ICON=$PROJECT_DIR/resources/icon_1080_rounded.png
+    ICON=$PROJECT_DIR/resources/icon_1024_mac.png
     ICON_OUT=$PROJECT_DIR/_deployment/mac/Gyroflow.app/Contents/Resources/Images.xcassets/AppIcon.appiconset
     sips -z 16 16      $ICON --out $ICON_OUT/icon_16x16.png
     sips -z 32 32      $ICON --out $ICON_OUT/icon_16x16@2x.png
