@@ -178,7 +178,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v3
 
-      - run: find .
+      - run: find . -type f
 
       - name: Publish
         uses: softprops/action-gh-release@v1

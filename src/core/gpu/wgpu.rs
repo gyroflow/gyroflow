@@ -20,6 +20,7 @@ pub enum WgpuError {
 }
 
 enum PipelineType {
+    None,
     Render(wgpu::RenderPipeline),
     Compute(wgpu::ComputePipeline)
 }
@@ -32,7 +33,7 @@ pub struct WgpuWrapper  {
     buf_params: wgpu::Buffer,
     buf_lens_data: wgpu::Buffer,
     buf_drawing: wgpu::Buffer,
-    bind_group: wgpu::BindGroup,
+    bind_group: Option<wgpu::BindGroup>,
     pipeline: PipelineType,
     pixel_format: wgpu::TextureFormat,
 
@@ -44,6 +45,17 @@ pub struct WgpuWrapper  {
     out_size: u64,
     params_size: u64,
     drawing_size: u64,
+}
+impl Drop for WgpuWrapper {
+    fn drop(&mut self) {
+        // We need to delete all texture references and then call device.poll() to actually release them properly
+        self.bind_group = None;
+        self.pipeline = PipelineType::None;
+        self.in_texture = TextureHolder::default();
+        self.out_texture = TextureHolder::default();
+
+        self.device.poll(wgpu::Maintain::Wait);
+    }
 }
 
 lazy_static::lazy_static! {
@@ -353,8 +365,9 @@ impl WgpuWrapper {
             };
 
             let bind_group = match &pipeline {
+                PipelineType::None => None,
                 PipelineType::Render(p) => {
-                    device.create_bind_group(&wgpu::BindGroupDescriptor {
+                    Some(device.create_bind_group(&wgpu::BindGroupDescriptor {
                         label: None,
                         layout: &p.get_bind_group_layout(0),
                         entries: &[
@@ -365,10 +378,10 @@ impl WgpuWrapper {
                             wgpu::BindGroupEntry { binding: 4, resource: buf_drawing.as_entire_binding() },
                             wgpu::BindGroupEntry { binding: 5, resource: wgpu::BindingResource::TextureView(&in_texture.wgpu_texture.as_ref().unwrap().create_view(&wgpu::TextureViewDescriptor::default())) },
                         ],
-                    })
+                    }))
                 },
                 PipelineType::Compute(p) => {
-                    device.create_bind_group(&wgpu::BindGroupDescriptor {
+                    Some(device.create_bind_group(&wgpu::BindGroupDescriptor {
                         label: None,
                         layout: &p.get_bind_group_layout(0),
                         entries: &[
@@ -380,7 +393,7 @@ impl WgpuWrapper {
                             wgpu::BindGroupEntry { binding: 5, resource: in_texture.wgpu_buffer.as_ref().unwrap().as_entire_binding() },
                             wgpu::BindGroupEntry { binding: 6, resource: out_texture.wgpu_buffer.as_ref().unwrap().as_entire_binding() },
                         ],
-                    })
+                    }))
                 }
             };
 
@@ -430,10 +443,11 @@ impl WgpuWrapper {
         }
 
         match &self.pipeline {
+            PipelineType::None => { },
             PipelineType::Compute(p) => {
                 let mut cpass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
                 cpass.set_pipeline(p);
-                cpass.set_bind_group(0, &self.bind_group, &[]);
+                cpass.set_bind_group(0, self.bind_group.as_ref().unwrap(), &[]);
                 cpass.dispatch_workgroups((buffers.output.size.0 as f32 / 8.0).ceil() as u32, (buffers.output.size.1 as f32 / 8.0).ceil() as u32, 1);
             },
             PipelineType::Render(p) => {
@@ -453,7 +467,7 @@ impl WgpuWrapper {
                     depth_stencil_attachment: None,
                 });
                 rpass.set_pipeline(p);
-                rpass.set_bind_group(0, &self.bind_group, &[]);
+                rpass.set_bind_group(0, self.bind_group.as_ref().unwrap(), &[]);
                 rpass.draw(0..6, 0..1);
             }
         }

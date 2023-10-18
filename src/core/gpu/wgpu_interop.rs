@@ -25,7 +25,8 @@ pub enum NativeTexture {
     Metal(metal::Texture)
 }
 
-pub struct TextureHolder  {
+#[derive(Default)]
+pub struct TextureHolder {
     pub native_texture: Option<NativeTexture>,
     pub wgpu_texture: Option<wgpu::Texture>,
     pub wgpu_buffer: Option<wgpu::Buffer>
