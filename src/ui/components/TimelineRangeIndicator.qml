@@ -33,16 +33,21 @@ Rectangle {
         radius: parent.radius;
         height: parent.height;
         width: 5 * dpiScale;
-        MouseArea {
+        Item {
             anchors.fill: parent;
-            cursorShape: Qt.SizeHorCursor;
-            onDoubleClicked: root.reset();
-        }
-        DragHandler {
-            id: leftTrimDrag;
-            target: null;
-            onActiveChanged: if (!active) { root.changeTrimStart(Math.max(0.0, root.trimStart + root.trimStartAdjustment)); root.trimStartAdjustment = 0; }
-            onActiveTranslationChanged: root.trimStartAdjustment = (leftTrimDrag.activeTranslation.x / root.parent.width) * root.visibleRange;
+            anchors.margins: (isMobile? -15 : -7) * dpiScale;
+            MouseArea {
+                anchors.fill: parent;
+                acceptedButtons: Qt.NoButton;
+                cursorShape: Qt.SizeHorCursor;
+            }
+            DragHandler {
+                id: leftTrimDrag;
+                target: null;
+                onActiveChanged: if (!active) { root.changeTrimStart(Math.max(0.0, root.trimStart + root.trimStartAdjustment)); root.trimStartAdjustment = 0; }
+                onActiveTranslationChanged: root.trimStartAdjustment = (leftTrimDrag.activeTranslation.x / root.parent.width) * root.visibleRange;
+            }
+            TapHandler { onDoubleTapped: root.reset(); }
         }
 
         Rectangle {
@@ -60,16 +65,21 @@ Rectangle {
         radius: parent.radius;
         height: parent.height;
         width: 5 * dpiScale;
-        MouseArea {
+        Item {
             anchors.fill: parent;
-            cursorShape: Qt.SizeHorCursor;
-            onDoubleClicked: root.reset();
-        }
-        DragHandler {
-            id: rightTrimDrag;
-            target: null;
-            onActiveChanged: if (!active) { root.changeTrimEnd(Math.min(1.0, root.trimEnd + root.trimEndAdjustment)); root.trimEndAdjustment = 0; }
-            onActiveTranslationChanged: root.trimEndAdjustment = (rightTrimDrag.activeTranslation.x / root.parent.width) * root.visibleRange;
+            anchors.margins: (isMobile? -15 : -7) * dpiScale;
+            MouseArea {
+                anchors.fill: parent;
+                acceptedButtons: Qt.NoButton;
+                cursorShape: Qt.SizeHorCursor;
+            }
+            DragHandler {
+                id: rightTrimDrag;
+                target: null;
+                onActiveChanged: if (!active) { root.changeTrimEnd(Math.min(1.0, root.trimEnd + root.trimEndAdjustment)); root.trimEndAdjustment = 0; }
+                onActiveTranslationChanged: root.trimEndAdjustment = (rightTrimDrag.activeTranslation.x / root.parent.width) * root.visibleRange;
+            }
+            TapHandler { onDoubleTapped: root.reset(); }
         }
         Rectangle {
             color: parent.color;

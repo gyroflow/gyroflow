@@ -599,7 +599,13 @@ MenuItem {
                 controller.set_video_speed(videoSpeed.value, videoSpeedAffectsSmoothing.checked, videoSpeedAffectsZooming.checked);
                 isKeyframed = controller.is_keyframed("VideoSpeed");
             }
-            onValueChanged: Qt.callLater(videoSpeed.updateVideoSpeed);
+            Timer {
+                id: speedUpdateTimer;
+                interval: 300;
+                onTriggered: Qt.callLater(videoSpeed.updateVideoSpeed);
+            }
+            slider.onPressedChanged: if (!slider.pressed) Qt.callLater(videoSpeed.updateVideoSpeed);
+            onValueChanged: speedUpdateTimer.restart();
             onKeyframesEnabledChanged: Qt.callLater(zoomingMethod.adjustMethod);
             Connections {
                 target: controller;
