@@ -1599,6 +1599,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "glutin_wgl_sys"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef89398e90033fc6bc65e9bd42fd29bbbfd483bda5b56dc5562f455550618165"
+dependencies = [
+ "gl_generator",
+]
+
+[[package]]
 name = "gpu-alloc"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2396,7 +2405,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.13.0"
-source = "git+https://github.com/gfx-rs/naga?rev=6854b0ab4f105131bfb87704927abec3fe366ef9#6854b0ab4f105131bfb87704927abec3fe366ef9"
+source = "git+https://github.com/gfx-rs/naga?rev=e25280df9316434ef7752970016d01a3aede3f17#e25280df9316434ef7752970016d01a3aede3f17"
 dependencies = [
  "bit-set",
  "bitflags 2.4.1",
@@ -2896,9 +2905,9 @@ checksum = "dd8b5dd2ae5ed71462c540258bedcb51965123ad7e7ccf4b9a8cafaa4a63576d"
 
 [[package]]
 name = "opencv"
-version = "0.85.1"
+version = "0.85.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20fa4b5c8c955eb58dfd973ee426ebe2751182e1c70b010698081986e91572d8"
+checksum = "b074bef50b0f6bbc9937a27ab1b5dcf6b10fbc7b036a5a8644e779fec52481f9"
 dependencies = [
  "cc",
  "dunce",
@@ -2915,9 +2924,9 @@ dependencies = [
 
 [[package]]
 name = "opencv-binding-generator"
-version = "0.73.0"
+version = "0.74.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0c42adda1250f1eee2371817f06aa7c7b2d4ad1c1ce54c305046d1688024945"
+checksum = "f90c5e2f2e409054d4d86870575a1b8bf8723c8ae9a746e0934b64d1d67bbb17"
 dependencies = [
  "clang",
  "clang-sys",
@@ -4074,9 +4083,9 @@ dependencies = [
 
 [[package]]
 name = "tracing"
-version = "0.1.39"
+version = "0.1.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee2ef2af84856a50c1d430afce2fdded0a4ec7eda868db86409b4543df0797f9"
+checksum = "c3523ab5a71916ccf420eebdf5521fcef02141234bbc0b8a49f2fdc4544364ef"
 dependencies = [
  "pin-project-lite",
  "tracing-attributes",
@@ -4332,7 +4341,7 @@ checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
 [[package]]
 name = "wgpu"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=da0b3fe#da0b3fe6854ce22f37239202e4ab117bc06e1fb2"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=7598919#75989192a9c8f70893882ce0f4373ac217d380c3"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -4355,7 +4364,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=da0b3fe#da0b3fe6854ce22f37239202e4ab117bc06e1fb2"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=7598919#75989192a9c8f70893882ce0f4373ac217d380c3"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4377,7 +4386,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=da0b3fe#da0b3fe6854ce22f37239202e4ab117bc06e1fb2"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=7598919#75989192a9c8f70893882ce0f4373ac217d380c3"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4388,6 +4397,7 @@ dependencies = [
  "core-graphics-types",
  "d3d12",
  "glow",
+ "glutin_wgl_sys",
  "gpu-alloc",
  "gpu-allocator",
  "gpu-descriptor",
@@ -4400,6 +4410,7 @@ dependencies = [
  "metal",
  "naga",
  "objc",
+ "once_cell",
  "parking_lot",
  "profiling",
  "range-alloc",
@@ -4417,7 +4428,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=da0b3fe#da0b3fe6854ce22f37239202e4ab117bc06e1fb2"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=7598919#75989192a9c8f70893882ce0f4373ac217d380c3"
 dependencies = [
  "bitflags 2.4.1",
  "js-sys",
@@ -4752,9 +4763,9 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.6.4"
+version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20707b61725734c595e840fb3704378a0cd2b9c74cc9e6e20724838fc6a1e2f9"
+checksum = "96f8f25c15a0edc9b07eb66e7e6e97d124c0505435c382fde1ab7ceb188aa956"
 dependencies = [
  "byteorder",
  "zerocopy-derive",
@@ -4762,9 +4773,9 @@ dependencies = [
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.6.4"
+version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56097d5b91d711293a42be9289403896b68654625021732067eac7a4ca388a1f"
+checksum = "855e0f6af9cd72b87d8a6c586f3cb583f5cdcc62c2c80869d8cd7e96fdf7ee20"
 dependencies = [
  "proc-macro2",
  "quote",
