@@ -21,6 +21,7 @@ MenuItem {
     property bool hasAccessToInputDirectory: true;
 
     Component.onCompleted: {
+        QT_TRANSLATE_NOOP("TableList", "Created at");
         const fields = [
             QT_TRANSLATE_NOOP("TableList", "File name"),
             QT_TRANSLATE_NOOP("TableList", "Detected camera"),
@@ -32,7 +33,7 @@ MenuItem {
             QT_TRANSLATE_NOOP("TableList", "Pixel format"),
             QT_TRANSLATE_NOOP("TableList", "Audio"),
             QT_TRANSLATE_NOOP("TableList", "Rotation"),
-            QT_TRANSLATE_NOOP("TableList", "Contains gyro")
+            QT_TRANSLATE_NOOP("TableList", "Contains gyro"),
         ];
         let model = {};
         for (const x of fields) model[x] = "---";
@@ -67,6 +68,12 @@ MenuItem {
         list.model["Pixel format"] = root.pixelFormat;
         list.model["Rotation"]     = (root.videoRotation) + " °";
         list.model["Audio"]        = getAudio(md) || "---";
+        if (md["metadata.creation_time"]) {
+            list.model["Created at"] = (new Date(Date.parse(md["metadata.creation_time"]))).toLocaleString();
+        } else {
+            delete list.model["Created at"];
+        }
+
         list.modelChanged();
 
         root.fps = framerate;
