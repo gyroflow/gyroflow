@@ -790,7 +790,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "279d3efcc55e19917fff7ab3ddd6c14afb6a90881a0078465196fe2f99d08c56"
 dependencies = [
  "bit_field",
- "flume",
+ "flume 0.10.14",
  "half 2.3.1",
  "lebe",
  "miniz_oxide",
@@ -882,6 +882,18 @@ dependencies = [
  "futures-sink",
  "nanorand",
  "pin-project",
+ "spin 0.9.8",
+]
+
+[[package]]
+name = "flume"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "55ac459de2512911e4b674ce33cf20befaba382d05b62b008afc1c8b57cbf181"
+dependencies = [
+ "futures-core",
+ "futures-sink",
+ "nanorand",
  "spin 0.9.8",
 ]
 
@@ -1073,7 +1085,7 @@ checksum = "cc11df1ace8e7e564511f53af41f3e42ddc95b56fd07b3f4445d2a6048bc682c"
 dependencies = [
  "bitflags 2.4.1",
  "gpu-descriptor-types",
- "hashbrown 0.14.1",
+ "hashbrown 0.14.2",
 ]
 
 [[package]]
@@ -1200,9 +1212,9 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.14.1"
+version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7dfda62a12f55daeae5015f81b0baea145391cb4520f86c248fc615d72640d12"
+checksum = "f93e7192158dbcda357bdec5fb5788eebf8bbac027f3f33e719d29135ae84156"
 dependencies = [
  "ahash",
  "allocator-api2",
@@ -1314,7 +1326,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8adf3ddd720272c6ea8bf59463c04e0f93d0bbf7c5439b691bca2987e0270897"
 dependencies = [
  "equivalent",
- "hashbrown 0.14.1",
+ "hashbrown 0.14.2",
 ]
 
 [[package]]
@@ -1526,7 +1538,7 @@ version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1efa59af2ddfad1854ae27d75009d538d0998b4b2fd47083e743ac1a10e46c60"
 dependencies = [
- "hashbrown 0.14.1",
+ "hashbrown 0.14.2",
 ]
 
 [[package]]
@@ -1999,9 +2011,9 @@ checksum = "dd8b5dd2ae5ed71462c540258bedcb51965123ad7e7ccf4b9a8cafaa4a63576d"
 
 [[package]]
 name = "opencv"
-version = "0.85.2"
+version = "0.85.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b074bef50b0f6bbc9937a27ab1b5dcf6b10fbc7b036a5a8644e779fec52481f9"
+checksum = "e07271acf89f1dbe3aa1d2f8f905ed5742a5b03117d73b583ba4f4157e77dd91"
 dependencies = [
  "cc",
  "dunce",
@@ -2018,9 +2030,9 @@ dependencies = [
 
 [[package]]
 name = "opencv-binding-generator"
-version = "0.74.0"
+version = "0.75.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f90c5e2f2e409054d4d86870575a1b8bf8723c8ae9a746e0934b64d1d67bbb17"
+checksum = "64d0632ad1ed848844a55c0cd622c7cfae4f36dee924eeabdf4119c6a7bd479c"
 dependencies = [
  "clang",
  "clang-sys",
@@ -3120,10 +3132,11 @@ checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
 [[package]]
 name = "wgpu"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=7598919#75989192a9c8f70893882ce0f4373ac217d380c3"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=095b46d#095b46dbdbc487ec8ee138f736adfba55cafa7fc"
 dependencies = [
  "arrayvec 0.7.4",
  "cfg-if",
+ "flume 0.11.0",
  "js-sys",
  "log",
  "naga",
@@ -3143,7 +3156,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=7598919#75989192a9c8f70893882ce0f4373ac217d380c3"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=095b46d#095b46dbdbc487ec8ee138f736adfba55cafa7fc"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-vec",
@@ -3165,7 +3178,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=7598919#75989192a9c8f70893882ce0f4373ac217d380c3"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=095b46d#095b46dbdbc487ec8ee138f736adfba55cafa7fc"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.4",
@@ -3207,7 +3220,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=7598919#75989192a9c8f70893882ce0f4373ac217d380c3"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=095b46d#095b46dbdbc487ec8ee138f736adfba55cafa7fc"
 dependencies = [
  "bitflags 2.4.1",
  "js-sys",
