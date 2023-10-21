@@ -218,7 +218,7 @@ Doporučený postup je exportovat soubor projektu a použít [pluginy video edit
     <message>
       <location filename="../../src/ui/App.qml" line="294"/>
       <source>There are no sync points present, your result will be incorrect. Are you sure you want to render this file?</source>
-      <translation>Profil objektivů není načten, výsledek bude nesprávný. Jste si jisti, že chcete vykreslit tento soubor?</translation>
+      <translation>Nejsou žádné body synchronizace, výsledek bude nesprávný. Jste si jisti, že chcete vykreslit tento soubor?</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="410"/>
