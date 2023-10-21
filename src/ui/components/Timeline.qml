@@ -47,7 +47,7 @@ Item {
     function setPosition(pos: real) {
         const frame = frameAtPosition(pos);
         if (frame != vid.currentFrame) {
-            vid.seekToFrame(frame, false);
+            vid.seekToFrame(frame, true);
         }
     }
     function frameAtPosition(pos: real): int {
