@@ -241,13 +241,17 @@ impl<'a> FfmpegProcessor<'a> {
             self.input_context.seek(position, ..position)?;
         }
         let mut output_options = Dictionary::new();
-        let output_format = if let Some(pos) = output_filename.rfind('.') { &output_filename[pos+1..] } else { "mp4" };
+        let output_format = if let Some(pos) = output_filename.rfind('.') { &output_filename[pos+1..] } else { "mp4" }.to_ascii_lowercase();
         if file.path.starts_with("fd:") {
             output_options.set("fd", &file.path[3..]);
             file.path = "fd:".into();
         }
 
-        let mut octx = format::output_as_with(&file.path, output_format, output_options)?;
+        let mut octx = if output_format == "exr" || output_format == "png" {
+            format::output_with(&file.path, output_options)
+        } else {
+            format::output_as_with(&file.path, &output_format, output_options)
+        }?;
 
         for (i, stream) in self.input_context.streams().enumerate() {
             let medium = stream.parameters().medium();
