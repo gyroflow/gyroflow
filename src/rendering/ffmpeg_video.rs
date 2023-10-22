@@ -107,11 +107,6 @@ impl<'a> VideoTranscoder<'a> {
         if cfg!(any(target_os = "macos", target_os = "ios")) && pixel_format == format::Pixel::NV12 && (codec_name == "prores_videotoolbox" || codec_name == "dnxhd") {
             color_range = util::color::Range::MPEG;
         }
-        if cfg!(any(target_os = "macos", target_os = "ios")) && codec_name == "hevc_videotoolbox" && pixel_format == format::Pixel::P010LE {
-            if options.get("profile").is_none() {
-                options.set("profile", "main10");
-            }
-        }
 
         log::debug!("Setting output pixel format: {:?}, color range: {:?}", pixel_format, color_range);
 
