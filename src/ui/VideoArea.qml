@@ -829,14 +829,14 @@ Item {
                     spacing: 5 * dpiScale;
                     enabled: vid.loaded;
                     Button { text: "["; font.bold: true; onClicked: timeline.setTrim(timeline.position, timeline.trimEnd); tooltip: qsTr("Trim start"); transparentOnMobile: true; }
-                    Button { iconName: "chevron-left"; tooltip: qsTr("Previous frame"); onClicked: vid.currentFrame -= 1; transparentOnMobile: true; }
+                    Button { iconName: "chevron-left"; tooltip: qsTr("Previous frame"); onClicked: vid.seekToFrameDelta(-1); transparentOnMobile: true; }
                     Button {
                         onClicked: { if (vid.playing) vid.pause(); else vid.play(); }
                         tooltip: vid.playing? qsTr("Pause") : qsTr("Play");
                         iconName: vid.playing? "pause" : "play";
                         transparentOnMobile: true;
                     }
-                    Button { iconName: "chevron-right"; tooltip: qsTr("Next frame"); onClicked: vid.currentFrame += 1; transparentOnMobile: true; }
+                    Button { iconName: "chevron-right"; tooltip: qsTr("Next frame"); onClicked: vid.seekToFrameDelta(1); transparentOnMobile: true; }
                     Button { text: "]"; font.bold: true; onClicked: timeline.setTrim(timeline.trimStart, timeline.position); tooltip: qsTr("Trim end"); transparentOnMobile: true; }
                     Button { visible: isMobile; iconName: "menu"; onClicked: timeline.toggleContextMenu(this); tooltip: qsTr("Show timeline menu"); transparentOnMobile: true; leftPadding: 10 * dpiScale; rightPadding: 10 * dpiScale; }
                 }
