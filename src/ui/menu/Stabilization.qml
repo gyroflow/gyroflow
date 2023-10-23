@@ -611,7 +611,9 @@ MenuItem {
                 target: controller;
                 function onKeyframe_value_updated(keyframe: string, value: real) {
                     if (keyframe == "VideoSpeed") {
-                        window.videoArea.vid.playbackRate = value;
+                        if (Math.abs(window.videoArea.vid.playbackRate - value) > 0.005) {
+                            window.videoArea.vid.playbackRate = value;
+                        }
                     }
                 }
             }
