@@ -52,7 +52,7 @@ MenuItem {
             if (o.hasOwnProperty("offset_method"))      offsetMethod.currentIndex           = +o.offset_method;
             if (o.hasOwnProperty("pose_method"))        poseMethod.currentIndex             = +o.pose_method;
             if (o.hasOwnProperty("custom_sync_pattern")) sync.customSyncTimestamps          = resolveSyncpointPattern(o.custom_sync_pattern);
-            if (o.hasOwnProperty("auto_sync_points")) experimentalAutoSyncPoints.checked    = !!o.experimental_auto_sync_points;
+            if (o.hasOwnProperty("auto_sync_points")) experimentalAutoSyncPoints.checked    = !!o.auto_sync_points;
             if (o.hasOwnProperty("do_autosync") && o.do_autosync) autosyncTimer.doRun = true;
         }
     }
