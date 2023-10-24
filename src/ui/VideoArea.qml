@@ -668,26 +668,10 @@ Item {
                 onTapped: timeline.focus = true;
                 onDoubleTapped: root.fullScreen = root.fullScreen? 0 : 1;
             }
-            Item {
+            GridGuide {
                 id: gridGuide;
-                property bool shown: false;
-                property bool isBlack: false;
                 anchors.fill: vid;
-                visible: opacity > 0;
-                opacity: vid.loaded && shown? 0.9 : 0;
-                Ease on opacity { }
-                Row {
-                    anchors.fill: parent;
-                    spacing: (parent.width - 3*2*dpiScale) / 3;
-                    Item { width: 1; height: 1; }
-                    Repeater { model: 2; Rectangle { width: 2 * dpiScale; height: parent.height; color: gridGuide.isBlack? "#000" : "#fff"; } }
-                }
-                Column {
-                    anchors.fill: parent;
-                    spacing: (parent.height - 3*2*dpiScale) / 3;
-                    Item { width: 1; height: 1; }
-                    Repeater { model: 2; Rectangle { height: 2 * dpiScale; width: parent.width; color: gridGuide.isBlack? "#000" : "#fff"; } }
-                }
+                canShow: vid.loaded;
             }
         }
         Rectangle {

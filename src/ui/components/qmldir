@@ -14,6 +14,7 @@ DropTargetRect 1.0 DropTargetRect.qml
 Ease 1.0 Ease.qml
 FileDialog 1.0 FileDialog.qml
 FrequencyChart 1.0 FrequencyChart.qml
+GridGuide 1.0 GridGuide.qml
 Hr 1.0 Hr.qml
 InfoMessage 1.0 InfoMessage.qml
 InfoMessageSmall 1.0 InfoMessageSmall.qml
