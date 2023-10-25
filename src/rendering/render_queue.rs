@@ -200,6 +200,7 @@ pub struct RenderQueue {
 
     pub start_timestamp: qt_property!(u64; NOTIFY progress_changed),
     pub end_timestamp: qt_property!(u64; NOTIFY progress_changed),
+    pub start_frame: qt_property!(u64; NOTIFY progress_changed),
     current_frame: qt_property!(u64; READ get_current_frame NOTIFY progress_changed),
     total_frames: qt_property!(u64; READ get_total_frames NOTIFY queue_changed),
     pub status: qt_property!(QString; NOTIFY status_changed),
@@ -492,7 +493,9 @@ impl RenderQueue {
         self.status = QString::from("active");
         self.status_changed();
 
-        if !paused && self.start_timestamp == 0 {
+        self.start_frame = self.get_current_frame();
+
+        if !paused {
             self.start_timestamp = Self::current_timestamp();
             self.progress_changed();
         } else if let Some(paused_timestamp) = self.paused_timestamp.take() {
@@ -527,9 +530,11 @@ impl RenderQueue {
                     self.render_job(job_id);
                 } else {
                     if self.get_active_render_count() == 0 {
+                        
                         self.post_render_action();
                         self.queue_finished();
 
+                        self.start_frame = 0;
                         self.start_timestamp = 0;
                         self.progress_changed();
 

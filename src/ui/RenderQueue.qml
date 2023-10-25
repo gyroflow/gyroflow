@@ -66,9 +66,9 @@ Item {
             id: topCol;
             spacing: 5 * dpiScale;
             width: parent.parent.width - x - mainBtn.width - 3 * parent.spacing;
-            property real progress: Math.max(0, Math.min(1, render_queue.current_frame / Math.max(1, render_queue.total_frames)));
+            property real progress: Math.max(0, Math.min(1, (render_queue.current_frame - render_queue.start_frame) / Math.max(1, (render_queue.total_frames - render_queue.start_frame))));
             onProgressChanged: {
-                const times = Util.calculateTimesAndFps(progress, render_queue.current_frame, render_queue.start_timestamp, render_queue.end_timestamp);
+                const times = Util.calculateTimesAndFps(progress, (render_queue.current_frame - render_queue.start_frame), render_queue.start_timestamp, render_queue.end_timestamp);
                 if (times !== false && progress < 1.0) {
                     totalTime.elapsed = times[0];
                     totalTime.remaining = times[1];
