@@ -481,40 +481,38 @@ Item {
                 root.focus = true;
             }
             onDoubleClicked: (mouse) => root.resetZoom();
+            function zoomHorizontally(wheelX: real, delta: real) {
+                const remainingWindow = (root.visibleAreaRight - root.visibleAreaLeft);
+
+                const factor = (delta / 120) / (10 / remainingWindow);
+                const xPosFactor = wheelX / root.width;
+                root.visibleAreaLeft  = Math.min(root.visibleAreaRight, Math.max(0.0, root.visibleAreaLeft  + factor * xPosFactor));
+                root.visibleAreaRight = Math.max(root.visibleAreaLeft,  Math.min(1.0, root.visibleAreaRight - factor * (1.0 - xPosFactor)));
+
+                scrollbar.position = root.visibleAreaLeft;
+            }
+            function zoomVertically(delta: real) {
+                const factor = (delta / 120) / 10;
+                chart.vscale += factor;
+            }
+            function moveHorizontally(delta: real) {
+                const remainingWindow = (root.visibleAreaRight - root.visibleAreaLeft);
+                const factor = (delta / 120) / (50 / remainingWindow);
+                root.visibleAreaLeft  = Math.min(root.visibleAreaRight, Math.max(0.0, Math.min(1 - remainingWindow, root.visibleAreaLeft - factor)));
+                root.visibleAreaRight = Math.max(root.visibleAreaLeft,  Math.min(1.0, Math.max(remainingWindow, root.visibleAreaRight - factor)));
+
+                scrollbar.position = root.visibleAreaLeft;
+            }
             onWheel: (wheel) => {
-                function zoomHorizontally(delta) {
-                    const remainingWindow = (root.visibleAreaRight - root.visibleAreaLeft);
-
-                    const factor = (delta / 120) / (10 / remainingWindow);
-                    const xPosFactor = wheel.x / root.width;
-                    root.visibleAreaLeft  = Math.min(root.visibleAreaRight, Math.max(0.0, root.visibleAreaLeft  + factor * xPosFactor));
-                    root.visibleAreaRight = Math.max(root.visibleAreaLeft,  Math.min(1.0, root.visibleAreaRight - factor * (1.0 - xPosFactor)));
-
-                    scrollbar.position = root.visibleAreaLeft;
-                }
-                function zoomVertically(delta) {
-                    const factor = (delta / 120) / 10;
-                    chart.vscale += factor;
-                }
-                function moveHorizontally(delta) {
-                    const remainingWindow = (root.visibleAreaRight - root.visibleAreaLeft);
-                    const factor = (delta / 120) / (50 / remainingWindow);
-                    root.visibleAreaLeft  = Math.min(root.visibleAreaRight, Math.max(0.0, Math.min(1 - remainingWindow, root.visibleAreaLeft - factor)));
-                    root.visibleAreaRight = Math.max(root.visibleAreaLeft,  Math.min(1.0, Math.max(remainingWindow, root.visibleAreaRight - factor)));
-
-                    scrollbar.position = root.visibleAreaLeft;
-                }
-
-
-                if(Qt.platform.os == "osx") {
-                    if(wheel.angleDelta.x != 0) {
+                if (Qt.platform.os == "osx") {
+                    if (wheel.angleDelta.x != 0) {
                         moveHorizontally(wheel.angleDelta.x);
                     }
-                    if(wheel.angleDelta.y != 0) {
+                    if (wheel.angleDelta.y != 0) {
                         if ((wheel.modifiers & Qt.AltModifier) || (wheel.modifiers & Qt.MetaModifier)) {
                             zoomVertically(wheel.angleDelta.y);
-                        }  else {
-                            zoomHorizontally(wheel.angleDelta.y);
+                        } else {
+                            zoomHorizontally(wheel.x, wheel.angleDelta.y);
                         }
                     }
                 } else {
@@ -523,7 +521,7 @@ Item {
                     } else if ((wheel.modifiers & Qt.ControlModifier)) {
                         moveHorizontally(wheel.angleDelta.y);
                     } else {
-                        zoomHorizontally(wheel.angleDelta.y);
+                        zoomHorizontally(wheel.x, heel.angleDelta.y);
                     }
                 }
             }
