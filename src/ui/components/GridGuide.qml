@@ -46,17 +46,17 @@ Item {
             Menu {
                 font.pixelSize: 11.5 * dpiScale;
                 Menu {
-                    Component.onCompleted: icon.name = "grid";
+                    Component.onCompleted: this.setIcon("grid");
                     title: qsTr("Grid guide");
                     Action { text: qsTr("Enabled"); checkable: true; checked: root.shown; onTriggered: root.shown = checked; }
                     Menu {
-                        Component.onCompleted: icon.name = "pencil";
+                        Component.onCompleted: this.setIcon("pencil");
                         title: qsTr("Color");
                         Action { text: qsTr("White"); checked: !root.isBlack; checkable: true; onTriggered: root.isBlack = false; }
                         Action { text: qsTr("Black"); checked: root.isBlack; checkable: true; onTriggered: root.isBlack = true; }
                     }
                     Menu {
-                        Component.onCompleted: icon.name = "grid";
+                        Component.onCompleted: this.setIcon("grid");
                         title: qsTr("Lines");
                         NumberField {
                             width: 80 * dpiScale;

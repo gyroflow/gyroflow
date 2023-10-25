@@ -18,6 +18,15 @@ QQC.Menu {
 
     property var colors: [];
 
+    // For compatibility with Qt < 6.5
+    function setIcon(iconName: string) {
+        icon.name = iconName;
+        icon.source = "qrc:/resources/icons/svg/" + iconName + ".svg";
+        icon.width = 14 * dpiScale;
+        icon.height = 14 * dpiScale;
+        icon.color = styleTextColor;
+    }
+
     component MenuItem: QQC.MenuItem {
         id: dlg;
         property real itemHeight: parentMenu? parentMenu.itemHeight : 0;
