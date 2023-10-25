@@ -157,6 +157,7 @@ fn main() {
         println!("cargo:rustc-link-lib=framework=AppKit");
         println!("cargo:rustc-link-lib=framework=OpenGL");
         println!("cargo:rustc-link-lib=framework=CFNetwork");
+        println!("cargo:rustc-link-lib=framework=Security");
     }
 
     let mut public_include = |name| {
