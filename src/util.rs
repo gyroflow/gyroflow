@@ -214,23 +214,14 @@ pub fn set_android_context() {
 
 pub fn init_logging() {
     use simplelog::*;
-    let log_config = ConfigBuilder::new()
-        .add_filter_ignore_str("mp4parse")
-        .add_filter_ignore_str("wgpu")
-        .add_filter_ignore_str("naga")
-        .add_filter_ignore_str("akaze")
-        .add_filter_ignore_str("ureq")
-        .add_filter_ignore_str("rustls")
-        .add_filter_ignore_str("mdk")
-        .build();
 
-    let file_log_config = ConfigBuilder::new()
-        .add_filter_ignore_str("mp4parse")
-        .add_filter_ignore_str("wgpu")
-        .add_filter_ignore_str("naga")
-        .add_filter_ignore_str("akaze")
-        .add_filter_ignore_str("ureq")
-        .add_filter_ignore_str("rustls")
+    let log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "mdk" ]
+        .into_iter()
+        .fold(ConfigBuilder::new(), |mut cfg, x| { cfg.add_filter_ignore_str(x); cfg })
+        .build();
+    let file_log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls" ]
+        .into_iter()
+        .fold(ConfigBuilder::new(), |mut cfg, x| { cfg.add_filter_ignore_str(x); cfg })
         .build();
 
     #[cfg(target_os = "android")]

@@ -724,32 +724,32 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="50"/>
       <source>Grid guide</source>
-      <translation type="unfinished">Grid guide</translation>
+      <translation>グリッドガイド</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Enabled</source>
-      <translation type="unfinished">Enabled</translation>
+      <translation>有効</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="54"/>
       <source>Color</source>
-      <translation type="unfinished">Color</translation>
+      <translation>色</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="55"/>
       <source>White</source>
-      <translation type="unfinished">White</translation>
+      <translation>白色</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="56"/>
       <source>Black</source>
-      <translation type="unfinished">Black</translation>
+      <translation>黒色</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="60"/>
       <source>Lines</source>
-      <translation type="unfinished">Lines</translation>
+      <translation>線</translation>
     </message>
   </context>
   <context>
@@ -2514,7 +2514,7 @@ Make sure you have proper rolling shutter value set before syncing.</source>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="24"/>
       <source>Created at</source>
-      <translation type="unfinished">Created at</translation>
+      <translation>作成日</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="28"/>
@@ -2762,7 +2762,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="577"/>
       <source>Clear trim range</source>
-      <translation type="unfinished">Clear trim range</translation>
+      <translation>トリム範囲をクリア</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="583"/>

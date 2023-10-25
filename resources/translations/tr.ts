@@ -719,32 +719,32 @@ Gelişmiş kısmında keskinlik sınırını artırabilirsiniz.</translation>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="50"/>
       <source>Grid guide</source>
-      <translation type="unfinished">Grid guide</translation>
+      <translation>Izgara rehberi</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Enabled</source>
-      <translation type="unfinished">Enabled</translation>
+      <translation>Etkin</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="54"/>
       <source>Color</source>
-      <translation type="unfinished">Color</translation>
+      <translation>Renk</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="55"/>
       <source>White</source>
-      <translation type="unfinished">White</translation>
+      <translation>Beyaz</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="56"/>
       <source>Black</source>
-      <translation type="unfinished">Black</translation>
+      <translation>Siyah</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="60"/>
       <source>Lines</source>
-      <translation type="unfinished">Lines</translation>
+      <translation>Çizgiler</translation>
     </message>
   </context>
   <context>
@@ -2506,7 +2506,7 @@ Senkronize etmeden önce uygun jöle etkisi değerini ayarladığınızdan emin 
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="24"/>
       <source>Created at</source>
-      <translation type="unfinished">Created at</translation>
+      <translation>Şurada oluşturuldu:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="28"/>
@@ -2752,7 +2752,7 @@ Bu özellik deneyseldir, sonuçlar hiç düzgün görünmeyebilir. Devam etmek i
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="577"/>
       <source>Clear trim range</source>
-      <translation type="unfinished">Clear trim range</translation>
+      <translation>Kırpma aralığını kaldır</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="583"/>
