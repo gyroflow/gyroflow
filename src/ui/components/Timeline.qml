@@ -481,28 +481,48 @@ Item {
                 root.focus = true;
             }
             onDoubleClicked: (mouse) => root.resetZoom();
+            function zoomHorizontally(wheelX: real, delta: real) {
+                const remainingWindow = (root.visibleAreaRight - root.visibleAreaLeft);
+
+                const factor = (delta / 120) / (10 / remainingWindow);
+                const xPosFactor = wheelX / root.width;
+                root.visibleAreaLeft  = Math.min(root.visibleAreaRight, Math.max(0.0, root.visibleAreaLeft  + factor * xPosFactor));
+                root.visibleAreaRight = Math.max(root.visibleAreaLeft,  Math.min(1.0, root.visibleAreaRight - factor * (1.0 - xPosFactor)));
+
+                scrollbar.position = root.visibleAreaLeft;
+            }
+            function zoomVertically(delta: real) {
+                const factor = (delta / 120) / 10;
+                chart.vscale += factor;
+            }
+            function moveHorizontally(delta: real) {
+                const remainingWindow = (root.visibleAreaRight - root.visibleAreaLeft);
+                const factor = (delta / 120) / (50 / remainingWindow);
+                root.visibleAreaLeft  = Math.min(root.visibleAreaRight, Math.max(0.0, Math.min(1 - remainingWindow, root.visibleAreaLeft - factor)));
+                root.visibleAreaRight = Math.max(root.visibleAreaLeft,  Math.min(1.0, Math.max(remainingWindow, root.visibleAreaRight - factor)));
+
+                scrollbar.position = root.visibleAreaLeft;
+            }
             onWheel: (wheel) => {
-                if ((wheel.modifiers & Qt.AltModifier) || (wheel.modifiers & Qt.MetaModifier)) {
-                    const delta = Qt.platform.os == "osx"? wheel.angleDelta.y : wheel.angleDelta.x;
-
-                    const factor = (delta / 120) / 10;
-                    chart.vscale += factor;
-                } else if ((wheel.modifiers & Qt.ControlModifier)) { // move horizontally
-                    const remainingWindow = (root.visibleAreaRight - root.visibleAreaLeft);
-                    const factor = (wheel.angleDelta.y / 120) / (50 / remainingWindow);
-                    root.visibleAreaLeft  = Math.min(root.visibleAreaRight, Math.max(0.0, Math.min(1 - remainingWindow, root.visibleAreaLeft - factor)));
-                    root.visibleAreaRight = Math.max(root.visibleAreaLeft,  Math.min(1.0, Math.max(remainingWindow, root.visibleAreaRight - factor)));
-
-                    scrollbar.position = root.visibleAreaLeft;
-                } else { // zoom by default
-                    const remainingWindow = (root.visibleAreaRight - root.visibleAreaLeft);
-
-                    const factor = (wheel.angleDelta.y / 120) / (10 / remainingWindow);
-                    const xPosFactor = wheel.x / root.width;
-                    root.visibleAreaLeft  = Math.min(root.visibleAreaRight, Math.max(0.0, root.visibleAreaLeft  + factor * xPosFactor));
-                    root.visibleAreaRight = Math.max(root.visibleAreaLeft,  Math.min(1.0, root.visibleAreaRight - factor * (1.0 - xPosFactor)));
-
-                    scrollbar.position = root.visibleAreaLeft;
+                if (Qt.platform.os == "osx") {
+                    if (wheel.angleDelta.x != 0) {
+                        moveHorizontally(wheel.angleDelta.x);
+                    }
+                    if (wheel.angleDelta.y != 0) {
+                        if ((wheel.modifiers & Qt.AltModifier) || (wheel.modifiers & Qt.MetaModifier)) {
+                            zoomVertically(wheel.angleDelta.y);
+                        } else {
+                            zoomHorizontally(wheel.x, wheel.angleDelta.y);
+                        }
+                    }
+                } else {
+                    if ((wheel.modifiers & Qt.AltModifier) || (wheel.modifiers & Qt.MetaModifier)) {
+                        zoomVertically(wheel.angleDelta.x);
+                    } else if ((wheel.modifiers & Qt.ControlModifier)) {
+                        moveHorizontally(wheel.angleDelta.y);
+                    } else {
+                        zoomHorizontally(wheel.x, heel.angleDelta.y);
+                    }
                 }
             }
         }
@@ -845,7 +865,7 @@ Item {
             text: qsTr("%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom")
                     .arg("<b>" + qsTr("Scroll") + "</b>")
                     .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Option+Scroll") : qsTr("Alt+Scroll")) + "</b>")
-                    .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Command+Scroll") : qsTr("Ctrl+Scroll")) + "</b>");
+                    .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Scroll") : qsTr("Ctrl+Scroll")) + "</b>");
             visible: !isMobile && ma.containsMouse;
             delay: 2000;
         }
