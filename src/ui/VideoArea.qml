@@ -325,7 +325,9 @@ Item {
             return;
         }
 
-        root.loadedFileUrl = url;
+        if (!(/\.(png|jpg|exr|dng)$/i.test(filename) && filename.includes("%0"))) {
+            root.loadedFileUrl = url;
+        }
         if (!skip_detection) {
             let newUrl;
             if (newUrl = detectImageSequence(folder, filename)) {
@@ -616,7 +618,7 @@ Item {
                     if (root.pendingGyroflowData) {
                         Qt.callLater(root.loadGyroflowData, root.pendingGyroflowData);
                     } else {
-                        controller.load_telemetry(vid.url, true, vid, -1);
+                        controller.load_telemetry(root.loadedFileUrl, true, vid, -1);
                     }
                     vidInfo.loadFromVideoMetadata(md);
                     window.sync.customSyncTimestamps = [];
