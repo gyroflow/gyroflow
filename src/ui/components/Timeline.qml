@@ -521,7 +521,7 @@ Item {
                     } else if ((wheel.modifiers & Qt.ControlModifier)) {
                         moveHorizontally(wheel.angleDelta.y);
                     } else {
-                        zoomHorizontally(wheel.x, heel.angleDelta.y);
+                        zoomHorizontally(wheel.x, wheel.angleDelta.y);
                     }
                 }
             }
