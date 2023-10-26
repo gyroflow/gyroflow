@@ -235,10 +235,10 @@ impl Stabilization {
                 src_index += params.stride as isize;
             }
             Vector4::new(
-                sum.x.min(params.max_pixel_value),
-                sum.y.min(params.max_pixel_value),
-                sum.z.min(params.max_pixel_value),
-                sum.w.min(params.max_pixel_value),
+                sum.x.min(params.pixel_value_limit),
+                sum.y.min(params.pixel_value_limit),
+                sum.z.min(params.pixel_value_limit),
+                sum.w.min(params.pixel_value_limit),
             )
         }
 

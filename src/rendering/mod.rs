@@ -481,12 +481,17 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                             output: get_plane_buffer(out_frame_data, out_size, plane_index, &mut g, wgpu_format)
                         };
 
-                        if plane.backend_initialized.is_none() {
+                        if plane.initialized_backend.is_none() {
                             plane.ensure_ready_for_processing::<$t>(timestamp_us, &mut buffers);
                             plane.stab_data.clear();
                         }
                         let mut transform = plane.get_frame_transform_at::<$t>(timestamp_us, &mut buffers);
+                        transform.kernel_params.pixel_value_limit = $max_val;
                         transform.kernel_params.max_pixel_value = $max_val;
+                        if plane.initialized_backend.is_wgpu() && $t::wgpu_format().map(|x| x.2).unwrap_or_default() {
+                            transform.kernel_params.pixel_value_limit = 1.0;
+                            transform.kernel_params.max_pixel_value = 1.0;
+                        }
                         if fill_with_background {
                             transform.kernel_params.flags |= KernelParamsFlags::FILL_WITH_BACKGROUND.bits();
                         }

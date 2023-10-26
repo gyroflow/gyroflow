@@ -17,7 +17,7 @@ pub trait PixelType: Default + Copy + Send + Sync + bytemuck::Pod {
     fn default_max_value() -> Option<f32>;
 
     fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str);
-    fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)>;
+    fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, bool)>; // texture format, shader data type, is_unorm
 }
 
 fn rgb_to_yuv(v: Vector4<f32>, is_limited: bool) -> Vector4<f32> {
@@ -76,7 +76,7 @@ impl PixelType for Luma8 {
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize], is_limited: bool) -> Vector4<f32> { Vector4::new(rgb_to_yuv(v, is_limited)[ind[0]], 0.0, 0.0, 0.0) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("uchar", "convert_uchar_sat", "float", "convert_float") }
-    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::R8Unorm, "f32", 255.0)) }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, bool)> { Some((wgpu::TextureFormat::R8Unorm, "f32", true)) }
     #[inline] fn default_max_value() -> Option<f32> { Some(255.0) }
 }
 unsafe impl bytemuck::Zeroable for Luma16 { }
@@ -94,7 +94,7 @@ impl PixelType for Luma16 {
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize], is_limited: bool) -> Vector4<f32> { Vector4::new(rgb_to_yuv(v, is_limited)[ind[0]], 0.0, 0.0, 0.0) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("ushort", "convert_ushort_sat", "float", "convert_float") }
-    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::R16Uint, "u32", 1.0)) }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, bool)> { Some((wgpu::TextureFormat::R16Uint, "u32", false)) }
     #[inline] fn default_max_value() -> Option<f32> { Some(65535.0) }
 }
 unsafe impl bytemuck::Zeroable for RGB8 { }
@@ -112,7 +112,7 @@ impl PixelType for RGB8 {
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _is_limited: bool) -> Vector4<f32> { v }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("uchar3", "convert_uchar3_sat", "float4", "convert_float4") } // FIXME: uchar3 can't be converted to float4
-    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { None }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, bool)> { None }
     #[inline] fn default_max_value() -> Option<f32> { Some(255.0) }
 }
 unsafe impl bytemuck::Zeroable for RGBA8 { }
@@ -130,7 +130,7 @@ impl PixelType for RGBA8 {
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar, v[3] as Self::Scalar) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _is_limited: bool) -> Vector4<f32> { v }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("uchar4", "convert_uchar4_sat", "float4", "convert_float4") }
-    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::Rgba8Unorm, "f32", 255.0)) }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, bool)> { Some((wgpu::TextureFormat::Rgba8Unorm, "f32", true)) }
     #[inline] fn default_max_value() -> Option<f32> { Some(255.0) }
 }
 unsafe impl bytemuck::Zeroable for BGRA8 { }
@@ -148,7 +148,7 @@ impl PixelType for BGRA8 {
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar, v[3] as Self::Scalar) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _is_limited: bool) -> Vector4<f32> { Vector4::new(v[2], v[1], v[0], v[3]) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("uchar4", "convert_uchar4_sat", "float4", "convert_float4") }
-    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::Bgra8Unorm, "f32", 255.0)) }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, bool)> { Some((wgpu::TextureFormat::Bgra8Unorm, "f32", true)) }
     #[inline] fn default_max_value() -> Option<f32> { Some(255.0) }
 }
 unsafe impl bytemuck::Zeroable for RGB16 { }
@@ -166,7 +166,7 @@ impl PixelType for RGB16 {
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _is_limited: bool) -> Vector4<f32> { v }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("ushort3", "convert_ushort3_sat", "float4", "convert_float4") }
-    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { None }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, bool)> { None }
     #[inline] fn default_max_value() -> Option<f32> { Some(65535.0) }
 }
 unsafe impl bytemuck::Zeroable for RGBA16 { }
@@ -184,7 +184,7 @@ impl PixelType for RGBA16 {
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar, v[3] as Self::Scalar) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _is_limited: bool) -> Vector4<f32> { v }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("ushort4", "convert_ushort4_sat", "float4", "convert_float4") }
-    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::Rgba16Uint, "u32", 1.0)) }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, bool)> { Some((wgpu::TextureFormat::Rgba16Uint, "u32", false)) }
     #[inline] fn default_max_value() -> Option<f32> { Some(65535.0) }
 }
 unsafe impl bytemuck::Zeroable for AYUV16 { }
@@ -202,7 +202,7 @@ impl PixelType for AYUV16 {
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar, v[2] as Self::Scalar, v[3] as Self::Scalar) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize], is_limited: bool) -> Vector4<f32> { let yuv = rgb_to_yuv(v, is_limited); Vector4::new(yuv[ind[0]], yuv[ind[1]], yuv[ind[2]], yuv[ind[3]]) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("ushort4", "convert_ushort4_sat", "float4", "convert_float4") }
-    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::Rgba16Uint, "u32", 1.0)) }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, bool)> { Some((wgpu::TextureFormat::Rgba16Uint, "u32", false)) }
     #[inline] fn default_max_value() -> Option<f32> { Some(65535.0) }
 }
 unsafe impl bytemuck::Zeroable for RGBAf { }
@@ -220,7 +220,7 @@ impl PixelType for RGBAf {
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0], v[1], v[2], v[3]) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _is_limited: bool) -> Vector4<f32> { v }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("float4", "convert_float4", "float4", "convert_float4") }
-    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::Rgba32Float, "f32", 255.0)) }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, bool)> { Some((wgpu::TextureFormat::Rgba32Float, "f32", false)) }
     #[inline] fn default_max_value() -> Option<f32> { None }
 }
 #[derive(Default, Copy, Clone, PartialEq, PartialOrd)]
@@ -243,7 +243,7 @@ impl PixelType for RGBAf16 {
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(Ff16(half::f16::from_f32(v[0])), Ff16(half::f16::from_f32(v[1])), Ff16(half::f16::from_f32(v[2])), Ff16(half::f16::from_f32(v[3]))) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, _ind: &[usize], _is_limited: bool) -> Vector4<f32> { v }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("half4", "convert_half4", "float4", "convert_half4_to_float4") }
-    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::Rgba16Float, "f32", 255.0)) }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, bool)> { Some((wgpu::TextureFormat::Rgba16Float, "f32", false)) }
     #[inline] fn default_max_value() -> Option<f32> { None }
 }
 unsafe impl bytemuck::Zeroable for R32f { }
@@ -261,7 +261,7 @@ impl PixelType for R32f {
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0]) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize], _is_limited: bool) -> Vector4<f32> { Vector4::new(v[ind[0]], 0.0, 0.0, 0.0) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("float", "convert_float", "float", "convert_float") }
-    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::R32Float, "f32", 255.0)) }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, bool)> { Some((wgpu::TextureFormat::R32Float, "f32", false)) }
     #[inline] fn default_max_value() -> Option<f32> { None }
 }
 unsafe impl bytemuck::Zeroable for UV8 { }
@@ -279,7 +279,7 @@ impl PixelType for UV8 {
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize], is_limited: bool) -> Vector4<f32> { let yuv = rgb_to_yuv(v, is_limited); Vector4::new(yuv[ind[0]], yuv[ind[1]], 0.0, 0.0) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("uchar2", "convert_uchar2_sat", "float2", "convert_float2") }
-    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::Rg8Unorm, "f32", 255.0)) }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, bool)> { Some((wgpu::TextureFormat::Rg8Unorm, "f32", true)) }
     #[inline] fn default_max_value() -> Option<f32> { Some(255.0) }
 }
 unsafe impl bytemuck::Zeroable for UV16 { }
@@ -297,6 +297,6 @@ impl PixelType for UV16 {
     #[inline] fn from_float(v: Vector4<f32>) -> Self { Self(v[0] as Self::Scalar, v[1] as Self::Scalar) }
     #[inline] fn from_rgb_color(v: Vector4<f32>, ind: &[usize], is_limited: bool) -> Vector4<f32> { let yuv = rgb_to_yuv(v, is_limited); Vector4::new(yuv[ind[0]], yuv[ind[1]], 0.0, 0.0) }
     #[inline] fn ocl_names() -> (&'static str, &'static str, &'static str, &'static str) { ("ushort2", "convert_ushort2_sat", "float2", "convert_float2") }
-    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, f64)> { Some((wgpu::TextureFormat::Rg16Uint, "u32", 1.0)) }
+    #[inline] fn wgpu_format() -> Option<(wgpu::TextureFormat, &'static str, bool)> { Some((wgpu::TextureFormat::Rg16Uint, "u32", false)) }
     #[inline] fn default_max_value() -> Option<f32> { Some(65535.0) }
 }
