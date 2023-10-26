@@ -493,10 +493,9 @@ impl RenderQueue {
         self.status = QString::from("active");
         self.status_changed();
 
-        self.start_frame = self.get_current_frame();
-
-        if !paused {
+        if !paused && self.start_timestamp == 0 {
             self.start_timestamp = Self::current_timestamp();
+            self.start_frame = self.get_current_frame();
             self.progress_changed();
         } else if let Some(paused_timestamp) = self.paused_timestamp.take() {
             let diff =  Self::current_timestamp() - paused_timestamp;
@@ -632,18 +631,6 @@ impl RenderQueue {
             itm.status = JobStatus::Queued;
         });
     }
-    pub fn update_status(&mut self) {
-        for v in self.queue.borrow().iter() {
-            if v.total_frames > 0 && v.status == JobStatus::Rendering {
-                self.status = QString::from("active");
-                self.status_changed();
-                return;
-            }
-        }
-
-        self.status = QString::from("stopped");
-        self.status_changed();
-    }
 
     pub fn render_queue_json(&self) -> QString {
         let mut all = Vec::new();
@@ -759,14 +746,9 @@ impl RenderQueue {
 
                 let is_queue_active = this.status == "active".into();
                 if finished {
-                    if this.get_pending_count() > 0 && is_queue_active {
+                    if is_queue_active {
                         // Start the next one
                         this.start();
-                    } else {
-                        this.update_status();
-                        if is_queue_active {
-                            this.post_render_action();
-                        }
                     }
                 }
             });
@@ -799,11 +781,7 @@ impl RenderQueue {
                 this.error(job_id, QString::from(msg), QString::from(arg), QString::default());
                 this.render_progress(job_id, 1.0, 0, 0, true, 0.0, false);
 
-                if this.get_pending_count() > 0 {
-                    // Start the next one
-                    this.start();
-                }
-                this.update_status();
+                this.start();
             });
 
             let convert_format = util::qt_queued_callback_mut(self, move |this, (format, mut supported): (String, String)| {
@@ -821,11 +799,7 @@ impl RenderQueue {
                 this.convert_format(job_id, QString::from(format), QString::from(supported));
                 this.render_progress(job_id, 1.0, 0, 0, true, 0.0, false);
 
-                if this.get_pending_count() > 0 {
-                    // Start the next one
-                    this.start();
-                }
-                this.update_status();
+                this.start();
             });
             let params = stab.params.read();
             let trim_ratio = params.trim_end - params.trim_start;

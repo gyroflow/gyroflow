@@ -106,7 +106,7 @@ Item {
                     leftPadding: 0;
                     anchors.horizontalCenter: parent.horizontalCenter;
                     textFormat: Text.RichText;
-                    text: `<b>${(topCol.progress*100).toFixed(2)}%</b> <small>(${render_queue.current_frame}/${render_queue.total_frames}${totalTime.fpsText})</small>`;
+                    text: `<b>${(topCol.progress*100).toFixed(2)}%</b> <small>(${render_queue.current_frame - render_queue.start_frame}/${render_queue.total_frames - render_queue.start_frame}${totalTime.fpsText})</small>`;
                     y: totalTime.twoLines? progressText1.height + 5 * dpiScale : 0;
                     onWidthChanged: Qt.callLater(totalTime.updateLayout);
                 }
