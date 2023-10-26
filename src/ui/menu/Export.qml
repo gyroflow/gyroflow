@@ -24,7 +24,7 @@ MenuItem {
     property var exportFormats: {
         let list = [
             // If changing, make sure it's in sync with render_queue.rs:get_output_url
-            { "name": "H.264/AVC",     "max_size": [4096, 2160],   "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
+            { "name": "H.264/AVC",     "max_size": [4096, 4096],   "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
             { "name": "H.265/HEVC",    "max_size": [8192, 8192],   "extension": ".mp4",      "gpu": true,  "audio": true,  "variants": [ ] },
             { "name": "ProRes",        "max_size": [16384, 16384], "extension": ".mov",      "gpu": isOsx, "audio": true,  "variants": ["Proxy", "LT", "Standard", "HQ", "4444", "4444XQ"] },
             { "name": "DNxHD",         "max_size": [8192, 8192],   "extension": ".mov",      "gpu": false, "audio": true,  "variants": [/*"DNxHD", */"DNxHR LB", "DNxHR SQ", "DNxHR HQ", "DNxHR HQX", "DNxHR 444"] },
