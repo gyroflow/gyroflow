@@ -200,7 +200,6 @@ pub struct RenderQueue {
 
     pub start_timestamp: qt_property!(u64; NOTIFY progress_changed),
     pub end_timestamp: qt_property!(u64; NOTIFY progress_changed),
-    pub start_frame: qt_property!(u64; NOTIFY progress_changed),
     current_frame: qt_property!(u64; READ get_current_frame NOTIFY progress_changed),
     total_frames: qt_property!(u64; READ get_total_frames NOTIFY queue_changed),
     pub status: qt_property!(QString; NOTIFY status_changed),
@@ -633,7 +632,6 @@ impl RenderQueue {
             itm.status = JobStatus::Queued;
         });
     }
-
     pub fn update_status(&mut self) {
         for v in self.queue.borrow().iter() {
             if v.total_frames > 0 && v.status == JobStatus::Rendering {
@@ -765,6 +763,8 @@ impl RenderQueue {
                         // Start the next one
                         this.start();
                     } else {
+                        this.start_timestamp = 0;
+                        this.start_frame = 0;
                         this.update_status();
                         if is_queue_active {
                             this.post_render_action();
@@ -804,6 +804,9 @@ impl RenderQueue {
                 if this.get_pending_count() > 0 {
                     // Start the next one
                     this.start();
+                } else {
+                    this.start_timestamp = 0;
+                    this.start_frame = 0;
                 }
                 this.update_status();
             });
@@ -822,10 +825,13 @@ impl RenderQueue {
 
                 this.convert_format(job_id, QString::from(format), QString::from(supported));
                 this.render_progress(job_id, 1.0, 0, 0, true, 0.0, false);
-               
+
                 if this.get_pending_count() > 0 {
                     // Start the next one
                     this.start();
+                } else {
+                    this.start_timestamp = 0;
+                    this.start_frame = 0;
                 }
                 this.update_status();
             });
