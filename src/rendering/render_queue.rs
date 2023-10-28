@@ -240,6 +240,7 @@ pub struct RenderQueue {
     pub jobs_added: HashSet<u32>,
 
     paused_timestamp: Option<u64>,
+    start_frame: u64,
 
     stabilizer: Arc<StabilizationManager>,
 
@@ -283,10 +284,10 @@ impl RenderQueue {
     }
 
     pub fn get_total_frames(&self) -> u64 {
-        self.queue.borrow().iter().map(|v| v.total_frames).sum()
+        self.queue.borrow().iter().map(|v| v.total_frames).sum::<u64>() - self.start_frame
     }
     pub fn get_current_frame(&self) -> u64 {
-        self.queue.borrow().iter().map(|v| v.current_frame).sum()
+        self.queue.borrow().iter().map(|v| v.current_frame).sum::<u64>() - self.start_frame
     }
 
     pub fn set_pixel_format(&mut self, job_id: u32, format: String) {
@@ -494,6 +495,7 @@ impl RenderQueue {
         self.status_changed();
 
         if !paused && self.start_timestamp == 0 {
+            self.start_frame = 0;
             self.start_timestamp = Self::current_timestamp();
             self.start_frame = self.get_current_frame();
             self.progress_changed();
@@ -632,6 +634,19 @@ impl RenderQueue {
         });
     }
 
+    pub fn update_status(&mut self) {
+        for v in self.queue.borrow().iter() {
+            if v.total_frames > 0 && v.status == JobStatus::Rendering {
+                self.status = QString::from("active");
+                self.status_changed();
+                return;
+            }
+        }
+
+        self.status = QString::from("stopped");
+        self.status_changed();
+    }
+
     pub fn render_queue_json(&self) -> QString {
         let mut all = Vec::new();
         for v in self.queue.borrow().iter() {
@@ -746,9 +761,14 @@ impl RenderQueue {
 
                 let is_queue_active = this.status == "active".into();
                 if finished {
-                    if is_queue_active {
+                    if this.get_pending_count() > 0 && is_queue_active {
                         // Start the next one
                         this.start();
+                    } else {
+                        this.update_status();
+                        if is_queue_active {
+                            this.post_render_action();
+                        }
                     }
                 }
             });
@@ -781,7 +801,11 @@ impl RenderQueue {
                 this.error(job_id, QString::from(msg), QString::from(arg), QString::default());
                 this.render_progress(job_id, 1.0, 0, 0, true, 0.0, false);
 
-                this.start();
+                if this.get_pending_count() > 0 {
+                    // Start the next one
+                    this.start();
+                }
+                this.update_status();
             });
 
             let convert_format = util::qt_queued_callback_mut(self, move |this, (format, mut supported): (String, String)| {
@@ -798,8 +822,12 @@ impl RenderQueue {
 
                 this.convert_format(job_id, QString::from(format), QString::from(supported));
                 this.render_progress(job_id, 1.0, 0, 0, true, 0.0, false);
-
-                this.start();
+               
+                if this.get_pending_count() > 0 {
+                    // Start the next one
+                    this.start();
+                }
+                this.update_status();
             });
             let params = stab.params.read();
             let trim_ratio = params.trim_end - params.trim_start;
