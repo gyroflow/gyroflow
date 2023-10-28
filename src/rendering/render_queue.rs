@@ -239,6 +239,7 @@ pub struct RenderQueue {
     pub jobs_added: HashSet<u32>,
 
     paused_timestamp: Option<u64>,
+    start_frame: u64,
 
     stabilizer: Arc<StabilizationManager>,
 
@@ -282,10 +283,10 @@ impl RenderQueue {
     }
 
     pub fn get_total_frames(&self) -> u64 {
-        self.queue.borrow().iter().map(|v| v.total_frames).sum()
+        self.queue.borrow().iter().map(|v| v.total_frames).sum::<u64>() - self.start_frame
     }
     pub fn get_current_frame(&self) -> u64 {
-        self.queue.borrow().iter().map(|v| v.current_frame).sum()
+        self.queue.borrow().iter().map(|v| v.current_frame).sum::<u64>() - self.start_frame
     }
 
     pub fn set_pixel_format(&mut self, job_id: u32, format: String) {
@@ -493,7 +494,9 @@ impl RenderQueue {
         self.status_changed();
 
         if !paused && self.start_timestamp == 0 {
+            self.start_frame = 0;
             self.start_timestamp = Self::current_timestamp();
+            self.start_frame = self.get_current_frame();
             self.progress_changed();
         } else if let Some(paused_timestamp) = self.paused_timestamp.take() {
             let diff =  Self::current_timestamp() - paused_timestamp;
@@ -527,9 +530,11 @@ impl RenderQueue {
                     self.render_job(job_id);
                 } else {
                     if self.get_active_render_count() == 0 {
+                        
                         self.post_render_action();
                         self.queue_finished();
 
+                        self.start_frame = 0;
                         self.start_timestamp = 0;
                         self.progress_changed();
 
@@ -758,6 +763,8 @@ impl RenderQueue {
                         // Start the next one
                         this.start();
                     } else {
+                        this.start_timestamp = 0;
+                        this.start_frame = 0;
                         this.update_status();
                         if is_queue_active {
                             this.post_render_action();
@@ -797,6 +804,9 @@ impl RenderQueue {
                 if this.get_pending_count() > 0 {
                     // Start the next one
                     this.start();
+                } else {
+                    this.start_timestamp = 0;
+                    this.start_frame = 0;
                 }
                 this.update_status();
             });
@@ -819,6 +829,9 @@ impl RenderQueue {
                 if this.get_pending_count() > 0 {
                     // Start the next one
                     this.start();
+                } else {
+                    this.start_timestamp = 0;
+                    this.start_frame = 0;
                 }
                 this.update_status();
             });
