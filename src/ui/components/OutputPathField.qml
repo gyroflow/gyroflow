@@ -3,7 +3,6 @@
 
 import QtQuick
 import QtQuick.Dialogs as QQD
-import "../Util.js" as Util
 
 import "."
 
