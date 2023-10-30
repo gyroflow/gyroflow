@@ -82,7 +82,7 @@ features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemSer
              "Win32_Storage_Packaging_Appx" ]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
-metal = { git = "https://github.com/gfx-rs/metal-rs/", rev = "d24f1a4" }
+metal = "0.27"
 core-foundation-sys = "0.8.4"
 
 [build-dependencies]
