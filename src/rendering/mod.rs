@@ -481,7 +481,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                             output: get_plane_buffer(out_frame_data, out_size, plane_index, &mut g, wgpu_format)
                         };
 
-                        if plane.initialized_backend.is_none() {
+                        if plane.initialized_backend.is_none() || plane.pending_device_change.is_some() {
                             plane.ensure_ready_for_processing::<$t>(timestamp_us, &mut buffers);
                             plane.stab_data.clear();
                         }

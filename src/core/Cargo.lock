@@ -26,7 +26,7 @@ dependencies = [
  "cfg-if",
  "once_cell",
  "version_check",
- "zerocopy 0.7.18",
+ "zerocopy 0.7.20",
 ]
 
 [[package]]
@@ -644,8 +644,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e16e44ab292b1dddfdaf7be62cfd8877df52f2f3fde5858d95bab606be259f20"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=8f6fcb1#8f6fcb1e6f9cd8042c6883a323ef3b879febdd9a"
 dependencies = [
  "bitflags 2.4.1",
  "libloading 0.8.1",
@@ -791,7 +790,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "279d3efcc55e19917fff7ab3ddd6c14afb6a90881a0078465196fe2f99d08c56"
 dependencies = [
  "bit_field",
- "flume 0.10.14",
+ "flume",
  "half 2.3.1",
  "lebe",
  "miniz_oxide",
@@ -883,18 +882,6 @@ dependencies = [
  "futures-sink",
  "nanorand",
  "pin-project",
- "spin",
-]
-
-[[package]]
-name = "flume"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "55ac459de2512911e4b674ce33cf20befaba382d05b62b008afc1c8b57cbf181"
-dependencies = [
- "futures-core",
- "futures-sink",
- "nanorand",
  "spin",
 ]
 
@@ -1587,8 +1574,9 @@ dependencies = [
 
 [[package]]
 name = "metal"
-version = "0.26.0"
-source = "git+https://github.com/gfx-rs/metal-rs/?rev=d24f1a4#d24f1a4ae92470bf87a0c65ecfe78c9299835505"
+version = "0.27.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c43f73953f8cbe511f021b58f18c3ce1c3d1ae13fe953293e13345bf83217f25"
 dependencies = [
  "bitflags 2.4.1",
  "block",
@@ -1634,8 +1622,8 @@ dependencies = [
 
 [[package]]
 name = "naga"
-version = "0.13.0"
-source = "git+https://github.com/gfx-rs/naga?rev=e25280df9316434ef7752970016d01a3aede3f17#e25280df9316434ef7752970016d01a3aede3f17"
+version = "0.14.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=8f6fcb1#8f6fcb1e6f9cd8042c6883a323ef3b879febdd9a"
 dependencies = [
  "bit-set",
  "bitflags 2.4.1",
@@ -1728,7 +1716,7 @@ dependencies = [
  "log",
  "ndk-sys",
  "num_enum",
- "raw-window-handle 0.6.0",
+ "raw-window-handle",
  "thiserror",
 ]
 
@@ -2012,9 +2000,9 @@ checksum = "dd8b5dd2ae5ed71462c540258bedcb51965123ad7e7ccf4b9a8cafaa4a63576d"
 
 [[package]]
 name = "opencv"
-version = "0.85.3"
+version = "0.86.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e07271acf89f1dbe3aa1d2f8f905ed5742a5b03117d73b583ba4f4157e77dd91"
+checksum = "e5db144ebbdbbde34ce9123a4e1cb393e111f321d79664b3f9bb7c65ada73d15"
 dependencies = [
  "cc",
  "dunce",
@@ -2031,9 +2019,9 @@ dependencies = [
 
 [[package]]
 name = "opencv-binding-generator"
-version = "0.75.0"
+version = "0.76.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64d0632ad1ed848844a55c0cd622c7cfae4f36dee924eeabdf4119c6a7bd479c"
+checksum = "124384aeb6d66ce7b14c0e0b300b56cbb686ea14457067ba6a44c25e91dc73a2"
 dependencies = [
  "clang",
  "clang-sys",
@@ -2331,12 +2319,6 @@ checksum = "9c8a99fddc9f0ba0a85884b8d14e3592853e787d581ca1816c91349b10e4eeab"
 
 [[package]]
 name = "raw-window-handle"
-version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2ff9a1f06a88b01621b7ae906ef0211290d1c8a168a15542486a8f61c0833b9"
-
-[[package]]
-name = "raw-window-handle"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "42a9830a0e1b9fb145ebb365b8bc4ccd75f290f98c0247deafbbe2c75cefb544"
@@ -2581,9 +2563,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.107"
+version = "1.0.108"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b420ce6e3d8bd882e9b243c6eed35dbc9a6110c9769e74b584e0d68d1f20c65"
+checksum = "3d1c7e3eac408d115102c4c24ad393e0821bb3a5df4d506a80f85f7a742a526b"
 dependencies = [
  "indexmap",
  "itoa",
@@ -2791,7 +2773,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.2.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=36dec52#36dec52e833a549960ffb2b63a486efa644a34e5"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=1f92212#1f9221210d636f1b5099f2ebc7176ad716b2422c"
 dependencies = [
  "argh",
  "byteorder",
@@ -3124,18 +3106,17 @@ checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
 
 [[package]]
 name = "wgpu"
-version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=3abf81e#3abf81efd2900191c73dec2189c3b0ebfe099b99"
+version = "0.18.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=8f6fcb1#8f6fcb1e6f9cd8042c6883a323ef3b879febdd9a"
 dependencies = [
  "arrayvec 0.7.4",
  "cfg-if",
- "flume 0.11.0",
  "js-sys",
  "log",
  "naga",
  "parking_lot",
  "profiling",
- "raw-window-handle 0.5.2",
+ "raw-window-handle",
  "smallvec",
  "static_assertions",
  "wasm-bindgen",
@@ -3148,8 +3129,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-core"
-version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=3abf81e#3abf81efd2900191c73dec2189c3b0ebfe099b99"
+version = "0.18.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=8f6fcb1#8f6fcb1e6f9cd8042c6883a323ef3b879febdd9a"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-vec",
@@ -3159,7 +3140,7 @@ dependencies = [
  "naga",
  "parking_lot",
  "profiling",
- "raw-window-handle 0.5.2",
+ "raw-window-handle",
  "rustc-hash",
  "smallvec",
  "thiserror",
@@ -3170,8 +3151,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-hal"
-version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=3abf81e#3abf81efd2900191c73dec2189c3b0ebfe099b99"
+version = "0.18.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=8f6fcb1#8f6fcb1e6f9cd8042c6883a323ef3b879febdd9a"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.4",
@@ -3199,7 +3180,7 @@ dependencies = [
  "parking_lot",
  "profiling",
  "range-alloc",
- "raw-window-handle 0.5.2",
+ "raw-window-handle",
  "renderdoc-sys",
  "rustc-hash",
  "smallvec",
@@ -3212,8 +3193,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-types"
-version = "0.17.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=3abf81e#3abf81efd2900191c73dec2189c3b0ebfe099b99"
+version = "0.18.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=8f6fcb1#8f6fcb1e6f9cd8042c6883a323ef3b879febdd9a"
 dependencies = [
  "bitflags 2.4.1",
  "js-sys",
@@ -3460,11 +3441,11 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.7.18"
+version = "0.7.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ede7d7c7970ca2215b8c1ccf4d4f354c4733201dfaaba72d44ae5b37472e4901"
+checksum = "dd66a62464e3ffd4e37bd09950c2b9dd6c4f8767380fabba0d523f9a775bc85a"
 dependencies = [
- "zerocopy-derive 0.7.18",
+ "zerocopy-derive 0.7.20",
 ]
 
 [[package]]
@@ -3480,9 +3461,9 @@ dependencies = [
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.7.18"
+version = "0.7.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b27b1bb92570f989aac0ab7e9cbfbacdd65973f7ee920d9f0e71ebac878fd0b"
+checksum = "255c4596d41e6916ced49cfafea18727b24d67878fa180ddfd69b9df34fd1726"
 dependencies = [
  "proc-macro2",
  "quote",

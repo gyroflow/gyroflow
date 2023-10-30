@@ -93,7 +93,7 @@ pub struct KernelParams {
 unsafe impl bytemuck::Zeroable for KernelParams {}
 unsafe impl bytemuck::Pod for KernelParams {}
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub enum BackendType {
     #[default]
     None,
@@ -451,6 +451,8 @@ impl Stabilization {
                 log::warn!("Cached wgpu not found, reinitializing. Key: {}", self.get_current_key(buffers));
                 self.initialized_backend = BackendType::None;
                 self.init_backends::<T>(timestamp_us, buffers);
+            } else {
+                self.initialized_backend = BackendType::Wgpu(hash);
             }
         }
     }
