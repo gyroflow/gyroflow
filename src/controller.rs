@@ -1744,6 +1744,11 @@ impl Controller {
 
         use crate::core::lens_profile_database::LensProfileDatabase;
 
+        if LensProfileDatabase::get_path().join("noupdate").exists() {
+            ::log::info!("Skipping lens profile updates.");
+            return;
+        }
+
         let update = util::qt_queued_callback_mut(self, |this, _| {
             this.lens_profiles_updated(true);
         });
