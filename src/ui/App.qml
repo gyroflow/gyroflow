@@ -233,8 +233,17 @@ Rectangle {
                     SplitButton {
                         id: renderBtn;
                         btn.accent: true;
-                        text: isAddToQueue? (render_queue.editing_job_id > 0? qsTr("Save") : qsTr("Add to render queue")) : qsTr("Export");
-                        iconName: "video";
+                        function getMainText() {
+                            if (addQueueDelayed) {
+                                return qsTr("Added to queue");
+                            } else if (isAddToQueue) {
+                                return render_queue.editing_job_id > 0? qsTr("Save") : qsTr("Add to render queue");
+                            } else {
+                                return qsTr("Export");
+                            }
+                        }
+                        text: getMainText();
+                        iconName: addQueueDelayed ? "confirmed" : "video";
                         isDown: isMobileLayout;
                         property bool isAddToQueue: false;
                         property bool allowFile: false;
@@ -246,6 +255,16 @@ Rectangle {
                         property bool enabled2: window.videoArea.vid.loaded && exportSettings.item && exportSettings.item.canExport && !videoArea.videoLoader.active;
                         onEnabled2Changed: et.start();
                         Timer { id: et; interval: 200; onTriggered: renderBtn.btn.enabled = renderBtn.enabled2; }
+
+                        property bool addQueueDelayed: false;
+                        Timer { 
+                            id: delayAddQueue; 
+                            interval: 2000; 
+                            onTriggered:  {
+                                renderBtn.addQueueDelayed = false;
+                                renderBtn.btn.enabled = renderBtn.enabled2; 
+                            }
+                        }
 
                         function updateModel() {
                             let m = [
@@ -343,6 +362,10 @@ Rectangle {
                                 const job_id = render_queue.add(window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
                                 if (renderBtn.isAddToQueue) {
                                     // Add to queue
+                                    renderBtn.addQueueDelayed = true;
+                                    renderBtn.btn.enabled = false;
+                                    delayAddQueue.start();
+
                                     if (+settings.value("showQueueWhenAdding", "1"))
                                         videoArea.queue.shown = true;
                                 } else {
