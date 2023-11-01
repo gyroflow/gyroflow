@@ -327,7 +327,7 @@ Rectangle {
                                     render();
                                 }
 
-                                if (render_queue.overwrite_mode === 0) {
+                                if (render_queue.overwrite_mode < 2) {
                                     messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
                                         { text: qsTr("Yes"), clicked: () => { overwrite() } },
                                         { text: qsTr("Rename"), clicked: () => { rename() } },
