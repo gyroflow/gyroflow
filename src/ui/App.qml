@@ -241,7 +241,7 @@ Rectangle {
                             } else {
                                 return qsTr("Export");
                             }
-                        };
+                        }
                         iconName: addQueueDelayed ? "confirmed" : "video";
                         isDown: isMobileLayout;
                         property bool isAddToQueue: false;
