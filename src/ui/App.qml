@@ -318,13 +318,30 @@ Rectangle {
                             }
                             const exists = filesystem.exists_in_folder(outputFile.folderUrl, outputFile.filename.replace("_%05d", "_00001"));
                             if ((exists || render_queue.file_exists_in_folder(outputFile.folderUrl, outputFile.filename)) && !allowFile) {
-                                messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
-                                    { text: qsTr("Yes"), clicked: () => { allowFile = true; renderBtn.render(); } },
-                                    { text: qsTr("Rename"), clicked: () => { outputFile.setFilename(window.renameOutput(outputFile.filename, outputFile.folderUrl)); render(); } },
-                                    { text: qsTr("No"), accent: true },
-                                ]);
+                                function overwrite() {
+                                    allowFile = true; 
+                                    renderBtn.render();
+                                }
+                                function rename() {
+                                    outputFile.setFilename(window.renameOutput(outputFile.filename, outputFile.folderUrl));
+                                    render();
+                                }
+
+                                if (render_queue.overwrite_mode === 0) {
+                                    messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
+                                        { text: qsTr("Yes"), clicked: () => { overwrite() } },
+                                        { text: qsTr("Rename"), clicked: () => { rename() } },
+                                        { text: qsTr("No"), accent: true },
+                                    ]);
+                                } else if (render_queue.overwrite_mode === 1) {
+                                    overwrite();
+                                } else if (render_queue.overwrite_mode === 2) {
+                                    rename();
+                                }
+
                                 return;
                             }
+
                             if (fname.endsWith('.r3d') && controller.find_redline()) {
                                 messageBox(Modal.Info, "Gyroflow will use REDline to convert .R3D to ProRes before stabilizing in order to export from Gyroflow directly.\nIf you want to work on RAW data instead, export project file (Ctrl+S) and use one of [video editor plugins] (%1).".replace(/\[(.*?)\]/, '<a href="https://gyroflow.xyz/download#plugins"><font color="' + styleTextColor + '">$1</font></a>').arg("DaVinci Resolve, Final Cut Pro"), [
                                     { text: qsTr("Ok"), accent: true }
