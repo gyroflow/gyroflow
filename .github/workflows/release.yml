@@ -180,11 +180,8 @@ jobs:
 
       - run: find . -type f
 
-      - name: Publish
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-         files: ./**/*
+      - if: startsWith(github.ref, 'refs/tags/')
+        run: rm -rf ./Gyroflow-debug-symbols
 
       - name: Upload to App Store
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
@@ -200,3 +197,9 @@ jobs:
           packageName: xyz.gyroflow
           releaseFiles: ./Gyroflow-android/Gyroflow.aab
           track: ${{ startsWith(github.ref, 'refs/tags/') && 'production' || 'beta' }}
+
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+         files: ./**/*
