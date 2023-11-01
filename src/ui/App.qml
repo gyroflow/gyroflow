@@ -233,7 +233,7 @@ Rectangle {
                     SplitButton {
                         id: renderBtn;
                         btn.accent: true;
-                        function getMainText() {
+                        text: {
                             if (addQueueDelayed) {
                                 return qsTr("Added to queue");
                             } else if (isAddToQueue) {
@@ -241,8 +241,7 @@ Rectangle {
                             } else {
                                 return qsTr("Export");
                             }
-                        }
-                        text: getMainText();
+                        };
                         iconName: addQueueDelayed ? "confirmed" : "video";
                         isDown: isMobileLayout;
                         property bool isAddToQueue: false;
@@ -329,8 +328,8 @@ Rectangle {
 
                                 if (render_queue.overwrite_mode < 2) {
                                     messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
-                                        { text: qsTr("Yes"), clicked: () => { overwrite() } },
-                                        { text: qsTr("Rename"), clicked: () => { rename() } },
+                                        { text: qsTr("Yes"), clicked: overwrite },
+                                        { text: qsTr("Rename"), clicked: rename },
                                         { text: qsTr("No"), accent: true },
                                     ]);
                                 } else if (render_queue.overwrite_mode === 1) {
