@@ -323,17 +323,20 @@ Rectangle {
                                 }
                                 function rename() {
                                     outputFile.setFilename(window.renameOutput(outputFile.filename, outputFile.folderUrl));
-                                    render();
+                                    renderBtn.render();
                                 }
 
-                                if (render_queue.overwrite_mode < 2) {
+                                if (!renderBtn.isAddToQueue || render_queue.overwrite_mode === 0) {
                                     messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
                                         { text: qsTr("Yes"), clicked: overwrite },
                                         { text: qsTr("Rename"), clicked: rename },
                                         { text: qsTr("No"), accent: true },
                                     ]);
                                 } else if (render_queue.overwrite_mode === 1) {
-                                    overwrite();
+                                    messageBox(Modal.Info, qsTr("Output file already exists, do you want to overwrite it?"), [
+                                        { text: qsTr("Yes"), clicked: overwrite },
+                                        { text: qsTr("No"), accent: true },
+                                    ], undefined, 0, "add_queue_file_overwritten");
                                 } else if (render_queue.overwrite_mode === 2) {
                                     rename();
                                 }
