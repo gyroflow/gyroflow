@@ -97,8 +97,8 @@ TextField {
                 return;
             }
             outputFileDialog.defaultSuffix = root.filename.substring(root.filename.length - 3);
-            outputFileDialog.selectedFile = root.filename;
             outputFileDialog.currentFolder = root.getFolderForDialog(root.folderUrl);
+            outputFileDialog.selectedFile = filesystem.get_file_url(root.folderUrl, root.filename, false);
             outputFileDialog.open();
         }
     }

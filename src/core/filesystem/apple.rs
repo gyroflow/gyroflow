@@ -165,7 +165,7 @@ pub fn resolve_bookmark(bookmark_data: &str) -> (String, bool) {
             let data_ref = CFDataCreate(kCFAllocatorDefault, decompressed.as_ptr(), decompressed.len() as isize);
             if !data_ref.is_null() {
                 let mut error = ptr::null_mut();
-                let opts: CFURLBookmarkResolutionOptions = 0;
+                let opts: CFURLBookmarkResolutionOptions = 1usize << 10; // kCFURLBookmarkResolutionWithSecurityScope
                 let is_stale_cf: Boolean = 0;
                 let url = CFURLCreateByResolvingBookmarkData(kCFAllocatorDefault, data_ref, opts, ptr::null(), ptr::null(), is_stale_cf as *mut Boolean, &mut error);
                 if error.is_null() {
