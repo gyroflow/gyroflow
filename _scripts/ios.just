@@ -141,7 +141,7 @@ build-and-package profile is_dist:
             PlistBuddy -x -c "Set :CFBundleVersion \"{{ProjectVersion}}.$GITHUB_RUN_NUMBER\"" {{AppBundle}}/Info.plist
         fi
         if [ "$IS_MANUAL_DISPATCH" == "true" ]; then
-            PlistBuddy -x -c "Set :CFBundleShortVersionString \"`echo "{{ProjectVersion}}" | sed -E 's/[^0-9\.]//' | sed -E 's/\.([0-9]+)$/\1/'`.1\"" {{AppBundle}}/Info.plist
+            PlistBuddy -x -c "Set :CFBundleShortVersionString \"0.`echo "{{ProjectVersion}}" | sed -E 's/[^0-9\.]//' | sed -E 's/\.([0-9]+)$/\1/'`\"" {{AppBundle}}/Info.plist
         fi
 
         ICON={{ProjectDir}}/resources/icon_1080.png
