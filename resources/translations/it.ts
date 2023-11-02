@@ -301,8 +301,8 @@ Fare clic su Ok e selezionare la cartella di destinazione.</translation>
       <location filename="../../src/ui/App.qml" line="338"/>
       <source>Keep this app in the foreground and don&apos;t lock the screen.
 Due to limitations of the system video encoders, rendering in the background is not supported.</source>
-      <translation type="unfinished">Keep this app in the foreground and don&apos;t lock the screen.
-Due to limitations of the system video encoders, rendering in the background is not supported.</translation>
+      <translation>Mantieni questa app in primo piano e non&apos; bloccare lo schermo.
+A causa delle limitazioni degli encoder video di sistema, il rendering in background non è supportato.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="581"/>
@@ -721,32 +721,32 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="50"/>
       <source>Grid guide</source>
-      <translation type="unfinished">Grid guide</translation>
+      <translation>Guida griglia</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Enabled</source>
-      <translation type="unfinished">Enabled</translation>
+      <translation>Abilitato</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="54"/>
       <source>Color</source>
-      <translation type="unfinished">Color</translation>
+      <translation>Colore</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="55"/>
       <source>White</source>
-      <translation type="unfinished">White</translation>
+      <translation>Bianco</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="56"/>
       <source>Black</source>
-      <translation type="unfinished">Black</translation>
+      <translation>Nero</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="60"/>
       <source>Lines</source>
-      <translation type="unfinished">Lines</translation>
+      <translation>Linee</translation>
     </message>
   </context>
   <context>
@@ -2509,7 +2509,7 @@ Assicurati di avere un corretto valore impostato per il rolling shutter prima de
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="24"/>
       <source>Created at</source>
-      <translation type="unfinished">Created at</translation>
+      <translation>Creato il</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="28"/>
@@ -2757,7 +2757,7 @@ Sei sicuro di voler continuare?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="577"/>
       <source>Clear trim range</source>
-      <translation type="unfinished">Clear trim range</translation>
+      <translation>Pulisci l'intervallo di assetto</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="583"/>

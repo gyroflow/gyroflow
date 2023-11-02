@@ -246,7 +246,7 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
 
 Compruebe la tasa de bits del archivo después de procesarlo y si se ve afectado por este error, puede:
 - Establecer una tasa de bits de salida inferior a 100 Mbps
-- Usar &quot;opciones personalizadas de codificador&quot;: `-rc cqp -qp_i 28 -qp_p 28`</translation>
+- Usar opciones personalizadas de codificador: `-rc cqp -qp_i 28 -qp_p 28`</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="675"/>
@@ -293,15 +293,15 @@ Compruebe la tasa de bits del archivo después de procesarlo y si se ve afectado
       <location filename="../../src/ui/App.qml" line="327"/>
       <source>Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>Debido a las restricciones de acceso al archivo, debe seleccionar la carpeta de destino manualmente.
+Haga clic en Ok y seleccione la carpeta de destino.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="338"/>
       <source>Keep this app in the foreground and don&apos;t lock the screen.
 Due to limitations of the system video encoders, rendering in the background is not supported.</source>
-      <translation type="unfinished">Keep this app in the foreground and don&apos;t lock the screen.
-Due to limitations of the system video encoders, rendering in the background is not supported.</translation>
+      <translation>Mantener esta aplicación en primer plano y no bloquear la pantalla.
+Debido a las limitaciones de los codificadores de vídeo del sistema, no se admite la reproducción en segundo plano.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="581"/>
@@ -624,12 +624,12 @@ Puedes aumentar el límite de nitidez en la sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="618"/>
       <source>Preserve export path</source>
-      <translation type="unfinished">Preserve export path</translation>
+      <translation>Conservar ruta de exportación</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="620"/>
       <source>Save output path in settings and use it for all files.</source>
-      <translation type="unfinished">Save output path in settings and use it for all files.</translation>
+      <translation>Guardar ruta de salida en ajustes y usarla para todos los archivos.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="383"/>
@@ -640,7 +640,7 @@ Puedes aumentar el límite de nitidez en la sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="364"/>
       <source>Edit sizes</source>
-      <translation>Editar tallas</translation>
+      <translation>Editar tamaños</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="367"/>
@@ -700,7 +700,7 @@ Puedes aumentar el límite de nitidez en la sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="543"/>
       <source>Audio codec</source>
-      <translation>Códec de Audio</translation>
+      <translation>Codificador de audio</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="555"/>
@@ -721,32 +721,32 @@ Puedes aumentar el límite de nitidez en la sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="50"/>
       <source>Grid guide</source>
-      <translation type="unfinished">Grid guide</translation>
+      <translation>Guía de cuadrícula</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Enabled</source>
-      <translation type="unfinished">Enabled</translation>
+      <translation>Activado</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="54"/>
       <source>Color</source>
-      <translation type="unfinished">Color</translation>
+      <translation>Color</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="55"/>
       <source>White</source>
-      <translation type="unfinished">White</translation>
+      <translation>Blanco</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="56"/>
       <source>Black</source>
-      <translation type="unfinished">Black</translation>
+      <translation>Negra</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="60"/>
       <source>Lines</source>
-      <translation type="unfinished">Lines</translation>
+      <translation>Líneas</translation>
     </message>
   </context>
   <context>
@@ -1076,7 +1076,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="200"/>
       <source>Troubleshooting</source>
-      <translation type="unfinished">Troubleshooting</translation>
+      <translation>Resolución de problemas</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="212"/>
@@ -1253,7 +1253,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="43"/>
       <source>[Selected folder]</source>
-      <translation type="unfinished">[Selected folder]</translation>
+      <translation>[Carpeta seleccionada]</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="109"/>
@@ -1355,12 +1355,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="147"/>
       <source>Mobile Light</source>
-      <translation type="unfinished">Mobile Light</translation>
+      <translation>Móvil claro</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="148"/>
       <source>Mobile Dark</source>
-      <translation type="unfinished">Mobile Dark</translation>
+      <translation>Móvil oscuro</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="167"/>
@@ -1608,17 +1608,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="514"/>
       <source>ETA %1</source>
-      <translation type="unfinished">ETA %1</translation>
+      <translation>Tiempo estimado %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="515"/>
       <source>Synchronizing: %1</source>
-      <translation type="unfinished">Synchronizing: %1</translation>
+      <translation>Sincronizando: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="516"/>
       <source>Rendering: %1</source>
-      <translation type="unfinished">Rendering: %1</translation>
+      <translation>Renderizando %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="688"/>
@@ -1898,17 +1898,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="234"/>
       <source>Save to lens profile directory</source>
-      <translation type="unfinished">Save to lens profile directory</translation>
+      <translation>Guardar en el directorio del perfiles del lente</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="235"/>
       <source>Save as default preset</source>
-      <translation type="unfinished">Save as default preset</translation>
+      <translation>Guardar como predefinido por defecto</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="236"/>
       <source>Save to file</source>
-      <translation type="unfinished">Save to file</translation>
+      <translation>Guardar en archivo</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
@@ -2509,7 +2509,7 @@ Asegúrese de que el valor de barrido del obturador es el adecuado antes de sinc
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="24"/>
       <source>Created at</source>
-      <translation type="unfinished">Created at</translation>
+      <translation>Fecha de creación</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="28"/>
@@ -2572,17 +2572,17 @@ Asegúrese de que el valor de barrido del obturador es el adecuado antes de sinc
     <message>
       <location filename="../../src/ui/App.qml" line="431"/>
       <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
+      <translation>Entradas</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="431"/>
       <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
+      <translation>Parámetros</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="431"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>Exportar</translation>
     </message>
   </context>
   <context>
@@ -2756,7 +2756,7 @@ Esta característica es experimental, los resultados pueden no ser correctos del
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="577"/>
       <source>Clear trim range</source>
-      <translation type="unfinished">Clear trim range</translation>
+      <translation>Limpiar rango recorte</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="583"/>
@@ -2791,7 +2791,7 @@ Esta característica es experimental, los resultados pueden no ser correctos del
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="847"/>
       <source>Option+Scroll</source>
-      <translation type="unfinished">Option+Scroll</translation>
+      <translation>Opción+Desplazamiento</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="848"/>
@@ -3058,8 +3058,7 @@ Asegúrese de copiar la aplicación Gyroflow a su carpeta de aplicaciones, en lu
       <location filename="../../src/ui/VideoArea.qml" line="173"/>
       <source>This is often caused by read-only file system.
 If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</translation>
+      <translation>Esto está causado normalmente por un acceso al sistema de archivos de solo lectura. Si Gyroflow está en C:Archivos de Programa, deberá ejecutarse en modo administrador para poder extraer la SDK al directorio de Gyroflow.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="274"/>
@@ -3094,7 +3093,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="695"/>
       <source>Click here to open a video file</source>
-      <translation type="unfinished">Click here to open a video file</translation>
+      <translation>Haga clic aquí para abrir un archivo de vídeo</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="815"/>
@@ -3129,7 +3128,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="825"/>
       <source>Show timeline menu</source>
-      <translation type="unfinished">Show timeline menu</translation>
+      <translation>Mostrar menú de línea de tiempo</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="864"/>
@@ -3172,7 +3171,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="138"/>
       <source>In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</source>
-      <translation type="unfinished">In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</translation>
+      <translation>Para detectar archivos de proyecto, secuencias de vídeo o secuencias de imágenes, haga clic aquí y seleccione el directorio con los archivos de entrada.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="129"/>

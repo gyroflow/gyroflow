@@ -1402,7 +1402,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="434"/>
       <source>Dynamic zooming</source>
-      <translation>Без зума</translation>
+      <translation>Динамический зум</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="434"/>
