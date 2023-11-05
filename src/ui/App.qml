@@ -326,19 +326,18 @@ Rectangle {
                                     renderBtn.render();
                                 }
 
-                                if (!renderBtn.isAddToQueue || render_queue.overwrite_mode === 0) {
+                                if (renderBtn.isAddToQueue && render_queue.overwrite_mode === 1) {
+                                    overwrite();
+                                    showNotification(Modal.Info, qsTr("Added to queue") + ", " + qsTr("file %1 will be overwritten").arg(outputFile.filename))
+                                } else if (renderBtn.isAddToQueue && render_queue.overwrite_mode === 2) {
+                                    rename();
+                                    showNotification(Modal.Info, qsTr("Added to queue") + ", " + qsTr("file will be rendered to %1").arg(outputFile.filename))
+                                } else {
                                     messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
                                         { text: qsTr("Yes"), clicked: overwrite },
                                         { text: qsTr("Rename"), clicked: rename },
                                         { text: qsTr("No"), accent: true },
                                     ]);
-                                } else if (render_queue.overwrite_mode === 1) {
-                                    messageBox(Modal.Info, qsTr("Output file already exists, do you want to overwrite it?"), [
-                                        { text: qsTr("Yes"), clicked: overwrite },
-                                        { text: qsTr("No"), accent: true },
-                                    ], undefined, 0, "add_queue_file_overwritten");
-                                } else if (render_queue.overwrite_mode === 2) {
-                                    rename();
                                 }
 
                                 return;
@@ -493,6 +492,22 @@ Rectangle {
         videoArea: videoArea;
     }
 
+    function showNotification(type: int, text: string, textFormat: int) {
+        if (typeof textFormat === "undefined") textFormat = Text.AutoText; // default
+        const im = Qt.createComponent("components/InfoMessage.qml").createObject(window.videoArea.infoMessages, {
+            text: text,
+            type: type - 1,
+            opacity: 0
+        });
+        im.t.textFormat = textFormat;
+        im.opacity = 1;
+        Qt.createQmlObject("import QtQuick; Timer { interval: 5000; running: true; }", im, "t1").onTriggered.connect(() => {
+            im.opacity = 0;
+            im.height = -5 * dpiScale;
+            im.destroy(700);
+        });
+    }
+    
     function messageBox(type: int, text: string, buttons: list, parent: QtObject, textFormat: int, identifier: string): Modal {
         if (typeof textFormat === "undefined") textFormat = Text.AutoText; // default
 
@@ -501,18 +516,7 @@ Rectangle {
         if (identifier && +window.settings.value("dontShowAgain-" + identifier, 0)) {
             const clickedButton = +window.settings.value("dontShowAgain-" + identifier, 0) - 1;
             if (buttons.length == 1) {
-                const im = Qt.createComponent("components/InfoMessage.qml").createObject(window.videoArea.infoMessages, {
-                    text: text,
-                    type: type - 1,
-                    opacity: 0
-                });
-                im.t.textFormat = textFormat;
-                im.opacity = 1;
-                Qt.createQmlObject("import QtQuick; Timer { interval: 5000; running: true; }", im, "t1").onTriggered.connect(() => {
-                    im.opacity = 0;
-                    im.height = -5 * dpiScale;
-                    im.destroy(700);
-                });
+                showNotification(type, text, textFormat);
                 return null;
             } else {
                 console.log("previously clicked", clickedButton);
