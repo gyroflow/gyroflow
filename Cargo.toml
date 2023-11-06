@@ -45,8 +45,8 @@ rodio = { default-features = false, features = ["vorbis"], version = "0.17.3" }
 filetime_creation = "0.1"
 directories = "5"
 
-qmetaobject = { version = "0.2.9", default-features = false, features = ["log"] }
-qttypes     = { version = "0.2.9", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
+qmetaobject = { version = "0.2.10", default-features = false, features = ["log"] }
+qttypes     = { version = "0.2.11", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
 qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "c43fb9c" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
@@ -69,8 +69,8 @@ keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "e
 
 [patch.crates-io]
 fc-blackbox = { git = "https://github.com/AdrianEddy/fc-blackbox.git",    rev = "4e9e4e6" }
-qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "98ebed1" }
-qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "98ebed1" }
+qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "59029b9" }
+qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "59029b9" }
 ffmpeg-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg.git" }
 ffmpeg-sys-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg-sys.git" }
 

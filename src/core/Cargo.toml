@@ -47,7 +47,7 @@ lru = "0.12"
 thiserror = "=1.0.48"
 ciborium = "0.2.1"
 nt-hive = "0.2"
-dyn-clone = "1.0.14"
+dyn-clone = "1.0.16"
 
 akaze = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee", features = ["rayon"] }
 eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee" }
@@ -77,15 +77,15 @@ rustfft = "6.1.0"
 include_dir = { version = "0.7.3", features = ["glob"] }
 opencv = { version = "0.86.1", features = ["clang-runtime"], optional = true }
 
-wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "862aff9", features = ["spirv"] }
-wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "862aff9" }
-wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "862aff9" }
-wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "862aff9" }
-naga       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "862aff9", features = ["clone", "span", "validate", "spv-in", "compact"] }
+wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "0dad159", features = ["spirv"] }
+wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "0dad159" }
+wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "0dad159" }
+wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "0dad159" }
+naga       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "0dad159", features = ["clone", "span", "validate", "spv-in", "compact"] }
 
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "862aff9"
+rev = "0dad159"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]

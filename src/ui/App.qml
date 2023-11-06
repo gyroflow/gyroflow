@@ -256,12 +256,12 @@ Rectangle {
                         Timer { id: et; interval: 200; onTriggered: renderBtn.btn.enabled = renderBtn.enabled2; }
 
                         property bool addQueueDelayed: false;
-                        Timer { 
-                            id: delayAddQueue; 
-                            interval: 2000; 
+                        Timer {
+                            id: delayAddQueue;
+                            interval: 2000;
                             onTriggered:  {
                                 renderBtn.addQueueDelayed = false;
-                                renderBtn.btn.enabled = renderBtn.enabled2; 
+                                renderBtn.btn.enabled = renderBtn.enabled2;
                             }
                         }
 
@@ -318,7 +318,7 @@ Rectangle {
                             const exists = filesystem.exists_in_folder(outputFile.folderUrl, outputFile.filename.replace("_%05d", "_00001"));
                             if ((exists || render_queue.file_exists_in_folder(outputFile.folderUrl, outputFile.filename)) && !allowFile) {
                                 function overwrite() {
-                                    allowFile = true; 
+                                    allowFile = true;
                                     renderBtn.render();
                                 }
                                 function rename() {
@@ -507,7 +507,7 @@ Rectangle {
             im.destroy(700);
         });
     }
-    
+
     function messageBox(type: int, text: string, buttons: list, parent: QtObject, textFormat: int, identifier: string): Modal {
         if (typeof textFormat === "undefined") textFormat = Text.AutoText; // default
 
