@@ -233,8 +233,16 @@ Rectangle {
                     SplitButton {
                         id: renderBtn;
                         btn.accent: true;
-                        text: isAddToQueue? (render_queue.editing_job_id > 0? qsTr("Save") : qsTr("Add to render queue")) : qsTr("Export");
-                        iconName: "video";
+                        text: {
+                            if (addQueueDelayed) {
+                                return qsTr("Added to queue");
+                            } else if (isAddToQueue) {
+                                return render_queue.editing_job_id > 0? qsTr("Save") : qsTr("Add to render queue");
+                            } else {
+                                return qsTr("Export");
+                            }
+                        }
+                        iconName: addQueueDelayed ? "confirmed" : "video";
                         isDown: isMobileLayout;
                         property bool isAddToQueue: false;
                         property bool allowFile: false;
@@ -246,6 +254,16 @@ Rectangle {
                         property bool enabled2: window.videoArea.vid.loaded && exportSettings.item && exportSettings.item.canExport && !videoArea.videoLoader.active;
                         onEnabled2Changed: et.start();
                         Timer { id: et; interval: 200; onTriggered: renderBtn.btn.enabled = renderBtn.enabled2; }
+
+                        property bool addQueueDelayed: false;
+                        Timer { 
+                            id: delayAddQueue; 
+                            interval: 2000; 
+                            onTriggered:  {
+                                renderBtn.addQueueDelayed = false;
+                                renderBtn.btn.enabled = renderBtn.enabled2; 
+                            }
+                        }
 
                         function updateModel() {
                             let m = [
@@ -299,13 +317,32 @@ Rectangle {
                             }
                             const exists = filesystem.exists_in_folder(outputFile.folderUrl, outputFile.filename.replace("_%05d", "_00001"));
                             if ((exists || render_queue.file_exists_in_folder(outputFile.folderUrl, outputFile.filename)) && !allowFile) {
-                                messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
-                                    { text: qsTr("Yes"), clicked: () => { allowFile = true; renderBtn.render(); } },
-                                    { text: qsTr("Rename"), clicked: () => { outputFile.setFilename(window.renameOutput(outputFile.filename, outputFile.folderUrl)); render(); } },
-                                    { text: qsTr("No"), accent: true },
-                                ]);
+                                function overwrite() {
+                                    allowFile = true; 
+                                    renderBtn.render();
+                                }
+                                function rename() {
+                                    outputFile.setFilename(window.renameOutput(outputFile.filename, outputFile.folderUrl));
+                                    renderBtn.render();
+                                }
+
+                                if (renderBtn.isAddToQueue && render_queue.overwrite_mode === 1) {
+                                    overwrite();
+                                    showNotification(Modal.Info, qsTr("Added to queue") + ", " + qsTr("file %1 will be overwritten").arg(outputFile.filename))
+                                } else if (renderBtn.isAddToQueue && render_queue.overwrite_mode === 2) {
+                                    rename();
+                                    showNotification(Modal.Info, qsTr("Added to queue") + ", " + qsTr("file will be rendered to %1").arg(outputFile.filename))
+                                } else {
+                                    messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
+                                        { text: qsTr("Yes"), clicked: overwrite },
+                                        { text: qsTr("Rename"), clicked: rename },
+                                        { text: qsTr("No"), accent: true },
+                                    ]);
+                                }
+
                                 return;
                             }
+
                             if (fname.endsWith('.r3d') && controller.find_redline()) {
                                 messageBox(Modal.Info, "Gyroflow will use REDline to convert .R3D to ProRes before stabilizing in order to export from Gyroflow directly.\nIf you want to work on RAW data instead, export project file (Ctrl+S) and use one of [video editor plugins] (%1).".replace(/\[(.*?)\]/, '<a href="https://gyroflow.xyz/download#plugins"><font color="' + styleTextColor + '">$1</font></a>').arg("DaVinci Resolve, Final Cut Pro"), [
                                     { text: qsTr("Ok"), accent: true }
@@ -343,6 +380,10 @@ Rectangle {
                                 const job_id = render_queue.add(window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
                                 if (renderBtn.isAddToQueue) {
                                     // Add to queue
+                                    renderBtn.addQueueDelayed = true;
+                                    renderBtn.btn.enabled = false;
+                                    delayAddQueue.start();
+
                                     if (+settings.value("showQueueWhenAdding", "1"))
                                         videoArea.queue.shown = true;
                                 } else {
@@ -451,6 +492,22 @@ Rectangle {
         videoArea: videoArea;
     }
 
+    function showNotification(type: int, text: string, textFormat: int) {
+        if (typeof textFormat === "undefined") textFormat = Text.AutoText; // default
+        const im = Qt.createComponent("components/InfoMessage.qml").createObject(window.videoArea.infoMessages, {
+            text: text,
+            type: type - 1,
+            opacity: 0
+        });
+        im.t.textFormat = textFormat;
+        im.opacity = 1;
+        Qt.createQmlObject("import QtQuick; Timer { interval: 5000; running: true; }", im, "t1").onTriggered.connect(() => {
+            im.opacity = 0;
+            im.height = -5 * dpiScale;
+            im.destroy(700);
+        });
+    }
+    
     function messageBox(type: int, text: string, buttons: list, parent: QtObject, textFormat: int, identifier: string): Modal {
         if (typeof textFormat === "undefined") textFormat = Text.AutoText; // default
 
@@ -459,18 +516,7 @@ Rectangle {
         if (identifier && +window.settings.value("dontShowAgain-" + identifier, 0)) {
             const clickedButton = +window.settings.value("dontShowAgain-" + identifier, 0) - 1;
             if (buttons.length == 1) {
-                const im = Qt.createComponent("components/InfoMessage.qml").createObject(window.videoArea.infoMessages, {
-                    text: text,
-                    type: type - 1,
-                    opacity: 0
-                });
-                im.t.textFormat = textFormat;
-                im.opacity = 1;
-                Qt.createQmlObject("import QtQuick; Timer { interval: 5000; running: true; }", im, "t1").onTriggered.connect(() => {
-                    im.opacity = 0;
-                    im.height = -5 * dpiScale;
-                    im.destroy(700);
-                });
+                showNotification(type, text, textFormat);
                 return null;
             } else {
                 console.log("previously clicked", clickedButton);
