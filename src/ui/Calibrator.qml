@@ -173,7 +173,7 @@ Window {
             target: controller;
             function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
                 calibrator_window.anyFileLoaded = true;
-                videoArea.timeline.updateDurations();
+                Qt.callLater(videoArea.timeline.updateDurations);
 
                 if (!batch.active) return;
                 batch.runIn(3000, function tryStart() {

@@ -107,7 +107,7 @@ MenuItem {
             controller.set_acc_rotation(arot.checked? ap.value : 0, arot.checked? ar.value : 0, arot.checked? ay.value : 0);
             Qt.callLater(controller.recompute_gyro);
 
-            window.videoArea.timeline.updateDurations();
+            Qt.callLater(window.videoArea.timeline.updateDurations);
 
             currentLog.preventChange = true;
             if (additional_data.usable_logs && additional_data.usable_logs.length > 0) {

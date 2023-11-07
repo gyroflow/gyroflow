@@ -515,14 +515,16 @@ impl LensProfile {
     }
 
     pub fn resolve_interpolations(&mut self, db: &crate::lens_profile_database::LensProfileDatabase) {
+        if !self.parsed_interpolations.is_empty() {
+            return; // Already resolved
+        }
+
         if let Some(digital) = self.digital_lens.as_ref() {
             let model = DistortionModel::from_name(&digital);
             model.adjust_lens_profile(self);
         }
 
-        self.parsed_interpolations.clear();
-
-        if let Some(serde_json::Value::Object(map)) = self.interpolations.take() {
+        if let Some(serde_json::Value::Object(map)) = &self.interpolations {
             let mut interpolations = BTreeMap::new();
             for (k, v) in map {
                 if let serde_json::Value::Object(v) = v {
