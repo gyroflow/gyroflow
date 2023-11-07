@@ -41,7 +41,8 @@ install-deps:
     if [ ! -d "{{ExtDir}}/{{QtVersion}}" ]; then
         echo "Installing Qt {{QtVersion}}"
         # Install Qt
-        pip3 install -U pip aqtinstall===3.1.7
+        pip3 install -U pip
+        pip3 install -U aqtinstall
         python3 -m aqt install-qt linux desktop {{QtVersion}}
 
         # For VMware: sudo apt install libpocl2
