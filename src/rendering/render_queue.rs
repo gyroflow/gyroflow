@@ -51,6 +51,7 @@ struct Job {
     render_options: RenderOptions,
     additional_data: String,
     cancel_flag: Arc<AtomicBool>,
+    project_data: Option<String>,
     stab: Arc<StabilizationManager>
 }
 
@@ -309,6 +310,7 @@ impl RenderQueue {
     pub fn set_job_output_filename(&mut self, job_id: u32, new_filename: QString, start: bool) {
         if let Some(job) = self.jobs.get_mut(&job_id) {
             job.render_options.output_filename = new_filename.to_string();
+            job.project_data = Self::get_gyroflow_data_internal(&job.stab, &job.additional_data, &job.render_options);
         }
         update_model!(self, job_id, itm {
             itm.output_filename = new_filename;
@@ -413,11 +415,14 @@ impl RenderQueue {
             });
         }
 
+        let project_data = Self::get_gyroflow_data_internal(&stab, &additional_data, &render_options);
+
         self.jobs.insert(job_id, Job {
             queue_index: 0,
             render_options,
             additional_data,
             cancel_flag: Default::default(),
+            project_data,
             stab: stab.clone()
         });
         self.update_queue_indices();
@@ -530,7 +535,6 @@ impl RenderQueue {
                     self.render_job(job_id);
                 } else {
                     if self.get_active_render_count() == 0 {
-                        
                         self.post_render_action();
                         self.queue_finished();
 
@@ -676,32 +680,38 @@ impl RenderQueue {
         }
     }
 
-    pub fn get_gyroflow_data(&self, job_id: u32) -> QString {
-        if let Some(job) = self.jobs.get(&job_id) {
-            if let Some(url) = job.stab.input_file.read().project_file_url.as_ref() {
-                if core::filesystem::exists(url) {
-                    #[cfg(any(target_os = "macos", target_os = "ios"))]
-                    {
-                        return QString::from(serde_json::json!({ "project_file": url, "project_file_bookmark": core::filesystem::apple::create_bookmark(&url, false, None) }).to_string());
-                    }
-                    #[cfg(not(any(target_os = "macos", target_os = "ios")))]
-                    {
-                        return QString::from(serde_json::json!({ "project_file": url }).to_string());
-                    }
+    fn get_gyroflow_data_internal(stab: &StabilizationManager, additional_data: &str, render_options: &RenderOptions) -> Option<String> {
+        if let Some(url) = stab.input_file.read().project_file_url.as_ref() {
+            if core::filesystem::exists(url) {
+                #[cfg(any(target_os = "macos", target_os = "ios"))]
+                {
+                    return Some(serde_json::json!({ "project_file": url, "project_file_bookmark": core::filesystem::apple::create_bookmark(&url, false, None) }).to_string());
                 }
-            }
-            let mut additional_data = job.additional_data.clone();
-            if let Ok(serde_json::Value::Object(mut obj)) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
-                if let Ok(output) = serde_json::to_value(&job.render_options) {
-                    obj.insert("output".into(), output);
+                #[cfg(not(any(target_os = "macos", target_os = "ios")))]
+                {
+                    return Some(serde_json::json!({ "project_file": url }).to_string());
                 }
-                additional_data = serde_json::to_string(&obj).unwrap_or_default();
-            }
-            if let Ok(data) = job.stab.export_gyroflow_data(core::GyroflowProjectType::Simple, &additional_data, None) {
-                return QString::from(data);
             }
         }
-        QString::default()
+        let mut additional_data = additional_data.to_owned();
+        if let Ok(serde_json::Value::Object(mut obj)) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
+            if let Ok(output) = serde_json::to_value(&render_options) {
+                obj.insert("output".into(), output);
+            }
+            additional_data = serde_json::to_string(&obj).unwrap_or_default();
+        }
+        if let Ok(data) = stab.export_gyroflow_data(core::GyroflowProjectType::Simple, &additional_data, None) {
+            return Some(data);
+        }
+        None
+    }
+
+    pub fn get_gyroflow_data(&self, job_id: u32) -> QString {
+        if let Some(job) = self.jobs.get(&job_id) {
+            job.project_data.clone().map(QString::from).unwrap_or_default()
+        } else {
+            QString::default()
+        }
     }
 
     pub fn render_job(&mut self, job_id: u32) {
@@ -1416,6 +1426,7 @@ impl RenderQueue {
                         itm.output_filename = QString::from(job.render_options.output_filename.as_str());
                         itm.output_folder   = QString::from(job.render_options.output_folder.as_str());
                         itm.display_output_path = QString::from(core::filesystem::display_folder_filename(job.render_options.output_folder.as_str(), job.render_options.output_filename.as_str()));
+                        job.project_data = Self::get_gyroflow_data_internal(&job.stab, &job.additional_data, &job.render_options);
                         if core::filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
                             let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
                             itm.error_string = msg.clone();
