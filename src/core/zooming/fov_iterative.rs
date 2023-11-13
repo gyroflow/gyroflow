@@ -98,7 +98,7 @@ impl<'a>  FovIterative<'a> {
         let adaptive_zoom_center_y = keyframe_values.1;
         let lens_correction_amount = keyframe_values.2;
 
-        let mut polygon = undistort_points_with_rolling_shutter(&rect, ts, &self.compute_params, lens_correction_amount);
+        let mut polygon = undistort_points_with_rolling_shutter(&rect, ts, &self.compute_params, lens_correction_amount, false);
         for (x, y) in polygon.iter_mut() {
             *x -= adaptive_zoom_center_x as f32 * self.input_dim.0;
             *y -= adaptive_zoom_center_y as f32 * self.input_dim.1;
@@ -122,7 +122,7 @@ impl<'a>  FovIterative<'a> {
                 ];
 
                 let distorted = interpolate_points(&relevant, 30);
-                polygon = undistort_points_with_rolling_shutter(&distorted, ts, &self.compute_params, lens_correction_amount);
+                polygon = undistort_points_with_rolling_shutter(&distorted, ts, &self.compute_params, lens_correction_amount, false);
                 for (x, y) in polygon.iter_mut() {
                     *x -= adaptive_zoom_center_x as f32 * self.input_dim.0;
                     *y -= adaptive_zoom_center_y as f32 * self.input_dim.1;
