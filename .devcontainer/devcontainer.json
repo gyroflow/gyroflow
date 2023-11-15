@@ -1,0 +1,22 @@
+{
+	"name": "GyroFlow",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"mounts": [
+		"source=gyroflow-bashhistory-${devcontainerId},target=/home/vscode/commandhistory,type=volume"
+	],
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"dev.containers.mountWaylandSocket": true,
+				"terminal.integrated.defaultProfile.linux": "bash"
+			}
+		}
+	},
+	// "postCreateCommand": "sudo apt update && just install-deps",
+	"features": {
+		"ghcr.io/devcontainers/features/python:1": {},
+		"ghcr.io/guiyomh/features/just:0": {}
+	}
+}
