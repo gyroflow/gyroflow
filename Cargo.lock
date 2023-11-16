@@ -3664,9 +3664,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.21.8"
+version = "0.21.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "446e14c5cda4f3f30fe71863c34ec70f5ac79d6087097ad0bb433e1be5edf04c"
+checksum = "629648aced5775d558af50b2b4c7b02983a04b312126d45eeead26e7caa498b9"
 dependencies = [
  "log",
  "ring",
@@ -4031,7 +4031,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.2.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=fdc177c#fdc177cd0dea84242c61d5cc3adf131432a6fb90"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=6748d25#6748d25986aa247ab427da6d4065acc41d7d7857"
 dependencies = [
  "argh",
  "byteorder",
