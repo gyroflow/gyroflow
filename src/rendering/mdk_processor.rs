@@ -94,18 +94,30 @@ impl MDKProcessor {
             if let Some(ref mut cb) = cb {
                 let timestamp_us = (timestamp_ms * 1000.0).round() as i64;
                 if ffmpeg_frame.is_none() {
-                    ffmpeg_frame = Some(ffmpeg_next::frame::Video::new(format, width, height));
+                    let mut frame = ffmpeg_next::frame::Video::empty();
+                    frame.set_format(format);
+                    frame.set_width(width);
+                    frame.set_height(height);
+                    ffmpeg_frame = Some(frame);
                 }
                 let ffmpeg_frame = ffmpeg_frame.as_mut().unwrap();
 
+                let mut buf;
                 unsafe {
-                    (*ffmpeg_frame.as_mut_ptr()).buf[0] = ffi::av_buffer_create(data.as_mut_ptr(), data.len(), Some(noop), std::ptr::null_mut(), 0);
+                    buf = ffi::av_buffer_create(data.as_mut_ptr(), data.len(), Some(noop), std::ptr::null_mut(), 0);
+                    (*ffmpeg_frame.as_mut_ptr()).buf[0] = buf;
                     (*ffmpeg_frame.as_mut_ptr()).data[0] = data.as_mut_ptr();
                     (*ffmpeg_frame.as_mut_ptr()).linesize[0] = data.len() as i32 / height as i32;
                 }
                 if let Err(e) = cb(timestamp_us, ffmpeg_frame, None, &mut converter, &mut RateControl::default()) {
                     ::log::error!("mdk_processor error: {:?}", e);
                     return false;
+                }
+                unsafe {
+                    ffi::av_buffer_unref(&mut buf);
+                    (*ffmpeg_frame.as_mut_ptr()).buf[0] = std::ptr::null_mut();
+                    (*ffmpeg_frame.as_mut_ptr()).data[0] = std::ptr::null_mut();
+                    (*ffmpeg_frame.as_mut_ptr()).linesize[0] = 0;
                 }
             }
             !cancel_flag.load(Relaxed)
