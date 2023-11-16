@@ -70,6 +70,7 @@ pub struct RenderOptions {
     pub output_filename: String,
     pub output_width: usize,
     pub output_height: usize,
+    pub input_filename: String,
     pub bitrate: f64,
     pub use_gpu: bool,
     pub audio: bool,
@@ -112,9 +113,7 @@ impl RenderOptions {
     }
     pub fn get_metadata_dict(&self) -> ffmpeg_next::Dictionary {
         let mut metadata = ffmpeg_next::Dictionary::new();
-        if !self.metadata.comment.is_empty() {
-            metadata.set("comment", &self.metadata.comment);
-        }
+        metadata.set("comment", format!("Original filename: {}\n{}", self.input_filename, self.metadata.comment).trim());
         metadata
     }
     pub fn update_from_json(&mut self, obj: &serde_json::Value) {
@@ -364,7 +363,7 @@ impl RenderQueue {
         job_id
     }
 
-    pub fn add_internal(&mut self, job_id: u32, stab: Arc<StabilizationManager>, render_options: RenderOptions, additional_data: String, thumbnail_url: QString) {
+    pub fn add_internal(&mut self, job_id: u32, stab: Arc<StabilizationManager>, mut render_options: RenderOptions, additional_data: String, thumbnail_url: QString) {
         let size = stab.params.read().video_size;
         stab.set_render_params(size, (render_options.output_width, render_options.output_height));
 
@@ -416,6 +415,8 @@ impl RenderQueue {
         }
 
         let project_data = Self::get_gyroflow_data_internal(&stab, &additional_data, &render_options);
+
+        render_options.input_filename = core::filesystem::get_filename(&stab.input_file.read().url);
 
         self.jobs.insert(job_id, Job {
             queue_index: 0,
