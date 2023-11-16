@@ -185,9 +185,9 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
 
     let mut pixel_format = render_options.pixel_format.clone();
 
-    #[cfg(not(target_os = "ios"))]
+    #[cfg(not(any(target_os = "ios", target_os = "android")))]
     let _prevent_system_sleep = keep_awake::inhibit_system("Gyroflow", "Rendering video");
-    #[cfg(target_os = "ios")]
+    #[cfg(any(target_os = "ios", target_os = "android"))]
     let _prevent_system_sleep = keep_awake::inhibit_display("Gyroflow", "Rendering video");
 
     let mut output_width = render_options.output_width;

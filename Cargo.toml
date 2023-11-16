@@ -12,7 +12,7 @@ opencv = ["gyroflow-core/use-opencv"]
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 gyroflow-core = { path = "src/core/", features = ["use-opencv", "use-opencl"] }
-system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", rev = "c3fc739" }
+system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", rev = "4d93e5e" }
 breakpad-sys = "0.2.0"
 
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
@@ -27,7 +27,7 @@ bytemuck = "1.14.0"
 nalgebra = "0.32"
 semver = "1.0.20"
 fastrand = "2.0.1"
-itertools = "0.11.0"
+itertools = "0.12.0"
 regex = "1.10.2"
 rayon = "1.8"
 
@@ -54,7 +54,7 @@ ffmpeg-next = { version = "6.0.0", default-features = false, features = ["codec"
 lazy_static = "1.4.0"
 parking_lot = "0.12.1"
 
-simplelog = "0.12.1"
+simplelog = { git = "https://github.com/Drakulix/simplelog.rs.git", rev = "4ef071d" }
 log = "0.4"
 
 ureq = "2.8.0"
@@ -65,7 +65,7 @@ lru = "0.12.0"
 
 log-panics = { version = "2.1", features = ["with-backtrace"] }
 
-keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "e38983d" }
+keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "1b5eaad" }
 
 [patch.crates-io]
 fc-blackbox = { git = "https://github.com/AdrianEddy/fc-blackbox.git",    rev = "4e9e4e6" }
@@ -75,7 +75,7 @@ ffmpeg-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg.git" }
 ffmpeg-sys-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg-sys.git" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
-version = "0.51.1"
+version = "0.52.0"
 features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation", "Win32_System_LibraryLoader",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry",
