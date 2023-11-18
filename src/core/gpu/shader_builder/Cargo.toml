@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-naga = { git = "https://github.com/gfx-rs/naga.git", features = ["validate", "span", "spv-in", "wgsl-out", "glsl-out", "compact"] }
+naga = { git = "https://github.com/gfx-rs/naga.git", features = ["spv-in", "wgsl-out", "glsl-out", "compact"] }
 regex = "1.9.0"
 
 [build-dependencies]

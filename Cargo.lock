@@ -1080,7 +1080,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "0.7.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=1d7c7c8#1d7c7c8a3c10eb13a32b7522d92c44b6b01a36de"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=fd53ea9#fd53ea90e675d94f1d79a1c3c44b2f356cecd9c5"
 dependencies = [
  "bitflags 2.4.1",
  "libloading 0.8.1",
@@ -2517,7 +2517,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.14.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=1d7c7c8#1d7c7c8a3c10eb13a32b7522d92c44b6b01a36de"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=fd53ea9#fd53ea90e675d94f1d79a1c3c44b2f356cecd9c5"
 dependencies = [
  "bit-set",
  "bitflags 2.4.1",
@@ -4481,7 +4481,7 @@ checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
 [[package]]
 name = "wgpu"
 version = "0.18.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=1d7c7c8#1d7c7c8a3c10eb13a32b7522d92c44b6b01a36de"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=fd53ea9#fd53ea90e675d94f1d79a1c3c44b2f356cecd9c5"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -4504,7 +4504,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.18.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=1d7c7c8#1d7c7c8a3c10eb13a32b7522d92c44b6b01a36de"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=fd53ea9#fd53ea90e675d94f1d79a1c3c44b2f356cecd9c5"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4526,7 +4526,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.18.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=1d7c7c8#1d7c7c8a3c10eb13a32b7522d92c44b6b01a36de"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=fd53ea9#fd53ea90e675d94f1d79a1c3c44b2f356cecd9c5"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4568,7 +4568,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.18.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=1d7c7c8#1d7c7c8a3c10eb13a32b7522d92c44b6b01a36de"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=fd53ea9#fd53ea90e675d94f1d79a1c3c44b2f356cecd9c5"
 dependencies = [
  "bitflags 2.4.1",
  "js-sys",

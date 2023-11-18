@@ -77,15 +77,15 @@ rustfft = "6.1.0"
 include_dir = { version = "0.7.3", features = ["glob"] }
 opencv = { version = "0.86.1", features = ["clang-runtime"], optional = true }
 
-wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "1d7c7c8", features = ["spirv"] }
-wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "1d7c7c8" }
-wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "1d7c7c8" }
-wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "1d7c7c8" }
-naga       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "1d7c7c8", features = ["clone", "span", "validate", "spv-in", "compact"] }
+wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "fd53ea9", features = ["spirv"] }
+wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "fd53ea9" }
+wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "fd53ea9" }
+wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "fd53ea9" }
+naga       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "fd53ea9", features = ["clone", "spv-in", "compact"] }
 
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "1d7c7c8"
+rev = "fd53ea9"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
