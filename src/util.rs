@@ -217,11 +217,14 @@ pub fn init_logging() {
 
     if cfg!(target_os = "macos") && gyroflow_core::filesystem::is_sandboxed() {
         // Log to macOS's Console app
-        let logger = oslog::OsLogger::new("xyz.gyroflow").level_filter(LevelFilter::Debug);
-        [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "mdk" ]
-            .into_iter()
-            .fold(logger, |cfg, x| cfg.category_level_filter(x, LevelFilter::Warn))
-            .init().unwrap();
+        #[cfg(target_os = "macos")]
+        {
+            let logger = oslog::OsLogger::new("xyz.gyroflow").level_filter(LevelFilter::Debug);
+            [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "mdk" ]
+                .into_iter()
+                .fold(logger, |cfg, x| cfg.category_level_filter(x, LevelFilter::Warn))
+                .init().unwrap();
+        }
     } else {
         let log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "mdk" ]
             .into_iter()
