@@ -1199,7 +1199,7 @@ impl Controller {
                 }
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 if let Some(v) = obj.get("videofile_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
-                    let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v);
+                    let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v, Some(&url));
                     if !resolved.is_empty() { org_video_url = resolved; }
                 }
 
@@ -1221,7 +1221,7 @@ impl Controller {
                     }
                     #[cfg(any(target_os = "macos", target_os = "ios"))]
                     if let Some(v) = obj.get("filepath_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
-                        let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v);
+                        let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v, Some(&url));
                         if !resolved.is_empty() { gyro_url = resolved; }
                     }
 

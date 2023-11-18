@@ -1061,7 +1061,7 @@ impl StabilizationManager {
             }
             #[cfg(any(target_os = "macos", target_os = "ios"))]
             if let Some(v) = obj.get("videofile_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
-                let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v);
+                let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v, url);
                 if !resolved.is_empty() { org_video_url = resolved; }
             }
 
@@ -1100,7 +1100,7 @@ impl StabilizationManager {
                 }
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 if let Some(v) = obj.get("filepath_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
-                    let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v);
+                    let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v, url);
                     if !resolved.is_empty() { org_gyro_url = resolved; }
                 }
                 let gyro_url = Self::get_new_videofile_url(&org_gyro_url, url.clone(), sequence_start);
@@ -1283,7 +1283,7 @@ impl StabilizationManager {
                 }
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 if let Some(v) = obj.get("output_folder_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
-                    let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v);
+                    let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v, url);
                     if !resolved.is_empty() {
                         filesystem::folder_access_granted(&resolved);
                         obj.insert("output_folder".into(), serde_json::Value::String(resolved));

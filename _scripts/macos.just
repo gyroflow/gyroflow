@@ -6,6 +6,10 @@ DistributionCertificateSHA    := "7F82D6013B8F6D45F88FE547438744BD64750C5B"
 DistributionMacInstallerSHA   := "DC70831576E7B2345E78A516BEA2FC34D18F42F5"
 DistributionProvisioning      := ProjectDir / "_deployment/mac/Gyroflow_mac_app_store.provisionprofile"
 
+# For local sandbox testing:
+# DistributionCertificateSHA    := "D125BE70B690030172EB74A828C10C1AE77FDE9A"
+# DistributionProvisioning      := ProjectDir / "_deployment/mac/Gyroflow_mac_developer_id.provisionprofile"
+
 AppBundle := ProjectDir / "_deployment/_binaries/mac/Gyroflow.app"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -670,7 +670,7 @@ impl RenderQueue {
                     let mut project = project.to_string();
                     #[cfg(any(target_os = "macos", target_os = "ios"))]
                     if let Some(bookmark) = x.get("project_file_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
-                        let (resolved, _is_stale) = core::filesystem::apple::resolve_bookmark(bookmark);
+                        let (resolved, _is_stale) = core::filesystem::apple::resolve_bookmark(bookmark, None);
                         if !resolved.is_empty() { project = resolved; }
                     }
                     self.add_file(project, String::new(), additional_data.clone());

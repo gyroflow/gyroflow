@@ -586,7 +586,7 @@ pub fn restore_allowed_folders(list: &[String]) {
     for x in list {
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         {
-            let (url, is_stale) = apple::resolve_bookmark(&x);
+            let (url, is_stale) = apple::resolve_bookmark(&x, None);
             if !url.is_empty() && url.contains("://") && !is_stale {
                 folder_access_granted(&url);
             }

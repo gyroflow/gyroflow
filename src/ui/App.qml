@@ -676,6 +676,9 @@ Rectangle {
         if (text.includes("hevc") && text.includes("-12912")) {
             return qsTr("Your GPU doesn't support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.");
         }
+        if (text.includes("failed to decode picture") && text.includes("-12909")) {
+            return qsTr("GPU decoder failed to decode this file. Disable GPU decoding in \"Advanced\" and try again.") + "\n\n" + text;
+        }
         if (text.includes("codec not currently supported in container")) {
             return qsTr("Make sure your output extension supports the selected codec. \".mov\" should work in most cases.") + "\n\n" + text;
         }

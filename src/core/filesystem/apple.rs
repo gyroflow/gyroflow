@@ -152,7 +152,7 @@ pub fn create_bookmark(url: &str, is_folder: bool, project_url: Option<&str>) ->
     ret
 }
 
-pub fn resolve_bookmark(bookmark_data: &str) -> (String, bool) {
+pub fn resolve_bookmark(bookmark_data: &str, project_url: Option<&str>) -> (String, bool) {
     let mut ret = String::new();
     let mut is_stale = false;
     if bookmark_data.is_empty() { return (ret, is_stale); }
@@ -162,12 +162,20 @@ pub fn resolve_bookmark(bookmark_data: &str) -> (String, bool) {
         let mut decompressed = Vec::new();
         e.read_to_end(&mut decompressed).unwrap();
         unsafe {
+            let project_url_ref = if let Some(project_url) = project_url {
+                if !super::exists(project_url) && !project_url.ends_with('/') { let _ = super::write(project_url, &[]); } // Create empty file if not exists
+                start_accessing_url(project_url, false);
+                let project_url = project_url.as_bytes();
+                CFURLCreateWithBytes(ptr::null(), project_url.as_ptr(), project_url.len() as isize, kCFStringEncodingUTF8, ptr::null())
+            } else {
+                ptr::null()
+            };
             let data_ref = CFDataCreate(kCFAllocatorDefault, decompressed.as_ptr(), decompressed.len() as isize);
             if !data_ref.is_null() {
                 let mut error = ptr::null_mut();
                 let opts: CFURLBookmarkResolutionOptions = 1usize << 10; // kCFURLBookmarkResolutionWithSecurityScope
                 let is_stale_cf: Boolean = 0;
-                let url = CFURLCreateByResolvingBookmarkData(kCFAllocatorDefault, data_ref, opts, ptr::null(), ptr::null(), is_stale_cf as *mut Boolean, &mut error);
+                let url = CFURLCreateByResolvingBookmarkData(kCFAllocatorDefault, data_ref, opts, project_url_ref, ptr::null(), is_stale_cf as *mut Boolean, &mut error);
                 if error.is_null() {
                     if !url.is_null() {
                         let len = CFURLGetBytes(url, ptr::null_mut(), 0);
@@ -184,6 +192,10 @@ pub fn resolve_bookmark(bookmark_data: &str) -> (String, bool) {
                     is_stale = true;
                 }
                 CFRelease(data_ref as CFTypeRef);
+            }
+            if !project_url_ref.is_null() {
+                CFRelease(project_url_ref as CFTypeRef);
+                stop_accessing_url(project_url.unwrap(), false);
             }
         }
     }
