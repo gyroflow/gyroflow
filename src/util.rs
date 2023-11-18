@@ -215,28 +215,37 @@ pub fn set_android_context() {
 pub fn init_logging() {
     use simplelog::*;
 
-    let log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "mdk" ]
-        .into_iter()
-        .fold(ConfigBuilder::new(), |mut cfg, x| { cfg.add_filter_ignore_str(x); cfg })
-        .build();
-    let file_log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls" ]
-        .into_iter()
-        .fold(ConfigBuilder::new(), |mut cfg, x| { cfg.add_filter_ignore_str(x); cfg })
-        .build();
+    if cfg!(target_os = "macos") && gyroflow_core::filesystem::is_sandboxed() {
+        // Log to macOS's Console app
+        let logger = oslog::OsLogger::new("xyz.gyroflow").level_filter(LevelFilter::Debug);
+        [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "mdk" ]
+            .into_iter()
+            .fold(logger, |cfg, x| cfg.category_level_filter(x, LevelFilter::Warn))
+            .init().unwrap();
+    } else {
+        let log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "mdk" ]
+            .into_iter()
+            .fold(ConfigBuilder::new(), |mut cfg, x| { cfg.add_filter_ignore_str(x); cfg })
+            .build();
+        let file_log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls" ]
+            .into_iter()
+            .fold(ConfigBuilder::new(), |mut cfg, x| { cfg.add_filter_ignore_str(x); cfg })
+            .build();
 
-    #[cfg(target_os = "android")]
-    WriteLogger::init(LevelFilter::Debug, log_config, crate::util::AndroidLog::default()).unwrap();
+        #[cfg(target_os = "android")]
+        WriteLogger::init(LevelFilter::Debug, log_config, crate::util::AndroidLog::default()).unwrap();
 
-    #[cfg(not(target_os = "android"))]
-    {
-        let exe_loc = std::env::current_exe().map(|x| x.with_file_name("gyroflow.log")).unwrap_or_else(|_| std::path::PathBuf::from("./gyroflow.log"));
-        if let Ok(file_log) = std::fs::File::create(exe_loc) {
-            let _ = CombinedLogger::init(vec![
-                TermLogger::new(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto),
-                WriteLogger::new(LevelFilter::Debug, file_log_config, file_log)
-            ]);
-        } else {
-            let _ = TermLogger::init(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto);
+        #[cfg(not(target_os = "android"))]
+        {
+            let exe_loc = std::env::current_exe().map(|x| x.with_file_name("gyroflow.log")).unwrap_or_else(|_| std::path::PathBuf::from("./gyroflow.log"));
+            if let Ok(file_log) = std::fs::File::create(exe_loc) {
+                let _ = CombinedLogger::init(vec![
+                    TermLogger::new(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto),
+                    WriteLogger::new(LevelFilter::Debug, file_log_config, file_log)
+                ]);
+            } else {
+                let _ = TermLogger::init(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto);
+            }
         }
     }
 

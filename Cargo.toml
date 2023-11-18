@@ -81,6 +81,9 @@ features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemSer
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry",
              "Win32_Storage_Packaging_Appx" ]
 
+[target.'cfg(target_os = "macos")'.dependencies]
+oslog = "0.2"
+
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 metal = "0.27"
 core-foundation-sys = "0.8.4"
