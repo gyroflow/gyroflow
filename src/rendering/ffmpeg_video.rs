@@ -94,7 +94,7 @@ impl<'a> VideoTranscoder<'a> {
         let mut ost = octx.stream_mut(output_index).unwrap();
         let encoder_codec = params.codec.unwrap();
 
-        let mut options = params.options.to_owned();
+        let options = params.options.to_owned();
 
         let ctx_ptr = unsafe { ffi::avcodec_alloc_context3(encoder_codec.as_ptr()) };
         let context = unsafe { codec::context::Context::wrap(ctx_ptr, Some(std::rc::Rc::new(0))) };

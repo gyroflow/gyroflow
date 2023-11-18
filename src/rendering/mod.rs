@@ -708,9 +708,6 @@ unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_cha
         *LAST_PREFIX.write() = prefix;
 
         if let Ok(mut line) = String::from_utf8(line) {
-            if line.contains("failed to decode picture") {
-                *GPU_DECODING.write() = false;
-            }
             match level {
                 ffi::AV_LOG_PANIC | ffi::AV_LOG_FATAL | ffi::AV_LOG_ERROR => {
                     ::log::error!("{}", line.trim());

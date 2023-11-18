@@ -133,8 +133,11 @@ Item {
             function onError(job_id: real, text: string, arg: string, callback: string) {
                 if (job_id == render_queue.main_job_id || loader.pendingJobs[job_id]) {
                     text = getReadableError(qsTr(text).arg(arg));
-                    if (text)
+                    if (text) {
+                        // if (text.includes("failed to decode picture"))
+                        //     window.advanced.gpudecode.checked = false;
                         messageBox(Modal.Error, text, [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
+                    }
                 }
                 delete loader.pendingJobs[job_id];
                 loader.updateStatus();
