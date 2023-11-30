@@ -66,7 +66,7 @@ MenuItem {
     }
     Connections {
         target: controller;
-        function onAll_profiles_loaded(profiles: list) {
+        function onAll_profiles_loaded(profiles: list<var>) {
             if (!lensProfilesList.length) { // If it's the first load
                 controller.request_profile_ratings();
             }

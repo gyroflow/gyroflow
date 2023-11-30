@@ -171,7 +171,7 @@ Window {
         }
         Connections {
             target: controller;
-            function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
+            function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var) {
                 calibrator_window.anyFileLoaded = true;
                 Qt.callLater(videoArea.timeline.updateDurations);
 

@@ -231,7 +231,7 @@ Modal {
     buttons: [isPreset? qsTr("Save") : qsTr("Apply"), qsTr("Cancel")];
     accentButton: 0;
 
-    function copyObj(from: object, by: object, to: object) {
+    function copyObj(from: var, by: var, to: var) {
         for (const key in by) {
             if (typeof by[key] === "boolean") {
                 if (by[key]) {
@@ -243,7 +243,7 @@ Modal {
             }
         }
     }
-    function getFilteredObject(source: object, desc: object): object {
+    function getFilteredObject(source: var, desc: var): var {
         let finalData = { version: 2 };
         copyObj(source, desc, finalData);
         // Cleanup empty objects

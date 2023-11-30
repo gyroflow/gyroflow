@@ -197,7 +197,7 @@ Item {
                 }
             }
         }
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var) {
             console.log("Telemetry additional data:", JSON.stringify(additional_data));
             if (is_main_video) {
                 root.detectedCamera = camera;
@@ -606,7 +606,7 @@ Item {
                 onMetadataLoaded: (md) => {
                     Qt.callLater(fileLoaded, md);
                 }
-                function fileLoaded(md: object) {
+                function fileLoaded(md: var) {
                     loaded = duration > 0;
                     videoLoader.active = false;
                     vidInfo.loader = false;

@@ -83,7 +83,7 @@ MenuItem {
     }
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var) {
             root.filename = filename || "";
             info.updateEntry("File name", filename || "---");
             info.updateEntry("Detected format", camera || "---");

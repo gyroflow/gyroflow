@@ -508,7 +508,7 @@ Rectangle {
         });
     }
 
-    function messageBox(type: int, text: string, buttons: list, parent: QtObject, textFormat: int, identifier: string): Modal {
+    function messageBox(type: int, text: string, buttons: list<var>, parent: QtObject, textFormat: int, identifier: string): Modal {
         if (typeof textFormat === "undefined") textFormat = Text.AutoText; // default
 
         let el = null;
@@ -689,7 +689,7 @@ Rectangle {
         return text.trim();
     }
 
-    function renameOutput(filename: name, folderUrl: url) {
+    function renameOutput(filename: string, folderUrl: url) {
         let newName = filename;
         for (let i = 1; i < 1000; ++i) {
             newName = filename.replace(/(_\d+)?((?:_%05d)?\.[a-z0-9]+)$/i, "_" + i + "$2");
@@ -709,7 +709,7 @@ Rectangle {
         ui_tools.set_progress(progress);
     }
 
-    function getAdditionalProjectData(): object {
+    function getAdditionalProjectData() {
         return {
             "output": exportSettings.item.getExportOptions(),
             "synchronization": sync.item.getSettings(),

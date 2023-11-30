@@ -129,7 +129,7 @@ MenuItem {
     }
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var) {
             sync.additionalSyncTimestamps = [];
             if (additional_data.additional_sync_points) {
                 for (const x of additional_data.additional_sync_points.split(";")) {

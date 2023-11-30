@@ -170,7 +170,7 @@ MenuItem {
                 }
             }
         }
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var) {
             if (is_main_video) {
                 if (Math.abs(+additional_data.frame_readout_time) > 0) {
                     root.setFrameReadoutTime(additional_data.frame_readout_time);

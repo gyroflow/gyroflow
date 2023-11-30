@@ -195,14 +195,14 @@ deploy *param:
     cp -af "$QT_DIR/lib/QtQuickLayouts.framework"             "$CARGO_TARGET/../Frameworks/"
     cp -af "$QT_DIR/lib/QtSvg.framework"                      "$CARGO_TARGET/../Frameworks/"
     cp -af "$QT_DIR/lib/QtWidgets.framework"                  "$CARGO_TARGET/../Frameworks/"
-    # Remove once moved to Qt 6.6.0
+    # Remove once moved to Qt 6.6.1
     cp -af "$QT_DIR/lib/QtLabsSettings.framework"             "$CARGO_TARGET/../Frameworks/"
 
     if [ "{{param}}" == "local" ] || [ "{{param}}" == "universal" ]; then
         CARGO_TARGET="$PROJECT_DIR/_deployment/_binaries/mac/Gyroflow.app/Contents/Resources/qml"
     fi
 
-    # Remove once moved to Qt 6.6.0
+    # Remove once moved to Qt 6.6.1
     mkdir -p "$CARGO_TARGET/Qt/labs/settings/"
     cp -f $QT_DIR/qml/Qt/labs/settings/qmldir                      "$CARGO_TARGET/Qt/labs/settings/"
     cp -f $QT_DIR/qml/Qt/labs/settings/libqmlsettingsplugin.dylib  "$CARGO_TARGET/Qt/labs/settings/"

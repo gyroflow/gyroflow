@@ -17,7 +17,7 @@ DistributionProvisioningName  := "Gyroflow dist"
 
 AppBundle := ProjectDir / "_deployment/_binaries/ios/Payload/Gyroflow.app"
 
-QtVersionIOS := "6.6.0"
+QtVersionIOS := "6.6.1"
 
 IPHONESDK := `xcode-select -p` + "/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 export BINDGEN_EXTRA_CLANG_ARGS_aarch64_apple_ios := "--target=arm64-apple-ios -arch arm64 -miphoneos-version-min=14 -isysroot " + IPHONESDK

@@ -86,7 +86,7 @@ MenuItem {
     }
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: object) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var) {
             shutter.value = Math.abs(additional_data.frame_readout_time);
             shutterCb.checked = Math.abs(additional_data.frame_readout_time) > 0;
             bottomToTop.checked = additional_data.frame_readout_time < 0;

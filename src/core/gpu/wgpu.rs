@@ -207,8 +207,8 @@ impl WgpuWrapper {
                     for _ in 0..4 {
                         let device = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
                             label: None,
-                            features: wgpu::Features::empty(),
-                            limits: limits.clone(),
+                            required_features: wgpu::Features::empty(),
+                            required_limits: limits.clone(),
                         }, None));
                         if let Err(e) = &device {
                             let e_str = format!("{e:?}");
