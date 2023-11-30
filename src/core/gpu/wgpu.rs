@@ -181,8 +181,8 @@ impl WgpuWrapper {
                             queue: <Metal as wgpu_hal::Api>::Queue::queue_from_raw(mtl_cq, 1.0)
                         }, &wgpu::DeviceDescriptor {
                             label: None,
-                            features: wgpu::Features::empty(),
-                            limits: wgpu::Limits {
+                            required_features: wgpu::Features::empty(),
+                            required_limits: wgpu::Limits {
                                 max_storage_buffers_per_shader_stage: 6,
                                 max_storage_textures_per_shader_stage: 4,
                                 max_buffer_size: (1 << 31) - 1,
