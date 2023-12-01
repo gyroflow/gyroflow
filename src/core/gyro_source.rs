@@ -329,6 +329,16 @@ impl GyroSource {
 
         let raw_imu = util::normalized_imu_interpolated(&input, Some("XYZ".into())).unwrap_or_default();
 
+        let mut has_accurate_timestamps = input.has_accurate_timestamps();
+        if let serde_json::Value::Object(o) = &mut additional_data {
+            match o.get("has_accurate_timestamps") {
+                Some(serde_json::Value::String(x)) => { if x == "true" || x == "1" { has_accurate_timestamps = true; } }
+                Some(serde_json::Value::Bool(x)) => { if *x { has_accurate_timestamps = true; } }
+                _ => {}
+            }
+            o.remove("has_accurate_timestamps");
+        }
+
         let mut md = FileMetadata {
             imu_orientation,
             detected_source: Some(detected_source),
@@ -342,7 +352,7 @@ impl GyroSource {
             frame_rate,
             lens_profile,
             camera_identifier,
-            has_accurate_timestamps: input.has_accurate_timestamps(),
+            has_accurate_timestamps,
             additional_data,
             per_frame_time_offsets: Default::default(),
             per_frame_data: Default::default(),
