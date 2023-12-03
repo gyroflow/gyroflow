@@ -123,9 +123,9 @@ pub fn create_bookmark(url: &str, is_folder: bool, project_url: Option<&str>) ->
         let url = url.as_bytes();
         let url_ref = CFURLCreateWithBytes(ptr::null(), url.as_ptr(), url.len() as isize, kCFStringEncodingUTF8, ptr::null());
         if !url_ref.is_null() {
-            static _kCFURLBookmarkCreationWithSecurityScope: CFURLBookmarkCreationOptions = (1u32 << 11) as usize;
+            let opts: CFURLBookmarkCreationOptions = 1usize << 11; // kCFURLBookmarkCreationWithSecurityScope
             let mut error = ptr::null_mut();
-            let bookmark_data = CFURLCreateBookmarkData(kCFAllocatorDefault, url_ref, _kCFURLBookmarkCreationWithSecurityScope, ptr::null(), project_url_ref, &mut error);
+            let bookmark_data = CFURLCreateBookmarkData(kCFAllocatorDefault, url_ref, opts, ptr::null(), project_url_ref, &mut error);
             if error.is_null() {
                 if !bookmark_data.is_null() {
                     let len = CFDataGetLength(bookmark_data);
