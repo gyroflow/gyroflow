@@ -117,6 +117,7 @@ pub struct VideoInfo {
     pub width: u32,
     pub height: u32,
     pub bitrate: f64, // in Mbps
+    pub rotation: i32,
 }
 
 impl<'a> FfmpegProcessor<'a> {
@@ -534,6 +535,28 @@ impl<'a> FfmpegProcessor<'a> {
                 let mut frames = stream.frames() as usize;
                 if frames == 0 { frames = (stream.duration() as f64 * f64::from(stream.time_base()) * f64::from(stream.rate())) as usize; }
 
+                let rotation = {
+                    let mut theta = 0.0;
+                    if let Some(rotate_tag) = stream.metadata().get("rotate") {
+                        if let Ok(num) = rotate_tag.parse::<f64>() {
+                            theta = num;
+                        }
+                    }
+                    if theta == 0.0 {
+                        for side_data in stream.side_data() {
+                            if side_data.kind() == codec::packet::side_data::Type::DisplayMatrix {
+                                let display_matrix = side_data.data();
+                                if display_matrix.len() == 9*4 {
+                                    theta = -unsafe { ffi::av_display_rotation_get(display_matrix.as_ptr() as *const i32) };
+                                }
+                            }
+                        }
+                    }
+
+                    theta -= 360.0 * (theta / 360.0 + 0.9 / 360.0).floor();
+                    theta as i32
+                };
+
                 return Ok(VideoInfo {
                     duration_ms: stream.duration() as f64 * f64::from(stream.time_base()) * 1000.0,
                     frame_count: frames,
@@ -541,6 +564,7 @@ impl<'a> FfmpegProcessor<'a> {
                     width: video.width(),
                     height: video.height(),
                     bitrate: bitrate as f64 / 1024.0 / 1024.0,
+                    rotation
                 });
             }
         }

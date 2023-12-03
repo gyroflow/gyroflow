@@ -57,6 +57,7 @@ impl<'a> VideoProcessor<'a> {
                 false
             });
             pollster::block_on(rx.receive());
+            info.borrow_mut().rotation = mdk.mdk.getRotation();
 
             std::thread::sleep(std::time::Duration::from_millis(100));
 

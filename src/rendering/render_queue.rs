@@ -1187,6 +1187,7 @@ impl RenderQueue {
                                 let video_size = (info.width as usize, info.height as usize);
 
                                 stab.init_from_video_data(info.duration_ms, info.fps, info.frame_count, video_size);
+                                stab.set_video_rotation(((360 - info.rotation) % 360) as f64);
 
                                 stab.input_file.write().url = url.clone();
 
