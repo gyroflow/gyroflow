@@ -1425,8 +1425,9 @@ dependencies = [
 
 [[package]]
 name = "ffmpeg-next"
-version = "6.0.0"
-source = "git+https://github.com/AdrianEddy/rust-ffmpeg.git#dd40befe3928e8e10b047e2a570f99c2b1c5c4b6"
+version = "6.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f45d337871329d85f5aad1e3d7b09d033cd611d50f734fd6464c731fe7c769bf"
 dependencies = [
  "bitflags 1.3.2",
  "ffmpeg-sys-next",
@@ -5087,8 +5088,3 @@ dependencies = [
  "quote",
  "syn 1.0.109",
 ]
-
-[[patch.unused]]
-name = "ffmpeg-sys-next"
-version = "6.0.1"
-source = "git+https://github.com/AdrianEddy/rust-ffmpeg-sys.git#4a2f5a38d1bd6d6a1fdeeb71cd0f69a6e49d1045"
