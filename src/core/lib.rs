@@ -1360,6 +1360,42 @@ impl StabilizationManager {
         Ok(obj)
     }
 
+    pub fn project_has_motion_data(data: &[u8]) -> bool {
+        if let Ok(serde_json::Value::Object(ref mut obj)) = serde_json::from_slice(&data) {
+            if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
+                let built_in_gyro: std::io::Result<crate::gyro_source::FileMetadata> = util::decompress_from_base91_cbor(obj.get("file_metadata").and_then(|x| x.as_str()).unwrap_or_default());
+                if built_in_gyro.as_ref().map(|x| x.has_motion()).unwrap_or_default() {
+                    return true;
+                }
+
+                // Compatibility with older formats
+                let is_compressed = obj.get("raw_imu").map(|x| x.is_string()).unwrap_or_default();
+                if is_compressed {
+                    if let Some(bytes) = util::decompress_from_base91(obj.get("raw_imu").and_then(|x| x.as_str()).unwrap_or_default()) {
+                        if let Ok(data) = bincode::deserialize(&bytes) as bincode::Result<Vec<crate::gyro_source::TimeIMU>> {
+                            if !data.is_empty() { return true; }
+                        }
+                    }
+                    if let Some(bytes) = util::decompress_from_base91(obj.get("quaternions").and_then(|x| x.as_str()).unwrap_or_default()) {
+                        if let Ok(data) = bincode::deserialize(&bytes) as bincode::Result<TimeQuat> {
+                            if !data.is_empty() { return true; }
+                        }
+                    }
+                } else {
+                    if let Some(ri) = obj.get("raw_imu") {
+                        if let Some(ri) = ri.as_array() {
+                            if !ri.is_empty() { return true; }
+                        }
+                    }
+                    if let Some(x) = obj.get("quaternions").and_then(|x| x.as_object()) {
+                        if !x.is_empty() { return true; }
+                    }
+                }
+            }
+        }
+        false
+    }
+
     pub fn load_video_file(&self, url: &str, mut metadata: Option<telemetry_parser::util::VideoMetadata>) -> Result<telemetry_parser::util::VideoMetadata, GyroflowCoreError> {
         if metadata.is_none() {
             metadata = Some(util::get_video_metadata(url)?);
