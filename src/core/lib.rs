@@ -587,9 +587,6 @@ impl StabilizationManager {
             let mut undist = self.stabilization.write();
             self.draw_overlays(&mut undist.drawing, timestamp_us);
             undist.ensure_ready_for_processing::<T>(timestamp_us, buffers);
-            if !undist.stab_data.contains_key(&timestamp_us) {
-                undist.ensure_stab_data_at_timestamp::<T>(timestamp_us, buffers, false)
-            }
         }
 
         let undist = self.stabilization.read();
