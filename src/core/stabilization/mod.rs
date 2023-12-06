@@ -112,7 +112,6 @@ impl BackendType {
 #[derive(Default)]
 pub struct Stabilization {
     pub stab_data: BTreeMap<i64, FrameTransform>,
-    last_frame_data: RefCell<FrameTransform>,
 
     size:        (usize, usize), // width, height
     output_size: (usize, usize), // width, height
@@ -123,7 +122,7 @@ pub struct Stabilization {
     #[cfg(feature = "use-opencl")]
     cl: Option<opencl::OclWrapper>,
 
-    wgpu: Option<wgpu::WgpuWrapper>,
+    pub wgpu: Option<wgpu::WgpuWrapper>,
 
     pub initialized_backend: BackendType,
 
@@ -459,14 +458,7 @@ impl Stabilization {
     pub fn process_pixels<T: PixelType>(&self, timestamp_us: i64, buffers: &mut Buffers, frame_transform: Option<&FrameTransform>) -> Result<ProcessedInfo, GyroflowCoreError> {
         if /*self.size != buffers.input.size || */buffers.input.size.1 < 4 || buffers.output.size.1 < 4 { return Err(GyroflowCoreError::SizeTooSmall); }
 
-        let mut _last_frame_data = None;
-
-        let itm = frame_transform.map(|x| Some(x)).unwrap_or_else(|| if self.stab_data.contains_key(&timestamp_us) {
-            self.stab_data.get(&timestamp_us)
-        } else {
-            _last_frame_data = Some(self.last_frame_data.borrow().clone());
-            _last_frame_data.as_ref()
-        });
+        let itm = frame_transform.map(|x| Some(x)).unwrap_or_else(|| self.stab_data.get(&timestamp_us));
 
         if let Some(itm) = itm {
             let mut ret = ProcessedInfo {
@@ -476,11 +468,6 @@ impl Stabilization {
                 backend: ""
             };
             let drawing_buffer = self.drawing.get_buffer();
-            if frame_transform.is_none() {
-                if let Ok(mut last_frame_data) = self.last_frame_data.try_borrow_mut() {
-                    *last_frame_data = itm.clone();
-                }
-            }
 
             if self.size        != (itm.kernel_params.width        as usize, itm.kernel_params.height        as usize) { return Err(GyroflowCoreError::SizeMismatch(self.size, (itm.kernel_params.width        as usize, itm.kernel_params.height        as usize))); }
             if self.output_size != (itm.kernel_params.output_width as usize, itm.kernel_params.output_height as usize) { return Err(GyroflowCoreError::SizeMismatch(self.size, (itm.kernel_params.output_width as usize, itm.kernel_params.output_height as usize))); }

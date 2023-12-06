@@ -26,8 +26,6 @@ enum PipelineType {
 }
 
 pub struct WgpuWrapper  {
-    pub device: wgpu::Device,
-    queue: wgpu::Queue,
     staging_buffer: wgpu::Buffer,
     buf_matrices: wgpu::Buffer,
     buf_params: wgpu::Buffer,
@@ -39,6 +37,9 @@ pub struct WgpuWrapper  {
 
     in_texture: TextureHolder,
     out_texture: TextureHolder,
+
+    queue: wgpu::Queue,
+    pub device: wgpu::Device,
 
     padded_out_stride: u32,
     in_size: u64,
@@ -231,6 +232,10 @@ impl WgpuWrapper {
                     result?
                 }
             };
+
+            device.on_uncaptured_error(Box::new(|e| {
+                log::error!("Uncaptured device error: {e:?}");
+            }));
 
             let mut kernel = include_str!("wgpu_undistort.wgsl").to_string();
             //let mut kernel = std::fs::read_to_string("D:/programowanie/projekty/Rust/gyroflow/src/core/gpu/wgpu_undistort.wgsl").unwrap();
