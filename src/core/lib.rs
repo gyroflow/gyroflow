@@ -1115,8 +1115,10 @@ impl StabilizationManager {
                 let is_compressed = obj.get("raw_imu").map(|x| x.is_string()).unwrap_or_default();
                 let is_main_video = org_gyro_url == org_video_url;
 
-                // Load IMU data only if it's from another file or the gyro file is not accessible anymore
-                if (!org_gyro_url.is_empty() && org_gyro_url != org_video_url) || !filesystem::can_open_file(&gyro_url) {
+                let built_in_gyro: std::io::Result<crate::gyro_source::FileMetadata> = util::decompress_from_base91_cbor(obj.get("file_metadata").and_then(|x| x.as_str()).unwrap_or_default());
+
+                // Load IMU data only if it's from another file or we are sure that built_in_gyro contains motion data
+                if (!org_gyro_url.is_empty() && org_gyro_url != org_video_url) || built_in_gyro.as_ref().map(|x| x.has_motion()).unwrap_or_default() {
                     let mut raw_imu = Vec::new();
                     let mut quaternions = TimeQuat::default();
                     let mut image_orientations = None;
@@ -1181,7 +1183,7 @@ impl StabilizationManager {
 
                         let mut gyro = self.gyro.write();
                         gyro.load_from_telemetry(md);
-                    } else if let Ok(md) = util::decompress_from_base91_cbor(obj.get("file_metadata").and_then(|x| x.as_str()).unwrap_or_default()) as std::io::Result<crate::gyro_source::FileMetadata> {
+                    } else if let Ok(md) = built_in_gyro {
                         let mut gyro = self.gyro.write();
                         gyro.load_from_telemetry(md);
                     } else if filesystem::exists(&gyro_url) && blocking {

@@ -73,6 +73,9 @@ impl FileMetadata {
             per_frame_data:          Default::default(),
         }
     }
+    pub fn has_motion(&self) -> bool {
+        !self.raw_imu.is_empty() || !self.quaternions.is_empty()
+    }
 }
 
 #[derive(Default, Clone)]
@@ -133,7 +136,7 @@ impl GyroSource {
         }
     }
     pub fn has_motion(&self) -> bool {
-        !self.file_metadata.raw_imu.is_empty() || !self.file_metadata.quaternions.is_empty()
+        self.file_metadata.has_motion()
     }
     pub fn set_use_gravity_vectors(&mut self, v: bool) {
         if self.use_gravity_vectors != v {
