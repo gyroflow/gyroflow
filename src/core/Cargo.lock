@@ -669,7 +669,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "0.7.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2882735#2882735cb94b501a72eadfac0a5e6e1bf20e9174"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=cf8e11e#cf8e11efc3984cf9e25fd0d6da1404d50907f660"
 dependencies = [
  "bitflags 2.4.1",
  "libloading 0.8.1",
@@ -1656,7 +1656,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.14.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2882735#2882735cb94b501a72eadfac0a5e6e1bf20e9174"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=cf8e11e#cf8e11efc3984cf9e25fd0d6da1404d50907f660"
 dependencies = [
  "bit-set",
  "bitflags 2.4.1",
@@ -2027,9 +2027,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.18.0"
+version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd8b5dd2ae5ed71462c540258bedcb51965123ad7e7ccf4b9a8cafaa4a63576d"
+checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
 name = "opencv"
@@ -2937,9 +2937,9 @@ checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 
 [[package]]
 name = "unicode-bidi"
-version = "0.3.13"
+version = "0.3.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92888ba5573ff080736b3648696b70cafad7d250551175acbaa4e0385b3e1460"
+checksum = "6f2528f27a9eb2b21e69c95319b30bd0efd85d09c379741b0f78ea1d86be2416"
 
 [[package]]
 name = "unicode-ident"
@@ -3132,7 +3132,7 @@ checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
 [[package]]
 name = "wgpu"
 version = "0.18.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2882735#2882735cb94b501a72eadfac0a5e6e1bf20e9174"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=cf8e11e#cf8e11efc3984cf9e25fd0d6da1404d50907f660"
 dependencies = [
  "arrayvec 0.7.4",
  "cfg-if",
@@ -3155,7 +3155,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.18.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2882735#2882735cb94b501a72eadfac0a5e6e1bf20e9174"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=cf8e11e#cf8e11efc3984cf9e25fd0d6da1404d50907f660"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-vec",
@@ -3177,7 +3177,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.18.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2882735#2882735cb94b501a72eadfac0a5e6e1bf20e9174"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=cf8e11e#cf8e11efc3984cf9e25fd0d6da1404d50907f660"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.4",
@@ -3219,7 +3219,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.18.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2882735#2882735cb94b501a72eadfac0a5e6e1bf20e9174"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=cf8e11e#cf8e11efc3984cf9e25fd0d6da1404d50907f660"
 dependencies = [
  "bitflags 2.4.1",
  "js-sys",
@@ -3511,9 +3511,9 @@ checksum = "dff9641d1cd4be8d1a070daf9e3773c5f67e78b4d9d42263020c057706765c04"
 
 [[package]]
 name = "winnow"
-version = "0.5.25"
+version = "0.5.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7e87b8dfbe3baffbe687eef2e164e32286eff31a5ee16463ce03d991643ec94"
+checksum = "b67b5f0a4e7a27a64c651977932b9dc5667ca7fc31ac44b03ed37a0cf42fdfff"
 dependencies = [
  "memchr",
 ]

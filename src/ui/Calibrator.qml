@@ -62,7 +62,7 @@ Window {
         }
     }
 
-    function messageBox(type: int, text: string, buttons: list, parent: QtObject, textFormat: int, identifier: string): Modal {
+    function messageBox(type: int, text: string, buttons: list<var>, parent: QtObject, textFormat: int, identifier: string): Modal {
         return window.messageBox(type, text, buttons, parent || calibrator_window.contentItem, textFormat, identifier);
     }
 
