@@ -69,8 +69,6 @@ pub struct VideoTranscoder<'a> {
     pub on_frame_callback: Option<Box<dyn FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter, &mut RateControl) -> Result<(), FFmpegError> + 'a>>,
     pub on_encoder_initialized: Option<Box<dyn FnMut(&encoder::video::Video) -> Result<(), FFmpegError> + 'a>>,
 
-    pub first_frame_ts: Option<i64>,
-
     pub processing_order: ProcessingOrder
 }
 
@@ -169,7 +167,7 @@ impl<'a> VideoTranscoder<'a> {
         Ok(context.encoder().video()?)
     }
 
-    pub fn receive_and_process_video_frames(&mut self, size: (u32, u32), bitrate: Option<f64>, mut octx: Option<&mut format::context::Output>, ost_time_bases: &mut Vec<Rational>, start_ms: Option<f64>, end_ms: Option<f64>) -> Result<Status, FFmpegError> {
+    pub fn receive_and_process_video_frames(&mut self, size: (u32, u32), bitrate: Option<f64>, mut octx: Option<&mut format::context::Output>, ost_time_bases: &mut Vec<Rational>, start_ms: Option<f64>, end_ms: Option<f64>, first_frame_ts: &mut Option<i64>) -> Result<Status, FFmpegError> {
         let mut status = Status::Continue;
 
         let decoder = self.decoder.as_mut().ok_or(FFmpegError::DecoderNotFound)?;
@@ -185,10 +183,10 @@ impl<'a> VideoTranscoder<'a> {
                 let timestamp_ms = timestamp_us as f64 / 1000.0;
 
                 if start_ms.is_none() || timestamp_ms >= start_ms.unwrap() {
-                    if self.first_frame_ts.is_none() {
-                        self.first_frame_ts = frame.timestamp();
+                    if first_frame_ts.is_none() {
+                        *first_frame_ts = Some(timestamp_us);
                     }
-                    ts -= self.first_frame_ts.unwrap();
+                    ts -= first_frame_ts.unwrap();
 
                     let mut rate_control = RateControl {
                         out_timestamp_us: ts,

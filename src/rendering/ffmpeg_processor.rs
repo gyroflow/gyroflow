@@ -38,6 +38,8 @@ pub struct FfmpegProcessor<'a> {
 
     ost_time_bases: Vec<Rational>,
 
+    first_frame_ts: Option<i64>,
+
     _file: FfmpegPathWrapper<'a>
 }
 
@@ -201,6 +203,8 @@ impl<'a> FfmpegProcessor<'a> {
 
             ost_time_bases: Vec::new(),
 
+            first_frame_ts: None,
+
             start_ms: None,
             end_ms: None,
 
@@ -324,12 +328,12 @@ impl<'a> FfmpegProcessor<'a> {
         // let mut copied_stream_first_pts = None;
         // let mut copied_stream_first_dts = None;
 
-        let mut process_stream = |octx: &mut format::context::Output, stream: Stream, mut packet: ffmpeg_next::Packet, ist_index: usize, ost_index: isize, ost_time_base: Rational| -> Result<(), Error> {
+        let mut process_stream = |octx: &mut format::context::Output, stream: Stream, mut packet: ffmpeg_next::Packet, ist_index: usize, ost_index: isize, ost_time_base: Rational, first_frame_ts: &mut Option<i64>| -> Result<(), Error> {
             match atranscoders.get_mut(&ist_index) {
                 Some(atranscoder) => {
                     packet.rescale_ts(stream.time_base(), atranscoder.decoder.time_base());
                     atranscoder.decoder.send_packet(&packet)?;
-                    atranscoder.receive_and_process_decoded_frames(octx, ost_time_base, self.start_ms)?;
+                    atranscoder.receive_and_process_decoded_frames(octx, ost_time_base, self.start_ms, self.end_ms, first_frame_ts)?;
                 }
                 None => {
                     // Direct stream copy
@@ -372,14 +376,14 @@ impl<'a> FfmpegProcessor<'a> {
                     }
                 }
 
-                match self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, self.start_ms, self.end_ms) {
+                match self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, self.start_ms, self.end_ms, &mut self.first_frame_ts) {
                     Ok(encoding_status) => {
                         if self.video.encoder.is_some() {
                             video_inited = true;
                             if !pending_packets.is_empty() {
                                 for (stream, packet, ist_index, ost_index) in pending_packets.drain(..) {
                                     let ost_time_base = self.ost_time_bases[ost_index as usize];
-                                    process_stream(&mut octx, stream, packet, ist_index, ost_index, ost_time_base)?;
+                                    process_stream(&mut octx, stream, packet, ist_index, ost_index, ost_time_base, &mut self.first_frame_ts)?;
                                 }
                             }
                             any_encoded = true;
@@ -403,7 +407,7 @@ impl<'a> FfmpegProcessor<'a> {
                     continue;
                 }
                 let ost_time_base = self.ost_time_bases[ost_index as usize];
-                process_stream(&mut octx, stream, packet, ist_index, ost_index, ost_time_base)?;
+                process_stream(&mut octx, stream, packet, ist_index, ost_index, ost_time_base, &mut self.first_frame_ts)?;
             }
         }
 
@@ -412,14 +416,14 @@ impl<'a> FfmpegProcessor<'a> {
             let ost_time_base = self.ost_time_bases[self.video.output_index.unwrap_or_default()];
             self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof()?;
             // self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.flush();
-            self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, self.start_ms, self.end_ms)?;
+            self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, self.start_ms, self.end_ms, &mut self.first_frame_ts)?;
             self.video.encoder.as_mut().ok_or(Error::EncoderNotFound)?.send_eof()?;
             self.video.receive_and_process_encoded_packets(&mut octx, ost_time_base)?;
         }
         if self.audio_codec != codec::Id::None {
             for (ost_index, transcoder) in atranscoders.iter_mut() {
                 let ost_time_base = self.ost_time_bases[*ost_index];
-                transcoder.flush(&mut octx, ost_time_base, self.start_ms)?;
+                transcoder.flush(&mut octx, ost_time_base, self.start_ms, self.end_ms, &mut self.first_frame_ts)?;
             }
         }
 
@@ -475,7 +479,7 @@ impl<'a> FfmpegProcessor<'a> {
                             return Err(err.into());
                         }
                     }
-                    match self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, self.start_ms, self.end_ms) {
+                    match self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, self.start_ms, self.end_ms, &mut self.first_frame_ts) {
                         Ok(encoding_status) => {
                             any_encoded = true;
                             if encoding_status == Status::Finish || cancel_flag.load(Relaxed) {
@@ -504,7 +508,7 @@ impl<'a> FfmpegProcessor<'a> {
 
         // Flush decoder.
         self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof()?;
-        self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, self.start_ms, self.end_ms)?;
+        self.video.receive_and_process_video_frames((0, 0), None, None, &mut self.ost_time_bases, self.start_ms, self.end_ms, &mut self.first_frame_ts)?;
 
         Ok(())
     }
