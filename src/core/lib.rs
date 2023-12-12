@@ -1065,9 +1065,15 @@ impl StabilizationManager {
                 if !resolved.is_empty() { org_video_url = resolved; }
             }
 
+            let full_data_included = blocking && Self::project_has_motion_data(&data);
+
             let sequence_start = obj.get("image_sequence_start").and_then(|x| x.as_i64()).unwrap_or_default() as u32;
 
-            let video_url = Self::get_new_videofile_url(&org_video_url, url, sequence_start);
+            let video_url = if full_data_included {
+                org_video_url.clone()
+            } else {
+                Self::get_new_videofile_url(&org_video_url, url, sequence_start)
+            };
             if let Some(videofile) = obj.get_mut("videofile") {
                 *videofile = serde_json::Value::String(video_url.clone());
             }
@@ -1103,7 +1109,11 @@ impl StabilizationManager {
                     let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v, url);
                     if !resolved.is_empty() { org_gyro_url = resolved; }
                 }
-                let gyro_url = Self::get_new_videofile_url(&org_gyro_url, url.clone(), sequence_start);
+                let gyro_url = if full_data_included {
+                    org_gyro_url.clone()
+                } else {
+                    Self::get_new_videofile_url(&org_gyro_url, url.clone(), sequence_start)
+                };
                 if let Some(fp) = obj.get_mut("filepath") {
                     *fp = serde_json::Value::String(gyro_url.clone());
                 }
@@ -1337,8 +1347,12 @@ impl StabilizationManager {
                 if let Some(seq_fps) = obj.get("image_sequence_fps").and_then(|x| x.as_f64()) {
                     input_file.image_sequence_fps = seq_fps;
                 }
-                if !org_video_url.is_empty() && filesystem::can_open_file(&video_url) {
-                    input_file.url = video_url;
+                if !org_video_url.is_empty() {
+                    if full_data_included {
+                        input_file.url = org_video_url;
+                    } else if filesystem::can_open_file(&video_url) {
+                        input_file.url = video_url;
+                    }
                 }
             }
 
@@ -1358,8 +1372,8 @@ impl StabilizationManager {
     }
 
     pub fn project_has_motion_data(data: &[u8]) -> bool {
-        if let Ok(serde_json::Value::Object(ref mut obj)) = serde_json::from_slice(&data) {
-            if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
+        if let Ok(serde_json::Value::Object(ref obj)) = serde_json::from_slice(&data) {
+            if let Some(serde_json::Value::Object(ref obj)) = obj.get("gyro_source") {
                 let built_in_gyro: std::io::Result<crate::gyro_source::FileMetadata> = util::decompress_from_base91_cbor(obj.get("file_metadata").and_then(|x| x.as_str()).unwrap_or_default());
                 if built_in_gyro.as_ref().map(|x| x.has_motion()).unwrap_or_default() {
                     return true;
