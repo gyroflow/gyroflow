@@ -398,7 +398,6 @@ impl Stabilization {
                 if self.share_wgpu_instances && CACHED_WGPU.with(|x| x.borrow_mut().contains(&hash)) {
                     self.wgpu = None;
                     self.initialized_backend = BackendType::Wgpu(hash);
-                    log::info!("Reusing wgpu instance {:?} -> {:?} | key: {}", buffers.input.size, buffers.output.size, self.get_current_key(buffers));
                 } else {
                     self.wgpu = None;
                     let params = self.get_frame_transform_at::<T>(timestamp_us, buffers).kernel_params;
@@ -415,7 +414,7 @@ impl Stabilization {
                                 self.wgpu = Some(wgpu);
                             }
                             self.initialized_backend = BackendType::Wgpu(hash);
-                            log::info!("Initialized wgpu for {:?} -> {:?} | key: {}, thread: {:?}", buffers.input.size, buffers.output.size, self.get_current_key(buffers), std::thread::current().id());
+                            log::info!("Initialized wgpu for {:?} -> {:?} | key: {}", buffers.input.size, buffers.output.size, self.get_current_key(buffers));
                         },
                         Ok(Err(e)) => { log::error!("Failed to initialize wgpu {:?}", e); if self.share_wgpu_instances { CACHED_WGPU.with(|x| x.borrow_mut().clear()) } },
                         Err(e) => {
@@ -505,7 +504,7 @@ impl Stabilization {
                             }
                         });
                     } else {
-                        log::error!("No cached wgpu found for key: {}, thread: {:?}", self.get_current_key(buffers), std::thread::current().id());
+                        log::error!("No cached wgpu found for key: {}", self.get_current_key(buffers));
                     }
                 } else {
                     if let Some(ref wgpu) = self.wgpu {
