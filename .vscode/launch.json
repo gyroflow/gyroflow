@@ -2,18 +2,51 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Build+Debug GyroFlow",
+            "name": "Run Gyroflow",
             "request": "launch",
-            "preLaunchTask" : "Build GyroFlow (Debug)",
-            "program": "${workspaceFolder}/target/debug/gyroflow.exe",
+            "preLaunchTask" : "Build Gyroflow (Release)",
+            "program": "${workspaceFolder}/target/release/gyroflow",
+            "windows": {
+                "environment": [
+                    {
+                        "name": "PATH",
+                        "value": "${env:Path};${workspaceFolder}/ext/6.6.1/msvc2019_64/bin;${workspaceFolder}/ext/ffmpeg-6.1-windows-desktop-vs2022-gpl-lite/bin;${workspaceFolder}/ext/vcpkg/installed/x64-windows-release/bin"
+                    }
+                ],
+            },
+            "osx": {
+                "environment": [
+                    {
+                        "name": "PATH",
+                        "value": "${env:Path};${workspaceFolder}/ext/6.6.1/macos/bin;${workspaceFolder}/ext/vcpkg/installed/arm64-osx/bin"
+                    }
+                ],
+            },
             "cwd": "${workspaceFolder}",
             "type":"cppvsdbg",
             "console": "integratedTerminal",
         },
         {
-            "name": "Debug GyroFlow",
+            "name": "Debug Gyroflow",
             "request": "launch",
-            "program": "${workspaceFolder}/target/debug/gyroflow.exe",
+            "preLaunchTask" : "Build Gyroflow (Debug)",
+            "program": "${workspaceFolder}/target/debug/gyroflow",
+            "windows": {
+                "environment": [
+                    {
+                        "name": "PATH",
+                        "value": "${env:Path};${workspaceFolder}/ext/6.6.1/msvc2019_64/bin;${workspaceFolder}/ext/ffmpeg-6.1-windows-desktop-vs2022-gpl-lite/bin;${workspaceFolder}/ext/vcpkg/installed/x64-windows-release/bin"
+                    }
+                ],
+            },
+            "osx": {
+                "environment": [
+                    {
+                        "name": "PATH",
+                        "value": "${env:Path};${workspaceFolder}/ext/6.6.1/macos/bin;${workspaceFolder}/ext/vcpkg/installed/arm64-osx/bin"
+                    }
+                ],
+            },
             "cwd": "${workspaceFolder}",
             "type":"cppvsdbg",
             "console": "integratedTerminal",

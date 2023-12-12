@@ -2,26 +2,11 @@
 	"version": "2.0.0",
 	"tasks": [
         {
-            "label": "Build GyroFlow (Debug)",
+            "label": "Build Gyroflow (Debug)",
             "group": "build",
-            "type": "cargo",
-            "command": "build",
-            "presentation": {
-                "panel": "shared",
-                "reveal": "always",
-                "focus": true
-            },
-            "problemMatcher": [
-                "$rustc"
-            ]
-        },
-        {
-            "label": "Build GyroFlow (Release)",
-            "group": "build",
-            "type": "cargo",
-            "command": "build",
+            "command": "just",
             "args": [
-                "--release"
+                "build-debug"
             ],
             "presentation": {
                 "panel": "shared",
@@ -33,7 +18,23 @@
             ]
         },
         {
-            "label": "Build GyroFlow (Profile)",
+            "label": "Build Gyroflow (Release)",
+            "group": "build",
+            "command": "just",
+            "args": [
+                "build"
+            ],
+            "presentation": {
+                "panel": "shared",
+                "reveal": "always",
+                "focus": true
+            },
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "label": "Build Gyroflow (Profile)",
             "group": "build",
             "type": "cargo",
             "command": "build",
@@ -51,7 +52,7 @@
             ]
         },
         {
-            "label": "Run GyroFlow (Debug)",
+            "label": "Run Gyroflow (Debug)",
             "group": "build",
             "type": "cargo",
             "command": "run",
@@ -65,7 +66,7 @@
             ]
         },
         {
-            "label": "Run GyroFlow (Release)",
+            "label": "Run Gyroflow (Release)",
             "group": "build",
             "type": "cargo",
             "command": "run",
@@ -82,7 +83,7 @@
             ]
         },
         {
-            "label": "Run GyroFlow (Profile)",
+            "label": "Run Gyroflow (Profile)",
             "group": "build",
             "type": "cargo",
             "command": "run",

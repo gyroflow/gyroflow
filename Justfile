@@ -5,6 +5,12 @@ BaseFile := os()
 run *param:
     just --unstable -f _scripts/{{BaseFile}}.just run {{param}}
 
+build *param:
+    just --unstable -f _scripts/{{BaseFile}}.just build {{param}}
+
+build-debug *param:
+    just --unstable -f _scripts/{{BaseFile}}.just build-debug {{param}}
+
 debug *param:
     just --unstable -f _scripts/{{BaseFile}}.just debug {{param}}
 
