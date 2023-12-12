@@ -34,7 +34,7 @@ lazy_static::lazy_static! {
     pub static ref GPU_LIST: parking_lot::RwLock<Vec<String>> = parking_lot::RwLock::new(Vec::new());
 }
 thread_local! {
-    static CACHED_WGPU: RefCell<lru::LruCache<u32, wgpu::WgpuWrapper>> = RefCell::new(lru::LruCache::new(std::num::NonZeroUsize::new(10).unwrap()));
+    static CACHED_WGPU: RefCell<lru::LruCache<u32, wgpu::WgpuWrapper>> = RefCell::new(lru::LruCache::new(std::num::NonZeroUsize::new(20).unwrap()));
 }
 
 bitflags::bitflags! {
@@ -361,7 +361,6 @@ impl Stabilization {
 
         if current_hash != hash {
             self.initialized_backend = BackendType::None;
-            let params = self.get_frame_transform_at::<T>(timestamp_us, buffers).kernel_params;
             let canvas_len = self.drawing.get_buffer_len();
             #[allow(unused_mut)]
             let mut next_backend = self.next_backend.take().unwrap_or_default();
@@ -369,6 +368,7 @@ impl Stabilization {
             #[cfg(feature = "use-opencl")]
             if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() && next_backend != "wgpu" && opencl::is_buffer_supported(buffers) {
                 self.cl = None;
+                let params = self.get_frame_transform_at::<T>(timestamp_us, buffers).kernel_params;
                 let distortion_model = self.compute_params.distortion_model.clone();
                 let digital_lens = self.compute_params.digital_lens.clone();
                 let cl = std::panic::catch_unwind(|| {
@@ -394,8 +394,13 @@ impl Stabilization {
                 }
             }
             if self.initialized_backend.is_none() && T::wgpu_format().is_some() && next_backend != "opencl" && std::env::var("NO_WGPU").unwrap_or_default().is_empty() && wgpu::is_buffer_supported(buffers) {
-                if !self.share_wgpu_instances || CACHED_WGPU.with(|x| x.borrow_mut().get(&hash).is_none()) {
+                if self.share_wgpu_instances && CACHED_WGPU.with(|x| x.borrow_mut().contains(&hash)) {
                     self.wgpu = None;
+                    self.initialized_backend = BackendType::Wgpu(hash);
+                    log::info!("Reusing wgpu instance {:?} -> {:?} | key: {}", buffers.input.size, buffers.output.size, self.get_current_key(buffers));
+                } else {
+                    self.wgpu = None;
+                    let params = self.get_frame_transform_at::<T>(timestamp_us, buffers).kernel_params;
                     let distortion_model = self.compute_params.distortion_model.clone();
                     let digital_lens = self.compute_params.digital_lens.clone();
                     let wgpu = std::panic::catch_unwind(|| {
@@ -425,7 +430,6 @@ impl Stabilization {
                     }
                 }
             }
-
         }
     }
 
@@ -499,12 +503,16 @@ impl Stabilization {
                                 Err(GyroflowCoreError::NoCachedWgpuInstance(self.get_current_key(buffers)))
                             }
                         });
+                    } else {
+                        log::error!("No cached wgpu found for key: {}", self.get_current_key(buffers));
                     }
                 } else {
                     if let Some(ref wgpu) = self.wgpu {
                         wgpu.undistort_image(buffers, &itm, drawing_buffer);
                         ret.backend = "wgpu";
                         return Ok(ret);
+                    } else {
+                        log::error!("No wgpu instance!");
                     }
                 }
             }
