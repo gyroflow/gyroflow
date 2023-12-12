@@ -84,7 +84,7 @@ oslog = "0.2"
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 metal = "0.27"
-core-foundation-sys = "0.8.4"
+core-foundation-sys = "0.8.6"
 
 [build-dependencies]
 cpp_build = "0.5.9"
