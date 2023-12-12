@@ -255,14 +255,15 @@ impl Stabilization {
 
     pub fn get_current_key(&self, buffers: &Buffers) -> String {
         format!(
-            "{}{}{}{}{}{:?}{:?}",
+            "{}|{}|{}|{}|{}|{:?}|{:?}|{:?}",
             buffers.get_checksum(),
             self.compute_params.distortion_model.id(),
             self.compute_params.digital_lens.as_ref().map(|x| x.id()).unwrap_or_default(),
             self.interpolation as u32,
             self.kernel_flags.bits(),
             self.size,
-            self.output_size
+            self.output_size,
+            std::thread::current().id(),
         )
     }
     pub fn get_current_checksum(&self, buffers: &Buffers) -> u32 {
@@ -414,7 +415,7 @@ impl Stabilization {
                                 self.wgpu = Some(wgpu);
                             }
                             self.initialized_backend = BackendType::Wgpu(hash);
-                            log::info!("Initialized wgpu for {:?} -> {:?} | key: {}", buffers.input.size, buffers.output.size, self.get_current_key(buffers));
+                            log::info!("Initialized wgpu for {:?} -> {:?} | key: {}, thread: {:?}", buffers.input.size, buffers.output.size, self.get_current_key(buffers), std::thread::current().id());
                         },
                         Ok(Err(e)) => { log::error!("Failed to initialize wgpu {:?}", e); if self.share_wgpu_instances { CACHED_WGPU.with(|x| x.borrow_mut().clear()) } },
                         Err(e) => {
@@ -504,7 +505,7 @@ impl Stabilization {
                             }
                         });
                     } else {
-                        log::error!("No cached wgpu found for key: {}", self.get_current_key(buffers));
+                        log::error!("No cached wgpu found for key: {}, thread: {:?}", self.get_current_key(buffers), std::thread::current().id());
                     }
                 } else {
                     if let Some(ref wgpu) = self.wgpu {
