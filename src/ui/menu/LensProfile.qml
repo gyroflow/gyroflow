@@ -185,7 +185,7 @@ MenuItem {
         onSelected: (item) => {
             const lensPathOrId = item[1];
             if (lensPathOrId.endsWith(".gyroflow")) {
-                window.videoArea.loadFile(lensPathOrId, true);
+                window.videoArea.loadFile(filesystem.path_to_url(lensPathOrId), true);
             } else {
                 controller.load_lens_profile(lensPathOrId);
             }
