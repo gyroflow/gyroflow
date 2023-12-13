@@ -69,7 +69,7 @@ impl AudioTranscoder {
 
         while self.decoder.receive_frame(&mut frame).is_ok() {
 
-            if let Some(mut ts) = frame.timestamp() {
+            if let Some(ts) = frame.timestamp() {
                 let timestamp_us = ts.rescale(self.decoder.time_base(), (1, 1000000));
                 let timestamp_ms = timestamp_us as f64 / 1000.0;
 

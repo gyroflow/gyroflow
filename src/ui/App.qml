@@ -603,6 +603,13 @@ Rectangle {
         }
     }
     FileDialog {
+        id: profileFileDialog;
+        fileMode: FileDialog.SaveFile;
+        title: qsTr("Select file destination");
+        nameFilters: ["*.json"];
+        type: "output-profile";
+    }
+    FileDialog {
         id: gfFileDialog;
         fileMode: FileDialog.SaveFile;
         title: qsTr("Select file destination");
@@ -734,11 +741,11 @@ Rectangle {
         const filename = filesystem.filename_with_extension(filesystem.get_filename(controller.input_file_url), "gyroflow");
 
         if (!filesystem.exists_in_folder(folder, filename)) {
-            getSaveFileUrl(folder, filename, function(url) { saveProjectToUrl(url, type); });
+            getSaveFileUrl(folder, filename, function(url) { saveProjectToUrl(url, type); }, type);
         } else {
             messageBox(Modal.Question, qsTr("`.gyroflow` file already exists, what do you want to do?"), [
                 { text: qsTr("Overwrite"), "accent": true, clicked: () => {
-                    getSaveFileUrl(folder, filename, function(url) { saveProjectToUrl(url, type); });
+                    getSaveFileUrl(folder, filename, function(url) { saveProjectToUrl(url, type); }, type);
                 } },
                 { text: qsTr("Rename"), clicked: () => {
                     let newGfFilename = filename;
@@ -753,7 +760,7 @@ Rectangle {
                     if (!filesystem.exists_in_folder(folder, newFilename)) {
                         outputFile.setFilename(newFilename);
                     }
-                    getSaveFileUrl(folder, newGfFilename, function(url) { saveProjectToUrl(url, type); });
+                    getSaveFileUrl(folder, newGfFilename, function(url) { saveProjectToUrl(url, type); }, type);
                 } },
                 { text: qsTr("Choose a different location"), clicked: () => {
                     gfFileDialog.projectType = type;
@@ -764,7 +771,7 @@ Rectangle {
             ], undefined, Text.MarkdownText);
         }
     }
-    function getSaveFileUrl(folder: url, filename: string, cb) {
+    function getSaveFileUrl(folder: url, filename: string, cb, type: string) {
         if (isSandboxed) {
             const opf = Qt.createComponent("components/OutputPathField.qml").createObject(window, { visible: false });
             opf.selectFolder(folder, function(folder_url) {
@@ -773,7 +780,22 @@ Rectangle {
             });
             return;
         }
-        cb(filesystem.get_file_url(folder, filename, true));
+        if (filesystem.can_create_file(folder, filename)) {
+            cb(filesystem.get_file_url(folder, filename, true));
+        } else {
+            if (type == "Lens profile") {
+                profileFileDialog.currentFolder = folder;
+                profileFileDialog.selectedFile = filesystem.get_file_url(folder, filename, true);
+                profileFileDialog.accepted.disconnect();
+                profileFileDialog.accepted.connect(function() { cb(profileFileDialog.selectedFile); });
+                profileFileDialog.open();
+            } else {
+                gfFileDialog.projectType = type;
+                gfFileDialog.currentFolder = folder;
+                gfFileDialog.selectedFile = filesystem.get_file_url(folder, filename, true);
+                gfFileDialog.open();
+            }
+        }
     }
 
     /*Row {

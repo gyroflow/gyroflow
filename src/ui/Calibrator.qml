@@ -203,7 +203,7 @@ Window {
 
                             window.getSaveFileUrl(folder, output, function(url) {
                                 controller.export_lens_profile(url, lensCalib.calibrationInfo, lensCalib.uploadProfile.checked);
-                            });
+                            }, "Lens profile");
                         }
                         batch.runIn(1000, function() { batch.start(); });
                     });
