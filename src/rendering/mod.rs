@@ -446,9 +446,14 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                 $({
                     let in_size = zero_copy::get_plane_size($in_frame, $ind);
                     let out_size = zero_copy::get_plane_size($out_frame, $ind);
+
+                    let org_sizes = {
+                        let params = stab.params.read();
+                        (params.size, params.output_size, params.video_size, params.video_output_size)
+                    };
                     {
                         let mut params = stab.params.write();
-                        params.plane_scale = Some(in_size.0 as f64 / params.video_size.0.max(1) as f64);
+                        params.plane_scale = Some((in_size.0 as f64 / params.video_size.0.max(1) as f64, in_size.1 as f64 / params.video_size.1.max(1) as f64));
                         params.size        = (in_size.0,  in_size.1);
                         params.output_size = (out_size.0, out_size.1);
                         params.video_size  = params.size;
@@ -465,6 +470,15 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                     }
 
                     let mut compute_params = ComputeParams::from_manager(&stab);
+
+                    // Restore org sizes
+                    {
+                        let mut params = stab.params.write();
+                        params.size        = org_sizes.0;
+                        params.output_size = org_sizes.1;
+                        params.video_size  = org_sizes.2;
+                        params.video_output_size = org_sizes.3;
+                    }
 
                     let is_limited_range = $out_frame.color_range() == ffmpeg_next::util::color::Range::MPEG;
                     compute_params.background = <$t as PixelType>::from_rgb_color(compute_params.background, &$yuvi, is_limited_range);

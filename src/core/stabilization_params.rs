@@ -47,7 +47,7 @@ pub struct StabilizationParams {
     pub min_fov: f64,
     pub fps: f64,
     pub fps_scale: Option<f64>,
-    pub plane_scale: Option<f64>,
+    pub plane_scale: Option<(f64, f64)>,
     pub video_speed: f64,
     pub video_speed_affects_smoothing: bool,
     pub video_speed_affects_zooming: bool,
