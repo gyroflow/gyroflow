@@ -53,7 +53,11 @@ TextField {
     function updateValue() {
         if (allowText) return;
         preventChange = true;
-        value = Number.fromLocaleString(Qt.locale(), text);
+        try {
+            value = Number.fromLocaleString(Qt.locale(), text.replace(/\s+/g, ""));
+        } catch(e) {
+            console.error(e, Qt.locale(), text);
+        }
         preventChange = false;
     }
     onTextChanged: if (live) updateValue();
