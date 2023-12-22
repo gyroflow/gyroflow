@@ -120,6 +120,7 @@ pub fn get_url_info(url: &str) -> Result<AndroidFileInfo> {
             }
         }
         if ret.is_dir { ret.size = None; }
+        log::debug!("get_url_info: {ret:?}");
         Ok(ret)
     })
 }
@@ -134,19 +135,31 @@ pub fn list_files(url: &str) -> Result<Vec<AndroidFileInfo>> {
     check_exception!(env, Vec<AndroidFileInfo>; {
         let mut ret = Vec::new();
 
-        let tree_uri = DocumentsContract::build_child_documents_uri_using_tree(&mut env, url)?;
+        let tree_uri = if url.contains("/children") {
+            Uri::parse(&mut env, &url)?
+        } else {
+            DocumentsContract::build_child_documents_uri_using_tree(&mut env, url)?
+        };
 
-        for x in ContentResolver::query(&mut env, &tree_uri, &["document_id", "_display_name", "mime_type", "_data", "_size"])? {
+        for x in ContentResolver::query(&mut env, &tree_uri, &["mime_type", "document_id", "_display_name", "_data", "_size"])? {
             let mut file = AndroidFileInfo::default();
+            let mut document_id = None;
             for (k, v) in x {
                 match k.as_str() {
-                    "document_id"   => { file.url = Some(DocumentsContract::build_document_uri_using_tree(&mut env, &tree_uri, &v)?); }
+                    "document_id"   => { document_id = Some(v); }
                     "_data"         => { file.path = Some(v); }
                     "_display_name" => { file.filename = Some(v); }
                     "mime_type"     => { file.is_dir = v == "vnd.android.document/directory"; }
                     "_size"         => { file.size = Some(v.parse::<usize>().unwrap()); }
                     _ => { panic!("Unhandled projection {k}"); }
                 }
+            }
+            if let Some(document_id) = document_id {
+                file.url = Some(if file.is_dir {
+                    DocumentsContract::build_children_uri_using_tree(&mut env, &tree_uri, &document_id)?
+                } else {
+                    DocumentsContract::build_document_uri_using_tree(&mut env, &tree_uri, &document_id)?
+                });
             }
             if file.filename.is_some() {
                 if file.is_dir { file.size = None; }
@@ -187,7 +200,13 @@ pub fn remove_file(url: &str) -> Result<bool> {
 }
 
 pub fn is_dir_url(url: &str) -> bool {
-    url.contains("/tree/") && !url.contains("/document/")
+    if !url.contains("/tree/") {
+        return false;
+    }
+    if url.ends_with("/") {
+        return true;
+    }
+    get_url_info(url).map(|x| x.is_dir).unwrap_or_default()
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -209,6 +228,9 @@ impl Uri {
     pub fn to_string<'a>(env: &mut jni::JNIEnv<'a>, uri: &JObject<'a>) -> Result<String> {
         let uri_str = env.call_method(uri, "toString", "()Ljava/lang/String;", &[])?.l()?;
         Ok(unsafe { env.get_string_unchecked(&uri_str.into())?.into() })
+    }
+    pub fn get_authority<'a>(env: &mut jni::JNIEnv<'a>, uri: &JObject<'a>) -> Result<JObject<'a>> {
+        Ok(env.call_method(uri, "getAuthority", "()Ljava/lang/String;", &[])?.l()?)
     }
 }
 
@@ -273,6 +295,13 @@ impl DocumentsContract {
     pub fn build_document_uri_using_tree<'a>(env: &mut jni::JNIEnv<'a>, tree_uri: &JObject<'a>, doc_id: &str) -> Result<String> {
         let doc_id = env.new_string(doc_id)?;
         let document_uri = env.call_static_method("android/provider/DocumentsContract", "buildDocumentUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;", &[JValue::Object(tree_uri), JValue::Object(&doc_id)])?.l()?;
+
+        Uri::to_string(env, &document_uri)
+    }
+    pub fn build_children_uri_using_tree<'a>(env: &mut jni::JNIEnv<'a>, tree_uri: &JObject<'a>, doc_id: &str) -> Result<String> {
+        let authority = Uri::get_authority(env, tree_uri)?;
+        let doc_id = env.new_string(doc_id)?;
+        let document_uri = env.call_static_method("android/provider/DocumentsContract", "buildChildDocumentsUri", "(Ljava/lang/String;Ljava/lang/String;)Landroid/net/Uri;", &[JValue::Object(&authority), JValue::Object(&doc_id)])?.l()?;
 
         Uri::to_string(env, &document_uri)
     }

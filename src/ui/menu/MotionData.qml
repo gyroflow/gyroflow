@@ -19,6 +19,7 @@ MenuItem {
     property alias integrationMethod: integrator.currentIndex;
     property alias orientationIndicator: orientationIndicator;
     property string filename: "";
+    property string detectedFormat: "";
     property url lastSelectedFile: "";
 
     FileDialog {
@@ -85,6 +86,7 @@ MenuItem {
         target: controller;
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var) {
             root.filename = filename || "";
+            root.detectedFormat = camera || "";
             info.updateEntry("File name", filename || "---");
             info.updateEntry("Detected format", camera || "---");
             orientation.text = additional_data.imu_orientation;
@@ -143,6 +145,22 @@ MenuItem {
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: fileDialog.open2();
     }
+    InfoMessageSmall {
+        show: Qt.platform.os == "android" && !root.detectedFormat && root.lastSelectedFile.toString();
+        type: InfoMessage.Info;
+        text: qsTr("In order to detect multiple motion data files, click here and grant access to the directory with files.");
+        OutputPathField { id: opf; visible: false; }
+        MouseArea {
+            anchors.fill: parent;
+            cursorShape: Qt.PointingHandCursor;
+            onClicked: {
+                opf.selectFolder("", function(_) {
+                    root.loadFile(root.lastSelectedFile);
+                });
+            }
+        }
+    }
+
     TableList {
         id: info;
 
