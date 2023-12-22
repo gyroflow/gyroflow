@@ -3285,9 +3285,9 @@ checksum = "e8cf8e6a8aa66ce33f63993ffc4ea4271eb5b0530a9002db8455ea6050c77bfa"
 
 [[package]]
 name = "pretty-hex"
-version = "0.3.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6fa0831dd7cc608c38a5e323422a0077678fa5744aa2be4ad91c4ece8eec8d5"
+checksum = "bbc83ee4a840062f368f9096d80077a9841ec117e17e7f700df81958f1451254"
 
 [[package]]
 name = "primal"
@@ -3357,9 +3357,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.70"
+version = "1.0.71"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39278fbbf5fb4f646ce651690877f89d1c5811a3d4acb27700c1cb3cdb78fd3b"
+checksum = "75cb1540fadbd5b8fbccc4dddad2734eba435053f725621c070711a14bb5f4b8"
 dependencies = [
  "unicode-ident",
 ]
@@ -3420,7 +3420,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=bbf6009#bbf60090b966f0df2dd016e01da2ea78666ecea2"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=63f35bf#63f35bfe96ba846e45c2bbf985e396bf634b29da"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3827,9 +3827,9 @@ dependencies = [
 
 [[package]]
 name = "serde_yaml"
-version = "0.9.28"
+version = "0.9.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9269cfafc7e0257ee4a42f3f68a307f458c63d9e7c8ba4b58c5d15f1b7d7e8d3"
+checksum = "a15e0ef66bf939a7c890a0bf6d5a733c70202225f9888a89ed5c62298b019129"
 dependencies = [
  "indexmap",
  "itoa",
@@ -4077,7 +4077,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.2.8"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=176f791#176f79167ec3e8a746c96730697de7915617e2d8"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=97a9e8e#97a9e8e72efce347c2c6460305e2b63f2ae83ac9"
 dependencies = [
  "argh",
  "byteorder",
@@ -4085,10 +4085,11 @@ dependencies = [
  "csv",
  "fc-blackbox",
  "human-sort",
+ "jni 0.21.1",
  "log",
  "memchr",
  "mp4parse",
- "once_cell",
+ "ndk-context",
  "paste",
  "pretty-hex",
  "prost",

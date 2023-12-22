@@ -87,7 +87,7 @@ pub struct StabilizationManager {
 
 impl Default for StabilizationManager {
     fn default() -> Self {
-        std::env::set_var("IS_GYROFLOW", "1");
+        util::init_telemetry_parser();
         Self {
             smoothing: Arc::new(RwLock::new(Smoothing::default())),
 

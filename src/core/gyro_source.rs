@@ -159,7 +159,7 @@ impl GyroSource {
         let base = filesystem::get_engine_base();
         let mut file = filesystem::open_file(&base, url, false)?;
         let filesize = file.size;
-        let mut input = Input::from_stream(file.get_file(), filesize, &filesystem::url_to_path(url), progress_cb, cancel_flag)?;
+        let mut input = Input::from_stream(file.get_file(), filesize, &url, progress_cb, cancel_flag)?;
 
         let camera_identifier = CameraIdentifier::from_telemetry_parser(&input, size.0, size.1, fps).ok();
 

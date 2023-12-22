@@ -223,6 +223,35 @@ pub fn get_setting(_key: &str) -> Option<String> {
     None
 }
 
+pub fn init_telemetry_parser() {
+    use telemetry_parser::filesystem as tp_fs;
+    fn telemetry_parser_open_file<'a>(base: &'a tp_fs::FilesystemBase, path: &str) -> std::io::Result<tp_fs::FileWrapper<'a>> {
+        match crate::filesystem::open_file(&base, path, false) {
+            Ok(file) => {
+                let size = file.size;
+                return Ok(tp_fs::FileWrapper { file: Box::new(file), size });
+            }
+            Err(e) => {
+                log::error!("Failed to open file: {e:?}");
+                return Err(std::io::Error::new(std::io::ErrorKind::Other, e));
+            }
+        }
+    }
+
+    static TP_INITED: std::sync::Once = std::sync::Once::new();
+    TP_INITED.call_once(|| {
+        telemetry_parser::util::set_load_gyro_only(true);
+        unsafe {
+            tp_fs::set_filesystem_functions(tp_fs::FilesystemFunctions {
+                get_filename: crate::filesystem::get_filename,
+                get_folder:   crate::filesystem::get_folder,
+                list_folder:  crate::filesystem::list_folder,
+                open_file:    telemetry_parser_open_file
+            });
+        }
+    });
+}
+
 /*
 pub fn rename_calib_videos() {
     use telemetry_parser::Input;

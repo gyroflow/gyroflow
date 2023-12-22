@@ -134,6 +134,16 @@ impl<'a> FileWrapper<'a> {
         self.file.as_mut().unwrap()
     }
 }
+impl<'a> Read for FileWrapper<'a> {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        self.file.as_mut().ok_or_else(|| std::io::Error::from(std::io::ErrorKind::Other))?.read(buf)
+    }
+}
+impl<'a> std::io::Seek for FileWrapper<'a> {
+    fn seek(&mut self, pos: std::io::SeekFrom) -> std::io::Result<u64> {
+        self.file.as_mut().ok_or_else(|| std::io::Error::from(std::io::ErrorKind::Other))?.seek(pos)
+    }
+}
 impl<'a> Drop for FileWrapper<'a> {
     fn drop(&mut self) {
         log::debug!("FileWrapper::drop {}", self.url);
@@ -316,6 +326,39 @@ pub fn exists_in_folder(folder_url: &str, filename: &str) -> bool {
 
     let ret = inner(folder_url, filename);
     dbg_call!(folder_url filename -> ret);
+    ret
+}
+pub fn list_folder(folder_url: &str) -> Vec<(String, String)> {
+    fn inner(folder_url: &str) -> Vec<(String, String)> {
+        let mut ret = Vec::new();
+
+        #[cfg(target_os = "android")]
+        if folder_url.starts_with("content://") && android::is_dir_url(folder_url) {
+            if let Ok(files) = android::list_files(folder_url) {
+                for x in files {
+                    if let Some(url) = x.url {
+                        if let Some(filename) = x.filename {
+                            ret.push((filename, url));
+                        }
+                    }
+                }
+                return ret;
+            }
+        }
+        if let Ok(entries) = std::fs::read_dir(url_to_path(folder_url)) {
+            for entry in entries {
+                if let Ok(entry) = entry {
+                    if entry.metadata().as_ref().map(|x| x.is_file() || x.is_dir()).unwrap_or_default() {
+                        ret.push((entry.file_name().to_string_lossy().to_string(), path_to_url(entry.path().to_string_lossy().as_ref())));
+                    }
+                }
+            }
+        }
+        ret
+    }
+
+    let ret = inner(folder_url);
+    dbg_call!(folder_url -> ret);
     ret
 }
 pub fn get_mime(filename: &str) -> &'static str {

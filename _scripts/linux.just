@@ -266,7 +266,7 @@ deploy *param:
     cp -f "$CARGO_TARGET/libmdk.so.0"                      "$TARGET/lib/"
     cp -f "$CARGO_TARGET/libmdk-braw.so"                   "$TARGET/lib/"
     cp -f "$CARGO_TARGET/libmdk-r3d.so"                    "$TARGET/lib/"
-    #cp -f "$CARGO_TARGET/libffmpeg.so.5"                  "$TARGET/"
+    #cp -f "$CARGO_TARGET/libffmpeg.so.6"                  "$TARGET/"
 
     cp -f "$FFMPEG_DIR/lib/libavcodec.so.60"               "$TARGET/lib/"
     cp -f "$FFMPEG_DIR/lib/libavfilter.so.9"               "$TARGET/lib/"
