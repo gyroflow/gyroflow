@@ -48,7 +48,9 @@ TextField {
     }
     onValueChanged: {
         if (preventChange || allowText) return;
-        text = intNoThousandSep ? (Math.round(value)).toString() : value.toLocaleString(Qt.locale(), "f", precision);
+        let locale = Qt.locale();
+        locale.numberOptions = Locale.OmitGroupSeparator;
+        text = intNoThousandSep ? (Math.round(value)).toString() : Number(value).toLocaleString(locale, "f", precision);
     }
     function updateValue() {
         if (allowText) return;
@@ -56,7 +58,9 @@ TextField {
         try {
             value = Number.fromLocaleString(Qt.locale(), text.replace(/\s+/g, ""));
         } catch(e) {
-            console.error(e, Qt.locale(), text);
+            let locale = Qt.locale();
+            locale.numberOptions = Locale.OmitGroupSeparator;
+            console.error(e, Qt.locale(), text, (11234.56).toLocaleString(Qt.locale(), "f", precision), (11234.56).toLocaleString(locale, "f", precision));
         }
         preventChange = false;
     }

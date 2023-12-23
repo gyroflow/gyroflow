@@ -61,7 +61,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――― LLVM ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "{{LLVMPath}}\libclang.dll")) {
         echo "Downloading LLVM"
-        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.0/LLVM-16.0.0-win64.exe" -outfile "llvm-win64.exe"
+        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.1/LLVM-17.0.1-win64.exe" -outfile "llvm-win64.exe"
         7z x -y llvm-win64.exe -ollvm
         del "llvm-win64.exe"
     }
@@ -255,7 +255,7 @@ bundle:
         Remove-Item -Path tmp.ta* -Force
     }
     if (-not (Test-Path -Path "$TargetDir\BlackmagicRawAPI.dll")) {
-        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_Windows_3.4.tar.gz" -OutFile tmp.tar.gz
+        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_Windows_3.6.1.tar.gz" -OutFile tmp.tar.gz
         7z x tmp.tar.gz
         7z x -o"$TargetDir\" tmp.tar
         Remove-Item -Path tmp.ta* -Force
