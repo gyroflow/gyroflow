@@ -1,4 +1,4 @@
-!include common.just
+import 'common.just'
 
 # Important! For development/debugging the provisioning profile needs to be "Development"
 # For distribution - it needs to be a distribution provisioning profile.
