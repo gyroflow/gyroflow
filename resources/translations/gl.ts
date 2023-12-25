@@ -300,8 +300,8 @@ Faga clic en Aceptar e seleccione o cartafol de destino.</translation>
       <location filename="../../src/ui/App.qml" line="338"/>
       <source>Keep this app in the foreground and don&apos;t lock the screen.
 Due to limitations of the system video encoders, rendering in the background is not supported.</source>
-      <translation type="unfinished">Keep this app in the foreground and don&apos;t lock the screen.
-Due to limitations of the system video encoders, rendering in the background is not supported.</translation>
+      <translation>Mantén esta aplicación en primeiro plano e non&apos; bloquea a pantalla.
+Debido ás limitacións dos codificadores de vídeo do sistema, non se admite a renderización en segundo plano.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="581"/>
@@ -721,32 +721,32 @@ Pode aumentar o límite de nitidez na sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="50"/>
       <source>Grid guide</source>
-      <translation type="unfinished">Grid guide</translation>
+      <translation>Guía de cuadrícula</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Enabled</source>
-      <translation type="unfinished">Enabled</translation>
+      <translation>Activado</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="54"/>
       <source>Color</source>
-      <translation type="unfinished">Color</translation>
+      <translation>Cor</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="55"/>
       <source>White</source>
-      <translation type="unfinished">White</translation>
+      <translation>Branco</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="56"/>
       <source>Black</source>
-      <translation type="unfinished">Black</translation>
+      <translation>Negro</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="60"/>
       <source>Lines</source>
-      <translation type="unfinished">Lines</translation>
+      <translation>Liñas</translation>
     </message>
   </context>
   <context>
@@ -1355,12 +1355,12 @@ Quere envialo seu perfil?</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="147"/>
       <source>Mobile Light</source>
-      <translation type="unfinished">Mobile Light</translation>
+      <translation>Luz móbil</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="148"/>
       <source>Mobile Dark</source>
-      <translation type="unfinished">Mobile Dark</translation>
+      <translation>Móbil escuro</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="167"/>
@@ -1608,17 +1608,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="514"/>
       <source>ETA %1</source>
-      <translation type="unfinished">ETA %1</translation>
+      <translation>Tempo estimado %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="515"/>
       <source>Synchronizing: %1</source>
-      <translation type="unfinished">Synchronizing: %1</translation>
+      <translation>Sincronizando: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="516"/>
       <source>Rendering: %1</source>
-      <translation type="unfinished">Rendering: %1</translation>
+      <translation>Renderizando: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="688"/>
@@ -1898,17 +1898,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="234"/>
       <source>Save to lens profile directory</source>
-      <translation type="unfinished">Save to lens profile directory</translation>
+      <translation>Gardar no directorio do perfil da lente</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="235"/>
       <source>Save as default preset</source>
-      <translation type="unfinished">Save as default preset</translation>
+      <translation>Gardar como predeterminado</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="236"/>
       <source>Save to file</source>
-      <translation type="unfinished">Save to file</translation>
+      <translation>Gardar nun arquivo</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
@@ -2511,7 +2511,7 @@ Asegúrese de ter configurado o valor do efecto xelatina adecuado antes de sincr
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="24"/>
       <source>Created at</source>
-      <translation type="unfinished">Created at</translation>
+      <translation>Creado en</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="28"/>
@@ -2574,17 +2574,17 @@ Asegúrese de ter configurado o valor do efecto xelatina adecuado antes de sincr
     <message>
       <location filename="../../src/ui/App.qml" line="431"/>
       <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
+      <translation>Entrada</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="431"/>
       <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
+      <translation>Parámetros</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="431"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>Exportar</translation>
     </message>
   </context>
   <context>
@@ -2759,7 +2759,7 @@ Está seguro de que quere continuar?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="577"/>
       <source>Clear trim range</source>
-      <translation type="unfinished">Clear trim range</translation>
+      <translation>Borrar o intervalo de recorte</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="583"/>
@@ -3132,7 +3132,7 @@ Se ten Gyroflow en "C:Arquivos de programas", terá&apos; que executar Gyroflow 
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="825"/>
       <source>Show timeline menu</source>
-      <translation type="unfinished">Show timeline menu</translation>
+      <translation>Mostrar menú da liña de tempo</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="864"/>
@@ -3175,7 +3175,7 @@ Se ten Gyroflow en "C:Arquivos de programas", terá&apos; que executar Gyroflow 
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="138"/>
       <source>In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</source>
-      <translation type="unfinished">In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</translation>
+      <translation>Para detectar ficheiros de proxecto, secuencias de vídeo ou secuencias de imaxes, faga clic aquí e seleccione o directorio con ficheiros de entrada.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="129"/>

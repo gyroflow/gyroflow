@@ -88,7 +88,7 @@ Isto é apenas um indicador visual, não afeta a renderização.</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="384"/>
       <source>Default file suffix</source>
-      <translation type="unfinished">Default file suffix</translation>
+      <translation>Sufixo padrão do arquivo</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="395"/>
@@ -103,7 +103,7 @@ Isto é apenas um indicador visual, não afeta a renderização.</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="404"/>
       <source>Are you sure you want to clear all settings and restore the defaults?</source>
-      <translation type="unfinished">Are you sure you want to clear all settings and restore the defaults?</translation>
+      <translation>Tem certeza que deseja limpar todas as configurações e restaura-lo ao padrão?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="405"/>
@@ -113,7 +113,7 @@ Isto é apenas um indicador visual, não afeta a renderização.</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="413"/>
       <source>Settings cleared, please restart Gyroflow for the changes to take effect.</source>
-      <translation type="unfinished">Settings cleared, please restart Gyroflow for the changes to take effect.</translation>
+      <translation>Configurações restauradas. Por favor, reinicie o Gyroflow para que as alterações tenham efeito.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="414"/>
@@ -170,8 +170,8 @@ Isto é apenas um indicador visual, não afeta a renderização.</translation>
       <location filename="../../src/ui/App.qml" line="280"/>
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use one of [video editor plugins] (%1).</source>
-      <translation type="unfinished">This format is not available for rendering.
-The recommended workflow is to export project file and use one of [video editor plugins] (%1).</translation>
+      <translation>Este formato não está disponível para a renderização.
+O fluxo de trabalho recomendado é exportar arquivo de projeto e usar um dos [plugins editores de vídeo] (%1).</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="302"/>
@@ -223,7 +223,7 @@ The recommended workflow is to export project file and use one of [video editor 
     <message>
       <location filename="../../src/ui/App.qml" line="410"/>
       <source>Render queue</source>
-      <translation type="unfinished">Render queue</translation>
+      <translation>Fila de renderização</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="281"/>
@@ -323,12 +323,12 @@ Devido a limitações dos codificadores de vídeo do sistema, a renderização e
     <message>
       <location filename="../../src/ui/App.qml" line="584"/>
       <source>Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.</source>
-      <translation type="unfinished">Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.</translation>
+      <translation>O Gyroflow irá encerrar o computador em 60 segundos porque todas as tarefas foram concluídas.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="585"/>
       <source>Gyroflow will reboot the computer in 60 seconds because all tasks have been completed.</source>
-      <translation type="unfinished">Gyroflow will reboot the computer in 60 seconds because all tasks have been completed.</translation>
+      <translation>Gyroflow irá reiniciar o computador em 60 segundos porque todas as tarefas foram concluídas.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="596"/>

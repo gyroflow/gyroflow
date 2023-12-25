@@ -3,37 +3,37 @@ set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 BaseFile := os()
 
 run *param:
-    just --unstable -f _scripts/{{BaseFile}}.just run {{param}}
+    just -f _scripts/{{BaseFile}}.just run {{param}}
 
 build *param:
-    just --unstable -f _scripts/{{BaseFile}}.just build {{param}}
+    just -f _scripts/{{BaseFile}}.just build {{param}}
 
 build-debug *param:
-    just --unstable -f _scripts/{{BaseFile}}.just build-debug {{param}}
+    just -f _scripts/{{BaseFile}}.just build-debug {{param}}
 
 debug *param:
-    just --unstable -f _scripts/{{BaseFile}}.just debug {{param}}
+    just -f _scripts/{{BaseFile}}.just debug {{param}}
 
 profile *param:
-    just --unstable -f _scripts/{{BaseFile}}.just profile {{param}}
+    just -f _scripts/{{BaseFile}}.just profile {{param}}
 
 clippy *param:
-    just --unstable -f _scripts/{{BaseFile}}.just clippy {{param}}
+    just -f _scripts/{{BaseFile}}.just clippy {{param}}
 
 install-deps *param:
-    just --unstable -f _scripts/{{BaseFile}}.just install-deps {{param}}
+    just -f _scripts/{{BaseFile}}.just install-deps {{param}}
 
 deploy *param:
-    just --unstable -f _scripts/{{BaseFile}}.just deploy {{param}}
+    just -f _scripts/{{BaseFile}}.just deploy {{param}}
 
 bundle *param:
-    just --unstable -f _scripts/{{BaseFile}}.just bundle {{param}}
+    just -f _scripts/{{BaseFile}}.just bundle {{param}}
 
 android *param:
-    just --unstable -f _scripts/android.just {{param}}
+    just -f _scripts/android.just {{param}}
 
 ios *param:
-    just --unstable -f _scripts/ios.just {{param}}
+    just -f _scripts/ios.just {{param}}
 
 publish version:
     #!/bin/bash

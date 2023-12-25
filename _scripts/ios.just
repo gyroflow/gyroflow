@@ -81,14 +81,14 @@ install-deps:
 [no-cd]
 run:
     #!/bin/bash
-    just --unstable -f {{justfile()}} build-and-package release development
+    just -f {{justfile()}} build-and-package release development
 
     ios-deploy --bundle {{AppBundle}} -d -W
 
 [no-cd]
 debug:
     #!/bin/bash
-    just --unstable -f {{justfile()}} build-and-package debug development
+    just -f {{justfile()}} build-and-package debug development
 
     ios-deploy --bundle {{AppBundle}} --debug
 
@@ -219,7 +219,7 @@ deploy *param:
     set -e
     export PATH="/usr/libexec/:$PATH"
 
-    just --unstable -f {{justfile()}} build-and-package deploy distribution
+    just -f {{justfile()}} build-and-package deploy distribution
 
     pushd {{AppBundle}}/../../
         zip -r ../Gyroflow.ipa Payload Symbols
@@ -285,7 +285,7 @@ build-ipa:
     set -e
     export PATH="/usr/libexec/:$PATH"
 
-    just --unstable -f {{justfile()}} build-and-package deploy distribution
+    just -f {{justfile()}} build-and-package deploy distribution
 
     pushd {{AppBundle}}/../../
         zip -r ../Gyroflow.ipa Payload Symbols
