@@ -1,4 +1,4 @@
-!include common.just
+import 'common.just'
 
 TeamID                        := "RR3ZC2L4DF"
 BundleIdentifier              := "xyz.gyroflow"

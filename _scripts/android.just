@@ -1,4 +1,4 @@
-!include common.just
+import 'common.just'
 
 KeyStore         := env_var_or_default("KEY_STORE_PATH",  "")
 KeyStoreAlias    := env_var_or_default("KEY_STORE_ALIAS", "")
