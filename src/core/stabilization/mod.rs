@@ -30,11 +30,20 @@ pub enum Interpolation {
     Lanczos4 = 8
 }
 
+struct ThreadLocalWgpuCache(RefCell<lru::LruCache<u32, wgpu::WgpuWrapper>>);
+impl Drop for ThreadLocalWgpuCache {
+    fn drop(&mut self) {
+        // Workaround for a Vulkan hang on device destroy (https://github.com/gfx-rs/wgpu/issues/4973)
+        let inner = self.0.replace(lru::LruCache::new(std::num::NonZeroUsize::new(1).unwrap()));
+        std::thread::spawn(move || drop(inner));
+    }
+}
+
 lazy_static::lazy_static! {
     pub static ref GPU_LIST: parking_lot::RwLock<Vec<String>> = parking_lot::RwLock::new(Vec::new());
 }
 thread_local! {
-    static CACHED_WGPU: RefCell<lru::LruCache<u32, wgpu::WgpuWrapper>> = RefCell::new(lru::LruCache::new(std::num::NonZeroUsize::new(20).unwrap()));
+    static CACHED_WGPU: ThreadLocalWgpuCache = ThreadLocalWgpuCache(RefCell::new(lru::LruCache::new(std::num::NonZeroUsize::new(20).unwrap())));
 }
 
 bitflags::bitflags! {
@@ -324,7 +333,7 @@ impl Stabilization {
             #[cfg(feature = "use-opencl")]
             { self.cl = None; }
             self.wgpu = None;
-            CACHED_WGPU.with(|x| x.borrow_mut().clear());
+            CACHED_WGPU.with(|x| x.0.borrow_mut().clear());
             self.initialized_backend = BackendType::Cpu(hash);
             return true;
         }
@@ -395,7 +404,7 @@ impl Stabilization {
                 }
             }
             if self.initialized_backend.is_none() && T::wgpu_format().is_some() && next_backend != "opencl" && std::env::var("NO_WGPU").unwrap_or_default().is_empty() && wgpu::is_buffer_supported(buffers) {
-                if self.share_wgpu_instances && CACHED_WGPU.with(|x| x.borrow_mut().contains(&hash)) {
+                if self.share_wgpu_instances && CACHED_WGPU.with(|x| x.0.borrow_mut().contains(&hash)) {
                     self.wgpu = None;
                     self.initialized_backend = BackendType::Wgpu(hash);
                 } else {
@@ -409,14 +418,14 @@ impl Stabilization {
                     match wgpu {
                         Ok(Ok(wgpu)) => {
                             if self.share_wgpu_instances {
-                                CACHED_WGPU.with(|x| x.borrow_mut().put(hash, wgpu));
+                                CACHED_WGPU.with(|x| x.0.borrow_mut().put(hash, wgpu));
                             } else {
                                 self.wgpu = Some(wgpu);
                             }
                             self.initialized_backend = BackendType::Wgpu(hash);
                             log::info!("Initialized wgpu for {:?} -> {:?} | key: {}", buffers.input.size, buffers.output.size, self.get_current_key(buffers));
                         },
-                        Ok(Err(e)) => { log::error!("Failed to initialize wgpu {:?}", e); if self.share_wgpu_instances { CACHED_WGPU.with(|x| x.borrow_mut().clear()) } },
+                        Ok(Err(e)) => { log::error!("Failed to initialize wgpu {:?}", e); if self.share_wgpu_instances { CACHED_WGPU.with(|x| x.0.borrow_mut().clear()) } },
                         Err(e) => {
                             if let Some(s) = e.downcast_ref::<&str>() {
                                 log::error!("Failed to initialize wgpu {}", s);
@@ -425,7 +434,7 @@ impl Stabilization {
                             } else {
                                 log::error!("Failed to initialize wgpu {:?}", e);
                             }
-                            if self.share_wgpu_instances { CACHED_WGPU.with(|x| x.borrow_mut().clear()); }
+                            if self.share_wgpu_instances { CACHED_WGPU.with(|x| x.0.borrow_mut().clear()); }
                         },
                     }
                 }
@@ -442,9 +451,9 @@ impl Stabilization {
         self.init_backends::<T>(timestamp_us, buffers);
         self.ensure_stab_data_at_timestamp::<T>(timestamp_us, buffers, false);
 
-        if self.share_wgpu_instances && CACHED_WGPU.with(|x| !x.borrow().is_empty()) {
+        if self.share_wgpu_instances && CACHED_WGPU.with(|x| !x.0.borrow().is_empty()) {
             let hash = self.get_current_checksum(buffers);
-            let has_cached = CACHED_WGPU.with(|x| x.borrow().contains(&hash));
+            let has_cached = CACHED_WGPU.with(|x| x.0.borrow().contains(&hash));
             if !has_cached {
                 log::warn!("Cached wgpu not found, reinitializing. Key: {}", self.get_current_key(buffers));
                 self.initialized_backend = BackendType::None;
@@ -491,10 +500,10 @@ impl Stabilization {
             if wgpu::is_buffer_supported(buffers) {
                 if self.share_wgpu_instances {
                     let hash = self.get_current_checksum(buffers);
-                    let has_any_cache = CACHED_WGPU.with(|x| !x.borrow().is_empty());
+                    let has_any_cache = CACHED_WGPU.with(|x| !x.0.borrow().is_empty());
                     if has_any_cache {
                         return CACHED_WGPU.with(|x| {
-                            let mut cached = x.borrow_mut();
+                            let mut cached = x.0.borrow_mut();
                             if let Some(wgpu) = cached.get(&hash) {
                                 wgpu.undistort_image(buffers, &itm, drawing_buffer);
                                 ret.backend = "wgpu";

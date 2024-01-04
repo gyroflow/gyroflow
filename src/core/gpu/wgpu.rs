@@ -26,21 +26,22 @@ enum PipelineType {
 }
 
 pub struct WgpuWrapper  {
-    staging_buffer: wgpu::Buffer,
-    buf_matrices: wgpu::Buffer,
-    buf_params: wgpu::Buffer,
-    buf_lens_data: wgpu::Buffer,
-    buf_drawing: wgpu::Buffer,
-    bind_group: Option<wgpu::BindGroup>,
-    pipeline: PipelineType,
-    pixel_format: wgpu::TextureFormat,
+    staging_buffer: Option<wgpu::Buffer>,
+    buf_matrices: Option<wgpu::Buffer>,
+    buf_params: Option<wgpu::Buffer>,
+    buf_lens_data: Option<wgpu::Buffer>,
+    buf_drawing: Option<wgpu::Buffer>,
 
     in_texture: TextureHolder,
     out_texture: TextureHolder,
 
+    pipeline: PipelineType,
+    bind_group: Option<wgpu::BindGroup>,
+
     queue: wgpu::Queue,
     pub device: wgpu::Device,
 
+    pixel_format: wgpu::TextureFormat,
     padded_out_stride: u32,
     in_size: u64,
     out_size: u64,
@@ -50,10 +51,15 @@ pub struct WgpuWrapper  {
 impl Drop for WgpuWrapper {
     fn drop(&mut self) {
         // We need to delete all texture references and then call device.poll() to actually release them properly
-        self.bind_group = None;
-        self.pipeline = PipelineType::None;
+        self.staging_buffer = None;
+        self.buf_matrices = None;
+        self.buf_params = None;
+        self.buf_lens_data = None;
+        self.buf_drawing = None;
         self.in_texture = TextureHolder::default();
         self.out_texture = TextureHolder::default();
+        self.pipeline = PipelineType::None;
+        self.bind_group = None;
 
         self.device.poll(wgpu::Maintain::Wait);
     }
@@ -404,13 +410,13 @@ impl WgpuWrapper {
             Ok(Self {
                 device,
                 queue,
-                staging_buffer,
+                staging_buffer: Some(staging_buffer),
                 out_texture,
                 in_texture,
-                buf_matrices,
-                buf_params,
-                buf_drawing,
-                buf_lens_data,
+                buf_matrices: Some(buf_matrices),
+                buf_params: Some(buf_params),
+                buf_drawing: Some(buf_drawing),
+                buf_lens_data: Some(buf_lens_data),
                 bind_group,
                 pipeline,
                 in_size,
@@ -439,11 +445,11 @@ impl WgpuWrapper {
 
         if self.params_size < matrices.len() as u64    { log::error!("Buffer size mismatch! {} vs {}", self.params_size, matrices.len()); return false; }
 
-        self.queue.write_buffer(&self.buf_matrices, 0, matrices);
-        self.queue.write_buffer(&self.buf_params, 0, bytemuck::bytes_of(&itm.kernel_params));
+        self.queue.write_buffer(self.buf_matrices.as_ref().unwrap(), 0, matrices);
+        self.queue.write_buffer(self.buf_params.as_ref().unwrap(), 0, bytemuck::bytes_of(&itm.kernel_params));
         if !drawing_buffer.is_empty() {
             if self.drawing_size < drawing_buffer.len() as u64 { log::error!("Buffer size mismatch! {} vs {}", self.drawing_size, drawing_buffer.len()); return false; }
-            self.queue.write_buffer(&self.buf_drawing, 0, drawing_buffer);
+            self.queue.write_buffer(self.buf_drawing.as_ref().unwrap(), 0, drawing_buffer);
         }
 
         match &self.pipeline {
@@ -476,13 +482,13 @@ impl WgpuWrapper {
             }
         }
 
-        let _temp_texture2 = handle_output_texture(&self.device, &buffers.output, &self.queue, &mut encoder, &self.out_texture, self.pixel_format, &self.staging_buffer, self.padded_out_stride);
+        let _temp_texture2 = handle_output_texture(&self.device, &buffers.output, &self.queue, &mut encoder, &self.out_texture, self.pixel_format, self.staging_buffer.as_ref().unwrap(), self.padded_out_stride);
 
         let sub_index = self.queue.submit(Some(encoder.finish()));
 
         match &mut buffers.output.data {
             BufferSource::Cpu { buffer, .. } => {
-                let buffer_slice = self.staging_buffer.slice(..);
+                let buffer_slice = self.staging_buffer.as_ref().unwrap().slice(..);
                 let (sender, receiver) = futures_intrusive::channel::shared::oneshot_channel();
                 buffer_slice.map_async(wgpu::MapMode::Read, move |v| sender.send(v).unwrap());
 
@@ -512,7 +518,7 @@ impl WgpuWrapper {
 
                     // We have to make sure all mapped views are dropped before we unmap the buffer.
                     drop(data);
-                    self.staging_buffer.unmap();
+                    self.staging_buffer.as_ref().unwrap().unmap();
                 } else {
                     // TODO change to Result
                     log::error!("failed to run compute on wgpu!");

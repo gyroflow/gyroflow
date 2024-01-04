@@ -27,7 +27,8 @@ pub struct CudaSharedMemory {
     pub external_memory: Option<CUexternalMemory>,
     pub shared_handle: usize,
     pub cuda_alloc_size: usize,
-    pub vulkan_pitch_alignment: usize
+    pub vulkan_pitch_alignment: usize,
+    pub additional_drop_func: Option<Box<dyn FnOnce()>>
 }
 impl Drop for CudaSharedMemory {
     fn drop(&mut self) {
@@ -42,8 +43,12 @@ impl Drop for CudaSharedMemory {
                 cuda!(cuda.cuMemAddressFree(self.device_ptr, self.cuda_alloc_size));
             }
         }
+        if let Some(drop_fn) = self.additional_drop_func.take() {
+            drop_fn();
+        }
     }
 }
+unsafe impl Send for CudaSharedMemory { }
 
 pub fn get_current_cuda_device() -> i32 {
     let mut dev = 0;
@@ -127,6 +132,7 @@ pub fn import_external_d3d12_resource(ptr: *mut std::ffi::c_void, size: usize) -
         external_memory: Some(memory),
         cuda_alloc_size: size,
         vulkan_pitch_alignment: wgpu::COPY_BYTES_PER_ROW_ALIGNMENT as usize,
+        additional_drop_func: None,
     })
 }
 
@@ -209,7 +215,8 @@ pub fn allocate_shared_cuda_memory(size: usize) -> Result<CudaSharedMemory, Box<
         shared_handle,
         external_memory: None,
         cuda_alloc_size: asize,
-        vulkan_pitch_alignment: 1
+        vulkan_pitch_alignment: 1,
+        additional_drop_func: None,
     })
 }
 
@@ -297,7 +304,7 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
 
 pub fn create_vk_buffer_backed_by_cuda_memory(device: &wgpu::Device, size: (usize, usize, usize)) -> Result<(vk::Buffer, CudaSharedMemory), Box<dyn std::error::Error>> {
     let buffer_size = size.2 * size.1;
-    let cuda_mem = allocate_shared_cuda_memory(buffer_size)?;
+    let mut cuda_mem = allocate_shared_cuda_memory(buffer_size)?;
 
     let handle_type = if cfg!(target_os = "windows") {
         vk::ExternalMemoryHandleTypeFlags::OPAQUE_WIN32
@@ -355,6 +362,11 @@ pub fn create_vk_buffer_backed_by_cuda_memory(device: &wgpu::Device, size: (usiz
                 let allocated_memory = raw_device.allocate_memory(&allocate_info, None)?;
 
                 raw_device.bind_buffer_memory(raw_buffer, allocated_memory, 0)?;
+
+                let raw_device = raw_device.clone();
+                cuda_mem.additional_drop_func = Some(Box::new(move || {
+                    raw_device.free_memory(allocated_memory, None);
+                }));
 
                 #[cfg(target_os = "windows")]
                 let _ = windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(cuda_mem.shared_handle as isize));
