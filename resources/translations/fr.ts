@@ -615,7 +615,7 @@ You can increase the sharpness limit in the Advanced section.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="605"/>
       <source>Preserve export settings</source>
-      <translation type="unfinished">Preserve export settings</translation>
+      <translation>Conserver les paramètres d'exportation</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="607"/>
@@ -625,7 +625,7 @@ You can increase the sharpness limit in the Advanced section.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="618"/>
       <source>Preserve export path</source>
-      <translation type="unfinished">Preserve export path</translation>
+      <translation>Conserver le chemin d'exportation</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="620"/>
@@ -885,7 +885,7 @@ Voulez-vous soumettre votre profil ?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="517"/>
       <source>mm</source>
-      <translation type="unfinished">mm</translation>
+      <translation>mm</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="526"/>
@@ -895,7 +895,7 @@ Voulez-vous soumettre votre profil ?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="530"/>
       <source>x</source>
-      <translation type="unfinished">x</translation>
+      <translation>x</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="542"/>
@@ -1077,7 +1077,7 @@ Voulez-vous soumettre votre profil ?</translation>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="200"/>
       <source>Troubleshooting</source>
-      <translation type="unfinished">Troubleshooting</translation>
+      <translation>Dépannage</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="212"/>
@@ -1254,7 +1254,7 @@ Voulez-vous soumettre votre profil ?</translation>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="43"/>
       <source>[Selected folder]</source>
-      <translation type="unfinished">[Selected folder]</translation>
+      <translation>[Dossier séléctionné]</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="109"/>
@@ -1356,12 +1356,12 @@ Voulez-vous soumettre votre profil ?</translation>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="147"/>
       <source>Mobile Light</source>
-      <translation type="unfinished">Mobile Light</translation>
+      <translation>Mobile clair</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="148"/>
       <source>Mobile Dark</source>
-      <translation type="unfinished">Mobile Dark</translation>
+      <translation>Mobile sombre</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="167"/>
@@ -1609,7 +1609,7 @@ Voulez-vous convertir à un format de pixel supporté ou garder l'original et fa
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="514"/>
       <source>ETA %1</source>
-      <translation type="unfinished">ETA %1</translation>
+      <translation>Reste %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="515"/>
@@ -2209,32 +2209,32 @@ Voulez-vous convertir à un format de pixel supporté ou garder l'original et fa
     <message>
       <location filename="../../src/ui/Statistics.qml" line="95"/>
       <source>Gyro-X</source>
-      <translation type="unfinished">Gyro-X</translation>
+      <translation>Gyro-X</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="105"/>
       <source>Gyro-Y</source>
-      <translation type="unfinished">Gyro-Y</translation>
+      <translation>Gyro-Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="115"/>
       <source>Gyro-Z</source>
-      <translation type="unfinished">Gyro-Z</translation>
+      <translation>Gyro-Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="134"/>
       <source>Accl-X</source>
-      <translation type="unfinished">Accl-X</translation>
+      <translation>Accl-X</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="144"/>
       <source>Accl-Y</source>
-      <translation type="unfinished">Accl-Y</translation>
+      <translation>Accl-Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="154"/>
       <source>Accl-Z</source>
-      <translation type="unfinished">Accl-Z</translation>
+      <translation>Accl-Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="173"/>
@@ -2356,7 +2356,7 @@ Ceci double le temps de calcul, donc ne vérifiez ceci que pour le point initial
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="358"/>
       <source>Offset method</source>
-      <translation type="unfinished">Offset method</translation>
+      <translation>Méthode de décalage</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="368"/>
@@ -2459,7 +2459,7 @@ Assurez-vous d'avoir une valeur d'e mouvement d'obturateur correcte avant de syn
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="58"/>
       <source>Distortion model</source>
-      <translation type="unfinished">Distortion model</translation>
+      <translation>Modèle de distorsion</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="59"/>
@@ -2814,7 +2814,7 @@ Cette fonctionnalité est expérimentale, les résultats peuvent ne pas du tout 
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="195"/>
       <source>Sync points debug layer</source>
-      <translation type="unfinished">Sync points debug layer</translation>
+      <translation>Synchroniser la couche de débogage des points</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="362"/>

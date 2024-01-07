@@ -295,8 +295,8 @@ Harap periksa kecepatan bit file setelah perenderan dan jika Anda terpengaruh ol
       <location filename="../../src/ui/App.qml" line="327"/>
       <source>Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>Karena pembatasan pada akses file, anda harus memilih lokasi folder secara manual.
+Klik Ok dan pilih lokasi folder.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="338"/>
@@ -614,22 +614,22 @@ Anda dapat meningkatkan batas ketajaman di bagian Lanjutan.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="605"/>
       <source>Preserve export settings</source>
-      <translation type="unfinished">Preserve export settings</translation>
+      <translation>Pertahankan pengaturan ekspor</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="607"/>
       <source>Save output size and bitrate in settings and use it for all files.</source>
-      <translation type="unfinished">Save output size and bitrate in settings and use it for all files.</translation>
+      <translation>Simpan ukuran output dan bitrate di pengaturan dan gunakan untuk semua file.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="618"/>
       <source>Preserve export path</source>
-      <translation type="unfinished">Preserve export path</translation>
+      <translation>Pertahankan lokasi ekspor</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="620"/>
       <source>Save output path in settings and use it for all files.</source>
-      <translation type="unfinished">Save output path in settings and use it for all files.</translation>
+      <translation>Simpan lokasi output di pengaturan dan gunakan di semua file.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="383"/>
@@ -640,17 +640,17 @@ Anda dapat meningkatkan batas ketajaman di bagian Lanjutan.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="364"/>
       <source>Edit sizes</source>
-      <translation type="unfinished">Edit sizes</translation>
+      <translation>Sunting ukuran</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="367"/>
       <source>Original</source>
-      <translation type="unfinished">Original</translation>
+      <translation>Asli</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="375"/>
       <source>You can edit the output size presets here:</source>
-      <translation type="unfinished">You can edit the output size presets here:</translation>
+      <translation>Anda bisa menyunting preset ukuran output disini:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="376"/>
@@ -660,7 +660,7 @@ Anda dapat meningkatkan batas ketajaman di bagian Lanjutan.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="383"/>
       <source>Invalid JSON format!</source>
-      <translation type="unfinished">Invalid JSON format!</translation>
+      <translation>Format JSON tidak valid!</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="386"/>
@@ -670,7 +670,7 @@ Anda dapat meningkatkan batas ketajaman di bagian Lanjutan.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="507"/>
       <source>Metadata comment</source>
-      <translation type="unfinished">Metadata comment</translation>
+      <translation>Komentar Metadata</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="515"/>
@@ -700,7 +700,7 @@ Anda dapat meningkatkan batas ketajaman di bagian Lanjutan.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="543"/>
       <source>Audio codec</source>
-      <translation type="unfinished">Audio codec</translation>
+      <translation>Kodek audio</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="555"/>
@@ -721,32 +721,32 @@ Anda dapat meningkatkan batas ketajaman di bagian Lanjutan.</translation>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="50"/>
       <source>Grid guide</source>
-      <translation type="unfinished">Grid guide</translation>
+      <translation>Petunjuk grid</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Enabled</source>
-      <translation type="unfinished">Enabled</translation>
+      <translation>Diaktifkan</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="54"/>
       <source>Color</source>
-      <translation type="unfinished">Color</translation>
+      <translation>Warna</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="55"/>
       <source>White</source>
-      <translation type="unfinished">White</translation>
+      <translation>Putih</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="56"/>
       <source>Black</source>
-      <translation type="unfinished">Black</translation>
+      <translation>Hitam</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="60"/>
       <source>Lines</source>
-      <translation type="unfinished">Lines</translation>
+      <translation>Garis</translation>
     </message>
   </context>
   <context>
@@ -1075,7 +1075,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="200"/>
       <source>Troubleshooting</source>
-      <translation type="unfinished">Troubleshooting</translation>
+      <translation>Penyelesaian Masalah</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="212"/>
@@ -1252,18 +1252,18 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="43"/>
       <source>[Selected folder]</source>
-      <translation type="unfinished">[Selected folder]</translation>
+      <translation>[Folder yang dipilih]</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="109"/>
       <location filename="../../src/ui/components/OutputPathField.qml" line="119"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>Pilih lokasi file</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="110"/>
       <source>Video files</source>
-      <translation type="unfinished">Video files</translation>
+      <translation>File video</translation>
     </message>
   </context>
   <context>
@@ -1606,17 +1606,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="514"/>
       <source>ETA %1</source>
-      <translation type="unfinished">ETA %1</translation>
+      <translation>ETA %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="515"/>
       <source>Synchronizing: %1</source>
-      <translation type="unfinished">Synchronizing: %1</translation>
+      <translation>Sinkronkan: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="516"/>
       <source>Rendering: %1</source>
-      <translation type="unfinished">Rendering: %1</translation>
+      <translation>Render: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="688"/>
@@ -1681,7 +1681,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="753"/>
       <source>Stabilized video + Project file with gyro data</source>
-      <translation type="unfinished">Stabilized video + Project file with gyro data</translation>
+      <translation>Stabilkan video + file project dengan data gyro</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="757"/>
@@ -1896,17 +1896,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="234"/>
       <source>Save to lens profile directory</source>
-      <translation type="unfinished">Save to lens profile directory</translation>
+      <translation>Simpan ke direktori profil lens</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="235"/>
       <source>Save as default preset</source>
-      <translation type="unfinished">Save as default preset</translation>
+      <translation>Simpan sebagai preset default</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="236"/>
       <source>Save to file</source>
-      <translation type="unfinished">Save to file</translation>
+      <translation>Simpan file</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
@@ -1971,7 +1971,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="88"/>
       <source>Add keyframe</source>
-      <translation type="unfinished">Add keyframe</translation>
+      <translation>Tambahkan keyframe</translation>
     </message>
   </context>
   <context>
@@ -2103,7 +2103,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="391"/>
       <source>IMU integration method for keeping track of the horizon and adjust built-in quaternions</source>
-      <translation type="unfinished">IMU integration method for keeping track of the horizon and adjust built-in quaternions</translation>
+      <translation>Metode integrasi IMU untuk mengamabkan pelacakan horizon dan sesuaikan built-in quaternions</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="400"/>
@@ -2206,32 +2206,32 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/Statistics.qml" line="95"/>
       <source>Gyro-X</source>
-      <translation type="unfinished">Gyro-X</translation>
+      <translation>Gyro-X</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="105"/>
       <source>Gyro-Y</source>
-      <translation type="unfinished">Gyro-Y</translation>
+      <translation>Gyro-Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="115"/>
       <source>Gyro-Z</source>
-      <translation type="unfinished">Gyro-Z</translation>
+      <translation>Gyro-Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="134"/>
       <source>Accl-X</source>
-      <translation type="unfinished">Accl-X</translation>
+      <translation>Accl-X</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="144"/>
       <source>Accl-Y</source>
-      <translation type="unfinished">Accl-Y</translation>
+      <translation>Accl-Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="154"/>
       <source>Accl-Z</source>
-      <translation type="unfinished">Accl-Z</translation>
+      <translation>Accl-Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="173"/>
@@ -2333,7 +2333,7 @@ Ini menggandakan waktu perhitungan, jadi periksa ini hanya untuk titik awal dan 
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="305"/>
       <source>Processing resolution</source>
-      <translation type="unfinished">Processing resolution</translation>
+      <translation>Resolusi Pemrosesan</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="328"/>
@@ -2353,7 +2353,7 @@ Ini menggandakan waktu perhitungan, jadi periksa ini hanya untuk titik awal dan 
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="358"/>
       <source>Offset method</source>
-      <translation type="unfinished">Offset method</translation>
+      <translation>Metode Seimbang</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="368"/>
@@ -2441,27 +2441,27 @@ Pastikan Anda mengatur nilai Rolling shutter yang tepat sebelum menyinkronkan.</
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="55"/>
       <source>Focal length</source>
-      <translation type="unfinished">Focal length</translation>
+      <translation>Panjang Fokus</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="56"/>
       <source>Crop factor</source>
-      <translation type="unfinished">Crop factor</translation>
+      <translation>Potong faktor</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="57"/>
       <source>Asymmetrical</source>
-      <translation type="unfinished">Asymmetrical</translation>
+      <translation>Asimetrikal</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="58"/>
       <source>Distortion model</source>
-      <translation type="unfinished">Distortion model</translation>
+      <translation>Model distorsi</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="59"/>
       <source>Digital lens</source>
-      <translation type="unfinished">Digital lens</translation>
+      <translation>Lens digital</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="64"/>
@@ -2508,12 +2508,12 @@ Pastikan Anda mengatur nilai Rolling shutter yang tepat sebelum menyinkronkan.</
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="24"/>
       <source>Created at</source>
-      <translation type="unfinished">Created at</translation>
+      <translation>Dibuat pada</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="28"/>
       <source>Detected lens</source>
-      <translation type="unfinished">Detected lens</translation>
+      <translation>Lensa terdeteksi</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="30"/>
@@ -2553,12 +2553,12 @@ Pastikan Anda mengatur nilai Rolling shutter yang tepat sebelum menyinkronkan.</
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="90"/>
       <source>Reprojection error</source>
-      <translation type="unfinished">Reprojection error</translation>
+      <translation>Masalah saat Reproyeksi</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="91"/>
       <source>Good frames</source>
-      <translation type="unfinished">Good frames</translation>
+      <translation>Frame bagus</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="92"/>

@@ -200,13 +200,25 @@ pub fn remove_file(url: &str) -> Result<bool> {
 }
 
 pub fn is_dir_url(url: &str) -> bool {
-    if !url.contains("/tree/") {
-        return false;
+    fn inner(url: &str) -> bool {
+        if !url.contains("/tree/")   { return false; }
+        if url.ends_with("/")        { return true; }
+        if url.contains("/children") { return true; }
+
+        match get_url_info(url) {
+            Ok(x) => x.is_dir,
+            Err(e) => {
+                log::error!("Failed to get url info for {url}: {e:?}");
+                // Check if the file has extension - not ideal but should work for most cases
+                // FIXME: write this properly
+                url.split('/').last().map(|x| !x.contains('.')).unwrap_or(false)
+            }
+        }
     }
-    if url.ends_with("/") {
-        return true;
-    }
-    get_url_info(url).map(|x| x.is_dir).unwrap_or_default()
+
+    let ret = inner(url);
+    dbg_call!(url -> ret);
+    ret
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -311,6 +323,19 @@ impl DocumentsContract {
         let children_uri = env.call_static_method("android/provider/DocumentsContract", "buildChildDocumentsUriUsingTree", "(Landroid/net/Uri;Ljava/lang/String;)Landroid/net/Uri;", &[JValue::Object(&uri), JValue::Object(&doc_id)])?.l()?;
 
         Ok(children_uri)
+    }
+    pub fn get_tree_document_id<'a>(env: &mut jni::JNIEnv<'a>, url: &str) -> Result<String> {
+        let uri = Uri::parse(env, url)?;
+        let doc_id = env.call_static_method("android/provider/DocumentsContract", "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;", &[JValue::Object(&uri)])?.l()?;
+        Ok(unsafe { env.get_string_unchecked(&doc_id.into())?.into() })
+    }
+    pub fn is_tree_uri<'a>(env: &mut jni::JNIEnv<'a>, url: &str) -> Result<bool> {
+        let uri = Uri::parse(env, url)?;
+        Ok(env.call_static_method("android/provider/DocumentsContract", "isTreeUri", "(Landroid/net/Uri;)Z", &[JValue::Object(&uri)])?.z()?)
+    }
+    pub fn is_document_uri<'a>(env: &mut jni::JNIEnv<'a>, url: &str) -> Result<bool> {
+        let uri = Uri::parse(env, url)?;
+        Ok(env.call_static_method("android/provider/DocumentsContract", "isDocumentUri", "(Landroid/net/Uri;)Z", &[JValue::Object(&uri)])?.z()?)
     }
     pub fn delete_document<'a>(env: &mut jni::JNIEnv<'a>, resolver: &JObject<'a>, url: &str) -> Result<bool> {
         let uri = Uri::parse(env, url)?;
