@@ -462,6 +462,9 @@ fn setup_defaults(stab: Arc<StabilizationManager>, queue: &mut RenderQueue) -> s
         stab.set_device(processing_device);
     }
 
+    let audio_codecs = ["AAC", "PCM (s16le)", "PCM (s16be)", "PCM (s24le)", "PCM (s24be)"];
+    let interpolations = ["Bilinear", "Bicubic", "Lanczos4"];
+
     // Sync and export settings
     serde_json::json!({
         "output": {
@@ -481,7 +484,8 @@ fn setup_defaults(stab: Arc<StabilizationManager>, queue: &mut RenderQueue) -> s
             "keyframe_distance":     settings.get("keyframeDistance").unwrap_or(&"1".into()).parse::<u32>().unwrap(),
             "preserve_other_tracks": settings.get("preserveOtherTracks").unwrap_or(&"false".into()).parse::<bool>().unwrap(),
             "pad_with_black":        settings.get("padWithBlack").unwrap_or(&"false".into()).parse::<bool>().unwrap(),
-            "audio_codec":           settings.get("audioCodec").unwrap_or(&"AAC".into()),
+            "audio_codec":           audio_codecs.get(settings.get("audioCodec").unwrap_or(&"0".into()).parse::<usize>().unwrap()).unwrap_or(&"AAC"),
+            "interpolation":         interpolations.get(settings.get("interpolationMethod").unwrap_or(&"2".into()).parse::<usize>().unwrap()).unwrap_or(&"Lanczos4"),
         },
         "synchronization": {
             "initial_offset":     0,

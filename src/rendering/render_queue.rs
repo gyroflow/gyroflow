@@ -83,6 +83,7 @@ pub struct RenderOptions {
     pub preserve_other_tracks: bool,
     pub pad_with_black: bool,
     pub audio_codec: String,
+    pub interpolation: String,
 }
 impl RenderOptions {
     pub fn settings_string(&self, fps: f64) -> String {
@@ -133,6 +134,7 @@ impl RenderOptions {
             if let Some(v) = obj.get("preserve_other_tracks").and_then(|x| x.as_bool()) { self.preserve_other_tracks = v; }
             if let Some(v) = obj.get("pad_with_black")       .and_then(|x| x.as_bool()) { self.pad_with_black = v; }
             if let Some(v) = obj.get("audio_codec")          .and_then(|x| x.as_str())  { self.audio_codec = v.to_string(); }
+            if let Some(v) = obj.get("interpolation")        .and_then(|x| x.as_str())  { self.interpolation = v.to_string(); }
 
             if let Some(v) = obj.get("metadata").and_then(|x| x.as_object())  {
                 if let Some(s) = v.get("comment").and_then(|x| x.as_str()) { self.metadata.comment = s.to_string(); }

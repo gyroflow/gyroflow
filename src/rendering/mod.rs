@@ -245,6 +245,13 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         _ => { }
     }
 
+    let interpolation = match render_options.interpolation.as_ref() {
+        "Bilinear"  => Interpolation::Bilinear,
+        "Bicubic"   => Interpolation::Bicubic,
+        _ => Interpolation::Lanczos4
+    };
+
+    log::debug!("interpolation: {:?}", &interpolation);
     log::debug!("proc.gpu_device: {:?}", &proc.gpu_device);
     let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(&render_options.codec, render_options.use_gpu), hwaccel_device);
     proc.video_codec = Some(encoder.0.to_owned());
@@ -460,7 +467,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                         params.video_output_size = params.output_size;
                     }
                     let mut plane = Stabilization::default();
-                    plane.interpolation = Interpolation::Lanczos4;
+                    plane.interpolation = interpolation;
                     plane.share_wgpu_instances = true;
                     plane.set_device(stab.params.read().current_device as isize);
 

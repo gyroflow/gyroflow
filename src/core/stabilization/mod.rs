@@ -22,7 +22,7 @@ pub use compute_params::ComputeParams;
 pub use frame_transform::FrameTransform;
 pub use cpu_undistort::*;
 
-#[derive(Default, Clone, Copy)]
+#[derive(Default, Clone, Copy, Debug)]
 pub enum Interpolation {
     #[default]
     Bilinear = 2,
@@ -264,7 +264,7 @@ impl Stabilization {
 
     pub fn get_current_key(&self, buffers: &Buffers) -> String {
         format!(
-            "{}|{}|{}|{}|{}|{:?}|{:?}|{:?}",
+            "{}|{}|{}|{}|{}|{:?}|{:?}|{:?}|{:?}",
             buffers.get_checksum(),
             self.compute_params.distortion_model.id(),
             self.compute_params.digital_lens.as_ref().map(|x| x.id()).unwrap_or_default(),
@@ -272,6 +272,7 @@ impl Stabilization {
             self.kernel_flags.bits(),
             self.size,
             self.output_size,
+            self.interpolation,
             std::thread::current().id(),
         )
     }

@@ -57,7 +57,7 @@ Modal {
             "Audio":       ["audio"],
             "Output size": ["output_width", "output_height"],
             "Output path": ["output_folder", "output_filename"],
-            "Advanced":    ["encoder_options", "metadata", "keyframe_distance", "preserve_other_tracks", "pad_with_black", "audio_codec"],
+            "Advanced":    ["encoder_options", "metadata", "keyframe_distance", "preserve_other_tracks", "pad_with_black", "audio_codec", "interpolation"],
         },
         "Advanced": {
             "Background":           ["background_color", "background_mode", "background_margin", "background_margin_feather"],

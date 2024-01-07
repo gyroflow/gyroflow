@@ -86,6 +86,7 @@ MenuItem {
         property alias padWithBlack: padWithBlack.checked;
         property alias metadataComment: metadataComment.text;
         property alias audioCodec: audioCodec.currentIndex;
+        property alias interpolationMethod: interpolationMethod.currentIndex;
         property alias preserveOutputSettings: preserveOutputSettings.checked;
         property alias preserveOutputPath: preserveOutputPath.checked;
     }
@@ -130,7 +131,8 @@ MenuItem {
             keyframe_distance:     keyframeDistance.value,
             preserve_other_tracks: preserveOtherTracks.checked,
             pad_with_black:        padWithBlack.checked,
-            audio_codec:           audioCodec.currentText
+            audio_codec:           audioCodec.currentText,
+            interpolation:         interpolationMethod.currentText
         };
     }
 
@@ -225,6 +227,7 @@ MenuItem {
             if (output.hasOwnProperty("preserve_other_tracks")) preserveOtherTracks.checked = output.preserve_other_tracks;
             if (output.hasOwnProperty("pad_with_black"))        padWithBlack.checked        = output.pad_with_black;
             if (output.hasOwnProperty("audio_codec"))           Util.setComboValue(audioCodec, output.audio_codec);
+            if (output.hasOwnProperty("interpolation"))         Util.setComboValue(interpolationMethod, output.interpolation);
             if (output.hasOwnProperty("metadata")) {
                 metadataComment.text = output.metadata.comment || "";
             }
@@ -548,6 +551,17 @@ MenuItem {
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 0;
+            }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Interpolation method");
+            ComboBox {
+                id: interpolationMethod;
+                model: ["Bilinear", "Bicubic", "Lanczos4"];
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                currentIndex: 2;
             }
         }
         Label {
