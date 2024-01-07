@@ -12,7 +12,7 @@ pub struct Converter {
     pub sw_frame_converted_out: Option<frame::Video>,
 }
 impl<'a> Converter {
-    pub fn convert_pixel_format<F>(&mut self, frame: &mut frame::Video, out_frame: &mut frame::Video, format: format::Pixel, mut cb: F) -> Result<(), FFmpegError> where F: FnMut(&mut frame::Video, &mut frame::Video) + 'a {
+    pub fn convert_pixel_format<F>(&mut self, frame: &mut frame::Video, out_frame: &mut frame::Video, format: format::Pixel, interpolation: software::scaling::flag::Flags, mut cb: F) -> Result<(), FFmpegError> where F: FnMut(&mut frame::Video, &mut frame::Video) + 'a {
         if frame.format() != format {
             if self.sw_frame_converted.is_none() {
                 self.sw_frame_converted = Some(frame::Video::new(format, frame.width(), frame.height()));
@@ -24,7 +24,7 @@ impl<'a> Converter {
                     format, // output
                     frame.width(),
                     frame.height(),
-                    software::scaling::flag::Flags::LANCZOS,
+                    interpolation,
                 )?);
             }
 
@@ -38,7 +38,7 @@ impl<'a> Converter {
                     out_frame.format(), // output
                     out_frame.width(),
                     out_frame.height(),
-                    software::scaling::flag::Flags::LANCZOS,
+                    interpolation,
                 )?);
             }
 

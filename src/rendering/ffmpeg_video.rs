@@ -69,7 +69,9 @@ pub struct VideoTranscoder<'a> {
     pub on_frame_callback: Option<Box<dyn FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter, &mut RateControl) -> Result<(), FFmpegError> + 'a>>,
     pub on_encoder_initialized: Option<Box<dyn FnMut(&encoder::video::Video) -> Result<(), FFmpegError> + 'a>>,
 
-    pub processing_order: ProcessingOrder
+    pub processing_order: ProcessingOrder,
+
+    pub ffmpeg_interpolation: i32,
 }
 
 pub struct RateControl {
@@ -303,7 +305,7 @@ impl<'a> VideoTranscoder<'a> {
                                     self.buffers.converted_frame.format(), // output
                                     self.buffers.converted_frame.width(),
                                     self.buffers.converted_frame.height(),
-                                    software::scaling::flag::Flags::LANCZOS,
+                                    software::scaling::flag::Flags::from_bits_truncate(self.ffmpeg_interpolation),
                                 )?;
 
                                 unsafe {

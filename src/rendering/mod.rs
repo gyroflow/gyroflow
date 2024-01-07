@@ -250,12 +250,18 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         "Bicubic"   => Interpolation::Bicubic,
         _ => Interpolation::Lanczos4
     };
+    let ffmpeg_interpolation = match interpolation {
+        Interpolation::Bilinear => ffmpeg_next::software::scaling::flag::Flags::BILINEAR,
+        Interpolation::Bicubic  => ffmpeg_next::software::scaling::flag::Flags::BICUBIC,
+       _ => ffmpeg_next::software::scaling::flag::Flags::LANCZOS,
+    };
 
     log::debug!("interpolation: {:?}", &interpolation);
     log::debug!("proc.gpu_device: {:?}", &proc.gpu_device);
     let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(&render_options.codec, render_options.use_gpu), hwaccel_device);
     proc.video_codec = Some(encoder.0.to_owned());
     proc.video.gpu_encoding = encoder.1;
+    proc.video.ffmpeg_interpolation = ffmpeg_interpolation.bits();
     proc.video.encoder_params.hw_device_type = encoder.2;
     proc.video.encoder_params.options.set("threads", "auto");
     proc.video.encoder_params.metadata = render_options.get_metadata_dict();
@@ -613,7 +619,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                 format => { // All other convert to YUV444P16LE
                     ::log::info!("Unknown format {:?}, converting to YUV444P16LE", format);
                     // Go through 4:4:4 because of even plane dimensions
-                    converter.convert_pixel_format(input_frame, output_frame, Pixel::YUV444P16LE, |converted_frame, converted_output| {
+                    converter.convert_pixel_format(input_frame, output_frame, Pixel::YUV444P16LE, ffmpeg_interpolation, |converted_frame, converted_output| {
                         create_planes_proc!(planes,
                             (Luma16, converted_frame, converted_output, 0, [0], 65535.0),
                             (Luma16, converted_frame, converted_output, 1, [1], 65535.0),
@@ -647,7 +653,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                 undistort_frame(input_frame, output_frame)
             },
             _ => {
-                converter.convert_pixel_format(input_frame, output_frame, Pixel::YUV444P16LE, |converted_frame, converted_output| {
+                converter.convert_pixel_format(input_frame, output_frame, Pixel::YUV444P16LE, ffmpeg_interpolation, |converted_frame, converted_output| {
                     undistort_frame(converted_frame, converted_output);
                 })?;
             }
