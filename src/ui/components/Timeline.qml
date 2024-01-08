@@ -516,12 +516,19 @@ Item {
                         }
                     }
                 } else {
-                    if ((wheel.modifiers & Qt.AltModifier) || (wheel.modifiers & Qt.MetaModifier)) {
-                        zoomVertically(wheel.angleDelta.x);
-                    } else if ((wheel.modifiers & Qt.ControlModifier)) {
-                        moveHorizontally(wheel.angleDelta.y);
-                    } else {
-                        zoomHorizontally(wheel.x, wheel.angleDelta.y);
+                    if (wheel.angleDelta.x != 0) {
+                        if ((wheel.modifiers & Qt.AltModifier) || (wheel.modifiers & Qt.MetaModifier)) {
+                            zoomVertically(wheel.angleDelta.x);
+                        } else {
+                            moveHorizontally(wheel.angleDelta.x);
+                        }
+                    }
+                    if (wheel.angleDelta.y != 0) {
+                        if ((wheel.modifiers & Qt.ControlModifier)) {
+                            moveHorizontally(wheel.angleDelta.y);
+                        } else {
+                            zoomHorizontally(wheel.x, wheel.angleDelta.y);
+                        }
                     }
                 }
             }
