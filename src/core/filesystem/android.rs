@@ -324,7 +324,7 @@ impl DocumentsContract {
 
         Ok(children_uri)
     }
-    pub fn get_tree_document_id<'a>(env: &mut jni::JNIEnv<'a>, url: &str) -> Result<String> {
+    /*pub fn get_tree_document_id<'a>(env: &mut jni::JNIEnv<'a>, url: &str) -> Result<String> {
         let uri = Uri::parse(env, url)?;
         let doc_id = env.call_static_method("android/provider/DocumentsContract", "getTreeDocumentId", "(Landroid/net/Uri;)Ljava/lang/String;", &[JValue::Object(&uri)])?.l()?;
         Ok(unsafe { env.get_string_unchecked(&doc_id.into())?.into() })
@@ -336,7 +336,7 @@ impl DocumentsContract {
     pub fn is_document_uri<'a>(env: &mut jni::JNIEnv<'a>, url: &str) -> Result<bool> {
         let uri = Uri::parse(env, url)?;
         Ok(env.call_static_method("android/provider/DocumentsContract", "isDocumentUri", "(Landroid/net/Uri;)Z", &[JValue::Object(&uri)])?.z()?)
-    }
+    }*/
     pub fn delete_document<'a>(env: &mut jni::JNIEnv<'a>, resolver: &JObject<'a>, url: &str) -> Result<bool> {
         let uri = Uri::parse(env, url)?;
         Ok(env.call_static_method("android/provider/DocumentsContract", "deleteDocument", "(Landroid/content/ContentResolver;Landroid/net/Uri;)Z", &[
