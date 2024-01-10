@@ -6,6 +6,8 @@ import QtQuick.Controls as QQC
 
 TextField {
     id: root;
+    overwriteMode: false;
+
     property int precision: 0;
     property string unit: "";
     property real value: 0;
@@ -45,6 +47,11 @@ TextField {
         else if (e.modifiers & Qt.ControlModifier) value += 100 / lastDigit;
         else if (e.modifiers & Qt.ShiftModifier) value += 1000 / lastDigit;
         else value += 10 / lastDigit;
+    }
+    Keys.onPressed: (e) => {
+        if (e.key == Qt.Key_Insert) {
+            overwriteMode = !overwriteMode;
+        }
     }
     onValueChanged: {
         if (preventChange || allowText) return;
