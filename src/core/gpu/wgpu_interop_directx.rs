@@ -155,7 +155,7 @@ pub fn create_vk_image_from_d3d11_texture(device: &wgpu::Device, d3d11_device: &
 
                 Ok::<ash::vk::Image, vk::Result>(raw_image)
             })
-        }).unwrap()?; // TODO: unwrap
+        }).unwrap().unwrap()?; // TODO: unwrap
 
         Ok((raw_image, shared_texture))
     }
@@ -178,7 +178,7 @@ pub fn create_dx12_resource_from_d3d11_texture(device: &wgpu::Device, d3d11_devi
                     Err::<::d3d12::Resource, String>("Failed to OpenSharedHandle".into())
                 }
             })
-        }).unwrap()?; // TODO: unwrap
+        }).unwrap().unwrap()?; // TODO: unwrap
 
         Ok((raw_image, shared_texture))
     }
@@ -317,7 +317,7 @@ pub fn create_native_shared_buffer_dx12(device: &wgpu::Device, size: usize) -> R
 
                 Ok::<(::d3d12::Resource, usize, usize), String>((resource, handle, actual_size))
             })
-        }).unwrap() // TODO: unwrap
+        }).unwrap().unwrap() // TODO: unwrap
     }
 }
 

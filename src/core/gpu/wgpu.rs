@@ -77,7 +77,7 @@ impl WgpuWrapper {
     pub fn list_devices() -> Vec<String> {
         if ADAPTERS.read().is_empty() {
             let devices = std::panic::catch_unwind(|| -> Vec<Adapter> {
-                INSTANCE.lock().enumerate_adapters(wgpu::Backends::all()).filter(|x| !EXCLUSIONS.iter().any(|e| x.get_info().name.contains(e))).collect()
+                INSTANCE.lock().enumerate_adapters(wgpu::Backends::all()).into_iter().filter(|x| !EXCLUSIONS.iter().any(|e| x.get_info().name.contains(e))).collect()
             });
             match devices {
                 Ok(devices) => { *ADAPTERS.write() = devices; },
