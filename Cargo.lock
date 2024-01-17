@@ -1073,8 +1073,8 @@ dependencies = [
 
 [[package]]
 name = "d3d12"
-version = "0.7.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=90b078f#90b078f0371f3938219dea60ab042f469c92c333"
+version = "0.19.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=adf1e3b#adf1e3b6c546098e936f49602c4e39c0e416e1d6"
 dependencies = [
  "bitflags 2.4.2",
  "libloading 0.8.1",
@@ -1689,8 +1689,9 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "glow"
-version = "0.13.0"
-source = "git+https://github.com/grovesNL/glow.git?rev=29ff917a2b2ff7ce0a81b2cc5681de6d4735b36e#29ff917a2b2ff7ce0a81b2cc5681de6d4735b36e"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd348e04c43b32574f2de31c8bb397d96c9fcfa1371bd4ca6d8bdc464ab121b1"
 dependencies = [
  "js-sys",
  "slotmap",
@@ -1859,7 +1860,6 @@ dependencies = [
  "lru",
  "metal",
  "mimalloc",
- "naga",
  "nalgebra 0.32.3",
  "ndk 0.8.0",
  "ndk-context",
@@ -1893,9 +1893,6 @@ dependencies = [
  "urlencoding",
  "walkdir",
  "wgpu",
- "wgpu-core",
- "wgpu-hal",
- "wgpu-types",
  "winapi",
  "windows 0.52.0",
 ]
@@ -1958,9 +1955,9 @@ dependencies = [
 
 [[package]]
 name = "hermit-abi"
-version = "0.3.3"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d77f7ec81a6d05a3abb01ab6eb7590f6083d08449fe5a1c8b1e620283546ccb7"
+checksum = "5d3d0e0f38255e7fa3cf31335b3a56f05febd18025f4db5ef7a0cfb4f8da651f"
 
 [[package]]
 name = "hex"
@@ -2524,8 +2521,8 @@ dependencies = [
 
 [[package]]
 name = "naga"
-version = "0.14.2"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=90b078f#90b078f0371f3938219dea60ab042f469c92c333"
+version = "0.19.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=adf1e3b#adf1e3b6c546098e936f49602c4e39c0e416e1d6"
 dependencies = [
  "bit-set",
  "bitflags 2.4.2",
@@ -2866,7 +2863,7 @@ version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "681030a937600a36906c185595136d26abfebb4aa9c65701cefcaf8578bb982b"
 dependencies = [
- "proc-macro-crate 3.0.0",
+ "proc-macro-crate 3.1.0",
  "proc-macro2",
  "quote",
  "syn 2.0.48",
@@ -3326,9 +3323,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro-crate"
-version = "3.0.0"
+version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b2685dd208a3771337d8d386a89840f0f43cd68be8dae90a5f8c2384effc9cd"
+checksum = "6d37c51ca738a55da99dc0c4a34860fd675453b8b36209178c2249bb13651284"
 dependencies = [
  "toml_edit 0.21.0",
 ]
@@ -3511,9 +3508,9 @@ checksum = "60a357793950651c4ed0f3f52338f53b2f809f32d83a07f72909fa13e4c6c1e3"
 
 [[package]]
 name = "rayon"
-version = "1.8.0"
+version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c27db03db7734835b3f53954b534c91069375ce6ccaa2e065441e07d9b6cdb1"
+checksum = "fa7237101a77a10773db45d62004a272517633fbcc3df19d96455ede1122e051"
 dependencies = [
  "either",
  "rayon-core",
@@ -3521,9 +3518,9 @@ dependencies = [
 
 [[package]]
 name = "rayon-core"
-version = "1.12.0"
+version = "1.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ce3fb6ad83f861aac485e76e1985cd109d9a3713802152be56c3b1f0e0658ed"
+checksum = "1465873a3dfdaa8ae7cb14b4383657caab0b3e8a0aa9ae8e04b044854c8dfce2"
 dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
@@ -4280,9 +4277,9 @@ dependencies = [
 
 [[package]]
 name = "unicode-bidi"
-version = "0.3.14"
+version = "0.3.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f2528f27a9eb2b21e69c95319b30bd0efd85d09c379741b0f78ea1d86be2416"
+checksum = "08f95100a766bf4f8f28f90d77e0a5461bbdb219042e7679bebe79004fed8d75"
 
 [[package]]
 name = "unicode-ident"
@@ -4480,8 +4477,8 @@ checksum = "9193164d4de03a926d909d3bc7c30543cecb35400c02114792c2cae20d5e2dbb"
 
 [[package]]
 name = "wgpu"
-version = "0.18.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=90b078f#90b078f0371f3938219dea60ab042f469c92c333"
+version = "0.19.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=adf1e3b#adf1e3b6c546098e936f49602c4e39c0e416e1d6"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -4504,8 +4501,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-core"
-version = "0.18.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=90b078f#90b078f0371f3938219dea60ab042f469c92c333"
+version = "0.19.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=adf1e3b#adf1e3b6c546098e936f49602c4e39c0e416e1d6"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4529,8 +4526,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-hal"
-version = "0.18.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=90b078f#90b078f0371f3938219dea60ab042f469c92c333"
+version = "0.19.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=adf1e3b#adf1e3b6c546098e936f49602c4e39c0e416e1d6"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4572,8 +4569,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-types"
-version = "0.18.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=90b078f#90b078f0371f3938219dea60ab042f469c92c333"
+version = "0.19.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=adf1e3b#adf1e3b6c546098e936f49602c4e39c0e416e1d6"
 dependencies = [
  "bitflags 2.4.2",
  "js-sys",

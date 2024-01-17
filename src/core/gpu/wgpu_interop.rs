@@ -138,9 +138,9 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
                     }
 
                     unsafe {
-                        let buffer = <wgpu_hal::api::Dx12 as wgpu_hal::Api>::Device::buffer_from_raw(dx12_texture, actual_size as u64);
+                        let buffer = <wgpu::hal::api::Dx12 as wgpu::hal::Api>::Device::buffer_from_raw(dx12_texture, actual_size as u64);
 
-                        let wgpu_buffer = device.create_buffer_from_hal::<wgpu_hal::api::Dx12>(buffer, &wgpu::BufferDescriptor {
+                        let wgpu_buffer = device.create_buffer_from_hal::<wgpu::hal::api::Dx12>(buffer, &wgpu::BufferDescriptor {
                             label: None,
                             size: actual_size as u64,
                             usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::COPY_SRC,

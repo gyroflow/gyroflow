@@ -2,7 +2,7 @@
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 use wgpu::Device;
-use wgpu_hal::api::Metal;
+use wgpu::hal::api::Metal;
 use metal::foreign_types::ForeignTypeRef;
 
 pub fn create_metal_texture_from_buffer(buffer: *mut metal::MTLBuffer, width: u32, height: u32, stride: u32, format: wgpu::TextureFormat, usage: metal::MTLTextureUsage) -> metal::Texture {
@@ -29,13 +29,13 @@ pub fn create_texture_from_metal(device: &Device, image: *mut metal::MTLTexture,
     };
 
     let texture = unsafe {
-        <Metal as wgpu_hal::Api>::Device::texture_from_raw(
+        <Metal as wgpu::hal::Api>::Device::texture_from_raw(
             image,
             format,
             metal::MTLTextureType::D2,
             1,
             1,
-            wgpu_hal::CopyExtent {
+            wgpu::hal::CopyExtent {
                 width,
                 height,
                 depth: 1,
@@ -62,7 +62,7 @@ pub fn create_texture_from_metal(device: &Device, image: *mut metal::MTLTexture,
 
 pub fn create_buffer_from_metal(device: &Device, buffer: *mut metal::MTLBuffer, size: u64, usage: wgpu::BufferUsages) -> wgpu::Buffer {
     let buffer = unsafe { metal::BufferRef::from_ptr(buffer) }.to_owned();
-    let buffer = unsafe { <Metal as wgpu_hal::Api>::Device::buffer_from_raw(buffer, size) };
+    let buffer = unsafe { <Metal as wgpu::hal::Api>::Device::buffer_from_raw(buffer, size) };
     unsafe {
         device.create_buffer_from_hal::<Metal>(
             buffer,

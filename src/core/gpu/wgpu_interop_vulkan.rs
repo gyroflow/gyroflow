@@ -3,7 +3,7 @@
 
 use ash::vk;
 use wgpu::Device;
-use wgpu_hal::api::Vulkan;
+use wgpu::hal::api::Vulkan;
 
 pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u32, height: u32, format: wgpu::TextureFormat, is_in: bool, drop: bool) -> wgpu::Texture {
     let size = wgpu::Extent3d {
@@ -14,9 +14,9 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
     let drop_guard = Box::new(());
 
     let texture = unsafe {
-        <Vulkan as wgpu_hal::Api>::Device::texture_from_raw(
+        <Vulkan as wgpu::hal::Api>::Device::texture_from_raw(
             image,
-            &wgpu_hal::TextureDescriptor {
+            &wgpu::hal::TextureDescriptor {
                 label: None,
                 size,
                 mip_level_count: 1,
@@ -25,11 +25,11 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
                 format,
                 view_formats: vec![],
                 usage: if is_in {
-                    wgpu_hal::TextureUses::RESOURCE | wgpu_hal::TextureUses::COPY_SRC
+                    wgpu::hal::TextureUses::RESOURCE | wgpu::hal::TextureUses::COPY_SRC
                 } else {
-                    wgpu_hal::TextureUses::COLOR_TARGET | wgpu_hal::TextureUses::COPY_DST
+                    wgpu::hal::TextureUses::COLOR_TARGET | wgpu::hal::TextureUses::COPY_DST
                 },
-                memory_flags: wgpu_hal::MemoryFlags::empty(),
+                memory_flags: wgpu::hal::MemoryFlags::empty(),
             },
             if drop { None } else { Some(drop_guard) },
         )
@@ -57,7 +57,7 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
 }
 
 pub fn create_buffer_from_vk_buffer(device: &Device, buffer: vk::Buffer, size: u64, is_in: bool) -> wgpu::Buffer {
-    let buffer = unsafe { <Vulkan as wgpu_hal::Api>::Device::buffer_from_raw(buffer) };
+    let buffer = unsafe { <Vulkan as wgpu::hal::Api>::Device::buffer_from_raw(buffer) };
 
     unsafe {
         device.create_buffer_from_hal::<Vulkan>(

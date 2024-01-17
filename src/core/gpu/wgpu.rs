@@ -178,14 +178,14 @@ impl WgpuWrapper {
                 BufferSource::MetalBuffer { command_queue, .. } if !(*command_queue).is_null() => {
                     unsafe {
                         use metal::foreign_types::ForeignType;
-                        use wgpu_hal::api::Metal;
+                        use wgpu::hal::api::Metal;
 
                         let mtl_cq = metal::CommandQueue::from_ptr(*command_queue);
                         let mtl_dev = mtl_cq.device();
 
-                        adapter.create_device_from_hal(wgpu_hal::OpenDevice::<Metal> {
-                            device: <Metal as wgpu_hal::Api>::Device::device_from_raw(mtl_dev.to_owned(), wgpu::Features::empty()),
-                            queue: <Metal as wgpu_hal::Api>::Queue::queue_from_raw(mtl_cq, 1.0)
+                        adapter.create_device_from_hal(wgpu::hal::OpenDevice::<Metal> {
+                            device: <Metal as wgpu::hal::Api>::Device::device_from_raw(mtl_dev.to_owned(), wgpu::Features::empty()),
+                            queue: <Metal as wgpu::hal::Api>::Queue::queue_from_raw(mtl_cq, 1.0)
                         }, &wgpu::DeviceDescriptor {
                             label: None,
                             required_features: wgpu::Features::empty(),

@@ -2,7 +2,8 @@
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 use wgpu::TextureFormat;
-use wgpu_hal::api::Vulkan;
+use wgpu::hal::api::Vulkan;
+use wgpu::hal::api::Dx12;
 use windows::Win32::Graphics::Dxgi::Common::*;
 use windows::Win32::Graphics::Dxgi::*;
 use windows::Win32::Graphics::Direct3D11::*;
@@ -165,7 +166,7 @@ pub fn create_dx12_resource_from_d3d11_texture(device: &wgpu::Device, d3d11_devi
     unsafe {
         let (handle, shared_texture) = get_shared_texture_d3d11(d3d11_device, texture)?;
 
-        let raw_image = device.as_hal::<wgpu_hal::api::Dx12, _, _>(|hdevice| {
+        let raw_image = device.as_hal::<Dx12, _, _>(|hdevice| {
             hdevice.map(|hdevice| {
                 let raw_device = hdevice.raw_device();
                 use winapi::Interface;
@@ -186,15 +187,15 @@ pub fn create_dx12_resource_from_d3d11_texture(device: &wgpu::Device, d3d11_devi
 
 pub fn create_texture_from_dx12_resource(device: &wgpu::Device, resource: ::d3d12::Resource, desc: &wgpu::TextureDescriptor) -> wgpu::Texture {
     unsafe {
-        let texture = <wgpu_hal::api::Dx12 as wgpu_hal::Api>::Device::texture_from_raw(resource, desc.format, desc.dimension, desc.size, 1, 1);
+        let texture = <Dx12 as wgpu::hal::Api>::Device::texture_from_raw(resource, desc.format, desc.dimension, desc.size, 1, 1);
 
-        device.create_texture_from_hal::<wgpu_hal::api::Dx12>(texture, &desc)
+        device.create_texture_from_hal::<Dx12>(texture, &desc)
     }
 }
 
 /*pub fn create_native_shared_texture_dx12(device: &wgpu::Device, desc: &wgpu::TextureDescriptor) -> Result<(::d3d12::Resource, usize, usize), String> {
     unsafe {
-        device.as_hal::<wgpu_hal::api::Dx12, _, _>(|hdevice| {
+        device.as_hal::<Dx12, _, _>(|hdevice| {
             hdevice.map(|hdevice| {
                 let raw_device = hdevice.raw_device();
                 use winapi::um::d3d12;
@@ -258,7 +259,7 @@ pub fn create_texture_from_dx12_resource(device: &wgpu::Device, resource: ::d3d1
 
 pub fn create_native_shared_buffer_dx12(device: &wgpu::Device, size: usize) -> Result<(::d3d12::Resource, usize, usize), String> {
     unsafe {
-        device.as_hal::<wgpu_hal::api::Dx12, _, _>(|hdevice| {
+        device.as_hal::<Dx12, _, _>(|hdevice| {
             hdevice.map(|hdevice| {
                 let raw_device = hdevice.raw_device();
                 use winapi::um::d3d12;

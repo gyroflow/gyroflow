@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2023 Adrian <adrian.eddy at gmail>
 
-use wgpu_hal::api::Vulkan;
+use wgpu::hal::api::Vulkan;
 use ash::vk::{ self, ImageCreateInfo, BufferCreateInfo };
 
 

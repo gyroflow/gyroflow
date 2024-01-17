@@ -941,12 +941,11 @@ impl RenderQueue {
                 } else {
                     vec![None]
                 };
-                let mut render_options2 = render_options.clone();
                 'ranges: for range in ranges_to_render {
                     if cancel_flag.load(SeqCst) { break; }
                     let mut i = 0;
                     loop {
-                        let result = rendering::render(stab.clone(), progress.clone(), &input_file, &render_options2, i, range, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone());
+                        let result = rendering::render(stab.clone(), progress.clone(), &input_file, &render_options, i, range, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone());
                         if let Err(e) = result {
                             if let rendering::FFmpegError::PixelFormatNotSupported((fmt, supported)) = e {
                                 convert_format((format!("{:?}", fmt), supported.into_iter().map(|v| format!("{:?}", v)).collect::<Vec<String>>().join(",")));

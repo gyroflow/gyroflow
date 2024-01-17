@@ -4,7 +4,7 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 
-use wgpu_hal::api::Vulkan;
+use wgpu::hal::api::Vulkan;
 use ash::vk::{ self, ImageCreateInfo, BufferCreateInfo };
 
 use CUmemAllocationType::*;

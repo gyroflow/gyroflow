@@ -39,7 +39,7 @@ time = { version = "0.3.31", features = ["local-offset"] }
 itertools = "0.12.0"
 num = "0.4.1"
 base91 = "0.1.0"
-bitflags = "2.4.1"
+bitflags = "2.4.2"
 enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.3.1"
@@ -77,15 +77,10 @@ rustfft = "6.1.0"
 include_dir = { version = "0.7.3", features = ["glob"] }
 opencv = { version = "0.88.7", features = ["clang-runtime"], optional = true }
 
-wgpu       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "90b078f", features = ["spirv"] }
-wgpu-hal   = { git = "https://github.com/gfx-rs/wgpu.git", rev = "90b078f" }
-wgpu-types = { git = "https://github.com/gfx-rs/wgpu.git", rev = "90b078f" }
-wgpu-core  = { git = "https://github.com/gfx-rs/wgpu.git", rev = "90b078f" }
-naga       = { git = "https://github.com/gfx-rs/wgpu.git", rev = "90b078f", features = ["clone", "spv-in", "compact"] }
-
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "adf1e3b", features = ["spirv", "naga-ir"] }
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "90b078f"
+rev = "adf1e3b"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
