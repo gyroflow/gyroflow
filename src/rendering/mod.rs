@@ -167,14 +167,15 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
     encoders
 }
 
-pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &gyroflow_core::InputFile, render_options: &RenderOptions, gpu_decoder_index: i32, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>, encoder_initialized: F2) -> Result<(), FFmpegError>
+pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &gyroflow_core::InputFile, render_options: &RenderOptions, gpu_decoder_index: i32, trim_range_ind: Option<usize>, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>, encoder_initialized: F2) -> Result<(), FFmpegError>
     where F: Fn((f64, usize, usize, bool, bool)) + Send + Sync + Clone,
           F2: Fn(String) + Send + Sync + Clone
 {
     log::debug!("ffmpeg_hw::supported_gpu_backends: {:?}", ffmpeg_hw::supported_gpu_backends());
 
     let params = stab.params.read();
-    let trim_ranges = params.trim_ranges.clone();
+    let org_trim_ranges = params.trim_ranges.clone();
+    let trim_ranges = trim_range_ind.map(|x| vec![params.trim_ranges[x]]).unwrap_or_else(|| params.trim_ranges.clone());
     let trim_ratio = if !render_options.pad_with_black && !render_options.preserve_other_tracks {
         params.get_trim_ratio()
     } else {
@@ -403,6 +404,12 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
 
     let progress2 = progress.clone();
     let mut process_frame = 0;
+    if let Some(i) = trim_range_ind {
+        for x in 0..i {
+            let x = org_trim_ranges[x];
+            process_frame += ((x.1 - x.0) * total_frame_count as f64).round() as usize;
+        }
+    }
 
     proc.on_encoder_initialized(|enc: &ffmpeg_next::encoder::video::Video| {
         encoder_initialized(enc.codec().map(|x| x.name().to_string()).unwrap_or_default());
@@ -663,7 +670,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         Ok(())
     });
 
-    let filename = &render_options.output_filename;
+    let mut filename = render_options.output_filename.clone();
     let folder = &render_options.output_folder;
     if cfg!(not(any(target_os = "android", target_os = "ios"))) && !gyroflow_core::filesystem::exists(folder) {
         let path = gyroflow_core::filesystem::url_to_path(folder);
@@ -671,19 +678,26 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
             let _ = std::fs::create_dir_all(path);
         }
     }
+    if let Some(ind) = trim_range_ind {
+        if let Some(pos) = filename.rfind('.') {
+            filename.insert_str(pos, &format!("-{:0>3}", ind + 1));
+        }
+    }
 
-    proc.render(&fs_base, folder, filename, (output_width as u32, output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
+    proc.render(&fs_base, folder, &filename, (output_width as u32, output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
 
     drop(proc);
 
-    let output_url = gyroflow_core::filesystem::get_file_url(folder, filename, false);
+    let output_url = gyroflow_core::filesystem::get_file_url(folder, &filename, false);
 
     let re = regex::Regex::new(r#"%[0-9]+d"#).unwrap();
-    if re.is_match(filename) {
+    if re.is_match(&filename) {
         ::log::debug!("Removing {output_url}");
         let _ = gyroflow_core::filesystem::remove_file(&output_url);
     }
-    progress((1.0, render_frame_count, render_frame_count, true, false));
+    if trim_range_ind.is_none() || trim_range_ind == Some(org_trim_ranges.len() - 1) {
+        progress((1.0, render_frame_count, render_frame_count, true, false));
+    }
 
     crate::util::update_file_times(&output_url, &input_file.url);
 

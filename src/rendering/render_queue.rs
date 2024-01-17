@@ -82,6 +82,7 @@ pub struct RenderOptions {
     pub keyframe_distance: f64,
     pub preserve_other_tracks: bool,
     pub pad_with_black: bool,
+    pub export_trims_separately: bool,
     pub audio_codec: String,
     pub interpolation: String,
 }
@@ -121,20 +122,21 @@ impl RenderOptions {
         if let serde_json::Value::Object(obj) = obj {
             if let Some(v) = obj.get("codec")          .and_then(|x| x.as_str())  { self.codec = v.to_string(); }
             if let Some(v) = obj.get("codec_options")  .and_then(|x| x.as_str())  { self.codec_options = v.to_string(); }
-            if let Some(v)  = obj.get("output_width")   .and_then(|x| x.as_u64())  { self.output_width = v as usize; }
-            if let Some(v)  = obj.get("output_height")  .and_then(|x| x.as_u64())  { self.output_height = v as usize; }
-            if let Some(v)  = obj.get("bitrate")        .and_then(|x| x.as_f64())  { self.bitrate = v; }
+            if let Some(v) = obj.get("output_width")   .and_then(|x| x.as_u64())  { self.output_width = v as usize; }
+            if let Some(v) = obj.get("output_height")  .and_then(|x| x.as_u64())  { self.output_height = v as usize; }
+            if let Some(v) = obj.get("bitrate")        .and_then(|x| x.as_f64())  { self.bitrate = v; }
             if let Some(v) = obj.get("use_gpu")        .and_then(|x| x.as_bool()) { self.use_gpu = v; }
             if let Some(v) = obj.get("audio")          .and_then(|x| x.as_bool()) { self.audio = v; }
             if let Some(v) = obj.get("pixel_format")   .and_then(|x| x.as_str())  { self.pixel_format = v.to_string(); }
 
             // Advanced
-            if let Some(v) = obj.get("encoder_options")      .and_then(|x| x.as_str())  { self.encoder_options = v.to_string(); }
-            if let Some(v)  = obj.get("keyframe_distance")    .and_then(|x| x.as_f64())  { self.keyframe_distance = v; }
-            if let Some(v) = obj.get("preserve_other_tracks").and_then(|x| x.as_bool()) { self.preserve_other_tracks = v; }
-            if let Some(v) = obj.get("pad_with_black")       .and_then(|x| x.as_bool()) { self.pad_with_black = v; }
-            if let Some(v) = obj.get("audio_codec")          .and_then(|x| x.as_str())  { self.audio_codec = v.to_string(); }
-            if let Some(v) = obj.get("interpolation")        .and_then(|x| x.as_str())  { self.interpolation = v.to_string(); }
+            if let Some(v) = obj.get("encoder_options")        .and_then(|x| x.as_str())  { self.encoder_options = v.to_string(); }
+            if let Some(v) = obj.get("keyframe_distance")      .and_then(|x| x.as_f64())  { self.keyframe_distance = v; }
+            if let Some(v) = obj.get("preserve_other_tracks")  .and_then(|x| x.as_bool()) { self.preserve_other_tracks = v; }
+            if let Some(v) = obj.get("pad_with_black")         .and_then(|x| x.as_bool()) { self.pad_with_black = v; }
+            if let Some(v) = obj.get("export_trims_separately").and_then(|x| x.as_bool()) { self.export_trims_separately = v; }
+            if let Some(v) = obj.get("audio_codec")            .and_then(|x| x.as_str())  { self.audio_codec = v.to_string(); }
+            if let Some(v) = obj.get("interpolation")          .and_then(|x| x.as_str())  { self.interpolation = v.to_string(); }
 
             if let Some(v) = obj.get("metadata").and_then(|x| x.as_object())  {
                 if let Some(s) = v.get("comment").and_then(|x| x.as_str()) { self.metadata.comment = s.to_string(); }
@@ -933,31 +935,41 @@ impl RenderQueue {
                     }
                 }
 
-                let mut i = 0;
-                loop {
-                    let result = rendering::render(stab.clone(), progress.clone(), &input_file, &render_options, i, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone());
-                    if let Err(e) = result {
-                        if let rendering::FFmpegError::PixelFormatNotSupported((fmt, supported)) = e {
-                            convert_format((format!("{:?}", fmt), supported.into_iter().map(|v| format!("{:?}", v)).collect::<Vec<String>>().join(",")));
+                let num_ranges = stab.params.read().trim_ranges.len();
+                let ranges_to_render = if render_options.export_trims_separately {
+                    (0..num_ranges).map(Some).collect::<Vec<_>>()
+                } else {
+                    vec![None]
+                };
+                let mut render_options2 = render_options.clone();
+                'ranges: for range in ranges_to_render {
+                    if cancel_flag.load(SeqCst) { break; }
+                    let mut i = 0;
+                    loop {
+                        let result = rendering::render(stab.clone(), progress.clone(), &input_file, &render_options2, i, range, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone());
+                        if let Err(e) = result {
+                            if let rendering::FFmpegError::PixelFormatNotSupported((fmt, supported)) = e {
+                                convert_format((format!("{:?}", fmt), supported.into_iter().map(|v| format!("{:?}", v)).collect::<Vec<String>>().join(",")));
+                                break 'ranges;
+                            }
+                            if rendered_frames.load(SeqCst) == 0 {
+                                if (0..4).contains(&i) {
+                                    // Try 4 times with different GPU decoders
+                                    i += 1;
+                                    continue;
+                                }
+                                if (0..5).contains(&i) {
+                                    // Try without GPU decoder
+                                    i = -1;
+                                    continue;
+                                }
+                            }
+                            err(("An error occured: %1".to_string(), e.to_string()));
+                            break 'ranges;
+                        } else {
+                            // Render ok
                             break;
                         }
-                        if rendered_frames.load(SeqCst) == 0 {
-                            if (0..4).contains(&i) {
-                                // Try 4 times with different GPU decoders
-                                i += 1;
-                                continue;
-                            }
-                            if (0..5).contains(&i) {
-                                // Try without GPU decoder
-                                i = -1;
-                                continue;
-                            }
-                        }
-                        err(("An error occured: %1".to_string(), e.to_string()));
-                        break;
-                    } else {
-                        // Render ok
-                        break;
                     }
                 }
             });

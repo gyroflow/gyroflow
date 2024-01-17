@@ -84,6 +84,7 @@ MenuItem {
         property alias keyframeDistance: keyframeDistance.value;
         property alias preserveOtherTracks: preserveOtherTracks.checked;
         property alias padWithBlack: padWithBlack.checked;
+        property alias exportTrimsSeparately: exportTrimsSeparately.checked;
         property alias metadataComment: metadataComment.text;
         property alias audioCodec: audioCodec.currentIndex;
         property alias interpolationMethod: interpolationMethod.currentIndex;
@@ -131,6 +132,7 @@ MenuItem {
             keyframe_distance:     keyframeDistance.value,
             preserve_other_tracks: preserveOtherTracks.checked,
             pad_with_black:        padWithBlack.checked,
+            export_trims_separately: exportTrimsSeparately.checked,
             audio_codec:           audioCodec.currentText,
             interpolation:         interpolationMethod.currentText
         };
@@ -226,6 +228,7 @@ MenuItem {
             if (output.hasOwnProperty("keyframe_distance"))     keyframeDistance.value      = +output.keyframe_distance;
             if (output.hasOwnProperty("preserve_other_tracks")) preserveOtherTracks.checked = output.preserve_other_tracks;
             if (output.hasOwnProperty("pad_with_black"))        padWithBlack.checked        = output.pad_with_black;
+            if (output.hasOwnProperty("export_trims_separately")) exportTrimsSeparately.checked = output.export_trims_separately;
             if (output.hasOwnProperty("audio_codec"))           Util.setComboValue(audioCodec, output.audio_codec);
             if (output.hasOwnProperty("interpolation"))         Util.setComboValue(interpolationMethod, output.interpolation);
             if (output.hasOwnProperty("metadata")) {
@@ -537,6 +540,13 @@ MenuItem {
         CheckBox {
             id: padWithBlack;
             text: qsTr("Use black frames outside trim range and keep original file duration");
+            checked: false;
+            width: parent.width;
+            Component.onCompleted: contentItem.wrapMode = Text.WordWrap;
+        }
+        CheckBox {
+            id: exportTrimsSeparately;
+            text: qsTr("Export trim ranges as separate videos");
             checked: false;
             width: parent.width;
             Component.onCompleted: contentItem.wrapMode = Text.WordWrap;

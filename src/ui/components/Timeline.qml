@@ -8,13 +8,12 @@ import Qt.labs.settings
 
 import Gyroflow
 
-// TODO: multiple trims
-
 Item {
     id: root;
     property var trimRanges: [];
     property var prevTrimRanges: [];
     property bool trimActive: trimRanges.length > 0;
+    property bool restrictTrim: true;
 
     property real durationMs: 0;
     property real orgDurationMs: 0;
@@ -57,21 +56,59 @@ Item {
         return new Date(time).toISOString().substring(11, 11+8);
     }
 
-    function setTrimStart(v: real) {
-        if (trimRanges.length > 0) {
-            trimRanges[0][0] = v;
-        } else {
-            trimRanges = [[v, 1.0]];
+    function cleanupTrimRanges() {
+        trimRanges.sort(function(a, b) { return a[0] - b[0]; });
+        for (let i = 0; i < trimRanges.length; ++i) {
+            const [start, end] = trimRanges[i];
+            if (start >= end) {
+                trimRanges.splice(i, 1);
+                i--;
+            }
         }
         root.trimRangesChanged();
     }
-    function setTrimEnd(v: real) {
-        if (trimRanges.length > 0) {
-            trimRanges[0][1] = v;
+
+    function closestTrimRange(pos: real, isStart: bool): int {
+        let closest = -1;
+        let closestDist = 1e9;
+        for (let i = 0; i < trimRanges.length; i++) {
+            const [start, end] = trimRanges[i];
+            const dist = isStart? Math.abs(pos - start) : Math.abs(pos - end);
+            if (dist < closestDist) {
+                closest = i;
+                closestDist = dist;
+            }
+        }
+        return closest;
+    }
+
+    function setTrimStart(i: int, v: real) {
+        if (trimRanges.length > 0 && i > -1) {
+            trimRanges[i][0] = v;
+            if (trimRanges[i][1] <= v) trimRanges[i][1] = v + 0.01;
+        } else {
+            trimRanges = [[v, 1.0]];
+        }
+        root.cleanupTrimRanges();
+    }
+    function setTrimEnd(i: int, v: real) {
+        if (trimRanges.length > 0 && i > -1) {
+            trimRanges[i][1] = v;
+            if (trimRanges[i][0] >= v) trimRanges[i][0] = v - 0.01;
         } else {
             trimRanges = [[0.0, v]];
         }
-        root.trimRangesChanged();
+        root.cleanupTrimRanges();
+    }
+    function addTrimStart(v: real) {
+        if (!trimRanges.length) return setTrimStart(-1, v);
+        trimRanges.push([v, v + 0.05]);
+        root.cleanupTrimRanges();
+    }
+    function addTrimEnd(v: real) {
+        if (!trimRanges.length) return setTrimEnd(-1, v);
+        trimRanges.push([v - 0.05, v]);
+        root.cleanupTrimRanges();
     }
     function setTrimRanges(ranges: list<var>) {
         for (const [start, end] of ranges) {
@@ -81,7 +118,7 @@ Item {
             }
         }
         trimRanges = ranges;
-        root.trimRangesChanged();
+        root.cleanupTrimRanges();
     }
     function getTrimRanges(): list<var> {
         if (trimRanges.length > 0) {
@@ -93,7 +130,7 @@ Item {
     function resetTrim() {
         trimRanges = prevTrimRanges;
         prevTrimRanges = [];
-        root.trimRangesChanged();
+        root.cleanupTrimRanges();
     }
     function resetZoom() {
         visibleAreaLeft  = 0.0;
@@ -188,6 +225,7 @@ Item {
 
     Settings {
         property alias timelineChart: chart.viewMode;
+        property alias restrictTrimRange: root.restrictTrim;
     }
 
     focus: true;
@@ -618,12 +656,49 @@ Item {
                         controller.clear_offsets();
                     }
                 }
-                Action {
-                    id: clearTrimAction;
-                    enabled: root.trimActive;
-                    iconName: "loop";
-                    text: qsTr("Clear trim range");
-                    onTriggered: root.resetTrim();
+                QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
+                Menu {
+                    font.pixelSize: 11.5 * dpiScale;
+                    title: qsTr("Trim range");
+                    Action {
+                        iconName: "plus";
+                        text: qsTr("Add new range");
+                        onTriggered: {
+                            root.trimRanges.push([root.position - 0.05, root.position + 0.05]);
+                            root.cleanupTrimRanges();
+                        }
+                    }
+                    Action {
+                        property int currentTrimRange: {
+                            for (let i = 0; i < root.trimRanges.length; ++i) {
+                                const [start, end] = root.trimRanges[i];
+                                if (root.position >= start - 0.001 && root.position <= end + 0.001) {
+                                    return i;
+                                }
+                            }
+                            return -1;
+                        };
+                        enabled: currentTrimRange != -1;
+                        iconName: "bin;#f67575";
+                        text: qsTr("Delete this range");
+                        onTriggered: {
+                            root.trimRanges.splice(currentTrimRange, 1);
+                            root.cleanupTrimRanges();
+                        }
+                    }
+                    Action {
+                        enabled: root.trimActive;
+                        iconName: "close;#f67575";
+                        text: qsTr("Clear all");
+                        onTriggered: root.resetTrim();
+                    }
+                    Action {
+                        enabled: root.trimActive;
+                        checked: enabled && root.restrictTrim;
+                        iconName: "loop";
+                        text: qsTr("Restrict playback to trim range");
+                        onTriggered: root.restrictTrim = !root.restrictTrim;
+                    }
                 }
                 QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
                 Menu {
@@ -676,8 +751,8 @@ Item {
                         if (!vid.playing) root.setPosition(dragPos);
                     }
                     visible: root.trimActive;
-                    onChangeTrimStart: (val) => { root.trimRanges[index][0] = val; root.trimRangesChanged(); };
-                    onChangeTrimEnd:   (val) => { root.trimRanges[index][1] = val; root.trimRangesChanged(); };
+                    onChangeTrimStart: (val) => { root.setTrimStart(index, val); };
+                    onChangeTrimEnd:   (val) => { root.setTrimEnd  (index, val); };
                     onReset: root.resetTrim();
                 }
             }

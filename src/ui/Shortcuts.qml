@@ -54,14 +54,28 @@ Item {
     Shortcut {
         sequences: ["i", "["];
         onActivated: {
-            videoArea.timeline.setTrimStart(videoArea.timeline.position);
+            videoArea.timeline.setTrimStart(videoArea.timeline.closestTrimRange(videoArea.timeline.position, true), videoArea.timeline.position);
         }
     }
     // Set trim end here
     Shortcut {
         sequences: ["o", "]"];
         onActivated: {
-            videoArea.timeline.setTrimEnd(videoArea.timeline.position);
+            videoArea.timeline.setTrimEnd(videoArea.timeline.closestTrimRange(videoArea.timeline.position, false), videoArea.timeline.position);
+        }
+    }
+    // Add new trim start here
+    Shortcut {
+        sequences: ["Ctrl+i", "Ctrl+["];
+        onActivated: {
+            videoArea.timeline.addTrimStart(videoArea.timeline.position);
+        }
+    }
+    // Add new trim end here
+    Shortcut {
+        sequences: ["Ctrl+o", "Ctrl+]"];
+        onActivated: {
+            videoArea.timeline.addTrimEnd(videoArea.timeline.position);
         }
     }
     // Clear trim range
@@ -204,6 +218,35 @@ Item {
     Shortcut {
         sequence: "Ctrl+G";
         onActivated: window.videoArea.gridGuide.isBlack = !window.videoArea.gridGuide.isBlack;
+    }
+
+    // Play backwards
+    Shortcut {
+        id: j;
+        sequence: "J";
+        property int currentX: 1;
+        onActivated: {
+            //videoArea.vid.playbackRate = -1 * [1, 2, 4, 8, 16][currentX++ % 5];
+            videoArea.vid.seekToFrameDelta(-100);
+            videoArea.vid.play();
+        }
+    }
+    // Play/Pause + reset playback rate
+    Shortcut {
+        sequences: ["K"];
+        onActivated: {
+            videoArea.vid.playbackRate = 1;
+            j.currentX = l.currentX = 0;
+            if (videoArea.vid.playing) videoArea.vid.pause();
+            else                       videoArea.vid.play();
+        }
+    }
+    // Play forward
+    Shortcut {
+        id: l;
+        sequence: "L";
+        property int currentX: 1;
+        onActivated: { videoArea.vid.playbackRate = 1 * [1, 2, 4, 8, 16][currentX++ % 5]; videoArea.vid.play(); }
     }
 
     // Horizon lock roll adjustment shortcuts

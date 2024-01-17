@@ -484,6 +484,7 @@ fn setup_defaults(stab: Arc<StabilizationManager>, queue: &mut RenderQueue) -> s
             "keyframe_distance":     settings.get("keyframeDistance").unwrap_or(&"1".into()).parse::<u32>().unwrap(),
             "preserve_other_tracks": settings.get("preserveOtherTracks").unwrap_or(&"false".into()).parse::<bool>().unwrap(),
             "pad_with_black":        settings.get("padWithBlack").unwrap_or(&"false".into()).parse::<bool>().unwrap(),
+            "export_trims_separately":settings.get("exportTrimsSeparately").unwrap_or(&"false".into()).parse::<bool>().unwrap(),
             "audio_codec":           audio_codecs.get(settings.get("audioCodec").unwrap_or(&"0".into()).parse::<usize>().unwrap()).unwrap_or(&"AAC"),
             "interpolation":         interpolations.get(settings.get("interpolationMethod").unwrap_or(&"2".into()).parse::<usize>().unwrap()).unwrap_or(&"Lanczos4"),
         },

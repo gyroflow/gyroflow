@@ -816,7 +816,7 @@ Item {
                     anchors.centerIn: parent;
                     spacing: 5 * dpiScale;
                     enabled: vid.loaded;
-                    Button { text: "["; font.bold: true; onClicked: timeline.setTrimStart(timeline.position); tooltip: qsTr("Trim start"); transparentOnMobile: true; }
+                    Button { text: "["; font.bold: true; onClicked: timeline.setTrimStart(timeline.closestTrimRange(timeline.position, true), timeline.position); tooltip: qsTr("Trim start"); transparentOnMobile: true; }
                     Button { iconName: "chevron-left"; tooltip: qsTr("Previous frame"); onClicked: vid.seekToFrameDelta(-1); transparentOnMobile: true; }
                     Button {
                         onClicked: { if (vid.playing) vid.pause(); else vid.play(); }
@@ -825,7 +825,7 @@ Item {
                         transparentOnMobile: true;
                     }
                     Button { iconName: "chevron-right"; tooltip: qsTr("Next frame"); onClicked: vid.seekToFrameDelta(1); transparentOnMobile: true; }
-                    Button { text: "]"; font.bold: true; onClicked: timeline.setTrimEnd(timeline.position); tooltip: qsTr("Trim end"); transparentOnMobile: true; }
+                    Button { text: "]"; font.bold: true; onClicked: timeline.setTrimEnd(timeline.closestTrimRange(timeline.position, false), timeline.position); tooltip: qsTr("Trim end"); transparentOnMobile: true; }
                     Button { visible: isMobile; iconName: "menu"; onClicked: timeline.toggleContextMenu(this); tooltip: qsTr("Show timeline menu"); transparentOnMobile: true; leftPadding: 10 * dpiScale; rightPadding: 10 * dpiScale; }
                 }
             }
@@ -966,8 +966,15 @@ Item {
 
                 onTrimRangesChanged: {
                     controller.set_trim_ranges(timeline.trimRanges.map(x => x[0] + ":" + x[1]).join(";"));
-                    const ranges = timeline.getTrimRanges();
-                    vid.setPlaybackRange(ranges[0][0] * vid.duration, ranges[ranges.length - 1][1] * vid.duration);
+                    restrictTrimChanged();
+                }
+                onRestrictTrimChanged: {
+                    if (restrictTrim) {
+                        const ranges = timeline.getTrimRanges();
+                        vid.setPlaybackRange(ranges[0][0] * vid.duration, ranges[ranges.length - 1][1] * vid.duration);
+                    } else {
+                        vid.setPlaybackRange(0, vid.duration);
+                    }
                 }
             }
         }
