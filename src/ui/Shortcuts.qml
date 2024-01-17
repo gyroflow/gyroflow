@@ -38,16 +38,20 @@ Item {
     }
     // Go to trim start
     Shortcut {
-        sequence: "Home";
+        sequences: ["Home", "H"];
         onActivated: {
-            videoArea.vid.currentFrame = videoArea.timeline.frameAtPosition(videoArea.timeline.getTrimRanges()[0][0]) + 1;
+            let closestRange = videoArea.timeline.closestTrimRange(videoArea.timeline.position, true);
+            if (closestRange == -1) closestRange = 0;
+            videoArea.vid.currentFrame = videoArea.timeline.frameAtPosition(videoArea.timeline.getTrimRanges()[closestRange][0]) + 1;
         }
     }
     // Go to trim end
     Shortcut {
-        sequence: "End";
+        sequences: ["End", ";"];
         onActivated: {
-            videoArea.vid.currentFrame = videoArea.timeline.frameAtPosition(videoArea.timeline.getTrimRanges()[0][1] || 1) - 1;
+            let closestRange = videoArea.timeline.closestTrimRange(videoArea.timeline.position, false);
+            if (closestRange == -1) closestRange = 0;
+            videoArea.vid.currentFrame = videoArea.timeline.frameAtPosition(videoArea.timeline.getTrimRanges()[closestRange][1]) - 1;
         }
     }
     // Set trim start here
@@ -227,7 +231,7 @@ Item {
         property int currentX: 1;
         onActivated: {
             //videoArea.vid.playbackRate = -1 * [1, 2, 4, 8, 16][currentX++ % 5];
-            videoArea.vid.seekToFrameDelta(-100);
+            videoArea.vid.seekToFrameDelta(-500);
             videoArea.vid.play();
         }
     }

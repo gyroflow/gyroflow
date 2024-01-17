@@ -963,6 +963,8 @@ Item {
                 anchors.fill: parent;
                 fullScreen: root.fullScreen;
                 visible: vid.loaded || !window.isMobileLayout;
+                property bool prevRestrictTrim: false;
+                Component.onCompleted: prevRestrictTrim = restrictTrim;
 
                 onTrimRangesChanged: {
                     controller.set_trim_ranges(timeline.trimRanges.map(x => x[0] + ":" + x[1]).join(";"));
@@ -972,9 +974,10 @@ Item {
                     if (restrictTrim) {
                         const ranges = timeline.getTrimRanges();
                         vid.setPlaybackRange(ranges[0][0] * vid.duration, ranges[ranges.length - 1][1] * vid.duration);
-                    } else {
-                        vid.setPlaybackRange(0, vid.duration);
+                    } else if (prevRestrictTrim != restrictTrim) {
+                        vid.setPlaybackRange(0, -1);
                     }
+                    prevRestrictTrim = restrictTrim;
                 }
             }
         }
