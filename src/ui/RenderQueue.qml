@@ -158,7 +158,7 @@ Item {
                         const folder = render_queue.get_job_output_folder(job_id);
                         const filename = render_queue.get_job_output_filename(job_id);
                         let options = [];
-                        if (Qt.platform.os != "ios") {
+                        if (Qt.platform.os != "ios" && !window.exportSettings.exportTrimsSeparately.checked) {
                             options.push({ text: qsTr("Open rendered file"), clicked: () => filesystem.open_file_externally(filesystem.get_file_url(folder, filename, false)) });
                         }
                         if (Qt.platform.os != "android" && Qt.platform.os != "ios") {

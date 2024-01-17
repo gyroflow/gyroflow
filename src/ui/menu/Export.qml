@@ -105,6 +105,7 @@ MenuItem {
     property alias outAudio: audio.checked;
     property alias preserveOutputSettings: preserveOutputSettings;
     property alias preserveOutputPath: preserveOutputPath;
+    property alias exportTrimsSeparately: exportTrimsSeparately;
     property string outCodecOptions: "";
     property real originalWidth: outWidth;
     property real originalHeight: outHeight;
