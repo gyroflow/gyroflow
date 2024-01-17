@@ -31,7 +31,7 @@ Modal {
             "IMU orientation":    ["imu_orientation"],
             "Integration method": ["integration_method"],
         },
-        "Trim range": ["trim_start", "trim_end"],
+        "Trim range": ["trim_ranges"],
         "Offsets":    ["offsets"],
         "Keyframes":  ["keyframes"]
     },
@@ -66,7 +66,7 @@ Modal {
         }
     }];
 
-    property var defaultOff: ["trim_start", "offsets", "video_infofps_scale", "video_inforotation", "synchronizationdo_autosync"];
+    property var defaultOff: ["trim_ranges", "offsets", "video_infofps_scale", "video_inforotation", "synchronizationdo_autosync"];
 
     text: isPreset? qsTr("Select settings you want to include in the preset")
                   : qsTr("Select settings you want to apply to all items in the render queue");

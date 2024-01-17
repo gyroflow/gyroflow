@@ -219,28 +219,8 @@ impl SmoothingAlgorithm for DefaultAlgo {
         };
         let noop = |v| v;
 
-        let mut _quats_copy = None;
-        let quats = if self.trim_range_only && (stabilization_params.trim_start != 0.0 || stabilization_params.trim_end != 1.0) {
-            let ts_start = ((duration * stabilization_params.trim_start) * 1000.0).round() as i64;
-            let ts_end   = ((duration * stabilization_params.trim_end) * 1000.0).round() as i64;
-            if quats.range(ts_start..ts_end).next().is_none() {
-                &quats
-            } else {
-                let first_q = quats.range(ts_start..ts_end).next().unwrap().1.clone();
-                let last_q = quats.range(ts_start..ts_end).next_back().unwrap().1.clone();
-                _quats_copy = Some(quats.clone());
-                for (ts, q) in _quats_copy.as_mut().unwrap().iter_mut() {
-                    if *ts < ts_start {
-                        *q = first_q.clone();
-                    } else if *ts > ts_end {
-                        *q = last_q.clone();
-                    }
-                }
-                _quats_copy.as_ref().unwrap()
-            }
-        } else {
-            &quats
-        };
+        let quats = Smoothing::get_trimmed_quats(quats, duration, self.trim_range_only, &stabilization_params.trim_ranges);
+        let quats = quats.as_ref();
 
         let get_keyframed_param = |typ: &KeyframeType, def: f64, cb: &dyn Fn(f64) -> f64| -> BTreeMap<i64, f64> {
             let mut ret = BTreeMap::<i64, f64>::new();

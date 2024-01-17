@@ -67,8 +67,7 @@ impl OptimSync {
     pub fn run(
         &mut self,
         target_sync_points: usize,
-        trim_start_s: f64,
-        trim_end_s: f64,
+        trim_ranges_s: Vec<(f64, f64)>,
     ) -> Vec<f64> {
         let gyro_c32: Vec<Vec<Complex<f32>>> = self
             .gyro
@@ -139,10 +138,8 @@ impl OptimSync {
             .collect();
 
         for i in 0..rank.len() {
-            if rank[i] < 100.0
-                || (i * step_size_samples) as f64 / self.sample_rate < trim_start_s
-                || (i * step_size_samples) as f64 / self.sample_rate > trim_end_s
-            {
+            let time = (i * step_size_samples) as f64 / self.sample_rate;
+            if rank[i] < 100.0 || !trim_ranges_s.iter().any(|x| time >= x.0 && time <= x.1) {
                 rank[i] = 0.0;
             }
         }
@@ -171,15 +168,18 @@ impl OptimSync {
 
         let mut selected_sync_points = Vec::<f64>::new();
         let mut rng = rand::thread_rng();
+        use rand::seq::SliceRandom;
         for _ in 0..target_sync_points {
             if sync_points.is_empty() { break; }
-            let rnd = rng.gen_range(trim_start_s * 1000.0..trim_end_s * 1000.0);
-            let mut p = sync_points.partition_point(|x| x < &rnd).min(sync_points.len() - 1);
-            if (sync_points[(p as i64-1).max(0) as usize] - rnd).abs() < (sync_points[p] - rnd) {
-                p -= 1;
+            let rands = trim_ranges_s.iter().map(|x| rng.gen_range(x.0 * 1000.0..x.1 * 1000.0)).collect::<Vec<_>>();
+            if let Some(rnd) = rands.choose(&mut rng) {
+                let mut p = sync_points.partition_point(|x| x < &rnd).min(sync_points.len() - 1);
+                if (sync_points[(p as i64-1).max(0) as usize] - rnd).abs() < (sync_points[p] - rnd) {
+                    p -= 1;
+                }
+                selected_sync_points.push(sync_points[p]);
+                sync_points.remove(p);
             }
-            selected_sync_points.push(sync_points[p]);
-            sync_points.remove(p);
         }
 
         // use inline_python::python;

@@ -174,8 +174,9 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     log::debug!("ffmpeg_hw::supported_gpu_backends: {:?}", ffmpeg_hw::supported_gpu_backends());
 
     let params = stab.params.read();
+    let trim_ranges = params.trim_ranges.clone();
     let trim_ratio = if !render_options.pad_with_black && !render_options.preserve_other_tracks {
-        params.trim_end - params.trim_start
+        params.get_trim_ratio()
     } else {
         1.0
     };
@@ -213,8 +214,6 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     } else {
         ffmpeg_video::ProcessingOrder::PreConversion
     };
-
-    let (trim_start, trim_end) = (params.trim_start, params.trim_end);
 
     drop(params);
 
@@ -268,9 +267,8 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     proc.video.processing_order = order;
     log::debug!("video_codec: {:?}, processing_order: {:?}", &proc.video_codec, proc.video.processing_order);
 
-    if !render_options.pad_with_black && !render_options.preserve_other_tracks {
-        if trim_start > 0.0 { proc.start_ms = Some(trim_start * duration_ms); }
-        if trim_end   < 1.0 { proc.end_ms   = Some(trim_end   * duration_ms); }
+    if !render_options.pad_with_black && !render_options.preserve_other_tracks && !trim_ranges.is_empty() {
+        proc.ranges_ms = trim_ranges.iter().map(|x| (if x.0 > 0.0 { Some(x.0 * duration_ms) } else { None }, if x.1 < 1.0 { Some(x.1 * duration_ms) } else { None })).collect();
     }
 
     match proc.video_codec.as_deref() {
@@ -391,7 +389,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         }
     }
 
-    let start_us = (proc.start_ms.unwrap_or_default() * 1000.0) as i64;
+    let start_us = (proc.ranges_ms.first().and_then(|x| x.0).unwrap_or_default() * 1000.0) as i64;
 
     if !render_options.audio {
         proc.audio_codec = codec::Id::None;
@@ -424,8 +422,8 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
 
     proc.on_frame(move |mut timestamp_us, input_frame, output_frame, converter, rate_control| {
         let fill_with_background = render_options.pad_with_black &&
-            (timestamp_us < (trim_start * duration_ms * 1000.0).round() as i64 ||
-             timestamp_us > (trim_end   * duration_ms * 1000.0).round() as i64);
+            !trim_ranges.iter().any(|x| timestamp_us >= (x.0 * duration_ms * 1000.0).round() as i64 &&
+                                        timestamp_us <= (x.1 * duration_ms * 1000.0).round() as i64);
 
         if let Some(scale) = fps_scale {
             timestamp_us = (timestamp_us as f64 / scale).round() as i64;

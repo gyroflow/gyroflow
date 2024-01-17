@@ -147,29 +147,36 @@ MenuItem {
         // enabled: controller.gyro_loaded;
         tooltip: !enabled? qsTr("No motion data loaded, cannot sync.") : "";
         function doSync() {
-            const maxPoints = maxSyncPoints.value;
+            let maxPoints = maxSyncPoints.value;
             let sync_points = null;
 
             if (experimentalAutoSyncPoints.checked) {
                 sync_points = controller.get_optimal_sync_points(maxPoints);
             }
             if (!sync_points) {
-                const trimmed = videoArea.trimEnd - videoArea.trimStart;
-                const chunks = trimmed / maxPoints;
-                const start = videoArea.trimStart + (chunks / 2);
-
                 let ranges = [];
-                for (let i = 0; i < maxPoints; ++i) {
-                    const pos = start + (i*chunks);
-                    ranges.push(pos);
+                const trimRanges = videoArea.timeline.getTrimRanges();
+                if (trimRanges.length > 1) {
+                    maxPoints = Math.ceil(maxPoints / trimRanges.length) + 1;
                 }
-                const duration = window.videoArea.vid.duration;
-                if (sync.customSyncTimestamps.length > 0) {
-                    ranges = sync.customSyncTimestamps.filter(v => (v >= videoArea.trimStart * duration) && (v <= videoArea.trimEnd * duration)).map(v => v / duration);
-                }
-                if (sync.additionalSyncTimestamps.length > 0) {
-                    for (const x of sync.additionalSyncTimestamps.filter(v => (v >= videoArea.trimStart * duration) && (v <= videoArea.trimEnd * duration))) {
-                        ranges.push(x / duration);
+                for (const [trimStart, trimEnd] of trimRanges) {
+                    const trimmed = trimEnd - trimStart;
+                    const chunks = trimmed / maxPoints;
+                    const start = trimStart + (chunks / 2);
+
+                    for (let i = 0; i < maxPoints; ++i) {
+                        const pos = start + (i*chunks);
+                        ranges.push(pos);
+                    }
+                    const duration = window.videoArea.vid.duration;
+                    const filter_ranges = v => (v >= trimStart * duration) && (v <= trimEnd * duration);
+                    if (sync.customSyncTimestamps.length > 0) {
+                        ranges = sync.customSyncTimestamps.filter(filter_ranges).map(v => v / duration);
+                    }
+                    if (sync.additionalSyncTimestamps.length > 0) {
+                        for (const x of sync.additionalSyncTimestamps.filter(filter_ranges)) {
+                            ranges.push(x / duration);
+                        }
                     }
                 }
                 ranges.sort((a, b) => a - b);

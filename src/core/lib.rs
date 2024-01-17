@@ -595,8 +595,15 @@ impl StabilizationManager {
 
     pub fn set_video_rotation(&self, v: f64) { self.params.write().video_rotation = v; self.invalidate_smoothing(); }
 
-    pub fn set_trim_start(&self, v: f64) { self.params.write().trim_start = v; self.invalidate_smoothing(); }
-    pub fn set_trim_end  (&self, v: f64) { self.params.write().trim_end   = v; self.invalidate_smoothing(); }
+    pub fn trim_ranges(&self) -> Vec<(f64, f64)> { self.params.read().trim_ranges.clone() }
+    pub fn set_trim_ranges(&self, v: Vec<(f64, f64)>) {
+        self.params.write().trim_ranges = if v.first() == Some(&(0.0, 1.0)) {
+           Vec::new()
+        } else {
+            v
+        };
+        self.invalidate_smoothing();
+    }
 
     pub fn set_of_method(&self, v: u32) { self.params.write().of_method = v; self.pose_estimator.clear(); }
     pub fn set_show_detected_features(&self, v: bool) { self.params.write().show_detected_features = v; }
@@ -959,8 +966,7 @@ impl StabilizationManager {
             "offsets": gyro.get_offsets(), // timestamp, offset value
             "keyframes": self.keyframes.read().serialize(),
 
-            "trim_start": params.trim_start,
-            "trim_end":   params.trim_end,
+            "trim_ranges": params.trim_ranges,
         });
 
         util::merge_json(&mut obj, &serde_json::from_str(additional_data).unwrap_or_default());
@@ -1316,10 +1322,20 @@ impl StabilizationManager {
 
             if let Some(start) = obj.get("trim_start").and_then(|x| x.as_f64()) {
                 if let Some(end) = obj.get("trim_end").and_then(|x| x.as_f64()) {
-                    let mut params = self.params.write();
-                    params.trim_start = start;
-                    params.trim_end = end;
+                    self.params.write().trim_ranges = vec![(start, end)];
                 }
+            }
+
+            if let Some(ranges) = obj.get("trim_ranges").and_then(|x| x.as_array()) {
+                let ranges = ranges.iter().filter_map(|x| {
+                    let x = x.as_array()?;
+                    if x.len() == 2 {
+                        Some((x[0].as_f64()?, x[1].as_f64()?))
+                    } else {
+                        None
+                    }
+                }).collect::<Vec<_>>();
+                self.params.write().trim_ranges = ranges;
             }
 
             {

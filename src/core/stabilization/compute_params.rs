@@ -39,8 +39,7 @@ pub struct ComputeParams {
     pub background_margin: f64,
     pub background_margin_feather: f64,
     pub frame_readout_time: f64,
-    pub trim_start: f64,
-    pub trim_end: f64,
+    pub trim_ranges: Vec<(f64, f64)>,
     pub scaled_fps: f64,
     pub plane_scale: (f64, f64),
     pub adaptive_zoom_window: f64,
@@ -92,8 +91,7 @@ impl ComputeParams {
             framebuffer_inverted: params.framebuffer_inverted,
             horizontal_rs: params.horizontal_rs,
             frame_readout_time: params.frame_readout_time,
-            trim_start: params.trim_start,
-            trim_end: params.trim_end,
+            trim_ranges: params.trim_ranges.clone(),
             scaled_fps: params.get_scaled_fps(),
             adaptive_zoom_window: params.adaptive_zoom_window,
             adaptive_zoom_center_offset: params.adaptive_zoom_center_offset,
@@ -144,8 +142,7 @@ impl std::fmt::Debug for ComputeParams {
          .field("background_margin",         &self.background_margin)
          .field("background_margin_feather", &self.background_margin_feather)
          .field("frame_readout_time",        &self.frame_readout_time)
-         .field("trim_start",                &self.trim_start)
-         .field("trim_end",                  &self.trim_end)
+         .field("trim_ranges",               &self.trim_ranges)
          .field("scaled_fps",                &self.scaled_fps)
          .field("adaptive_zoom_window",      &self.adaptive_zoom_window)
          .field("adaptive_zoom_center_offset", &self.adaptive_zoom_center_offset)

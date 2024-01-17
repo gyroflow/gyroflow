@@ -55,8 +55,7 @@ pub struct StabilizationParams {
     pub frame_count: usize,
     pub duration_ms: f64,
 
-    pub trim_start: f64,
-    pub trim_end: f64,
+    pub trim_ranges: Vec<(f64, f64)>,
 
     pub video_rotation: f64,
 
@@ -111,8 +110,7 @@ impl Default for StabilizationParams {
             framebuffer_inverted: false,
             is_calibrator: false,
 
-            trim_start: 0.0,
-            trim_end: 1.0,
+            trim_ranges: Vec::new(),
 
             zooming_debug_points: BTreeMap::new(),
 
@@ -136,6 +134,13 @@ impl Default for StabilizationParams {
 }
 
 impl StabilizationParams {
+    pub fn get_trim_ratio(&self) -> f64 {
+        if self.trim_ranges.is_empty() {
+            1.0
+        } else {
+            self.trim_ranges.iter().fold(0.0, |acc, &x| acc + (x.1 - x.0))
+        }
+    }
     pub fn get_scaled_duration_ms(&self) -> f64 {
         match self.fps_scale {
             Some(scale) => self.duration_ms / scale,

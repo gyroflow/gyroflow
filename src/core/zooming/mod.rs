@@ -29,7 +29,7 @@ impl From<i32> for ZoomMethod {
 }
 
 pub trait FieldOfViewAlgorithm {
-    fn compute(&self, timestamps: &[f64], range: (f64, f64)) -> Vec<f64>;
+    fn compute(&self, timestamps: &[f64], range: &[(f64, f64)]) -> Vec<f64>;
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>>;
 }
 
@@ -51,7 +51,7 @@ pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[f64], keyfra
     compute_params.output_height = compute_params.video_height;
 
     let fov_estimator = fov_iterative::FovIterative::new(&compute_params);
-    let mut fov_values = fov_estimator.compute(timestamps, (compute_params.trim_start, compute_params.trim_end));
+    let mut fov_values = fov_estimator.compute(timestamps, &compute_params.trim_ranges);
     let (final_fovs, final_fovs_minimal) = if compute_params.adaptive_zoom_window < -0.9 {
         // Static zoom
         let fov_minimal = fov_values.clone();
@@ -80,8 +80,10 @@ pub fn get_checksum(compute_params: &ComputeParams) -> u64 {
     hasher.write_usize(compute_params.video_output_width);
     hasher.write_usize(compute_params.video_output_height);
     hasher.write_u64(compute_params.scaled_fps.to_bits());
-    hasher.write_u64(compute_params.trim_start.to_bits());
-    hasher.write_u64(compute_params.trim_end.to_bits());
+    for x in compute_params.trim_ranges.iter() {
+        hasher.write_u64(x.0.to_bits());
+        hasher.write_u64(x.1.to_bits());
+    }
     hasher.write_u64(compute_params.video_rotation.to_bits());
     hasher.write_u64(compute_params.adaptive_zoom_window.to_bits());
 

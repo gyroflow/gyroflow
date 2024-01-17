@@ -29,7 +29,7 @@ impl FieldOfViewAlgorithm for FovIterative<'_> {
         self.debug_points.read().clone()
     }
 
-    fn compute(&self, timestamps: &[f64], range: (f64, f64)) -> Vec<f64> {
+    fn compute(&self, timestamps: &[f64], ranges: &[(f64, f64)]) -> Vec<f64> {
         if timestamps.is_empty() {
             return Vec::new();
         }
@@ -57,16 +57,14 @@ impl FieldOfViewAlgorithm for FovIterative<'_> {
                 .collect()
         };
 
-        if range.0 > 0.0 || range.1 < 1.0 {
+        if !ranges.is_empty() {
             // Only within render range.
             if let Some(max_fov) = fov_values.iter().copied().reduce(f64::max) {
-                let first_ind = (l * range.0).floor() as usize;
-                let last_ind  = (l * range.1).ceil() as usize;
-                if fov_values.len() > first_ind {
-                    fov_values[0..first_ind].iter_mut().for_each(|v| *v = max_fov);
-                }
-                if fov_values.len() > last_ind {
-                    fov_values[last_ind..].iter_mut().for_each(|v| *v = max_fov);
+                for (i, v) in fov_values.iter_mut().enumerate() {
+                    let within_range = ranges.iter().any(|r| i >= (l*r.0).floor() as usize && i <= (l*r.1).ceil() as usize);
+                    if !within_range {
+                        *v = max_fov;
+                    }
                 }
             }
         }

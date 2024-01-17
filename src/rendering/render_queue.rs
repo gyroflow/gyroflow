@@ -370,7 +370,7 @@ impl RenderQueue {
         stab.set_render_params(size, (render_options.output_width, render_options.output_height));
 
         let params = stab.params.read();
-        let trim_ratio = params.trim_end - params.trim_start;
+        let trim_ratio = params.get_trim_ratio();
         let video_url = stab.input_file.read().url.clone();
 
         let editing = self.jobs.contains_key(&job_id);
@@ -849,7 +849,7 @@ impl RenderQueue {
                 this.update_status();
             });
             let params = stab.params.read();
-            let trim_ratio = params.trim_end - params.trim_start;
+            let trim_ratio = params.get_trim_ratio();
             let total_frame_count = params.frame_count;
             drop(params);
             let mut input_file = stab.input_file.read().clone();

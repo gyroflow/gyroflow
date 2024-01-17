@@ -5,6 +5,7 @@ use ffmpeg_next::{ ffi, codec, decoder, encoder, format, frame, picture, softwar
 
 use super::ffmpeg_processor::Status;
 use super::ffmpeg_processor::FFmpegError;
+use super::ffmpeg_processor::FrameTimestamps;
 use super::ffmpeg_video_converter::Converter;
 
 pub struct FrameBuffers {
@@ -169,7 +170,7 @@ impl<'a> VideoTranscoder<'a> {
         Ok(context.encoder().video()?)
     }
 
-    pub fn receive_and_process_video_frames(&mut self, size: (u32, u32), bitrate: Option<f64>, mut octx: Option<&mut format::context::Output>, ost_time_bases: &mut Vec<Rational>, start_ms: Option<f64>, end_ms: Option<f64>, first_frame_ts: &mut Option<i64>) -> Result<Status, FFmpegError> {
+    pub fn receive_and_process_video_frames(&mut self, size: (u32, u32), bitrate: Option<f64>, mut octx: Option<&mut format::context::Output>, ost_time_bases: &mut Vec<Rational>, start_ms: Option<f64>, end_ms: Option<f64>, frame_ts: &mut FrameTimestamps) -> Result<Status, FFmpegError> {
         let mut status = Status::Continue;
 
         let decoder = self.decoder.as_mut().ok_or(FFmpegError::DecoderNotFound)?;
@@ -185,10 +186,11 @@ impl<'a> VideoTranscoder<'a> {
                 let timestamp_ms = timestamp_us as f64 / 1000.0;
 
                 if start_ms.is_none() || timestamp_ms >= start_ms.unwrap() {
-                    if first_frame_ts.is_none() {
-                        *first_frame_ts = Some(timestamp_us);
+                    if frame_ts.first.is_none() {
+                        frame_ts.first = Some(timestamp_us);
                     }
-                    ts -= first_frame_ts.unwrap();
+                    ts -= frame_ts.first.unwrap();
+                    ts += frame_ts.add_video;
 
                     let mut rate_control = RateControl {
                         out_timestamp_us: ts,
@@ -442,6 +444,10 @@ impl<'a> VideoTranscoder<'a> {
                             }
                         }
                     }
+                    if let Some(last_ts) = frame_ts.last_video {
+                        frame_ts.last_duration_video = ts - last_ts;
+                    }
+                    frame_ts.last_video = Some(ts);
                     if end_ms.is_some() && timestamp_ms > end_ms.unwrap() {
                         status = Status::Finish;
                         break;

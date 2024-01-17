@@ -12,11 +12,9 @@ import Gyroflow
 
 Item {
     id: root;
-    property real trimStart: 0.0;
-    property real trimEnd: 1.0;
-    property bool trimActive: trimStart > 0.01 || trimEnd < 0.99;
-    property real prevTrimStart: 0.0;
-    property real prevTrimEnd: 1.0;
+    property var trimRanges: [];
+    property var prevTrimRanges: [];
+    property bool trimActive: trimRanges.length > 0;
 
     property real durationMs: 0;
     property real orgDurationMs: 0;
@@ -59,26 +57,49 @@ Item {
         return new Date(time).toISOString().substring(11, 11+8);
     }
 
-    function setTrim(start: real, end: real) {
-        if (start >= end) {
-            resetTrim();
+    function setTrimStart(v: real) {
+        if (trimRanges.length > 0) {
+            trimRanges[0][0] = v;
         } else {
-            trimStart = start;
-            trimEnd   = end;
+            trimRanges = [[v, 1.0]];
         }
+        root.trimRangesChanged();
+    }
+    function setTrimEnd(v: real) {
+        if (trimRanges.length > 0) {
+            trimRanges[0][1] = v;
+        } else {
+            trimRanges = [[0.0, v]];
+        }
+        root.trimRangesChanged();
+    }
+    function setTrimRanges(ranges: list<var>) {
+        for (const [start, end] of ranges) {
+            if (start >= end) {
+                resetTrim();
+                return;
+            }
+        }
+        trimRanges = ranges;
+        root.trimRangesChanged();
+    }
+    function getTrimRanges(): list<var> {
+        if (trimRanges.length > 0) {
+            return trimRanges;
+        }
+        return [[0.0, 1.0]];
     }
 
     function resetTrim() {
-        root.trimStart = prevTrimStart;
-        root.trimEnd = prevTrimEnd;
-        root.prevTrimStart = 0;
-        root.prevTrimEnd = 1;
+        trimRanges = prevTrimRanges;
+        prevTrimRanges = [];
+        root.trimRangesChanged();
     }
     function resetZoom() {
-        root.visibleAreaLeft  = 0.0;
-        root.visibleAreaRight = 1.0;
+        visibleAreaLeft  = 0.0;
+        visibleAreaRight = 1.0;
         chart.vscale = 1.0;
-        if ((root.trimStart != 0 || root.trimEnd != 1) && (root.prevTrimStart != 0 || root.prevTrimEnd != 1)) {
+        if (trimRanges.length > 0 && prevTrimRanges.length > 0) {
             resetTrim();
         }
     }
@@ -631,31 +652,34 @@ Item {
         Item {
             anchors.fill: parent;
             clip: true;
-            TimelineRangeIndicator {
-                trimStart: root.trimStart;
-                trimEnd: root.trimEnd;
-                y: (root.fullScreen || window.isMobileLayout? 0 : 35) * dpiScale;
-                height: parent.height - y;
+            Repeater {
+                model: root.trimRanges;
+                TimelineRangeIndicator {
+                    trimStart: modelData[0];
+                    trimEnd: modelData[1];
+                    y: (root.fullScreen || window.isMobileLayout? 0 : 35) * dpiScale;
+                    height: parent.height - y;
 
-                onActiveChanged: if (active) vid.setPlaybackRange(0, vid.duration);
-                onTrimStartAdjustmentChanged: {
-                    const dragPos = Math.max(0, trimStart + trimStartAdjustment);
-                    if (mapToVisibleArea(dragPos) < 0 && dragPos >= 0) {
-                        scrollbar.position = root.visibleAreaLeft = dragPos;
+                    onActiveChanged: if (active) vid.setPlaybackRange(0, vid.duration);
+                    onTrimStartAdjustmentChanged: {
+                        const dragPos = Math.max(0, trimStart + trimStartAdjustment);
+                        if (mapToVisibleArea(dragPos) < 0 && dragPos >= 0) {
+                            scrollbar.position = root.visibleAreaLeft = dragPos;
+                        }
+                        if (!vid.playing) root.setPosition(dragPos);
                     }
-                    if (!vid.playing) root.setPosition(dragPos);
-                }
-                onTrimEndAdjustmentChanged: {
-                    const dragPos = Math.min(1, trimEnd + trimEndAdjustment);
-                    if (mapToVisibleArea(dragPos) > 1 && dragPos <= 1) {
-                        root.visibleAreaRight = dragPos;
+                    onTrimEndAdjustmentChanged: {
+                        const dragPos = Math.min(1, trimEnd + trimEndAdjustment);
+                        if (mapToVisibleArea(dragPos) > 1 && dragPos <= 1) {
+                            root.visibleAreaRight = dragPos;
+                        }
+                        if (!vid.playing) root.setPosition(dragPos);
                     }
-                    if (!vid.playing) root.setPosition(dragPos);
+                    visible: root.trimActive;
+                    onChangeTrimStart: (val) => { root.trimRanges[index][0] = val; root.trimRangesChanged(); };
+                    onChangeTrimEnd:   (val) => { root.trimRanges[index][1] = val; root.trimRangesChanged(); };
+                    onReset: root.resetTrim();
                 }
-                visible: root.trimActive;
-                onChangeTrimStart: (val) => root.setTrim(val, root.trimEnd);
-                onChangeTrimEnd: (val) => root.setTrim(root.trimStart, val);
-                onReset: root.resetTrim();
             }
         }
 
@@ -746,14 +770,12 @@ Item {
                     chart.setVScaleToVisibleArea();
                 }
                 onZoomInLoop: (ts_us) => {
-                    root.prevTrimStart = root.trimStart;
-                    root.prevTrimEnd   = root.trimEnd;
+                    root.prevTrimRanges = root.trimRanges;
                     const start_ts = ts_us - (window.sync.timePerSyncpoint.value * 1000000 / 2) * 1.05;
                     const end_ts   = ts_us + (window.sync.timePerSyncpoint.value * 1000000 / 2) * 1.05;
                     root.visibleAreaLeft  = start_ts / (root.durationMs * 1000.0);
                     root.visibleAreaRight = end_ts   / (root.durationMs * 1000.0);
-                    root.trimStart = root.visibleAreaLeft;
-                    root.trimEnd = root.visibleAreaRight;
+                    root.setTrimRanges([[root.visibleAreaLeft, root.visibleAreaRight]]);
                     chart.setVScaleToVisibleArea();
                 }
             }

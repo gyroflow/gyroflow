@@ -17,8 +17,6 @@ Item {
     property alias vid: vid;
     property alias timeline: timeline;
     property alias durationMs: timeline.durationMs;
-    property alias trimStart: timeline.trimStart;
-    property alias trimEnd: timeline.trimEnd;
     property alias videoLoader: videoLoader;
     property alias stabEnabledBtn: stabEnabledBtn;
     property alias fovOverviewBtn: fovOverviewBtn;
@@ -114,7 +112,10 @@ Item {
                     controller.set_offset(ts, obj.offsets[ts]);
                 }
                 if (obj.hasOwnProperty("trim_start")) {
-                    timeline.setTrim(obj.trim_start, obj.trim_end);
+                    timeline.setTrimRanges([[obj.trim_start, obj.trim_end]]);
+                }
+                if (obj.hasOwnProperty("trim_ranges")) {
+                    timeline.setTrimRanges(obj.trim_ranges);
                 }
                 window.motionData.loadGyroflow(obj);
                 window.stab.loadGyroflow(obj);
@@ -815,7 +816,7 @@ Item {
                     anchors.centerIn: parent;
                     spacing: 5 * dpiScale;
                     enabled: vid.loaded;
-                    Button { text: "["; font.bold: true; onClicked: timeline.setTrim(timeline.position, timeline.trimEnd); tooltip: qsTr("Trim start"); transparentOnMobile: true; }
+                    Button { text: "["; font.bold: true; onClicked: timeline.setTrimStart(timeline.position); tooltip: qsTr("Trim start"); transparentOnMobile: true; }
                     Button { iconName: "chevron-left"; tooltip: qsTr("Previous frame"); onClicked: vid.seekToFrameDelta(-1); transparentOnMobile: true; }
                     Button {
                         onClicked: { if (vid.playing) vid.pause(); else vid.play(); }
@@ -824,7 +825,7 @@ Item {
                         transparentOnMobile: true;
                     }
                     Button { iconName: "chevron-right"; tooltip: qsTr("Next frame"); onClicked: vid.seekToFrameDelta(1); transparentOnMobile: true; }
-                    Button { text: "]"; font.bold: true; onClicked: timeline.setTrim(timeline.trimStart, timeline.position); tooltip: qsTr("Trim end"); transparentOnMobile: true; }
+                    Button { text: "]"; font.bold: true; onClicked: timeline.setTrimEnd(timeline.position); tooltip: qsTr("Trim end"); transparentOnMobile: true; }
                     Button { visible: isMobile; iconName: "menu"; onClicked: timeline.toggleContextMenu(this); tooltip: qsTr("Show timeline menu"); transparentOnMobile: true; leftPadding: 10 * dpiScale; rightPadding: 10 * dpiScale; }
                 }
             }
@@ -963,13 +964,10 @@ Item {
                 fullScreen: root.fullScreen;
                 visible: vid.loaded || !window.isMobileLayout;
 
-                onTrimStartChanged: {
-                    controller.set_trim_start(trimStart);
-                    vid.setPlaybackRange(trimStart * vid.duration, trimEnd * vid.duration);
-                }
-                onTrimEndChanged: {
-                    controller.set_trim_end(trimEnd);
-                    vid.setPlaybackRange(trimStart * vid.duration, trimEnd * vid.duration);
+                onTrimRangesChanged: {
+                    controller.set_trim_ranges(timeline.trimRanges.map(x => x[0] + ":" + x[1]).join(";"));
+                    const ranges = timeline.getTrimRanges();
+                    vid.setPlaybackRange(ranges[0][0] * vid.duration, ranges[ranges.length - 1][1] * vid.duration);
                 }
             }
         }

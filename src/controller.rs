@@ -151,8 +151,7 @@ pub struct Controller {
 
     set_video_rotation: qt_method!(fn(&self, angle: f64)),
 
-    set_trim_start: qt_method!(fn(&self, trim_start: f64)),
-    set_trim_end: qt_method!(fn(&self, trim_end: f64)),
+    set_trim_ranges: qt_method!(fn(&self, trim_ranges: QString)),
 
     set_output_size: qt_method!(fn(&self, width: usize, height: usize)),
 
@@ -523,10 +522,9 @@ impl Controller {
 
     fn get_optimal_sync_points(&mut self, target_sync_points: usize) -> QString {
         let dur_ms = self.stabilizer.params.read().get_scaled_duration_ms();
-        let trim_start = self.stabilizer.params.read().trim_start * dur_ms / 1000.0;
-        let trim_end = self.stabilizer.params.read().trim_end * dur_ms / 1000.0;
+        let trim_ranges = self.stabilizer.params.read().trim_ranges.iter().map(|x| (x.0 * dur_ms / 1000.0, x.1 * dur_ms / 1000.0)).collect::<Vec<_>>();
         if let Some(mut optsync) = core::synchronization::optimsync::OptimSync::new(&self.stabilizer.gyro.read()) {
-            let s: String = optsync.run(target_sync_points, trim_start, trim_end).iter().map(|x| x / dur_ms).map(|x| x.to_string()).join(";").chars().collect();
+            let s: String = optsync.run(target_sync_points, trim_ranges).iter().map(|x| x / dur_ms).map(|x| x.to_string()).join(";").chars().collect();
             QString::from(s)
         } else {
             QString::default()
@@ -1338,8 +1336,6 @@ impl Controller {
     wrap_simple_method!(set_zooming_center_x,   v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_center_y,   v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_method,     v: i32; recompute; zooming_data_changed);
-    wrap_simple_method!(set_trim_start,         v: f64; recompute; chart_data_changed);
-    wrap_simple_method!(set_trim_end,           v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_of_method,          v: u32; recompute; chart_data_changed);
 
     wrap_simple_method!(set_lens_correction_amount,    v: f64; recompute; zooming_data_changed);
@@ -1369,6 +1365,16 @@ impl Controller {
     fn get_scaled_fps        (&self) -> f64 { self.stabilizer.params.read().get_scaled_fps() }
     fn get_scaling_ratio     (&self) -> f64 { self.stabilizer.get_scaling_ratio() }
     fn get_min_fov           (&self) -> f64 { self.stabilizer.get_min_fov() }
+
+    fn set_trim_ranges(&self, ranges: QString) {
+        let ranges = ranges.to_string()
+            .split(';')
+            .filter_map(|x| { let mut x = x.split(':'); Some((x.next()?.parse::<f64>().ok()?, x.next()?.parse::<f64>().ok()?)) })
+            .collect::<Vec<(f64, f64)>>();
+        self.stabilizer.set_trim_ranges(ranges);
+        self.request_recompute();
+        self.chart_data_changed();
+    }
 
     fn offset_at_video_timestamp(&self, timestamp_us: i64) -> f64 {
         self.stabilizer.offset_at_video_timestamp(timestamp_us)
@@ -1441,19 +1447,19 @@ impl Controller {
 
             let stab = self.stabilizer.clone();
 
-            let (fps, frame_count, trim_start_ms, trim_end_ms, trim_ratio, input_horizontal_stretch, input_vertical_stretch) = {
+            let (fps, frame_count, trim_ranges_ms, trim_ratio, input_horizontal_stretch, input_vertical_stretch) = {
                 let params = stab.params.read();
                 let lens = stab.lens.read();
                 let input_horizontal_stretch = if lens.input_horizontal_stretch > 0.01 { lens.input_horizontal_stretch } else { 1.0 };
                 let input_vertical_stretch = if lens.input_vertical_stretch > 0.01 { lens.input_vertical_stretch } else { 1.0 };
-                (params.fps, params.frame_count, params.trim_start * params.duration_ms, params.trim_end * params.duration_ms, params.trim_end - params.trim_start, input_horizontal_stretch, input_vertical_stretch)
+                (params.fps, params.frame_count, params.trim_ranges.iter().map(|x| (x.0 * params.duration_ms, x.1 * params.duration_ms)).collect(), params.get_trim_ratio(), input_horizontal_stretch, input_vertical_stretch)
             };
 
             let is_forced = custom_timestamp_ms > -0.5;
             let ranges = if is_forced {
                 vec![(custom_timestamp_ms - 1.0, custom_timestamp_ms + 1.0)]
             } else {
-                vec![(trim_start_ms, trim_end_ms)]
+                trim_ranges_ms
             };
 
             let cal = stab.lens_calibrator.clone();

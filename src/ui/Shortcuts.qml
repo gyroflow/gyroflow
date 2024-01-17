@@ -40,28 +40,28 @@ Item {
     Shortcut {
         sequence: "Home";
         onActivated: {
-            videoArea.vid.currentFrame = videoArea.timeline.frameAtPosition(videoArea.timeline.trimStart) + 1;
+            videoArea.vid.currentFrame = videoArea.timeline.frameAtPosition(videoArea.timeline.getTrimRanges()[0][0]) + 1;
         }
     }
     // Go to trim end
     Shortcut {
         sequence: "End";
         onActivated: {
-            videoArea.vid.currentFrame = videoArea.timeline.frameAtPosition(videoArea.timeline.trimEnd) - 1;
+            videoArea.vid.currentFrame = videoArea.timeline.frameAtPosition(videoArea.timeline.getTrimRanges()[0][1] || 1) - 1;
         }
     }
     // Set trim start here
     Shortcut {
         sequences: ["i", "["];
         onActivated: {
-            videoArea.timeline.setTrim(videoArea.timeline.position, videoArea.timeline.trimEnd);
+            videoArea.timeline.setTrimStart(videoArea.timeline.position);
         }
     }
     // Set trim end here
     Shortcut {
         sequences: ["o", "]"];
         onActivated: {
-            videoArea.timeline.setTrim(videoArea.timeline.trimStart, videoArea.timeline.position);
+            videoArea.timeline.setTrimEnd(videoArea.timeline.position);
         }
     }
     // Clear trim range
