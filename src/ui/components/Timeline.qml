@@ -658,8 +658,21 @@ Item {
                 }
                 QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
                 Menu {
+                    id: trimRangeMenu;
                     font.pixelSize: 11.5 * dpiScale;
                     title: qsTr("Trim range");
+                    property int currentTrimRange: -1;
+                    onVisibleChanged: {
+                        if (visible) {
+                            currentTrimRange = -1;
+                            for (let i = 0; i < root.trimRanges.length; ++i) {
+                                const [start, end] = root.trimRanges[i];
+                                if (root.position >= start - 0.001 && root.position <= end + 0.001) {
+                                    currentTrimRange = i;
+                                }
+                            }
+                        }
+                    }
                     Action {
                         iconName: "plus";
                         text: qsTr("Add new range");
@@ -669,20 +682,11 @@ Item {
                         }
                     }
                     Action {
-                        property int currentTrimRange: {
-                            for (let i = 0; i < root.trimRanges.length; ++i) {
-                                const [start, end] = root.trimRanges[i];
-                                if (root.position >= start - 0.001 && root.position <= end + 0.001) {
-                                    return i;
-                                }
-                            }
-                            return -1;
-                        };
-                        enabled: currentTrimRange != -1;
+                        enabled: trimRangeMenu.currentTrimRange != -1;
                         iconName: "bin;#f67575";
                         text: qsTr("Delete this range");
                         onTriggered: {
-                            root.trimRanges.splice(currentTrimRange, 1);
+                            root.trimRanges.splice(trimRangeMenu.currentTrimRange, 1);
                             root.cleanupTrimRanges();
                         }
                     }
