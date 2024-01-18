@@ -622,7 +622,7 @@ Item {
                     } else {
                         controller.load_telemetry(root.loadedFileUrl, true, vid, -1);
                     }
-                    vidInfo.loadFromVideoMetadata(md);
+                    vidInfo.loadFromVideoMetadata(md, vid.videoWidth, vid.videoHeight);
                     window.sync.customSyncTimestamps = [];
                     // for (var i in md) console.info(i, md[i]);
                 }

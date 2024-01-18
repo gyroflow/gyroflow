@@ -42,10 +42,10 @@ MenuItem {
 
     signal selectFileRequest();
 
-    function loadFromVideoMetadata(md) {
+    function loadFromVideoMetadata(md: var, org_w: int, org_h: int) {
         const framerate = +md["stream.video[0].codec.frame_rate"] || 0;
-        const w = md["stream.video[0].codec.width"] || 0;
-        const h = md["stream.video[0].codec.height"] || 0;
+        const w = org_w || md["stream.video[0].codec.width"] || 0;
+        const h = org_h || md["stream.video[0].codec.height"] || 0;
         const bitrate = +md["stream.video[0].codec.bit_rate"]? ((+md["stream.video[0].codec.bit_rate"] / 1024 / 1024)) : 200;
 
         if (window) {
