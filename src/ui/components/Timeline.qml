@@ -84,31 +84,33 @@ Item {
 
     function setTrimStart(i: int, v: real) {
         if (trimRanges.length > 0 && i > -1) {
+            if (i > trimRanges.length - 1) return;
             trimRanges[i][0] = v;
             if (trimRanges[i][1] <= v) trimRanges[i][1] = v + 0.01;
         } else {
             trimRanges = [[v, 1.0]];
         }
-        root.cleanupTrimRanges();
+        Qt.callLater(root.cleanupTrimRanges);
     }
     function setTrimEnd(i: int, v: real) {
         if (trimRanges.length > 0 && i > -1) {
+            if (i > trimRanges.length - 1) return;
             trimRanges[i][1] = v;
             if (trimRanges[i][0] >= v) trimRanges[i][0] = v - 0.01;
         } else {
             trimRanges = [[0.0, v]];
         }
-        root.cleanupTrimRanges();
+        Qt.callLater(root.cleanupTrimRanges);
     }
     function addTrimStart(v: real) {
         if (!trimRanges.length) return setTrimStart(-1, v);
         trimRanges.push([v, v + 0.05]);
-        root.cleanupTrimRanges();
+        Qt.callLater(root.cleanupTrimRanges);
     }
     function addTrimEnd(v: real) {
         if (!trimRanges.length) return setTrimEnd(-1, v);
         trimRanges.push([v - 0.05, v]);
-        root.cleanupTrimRanges();
+        Qt.callLater(root.cleanupTrimRanges);
     }
     function setTrimRanges(ranges: list<var>) {
         for (const [start, end] of ranges) {
@@ -118,7 +120,7 @@ Item {
             }
         }
         trimRanges = ranges;
-        root.cleanupTrimRanges();
+        Qt.callLater(root.cleanupTrimRanges);
     }
     function getTrimRanges(): list<var> {
         if (trimRanges.length > 0) {
@@ -130,7 +132,7 @@ Item {
     function resetTrim() {
         trimRanges = prevTrimRanges;
         prevTrimRanges = [];
-        root.cleanupTrimRanges();
+        Qt.callLater(root.cleanupTrimRanges);
     }
     function resetZoom() {
         visibleAreaLeft  = 0.0;
