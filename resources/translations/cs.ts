@@ -296,17 +296,17 @@ Prosím zkontrolujte bitrate souboru po renderování a pokud jste &apos; posti�
       <location filename="../../src/ui/App.qml" line="331"/>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>Added to queue</source>
-      <translation type="unfinished">Added to queue</translation>
+      <translation>Přidáno do fronty</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="331"/>
       <source>file %1 will be overwritten</source>
-      <translation type="unfinished">file %1 will be overwritten</translation>
+      <translation>soubor %1 bude přepsán</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>file will be rendered to %1</source>
-      <translation type="unfinished">file will be rendered to %1</translation>
+      <translation>soubor bude vyrenderován do %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="364"/>
@@ -400,7 +400,7 @@ Pokud máte moderní zařízení, nejnovější GPU ovladače a myslíte, že se
     <message>
       <location filename="../../src/ui/App.qml" line="687"/>
       <source>GPU decoder failed to decode this file. Disable GPU decoding in &quot;Advanced&quot; and try again.</source>
-      <translation type="unfinished">GPU decoder failed to decode this file. Disable GPU decoding in &quot;Advanced&quot; and try again.</translation>
+      <translation>GPU dekodéru se nepodařilo dekódovat tento soubor. Zakažte GPU dekódování v &quot;Pokročilé&quot; a zkuste to znovu.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="690"/>
@@ -639,12 +639,12 @@ Limit ostrosti můžete zvýšit v sekci Pokročilé.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="550"/>
       <source>Export trim ranges as separate videos</source>
-      <translation type="unfinished">Export trim ranges as separate videos</translation>
+      <translation>Exportovat rozsahy oříznutí jako samostatná videa</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="569"/>
       <source>Interpolation method</source>
-      <translation type="unfinished">Interpolation method</translation>
+      <translation>Metoda integrace</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="630"/>
@@ -1159,7 +1159,7 @@ Chcete odeslat svůj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="151"/>
       <source>In order to detect multiple motion data files, click here and grant access to the directory with files.</source>
-      <translation type="unfinished">In order to detect multiple motion data files, click here and grant access to the directory with files.</translation>
+      <translation>Chcete-li detekovat více souborů s daty pohybu, klikněte zde a povolte přístup k adresáři se soubory.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="179"/>
@@ -2862,27 +2862,27 @@ Opravdu chcete pokračovat?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="662"/>
       <source>Trim range</source>
-      <translation type="unfinished">Trim range</translation>
+      <translation>Rozsah oříznutí</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="665"/>
       <source>Add new range</source>
-      <translation type="unfinished">Add new range</translation>
+      <translation>Přidat nový rozsah</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="683"/>
       <source>Delete this range</source>
-      <translation type="unfinished">Delete this range</translation>
+      <translation>Odstranit tento rozsah</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="692"/>
       <source>Clear all</source>
-      <translation type="unfinished">Clear all</translation>
+      <translation>Vymazat vše</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="699"/>
       <source>Restrict playback to trim range</source>
-      <translation type="unfinished">Restrict playback to trim range</translation>
+      <translation>Omezit přehrávání na rozsah oříznutí</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="970"/>

@@ -296,17 +296,17 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="331"/>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>Added to queue</source>
-      <translation type="unfinished">Added to queue</translation>
+      <translation>キューに追加しました</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="331"/>
       <source>file %1 will be overwritten</source>
-      <translation type="unfinished">file %1 will be overwritten</translation>
+      <translation>ファイル %1 は上書きされます</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>file will be rendered to %1</source>
-      <translation type="unfinished">file will be rendered to %1</translation>
+      <translation>ファイルは %1 にレンダリングされます</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="364"/>
@@ -400,7 +400,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/App.qml" line="687"/>
       <source>GPU decoder failed to decode this file. Disable GPU decoding in &quot;Advanced&quot; and try again.</source>
-      <translation type="unfinished">GPU decoder failed to decode this file. Disable GPU decoding in &quot;Advanced&quot; and try again.</translation>
+      <translation>GPU デコーダーはこのファイルのデコードに失敗しました。 &quot;Advanced&quot; でGPU デコーディングを無効にして再試行してください。</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="690"/>
@@ -640,12 +640,12 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="550"/>
       <source>Export trim ranges as separate videos</source>
-      <translation type="unfinished">Export trim ranges as separate videos</translation>
+      <translation>トリム範囲を別の動画としてエクスポート</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="569"/>
       <source>Interpolation method</source>
-      <translation type="unfinished">Interpolation method</translation>
+      <translation>補間法</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="630"/>
@@ -1160,7 +1160,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="151"/>
       <source>In order to detect multiple motion data files, click here and grant access to the directory with files.</source>
-      <translation type="unfinished">In order to detect multiple motion data files, click here and grant access to the directory with files.</translation>
+      <translation>複数のモーションデータファイルを検出するには、ここをクリックし、ファイルを含むディレクトリへのアクセスを許可します。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="179"/>
@@ -2865,27 +2865,27 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="662"/>
       <source>Trim range</source>
-      <translation type="unfinished">Trim range</translation>
+      <translation>トリム範囲</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="665"/>
       <source>Add new range</source>
-      <translation type="unfinished">Add new range</translation>
+      <translation>範囲を追加</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="683"/>
       <source>Delete this range</source>
-      <translation type="unfinished">Delete this range</translation>
+      <translation>この範囲を削除する</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="692"/>
       <source>Clear all</source>
-      <translation type="unfinished">Clear all</translation>
+      <translation>全て消去</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="699"/>
       <source>Restrict playback to trim range</source>
-      <translation type="unfinished">Restrict playback to trim range</translation>
+      <translation>トリム範囲に再生を制限する</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="970"/>
