@@ -588,9 +588,9 @@ checksum = "7f30e7476521f6f8af1a1c4c0b8cc94f0bee37d91763d0ca2665f299b6cd8aec"
 
 [[package]]
 name = "bytemuck"
-version = "1.14.0"
+version = "1.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "374d28ec25809ee0e23827c2ab573d729e293f281dfe393500e7ad618baa61c6"
+checksum = "ed2490600f404f2b94c167e31d3ed1d5f3c225a0f3b80230053b3e0b7b962bd9"
 
 [[package]]
 name = "byteorder"
@@ -652,23 +652,23 @@ dependencies = [
 
 [[package]]
 name = "chrono"
-version = "0.4.31"
+version = "0.4.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f2c685bad3eb3d45a01354cedb7d5faa66194d1d58ba6e267a8de788f79db38"
+checksum = "9f13690e35a5e4ace198e7beea2895d29f3a9cc55015fcebe6336bd2010af9eb"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
  "js-sys",
  "num-traits 0.2.17",
  "wasm-bindgen",
- "windows-targets 0.48.5",
+ "windows-targets 0.52.0",
 ]
 
 [[package]]
 name = "ciborium"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "effd91f6c78e5a4ace8a5d3c0b6bfaec9e2baaef55f3efc00e45fb2e477ee926"
+checksum = "42e69ffd6f0917f5c029256a24d0161db17cea3997d185db0d35926308770f0e"
 dependencies = [
  "ciborium-io",
  "ciborium-ll",
@@ -677,18 +677,18 @@ dependencies = [
 
 [[package]]
 name = "ciborium-io"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cdf919175532b369853f5d5e20b26b43112613fd6fe7aee757e35f7a44642656"
+checksum = "05afea1e0a06c9be33d539b876f1ce3692f4afea2cb41f740e7743225ed1c757"
 
 [[package]]
 name = "ciborium-ll"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "defaa24ecc093c77630e6c15e17c51f5e187bf35ee514f4e2d67baaa96dae22b"
+checksum = "57663b653d948a338bfb3eeba9bb2fd5fcfaecb9e199e87e1eda4d9e8b240fd9"
 dependencies = [
  "ciborium-io",
- "half 1.8.2",
+ "half",
 ]
 
 [[package]]
@@ -1075,7 +1075,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2ee7604#2ee76043077aa0393472eb0cf3deb658c30da8f7"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=d47534e#d47534ed9a46956cc8a192b878b7204fedfaafbd"
 dependencies = [
  "bitflags 2.4.2",
  "libloading 0.8.1",
@@ -1364,7 +1364,7 @@ checksum = "279d3efcc55e19917fff7ab3ddd6c14afb6a90881a0078465196fe2f99d08c56"
 dependencies = [
  "bit_field",
  "flume",
- "half 2.3.1",
+ "half",
  "lebe",
  "miniz_oxide",
  "rayon-core",
@@ -1848,7 +1848,7 @@ dependencies = [
  "fastrand 2.0.1",
  "flate2",
  "futures-intrusive",
- "half 2.3.1",
+ "half",
  "image",
  "include_dir",
  "itertools 0.12.0",
@@ -1897,12 +1897,6 @@ dependencies = [
  "winapi",
  "windows 0.52.0",
 ]
-
-[[package]]
-name = "half"
-version = "1.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eabb4a44450da02c90444cf74558da904edde8fb4e9035a9a6a4e15445af0bd7"
 
 [[package]]
 name = "half"
@@ -2511,11 +2505,12 @@ dependencies = [
 
 [[package]]
 name = "mp4-merge"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c86d5d99a15116fce87baea15314b7d455a3c9689382f6bb36092c11c0a4db7"
+checksum = "0224cd4e86031506b998180ee884afa26308155cb65f90888fa560ec72281ff8"
 dependencies = [
  "byteorder",
+ "filetime_creation",
  "log",
 ]
 
@@ -2536,7 +2531,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2ee7604#2ee76043077aa0393472eb0cf3deb658c30da8f7"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=d47534e#d47534ed9a46956cc8a192b878b7204fedfaafbd"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -4493,7 +4488,7 @@ checksum = "53a85b86a771b1c87058196170769dd264f66c0782acf1ae6cc51bfd64b39082"
 [[package]]
 name = "wgpu"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2ee7604#2ee76043077aa0393472eb0cf3deb658c30da8f7"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=d47534e#d47534ed9a46956cc8a192b878b7204fedfaafbd"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -4517,11 +4512,12 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2ee7604#2ee76043077aa0393472eb0cf3deb658c30da8f7"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=d47534e#d47534ed9a46956cc8a192b878b7204fedfaafbd"
 dependencies = [
  "arrayvec",
  "bit-vec",
  "bitflags 2.4.2",
+ "bytemuck",
  "cfg_aliases",
  "codespan-reporting",
  "indexmap",
@@ -4542,7 +4538,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2ee7604#2ee76043077aa0393472eb0cf3deb658c30da8f7"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=d47534e#d47534ed9a46956cc8a192b878b7204fedfaafbd"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4585,7 +4581,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2ee7604#2ee76043077aa0393472eb0cf3deb658c30da8f7"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=d47534e#d47534ed9a46956cc8a192b878b7204fedfaafbd"
 dependencies = [
  "bitflags 2.4.2",
  "js-sys",

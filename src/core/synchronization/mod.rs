@@ -82,9 +82,9 @@ impl PoseEstimator {
 
     pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32, of_method: u32) {
         let frame_size = (width, height);
-        {
-            let mut l = self.sync_results.write();
-            l.entry(timestamp_us).or_insert(FrameResult {
+        let contains = self.sync_results.read().contains_key(&timestamp_us);
+        if !contains {
+            let result = FrameResult {
                 of_method: OpticalFlowMethod::detect_features(of_method, timestamp_us, img, width, height),
                 frame_no,
                 frame_size,
@@ -94,7 +94,9 @@ impl PoseEstimator {
                 quat: None,
                 euler: None,
                 optical_flow: Default::default()
-            });
+            };
+            let mut l = self.sync_results.write();
+            l.entry(timestamp_us).or_insert(result);
         }
     }
 
