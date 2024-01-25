@@ -76,6 +76,16 @@ MenuItem {
                 zoomingCenterX.value = stab.adaptive_zoom_center_offset[0];
                 zoomingCenterY.value = stab.adaptive_zoom_center_offset[1];
             }
+            if (stab.hasOwnProperty("additional_rotation")) {
+                additionalRotationX.value = stab.additional_rotation[0];
+                additionalRotationY.value = stab.additional_rotation[1];
+                additionalRotationZ.value = stab.additional_rotation[2];
+            }
+            if (stab.hasOwnProperty("additional_translation")) {
+                additionalTranslationX.value = stab.additional_translation[0];
+                additionalTranslationY.value = stab.additional_translation[1];
+                additionalTranslationZ.value = stab.additional_translation[2];
+            }
             if (stab.hasOwnProperty("adaptive_zoom_method")) zoomingMethod.currentIndex = +stab.adaptive_zoom_method;
             if (stab.hasOwnProperty("use_gravity_vectors")) {
                 useGravityVectors.checked = !!stab.use_gravity_vectors;
@@ -526,6 +536,49 @@ MenuItem {
                         scaler: 100.0;
                         onValueChanged: controller.zooming_center_y = value;
                     }
+                }
+            }
+        }
+        Label {
+            text: qsTr("Additional 3D rotation");
+            Column {
+                width: parent.width;
+                Label {
+                    text: qsTr("Pitch"); position: Label.LeftPosition;
+                    SliderWithField { id: additionalRotationY; precision: 2; value: 0; defaultValue: 0; from: -180; to: 180; unit: "°"; width: parent.width; keyframe: "AdditionalRotationY";
+                                      onValueChanged: controller.additional_rotation_y = value; }
+                }
+                Label {
+                    text: qsTr("Yaw"); position: Label.LeftPosition;
+                    SliderWithField { id: additionalRotationX; precision: 2; value: 0; defaultValue: 0; from: -180; to: 180; unit: "°"; width: parent.width; keyframe: "AdditionalRotationX";
+                                      onValueChanged: controller.additional_rotation_x = value; }
+                }
+                Label {
+                    text: qsTr("Roll"); position: Label.LeftPosition;
+                    SliderWithField { id: additionalRotationZ; precision: 2; value: 0; defaultValue: 0; from: -180; to: 180; unit: "°"; width: parent.width; keyframe: "AdditionalRotationZ";
+                                      onValueChanged: controller.additional_rotation_z = value; }
+                }
+            }
+        }
+        Label {
+            text: qsTr("Additional 3D translation");
+            visible: false;
+            Column {
+                width: parent.width;
+                Label {
+                    text: qsTr("X"); position: Label.LeftPosition;
+                    SliderWithField { id: additionalTranslationX; precision: 0; value: 0; defaultValue: 0; from: -1000; to: 1000; unit: "px"; width: parent.width; keyframe: "AdditionalTranslationX";
+                                      onValueChanged: controller.additional_translation_x = value; }
+                }
+                Label {
+                    text: qsTr("Y"); position: Label.LeftPosition;
+                    SliderWithField { id: additionalTranslationY; precision: 0; value: 0; defaultValue: 0; from: -1000; to: 1000; unit: "px"; width: parent.width; keyframe: "AdditionalTranslationY";
+                                      onValueChanged: controller.additional_translation_y = value; }
+                }
+                Label {
+                    text: qsTr("Z"); position: Label.LeftPosition;
+                    SliderWithField { id: additionalTranslationZ; precision: 0; value: 0; defaultValue: 0; from: -1000; to: 1000; unit: "px"; width: parent.width; keyframe: "AdditionalTranslationZ";
+                                      onValueChanged: controller.additional_translation_z = value; }
                 }
             }
         }

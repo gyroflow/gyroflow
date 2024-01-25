@@ -6,6 +6,8 @@ use super::{ ComputeParams, KernelParams };
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use crate::keyframes::KeyframeType;
 
+const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
+
 #[derive(Default, Clone)]
 pub struct FrameTransform {
     pub matrices: Vec<[f32; 12]>,
@@ -118,6 +120,15 @@ impl FrameTransform {
         let lens_correction_amount = params.keyframes.value_at_video_timestamp(&KeyframeType::LensCorrectionStrength, timestamp_ms).unwrap_or(params.lens_correction_amount);
         let adaptive_zoom_center_x = params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterX, timestamp_ms).unwrap_or(params.adaptive_zoom_center_offset.0);
         let mut adaptive_zoom_center_y = params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterY, timestamp_ms).unwrap_or(params.adaptive_zoom_center_offset.1);
+
+        let additional_rotation_x = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalRotationX, timestamp_ms).unwrap_or(params.additional_rotation.0) * DEG2RAD;
+        let additional_rotation_y = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalRotationY, timestamp_ms).unwrap_or(params.additional_rotation.1) * DEG2RAD;
+        let additional_rotation_z = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalRotationZ, timestamp_ms).unwrap_or(params.additional_rotation.2) * DEG2RAD;
+        let additional_rotation   = crate::gyro_source::Quat64::from_euler_angles(additional_rotation_y, additional_rotation_x, additional_rotation_z);
+
+        // let additional_translation_x = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalTranslationX, timestamp_ms).unwrap_or(params.additional_translation.0) as f32;
+        // let additional_translation_y = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalTranslationY, timestamp_ms).unwrap_or(params.additional_translation.1) as f32;
+        // let additional_translation_z = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalTranslationZ, timestamp_ms).unwrap_or(params.additional_translation.2) as f32;
         // ----------- Keyframes -----------
 
         // ----------- Lens -----------
@@ -169,7 +180,8 @@ impl FrameTransform {
             } else {
                 start_ts
             };
-            let quat = smoothed_quat1
+            let quat = additional_rotation
+                     * smoothed_quat1
                      * quat1
                      * gyro.org_quat_at_timestamp(quat_time);
 
@@ -238,6 +250,11 @@ impl FrameTransform {
     pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64, use_fovs: bool) -> (Matrix3<f64>, [f64; 12], Matrix3<f64>, Vec<Matrix3<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
         // ----------- Keyframes -----------
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
+
+        let additional_rotation_x = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalRotationX, timestamp_ms).unwrap_or(params.additional_rotation.0) * DEG2RAD;
+        let additional_rotation_y = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalRotationY, timestamp_ms).unwrap_or(params.additional_rotation.1) * DEG2RAD;
+        let additional_rotation_z = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalRotationZ, timestamp_ms).unwrap_or(params.additional_rotation.2) * DEG2RAD;
+        let additional_rotation   = crate::gyro_source::Quat64::from_euler_angles(additional_rotation_y, additional_rotation_x, additional_rotation_z);
         // ----------- Keyframes -----------
 
         let frame = crate::frame_at_timestamp(timestamp_ms, params.scaled_fps) as usize;
@@ -274,7 +291,8 @@ impl FrameTransform {
             } else {
                 start_ts
             };
-            let quat = smoothed_quat1
+            let quat = additional_rotation
+                     * smoothed_quat1
                      * quat1
                      * gyro.org_quat_at_timestamp(quat_time);
 

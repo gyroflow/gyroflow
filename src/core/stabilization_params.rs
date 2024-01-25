@@ -39,6 +39,8 @@ pub struct StabilizationParams {
     pub adaptive_zoom_window: f64,
     pub adaptive_zoom_center_offset: (f64, f64),
     pub adaptive_zoom_method: i32,
+    pub additional_rotation: (f64, f64, f64),
+    pub additional_translation: (f64, f64, f64),
     pub fov: f64,
     pub fov_overview: bool,
     pub show_safe_area: bool,
@@ -93,6 +95,9 @@ impl Default for StabilizationParams {
             adaptive_zoom_window: 4.0,
             adaptive_zoom_center_offset: (0.0, 0.0),
             adaptive_zoom_method: 0,
+
+            additional_rotation: (0.0, 0.0, 0.0),
+            additional_translation: (0.0, 0.0, 0.0),
 
             size: (0, 0),
             output_size: (0, 0),

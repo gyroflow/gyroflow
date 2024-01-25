@@ -45,6 +45,8 @@ pub struct ComputeParams {
     pub adaptive_zoom_window: f64,
     pub adaptive_zoom_center_offset: (f64, f64),
     pub adaptive_zoom_method: i32,
+    pub additional_rotation: (f64, f64, f64),
+    pub additional_translation: (f64, f64, f64),
     pub framebuffer_inverted: bool,
     pub horizontal_rs: bool,
 
@@ -95,6 +97,8 @@ impl ComputeParams {
             scaled_fps: params.get_scaled_fps(),
             adaptive_zoom_window: params.adaptive_zoom_window,
             adaptive_zoom_center_offset: params.adaptive_zoom_center_offset,
+            additional_rotation: params.additional_rotation,
+            additional_translation: params.additional_translation,
             adaptive_zoom_method: params.adaptive_zoom_method,
             video_speed: params.video_speed,
             video_speed_affects_smoothing: params.video_speed_affects_smoothing,
@@ -146,6 +150,8 @@ impl std::fmt::Debug for ComputeParams {
          .field("scaled_fps",                &self.scaled_fps)
          .field("adaptive_zoom_window",      &self.adaptive_zoom_window)
          .field("adaptive_zoom_center_offset", &self.adaptive_zoom_center_offset)
+         .field("additional_rotation",       &self.additional_rotation)
+         .field("additional_translation",    &self.additional_translation)
          .field("adaptive_zoom_method",      &self.adaptive_zoom_method)
          .field("framebuffer_inverted",      &self.framebuffer_inverted)
          .field("zooming_debug_points",      &self.zooming_debug_points)

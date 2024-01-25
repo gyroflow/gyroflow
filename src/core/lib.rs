@@ -613,6 +613,12 @@ impl StabilizationManager {
     pub fn set_adaptive_zoom         (&self, v: f64)  { self.params.write().adaptive_zoom_window   = v; self.invalidate_zooming(); }
     pub fn set_zooming_center_x      (&self, v: f64)  { self.params.write().adaptive_zoom_center_offset.0 = v; self.invalidate_zooming(); }
     pub fn set_zooming_center_y      (&self, v: f64)  { self.params.write().adaptive_zoom_center_offset.1 = v; self.invalidate_zooming(); }
+    pub fn set_additional_rotation_x (&self, v: f64)  { self.params.write().additional_rotation.0  = v; self.invalidate_smoothing(); }
+    pub fn set_additional_rotation_y (&self, v: f64)  { self.params.write().additional_rotation.1  = v; self.invalidate_smoothing(); }
+    pub fn set_additional_rotation_z (&self, v: f64)  { self.params.write().additional_rotation.2  = v; self.invalidate_smoothing(); }
+    pub fn set_additional_translation_x(&self, v: f64){ self.params.write().additional_translation.0 = v; self.invalidate_zooming(); }
+    pub fn set_additional_translation_y(&self, v: f64){ self.params.write().additional_translation.1 = v; self.invalidate_zooming(); }
+    pub fn set_additional_translation_z(&self, v: f64){ self.params.write().additional_translation.2 = v; self.invalidate_zooming(); }
     pub fn set_zooming_method        (&self, v: i32)  { self.params.write().adaptive_zoom_method   = v;        self.invalidate_zooming(); }
     pub fn set_fov                   (&self, v: f64)  { self.params.write().fov                    = v; }
     pub fn set_fov_overview          (&self, v: bool) { self.params.write().fov_overview           = v; }
@@ -941,6 +947,8 @@ impl StabilizationManager {
                 "adaptive_zoom_window":   params.adaptive_zoom_window,
                 "adaptive_zoom_center_offset": params.adaptive_zoom_center_offset,
                 "adaptive_zoom_method":   params.adaptive_zoom_method,
+                "additional_rotation":    params.additional_rotation,
+                "additional_translation": params.additional_translation,
                 "lens_correction_amount": params.lens_correction_amount,
                 "horizon_lock_amount":    horizon_amount,
                 "horizon_lock_roll":      horizon_roll,
@@ -1251,6 +1259,20 @@ impl StabilizationManager {
                     params.adaptive_zoom_center_offset = (
                         center_offs.get(0).and_then(|x| x.as_f64()).unwrap_or_default(),
                         center_offs.get(1).and_then(|x| x.as_f64()).unwrap_or_default()
+                    );
+                }
+                if let Some(x) = obj.get("additional_rotation").and_then(|x| x.as_array()) {
+                    params.additional_rotation = (
+                        x.get(0).and_then(|x| x.as_f64()).unwrap_or_default(),
+                        x.get(1).and_then(|x| x.as_f64()).unwrap_or_default(),
+                        x.get(2).and_then(|x| x.as_f64()).unwrap_or_default()
+                    );
+                }
+                if let Some(x) = obj.get("additional_translation").and_then(|x| x.as_array()) {
+                    params.additional_translation = (
+                        x.get(0).and_then(|x| x.as_f64()).unwrap_or_default(),
+                        x.get(1).and_then(|x| x.as_f64()).unwrap_or_default(),
+                        x.get(2).and_then(|x| x.as_f64()).unwrap_or_default()
                     );
                 }
                 if let Some(zooming_method) = obj.get("adaptive_zoom_method").and_then(|x| x.as_i64()) {

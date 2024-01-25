@@ -127,7 +127,7 @@ impl AutosyncProcess {
     }
 
     pub fn feed_frame(&self, mut timestamp_us: i64, frame_no: usize, mut width: u32, height: u32, stride: usize, pixels: &[u8]) {
-        let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels).map(|v| Arc::new(v));
+        let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels).map(Arc::new);
         if width > stride as u32 {
             width = stride as u32;
         }
@@ -152,7 +152,7 @@ impl AutosyncProcess {
             timestamp_us += (compute_params.gyro.read().file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0) * 1000.0).round() as i64;
         }
 
-        if let Some(_current_range) = self.scaled_ranges_us.iter().find(|(from, to)| (*from..*to).contains(&timestamp_us)).copied() {
+        if let Some(_current_range) = self.scaled_ranges_us.iter().find(|(from, to)| (*from..=*to).contains(&timestamp_us)) {
             self.total_read_frames.fetch_add(1, SeqCst);
 
             self.thread_pool.spawn(move || {

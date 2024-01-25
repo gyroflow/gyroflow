@@ -126,6 +126,13 @@ pub struct Controller {
     zooming_center_y: qt_property!(f64; WRITE set_zooming_center_y),
     zooming_method: qt_property!(i32; WRITE set_zooming_method),
 
+    additional_rotation_x: qt_property!(f64; WRITE set_additional_rotation_x),
+    additional_rotation_y: qt_property!(f64; WRITE set_additional_rotation_y),
+    additional_rotation_z: qt_property!(f64; WRITE set_additional_rotation_z),
+    additional_translation_x: qt_property!(f64; WRITE set_additional_translation_x),
+    additional_translation_y: qt_property!(f64; WRITE set_additional_translation_y),
+    additional_translation_z: qt_property!(f64; WRITE set_additional_translation_z),
+
     lens_correction_amount: qt_property!(f64; WRITE set_lens_correction_amount),
     set_video_speed: qt_method!(fn(&self, v: f64, s: bool, z: bool)),
 
@@ -1335,6 +1342,12 @@ impl Controller {
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_center_x,   v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_center_y,   v: f64; recompute; zooming_data_changed);
+    wrap_simple_method!(set_additional_rotation_x,v: f64; recompute; zooming_data_changed);
+    wrap_simple_method!(set_additional_rotation_y,v: f64; recompute; zooming_data_changed);
+    wrap_simple_method!(set_additional_rotation_z,v: f64; recompute; zooming_data_changed);
+    wrap_simple_method!(set_additional_translation_x,v: f64; recompute; zooming_data_changed);
+    wrap_simple_method!(set_additional_translation_y,v: f64; recompute; zooming_data_changed);
+    wrap_simple_method!(set_additional_translation_z,v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_method,     v: i32; recompute; zooming_data_changed);
     wrap_simple_method!(set_of_method,          v: u32; recompute; chart_data_changed);
 

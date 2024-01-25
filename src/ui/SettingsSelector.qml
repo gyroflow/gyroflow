@@ -48,7 +48,7 @@ Modal {
             "Smoothing params":           ["method", "smoothing_params"],
             "Horizon lock":               ["horizon_lock_amount", "horizon_lock_roll", "use_gravity_vectors"],
             "Rolling shutter correction": ["frame_readout_time"],
-            "Zooming":                    ["adaptive_zoom_window", "adaptive_zoom_center_offset", "adaptive_zoom_method"],
+            "Zooming":                    ["adaptive_zoom_window", "adaptive_zoom_center_offset", "adaptive_zoom_method", "additional_rotation", "additional_translation"],
             "Lens correction strength":   ["lens_correction_amount"],
             "Video speed":                ["video_speed", "video_speed_affects_smoothing", "video_speed_affects_zooming"],
         },
