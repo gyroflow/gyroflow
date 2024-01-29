@@ -17,7 +17,6 @@ TextField {
     property bool live: true;
     property real defaultValue: NaN;
     property bool allowText: false;
-    property bool intNoThousandSep: false;
     property var reset: () => { value = defaultValue; };
 
     property string keyframe: "";
@@ -57,13 +56,15 @@ TextField {
         if (preventChange || allowText) return;
         let locale = Qt.locale();
         locale.numberOptions = Locale.OmitGroupSeparator;
-        text = intNoThousandSep ? (Math.round(value)).toString() : Number(value).toLocaleString(locale, "f", precision);
+        text = Number(value).toLocaleString(locale, "f", precision);
     }
     function updateValue() {
         if (allowText) return;
         preventChange = true;
+        let locale = Qt.locale();
+        locale.numberOptions = Locale.OmitGroupSeparator;
         try {
-            value = Number.fromLocaleString(Qt.locale(), text.replace(/\s+/g, ""));
+            value = Number.fromLocaleString(locale, text.replace(/\s+/g, ""));
         } catch(e) {
             let locale = Qt.locale();
             locale.numberOptions = Locale.OmitGroupSeparator;

@@ -299,7 +299,6 @@ MenuItem {
                 anchors.verticalCenter: parent.verticalCenter;
                 anchors.left: parent.left;
                 width: (sizeMenuBtn.x - outputHeight.anchors.rightMargin - x - lockAspectRatio.width) / 2 - lockAspectRatio.anchors.leftMargin;
-                intNoThousandSep: true;
                 onValueChanged: {
                     if (!disableUpdate) {
                         disableUpdate = true;
@@ -315,7 +314,6 @@ MenuItem {
             NumberField {
                 id: outputHeight;
                 tooltip: qsTr("Height");
-                intNoThousandSep: true;
                 anchors.verticalCenter: parent.verticalCenter;
                 anchors.right: sizeMenuBtn.left;
                 anchors.rightMargin: 5 * dpiScale;
