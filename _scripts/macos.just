@@ -97,6 +97,10 @@ run *param:
     cargo run --release -- {{param}}
 
 [no-cd]
+test *param:
+    cargo test -- {{param}}
+
+[no-cd]
 debug *param:
     cargo run -- {{param}}
 
