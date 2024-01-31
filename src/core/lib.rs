@@ -59,6 +59,7 @@ pub struct InputFile {
     pub image_sequence_start: i32
 }
 
+#[derive(Clone)]
 pub struct StabilizationManager {
     pub gyro: Arc<RwLock<GyroSource>>,
     pub lens: Arc<RwLock<LensProfile>>,
@@ -74,6 +75,9 @@ pub struct StabilizationManager {
     pub smoothing_checksum: Arc<AtomicU64>,
     pub zooming_checksum: Arc<AtomicU64>,
     pub prevent_recompute: Arc<AtomicBool>,
+    pub smoothing_invalidated: Arc<AtomicBool>,
+    pub zooming_invalidated: Arc<AtomicBool>,
+    pub undistortion_invalidated: Arc<AtomicBool>,
 
     pub camera_id: Arc<RwLock<Option<CameraIdentifier>>>,
     pub lens_profile_db: Arc<RwLock<LensProfileDatabase>>,
@@ -101,6 +105,9 @@ impl Default for StabilizationManager {
             smoothing_checksum: Arc::new(AtomicU64::new(0)),
             zooming_checksum: Arc::new(AtomicU64::new(0)),
             prevent_recompute: Arc::new(AtomicBool::new(false)),
+            smoothing_invalidated: Arc::new(AtomicBool::new(false)),
+            zooming_invalidated: Arc::new(AtomicBool::new(false)),
+            undistortion_invalidated: Arc::new(AtomicBool::new(false)),
 
             pose_estimator: Arc::new(synchronization::PoseEstimator::default()),
 
@@ -583,14 +590,32 @@ impl StabilizationManager {
             timestamp_us = (timestamp_us as f64 / scale).round() as i64;
         }
 
+        if self.smoothing_invalidated.load(SeqCst) {
+            self.recompute_smoothness();
+            self.smoothing_invalidated.store(false, SeqCst);
+        }
+        if self.zooming_invalidated.load(SeqCst) {
+            self.recompute_adaptive_zoom();
+            self.zooming_invalidated.store(false, SeqCst);
+        }
+        if self.undistortion_invalidated.load(SeqCst) {
+            self.recompute_undistortion();
+            self.undistortion_invalidated.store(false, SeqCst);
+        }
         {
-            let mut undist = self.stabilization.write();
-            self.draw_overlays(&mut undist.drawing, timestamp_us);
-            undist.ensure_ready_for_processing::<T>(timestamp_us, buffers);
+            if let Some(mut undist) = self.stabilization.try_write_for(std::time::Duration::from_millis(30000)) {
+                self.draw_overlays(&mut undist.drawing, timestamp_us);
+                undist.ensure_ready_for_processing::<T>(timestamp_us, buffers);
+            } else {
+                return Err(GyroflowCoreError::Unknown);
+            }
         }
 
-        let undist = self.stabilization.read();
-        undist.process_pixels::<T>(timestamp_us, buffers, None)
+        if let Some(undist) = self.stabilization.try_read_for(std::time::Duration::from_millis(30000)) {
+            undist.process_pixels::<T>(timestamp_us, buffers, None)
+        } else {
+            Err(GyroflowCoreError::Unknown)
+        }
     }
 
     pub fn set_video_rotation(&self, v: f64) { self.params.write().video_rotation = v; self.invalidate_smoothing(); }
@@ -663,6 +688,10 @@ impl StabilizationManager {
 
     pub fn invalidate_smoothing(&self) { self.invalidate_ongoing_computations(); self.smoothing_checksum.store(0, SeqCst); self.invalidate_zooming(); }
     pub fn invalidate_zooming(&self) { self.invalidate_ongoing_computations(); self.zooming_checksum.store(0, SeqCst); }
+
+    pub fn invalidate_blocking_smoothing(&self) { self.invalidate_ongoing_computations(); self.smoothing_invalidated.store(true, SeqCst); self.zooming_invalidated.store(true, SeqCst); self.undistortion_invalidated.store(true, SeqCst); }
+    pub fn invalidate_blocking_zooming(&self) { self.invalidate_ongoing_computations(); self.zooming_invalidated.store(true, SeqCst); self.undistortion_invalidated.store(true, SeqCst); }
+    pub fn invalidate_blocking_undistortion(&self) { self.invalidate_ongoing_computations(); self.undistortion_invalidated.store(true, SeqCst); }
 
     pub fn set_digital_lens_name(&self, v: String) {
         self.lens.write().digital_lens =  if !v.is_empty() { Some(v.clone()) } else { None };

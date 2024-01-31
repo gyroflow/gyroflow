@@ -42,7 +42,7 @@ indicatif = "0.17"
 rustfft = "6.2.0"
 crc32fast = "1.3.2"
 rodio = { default-features = false, features = ["vorbis"], version = "0.17.3" }
-filetime_creation = "0.1"
+filetime_creation = "0.2"
 directories = "5"
 
 qmetaobject = { version = "0.2.10", default-features = false, features = ["log"] }
