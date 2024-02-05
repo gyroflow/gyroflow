@@ -165,6 +165,7 @@ MenuItem {
         if (preserveOutputSettings.checked) {
             const pw = +settings.value("preservedWidth",  w); if (pw > 0) w = pw;
             const ph = +settings.value("preservedHeight", h); if (ph > 0) h = ph;
+            aspectRatio = w / h;
         }
         outWidth      = w;
         outHeight     = h;

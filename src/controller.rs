@@ -724,19 +724,21 @@ impl Controller {
             });
 
             if duration_ms > 0.0 && fps > 0.0 {
+                if is_main_video {
+                    stab.init_from_video_data(duration_ms, fps, frame_count, video_size);
+                    stab.set_output_size(video_size.0, video_size.1);
+                }
+
                 self.loading_gyro_in_progress = true;
                 self.loading_gyro_in_progress_changed();
                 core::run_threaded(move || {
                     let mut additional_data = serde_json::Value::Object(serde_json::Map::new());
                     let additional_obj = additional_data.as_object_mut().unwrap();
                     if is_main_video {
-                        stab.init_from_video_data(duration_ms, fps, frame_count, video_size);
                         // Ignore the error here, video file may not contain the telemetry and it's ok
                         let _ = stab.load_gyro_data(&url, is_main_video, &Default::default(), progress, cancel_flag);
 
-                        if stab.set_output_size(video_size.0, video_size.1) {
-                            stab.recompute_undistortion();
-                        }
+                        stab.recompute_undistortion();
                     } else {
                         let mut options = gyroflow_core::gyro_source::FileLoadOptions::default();
                         if sample_index > -1 {
