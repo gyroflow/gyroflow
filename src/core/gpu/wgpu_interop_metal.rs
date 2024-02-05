@@ -5,6 +5,19 @@ use wgpu::Device;
 use wgpu::hal::api::Metal;
 use metal::foreign_types::ForeignTypeRef;
 
+pub fn check_metal_stride(device: &Device, format: wgpu::TextureFormat, stride: usize) -> bool {
+    let alignment = unsafe { device.as_hal::<Metal, _, _>(|device| {
+        let raw_device = device?.raw_device().lock();
+        Some(raw_device.minimum_linear_texture_alignment_for_pixel_format(format_wgpu_to_metal(format)))
+    }).unwrap().unwrap_or(16) as usize };
+
+    if stride % alignment != 0 {
+        log::error!("Invalid stride alignment: stride: {stride}, required alignment: {alignment}");
+    }
+
+    stride % alignment == 0
+}
+
 pub fn create_metal_texture_from_buffer(buffer: *mut metal::MTLBuffer, width: u32, height: u32, stride: u32, format: wgpu::TextureFormat, usage: metal::MTLTextureUsage) -> metal::Texture {
     let buf = unsafe { metal::BufferRef::from_ptr(buffer) };
     let texture_descriptor = metal::TextureDescriptor::new();

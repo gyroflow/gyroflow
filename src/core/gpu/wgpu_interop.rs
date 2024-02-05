@@ -84,21 +84,32 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
                     native_texture: None
                 }
             } else {
-                let metal_usage = if is_in { metal::MTLTextureUsage::ShaderRead }
-                                  else     { metal::MTLTextureUsage::RenderTarget };
-                let metal_texture = create_metal_texture_from_buffer(buffer, buf.size.0 as u32, buf.size.1 as u32, buf.size.2 as u32, format, metal_usage);
-                if metal_texture.as_ptr().is_null() {
-                    log::error!("Failed to create Metal texture from MTLBuffer!");
-                }
-
+                let native_texture = if buf.texture_copy {
+                    None
+                } else {
+                    if check_metal_stride(device, format, buf.size.2) {
+                        let metal_usage = if is_in { metal::MTLTextureUsage::ShaderRead }
+                                          else     { metal::MTLTextureUsage::RenderTarget };
+                        let texture = create_metal_texture_from_buffer(buffer, buf.size.0 as u32, buf.size.1 as u32, buf.size.2 as u32, format, metal_usage);
+                        if texture.as_ptr().is_null() {
+                            log::error!("Failed to create Metal texture from MTLBuffer!");
+                            None
+                        } else {
+                            Some(texture)
+                        }
+                    } else {
+                        // TODO: handle this case
+                        None
+                    }
+                };
                 TextureHolder {
-                    wgpu_texture: Some(if buf.texture_copy {
+                    wgpu_texture: Some(if buf.texture_copy || native_texture.is_none() {
                         device.create_texture(&desc)
                     } else {
-                        create_texture_from_metal(&device, metal_texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, usage)
+                        create_texture_from_metal(&device, native_texture.as_ref().unwrap().as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, usage)
                     }),
                     wgpu_buffer: None,
-                    native_texture: Some(NativeTexture::Metal(metal_texture))
+                    native_texture: native_texture.map(NativeTexture::Metal)
                 }
             }
         },
