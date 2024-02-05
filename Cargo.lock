@@ -1075,10 +1075,10 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=443d5f9#443d5f93dc7a74bf2ca759f86c813a3c99818b18"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=4da46f3#4da46f35ef486a9b9192874221083f62fd5ac1db"
 dependencies = [
  "bitflags 2.4.2",
- "libloading 0.8.1",
+ "libloading 0.7.4",
  "winapi",
 ]
 
@@ -2542,7 +2542,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=443d5f9#443d5f93dc7a74bf2ca759f86c813a3c99818b18"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=4da46f3#4da46f35ef486a9b9192874221083f62fd5ac1db"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -4499,7 +4499,7 @@ checksum = "53a85b86a771b1c87058196170769dd264f66c0782acf1ae6cc51bfd64b39082"
 [[package]]
 name = "wgpu"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=443d5f9#443d5f93dc7a74bf2ca759f86c813a3c99818b18"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=4da46f3#4da46f35ef486a9b9192874221083f62fd5ac1db"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -4523,7 +4523,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=443d5f9#443d5f93dc7a74bf2ca759f86c813a3c99818b18"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=4da46f3#4da46f35ef486a9b9192874221083f62fd5ac1db"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4549,7 +4549,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=443d5f9#443d5f93dc7a74bf2ca759f86c813a3c99818b18"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=4da46f3#4da46f35ef486a9b9192874221083f62fd5ac1db"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4569,7 +4569,7 @@ dependencies = [
  "js-sys",
  "khronos-egl",
  "libc",
- "libloading 0.8.1",
+ "libloading 0.7.4",
  "log",
  "metal",
  "naga",
@@ -4592,7 +4592,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=443d5f9#443d5f93dc7a74bf2ca759f86c813a3c99818b18"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=4da46f3#4da46f35ef486a9b9192874221083f62fd5ac1db"
 dependencies = [
  "bitflags 2.4.2",
  "js-sys",
