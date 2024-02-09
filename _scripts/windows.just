@@ -85,6 +85,10 @@ run *param:
     cargo run --release -- {{param}}
 
 [no-cd]
+test *param:
+    cargo test -- {{param}}
+
+[no-cd]
 clippy:
     cargo clippy
 

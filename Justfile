@@ -5,6 +5,9 @@ BaseFile := os()
 run *param:
     just -f _scripts/{{BaseFile}}.just run {{param}}
 
+test *param:
+    just -f _scripts/{{BaseFile}}.just test {{param}}
+
 build *param:
     just -f _scripts/{{BaseFile}}.just build {{param}}
 

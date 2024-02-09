@@ -32,20 +32,18 @@ TextField {
     }
 
     Keys.onDownPressed: (e) => {
-        const lastDigit = Math.pow(10, precision);
         if (allowText) return;
-             if (e.modifiers & Qt.AltModifier) value -= 1 / lastDigit;
-        else if (e.modifiers & Qt.ControlModifier) value -= 100 / lastDigit;
-        else if (e.modifiers & Qt.ShiftModifier) value -= 1000 / lastDigit;
-        else value -= 10 / lastDigit;
+        const locale = Qt.locale();
+        const result = ui_tools.modify_digit(root.text.replace(locale.decimalPoint, '.'), root.cursorPosition, false).split(';');
+        root.text = result[0].replace('.', locale.decimalPoint);
+        root.cursorPosition = result[1];
     }
     Keys.onUpPressed: (e) => {
-        const lastDigit = Math.pow(10, precision);
         if (allowText) return;
-             if (e.modifiers & Qt.AltModifier) value += 1 / lastDigit;
-        else if (e.modifiers & Qt.ControlModifier) value += 100 / lastDigit;
-        else if (e.modifiers & Qt.ShiftModifier) value += 1000 / lastDigit;
-        else value += 10 / lastDigit;
+        const locale = Qt.locale();
+        const result = ui_tools.modify_digit(root.text.replace(locale.decimalPoint, '.'), root.cursorPosition, true).split(';');
+        root.text = result[0].replace('.', locale.decimalPoint);
+        root.cursorPosition = result[1];
     }
     Keys.onPressed: (e) => {
         if (e.key == Qt.Key_Insert) {

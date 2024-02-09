@@ -105,6 +105,9 @@ inherits = "release"
 lto = true
 codegen-units = 1
 
+[dev-dependencies]
+test-case = "3.3.1"
+
 # -------------------------- Android stuff --------------------------
 
 # [lib]
