@@ -295,17 +295,17 @@ Comprobe a taxa de bits do ficheiro despois da renderización e se &apos;está a
       <location filename="../../src/ui/App.qml" line="331"/>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>Added to queue</source>
-      <translation type="unfinished">Added to queue</translation>
+      <translation>Engadido á cola</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="331"/>
       <source>file %1 will be overwritten</source>
-      <translation type="unfinished">file %1 will be overwritten</translation>
+      <translation>o ficheiro %1 sobrescribirase</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>file will be rendered to %1</source>
-      <translation type="unfinished">file will be rendered to %1</translation>
+      <translation>o ficheiro renderase a %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="364"/>
@@ -398,7 +398,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/App.qml" line="687"/>
       <source>GPU decoder failed to decode this file. Disable GPU decoding in &quot;Advanced&quot; and try again.</source>
-      <translation type="unfinished">GPU decoder failed to decode this file. Disable GPU decoding in &quot;Advanced&quot; and try again.</translation>
+      <translation>O descodificador da GPU non puido descodificar este ficheiro. Desactivar a decodificación da GPU en &quot;Avanzado&quot; e ténteo de novo.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="690"/>
@@ -637,12 +637,12 @@ Pode aumentar o límite de nitidez na sección Avanzado.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="550"/>
       <source>Export trim ranges as separate videos</source>
-      <translation type="unfinished">Export trim ranges as separate videos</translation>
+      <translation>Exporta intervalos de recorte como vídeos separados</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="569"/>
       <source>Interpolation method</source>
-      <translation type="unfinished">Interpolation method</translation>
+      <translation>Método de interpolación</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="630"/>
@@ -1157,7 +1157,7 @@ Quere envialo seu perfil?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="151"/>
       <source>In order to detect multiple motion data files, click here and grant access to the directory with files.</source>
-      <translation type="unfinished">In order to detect multiple motion data files, click here and grant access to the directory with files.</translation>
+      <translation>Para detectar varios ficheiros de datos de movemento, faga clic aquí e conceda acceso ao directorio con ficheiros.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="179"/>
@@ -2862,27 +2862,27 @@ Está seguro de que quere continuar?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="662"/>
       <source>Trim range</source>
-      <translation type="unfinished">Trim range</translation>
+      <translation>Rango de recorte</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="665"/>
       <source>Add new range</source>
-      <translation type="unfinished">Add new range</translation>
+      <translation>Engadir novo intervalo</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="683"/>
       <source>Delete this range</source>
-      <translation type="unfinished">Delete this range</translation>
+      <translation>Eliminar este intervalo</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="692"/>
       <source>Clear all</source>
-      <translation type="unfinished">Clear all</translation>
+      <translation>Limpar todo</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="699"/>
       <source>Restrict playback to trim range</source>
-      <translation type="unfinished">Restrict playback to trim range</translation>
+      <translation>Restrinxa a reprodución ó rango de recorte</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="970"/>
