@@ -57,11 +57,12 @@ parking_lot = "0.12.1"
 simplelog = { git = "https://github.com/Drakulix/simplelog.rs.git", rev = "4ef071d" }
 log = "0.4"
 
-ureq = "2.9.1"
+ureq = "2.9.6"
 url = "2.5.0"
 whoami = "1.4.1"
 tar = "0.4.40"
 lru = "0.12"
+chrono = "0.4"
 
 log-panics = { version = "2.1", features = ["with-backtrace"] }
 
