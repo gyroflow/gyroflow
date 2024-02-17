@@ -337,6 +337,24 @@ impl<'a> FfmpegProcessor<'a> {
         for (k, v) in self.video.encoder_params.metadata.iter() {
             metadata.set(k, v);
         }
+        let mut updated_creation_time = None;
+        if let Some(start_ms) = start_ms {
+            if start_ms > 0.0 {
+                for (k, v) in metadata.iter() {
+                    if k == "creation_time" {
+                        if let Ok(v) = chrono::DateTime::parse_from_rfc3339(v) {
+                            if let Some(v) = v.checked_add_signed(chrono::TimeDelta::milliseconds(start_ms.round() as i64)) {
+                                updated_creation_time = Some(v.to_rfc3339());
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        if let Some(updated_creation_time) = updated_creation_time {
+            metadata.set("creation_time", &updated_creation_time);
+        }
         log::debug!("Output metadata: {:?}", &metadata);
         octx.set_metadata(metadata);
         // Header will be written after video encoder is initalized, in ffmpeg_video.rs:init_encoder

@@ -451,21 +451,32 @@ pub fn image_to_b64(img: QImage) -> QString {
     })
 }
 
-pub fn update_file_times(output_url: &str, input_url: &str) {
+pub fn update_file_times(output_url: &str, input_url: &str, additional_ms: Option<f64>) {
     if let Err(e) = || -> std::io::Result<()> {
         let input_path = gyroflow_core::filesystem::url_to_path(input_url);
         let output_path = gyroflow_core::filesystem::url_to_path(output_url);
         if input_path.is_empty() || output_path.is_empty() {
             return Err(std::io::Error::new(std::io::ErrorKind::PermissionDenied, format!("Can't get path from url! Input: {input_url} / {input_path}, output: {output_url} / {output_path}")));
         }
-        let org_time = filetime_creation::FileTime::from_creation_time(&std::fs::metadata(&input_path)?).ok_or(std::io::ErrorKind::Other)?;
-        if cfg!(target_os = "windows") {
-            ::log::debug!("Updating creation time of {} to {}", output_path, org_time.to_string());
-            filetime_creation::set_file_ctime(output_path, org_time)?;
-        } else {
-            ::log::debug!("Updating modification time of {} to {}", output_path, org_time.to_string());
-            filetime_creation::set_file_mtime(output_path, org_time)?;
+        let mut org_time_c = filetime_creation::FileTime::from_creation_time(&std::fs::metadata(&input_path)?);
+        let mut org_time_m = filetime_creation::FileTime::from_last_modification_time(&std::fs::metadata(&input_path)?);
+        if let Some(additional_ms) = additional_ms {
+            if additional_ms > 0.0 {
+                if let Some(ctime) = org_time_c {
+                    org_time_c = Some(filetime_creation::FileTime::from_unix_time(ctime.unix_seconds() + (additional_ms / 1000.0).round() as i64, ctime.nanoseconds()));
+                }
+                org_time_m = filetime_creation::FileTime::from_unix_time(org_time_m.unix_seconds() + (additional_ms / 1000.0).round() as i64, org_time_m.nanoseconds());
+            }
         }
+        if cfg!(target_os = "windows") {
+            if let Some(org_time_c) = org_time_c {
+                ::log::debug!("Updating creation time of {} to {}", output_path, org_time_c.to_string());
+                filetime_creation::set_file_ctime(output_path.clone(), org_time_c)?;
+            }
+        }
+        ::log::debug!("Updating modification time of {} to {}", output_path, org_time_m.to_string());
+        filetime_creation::set_file_mtime(output_path, org_time_m)?;
+
         Ok(())
     }() { ::log::warn!("Failed to update file times: {e:?}"); }
 }

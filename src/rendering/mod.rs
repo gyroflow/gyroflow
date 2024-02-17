@@ -684,6 +684,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         }
     }
 
+    let start_ms = proc.ranges_ms.first().and_then(|x| x.0);
     proc.render(&fs_base, folder, &filename, (output_width as u32, output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
 
     drop(proc);
@@ -699,7 +700,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         progress((1.0, render_frame_count, render_frame_count, true, false));
     }
 
-    crate::util::update_file_times(&output_url, &input_file.url);
+    crate::util::update_file_times(&output_url, &input_file.url, start_ms);
 
     Ok(())
 }

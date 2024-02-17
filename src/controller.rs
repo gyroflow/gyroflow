@@ -1973,7 +1973,7 @@ impl Controller {
                         ::log::error!("Failed to merge .gcsv files: {:?}", e);
                     }
 
-                    crate::util::update_file_times(&output_url, &first_url);
+                    crate::util::update_file_times(&output_url, &first_url, None);
 
                     progress((1.0, String::default()))
                 },
