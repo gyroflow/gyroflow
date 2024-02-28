@@ -95,6 +95,16 @@ jobs:
 
       - uses: extractions/setup-just@v1
 
+      - name: Workaround GitHub CI brew python install issue
+        if: ${{ matrix.targets.os == 'macos-13' }}
+        run: |
+          # https://github.com/actions/setup-python/issues/577
+          rm /usr/local/bin/2to3 || true
+          rm /usr/local/bin/idle3 || true
+          rm /usr/local/bin/pydoc3 || true
+          rm /usr/local/bin/python3 || true
+          rm /usr/local/bin/python3-config || true
+
       - name: Build Gyroflow (macOS)
         if: ${{ matrix.targets.type == 'macos' }}
         env:
