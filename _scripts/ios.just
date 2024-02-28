@@ -33,7 +33,7 @@ install-deps:
     #!/bin/bash
     set -e
     brew install p7zip pkg-config ios-deploy
-    brew install --force python
+    brew list python &>/dev/null || brew install python
     rustup target add aarch64-apple-ios
     xcode-select --install || true
     export DYLD_FALLBACK_LIBRARY_PATH=""
@@ -48,7 +48,7 @@ install-deps:
 
     if [ ! -d "{{ExtDir}}/{{QtVersionIOS}}/ios" ] || [ ! -d "{{ExtDir}}/{{QtVersionIOS}}/macos" ]; then
         # Install Qt
-        pip3 install -U pip aqtinstall
+        python3 -m pip install -U pip aqtinstall
         python3 -m aqt install-qt mac desktop {{QtVersionIOS}}
         python3 -m aqt install-qt mac ios {{QtVersionIOS}}
 
