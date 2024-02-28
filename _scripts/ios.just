@@ -32,7 +32,8 @@ export IPHONEOS_DEPLOYMENT_TARGET := "14.0"
 install-deps:
     #!/bin/bash
     set -e
-    brew install p7zip python pkg-config ios-deploy
+    brew install p7zip pkg-config ios-deploy
+    brew install python || true
     rustup target add aarch64-apple-ios
     xcode-select --install || true
     export DYLD_FALLBACK_LIBRARY_PATH=""
