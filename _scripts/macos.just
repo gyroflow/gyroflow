@@ -35,6 +35,8 @@ install-deps:
 
     if [ ! -d "{{ExtDir}}/{{QtVersion}}" ]; then
         # Install Qt
+        echo "Installing Qt"
+        export PATH="/usr/local/opt/python/libexec/bin:$PATH"
         pip3 install -U pip aqtinstall
         python3 -m aqt install-qt mac desktop {{QtVersion}}
     fi
