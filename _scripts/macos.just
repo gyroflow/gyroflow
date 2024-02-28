@@ -326,7 +326,7 @@ deploy *param:
             do
                 hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v{{ProjectVersion}}" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9 || true
 
-                if [ -f "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"]; then
+                if [ -f "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" ]; then
                     break
                 fi
             done
