@@ -22,8 +22,7 @@ install-deps:
     set -e
 
     brew install p7zip pkg-config
-    brew install --force python || true
-    brew link --overwrite python@3.12
+    HOMEBREW_NO_AUTO_UPDATE=1 brew install python
     xcode-select --install || true
 
     mkdir -p {{ExtDir}}
@@ -36,8 +35,7 @@ install-deps:
     if [ ! -d "{{ExtDir}}/{{QtVersion}}" ]; then
         # Install Qt
         echo "Installing Qt"
-        export PATH="/usr/local/opt/python/libexec/bin:$PATH"
-        pip3 install -U pip aqtinstall
+        python3 -m pip install -U pip aqtinstall
         python3 -m aqt install-qt mac desktop {{QtVersion}}
     fi
 
