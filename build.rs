@@ -230,12 +230,13 @@ fn main() {
         .build("src/gyroflow.rs");
 
     if target_os == "ios" {
-        let out_dir = Path::new(&env::var("OUT_DIR").unwrap());
-        for entry in out_dir.read_dir().unwrap() {
+        let out_dir = env::var("OUT_DIR").unwrap();
+        for entry in Path::new(&out_dir).read_dir().unwrap() {
             let path = entry.unwrap().path();
             if path.is_file() && path.to_string_lossy().contains("qml_plugins.o") {
                 println!("cargo:rustc-link-arg=-force_load");
                 println!("cargo:rustc-link-arg={}", path.to_string_lossy());
+                break;
             }
         }
     }
