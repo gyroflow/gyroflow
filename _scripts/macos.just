@@ -320,9 +320,16 @@ deploy *param:
             sudo mdutil -a -i off
 
             sudo pkill -9 XProtect >/dev/null || true
-            sleep 2
+            while pgrep XProtect; do sleep 3; done;
 
-            hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v{{ProjectVersion}}" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9
+            for i in 1 2 3 4 5
+            do
+                hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v{{ProjectVersion}}" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9 || true
+
+                if [ -f "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"]; then
+                    break
+                fi
+            done
 
             if [ "$SIGNING_FINGERPRINT" != "" ]; then
                 codesign -vvvv --strict --options runtime --timestamp --force -s $SIGNING_FINGERPRINT "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg"
