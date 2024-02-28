@@ -94,8 +94,6 @@ fn main() {
     if target_os == "ios" {
         println!("cargo:rerun-if-changed=_deployment/ios/qml_plugins.cpp");
         config.file("_deployment/ios/qml_plugins.cpp");
-        println!("cargo:rustc-link-arg=-force_load");
-        println!("cargo:rustc-link-arg={}/_deployment/ios/qml_plugins.o", env::var("OUT_DIR").unwrap());
 
         println!("cargo:rustc-link-arg=-Wl,-e,_qt_main_wrapper");
         println!("cargo:rustc-link-arg=-fapple-link-rtlib");
@@ -231,4 +229,14 @@ fn main() {
         .include(&qt_include_path)
         .build("src/gyroflow.rs");
 
+    if target_os == "ios" {
+        let out_dir = Path::new(&env::var("OUT_DIR").unwrap());
+        for entry in out_dir.read_dir().unwrap() {
+            let path = entry.unwrap().path();
+            if path.is_file() && path.to_string_lossy().contains("qml_plugins.o") {
+                println!("cargo:rustc-link-arg=-force_load");
+                println!("cargo:rustc-link-arg={}", path.to_string_lossy());
+            }
+        }
+    }
 }

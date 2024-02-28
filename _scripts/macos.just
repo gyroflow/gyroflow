@@ -318,6 +318,10 @@ deploy *param:
         if [ -z "$DONT_BUILD_DMG" ]; then
             ln -sf /Applications "$PROJECT_DIR/_deployment/_binaries/mac/Applications"
             sudo mdutil -a -i off
+
+            sudo pkill -9 XProtect >/dev/null || true
+            sleep 2
+
             hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v{{ProjectVersion}}" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9
 
             if [ "$SIGNING_FINGERPRINT" != "" ]; then
