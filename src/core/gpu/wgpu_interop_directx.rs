@@ -9,7 +9,7 @@ use windows::Win32::Graphics::Dxgi::*;
 use windows::Win32::Graphics::Direct3D11::*;
 use windows::Win32::Foundation::{ CloseHandle, HANDLE, E_NOINTERFACE, E_FAIL };
 use windows::Win32::System::Threading::{ CreateEventA, WaitForSingleObject };
-use windows::core::ComInterface;
+use windows::core::Interface;
 use ash::vk::{ self, ImageCreateInfo };
 
 pub struct DirectX11Fence {
@@ -24,7 +24,7 @@ impl DirectX11Fence {
             let mut fence: Option<ID3D11Fence> = None;
 
             device.CreateFence(0, D3D11_FENCE_FLAG_NONE, &mut fence)?;
-            let fence = fence.ok_or(windows::core::Error::new(E_FAIL, "Failed to create fence".into()))?;
+            let fence = fence.ok_or(windows::core::Error::new(E_FAIL, "Failed to create fence"))?;
 
             let event = CreateEventA(None, false, false, windows::core::PCSTR::null())?;
 
@@ -73,7 +73,7 @@ impl DirectX11SharedTexture {
                 mutex.ReleaseSync(0)?;
                 Ok(())
             } else {
-                Err(windows::core::Error::new(E_NOINTERFACE, "Failed to query IDXGIKeyedMutex".into()))
+                Err(windows::core::Error::new(E_NOINTERFACE, "Failed to query IDXGIKeyedMutex"))
             }
         }
     }

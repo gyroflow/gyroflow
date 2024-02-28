@@ -22,7 +22,7 @@ rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "57f8c1a" }
 
 mimalloc = { version = "0.1.39", default-features = false }
 nalgebra = { version = "0.32", features = ["serde-serialize"] }
-rayon = "1.8"
+rayon = "1.9"
 biquad = "0.4.2"
 fastrand = "2.0.1"
 lazy_static = "1.4.0"
@@ -35,19 +35,19 @@ crc32fast = "1.4.0"
 byteorder = "1.5.0"
 line_drawing = "1.0.0"
 rand = "0.8.5"
-time = { version = "0.3.31", features = ["local-offset"] }
-itertools = "0.12.0"
+time = { version = "0.3.34", features = ["local-offset"] }
+itertools = "0.12.1"
 num = "0.4.1"
 base91 = "0.1.0"
 bitflags = "2.4.2"
 enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
-half = "2.3.1"
+half = "2.4.0"
 lru = "0.12"
 thiserror = "1.0.57"
-ciborium = "0.2.1"
+ciborium = "0.2.2"
 nt-hive = "0.2"
-dyn-clone = "1.0.16"
+dyn-clone = "1.0.17"
 
 akaze = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee", features = ["rayon"] }
 eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee" }
@@ -62,7 +62,7 @@ bitarray = { version = "0.9", features = ["space"] }
 enterpolation = "0.2.1"
 libloading = "0.8"
 libc = "0.2"
-bytemuck = "1.14.1"
+bytemuck = "1.14.3"
 ash = "0.37.3"
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"
@@ -77,10 +77,10 @@ rustfft = "6.2.0"
 include_dir = { version = "0.7.3", features = ["glob"] }
 opencv = { version = "0.88.8", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "004e3ef", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "330a860", features = ["spirv", "naga-ir"] }
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "004e3ef"
+rev = "330a860"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
@@ -89,7 +89,7 @@ objc-foundation = "0.1.1"
 core-foundation-sys = "0.8.6"
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
-version = "0.52.0"
+version = "0.54.0"
 features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation", "Win32_System_LibraryLoader",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry" ]
@@ -119,6 +119,6 @@ ndk-sys = { version = "0.5.0" }
 ndk-context = { version = "0.1.1" }
 
 [build-dependencies]
-ureq = "2.9.1"
+ureq = "2.9.6"
 flate2 = "1.0.28"
 tar = "0.4.40"
