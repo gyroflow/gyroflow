@@ -22,7 +22,8 @@ install-deps:
     set -e
 
     brew install p7zip pkg-config
-    brew install --force python
+    brew install --force python || true
+    brew link --overwrite python@3.12
     xcode-select --install || true
 
     mkdir -p {{ExtDir}}
