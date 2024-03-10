@@ -24,6 +24,7 @@
 	<key>NSNetworkVolumesUsageDescription</key>    <string>Permission needed to open file in Gyroflow</string>
 	<key>NSRemovableVolumesUsageDescription</key>  <string>Permission needed to open file in Gyroflow</string>
 	<key>NSFileProviderDomainUsageDescription</key><string>Permission needed to open file in Gyroflow</string>
+	<key>NSCameraUsageDescription</key>			   <string>Permission needed to use Gyroflow</string>
 	<key>UILaunchStoryboardName</key>              <string>LaunchScreen</string>
     <key>ITSAppUsesNonExemptEncryption</key>       <false/>
 	<key>UISupportedInterfaceOrientations</key>
