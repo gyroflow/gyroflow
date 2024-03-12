@@ -267,4 +267,31 @@ Item {
     Shortcut { sequence: "Ctrl+R";  onActivated: hlRollAdjust(-0.1); }
     Shortcut { sequence: "Alt+R";   onActivated: hlRollAdjust(-1);   }
     Shortcut { sequence: "Shift+R"; onActivated: hlRollAdjust(-5);   }
+
+    // Save and open next queue item
+    Shortcut {
+        sequence: "Ctrl+D";
+        onActivated: loadQueueItem(render_queue.get_next_item_id(render_queue.editing_job_id));
+    }
+
+    // Save and open prev queue item
+    Shortcut {
+        sequence: "Ctrl+A";
+        onActivated: loadQueueItem(render_queue.get_prev_item_id(render_queue.editing_job_id));
+    }
+
+    function loadQueueItem(new_id: int) {
+        const current_id = render_queue.editing_job_id;
+        if (current_id > 0) {
+            // Save
+            window.renderBtn.isAddToQueue = true;
+            window.videoArea.vid.grabToImage(function(result) {
+                render_queue.add(window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
+                if (new_id > 0) {
+                    const data = render_queue.get_gyroflow_data(new_id);
+                    window.videoArea.loadGyroflowData(JSON.parse(data), new_id);
+                }
+            });
+        }
+    }
 }

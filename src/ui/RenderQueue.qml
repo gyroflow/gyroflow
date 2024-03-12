@@ -331,9 +331,8 @@ Item {
                     onTriggered:{
                         const data = render_queue.get_gyroflow_data(job_id);
                         if (data) {
-                            window.videoArea.loadGyroflowData(JSON.parse(data));
+                            window.videoArea.loadGyroflowData(JSON.parse(data), job_id);
                         }
-                        render_queue.editing_job_id = job_id;
                         root.shown = false;
                     }
                 }

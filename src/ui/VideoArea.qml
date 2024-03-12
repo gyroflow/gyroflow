@@ -32,6 +32,7 @@ Item {
     property bool isCalibrator: false;
 
     property var pendingGyroflowData: null;
+    property int pendingQueueJobId: 0;
     property url loadedFileUrl;
 
     property int fullScreen: 0;
@@ -40,11 +41,13 @@ Item {
 
     property Menu.VideoInformation vidInfo: null;
 
-    function loadGyroflowData(obj) {
+    function loadGyroflowData(obj, queueJobId) {
         root.pendingGyroflowData = null;
+        root.pendingQueueJobId = 0;
 
         if (controller.loading_gyro_in_progress) {
             root.pendingGyroflowData = obj;
+            root.pendingQueueJobId = +queueJobId;
             controller.cancel_current_operation();
             // we'll get called again from telemetry_loaded
             return;
@@ -69,8 +72,9 @@ Item {
 
         if (urls[0] && !isCorrectVideoLoaded) {
             root.pendingGyroflowData = obj;
+            root.pendingQueueJobId = +queueJobId;
             console.log("Loading video file", urls[0]);
-            loadFile(urls[0], false);
+            loadFile(urls[0], false, +queueJobId);
             if (controller.image_sequence_fps > 0) {
                 vid.setFrameRate(controller.image_sequence_fps);
             }
@@ -78,6 +82,7 @@ Item {
         }
         if (urls[1] && !isCorrectGyroLoaded && filesystem.exists(urls[1])) {
             root.pendingGyroflowData = obj;
+            root.pendingQueueJobId = +queueJobId;
             console.log("Loading gyro file", urls[1]);
             window.motionData.lastSelectedFile = urls[1];
             controller.load_telemetry(urls[1], urls[0] == urls[1], window.videoArea.vid, -1);
@@ -93,6 +98,7 @@ Item {
         } else {
             controller.import_gyroflow_data(JSON.stringify(obj));
         }
+        render_queue.editing_job_id = +queueJobId;
     }
     Connections {
         target: controller;
@@ -234,7 +240,7 @@ Item {
                 messageBox(Modal.Warning, qsTr("Motion data sampling rate is too low (%1 Hz).\n50 Hz is an absolute minimum and we recommend at least 200 Hz.").arg(additional_data.sample_rate.toFixed(0)), [ { "text": qsTr("Ok") } ]);
             }
             if (root.pendingGyroflowData) {
-                Qt.callLater(loadGyroflowData, root.pendingGyroflowData);
+                Qt.callLater(loadGyroflowData, root.pendingGyroflowData, root.pendingQueueJobId);
             } else {
                 Qt.callLater(controller.recompute_threaded);
                 if (is_main_video) {
@@ -280,12 +286,12 @@ Item {
     }
     property Modal externalSdkModal: null;
 
-    function loadFile(url: url, skip_detection: bool) {
+    function loadFile(url: url, skip_detection: bool, queueJobId: int) {
         let filename = filesystem.get_filename(url);
         let folder = filesystem.get_folder(url);
 
         if (filename.endsWith(".gyroflow")) {
-            return loadGyroflowData(url);
+            return loadGyroflowData(url, queueJobId);
         }
         if (filename.endsWith(".RDC")) {
             // Assumes regular filesystem
@@ -618,7 +624,7 @@ Item {
                     window.motionData.filename = "";
 
                     if (root.pendingGyroflowData) {
-                        Qt.callLater(root.loadGyroflowData, root.pendingGyroflowData);
+                        Qt.callLater(root.loadGyroflowData, root.pendingGyroflowData, root.pendingQueueJobId);
                     } else {
                         controller.load_telemetry(root.loadedFileUrl, true, vid, -1);
                     }

@@ -221,6 +221,8 @@ pub struct RenderQueue {
     pub processing_done: qt_signal!(job_id: u32, by_preset: bool),
     pub processing_progress: qt_signal!(job_id: u32, progress: f64),
 
+    get_prev_item_id: qt_method!(fn(&self, job_id: u32) -> u32),
+    get_next_item_id: qt_method!(fn(&self, job_id: u32) -> u32),
     get_encoder_options: qt_method!(fn(&self, encoder: String) -> String),
     get_default_encoder: qt_method!(fn(&self, codec: String, gpu: bool) -> String),
 
@@ -1480,6 +1482,28 @@ impl RenderQueue {
     }
     fn get_encoder_options(&self, encoder: String) -> String {
         rendering::get_encoder_options(&encoder)
+    }
+    fn get_next_item_id(&self, job_id: u32) -> u32 {
+        let q = self.queue.borrow();
+        let mut qiter = q.iter();
+        while let Some(itm) = qiter.next() {
+            if job_id == itm.job_id {
+                return qiter.next().map(|itm| itm.job_id).unwrap_or(0);
+            }
+        }
+        0
+    }
+    fn get_prev_item_id(&self, job_id: u32) -> u32 {
+        let q = self.queue.borrow();
+        let mut qiter = q.iter();
+        let mut prev_id = 0;
+        while let Some(itm) = qiter.next() {
+            if job_id == itm.job_id {
+                return prev_id;
+            }
+            prev_id = itm.job_id;
+        }
+        0
     }
 
     // Keep in sync with Synchronization.qml
