@@ -56,7 +56,7 @@ cv-core = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a
 sample-consensus = "1.0.2"
 arrsac = "0.10.0"
 rand_xoshiro = "0.6.0"
-image = "0.24"
+image = { version = "0.24", default-features = false }
 space = { version = "0.17", features = ["alloc"] }
 bitarray = { version = "0.9", features = ["space"] }
 enterpolation = "0.2.1"
@@ -77,10 +77,10 @@ rustfft = "6.2.0"
 include_dir = { version = "0.7.3", features = ["glob"] }
 opencv = { version = "0.88.8", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "b731495", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "6040820", features = ["spirv", "naga-ir"] }
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "b731495"
+rev = "6040820"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
