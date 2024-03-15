@@ -68,7 +68,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="242"/>
       <source>Format for R3D conversion</source>
-      <translation type="unfinished">Format for R3D conversion</translation>
+      <translation>Формат для R3D конвертації</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="304"/>
@@ -83,7 +83,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="342"/>
       <source>CPU only</source>
-      <translation>Тільки ЦП</translation>
+      <translation>Тільки CPU</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="385"/>
@@ -170,8 +170,8 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
       <location filename="../../src/ui/App.qml" line="298"/>
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use one of [video editor plugins] (%1).</source>
-      <translation type="unfinished">This format is not available for rendering.
-The recommended workflow is to export project file and use one of [video editor plugins] (%1).</translation>
+      <translation>Цей формат недоступний для візуалізації.
+Рекомендований робочий процес полягає в тому, щоб експортувати файл проекту та використовувати один із [video editor plugins] (%1).</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="336"/>
@@ -244,16 +244,16 @@ The recommended workflow is to export project file and use one of [video editor 
 Please check the file bitrate after rendering and if you&apos;re affected by this bug, you can either:
 - Set output bitrate to less than 100 Mbps
 - Use &quot;Custom encoder options&quot;: `-rc cqp -qp_i 28 -qp_p 28`</source>
-      <translation type="unfinished">Some AMD GPU encoders have a bug where it limits the bitrate to 20 Mbps, if the target bitrate is greater than 100 Mbps.
+      <translation>У деяких графічних &quot;кодерів AMD є помилка, яка обмежує бітрейт до 20 Мбіт/с, якщо цільовий бітрейт перевищує 100 Мбіт/с.
 
-Please check the file bitrate after rendering and if you&apos;re affected by this bug, you can either:
-- Set output bitrate to less than 100 Mbps
-- Use &quot;Custom encoder options&quot;: `-rc cqp -qp_i 28 -qp_p 28`</translation>
+Будь ласка, перевірте бітрейт файлу після візуалізації, і якщо ця помилка вас стосується, ви можете:
+- Встановіть вихідний бітрейт менше 100 Мбіт/с
+- Використовуйте &quot;Custom encoder options&quot;: `-rc cqp -qp_i 28 -qp_p 28`</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="731"/>
       <source>Saving...</source>
-      <translation type="unfinished">Saving...</translation>
+      <translation>Збереження...</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="595"/>
@@ -296,31 +296,31 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="331"/>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>Added to queue</source>
-      <translation type="unfinished">Added to queue</translation>
+      <translation>Додано до черги</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="331"/>
       <source>file %1 will be overwritten</source>
-      <translation type="unfinished">file %1 will be overwritten</translation>
+      <translation>файл %1 буде перезаписано</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>file will be rendered to %1</source>
-      <translation type="unfinished">file will be rendered to %1</translation>
+      <translation>файл буде рендерений до %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="364"/>
       <source>Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>Через обмеження доступу до файлів, вам потрібно вибрати папку призначення вручну.
+Натисніть OK і виберіть папку призначення.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="375"/>
       <source>Keep this app in the foreground and don&apos;t lock the screen.
 Due to limitations of the system video encoders, rendering in the background is not supported.</source>
-      <translation type="unfinished">Keep this app in the foreground and don&apos;t lock the screen.
-Due to limitations of the system video encoders, rendering in the background is not supported.</translation>
+      <translation>Тримайте цю програму на передньому плані та не блокуйте екран.
+Через обмеження системних відеокодерів рендеринг у фоновому режимі не підтримується.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="634"/>
@@ -352,7 +352,7 @@ Due to limitations of the system video encoders, rendering in the background is 
       <location filename="../../src/ui/App.qml" line="649"/>
       <source>This encoder requires an external library licensed as GPL.
 Do you agree with the [GPL license] and want to download the additional codec?</source>
-      <translation>Цей енкодер вимагає ліцензійну бібліотеку GPL.
+      <translation>Для цього кодувальника потрібна зовнішня бібліотека під ліцензією GPL.
 Ви погоджуєтесь з [ліцензією GPL] і хочете завантажити додатковий кодек?</translation>
     </message>
     <message>
@@ -389,28 +389,28 @@ Do you want to convert to a different supported pixel format or keep the origina
       <location filename="../../src/ui/App.qml" line="681"/>
       <source>GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.
 If you have a modern device, latest GPU drivers and you think this shouldn&apos;t happen, report this on GitHub including gyroflow.log file.</source>
-      <translation type="unfinished">GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.
-If you have a modern device, latest GPU drivers and you think this shouldn&apos;t happen, report this on GitHub including gyroflow.log file.</translation>
+      <translation>Не вдалося ініціалізувати GPU кодер, і візуалізація виконується на CPU, який працює набагато повільніше.
+Якщо у вас сучасний пристрій, останні драйвери GPU, і ви вважаєте, що цього не повинно статися, повідомте про це на GitHub, включаючи файл gyroflow.log.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="684"/>
       <source>Your GPU doesn&apos;t support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.</source>
-      <translation type="unfinished">Your GPU doesn&apos;t support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.</translation>
+      <translation>Ваш GPU не підтримує кодування H.265/HEVC, спробуйте використати H.264/AVC або вимкніть кодування GPU в налаштуваннях експорту.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="687"/>
       <source>GPU decoder failed to decode this file. Disable GPU decoding in &quot;Advanced&quot; and try again.</source>
-      <translation type="unfinished">GPU decoder failed to decode this file. Disable GPU decoding in &quot;Advanced&quot; and try again.</translation>
+      <translation>Декодер GPU не зміг декодувати цей файл(и). Вимкніть GPU в &quot;Додатково&quot; і спробуйте ще раз.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="690"/>
       <source>Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</source>
-      <translation type="unfinished">Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</translation>
+      <translation>Переконайтеся, що вихідне розширення підтримує вибраний кодек. &quot;.mov&quot; має працювати в більшості випадків.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="693"/>
       <source>Audio encoder couldn&apos;t process the input data. Try unchecking &quot;Export audio&quot; in Export settings.</source>
-      <translation type="unfinished">Audio encoder couldn&apos;t process the input data. Try unchecking &quot;Export audio&quot; in Export settings.</translation>
+      <translation>Аудіокодер не зміг обробити вхідні дані. Спробуйте зняти прапорець &quot;Експортувати аудіо&quot; у налаштуваннях експорту.</translation>
     </message>
   </context>
   <context>
@@ -452,17 +452,17 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="81"/>
       <source>Pattern sharpness: %1</source>
-      <translation type="unfinished">Pattern sharpness: %1</translation>
+      <translation>Шаблон різкості: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="97"/>
       <source>Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</source>
-      <translation type="unfinished">Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</translation>
+      <translation>Було виявлено деякі шаблони, але їх середня різкість становила &lt;b&gt;%1 пікс&lt;/b&gt; а максимальне обмеження становить &lt;b&gt;%2 пікселів&lt;/b&gt;.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="98"/>
       <source>No calibration patterns were detected.</source>
-      <translation type="unfinished">No calibration patterns were detected.</translation>
+      <translation>Шаблонів калібрування не виявлено.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="99"/>
@@ -474,14 +474,14 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
 - Make sure the pattern stays in focus.
 
 You can increase the sharpness limit in the Advanced section.</source>
-      <translation type="unfinished">Make sure your calibration footage is as sharp as possible:
-- Use high shutter speed
-- Use good lighting
-- Move the camera slowly
-- Avoid motion blur
-- Make sure the pattern stays in focus.
+      <translation>Переконайтеся, що кадри калібрування максимально чіткі:
+- Використовуйте високий shutter speed
+- Використовуйте хороше освітлення
+- Рухайте камерою повільно
+- Уникайте розмиття в русі
+- Переконайтеся, що шаблон залишається у фокусі.
 
-You can increase the sharpness limit in the Advanced section.</translation>
+Ви можете збільшити межу різкості в розділі «Додатково».</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="116"/>
@@ -624,123 +624,123 @@ You can increase the sharpness limit in the Advanced section.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="474"/>
       <source>Audio export not available when changing video speed.</source>
-      <translation type="unfinished">Audio export not available when changing video speed.</translation>
+      <translation>Експорт аудіо недоступний при зміні швидкості відео.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="481"/>
       <source>Custom encoder options</source>
-      <translation type="unfinished">Custom encoder options</translation>
+      <translation>Власні параметри кодека</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="504"/>
       <source>Show available options</source>
-      <translation type="unfinished">Show available options</translation>
+      <translation>Показати доступні опції</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="550"/>
       <source>Export trim ranges as separate videos</source>
-      <translation type="unfinished">Export trim ranges as separate videos</translation>
+      <translation>Експортувати потрійний діапазон як окремі відео</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="569"/>
       <source>Interpolation method</source>
-      <translation type="unfinished">Interpolation method</translation>
+      <translation>Спосіб інтерполяції</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="630"/>
       <source>Preserve export settings</source>
-      <translation type="unfinished">Preserve export settings</translation>
+      <translation>Зберегти налаштування експорту</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="632"/>
       <source>Save output size and bitrate in settings and use it for all files.</source>
-      <translation type="unfinished">Save output size and bitrate in settings and use it for all files.</translation>
+      <translation>Зберегти вихідний розмір та бітрейт у налаштуваннях і використовувати для всіх файлів.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="643"/>
       <source>Preserve export path</source>
-      <translation type="unfinished">Preserve export path</translation>
+      <translation>Зберегти шлях для експорту</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="645"/>
       <source>Save output path in settings and use it for all files.</source>
-      <translation type="unfinished">Save output path in settings and use it for all files.</translation>
+      <translation>Зберегти вихідний шлях у налаштуваннях і використати для всіх файлів.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="390"/>
       <location filename="../../src/ui/menu/Export.qml" line="507"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Ок</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="371"/>
       <source>Edit sizes</source>
-      <translation type="unfinished">Edit sizes</translation>
+      <translation>Редагувати розмір</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="374"/>
       <source>Original</source>
-      <translation type="unfinished">Original</translation>
+      <translation>Оригінал</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="382"/>
       <source>You can edit the output size presets here:</source>
-      <translation type="unfinished">You can edit the output size presets here:</translation>
+      <translation>Ви можете редагувати налаштування вихідного розміру тут:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="383"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Зберегти</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="390"/>
       <source>Invalid JSON format!</source>
-      <translation type="unfinished">Invalid JSON format!</translation>
+      <translation>Невірний формат JSON!</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="393"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Скасувати</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="514"/>
       <source>Metadata comment</source>
-      <translation type="unfinished">Metadata comment</translation>
+      <translation>Metadata коментар</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="522"/>
       <source>Keyframe distance</source>
-      <translation type="unfinished">Keyframe distance</translation>
+      <translation>Відстань ключових кадрів</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="531"/>
       <source>s</source>
-      <translation type="unfinished">s</translation>
+      <translation>s</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="536"/>
       <source>Preserve other tracks</source>
-      <translation type="unfinished">Preserve other tracks</translation>
+      <translation>Зберігати інші треки</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="538"/>
       <source>This disables trim range and you need to use the .mov output file extension</source>
-      <translation type="unfinished">This disables trim range and you need to use the .mov output file extension</translation>
+      <translation>Це вимикає діапазон обрізання, і вам потрібно використовувати .mov розширення</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="543"/>
       <source>Use black frames outside trim range and keep original file duration</source>
-      <translation type="unfinished">Use black frames outside trim range and keep original file duration</translation>
+      <translation>Використовуйте чорні рамки за межами діапазону обрізання та зберігайте оригінальну тривалість файлу</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="557"/>
       <source>Audio codec</source>
-      <translation type="unfinished">Audio codec</translation>
+      <translation>Аудіо кодек</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="580"/>
       <source>Device for rendering</source>
-      <translation type="unfinished">Device for rendering</translation>
+      <translation>Пристрій для рендерингу</translation>
     </message>
   </context>
   <context>
@@ -748,7 +748,7 @@ You can increase the sharpness limit in the Advanced section.</translation>
     <message>
       <location filename="../../src/ui/components/FrequencyChart.qml" line="38"/>
       <source>%1 Hz</source>
-      <translation type="unfinished">%1 Hz</translation>
+      <translation>%1 Hz</translation>
     </message>
   </context>
   <context>
@@ -756,32 +756,32 @@ You can increase the sharpness limit in the Advanced section.</translation>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="50"/>
       <source>Grid guide</source>
-      <translation type="unfinished">Grid guide</translation>
+      <translation>Керівництво по сітці</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Enabled</source>
-      <translation type="unfinished">Enabled</translation>
+      <translation>Увімкнено</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="54"/>
       <source>Color</source>
-      <translation type="unfinished">Color</translation>
+      <translation>Колір</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="55"/>
       <source>White</source>
-      <translation type="unfinished">White</translation>
+      <translation>Білий</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="56"/>
       <source>Black</source>
-      <translation type="unfinished">Black</translation>
+      <translation>Чорний</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="60"/>
       <source>Lines</source>
-      <translation type="unfinished">Lines</translation>
+      <translation>Лінії</translation>
     </message>
   </context>
   <context>
@@ -874,7 +874,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="362"/>
       <source>Digital lens</source>
-      <translation type="unfinished">Digital lens</translation>
+      <translation>Лінза</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="423"/>
@@ -889,7 +889,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="464"/>
       <source>Do you want to update the output resolution to %1?</source>
-      <translation type="unfinished">Do you want to update the output resolution to %1?</translation>
+      <translation>Ви бажаєте оновити роздільну здатність виводу до %1?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="475"/>
@@ -909,27 +909,27 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="511"/>
       <source>Focal length</source>
-      <translation type="unfinished">Focal length</translation>
+      <translation>Фокусна відстань</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="513"/>
       <source>Lens native focal length</source>
-      <translation type="unfinished">Lens native focal length</translation>
+      <translation>Рідна фокальна довжина лінзи</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="517"/>
       <source>mm</source>
-      <translation type="unfinished">mm</translation>
+      <translation>мм</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="526"/>
       <source>Crop factor</source>
-      <translation type="unfinished">Crop factor</translation>
+      <translation>Кроп-фактор</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="530"/>
       <source>x</source>
-      <translation type="unfinished">x</translation>
+      <translation>x</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="542"/>
@@ -939,12 +939,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="565"/>
       <source>Processing resolution</source>
-      <translation type="unfinished">Processing resolution</translation>
+      <translation>Обробка роздільності</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="588"/>
       <source>Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</source>
-      <translation type="unfinished">Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</translation>
+      <translation>Калібрування об’єктива має виконуватись із повною роздільною здатністю або принаймні з 4k. Змінюйте це налаштування, лише якщо знаєте, що робите.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="592"/>
@@ -954,17 +954,17 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="608"/>
       <source>Lens is asymmetrical</source>
-      <translation type="unfinished">Lens is asymmetrical</translation>
+      <translation>Лінза асиметрична</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="615"/>
       <source>Sensor is global shutter</source>
-      <translation type="unfinished">Sensor is global shutter</translation>
+      <translation>Сенсор є глобальним затвором</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="622"/>
       <source>Plain chessboard pattern (previous version without dots in the middle)</source>
-      <translation type="unfinished">Plain chessboard pattern (previous version without dots in the middle)</translation>
+      <translation>Шаблон звичайної шахівниці (попередня версія без крапок посередині)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="260"/>
@@ -1007,7 +1007,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="99"/>
       <source>Yes</source>
-      <translation type="unfinished">Yes</translation>
+      <translation>Так</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="180"/>
@@ -1075,12 +1075,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>preset</source>
-      <translation type="unfinished">preset</translation>
+      <translation>пресет</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/LensProfileSearchDelegate.qml" line="71"/>
       <source>official</source>
-      <translation type="unfinished">official</translation>
+      <translation>офіційний</translation>
     </message>
   </context>
   <context>
@@ -1111,17 +1111,17 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="200"/>
       <source>Troubleshooting</source>
-      <translation type="unfinished">Troubleshooting</translation>
+      <translation>Вирішення проблем</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="212"/>
       <source>Don&apos;t show again</source>
-      <translation type="unfinished">Don&apos;t show again</translation>
+      <translation>Не показувати знову</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="212"/>
       <source>Remember this choice</source>
-      <translation type="unfinished">Remember this choice</translation>
+      <translation>Пам'ятати вибір</translation>
     </message>
   </context>
   <context>
@@ -1144,12 +1144,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="36"/>
       <source>Video file is not loaded.</source>
-      <translation type="unfinished">Video file is not loaded.</translation>
+      <translation>Відео файл не завантажено.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="36"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Ок</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="143"/>
@@ -1159,12 +1159,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="151"/>
       <source>In order to detect multiple motion data files, click here and grant access to the directory with files.</source>
-      <translation type="unfinished">In order to detect multiple motion data files, click here and grant access to the directory with files.</translation>
+      <translation>Щоб виявити кілька файлів даних руху, натисніть тут та надайте доступ до папки з файлами.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="179"/>
       <source>Select log</source>
-      <translation type="unfinished">Select log</translation>
+      <translation>Виберіть log</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="197"/>
@@ -1212,12 +1212,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="269"/>
       <source>Separate accelerometer rotation</source>
-      <translation type="unfinished">Separate accelerometer rotation</translation>
+      <translation>Відокремити обертання акселерометра</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="277"/>
       <source>Accelerometer rotation</source>
-      <translation type="unfinished">Accelerometer rotation</translation>
+      <translation>Обертання акселерометра</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="315"/>
@@ -1267,12 +1267,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="391"/>
       <source>Orientation indicator</source>
-      <translation type="unfinished">Orientation indicator</translation>
+      <translation>Індикатор орієнтації</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="486"/>
       <source>Statistics</source>
-      <translation type="unfinished">Statistics</translation>
+      <translation>Статистика</translation>
     </message>
   </context>
   <context>
@@ -1285,7 +1285,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/NumberField.qml" line="120"/>
       <source>Enable keyframing</source>
-      <translation type="unfinished">Enable keyframing</translation>
+      <translation>Увімкнути keyframing</translation>
     </message>
   </context>
   <context>
@@ -1293,18 +1293,18 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="42"/>
       <source>[Selected folder]</source>
-      <translation type="unfinished">[Selected folder]</translation>
+      <translation>[Selected folder]</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="108"/>
       <location filename="../../src/ui/components/OutputPathField.qml" line="118"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>Виберіть файл призначення</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="109"/>
       <source>Video files</source>
-      <translation type="unfinished">Video files</translation>
+      <translation>Відео файли</translation>
     </message>
   </context>
   <context>
@@ -1327,32 +1327,32 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/App.qml" line="271"/>
       <source>Create settings preset</source>
-      <translation type="unfinished">Create settings preset</translation>
+      <translation>Створити налаштування пресету</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="272"/>
       <source>Apply selected settings to all items in the render queue</source>
-      <translation type="unfinished">Apply selected settings to all items in the render queue</translation>
+      <translation>Застосувати вибрані параметри до всіх елементів у черзі рендеренгу</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="273"/>
       <source>Export project file (including processed gyro data)</source>
-      <translation type="unfinished">Export project file (including processed gyro data)</translation>
+      <translation>Файл проєкт (включаючи оброблені gyro дані)</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="274"/>
       <source>Export project file (including gyro data)</source>
-      <translation type="unfinished">Export project file (including gyro data)</translation>
+      <translation>Експорт проєкту (включаючи gyro дані)</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="275"/>
       <source>Export project file</source>
-      <translation type="unfinished">Export project file</translation>
+      <translation>Експорт файлу проєкту</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="277"/>
       <source>Save project file</source>
-      <translation type="unfinished">Save project file</translation>
+      <translation>Зберегти файл проєкту</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="51"/>
@@ -1395,17 +1395,17 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="148"/>
       <source>Mobile Light</source>
-      <translation type="unfinished">Mobile Light</translation>
+      <translation>Mobile Light</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="149"/>
       <source>Mobile Dark</source>
-      <translation type="unfinished">Mobile Dark</translation>
+      <translation>Mobile Dark</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="185"/>
       <source>All logs combined</source>
-      <translation type="unfinished">All logs combined</translation>
+      <translation>Усі logs об'єднано</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="372"/>
@@ -1450,52 +1450,52 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="370"/>
       <source>rs-sync</source>
-      <translation type="unfinished">rs-sync</translation>
+      <translation>rs-sync</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="370"/>
       <source>Essential matrix</source>
-      <translation type="unfinished">Essential matrix</translation>
+      <translation>Есенційна матриця</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="370"/>
       <source>Visual features</source>
-      <translation type="unfinished">Visual features</translation>
+      <translation>Візуальні особливості</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="662"/>
       <source>Do nothing</source>
-      <translation type="unfinished">Do nothing</translation>
+      <translation>Нічого не робити</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="663"/>
       <source>Shut down the computer</source>
-      <translation type="unfinished">Shut down the computer</translation>
+      <translation>Вимкнути комп'ютер</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="664"/>
       <source>Restart the computer</source>
-      <translation type="unfinished">Restart the computer</translation>
+      <translation>Перезавантажити комп'ютер</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="665"/>
       <source>Sleep</source>
-      <translation type="unfinished">Sleep</translation>
+      <translation>Режим сну</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="666"/>
       <source>Hibernate</source>
-      <translation type="unfinished">Hibernate</translation>
+      <translation>Режим глибокого сну</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="667"/>
       <source>Logout</source>
-      <translation type="unfinished">Logout</translation>
+      <translation>Вихід</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="668"/>
       <source>Close Gyroflow</source>
-      <translation type="unfinished">Close Gyroflow</translation>
+      <translation>Закрити Gyroflow</translation>
     </message>
   </context>
   <context>
@@ -1513,7 +1513,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="670"/>
       <source>When rendering is finished: %1</source>
-      <translation type="unfinished">When rendering is finished: %1</translation>
+      <translation>Після завершення рендерингу: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="90"/>
@@ -1546,7 +1546,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="151"/>
       <source>Converting to %1 %2...</source>
-      <translation type="unfinished">Converting to %1 %2...</translation>
+      <translation>Конвертація %1 %2...</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="169"/>
@@ -1596,12 +1596,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="253"/>
       <source>You have unfinished tasks in the render queue.</source>
-      <translation type="unfinished">You have unfinished tasks in the render queue.</translation>
+      <translation>У вас є незавершені завдання в черзі рендерингу.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="254"/>
       <source>Open render queue</source>
-      <translation type="unfinished">Open render queue</translation>
+      <translation>Відкрити чергу рендерингу</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="323"/>
@@ -1626,7 +1626,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="410"/>
       <source>Missing required components.</source>
-      <translation type="unfinished">Missing required components.</translation>
+      <translation>Відсутні необхідні компоненти.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="433"/>
@@ -1648,97 +1648,97 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="517"/>
       <source>ETA %1</source>
-      <translation type="unfinished">ETA %1</translation>
+      <translation>ETA %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="518"/>
       <source>Synchronizing: %1</source>
-      <translation type="unfinished">Synchronizing: %1</translation>
+      <translation>Синхронізація: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="519"/>
       <source>Rendering: %1</source>
-      <translation type="unfinished">Rendering: %1</translation>
+      <translation>Рендерінг: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="691"/>
       <source>Queue settings</source>
-      <translation type="unfinished">Queue settings</translation>
+      <translation>Налаштування черги</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="730"/>
       <source>Number of parallel renders</source>
-      <translation type="unfinished">Number of parallel renders</translation>
+      <translation>Кількість паралельних рендерів</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="741"/>
       <source>Default overwrite action</source>
-      <translation type="unfinished">Default overwrite action</translation>
+      <translation>Дія при перезаписуванні за умовчанням</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="742"/>
       <source>Ask</source>
-      <translation type="unfinished">Ask</translation>
+      <translation>Запитати</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="744"/>
       <source>Overwrite file</source>
-      <translation type="unfinished">Overwrite file</translation>
+      <translation>Перезаписати файл</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="745"/>
       <source>Rename file</source>
-      <translation type="unfinished">Rename file</translation>
+      <translation>Перейменувати файл</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="746"/>
       <source>Skip file</source>
-      <translation type="unfinished">Skip file</translation>
+      <translation>Пропустити файл</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="751"/>
       <source>Export mode</source>
-      <translation type="unfinished">Export mode</translation>
+      <translation>Режим експорту</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="752"/>
       <source>Stabilized video</source>
-      <translation type="unfinished">Stabilized video</translation>
+      <translation>Стабілізоване відео</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="753"/>
       <source>Project file</source>
-      <translation type="unfinished">Project file</translation>
+      <translation>Файл проєкт</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="754"/>
       <source>Project file (including gyro data)</source>
-      <translation type="unfinished">Project file (including gyro data)</translation>
+      <translation>Файл проєкт (включаючи gyro-дані)</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="755"/>
       <source>Project file (including processed gyro data)</source>
-      <translation type="unfinished">Project file (including processed gyro data)</translation>
+      <translation>Файл проєкт (включаючи оброблені gyro дані)</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="756"/>
       <source>Stabilized video + Project file with gyro data</source>
-      <translation type="unfinished">Stabilized video + Project file with gyro data</translation>
+      <translation>Стабілізоване відео + Проєкт файл з gyro даними</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="760"/>
       <source>Show queue when adding an item</source>
-      <translation type="unfinished">Show queue when adding an item</translation>
+      <translation>Показувати чергу при додаванні у чергу</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="761"/>
       <source>Clear render queue</source>
-      <translation type="unfinished">Clear render queue</translation>
+      <translation>Очистити чергу рендеру</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="762"/>
       <source>Are you sure you want to remove all items from the render queue?</source>
-      <translation type="unfinished">Are you sure you want to remove all items from the render queue?</translation>
+      <translation>Ви впевнені, що бажаєте видалити всі елементи з черги рендерингу?</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="430"/>
@@ -1749,7 +1749,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="554"/>
       <source>Synchronizing...</source>
-      <translation type="unfinished">Synchronizing...</translation>
+      <translation>Синхронізація...</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="555"/>
@@ -1777,225 +1777,225 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="71"/>
       <source>Select settings you want to include in the preset</source>
-      <translation type="unfinished">Select settings you want to include in the preset</translation>
+      <translation>Виберіть налаштування, які потрібно включити до пресету</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="72"/>
       <source>Select settings you want to apply to all items in the render queue</source>
-      <translation type="unfinished">Select settings you want to apply to all items in the render queue</translation>
+      <translation>Виберіть параметри, які потрібно застосувати до всіх елементів у черзі рендерингу</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="90"/>
       <source>Video</source>
-      <translation type="unfinished">Video</translation>
+      <translation>Відео</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="91"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="96"/>
       <source>Rotation</source>
-      <translation type="unfinished">Rotation</translation>
+      <translation>Обертання</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="92"/>
       <source>Frame rate</source>
-      <translation type="unfinished">Frame rate</translation>
+      <translation>Частота кадрів</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="93"/>
       <source>Lens profile</source>
-      <translation type="unfinished">Lens profile</translation>
+      <translation>Профіль обʼєктиву</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="94"/>
       <source>Motion data</source>
-      <translation type="unfinished">Motion data</translation>
+      <translation>Дані руху</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="95"/>
       <source>Low pass filter</source>
-      <translation type="unfinished">Low pass filter</translation>
+      <translation>Фільтр низьких частот</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="97"/>
       <source>Gyro bias</source>
-      <translation type="unfinished">Gyro bias</translation>
+      <translation>Gyro-упередженість</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="98"/>
       <source>IMU orientation</source>
-      <translation type="unfinished">IMU orientation</translation>
+      <translation>Орієнтація IMU</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="99"/>
       <source>Integration method</source>
-      <translation type="unfinished">Integration method</translation>
+      <translation>Метод інтеграції</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="100"/>
       <source>Trim range</source>
-      <translation type="unfinished">Trim range</translation>
+      <translation>Діапазон обрізки</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="101"/>
       <source>Offsets</source>
-      <translation type="unfinished">Offsets</translation>
+      <translation>Відхилення</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="102"/>
       <source>Keyframes</source>
-      <translation type="unfinished">Keyframes</translation>
+      <translation>Ключові кадри</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="103"/>
       <source>Synchronization</source>
-      <translation type="unfinished">Synchronization</translation>
+      <translation>Синхронізація</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="104"/>
       <source>Rough gyro offset</source>
-      <translation type="unfinished">Rough gyro offset</translation>
+      <translation>Грубе gyro відхилення</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="105"/>
       <source>Sync search size</source>
-      <translation type="unfinished">Sync search size</translation>
+      <translation>Синхр. розмір пошуку</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="106"/>
       <source>Max sync points</source>
-      <translation type="unfinished">Max sync points</translation>
+      <translation>Max синхр. точок</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="107"/>
       <source>Do autosync</source>
-      <translation type="unfinished">Do autosync</translation>
+      <translation>Автосинхронізація</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="109"/>
       <source>Stabilization</source>
-      <translation type="unfinished">Stabilization</translation>
+      <translation>Стабілізація</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="110"/>
       <source>FOV</source>
-      <translation type="unfinished">FOV</translation>
+      <translation>FOV</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="111"/>
       <source>Smoothing params</source>
-      <translation type="unfinished">Smoothing params</translation>
+      <translation>Параметри згладження</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="112"/>
       <source>Horizon lock</source>
-      <translation type="unfinished">Horizon lock</translation>
+      <translation>Горизонтальне блокування</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="113"/>
       <source>Rolling shutter correction</source>
-      <translation type="unfinished">Rolling shutter correction</translation>
+      <translation>Корекція Rolling shutter</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="114"/>
       <source>Zooming</source>
-      <translation type="unfinished">Zooming</translation>
+      <translation>Масштабування</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="115"/>
       <source>Lens correction strength</source>
-      <translation type="unfinished">Lens correction strength</translation>
+      <translation>Корекція обʼєктиву</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="116"/>
       <source>Video speed</source>
-      <translation type="unfinished">Video speed</translation>
+      <translation>Швидкість відео</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="117"/>
       <source>Export settings</source>
-      <translation type="unfinished">Export settings</translation>
+      <translation>Налаштування експорту</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="118"/>
       <source>Codec</source>
-      <translation type="unfinished">Codec</translation>
+      <translation>Кодек</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="119"/>
       <source>Audio</source>
-      <translation type="unfinished">Audio</translation>
+      <translation>Звук</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="120"/>
       <source>Output path</source>
-      <translation type="unfinished">Output path</translation>
+      <translation>Вихідний шлях</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="121"/>
       <source>Output size</source>
-      <translation type="unfinished">Output size</translation>
+      <translation>Вихідний розмір</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="234"/>
       <source>Save to lens profile directory</source>
-      <translation type="unfinished">Save to lens profile directory</translation>
+      <translation>Зберегти в каталог lens профілю</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="235"/>
       <source>Save as default preset</source>
-      <translation type="unfinished">Save as default preset</translation>
+      <translation>Зберегти як default preset</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="236"/>
       <source>Save to file</source>
-      <translation type="unfinished">Save to file</translation>
+      <translation>Зберегти до файлу</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="122"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="123"/>
       <source>Advanced</source>
-      <translation type="unfinished">Advanced</translation>
+      <translation>Розширені</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="124"/>
       <source>Background</source>
-      <translation type="unfinished">Background</translation>
+      <translation>Фон</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="125"/>
       <source>Playback speed</source>
-      <translation type="unfinished">Playback speed</translation>
+      <translation>Швидкість відтворення</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="126"/>
       <source>Playback mute status</source>
-      <translation type="unfinished">Playback mute status</translation>
+      <translation>Статус вимкнення звуку відтворення</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="204"/>
       <source>Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</source>
-      <translation type="unfinished">Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</translation>
+      <translation>Підказка: у вас можуть бути пресети в полі пошуку lens профілю, якщо ви збережете пресет (файл `.gyroflow`) в папці "camera_presets".</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="205"/>
       <source>You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.</source>
-      <translation type="unfinished">You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.</translation>
+      <translation>Ви також можете зберегти Ваш пресет як `default.gyroflow` у папці "camera_presets", і він буде завжди застосовуватися до кожного завантаженого відеофайлу.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="231"/>
       <source>Save</source>
-      <translation type="unfinished">Save</translation>
+      <translation>Зберегти</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="231"/>
       <source>Apply</source>
-      <translation type="unfinished">Apply</translation>
+      <translation>Застосувати</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="231"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Скасувати</translation>
     </message>
   </context>
   <context>
@@ -2008,12 +2008,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="75"/>
       <source>Enable keyframing</source>
-      <translation type="unfinished">Enable keyframing</translation>
+      <translation>Увімкнути keyframing</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="88"/>
       <source>Add keyframe</source>
-      <translation type="unfinished">Add keyframe</translation>
+      <translation>Додати keyframe</translation>
     </message>
   </context>
   <context>
@@ -2056,17 +2056,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="199"/>
       <source>Max smoothness at high velocity</source>
-      <translation type="unfinished">Max smoothness at high velocity</translation>
+      <translation>Максимальна плавність на високій швидкості</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="200"/>
       <source>Second smoothing pass</source>
-      <translation type="unfinished">Second smoothing pass</translation>
+      <translation>Другий згладжуваний прохід</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="201"/>
       <source>Only within trim range</source>
-      <translation type="unfinished">Only within trim range</translation>
+      <translation>Тільки в межах обрізки</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="202"/>
@@ -2135,22 +2135,22 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="373"/>
       <source>Use gravity vectors</source>
-      <translation type="unfinished">Use gravity vectors</translation>
+      <translation>Використовувати гравітаційні вектори</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="381"/>
       <source>Integration method</source>
-      <translation type="unfinished">Integration method</translation>
+      <translation>Метод інтеграції</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="391"/>
       <source>IMU integration method for keeping track of the horizon and adjust built-in quaternions</source>
-      <translation type="unfinished">IMU integration method for keeping track of the horizon and adjust built-in quaternions</translation>
+      <translation>Метод інтеграції IMU для відстеження горизонту та налаштування вбудованих квотерніонів</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="400"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
-      <translation type="unfinished">If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</translation>
+      <translation>Якщо горизонт не повністю заблокований, спробуйте інший метод у розділі &quot;Motion data&quot;.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="421"/>
@@ -2175,27 +2175,27 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="468"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
-      <translation type="unfinished">When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</translation>
+      <translation>Під час масштабування ключових кадрів рекомендується використовувати метод Envelope повторення конверта. Фільтр Гауса може призвести до появи чорних рамок у полі зору.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="473"/>
       <source>Zooming method</source>
-      <translation type="unfinished">Zooming method</translation>
+      <translation>Метод масштабування</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="493"/>
       <source>Zooming center offset</source>
-      <translation type="unfinished">Zooming center offset</translation>
+      <translation>Зміщення центру масштабування</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="497"/>
       <source>X</source>
-      <translation type="unfinished">X</translation>
+      <translation>X</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="514"/>
       <source>Y</source>
-      <translation type="unfinished">Y</translation>
+      <translation>Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="536"/>
@@ -2225,17 +2225,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="584"/>
       <source>Video speed</source>
-      <translation type="unfinished">Video speed</translation>
+      <translation>Швидкість відео</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="629"/>
       <source>Link with smoothing</source>
-      <translation type="unfinished">Link with smoothing</translation>
+      <translation>Зв'язок з згладжуванням</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="642"/>
       <source>Link with zooming speed</source>
-      <translation type="unfinished">Link with zooming speed</translation>
+      <translation>Зв'язок зі швидкістю збільшення</translation>
     </message>
   </context>
   <context>
@@ -2243,47 +2243,47 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/Statistics.qml" line="60"/>
       <source>Statistics</source>
-      <translation type="unfinished">Statistics</translation>
+      <translation>Статистика</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="95"/>
       <source>Gyro-X</source>
-      <translation type="unfinished">Gyro-X</translation>
+      <translation>Gyro-X</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="105"/>
       <source>Gyro-Y</source>
-      <translation type="unfinished">Gyro-Y</translation>
+      <translation>Gyro-Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="115"/>
       <source>Gyro-Z</source>
-      <translation type="unfinished">Gyro-Z</translation>
+      <translation>Gyro-Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="134"/>
       <source>Accl-X</source>
-      <translation type="unfinished">Accl-X</translation>
+      <translation>Accl-X</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="144"/>
       <source>Accl-Y</source>
-      <translation type="unfinished">Accl-Y</translation>
+      <translation>Accl-Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="154"/>
       <source>Accl-Z</source>
-      <translation type="unfinished">Accl-Z</translation>
+      <translation>Accl-Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="173"/>
       <source>Logarithmic value axis</source>
-      <translation type="unfinished">Logarithmic value axis</translation>
+      <translation>Логарифмічна вісь</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="179"/>
       <source>Sample rate</source>
-      <translation type="unfinished">Sample rate</translation>
+      <translation>Частота</translation>
     </message>
   </context>
   <context>
@@ -2321,7 +2321,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="207"/>
       <source>Experimental automatic sync point selection.</source>
-      <translation type="unfinished">Experimental automatic sync point selection.</translation>
+      <translation>Експериментальний вибір автоматичної точки синхронізації.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="214"/>
@@ -2344,8 +2344,8 @@ Do you want to convert to a different supported pixel format or keep the origina
       <location filename="../../src/ui/menu/Synchronization.qml" line="237"/>
       <source>Analyze both positive and negative offset.
 This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</source>
-      <translation type="unfinished">Analyze both positive and negative offset.
-This doubles the calculation time, so check this only for the initial point and uncheck once you know the offset.</translation>
+      <translation>Проаналізуйте як позитивне, так і негативне зміщення.
+Це подвоює час обчислення, тому позначте це лише для початкової точки та зніміть прапорець, коли дізнаєтеся зсув.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="243"/>
@@ -2355,7 +2355,7 @@ This doubles the calculation time, so check this only for the initial point and 
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="263"/>
       <source>Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</source>
-      <translation type="unfinished">Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.</translation>
+      <translation>Спочатку обчисліть початкове зміщення (за допомогою основного методу матриці), а потім уточніть за допомогою повільнішого, але більш точного методу rs-sync.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="268"/>
@@ -2375,7 +2375,7 @@ This doubles the calculation time, so check this only for the initial point and 
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="312"/>
       <source>Processing resolution</source>
-      <translation type="unfinished">Processing resolution</translation>
+      <translation>Обробка роздільності</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="335"/>
@@ -2390,12 +2390,12 @@ This doubles the calculation time, so check this only for the initial point and 
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="352"/>
       <source>Pose method</source>
-      <translation type="unfinished">Pose method</translation>
+      <translation>Pose метод</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="365"/>
       <source>Offset method</source>
-      <translation type="unfinished">Offset method</translation>
+      <translation>Offset метод</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="375"/>
@@ -2417,8 +2417,8 @@ Resulting offset is the one where lines were the shortest, meaning the video was
       <location filename="../../src/ui/menu/Synchronization.qml" line="377"/>
       <source>Rolling shutter video to gyro synchronization algorithm.
 Make sure you have proper rolling shutter value set before syncing.</source>
-      <translation type="unfinished">Rolling shutter video to gyro synchronization algorithm.
-Make sure you have proper rolling shutter value set before syncing.</translation>
+      <translation>Алгоритм синхронізації відео з гіроскопом.
+Перед синхронізацією переконайтеся, що встановлено правильне значення rolling shutter.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="384"/>
@@ -2433,7 +2433,7 @@ Make sure you have proper rolling shutter value set before syncing.</translation
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="402"/>
       <source>Show detected features</source>
-      <translation type="unfinished">Show detected features</translation>
+      <translation>Показати виявлені функції</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="408"/>
@@ -2483,27 +2483,27 @@ Make sure you have proper rolling shutter value set before syncing.</translation
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="55"/>
       <source>Focal length</source>
-      <translation type="unfinished">Focal length</translation>
+      <translation>Фокусна відстань</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="56"/>
       <source>Crop factor</source>
-      <translation type="unfinished">Crop factor</translation>
+      <translation>Кроп-фактор</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="57"/>
       <source>Asymmetrical</source>
-      <translation type="unfinished">Asymmetrical</translation>
+      <translation>Асиметричне</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="58"/>
       <source>Distortion model</source>
-      <translation type="unfinished">Distortion model</translation>
+      <translation>Модель дисторсії</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="59"/>
       <source>Digital lens</source>
-      <translation type="unfinished">Digital lens</translation>
+      <translation>Цифрова лінза</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="64"/>
@@ -2550,12 +2550,12 @@ Make sure you have proper rolling shutter value set before syncing.</translation
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="24"/>
       <source>Created at</source>
-      <translation type="unfinished">Created at</translation>
+      <translation>Створено в</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="28"/>
       <source>Detected lens</source>
-      <translation type="unfinished">Detected lens</translation>
+      <translation>Виявлено лінзу</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="30"/>
@@ -2595,17 +2595,17 @@ Make sure you have proper rolling shutter value set before syncing.</translation
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="90"/>
       <source>Reprojection error</source>
-      <translation type="unfinished">Reprojection error</translation>
+      <translation>Помилка репроекції</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="91"/>
       <source>Good frames</source>
-      <translation type="unfinished">Good frames</translation>
+      <translation>Хороші фрейми</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="92"/>
       <source>Average pattern sharpness</source>
-      <translation type="unfinished">Average pattern sharpness</translation>
+      <translation>Середня різкість зразка</translation>
     </message>
   </context>
   <context>
@@ -2613,17 +2613,17 @@ Make sure you have proper rolling shutter value set before syncing.</translation
     <message>
       <location filename="../../src/ui/App.qml" line="472"/>
       <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
+      <translation>Вхідні</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="472"/>
       <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
+      <translation>Параметри</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="472"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>Експорт</translation>
     </message>
   </context>
   <context>
@@ -2674,116 +2674,116 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="242"/>
       <source>Zooming</source>
-      <translation type="unfinished">Zooming</translation>
+      <translation>Масштаб</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="289"/>
       <location filename="../../src/ui/components/Timeline.qml" line="292"/>
       <source>Yaw axis</source>
-      <translation type="unfinished">Yaw axis</translation>
+      <translation>Yaw axis</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="290"/>
       <location filename="../../src/ui/components/Timeline.qml" line="293"/>
       <source>Pitch axis</source>
-      <translation type="unfinished">Pitch axis</translation>
+      <translation>Pitch axis</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="291"/>
       <location filename="../../src/ui/components/Timeline.qml" line="294"/>
       <source>Roll axis</source>
-      <translation type="unfinished">Roll axis</translation>
+      <translation>Roll axis</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="302"/>
       <location filename="../../src/ui/components/Timeline.qml" line="306"/>
       <source>Angle</source>
-      <translation type="unfinished">Angle</translation>
+      <translation>Кут</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="377"/>
       <source>Delete</source>
-      <translation type="unfinished">Delete</translation>
+      <translation>Видалити</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="383"/>
       <source>Ease in</source>
-      <translation type="unfinished">Ease in</translation>
+      <translation>Ease in</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="390"/>
       <source>Ease out</source>
-      <translation type="unfinished">Ease out</translation>
+      <translation>Ease out</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="408"/>
       <source>FOV</source>
-      <translation type="unfinished">FOV</translation>
+      <translation>FOV</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="409"/>
       <source>Video rotation</source>
-      <translation type="unfinished">Video rotation</translation>
+      <translation>Обертання відео</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="410"/>
       <source>Zooming speed</source>
-      <translation type="unfinished">Zooming speed</translation>
+      <translation>Швидкість збільшення</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="411"/>
       <source>Zooming center offset X</source>
-      <translation type="unfinished">Zooming center offset X</translation>
+      <translation>Зсув центру збільшення X</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="412"/>
       <source>Zooming center offset Y</source>
-      <translation type="unfinished">Zooming center offset Y</translation>
+      <translation>Зсув центру збільшення Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="413"/>
       <source>Background margin</source>
-      <translation type="unfinished">Background margin</translation>
+      <translation>Відступ фону</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="414"/>
       <source>Background feather</source>
-      <translation type="unfinished">Background feather</translation>
+      <translation>Фоновий feather</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="415"/>
       <source>Horizon lock amount</source>
-      <translation type="unfinished">Horizon lock amount</translation>
+      <translation>Горизонт блокування</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="416"/>
       <source>Horizon lock roll correction</source>
-      <translation type="unfinished">Horizon lock roll correction</translation>
+      <translation>Горизонт блокування roll корекції</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="417"/>
       <source>Lens correction strength</source>
-      <translation type="unfinished">Lens correction strength</translation>
+      <translation>Сила корекції обʼєктиву</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="418"/>
       <source>Max smoothness</source>
-      <translation type="unfinished">Max smoothness</translation>
+      <translation>Максимальне згладжування</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="419"/>
       <source>Max smoothness at high velocity</source>
-      <translation type="unfinished">Max smoothness at high velocity</translation>
+      <translation>Максимальна плавність на високій швидкості</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="420"/>
       <source>Smoothness</source>
-      <translation type="unfinished">Smoothness</translation>
+      <translation>Плавність</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="623"/>
       <source>Guess IMU orientation here</source>
-      <translation type="unfinished">Guess IMU orientation here</translation>
+      <translation>Вгадати IMU орієнтацію тут</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="648"/>
@@ -2828,7 +2828,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="971"/>
       <source>Option+Scroll</source>
-      <translation type="unfinished">Option+Scroll</translation>
+      <translation>Option+Scroll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="972"/>
@@ -2843,47 +2843,47 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="254"/>
       <source>Sync points debug layer</source>
-      <translation type="unfinished">Sync points debug layer</translation>
+      <translation>Синхронізація точок debug шару</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="421"/>
       <source>Pitch smoothness</source>
-      <translation type="unfinished">Pitch smoothness</translation>
+      <translation>Згладжування по Pitch</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="422"/>
       <source>Roll smoothness</source>
-      <translation type="unfinished">Roll smoothness</translation>
+      <translation>Згладжування по Roll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="423"/>
       <source>Yaw smoothness</source>
-      <translation type="unfinished">Yaw smoothness</translation>
+      <translation>Згладжування по Yaw</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="662"/>
       <source>Trim range</source>
-      <translation type="unfinished">Trim range</translation>
+      <translation>Діапазон обрізки</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="665"/>
       <source>Add new range</source>
-      <translation type="unfinished">Add new range</translation>
+      <translation>Додати новий діапазон</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="683"/>
       <source>Delete this range</source>
-      <translation type="unfinished">Delete this range</translation>
+      <translation>Видалити діапазон</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="692"/>
       <source>Clear all</source>
-      <translation type="unfinished">Clear all</translation>
+      <translation>Очистити все</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="699"/>
       <source>Restrict playback to trim range</source>
-      <translation type="unfinished">Restrict playback to trim range</translation>
+      <translation>Обмежити відтворення діапазоном обрізки</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="970"/>
@@ -2934,7 +2934,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="96"/>
       <source>Zoom in and loop</source>
-      <translation type="unfinished">Zoom in and loop</translation>
+      <translation>Збільшувати та цикл</translation>
     </message>
   </context>
   <context>
@@ -3025,65 +3025,65 @@ Please provide frame rate: </source>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="159"/>
       <source>Downloading %1 (%2)</source>
-      <translation type="unfinished">Downloading %1 (%2)</translation>
+      <translation>Завантаження %1 (%2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="166"/>
       <source>Component was installed successfully.
 You need to restart Gyroflow for changes to take effect.
 Your render queue and current file is saved automatically.</source>
-      <translation type="unfinished">Component was installed successfully.
-You need to restart Gyroflow for changes to take effect.
-Your render queue and current file is saved automatically.</translation>
+      <translation>Компонент успішно встановлено.
+Потрібно перезапустити Gyroflow, щоб зміни набули чинності.
+Черга візуалізації та поточний файл зберігаються автоматично.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="188"/>
       <source>Merging files to %1 (%2)</source>
-      <translation type="unfinished">Merging files to %1 (%2)</translation>
+      <translation>Об'єднання файлів у %1 (%2)</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="315"/>
       <source>This format requires an external SDK. Do you want to download it now?</source>
-      <translation type="unfinished">This format requires an external SDK. Do you want to download it now?</translation>
+      <translation>Цей формат потребує зовнішньої SDK. Ви хочете завантажити його зараз?</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="352"/>
       <source>Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?</source>
-      <translation type="unfinished">Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?</translation>
+      <translation>Виявлено розділений запис, хочете автоматично об'єднати ці файли (%1), щоб створити один кліп?</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="416"/>
       <source>You have opened multiple files. What do you want to do?</source>
-      <translation type="unfinished">You have opened multiple files. What do you want to do?</translation>
+      <translation>Ви відкрили декілька файлів. Що бажаєте зробити?</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="417"/>
       <source>Add to render queue</source>
-      <translation type="unfinished">Add to render queue</translation>
+      <translation>Додати до черги</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="421"/>
       <source>Merge them into one video</source>
-      <translation type="unfinished">Merge them into one video</translation>
+      <translation>З&apos;єднайте в одне відео</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="432"/>
       <source>Open the first file</source>
-      <translation type="unfinished">Open the first file</translation>
+      <translation>Відкрийте перший файл</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="220"/>
       <source>File format was detected, but no motion data was found.
 The camera probably doesn&apos;t record motion data in this particular shooting mode.</source>
-      <translation type="unfinished">File format was detected, but no motion data was found.
-The camera probably doesn&apos;t record motion data in this particular shooting mode.</translation>
+      <translation>Формат файлу був виявлений, але дані руху не знайдено.
+Ймовірно камера не робить запис даних руху в цьому режимі.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="234"/>
       <source>Motion data sampling rate is too low (%1 Hz).
 50 Hz is an absolute minimum and we recommend at least 200 Hz.</source>
-      <translation type="unfinished">Motion data sampling rate is too low (%1 Hz).
-50 Hz is an absolute minimum and we recommend at least 200 Hz.</translation>
+      <translation>Частота дискретизації даних надто низька (%1 Гц)
+50 Гц є абсолютним мінімальним і ми рекомендуємо не менше 200 Гц.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="1012"/>
@@ -3109,50 +3109,50 @@ The camera probably doesn&apos;t record motion data in this particular shooting 
       <location filename="../../src/ui/VideoArea.qml" line="172"/>
       <source>This is often caused by read-only file system.
 Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</translation>
+      <translation>Це трапилось, бо файлова система, доступна лише для читання.
+Переконайтеся, що ви скопіювали Gyroflow до папки з додатками, замість безпосередньої роботи з .dmg.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="175"/>
       <source>This is often caused by read-only file system.
 If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</translation>
+      <translation>Це трапилось, бо файлова система, доступна лише для читання.
+Якщо Gyroflow встановлено у C:Program Files, тоді вам необхідно запустити Gyroflow як адміністратор, щоб розпакувати SDK в папку Gyroflow.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="276"/>
       <source>Loading gyro data %1...</source>
-      <translation type="unfinished">Loading gyro data %1...</translation>
+      <translation>Завантаження gyro даних %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="465"/>
       <source>Same as the original file</source>
-      <translation type="unfinished">Same as the original file</translation>
+      <translation>Як і оригінальний файл</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="466"/>
       <source>Custom path</source>
-      <translation type="unfinished">Custom path</translation>
+      <translation>Власний шлях</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="443"/>
       <source>Please enter the output path:</source>
-      <translation type="unfinished">Please enter the output path:</translation>
+      <translation>Будь ласка, введіть шлях для вихідного файлу:</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="595"/>
       <source>Focal length: %1 mm</source>
-      <translation type="unfinished">Focal length: %1 mm</translation>
+      <translation>Фокусна довжина: %1 мм</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="597"/>
       <source>full frame equiv.: %1 mm</source>
-      <translation type="unfinished">full frame equiv.: %1 mm</translation>
+      <translation>повний кадр дорівнює: %1 мм</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="699"/>
       <source>Click here to open a video file</source>
-      <translation type="unfinished">Click here to open a video file</translation>
+      <translation>Натисніть тут, щоб відкрити відео файл</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="819"/>
@@ -3187,12 +3187,12 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="829"/>
       <source>Show timeline menu</source>
-      <translation type="unfinished">Show timeline menu</translation>
+      <translation>Показати меню часової шкали</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="868"/>
       <source>Toggle stabilization overview</source>
-      <translation type="unfinished">Toggle stabilization overview</translation>
+      <translation>Перемкнути огляд стабілізації</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="875"/>
@@ -3212,7 +3212,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="899"/>
       <source>Volume</source>
-      <translation type="unfinished">Volume</translation>
+      <translation>Гучність</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="929"/>
@@ -3230,7 +3230,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="138"/>
       <source>In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</source>
-      <translation type="unfinished">In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</translation>
+      <translation>Для того, щоб виявити файли проекту, послідовностей відео або послідовності зображень, натисніть тут і виберіть каталог з файлами.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="129"/>

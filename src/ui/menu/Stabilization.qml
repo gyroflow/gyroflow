@@ -487,7 +487,7 @@ MenuItem {
                 model: ["Gaussian filter", "Envelope follower"];
                 // font.pixelSize: 12 * dpiScale;
                 width: parent.width;
-                currentIndex: 0;
+                currentIndex: 1;
                 onCurrentIndexChanged: controller.zooming_method = currentIndex;
                 property bool zoomingSpeedKeyframed: adaptiveZoom.keyframesEnabled || (videoSpeed.keyframesEnabled && videoSpeedAffectsSmoothing.checked);
                 function adjustMethod() {
@@ -501,6 +501,7 @@ MenuItem {
 
         Label {
             text: qsTr("Zooming center offset");
+            visible: false; // Deprecated
             Column {
                 width: parent.width;
                 Label {

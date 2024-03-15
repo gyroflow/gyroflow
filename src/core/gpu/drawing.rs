@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
-use std::cell::RefCell;
+use std::sync::atomic::{ AtomicBool, Ordering::SeqCst };
 
 // Up to 32 colors
 #[repr(u8)]
@@ -39,7 +39,7 @@ pub struct DrawCanvas {
     pub has_any_pixels: bool,
     buffer: Vec<u8>,
 
-    drawing_cleared: RefCell<bool>,
+    drawing_cleared: AtomicBool,
 }
 
 impl DrawCanvas {
@@ -57,7 +57,7 @@ impl DrawCanvas {
             scale,
             buffer: vec![0; size],
             has_any_pixels: false,
-            drawing_cleared: RefCell::new(false)
+            drawing_cleared: AtomicBool::new(false)
         }
     }
 
@@ -95,12 +95,12 @@ impl DrawCanvas {
         self.buffer.len()
     }
     pub fn get_buffer(&self) -> &[u8] {
-        let buf = if self.has_any_pixels || !*self.drawing_cleared.borrow() {
+        let buf = if self.has_any_pixels || !self.drawing_cleared.load(SeqCst) {
             self.buffer.as_slice()
         } else {
             &[]
         };
-        *self.drawing_cleared.borrow_mut() = !self.has_any_pixels;
+        self.drawing_cleared.store(!self.has_any_pixels, SeqCst);
         buf
     }
 }

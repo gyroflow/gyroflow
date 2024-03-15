@@ -296,7 +296,7 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="331"/>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>Added to queue</source>
-      <translation type="unfinished">Added to queue</translation>
+      <translation>已添加入解析队列</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="331"/>
