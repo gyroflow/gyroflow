@@ -41,6 +41,11 @@ Row {
                 root.preventChange = false;
             }
         }
+        function onGyroflow_file_loaded(obj) {
+            if (obj.keyframes && typeof obj.keyframes[root.keyframe] !== "undefined") {
+                root.keyframesEnabled = true;
+            }
+        }
     }
 
     Slider {
