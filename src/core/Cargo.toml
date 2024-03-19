@@ -39,7 +39,7 @@ time = { version = "0.3.34", features = ["local-offset"] }
 itertools = "0.12.1"
 num = "0.4.1"
 base91 = "0.1.0"
-bitflags = "2.4.2"
+bitflags = "2.5.0"
 enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.4.0"
@@ -75,12 +75,12 @@ ocl = { version = "0.19.6", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.2.0"
 include_dir = { version = "0.7.3", features = ["glob"] }
-opencv = { version = "0.88.8", features = ["clang-runtime"], optional = true }
+opencv = { version = "0.89.0", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "e04a9f4", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "152a94b", features = ["spirv", "naga-ir"] }
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "e04a9f4"
+rev = "152a94b"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]

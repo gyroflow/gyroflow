@@ -120,10 +120,10 @@ fn read_input_at(uv: vec2<i32>) -> vec4<f32> {
     let stride_px = params.stride / (params.bytes_per_pixel / params.pix_element_count);
     let buffer_pos = u32((uv.y * stride_px) + uv.x * params.pix_element_count);
     return vec4<f32>(
-        input_buffer[buffer_pos + 0u],
-        input_buffer[buffer_pos + 1u],
-        input_buffer[buffer_pos + 2u],
-        input_buffer[buffer_pos + 3u]
+        f32(input_buffer[buffer_pos + 0u]),
+        f32(input_buffer[buffer_pos + 1u]),
+        f32(input_buffer[buffer_pos + 2u]),
+        f32(input_buffer[buffer_pos + 3u])
     );
     // {/buffer_input}
 }
