@@ -8,7 +8,7 @@
 #[cfg(feature = "use-opencv")]
 use opencv::{
     core::{ Mat, Size, Point2f, Vector, Point3d, TermCriteria, TermCriteria_Type, CV_8UC1 },
-    prelude::MatTraitConst,
+    prelude::{ MatTraitConst, MatTraitConstManual },
     calib3d::{ CALIB_CB_MARKER, Fisheye_CALIB_RECOMPUTE_EXTRINSIC, Fisheye_CALIB_FIX_SKEW }
 };
 
