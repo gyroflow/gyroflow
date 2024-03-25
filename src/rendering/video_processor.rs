@@ -5,7 +5,7 @@ use super::*;
 use super::mdk_processor::*;
 use super::ffmpeg_video::RateControl;
 use ffmpeg_next::{ frame, Dictionary };
-use std::{ sync::{ Arc, atomic::{ AtomicI32, AtomicBool } }, rc::Rc, cell::RefCell };
+use std::{ sync::{ Arc, atomic::AtomicBool }, rc::Rc, cell::RefCell };
 
 pub enum Processor<'a> {
     Ffmpeg(FfmpegProcessor<'a>),
@@ -25,12 +25,6 @@ impl<'a> VideoProcessor<'a> {
         }
     }
 
-    pub fn get_org_dimensions(&self) -> Option<(Arc<AtomicI32>, Arc<AtomicI32>)> {
-        match &self.inner {
-            Processor::Ffmpeg(_) => None,
-            Processor::Mdk(x) => x.get_org_dimensions(),
-        }
-    }
     pub fn get_video_info(url: &str) -> Result<crate::rendering::ffmpeg_processor::VideoInfo, ffmpeg_next::Error> {
         let filename = gyroflow_core::filesystem::get_filename(url);
         if filename.to_lowercase().ends_with(".braw") || filename.to_lowercase().ends_with(".r3d") {

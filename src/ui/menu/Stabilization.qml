@@ -136,6 +136,14 @@ MenuItem {
         return traverseChildren(smoothingOptions, "param-" + name);
     }
 
+    function updateHorizonLock() {
+        const lockAmount = horizonCb.checked? horizonSlider.value : 0.0;
+        const roll = horizonCb.checked? horizonRollSlider.value : 0.0;
+        controller.set_horizon_lock(lockAmount, roll);
+        controller.set_use_gravity_vectors(useGravityVectors.checked);
+        controller.set_horizon_lock_integration_method(integrationMethod.currentIndex);
+    }
+
     Connections {
         target: controller;
         function onCompute_progress(id: real, progress: real) {
@@ -215,35 +223,6 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Yaw angle");
         QT_TRANSLATE_NOOP("Stabilization", "Pitch angle");
         QT_TRANSLATE_NOOP("Stabilization", "Roll angle");
-    }
-
-    InfoMessageSmall {
-        id: fovWarning;
-        show: fov.value > 1.0 && croppingMode.currentIndex > 0;
-        text: qsTr("FOV is greater than 1.0, you may see black borders");
-    }
-
-    Label {
-        position: Label.LeftPosition;
-        text: qsTr("FOV");
-        SliderWithField {
-            id: fov;
-            from: 0.1;
-            to: 3;
-            value: 1.0;
-            defaultValue: 1.0;
-            width: parent.width;
-            keyframe: "Fov";
-            onValueChanged: controller.fov = value;
-        }
-    }
-
-    function updateHorizonLock() {
-        const lockAmount = horizonCb.checked? horizonSlider.value : 0.0;
-        const roll = horizonCb.checked? horizonRollSlider.value : 0.0;
-        controller.set_horizon_lock(lockAmount, roll);
-        controller.set_use_gravity_vectors(useGravityVectors.checked);
-        controller.set_horizon_lock_integration_method(integrationMethod.currentIndex);
     }
 
     ComboBox {
@@ -474,6 +453,27 @@ MenuItem {
 
     AdvancedSection {
         InfoMessageSmall {
+            id: fovWarning;
+            show: fov.value > 1.0 && croppingMode.currentIndex > 0;
+            text: qsTr("FOV is greater than 1.0, you may see black borders");
+        }
+
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("FOV");
+            SliderWithField {
+                id: fov;
+                from: 0.1;
+                to: 3;
+                value: 1.0;
+                defaultValue: 1.0;
+                width: parent.width;
+                keyframe: "Fov";
+                onValueChanged: controller.fov = value;
+            }
+        }
+
+        InfoMessageSmall {
             show: croppingMode.currentIndex == 1 && zoomingMethod.currentIndex == 0 && zoomingMethod.zoomingSpeedKeyframed;
             text: qsTr("When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.");
         }
@@ -501,7 +501,7 @@ MenuItem {
 
         Label {
             text: qsTr("Zooming center offset");
-            visible: false; // Deprecated
+            visible: false; // Deprecated, use Additional 3D rotation instead
             Column {
                 width: parent.width;
                 Label {

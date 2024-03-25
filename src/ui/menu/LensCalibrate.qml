@@ -176,6 +176,7 @@ MenuItem {
         iconName: "spinner"
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
+            processingResolution.currentIndexChanged();
             controller.start_autocalibrate(maxPoints.value, everyNthFrame.value, iterations.value, maxSharpness.value, -1, noMarker.checked);
         }
     }

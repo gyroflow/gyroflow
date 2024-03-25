@@ -9,9 +9,7 @@ use super::ffmpeg_video::RateControl;
 use super::FFmpegError;
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
-use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering::Relaxed;
-use std::sync::atomic::Ordering::SeqCst;
 use qmetaobject::QUrl;
 use qmetaobject::QString;
 use itertools::Itertools;
@@ -20,8 +18,6 @@ pub struct MDKProcessor {
     pub mdk: qml_video_rs::video_item::MDKVideoItem,
     format: ffmpeg_next::format::Pixel,
     pub custom_decoder: String,
-    org_width: Arc<AtomicI32>,
-    org_height: Arc<AtomicI32>,
     url: String,
     pub on_frame_callback: Option<Box<dyn FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter, &mut RateControl) -> Result<(), FFmpegError> + 'static>>,
 }
@@ -59,17 +55,11 @@ impl MDKProcessor {
             url: url.to_owned(),
             format,
             custom_decoder,
-            org_width: Arc::new(AtomicI32::new(-1)),
-            org_height: Arc::new(AtomicI32::new(-1)),
             on_frame_callback: None
         }
     }
     pub fn on_frame<F>(&mut self, cb: F) where F: FnMut(i64, &mut frame::Video, Option<&mut frame::Video>, &mut Converter, &mut RateControl) -> Result<(), FFmpegError> + 'static {
         self.on_frame_callback = Some(Box::new(cb));
-    }
-
-    pub fn get_org_dimensions(&self) -> Option<(Arc<AtomicI32>, Arc<AtomicI32>)> {
-        Some((self.org_width.clone(), self.org_height.clone()))
     }
 
     pub fn start_decoder_only(&mut self, ranges: Vec<(f64, f64)>, cancel_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
@@ -81,15 +71,11 @@ impl MDKProcessor {
         let mut converter = Converter::default();
         let mut ffmpeg_frame = None;
         let format = self.format;
-        let self_org_width = self.org_width.clone();
-        let self_org_height = self.org_height.clone();
-        self.mdk.startProcessing(0, 0, 0, false, &self.custom_decoder, ranges_ms, move |frame_num, timestamp_ms, width, height, org_width, org_height, _fps, _duration_ms, _frame_count, data| {
+        self.mdk.startProcessing(0, 0, 0, false, &self.custom_decoder, ranges_ms, move |frame_num, timestamp_ms, width, height, _org_width, _org_height, _fps, _duration_ms, _frame_count, data| {
             if frame_num == -1 || data.is_empty() {
                 let _ = tx.send(());
                 return true;
             }
-            if org_width  > 0 { self_org_width.store(org_width as i32, SeqCst); }
-            if org_height > 0 { self_org_height.store(org_height as i32, SeqCst); }
 
             if let Some(ref mut cb) = cb {
                 let timestamp_us = (timestamp_ms * 1000.0).round() as i64;

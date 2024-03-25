@@ -294,9 +294,11 @@ impl Controller {
         let filename = filesystem::get_filename(&url);
 
         // Load current (clean) state to the UI
-        if let Ok(current_state) = self.stabilizer.export_gyroflow_data(core::GyroflowProjectType::Simple, "{}", None) {
-            if let Ok(current_state) = serde_json::from_str(current_state.as_str()) as serde_json::Result<serde_json::Value> {
-                self.gyroflow_file_loaded(util::serde_json_to_qt_object(&current_state));
+        if self.stabilizer.lens_calibrator.read().is_none() {
+            if let Ok(current_state) = self.stabilizer.export_gyroflow_data(core::GyroflowProjectType::Simple, "{}", None) {
+                if let Ok(current_state) = serde_json::from_str(current_state.as_str()) as serde_json::Result<serde_json::Value> {
+                    self.gyroflow_file_loaded(util::serde_json_to_qt_object(&current_state));
+                }
             }
         }
 
@@ -1462,12 +1464,12 @@ impl Controller {
 
             let stab = self.stabilizer.clone();
 
-            let (fps, frame_count, trim_ranges_ms, trim_ratio, input_horizontal_stretch, input_vertical_stretch) = {
+            let (fps, frame_count, trim_ranges_ms, trim_ratio, org_size, input_horizontal_stretch, input_vertical_stretch) = {
                 let params = stab.params.read();
                 let lens = stab.lens.read();
                 let input_horizontal_stretch = if lens.input_horizontal_stretch > 0.01 { lens.input_horizontal_stretch } else { 1.0 };
                 let input_vertical_stretch = if lens.input_vertical_stretch > 0.01 { lens.input_vertical_stretch } else { 1.0 };
-                (params.fps, params.frame_count, params.trim_ranges.iter().map(|x| (x.0 * params.duration_ms, x.1 * params.duration_ms)).collect(), params.get_trim_ratio(), input_horizontal_stretch, input_vertical_stretch)
+                (params.fps, params.frame_count, params.trim_ranges.iter().map(|x| (x.0 * params.duration_ms, x.1 * params.duration_ms)).collect(), params.get_trim_ratio(), params.video_size, input_horizontal_stretch, input_vertical_stretch)
             };
 
             let is_forced = custom_timestamp_ms > -0.5;
@@ -1544,7 +1546,6 @@ impl Controller {
                         let total_read = total_read.clone();
                         let processed = processed.clone();
                         let cancel_flag2 = cancel_flag.clone();
-                        let dims = proc.get_org_dimensions();
 
                         proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                             let frame = core::frame_at_timestamp(timestamp_us as f64 / 1000.0, fps);
@@ -1556,7 +1557,7 @@ impl Controller {
                             if (frame % every_nth_frame as i32) == 0 {
                                 let mut width = (input_frame.width() as f64 * input_horizontal_stretch).round() as u32;
                                 let mut height = (input_frame.height() as f64 * input_vertical_stretch).round() as u32;
-                                let mut org_size = (width, height);
+                                let org_size = (org_size.0 as u32, org_size.1 as u32);
                                 let mut pt_scale = 1.0;
                                 if processing_resolution > 0 && height > processing_resolution as u32 {
                                     pt_scale = height as f32 / processing_resolution as f32;
@@ -1575,12 +1576,9 @@ impl Controller {
                                         }
                                         cal.no_marker = no_marker;
 
-                                        if let Some(dims) = &dims {
-                                            let (w, h) = (dims.0.load(SeqCst), dims.1.load(SeqCst));
-                                            if w > 0 && h > 0 {
-                                                pt_scale = h as f32 / height as f32;
-                                                org_size = (w as u32, h as u32);
-                                            }
+                                        let (w, h) = org_size;
+                                        if w > 0 && h > 0 {
+                                            pt_scale = h as f32 / height as f32;
                                         }
                                         cal.feed_frame(timestamp_us, frame, (width, height), org_size, stride, pt_scale, pixels, cancel_flag2.clone(), total, processed.clone(), progress.clone());
                                     },

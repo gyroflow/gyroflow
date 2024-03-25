@@ -19,7 +19,7 @@ breakpad-sys = "0.2.0"
 gyroflow-core = { path = "src/core/", features = ["use-opencv"] }
 
 [dependencies]
-cstr = "0.2.11"
+cstr = "0.2.12"
 cpp = "0.5.9"
 serde = "1.0"
 serde_json = "1.0"
@@ -28,8 +28,8 @@ nalgebra = "0.32"
 semver = "1.0.22"
 fastrand = "2.0.1"
 itertools = "0.12.1"
-regex = "1.10.3"
-rayon = "1.9"
+regex = "1.10.4"
+rayon = "1.10"
 
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"

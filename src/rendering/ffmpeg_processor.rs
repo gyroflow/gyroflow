@@ -343,7 +343,7 @@ impl<'a> FfmpegProcessor<'a> {
                 for (k, v) in metadata.iter() {
                     if k == "creation_time" {
                         if let Ok(v) = chrono::DateTime::parse_from_rfc3339(v) {
-                            if let Some(v) = v.checked_add_signed(chrono::TimeDelta::milliseconds(start_ms.round() as i64)) {
+                            if let Some(v) = v.checked_add_signed(chrono::TimeDelta::try_milliseconds(start_ms.round() as i64).unwrap()) {
                                 updated_creation_time = Some(v.to_rfc3339());
                             }
                         }
