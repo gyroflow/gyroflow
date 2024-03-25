@@ -94,17 +94,17 @@ impl UITools {
             match self.is_dark {
                 true => {
                     engine.set_property("style"                 .into(), QString::from("dark").into());
-                    engine.set_property("styleBackground"       .into(), QString::from("#272727").into());
-                    engine.set_property("styleBackground2"      .into(), QString::from("#202020").into());
-                    engine.set_property("styleButtonColor"      .into(), QString::from("#2d2d2d").into());
+                    engine.set_property("styleBackground"       .into(), QString::from("#1e1e1e").into());
+                    engine.set_property("styleBackground2"      .into(), QString::from("#191919").into());
+                    engine.set_property("styleButtonColor"      .into(), QString::from("#282828").into());
                     engine.set_property("styleTextColor"        .into(), QString::from("#ffffff").into());
                     engine.set_property("styleAccentColor"      .into(), QString::from("#76baed").into());
-                    engine.set_property("styleVideoBorderColor" .into(), QString::from("#313131").into());
+                    engine.set_property("styleVideoBorderColor" .into(), QString::from("#2b2b2b").into());
                     engine.set_property("styleTextColorOnAccent".into(), QString::from("#000000").into());
-                    engine.set_property("styleHrColor"          .into(), QString::from("#323232").into());
-                    engine.set_property("stylePopupBorder"      .into(), QString::from("#141414").into());
+                    engine.set_property("styleHrColor"          .into(), QString::from("#2e2e2e").into());
+                    engine.set_property("stylePopupBorder"      .into(), QString::from("#0f0f0f").into());
                     engine.set_property("styleSliderHandle"     .into(), QString::from("#454545").into());
-                    engine.set_property("styleSliderBackground" .into(), QString::from("#9a9a9a").into());
+                    engine.set_property("styleSliderBackground" .into(), QString::from("#949494").into());
                     engine.set_property("styleHighlightColor"   .into(), QString::from("#10ffffff").into());
                 },
                 false => {

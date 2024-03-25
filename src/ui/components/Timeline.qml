@@ -268,7 +268,7 @@ Item {
             y: (root.fullScreen || window.isMobileLayout? 0 : 35) * dpiScale;
             width: parent.width
             radius: 4 * dpiScale;
-            color: root.fullScreen || window.isMobileLayout? "transparent" : Qt.lighter(styleButtonColor, 1.1)
+            color: root.fullScreen || window.isMobileLayout? "transparent" : styleButtonColor
             height: parent.height - y;
             opacity: root.trimActive? 0.9 : 1.0;
 
