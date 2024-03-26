@@ -134,6 +134,7 @@ build-and-package profile is_dist:
         cp -f {{ProjectDir}}/target/aarch64-apple-ios/{{profile}}/gyroflow {{AppBundle}}/gyroflow
         cp -rf {{ProjectDir}}/target/aarch64-apple-ios/Frameworks {{AppBundle}}/Frameworks
         cp -rf {{ProjectDir}}/_deployment/ios/Info.plist {{AppBundle}}/Info.plist
+        cp -rf {{ProjectDir}}/_deployment/ios/PrivacyInfo.xcprivacy {{AppBundle}}/PrivacyInfo.xcprivacy
         cp -rf {{ProjectDir}}/_deployment/ios/PkgInfo {{AppBundle}}/PkgInfo
         PlistBuddy -x -c "Set :CFBundleIdentifier {{BundleIdentifier}}" {{AppBundle}}/Info.plist
         PlistBuddy -x -c "Set :CFBundleShortVersionString {{ProjectVersion}}" {{AppBundle}}/Info.plist
