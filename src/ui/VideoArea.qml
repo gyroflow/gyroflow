@@ -614,7 +614,7 @@ Item {
                     Qt.callLater(fileLoaded, md);
                 }
                 function fileLoaded(md: var) {
-                    loaded = duration > 0;
+                    loaded = vid.videoWidth > 0;
                     videoLoader.active = false;
                     vidInfo.loader = false;
                     timeline.resetTrim();
@@ -634,9 +634,10 @@ Item {
                 }
                 property bool errorShown: false;
                 onMetadataChanged: {
-                    if (vid.duration > 0) {
+                    if (vid.videoWidth > 0) {
                         // Trigger seek to buffer the video frames
-                        bufferTrigger.start();
+                        if (vid.duration == 0) vid.play();
+                        else bufferTrigger.start();
                     } else if (!errorShown) {
                         messageBox(Modal.Error, qsTr("Failed to load the selected file, it may be unsupported or invalid."), [ { "text": qsTr("Ok") } ]);
                         errorShown = true;
@@ -648,7 +649,7 @@ Item {
                     id: bufferTrigger;
                     interval: 150;
                     onTriggered: {
-                        if (!vid.loaded) bufferTrigger.start();
+                        if (!vid.videoWidth) bufferTrigger.start();
                         Qt.callLater(() => {
                             vid.currentFrame++;
                             Qt.callLater(() => vid.currentFrame = 0);
