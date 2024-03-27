@@ -201,6 +201,10 @@ deploy *param:
     cp -af "$QT_DIR/lib/QtQuick.framework"                    "$CARGO_TARGET/../Frameworks/"
     cp -af "$QT_DIR/lib/QtQuickControls2.framework"           "$CARGO_TARGET/../Frameworks/"
     cp -af "$QT_DIR/lib/QtQuickControls2Impl.framework"       "$CARGO_TARGET/../Frameworks/"
+    cp -af "$QT_DIR/lib/QtQuickControls2Basic.framework"             "$CARGO_TARGET/../Frameworks/" || true
+    cp -af "$QT_DIR/lib/QtQuickControls2BasicStyleImpl.framework"    "$CARGO_TARGET/../Frameworks/" || true
+    cp -af "$QT_DIR/lib/QtQuickControls2Material.framework"          "$CARGO_TARGET/../Frameworks/" || true
+    cp -af "$QT_DIR/lib/QtQuickControls2MaterialStyleImpl.framework" "$CARGO_TARGET/../Frameworks/" || true
     cp -af "$QT_DIR/lib/QtQuickDialogs2.framework"            "$CARGO_TARGET/../Frameworks/"
     cp -af "$QT_DIR/lib/QtQuickDialogs2QuickImpl.framework"   "$CARGO_TARGET/../Frameworks/"
     cp -af "$QT_DIR/lib/QtQuickDialogs2Utils.framework"       "$CARGO_TARGET/../Frameworks/"
