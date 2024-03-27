@@ -276,18 +276,18 @@ deploy *param:
     cp -f "$CARGO_TARGET/libmdk-r3d.so"                    "$TARGET/lib/"
     #cp -f "$CARGO_TARGET/libffmpeg.so.6"                  "$TARGET/"
 
-    cp -f "$FFMPEG_DIR/lib/libavcodec.so.60"               "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/libavfilter.so.9"               "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/libavformat.so.60"              "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/libavutil.so.58"                "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/libswresample.so.4"             "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/libswscale.so.7"                "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/amd64/libavcodec.so.60"         "$TARGET/lib/" || true
-    cp -f "$FFMPEG_DIR/lib/amd64/libavfilter.so.9"         "$TARGET/lib/" || true
-    cp -f "$FFMPEG_DIR/lib/amd64/libavformat.so.60"        "$TARGET/lib/" || true
-    cp -f "$FFMPEG_DIR/lib/amd64/libavutil.so.58"          "$TARGET/lib/" || true
-    cp -f "$FFMPEG_DIR/lib/amd64/libswresample.so.4"       "$TARGET/lib/" || true
-    cp -f "$FFMPEG_DIR/lib/amd64/libswscale.so.7"          "$TARGET/lib/" || true
+    cp -f "$FFMPEG_DIR/lib/libavcodec.so.61"               "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/libavfilter.so.10"               "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/libavformat.so.61"              "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/libavutil.so.59"                "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/libswresample.so.5"             "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/libswscale.so.8"                "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/amd64/libavcodec.so.61"         "$TARGET/lib/" || true
+    cp -f "$FFMPEG_DIR/lib/amd64/libavfilter.so.10"         "$TARGET/lib/" || true
+    cp -f "$FFMPEG_DIR/lib/amd64/libavformat.so.61"        "$TARGET/lib/" || true
+    cp -f "$FFMPEG_DIR/lib/amd64/libavutil.so.59"          "$TARGET/lib/" || true
+    cp -f "$FFMPEG_DIR/lib/amd64/libswresample.so.5"       "$TARGET/lib/" || true
+    cp -f "$FFMPEG_DIR/lib/amd64/libswscale.so.8"          "$TARGET/lib/" || true
 
     cp -f "$CARGO_TARGET/gyroflow"                         "$TARGET/"
     strip "$TARGET/gyroflow"
