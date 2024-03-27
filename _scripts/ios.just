@@ -65,11 +65,11 @@ install-deps:
         rm -rf ./vcpkg/downloads
     fi
 
-    if [ ! -d "ffmpeg-6.1-iOS-gpl-lite" ]; then
+    if [ ! -d "ffmpeg-7.0-iOS-gpl-lite" ]; then
         echo "Downloading ffmpeg for iOS"
 
         # Download and extract ffmpeg
-        curl -L https://sourceforge.net/projects/avbuild/files/iOS/ffmpeg-6.1-iOS-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
+        curl -L https://sourceforge.net/projects/avbuild/files/iOS/ffmpeg-7.0-iOS-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
         7z x -aoa ffmpeg.tar.xz
         tar -xf ffmpeg.tar
         rm ffmpeg.tar ffmpeg.tar.xz
@@ -107,7 +107,7 @@ build-and-package profile is_dist:
 
     mkdir -p {{AppBundle}}
 
-    export FFMPEG_DIR="{{ProjectDir}}/ext/ffmpeg-6.1-iOS-gpl-lite"
+    export FFMPEG_DIR="{{ProjectDir}}/ext/ffmpeg-7.0-iOS-gpl-lite"
     export PATH="{{ProjectDir}}/ext/{{QtVersionIOS}}/ios/bin:/usr/libexec/:$PATH"
 
     export OPENCV_LINK_LIBS="opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4,opencv_stitching4"

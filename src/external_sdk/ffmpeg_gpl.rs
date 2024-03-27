@@ -29,6 +29,6 @@ impl FfmpegGpl {
     }
 }
 
-// https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-6.1-windows-desktop-vs2022-gpl-lite.7z/download
-// https://sourceforge.net/projects/avbuild/files/macOS/ffmpeg-6.1-macOS-gpl-lite.tar.xz/download
-// https://sourceforge.net/projects/avbuild/files/linux/ffmpeg-6.1-linux-clang-gpl-lite.tar.xz/download
+// https://sourceforge.net/projects/avbuild/files/windows-desktop/ffmpeg-7.0-windows-desktop-vs2022-gpl-lite.7z/download
+// https://sourceforge.net/projects/avbuild/files/macOS/ffmpeg-7.0-macOS-gpl-lite.tar.xz/download
+// https://sourceforge.net/projects/avbuild/files/linux/ffmpeg-7.0-linux-clang-gpl-lite.tar.xz/download

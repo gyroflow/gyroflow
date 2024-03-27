@@ -10,7 +10,7 @@
                 "environment": [
                     {
                         "name": "PATH",
-                        "value": "${env:Path};${workspaceFolder}/ext/6.6.3/msvc2019_64/bin;${workspaceFolder}/ext/ffmpeg-6.1-windows-desktop-vs2022-gpl-lite/bin;${workspaceFolder}/ext/vcpkg/installed/x64-windows-release/bin"
+                        "value": "${env:Path};${workspaceFolder}/ext/6.6.3/msvc2019_64/bin;${workspaceFolder}/ext/ffmpeg-7.0-windows-desktop-vs2022-gpl-lite/bin;${workspaceFolder}/ext/vcpkg/installed/x64-windows-release/bin"
                     }
                 ],
             },
@@ -35,7 +35,7 @@
                 "environment": [
                     {
                         "name": "PATH",
-                        "value": "${env:Path};${workspaceFolder}/ext/6.6.3/msvc2019_64/bin;${workspaceFolder}/ext/ffmpeg-6.1-windows-desktop-vs2022-gpl-lite/bin;${workspaceFolder}/ext/vcpkg/installed/x64-windows-release/bin"
+                        "value": "${env:Path};${workspaceFolder}/ext/6.6.3/msvc2019_64/bin;${workspaceFolder}/ext/ffmpeg-7.0-windows-desktop-vs2022-gpl-lite/bin;${workspaceFolder}/ext/vcpkg/installed/x64-windows-release/bin"
                     }
                 ],
             },

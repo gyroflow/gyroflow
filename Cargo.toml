@@ -50,7 +50,7 @@ qttypes     = { version = "0.2.11", default-features = false, features = ["requi
 qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "47dc0e1" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
-ffmpeg-next = { version = "6.1.1", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
+ffmpeg-next = { version = "7.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.4.0"
 parking_lot = "0.12.1"
 
@@ -72,6 +72,8 @@ keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "1
 fc-blackbox = { git = "https://github.com/AdrianEddy/fc-blackbox.git",    rev = "4e9e4e6" }
 qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "59029b9" }
 qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "59029b9" }
+ffmpeg-next     = { git = "https://github.com/AdrianEddy/rust-ffmpeg.git", rev = "ef8ee44" }
+ffmpeg-sys-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg-sys.git", rev = "363d5fa" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.54.0"

@@ -519,7 +519,7 @@ impl<'a> VideoTranscoder<'a> {
         // (*dst).pkt_size               = (*src).pkt_size;
         // (*dst).pkt_duration           = (*src).pkt_duration;
         // (*dst).time_base              = (*src).time_base; // TODO
-        (*dst).reordered_opaque       = (*src).reordered_opaque;
+        // (*dst).reordered_opaque       = (*src).reordered_opaque;
         (*dst).quality                = (*src).quality;
         // (*dst).best_effort_timestamp  = (*src).best_effort_timestamp;
         // (*dst).coded_picture_number   = (*src).coded_picture_number;
