@@ -155,10 +155,10 @@ deploy *param:
     cp -f "$QT_DIR/lib/libQt6LabsQmlModels.so.6"                   "$TARGET/lib/"
     cp -f "$QT_DIR/lib/libQt6QuickControls2.so.6"                  "$TARGET/lib/"
     cp -f "$QT_DIR/lib/libQt6QuickControls2Impl.so.6"              "$TARGET/lib/"
-    cp -f "$QT_DIR/lib/libQt6QuickControls2Material.so.6"          "$TARGET/lib/"
-    cp -f "$QT_DIR/lib/libQt6QuickControls2MaterialStyleImpl.so.6" "$TARGET/lib/"
-    cp -f "$QT_DIR/lib/libQt6QuickControls2Basic.so.6"             "$TARGET/lib/"
-    cp -f "$QT_DIR/lib/libQt6QuickControls2BasicStyleImpl.so.6"    "$TARGET/lib/"
+    cp -f "$QT_DIR/lib/libQt6QuickControls2Material.so.6"          "$TARGET/lib/" || true
+    cp -f "$QT_DIR/lib/libQt6QuickControls2MaterialStyleImpl.so.6" "$TARGET/lib/" || true
+    cp -f "$QT_DIR/lib/libQt6QuickControls2Basic.so.6"             "$TARGET/lib/" || true
+    cp -f "$QT_DIR/lib/libQt6QuickControls2BasicStyleImpl.so.6"    "$TARGET/lib/" || true
     cp -f "$QT_DIR/lib/libQt6QuickTemplates2.so.6"                 "$TARGET/lib/"
     cp -f "$QT_DIR/lib/libQt6QuickDialogs2.so.6"                   "$TARGET/lib/"
     cp -f "$QT_DIR/lib/libQt6QuickDialogs2QuickImpl.so.6"          "$TARGET/lib/"
