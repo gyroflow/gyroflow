@@ -636,13 +636,21 @@ Item {
                 onMetadataChanged: {
                     if (vid.videoWidth > 0) {
                         // Trigger seek to buffer the video frames
-                        if (vid.duration == 0) vid.play();
-                        else bufferTrigger.start();
+                        if (vid.duration == 0) {
+                            vid.play();
+                            Qt.callLater(function() {
+                                stabEnabledBtn.checked = true;
+                                vid.volume = volumeSlider.value / 100.0;
+                            })
+                        } else {
+                            bufferTrigger.start();
+                        }
                     } else if (!errorShown) {
                         messageBox(Modal.Error, qsTr("Failed to load the selected file, it may be unsupported or invalid."), [ { "text": qsTr("Ok") } ]);
                         errorShown = true;
                         dropText.loadingFile = "";
                         root.pendingGyroflowData = null;
+                        stabEnabledBtn.checked = true;
                     }
                 }
                 Timer {
@@ -653,7 +661,7 @@ Item {
                         Qt.callLater(() => {
                             vid.currentFrame++;
                             Qt.callLater(() => vid.currentFrame = 0);
-                            if (vid.loaded) {
+                            if (vid.videoWidth) {
                                 stabEnabledBtn.checked = true;
                                 vid.volume = volumeSlider.value / 100.0;
                             }
