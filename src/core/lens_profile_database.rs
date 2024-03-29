@@ -4,19 +4,26 @@
 use std::collections::{ HashSet, HashMap, BTreeMap };
 use crate::LensProfile;
 use std::path::PathBuf;
+use std::io::Read;
 
 #[cfg(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles"))]
-static LENS_PROFILES_STATIC: include_dir::Dir = include_dir::include_dir!("$CARGO_MANIFEST_DIR/../../resources/camera_presets/");
+static LENS_PROFILES_STATIC: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../resources/camera_presets/profiles.cbor.gz"));
+
+enum DataSource {
+    String(String),
+    SerdeValue(serde_json::Value)
+}
 
 #[derive(Default)]
 pub struct LensProfileDatabase {
+    preset_map: HashMap<String, String>,
     map: HashMap<String, LensProfile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
     pub loaded: bool
 }
 impl Clone for LensProfileDatabase {
     fn clone(&self) -> Self {
-        Self { map: self.map.clone(), loaded: self.loaded, ..Default::default() }
+        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), loaded: self.loaded, ..Default::default() }
     }
 }
 
@@ -62,16 +69,24 @@ impl LensProfileDatabase {
 
         let _time = std::time::Instant::now();
 
-        let mut load = |data: &str, f_name: &str| {
+        let mut load = |data: DataSource, f_name: &str| {
             if f_name.ends_with(".gyroflow") {
                 let mut profile = LensProfile::default();
                 profile.name = std::path::Path::new(f_name).file_stem().map(|x| x.to_string_lossy().to_string()).unwrap_or_default();
                 profile.path_to_file = f_name.to_string();
                 profile.checksum = Some(format!("{:08x}", crc32fast::hash(profile.path_to_file.as_bytes())));
                 self.map.insert(f_name.to_string(), profile);
+                match data {
+                    DataSource::String(v)     => { self.preset_map.insert(f_name.to_string(), v); }
+                    DataSource::SerdeValue(v) => { self.preset_map.insert(f_name.to_string(), serde_json::to_string(&v).unwrap()); }
+                }
                 return;
             }
-            match LensProfile::from_json(data) {
+            let parsed = match data {
+                DataSource::String(x)     => LensProfile::from_json(&x),
+                DataSource::SerdeValue(x) => LensProfile::from_value(x)
+            };
+            match parsed {
                 Ok(mut v) => {
                     v.path_to_file = f_name.to_string();
                     for mut profile in v.get_all_matching_profiles() {
@@ -122,11 +137,14 @@ impl LensProfileDatabase {
         };
 
         #[cfg(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles"))]
-        for entry in LENS_PROFILES_STATIC.find("**/*").unwrap() {
-            let filename = entry.path().file_name().unwrap().to_string_lossy();
-            if filename.ends_with(".json") || filename.ends_with(".gyroflow") {
-                if let Some(data) = entry.as_file().and_then(|x| x.contents_utf8()) {
-                    load(data, &entry.path().display().to_string());
+        {
+            let mut e = flate2::read::GzDecoder::new(LENS_PROFILES_STATIC);
+            let mut decompressed = Vec::new();
+            if let Ok(_) = e.read_to_end(&mut decompressed) {
+                if let Ok(array) = ciborium::from_reader::<Vec<(String, serde_json::Value)>, _>(std::io::Cursor::new(decompressed)) {
+                    for (f_name, profile) in array {
+                        load(DataSource::SerdeValue(profile), &f_name);
+                    }
                 }
             }
         }
@@ -137,7 +155,20 @@ impl LensProfileDatabase {
                 let f_name = entry.path().to_string_lossy().replace('\\', "/");
                 if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
                     if let Ok(data) = std::fs::read_to_string(&f_name) {
-                        load(&data, &f_name);
+                        load(DataSource::String(data), &f_name);
+                    }
+                }
+                if f_name.ends_with(".cbor.gz") {
+                    if let Ok(data) = std::fs::read(&f_name) {
+                        let mut e = flate2::read::GzDecoder::new(std::io::Cursor::new(data));
+                        let mut decompressed = Vec::new();
+                        if let Ok(_) = e.read_to_end(&mut decompressed) {
+                            if let Ok(array) = ciborium::from_reader::<Vec<(String, serde_json::Value)>, _>(std::io::Cursor::new(decompressed)) {
+                                for (f_name, profile) in array {
+                                    load(DataSource::SerdeValue(profile), &f_name);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -154,6 +185,7 @@ impl LensProfileDatabase {
 
     pub fn set_from_db(&mut self, b: Self) {
         self.map = b.map;
+        self.preset_map = b.preset_map;
         self.loaded = b.loaded;
         if self.loaded {
             let cbs: Vec<_> = self.loaded_callbacks.drain(..).collect();
@@ -161,6 +193,17 @@ impl LensProfileDatabase {
                 cb(&self);
             }
         }
+    }
+
+    pub fn get_all_filenames(&self) -> Vec<String> {
+        self.map.values().map(|x| {
+            let mut path = x.path_to_file.clone();
+            path = path.replace('\\', "/");
+            if let Some(pos) = path.find("camera_presets/") {
+                path = path[pos + 15..].to_string();
+            }
+            path
+        }).collect()
     }
 
     pub fn get_all_info(&self) -> Vec<(String, String, String, bool, f64, i32)> {
@@ -241,6 +284,9 @@ impl LensProfileDatabase {
     }
     pub fn contains_id(&self, id: &str) -> bool {
         self.map.contains_key(id)
+    }
+    pub fn get_preset_by_id(&self, id: &str) -> Option<String> {
+        self.preset_map.get(id).cloned()
     }
     pub fn get_by_id(&self, id: &str) -> Option<&LensProfile> {
         self.map.get(id)

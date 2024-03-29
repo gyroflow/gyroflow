@@ -198,7 +198,6 @@ pub fn allocate_shared_cuda_memory(size: usize) -> Result<CudaSharedMemory, Box<
     cuda!(cuda.cuMemGetAllocationGranularity(&mut granularity, &prop, CU_MEM_ALLOC_GRANULARITY_MINIMUM));
 
     let asize = align(size, granularity);
-    drop(size);
 
     cuda!(cuda.cuMemAddressReserve(&mut device_ptr, asize, granularity, 0, 0));
     cuda!(cuda.cuMemCreate(&mut cu_mem_handle, asize, &prop, 0));

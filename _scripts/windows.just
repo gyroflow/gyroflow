@@ -225,7 +225,9 @@ deploy:
     xcopy /Y "$CargoTarget\mdk-r3d.dll"                                  "$TargetDir\"
     echo F | xcopy /Y "$CargoTarget\gyroflow.exe"                        "$TargetDir\Gyroflow.exe"
     xcopy /Y "$ProjectDir\_deployment\windows\Gyroflow_with_console.bat" "$TargetDir\"
-    xcopy /Y /E "$ProjectDir\resources\camera_presets\*"                 "$TargetDir\camera_presets\"
+    # xcopy /Y /E "$ProjectDir\resources\camera_presets\*"                 "$TargetDir\camera_presets\"
+    mkdir "$TargetDir\camera_presets\" -Force
+    echo F | xcopy /Y "$ProjectDir\resources\camera_presets\profiles.cbor.gz"  "$TargetDir\camera_presets\profiles.cbor.gz"
 
     # Other
     xcopy /Y "$QtDir\bin\d3dcompiler_47.dll"                             "$TargetDir\"

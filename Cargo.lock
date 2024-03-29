@@ -43,7 +43,7 @@ name = "ahrs"
 version = "0.6.0"
 source = "git+https://github.com/jmagnuson/ahrs-rs.git?rev=bf7b41d#bf7b41d09115b47ce8f6060624ed6a8a9bc445d4"
 dependencies = [
- "nalgebra 0.32.4",
+ "nalgebra 0.32.5",
  "num-traits 0.2.18",
  "simba 0.8.1",
 ]
@@ -180,7 +180,7 @@ checksum = "a8798ca7447753fcb3dd98d9095335b1564812a68c6e7c3d1926e1d5cf094e37"
 dependencies = [
  "anyhow",
  "cfg-if",
- "nalgebra 0.32.4",
+ "nalgebra 0.32.5",
  "num-complex",
  "num-integer",
  "num-traits 0.2.18",
@@ -1028,7 +1028,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e102e59#e102e59e477c54dd9c8913438b92ad97a81c491a"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=0f4839c#0f4839c46627437006f6cb6f2f4f804eb5b5cd2d"
 dependencies = [
  "bitflags 2.5.0",
  "libloading 0.8.3",
@@ -1717,7 +1717,7 @@ dependencies = [
  "lru",
  "metal",
  "mp4-merge",
- "nalgebra 0.32.4",
+ "nalgebra 0.32.5",
  "ndk",
  "ndk-context",
  "ndk-sys",
@@ -1776,7 +1776,6 @@ dependencies = [
  "futures-intrusive",
  "half",
  "image",
- "include_dir",
  "itertools 0.12.1",
  "jni",
  "lazy_static",
@@ -1787,7 +1786,7 @@ dependencies = [
  "lru",
  "metal",
  "mimalloc",
- "nalgebra 0.32.4",
+ "nalgebra 0.32.5",
  "ndk",
  "ndk-context",
  "ndk-sys",
@@ -1941,26 +1940,6 @@ dependencies = [
  "byteorder",
  "color_quant",
  "num-traits 0.2.18",
-]
-
-[[package]]
-name = "include_dir"
-version = "0.7.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18762faeff7122e89e0857b02f7ce6fcc0d101d5e9ad2ad7846cc01d61b7f19e"
-dependencies = [
- "glob",
- "include_dir_macros",
-]
-
-[[package]]
-name = "include_dir_macros"
-version = "0.7.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b139284b5cf57ecfa712bcc66950bb635b31aff41c188e8a4cfc758eca374a3f"
-dependencies = [
- "proc-macro2",
- "quote",
 ]
 
 [[package]]
@@ -2388,7 +2367,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e102e59#e102e59e477c54dd9c8913438b92ad97a81c491a"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=0f4839c#0f4839c46627437006f6cb6f2f4f804eb5b5cd2d"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -2423,9 +2402,9 @@ dependencies = [
 
 [[package]]
 name = "nalgebra"
-version = "0.32.4"
+version = "0.32.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4541eb06dce09c0241ebbaab7102f0a01a0c8994afed2e5d0d66775016e25ac2"
+checksum = "3ea4908d4f23254adda3daa60ffef0f1ac7b8c3e9a864cf3cc154b251908a2ef"
 dependencies = [
  "approx",
  "matrixmultiply",
@@ -3345,7 +3324,7 @@ dependencies = [
  "argmin-math",
  "libm 0.2.8",
  "log",
- "nalgebra 0.32.4",
+ "nalgebra 0.32.5",
  "rand",
  "rayon",
  "superslice",
@@ -4192,7 +4171,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e102e59#e102e59e477c54dd9c8913438b92ad97a81c491a"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=0f4839c#0f4839c46627437006f6cb6f2f4f804eb5b5cd2d"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -4217,7 +4196,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e102e59#e102e59e477c54dd9c8913438b92ad97a81c491a"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=0f4839c#0f4839c46627437006f6cb6f2f4f804eb5b5cd2d"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4244,7 +4223,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e102e59#e102e59e477c54dd9c8913438b92ad97a81c491a"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=0f4839c#0f4839c46627437006f6cb6f2f4f804eb5b5cd2d"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4288,7 +4267,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e102e59#e102e59e477c54dd9c8913438b92ad97a81c491a"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=0f4839c#0f4839c46627437006f6cb6f2f4f804eb5b5cd2d"
 dependencies = [
  "bitflags 2.5.0",
  "js-sys",

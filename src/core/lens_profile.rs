@@ -81,6 +81,9 @@ pub struct LensProfile {
 }
 
 impl LensProfile {
+    pub fn from_value(json: serde_json::Value) -> Result<Self, serde_json::Error> {
+        serde_json::from_value(json)
+    }
     pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
         serde_json::from_str(json)
     }

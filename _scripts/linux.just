@@ -292,8 +292,10 @@ deploy *param:
     cp -f "$CARGO_TARGET/gyroflow"                         "$TARGET/"
     strip "$TARGET/gyroflow"
 
-    cp -rf "$PROJECT_DIR/resources/camera_presets"         "$TARGET/"
-    rm -rf "$TARGET/camera_presets/.git"
+    # cp -rf "$PROJECT_DIR/resources/camera_presets"         "$TARGET/"
+    # rm -rf "$TARGET/camera_presets/.git"
+    mkdir -p "$TARGET/camera_presets/"
+    cp -f "$PROJECT_DIR/resources/camera_presets/profiles.cbor.gz" "$TARGET/camera_presets/profiles.cbor.gz"
 
     pushd $TARGET/..
     tar -czf Gyroflow-linux64.tar.gz --transform 's!linux64!Gyroflow!' linux64

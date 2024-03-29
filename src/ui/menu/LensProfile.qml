@@ -29,6 +29,8 @@ MenuItem {
     property string profileOriginalJson;
     property string profileChecksum;
 
+    property bool fetched_from_github: false;
+
     FileDialog {
         id: fileDialog;
         property var extensions: ["json"];
@@ -43,7 +45,6 @@ MenuItem {
     }
 
     Component.onCompleted: {
-        controller.fetch_profiles_from_github();
         controller.load_profiles(true);
 
         QT_TRANSLATE_NOOP("TableList", "Camera");
@@ -76,6 +77,10 @@ MenuItem {
 
             search.model = lensProfilesList;
             root.loadFavorites();
+            if (!root.fetched_from_github) {
+                root.fetched_from_github = true;
+                controller.fetch_profiles_from_github();
+            }
         }
         function onLens_profiles_updated(fromDisk: bool) {
             profilesUpdateTimer.fromDisk = fromDisk;
@@ -185,7 +190,7 @@ MenuItem {
         onSelected: (item) => {
             const lensPathOrId = item[1];
             if (lensPathOrId.endsWith(".gyroflow")) {
-                window.videoArea.loadFile(filesystem.path_to_url(lensPathOrId), true);
+                window.videoArea.loadGyroflowData(JSON.parse(controller.get_preset_contents(lensPathOrId)), 0);
             } else {
                 controller.load_lens_profile(lensPathOrId);
             }

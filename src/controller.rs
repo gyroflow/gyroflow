@@ -54,6 +54,7 @@ pub struct Controller {
     video_file_loaded: qt_method!(fn(&self, player: QJSValue)),
     load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, sample_index: i32)),
     load_lens_profile: qt_method!(fn(&mut self, url_or_id: QString)),
+    get_preset_contents: qt_method!(fn(&mut self, url_or_id: QString) -> QString),
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool)),
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
 
@@ -822,6 +823,10 @@ impl Controller {
         if local_path.exists() {
             self.import_gyroflow_file(QUrl::from(QString::from(filesystem::path_to_url(&local_path.to_string_lossy()))));
         }
+    }
+    fn get_preset_contents(&mut self, url_or_id: QString) -> QString {
+        let db = self.stabilizer.lens_profile_db.read();
+        QString::from(db.get_preset_by_id(&url_or_id.to_string()).unwrap_or_default())
     }
 
     fn set_preview_resolution(&mut self, target_height: i32, player: QJSValue) {
@@ -1772,6 +1777,8 @@ impl Controller {
             this.lens_profiles_updated(true);
         });
 
+        let existing_keys = self.stabilizer.lens_profile_db.read().get_all_filenames();
+
         core::run_threaded(move || {
             if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/lens_profiles/git/trees/main?recursive=1").call().map(|x| x.into_string()) {
                 (|| -> Option<()> {
@@ -1781,7 +1788,7 @@ impl Controller {
                         let path = obj.get("path")?.as_str()?;
                         if path.ends_with(".json") || path.ends_with(".gyroflow") {
                             let local_path = LensProfileDatabase::get_path().join(path);
-                            if !local_path.exists() {
+                            if !local_path.exists() && !existing_keys.contains(&path.to_string()) {
                                 ::log::info!("Downloading lens profile {:?}", local_path.file_name()?);
 
                                 let url = obj.get("url")?.as_str()?.to_string();
