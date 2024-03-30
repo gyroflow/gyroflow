@@ -89,7 +89,7 @@ jobs:
           certutil -decode ${{ github.workspace }}/android_release.keystore.b64 ${{ github.workspace }}/android_release.keystore
           certutil -decode ${{ github.workspace }}/_deployment/windows/msix_signing_key.pfx.b64 ${{ github.workspace }}/_deployment/windows/msix_signing_key.pfx
 
-      - uses: extractions/setup-just@v1
+      - uses: extractions/setup-just@v2
 
       - name: Build Gyroflow (macOS)
         if: ${{ matrix.targets.type == 'macos' }}
