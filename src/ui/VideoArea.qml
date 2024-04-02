@@ -487,7 +487,7 @@ Item {
         }
     }
 
-    function detectImageSequence(folder: url, filename: string) {
+    function detectImageSequence(folder: url, filename: string): var {
         if (!filename.includes("%0")) {
             controller.image_sequence_start = 0;
             controller.image_sequence_fps = 0;
@@ -511,7 +511,7 @@ Item {
         }
         return false;
     }
-    function detectVideoSequence(folder: url, filename: string) {
+    function detectVideoSequence(folder: url, filename: string): var {
         // url pattern, new path function, additional condition
         const patterns = [
             // GoPro

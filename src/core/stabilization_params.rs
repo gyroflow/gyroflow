@@ -7,7 +7,7 @@ use nalgebra::Vector4;
 
 use crate::keyframes::*;
 
-#[derive(Default, Clone, Copy, Debug)]
+#[derive(Default, Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
 pub enum BackgroundMode {
     #[default]
     SolidColor = 0,
@@ -26,7 +26,7 @@ impl From<i32> for BackgroundMode {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct StabilizationParams {
     pub size: (usize, usize), // Processing input size
     pub output_size: (usize, usize), // Processing output size

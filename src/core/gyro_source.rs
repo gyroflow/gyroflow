@@ -78,12 +78,12 @@ impl FileMetadata {
     }
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
 pub struct FileLoadOptions {
     pub sample_index: Option<usize>
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
 pub struct GyroSource {
     pub file_load_options: FileLoadOptions,
 

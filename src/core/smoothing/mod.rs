@@ -32,8 +32,23 @@ pub trait SmoothingAlgorithm: DynClone {
 }
 clone_trait_object!(SmoothingAlgorithm);
 
+struct Algs(Vec<Box<dyn SmoothingAlgorithm>>);
+impl Default for Algs {
+    fn default() -> Self {
+        Self(vec![
+            Box::new(self::none::None::default()),
+            Box::new(self::default_algo::DefaultAlgo::default()),
+            Box::new(self::plain::Plain::default()),
+            Box::new(self::fixed::Fixed::default())
+        ])
+    }
+
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct Smoothing {
-    algs: Vec<Box<dyn SmoothingAlgorithm>>,
+    #[serde(skip)]
+    algs: Algs,
     current_id: usize,
 
     pub horizon_lock: horizon::HorizonLock
@@ -44,12 +59,7 @@ unsafe impl Sync for Smoothing { }
 impl Default for Smoothing {
     fn default() -> Self {
         Self {
-            algs: vec![
-                Box::new(self::none::None::default()),
-                Box::new(self::default_algo::DefaultAlgo::default()),
-                Box::new(self::plain::Plain::default()),
-                Box::new(self::fixed::Fixed::default())
-            ],
+            algs: Algs::default(),
 
             current_id: 1,
 
@@ -84,27 +94,27 @@ impl Clone for Smoothing {
 
 impl Smoothing {
     pub fn set_current(&mut self, id: usize) {
-        self.current_id = id.min(self.algs.len() - 1);
+        self.current_id = id.min(self.algs.0.len() - 1);
     }
 
     pub fn current(&self) -> &Box<dyn SmoothingAlgorithm> {
-        &self.algs[self.current_id]
+        &self.algs.0[self.current_id]
     }
     pub fn current_mut(&mut self) -> &mut Box<dyn SmoothingAlgorithm> {
-        &mut self.algs[self.current_id]
+        &mut self.algs.0[self.current_id]
     }
 
     pub fn get_state_checksum(&self, gyro_checksum: u64) -> u64 {
         let mut hasher = DefaultHasher::new();
         hasher.write_u64(gyro_checksum);
         hasher.write_usize(self.current_id);
-        hasher.write_u64(self.algs[self.current_id].get_checksum());
+        hasher.write_u64(self.algs.0[self.current_id].get_checksum());
         hasher.write_u64(self.horizon_lock.get_checksum());
         hasher.finish()
     }
 
     pub fn get_names(&self) -> Vec<String> {
-        self.algs.iter().map(|x| x.get_name()).collect()
+        self.algs.0.iter().map(|x| x.get_name()).collect()
     }
 
     pub fn get_trimmed_quats<'a>(quats: &'a TimeQuat, duration: f64, trim_range_only: bool, trim_ranges: &[(f64, f64)]) -> Cow<'a, TimeQuat> {

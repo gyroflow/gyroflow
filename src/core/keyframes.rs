@@ -66,10 +66,11 @@ pub struct Keyframe {
     pub easing: Easing
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
 pub struct KeyframeManager {
     keyframes: BTreeMap<KeyframeType, BTreeMap<i64, Keyframe>>,
     gyro_offsets: BTreeMap<i64, f64>,
+    #[serde(skip)]
     custom_provider: Option<Arc<Mutex<dyn FnMut(&KeyframeManager, &KeyframeType, f64) -> Option<f64> + Send + 'static>>>,
     pub timestamp_scale: Option<f64>,
 }

@@ -96,7 +96,7 @@ Rectangle {
             anchors.fill: parent;
             color: styleBackground2;
             radius: 5 * dpiScale;
-            // Replace BorderImage with MultiEffect once Qt is upgraded to 6.6.3 (https://bugreports.qt.io/browse/QTBUG-117830)
+            // Replace BorderImage with MultiEffect once Qt is upgraded to 6.7.0 (https://bugreports.qt.io/browse/QTBUG-117830)
             // layer.enabled: true; layer.effect: MultiEffect { shadowEnabled: true; }
         }
 

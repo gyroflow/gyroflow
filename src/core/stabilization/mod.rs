@@ -22,7 +22,7 @@ pub use compute_params::ComputeParams;
 pub use frame_transform::FrameTransform;
 pub use cpu_undistort::*;
 
-#[derive(Default, Clone, Copy, Debug)]
+#[derive(Default, Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
 pub enum Interpolation {
     #[default]
     Bilinear = 2,
@@ -122,8 +122,8 @@ impl BackendType {
 pub struct Stabilization {
     pub stab_data: BTreeMap<i64, FrameTransform>,
 
-    size:        (usize, usize), // width, height
-    output_size: (usize, usize), // width, height
+    pub size:        (usize, usize), // width, height
+    pub output_size: (usize, usize), // width, height
 
     pub interpolation: Interpolation,
     pub kernel_flags: KernelParamsFlags,

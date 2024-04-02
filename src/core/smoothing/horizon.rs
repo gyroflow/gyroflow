@@ -26,7 +26,7 @@ pub fn lock_horizon_angle(q: &UnitQuaternion<f64>, roll_correction: f64) -> Unit
     initial_quat * rot_yaw * rot_pitch * rot_roll
 }
 
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct HorizonLock {
     pub lock_enabled: bool,
     pub horizonlockpercent: f64,

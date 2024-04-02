@@ -678,9 +678,11 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
             let _ = std::fs::create_dir_all(path);
         }
     }
-    if let Some(ind) = trim_range_ind {
-        if let Some(pos) = filename.rfind('.') {
-            filename.insert_str(pos, &format!("-{:0>3}", ind + 1));
+    if org_trim_ranges.len() > 1 {
+        if let Some(ind) = trim_range_ind {
+            if let Some(pos) = filename.rfind('.') {
+                filename.insert_str(pos, &format!("-{:0>3}", ind + 1));
+            }
         }
     }
 

@@ -182,7 +182,7 @@ deploy *param:
     cp -f "$QT_DIR/lib/libicuuc.so.56"                             "$TARGET/lib/"
     cp -f "$QT_DIR/lib/libicui18n.so.56"                           "$TARGET/lib/"
 
-    # Remove once moved to Qt 6.6.3
+    # Remove once moved to Qt 6.7.0
     cp -f "$QT_DIR/lib/libQt6LabsSettings.so.6"                "$TARGET/lib/"
     mkdir -p "$TARGET/qml/Qt/labs/settings/"
     cp -f $QT_DIR/qml/Qt/labs/settings/qmldir                  "$TARGET/qml/Qt/labs/settings/"

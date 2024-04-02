@@ -938,7 +938,7 @@ impl RenderQueue {
                 }
 
                 let num_ranges = stab.params.read().trim_ranges.len();
-                let ranges_to_render = if render_options.export_trims_separately {
+                let ranges_to_render = if render_options.export_trims_separately && num_ranges > 0 {
                     (0..num_ranges).map(Some).collect::<Vec<_>>()
                 } else {
                     vec![None]

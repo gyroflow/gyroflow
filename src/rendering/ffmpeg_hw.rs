@@ -160,13 +160,13 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)], device: Option<&s
     }
 
     for x in encoders {
-        if let Some(mut enc) = encoder::find_by_name(x.0) {
+        if let Some(enc) = encoder::find_by_name(x.0) {
             if !x.1 { return (x.0, x.1, None); } // If not HW encoder
 
             for i in 0..20 {
                 unsafe {
                     let type_ = if !x.0.contains("videotoolbox") {
-                        let config = ffi::avcodec_get_hw_config(enc.as_mut_ptr(), i);
+                        let config = ffi::avcodec_get_hw_config(enc.as_ptr(), i);
                         if config.is_null() {
                             println!("config is null {}", x.0);
                             break;
