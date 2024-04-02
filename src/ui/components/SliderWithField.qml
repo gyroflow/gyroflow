@@ -34,14 +34,14 @@ Row {
     Connections {
         target: controller;
         enabled: root.keyframe.length > 0;
-        function onKeyframe_value_updated(keyframe: string, value: real) {
+        function onKeyframe_value_updated(keyframe: string, value: real): void {
             if (keyframe == root.keyframe) {
                 root.preventChange = true;
                 field.value = value * root.scaler;
                 root.preventChange = false;
             }
         }
-        function onGyroflow_file_loaded(obj) {
+        function onGyroflow_file_loaded(obj: var): void {
             if (obj.keyframes && typeof obj.keyframes[root.keyframe] !== "undefined") {
                 root.keyframesEnabled = true;
             }

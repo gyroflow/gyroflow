@@ -115,7 +115,7 @@ Window {
         anchors.horizontalCenter: parent.horizontalCenter;
         z: 9999;
         onHeightChanged: updateYAnim(loadingIndicator.y, height);
-        function updateYAnim(indicatorY: real, imageHeight: real) {
+        function updateYAnim(indicatorY: real, imageHeight: real): void {
             liy.stop();
             liy.from = indicatorY - imageHeight - 10 * dpiScale;
             liy.to = indicatorY - imageHeight - 30 * dpiScale;

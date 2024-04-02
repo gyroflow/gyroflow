@@ -35,7 +35,7 @@ Rectangle {
 
     signal clicked(int index, bool dontShowAgain);
 
-    function close() {
+    function close(): void {
         opened = false;
         destroy(1000);
     }
@@ -175,7 +175,7 @@ Rectangle {
                         id: btnsRow;
                         anchors.horizontalCenter: parent.horizontalCenter;
                         spacing: 10 * dpiScale;
-                        function updateWidth() {
+                        function updateWidth(): void {
                             if (btnsRow.width > btnsCol.width - 20 * dpiScale) {
                                 btnsRow.width = btnsCol.width - 20 * dpiScale;
                             }
@@ -203,12 +203,12 @@ Rectangle {
                         iconName: "external_link";
                         onClicked: Qt.openUrlExternally("https://docs.gyroflow.xyz/app/getting-started/troubleshooting")
                     }
-                    Item { visible: root.modalIdentifier; height: 15 * dpiScale; width: 1; }
+                    Item { visible: root.modalIdentifier.length > 0; height: 15 * dpiScale; width: 1; }
                     CheckBox {
                         anchors.horizontalCenter: parent.horizontalCenter;
                         x: 20 * dpiScale;
                         id: dontShowAgain;
-                        visible: root.modalIdentifier;
+                        visible: root.modalIdentifier.length > 0;
                         text: btns.model?.length == 1? qsTr("Don't show again") : qsTr("Remember this choice");
                         checked: false;
                     }

@@ -94,7 +94,7 @@ impl Default for StabilizationParams {
             frame_readout_time: 0.0,
             adaptive_zoom_window: 4.0,
             adaptive_zoom_center_offset: (0.0, 0.0),
-            adaptive_zoom_method: 0,
+            adaptive_zoom_method: 1,
 
             additional_rotation: (0.0, 0.0, 0.0),
             additional_translation: (0.0, 0.0, 0.0),

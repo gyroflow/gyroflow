@@ -42,7 +42,7 @@ MenuItem {
 
     signal selectFileRequest();
 
-    function loadFromVideoMetadata(md: var, org_w: int, org_h: int) {
+    function loadFromVideoMetadata(md: var, org_w: int, org_h: int): void {
         const framerate = +md["stream.video[0].codec.frame_rate"] || 0;
         const w = org_w || md["stream.video[0].codec.width"] || 0;
         const h = org_h || md["stream.video[0].codec.height"] || 0;
@@ -83,11 +83,11 @@ MenuItem {
 
         Qt.callLater(window.exportSettings.videoInfoLoaded, w, h, bitrate);
     }
-    function updateEntry(key: string, value: string) {
+    function updateEntry(key: string, value: string): void {
         if (key == "File name") root.filename = value;
         list.updateEntry(key, value);
     }
-    function updateEntryWithTrigger(key: string, value: string) {
+    function updateEntryWithTrigger(key: string, value: string): void {
         list.updateEntryWithTrigger(key, value);
     }
 

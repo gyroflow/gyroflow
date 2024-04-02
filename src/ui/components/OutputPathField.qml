@@ -35,7 +35,7 @@ TextField {
         }
     }
 
-    function updateText() {
+    function updateText(): void {
         preventChange = true;
         if (!filename && root.folderOnly && root.folderUrl.toString()) {
             text = filesystem.display_folder_filename(root.folderUrl, filename);
@@ -46,20 +46,20 @@ TextField {
         preventChange = false;
     }
 
-    function setUrl(url: url) {
+    function setUrl(url: url): void {
         fullFileUrl = url;
         filename = filesystem.get_filename(url);
         folderUrl = filesystem.get_folder(url);
         updateText();
     }
-    function setFilename(fname: string) {
+    function setFilename(fname: string): void {
         if (fname != filename) {
             filename = fname;
             fullFileUrl = "";
             updateText();
         }
     }
-    function setFolder(folder: url) {
+    function setFolder(folder: url): void {
         folderUrl = folder;
         if (folder.toString())
             fullFileUrl = "";
@@ -77,7 +77,7 @@ TextField {
         return "";
     }
 
-    function selectFolder(folder: url, cb) {
+    function selectFolder(folder: url, cb: var): void {
         root.cbAfterSelect = cb;
         outputFolderDialog.currentFolder = root.getFolderForDialog(folder);
         outputFolderDialog.open();

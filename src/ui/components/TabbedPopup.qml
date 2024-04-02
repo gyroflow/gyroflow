@@ -26,7 +26,7 @@ QQC.Popup {
     property var icons: [];
     property var colors: [];
 
-    function resetTab() {
+    function resetTab(): void {
         tabBar.currentIndex = 1;
         tabBar.currentIndex = 0;
     }

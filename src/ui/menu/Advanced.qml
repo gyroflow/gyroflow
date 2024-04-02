@@ -36,7 +36,7 @@ MenuItem {
     property alias r3dConvertFormat: r3dConvertFormat;
     property alias gpudecode: gpudecode;
 
-    function loadGyroflow(obj) {
+    function loadGyroflow(obj: var): void {
         if (obj.hasOwnProperty("background_mode")) backgroundMode.currentIndex = +obj.background_mode;
         if (obj.hasOwnProperty("background_margin")) marginPixels.value = +obj.background_margin;
         if (obj.hasOwnProperty("background_margin_feather")) featherPixels.value = +obj.background_margin_feather;
@@ -212,7 +212,7 @@ MenuItem {
             }
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
-            function setLang() {
+            function setLang(): void {
                 settings.lang = langs[currentIndex][1];
 
                 window.LayoutMirroring.enabled = settings.lang == "ar" || settings.lang == "fa" || settings.lang == "he";
@@ -336,7 +336,7 @@ MenuItem {
             property bool preventChange: true;
             Connections {
                 target: controller;
-                function onGpu_list_loaded(list) {
+                function onGpu_list_loaded(list: list<string>): void {
                     const saved = settings.value("processingDevice", defaultInitializedDevice);
                     processingDevice.preventChange = true;
                     processingDevice.model = [...list, qsTr("CPU only")];
@@ -360,7 +360,7 @@ MenuItem {
                 if (preventChange) return;
                 Qt.callLater(processingDevice.updateController);
             }
-            function updateController() {
+            function updateController(): void {
                 if (model.length == 0) return;
                 if (currentIndex == model.length - 1) {
                     controller.set_device(-1);

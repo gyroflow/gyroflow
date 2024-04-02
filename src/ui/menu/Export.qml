@@ -15,7 +15,7 @@ MenuItem {
     innerItem.enabled: window.videoArea.vid.loaded;
     objectName: "export";
 
-    function updateCodecParams() {
+    function updateCodecParams(): void {
         codec.currentIndexChanged();
     }
 
@@ -112,7 +112,7 @@ MenuItem {
 
     property bool canExport: !resolutionWarning.visible && !resolutionWarning2.visible;
 
-    function getExportOptions() {
+    function getExportOptions(): var {
         let encoderOpts = encoderOptions.text.replace("-qscale:v", "-qscale")
                                              .replace("-q:v", "-qscale");
         return {
@@ -140,14 +140,14 @@ MenuItem {
     }
 
     property bool disableUpdate: false;
-    function notifySizeChanged() {
+    function notifySizeChanged(): void {
         controller.set_output_size(outWidth, outHeight);
         if (preserveOutputSettings.checked && outWidth > 0 && outHeight > 0) {
             settings.setValue("preservedWidth", outWidth);
             settings.setValue("preservedHeight", outHeight);
         }
     }
-    function ensureAspectRatio(byWidth: bool) {
+    function ensureAspectRatio(byWidth: bool): void {
         if (lockAspectRatio.checked && aspectRatio > 0) {
             if (byWidth) {
                 outHeight = Math.round(outWidth / aspectRatio);
@@ -156,7 +156,7 @@ MenuItem {
             }
         }
     }
-    function setDefaultSize(w: real, h: real) {
+    function setDefaultSize(w: real, h: real): void {
         aspectRatio   = w / h;
         defaultWidth  = w;
         defaultHeight = h;
@@ -171,7 +171,7 @@ MenuItem {
         outHeight     = h;
         disableUpdate = false;
     }
-    function videoInfoLoaded(w: real, h: real, br: real) {
+    function videoInfoLoaded(w: real, h: real, br: real): void {
         setDefaultSize(w, h);
         root.originalWidth = w;
         root.originalHeight = h;
@@ -191,11 +191,11 @@ MenuItem {
 
         codec.updateGpuStatus();
     }
-    function lensProfileLoaded(w: real, h: real) {
+    function lensProfileLoaded(w: real, h: real): void {
         setDefaultSize(w, h);
         Qt.callLater(notifySizeChanged);
     }
-    function loadGyroflow(obj) {
+    function loadGyroflow(obj: var): void {
         const output = obj.output || { };
         if (output && Object.keys(output).length > 0) {
             if (output.output_path) {
@@ -244,10 +244,10 @@ MenuItem {
         model: exportFormats.map(x => x.name);
         width: parent.width;
         currentIndex: 1;
-        function updateExtension(ext: string) {
+        function updateExtension(ext: string): void {
             window.outputFile.setFilename(window.outputFile.filename.replace(/(_%[0-9d]+)?\.[a-z0-9]+$/i, ext));
         }
-        function updateGpuStatus() {
+        function updateGpuStatus(): void {
             const format = exportFormats[currentIndex];
             gpu.enabled2 = format.gpu;
             if ((format.name == "H.264/AVC" && window.vidInfo && window.vidInfo.pixelFormat.includes("10 bit"))) {
@@ -401,7 +401,7 @@ MenuItem {
                     const tf = Qt.createComponent("../components/TextArea.qml").createObject(dlg.mainColumn, { text: json });
                     tf.anchors.horizontalCenter = dlg.mainColumn.horizontalCenter;
                 }
-                function setSize(w: real, h: real) {
+                function setSize(w: real, h: real): void {
                     disableUpdate = true;
                     aspectRatio = w / h;
                     outWidth = w;
@@ -588,7 +588,7 @@ MenuItem {
                 property var orgList: [];
                 Connections {
                     target: controller;
-                    function onGpu_list_loaded(list) {
+                    function onGpu_list_loaded(list: list<string>): void {
                         const saved = settings.value("renderingDevice", defaultInitializedDevice);
                         const toRemove = [ "[OpenCL]", "[wgpu]", "(Vulkan)", "(Metal)", "(Dx12)", "(Dx11)", "(Gl)" ];
                         list = list.map(x => {
@@ -618,7 +618,7 @@ MenuItem {
                     if (preventChange) return;
                     Qt.callLater(renderingDevice.updateController);
                 }
-                function updateController() {
+                function updateController(): void {
                     controller.set_rendering_gpu_type_from_name(renderingDevice.currentText);
                     settings.setValue("renderingDevice", renderingDevice.orgList[renderingDevice.currentIndex]);
                 }

@@ -18,14 +18,14 @@ Row {
 
     signal commitAll();
 
-    function updateEntry(key: string, value: string) {
+    function updateEntry(key: string, value: string): void {
         model[key] = value;
         let index = Object.keys(tl.model).indexOf(key);
         if (index !== -1) {
             col2.children[index].children[0].text = value;
         }
     }
-    function updateEntryWithTrigger(key: string, value: string) {
+    function updateEntryWithTrigger(key: string, value: string): void {
         updateEntry(key, value);
 
         const desc = tl.editableFields[key];
@@ -77,7 +77,7 @@ Row {
             }
         }
     }
-    function updateHeights() {
+    function updateHeights(): void {
         for (let i = 0; i < col1.children.length; ++i) {
             if (i < col2.children.length) {
                 const l = col1.children[i];
@@ -114,7 +114,7 @@ Row {
                 }
                 Connections {
                     target: tl;
-                    function onCommitAll() { if (newValue.visible) newValue.accepted(); }
+                    function onCommitAll(): void { if (newValue.visible) newValue.accepted(); }
                 }
             }
             LinkButton {
@@ -127,7 +127,7 @@ Row {
                 height: newValue.visible? newValue.height + 5 * dpiScale : undefined;
                 leftPadding: newValue.visible? 15 * dpiScale : 0; rightPadding: leftPadding;
 
-                function _onClicked() {
+                function _onClicked(): void {
                     if (newValue.visible) {
                         newValue.accepted();
                     } else {

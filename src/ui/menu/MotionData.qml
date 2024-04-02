@@ -31,7 +31,7 @@ MenuItem {
         type: "video";
         onAccepted: loadFile(selectedFile);
     }
-    function loadFile(url: url) {
+    function loadFile(url: url): void {
         if (!window.videoArea.vid.loaded) {
             messageBox(Modal.Error, qsTr("Video file is not loaded."), [ { text: qsTr("Ok"), accent: true } ]);
             return;
@@ -40,7 +40,7 @@ MenuItem {
         controller.load_telemetry(url, false, window.videoArea.vid, currentLog.visible && currentLog.currentIndex > 0? currentLog.currentIndex - 1 : -1);
     }
 
-    function loadGyroflow(obj) {
+    function loadGyroflow(obj: var): void {
         const gyro = obj.gyro_source || { };
         if (gyro && Object.keys(gyro).length > 0) {
             if (gyro.rotation && gyro.rotation.length == 3) {
@@ -70,7 +70,7 @@ MenuItem {
             }
         }
     }
-    function setGyroLpf(v: real) {
+    function setGyroLpf(v: real): void {
         lpf.value = v;
         lpfcb.checked = +v > 0;
     }
@@ -84,7 +84,7 @@ MenuItem {
     }
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
             root.filename = filename || "";
             root.detectedFormat = camera || "";
             info.updateEntry("File name", filename || "---");
@@ -125,16 +125,16 @@ MenuItem {
             }
             currentLog.preventChange = false;
         }
-        function onBias_estimated(biasX: real, biasY: real, biasZ: real) {
+        function onBias_estimated(biasX: real, biasY: real, biasZ: real): void {
             gyrobias.checked = true;
             bx.value = biasX;
             by.value = biasY;
             bz.value = biasZ;
         }
-        function onOrientation_guessed(value: string) {
+        function onOrientation_guessed(value: string): void {
              orientation.text = value;
         }
-        function onChart_data_changed() {
+        function onChart_data_changed(): void {
             Qt.callLater(orientationIndicator.requestPaint);
         }
     }
@@ -221,7 +221,7 @@ MenuItem {
             id: rot;
             text: qsTr("Rotation");
             onCheckedChanged: update_rotation();
-            function update_rotation() {
+            function update_rotation(): void {
                 controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
                 Qt.callLater(controller.recompute_gyro);
             }
@@ -276,7 +276,7 @@ MenuItem {
         visible: arot_action.checked;
         text: qsTr("Accelerometer rotation");
         onCheckedChanged: update_rotation();
-        function update_rotation() {
+        function update_rotation(): void {
             controller.set_acc_rotation(arot.checked? ap.value : 0, arot.checked? ar.value : 0, arot.checked? ay.value : 0);
             Qt.callLater(controller.recompute_gyro);
         }
@@ -314,7 +314,7 @@ MenuItem {
         id: gyrobias;
         text: qsTr("Gyro bias");
         onCheckedChanged: update_bias();
-        function update_bias() {
+        function update_bias(): void {
             controller.set_imu_bias(gyrobias.checked? bx.value : 0, gyrobias.checked? by.value : 0, gyrobias.checked? bz.value : 0);
             Qt.callLater(controller.recompute_gyro);
         }
@@ -373,7 +373,7 @@ MenuItem {
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
             tooltip: hasQuaternions && currentIndex === 0? qsTr("Use built-in quaternions instead of IMU data") : qsTr("IMU integration method for calculating motion data");
-            function setMethod() {
+            function setMethod(): void {
                 controller.set_integration_method(hasQuaternions? currentIndex : currentIndex + 1);
             }
             onCurrentIndexChanged: integrateTimer.start();
@@ -395,8 +395,8 @@ MenuItem {
             id: orientationIndicator
             width: parent.width
             height: 100
-            property var currentTimestamp: 0
-            property var initialDraw: false
+            property real currentTimestamp: 0
+            property bool initialDraw: false
             onPaint: {
                 if (orientationCheckbox.checked || !initialDraw) {
                     initialDraw = true
@@ -475,7 +475,7 @@ MenuItem {
                     }
                 }
             }
-            function updateOrientation(timestamp) {
+            function updateOrientation(timestamp: real): void {
                 currentTimestamp = timestamp;
                 requestPaint();
             }

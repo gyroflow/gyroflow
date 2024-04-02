@@ -95,7 +95,7 @@ QQC.ItemDelegate {
             }
         }
     }
-    function clickHandler() {
+    function clickHandler(): void {
         popup.focus = false;
         popup.parent.focus = true;
         popup.clicked(index);

@@ -41,7 +41,7 @@ Item {
 
     property Menu.VideoInformation vidInfo: null;
 
-    function loadGyroflowData(obj, queueJobId) {
+    function loadGyroflowData(obj: var, queueJobId: var): void {
         root.pendingGyroflowData = null;
         root.pendingQueueJobId = 0;
 
@@ -102,7 +102,7 @@ Item {
     }
     Connections {
         target: controller;
-        function onGyroflow_file_loaded(obj) {
+        function onGyroflow_file_loaded(obj: var): void {
             if (obj && +obj.version > 0) {
                 const info = obj.video_info || { };
                 if (info && Object.keys(info).length > 0) {
@@ -157,7 +157,7 @@ Item {
             Qt.callLater(controller.recompute_threaded);
             Qt.callLater(timeline.updateDurations);
         }
-        function onExternal_sdk_progress(percent: real, sdk_name: string, error_string: string, url: string) {
+        function onExternal_sdk_progress(percent: real, sdk_name: string, error_string: string, url: string): void {
             if (externalSdkModal !== null && externalSdkModal.loader !== null) {
                 externalSdkModal.loader.visible = percent < 1;
                 externalSdkModal.loader.active = percent < 1;
@@ -186,7 +186,7 @@ Item {
             }
         }
 
-        function onMp4_merge_progress(percent: real, error_string: string, url: url) {
+        function onMp4_merge_progress(percent: real, error_string: string, url: url): void {
             if (externalSdkModal !== null && externalSdkModal.loader !== null) {
                 externalSdkModal.loader.visible = percent < 1;
                 externalSdkModal.loader.active = percent < 1;
@@ -204,7 +204,7 @@ Item {
                 }
             }
         }
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
             console.log("Telemetry additional data:", JSON.stringify(additional_data));
             if (is_main_video) {
                 root.detectedCamera = camera;
@@ -248,24 +248,24 @@ Item {
                 }
             }
         }
-        function onChart_data_changed() {
+        function onChart_data_changed(): void {
             timeline.triggerUpdateChart("");
         }
-        function onZooming_data_changed() {
+        function onZooming_data_changed(): void {
             timeline.triggerUpdateChart("8");
         }
-        function updateKeyframesView() {
+        function updateKeyframesView(): void {
             controller.update_keyframes_view(timeline.getKeyframesView());
             controller.update_keyframe_values(vid.timestamp);
         }
-        function onKeyframes_changed() {
+        function onKeyframes_changed(): void {
             Qt.callLater(updateKeyframesView);
         }
-        function onCompute_progress(id: real, progress: real) {
+        function onCompute_progress(id: real, progress: real): void {
             videoLoader.active = progress < 1;
             videoLoader.cancelable = false;
         }
-        function onSync_progress(progress: real, ready: int, total: int) {
+        function onSync_progress(progress: real, ready: int, total: int): void {
             videoLoader.active = progress < 1;
             videoLoader.currentFrame = ready;
             videoLoader.totalFrames = total;
@@ -274,7 +274,7 @@ Item {
             videoLoader.progress = videoLoader.active? progress : -1;
             videoLoader.cancelable = true;
         }
-        function onLoading_gyro_progress(progress: real) {
+        function onLoading_gyro_progress(progress: real): void {
             videoLoader.active = progress < 1;
             videoLoader.currentFrame = 0;
             videoLoader.totalFrames = 0;
@@ -286,7 +286,7 @@ Item {
     }
     property Modal externalSdkModal: null;
 
-    function loadFile(url: url, skip_detection: bool, queueJobId: int) {
+    function loadFile(url: url, skip_detection: bool, queueJobId: int): void {
         let filename = filesystem.get_filename(url);
         let folder = filesystem.get_folder(url);
 
@@ -414,7 +414,7 @@ Item {
         vidInfo.updateEntry("Contains gyro", "---");
         timeline.editingSyncPoint = false;
     }
-    function loadMultipleFiles(urls: list<url>, skip_detection: bool) {
+    function loadMultipleFiles(urls: list<url>, skip_detection: bool): void {
         if (urls.length == 1) {
             root.loadFile(urls[0], skip_detection);
         } else if (urls.length > 1) {
@@ -445,7 +445,7 @@ Item {
         }
     }
 
-    function askForOutputLocation(folder: url, filename: string, choice: bool, cb) {
+    function askForOutputLocation(folder: url, filename: string, choice: bool, cb: var): void {
         const dlg = messageBox(Modal.Question, qsTr("Please enter the output path:"), [
             { text: qsTr("Ok"), accent: true, clicked: function() {
                 if (choice) {
@@ -477,7 +477,7 @@ Item {
             opf.setFilename(filename);
         }
     }
-    function getOutputFile(folder: url, filename: string, suffix: string, extension: string, ask: bool, cb) {
+    function getOutputFile(folder: url, filename: string, suffix: string, extension: string, ask: bool, cb: var): void {
         if (suffix) filename = filesystem.filename_with_suffix(filename, suffix);
         if (extension) filename = filesystem.filename_with_extension(filename, extension);
         if (ask) {
@@ -589,7 +589,7 @@ Item {
                     }
                 ]
 
-                function fovChanged() {
+                function fovChanged(): void {
                     const fov = controller.current_fov;
                     const focal_length = controller.current_focal_length;
                     const crop_factor = window.lensProfile?.cropFactor || 1.0;
@@ -613,7 +613,7 @@ Item {
                 onMetadataLoaded: (md) => {
                     Qt.callLater(fileLoaded, md);
                 }
-                function fileLoaded(md: var) {
+                function fileLoaded(md: var): void {
                     loaded = vid.videoWidth > 0;
                     videoLoader.active = false;
                     vidInfo.loader = false;
@@ -960,7 +960,7 @@ Item {
             onHeightAdjusted: window.settings.setValue("bottomPanelSize" + (root.fullScreen? "-full" : ""), height);
             Connections {
                 target: root;
-                function onFullScreenChanged() {
+                function onFullScreenChanged(): void {
                     bottomPanel.lastHeight = window.settings.value("bottomPanelSize" + (root.fullScreen? "-full" : ""), bottomPanel.defaultHeight);
                     if (root.fullScreen == 2) {
                         main_window.visibility = Window.FullScreen;

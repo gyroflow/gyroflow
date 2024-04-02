@@ -40,7 +40,7 @@ MenuItem {
         type: "lens";
         onAccepted: loadFile(fileDialog.selectedFile);
     }
-    function loadFile(url: url) {
+    function loadFile(url: url): void {
         controller.load_lens_profile(url.toString());
     }
 
@@ -67,7 +67,7 @@ MenuItem {
     }
     Connections {
         target: controller;
-        function onAll_profiles_loaded(profiles: list<var>) {
+        function onAll_profiles_loaded(profiles: list<var>): void {
             if (!lensProfilesList.length) { // If it's the first load
                 controller.request_profile_ratings();
             }
@@ -82,11 +82,11 @@ MenuItem {
                 controller.fetch_profiles_from_github();
             }
         }
-        function onLens_profiles_updated(fromDisk: bool) {
+        function onLens_profiles_updated(fromDisk: bool): void {
             profilesUpdateTimer.fromDisk = fromDisk;
             profilesUpdateTimer.start();
         }
-        function onLens_profile_loaded(json_str: string, filepath: string, checksum: string) {
+        function onLens_profile_loaded(json_str: string, filepath: string, checksum: string): void {
             if (json_str) {
                 const obj = JSON.parse(json_str);
                 if (obj) {
@@ -167,7 +167,7 @@ MenuItem {
     property int currentVideoAspectRatioSwapped: Math.round((root.videoHeight / Math.max(1, root.videoWidth)) * 1000);
 
     property var favorites: ({});
-    function loadFavorites() {
+    function loadFavorites(): void {
         const list = window.settings.value("lensProfileFavorites") || "";
         let fav = {};
         for (const x of list.split(",")) {
@@ -176,7 +176,7 @@ MenuItem {
         }
         favorites = fav;
     }
-    function updateFavorites() {
+    function updateFavorites(): void {
         window.settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
     }
 
@@ -246,7 +246,7 @@ MenuItem {
         }
         Connections {
             target: officialInfo.t;
-            function onLinkActivated(link: url) {
+            function onLinkActivated(link: url): void {
                 controller.rate_profile(root.profileName, root.profileOriginalJson, root.profileChecksum, link === "#good");
                 if (link === "#good")
                     window.settings.setValue("rated-profile-" + root.profileChecksum, "1");
@@ -290,7 +290,7 @@ MenuItem {
             onValueChanged: {
                 if (!preventChange2) controller.set_lens_param(param, value);
             }
-            function setInitialValue(v: real) {
+            function setInitialValue(v: real): void {
                 preventChange2 = true;
                 value = v;
                 preventChange2 = false;

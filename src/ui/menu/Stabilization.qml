@@ -35,7 +35,7 @@ MenuItem {
         property alias zoomingMethod: zoomingMethod.currentIndex;
     }
 
-    function loadGyroflow(obj) {
+    function loadGyroflow(obj: var): void {
         const stab = obj.stabilization || { };
         if (stab && Object.keys(stab).length > 0) {
             if (stab.hasOwnProperty("fov")) fov.value = +stab.fov;
@@ -106,13 +106,13 @@ MenuItem {
         }
     }
 
-    function setFrameReadoutTime(v: real) {
+    function setFrameReadoutTime(v: real): void {
         shutter.value = Math.abs(v);
         shutterCb.checked = Math.abs(v) > 0;
         bottomToTop.checked = v < 0;
     }
 
-    function setSmoothingParam(name: string, value: real) {
+    function setSmoothingParam(name: string, value: real): void {
         settings.setValue("smoothing-" + smoothingMethod.currentIndex + "-" + name, value);
         controller.set_smoothing_param(name, value);
     }
@@ -136,7 +136,7 @@ MenuItem {
         return traverseChildren(smoothingOptions, "param-" + name);
     }
 
-    function updateHorizonLock() {
+    function updateHorizonLock(): void {
         const lockAmount = horizonCb.checked? horizonSlider.value : 0.0;
         const roll = horizonCb.checked? horizonRollSlider.value : 0.0;
         controller.set_horizon_lock(lockAmount, roll);
@@ -146,7 +146,7 @@ MenuItem {
 
     Connections {
         target: controller;
-        function onCompute_progress(id: real, progress: real) {
+        function onCompute_progress(id: real, progress: real): void {
             if (progress >= 1) {
                 const min_fov = controller.get_min_fov();
                 const max_angles = controller.get_smoothing_max_angles();
@@ -188,7 +188,7 @@ MenuItem {
                 }
             }
         }
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
             if (is_main_video) {
                 if (Math.abs(+additional_data.frame_readout_time) > 0) {
                     root.setFrameReadoutTime(additional_data.frame_readout_time);
@@ -197,7 +197,7 @@ MenuItem {
                 }
             }
         }
-        function onRolling_shutter_estimated(rolling_shutter: real) {
+        function onRolling_shutter_estimated(rolling_shutter: real): void {
             root.setFrameReadoutTime(rolling_shutter);
         }
     }
@@ -490,7 +490,7 @@ MenuItem {
                 currentIndex: 1;
                 onCurrentIndexChanged: controller.zooming_method = currentIndex;
                 property bool zoomingSpeedKeyframed: adaptiveZoom.keyframesEnabled || (videoSpeed.keyframesEnabled && videoSpeedAffectsSmoothing.checked);
-                function adjustMethod() {
+                function adjustMethod(): void {
                     // If keyframes are enabled, change to Envelope follower by default
                     if (zoomingSpeedKeyframed && zoomingMethod.currentIndex == 0) {
                         currentIndex = 1;
@@ -648,7 +648,7 @@ MenuItem {
             keyframe: "VideoSpeed";
             scaler: 100.0;
             property bool isKeyframed: false;
-            function updateVideoSpeed() {
+            function updateVideoSpeed(): void {
                 window.videoArea.vid.playbackRate = videoSpeed.value;
                 controller.set_video_speed(videoSpeed.value, videoSpeedAffectsSmoothing.checked, videoSpeedAffectsZooming.checked);
                 isKeyframed = controller.is_keyframed("VideoSpeed");
@@ -663,7 +663,7 @@ MenuItem {
             onKeyframesEnabledChanged: Qt.callLater(zoomingMethod.adjustMethod);
             Connections {
                 target: controller;
-                function onKeyframe_value_updated(keyframe: string, value: real) {
+                function onKeyframe_value_updated(keyframe: string, value: real): void {
                     if (keyframe == "VideoSpeed") {
                         if (Math.abs(window.videoArea.vid.playbackRate - value) > 0.005) {
                             window.videoArea.vid.playbackRate = value;

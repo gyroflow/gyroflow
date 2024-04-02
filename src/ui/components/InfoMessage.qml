@@ -20,7 +20,7 @@ Rectangle {
     property alias text: t.text;
     property alias t: t;
     property bool shrinkToText: false;
-    function updateSize() {;
+    function updateSize(): void {;
         if (shrinkToText && tm.contentWidth + 20 * dpiScale < root.parentWidth) {
             t.width = undefined;
             width = Qt.binding(() => tm.contentWidth + 20 * dpiScale);

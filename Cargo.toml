@@ -72,8 +72,7 @@ keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "1
 fc-blackbox = { git = "https://github.com/AdrianEddy/fc-blackbox.git",    rev = "4e9e4e6" }
 qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "59029b9" }
 qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "59029b9" }
-ffmpeg-next     = { git = "https://github.com/AdrianEddy/rust-ffmpeg.git", rev = "0e704fd" }
-ffmpeg-sys-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg-sys.git", rev = "5c33974" }
+ffmpeg-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg.git",    rev = "47c6add" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.54.0"

@@ -73,7 +73,7 @@ Modal {
     t.font.bold: true;
     t.font.pixelSize: 18 * dpiScale;
 
-    function getData(group: int) {
+    function getData(group: int): list<var> {
         return Object.keys(root.desc[group]).map((v) => {
             const text = v.split("|")[0];
             const group_name = v.split("|")[1] || "";
@@ -132,7 +132,7 @@ Modal {
         id: sectionsArea;
         width: parent.width;
         spacing: 15 * dpiScale;
-        function forAllCheckboxes(node, cb) {
+        function forAllCheckboxes(node, cb): void {
             for (let i = node.children.length; i > 0; --i) {
                 const child = node.children[i - 1];
                 if (child) {
@@ -231,7 +231,7 @@ Modal {
     buttons: [isPreset? qsTr("Save") : qsTr("Apply"), qsTr("Cancel")];
     accentButton: 0;
 
-    function copyObj(from: var, by: var, to: var) {
+    function copyObj(from: var, by: var, to: var): void {
         for (const key in by) {
             if (typeof by[key] === "boolean") {
                 if (by[key]) {

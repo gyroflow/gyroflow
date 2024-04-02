@@ -90,7 +90,7 @@ Item {
                 property string fpsText: topCol.progress > 0? qsTr(" @ %1fps").arg(fps.toFixed(1)) : "";
                 onWidthChanged: Qt.callLater(totalTime.updateLayout);
                 property bool twoLines: false;
-                function updateLayout() {
+                function updateLayout(): void {
                     const totalTextSize = progressText1.width + progressText2.width + progressText3.width + 25 * dpiScale;
                     twoLines = totalTextSize > totalTime.width;
                 }
@@ -126,11 +126,11 @@ Item {
         }
         Connections {
             target: render_queue;
-            function onAdded(job_id: real) {
+            function onAdded(job_id: real): void {
                 delete loader.pendingJobs[job_id];
                 loader.updateStatus();
             }
-            function onError(job_id: real, text: string, arg: string, callback: string) {
+            function onError(job_id: real, text: string, arg: string, callback: string): void {
                 if (job_id == render_queue.main_job_id || loader.pendingJobs[job_id]) {
                     text = getReadableError(qsTr(text).arg(arg));
                     if (text) {
@@ -142,7 +142,7 @@ Item {
                 delete loader.pendingJobs[job_id];
                 loader.updateStatus();
             }
-            function onRender_progress(job_id: real, progress: real, frame: int, total_frames: int, finished: bool, start_time: real, is_conversion: bool) {
+            function onRender_progress(job_id: real, progress: real, frame: int, total_frames: int, finished: bool, start_time: real, is_conversion: bool): void {
                 if (job_id == render_queue.main_job_id) {
                     window.videoArea.videoLoader.active = !finished;
                     window.videoArea.videoLoader.currentFrame = frame;
@@ -170,7 +170,7 @@ Item {
                     }
                 }
             }
-            function onConvert_format(job_id: real, format: string, supported: string) {
+            function onConvert_format(job_id: real, format: string, supported: string): void {
                 if (job_id == render_queue.main_job_id) {
                     let buttons = supported.split(",").map(f => ({
                         text: f,
@@ -194,10 +194,10 @@ Item {
                 delete loader.pendingJobs[job_id];
                 loader.updateStatus();
             }
-            function onEncoder_initialized(job_id: real, encoder_name: string) {
+            function onEncoder_initialized(job_id: real, encoder_name: string): void {
 
             }
-            function onRequest_close() {
+            function onRequest_close(): void {
                 main_window.closeConfirmed = true;
                 Qt.callLater(Qt.quit);
             }
@@ -263,10 +263,10 @@ Item {
 
         Connections {
             target: render_queue;
-            function onQueue_changed() {
+            function onQueue_changed(): void {
                 window.settings.setValue("renderQueue", render_queue.render_queue_json());
             }
-            function onStatus_changed() {
+            function onStatus_changed(): void {
                 window.settings.setValue("renderQueue", render_queue.render_queue_json());
             }
         }
@@ -624,7 +624,7 @@ Item {
         anchors.margins: 0 * dpiScale;
         anchors.topMargin: lv.y;
         extensions: fileDialog.extensions;
-        function add(outFolder, urls) {
+        function add(outFolder, urls): void {
             let additional = window.getAdditionalProjectData();
             if (!outFolder) {
                 delete additional.output.output_folder;
@@ -690,7 +690,7 @@ Item {
         text: qsTr("Queue settings");
         onClicked: if (queueSettingsMenu.visible) { queueSettingsMenu.dismiss(); } else { queueSettingsMenu.popup(queueSettings, 0, height); }
 
-        function setParallelRenders(v: int, menuItem: Menu) {
+        function setParallelRenders(v: int, menuItem: Menu): void {
             v = Math.min(6, Math.max(v, 1));
 
             render_queue.parallel_renders = v;
@@ -700,7 +700,7 @@ Item {
             }
             window.settings.setValue("parallelRenders", v);
         }
-        function setOverwriteAction(v: int, menuItem: Menu) {
+        function setOverwriteAction(v: int, menuItem: Menu): void {
             v = Math.min(3, Math.max(v, 0));
 
             render_queue.overwrite_mode = v;
@@ -711,7 +711,7 @@ Item {
             window.settings.setValue("defaultOverwriteAction", v);
 
         }
-        function setExportMode(v: int, menuItem: Menu) {
+        function setExportMode(v: int, menuItem: Menu): void {
             v = Math.min(4, Math.max(v, 0));
 
             render_queue.export_project = v;
@@ -770,6 +770,6 @@ Item {
         id: loader;
         active: false;
         property var pendingJobs: ({});
-        function updateStatus() { active = Object.keys(pendingJobs).length > 0; }
+        function updateStatus(): void { active = Object.keys(pendingJobs).length > 0; }
     }
 }

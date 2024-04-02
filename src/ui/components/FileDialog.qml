@@ -12,7 +12,7 @@ FileDialog {
     property string type: "";
     onAccepted: window.settings.setValue("folder-" + type, filesystem.get_folder(selectedFile).toString());
 
-    function open2() {
+    function open2(): void {
         const savedFolder = window.settings.value("folder-" + type, "");
         if (savedFolder) currentFolder = savedFolder;
         open();

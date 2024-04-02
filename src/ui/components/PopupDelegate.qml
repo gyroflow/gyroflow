@@ -39,7 +39,7 @@ QQC.ItemDelegate {
 
     MouseArea { anchors.fill: parent; acceptedButtons: Qt.NoButton; cursorShape: Qt.PointingHandCursor; }
 
-    function clickHandler() {
+    function clickHandler(): void {
         parentPopup.focus = false;
         parentPopup.parent.focus = true;
         parentPopup.clicked(index);

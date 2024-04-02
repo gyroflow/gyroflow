@@ -38,7 +38,7 @@ MenuItem {
     property var customSyncTimestamps: [];
     property var additionalSyncTimestamps: [];
 
-    function loadGyroflow(obj) {
+    function loadGyroflow(obj: var): void {
         const o = obj.synchronization || { };
         if (o && Object.keys(o).length > 0) {
             if (o.hasOwnProperty("initial_offset"))     initialOffset.value                 = +o.initial_offset;
@@ -67,7 +67,7 @@ MenuItem {
                 autosync.doSync();
         }
     }
-    function getSettings() {
+    function getSettings(): var {
         return {
             "initial_offset":     initialOffset.value,
             "initial_offset_inv": checkNegativeInitialOffset.checked,
@@ -82,7 +82,7 @@ MenuItem {
             "auto_sync_points":   experimentalAutoSyncPoints.checked,
         };
     }
-    function getSettingsJson() { return JSON.stringify(getSettings()); }
+    function getSettingsJson(): string { return JSON.stringify(getSettings()); }
 
     // Pattern example, all values can be either frames, s or ms
     // {
@@ -91,29 +91,28 @@ MenuItem {
     //     "gap": "100ms"     // ms
     // }
     // Keep in sync with render_queue.rs
-    function resolveSyncpointPattern(o) {
+    function resolveDurationToMs(d: var): real {
+        if (!d) return 0;
+             if (d.toString().endsWith("ms")) return +(d.replace("ms", ""));
+        else if (d.toString().endsWith("s"))  return +(d.replace("s", "")) * 1000.0;
+        else                                  return (+d / fps) * 1000.0;
+    }
+    function resolveItem(x: var): list<var> {
+        const start = x.hasOwnProperty("start")? resolveDurationToMs(x.start) : 0;
+        const interval = x.hasOwnProperty("interval")? resolveDurationToMs(x.interval) : duration;
+        const gap = resolveDurationToMs(x.gap);
+        let out = [];
+        for (let i = start; i < duration; i += interval) {
+            out.push(i - gap / 2.0);
+            if (gap > 0) {
+                out.push(i + gap / 2.0);
+            }
+        }
+        return out;
+    }
+    function resolveSyncpointPattern(o: var): list<real> {
         const duration = window.videoArea.vid.duration;
         const fps      = window.videoArea.vid.frameRate;
-
-        function resolveDurationToMs(d) {
-            if (!d) return 0;
-                 if (d.toString().endsWith("ms")) return +(d.replace("ms", ""));
-            else if (d.toString().endsWith("s"))  return +(d.replace("s", "")) * 1000.0;
-            else                                  return (+d / fps) * 1000.0;
-        }
-        function resolveItem(x) {
-            const start = x.hasOwnProperty("start")? resolveDurationToMs(x.start) : 0;
-            const interval = x.hasOwnProperty("interval")? resolveDurationToMs(x.interval) : duration;
-            const gap = resolveDurationToMs(x.gap);
-            let out = [];
-            for (let i = start; i < duration; i += interval) {
-                out.push(i - gap / 2.0);
-                if (gap > 0) {
-                    out.push(i + gap / 2.0);
-                }
-            }
-            return out;
-        }
 
         let timestamps = [];
         if (Array.isArray(o)) {
@@ -129,7 +128,7 @@ MenuItem {
     }
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
             sync.additionalSyncTimestamps = [];
             if (additional_data.additional_sync_points) {
                 for (const x of additional_data.additional_sync_points.split(";")) {
@@ -146,7 +145,7 @@ MenuItem {
         anchors.horizontalCenter: parent.horizontalCenter;
         // enabled: controller.gyro_loaded;
         tooltip: !enabled? qsTr("No motion data loaded, cannot sync.") : "";
-        function doSync() {
+        function doSync(): void {
             let maxPoints = maxSyncPoints.value;
             let sync_points = null;
 

@@ -23,7 +23,7 @@ Item {
     onTimestampChanged: updateCharts();
     onVisibleChanged: updateCharts();
 
-    function updateCharts() {
+    function updateCharts(): void {
         if (root.visible) {
             let sr = 800.0;
             switch (samplerate.currentIndex) {

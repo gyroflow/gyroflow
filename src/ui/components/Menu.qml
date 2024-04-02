@@ -19,7 +19,7 @@ QQC.Menu {
     property var colors: [];
 
     // For compatibility with Qt < 6.5
-    function setIcon(iconName: string) {
+    function setIcon(iconName: string): void {
         icon.name = iconName;
         icon.source = "qrc:/resources/icons/svg/" + iconName + ".svg";
         icon.width = 14 * dpiScale;
@@ -36,7 +36,7 @@ QQC.Menu {
         QQCM.Material.foreground: textColor;
 
         onImplicitWidthChanged: Qt.callLater(updateMaxHeight);
-        function updateMaxHeight() {
+        function updateMaxHeight(): void {
             if (parentMenu && implicitContentWidth > parentMenu.maxItemWidth)
                 parentMenu.maxItemWidth = implicitContentWidth;
         }

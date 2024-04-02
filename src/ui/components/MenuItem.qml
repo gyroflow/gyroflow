@@ -25,7 +25,7 @@ Item {
         root.opened = (val == true || val == 1 || val == "true");
     }
 
-    function ensureVisible() {
+    function ensureVisible(): void {
         const flick = parent.parent.parent.parent;
         if (canEnsureVisible && (opened || !root.showBtn) && anim.enabled && (parent.y + height > flick.height)) {
             flick.contentY = parent.y;

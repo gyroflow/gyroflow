@@ -27,7 +27,7 @@ Rectangle {
     radius: 6 * dpiScale;
     color: "transparent";
 
-    function open() {
+    function open(): void {
         if (popup.visible)
             return popup.close();
 

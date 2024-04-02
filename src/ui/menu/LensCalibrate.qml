@@ -27,7 +27,7 @@ MenuItem {
     property int videoHeight: 0;
     property real fps: 0;
 
-    function setVideoSize(w: int, h: int) {
+    function setVideoSize(w: int, h: int): void {
         videoWidth = w;
         videoHeight = h;
         sizeTimer.start();
@@ -53,13 +53,13 @@ MenuItem {
             yStretch.valueChanged();
         }
     }
-    function resetMetadata() {
+    function resetMetadata(): void {
         calib.calibrationInfo = {
             "calibrated_by": calib.calibrationInfo.calibrated_by || settings.value("calibratedBy", "") || controller.get_username(),
             "output_dimension": { "w": 0, "h": 0 }
         };
     }
-    function updateTable() {
+    function updateTable(): void {
         const fields = {
             "camera_brand":     QT_TRANSLATE_NOOP("TableList", "Camera brand"),
             "camera_model":     QT_TRANSLATE_NOOP("TableList", "Camera model"),
@@ -86,7 +86,7 @@ MenuItem {
     }
     Connections {
         target: controller;
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var) {
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
             shutter.value = Math.abs(additional_data.frame_readout_time);
             shutterCb.checked = Math.abs(additional_data.frame_readout_time) > 0;
             bottomToTop.checked = additional_data.frame_readout_time < 0;
@@ -117,7 +117,7 @@ MenuItem {
             calib.updateTable();
             sizeTimer.start();
         }
-        function onRolling_shutter_estimated(rolling_shutter: real) {
+        function onRolling_shutter_estimated(rolling_shutter: real): void {
             shutter.value = Math.abs(rolling_shutter);
             shutterCb.checked = Math.abs(rolling_shutter) > 0;
             bottomToTop.checked = rolling_shutter < 0;

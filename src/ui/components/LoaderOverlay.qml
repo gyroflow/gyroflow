@@ -56,7 +56,7 @@ Item {
         }
     }
 
-    function show(text: string, cancelable: bool) {
+    function show(text: string, cancelable: bool): void {
         videoLoader.active = true;
         videoLoader.currentFrame = 0;
         videoLoader.totalFrames = 0;

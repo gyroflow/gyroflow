@@ -28,7 +28,7 @@ QQC.CheckBox {
         opacity: cb.down || cb.activeFocus? 0.8 : 1.0;
         Ease on opacity { }
 
-        function reset() {
+        function reset(): void {
             cm1.width = 0;
             cm2.width = 0;
             cbanim.start();

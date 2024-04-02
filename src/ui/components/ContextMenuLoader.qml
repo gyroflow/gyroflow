@@ -15,7 +15,7 @@ Loader {
             root.item.popup(parentItem, posx, posy);
     }
 
-    function popup(parentItem: Item, x: real, y: real) {
+    function popup(parentItem: Item, x: real, y: real): void {
         root.parentItem = parentItem;
         root.posx = x;
         root.posy = y;
@@ -25,7 +25,7 @@ Loader {
             root.active = true;
         }
     }
-    function toggle(parentItem: Item, x: real, y: real) {
+    function toggle(parentItem: Item, x: real, y: real): void {
         if (root.item && root.item.visible) {
             root.item.close();
         } else {

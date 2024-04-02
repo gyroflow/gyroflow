@@ -35,13 +35,13 @@ Item {
     function mapToVisibleArea(pos: real): real { return (pos - visibleAreaLeft) / (visibleAreaRight - visibleAreaLeft); }
     function mapFromVisibleArea(pos: real): real { return pos * (visibleAreaRight - visibleAreaLeft) + visibleAreaLeft; }
 
-    function redrawChart() { chart.update(); keyframes.item.update(); }
+    function redrawChart(): void { chart.update(); keyframes.item.update(); }
     function getKeyframesView(): TimelineKeyframesView { return keyframes.item; }
 
     function getTimestampUs(): real {
         return vid.timestamp * 1000;
     }
-    function setPosition(pos: real) {
+    function setPosition(pos: real): void {
         const frame = frameAtPosition(pos);
         if (frame != vid.currentFrame) {
             vid.seekToFrame(frame, true);
@@ -56,7 +56,7 @@ Item {
         return new Date(time).toISOString().substring(11, 11+8);
     }
 
-    function cleanupTrimRanges() {
+    function cleanupTrimRanges(): void {
         trimRanges.sort(function(a, b) { return a[0] - b[0]; });
         for (let i = 0; i < trimRanges.length; ++i) {
             const [start, end] = trimRanges[i];
@@ -82,7 +82,7 @@ Item {
         return closest;
     }
 
-    function setTrimStart(i: int, v: real) {
+    function setTrimStart(i: int, v: real): void {
         if (trimRanges.length > 0 && i > -1) {
             if (i > trimRanges.length - 1) return;
             trimRanges[i][0] = v;
@@ -92,7 +92,7 @@ Item {
         }
         Qt.callLater(root.cleanupTrimRanges);
     }
-    function setTrimEnd(i: int, v: real) {
+    function setTrimEnd(i: int, v: real): void {
         if (trimRanges.length > 0 && i > -1) {
             if (i > trimRanges.length - 1) return;
             trimRanges[i][1] = v;
@@ -102,17 +102,17 @@ Item {
         }
         Qt.callLater(root.cleanupTrimRanges);
     }
-    function addTrimStart(v: real) {
+    function addTrimStart(v: real): void {
         if (!trimRanges.length) return setTrimStart(-1, v);
         trimRanges.push([v, v + 0.05]);
         Qt.callLater(root.cleanupTrimRanges);
     }
-    function addTrimEnd(v: real) {
+    function addTrimEnd(v: real): void {
         if (!trimRanges.length) return setTrimEnd(-1, v);
         trimRanges.push([v - 0.05, v]);
         Qt.callLater(root.cleanupTrimRanges);
     }
-    function setTrimRanges(ranges: list<var>) {
+    function setTrimRanges(ranges: list<var>): void {
         for (const [start, end] of ranges) {
             if (start >= end) {
                 resetTrim();
@@ -129,12 +129,12 @@ Item {
         return [[0.0, 1.0]];
     }
 
-    function resetTrim() {
+    function resetTrim(): void {
         trimRanges = prevTrimRanges;
         prevTrimRanges = [];
         Qt.callLater(root.cleanupTrimRanges);
     }
-    function resetZoom() {
+    function resetZoom(): void {
         visibleAreaLeft  = 0.0;
         visibleAreaRight = 1.0;
         chart.vscale = 1.0;
@@ -143,7 +143,7 @@ Item {
         }
     }
 
-    function toggleAxis(axis: int, solo: bool) {
+    function toggleAxis(axis: int, solo: bool): void {
         let v = (chart.getAxisVisible(axis) ? 1 : 0) + (chart.getAxisVisible(axis + 4) ? 2 : 0);
         v = (v + 1) % 4;
         chart.setAxisVisible(axis, v & 1);
@@ -155,11 +155,11 @@ Item {
             }
         }
     }
-    function setDisplayMode(i) {
+    function setDisplayMode(i): void {
         chart.viewMode = i;
         triggerUpdateChart("");
     }
-    function triggerUpdateChart(series: string) {
+    function triggerUpdateChart(series: string): void {
         chartUpdateTimer.series = series || "";
         chartUpdateTimer.start();
     }
@@ -176,7 +176,7 @@ Item {
         }
     }
 
-    function updateDurations() {
+    function updateDurations(): void {
         chart.setDurationMs(controller.get_scaled_duration_ms());
         keyframes.item.setDurationMs(controller.get_org_duration_ms());
         root.durationMs    = controller.get_scaled_duration_ms();
@@ -187,14 +187,14 @@ Item {
         Qt.callLater(controller.update_keyframes_view, keyframes);
     }
 
-    function jumpToNextKeyframe(typ: string) {
+    function jumpToNextKeyframe(typ: string): void {
         const kf = keyframes.item.nextKeyframe(typ);
         if (kf) {
             const [keyframe, timestamp, name, value] = kf.split(":", 4);
             vid.setTimestamp(timestamp / 1000);
         }
     }
-    function jumpToPrevKeyframe(typ: string) {
+    function jumpToPrevKeyframe(typ: string): void {
         const kf = keyframes.item.prevKeyframe(typ);
         if (kf) {
             const [keyframe, timestamp, name, value] = kf.split(":", 4);
@@ -202,11 +202,11 @@ Item {
         }
     }
 
-    function addAutoSyncPoint(pos: real) {
+    function addAutoSyncPoint(pos: real): void {
         controller.start_autosync(pos.toString(), window.sync.getSettingsJson(), "synchronize");
     }
 
-    function addManualSyncPoint(pos: real) {
+    function addManualSyncPoint(pos: real): void {
         const ts = pos * root.durationMs * 1000;
         const offset = controller.offset_at_video_timestamp(ts);
         const final_ts = Math.round(ts - offset * 1000);
@@ -221,7 +221,7 @@ Item {
         });
     }
 
-    function toggleContextMenu(el: Item) {
+    function toggleContextMenu(el: Item): void {
         menuLoader.toggle(el, 0, el.height);
     }
 
@@ -393,12 +393,12 @@ Item {
                                 checkable: true;
                                 onTriggered: keyframeContextMenu.updateEasing();
                             }
-                            function updateEasingMenu() {
+                            function updateEasingMenu(): void {
                                 let e = controller.keyframe_easing(pressedKeyframe, pressedKeyframeTs);
                                 easeIn.checked  = e == "EaseIn"  || e == "EaseInOut";
                                 easeOut.checked = e == "EaseOut" || e == "EaseInOut";
                             }
-                            function updateEasing() {
+                            function updateEasing(): void {
                                 let e = "NoEasing";
                                 if (easeIn.checked) e = "EaseIn";
                                 if (easeOut.checked) e = "EaseOut";
@@ -542,7 +542,7 @@ Item {
                 root.focus = true;
             }
             onDoubleClicked: (mouse) => root.resetZoom();
-            function zoomHorizontally(wheelX: real, delta: real) {
+            function zoomHorizontally(wheelX: real, delta: real): void {
                 const remainingWindow = (root.visibleAreaRight - root.visibleAreaLeft);
 
                 const factor = (delta / 120) / (10 / remainingWindow);
@@ -552,11 +552,11 @@ Item {
 
                 scrollbar.position = root.visibleAreaLeft;
             }
-            function zoomVertically(delta: real) {
+            function zoomVertically(delta: real): void {
                 const factor = (delta / 120) / 10;
                 chart.vscale += factor;
             }
-            function moveHorizontally(delta: real) {
+            function moveHorizontally(delta: real): void {
                 const remainingWindow = (root.visibleAreaRight - root.visibleAreaLeft);
                 const factor = (delta / 120) / (50 / remainingWindow);
                 root.visibleAreaLeft  = Math.min(root.visibleAreaRight, Math.max(0.0, Math.min(1 - remainingWindow, root.visibleAreaLeft - factor)));
@@ -806,11 +806,11 @@ Item {
 
         Connections {
             target: controller;
-            function onOffsets_updated() {
+            function onOffsets_updated(): void {
                 offsetsRepeater.model = [];
                 offsetsRepeater.model = controller.offsets_model;
             }
-            function onCalib_model_updated() {
+            function onCalib_model_updated(): void {
                 calibRepeater.model = [];
                 if (isCalibrator) {
                     calibRepeater.model = controller.calib_model;

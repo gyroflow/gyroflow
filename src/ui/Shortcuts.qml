@@ -210,7 +210,7 @@ Item {
     // Save project file
     Shortcut {
         sequence: "Ctrl+s";
-        onActivated: window.saveProject();
+        onActivated: window.saveProject("");
     }
 
     // Toggle grid guide
@@ -254,7 +254,7 @@ Item {
     }
 
     // Horizon lock roll adjustment shortcuts
-    function hlRollAdjust(v: real) {
+    function hlRollAdjust(v: real): void {
         if (window.stab.horizonCb.checked) {
             window.stab.horizonRollSlider.field.value += v;
         }
@@ -280,7 +280,7 @@ Item {
         onActivated: loadQueueItem(render_queue.get_prev_item_id(render_queue.editing_job_id));
     }
 
-    function loadQueueItem(new_id: int) {
+    function loadQueueItem(new_id: int): void {
         const current_id = render_queue.editing_job_id;
         if (current_id > 0) {
             // Save

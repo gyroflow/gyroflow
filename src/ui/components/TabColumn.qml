@@ -9,7 +9,7 @@ Flickable {
     default property alias data: tabColInner.data;
     property real parentHeight: 0;
 
-    function updateHeight(tabBarHeight: real) {
+    function updateHeight(tabBarHeight: real): void {
         height = Qt.binding(() => Math.min(tabColInner.height, parentHeight - tabBarHeight));
     }
 

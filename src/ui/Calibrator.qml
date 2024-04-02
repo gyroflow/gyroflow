@@ -68,13 +68,13 @@ Window {
 
     Connections {
         target: controller;
-        function onError(text: string, arg: string, callback: string) {
+        function onError(text: string, arg: string, callback: string): void {
             messageBox(Modal.Error, qsTr(text).arg(arg), [ { "text": qsTr("Ok"), clicked: window[callback] } ]);
         }
-        function onRequest_recompute() {
+        function onRequest_recompute(): void {
             Qt.callLater(controller.recompute_threaded);
         }
-        function onCalib_progress(progress: real, rms: real, ready: int, total: int, good: int, sharpness: real) {
+        function onCalib_progress(progress: real, rms: real, ready: int, total: int, good: int, sharpness: real): void {
             lensCalib.infoList.rms = rms;
             videoArea.videoLoader.active = progress < 1 || rms == 0;
             videoArea.videoLoader.additional = " - " + qsTr("%1 good frames").arg(good);
@@ -107,7 +107,7 @@ Window {
         }
     }
 
-    function loadFiles(files: list<url>) {
+    function loadFiles(files: list<url>): void {
         if (files.length == 1)
             return loadFile(files[0]);
 
@@ -120,7 +120,7 @@ Window {
             { text: qsTr("No") }
         ]);
     }
-    function loadFile(file: url) {
+    function loadFile(file: url): void {
         lensCalib.infoList.rms = 0;
         controller.reset_player(videoArea.vid);
         Qt.callLater(() => {
@@ -155,12 +155,12 @@ Window {
         property var queue: [];
         property bool active: false;
         property url currentFile;
-        function runIn(ms: int, cb) {
+        function runIn(ms: int, cb: var): void {
             batchTimer.cb = cb;
             batchTimer.interval = ms;
             batchTimer.start();
         }
-        function start() {
+        function start(): void {
             if (queue.length) {
                 active = true;
                 batch.currentFile = batch.queue.shift();
@@ -171,7 +171,7 @@ Window {
         }
         Connections {
             target: controller;
-            function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var) {
+            function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
                 calibrator_window.anyFileLoaded = true;
                 Qt.callLater(videoArea.timeline.updateDurations);
 
@@ -181,7 +181,7 @@ Window {
                     lensCalib.autoCalibBtn.clicked();
                 });
             }
-            function onCalib_progress(progress: real, rms: real, ready: int, total: int, good: int, sharpness: real) {
+            function onCalib_progress(progress: real, rms: real, ready: int, total: int, good: int, sharpness: real): void {
                 if (!batch.active) return;
                 if (ready > 0 && rms > 0) {
                     batch.runIn(2000, function() {

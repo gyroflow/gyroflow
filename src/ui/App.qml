@@ -116,9 +116,9 @@ Rectangle {
     onPendingOpenFileOrgChanged: { pendingOpenFile = pendingOpenFileOrg; onItemLoaded(); }
     Connections {
         target: filesystem;
-        function onUrl_opened(url: url) { pendingOpenFileOrg = ""; pendingOpenFileOrg = url; }
+        function onUrl_opened(url: url): void { pendingOpenFileOrg = ""; pendingOpenFileOrg = url; }
     }
-    function onItemLoaded() {
+    function onItemLoaded(): void {
         if (window.vidInfo && window.stab && window.exportSettings && window.sync && window.motionData && pendingOpenFile.toString()) {
             pendingFileLoadTimer.start();
         }
@@ -265,7 +265,7 @@ Rectangle {
                             }
                         }
 
-                        function updateModel() {
+                        function updateModel(): void {
                             let m = [
                                 ["export",        isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : (render_queue.editing_job_id > 0? QT_TRANSLATE_NOOP("Popup", "Save") : QT_TRANSLATE_NOOP("Popup", "Add to render queue"))],
                                 ["create_preset", QT_TRANSLATE_NOOP("Popup", "Create settings preset")],
@@ -284,15 +284,15 @@ Rectangle {
 
                         Connections {
                             target: controller;
-                            function onProject_file_url_changed() { renderBtn.updateModel(); }
+                            function onProject_file_url_changed(): void { renderBtn.updateModel(); }
                         }
                         Connections {
                             target: render_queue;
-                            function onQueue_changed() { renderBtn.updateModel(); }
+                            function onQueue_changed(): void { renderBtn.updateModel(); }
                         }
                         Component.onCompleted: updateModel();
 
-                        function render() {
+                        function render(): void {
                             const fname = vidInfo.item.filename.toLowerCase();
                             if (fname.endsWith('.braw') || (fname.endsWith('.r3d') && !controller.find_redline()) || fname.endsWith('.dng')) {
                                 messageBox(Modal.Info, qsTr("This format is not available for rendering.\nThe recommended workflow is to export project file and use one of [video editor plugins] (%1).").replace(/\[(.*?)\]/, '<a href="https://gyroflow.xyz/download#plugins"><font color="' + styleTextColor + '">$1</font></a>').arg("DaVinci Resolve, Final Cut Pro"), [
@@ -492,7 +492,7 @@ Rectangle {
         videoArea: videoArea;
     }
 
-    function showNotification(type: int, text: string, textFormat: int) {
+    function showNotification(type: int, text: string, textFormat: var): void {
         if (typeof textFormat === "undefined") textFormat = Text.AutoText; // default
         const im = Qt.createComponent("components/InfoMessage.qml").createObject(window.videoArea.infoMessages, {
             text: text,
@@ -508,8 +508,9 @@ Rectangle {
         });
     }
 
-    function messageBox(type: int, text: string, buttons: list<var>, parent: QtObject, textFormat: var, identifier: string): Modal {
+    function messageBox(type: int, text: string, buttons: list<var>, parent: QtObject, textFormat: var, identifier: var): Modal {
         if (typeof textFormat === "undefined") textFormat = Text.AutoText; // default
+        if (typeof identifier === "undefined") identifier = "";
 
         let el = null;
 
@@ -559,25 +560,25 @@ Rectangle {
         window.isDialogOpened = true;
         return el;
     }
-    function play_sound(type: string) {
+    function play_sound(type: string): void {
         if (settings.value("playSounds", "true") == "true")
             controller.play_sound(type);
     }
 
     Connections {
         target: controller;
-        function onError(text: string, arg: string, callback: string) {
+        function onError(text: string, arg: string, callback: string): void {
             text = getReadableError(qsTr(text).arg(arg));
             if (text)
                 messageBox(Modal.Error, text, [ { text: qsTr("Ok"), clicked: window[callback] } ]);
         }
-        function onMessage(text: string, arg: string, callback: string, id: string) {
+        function onMessage(text: string, arg: string, callback: string, id: string): void {
             messageBox(Modal.Info, qsTr(text).arg(arg), [ { text: qsTr("Ok"), clicked: window[callback] } ], null, undefined, id);
         }
-        function onRequest_recompute() {
+        function onRequest_recompute(): void {
             Qt.callLater(controller.recompute_threaded);
         }
-        function openUpdatePage() {
+        function openUpdatePage(): void {
             if (Qt.platform.os == "android") {
                 Qt.openUrlExternally("https://play.google.com/store/apps/details?id=xyz.gyroflow");
             } else if (Qt.platform.os == "ios") {
@@ -591,12 +592,12 @@ Rectangle {
                 Qt.openUrlExternally("https://github.com/gyroflow/gyroflow/releases");
             }
         }
-        function onUpdates_available(version: string, changelog: string) {
+        function onUpdates_available(version: string, changelog: string): void {
             const heading = "<p align=\"center\">" + qsTr("There's a newer version available: %1.").arg("<b>" + version + "</b>") + "</p>\n\n";
             const el = messageBox(Modal.Info, heading + changelog, [ { text: qsTr("Download"),accent: true, clicked: () => openUpdatePage() },{ text: qsTr("Close") }], undefined, Text.MarkdownText);
             el.t.horizontalAlignment = Text.AlignLeft;
         }
-        function onRequest_location(url: string, type: string) {
+        function onRequest_location(url: string, type: string): void {
             gfFileDialog.projectType = type;
             gfFileDialog.currentFolder = filesystem.get_folder(url);
             gfFileDialog.open();
@@ -696,7 +697,7 @@ Rectangle {
         return text.trim();
     }
 
-    function renameOutput(filename: string, folderUrl: url) {
+    function renameOutput(filename: string, folderUrl: url): string {
         let newName = filename;
         for (let i = 1; i < 1000; ++i) {
             newName = filename.replace(/(_\d+)?((?:_%05d)?\.[a-z0-9]+)$/i, "_" + i + "$2");
@@ -708,7 +709,7 @@ Rectangle {
         return newName;
     }
 
-    function reportProgress(progress: real, type: string) {
+    function reportProgress(progress: real, type: string): void {
         if (videoArea.videoLoader.active) {
             if (type === "loader") ui_tools.set_progress(progress);
             return;
@@ -716,7 +717,7 @@ Rectangle {
         ui_tools.set_progress(progress);
     }
 
-    function getAdditionalProjectData() {
+    function getAdditionalProjectData(): var {
         return {
             "output": exportSettings.item.getExportOptions(),
             "synchronization": sync.item.getSettings(),
@@ -727,11 +728,11 @@ Rectangle {
     }
     function getAdditionalProjectDataJson(): string { return JSON.stringify(getAdditionalProjectData()); }
 
-    function saveProjectToUrl(url: url, type: string) {
+    function saveProjectToUrl(url: url, type: string): void {
         videoArea.videoLoader.show(qsTr("Saving..."), false);
         controller.export_gyroflow_file(url, type, window.getAdditionalProjectData());
     }
-    function saveProject(type: string) {
+    function saveProject(type: string): void {
         if (!type) type = "WithGyroData";
 
         if (controller.project_file_url) // Always overwrite
@@ -744,7 +745,7 @@ Rectangle {
             getSaveFileUrl(folder, filename, function(url) { saveProjectToUrl(url, type); }, type);
         } else {
             messageBox(Modal.Question, qsTr("`.gyroflow` file already exists, what do you want to do?"), [
-                { text: qsTr("Overwrite"), "accent": true, clicked: () => {
+                { text: qsTr("Overwrite"), "accent": true, clicked: function() {
                     getSaveFileUrl(folder, filename, function(url) { saveProjectToUrl(url, type); }, type);
                 } },
                 { text: qsTr("Rename"), clicked: () => {
@@ -771,7 +772,7 @@ Rectangle {
             ], undefined, Text.MarkdownText);
         }
     }
-    function getSaveFileUrl(folder: url, filename: string, cb, type: string) {
+    function getSaveFileUrl(folder: url, filename: string, cb, type: string): void {
         if (isSandboxed) {
             const opf = Qt.createComponent("components/OutputPathField.qml").createObject(window, { visible: false });
             opf.selectFolder(folder, function(folder_url) {

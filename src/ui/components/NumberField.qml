@@ -56,7 +56,7 @@ TextField {
         locale.numberOptions = Locale.OmitGroupSeparator;
         text = Number(value).toLocaleString(locale, "f", precision);
     }
-    function updateValue() {
+    function updateValue(): void {
         if (allowText) return;
         preventChange = true;
         let locale = Qt.locale();
