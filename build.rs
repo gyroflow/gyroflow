@@ -120,8 +120,12 @@ fn main() {
             let name = x.file_name().to_str().unwrap();
             let path = x.path().to_str().unwrap();
             if path.contains("objects-Debug") ||
-               path.contains("Imagine") || path.contains("Fusion") || path.contains("Universal") ||
-               path.to_ascii_lowercase().contains("particles") || path.to_ascii_lowercase().contains("tooling") {
+               path.contains("Imagine") ||
+               path.contains("Fusion") ||
+               path.contains("Universal") ||
+               path.to_ascii_lowercase().contains("particles") ||
+               path.to_ascii_lowercase().contains("tooling") ||
+               path.to_ascii_lowercase().contains("test") {
                 continue;
             }
             if name.starts_with("qrc_") && name.ends_with(".cpp.o") {

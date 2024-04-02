@@ -327,7 +327,7 @@ deploy *param:
             sudo pkill -9 XProtect >/dev/null || true
             while pgrep XProtect; do sleep 3; done;
 
-            for i in 1 2 3 4 5
+            for i in 1 2 3 4 5 6 7 8
             do
                 hdiutil create "$PROJECT_DIR/_deployment/_binaries/Gyroflow-mac-universal.dmg" -volname "Gyroflow v{{ProjectVersion}}" -fs HFS+ -srcfolder "$PROJECT_DIR/_deployment/_binaries/mac/" -ov -format UDZO -imagekey zlib-level=9 || true
 
