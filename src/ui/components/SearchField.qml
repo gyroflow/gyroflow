@@ -42,86 +42,20 @@ TextField {
         anchors.verticalCenter: parent.verticalCenter;
     }
 
+    Connections {
+        target: controller;
+        function onSearch_lens_profile_finished(profiles: list<var>): void {
+            if (!popup.opened && profiles.length > 0) popup.open();
+            if (popup.opened && !profiles.length) popup.close();
+            popup.maxItemWidth = 0;
+            popup.model = [];
+            popup.model = profiles;
+            popup.currentIndex = -1;
+        }
+    }
+
     onTextChanged: {
-        const searchTerm = text.toLowerCase()
-            .replace("bmpcc4k",  "blackmagic pocket cinema camera 4k")
-            .replace("bmpcc6k",  "blackmagic pocket cinema camera 6k")
-            .replace("bmpcc",    "blackmagic pocket cinema camera")
-            .replace("gopro5",   "hero5 black")  .replace("gopro 5",   "hero5 black")
-            .replace("gopro6",   "hero6 black")  .replace("gopro 6",   "hero6 black")
-            .replace("gopro7",   "hero7 black")  .replace("gopro 7",   "hero7 black")
-            .replace("gopro8",   "hero8 black")  .replace("gopro 8",   "hero8 black")
-            .replace("gopro9",   "hero9 black")  .replace("gopro 9",   "hero9 black")
-            .replace("gopro10",  "hero10 black") .replace("gopro 10",  "hero10 black")
-            .replace("gopro11",  "hero11 black") .replace("gopro 11",  "hero11 black")
-            .replace("gopro12",  "hero12 black") .replace("gopro 12",  "hero12 black")
-            .replace("session5", "hero5 session").replace("session 5", "hero5 session")
-            .replace("a73",      "a7iii")
-            .replace("a74",      "a7iv")
-            .replace("a7r3",     "a7riii")
-            .replace("a7r4",     "a7riv")
-            .replace("a7r5",     "a7rv")
-            .replace("a7s2",     "a7sii")
-            .replace("a7s3",     "a7siii");
-
-        const words = searchTerm.split(/[\s,;]+/).filter(s => s);
-
-        if (!words.length) {
-            popup.close();
-            return;
-        }
-
-        if (!popup.opened) popup.open();
-
-        let m = [];
-
-        let i = 0;
-        for (const x of root.model) {
-            const test = x[0].toLowerCase();
-            let add = true;
-            for (const word of words) {
-                if (test.indexOf(word) < 0) {
-                    add = false;
-                    break;
-                }
-            }
-
-            if (add) {
-                m.push(x);
-            }
-
-            ++i;
-        }
-
-        if (!m.length) popup.close();
-        else {
-            m.sort((a, b) => {
-                // Is preset or favorited
-                const aPriority = a[1].endsWith(".gyroflow") || root.profilesMenu.favorites[a[2]];
-                const bPriority = b[1].endsWith(".gyroflow") || root.profilesMenu.favorites[b[2]];
-                if (aPriority && !bPriority) return -1;
-                if (bPriority && !aPriority) return 1;
-
-                // Check aspect match
-                const aPriority2 = a[5] != 0 && profilesMenu.currentVideoAspectRatio == a[5];
-                const bPriority2 = b[5] != 0 && profilesMenu.currentVideoAspectRatio == b[5];
-                if (aPriority2 && !bPriority2) return -1;
-                if (bPriority2 && !aPriority2) return 1;
-
-                // Check swapped aspect match
-                const aPriority3 = a[5] != 0 && profilesMenu.currentVideoAspectRatioSwapped == a[5];
-                const bPriority3 = b[5] != 0 && profilesMenu.currentVideoAspectRatioSwapped == b[5];
-                if (aPriority3 && !bPriority3) return -1;
-                if (bPriority3 && !aPriority3) return 1;
-
-                return a[0].localeCompare(b[0]);
-            });
-        }
-
-        popup.maxItemWidth = 0;
-        popup.model = [];
-        popup.model = m;
-        popup.currentIndex = -1;
+        controller.search_lens_profile(text, Object.keys(root.profilesMenu.favorites), profilesMenu.currentVideoAspectRatio, profilesMenu.currentVideoAspectRatioSwapped);
     }
     Keys.onDownPressed: {
         if (!popup.opened) {

@@ -23,7 +23,7 @@ MenuItem {
 
     property real cropFactor: 0;
 
-    property var lensProfilesList: [];
+    property bool lensProfilesListPrepared: false;
     property var distortionCoeffs: [];
     property string profileName;
     property string profileOriginalJson;
@@ -75,15 +75,13 @@ MenuItem {
     }
     Connections {
         target: controller;
-        function onAll_profiles_loaded(profiles: list<var>): void {
-            if (!lensProfilesList.length) { // If it's the first load
+        function onAll_profiles_loaded(): void {
+            if (!lensProfilesListPrepared) { // If it's the first load
                 controller.request_profile_ratings();
             }
 
-            // Each item is [name, filename, crc32, official, rating, aspect_ratio*1000]
-            lensProfilesList = profiles;
+            lensProfilesListPrepared = true;
 
-            search.model = lensProfilesList;
             root.loadFavorites();
             if (!root.fetched_from_github) {
                 root.fetched_from_github = true;

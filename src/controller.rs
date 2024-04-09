@@ -7,7 +7,7 @@ use nalgebra::Vector4;
 use std::sync::Arc;
 use std::cell::RefCell;
 use std::sync::atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst };
-use std::collections::{ BTreeSet, BTreeMap };
+use std::collections::{ BTreeMap, BTreeSet, HashSet };
 use std::str::FromStr;
 
 use qml_video_rs::video_item::MDKVideoItem;
@@ -94,7 +94,9 @@ pub struct Controller {
     offsets_updated: qt_signal!(),
 
     load_profiles: qt_method!(fn(&self, reload_from_disk: bool)),
-    all_profiles_loaded: qt_signal!(profiles: QVariantList),
+    all_profiles_loaded: qt_signal!(),
+    search_lens_profile_finished: qt_signal!(profiles: QVariantList),
+    search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
     fetch_profiles_from_github: qt_method!(fn(&self)),
     lens_profiles_updated: qt_signal!(reload_from_disk: bool),
 
@@ -1730,8 +1732,8 @@ impl Controller {
     }
 
     fn load_profiles(&self, reload_from_disk: bool) {
-        let loaded = util::qt_queued_callback_mut(self, |this, all_names: QVariantList| {
-            this.all_profiles_loaded(all_names)
+        let loaded = util::qt_queued_callback_mut(self, |this, _: ()| {
+            this.all_profiles_loaded();
         });
         let db = self.stabilizer.lens_profile_db.clone();
         core::run_threaded(move || {
@@ -1745,7 +1747,21 @@ impl Controller {
                 db.write().set_from_db(new_db);
             }
 
-            let all_names = db.read().get_all_info().into_iter().map(|(name, file, crc, official, rating, aspect_ratio)| {
+            db.write().prepare_list_for_ui();
+
+            loaded(());
+        });
+    }
+
+    fn search_lens_profile(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32) {
+        let finished = util::qt_queued_callback_mut(self, |this, profiles: QVariantList| {
+            this.search_lens_profile_finished(profiles);
+        });
+        let db = self.stabilizer.lens_profile_db.clone();
+        let text = text.to_string();
+        let mut favorites = HashSet::<String>::from_iter(favorites.into_iter().map(|x| x.to_qbytearray().to_string()));
+        core::run_threaded(move || {
+            let profiles = db.read().search(&text, &favorites, aspect_ratio, aspect_ratio_swapped).into_iter().map(|(name, file, crc, official, rating, aspect_ratio)| {
                 let mut list = QVariantList::from_iter([
                     QString::from(name),
                     QString::from(file),
@@ -1757,7 +1773,7 @@ impl Controller {
                 list
             }).collect();
 
-            loaded(all_names);
+            finished(profiles);
         });
     }
 
@@ -2168,11 +2184,11 @@ impl Filesystem {
         }
         #[cfg(not(any(target_os = "android", target_os = "ios")))]
         {
-        let path = filesystem::url_to_path(&util::qurl_to_encoded(url));
-        ::log::info!("Moving file to trash: {path}");
-        match trash::delete(path) {
-            Ok(_) => { },
-            Err(e) => ::log::error!("Failed to move file to trash: {e:?}"),
+            let path = filesystem::url_to_path(&util::qurl_to_encoded(url));
+            ::log::info!("Moving file to trash: {path}");
+            match trash::delete(path) {
+                Ok(_) => { },
+                Err(e) => ::log::error!("Failed to move file to trash: {e:?}"),
             }
         }
     }

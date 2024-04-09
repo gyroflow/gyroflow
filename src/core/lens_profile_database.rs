@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
+use std::cmp::Ordering;
 use std::collections::{ HashSet, HashMap, BTreeMap };
 use crate::LensProfile;
 use std::path::PathBuf;
@@ -19,6 +20,7 @@ pub struct LensProfileDatabase {
     preset_map: HashMap<String, String>,
     map: HashMap<String, LensProfile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
+    list_for_ui: Vec<(String, String, String, bool, f64, i32)>,
     pub loaded: bool
 }
 impl Clone for LensProfileDatabase {
@@ -206,20 +208,20 @@ impl LensProfileDatabase {
         }).collect()
     }
 
-    pub fn get_all_info(&self) -> Vec<(String, String, String, bool, f64, i32)> {
+    pub fn prepare_list_for_ui(&mut self) {
         // (name, path_to_file, crc32, official, rating, aspect_ratio*1000)
         let mut set = HashSet::with_capacity(self.map.len());
         let mut checksum_map = HashMap::with_capacity(self.map.len());
-        let mut ret = Vec::with_capacity(self.map.len());
+        self.list_for_ui = Vec::with_capacity(self.map.len());
         for (k, v) in &self.map {
             if v.path_to_file.ends_with(".gyroflow") {
-                ret.push((v.name.clone(), k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), 0));
+                self.list_for_ui.push((v.name.clone(), k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), 0));
             } else if !v.camera_brand.is_empty() && !v.camera_model.is_empty() {
                 if !v.is_copy {
                     let mut name = v.get_display_name();
                     let mut new_name = name.clone();
                     if set.contains(&new_name) {
-                        if let Some((kk, vv, _, _, _, _)) = ret.iter_mut().find(|(k, _, _, _, _, _)| *k == new_name) {
+                        if let Some((kk, vv, _, _, _, _)) = self.list_for_ui.iter_mut().find(|(k, _, _, _, _, _)| *k == new_name) {
                             set.remove(kk);
                             *kk = format!("{} by {}", *kk, self.map[vv].calibrated_by);
                             set.insert(kk.clone());
@@ -238,7 +240,7 @@ impl LensProfileDatabase {
                     let vstretch = if v.input_vertical_stretch   > 0.01 { v.input_vertical_stretch   } else { 1.0 };
 
                     let aspect_ratio = (((v.calib_dimension.w as f64 / hstretch) / (v.calib_dimension.h.max(1) as f64 / vstretch)) * 1000.0).round() as i32;
-                    ret.push((new_name, k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), aspect_ratio));
+                    self.list_for_ui.push((new_name, k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), aspect_ratio));
                 }
             } else {
                 log::debug!("Unknown camera model: {:?}", v);
@@ -249,8 +251,71 @@ impl LensProfileDatabase {
                 checksum_map.insert(v.checksum.clone(), v.path_to_file.clone());
             }
         }
-        ret.sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
-        ret
+        self.list_for_ui.sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
+    }
+
+    pub fn search(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<(String, String, String, bool, f64, i32)> {
+        let text = text.to_ascii_lowercase()
+            .replace("bmpcc4k",  "blackmagic pocket cinema camera 4k")
+            .replace("bmpcc6k",  "blackmagic pocket cinema camera 6k")
+            .replace("bmpcc",    "blackmagic pocket cinema camera")
+            .replace("gopro5",   "hero5 black") .replace("gopro 5",  "hero5 black")
+            .replace("gopro6",   "hero6 black") .replace("gopro 6",  "hero6 black")
+            .replace("gopro7",   "hero7 black") .replace("gopro 7",  "hero7 black")
+            .replace("gopro8",   "hero8 black") .replace("gopro 8",  "hero8 black")
+            .replace("gopro9",   "hero9 black") .replace("gopro 9",  "hero9 black")
+            .replace("gopro10",  "hero10 black").replace("gopro 10", "hero10 black")
+            .replace("gopro11",  "hero11 black").replace("gopro 11", "hero11 black")
+            .replace("gopro12",  "hero12 black").replace("gopro 12", "hero12 black")
+            .replace("session5", "hero5 session") .replace("session 5", "hero5 session")
+            .replace("a73",      "a7iii")
+            .replace("a74",      "a7iv")
+            .replace("a7r3",     "a7riii")
+            .replace("a7r4",     "a7riv")
+            .replace("a7r5",     "a7rv")
+            .replace("a7s2",     "a7sii")
+            .replace("a7s3",     "a7siii")
+            .replace(",", " ")
+            .replace(";", " ");
+
+        let words = text.split_ascii_whitespace().map(str::trim).filter(|x| !x.is_empty()).collect::<Vec<_>>();
+        if words.is_empty() {
+            return Vec::new();
+        }
+
+        let mut filtered = self.list_for_ui.iter().filter(|(name, _, _, _, _, _)| {
+            let name = name.to_ascii_lowercase();
+            for word in &words {
+                if name.contains(word) {
+                    return true;
+                }
+            }
+            return false;
+        }).collect::<Vec<_>>();
+
+        filtered.sort_by(|a, b| {
+            // Is preset or favorited
+            let a_priority = a.1.ends_with(".gyroflow") || favorites.contains(&a.2);
+            let b_priority = b.1.ends_with(".gyroflow") || favorites.contains(&b.2);
+            if a_priority && !b_priority { return Ordering::Less; }
+            if b_priority && !a_priority { return Ordering::Greater; }
+
+            // Check aspect match
+            let a_priority2 = a.5 != 0 && aspect_ratio == a.5;
+            let b_priority2 = b.5 != 0 && aspect_ratio == b.5;
+            if a_priority2 && !b_priority2 { return Ordering::Less; }
+            if b_priority2 && !a_priority2 { return Ordering::Greater; }
+
+            // Check swapped aspect match
+            let a_priority3 = a.5 != 0 && aspect_ratio_swapped == a.5;
+            let b_priority3 = b.5 != 0 && aspect_ratio_swapped == b.5;
+            if a_priority3 && !b_priority3 { return Ordering::Less; }
+            if b_priority3 && !a_priority3 { return Ordering::Greater; }
+
+            a.0.cmp(&b.0)
+        });
+
+        filtered.into_iter().take(200).cloned().collect()
     }
 
     pub fn set_profile_ratings(&mut self, json: &str) {
