@@ -2159,18 +2159,21 @@ impl Filesystem {
     }
 
     fn move_to_trash(&self, url: QUrl) {
-        if cfg!(target_os = "android") || cfg!(target_os = "ios") {
+        #[cfg(any(target_os = "android", target_os = "ios"))]
+         {
             let url = QString::from(url).to_string();
             if let Err(e) = filesystem::remove_file(&url) {
                 ::log::error!("Failed to remoev file: {e:?}");
             }
-            return;
         }
+        #[cfg(not(any(target_os = "android", target_os = "ios")))]
+        {
         let path = filesystem::url_to_path(&util::qurl_to_encoded(url));
         ::log::info!("Moving file to trash: {path}");
         match trash::delete(path) {
             Ok(_) => { },
             Err(e) => ::log::error!("Failed to move file to trash: {e:?}"),
+            }
         }
     }
 }
