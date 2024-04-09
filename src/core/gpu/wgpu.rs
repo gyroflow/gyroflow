@@ -2,6 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use std::borrow::Cow;
+use std::collections::HashMap;
 use std::sync::atomic::{ AtomicUsize, Ordering::SeqCst };
 use wgpu::Adapter;
 use wgpu::BufferUsages;
@@ -347,6 +348,7 @@ impl WgpuWrapper {
                         module: &shader,
                         entry_point: "undistort_vertex",
                         buffers: &[],
+                        constants: &HashMap::new(),
                     },
                     fragment: Some(wgpu::FragmentState {
                         module: &shader,
@@ -356,6 +358,7 @@ impl WgpuWrapper {
                             blend: None,
                             write_mask: wgpu::ColorWrites::default(),
                         })],
+                        constants: &HashMap::new(),
                     }),
                     primitive: wgpu::PrimitiveState {
                         topology: wgpu::PrimitiveTopology::TriangleStrip,
@@ -371,6 +374,7 @@ impl WgpuWrapper {
                     entry_point: "undistort_compute",
                     label: None,
                     layout: Some(&pipeline_layout),
+                    constants: &HashMap::new(),
                 }))
             };
 
