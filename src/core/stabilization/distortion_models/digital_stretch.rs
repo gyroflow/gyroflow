@@ -24,6 +24,9 @@ impl DigitalStretch {
         // TODO
     }
 
+    pub fn distort_for_light_refraction(&self, _p: &[f64], _theta: f64) -> f64 { 0.0 }
+    pub fn undistort_for_light_refraction_gradient(&self, _p: &[f64], _theta: f64) -> Vec<f64> { vec![] }
+
     pub fn id()   -> &'static str { "digital_stretch" }
     pub fn name() -> &'static str { "Digital stretch" }
 

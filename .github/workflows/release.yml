@@ -138,6 +138,7 @@ jobs:
           KEY_STORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_ALIAS }}
           KEY_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASS }}
           BUILD_PROFILE: deploy
+          FORCE_QT_VERSION: 6.6.3
         run: |
           $Env:JAVA_HOME = $Env:JAVA_HOME_17_X64
           just android install-deps

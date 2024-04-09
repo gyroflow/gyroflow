@@ -63,7 +63,14 @@ impl FrameTransform {
                 interpolated_lens = Some(params.lens.get_interpolated_lens_at(*val));
             }
         }
-        let lens = interpolated_lens.as_ref().unwrap_or(&params.lens);
+        let mut lens = interpolated_lens.as_ref().unwrap_or(&params.lens);
+
+        let lrc = params.keyframes.value_at_video_timestamp(&KeyframeType::LightRefractionCoeff, timestamp_ms).unwrap_or(params.light_refraction_coefficient);
+        if lrc != 1.0 {
+            interpolated_lens = Some(lens.for_light_refraction(lrc, 0.05));
+            lens = interpolated_lens.as_ref().unwrap_or(&params.lens);
+        }
+
         let mut focal_length = lens.focal_length;
 
         let mut camera_matrix = lens.get_camera_matrix((params.width, params.height), (params.video_width, params.video_height));

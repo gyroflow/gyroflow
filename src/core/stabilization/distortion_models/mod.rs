@@ -43,6 +43,16 @@ macro_rules! impl_models {
                     $(DistortionModels::$name(m) => m.adjust_lens_profile(profile),)*
                 }
             }
+            pub fn distort_for_light_refraction(&self, p: &[f64], theta: f64) -> f64 {
+                match &self.inner {
+                    $(DistortionModels::$name(m) => m.distort_for_light_refraction(p, theta),)*
+                }
+            }
+            pub fn undistort_for_light_refraction_gradient(&self, p: &[f64], theta: f64) -> Vec<f64> {
+                match &self.inner {
+                    $(DistortionModels::$name(m) => m.undistort_for_light_refraction_gradient(p, theta),)*
+                }
+            }
 
             pub fn id(&self)               -> &'static str { match &self.inner { $(DistortionModels::$name(_) => <$class>::id(),)* } }
             pub fn name(&self)             -> &'static str { match &self.inner { $(DistortionModels::$name(_) => <$class>::name(),)* } }

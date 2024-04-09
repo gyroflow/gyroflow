@@ -62,6 +62,7 @@ pub struct StabilizationParams {
     pub video_rotation: f64,
 
     pub lens_correction_amount: f64,
+    pub light_refraction_coefficient: f64,
     pub background_mode: BackgroundMode,
     pub background_margin: f64,
     pub background_margin_feather: f64,
@@ -107,6 +108,7 @@ impl Default for StabilizationParams {
             video_rotation: 0.0,
 
             lens_correction_amount: 1.0,
+            light_refraction_coefficient: 1.0,
             background_mode: BackgroundMode::SolidColor,
             background_margin: 0.0,
             background_margin_feather: 0.0,
@@ -238,6 +240,7 @@ impl StabilizationParams {
             video_speed:               self.video_speed,
             video_speed_affects_smoothing: self.video_speed_affects_smoothing,
             video_speed_affects_zooming:   self.video_speed_affects_zooming,
+            light_refraction_coefficient:  self.light_refraction_coefficient,
             background_mode:           self.background_mode,
             background_margin:         self.background_margin,
             background_margin_feather: self.background_margin_feather,

@@ -44,6 +44,15 @@ impl Insta360 {
     }
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
+    pub fn distort_for_light_refraction(&self, _p: &[f64], _theta: f64) -> f64 {
+        log::error!("Insta360::distort_for_light_refraction not implemented");
+        0.0
+    }
+    pub fn undistort_for_light_refraction_gradient(&self, _p: &[f64], _theta: f64) -> Vec<f64> {
+        log::error!("Insta360::undistort_for_light_refraction_gradient not implemented");
+        vec![]
+    }
+
     pub fn id() -> &'static str { "insta360" }
     pub fn name() -> &'static str { "Insta360" }
 

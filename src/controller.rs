@@ -135,6 +135,7 @@ pub struct Controller {
     additional_translation_z: qt_property!(f64; WRITE set_additional_translation_z),
 
     lens_correction_amount: qt_property!(f64; WRITE set_lens_correction_amount),
+    light_refraction_coefficient: qt_property!(f64; WRITE set_light_refraction_coefficient),
     set_video_speed: qt_method!(fn(&self, v: f64, s: bool, z: bool)),
 
     input_horizontal_stretch: qt_property!(f64; WRITE set_input_horizontal_stretch),
@@ -1361,6 +1362,7 @@ impl Controller {
     wrap_simple_method!(set_of_method,          v: u32; recompute; chart_data_changed);
 
     wrap_simple_method!(set_lens_correction_amount,    v: f64; recompute; zooming_data_changed);
+    wrap_simple_method!(set_light_refraction_coefficient, v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_input_horizontal_stretch,  v: f64; recompute);
     wrap_simple_method!(set_lens_is_asymmetrical,      v: bool; recompute);
     wrap_simple_method!(set_input_vertical_stretch,    v: f64; recompute);

@@ -18,7 +18,10 @@ ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", rev = "bf7b41d", feat
 stabilize_spirv = { path = "./gpu/stabilize_spirv" }
 
 #rs-sync = { path = "../../../rs-sync" }
-rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "57f8c1a" }
+rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "0d22978" }
+
+argmin = { version = "0.10.0", default-features = false }
+argmin-math = { version = "0.4.0", default-features = false, features = ["nalgebra_v0_32"] }
 
 mimalloc = { version = "0.1.39", default-features = false }
 nalgebra = { version = "0.32", features = ["serde-serialize"] }
@@ -76,10 +79,10 @@ ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.2.0"
 opencv = { version = "0.89.0", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "0c5bebc", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "82dead0", features = ["spirv", "naga-ir"] }
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "0c5bebc"
+rev = "82dead0"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]

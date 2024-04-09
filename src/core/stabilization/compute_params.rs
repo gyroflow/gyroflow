@@ -31,6 +31,7 @@ pub struct ComputeParams {
     pub video_height: usize,
     pub video_rotation: f64,
     pub lens_correction_amount: f64,
+    pub light_refraction_coefficient: f64,
     pub video_speed: f64,
     pub video_speed_affects_smoothing: bool,
     pub video_speed_affects_zooming: bool,
@@ -90,6 +91,7 @@ impl ComputeParams {
             background_margin: params.background_margin,
             background_margin_feather: params.background_margin_feather,
             lens_correction_amount: params.lens_correction_amount,
+            light_refraction_coefficient: params.light_refraction_coefficient,
             framebuffer_inverted: params.framebuffer_inverted,
             horizontal_rs: params.horizontal_rs,
             frame_readout_time: params.frame_readout_time,
@@ -142,6 +144,7 @@ impl std::fmt::Debug for ComputeParams {
          .field("video_height",         &self.video_height)
          .field("video_rotation",       &self.video_rotation)
          .field("lens_correction_amount",    &self.lens_correction_amount)
+         .field("light_refraction_coefficient", &self.light_refraction_coefficient)
          .field("background_mode",           &self.background_mode)
          .field("background_margin",         &self.background_margin)
          .field("background_margin_feather", &self.background_margin_feather)

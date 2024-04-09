@@ -568,4 +568,117 @@ impl LensProfile {
             self.parsed_interpolations = interpolations;
         }
     }
+
+    pub fn for_light_refraction(&self, ior_ratio: f64, tir_margin: f64) -> LensProfile {
+        if self.fisheye_params.distortion_coeffs.len() < 4 {
+            log::warn!("Not enough distortion coefficients! {}", self.fisheye_params.distortion_coeffs.len());
+            return self.clone();
+        }
+        if ior_ratio == 1.0 {
+            return self.clone();
+        }
+        use argmin::{ core::{ Executor, Jacobian, Operator, State }, solver::gaussnewton::GaussNewton };
+        use nalgebra::{ DMatrix, DVector };
+
+        struct Problem {
+            ior_ratio: f64,
+            max_ray_angle: f64,
+            params_orig: [f64; 5],
+            model: DistortionModel,
+        }
+
+        let params_orig = [
+            1.0,
+            self.fisheye_params.distortion_coeffs[0],
+            self.fisheye_params.distortion_coeffs[1],
+            self.fisheye_params.distortion_coeffs[2],
+            self.fisheye_params.distortion_coeffs[3],
+        ];
+
+        impl Problem {
+            const STEP: f64 = 0.01;
+        }
+
+        impl Jacobian for Problem {
+            type Param = DVector<f64>;
+            type Jacobian = DMatrix<f64>;
+
+            fn jacobian(&self, param: &Self::Param) -> Result<Self::Jacobian, argmin::core::Error> {
+                let n_pts = (self.max_ray_angle / Problem::STEP) as i32;
+                let jac = DMatrix::from_row_iterator(
+                    n_pts as usize,
+                    5,
+                    (0..n_pts).flat_map(|i| {
+                        let theta = (i as f64) * Problem::STEP;
+                        self.model.undistort_for_underwater_gradient(param.as_slice(), theta).into_iter()
+                    }),
+                );
+
+                Ok(jac)
+            }
+        }
+
+        impl Operator for Problem {
+            type Param = DVector<f64>;
+            type Output = DVector<f64>;
+
+            fn apply(&self, param: &Self::Param) -> Result<Self::Output, argmin::core::Error> {
+                let n_pts = (self.max_ray_angle / Problem::STEP) as i32;
+
+                let residue = DVector::from_iterator(
+                    n_pts as usize,
+                    (0..n_pts).map(|i| {
+                        let theta = (i as f64) * Problem::STEP;
+                        let theta_new = (theta.sin() * self.ior_ratio).asin();
+                        (self.model.distort_for_underwater(param.as_slice(), theta)
+                            - self.model.distort_for_underwater(self.params_orig.as_slice(), theta_new))
+                            as f64
+                    }),
+                );
+
+                Ok(residue)
+            }
+        }
+
+        let max_ray_angle = if ior_ratio > 1.0 {
+            (1.0 / ior_ratio).asin() - tir_margin
+        } else {
+            std::f64::consts::PI / 2.0
+        };
+        let cost = Problem {
+            ior_ratio,
+            max_ray_angle,
+            params_orig,
+            model: DistortionModel::from_name(self.distortion_model.as_deref().unwrap_or("opencv_fisheye"))
+        };
+
+        let init_param = DVector::from_row_slice(&cost.params_orig);
+
+        let solver: GaussNewton<f64> = GaussNewton::new();
+
+        let res = Executor::new(cost, solver)
+            .configure(|state| state.param(init_param).max_iters(10))
+            .run();
+
+        let mut clone = self.clone();
+        match res {
+            Ok(x) => {
+                if let Some(best_param) = x.state().get_best_param() {
+                    clone.focal_length = self.focal_length.map(|x| x * best_param[0]);
+                    clone.fisheye_params.distortion_coeffs = vec![
+                        best_param[1],
+                        best_param[2],
+                        best_param[3],
+                        best_param[4],
+                    ];
+                    clone.fisheye_params.camera_matrix[0][0] *= best_param[0];
+                    clone.fisheye_params.camera_matrix[1][1] *= best_param[0];
+                }
+            }
+            Err(e) => {
+                log::warn!("Failed to optimize distortion coefficients for underwater correction: {e:?}");
+            },
+        }
+        clone
+    }
 }

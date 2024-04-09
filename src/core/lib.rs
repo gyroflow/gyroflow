@@ -649,6 +649,7 @@ impl StabilizationManager {
     pub fn set_fov_overview          (&self, v: bool) { self.params.write().fov_overview           = v; }
     pub fn set_show_safe_area        (&self, v: bool) { self.params.write().show_safe_area         = v; }
     pub fn set_lens_correction_amount(&self, v: f64)  { self.params.write().lens_correction_amount = v; self.invalidate_zooming(); }
+    pub fn set_light_refraction_coefficient(&self, v: f64) { self.params.write().light_refraction_coefficient = v; self.invalidate_zooming(); }
     pub fn set_background_color      (&self, bg: Vector4<f32>) { self.params.write().background = bg; }
     pub fn set_background_mode       (&self, v: i32)  { self.params.write().background_mode = stabilization_params::BackgroundMode::from(v); }
     pub fn set_background_margin     (&self, v: f64)  { self.params.write().background_margin = v; }
@@ -956,6 +957,7 @@ impl StabilizationManager {
             "background_mode":  params.background_mode as i32,
             "background_margin":          params.background_margin,
             "background_margin_feather":  params.background_margin_feather,
+            "light_refraction_coefficient": params.light_refraction_coefficient,
 
             "video_info": {
                 "width":       params.video_size.0,
@@ -1278,7 +1280,7 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("frame_readout_time")    .and_then(|x| x.as_f64()) { params.frame_readout_time      = v; }
                 if let Some(v) = obj.get("adaptive_zoom_window")  .and_then(|x| x.as_f64()) { params.adaptive_zoom_window    = v; }
                 if let Some(v) = obj.get("lens_correction_amount").and_then(|x| x.as_f64()) { params.lens_correction_amount  = v; }
-                if let Some(v) = obj.get("horizontal_rs")        .and_then(|x| x.as_bool()) { params.horizontal_rs          = v; }
+                if let Some(v) = obj.get("horizontal_rs")         .and_then(|x| x.as_bool()) { params.horizontal_rs          = v; }
 
                 if let Some(v) = obj.get("video_speed").and_then(|x| x.as_f64()) { params.video_speed = v; }
                 if let Some(v) = obj.get("video_speed_affects_smoothing").and_then(|x| x.as_bool()) { params.video_speed_affects_smoothing = v; }
@@ -1404,6 +1406,7 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("background_mode").and_then(|x| x.as_i64()) { params.background_mode = stabilization_params::BackgroundMode::from(v as i32); }
                 if let Some(v) = obj.get("background_margin").and_then(|x| x.as_f64()) { params.background_margin = v; }
                 if let Some(v) = obj.get("background_margin_feather").and_then(|x| x.as_f64()) { params.background_margin_feather = v; }
+                if let Some(v) = obj.get("light_refraction_coefficient").and_then(|x| x.as_f64()) { params.light_refraction_coefficient = v; }
             }
 
             {

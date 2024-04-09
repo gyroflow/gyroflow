@@ -44,6 +44,12 @@ MenuItem {
         controller.load_lens_profile(url.toString());
     }
 
+    function loadGyroflow(obj: var): void {
+        if (typeof obj.light_refraction_coefficient !== "undefined") {
+            isUnderwater.checked = Math.round(+obj.light_refraction_coefficient * 1000) == 1330;
+        }
+    }
+
     Component.onCompleted: {
         controller.load_profiles(true);
 
@@ -276,9 +282,59 @@ MenuItem {
         copyable: true;
         model: ({ })
     }
+
     AdvancedSection {
-        btn.text: qsTr("Adjust parameters");
+        btn.text: qsTr("Advanced");
         visible: Object.keys(info.model).length > 0
+
+        CheckBox {
+            id: isUnderwater;
+            text: qsTr("Lens is under water");
+            checked: false;
+            tooltip: qsTr("Enable this if you're filming under water, it will adjust the refraction coefficient.");
+            property bool keyframesEnabled: false;
+
+            onCheckedChanged: {
+                controller.light_refraction_coefficient = checked? 1.33 : 1.0;
+                if (keyframesEnabled) {
+                    controller.set_keyframe("LightRefractionCoeff", window.videoArea.timeline.getTimestampUs(), checked? 1.33 : 1.0);
+                }
+            }
+            ContextMenuMouseArea {
+                cursorShape: Qt.ibeam;
+                underlyingItem: isUnderwater;
+                onContextMenu: (isHold, x, y) => menuLoader.popup(isUnderwater, x, y);
+            }
+
+            Component {
+                id: isUnderwaterMenu;
+                Menu {
+                    font.pixelSize: 11.5 * dpiScale;
+                    Action {
+                        iconName: "keyframe";
+                        text: qsTr("Enable keyframing");
+                        checked: isUnderwater.keyframesEnabled;
+                        onTriggered: {
+                            checked = !checked;
+                            isUnderwater.keyframesEnabled = checked;
+                            if (!checked) {
+                                controller.clear_keyframes_type("LightRefractionCoeff");
+                            }
+                        }
+                    }
+                    Action {
+                        iconName: "plus";
+                        enabled: isUnderwater.keyframesEnabled;
+                        text: qsTr("Add keyframe");
+                        onTriggered: controller.set_keyframe("LightRefractionCoeff", window.videoArea.timeline.getTimestampUs(), isUnderwater.checked? 1.33 : 1.0);
+                    }
+                }
+            }
+            ContextMenuLoader {
+                id: menuLoader;
+                sourceComponent: isUnderwaterMenu
+            }
+        }
 
         component SmallNumberField: NumberField {
             property bool preventChange2: true;
