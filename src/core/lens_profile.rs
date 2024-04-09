@@ -610,7 +610,7 @@ impl LensProfile {
                     5,
                     (0..n_pts).flat_map(|i| {
                         let theta = (i as f64) * Problem::STEP;
-                        self.model.undistort_for_underwater_gradient(param.as_slice(), theta).into_iter()
+                        self.model.undistort_for_light_refraction_gradient(param.as_slice(), theta).into_iter()
                     }),
                 );
 
@@ -630,8 +630,8 @@ impl LensProfile {
                     (0..n_pts).map(|i| {
                         let theta = (i as f64) * Problem::STEP;
                         let theta_new = (theta.sin() * self.ior_ratio).asin();
-                        (self.model.distort_for_underwater(param.as_slice(), theta)
-                            - self.model.distort_for_underwater(self.params_orig.as_slice(), theta_new))
+                        (self.model.distort_for_light_refraction(param.as_slice(), theta)
+                            - self.model.distort_for_light_refraction(self.params_orig.as_slice(), theta_new))
                             as f64
                     }),
                 );

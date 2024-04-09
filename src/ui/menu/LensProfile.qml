@@ -291,7 +291,7 @@ MenuItem {
             id: isUnderwater;
             text: qsTr("Lens is under water");
             checked: false;
-            tooltip: qsTr("Enable this if you're filming under water, it will adjust the refraction coefficient.");
+            tooltip: qsTr("Enable if you're filming under water. This will adjust the refraction coefficient.");
             property bool keyframesEnabled: false;
 
             onCheckedChanged: {

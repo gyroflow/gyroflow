@@ -231,10 +231,6 @@ Modal {
     buttons: [isPreset? qsTr("Save") : qsTr("Apply"), qsTr("Cancel")];
     accentButton: 0;
 
-    property string text1: qsTr("Save to lens profile directory");
-    property string text2: qsTr("Save as default preset");
-    property string text3: qsTr("Save to file");
-
     function copyObj(from: var, by: var, to: var): void {
         for (const key in by) {
             if (typeof by[key] === "boolean") {
