@@ -14,6 +14,7 @@ opencv = ["gyroflow-core/use-opencv"]
 gyroflow-core = { path = "src/core/", features = ["use-opencv", "use-opencl"] }
 system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", rev = "7c79e4e" }
 breakpad-sys = "0.2.0"
+trash = "4.1.0"
 
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
 gyroflow-core = { path = "src/core/", features = ["use-opencv"] }

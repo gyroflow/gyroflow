@@ -2119,6 +2119,7 @@ pub struct Filesystem {
     catch_url_open:           qt_method!(fn(&self, url: QUrl)),
     remove_file:              qt_method!(fn(&self, url: QUrl)),
     folder_access_granted:    qt_method!(fn(&self, url: QUrl)),
+    move_to_trash:            qt_method!(fn(&self, url: QUrl)),
     save_allowed_folders:     qt_method!(fn(&self)),
     restore_allowed_folders:  qt_method!(fn(&self)),
     url_opened:               qt_signal!(url: QUrl),
@@ -2154,6 +2155,22 @@ impl Filesystem {
             if let Ok(deserialized) = serde_json::from_str::<Vec<String>>(&saved) {
                 filesystem::restore_allowed_folders(&deserialized);
             }
+        }
+    }
+
+    fn move_to_trash(&self, url: QUrl) {
+        if cfg!(target_os = "android") || cfg!(target_os = "ios") {
+            let url = QString::from(url).to_string();
+            if let Err(e) = filesystem::remove_file(&url) {
+                ::log::error!("Failed to remoev file: {e:?}");
+            }
+            return;
+        }
+        let path = filesystem::url_to_path(&util::qurl_to_encoded(url));
+        ::log::info!("Moving file to trash: {path}");
+        match trash::delete(path) {
+            Ok(_) => { },
+            Err(e) => ::log::error!("Failed to move file to trash: {e:?}"),
         }
     }
 }

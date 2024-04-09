@@ -1742,6 +1742,7 @@ dependencies = [
  "system_shutdown",
  "tar",
  "test-case",
+ "trash",
  "ureq",
  "url",
  "walkdir",
@@ -3939,6 +3940,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "trash"
+version = "4.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a1a7a9a17d3b004898be42be29a4c18d5a4cf008b5cdf72d69b1945dfcb158a"
+dependencies = [
+ "chrono",
+ "libc",
+ "log",
+ "objc",
+ "once_cell",
+ "scopeguard",
+ "url",
+ "windows 0.44.0",
+]
+
+[[package]]
 name = "typenum"
 version = "1.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4316,6 +4333,15 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
+
+[[package]]
+name = "windows"
+version = "0.44.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e745dab35a0c4c77aa3ce42d595e13d2003d6902d6b08c9ef5fc326d08da12b"
+dependencies = [
+ "windows-targets 0.42.2",
+]
 
 [[package]]
 name = "windows"

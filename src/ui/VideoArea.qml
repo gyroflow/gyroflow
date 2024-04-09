@@ -38,6 +38,7 @@ Item {
     property int fullScreen: 0;
     property string detectedCamera: "";
     property real additionalTopMargin: 0;
+    property var mergedFiles: [];
 
     property Menu.VideoInformation vidInfo: null;
 
@@ -337,6 +338,18 @@ Item {
         if (!(/\.(png|jpg|exr|dng)$/i.test(filename) && filename.includes("%0"))) {
             root.loadedFileUrl = url;
         }
+
+        if (isStorePackage && Qt.platform.os == "macos" && filename.toLowerCase().endsWith(".r3d") && folder.toString().length < 3) {
+            messageBox(Modal.Info, qsTr("In order to load all R3D parts, you need to select the entire .RDC folder."), [
+                { text: qsTr("OK"), accent: true, clicked: function() {
+                    opf.selectFolder("", function(_) {
+                        root.loadFile(root.loadedFileUrl);
+                    });
+                } },
+            ]);
+            return;
+        }
+
         if (!skip_detection) {
             let newUrl;
             if (newUrl = detectImageSequence(folder, filename)) {
@@ -360,6 +373,7 @@ Item {
                     { text: qsTr("Yes"), accent: true, clicked: function() {
                         dlg.btnsRow.children[0].enabled = false;
                         getOutputFile(folder, sequenceList[0], "_joined", "", true, function(outFolder, outFilename, outFullFileUrl) {
+                            root.mergedFiles = sequenceList.map(x => filesystem.get_file_url(folder, x, false).toString());
                             controller.mp4_merge(sequenceList.map(x => filesystem.get_file_url(folder, x, false).toString()), outFolder, outFilename);
                         });
                         return false;
@@ -432,6 +446,7 @@ Item {
                     const filename = filesystem.get_filename(urlsCopy[0]);
                     const folder = filesystem.get_folder(urlsCopy[0]);
                     getOutputFile(folder, filename, "_joined", "", true, function(outFolder, outFilename, outFullFileUrl) {
+                        root.mergedFiles = urlsCopy.map(x => x.toString());
                         controller.mp4_merge(urlsCopy.map(x => x.toString()), outFolder, outFilename);
                     });
                     return false;
@@ -543,6 +558,7 @@ Item {
         }
         return false;
     }
+    OutputPathField { id: opf; visible: false; }
 
     Item {
         id: vidParentParent;
@@ -631,6 +647,25 @@ Item {
                     }
                     vidInfo.loadFromVideoMetadata(md, vid.videoWidth, vid.videoHeight);
                     window.sync.customSyncTimestamps = [];
+
+                    if (root.mergedFiles.length > 1) {
+                        if (loaded) {
+                            const copy = [...root.mergedFiles];
+                            messageBox(Modal.Question, qsTr("Files merged successfully, do you want to delete the original ones?"), [
+                                { text: qsTr("Yes"), accent: true, clicked: function() {
+                                    for (const x of copy) {
+                                        filesystem.move_to_trash(x);
+                                    }
+                                    return true;
+                                } },
+                                { text: qsTr("No") },
+                            ], null, undefined, "delete-after-join");
+                        }
+                        root.mergedFiles = [];
+                    }
+
+                    window.lensProfile.selected_manually = false;
+
                     // for (var i in md) console.info(i, md[i]);
                 }
                 property bool errorShown: false;

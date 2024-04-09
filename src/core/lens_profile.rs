@@ -570,11 +570,11 @@ impl LensProfile {
     }
 
     pub fn for_light_refraction(&self, ior_ratio: f64, tir_margin: f64) -> LensProfile {
-        if self.fisheye_params.distortion_coeffs.len() < 4 {
-            log::warn!("Not enough distortion coefficients! {}", self.fisheye_params.distortion_coeffs.len());
+        if ior_ratio == 1.0 {
             return self.clone();
         }
-        if ior_ratio == 1.0 {
+        if self.fisheye_params.distortion_coeffs.len() < 4 {
+            log::warn!("Not enough distortion coefficients! {}", self.fisheye_params.distortion_coeffs.len());
             return self.clone();
         }
         use argmin::{ core::{ Executor, Jacobian, Operator, State }, solver::gaussnewton::GaussNewton };

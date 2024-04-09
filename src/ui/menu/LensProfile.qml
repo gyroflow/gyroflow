@@ -30,6 +30,7 @@ MenuItem {
     property string profileChecksum;
 
     property bool fetched_from_github: false;
+    property bool selected_manually: false;
 
     FileDialog {
         id: fileDialog;
@@ -41,6 +42,7 @@ MenuItem {
         onAccepted: loadFile(fileDialog.selectedFile);
     }
     function loadFile(url: url): void {
+        root.selected_manually = true;
         controller.load_lens_profile(url.toString());
     }
 
@@ -114,6 +116,16 @@ MenuItem {
                     info.model = lensInfo;
 
                     root.cropFactor = +obj.crop_factor;
+
+                    if (!root.selected_manually &&
+                           (obj.calibrated_by == "Eddy" ||
+                            obj.calibrated_by == "GoPro" ||
+                            obj.calibrated_by == "DJI" ||
+                            obj.calibrated_by == "Insta360" ||
+                            obj.calibrated_by == "Sony")) {
+                        root.opened = false;
+                        window.motionData.opened = false;
+                    }
 
                     officialInfo.show = !obj.official && !+window.settings.value("rated-profile-" + checksum, "0");
                     officialInfo.canRate = true;
@@ -198,6 +210,7 @@ MenuItem {
             if (lensPathOrId.endsWith(".gyroflow")) {
                 window.videoArea.loadGyroflowData(JSON.parse(controller.get_preset_contents(lensPathOrId)), 0);
             } else {
+                root.selected_manually = true;
                 controller.load_lens_profile(lensPathOrId);
             }
         }
