@@ -451,6 +451,23 @@ MenuItem {
         }
     }
 
+    Label {
+        text: qsTr("Lens correction strength");
+        SliderWithField {
+            id: correctionAmount;
+            from: 0.0;
+            to: 100.0;
+            value: 1.0;
+            unit: "%";
+            defaultValue: 100.0;
+            precision: 0;
+            width: parent.width;
+            keyframe: "LensCorrectionStrength";
+            scaler: 100.0;
+            onValueChanged: Qt.callLater(() => { controller.lens_correction_amount = value; });
+        }
+    }
+
     AdvancedSection {
         InfoMessageSmall {
             id: fovWarning;
@@ -473,6 +490,102 @@ MenuItem {
             }
         }
 
+        CheckBoxWithContent {
+            id: shutterCb;
+            text: qsTr("Rolling shutter correction");
+            cb.onCheckedChanged: {
+                controller.frame_readout_time = cb.checked? (bottomToTop.checked? -shutter.value : shutter.value) : 0.0;
+            }
+
+            Label {
+                text: qsTr("Frame readout time");
+                SliderWithField {
+                    id: shutter;
+                    defaultValue: 0;
+                    to: 1000 / Math.max(1, window.videoArea.timeline.scaledFps);
+                    width: parent.width;
+                    unit: qsTr("ms");
+                    precision: 2;
+                    onValueChanged: controller.frame_readout_time = bottomToTop.checked? -value : value;
+                }
+                CheckBox {
+                    id: bottomToTop;
+                    anchors.right: parent.right;
+                    anchors.top: parent.top;
+                    anchors.topMargin: -30 * dpiScale;
+                    anchors.rightMargin: -10 * dpiScale;
+                    contentItem.visible: false;
+                    scale: 0.7;
+                    tooltip: qsTr("Bottom to top")
+                    onCheckedChanged: controller.frame_readout_time = bottomToTop.checked? -shutter.value : shutter.value;
+                }
+            }
+        }
+
+        Label {
+            text: qsTr("Video speed");
+            SliderWithField {
+                id: videoSpeed;
+                from: 10;
+                to: 1000.0;
+                value: 1.0;
+                unit: "%";
+                defaultValue: 100.0;
+                precision: 0;
+                width: parent.width;
+                keyframe: "VideoSpeed";
+                scaler: 100.0;
+                property bool isKeyframed: false;
+                function updateVideoSpeed(): void {
+                    window.videoArea.vid.playbackRate = videoSpeed.value;
+                    controller.set_video_speed(videoSpeed.value, videoSpeedAffectsSmoothing.checked, videoSpeedAffectsZooming.checked);
+                    isKeyframed = controller.is_keyframed("VideoSpeed");
+                }
+                Timer {
+                    id: speedUpdateTimer;
+                    interval: 300;
+                    onTriggered: Qt.callLater(videoSpeed.updateVideoSpeed);
+                }
+                slider.onPressedChanged: if (!slider.pressed) Qt.callLater(videoSpeed.updateVideoSpeed);
+                onValueChanged: speedUpdateTimer.restart();
+                onKeyframesEnabledChanged: Qt.callLater(zoomingMethod.adjustMethod);
+                Connections {
+                    target: controller;
+                    function onKeyframe_value_updated(keyframe: string, value: real): void {
+                        if (keyframe == "VideoSpeed") {
+                            if (Math.abs(window.videoArea.vid.playbackRate - value) > 0.005) {
+                                window.videoArea.vid.playbackRate = value;
+                            }
+                        }
+                    }
+                }
+            }
+            CheckBox {
+                id: videoSpeedAffectsSmoothing;
+                anchors.right: parent.right;
+                anchors.top: parent.top;
+                anchors.topMargin: -30 * dpiScale;
+                anchors.rightMargin: -15 * dpiScale;
+                contentItem.visible: false;
+                scale: 0.7;
+                tooltip: qsTr("Link with smoothing");
+                checked: true;
+                onCheckedChanged: Qt.callLater(videoSpeed.updateVideoSpeed);
+            }
+            CheckBox {
+                id: videoSpeedAffectsZooming;
+                anchors.right: parent.right;
+                anchors.top: parent.top;
+                anchors.topMargin: -30 * dpiScale;
+                anchors.rightMargin: 15 * dpiScale;
+                width: 25 * dpiScale;
+                contentItem.visible: false;
+                scale: 0.7;
+                tooltip: qsTr("Link with zooming speed");
+                checked: true;
+                onCheckedChanged: Qt.callLater(videoSpeed.updateVideoSpeed);
+            }
+        }
         InfoMessageSmall {
             show: croppingMode.currentIndex == 1 && zoomingMethod.currentIndex == 0 && zoomingMethod.zoomingSpeedKeyframed;
             text: qsTr("When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.");
@@ -582,120 +695,6 @@ MenuItem {
                                       onValueChanged: controller.additional_translation_z = value; }
                 }
             }
-        }
-    }
-
-    CheckBoxWithContent {
-        id: shutterCb;
-        text: qsTr("Rolling shutter correction");
-        cb.onCheckedChanged: {
-            controller.frame_readout_time = cb.checked? (bottomToTop.checked? -shutter.value : shutter.value) : 0.0;
-        }
-
-        Label {
-            text: qsTr("Frame readout time");
-            SliderWithField {
-                id: shutter;
-                defaultValue: 0;
-                to: 1000 / Math.max(1, window.videoArea.timeline.scaledFps);
-                width: parent.width;
-                unit: qsTr("ms");
-                precision: 2;
-                onValueChanged: controller.frame_readout_time = bottomToTop.checked? -value : value;
-            }
-            CheckBox {
-                id: bottomToTop;
-                anchors.right: parent.right;
-                anchors.top: parent.top;
-                anchors.topMargin: -30 * dpiScale;
-                anchors.rightMargin: -10 * dpiScale;
-                contentItem.visible: false;
-                scale: 0.7;
-                tooltip: qsTr("Bottom to top")
-                onCheckedChanged: controller.frame_readout_time = bottomToTop.checked? -shutter.value : shutter.value;
-            }
-        }
-    }
-
-    Label {
-        text: qsTr("Lens correction strength");
-        SliderWithField {
-            id: correctionAmount;
-            from: 0.0;
-            to: 100.0;
-            value: 1.0;
-            unit: "%";
-            defaultValue: 100.0;
-            precision: 0;
-            width: parent.width;
-            keyframe: "LensCorrectionStrength";
-            scaler: 100.0;
-            onValueChanged: Qt.callLater(() => { controller.lens_correction_amount = value; });
-        }
-    }
-
-    Label {
-        text: qsTr("Video speed");
-        SliderWithField {
-            id: videoSpeed;
-            from: 10;
-            to: 1000.0;
-            value: 1.0;
-            unit: "%";
-            defaultValue: 100.0;
-            precision: 0;
-            width: parent.width;
-            keyframe: "VideoSpeed";
-            scaler: 100.0;
-            property bool isKeyframed: false;
-            function updateVideoSpeed(): void {
-                window.videoArea.vid.playbackRate = videoSpeed.value;
-                controller.set_video_speed(videoSpeed.value, videoSpeedAffectsSmoothing.checked, videoSpeedAffectsZooming.checked);
-                isKeyframed = controller.is_keyframed("VideoSpeed");
-            }
-            Timer {
-                id: speedUpdateTimer;
-                interval: 300;
-                onTriggered: Qt.callLater(videoSpeed.updateVideoSpeed);
-            }
-            slider.onPressedChanged: if (!slider.pressed) Qt.callLater(videoSpeed.updateVideoSpeed);
-            onValueChanged: speedUpdateTimer.restart();
-            onKeyframesEnabledChanged: Qt.callLater(zoomingMethod.adjustMethod);
-            Connections {
-                target: controller;
-                function onKeyframe_value_updated(keyframe: string, value: real): void {
-                    if (keyframe == "VideoSpeed") {
-                        if (Math.abs(window.videoArea.vid.playbackRate - value) > 0.005) {
-                            window.videoArea.vid.playbackRate = value;
-                        }
-                    }
-                }
-            }
-        }
-        CheckBox {
-            id: videoSpeedAffectsSmoothing;
-            anchors.right: parent.right;
-            anchors.top: parent.top;
-            anchors.topMargin: -30 * dpiScale;
-            anchors.rightMargin: -15 * dpiScale;
-            contentItem.visible: false;
-            scale: 0.7;
-            tooltip: qsTr("Link with smoothing");
-            checked: true;
-            onCheckedChanged: Qt.callLater(videoSpeed.updateVideoSpeed);
-        }
-        CheckBox {
-            id: videoSpeedAffectsZooming;
-            anchors.right: parent.right;
-            anchors.top: parent.top;
-            anchors.topMargin: -30 * dpiScale;
-            anchors.rightMargin: 15 * dpiScale;
-            width: 25 * dpiScale;
-            contentItem.visible: false;
-            scale: 0.7;
-            tooltip: qsTr("Link with zooming speed");
-            checked: true;
-            onCheckedChanged: Qt.callLater(videoSpeed.updateVideoSpeed);
         }
     }
 }
