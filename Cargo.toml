@@ -84,14 +84,14 @@ features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemSer
 oslog = "0.2"
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
-metal = "0.27"
+metal = { version = "0.27.0", git = "https://github.com/gfx-rs/metal-rs", rev = "ff8fd3d6dc7792852f8a015458d7e6d42d7fb352" }
 core-foundation-sys = "0.8.6"
 
 [build-dependencies]
 cpp_build = "0.5.9"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.0.90"
+cc = "1.0.92"
 
 [[bin]]
 name = "gyroflow"
