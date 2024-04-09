@@ -286,11 +286,11 @@ impl LensProfileDatabase {
         let mut filtered = self.list_for_ui.iter().filter(|(name, _, _, _, _, _)| {
             let name = name.to_ascii_lowercase();
             for word in &words {
-                if name.contains(word) {
-                    return true;
+                if !name.contains(word) {
+                    return false;
                 }
             }
-            return false;
+            return true;
         }).collect::<Vec<_>>();
 
         filtered.sort_by(|a, b| {
