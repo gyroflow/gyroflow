@@ -42,7 +42,18 @@ impl AudioResampler {
         self.src_frame = frame::Audio::empty();
         self.src_frame.set_pts(in_frame.pts());
 
-        in_frame.set_channel_layout(self.resampler.input().channel_layout);
+        unsafe {
+            if self.src_frame.is_empty() {
+                (*self.src_frame.as_mut_ptr()).sample_rate = self.resampler.output().rate as i32;
+                self.src_frame.alloc(
+                    self.resampler.output().format,
+                    in_frame.samples(),
+                    self.resampler.output().channel_layout,
+                );
+            }
+            ffmpeg_next::ffi::swr_config_frame(self.resampler.as_mut_ptr(), self.src_frame.as_mut_ptr(), in_frame.as_ptr());
+        }
+        // in_frame.set_channel_layout(self.resampler.input().channel_layout);
         self.resampler.run(in_frame, &mut self.src_frame)?;
 
         self.src_frame_offset = 0;
