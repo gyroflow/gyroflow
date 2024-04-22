@@ -2,7 +2,7 @@ import 'common.just'
 
 TeamID                        := "RR3ZC2L4DF"
 BundleIdentifier              := "xyz.gyroflow"
-DistributionCertificateSHA    := "7F82D6013B8F6D45F88FE547438744BD64750C5B"
+DistributionCertificateSHA    := "FA062BFB7CB1A27FA0EC5CC7C03D9447DF15F92A"
 DistributionMacInstallerSHA   := "DC70831576E7B2345E78A516BEA2FC34D18F42F5"
 DistributionProvisioning      := ProjectDir / "_deployment/mac/Gyroflow_mac_app_store.provisionprofile"
 

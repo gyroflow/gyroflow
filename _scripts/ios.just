@@ -11,7 +11,7 @@ BundleIdentifier              := "xyz.gyroflow"
 DevelopmentCertificateSHA     := "612D010FA5522A25CE1F1D5A38B84DCD2798704B"
 DevelopmentProvisioning       := ProjectDir / "_deployment/ios/Gyroflow_dev.mobileprovision"
 DevelopmentProvisioningName   := "Gyroflow dev"
-DistributionCertificateSHA    := "7F82D6013B8F6D45F88FE547438744BD64750C5B"
+DistributionCertificateSHA    := "FA062BFB7CB1A27FA0EC5CC7C03D9447DF15F92A"
 DistributionProvisioning      := ProjectDir / "_deployment/ios/Gyroflow_dist.mobileprovision"
 DistributionProvisioningName  := "Gyroflow dist"
 
