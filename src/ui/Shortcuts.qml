@@ -197,7 +197,7 @@ Item {
 
     // Toggle full screen mode
     Shortcut {
-        sequence: "F11";
+        sequences: ["F11", "F"];
         onActivated: videoArea.fullScreen = (videoArea.fullScreen + 1) % 3;
     }
 
@@ -205,6 +205,24 @@ Item {
     Shortcut {
         sequence: "q";
         onActivated: videoArea.queue.shown = !videoArea.queue.shown;
+    }
+
+    // Add to render queue
+    Shortcut {
+        sequence: "Ctrl+Q";
+        onActivated: {
+            window.renderBtn.tempIsAddToQueue = true;
+            window.renderBtn.btn.clicked();
+        }
+    }
+
+    // Export
+    Shortcut {
+        sequence: "Ctrl+W";
+        onActivated: {
+            window.renderBtn.tempIsAddToQueue = false;
+            window.renderBtn.btn.clicked();
+        }
     }
 
     // Save project file

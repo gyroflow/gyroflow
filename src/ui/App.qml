@@ -244,6 +244,7 @@ Rectangle {
                         }
                         iconName: addQueueDelayed ? "confirmed" : "video";
                         isDown: isMobileLayout;
+                        property bool tempIsAddToQueue: false;
                         property bool isAddToQueue: false;
                         property bool allowFile: false;
                         property bool allowLens: false;
@@ -326,10 +327,10 @@ Rectangle {
                                     renderBtn.render();
                                 }
 
-                                if (renderBtn.isAddToQueue && render_queue.overwrite_mode === 1) {
+                                if ((renderBtn.isAddToQueue || renderBtn.tempIsAddToQueue) && render_queue.overwrite_mode === 1) {
                                     overwrite();
                                     showNotification(Modal.Info, qsTr("Added to queue") + ", " + qsTr("file %1 will be overwritten").arg(outputFile.filename))
-                                } else if (renderBtn.isAddToQueue && render_queue.overwrite_mode === 2) {
+                                } else if ((renderBtn.isAddToQueue || renderBtn.tempIsAddToQueue) && render_queue.overwrite_mode === 2) {
                                     rename();
                                     showNotification(Modal.Info, qsTr("Added to queue") + ", " + qsTr("file will be rendered to %1").arg(outputFile.filename))
                                 } else {
@@ -378,7 +379,7 @@ Rectangle {
                                 }
 
                                 const job_id = render_queue.add(window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
-                                if (renderBtn.isAddToQueue) {
+                                if (renderBtn.isAddToQueue || renderBtn.tempIsAddToQueue) {
                                     // Add to queue
                                     renderBtn.addQueueDelayed = true;
                                     renderBtn.btn.enabled = false;
@@ -391,6 +392,7 @@ Rectangle {
                                     render_queue.main_job_id = job_id;
                                     render_queue.render_job(job_id);
                                 }
+                                renderBtn.tempIsAddToQueue = false;
                             }, Qt.size(50 * dpiScale * videoArea.vid.parent.ratio, 50 * dpiScale));
                         }
                         btn.onClicked: {
