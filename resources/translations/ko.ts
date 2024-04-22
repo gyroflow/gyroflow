@@ -295,31 +295,31 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="331"/>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>Added to queue</source>
-      <translation type="unfinished">Added to queue</translation>
+      <translation>대기열에 추가됨</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="331"/>
       <source>file %1 will be overwritten</source>
-      <translation type="unfinished">file %1 will be overwritten</translation>
+      <translation>파일 %1을(를) 덮어씌웁니다</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>file will be rendered to %1</source>
-      <translation type="unfinished">file will be rendered to %1</translation>
+      <translation>파일이 %1(으)로 렌더링됩니다</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="364"/>
       <source>Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>파일 접근 권한 제한으로 인해, 파일을 저장할 위치를 직접 선택해야 합니다.
+확인을 클릭하고 파일을 저장할 위치를 선택하세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="375"/>
       <source>Keep this app in the foreground and don&apos;t lock the screen.
 Due to limitations of the system video encoders, rendering in the background is not supported.</source>
-      <translation type="unfinished">Keep this app in the foreground and don&apos;t lock the screen.
-Due to limitations of the system video encoders, rendering in the background is not supported.</translation>
+      <translation>이 앱을 포그라운드에 유지하고 기기를 잠그지 마세요.
+시스템 비디오 인코더의 한계로, 백그라운드 렌더링을 지원하지 않습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="634"/>
@@ -366,7 +366,7 @@ Change the output path or run the program as administrator.
 Make sure you have write permissions to the target directory and make sure target file is not used by any other application.</source>
       <translation>파일을 만들거나 쓸 권한이 없습니다.
 출력 위치를 변경하거나 프로그램을 관리자 권한으로 실행하세요.
-대상 위치에 쓰기 권한이 있는지, 다른 프로그램이 대상 파일을 사용 중인지 확인하세요.</translation>
+대상 디렉터리에 쓰기 권한이 있는지, 다른 프로그램이 대상 파일을 사용 중인지 확인하세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="666"/>
@@ -399,7 +399,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/App.qml" line="687"/>
       <source>GPU decoder failed to decode this file. Disable GPU decoding in &quot;Advanced&quot; and try again.</source>
-      <translation type="unfinished">GPU decoder failed to decode this file. Disable GPU decoding in &quot;Advanced&quot; and try again.</translation>
+      <translation>GPU 디코더가 이 파일의 디코딩에 실패했습니다. &quot;고급&quot;에서 GPU 디코딩을 비활성화 후 다시 시도해 주세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="690"/>
@@ -446,7 +446,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="115"/>
       <source>You selected multiple files. Do you want to process them automatically and export lens profiles?</source>
-      <translation>복수의 파일을 선택했습니다. 자동으로 처리하여 렌즈 프로필을 내보낼까요?</translation>
+      <translation>여러 파일을 선택했습니다. 자동으로 처리하여 렌즈 프로필을 내보낼까요?</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="81"/>
@@ -638,32 +638,32 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="550"/>
       <source>Export trim ranges as separate videos</source>
-      <translation type="unfinished">Export trim ranges as separate videos</translation>
+      <translation>잘라내기 범위를 각각의 비디오로 내보내기</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="569"/>
       <source>Interpolation method</source>
-      <translation type="unfinished">Interpolation method</translation>
+      <translation>보간 방식</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="630"/>
       <source>Preserve export settings</source>
-      <translation type="unfinished">Preserve export settings</translation>
+      <translation>내보내기 설정 유지</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="632"/>
       <source>Save output size and bitrate in settings and use it for all files.</source>
-      <translation type="unfinished">Save output size and bitrate in settings and use it for all files.</translation>
+      <translation>출력 해상도와 비트 전송률을 설정에 저장하고 모든 파일에 적용합니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="643"/>
       <source>Preserve export path</source>
-      <translation type="unfinished">Preserve export path</translation>
+      <translation>내보내기 위치 유지</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="645"/>
       <source>Save output path in settings and use it for all files.</source>
-      <translation type="unfinished">Save output path in settings and use it for all files.</translation>
+      <translation>출력 위치를 설정에 저장하고 모든 파일에 적용합니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="390"/>
@@ -674,17 +674,17 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="371"/>
       <source>Edit sizes</source>
-      <translation type="unfinished">Edit sizes</translation>
+      <translation>해상도 편집</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="374"/>
       <source>Original</source>
-      <translation type="unfinished">Original</translation>
+      <translation>원본</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="382"/>
       <source>You can edit the output size presets here:</source>
-      <translation type="unfinished">You can edit the output size presets here:</translation>
+      <translation>여기서 출력 해상도 프리셋을 편집할 수 있습니다:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="383"/>
@@ -694,7 +694,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="390"/>
       <source>Invalid JSON format!</source>
-      <translation type="unfinished">Invalid JSON format!</translation>
+      <translation>유효하지 않은 JSON 형식!</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="393"/>
@@ -704,7 +704,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="514"/>
       <source>Metadata comment</source>
-      <translation type="unfinished">Metadata comment</translation>
+      <translation>메타데이터 코멘트</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="522"/>
@@ -734,7 +734,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="557"/>
       <source>Audio codec</source>
-      <translation type="unfinished">Audio codec</translation>
+      <translation>음성 코덱</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="580"/>
@@ -755,32 +755,32 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="50"/>
       <source>Grid guide</source>
-      <translation type="unfinished">Grid guide</translation>
+      <translation>격자 가이드</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Enabled</source>
-      <translation type="unfinished">Enabled</translation>
+      <translation>활성</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="54"/>
       <source>Color</source>
-      <translation type="unfinished">Color</translation>
+      <translation>색상</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="55"/>
       <source>White</source>
-      <translation type="unfinished">White</translation>
+      <translation>흰색</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="56"/>
       <source>Black</source>
-      <translation type="unfinished">Black</translation>
+      <translation>검은색</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="60"/>
       <source>Lines</source>
-      <translation type="unfinished">Lines</translation>
+      <translation>선</translation>
     </message>
   </context>
   <context>
@@ -1051,7 +1051,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="275"/>
       <source>Adjust parameters</source>
-      <translation>매개변수 조정</translation>
+      <translation>매개 변수 조정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="296"/>
@@ -1110,7 +1110,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="200"/>
       <source>Troubleshooting</source>
-      <translation type="unfinished">Troubleshooting</translation>
+      <translation>문제 해결</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="212"/>
@@ -1158,7 +1158,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="151"/>
       <source>In order to detect multiple motion data files, click here and grant access to the directory with files.</source>
-      <translation type="unfinished">In order to detect multiple motion data files, click here and grant access to the directory with files.</translation>
+      <translation>여러 흔들림 데이터 파일을 감지하려면, 여기를 클릭하여 파일이 있는 디렉터리의 권한을 얻습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="179"/>
@@ -1292,18 +1292,18 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="42"/>
       <source>[Selected folder]</source>
-      <translation type="unfinished">[Selected folder]</translation>
+      <translation>[선택된 폴더]</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="108"/>
       <location filename="../../src/ui/components/OutputPathField.qml" line="118"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>파일을 저장할 위치 선택</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="109"/>
       <source>Video files</source>
-      <translation type="unfinished">Video files</translation>
+      <translation>영상 파일</translation>
     </message>
   </context>
   <context>
@@ -1394,12 +1394,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="148"/>
       <source>Mobile Light</source>
-      <translation type="unfinished">Mobile Light</translation>
+      <translation>모바일 라이트</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="149"/>
       <source>Mobile Dark</source>
-      <translation type="unfinished">Mobile Dark</translation>
+      <translation>모바일 다크</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="185"/>
@@ -1647,17 +1647,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="517"/>
       <source>ETA %1</source>
-      <translation type="unfinished">ETA %1</translation>
+      <translation>남은 시간 %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="518"/>
       <source>Synchronizing: %1</source>
-      <translation type="unfinished">Synchronizing: %1</translation>
+      <translation>동기화 중: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="519"/>
       <source>Rendering: %1</source>
-      <translation type="unfinished">Rendering: %1</translation>
+      <translation>렌더링 중: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="691"/>
@@ -1722,7 +1722,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="756"/>
       <source>Stabilized video + Project file with gyro data</source>
-      <translation type="unfinished">Stabilized video + Project file with gyro data</translation>
+      <translation>안정화된 영상 + 프로젝트 파일(자이로 데이터 포함)</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="760"/>
@@ -1937,17 +1937,17 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="234"/>
       <source>Save to lens profile directory</source>
-      <translation type="unfinished">Save to lens profile directory</translation>
+      <translation>렌즈 프로필 디렉터리에 저장</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="235"/>
       <source>Save as default preset</source>
-      <translation type="unfinished">Save as default preset</translation>
+      <translation>기본 프리셋으로 저장</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="236"/>
       <source>Save to file</source>
-      <translation type="unfinished">Save to file</translation>
+      <translation>파일로 저장</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="108"/>
@@ -1974,12 +1974,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="204"/>
       <source>Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.</source>
-      <translation>힌트: 'camera_presets' 폴더에 프리셋 파일('.gyroflow' 파일)을 저장하면, 렌즈 프로필 검색 상자에 프리셋이 표시됩니다.</translation>
+      <translation>힌트: 'camera_presets' 디렉터리에 프리셋 파일('.gyroflow' 파일)을 저장하면, 렌즈 프로필 검색 상자에 프리셋이 표시됩니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="205"/>
       <source>You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.</source>
-      <translation>프리셋을 `default.gyroflow` 로 만들어 `camera_presets` 디렉토리에 저장하면, 불러오는 영상 파일마다 항상 적용됩니다.</translation>
+      <translation>프리셋을 `default.gyroflow` 로 만들어 `camera_presets` 디렉터리에 저장하면, 불러오는 영상 파일마다 항상 적용됩니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="231"/>
@@ -2012,7 +2012,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="88"/>
       <source>Add keyframe</source>
-      <translation type="unfinished">Add keyframe</translation>
+      <translation>키프레임 추가</translation>
     </message>
   </context>
   <context>
@@ -2144,7 +2144,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="391"/>
       <source>IMU integration method for keeping track of the horizon and adjust built-in quaternions</source>
-      <translation type="unfinished">IMU integration method for keeping track of the horizon and adjust built-in quaternions</translation>
+      <translation>수평을 추적하고 내장 쿼터니언을 조정하는 IMU 보정 방식</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="400"/>
@@ -2549,7 +2549,7 @@ Make sure you have proper rolling shutter value set before syncing.</source>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="24"/>
       <source>Created at</source>
-      <translation type="unfinished">Created at</translation>
+      <translation>만든 날짜:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="28"/>
@@ -2612,17 +2612,17 @@ Make sure you have proper rolling shutter value set before syncing.</source>
     <message>
       <location filename="../../src/ui/App.qml" line="472"/>
       <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
+      <translation>입력</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="472"/>
       <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
+      <translation>매개 변수</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="472"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>내보내기</translation>
     </message>
   </context>
   <context>
@@ -2827,7 +2827,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="971"/>
       <source>Option+Scroll</source>
-      <translation type="unfinished">Option+Scroll</translation>
+      <translation>Option+스크롤 휠</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="972"/>
@@ -2862,27 +2862,27 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="662"/>
       <source>Trim range</source>
-      <translation type="unfinished">Trim range</translation>
+      <translation>잘라내기 범위</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="665"/>
       <source>Add new range</source>
-      <translation type="unfinished">Add new range</translation>
+      <translation>새로운 범위 추가</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="683"/>
       <source>Delete this range</source>
-      <translation type="unfinished">Delete this range</translation>
+      <translation>이 범위 제거</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="692"/>
       <source>Clear all</source>
-      <translation type="unfinished">Clear all</translation>
+      <translation>모두 지우기</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="699"/>
       <source>Restrict playback to trim range</source>
-      <translation type="unfinished">Restrict playback to trim range</translation>
+      <translation>잘라내기 범위로 재생 제한</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="970"/>
@@ -3108,15 +3108,15 @@ The camera probably doesn&apos;t record motion data in this particular shooting 
       <location filename="../../src/ui/VideoArea.qml" line="172"/>
       <source>This is often caused by read-only file system.
 Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-Make sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.</translation>
+      <translation>이는 종종 읽기 전용 파일 시스템으로 인해 발생합니다.
+.dmg 파일을 직접 실행하는 대신, Gyroflow 앱을 Application 폴더로 복사하세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="175"/>
       <source>This is often caused by read-only file system.
 If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation type="unfinished">This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</translation>
+      <translation>이는 종종 읽기 전용 파일 시스템으로 인해 발생합니다.
+Gyroflow가 C:Program Files에 있다면, Gyroflow를 관리자 권한으로 실행해야 SDK를 Gyroflow 폴더에 압축 해제할 수 있습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="276"/>
@@ -3126,17 +3126,17 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="465"/>
       <source>Same as the original file</source>
-      <translation type="unfinished">Same as the original file</translation>
+      <translation>원본 파일과 동일</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="466"/>
       <source>Custom path</source>
-      <translation type="unfinished">Custom path</translation>
+      <translation>사용자 지정 경로</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="443"/>
       <source>Please enter the output path:</source>
-      <translation type="unfinished">Please enter the output path:</translation>
+      <translation>출력 위치 입력:</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="595"/>
@@ -3151,7 +3151,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="699"/>
       <source>Click here to open a video file</source>
-      <translation type="unfinished">Click here to open a video file</translation>
+      <translation>여기를 클릭하여 영상 파일 열기</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="819"/>
@@ -3186,7 +3186,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="829"/>
       <source>Show timeline menu</source>
-      <translation type="unfinished">Show timeline menu</translation>
+      <translation>타임라인 메뉴 보이기</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="868"/>
@@ -3211,7 +3211,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="899"/>
       <source>Volume</source>
-      <translation type="unfinished">Volume</translation>
+      <translation>음량</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="929"/>
@@ -3229,7 +3229,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="138"/>
       <source>In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</source>
-      <translation type="unfinished">In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</translation>
+      <translation>프로젝트 파일, 영상 시퀀스 또는 이미지 시퀀스를 감지하려면 여기를 클릭하여 입력 파일이 있는 디렉터리를 선택하세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="129"/>

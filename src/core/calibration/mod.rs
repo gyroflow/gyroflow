@@ -142,8 +142,8 @@ impl LensCalibrator {
                     *px = (*px as f64 * contrast + brightness).min(255.0) as u8;
                 }
 
-                let inp1 = unsafe { Mat::new_size_with_data(Size::new(size.0 as i32, size.1 as i32), CV_8UC1, pixels.as_ptr() as *mut c_void, stride as usize)? };
-                let mut inp = unsafe { Mat::new_size_with_data(Size::new(size.0 as i32, size.1 as i32), CV_8UC1, pixels.as_ptr() as *mut c_void, stride as usize)? };
+                let inp1 = unsafe { Mat::new_size_with_data_unsafe(Size::new(size.0 as i32, size.1 as i32), CV_8UC1, pixels.as_ptr() as *mut c_void, stride as usize)? };
+                let mut inp = unsafe { Mat::new_size_with_data_unsafe(Size::new(size.0 as i32, size.1 as i32), CV_8UC1, pixels.as_ptr() as *mut c_void, stride as usize)? };
 
                 let _ = opencv::imgproc::equalize_hist(&inp1, &mut inp);
 

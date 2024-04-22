@@ -12,7 +12,7 @@ opencv = ["gyroflow-core/use-opencv"]
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 gyroflow-core = { path = "src/core/", features = ["use-opencv", "use-opencl"] }
-system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", rev = "7c79e4e" }
+system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", rev = "59ca281" }
 breakpad-sys = "0.2.0"
 trash = "4.1.0"
 
@@ -27,7 +27,7 @@ serde_json = "1.0"
 bytemuck = "1.15.0"
 nalgebra = "0.32"
 semver = "1.0.22"
-fastrand = "2.0.1"
+fastrand = "2.0.2"
 itertools = "0.12.1"
 regex = "1.10.4"
 rayon = "1.10"
@@ -48,7 +48,7 @@ directories = "5"
 
 qmetaobject = { version = "0.2.10", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.11", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "520acc0" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "7f302b4" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "7.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
@@ -67,7 +67,7 @@ chrono = "0.4"
 
 log-panics = { version = "2.1", features = ["with-backtrace"] }
 
-keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "19df15a" }
+keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "48b49f0" }
 
 [patch.crates-io]
 fc-blackbox = { git = "https://github.com/AdrianEddy/fc-blackbox.git",    rev = "4e9e4e6" }
@@ -75,7 +75,7 @@ qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = 
 qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "59029b9" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
-version = "0.54.0"
+version = "0.56.0"
 features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation", "Win32_System_LibraryLoader",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry",
@@ -92,7 +92,7 @@ core-foundation-sys = "0.8.6"
 cpp_build = "0.5.9"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.0.92"
+cc = "1.0.95"
 
 [[bin]]
 name = "gyroflow"
