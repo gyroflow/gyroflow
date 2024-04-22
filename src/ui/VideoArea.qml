@@ -966,7 +966,7 @@ Item {
 
                 ComboBox {
                     id: playbackRateCb;
-                    model: ["0.13x", "0.25x", "0.5x", "1x", "2x", "4x", "5x", "8x", "10x", "20x"];
+                    model: ["0.13x", "0.25x", "0.5x", "1x", "2x", "4x", "5x", "8x", "10x", "20x", "50x"];
                     width: 60 * dpiScale;
                     currentIndex: 3;
                     height: 25 * dpiScale;

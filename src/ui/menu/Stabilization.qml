@@ -246,6 +246,15 @@ MenuItem {
                     // TODO: figure out a better way than constructing a string
                     let str = "";
                     const add = x.custom_qml || "";
+                    const isPercent = x.keyframe == "SmoothingParamSmoothness" || x.keyframe == "SmoothingParamPitch" || x.keyframe == "SmoothingParamYaw" || x.keyframe == "SmoothingParamRoll";
+                    if (isPercent) {
+                        x.from      *= 100.0;
+                        x.to        *= 100.0;
+                        x.default   *= 100.0;
+                        x.unit      = "%";
+                        x.precision = 1;
+                        x.scaler    = 100.0;
+                    }
                     switch (x.type) {
                         case 'Slider':
                         case 'SliderWithField':
@@ -260,6 +269,7 @@ MenuItem {
                                     width: parent.width;
                                     from: ${x.from};
                                     to: ${x.to};
+                                    scaler: ${x.scaler || 1.0};
                                     value: root.getSmoothingParam("${x.name}", ${x.value});
                                     defaultValue: ${x.default};
                                     objectName: "param-${x.name}";

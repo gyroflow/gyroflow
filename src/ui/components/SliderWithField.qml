@@ -102,7 +102,7 @@ Row {
     }
     NumberField {
         id: field;
-        width: 50 * dpiScale;
+        width: 55 * dpiScale;
         height: 25 * dpiScale;
         precision: 3;
         font.pixelSize: 11 * dpiScale;
