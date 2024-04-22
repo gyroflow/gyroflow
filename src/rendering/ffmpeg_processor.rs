@@ -130,6 +130,7 @@ pub struct VideoInfo {
     pub height: u32,
     pub bitrate: f64, // in Mbps
     pub rotation: i32,
+    pub created_at: Option<u64>
 }
 
 impl<'a> FfmpegProcessor<'a> {
@@ -585,6 +586,7 @@ impl<'a> FfmpegProcessor<'a> {
         }
 
         let context = format::input_with_dictionary(&file.path, dict)?;
+        let created_at = context.metadata().get("creation_time").and_then(|x| chrono::DateTime::parse_from_rfc3339(x).ok()).map(|x| x.timestamp_millis() as u64 / 1000);
         if let Some(stream) = context.streams().best(media::Type::Video) {
             let codec = codec::context::Context::from_parameters(stream.parameters())?;
             if let Ok(video) = codec.decoder().video() {
@@ -623,7 +625,8 @@ impl<'a> FfmpegProcessor<'a> {
                     width: video.width(),
                     height: video.height(),
                     bitrate: bitrate as f64 / 1024.0 / 1024.0,
-                    rotation
+                    rotation,
+                    created_at
                 });
             }
         }

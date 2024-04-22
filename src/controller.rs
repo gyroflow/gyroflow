@@ -112,6 +112,7 @@ pub struct Controller {
     get_org_duration_ms: qt_method!(fn(&self) -> f64),
     get_scaled_duration_ms: qt_method!(fn(&self) -> f64),
     get_scaled_fps: qt_method!(fn(&self) -> f64),
+    set_video_created_at: qt_method!(fn(&self, timestamp: u64)),
 
     recompute_threaded: qt_method!(fn(&mut self)),
     request_recompute: qt_signal!(),
@@ -1391,6 +1392,7 @@ impl Controller {
     fn get_scaled_fps        (&self) -> f64 { self.stabilizer.params.read().get_scaled_fps() }
     fn get_scaling_ratio     (&self) -> f64 { self.stabilizer.get_scaling_ratio() }
     fn get_min_fov           (&self) -> f64 { self.stabilizer.get_min_fov() }
+    fn set_video_created_at  (&self, timestamp: u64) { self.stabilizer.params.write().video_created_at = if timestamp > 0 { Some(timestamp) } else { None }; }
 
     fn set_trim_ranges(&self, ranges: QString) {
         let ranges = ranges.to_string()
@@ -1759,7 +1761,7 @@ impl Controller {
         });
         let db = self.stabilizer.lens_profile_db.clone();
         let text = text.to_string();
-        let mut favorites = HashSet::<String>::from_iter(favorites.into_iter().map(|x| x.to_qbytearray().to_string()));
+        let favorites = HashSet::<String>::from_iter(favorites.into_iter().map(|x| x.to_qbytearray().to_string()));
         core::run_threaded(move || {
             let profiles = db.read().search(&text, &favorites, aspect_ratio, aspect_ratio_swapped).into_iter().map(|(name, file, crc, official, rating, aspect_ratio)| {
                 let mut list = QVariantList::from_iter([

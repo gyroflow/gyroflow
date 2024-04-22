@@ -1204,6 +1204,7 @@ impl RenderQueue {
 
                                 stab.init_from_video_data(info.duration_ms, info.fps, info.frame_count, video_size);
                                 stab.set_video_rotation(((360 - info.rotation) % 360) as f64);
+                                stab.params.write().video_created_at = info.created_at;
 
                                 stab.input_file.write().url = url.clone();
 

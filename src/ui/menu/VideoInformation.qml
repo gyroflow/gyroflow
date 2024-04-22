@@ -69,7 +69,9 @@ MenuItem {
         list.model["Rotation"]     = (root.videoRotation) + " °";
         list.model["Audio"]        = getAudio(md) || "---";
         if (md["metadata.creation_time"]) {
-            list.model["Created at"] = (new Date(Date.parse(md["metadata.creation_time"]))).toLocaleString();
+            const created_at = (new Date(Date.parse(md["metadata.creation_time"])));
+            list.model["Created at"] = created_at.toLocaleString();
+            controller.set_video_created_at(created_at.getTime() / 1000);
         } else {
             delete list.model["Created at"];
         }

@@ -969,6 +969,7 @@ impl StabilizationManager {
                 "fps_scale":   params.fps_scale,
                 "vfr_fps":     params.get_scaled_fps(),
                 "vfr_duration_ms": params.get_scaled_duration_ms(),
+                "created_at"   : params.video_created_at,
             },
             "stabilization": {
                 "fov":                    params.fov,

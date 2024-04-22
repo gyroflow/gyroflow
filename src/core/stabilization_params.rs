@@ -56,6 +56,7 @@ pub struct StabilizationParams {
     pub speed_ramped_timestamps: Option<BTreeMap<i64, i64>>,
     pub frame_count: usize,
     pub duration_ms: f64,
+    pub video_created_at: Option<u64>,
 
     pub trim_ranges: Vec<(f64, f64)>,
 
@@ -136,6 +137,7 @@ impl Default for StabilizationParams {
             speed_ramped_timestamps: None,
             frame_count: 0,
             duration_ms: 0.0,
+            video_created_at: None,
         }
     }
 }
