@@ -25,7 +25,7 @@ fn main() {
 
     // Serialize to a compressed binary file, only if the profile is deploy
     if let Ok(out_dir) = std::env::var("OUT_DIR") {
-        if out_dir.contains("\\deploy\\build\\") || out_dir.contains("/deploy/build/") || cfg!(feature = "bundle-lens-profiles") {
+        if out_dir.contains("\\deploy\\build\\") || out_dir.contains("/deploy/build/") || cfg!(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles")) {
             let binary_path = format!("{project_dir}/../../resources/camera_presets/profiles.cbor.gz");
             if !Path::new(&binary_path).exists() {
                 let mut all_profiles = Vec::new();
