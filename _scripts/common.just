@@ -40,7 +40,20 @@ export MACOSX_DEPLOYMENT_TARGET := "10.15"
 # ――――――――――――――――――――――――――――――――――――――― MacOS ―――――――――――――――――――――――――――――――――――――――――
 
 # ――――――――――――――――――――――――――――――――――――――― Clang ―――――――――――――――――――――――――――――――――――――――――
-export LIBCLANG_PATH := if os() == "macos" { DYLD_FALLBACK_LIBRARY_PATH } else { if path_exists(ExtDir / "llvm/bin") == "true" { ExtDir / "llvm/bin" } else { env_var_or_default("LIBCLANG_PATH", if path_exists("/usr/lib/llvm-13/lib/") == "true" { "/usr/lib/llvm-13/lib/" } else { "" }) } }
+LlvmConfigExists := if os() == "linux" { `which llvm-config &>/dev/null && echo true || echo false` } else { "false" }
+export LIBCLANG_PATH := if os() == "macos" {
+   DYLD_FALLBACK_LIBRARY_PATH
+} else {
+   if path_exists(ExtDir / "llvm/bin") == "true" {
+      ExtDir / "llvm/bin"
+   } else {
+      env_var_or_default("LIBCLANG_PATH", if LlvmConfigExists == "true" {
+         `llvm-config --libdir`
+      } else {
+         if path_exists("/usr/lib/llvm-13/lib/") == "true" { "/usr/lib/llvm-13/lib/" } else { "" }
+      })
+   }
+}
 LLVMPath := LIBCLANG_PATH
 # ――――――――――――――――――――――――――――――――――――――― Clang ―――――――――――――――――――――――――――――――――――――――――
 
