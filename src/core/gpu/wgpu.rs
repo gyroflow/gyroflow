@@ -252,21 +252,12 @@ impl WgpuWrapper {
             lens_model_functions.push_str(digital_lens.as_ref().map(|x| x.wgsl_functions()).unwrap_or(default_digital_lens));
             kernel = kernel.replace("LENS_MODEL_FUNCTIONS;", &lens_model_functions);
             kernel = kernel.replace("SCALAR", wgpu_format.1);
-            // Replace it in source to allow for loop unrolling when compiling shader
-            kernel = kernel.replace("params.interpolation", &format!("{}u", params.interpolation));
 
             let lens_data_len = 16; // TODO
 
             if !drawing_enabled {
                 drawing_len = 16;
             }
-            kernel = kernel.replace("params.pix_element_count >= 1", &format!("{}", params.pix_element_count >= 1));
-            kernel = kernel.replace("params.pix_element_count >= 2", &format!("{}", params.pix_element_count >= 2));
-            kernel = kernel.replace("params.pix_element_count >= 3", &format!("{}", params.pix_element_count >= 3));
-            kernel = kernel.replace("params.pix_element_count >= 4", &format!("{}", params.pix_element_count >= 4));
-            kernel = kernel.replace("bool(params.flags & 1)", &format!("{}", (params.flags & 1) > 0)); // fix_range
-            kernel = kernel.replace("bool(params.flags & 2)", &format!("{}", (params.flags & 2) > 0)); // has_digital_lens
-            kernel = kernel.replace("bool(params.flags & 8)", &format!("{}", (params.flags & 8) > 0)); // has_drawing
 
             let backend = adapter.get_info().backend;
             let in_texture = init_texture(&device, backend, &buffers.input, wgpu_format.0, true);
@@ -339,6 +330,16 @@ impl WgpuWrapper {
                 push_constant_ranges: &[],
             });
 
+            let compilation_options = wgpu::PipelineCompilationOptions {
+                constants: &std::collections::HashMap::from([
+                    (String::from("interpolation"),     params.interpolation     as f64),
+                    (String::from("pix_element_count"), params.pix_element_count as f64),
+                    (String::from("bytes_per_pixel"),   params.bytes_per_pixel   as f64),
+                    (String::from("flags"),             params.flags             as f64),
+                ]),
+                ..Default::default()
+            };
+
             let pipeline = if uses_textures {
                 PipelineType::Render(device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                     label: None,
@@ -347,7 +348,7 @@ impl WgpuWrapper {
                         module: &shader,
                         entry_point: "undistort_vertex",
                         buffers: &[],
-                        compilation_options: Default::default(),
+                        compilation_options: compilation_options.clone(),
                     },
                     fragment: Some(wgpu::FragmentState {
                         module: &shader,
@@ -357,7 +358,7 @@ impl WgpuWrapper {
                             blend: None,
                             write_mask: wgpu::ColorWrites::default(),
                         })],
-                        compilation_options: Default::default(),
+                        compilation_options,
                     }),
                     primitive: wgpu::PrimitiveState {
                         topology: wgpu::PrimitiveTopology::TriangleStrip,
@@ -373,7 +374,7 @@ impl WgpuWrapper {
                     entry_point: "undistort_compute",
                     label: None,
                     layout: Some(&pipeline_layout),
-                    compilation_options: Default::default(),
+                    compilation_options,
                 }))
             };
 

@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
+@id(100) override interpolation:      u32 = 8u;
+@id(101) override pix_element_count:  i32 = 0;
+@id(102) override bytes_per_pixel:    i32 = 0;
+@id(103) override flags:              i32 = 0;
+
 struct KernelParams {
     width:             i32, // 4
     height:            i32, // 8
@@ -59,7 +64,7 @@ const INTER_BITS: u32 = 5u;
 const INTER_TAB_SIZE: i32 = 32; // (1u << INTER_BITS);
 
 fn draw_pixel(in_pix: vec4<f32>, x: u32, y: u32, isInput: bool) -> vec4<f32> {
-    if (!bool(params.flags & 8)) { // Drawing not enabled
+    if (!bool(flags & 8)) { // Drawing not enabled
         return in_pix;
     }
 
@@ -117,8 +122,8 @@ fn read_input_at(uv: vec2<i32>) -> vec4<f32> {
     return vec4<f32>(textureLoad(input_texture, uv, 0));
     // {/texture_input}
     // {buffer_input}
-    let stride_px = params.stride / (params.bytes_per_pixel / params.pix_element_count);
-    let buffer_pos = u32((uv.y * stride_px) + uv.x * params.pix_element_count);
+    let stride_px = params.stride / (bytes_per_pixel / pix_element_count);
+    let buffer_pos = u32((uv.y * stride_px) + uv.x * pix_element_count);
     return vec4<f32>(
         f32(input_buffer[buffer_pos + 0u]),
         f32(input_buffer[buffer_pos + 1u]),
@@ -134,16 +139,16 @@ fn rotate_point(pos: vec2<f32>, angle: f32, origin: vec2<f32>) -> vec2<f32> {
 }
 
 fn sample_input_at(uv_param: vec2<f32>) -> vec4<f32> {
-    let fix_range = bool(params.flags & 1);
+    let fix_range = bool(flags & 1);
 
     let bg = params.background * params.max_pixel_value;
     var sum = vec4<f32>(0.0);
 
-    let shift = (params.interpolation >> 2u) + 1u;
+    let shift = (interpolation >> 2u) + 1u;
     var indices: array<i32, 3> = array<i32, 3>(0, 64, 192);
-    let ind = indices[params.interpolation >> 2u];
+    let ind = indices[interpolation >> 2u];
     var offsets: array<f32, 3> = array<f32, 3>(0.0, 1.0, 3.0);
-    let offset = offsets[params.interpolation >> 2u];
+    let offset = offsets[interpolation >> 2u];
 
     var uv = uv_param;
     if (params.input_rotation != 0.0) {
@@ -166,16 +171,16 @@ fn sample_input_at(uv_param: vec2<f32>) -> vec4<f32> {
     let coeffs_x = i32(ind + ((sx0 & (INTER_TAB_SIZE - 1)) << shift));
     let coeffs_y = i32(ind + ((sy0 & (INTER_TAB_SIZE - 1)) << shift));
 
-    for (var yp: i32 = 0; yp < i32(params.interpolation); yp = yp + 1) {
+    for (var yp: i32 = 0; yp < i32(interpolation); yp = yp + 1) {
         if (sy + yp >= params.source_rect.y && sy + yp < params.source_rect.y + params.source_rect.w) {
             var xsum = vec4<f32>(0.0, 0.0, 0.0, 0.0);
-            for (var xp: i32 = 0; xp < i32(params.interpolation); xp = xp + 1) {
+            for (var xp: i32 = 0; xp < i32(interpolation); xp = xp + 1) {
                 var pixel: vec4<f32>;
                 if (sx + xp >= params.source_rect.x && sx + xp < params.source_rect.x + params.source_rect.z) {
                     pixel = read_input_at(vec2<i32>(sx + xp, sy + yp));
                     pixel = draw_pixel(pixel, u32(sx + xp), u32(sy + yp), true);
                     if (fix_range) {
-                        pixel = remap_colorrange(pixel, params.bytes_per_pixel == 1);
+                        pixel = remap_colorrange(pixel, bytes_per_pixel == 1);
                     }
                 } else {
                     pixel = bg;
@@ -206,7 +211,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
         }
         var uv = f * distort_point(_x, _y, _w) + c;
 
-        if (bool(params.flags & 2)) { // Has digital lens
+        if (bool(flags & 2)) { // Has digital lens
             uv = digital_distort_point(uv);
         }
 
@@ -224,7 +229,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
 fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
     let bg = vec4<f32>(params.background.x, params.background.y, params.background.z, params.background.w) * params.max_pixel_value;
 
-    if (bool(params.flags & 4)) { // Fill with background
+    if (bool(flags & 4)) { // Fill with background
         return vec4<SCALAR>(bg);
     }
 
@@ -248,7 +253,7 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
 
         var new_out_pos = out_pos;
 
-        if (bool(params.flags & 2)) { // Has digital lens
+        if (bool(flags & 2)) { // Has digital lens
             new_out_pos = digital_undistort_point(new_out_pos);
         }
 
@@ -263,7 +268,7 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
     var sy = 0u;
-    if (bool(params.flags & 16)) { // Horizontal RS
+    if (bool(flags & 16)) { // Horizontal RS
         sy = u32(min(params.width, max(0, i32(floor(0.5 + out_pos.x)))));
     } else {
         sy = u32(min(params.height, max(0, i32(floor(0.5 + out_pos.y)))));
@@ -272,7 +277,7 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
         let idx: u32 = u32((params.matrix_count / 2) * 12); // Use middle matrix
         let uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k1, params.k2, params.k3);
         if (uv.x > -99998.0) {
-            if (bool(params.flags & 16)) { // Horizontal RS
+            if (bool(flags & 16)) { // Horizontal RS
                 sy = u32(min(params.width, max(0, i32(floor(0.5 + uv.x)))));
             } else {
                 sy = u32(min(params.height, max(0, i32(floor(0.5 + uv.y)))));
@@ -349,11 +354,11 @@ fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) ve
 @compute @workgroup_size(8, 8)
 fn undistort_compute(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let final_px = undistort(vec2<f32>(f32(global_id.x), f32(global_id.y)));
-    let stride_px = params.output_stride / (params.bytes_per_pixel / params.pix_element_count);
-    let buffer_pos = (global_id.y * u32(stride_px) + global_id.x * u32(params.pix_element_count));
-    if (params.pix_element_count >= 1) { output_buffer[buffer_pos + 0u] = final_px.x; }
-    if (params.pix_element_count >= 2) { output_buffer[buffer_pos + 1u] = final_px.y; }
-    if (params.pix_element_count >= 3) { output_buffer[buffer_pos + 2u] = final_px.z; }
-    if (params.pix_element_count >= 4) { output_buffer[buffer_pos + 3u] = final_px.w; }
+    let stride_px = params.output_stride / (bytes_per_pixel / pix_element_count);
+    let buffer_pos = (global_id.y * u32(stride_px) + global_id.x * u32(pix_element_count));
+    if (pix_element_count >= 1) { output_buffer[buffer_pos + 0u] = final_px.x; }
+    if (pix_element_count >= 2) { output_buffer[buffer_pos + 1u] = final_px.y; }
+    if (pix_element_count >= 3) { output_buffer[buffer_pos + 2u] = final_px.z; }
+    if (pix_element_count >= 4) { output_buffer[buffer_pos + 3u] = final_px.w; }
 }
 // {/buffer_input}
