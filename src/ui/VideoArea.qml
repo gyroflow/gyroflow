@@ -339,7 +339,7 @@ Item {
             root.loadedFileUrl = url;
         }
 
-        if (isStorePackage && Qt.platform.os == "macos" && filename.toLowerCase().endsWith(".r3d") && folder.toString().length < 3) {
+        if (isStorePackage && Qt.platform.os == "osx" && filename.toLowerCase().endsWith(".r3d") && folder.toString().length < 3) {
             messageBox(Modal.Info, qsTr("In order to load all R3D parts, you need to select the entire .RDC folder."), [
                 { text: qsTr("OK"), accent: true, clicked: function() {
                     opf.selectFolder("", function(_) {
@@ -434,6 +434,9 @@ Item {
             root.loadFile(urls[0], skip_detection);
         } else if (urls.length > 1) {
             const urlsCopy = [...urls];
+            if (urlsCopy[0].toLowerCase().endsWith(".r3d")) {
+                return root.loadFile(urlsCopy[0], true);
+            }
             const dlg = messageBox(Modal.Question, qsTr("You have opened multiple files. What do you want to do?"), [
                 { text: qsTr("Add to render queue"), clicked: () => {
                     queue.item.dt.loadFiles(urlsCopy);
