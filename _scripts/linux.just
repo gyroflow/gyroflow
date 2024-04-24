@@ -49,7 +49,7 @@ install-deps:
 
     if [ ! -d "{{ExtDir}}/{{QtVersion}}" ]; then
         echo "Setting up python venv in {{ExtDir}}/venv"
-        python -m venv "{{ExtDir}}/venv"
+        python3 -m venv "{{ExtDir}}/venv"
         source "{{ExtDir}}/venv/bin/activate"
 
         echo "Installing Qt {{QtVersion}}"
