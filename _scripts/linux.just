@@ -1,5 +1,7 @@
 import 'common.just'
 
+AptGetExists := `which apt-get &>/dev/null && echo true || echo false`
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -9,17 +11,22 @@ install-deps:
     #!/bin/bash
     set -e
 
-    sudo apt-get install -y p7zip-full python3-pip clang libclang-dev bison pkg-config gperf curl unzip zip git
-    sudo apt-get install -y libc++-dev libva-dev libvdpau-dev libvdpau1 mesa-va-drivers ocl-icd-opencl-dev opencl-headers
-    sudo apt-get install -y libpulse-dev libasound-dev libxkbcommon-dev
-    sudo apt-get install -y libfontconfig1 libfreetype6
+    echo "Installing dependencies $LIBCLANG_PATH  {{AptGetExists}}"
+    if [ "{{AptGetExists}}" == "true" ]; then
+        sudo apt-get install -y p7zip-full python3-pip clang libclang-dev bison pkg-config gperf curl unzip zip git
+        sudo apt-get install -y libc++-dev libva-dev libvdpau-dev libvdpau1 mesa-va-drivers ocl-icd-opencl-dev opencl-headers
+        sudo apt-get install -y libpulse-dev libasound-dev libxkbcommon-dev
+        sudo apt-get install -y libfontconfig1 libfreetype6
+    fi
 
     mkdir -p {{ExtDir}}
 
     if [ ! -f "{{OpenCVPath}}/../lib/libopencv_core4.a" ]; then
         echo "Installing OpenCV from vcpkg"
         # OpenCV dependencies
-        sudo apt-get install -y libx11-dev libxft-dev libxext-dev autoconf libtool libglfw3 libgles2-mesa-dev libxrandr-dev libxi-dev libxcursor-dev libxdamage-dev libxinerama-dev libxxf86vm-dev libdbus-1-dev libxtst-dev libdbus-1-dev libxi-dev libxtst-dev libsystemd-dev
+        if [ "{{AptGetExists}}" == "true" ]; then
+            sudo apt-get install -y libx11-dev libxft-dev libxext-dev autoconf libtool libglfw3 libgles2-mesa-dev libxrandr-dev libxi-dev libxcursor-dev libxdamage-dev libxinerama-dev libxxf86vm-dev libdbus-1-dev libxtst-dev libdbus-1-dev libxi-dev libxtst-dev libsystemd-dev
+        fi
 
         # Install vcpkg
         git clone --depth 1 https://github.com/Microsoft/vcpkg.git {{ExtDir}}/vcpkg || true
@@ -33,12 +40,18 @@ install-deps:
     fi
 
     if [[ ! -d "${LIBCLANG_PATH}" ]]; then
-        sudo apt-get install -y libclang-13-dev
+        if [ "{{AptGetExists}}" == "true" ]; then
+            sudo apt-get install -y libclang-13-dev
+        fi
     fi
 
     pushd {{ExtDir}}
 
     if [ ! -d "{{ExtDir}}/{{QtVersion}}" ]; then
+        echo "Setting up python venv in {{ExtDir}}/venv"
+        python -m venv "{{ExtDir}}/venv"
+        source "{{ExtDir}}/venv/bin/activate"
+
         echo "Installing Qt {{QtVersion}}"
         # Install Qt
         pip3 install -U pip
@@ -76,6 +89,11 @@ install-deps:
     fi
 
     popd
+
+    if [ "{{AptGetExists}}" == "false" ]; then
+        echo "Warning: apt-get not found, so build dependencies could not be automatically installed."
+        echo "  Make sure you have installed all required build dependencies using your system's package manager."
+    fi
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Development ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
