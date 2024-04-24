@@ -40,7 +40,7 @@ export MACOSX_DEPLOYMENT_TARGET := "10.15"
 # ――――――――――――――――――――――――――――――――――――――― MacOS ―――――――――――――――――――――――――――――――――――――――――
 
 # ――――――――――――――――――――――――――――――――――――――― Clang ―――――――――――――――――――――――――――――――――――――――――
-LlvmConfigExists := if os() == "linux" { `which llvm-config &>/dev/null && echo true || echo false` } else { "false" }
+LlvmConfigExists := if os() == "linux" { `which llvm-config > /dev/null && echo true || echo false` } else { "false" }
 export LIBCLANG_PATH := if os() == "macos" {
    DYLD_FALLBACK_LIBRARY_PATH
 } else {

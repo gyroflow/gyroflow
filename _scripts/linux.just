@@ -1,6 +1,6 @@
 import 'common.just'
 
-AptGetExists := `which apt-get &>/dev/null && echo true || echo false`
+AptGetExists := `which apt-get > /dev/null && echo true || echo false`
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -11,7 +11,7 @@ install-deps:
     #!/bin/bash
     set -e
 
-    echo "Installing dependencies $LIBCLANG_PATH  {{AptGetExists}}"
+    echo "Installing dependencies $LIBCLANG_PATH {{AptGetExists}}"
     if [ "{{AptGetExists}}" == "true" ]; then
         sudo apt-get install -y p7zip-full python3-pip clang libclang-dev bison pkg-config gperf curl unzip zip git
         sudo apt-get install -y libc++-dev libva-dev libvdpau-dev libvdpau1 mesa-va-drivers ocl-icd-opencl-dev opencl-headers
