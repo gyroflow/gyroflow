@@ -424,9 +424,9 @@ Item {
                                 } else if (errorString.startsWith("file_exists:")) {
                                     const data = JSON.parse(errorString.substring(12));
                                     switch (render_queue.overwrite_mode) {
-                                        case 1: render_queue.reset_job(job_id); btns.model = []; break; // Overwrite
-                                        case 2: render_queue.set_job_output_filename(job_id, window.renameOutput(data.filename, data.folder), false); btns.model = []; break; // Rename
-                                        case 3: render_queue.set_error_string(job_id, qsTr("Output file already exists.")); btns.model = []; break; // Skip
+                                        case 1: Qt.callLater(render_queue.reset_job, job_id); btns.model = []; break; // Overwrite
+                                        case 2: Qt.callLater(render_queue.set_job_output_filename, job_id, window.renameOutput(data.filename, data.folder), false); btns.model = []; break; // Rename
+                                        case 3: Qt.callLater(render_queue.set_error_string, job_id, qsTr("Output file already exists.")); btns.model = []; break; // Skip
                                         default:
                                             btns.model = [
                                                 { text: qsTr("Yes"),    clicked: () => { render_queue.reset_job(job_id); }, accent: true },
