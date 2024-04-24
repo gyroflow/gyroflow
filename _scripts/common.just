@@ -47,7 +47,7 @@ export LIBCLANG_PATH := if os() == "macos" {
    if path_exists(ExtDir / "llvm/bin") == "true" {
       ExtDir / "llvm/bin"
    } else {
-      env_var_or_default("LIBCLANG_PATH", if LlvmConfigExists == "true" {
+      env_var_or_default("LIBCLANG_PATH", if "{{LlvmConfigExists}}" == "true" {
          `llvm-config --libdir`
       } else {
          if path_exists("/usr/lib/llvm-13/lib/") == "true" { "/usr/lib/llvm-13/lib/" } else { "" }
