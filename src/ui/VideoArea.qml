@@ -346,7 +346,7 @@ Item {
                         root.loadFile(root.loadedFileUrl);
                     });
                 } },
-            ]);
+            ], null, undefined, "open-rdc-folder");
             return;
         }
 
