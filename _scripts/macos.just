@@ -21,7 +21,7 @@ install-deps:
     #!/bin/bash
     set -e
 
-    brew install p7zip pkg-config
+    brew install p7zip pkg-config flatbuffers
     brew list python &>/dev/null || brew install python
     xcode-select --install || true
 
@@ -33,6 +33,9 @@ install-deps:
     ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
     if [ ! -d "{{ExtDir}}/{{QtVersion}}" ]; then
+        echo "Setting up python venv in {{ExtDir}}/venv"
+        python3 -m venv "{{ExtDir}}/venv"
+        source "{{ExtDir}}/venv/bin/activate"
         # Install Qt
         echo "Installing Qt"
         python3 -m pip install -U pip aqtinstall
