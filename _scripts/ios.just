@@ -32,7 +32,7 @@ export IPHONEOS_DEPLOYMENT_TARGET := "14.0"
 install-deps:
     #!/bin/bash
     set -e
-    brew install p7zip pkg-config ios-deploy flatbuffers
+    brew install p7zip pkg-config ios-deploy
     brew list python &>/dev/null || brew install python
     rustup target add aarch64-apple-ios
     xcode-select --install || true
@@ -47,6 +47,9 @@ install-deps:
     ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
     if [ ! -d "{{ExtDir}}/{{QtVersionIOS}}/ios" ] || [ ! -d "{{ExtDir}}/{{QtVersionIOS}}/macos" ]; then
+        echo "Setting up python venv in {{ExtDir}}/venv"
+        python3 -m venv "{{ExtDir}}/venv"
+        source "{{ExtDir}}/venv/bin/activate"
         # Install Qt
         python3 -m pip install -U pip aqtinstall
         python3 -m aqt install-qt mac desktop {{QtVersionIOS}}
@@ -60,6 +63,7 @@ install-deps:
     if [ ! -f "{{ExtDir}}/vcpkg/installed/arm64-ios/lib/libopencv_core4.a" ]; then
         echo "Installing OpenCV from vcpkg"
         # Install OpenCV
+        ./vcpkg/vcpkg install "flatbuffers:arm64-ios"
         ./vcpkg/vcpkg install "opencv4[core]:arm64-ios"
         rm -rf ./vcpkg/buildtrees
         rm -rf ./vcpkg/downloads
