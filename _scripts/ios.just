@@ -32,7 +32,7 @@ export IPHONEOS_DEPLOYMENT_TARGET := "14.0"
 install-deps:
     #!/bin/bash
     set -e
-    brew install p7zip pkg-config ios-deploy
+    brew install p7zip pkg-config ios-deploy flatbuffers
     brew list python &>/dev/null || brew install python
     rustup target add aarch64-apple-ios
     xcode-select --install || true
