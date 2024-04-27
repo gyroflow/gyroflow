@@ -51,6 +51,7 @@ install-deps:
         rm -Recurse -Force \vcpkg -ErrorAction SilentlyContinue
         git clone --depth 1 https://github.com/Microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+        .\vcpkg\vcpkg install "flatbuffers:{{VcpkgArch}}"
         .\vcpkg\vcpkg install "opencv4[core]:{{VcpkgArch}}"
         .\vcpkg\vcpkg install "opencl:{{VcpkgArch}}"
         rm -Recurse -Force .\vcpkg\buildtrees

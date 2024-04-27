@@ -246,7 +246,7 @@ MenuItem {
                     // TODO: figure out a better way than constructing a string
                     let str = "";
                     const add = x.custom_qml || "";
-                    const isPercent = x.keyframe == "SmoothingParamSmoothness" || x.keyframe == "SmoothingParamPitch" || x.keyframe == "SmoothingParamYaw" || x.keyframe == "SmoothingParamRoll";
+                    const isPercent = smoothingMethod.currentIndex == 1 && (x.keyframe == "SmoothingParamSmoothness" || x.keyframe == "SmoothingParamPitch" || x.keyframe == "SmoothingParamYaw" || x.keyframe == "SmoothingParamRoll");
                     if (isPercent) {
                         x.from      *= 100.0;
                         x.to        *= 100.0;
