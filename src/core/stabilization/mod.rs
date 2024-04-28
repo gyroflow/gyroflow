@@ -331,9 +331,6 @@ impl Stabilization {
 
         let hash = self.get_current_checksum(buffers);
         if i < 0 { // CPU
-            #[cfg(feature = "use-opencl")]
-            { self.cl = None; }
-            self.wgpu = None;
             CACHED_WGPU.with(|x| x.0.borrow_mut().clear());
             self.initialized_backend = BackendType::Cpu(hash);
             return true;
@@ -344,7 +341,11 @@ impl Stabilization {
                 self.initialized_backend = BackendType::None;
                 #[cfg(feature = "use-opencl")]
                 match opencl::OclWrapper::set_device(i as usize, buffers) {
-                    Ok(_) => { self.next_backend = Some("opencl"); return true; },
+                    Ok(_) => {
+                        self.next_backend = Some("opencl");
+                        CACHED_WGPU.with(|x| x.0.borrow_mut().clear());
+                        return true;
+                    },
                     Err(e) => {
                         log::error!("Failed to set OpenCL device {}: {:?}", name, e);
                     }
@@ -487,7 +488,7 @@ impl Stabilization {
             // OpenCL path
             #[cfg(feature = "use-opencl")]
             if let Some(ref cl) = self.cl {
-                if opencl::is_buffer_supported(buffers) {
+                if !matches!(self.initialized_backend, BackendType::Cpu(_)) && opencl::is_buffer_supported(buffers) {
                     if let Err(err) = cl.undistort_image(buffers, &itm, drawing_buffer) {
                         log::error!("OpenCL error undistort: {:?}", err);
                     } else {
@@ -498,7 +499,7 @@ impl Stabilization {
             }
 
             // wgpu path
-            if wgpu::is_buffer_supported(buffers) {
+            if !matches!(self.initialized_backend, BackendType::Cpu(_)) && wgpu::is_buffer_supported(buffers) {
                 if self.share_wgpu_instances {
                     let hash = self.get_current_checksum(buffers);
                     let has_any_cache = CACHED_WGPU.with(|x| !x.0.borrow().is_empty());
