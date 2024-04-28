@@ -474,7 +474,9 @@ impl<'a> FfmpegProcessor<'a> {
             // self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.flush();
             self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, start_ms, end_ms, &mut self.frame_ts)?;
             self.video.encoder.as_mut().ok_or(Error::EncoderNotFound)?.send_eof()?;
-            self.video.receive_and_process_encoded_packets(&mut octx, ost_time_base)?;
+            if let Err(e) = self.video.receive_and_process_encoded_packets(&mut octx, ost_time_base) {
+                log::error!("Failed to flush last packet: {e:?}");
+            }
         }
         if self.audio_codec != codec::Id::None {
             for (ost_index, transcoder) in atranscoders.iter_mut() {
