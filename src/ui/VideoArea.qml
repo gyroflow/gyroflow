@@ -434,7 +434,7 @@ Item {
             root.loadFile(urls[0], skip_detection);
         } else if (urls.length > 1) {
             const urlsCopy = [...urls];
-            if (urlsCopy[0].toLowerCase().endsWith(".r3d")) {
+            if (urlsCopy[0].toString().toLowerCase().endsWith(".r3d")) {
                 return root.loadFile(urlsCopy[0], true);
             }
             const dlg = messageBox(Modal.Question, qsTr("You have opened multiple files. What do you want to do?"), [
