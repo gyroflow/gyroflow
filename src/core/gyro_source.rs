@@ -396,8 +396,9 @@ impl GyroSource {
 
                             let mut video_ts = 0.0;
                             let mut zero_ref = None;
+                            let mut prev_t = 0.0;
                             for x in exp {
-                                if x.t >= 0.0 {
+                                if x.t > prev_t || x.t == 0.0 {
                                     if zero_ref.is_none() {
                                         zero_ref = Some(x.t * 1000.0);
                                         log::debug!("Insta360 first frame reference time: {:.4}", x.t * 1000.0);
@@ -407,6 +408,7 @@ impl GyroSource {
                                     md.per_frame_time_offsets.push(-(x.v * 1000.0 / 2.0) - 0.9 - diff - zero_ref.unwrap());
 
                                     video_ts += 1.0 / fps;
+                                    prev_t = x.t;
                                 }
                             }
                         });
