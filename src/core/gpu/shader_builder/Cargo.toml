@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-naga = { git = "https://github.com/gfx-rs/naga.git", features = ["spv-in", "wgsl-out", "glsl-out", "compact"] }
+naga = { git = "https://github.com/gfx-rs/wgpu.git", rev = "5fa537b", features = ["spv-in", "wgsl-out", "glsl-out", "compact"] }
 regex = "1.9.0"
 
 [build-dependencies]
-spirv-builder = "0.9"
+spirv-builder = { git = "https://github.com/EmbarkStudios/rust-gpu", rev = "54f6978" }
 
 [profile.release]
 opt-level = 3

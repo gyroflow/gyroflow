@@ -155,10 +155,12 @@ fn sample_input_at(uv_param: vec2<f32>) -> vec4<f32> {
         uv = rotate_point(uv, params.input_rotation * (3.14159265359 / 180.0), vec2<f32>(f32(params.width) / 2.0, f32(params.height) / 2.0));
     }
 
-    uv = vec2<f32>(
-        map_coord(uv.x, 0.0, f32(params.width),  f32(params.source_rect.x), f32(params.source_rect.x + params.source_rect.z)),
-        map_coord(uv.y, 0.0, f32(params.height), f32(params.source_rect.y), f32(params.source_rect.y + params.source_rect.w))
-    );
+    if (bool(flags & 32)) { // Uses source rect
+        uv = vec2<f32>(
+            map_coord(uv.x, 0.0, f32(params.width),  f32(params.source_rect.x), f32(params.source_rect.x + params.source_rect.z)),
+            map_coord(uv.y, 0.0, f32(params.height), f32(params.source_rect.y), f32(params.source_rect.y + params.source_rect.w))
+        );
+    }
 
     uv = uv - offset;
 
@@ -229,14 +231,17 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
 fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
     let bg = vec4<f32>(params.background.x, params.background.y, params.background.z, params.background.w) * params.max_pixel_value;
 
-    if (bool(flags & 4)) { // Fill with background
+    if (bool(params.flags & 4)) { // Fill with background
         return vec4<SCALAR>(bg);
     }
 
-    var out_pos = vec2<f32>(
-        map_coord(position.x, f32(params.output_rect.x), f32(params.output_rect.x + params.output_rect.z), 0.0, f32(params.output_width) ),
-        map_coord(position.y, f32(params.output_rect.y), f32(params.output_rect.y + params.output_rect.w), 0.0, f32(params.output_height))
-    );
+    var out_pos = position;
+    if (bool(flags & 64)) { // Uses output rect
+        out_pos = vec2<f32>(
+            map_coord(position.x, f32(params.output_rect.x), f32(params.output_rect.x + params.output_rect.z), 0.0, f32(params.output_width) ),
+            map_coord(position.y, f32(params.output_rect.y), f32(params.output_rect.y + params.output_rect.w), 0.0, f32(params.output_height))
+        );
+    }
 
     let p = out_pos;
 

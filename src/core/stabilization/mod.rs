@@ -54,6 +54,8 @@ bitflags::bitflags! {
         const FILL_WITH_BACKGROUND = 4;
         const DRAWING_ENABLED      = 8;
         const HORIZONTAL_RS        = 16; // right-to-left or left-to-right rolling shutter
+        const HAS_SOURCE_RECT      = 32;
+        const HAS_OUTPUT_RECT      = 64;
     }
 }
 
@@ -181,6 +183,8 @@ impl Stabilization {
 
         self.kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, self.compute_params.digital_lens.is_some());
         self.kernel_flags.set(KernelParamsFlags::HORIZONTAL_RS, self.compute_params.horizontal_rs);
+        self.kernel_flags.set(KernelParamsFlags::HAS_SOURCE_RECT, buffers.input.rect.is_some());
+        self.kernel_flags.set(KernelParamsFlags::HAS_OUTPUT_RECT, buffers.output.rect.is_some());
 
         let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
         transform.kernel_params.pixel_value_limit = T::default_max_value().unwrap_or(f32::MAX);

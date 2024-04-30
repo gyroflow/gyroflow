@@ -27,9 +27,13 @@ pub fn undistort_fragment(
     #[spirv(descriptor_set = 0, binding = 3)] matrices: &Image!(2D, type=f32, sampled),
     #[spirv(descriptor_set = 0, binding = 4)] drawing: &Image!(2D, type=f32, sampled),
     #[spirv(descriptor_set = 0, binding = 5)] sampler: &spirv_std::Sampler,
+    #[spirv(spec_constant(id = 100, default = 8))] interpolation: u32,
+    #[spirv(spec_constant(id = 101, default = 1))] distortion_model: u32,
+    #[spirv(spec_constant(id = 102))] digital_distortion_model: u32,
+    #[spirv(spec_constant(id = 103))] flags: u32,
     output: &mut ScalarVec4,
 ) {
-    *output = undistort(vec2(in_frag_coord.x, in_frag_coord.y), params, matrices, &[], &[], drawing, input_texture, sampler);
+    *output = undistort(vec2(in_frag_coord.x, in_frag_coord.y), params, matrices, &[], &[], drawing, input_texture, sampler, interpolation, distortion_model, digital_distortion_model, flags);
 }
 
 #[cfg(not(feature = "for_qtrhi"))]
@@ -42,10 +46,13 @@ pub fn undistort_fragment(
     #[spirv(storage_buffer, descriptor_set = 0, binding = 3)] lens_data: &[f32],
     #[spirv(storage_buffer, descriptor_set = 0, binding = 4)] drawing: &[u32],
     #[spirv(descriptor_set = 0, binding = 5)] input_texture: &ImageType,
+    #[spirv(spec_constant(id = 100, default = 8))] interpolation: u32,
+    #[spirv(spec_constant(id = 101, default = 1))] distortion_model: u32,
+    #[spirv(spec_constant(id = 102))] digital_distortion_model: u32,
+    #[spirv(spec_constant(id = 103))] flags: u32,
     output: &mut ScalarVec4,
 ) {
-    *output = from_float(undistort(vec2(in_frag_coord.x, in_frag_coord.y), params, matrices, coeffs, lens_data, drawing, input_texture, 0.0));
-    // *output *= 1.3;
+    *output = from_float(undistort(vec2(in_frag_coord.x, in_frag_coord.y), params, matrices, coeffs, lens_data, drawing, input_texture, 0.0, interpolation, distortion_model, digital_distortion_model, flags));
 }
 
 #[spirv(vertex)]

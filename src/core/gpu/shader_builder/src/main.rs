@@ -109,7 +109,7 @@ fn main() {
                 (naga::ResourceBinding { group: 0, binding: 1 }, 1),
                 (naga::ResourceBinding { group: 0, binding: 2 }, 2),
                 (naga::ResourceBinding { group: 0, binding: 3 }, 3),
-                (naga::ResourceBinding { group: 0, binding: 4 }, 4)
+                (naga::ResourceBinding { group: 0, binding: 4 }, 4),
             ]),
             ..Default::default()
         };
@@ -118,7 +118,23 @@ fn main() {
             shader_stage: naga::ShaderStage::Fragment,
             multiview: None,
         };
-        let mut writer = glsl::Writer::new(&mut buffer, &module, &info, &options, &pipeline_options, naga::proc::BoundsCheckPolicies::default()).unwrap();
+
+        let mut constants = naga::back::PipelineConstants::default();
+        constants.insert("100".to_owned(), 2.0); // interpolation
+        constants.insert("101".to_owned(), 1.0); // distortion_model
+        constants.insert("102".to_owned(), 0.0); // digital_distortion_model
+        constants.insert("103".to_owned(), 0.0); // flags
+        let (module, info) = naga::back::pipeline_constants::process_overrides(&module, &info, &constants).unwrap();
+
+        let policies = naga::proc::BoundsCheckPolicies {
+            index:         naga::proc::BoundsCheckPolicy::Unchecked,
+            buffer:        naga::proc::BoundsCheckPolicy::Unchecked,
+            image_load:    naga::proc::BoundsCheckPolicy::Unchecked,
+            image_store:   naga::proc::BoundsCheckPolicy::Unchecked,
+            binding_array: naga::proc::BoundsCheckPolicy::Unchecked,
+        };
+
+        let mut writer = glsl::Writer::new(&mut buffer, &module, &info, &options, &pipeline_options, policies).unwrap();
         writer.write().unwrap();
 
         // Uints are not supported in ES
@@ -144,10 +160,11 @@ fn main() {
         // println!("{}", buffer);
     }
 
-    let _ = std::process::Command::new("../../../../ext/6.4.3/msvc2019_64/bin/qsb.exe")
+    let _ = std::process::Command::new("../../../../ext/6.7.0/msvc2019_64/bin/qsb.exe")
             .args(["--glsl", "120,300 es,310 es,320 es,310,320,330,400,410,420"])
             .args(["--hlsl", "50"])
             .args(["--msl", "12"])
+            .arg("-O")
             .args(["-o", &qsb_out_path])
             .arg(&frag_out_path)
             .status().unwrap().success();

@@ -18,8 +18,8 @@ fn get_mtrx_param(_size_for_rs: f32, matrices: &MatricesType, _sampler: SamplerT
     }
 }
 
-pub fn rotate_and_distort(pos: Vec2, idx: i32, params: &KernelParams, matrices: &MatricesType, sampler: SamplerType) -> Vec2 {
-    let size_for_rs = if (params.flags & 16) == 16 { params.width as f32 } else { params.height as f32 };
+pub fn rotate_and_distort(pos: Vec2, idx: i32, params: &KernelParams, matrices: &MatricesType, sampler: SamplerType, distortion_model: u32, digital_distortion_model: u32, flags: u32) -> Vec2 {
+    let size_for_rs = if (flags & 16) == 16 { params.width as f32 } else { params.height as f32 };
     let point_3d = vec3(
         (pos.x * get_mtrx_param(size_for_rs, matrices, sampler, idx, 0)) + (pos.y * get_mtrx_param(size_for_rs, matrices, sampler, idx, 1)) + get_mtrx_param(size_for_rs, matrices, sampler, idx, 2) + params.translation3d.x,
         (pos.x * get_mtrx_param(size_for_rs, matrices, sampler, idx, 3)) + (pos.y * get_mtrx_param(size_for_rs, matrices, sampler, idx, 4)) + get_mtrx_param(size_for_rs, matrices, sampler, idx, 5) + params.translation3d.y,
@@ -29,10 +29,10 @@ pub fn rotate_and_distort(pos: Vec2, idx: i32, params: &KernelParams, matrices: 
         if params.r_limit > 0.0 && vec2(point_3d.x / point_3d.z, point_3d.y / point_3d.z).length_squared() > params.r_limit.powi(2) {
             return vec2(-99999.0, -99999.0);
         }
-        let mut uv = params.f * lens_distort(point_3d, params) + params.c;
+        let mut uv = params.f * lens_distort(point_3d, params, distortion_model) + params.c;
 
-        if (params.flags & 2) == 2 { // Has digital lens
-            uv = digital_lens_distort(vec3(uv.x, uv.y, 1.0), params);
+        if (flags & 2) == 2 { // Has digital lens
+            uv = digital_lens_distort(vec3(uv.x, uv.y, 1.0), params, digital_distortion_model);
         }
 
         if params.input_horizontal_stretch > 0.001 { uv.x /= params.input_horizontal_stretch; }
@@ -43,17 +43,21 @@ pub fn rotate_and_distort(pos: Vec2, idx: i32, params: &KernelParams, matrices: 
     vec2(-99999.0, -99999.0)
 }
 
-pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeffs: &[f32], _lens_data: &[f32], drawing: &DrawingType, input: &ImageType, sampler: SamplerType) -> Vec4 {
+pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeffs: &[f32], _lens_data: &[f32], drawing: &DrawingType, input: &ImageType, sampler: SamplerType, interpolation: u32, distortion_model: u32, digital_distortion_model: u32, flags: u32) -> Vec4 {
     let bg = params.background * params.max_pixel_value;
 
     if (params.flags & 4) == 4 { // Fill with background
         return bg;
     }
 
-    let mut out_pos = vec2(
-        map_coord(uv.x as f32, params.output_rect.x as f32, (params.output_rect.x + params.output_rect.z) as f32, 0.0, params.output_width as f32 ),
-        map_coord(uv.y as f32, params.output_rect.y as f32, (params.output_rect.y + params.output_rect.w) as f32, 0.0, params.output_height as f32)
-    );
+    let mut out_pos = if (flags & 64) == 64 { // Uses output rect
+        vec2(
+            map_coord(uv.x as f32, params.output_rect.x as f32, (params.output_rect.x + params.output_rect.z) as f32, 0.0, params.output_width as f32 ),
+            map_coord(uv.y as f32, params.output_rect.y as f32, (params.output_rect.y + params.output_rect.w) as f32, 0.0, params.output_height as f32)
+        )
+    } else {
+        vec2(uv.x as f32, uv.y as f32)
+    };
 
     if out_pos.x < 0.0 || out_pos.y < 0.0 || out_pos.x > params.output_width as f32 || out_pos.y > params.output_height as f32 { return bg; }
 
@@ -68,15 +72,15 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
         let out_f = params.f / params.fov / factor;
         let mut new_out_pos = out_pos;
 
-        if (params.flags & 2) == 2 { // Has digial lens
-            let pt = digital_lens_undistort(new_out_pos, params);
+        if (flags & 2) == 2 { // Has digial lens
+            let pt = digital_lens_undistort(new_out_pos, params, digital_distortion_model);
             if pt.x > -99998.0 {
                 new_out_pos = pt;
             }
         }
 
         new_out_pos = (new_out_pos - out_c) / out_f;
-        new_out_pos = lens_undistort(new_out_pos, params);
+        new_out_pos = lens_undistort(new_out_pos, params, distortion_model);
         new_out_pos = new_out_pos * out_f + out_c;
 
         out_pos = new_out_pos * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);
@@ -85,16 +89,16 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
 
     ///////////////////////////////////////////////////////////////////
     // Calculate source `y` for rolling shutter
-    let mut sy = if (params.flags & 16) == 16 { // Horizontal RS
+    let mut sy = if (flags & 16) == 16 { // Horizontal RS
         (fast_round(out_pos.x) as f32).min(params.width as f32).max(0.0)
     } else {
         (fast_round(out_pos.y) as f32).min(params.height as f32).max(0.0)
     };
     if params.matrix_count > 1 {
         let idx = params.matrix_count / 2;
-        let pt = rotate_and_distort(out_pos, idx, params, matrices, sampler);
+        let pt = rotate_and_distort(out_pos, idx, params, matrices, sampler, distortion_model, digital_distortion_model, flags);
         if pt.x > -99998.0 {
-            if (params.flags & 16) == 16 { // Horizontal RS
+            if (flags & 16) == 16 { // Horizontal RS
                 sy = (fast_round(pt.x) as f32).min(params.width as f32).max(0.0);
             } else {
                 sy = (fast_round(pt.y) as f32).min(params.height as f32).max(0.0);
@@ -106,11 +110,11 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
     let mut pixel = bg;
 
     let idx = sy.min(params.matrix_count as f32 - 1.0) as i32;
-    let uv = rotate_and_distort(out_pos, idx, params, matrices, sampler);
+    let uv = rotate_and_distort(out_pos, idx, params, matrices, sampler, distortion_model, digital_distortion_model, flags);
     if uv.x > -99998.0 {
-        pixel = sample_with_background_at(uv, coeffs, input, params, sampler);
+        pixel = sample_with_background_at(uv, coeffs, input, params, sampler, interpolation, flags);
     }
-    pixel = process_final_pixel(pixel, uv, org_out_pos, params, coeffs, drawing, sampler);
+    pixel = process_final_pixel(pixel, uv, org_out_pos, params, coeffs, drawing, sampler, flags);
 
     pixel
 }

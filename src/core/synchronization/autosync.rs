@@ -199,7 +199,7 @@ impl AutosyncProcess {
 
         if self.mode == "synchronize" && !self.compute_params.read().gyro.read().has_motion() {
             // If no gyro data in file, set the computed optical flow as gyro data
-            let mut compute_params = self.compute_params.write();
+            let compute_params = self.compute_params.write();
             let mut gyro = compute_params.gyro.write();
             gyro.file_metadata.raw_imu = self.estimator.estimated_gyro.read().values().cloned().collect::<Vec<_>>();
             gyro.apply_transforms();

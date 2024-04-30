@@ -25,7 +25,7 @@ macro_rules! impl_models {
         }
         #[derive(Default, Clone)]
         pub struct DistortionModel {
-            inner: DistortionModels
+            pub inner: DistortionModels
         }
         impl DistortionModel {
             pub fn undistort_point(&self, point: (f32, f32), params: &KernelParams) -> Option<(f32, f32)> {

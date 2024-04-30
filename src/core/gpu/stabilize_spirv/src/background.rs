@@ -5,7 +5,7 @@ use glam::{ vec2, Vec2, Vec4 };
 use super::types::*;
 use super::interpolate::*;
 
-pub fn sample_with_background_at(mut uv: Vec2, coeffs: &[f32], input: &ImageType, params: &KernelParams, sampler: SamplerType) -> Vec4 {
+pub fn sample_with_background_at(mut uv: Vec2, coeffs: &[f32], input: &ImageType, params: &KernelParams, sampler: SamplerType, interpolation: u32, flags: u32) -> Vec4 {
     let width_f = params.width as f32;
     let height_f = params.height as f32;
     match params.background_mode {
@@ -14,7 +14,7 @@ pub fn sample_with_background_at(mut uv: Vec2, coeffs: &[f32], input: &ImageType
                 uv.x.max(0.0).min(width_f  - 1.0),
                 uv.y.max(0.0).min(height_f - 1.0),
             );
-            sample_input_at(uv, coeffs, input, params, sampler)
+            sample_input_at(uv, coeffs, input, params, sampler, interpolation, flags)
         },
         2 => { // Edge mirror
             let rx = fast_round(uv.x) as f32;
@@ -25,7 +25,7 @@ pub fn sample_with_background_at(mut uv: Vec2, coeffs: &[f32], input: &ImageType
             if rx < 3.0     { uv.x = 3.0 + width_f - (width3  + rx); }
             if ry > height3 { uv.y = height3 - (ry - height3); }
             if ry < 3.0     { uv.y = 3.0 + height_f - (height3 + ry); }
-            sample_input_at(uv, coeffs, input, params, sampler)
+            sample_input_at(uv, coeffs, input, params, sampler, interpolation, flags)
         },
         3 => { // Margin with feather
             let size = vec2(width_f - 1.0, height_f - 1.0);
@@ -38,10 +38,10 @@ pub fn sample_with_background_at(mut uv: Vec2, coeffs: &[f32], input: &ImageType
                 pt2 = ((((pt2 / size) - 0.5) * (1.0 - params.background_margin)) + 0.5) * size;
             }
 
-            let c1 = sample_input_at(uv, coeffs, input, params, sampler);
-            let c2 = sample_input_at(pt2, coeffs, input, params, sampler);
+            let c1 = sample_input_at(uv, coeffs, input, params, sampler, interpolation, flags);
+            let c2 = sample_input_at(pt2, coeffs, input, params, sampler, interpolation, flags);
             c1 * alpha + c2 * (1.0 - alpha)
         },
-        _ => { sample_input_at(uv, coeffs, input, params, sampler) }
+        _ => { sample_input_at(uv, coeffs, input, params, sampler, interpolation, flags) }
     }
 }

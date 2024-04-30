@@ -101,7 +101,20 @@ impl Stabilization {
                         let params2: stabilize_spirv::KernelParams  = unsafe { std::mem::transmute(*params) };
                         let drawing2: &[u32]  = unsafe { std::slice::from_raw_parts(drawing.as_ptr() as *const u32, drawing.len() / 4 ) };
 
-                        let color = stabilize_spirv::undistort(stabilize_spirv::glam::vec2(x as f32, y as f32), &params2, matrices2, &COEFFS, &[], drawing2, &(input, T::to_float_glam), 0.0);
+                        let color = stabilize_spirv::undistort(
+                            stabilize_spirv::glam::vec2(x as f32, y as f32),
+                            &params2,
+                            matrices2,
+                            &COEFFS,
+                            &[],
+                            drawing2,
+                            &(input, T::to_float_glam),
+                            0.0,
+                            params.interpolation as _,
+                            params.distortion_model as u32,
+                            params.digital_lens as u32,
+                            params.flags as u32
+                        );
 
                         let pix_out: &mut T = bytemuck::from_bytes_mut(pix_chunk); // treat this byte chunk as `T`
                         *pix_out = PixelType::from_float_glam(color);

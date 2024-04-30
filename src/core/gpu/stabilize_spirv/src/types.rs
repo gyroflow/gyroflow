@@ -67,8 +67,8 @@ pub struct KernelParams {
     pub digital_lens_params:      Vec4, // 16
     pub safe_area_rect:           Vec4, // 16
     pub max_pixel_value:          f32, // 4
-    pub distortion_model:         crate::distortion_models::DistortionModel, // 8
-    pub digital_lens:             crate::distortion_models::DistortionModel, // 12
+    pub distortion_model:         u32, // 8
+    pub digital_lens:             u32, // 12
     pub pixel_value_limit:        f32, // 16
 }
 

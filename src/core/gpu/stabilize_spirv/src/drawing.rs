@@ -73,15 +73,15 @@ fn remap_colorrange(px: Vec4, is_y: bool, max_value: f32) -> Vec4 {
     else    { ((16.0 / 255.0) * max_value) + (px * ((240.0 - 16.0) / 255.0)) }
 }
 
-pub fn process_final_pixel(mut pixel: Vec4, src_pos: Vec2, out_pos: Vec2, params: &KernelParams, coeffs: &[f32], drawing: &DrawingType, sampler: SamplerType) -> Vec4 {
-    if (params.flags & 1) == 1 {
+pub fn process_final_pixel(mut pixel: Vec4, src_pos: Vec2, out_pos: Vec2, params: &KernelParams, coeffs: &[f32], drawing: &DrawingType, sampler: SamplerType, flags: u32) -> Vec4 {
+    if (flags & 1) == 1 {
         pixel = remap_colorrange(pixel, params.bytes_per_pixel == 1, params.max_pixel_value);
     }
 
     #[cfg(feature="for_qtrhi")]
-    let drawing_enabled = (params.flags & 8) == 8;
+    let drawing_enabled = (flags & 8) == 8;
     #[cfg(not(feature="for_qtrhi"))]
-    let drawing_enabled = (params.flags & 8) == 8 && !drawing.is_empty();
+    let drawing_enabled = (flags & 8) == 8 && !drawing.is_empty();
 
     if drawing_enabled {
         if src_pos.y >= params.source_rect.y as f32 && src_pos.y < (params.source_rect.y + params.source_rect.w) as f32 {

@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2023 Adrian <adrian.eddy at gmail>
 
-mod opencv_fisheye;
-mod opencv_standard;
-mod poly3;
-mod poly5;
-mod ptlens;
-mod insta360;
+pub mod opencv_fisheye;
+pub mod opencv_standard;
+pub mod poly3;
+pub mod poly5;
+pub mod ptlens;
+pub mod insta360;
 
-mod gopro_superview;
-mod gopro_hyperview;
-mod digital_stretch;
+pub mod gopro_superview;
+pub mod gopro_hyperview;
+pub mod digital_stretch;
 
 use crate::KernelParams;
 use crate::glam::{ Vec2, Vec3 };

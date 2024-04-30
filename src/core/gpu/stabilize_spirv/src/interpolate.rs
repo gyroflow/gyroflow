@@ -4,7 +4,7 @@
 use glam::{ vec2, Vec2, Vec4 };
 use super::types::*;
 
-pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &KernelParams, _sampler: SamplerType) -> Vec4 {
+pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &KernelParams, _sampler: SamplerType, interpolation: u32, flags: u32) -> Vec4 {
     let bg = params.background * params.max_pixel_value;
     #[cfg(feature = "for_qtrhi")]
     {
@@ -21,19 +21,23 @@ pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &Ke
         const INTER_BITS: usize = 5;
         const INTER_TAB_SIZE: usize = 1 << INTER_BITS;
 
-        let shift: i32 = (params.interpolation >> 2) + 1;
-        let offset: f32 = ((params.interpolation >> 1) - 1) as f32;
-        let ind: usize = [0, 64, 64 + 128][params.interpolation as usize >> 2];
+        let interpolation = interpolation as i32;
+
+        let shift: i32 = (interpolation >> 2) + 1;
+        let offset: f32 = ((interpolation >> 1) - 1) as f32;
+        let ind: usize = [0, 64, 64 + 128][interpolation as usize >> 2];
         let mut uv = uv;
 
         if params.input_rotation != 0.0 {
             uv = rotate_point(uv, params.input_rotation * (core::f32::consts::PI / 180.0), vec2(params.width as f32 / 2.0, params.height as f32 / 2.0));
         }
 
-        uv = vec2(
-            map_coord(uv.x, 0.0, params.width  as f32, params.source_rect.x as f32, (params.source_rect.x + params.source_rect.z) as f32),
-            map_coord(uv.y, 0.0, params.height as f32, params.source_rect.y as f32, (params.source_rect.y + params.source_rect.w) as f32)
-        );
+        if (flags & 32) == 32 { // Uses source rect
+            uv = vec2(
+                map_coord(uv.x, 0.0, params.width  as f32, params.source_rect.x as f32, (params.source_rect.x + params.source_rect.z) as f32),
+                map_coord(uv.y, 0.0, params.height as f32, params.source_rect.y as f32, (params.source_rect.y + params.source_rect.w) as f32)
+            );
+        }
 
         let u = uv.x - offset;
         let v = uv.y - offset;
@@ -50,11 +54,11 @@ pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &Ke
         let mut sum = Vec4::splat(0.0);
         let mut _src_index = sy as isize * params.stride as isize + sx as isize * params.bytes_per_pixel as isize;
 
-        let mut yp = 0; while yp < params.interpolation {
+        let mut yp = 0; while yp < interpolation {
         //for yp in 0..params.interpolation {
             if sy + yp >= params.source_rect.y as i32 && sy + yp < (params.source_rect.y + params.source_rect.w) as i32 {
                 let mut xsum = Vec4::splat(0.0);
-                let mut xp = 0; while xp < params.interpolation {
+                let mut xp = 0; while xp < interpolation {
                 // for xp in 0..params.interpolation {
                     let pixel = if sx + xp >= params.source_rect.x as i32 && sx + xp < (params.source_rect.x + params.source_rect.z) as i32 {
                         #[cfg(target_arch = "spirv")]
@@ -69,7 +73,7 @@ pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &Ke
                     };
                     xsum += pixel * _coeffs[coeffs_x + xp as usize];
                     xp += 1;
-                    if xp >= params.interpolation { break; } // Bug in Dx12 backend, doesn't work without it for some strange reason
+                    if xp >= interpolation { break; } // Bug in Dx12 backend, doesn't work without it for some strange reason
                 }
 
                 sum += xsum * _coeffs[coeffs_y + yp as usize];
@@ -78,7 +82,7 @@ pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &Ke
             }
             _src_index += params.stride as isize;
             yp += 1;
-            if yp >= params.interpolation { break; } // Bug in Dx12 backend, doesn't work without it for some strange reason
+            if yp >= interpolation { break; } // Bug in Dx12 backend, doesn't work without it for some strange reason
         }
         glam::vec4(
             sum.x.min(params.pixel_value_limit),
