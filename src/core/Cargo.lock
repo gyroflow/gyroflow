@@ -1073,7 +1073,7 @@ dependencies = [
  "line_drawing",
  "log",
  "lru",
- "metal 0.27.0",
+ "metal",
  "mimalloc",
  "nalgebra 0.32.5",
  "ndk",
@@ -1470,20 +1470,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5aa361d4faea93603064a027415f07bd8e1d5c88c9fbf68bf56a285428fd79ce"
 dependencies = [
  "autocfg",
-]
-
-[[package]]
-name = "metal"
-version = "0.27.0"
-source = "git+https://github.com/gfx-rs/metal-rs?rev=ff8fd3d6dc7792852f8a015458d7e6d42d7fb352#ff8fd3d6dc7792852f8a015458d7e6d42d7fb352"
-dependencies = [
- "bitflags 2.5.0",
- "block",
- "core-graphics-types",
- "foreign-types",
- "log",
- "objc",
- "paste",
 ]
 
 [[package]]
@@ -3022,7 +3008,7 @@ dependencies = [
  "libc",
  "libloading 0.8.3",
  "log",
- "metal 0.28.0",
+ "metal",
  "naga",
  "ndk-sys",
  "objc",
