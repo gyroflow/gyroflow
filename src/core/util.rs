@@ -15,7 +15,7 @@ pub fn get_video_metadata(url: &str) -> std::result::Result<telemetry_parser::ut
         return Err(crate::GyroflowCoreError::UnsupportedFormat(filename));
     }
     let base = crate::filesystem::get_engine_base();
-    let mut file = crate::filesystem::open_file(&base, &url, false)?;
+    let mut file = crate::filesystem::open_file(&base, &url, false, false)?;
     let filesize = file.size;
     Ok(telemetry_parser::util::get_video_metadata(file.get_file(), filesize)?)
 }
@@ -226,7 +226,7 @@ pub fn get_setting(_key: &str) -> Option<String> {
 pub fn init_telemetry_parser() {
     use telemetry_parser::filesystem as tp_fs;
     fn telemetry_parser_open_file<'a>(base: &'a tp_fs::FilesystemBase, path: &str) -> std::io::Result<tp_fs::FileWrapper<'a>> {
-        match crate::filesystem::open_file(&base, path, false) {
+        match crate::filesystem::open_file(&base, path, false, false) {
             Ok(file) => {
                 let size = file.size;
                 return Ok(tp_fs::FileWrapper { file: Box::new(file), size });

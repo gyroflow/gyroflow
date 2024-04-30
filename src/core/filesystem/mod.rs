@@ -415,7 +415,7 @@ pub fn read(url: &str) -> Result<Vec<u8>> {
     start_accessing_url(url, false);
     let buf = {
         let base = get_engine_base();
-        let mut f = open_file(&base, &url, false)?;
+        let mut f = open_file(&base, &url, false, false)?;
         let mut buf = Vec::with_capacity(f.size);
         f.get_file().read_to_end(&mut buf)?;
         buf
@@ -428,7 +428,7 @@ pub fn write(url: &str, data: &[u8]) -> Result<()> {
     start_accessing_url(url, false);
     {
         let base = get_engine_base();
-        let mut f = open_file(&base, &url, true)?;
+        let mut f = open_file(&base, &url, true, true)?;
         f.get_file().write(data)?;
     }
     stop_accessing_url(url, false);
@@ -475,7 +475,7 @@ pub fn can_open_file(url: &str) -> bool {
     dbg_call!(url);
     if !exists(url) { return false; }
     let base = get_engine_base();
-    let x = open_file(&base, url, false).is_ok(); x
+    let x = open_file(&base, url, false, false).is_ok(); x
 }
 pub fn can_create_file(folder: &str, filename: &str) -> bool {
     if folder.is_empty() || filename.is_empty() { return false; }
@@ -492,7 +492,7 @@ pub fn can_create_file(folder: &str, filename: &str) -> bool {
         let url = get_file_url(folder, filename, true);
         if !url.is_empty() {
             let base = get_engine_base();
-            if open_file(&base, &url, true).is_ok() {
+            if open_file(&base, &url, true, false).is_ok() {
                 if !already_exists {
                     let _ = remove_file(&url);
                 }
@@ -506,18 +506,18 @@ pub fn can_create_file(folder: &str, filename: &str) -> bool {
     ret
 }
 
-pub fn open_file<'a>(_base: &'a EngineBase, url: &str, writing: bool) -> Result<FileWrapper<'a>> {
+pub fn open_file<'a>(_base: &'a EngineBase, url: &str, writing: bool, truncate: bool) -> Result<FileWrapper<'a>> {
     dbg_call!(url writing);
     start_accessing_url(url, false);
 
     #[cfg(target_os = "android")]
     {
-        return FileWrapper::open_android(_base, url, if writing { "wt" } else { "r" });
+        return FileWrapper::open_android(_base, url, if writing && truncate { "wt" } else if writing { "w" } else { "r" });
     }
     #[cfg(not(target_os = "android"))]
     {
         let path = url_to_path(url);
-        let file = if writing { File::create(path)? } else { File::open(path)? };
+        let file = if writing && truncate { File::create(path)? } else if writing { OpenOptions::new().read(true).write(true).open(path)? } else { File::open(path)? };
         let size = file.metadata()?.len() as usize;
         Ok(FileWrapper { file: Some(file), size, url: url.to_owned(), _lifetime: Default::default() })
     }

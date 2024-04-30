@@ -498,3 +498,36 @@ pub fn is_store_package() -> bool {
 
     false
 }
+
+pub fn is_insta360(input_url: &str) -> bool {
+    use std::io::*;
+    let mut buf = vec![0u8; 32];
+    let base = gyroflow_core::filesystem::get_engine_base();
+    if let Ok(mut input) = gyroflow_core::filesystem::open_file(&base, input_url, false, false) {
+        let _ = input.seek(SeekFrom::End(-32));
+        let _ = input.read_exact(&mut buf);
+    }
+    &buf == b"8db42d694ccc418790edff439fe026bf"
+}
+pub fn copy_insta360_metadata(output_url: &str, input_url: &str) -> Result<(), gyroflow_core::filesystem::FilesystemError> {
+    use std::io::*;
+    pub const HEADER_SIZE: usize = 32 + 4 + 4 + 32; // padding(32), size(4), version(4), magic(32)
+    pub const MAGIC: &[u8] = b"8db42d694ccc418790edff439fe026bf";
+
+    let base = gyroflow_core::filesystem::get_engine_base();
+    let mut input = gyroflow_core::filesystem::open_file(&base, input_url, false, false)?;
+
+    let mut buf = vec![0u8; HEADER_SIZE];
+    input.seek(SeekFrom::End(-(HEADER_SIZE as i64)))?;
+    input.read_exact(&mut buf)?;
+    if &buf[HEADER_SIZE-32..] == MAGIC {
+        let extra_size = u32::from_le_bytes(buf[32..36].try_into().unwrap()) as i64;
+        input.seek(SeekFrom::End(-extra_size))?;
+
+        let mut output = gyroflow_core::filesystem::open_file(&base, output_url, true, false)?;
+        output.seek(SeekFrom::End(0))?;
+        std::io::copy(&mut input, &mut output.get_file())?;
+    }
+
+    Ok(())
+}

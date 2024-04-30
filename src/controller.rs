@@ -1981,13 +1981,13 @@ impl Controller {
             let base = filesystem::get_engine_base();
             let mut opened = Vec::with_capacity(file_list.len());
             for x in &file_list {
-                match filesystem::open_file(&base, &x, false) {
+                match filesystem::open_file(&base, &x, false, false) {
                     Ok(x) => { opened.push(x); },
                     Err(e) => { progress((1.0, format!("Failed to open file: {x}: {e:?}"))); return; }
                 }
             }
             let mut file_references: Vec<(&mut std::fs::File, usize)> = opened.iter_mut().map(|x| { let s = x.size; (x.get_file(), s) }).collect();
-            let mut opened_output = match filesystem::open_file(&base, &output_url, true) {
+            let mut opened_output = match filesystem::open_file(&base, &output_url, true, true) {
                 Ok(x) => { x },
                 Err(e) => { progress((1.0, format!("Failed to create file: {output_url}: {e:?}"))); return; }
             };
@@ -2025,10 +2025,10 @@ impl Controller {
             let gcsv_url = filesystem::get_file_url(&folder, &gcsv_name, false);
             if filesystem::exists_in_folder(&folder, &gcsv_name) {
                 let mut is_data = false;
-                if let Ok(mut file) = filesystem::open_file(&base, &gcsv_url, false) {
+                if let Ok(mut file) = filesystem::open_file(&base, &gcsv_url, false, false) {
                     if output_gcsv.is_none() {
                         let out_url = filesystem::get_file_url(&output_folder, &filesystem::filename_with_extension(output_filename, "gcsv"), true);
-                        output_gcsv = Some(filesystem::open_file(&base, &out_url, true)?);
+                        output_gcsv = Some(filesystem::open_file(&base, &out_url, true, true)?);
                     }
                     for (i, line) in std::io::BufReader::new(file.get_file()).lines().enumerate() {
                         let mut line = line?;

@@ -371,7 +371,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
 
     proc.video.encoder_params.keyframe_distance_s = render_options.keyframe_distance.max(0.0001);
 
-    proc.preserve_other_tracks = render_options.preserve_other_tracks;
+    proc.preserve_other_tracks = render_options.preserve_other_tracks && !crate::util::is_insta360(&input_file.url);
 
     for (key, value) in render_options_dict.iter() {
         log::info!("Setting encoder option {}: {}", key, value);
@@ -703,6 +703,12 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     }
 
     crate::util::update_file_times(&output_url, &input_file.url, start_ms);
+
+    if render_options.preserve_other_tracks {
+        if let Err(e) = crate::util::copy_insta360_metadata(&output_url, &input_file.url) {
+            ::log::error!("Failed to copy Insta360 metadata: {e:?}");
+        }
+    }
 
     Ok(())
 }

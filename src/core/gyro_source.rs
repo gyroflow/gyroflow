@@ -157,7 +157,7 @@ impl GyroSource {
     }
     pub fn parse_telemetry_file<F: Fn(f64)>(url: &str, options: &FileLoadOptions, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Result<FileMetadata, crate::GyroflowCoreError> {
         let base = filesystem::get_engine_base();
-        let mut file = filesystem::open_file(&base, url, false)?;
+        let mut file = filesystem::open_file(&base, url, false, false)?;
         let filesize = file.size;
         let mut input = Input::from_stream(file.get_file(), filesize, &url, progress_cb, cancel_flag)?;
 
