@@ -1020,8 +1020,8 @@ dependencies = [
 
 [[package]]
 name = "d3d12"
-version = "0.19.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=d4f3063#d4f30638b749f269feeb654d7880a7d845a2fff1"
+version = "0.20.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=bdf30fa#bdf30fa45aa86b827749f7ee45ed342ce27b0fbb"
 dependencies = [
  "bitflags 2.5.0",
  "libloading 0.8.3",
@@ -1332,9 +1332,9 @@ dependencies = [
 
 [[package]]
 name = "fastrand"
-version = "2.0.2"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "658bd65b1cf4c852a3cc96f18a8ce7b5640f6b703f905c7d74532294c2a63984"
+checksum = "9fc0510504f03c51ada170672ac806f1f105a88aa97a5281117e1ddc3368e51a"
 
 [[package]]
 name = "fc-blackbox"
@@ -1389,17 +1389,6 @@ dependencies = [
 
 [[package]]
 name = "filetime_creation"
-version = "0.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d273b12293b73b44ab8a525e161f74ebe2f38dd50c33ce7f538a4ccf9077383"
-dependencies = [
- "cfg-if",
- "filetime",
- "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "filetime_creation"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c25b5d475550e559de5b0c0084761c65325444e3b6c9e298af9cefe7a9ef3a5f"
@@ -1417,9 +1406,9 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 
 [[package]]
 name = "flate2"
-version = "1.0.28"
+version = "1.0.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46303f565772937ffe1d394a4fac6f411c6013172fadde9dcdb1e147a086940e"
+checksum = "5f54427cfd1c7829e2a139fcefea601bf088ebca651d2bf53ebc600eac295dae"
 dependencies = [
  "crc32fast",
  "miniz_oxide",
@@ -1577,9 +1566,9 @@ dependencies = [
 
 [[package]]
 name = "glam"
-version = "0.25.0"
+version = "0.24.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "151665d9be52f9bb40fc7966565d39666f2d1e69233571b71b87791c7e0528b3"
+checksum = "b5418c17512bdf42730f9032c74e1ae39afc408745ebb2acf72fbc4691c17945"
 dependencies = [
  "libm 0.2.8",
 ]
@@ -1680,7 +1669,7 @@ dependencies = [
  "directories",
  "fastrand",
  "ffmpeg-next",
- "filetime_creation 0.2.0",
+ "filetime_creation",
  "flate2",
  "futures-intrusive",
  "gyroflow-core",
@@ -1693,7 +1682,7 @@ dependencies = [
  "log",
  "log-panics",
  "lru",
- "metal",
+ "metal 0.27.0",
  "mp4-merge",
  "nalgebra 0.32.5",
  "ndk",
@@ -1765,7 +1754,7 @@ dependencies = [
  "line_drawing",
  "log",
  "lru",
- "metal",
+ "metal 0.27.0",
  "mimalloc",
  "nalgebra 0.32.5",
  "ndk",
@@ -2272,6 +2261,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "metal"
+version = "0.28.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5637e166ea14be6063a3f8ba5ccb9a4159df7d8f6d61c02fc3d480b1f90dcfcb"
+dependencies = [
+ "bitflags 2.5.0",
+ "block",
+ "core-graphics-types",
+ "foreign-types",
+ "log",
+ "objc",
+ "paste",
+]
+
+[[package]]
 name = "mimalloc"
 version = "0.1.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2297,12 +2301,12 @@ dependencies = [
 
 [[package]]
 name = "mp4-merge"
-version = "0.1.7"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0224cd4e86031506b998180ee884afa26308155cb65f90888fa560ec72281ff8"
+checksum = "b215bbec29b42b194571c772b2c6f5049ec0efb62e8a8c9fb820d4af90b52ccc"
 dependencies = [
  "byteorder",
- "filetime_creation 0.1.7",
+ "filetime_creation",
  "log",
 ]
 
@@ -2322,8 +2326,8 @@ dependencies = [
 
 [[package]]
 name = "naga"
-version = "0.19.2"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=d4f3063#d4f30638b749f269feeb654d7880a7d845a2fff1"
+version = "0.20.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=bdf30fa#bdf30fa45aa86b827749f7ee45ed342ce27b0fbb"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -2756,9 +2760,9 @@ checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
 name = "opencv"
-version = "0.91.1"
+version = "0.91.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f338f86d1dd03ee766ce57522edbb7b691dc5bff437f224655ed1ff5f790a987"
+checksum = "8bf9ba983f4e01e39592c8501eee884c56bf0e673bca47ec4ea96ba4368e45ff"
 dependencies = [
  "cc",
  "dunce",
@@ -2771,13 +2775,14 @@ dependencies = [
  "semver",
  "shlex",
  "vcpkg",
+ "windows 0.56.0",
 ]
 
 [[package]]
 name = "opencv-binding-generator"
-version = "0.88.0"
+version = "0.89.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d32d95d8c915a19baa9dce2488d0057a7824a0456e315d7d7e20798716c8df8"
+checksum = "7f21f53608956ac8b827bc1b7254cdc0dddd3e61f3ef199a83c786a638da24c3"
 dependencies = [
  "clang",
  "clang-sys",
@@ -3584,8 +3589,9 @@ dependencies = [
 
 [[package]]
 name = "spirv-std"
-version = "0.9.0"
-source = "git+https://github.com/EmbarkStudios/rust-gpu?rev=54f6978#54f6978c25b7e168ded04e720b996625b3654ebd"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "53ad6bf0206aea3e6ac6283cb88ef397239cd2d9276b8f71854d60ac2cf94e0b"
 dependencies = [
  "bitflags 1.3.2",
  "glam",
@@ -3596,8 +3602,9 @@ dependencies = [
 
 [[package]]
 name = "spirv-std-macros"
-version = "0.9.0"
-source = "git+https://github.com/EmbarkStudios/rust-gpu?rev=54f6978#54f6978c25b7e168ded04e720b996625b3654ebd"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2058ef7585e7ef31ee7b00bdfee2e6726649d827c71070a50087598405e8b2cf"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3607,8 +3614,9 @@ dependencies = [
 
 [[package]]
 name = "spirv-std-types"
-version = "0.9.0"
-source = "git+https://github.com/EmbarkStudios/rust-gpu?rev=54f6978#54f6978c25b7e168ded04e720b996625b3654ebd"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5cce2183deb9e7ada727867823fb8bbbc8b56e503801a332d155dde613130e1b"
 
 [[package]]
 name = "stabilize_spirv"
@@ -3686,7 +3694,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.3.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=395fba0#395fba04de0a3af01ce84db99b15e1c2194946be"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=dfb2731#dfb2731226e4b5affb6e2f30ccc80ba09151d4e8"
 dependencies = [
  "argh",
  "byteorder",
@@ -4138,8 +4146,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu"
-version = "0.19.3"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=d4f3063#d4f30638b749f269feeb654d7880a7d845a2fff1"
+version = "0.20.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=bdf30fa#bdf30fa45aa86b827749f7ee45ed342ce27b0fbb"
 dependencies = [
  "arrayvec",
  "cfg-if",
@@ -4163,15 +4171,14 @@ dependencies = [
 
 [[package]]
 name = "wgpu-core"
-version = "0.19.3"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=d4f3063#d4f30638b749f269feeb654d7880a7d845a2fff1"
+version = "0.20.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=bdf30fa#bdf30fa45aa86b827749f7ee45ed342ce27b0fbb"
 dependencies = [
  "arrayvec",
  "bit-vec",
  "bitflags 2.5.0",
  "bytemuck",
  "cfg_aliases",
- "codespan-reporting",
  "document-features",
  "indexmap",
  "log",
@@ -4190,8 +4197,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-hal"
-version = "0.19.3"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=d4f3063#d4f30638b749f269feeb654d7880a7d845a2fff1"
+version = "0.20.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=bdf30fa#bdf30fa45aa86b827749f7ee45ed342ce27b0fbb"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4213,7 +4220,7 @@ dependencies = [
  "libc",
  "libloading 0.8.3",
  "log",
- "metal",
+ "metal 0.28.0",
  "naga",
  "ndk-sys",
  "objc",
@@ -4234,8 +4241,8 @@ dependencies = [
 
 [[package]]
 name = "wgpu-types"
-version = "0.19.2"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=d4f3063#d4f30638b749f269feeb654d7880a7d845a2fff1"
+version = "0.20.0"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=bdf30fa#bdf30fa45aa86b827749f7ee45ed342ce27b0fbb"
 dependencies = [
  "bitflags 2.5.0",
  "js-sys",
