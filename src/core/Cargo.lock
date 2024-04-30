@@ -947,9 +947,9 @@ dependencies = [
 
 [[package]]
 name = "glam"
-version = "0.24.2"
+version = "0.25.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5418c17512bdf42730f9032c74e1ae39afc408745ebb2acf72fbc4691c17945"
+checksum = "151665d9be52f9bb40fc7966565d39666f2d1e69233571b71b87791c7e0528b3"
 dependencies = [
  "libm 0.2.8",
 ]
@@ -1078,7 +1078,7 @@ dependencies = [
  "nalgebra 0.32.5",
  "ndk",
  "ndk-context",
- "ndk-sys",
+ "ndk-sys 0.6.0+11769913",
  "nt-hive",
  "num",
  "objc-foundation",
@@ -1598,14 +1598,14 @@ dependencies = [
 
 [[package]]
 name = "ndk"
-version = "0.8.0"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2076a31b7010b17a38c01907c45b945e8f11495ee4dd588309718901b1f7a5b7"
+checksum = "c3f42e7bbe13d351b6bead8286a43aac9534b82bd3cc43e47037f012ebfd62d4"
 dependencies = [
  "bitflags 2.5.0",
  "jni-sys",
  "log",
- "ndk-sys",
+ "ndk-sys 0.6.0+11769913",
  "num_enum",
  "raw-window-handle",
  "thiserror",
@@ -1622,6 +1622,15 @@ name = "ndk-sys"
 version = "0.5.0+25.2.9519653"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8c196769dd60fd4f363e11d948139556a344e79d451aeb2fa2fd040738ef7691"
+dependencies = [
+ "jni-sys",
+]
+
+[[package]]
+name = "ndk-sys"
+version = "0.6.0+11769913"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee6cda3051665f1fb8d9e08fc35c96d5a244fb1be711a03b71118828afc9a873"
 dependencies = [
  "jni-sys",
 ]
@@ -2510,9 +2519,8 @@ dependencies = [
 
 [[package]]
 name = "spirv-std"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53ad6bf0206aea3e6ac6283cb88ef397239cd2d9276b8f71854d60ac2cf94e0b"
+version = "0.9.0"
+source = "git+https://github.com/EmbarkStudios/rust-gpu?rev=54f6978#54f6978c25b7e168ded04e720b996625b3654ebd"
 dependencies = [
  "bitflags 1.3.2",
  "glam",
@@ -2523,9 +2531,8 @@ dependencies = [
 
 [[package]]
 name = "spirv-std-macros"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2058ef7585e7ef31ee7b00bdfee2e6726649d827c71070a50087598405e8b2cf"
+version = "0.9.0"
+source = "git+https://github.com/EmbarkStudios/rust-gpu?rev=54f6978#54f6978c25b7e168ded04e720b996625b3654ebd"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2535,9 +2542,8 @@ dependencies = [
 
 [[package]]
 name = "spirv-std-types"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5cce2183deb9e7ada727867823fb8bbbc8b56e503801a332d155dde613130e1b"
+version = "0.9.0"
+source = "git+https://github.com/EmbarkStudios/rust-gpu?rev=54f6978#54f6978c25b7e168ded04e720b996625b3654ebd"
 
 [[package]]
 name = "stabilize_spirv"
@@ -3010,7 +3016,7 @@ dependencies = [
  "log",
  "metal",
  "naga",
- "ndk-sys",
+ "ndk-sys 0.5.0+25.2.9519653",
  "objc",
  "once_cell",
  "parking_lot",

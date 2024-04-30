@@ -22,11 +22,14 @@ struct AVMediaCodecDeviceContext {
     create_window: c_int
 }
 
+struct AndroidHWBuffer(HardwareBuffer);
+unsafe impl Send for AndroidHWBuffer {}
+
 pub struct AndroidHWHandles {
     image_reader: ImageReader,
     window: NativeWindow,
     surface: GlobalRef,
-    pub receiver: Option<Receiver<HardwareBufferRef>>
+    pub receiver: Option<Receiver<AndroidHWBuffer>>
 }
 
 impl AndroidHWHandles {
@@ -37,7 +40,7 @@ impl AndroidHWHandles {
 
         image_reader.set_image_listener(Box::new(move |image_reader| {
             match &mut image_reader.acquire_next_image() {
-                Ok(Some(image)) => {
+                Ok(AcquireResult::Image(image)) => {
                     let timestamp = std::time::Duration::from_nanos(image.timestamp().unwrap() as u64);
 
                     // TODO import AHardwareBuffer to wgpu Vulkan
@@ -48,9 +51,10 @@ impl AndroidHWHandles {
                     let hw_buffer = image.hardware_buffer().unwrap();
                     ::log::debug!("AHardwareBuffer: {:?} ({}x{} {:?} {:?})", hw_buffer.as_ptr(), image.width().unwrap(), image.height().unwrap(), image.format().unwrap(), timestamp);
 
-                    sender.send(hw_buffer.acquire()).unwrap();
+                    sender.send(AndroidHWBuffer(hw_buffer)).unwrap();
                 }
-                Ok(None) => { ::log::warn!("acquire_next_image is None"); }
+                Ok(AcquireResult::NoBufferAvailable) => { ::log::warn!("acquire_next_image: NoBufferAvailable"); }
+                Ok(AcquireResult::MaxImagesAcquired) => { ::log::warn!("acquire_next_image: MaxImagesAcquired"); }
                 Err(e) => { ::log::error!("acquire_next_image error {e:?}"); }
             }
         })).unwrap();

@@ -900,7 +900,7 @@ pub fn test() {
 pub fn test_decode() {
     let mut proc = FfmpegProcessor::from_file("/storage/self/primary/Download/gf/h8.MP4", true, 0, None).unwrap();
 
-    let recv = proc.android_handles.as_mut().unwrap().receiver.take().unwrap();
+    let recv = proc.android_handles.as_mut().unwrap().receiver.take().unwrap().0.acquire();
     // TODO: gpu scaling in filters, example here https://github.com/zmwangx/rust-ffmpeg/blob/master/examples/transcode-audio.rs, filter scale_cuvid or scale_npp
     proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
 
