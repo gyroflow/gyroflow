@@ -86,7 +86,7 @@ rev = "bdf30fa"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
-metal = { version = "0.27.0", git = "https://github.com/gfx-rs/metal-rs", rev = "ff8fd3d6dc7792852f8a015458d7e6d42d7fb352" }
+metal = { version = "0.28.0" }
 objc-foundation = "0.1.1"
 core-foundation-sys = "0.8.6"
 
