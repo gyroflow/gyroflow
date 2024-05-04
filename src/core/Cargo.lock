@@ -35,7 +35,7 @@ version = "0.6.0"
 source = "git+https://github.com/jmagnuson/ahrs-rs.git?rev=bf7b41d#bf7b41d09115b47ce8f6060624ed6a8a9bc445d4"
 dependencies = [
  "nalgebra 0.32.5",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "simba 0.8.1",
 ]
 
@@ -92,7 +92,7 @@ version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cab112f0a86d568ea0e627cc1d6be74a1e9cd55214684db5561995f6dad897c6"
 dependencies = [
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
 ]
 
 [[package]]
@@ -135,7 +135,7 @@ dependencies = [
  "anyhow",
  "argmin-math",
  "instant",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "paste",
  "rand",
  "rand_xoshiro",
@@ -153,7 +153,7 @@ dependencies = [
  "nalgebra 0.32.5",
  "num-complex",
  "num-integer",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "rand",
  "thiserror",
 ]
@@ -197,15 +197,15 @@ checksum = "4cea652ffbedecf29e9cd41bb4c066881057a42c0c119040f022802b26853e77"
 
 [[package]]
 name = "autocfg"
-version = "1.2.0"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1fdabc7756949593fe60f30ec81974b613357de856987752631dea1e3394c80"
+checksum = "0c4b4d0bd25bd0b74681c0ad21497610ce1b7c91b1022cd21c80c6fbdd9476b0"
 
 [[package]]
 name = "base64"
-version = "0.22.0"
+version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9475866fec1451be56a3c2400fd081ff546538961565ccb5b7142cbd22bc7a51"
+checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
 name = "base91"
@@ -366,7 +366,7 @@ dependencies = [
  "android-tzdata",
  "iana-time-zone",
  "js-sys",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "wasm-bindgen",
  "windows-targets 0.52.5",
 ]
@@ -617,7 +617,7 @@ source = "git+https://github.com/rust-cv/cv.git?rev=82a25ee#82a25ee3a88c12002741
 dependencies = [
  "derive_more",
  "nalgebra 0.30.1",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "sample-consensus",
 ]
 
@@ -630,13 +630,13 @@ dependencies = [
  "derive_more",
  "float-ord",
  "nalgebra 0.30.1",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
 ]
 
 [[package]]
 name = "d3d12"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=5fa537b#5fa537bfd97683683cdad793bb0fe34a63a75c40"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=5f46468#5f464688e693ee0f16003ade3c02041810a2f75a"
 dependencies = [
  "bitflags 2.5.0",
  "libloading 0.8.3",
@@ -713,7 +713,7 @@ dependencies = [
  "cv-pinhole",
  "derive_more",
  "float-ord",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
 ]
 
 [[package]]
@@ -729,7 +729,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1fadf5c8cbf7c6765ff05ccbd8811cd7bc3a763e4671755204552bf8740d042a"
 dependencies = [
  "assert_float_eq",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "serde",
  "topology-traits",
 ]
@@ -820,7 +820,7 @@ dependencies = [
  "itertools 0.10.5",
  "nom",
  "num-rational",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "thiserror",
 ]
 
@@ -1216,7 +1216,7 @@ dependencies = [
  "bytemuck",
  "byteorder",
  "color_quant",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
 ]
 
 [[package]]
@@ -1398,7 +1398,7 @@ version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d1478a313008a3e6c8149995e90a99ee9094034b5c5c3da1eeb81183cb61d1d"
 dependencies = [
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
 ]
 
 [[package]]
@@ -1515,14 +1515,14 @@ dependencies = [
  "byteorder",
  "fallible_collections",
  "log",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "static_assertions",
 ]
 
 [[package]]
 name = "naga"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=5fa537b#5fa537bfd97683683cdad793bb0fe34a63a75c40"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=5f46468#5f464688e693ee0f16003ade3c02041810a2f75a"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-set",
@@ -1531,7 +1531,7 @@ dependencies = [
  "hexf-parse",
  "indexmap",
  "log",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "petgraph",
  "rustc-hash",
  "spirv",
@@ -1550,7 +1550,7 @@ dependencies = [
  "matrixmultiply",
  "num-complex",
  "num-rational",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "simba 0.7.3",
  "typenum",
 ]
@@ -1566,7 +1566,7 @@ dependencies = [
  "nalgebra-macros",
  "num-complex",
  "num-rational",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "serde",
  "simba 0.8.1",
  "typenum",
@@ -1592,7 +1592,7 @@ dependencies = [
  "matrixmultiply",
  "num-complex",
  "num-integer",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "rawpointer",
 ]
 
@@ -1688,7 +1688,7 @@ dependencies = [
  "num-integer",
  "num-iter",
  "num-rational",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
 ]
 
 [[package]]
@@ -1699,7 +1699,7 @@ checksum = "608e7659b5c3d7cba262d894801b9ec9d00de989e8a82bd4bef91d08da45cdc0"
 dependencies = [
  "autocfg",
  "num-integer",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
 ]
 
 [[package]]
@@ -1708,7 +1708,7 @@ version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "23c6602fda94a57c990fe0df199a035d83576b496aa29f4e634a8ac6004e68a6"
 dependencies = [
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "serde",
 ]
 
@@ -1724,18 +1724,18 @@ version = "0.1.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7969661fd2958a5cb096e56c8e1ad0444ac2bbcd0061bd28660485a44879858f"
 dependencies = [
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
 ]
 
 [[package]]
 name = "num-iter"
-version = "0.1.44"
+version = "0.1.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d869c01cc0c455284163fd0092f1f93835385ccab5a98a0dcc497b2f8bf055a9"
+checksum = "1429034a0490724d0075ebb2bc9e875d6503c3cf69e235a8941aa757d83ef5bf"
 dependencies = [
  "autocfg",
  "num-integer",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
 ]
 
 [[package]]
@@ -1747,7 +1747,7 @@ dependencies = [
  "autocfg",
  "num-bigint",
  "num-integer",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
 ]
 
 [[package]]
@@ -1756,14 +1756,14 @@ version = "0.1.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92e5113e9fd4cc14ded8e499429f396a20f98c772a47cc8622a736e1ec843c31"
 dependencies = [
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
 ]
 
 [[package]]
 name = "num-traits"
-version = "0.2.18"
+version = "0.2.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da0df0e5185db44f69b44f26786fe401b6c293d1907744beaa7fa62b2e5a517a"
+checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
 dependencies = [
  "autocfg",
  "libm 0.2.8",
@@ -1836,7 +1836,7 @@ checksum = "4297afb442d411793e4e24ee5a2977d15b6c95c743418f1c0ce0a2397d7ec8a3"
 dependencies = [
  "futures",
  "nodrop",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "ocl-core",
  "qutex",
  "thiserror",
@@ -1852,7 +1852,7 @@ dependencies = [
  "cl-sys",
  "enum_primitive",
  "num-complex",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "ocl-core-vector",
  "rustc_version",
  "thiserror",
@@ -1864,7 +1864,7 @@ version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f562279e046ca160aeed5eaf6f7c4eb9fa56cb8fd9d038dbdbf56225caeb8074"
 dependencies = [
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
 ]
 
 [[package]]
@@ -1886,15 +1886,15 @@ checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
 name = "opencv"
-version = "0.91.2"
+version = "0.91.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8bf9ba983f4e01e39592c8501eee884c56bf0e673bca47ec4ea96ba4368e45ff"
+checksum = "e64b5a733be752a917aa27981c1100fbc7836cf2cfe3fb06f5cac691339837b7"
 dependencies = [
  "cc",
  "dunce",
  "jobserver",
  "libc",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "once_cell",
  "opencv-binding-generator",
  "pkg-config",
@@ -1906,9 +1906,9 @@ dependencies = [
 
 [[package]]
 name = "opencv-binding-generator"
-version = "0.89.0"
+version = "0.89.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f21f53608956ac8b827bc1b7254cdc0dddd3e61f3ef199a83c786a638da24c3"
+checksum = "81af1298c489597ffdbadc7710673ec26f8a2440228992681ffa3b8f00233bd9"
 dependencies = [
  "clang",
  "clang-sys",
@@ -2300,7 +2300,7 @@ checksum = "43806561bc506d0c5d160643ad742e3161049ac01027b5e6d7524091fd401d86"
 dependencies = [
  "num-complex",
  "num-integer",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "primal-check",
  "strength_reduce",
  "transpose",
@@ -2395,18 +2395,18 @@ checksum = "92d43fe69e652f3df9bdc2b85b2854a0825b86e4fb76bc44d945137d053639ca"
 
 [[package]]
 name = "serde"
-version = "1.0.199"
+version = "1.0.200"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c9f6e76df036c77cd94996771fb40db98187f096dd0b9af39c6c6e452ba966a"
+checksum = "ddc6f9cc94d67c0e21aaf7eda3a010fd3af78ebf6e096aa6e2e13c79749cce4f"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.199"
+version = "1.0.200"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11bd257a6541e141e42ca6d24ae26f7714887b47e89aa739099104c7e4d3b7fc"
+checksum = "856f046b9400cee3c8c94ed572ecdb752444c24528c035cd35882aad6f492bcb"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2452,7 +2452,7 @@ checksum = "2f3fd720c48c53cace224ae62bef1bbff363a70c68c4802a78b5cc6159618176"
 dependencies = [
  "approx",
  "num-complex",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "paste",
  "wide",
 ]
@@ -2466,7 +2466,7 @@ dependencies = [
  "approx",
  "libm 0.2.8",
  "num-complex",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "paste",
  "wide",
 ]
@@ -2499,7 +2499,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c5ab9701ae895386d13db622abf411989deff7109b13b46b6173bb4ce5c1d123"
 dependencies = [
  "doc-comment",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
 ]
 
 [[package]]
@@ -2524,7 +2524,7 @@ source = "git+https://github.com/EmbarkStudios/rust-gpu?rev=54f6978#54f6978c25b7
 dependencies = [
  "bitflags 1.3.2",
  "glam",
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
  "spirv-std-macros",
  "spirv-std-types",
 ]
@@ -2727,7 +2727,7 @@ version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c0c8dab428531e30115d3bfd6e3092b55256a4a7b4f87cb3abe37a000b1f4032"
 dependencies = [
- "num-traits 0.2.18",
+ "num-traits 0.2.19",
 ]
 
 [[package]]
@@ -2941,7 +2941,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=5fa537b#5fa537bfd97683683cdad793bb0fe34a63a75c40"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=5f46468#5f464688e693ee0f16003ade3c02041810a2f75a"
 dependencies = [
  "arrayvec 0.7.4",
  "cfg-if",
@@ -2966,7 +2966,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=5fa537b#5fa537bfd97683683cdad793bb0fe34a63a75c40"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=5f46468#5f464688e693ee0f16003ade3c02041810a2f75a"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-vec",
@@ -2992,7 +2992,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=5fa537b#5fa537bfd97683683cdad793bb0fe34a63a75c40"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=5f46468#5f464688e693ee0f16003ade3c02041810a2f75a"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.4",
@@ -3036,7 +3036,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=5fa537b#5fa537bfd97683683cdad793bb0fe34a63a75c40"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=5f46468#5f464688e693ee0f16003ade3c02041810a2f75a"
 dependencies = [
  "bitflags 2.5.0",
  "js-sys",
