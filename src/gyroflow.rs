@@ -100,9 +100,11 @@ fn entry() {
         #ifdef Q_OS_ANDROID
             // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
             int av_jni_set_java_vm(void *vm, void *log_ctx);
-            int av_jni_set_android_app_ctx(void *app_ctx, void *log_ctx);
             av_jni_set_java_vm(QJniEnvironment::javaVM(), nullptr);
-            av_jni_set_android_app_ctx(QNativeInterface::QAndroidApplication::context(), nullptr);
+
+            // FFmpeg 7.0
+            // int av_jni_set_android_app_ctx(void *app_ctx, void *log_ctx);
+            // av_jni_set_android_app_ctx(QNativeInterface::QAndroidApplication::context(), nullptr);
         #endif
 
         #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)

@@ -14,7 +14,7 @@ opencv = ["gyroflow-core/use-opencv"]
 gyroflow-core = { path = "src/core/", features = ["use-opencv", "use-opencl"] }
 system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", rev = "59ca281" }
 breakpad-sys = "0.2.0"
-trash = "4.1.0"
+trash = "4.1.1"
 
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
 gyroflow-core = { path = "src/core/", features = ["use-opencv"] }
@@ -42,7 +42,7 @@ argh = "0.1.12"
 indicatif = "0.17"
 rustfft = "6.2.0"
 crc32fast = "1.4.0"
-rodio = { default-features = false, features = ["vorbis"], version = "0.17.3" }
+rodio = { default-features = false, features = ["vorbis"], version = "0.18.0" }
 filetime_creation = "0.2"
 directories = "5"
 
@@ -92,7 +92,7 @@ core-foundation-sys = "0.8.6"
 cpp_build = "0.5.9"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.0.95"
+cc = "1.0.97"
 
 [[bin]]
 name = "gyroflow"
