@@ -332,10 +332,10 @@ impl WgpuWrapper {
 
             let compilation_options = wgpu::PipelineCompilationOptions {
                 constants: &std::collections::HashMap::from([
-                    (String::from("interpolation"),     params.interpolation     as f64),
-                    (String::from("pix_element_count"), params.pix_element_count as f64),
-                    (String::from("bytes_per_pixel"),   params.bytes_per_pixel   as f64),
-                    (String::from("flags"),             params.flags             as f64),
+                    (String::from("100"), params.interpolation     as f64),
+                    (String::from("101"), params.pix_element_count as f64),
+                    (String::from("102"), params.bytes_per_pixel   as f64),
+                    (String::from("103"), params.flags             as f64),
                 ]),
                 ..Default::default()
             };

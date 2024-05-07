@@ -97,10 +97,9 @@ void draw_safe_area(inout vec4 out_pix, float x, float y) {
         bool isBorder = x >= params.safe_area_rect.x - 5.0 && x <= params.safe_area_rect.z + 5.0 &&
                         y >= params.safe_area_rect.y - 5.0 && y <= params.safe_area_rect.w + 5.0;
         if (isBorder) {
-            out_pix.x = 40.0  / 255.0;
-            out_pix.y = 40.0  / 255.0;
-            out_pix.z = 40.0  / 255.0;
-            out_pix.w = 255.0 / 255.0;
+            out_pix.x *= 0.5;
+            out_pix.y *= 0.5;
+            out_pix.z *= 0.5;
         }
     }
 }

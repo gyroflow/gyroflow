@@ -236,12 +236,12 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
     }
 
     var out_pos = position;
-    //if (bool(flags & 64)) { // Uses output rect
+    if (bool(flags & 64)) { // Uses output rect
         out_pos = vec2<f32>(
             map_coord(position.x, f32(params.output_rect.x), f32(params.output_rect.x + params.output_rect.z), 0.0, f32(params.output_width) ),
             map_coord(position.y, f32(params.output_rect.y), f32(params.output_rect.y + params.output_rect.w), 0.0, f32(params.output_height))
         );
-    //}
+    }
 
     let p = out_pos;
 
