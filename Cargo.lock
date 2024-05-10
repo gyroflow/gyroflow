@@ -2286,8 +2286,7 @@ dependencies = [
 [[package]]
 name = "mp4parse"
 version = "0.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63a35203d3c6ce92d5251c77520acb2e57108c88728695aa883f70023624c570"
+source = "git+https://github.com/AdrianEddy/mp4parse-rust.git#2f1b4a5a0c86155a7c4d1c12ca347cd33a5b2b24"
 dependencies = [
  "bitreader",
  "byteorder",
@@ -3064,7 +3063,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=5328173#532817339342dd6df7b4bda90c51c4d755b31623"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=e826437#e8264379f76617d69f851fd91b5299c942c14407"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3686,7 +3685,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.3.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=dfb2731#dfb2731226e4b5affb6e2f30ccc80ba09151d4e8"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=bc255fd#bc255fda7b615ae5208a44e54fd7122157166aad"
 dependencies = [
  "argh",
  "byteorder",
