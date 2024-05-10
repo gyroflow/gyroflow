@@ -105,6 +105,7 @@ Item {
         target: controller;
         function onGyroflow_file_loaded(obj: var): void {
             if (obj && +obj.version > 0) {
+                let duration_ms = videoArea.vid.duration;
                 const info = obj.video_info || { };
                 if (info && Object.keys(info).length > 0) {
                     if (info.hasOwnProperty("vfr_fps") && Math.round(+info.vfr_fps * 1000) != Math.round(+info.fps * 1000)) {
@@ -112,6 +113,9 @@ Item {
                     }
                     if (info.hasOwnProperty("rotation")) {
                         vidInfo.updateEntryWithTrigger("Rotation", +info.rotation);
+                    }
+                    if (info.hasOwnProperty("duration_ms")) {
+                        duration_ms = info.duration_ms;
                     }
                 }
 
@@ -121,7 +125,9 @@ Item {
                 if (obj.hasOwnProperty("trim_start")) {
                     timeline.setTrimRanges([[obj.trim_start, obj.trim_end]]);
                 }
-                if (obj.hasOwnProperty("trim_ranges")) {
+                if (obj.hasOwnProperty("trim_ranges_ms")) {
+                    timeline.setTrimRanges(obj.trim_ranges_ms.map(x => [x[0] / duration_ms, x[1] / duration_ms]));
+                } else if (obj.hasOwnProperty("trim_ranges")) {
                     timeline.setTrimRanges(obj.trim_ranges);
                 }
                 window.motionData.loadGyroflow(obj);

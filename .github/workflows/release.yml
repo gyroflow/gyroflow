@@ -56,7 +56,7 @@ jobs:
 
       - name: Install Mac certificates
         if: ${{ matrix.targets.os == 'macos-13' }}
-        uses: apple-actions/import-codesign-certs@v2
+        uses: apple-actions/import-codesign-certs@v3
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATES }}
           p12-password: ${{ secrets.MACOS_CERTIFICATE_PWD }}

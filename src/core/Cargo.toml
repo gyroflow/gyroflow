@@ -47,7 +47,7 @@ enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.4.1"
 lru = "0.12"
-thiserror = "1.0.59"
+thiserror = "1.0.60"
 ciborium = "0.2.2"
 nt-hive = "0.2"
 dyn-clone = "1.0.17"
@@ -79,10 +79,10 @@ ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.2.0"
 opencv = { version = "0.91.3", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "3b6112d", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "f4b8b15", features = ["spirv", "naga-ir"] }
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "3b6112d"
+rev = "f4b8b15"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]

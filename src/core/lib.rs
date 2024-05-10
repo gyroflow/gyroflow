@@ -943,6 +943,8 @@ impl StabilizationManager {
 
         let input_file = self.input_file.read().clone();
 
+        let mut trim_ranges_ms = params.trim_ranges.iter().map(|(a, b)| (a * params.duration_ms, b * params.duration_ms)).collect::<Vec<_>>();
+
         let mut obj = serde_json::json!({
             "title": "Gyroflow data file",
             "version": 3,
@@ -1006,7 +1008,8 @@ impl StabilizationManager {
             "offsets": gyro.get_offsets(), // timestamp, offset value
             "keyframes": self.keyframes.read().serialize(),
 
-            "trim_ranges": params.trim_ranges,
+            // "trim_ranges": params.trim_ranges,
+            "trim_ranges_ms": trim_ranges_ms,
         });
 
         util::merge_json(&mut obj, &serde_json::from_str(additional_data).unwrap_or_default());
@@ -1380,7 +1383,19 @@ impl StabilizationManager {
                 }
             }
 
-            if let Some(ranges) = obj.get("trim_ranges").and_then(|x| x.as_array()) {
+            let duration_ms = self.params.read().duration_ms.max(1.0);
+            if let Some(ranges) = obj.get("trim_ranges_ms").and_then(|x| x.as_array()) {
+                let ranges = ranges.iter().filter_map(|x| {
+                    let x = x.as_array()?;
+                    if x.len() == 2 {
+                        Some((x[0].as_f64()? / duration_ms, x[1].as_f64()? / duration_ms))
+                    } else {
+                        None
+                    }
+                }).collect::<Vec<_>>();
+                self.params.write().trim_ranges = ranges;
+            } else if let Some(ranges) = obj.get("trim_ranges").and_then(|x| x.as_array()) {
+                // Deprecated
                 let ranges = ranges.iter().filter_map(|x| {
                     let x = x.as_array()?;
                     if x.len() == 2 {

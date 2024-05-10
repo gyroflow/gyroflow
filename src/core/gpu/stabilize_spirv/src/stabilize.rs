@@ -52,13 +52,14 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
 
     let mut out_pos = if (flags & 64) == 64 { // Uses output rect
         vec2(
-            map_coord(uv.x as f32, params.output_rect.x as f32, (params.output_rect.x + params.output_rect.z) as f32, 0.0, params.output_width as f32 ),
-            map_coord(uv.y as f32, params.output_rect.y as f32, (params.output_rect.y + params.output_rect.w) as f32, 0.0, params.output_height as f32)
+            map_coord(uv.x, params.output_rect.x as f32, (params.output_rect.x + params.output_rect.z) as f32, 0.0, params.output_width  as f32),
+            map_coord(uv.y, params.output_rect.y as f32, (params.output_rect.y + params.output_rect.w) as f32, 0.0, params.output_height as f32)
         )
     } else {
-        vec2(uv.x as f32, uv.y as f32)
+        vec2(uv.x, uv.y)
     };
 
+    #[cfg(not(feature = "for_qtrhi"))]
     if out_pos.x < 0.0 || out_pos.y < 0.0 || out_pos.x > params.output_width as f32 || out_pos.y > params.output_height as f32 { return bg; }
 
     let org_out_pos = out_pos;
