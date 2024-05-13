@@ -25,7 +25,7 @@ macro_rules! cuda {
 pub struct CudaSharedMemory {
     pub device_ptr: CUdeviceptr,
     pub external_memory: Option<CUexternalMemory>,
-    pub shared_handle: usize,
+    pub shared_handle: isize,
     pub cuda_alloc_size: usize,
     pub vulkan_pitch_alignment: usize,
     pub additional_drop_func: Option<Box<dyn FnOnce()>>
@@ -149,7 +149,7 @@ pub fn allocate_shared_cuda_memory(size: usize) -> Result<CudaSharedMemory, Box<
     let location = CUmemLocation { type_: CU_MEM_LOCATION_TYPE_DEVICE, id: dev };
 
     let mut device_ptr: CUdeviceptr = 0u64;
-    let mut shared_handle = 0usize;
+    let mut shared_handle = 0isize;
 
     let mut cu_mem_handle: CUmemGenericAllocationHandle = 0;
     let mut prop = CUmemAllocationProp {
@@ -201,7 +201,7 @@ pub fn allocate_shared_cuda_memory(size: usize) -> Result<CudaSharedMemory, Box<
 
     cuda!(cuda.cuMemAddressReserve(&mut device_ptr, asize, granularity, 0, 0));
     cuda!(cuda.cuMemCreate(&mut cu_mem_handle, asize, &prop, 0));
-    cuda!(cuda.cuMemExportToShareableHandle((&mut shared_handle) as *mut usize as *mut _, cu_mem_handle, share_type, 0));
+    cuda!(cuda.cuMemExportToShareableHandle((&mut shared_handle) as *mut isize as *mut _, cu_mem_handle, share_type, 0));
     log::debug!("Creating CUDA memory 0x{device_ptr:08x} (device {}) | size: {size}, aligned size: {asize}", dev);
 
     cuda!(cuda.cuMemMap(device_ptr, asize, 0, cu_mem_handle, 0));
@@ -234,18 +234,18 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
                 let raw_device = device.raw_device();
 
                 #[cfg(target_os = "windows")]
-                let mut import_memory_info = vk::ImportMemoryWin32HandleInfoKHR::builder()
+                let mut import_memory_info = vk::ImportMemoryWin32HandleInfoKHR::default()
                     .handle_type(handle_type)
-                    .handle(cuda_mem.shared_handle as *mut std::ffi::c_void);
+                    .handle(cuda_mem.shared_handle);
 
                 #[cfg(target_os = "linux")]
-                let mut import_memory_info = vk::ImportMemoryFdInfoKHR::builder()
+                let mut import_memory_info = vk::ImportMemoryFdInfoKHR::default()
                     .handle_type(handle_type)
                     .fd(cuda_mem.shared_handle as std::ffi::c_int);
 
-                let mut ext_create_info = vk::ExternalMemoryImageCreateInfo::builder().handle_types(handle_type);
+                let mut ext_create_info = vk::ExternalMemoryImageCreateInfo::default().handle_types(handle_type);
 
-                let image_create_info = ImageCreateInfo::builder()
+                let image_create_info = ImageCreateInfo::default()
                     .push_next(&mut ext_create_info)
                     .image_type(vk::ImageType::TYPE_2D)
                     .format(super::wgpu_interop_vulkan::format_wgpu_to_vulkan(format))
@@ -279,7 +279,7 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
                     memory_type_index as u32
                 };
 
-                let allocate_info = vk::MemoryAllocateInfo::builder()
+                let allocate_info = vk::MemoryAllocateInfo::default()
                     .allocation_size(cuda_mem.cuda_alloc_size as u64)
                     .push_next(&mut import_memory_info)
                     .memory_type_index(memory_type_index);
@@ -289,7 +289,7 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
                 raw_device.bind_image_memory(raw_image, allocated_memory, 0)?;
 
                 #[cfg(target_os = "windows")]
-                let _ = windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(cuda_mem.shared_handle as isize));
+                let _ = windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(cuda_mem.shared_handle));
                 #[cfg(target_os = "linux")]
                 libc::close(cuda_mem.shared_handle as i32);
 
@@ -317,18 +317,18 @@ pub fn create_vk_buffer_backed_by_cuda_memory(device: &wgpu::Device, size: (usiz
                 let raw_device = device.raw_device();
 
                 #[cfg(target_os = "windows")]
-                let mut import_memory_info = vk::ImportMemoryWin32HandleInfoKHR::builder()
+                let mut import_memory_info = vk::ImportMemoryWin32HandleInfoKHR::default()
                     .handle_type(handle_type)
-                    .handle(cuda_mem.shared_handle as *mut std::ffi::c_void);
+                    .handle(cuda_mem.shared_handle);
 
                 #[cfg(target_os = "linux")]
-                let mut import_memory_info = vk::ImportMemoryFdInfoKHR::builder()
+                let mut import_memory_info = vk::ImportMemoryFdInfoKHR::default()
                     .handle_type(handle_type)
                     .fd(cuda_mem.shared_handle as std::ffi::c_int);
 
-                let mut ext_create_info = vk::ExternalMemoryBufferCreateInfo::builder().handle_types(handle_type);
+                let mut ext_create_info = vk::ExternalMemoryBufferCreateInfo::default().handle_types(handle_type);
 
-                let buffer_create_info = BufferCreateInfo::builder()
+                let buffer_create_info = BufferCreateInfo::default()
                     .push_next(&mut ext_create_info)
                     .size(cuda_mem.cuda_alloc_size as vk::DeviceSize)
                     .usage(vk::BufferUsageFlags::STORAGE_BUFFER | vk::BufferUsageFlags::TRANSFER_SRC | vk::BufferUsageFlags::TRANSFER_DST)
@@ -353,7 +353,7 @@ pub fn create_vk_buffer_backed_by_cuda_memory(device: &wgpu::Device, size: (usiz
                     memory_type_index as u32
                 };
 
-                let allocate_info = vk::MemoryAllocateInfo::builder()
+                let allocate_info = vk::MemoryAllocateInfo::default()
                     .allocation_size(cuda_mem.cuda_alloc_size as u64)
                     .push_next(&mut import_memory_info)
                     .memory_type_index(memory_type_index);

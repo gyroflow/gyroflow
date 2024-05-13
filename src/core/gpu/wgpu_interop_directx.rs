@@ -124,19 +124,19 @@ pub fn create_vk_image_from_d3d11_texture(device: &wgpu::Device, d3d11_device: &
                 let raw_device = device.raw_device();
                 let handle_type = vk::ExternalMemoryHandleTypeFlags::D3D11_TEXTURE; // D3D12_RESOURCE_KHR
 
-                let mut import_memory_info = vk::ImportMemoryWin32HandleInfoKHR::builder()
+                let mut import_memory_info = vk::ImportMemoryWin32HandleInfoKHR::default()
                     .handle_type(handle_type)
-                    .handle(handle.0 as *mut std::ffi::c_void);
+                    .handle(handle.0);
 
-                let allocate_info = vk::MemoryAllocateInfo::builder()
+                let allocate_info = vk::MemoryAllocateInfo::default()
                     .push_next(&mut import_memory_info)
                     .memory_type_index(0);
 
                 let allocated_memory = raw_device.allocate_memory(&allocate_info, None)?;
 
-                let mut ext_create_info = vk::ExternalMemoryImageCreateInfo::builder().handle_types(handle_type);
+                let mut ext_create_info = vk::ExternalMemoryImageCreateInfo::default().handle_types(handle_type);
 
-                let image_create_info = ImageCreateInfo::builder()
+                let image_create_info = ImageCreateInfo::default()
                     .push_next(&mut ext_create_info)
                     .image_type(vk::ImageType::TYPE_2D)
                     .format(super::wgpu_interop_vulkan::format_wgpu_to_vulkan(format_dxgi_to_wgpu(desc.Format)))

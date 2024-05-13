@@ -943,7 +943,7 @@ impl StabilizationManager {
 
         let input_file = self.input_file.read().clone();
 
-        let mut trim_ranges_ms = params.trim_ranges.iter().map(|(a, b)| (a * params.duration_ms, b * params.duration_ms)).collect::<Vec<_>>();
+        let trim_ranges_ms = params.trim_ranges.iter().map(|(a, b)| (a * params.duration_ms, b * params.duration_ms)).collect::<Vec<_>>();
 
         let mut obj = serde_json::json!({
             "title": "Gyroflow data file",

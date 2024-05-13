@@ -13,17 +13,17 @@ pub fn create_vk_image_from_android_hw_buffer(hw_buffer: *mut std::ffi::c_void, 
             device.map(|device| {
                 let raw_device = device.raw_device();
 
-                let mut import_memory_info = vk::ImportAndroidHardwareBufferInfoANDROID::builder()
+                let mut import_memory_info = vk::ImportAndroidHardwareBufferInfoANDROID::default()
                     .buffer(hw_buffer as _);
 
-                let image_create_info = ImageCreateInfo::builder()
+                let image_create_info = ImageCreateInfo::default()
                     .push_next(
-                        &mut vk::ExternalMemoryImageCreateInfo::builder().handle_types(
+                        &mut vk::ExternalMemoryImageCreateInfo::default().handle_types(
                             vk::ExternalMemoryHandleTypeFlags::ANDROID_HARDWARE_BUFFER_ANDROID
                         )
                     )
                     .push_next(
-                        &mut vk::ExternalFormatANDROID::builder()
+                        &mut vk::ExternalFormatANDROID::default()
                             .external_format(self.input_format_properties.external_format),
                     )
                     .image_type(vk::ImageType::TYPE_2D)
@@ -59,7 +59,7 @@ pub fn create_vk_image_from_android_hw_buffer(hw_buffer: *mut std::ffi::c_void, 
                     memory_type_index as u32
                 };
 
-                let allocate_info = vk::MemoryAllocateInfo::builder()
+                let allocate_info = vk::MemoryAllocateInfo::default()
                     .allocation_size(cuda_mem.cuda_alloc_size as u64)
                     .push_next(&mut import_memory_info)
                     .memory_type_index(memory_type_index);
