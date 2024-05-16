@@ -303,9 +303,9 @@ checksum = "79296716171880943b8470b5f8d03aa55eb2e645a4874bdbb28adb49162e012c"
 
 [[package]]
 name = "bytemuck"
-version = "1.15.0"
+version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d6d68c57235a3a081186990eca2867354726650f42f7516ca50c28d6281fd15"
+checksum = "78834c15cb5d5efe3452d58b1e8ba890dd62d21907f867f383358198e56ebca5"
 
 [[package]]
 name = "byteorder"
@@ -636,7 +636,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=8879733#8879733875fc2e8852d7890646b4557cb4bedf1a"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=4902e47#4902e470ce61bd102a7d57f3e17bf15798095b6a"
 dependencies = [
  "bitflags 2.5.0",
  "libloading",
@@ -1511,7 +1511,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=8879733#8879733875fc2e8852d7890646b4557cb4bedf1a"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=4902e47#4902e470ce61bd102a7d57f3e17bf15798095b6a"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-set",
@@ -2381,18 +2381,18 @@ checksum = "61697e0a1c7e512e84a621326239844a24d8207b4669b41bc18b32ea5cbf988b"
 
 [[package]]
 name = "serde"
-version = "1.0.201"
+version = "1.0.202"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "780f1cebed1629e4753a1a38a3c72d30b97ec044f0aef68cb26650a3c5cf363c"
+checksum = "226b61a0d411b2ba5ff6d7f73a476ac4f8bb900373459cd00fab8512828ba395"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.201"
+version = "1.0.202"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c5e405930b9796f1c00bee880d03fc7e0bb4b9a11afc776885ffe84320da2865"
+checksum = "6048858004bcff69094cd972ed40a32500f153bd3be9f716b2eed2e8217c4838"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2692,9 +2692,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "toml_datetime"
-version = "0.6.5"
+version = "0.6.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3550f4e9685620ac18a50ed434eb3aec30db8ba93b0287467bca5826ea25baf1"
+checksum = "4badfd56924ae69bcc9039335b2e017639ce3f9b001c393c1b2d1ef846ce2cbf"
 
 [[package]]
 name = "toml_edit"
@@ -2927,7 +2927,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=8879733#8879733875fc2e8852d7890646b4557cb4bedf1a"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=4902e47#4902e470ce61bd102a7d57f3e17bf15798095b6a"
 dependencies = [
  "arrayvec 0.7.4",
  "cfg_aliases",
@@ -2951,7 +2951,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=8879733#8879733875fc2e8852d7890646b4557cb4bedf1a"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=4902e47#4902e470ce61bd102a7d57f3e17bf15798095b6a"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-vec",
@@ -2976,7 +2976,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=8879733#8879733875fc2e8852d7890646b4557cb4bedf1a"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=4902e47#4902e470ce61bd102a7d57f3e17bf15798095b6a"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.4",
@@ -3020,7 +3020,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=8879733#8879733875fc2e8852d7890646b4557cb4bedf1a"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=4902e47#4902e470ce61bd102a7d57f3e17bf15798095b6a"
 dependencies = [
  "bitflags 2.5.0",
  "js-sys",
@@ -3029,9 +3029,9 @@ dependencies = [
 
 [[package]]
 name = "wide"
-version = "0.7.18"
+version = "0.7.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5925f89e85af9e6e776bedb11ddeb2365b85cb56c13bfb30223e4b6398d30bb6"
+checksum = "aab6594190de06d718a5dbc5fa781ab62f8903797056480e549ca74add6b7065"
 dependencies = [
  "bytemuck",
  "safe_arch",

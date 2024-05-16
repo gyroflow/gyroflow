@@ -367,6 +367,7 @@ impl WgpuWrapper {
                     multiview: None,
                     depth_stencil: None,
                     multisample: wgpu::MultisampleState::default(),
+                    cache: Default::default()
                 }))
             } else {
                 PipelineType::Compute(device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
@@ -375,6 +376,7 @@ impl WgpuWrapper {
                     label: None,
                     layout: Some(&pipeline_layout),
                     compilation_options,
+                    cache: Default::default()
                 }))
             };
 

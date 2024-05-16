@@ -65,7 +65,7 @@ bitarray = { version = "0.9", features = ["space"] }
 enterpolation = "0.2.1"
 libloading = "0.8"
 libc = "0.2"
-bytemuck = "1.15.0"
+bytemuck = "1.16.0"
 ash = "0.38.0"
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"
@@ -79,10 +79,10 @@ ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.2.0"
 opencv = { version = "0.91.3", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "8879733", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "4902e47", features = ["spirv", "naga-ir"] }
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "8879733"
+rev = "4902e47"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
