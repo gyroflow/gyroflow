@@ -1044,6 +1044,9 @@ impl RenderQueue {
                 sync_options = sync.clone();
             }
             if let Some(out) = additional_data.get("output") {
+                let has_output_width  = out.as_object().map(|x| x.contains_key("output_width")).unwrap_or_default();
+                let has_output_height = out.as_object().map(|x| x.contains_key("output_height")).unwrap_or_default();
+
                 let override_ext = out.get("output_extension").and_then(|x| x.as_str()).map(|x| x.to_owned());
                 if let Ok(mut render_options) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
                     render_options.update_from_json(out);
@@ -1191,8 +1194,12 @@ impl RenderQueue {
                             ::log::info!("Loaded {:?}", &info);
 
                             render_options.bitrate = render_options.bitrate.max(info.bitrate);
-                            render_options.output_width = info.width as usize;
-                            render_options.output_height = info.height as usize;
+                            if !has_output_width {
+                                render_options.output_width = info.width as usize;
+                            }
+                            if !has_output_height {
+                                render_options.output_height = info.height as usize;
+                            }
                             render_options.output_folder = Self::get_output_folder(&url, &render_options.output_folder);
                             render_options.output_filename = Self::get_output_filename(&url, &suffix, &render_options, override_ext.as_deref());
 
@@ -1232,8 +1239,12 @@ impl RenderQueue {
                                     }
                                 }
                                 if let Some(output_dim) = stab.lens.read().output_dimension.clone() {
-                                    render_options.output_width = output_dim.w;
-                                    render_options.output_height = output_dim.h;
+                                    if !has_output_width {
+                                        render_options.output_width = output_dim.w;
+                                    }
+                                    if !has_output_height {
+                                        render_options.output_height = output_dim.h;
+                                    }
                                 }
 
                                 stab.set_size(video_size.0, video_size.1);
