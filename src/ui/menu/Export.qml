@@ -595,6 +595,9 @@ MenuItem {
                             for (const keyword of toRemove) {
                                 x = x.replace(keyword, "").trim()
                             }
+                            if (Qt.platform.os == "ios" && x.toLowerCase().includes("apple m")) {
+                                root.exportFormats[2]['gpu'] = true; // ProRes is supported on apple silicon
+                            }
                             return x;
                         });
                         list = [...new Set(list)];
