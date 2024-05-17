@@ -39,7 +39,7 @@ byteorder = "1.5.0"
 line_drawing = "1.0.0"
 rand = "0.8.5"
 time = { version = "0.3.36", features = ["local-offset"] }
-itertools = "0.12.1"
+itertools = "0.13.0"
 num = "0.4.2"
 base91 = "0.1.0"
 bitflags = "2.5.0"

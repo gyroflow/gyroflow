@@ -28,7 +28,7 @@ bytemuck = "1.15.0"
 nalgebra = "0.32"
 semver = "1.0.22"
 fastrand = "2.1.0"
-itertools = "0.12.1"
+itertools = "0.13.0"
 regex = "1.10.4"
 rayon = "1.10"
 
