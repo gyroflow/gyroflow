@@ -517,7 +517,7 @@ pub fn open_file<'a>(_base: &'a EngineBase, url: &str, writing: bool, truncate: 
     #[cfg(not(target_os = "android"))]
     {
         let path = url_to_path(url);
-        let file = if writing && truncate { File::create(path)? } else if writing { OpenOptions::new().read(true).write(true).open(path)? } else { File::open(path)? };
+        let file = if (writing && truncate) || (writing && !path.exists()) { File::create(path)? } else if writing { OpenOptions::new().read(true).write(true).open(path)? } else { File::open(path)? };
         let size = file.metadata()?.len() as usize;
         Ok(FileWrapper { file: Some(file), size, url: url.to_owned(), _lifetime: Default::default() })
     }
