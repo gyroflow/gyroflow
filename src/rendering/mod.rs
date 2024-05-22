@@ -218,6 +218,8 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
 
     drop(params);
 
+    let lens_checksum = stab.lens.read().checksum.clone();
+
     let mut decoder_options = ffmpeg_next::Dictionary::new();
     if input_file.image_sequence_fps > 0.0 {
         let fps = fps_to_rational(input_file.image_sequence_fps);
@@ -709,6 +711,8 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
             ::log::error!("Failed to copy Insta360 metadata: {e:?}");
         }
     }
+
+    crate::util::report_lens_profile_usage(lens_checksum);
 
     Ok(())
 }

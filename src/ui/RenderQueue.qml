@@ -624,13 +624,44 @@ Item {
         anchors.margins: 0 * dpiScale;
         anchors.topMargin: lv.y;
         extensions: fileDialog.extensions;
-        function add(outFolder, urls): void {
+        function add(outFolder: string, urls: list<url>): void {
+            let foldersWithoutAccess = [];
             let additional = window.getAdditionalProjectData();
             if (!outFolder) {
                 delete additional.output.output_folder;
                 delete additional.output.output_filename;
+                if (isSandboxed) {
+                    for (const url of urls) {
+                        const folder = filesystem.get_folder(url);
+                        if (!foldersWithoutAccess.includes(folder) && !filesystem.can_create_file(folder, "check.tmp")) {
+                            foldersWithoutAccess.push(folder);
+                        }
+                    }
+                }
             } else {
                 additional.output.output_folder = outFolder;
+                if (isSandboxed) {
+                    if (!foldersWithoutAccess.includes(outFolder) && !filesystem.can_create_file(outFolder, "check.tmp")) {
+                        foldersWithoutAccess.push(outFolder);
+                    }
+                }
+            }
+            if (foldersWithoutAccess.length > 0) {
+                console.log("Folders without write access:", foldersWithoutAccess);
+                let remaining = foldersWithoutAccess.length;
+                for (const folder of foldersWithoutAccess) {
+                    remaining--;
+                    let el = messageBox(Modal.Info, qsTr("Due to file access restrictions, you need to select the destination folder manually.\nClick Ok and select the destination folder."), [
+                        { text: qsTr("Ok"), clicked: () => {
+                            outputFile.selectFolder(folder, function(_) { if (!remaining) add(outFolder, urls); });
+                        }},
+                    ], undefined, Text.AutoText, "file-access-restriction");
+                    if (!el) { // Don't show again triggered
+                        outputFile.selectFolder(folder, function(_) { if (!remaining) add(outFolder, urls); });
+                    }
+                    filesystem.remove_file(filesystem.get_file_url(folder, "check.tmp", false));
+                }
+                return;
             }
             additional = JSON.stringify(additional);
 

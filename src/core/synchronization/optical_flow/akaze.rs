@@ -56,6 +56,7 @@ impl OpticalFlowTrait for OFAkaze {
         None
     }
 
+    fn can_cleanup(&self) -> bool { true }
     fn features(&self) -> &Vec<(f32, f32)> { &self.features }
     fn size(&self) -> (u32, u32) { self.img_size }
     fn cleanup(&mut self) { }

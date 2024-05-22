@@ -151,6 +151,15 @@ impl PoseEstimator {
                     }
                 }
             }
+
+            // Free unneeded img memory
+            let mut l = results.write();
+            if let Some(curr) = l.get_mut(ts) {
+                if curr.of_method.can_cleanup() { curr.of_method.cleanup(); }
+                if let Some(next) = l.get_mut(next_ts) {
+                    if next.of_method.can_cleanup() { next.of_method.cleanup(); }
+                }
+            }
         });
         self.recalculate_gyro_data(fps, false);
     }

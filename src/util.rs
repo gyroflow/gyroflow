@@ -531,3 +531,17 @@ pub fn copy_insta360_metadata(output_url: &str, input_url: &str) -> Result<(), g
 
     Ok(())
 }
+
+pub fn report_lens_profile_usage(checksum: Option<String>) {
+    if let Some(checksum) = checksum {
+        if !checksum.is_empty() {
+            gyroflow_core::run_threaded(move || {
+                let url = url::Url::parse(&format!("https://api.gyroflow.xyz/usage?checksum={checksum}")).unwrap();
+        
+                if let Ok(body) = ureq::request_url("GET", &url).call() {
+                    ::log::debug!("Lens profile usage stats: {:?}", body.into_string());
+                }
+            });
+        }
+    }
+}

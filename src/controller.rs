@@ -1191,8 +1191,13 @@ impl Controller {
             this.request_recompute();
         });
 
+        let lens_checksum = self.stabilizer.lens.read().checksum.clone();
+
         let stab = self.stabilizer.clone();
         core::run_threaded(move || {
+
+            util::report_lens_profile_usage(lens_checksum);
+
             match stab.export_gyroflow_file(&url, typ, &additional_data.to_json().to_string()) {
                 Ok(_) => finished(("ok", url.to_string())),
                 Err(core::GyroflowCoreError::IOError(ref e)) if e.kind() == std::io::ErrorKind::PermissionDenied => finished(("location", url.to_string())),
@@ -1203,6 +1208,9 @@ impl Controller {
 
     fn export_gyroflow_data(&self, typ: QString, additional_data: QJsonObject) -> QString {
         let typ = core::GyroflowProjectType::from_str(&typ.to_string()).unwrap();
+
+        util::report_lens_profile_usage(self.stabilizer.lens.read().checksum.clone());
+
         QString::from(self.stabilizer.export_gyroflow_data(typ, &additional_data.to_json().to_string(), None).unwrap_or_default())
     }
 

@@ -8,6 +8,7 @@ use super::{ OpticalFlowTrait, OpticalFlowMethod };
 use std::collections::BTreeMap;
 use std::sync::Arc;
 use parking_lot::RwLock;
+use std::sync::atomic::AtomicU32;
 #[cfg(feature = "use-opencv")]
 use opencv::{ core::{ Mat, Size, Point2f, CV_8UC1, TermCriteria }, prelude::MatTraitConst };
 
@@ -17,7 +18,8 @@ pub struct OFOpenCVPyrLK {
     img: Arc<image::GrayImage>,
     matched_points: Arc<RwLock<BTreeMap<i64, (OpticalFlowPoints, OpticalFlowPoints)>>>,
     timestamp_us: i64,
-    size: (i32, i32)
+    size: (i32, i32),
+    used: Arc<AtomicU32>,
 }
 impl OFOpenCVPyrLK {
     pub fn detect_features(timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32) -> Self {
@@ -46,7 +48,8 @@ impl OFOpenCVPyrLK {
             size: (w, h),
             img,
             timestamp_us,
-            matched_points: Default::default()
+            matched_points: Default::default(),
+            used: Default::default()
         }
     }
 }
@@ -97,6 +100,9 @@ impl OpticalFlowTrait for OFOpenCVPyrLK {
                 }
                 Ok((pts1, pts2))
             }();
+            
+            self.used.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            next.used.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
 
             match result {
                 Ok(res) => {
@@ -109,6 +115,9 @@ impl OpticalFlowTrait for OFOpenCVPyrLK {
             }
         }
         None
+    }
+    fn can_cleanup(&self) -> bool {
+        self.used.load(std::sync::atomic::Ordering::SeqCst) == 2
     }
     fn cleanup(&mut self) {
         self.img = Arc::new(image::GrayImage::default());

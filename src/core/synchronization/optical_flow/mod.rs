@@ -14,6 +14,7 @@ pub trait OpticalFlowTrait {
     fn features(&self) -> &Vec<(f32, f32)>;
     fn optical_flow_to(&self, to: &OpticalFlowMethod) -> OpticalFlowPair;
     fn cleanup(&mut self);
+    fn can_cleanup(&self) -> bool;
 }
 
 #[enum_delegate::implement(OpticalFlowTrait)]

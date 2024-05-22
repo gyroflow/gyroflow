@@ -6,6 +6,7 @@ use super::super::OpticalFlowPair;
 use super::{ OpticalFlowTrait, OpticalFlowMethod };
 
 use std::collections::BTreeMap;
+use std::sync::atomic::AtomicU32;
 use std::sync::Arc;
 use parking_lot::RwLock;
 #[cfg(feature = "use-opencv")]
@@ -17,7 +18,8 @@ pub struct OFOpenCVDis {
     img: Arc<image::GrayImage>,
     matched_points: Arc<RwLock<BTreeMap<i64, (Vec<(f32, f32)>, Vec<(f32, f32)>)>>>,
     timestamp_us: i64,
-    size: (i32, i32)
+    size: (i32, i32),
+    used: Arc<AtomicU32>,
 }
 
 impl OFOpenCVDis {
@@ -27,7 +29,8 @@ impl OFOpenCVDis {
             timestamp_us,
             size: (width as i32, height as i32),
             matched_points: Default::default(),
-            img
+            img,
+            used: Default::default()
         }
     }
 }
@@ -42,11 +45,11 @@ impl OpticalFlowTrait for OFOpenCVDis {
         #[cfg(feature = "use-opencv")]
         if let OpticalFlowMethod::OFOpenCVDis(next) = _to {
             let (w, h) = self.size;
-            if self.img.is_empty() || next.img.is_empty() || w <= 0 || h <= 0 { return None; }
-
             if let Some(matched) = self.matched_points.read().get(&next.timestamp_us) {
                 return Some(matched.clone());
             }
+            if self.img.is_empty() || next.img.is_empty() || w <= 0 || h <= 0 { return None; }
+
 
             let result = || -> Result<(Vec<(f32, f32)>, Vec<(f32, f32)>), opencv::Error> {
                 let a1_img = unsafe { Mat::new_size_with_data_unsafe(Size::new(self.img.width() as i32, self.img.height() as i32), CV_8UC1, self.img.as_raw().as_ptr() as *mut std::ffi::c_void, 0) }?;
@@ -69,6 +72,9 @@ impl OpticalFlowTrait for OFOpenCVDis {
                 Ok((points_a, points_b))
             }();
 
+            self.used.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            next.used.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+
             match result {
                 Ok(res) => {
                     self.matched_points.write().insert(next.timestamp_us, res.clone());
@@ -80,6 +86,9 @@ impl OpticalFlowTrait for OFOpenCVDis {
             }
         }
         None
+    }
+    fn can_cleanup(&self) -> bool {
+        self.used.load(std::sync::atomic::Ordering::SeqCst) == 2
     }
     fn cleanup(&mut self) {
         self.img = Arc::new(image::GrayImage::default());
