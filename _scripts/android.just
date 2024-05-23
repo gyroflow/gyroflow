@@ -250,15 +250,19 @@ deploy *param:
 
     $job = Start-Job -Name "Cleanup" -ArgumentList "$ProjectDir\target\android-build\libs\arm64-v8a" -ScriptBlock {
         for ($num = 1; $num -le 800 ; $num++) {
-            $c = [System.IO.File]::ReadAllText("${args}\..\..\res\values\libs.xml") -replace "<item.+?(Fusion|Imagine|Universal).+?item>", ""
-            [System.IO.File]::WriteAllText("${args}\..\..\res\values\libs.xml", $c)
-            Remove-Item "${args}\*Universal*"
-            Remove-Item "${args}\*Imagine*"
-            Remove-Item "${args}\*Fusion*"
-            Remove-Item "${args}\*Particles*"
-            Remove-Item "${args}\*tooling*"
-            Remove-Item "${args}\*qgif*"
-            Remove-Item "${args}\*qico*"
+            try {
+                $c = [System.IO.File]::ReadAllText("${args}\..\..\res\values\libs.xml") -replace "<item.+?(Fusion|Imagine|Universal).+?item>", ""
+                [System.IO.File]::WriteAllText("${args}\..\..\res\values\libs.xml", $c)
+                Remove-Item "${args}\*Universal*"
+                Remove-Item "${args}\*Imagine*"
+                Remove-Item "${args}\*Fusion*"
+                Remove-Item "${args}\*Particles*"
+                Remove-Item "${args}\*tooling*"
+                Remove-Item "${args}\*qgif*"
+                Remove-Item "${args}\*qico*"
+            } catch {
+
+            }
             Start-Sleep -Milliseconds 150;
         }
     }
