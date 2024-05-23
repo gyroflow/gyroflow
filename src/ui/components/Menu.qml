@@ -29,7 +29,7 @@ QQC.Menu {
 
     component MenuItem: QQC.MenuItem {
         id: dlg;
-        property real itemHeight: parentMenu? parentMenu.itemHeight : 0;
+        property real itemHeight: parentMenu? parentMenu.itemHeight : (27 * dpiScale);
 
         property QQC.Menu parentMenu: null;
         property color textColor: orgIconColor.a > 0.1? orgIconColor : (dlg.checked? styleTextColorOnAccent : styleTextColor);
