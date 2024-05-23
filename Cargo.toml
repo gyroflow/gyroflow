@@ -41,14 +41,14 @@ human-sort = "0.2.2"
 argh = "0.1.12"
 indicatif = "0.17"
 rustfft = "6.2.0"
-crc32fast = "1.4.0"
+crc32fast = "1.4.2"
 rodio = { default-features = false, features = ["vorbis"], version = "0.18.0" }
 filetime_creation = "0.2"
 directories = "5"
 
 qmetaobject = { version = "0.2.10", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.11", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "e826437" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "5dbb75e" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "7.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
@@ -92,7 +92,7 @@ core-foundation-sys = "0.8.6"
 cpp_build = "0.5.9"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.0.97"
+cc = "1.0.98"
 
 [[bin]]
 name = "gyroflow"

@@ -13,6 +13,8 @@ TextField {
 
     signal selected(var item);
 
+    Component.onCompleted: root.children[0].x = root.leftPadding; // Set x of PlaceholderText
+
     Popup {
         id: popup;
         model: [];

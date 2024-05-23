@@ -4,7 +4,7 @@ KeyStore         := env_var_or_default("KEY_STORE_PATH",  "")
 KeyStoreAlias    := env_var_or_default("KEY_STORE_ALIAS", "")
 KeyStorePassword := env_var_or_default("KEY_STORE_PASS",  "")
 
-export ANDROID_NDK_HOME := env_var_or_default("ANDROID_NDK_HOME", "D:\\Programy\\Android\\sdk\\ndk\\android-ndk-r23c")
+export ANDROID_NDK_HOME := env_var_or_default("ANDROID_NDK_LATEST_HOME", env_var_or_default("ANDROID_NDK_HOME", "D:\\Programy\\Android\\sdk\\ndk\\android-ndk-r26b"))
 export ANDROID_SDK_ROOT := env_var_or_default("ANDROID_SDK_ROOT", "D:\\Programy\\Android\\sdk\\")
 export JAVA_HOME        := env_var_or_default("JAVA_HOME",        "D:\\Programy\\Java\\jdk-14.0.1")
 export BUILD_PROFILE    := env_var_or_default("BUILD_PROFILE",    "release") # use "deploy" for final apk
@@ -42,7 +42,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "{{QtVersion}}/android_arm64_v8a")) {
         echo "Downloading Qt {{QtVersion}} for Android"
-        & $Python -m pip install -U pip aqtinstall
+        & $Python -m pip install -U pip git+https://github.com/AdrianEddy/aqtinstall.git
         & $Python -m aqt install-qt windows desktop {{QtVersion}} win64_mingw
         & $Python -m aqt install-qt windows android {{QtVersion}} android_arm64_v8a
     }
@@ -250,6 +250,8 @@ deploy *param:
 
     $job = Start-Job -Name "Cleanup" -ArgumentList "$ProjectDir\target\android-build\libs\arm64-v8a" -ScriptBlock {
         for ($num = 1; $num -le 800 ; $num++) {
+            $c = [System.IO.File]::ReadAllText("${args}\..\..\res\values\libs.xml") -replace "<item.+?(Fusion|Imagine|Universal).+?item>", ""
+            [System.IO.File]::WriteAllText("${args}\..\..\res\values\libs.xml", $c)
             Remove-Item "${args}\*Universal*"
             Remove-Item "${args}\*Imagine*"
             Remove-Item "${args}\*Fusion*"

@@ -203,7 +203,11 @@ pub fn set_android_context() {
         });
         let activity = cpp!(unsafe [] -> *mut std::ffi::c_void as "void *" {
             #ifdef Q_OS_ANDROID
-                return QNativeInterface::QAndroidApplication::context();
+                #if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+                    return QNativeInterface::QAndroidApplication::context().object<jobject>();
+                #else
+                    return QNativeInterface::QAndroidApplication::context();
+                #endif
             #else
                 return nullptr;
             #endif
@@ -537,7 +541,7 @@ pub fn report_lens_profile_usage(checksum: Option<String>) {
         if !checksum.is_empty() {
             gyroflow_core::run_threaded(move || {
                 let url = url::Url::parse(&format!("https://api.gyroflow.xyz/usage?checksum={checksum}")).unwrap();
-        
+
                 if let Ok(body) = ureq::request_url("GET", &url).call() {
                     ::log::debug!("Lens profile usage stats: {:?}", body.into_string());
                 }
