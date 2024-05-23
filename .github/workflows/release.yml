@@ -140,6 +140,8 @@ jobs:
           BUILD_PROFILE: deploy
         run: |
           $Env:ANDROID_NDK_HOME = $Env:ANDROID_NDK_LATEST_HOME
+          $Env:ANDROID_NDK = $Env:ANDROID_NDK_LATEST_HOME
+          $Env:ANDROID_NDK_ROOT = $Env:ANDROID_NDK_LATEST_HOME
           $Env:JAVA_HOME = $Env:JAVA_HOME_17_X64
           Get-ChildItem Env:
           just android install-deps
