@@ -659,7 +659,6 @@ Item {
                     if (!el) { // Don't show again triggered
                         outputFile.selectFolder(folder, function(_) { if (!remaining) add(outFolder, urls); });
                     }
-                    filesystem.remove_file(filesystem.get_file_url(folder, "check.tmp", false));
                 }
                 return;
             }
