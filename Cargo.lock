@@ -3060,7 +3060,7 @@ dependencies = [
 [[package]]
 name = "qml-video-rs"
 version = "0.1.0"
-source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=5dbb75e#5dbb75e864319938dacbc58aab93afc47794c744"
+source = "git+https://github.com/AdrianEddy/qml-video-rs.git?rev=a698241#a698241ec1f9928f3d20e9f27bb1843a2cf3fee3"
 dependencies = [
  "cpp",
  "cpp_build",
@@ -3257,9 +3257,9 @@ dependencies = [
 
 [[package]]
 name = "rodio"
-version = "0.18.0"
+version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16e3ea3fb0b6a1837445e29e36971b101c154920791113ff860768a68a0b1cad"
+checksum = "d1fceb9d127d515af1586d8d0cc601e1245bdb0af38e75c865a156290184f5b3"
 dependencies = [
  "cpal",
  "lewton",

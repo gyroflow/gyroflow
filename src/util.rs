@@ -203,11 +203,8 @@ pub fn set_android_context() {
         });
         let activity = cpp!(unsafe [] -> *mut std::ffi::c_void as "void *" {
             #ifdef Q_OS_ANDROID
-                #if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
-                    return QNativeInterface::QAndroidApplication::context().object<jobject>();
-                #else
-                    return QNativeInterface::QAndroidApplication::context();
-                #endif
+                extern Q_CORE_EXPORT jobject qt_androidActivity();
+                return qt_androidActivity();
             #else
                 return nullptr;
             #endif
