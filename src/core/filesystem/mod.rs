@@ -480,7 +480,7 @@ pub fn can_open_file(url: &str) -> bool {
 pub fn can_create_file(folder: &str, filename: &str) -> bool {
     if folder.is_empty() || filename.is_empty() { return false; }
     fn inner(folder: &str, filename: &str) -> bool {
-        if folder.contains("://") {
+        if is_sandboxed() && folder.contains("://") {
             let lock = ALLOWED_FOLDERS.read();
             if !lock.contains(&normalize_url(folder, true)) {
                 return false; // Access not allowed
