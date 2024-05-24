@@ -435,7 +435,7 @@ impl<'a> FfmpegProcessor<'a> {
                                     }
                                     any_encoded = true;
                                 }
-                                if encoding_status == Status::Finish || cancel_flag.load(Relaxed) {
+                                if encoding_status == Status::Finish {
                                     encoding_video = false;
                                 }
                                 while pause_flag.load(Relaxed) {
@@ -461,7 +461,7 @@ impl<'a> FfmpegProcessor<'a> {
                         }
                     }
                 }
-                if !encoding_video && !encoding_audio {
+                if (!encoding_video && !encoding_audio) || cancel_flag.load(Relaxed) {
                     break;
                 }
             }
