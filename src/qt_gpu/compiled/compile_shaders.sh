@@ -3,7 +3,7 @@ QSB='../../../ext/6.4.3/msvc2019_64/bin/qsb.exe --glsl "120,300 es,310 es,320 es
 
 NO_DIGITAL_LENS="vec2 digital_undistort_point(vec2 uv) { return uv; } vec2 digital_distort_point(vec2 uv) { return uv; }"
 
-DISTORTION_MODELS=( "opencv_fisheye" "opencv_standard" "poly3" "poly5" "ptlens" "insta360" )
+DISTORTION_MODELS=( "opencv_fisheye" "opencv_standard" "poly3" "poly5" "ptlens" "insta360" "sony" )
 DIGITAL_LENSES=( "" "gopro_superview" "gopro_hyperview" "digital_stretch" )
 
 for i in "${DISTORTION_MODELS[@]}"

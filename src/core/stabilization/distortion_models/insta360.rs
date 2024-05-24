@@ -13,8 +13,12 @@ impl Insta360 {
 
         for _ in 0..200 {
             let dp = self.distort_point(px, py, 1.0, params);
-            px -= dp.0 - point.0;
-            py -= dp.1 - point.1;
+            let diff = (dp.0 - point.0, dp.1 - point.1);
+            if diff.0.abs() < 1e-6 && diff.1.abs() < 1e-6 {
+                break;
+            }
+            px -= diff.0;
+            py -= diff.1;
         }
 
         Some((px, py))

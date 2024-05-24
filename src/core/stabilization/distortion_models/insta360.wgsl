@@ -30,7 +30,11 @@ fn undistort_point(p: vec2<f32>) -> vec2<f32> {
     var pp = p;
 
     for (var i: i32 = 0; i < 200; i = i + 1) {
-        pp -= distort_point(pp.x, pp.y, 1.0) - p;
+        let diff = distort_point(pp.x, pp.y, 1.0) - p;
+        if (abs(diff.x) < 1e-6 && abs(diff.y) < 1e-6) {
+            break;
+        }
+        pp -= diff;
     }
 
     return pp;

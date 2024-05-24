@@ -65,20 +65,15 @@ impl FrameTransform {
         }
         let mut lens = interpolated_lens.as_ref().unwrap_or(&params.lens);
 
-        let lrc = params.keyframes.value_at_video_timestamp(&KeyframeType::LightRefractionCoeff, timestamp_ms).unwrap_or(params.light_refraction_coefficient);
-        if lrc != 1.0 {
-            interpolated_lens = Some(lens.for_light_refraction(lrc, 0.05));
-            lens = interpolated_lens.as_ref().unwrap_or(&params.lens);
-        }
-
         let mut focal_length = lens.focal_length;
 
         let mut camera_matrix = lens.get_camera_matrix((params.width, params.height), (params.video_width, params.video_height));
-        let distortion_coeffs = lens.get_distortion_coeffs();
+        let mut org_coeffs_len = lens.fisheye_params.distortion_coeffs.len();
+        let mut distortion_coeffs = lens.get_distortion_coeffs();
 
         let mut stretch_lens = true;
 
-        if !gyro.file_metadata.lens_params.is_empty() && lens.fisheye_params.distortion_coeffs.len() < 4 {
+        if !gyro.file_metadata.lens_params.is_empty() && org_coeffs_len < 4 {
             use crate::util::MapClosest;
             if let Some(val) = gyro.file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
                 let pixel_focal_length = val.pixel_focal_length.map(|x| x as f64).or_else(|| {
@@ -92,7 +87,32 @@ impl FrameTransform {
                     camera_matrix[(0, 2)] = params.video_width as f64 / 2.0;
                     camera_matrix[(1, 2)] = params.video_height as f64 / 2.0;
                     stretch_lens = false;
+
+                    if let Some(fl) = val.focal_length {
+                        focal_length = Some(fl as f64);
+                    }
                 }
+                if !val.distortion_coefficients.is_empty() && val.distortion_coefficients.len() <= 12 {
+                    org_coeffs_len = val.distortion_coefficients.len();
+                    if lens.distortion_model.as_deref() == Some("sony") {
+                        org_coeffs_len -= 2; // skip post_scale
+                    }
+                    for (i, x) in val.distortion_coefficients.iter().enumerate() {
+                        distortion_coeffs[i] = *x;
+                    }
+                }
+            }
+        }
+        let lrc = params.keyframes.value_at_video_timestamp(&KeyframeType::LightRefractionCoeff, timestamp_ms).unwrap_or(params.light_refraction_coefficient);
+        if lrc != 1.0 && org_coeffs_len > 0 {
+            let (multiplier, new_coeffs) = lens.for_light_refraction(&distortion_coeffs[..org_coeffs_len], lrc, 0.05);
+            if multiplier != 1.0 && !new_coeffs.is_empty() {
+                focal_length = focal_length.map(|x| x * multiplier);
+                for (i, x) in new_coeffs.iter().enumerate() {
+                    distortion_coeffs[i] = *x;
+                }
+                camera_matrix[(0, 0)] *= multiplier;
+                camera_matrix[(1, 1)] *= multiplier;
             }
         }
         drop(gyro);

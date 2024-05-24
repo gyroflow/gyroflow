@@ -29,7 +29,11 @@ float2 undistort_point(float2 p, __global KernelParams *params) {
     float2 P = p;
 
     for (int i = 0; i < 200; ++i) {
-        P -= distort_point(P.x, P.y, 1.0, params) - p;
+        float2 diff = distort_point(P.x, P.y, 1.0, params) - p;
+        if (fabs(diff.x) < 1e-6f && fabs(diff.y) < 1e-6f) {
+            break;
+        }
+        P -= diff;
     }
 
     return P;

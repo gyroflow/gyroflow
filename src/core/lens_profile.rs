@@ -569,13 +569,13 @@ impl LensProfile {
         }
     }
 
-    pub fn for_light_refraction(&self, ior_ratio: f64, tir_margin: f64) -> LensProfile {
+    pub fn for_light_refraction(&self, coeffs: &[f64], ior_ratio: f64, tir_margin: f64) -> (f64, Vec<f64>) {
         if ior_ratio == 1.0 {
-            return self.clone();
+            return (1.0, vec![]);
         }
-        if self.fisheye_params.distortion_coeffs.len() < 4 {
-            log::warn!("Not enough distortion coefficients! {}", self.fisheye_params.distortion_coeffs.len());
-            return self.clone();
+        if coeffs.len() < 4 {
+            log::warn!("Not enough distortion coefficients! {}", coeffs.len());
+            return (1.0, vec![]);
         }
         use argmin::{ core::{ Executor, Jacobian, Operator, State }, solver::gaussnewton::GaussNewton };
         use nalgebra::{ DMatrix, DVector };
@@ -583,17 +583,12 @@ impl LensProfile {
         struct Problem {
             ior_ratio: f64,
             max_ray_angle: f64,
-            params_orig: [f64; 5],
+            params_orig: Vec<f64>,
             model: DistortionModel,
         }
 
-        let params_orig = [
-            1.0,
-            self.fisheye_params.distortion_coeffs[0],
-            self.fisheye_params.distortion_coeffs[1],
-            self.fisheye_params.distortion_coeffs[2],
-            self.fisheye_params.distortion_coeffs[3],
-        ];
+        let mut params_orig = coeffs.to_vec();
+        params_orig.insert(0, 1.0);
 
         impl Problem {
             const STEP: f64 = 0.01;
@@ -607,7 +602,7 @@ impl LensProfile {
                 let n_pts = (self.max_ray_angle / Problem::STEP) as i32;
                 let jac = DMatrix::from_row_iterator(
                     n_pts as usize,
-                    5,
+                    param.len(),
                     (0..n_pts).flat_map(|i| {
                         let theta = (i as f64) * Problem::STEP;
                         self.model.undistort_for_light_refraction_gradient(param.as_slice(), theta).into_iter()
@@ -660,25 +655,16 @@ impl LensProfile {
             .configure(|state| state.param(init_param).max_iters(10))
             .run();
 
-        let mut clone = self.clone();
         match res {
             Ok(x) => {
                 if let Some(best_param) = x.state().get_best_param() {
-                    clone.focal_length = self.focal_length.map(|x| x * best_param[0]);
-                    clone.fisheye_params.distortion_coeffs = vec![
-                        best_param[1],
-                        best_param[2],
-                        best_param[3],
-                        best_param[4],
-                    ];
-                    clone.fisheye_params.camera_matrix[0][0] *= best_param[0];
-                    clone.fisheye_params.camera_matrix[1][1] *= best_param[0];
+                    return (best_param[0], best_param.iter().skip(1).cloned().collect::<Vec<f64>>());
                 }
             }
             Err(e) => {
                 log::warn!("Failed to optimize distortion coefficients for underwater correction: {e:?}");
-            },
+            }
         }
-        clone
+        (1.0, vec![])
     }
 }

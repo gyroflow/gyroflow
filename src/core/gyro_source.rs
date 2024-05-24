@@ -30,6 +30,7 @@ pub struct LensParams {
     pub capture_area_origin: Option<(u32, u32)>, // pixels
     pub capture_area_size: Option<(u32, u32)>, // pixels
     pub pixel_focal_length: Option<f32>, // pixels
+    pub distortion_coefficients: Vec<f64>,
 }
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -367,6 +368,134 @@ impl GyroSource {
             for info in samples {
                 if let Some(ref tag_map) = info.tag_map {
                     // --------------------------------- Sony ---------------------------------
+
+                    if let Some(lmd) = tag_map.get(&GroupId::Custom("LensDistortion".into())) {
+                        let pixel_pitch = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::PixelPitch) as Option<&(u32, u32)>).cloned();
+                        let crop_size = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaSize) as Option<&(u32, u32)>).cloned();
+                        let mut lens_compensation_enabled = false;
+
+                        if let Some(enabled) = lmd.get_t(TagId::Enabled) as Option<&bool> {
+                            lens_compensation_enabled = *enabled;
+                        }
+
+                        if let Some(v) = lmd.get_t(TagId::Data) as Option<&serde_json::Value> {
+                            telemetry_parser::try_block!({
+                                let pixel_pitch = pixel_pitch?;
+                                let crop_size = crop_size?;
+                                let sensor_height = v.get("effective_sensor_height_nm")?.as_f64()? / 1e9;
+                                let coeff_scale = v.get("coeff_scale")?.as_f64()?;
+                                // let focal_length_nm = v.get("focal_length_nm")?.as_f64()?;
+                                let mut lens_in_ray_angle: Vec<f64> = v.get("coeffs")?.as_array()?.into_iter().filter_map(|x| Some(x.as_f64()? / coeff_scale.max(1.0) / 180.0 * std::f64::consts::PI)).collect();
+                                lens_in_ray_angle.insert(0, 0.0);
+
+                                let lens_out_radius = nalgebra::DVector::from_iterator(11, (0..11).map(|i| (i as f64) / 10.0 * sensor_height));
+
+                                // Fit polynomial
+                                let mut matrix = nalgebra::DMatrix::<f64>::zeros(11, 6);
+                                for (i, angle) in lens_in_ray_angle.iter().enumerate() {
+                                    for power in 0..6 {
+                                        matrix[(i, power)] = angle.powf((power + 1) as f64);
+                                    }
+                                }
+                                match nalgebra::SVD::new(matrix.clone(), true, true).solve(&lens_out_radius, 1e-18f64) {
+                                    Ok(poly_coeffs) => {
+                                        assert_eq!(poly_coeffs.len(), 6);
+                                        //////////////////////////////////////////////////
+                                        fn a2y(a: f64, params: &nalgebra::DVector<f64>) -> f64 {
+                                            let mut sum = 0.0;
+                                            for i in 0..6 {
+                                                sum += a.powi(i + 1) * params[i as usize];
+                                            }
+                                            sum
+                                        }
+                                        fn a2y_diff(a: f64, params: &nalgebra::DVector<f64>) -> f64 {
+                                            let mut sum = 0.0;
+                                            for i in 0..6 {
+                                                sum += (i as f64 + 1.0) * a.powi(i) * params[i as usize];
+                                            }
+                                            sum
+                                        }
+                                        fn y2a(y: f64, params: &nalgebra::DVector<f64>) -> f64 {
+                                            let mut x = 0.01;
+                                            for _ in 0..50 {
+                                                x = x - (a2y(x, params) - y) / a2y_diff(x, params);
+                                            }
+                                            x
+                                        }
+
+                                        // Calculate max possible fov
+                                        let sensor_crop_px = nalgebra::Vector2::new(crop_size.0 as f64, crop_size.1 as f64);
+                                        let pixel_pitch = nalgebra::Vector2::new(pixel_pitch.0 as f64, pixel_pitch.1 as f64) / 1e9;
+                                        let video_res_px = nalgebra::Vector2::new(size.0 as f64, size.1 as f64);
+
+                                        let sensor_crop = pixel_pitch.component_mul(&sensor_crop_px);
+                                        let pixel_pitch_scaled = sensor_crop.component_div(&video_res_px);
+
+                                        let fov_hor = y2a(sensor_crop.x / 2.0, &poly_coeffs);
+                                        let fov_vert = y2a(sensor_crop.y / 2.0, &poly_coeffs);
+                                        let fov_diag = y2a(sensor_crop.norm() / 2.0, &poly_coeffs);
+
+                                        let focal_length = (video_res_px.x / fov_hor.tan())
+                                            .max(video_res_px.y / fov_vert.tan())
+                                            .max(video_res_px.norm() / fov_diag.tan())
+                                            / 2.0;
+                                        let post_scale = [
+                                            1.0 / pixel_pitch_scaled.x / focal_length,
+                                            1.0 / pixel_pitch_scaled.y / focal_length,
+                                        ];
+
+                                        let timestamp_us = (info.timestamp_ms * 1000.0).round() as i64;
+                                        if let Some(lp) = md.lens_params.get_mut(&timestamp_us) {
+                                            lp.focal_length = Some((focal_length * sensor_height / size.1 as f64 * 1000.0) as f32);
+                                            lp.pixel_focal_length = Some(focal_length as f32);
+                                            if !lens_compensation_enabled {
+                                                lp.distortion_coefficients = poly_coeffs.into_iter().cloned().chain(post_scale).collect();
+                                            }
+                                        }
+                                    },
+                                    Err(e) => {
+                                        log::error!("Error fitting polynomial: {e:?}");
+                                    }
+                                }
+
+                            });
+                        }
+                        let note = format!("Distortion comp.: {}", if lens_compensation_enabled { "On" } else { "Off" });
+                        md.lens_profile = Some(serde_json::json!({
+                            "calibrated_by": "Sony",
+                            "camera_brand": "Sony",
+                            "camera_model": input.camera_model(),
+                            "calib_dimension":  { "w": size.0, "h": size.1 },
+                            "orig_dimension":   { "w": size.0, "h": size.1 },
+                            "output_dimension": { "w": size.0, "h": size.1 },
+                            "frame_readout_time": md.frame_readout_time,
+                            "official": true,
+                            "asymmetrical": false,
+                            "note": note,
+                            "fisheye_params": {
+                              "camera_matrix": [
+                                [ 0.0, 0.0, size.0 / 2 ],
+                                [ 0.0, 0.0, size.1 / 2 ],
+                                [ 0.0, 0.0, 1.0 ]
+                              ],
+                              "distortion_coeffs": []
+                            },
+                            "distortion_model": "sony",
+                            "sync_settings": {
+                              "initial_offset": 0,
+                              "initial_offset_inv": false,
+                              "search_size": 0.3,
+                              "max_sync_points": 5,
+                              "every_nth_frame": 1,
+                              "time_per_syncpoint": 0.5,
+                              "do_autosync": false
+                            },
+                            "calibrator_version": "---"
+                        }));
+                    }
+
+                    // --------------------------------- Sony ---------------------------------
+                    // Timing
                     telemetry_parser::try_block!({
                         let model_offset = if input.camera_model().map(|x| x == "DSC-RX0M2").unwrap_or_default() { 1.5 } else { 0.0 };
                         let imager = tag_map.get(&GroupId::Imager)?;

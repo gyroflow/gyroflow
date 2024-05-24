@@ -80,6 +80,8 @@ qrc!(pub rsrc,
         "src/qt_gpu/compiled/undistort_ptlens.frag.qsb",
         "src/qt_gpu/compiled/undistort_insta360_digital_stretch.frag.qsb",
         "src/qt_gpu/compiled/undistort_insta360.frag.qsb",
+        "src/qt_gpu/compiled/undistort_sony_digital_stretch.frag.qsb",
+        "src/qt_gpu/compiled/undistort_sony.frag.qsb",
 
         "resources/translations/cs.qm",
         "resources/translations/da.qm",

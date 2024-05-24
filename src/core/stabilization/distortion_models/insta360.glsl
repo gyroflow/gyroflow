@@ -30,7 +30,11 @@ vec2 undistort_point(vec2 p) {
     vec2 P = p;
 
     for (int i = 0; i < 200; i++) {
-        P -= distort_point(P.x, P.y, 1.0) - p;
+        vec2 diff = distort_point(P.x, P.y, 1.0) - p;
+        if (abs(diff.x) < 1e-6 && abs(diff.y) < 1e-6) {
+            break;
+        }
+        P -= diff;
     }
 
     return P;
