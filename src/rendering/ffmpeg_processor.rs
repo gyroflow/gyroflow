@@ -364,12 +364,15 @@ impl<'a> FfmpegProcessor<'a> {
         // let mut copied_stream_first_pts = None;
         // let mut copied_stream_first_dts = None;
 
-        let process_stream = |atranscoders: &mut HashMap<usize, AudioTranscoder>, octx: &mut format::context::Output, stream: Stream, mut packet: ffmpeg_next::Packet, start_ms: Option<f64>, end_ms: Option<f64>, ist_index: usize, ost_index: isize, ost_time_base: Rational, frame_ts: &mut FrameTimestamps| -> Result<(), Error> {
+        let process_stream = |atranscoders: &mut HashMap<usize, AudioTranscoder>, octx: &mut format::context::Output, stream: Stream, mut packet: ffmpeg_next::Packet, start_ms: Option<f64>, end_ms: Option<f64>, ist_index: usize, ost_index: isize, ost_time_base: Rational, frame_ts: &mut FrameTimestamps| -> Result<bool, Error> {
             match atranscoders.get_mut(&ist_index) {
                 Some(atranscoder) => {
                     packet.rescale_ts(stream.time_base(), atranscoder.decoder.time_base());
                     atranscoder.decoder.send_packet(&packet)?;
-                    atranscoder.receive_and_process_decoded_frames(octx, ost_time_base, start_ms, end_ms, frame_ts)?;
+                    let status = atranscoder.receive_and_process_decoded_frames(octx, ost_time_base, start_ms, end_ms, frame_ts)?;
+                    if status == Status::Finish {
+                        return Ok(true);
+                    }
                 }
                 None => {
                     // Direct stream copy
@@ -387,13 +390,16 @@ impl<'a> FfmpegProcessor<'a> {
                     packet.write_interleaved(octx)?;
                 }
             }
-            Ok(())
+            Ok(false)
         };
 
         let mut any_encoded = false;
 
         loop {
             let mut pending_packets: Vec<(Stream, ffmpeg_next::Packet, usize, isize)> = Vec::new();
+
+            let mut encoding_video = true;
+            let mut encoding_audio = true;
 
             for (stream, mut packet) in self.input_context.packets() {
                 let ist_index = stream.index();
@@ -403,51 +409,60 @@ impl<'a> FfmpegProcessor<'a> {
                 }
 
                 if ist_index == self.video.input_index {
-                    {
-                        let decoder = self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?;
-                        packet.rescale_ts(stream.time_base(), (1, 1000000)); // rescale to microseconds
-                        if let Err(err) = decoder.send_packet(&packet) {
-                            if self.gpu_decoding && !*GPU_DECODING.read() {
-                                return Err(FFmpegError::GPUDecodingFailed);
-                            }
-                            if !any_encoded {
-                                return Err(err.into());
+                    if encoding_video {
+                        {
+                            let decoder = self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?;
+                            packet.rescale_ts(stream.time_base(), (1, 1000000)); // rescale to microseconds
+                            if let Err(err) = decoder.send_packet(&packet) {
+                                if self.gpu_decoding && !*GPU_DECODING.read() {
+                                    return Err(FFmpegError::GPUDecodingFailed);
+                                }
+                                if !any_encoded {
+                                    return Err(err.into());
+                                }
                             }
                         }
-                    }
 
-                    match self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, start_ms, end_ms, &mut self.frame_ts) {
-                        Ok(encoding_status) => {
-                            if self.video.encoder.is_some() {
-                                video_inited = true;
-                                if !pending_packets.is_empty() {
-                                    for (stream, packet, ist_index, ost_index) in pending_packets.drain(..) {
-                                        let ost_time_base = self.ost_time_bases[ost_index as usize];
-                                        process_stream(&mut atranscoders, &mut octx, stream, packet, start_ms, end_ms, ist_index, ost_index, ost_time_base, &mut self.frame_ts)?;
+                        match self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, start_ms, end_ms, &mut self.frame_ts) {
+                            Ok(encoding_status) => {
+                                if self.video.encoder.is_some() {
+                                    video_inited = true;
+                                    if !pending_packets.is_empty() {
+                                        for (stream, packet, ist_index, ost_index) in pending_packets.drain(..) {
+                                            let ost_time_base = self.ost_time_bases[ost_index as usize];
+                                            process_stream(&mut atranscoders, &mut octx, stream, packet, start_ms, end_ms, ist_index, ost_index, ost_time_base, &mut self.frame_ts)?;
+                                        }
                                     }
+                                    any_encoded = true;
                                 }
-                                any_encoded = true;
-                            }
-                            if encoding_status == Status::Finish || cancel_flag.load(Relaxed) {
-                                break;
-                            }
-                            while pause_flag.load(Relaxed) {
-                                std::thread::sleep(std::time::Duration::from_millis(100));
-                            }
-                        },
-                        Err(e) => {
-                            if !any_encoded {
-                                return Err(e);
+                                if encoding_status == Status::Finish || cancel_flag.load(Relaxed) {
+                                    encoding_video = false;
+                                }
+                                while pause_flag.load(Relaxed) {
+                                    std::thread::sleep(std::time::Duration::from_millis(100));
+                                }
+                            },
+                            Err(e) => {
+                                if !any_encoded {
+                                    return Err(e);
+                                }
                             }
                         }
                     }
                 } else if self.audio_codec != codec::Id::None || self.preserve_other_tracks {
-                    if !video_inited {
-                        pending_packets.push((stream, packet, ist_index, ost_index));
-                        continue;
+                    if encoding_audio {
+                        if !video_inited {
+                            pending_packets.push((stream, packet, ist_index, ost_index));
+                            continue;
+                        }
+                        let ost_time_base = self.ost_time_bases[ost_index as usize];
+                        if process_stream(&mut atranscoders, &mut octx, stream, packet, start_ms, end_ms, ist_index, ost_index, ost_time_base, &mut self.frame_ts)? {
+                            encoding_audio = false;
+                        }
                     }
-                    let ost_time_base = self.ost_time_bases[ost_index as usize];
-                    process_stream(&mut atranscoders, &mut octx, stream, packet, start_ms, end_ms, ist_index, ost_index, ost_time_base, &mut self.frame_ts)?;
+                }
+                if !encoding_video && !encoding_audio {
+                    break;
                 }
             }
             if !self.ranges_ms.is_empty() && !cancel_flag.load(Relaxed) {
