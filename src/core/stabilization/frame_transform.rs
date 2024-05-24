@@ -103,18 +103,6 @@ impl FrameTransform {
                 }
             }
         }
-        let lrc = params.keyframes.value_at_video_timestamp(&KeyframeType::LightRefractionCoeff, timestamp_ms).unwrap_or(params.light_refraction_coefficient);
-        if lrc != 1.0 && org_coeffs_len > 0 {
-            let (multiplier, new_coeffs) = lens.for_light_refraction(&distortion_coeffs[..org_coeffs_len], lrc, 0.05);
-            if multiplier != 1.0 && !new_coeffs.is_empty() {
-                focal_length = focal_length.map(|x| x * multiplier);
-                for (i, x) in new_coeffs.iter().enumerate() {
-                    distortion_coeffs[i] = *x;
-                }
-                camera_matrix[(0, 0)] *= multiplier;
-                camera_matrix[(1, 1)] *= multiplier;
-            }
-        }
         drop(gyro);
 
         let radial_distortion_limit = lens.fisheye_params.radial_distortion_limit.unwrap_or_default();
@@ -147,6 +135,8 @@ impl FrameTransform {
         let lens_correction_amount = params.keyframes.value_at_video_timestamp(&KeyframeType::LensCorrectionStrength, timestamp_ms).unwrap_or(params.lens_correction_amount);
         let adaptive_zoom_center_x = params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterX, timestamp_ms).unwrap_or(params.adaptive_zoom_center_offset.0);
         let mut adaptive_zoom_center_y = params.keyframes.value_at_video_timestamp(&KeyframeType::ZoomingCenterY, timestamp_ms).unwrap_or(params.adaptive_zoom_center_offset.1);
+
+        let light_refraction_coefficient = params.keyframes.value_at_video_timestamp(&KeyframeType::LightRefractionCoeff, timestamp_ms).unwrap_or(params.light_refraction_coefficient);
 
         let additional_rotation_x = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalRotationX, timestamp_ms).unwrap_or(params.additional_rotation.0) * DEG2RAD;
         let additional_rotation_y = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalRotationY, timestamp_ms).unwrap_or(params.additional_rotation.1) * DEG2RAD;
@@ -262,6 +252,7 @@ impl FrameTransform {
             translation2d: [(adaptive_zoom_center_x * params.width as f64 / fov) as f32, (adaptive_zoom_center_y * params.height as f64 / fov) as f32],
             translation3d: [0.0, 0.0, 0.0, 0.0], // currently unused
             digital_lens_params,
+            light_refraction_coefficient: light_refraction_coefficient as f32,
             ..Default::default()
         };
 

@@ -20,7 +20,7 @@ fn get_mtrx_param(_size_for_rs: f32, matrices: &MatricesType, _sampler: SamplerT
 
 pub fn rotate_and_distort(pos: Vec2, idx: i32, params: &KernelParams, matrices: &MatricesType, sampler: SamplerType, distortion_model: u32, digital_distortion_model: u32, flags: u32) -> Vec2 {
     let size_for_rs = if (flags & 16) == 16 { params.width as f32 } else { params.height as f32 };
-    let point_3d = vec3(
+    let mut point_3d = vec3(
         (pos.x * get_mtrx_param(size_for_rs, matrices, sampler, idx, 0)) + (pos.y * get_mtrx_param(size_for_rs, matrices, sampler, idx, 1)) + get_mtrx_param(size_for_rs, matrices, sampler, idx, 2) + params.translation3d.x,
         (pos.x * get_mtrx_param(size_for_rs, matrices, sampler, idx, 3)) + (pos.y * get_mtrx_param(size_for_rs, matrices, sampler, idx, 4)) + get_mtrx_param(size_for_rs, matrices, sampler, idx, 5) + params.translation3d.y,
         (pos.x * get_mtrx_param(size_for_rs, matrices, sampler, idx, 6)) + (pos.y * get_mtrx_param(size_for_rs, matrices, sampler, idx, 7)) + get_mtrx_param(size_for_rs, matrices, sampler, idx, 8) + params.translation3d.z
@@ -29,6 +29,14 @@ pub fn rotate_and_distort(pos: Vec2, idx: i32, params: &KernelParams, matrices: 
         if params.r_limit > 0.0 && vec2(point_3d.x / point_3d.z, point_3d.y / point_3d.z).length_squared() > params.r_limit.powi(2) {
             return vec2(-99999.0, -99999.0);
         }
+
+        if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
+            let r = vec2(point_3d.x, point_3d.y).length() / point_3d.z;
+            let sin_theta_d = (r / (1.0 + r * r).sqrt()) * params.light_refraction_coefficient;
+            let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
+            point_3d.z *= r / r_d;
+        }
+
         let mut uv = params.f * lens_distort(point_3d, params, distortion_model) + params.c;
 
         if (flags & 2) == 2 { // Has digital lens
@@ -82,6 +90,12 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
 
         new_out_pos = (new_out_pos - out_c) / out_f;
         new_out_pos = lens_undistort(new_out_pos, params, distortion_model);
+        if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
+            let r = new_out_pos.length();
+            let sin_theta_d = (r / (1.0 + r * r).sqrt()) / params.light_refraction_coefficient;
+            let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
+            new_out_pos *= r_d / r;
+        }
         new_out_pos = new_out_pos * out_f + out_c;
 
         out_pos = new_out_pos * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);

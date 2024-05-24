@@ -22,7 +22,6 @@ vec2 undistort_point(vec2 pos) {
             float theta3 = theta2*theta;
             float theta4 = theta2*theta2;
             float theta5 = theta2*theta3;
-            float theta6 = theta3*theta3;
             float k0 = params.k1.x;
             float k1_theta1 = params.k1.y * theta;
             float k2_theta2 = params.k1.z * theta2;

@@ -40,9 +40,13 @@ struct KernelParams {
     digital_lens_params:vec4<f32>, // 16
     safe_area_rect:     vec4<f32>, // 16
     max_pixel_value:          f32, // 4
-    reserved1:                f32, // 8
-    reserved2:                f32, // 12
+    distortion_model:         i32, // 8
+    digital_lens:             i32, // 12
     pixel_value_limit:        f32, // 16
+    light_refraction_coefficient: f32, // 4
+    reserved0:                f32, // 8
+    reserved1:                f32, // 12
+    reserved2:                f32, // 16
 }
 
 @group(0) @binding(0) @fragment var<uniform> params: KernelParams;
@@ -201,16 +205,25 @@ fn sample_input_at(uv_param: vec2<f32>) -> vec4<f32> {
         min(sum.w, params.pixel_value_limit)
     );
 }
+}
 
 fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>) -> vec2<f32> {
     let _x = (pos.x * matrices[idx + 0u]) + (pos.y * matrices[idx + 1u]) + matrices[idx + 2u] + params.translation3d.x;
     let _y = (pos.x * matrices[idx + 3u]) + (pos.y * matrices[idx + 4u]) + matrices[idx + 5u] + params.translation3d.y;
-    let _w = (pos.x * matrices[idx + 6u]) + (pos.y * matrices[idx + 7u]) + matrices[idx + 8u] + params.translation3d.z;
+    var _w = (pos.x * matrices[idx + 6u]) + (pos.y * matrices[idx + 7u]) + matrices[idx + 8u] + params.translation3d.z;
 
     if (_w > 0.0) {
         if (params.r_limit > 0.0 && length(vec2<f32>(_x, _y) / _w) > params.r_limit) {
             return vec2<f32>(-99999.0, -99999.0);
         }
+
+        if (params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
+            let r = length(vec2<f32>(_x, _y)) / _w;
+            let sin_theta_d = (r / sqrt(1.0 + r * r)) * params.light_refraction_coefficient;
+            let r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
+            _w *= r / r_d;
+        }
+
         var uv = f * distort_point(_x, _y, _w) + c;
 
         if (bool(flags & 2)) { // Has digital lens
@@ -264,6 +277,12 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
 
         new_out_pos = (new_out_pos - out_c) / out_f;
         new_out_pos = undistort_point(new_out_pos);
+        if (params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
+            let r = length(new_out_pos);
+            let sin_theta_d = (r / sqrt(1.0 + r * r)) / params.light_refraction_coefficient;
+            let r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
+            new_out_pos *= r_d / r;
+        }
         new_out_pos = out_f * new_out_pos + out_c;
 
         out_pos = new_out_pos * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);

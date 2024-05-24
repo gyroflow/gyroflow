@@ -22,7 +22,6 @@ fn undistort_point(pos_param: vec2<f32>) -> vec2<f32> {
                 let theta3 = theta2*theta;
                 let theta4 = theta2*theta2;
                 let theta5 = theta2*theta3;
-                let theta6 = theta3*theta3;
                 let k0  = params.k1.x;
                 let k1_theta1 = params.k1.y * theta;
                 let k2_theta2 = params.k1.z * theta2;

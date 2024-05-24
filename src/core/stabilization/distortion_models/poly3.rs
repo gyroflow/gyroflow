@@ -63,15 +63,6 @@ impl Poly3 {
     }
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
-    pub fn distort_for_light_refraction(&self, _p: &[f64], _theta: f64) -> f64 {
-        log::error!("Poly3::distort_for_light_refraction not implemented");
-        0.0
-    }
-    pub fn undistort_for_light_refraction_gradient(&self, _p: &[f64], _theta: f64) -> Vec<f64> {
-        log::error!("Poly3::undistort_for_light_refraction_gradient not implemented");
-        vec![]
-    }
-
     pub fn rescale_coeffs(k: &mut [f64], hugin_scaling: f64) {
         let d = 1.0 - k[0];
         k[0] *= hugin_scaling.powi(2) / d.powi(3);

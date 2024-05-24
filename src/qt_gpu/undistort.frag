@@ -45,9 +45,13 @@ layout(std140, binding = 2) uniform KernelParams {
     vec4 digital_lens_params;       // 16
     vec4 safe_area_rect;            // 16
     float max_pixel_value;          // 4
-    float reserved1;                // 8
-    float reserved2;                // 12
-    float reserved3;                // 16
+    int distortion_model;           // 8
+    int digital_lens;               // 12
+    float pixel_value_limit;        // 16
+    float light_refraction_coefficient; // 4
+    float reserved0;                // 8
+    float reserved1;                // 12
+    float reserved2;                // 16
 } params;
 
 LENS_MODEL_FUNCTIONS;
@@ -118,6 +122,14 @@ vec2 rotate_and_distort(vec2 pos, float idx) {
         if (params.r_limit > 0.0 && length(vec2(_x, _y) / _w) > params.r_limit) {
             return vec2(-99999.0, -99999.0);
         }
+
+        if (params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
+            float r = length(vec2(_x, _y)) / _w;
+            float sin_theta_d = (r / sqrt(1.0 + r * r)) * params.light_refraction_coefficient;
+            float r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
+            _w *= r / r_d;
+        }
+
         vec2 uv = params.f * distort_point(_x, _y, _w) + params.c;
 
         if (bool(params.flags & 2)) { // Has digital lens
@@ -156,6 +168,12 @@ void main() {
 
         new_out_pos = (new_out_pos - out_c) / out_f;
         new_out_pos = undistort_point(new_out_pos);
+        if (params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
+            float r = length(new_out_pos);
+            float sin_theta_d = (r / sqrt(1.0 + r * r)) / params.light_refraction_coefficient;
+            float r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
+            new_out_pos *= r_d / r;
+        }
         new_out_pos = out_f * new_out_pos + out_c;
 
         texPos = new_out_pos * (1.0 - params.lens_correction_amount) + (texPos * params.lens_correction_amount);

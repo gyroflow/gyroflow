@@ -7,6 +7,7 @@ pub mod poly3;
 pub mod poly5;
 pub mod ptlens;
 pub mod insta360;
+pub mod sony;
 
 pub mod gopro_superview;
 pub mod gopro_hyperview;
@@ -64,6 +65,7 @@ impl_models! {
     poly5::Poly5,
     ptlens::PtLens,
     insta360::Insta360,
+    sony::Sony,
 
     // Digital lenses (ie. post-processing)
     gopro_superview::GoProSuperview,

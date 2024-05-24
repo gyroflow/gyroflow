@@ -42,9 +42,13 @@ typedef struct {
     float4 digital_lens_params;      // 16
     float4 safe_area_rect;           // 16
     float max_pixel_value;           // 4
-    float reserved1;                 // 8
-    float reserved2;                 // 12
+    int distortion_model;            // 8
+    int digital_lens;                // 12
     float pixel_value_limit;         // 16
+    float light_refraction_coefficient; // 4
+    float reserved0;                 // 8
+    float reserved1;                 // 12
+    float reserved2;                 // 16
 } KernelParams;
 
 #if INTERPOLATION == 2 // Bilinear
@@ -225,6 +229,14 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
         if (params->r_limit > 0.0f && length((float2)(_x, _y) / _w) > params->r_limit) {
             return (float2)(-99999.0f, -99999.0f);
         }
+
+        if (params->light_refraction_coefficient != 1.0f && params->light_refraction_coefficient > 0.0f) {
+            float r = length((float2)(_x, _y)) / _w;
+            float sin_theta_d = (r / sqrt(1.0f + r * r)) * params->light_refraction_coefficient;
+            float r_d = sin_theta_d / sqrt(1.0f - sin_theta_d * sin_theta_d);
+            _w *= r / r_d;
+        }
+
         float2 uv = params->f * distort_point(_x, _y, _w, params) + params->c;
 
         if (params->flags & 2) { // Has digital lens
@@ -280,6 +292,12 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
             }
             new_out_pos = (new_out_pos - out_c) / out_f;
             new_out_pos = undistort_point(new_out_pos, params);
+            if (params->light_refraction_coefficient != 1.0f && params->light_refraction_coefficient > 0.0f) {
+                float r = length(new_out_pos);
+                float sin_theta_d = (r / sqrt(1.0f + r * r)) / params->light_refraction_coefficient;
+                float r_d = sin_theta_d / sqrt(1.0f - sin_theta_d * sin_theta_d);
+                new_out_pos *= r_d / r;
+            }
             new_out_pos = out_f * new_out_pos + out_c;
 
             out_pos = new_out_pos * (1.0f - params->lens_correction_amount) + (out_pos * params->lens_correction_amount);

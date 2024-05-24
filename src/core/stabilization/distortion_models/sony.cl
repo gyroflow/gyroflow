@@ -21,8 +21,7 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
             float theta2 = theta*theta,
                   theta3 = theta2*theta,
                   theta4 = theta2*theta2,
-                  theta5 = theta2*theta3,
-                  theta6 = theta3*theta3;
+                  theta5 = theta2*theta3;
             float k0 = params->k[0];
             float k1_theta1 = params->k[1] * theta;
             float k2_theta2 = params->k[2] * theta2;

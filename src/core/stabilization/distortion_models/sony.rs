@@ -33,7 +33,6 @@ impl Sony {
                 let theta3 = theta2*theta;
                 let theta4 = theta2*theta2;
                 let theta5 = theta2*theta3;
-                let theta6 = theta3*theta3;
                 let k0  = params.k[0];
                 let k1_theta1 = params.k[1] * theta;
                 let k2_theta2 = params.k[2] * theta2;
@@ -90,34 +89,6 @@ impl Sony {
             x * scale * post_scale.0,
             y * scale * post_scale.1
         )
-    }
-
-    pub fn distort_for_light_refraction(&self, p: &[f64], theta: f64) -> f64 {
-        // FIXME
-        let theta2 = theta*theta;
-        let theta3 = theta2*theta;
-        let theta4 = theta2*theta2;
-        let theta5 = theta2*theta3;
-        let theta6 = theta3*theta3;
-        p[0] * (theta * p[1] + theta2 * p[2] + theta3 * p[3] + theta4 * p[4] + theta5 * p[5] + theta6 * p[6])
-    }
-
-    pub fn undistort_for_light_refraction_gradient(&self, p: &[f64], theta: f64) -> Vec<f64> {
-        // FIXME
-        let theta2 = theta*theta;
-        let theta3 = theta2*theta;
-        let theta4 = theta2*theta2;
-        let theta5 = theta2*theta3;
-        let theta6 = theta3*theta3;
-        vec![
-            theta * p[1] + theta2 * p[2] + theta3 * p[3] + theta4 * p[4] + theta5 * p[5] + theta6 * p[6],
-            p[0] * theta * theta,
-            p[0] * theta * theta2,
-            p[0] * theta * theta3,
-            p[0] * theta * theta4,
-            p[0] * theta * theta5,
-            p[0] * theta * theta6,
-        ]
     }
 
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }

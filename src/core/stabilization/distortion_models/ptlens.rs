@@ -55,15 +55,6 @@ impl PtLens {
     }
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
-    pub fn distort_for_light_refraction(&self, _p: &[f64], _theta: f64) -> f64 {
-        log::error!("PtLens::distort_for_light_refraction not implemented");
-        0.0
-    }
-    pub fn undistort_for_light_refraction_gradient(&self, _p: &[f64], _theta: f64) -> Vec<f64> {
-        log::error!("PtLens::undistort_for_light_refraction_gradient not implemented");
-        vec![]
-    }
-
     pub fn rescale_coeffs(k: &mut [f64], hugin_scaling: f64) {
         let d = 1.0 - k[0] - k[1] - k[2];
         k[0] *= hugin_scaling.powi(3) / d.powi(4);
