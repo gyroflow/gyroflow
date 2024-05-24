@@ -452,6 +452,40 @@ impl GyroSource {
                                                 lp.distortion_coefficients = poly_coeffs.into_iter().cloned().chain(post_scale).collect();
                                             }
                                         }
+
+                                        if md.lens_profile.is_none() {
+                                            md.lens_profile = Some(serde_json::json!({
+                                                "calibrated_by": "Sony",
+                                                "camera_brand": "Sony",
+                                                "camera_model": input.camera_model(),
+                                                "calib_dimension":  { "w": size.0, "h": size.1 },
+                                                "orig_dimension":   { "w": size.0, "h": size.1 },
+                                                "output_dimension": { "w": size.0, "h": size.1 },
+                                                "frame_readout_time": md.frame_readout_time,
+                                                "official": true,
+                                                "asymmetrical": false,
+                                                "note": format!("Distortion comp.: {}", if lens_compensation_enabled { "On" } else { "Off" }),
+                                                "fisheye_params": {
+                                                "camera_matrix": [
+                                                    [ 0.0, 0.0, size.0 / 2 ],
+                                                    [ 0.0, 0.0, size.1 / 2 ],
+                                                    [ 0.0, 0.0, 1.0 ]
+                                                ],
+                                                "distortion_coeffs": []
+                                                },
+                                                "distortion_model": "sony",
+                                                "sync_settings": {
+                                                "initial_offset": 0,
+                                                "initial_offset_inv": false,
+                                                "search_size": 0.3,
+                                                "max_sync_points": 5,
+                                                "every_nth_frame": 1,
+                                                "time_per_syncpoint": 0.5,
+                                                "do_autosync": false
+                                                },
+                                                "calibrator_version": "---"
+                                            }));
+                                        }
                                     },
                                     Err(e) => {
                                         log::error!("Error fitting polynomial: {e:?}");
@@ -460,40 +494,7 @@ impl GyroSource {
 
                             });
                         }
-                        let note = format!("Distortion comp.: {}", if lens_compensation_enabled { "On" } else { "Off" });
-                        md.lens_profile = Some(serde_json::json!({
-                            "calibrated_by": "Sony",
-                            "camera_brand": "Sony",
-                            "camera_model": input.camera_model(),
-                            "calib_dimension":  { "w": size.0, "h": size.1 },
-                            "orig_dimension":   { "w": size.0, "h": size.1 },
-                            "output_dimension": { "w": size.0, "h": size.1 },
-                            "frame_readout_time": md.frame_readout_time,
-                            "official": true,
-                            "asymmetrical": false,
-                            "note": note,
-                            "fisheye_params": {
-                              "camera_matrix": [
-                                [ 0.0, 0.0, size.0 / 2 ],
-                                [ 0.0, 0.0, size.1 / 2 ],
-                                [ 0.0, 0.0, 1.0 ]
-                              ],
-                              "distortion_coeffs": []
-                            },
-                            "distortion_model": "sony",
-                            "sync_settings": {
-                              "initial_offset": 0,
-                              "initial_offset_inv": false,
-                              "search_size": 0.3,
-                              "max_sync_points": 5,
-                              "every_nth_frame": 1,
-                              "time_per_syncpoint": 0.5,
-                              "do_autosync": false
-                            },
-                            "calibrator_version": "---"
-                        }));
                     }
-
                     // --------------------------------- Sony ---------------------------------
                     // Timing
                     telemetry_parser::try_block!({
