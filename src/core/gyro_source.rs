@@ -466,22 +466,22 @@ impl GyroSource {
                                                 "asymmetrical": false,
                                                 "note": format!("Distortion comp.: {}", if lens_compensation_enabled { "On" } else { "Off" }),
                                                 "fisheye_params": {
-                                                "camera_matrix": [
-                                                    [ 0.0, 0.0, size.0 / 2 ],
-                                                    [ 0.0, 0.0, size.1 / 2 ],
-                                                    [ 0.0, 0.0, 1.0 ]
-                                                ],
-                                                "distortion_coeffs": []
+                                                    "camera_matrix": [
+                                                        [ 0.0, 0.0, size.0 / 2 ],
+                                                        [ 0.0, 0.0, size.1 / 2 ],
+                                                        [ 0.0, 0.0, 1.0 ]
+                                                    ],
+                                                    "distortion_coeffs": []
                                                 },
                                                 "distortion_model": "sony",
                                                 "sync_settings": {
-                                                "initial_offset": 0,
-                                                "initial_offset_inv": false,
-                                                "search_size": 0.3,
-                                                "max_sync_points": 5,
-                                                "every_nth_frame": 1,
-                                                "time_per_syncpoint": 0.5,
-                                                "do_autosync": false
+                                                    "initial_offset": 0,
+                                                    "initial_offset_inv": false,
+                                                    "search_size": 0.3,
+                                                    "max_sync_points": 5,
+                                                    "every_nth_frame": 1,
+                                                    "time_per_syncpoint": 0.5,
+                                                    "do_autosync": false
                                                 },
                                                 "calibrator_version": "---"
                                             }));
