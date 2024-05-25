@@ -29,7 +29,7 @@ rayon = "1.10"
 biquad = "0.4.2"
 fastrand = "2.1.0"
 lazy_static = "1.4.0"
-parking_lot = "0.12.2"
+parking_lot = "0.12.3"
 regex = "1.10.4"
 bincode = "1.3.3"
 serde = "1.0"
@@ -79,10 +79,10 @@ ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.2.0"
 opencv = { version = "0.91.3", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "9f74b15", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "2fd0994", features = ["spirv", "naga-ir"] }
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "9f74b15"
+rev = "2fd0994"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]

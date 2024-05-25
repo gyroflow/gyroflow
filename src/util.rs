@@ -203,8 +203,8 @@ pub fn set_android_context() {
         });
         let activity = cpp!(unsafe [] -> *mut std::ffi::c_void as "void *" {
             #ifdef Q_OS_ANDROID
-                extern Q_CORE_EXPORT jobject qt_androidActivity();
-                return qt_androidActivity();
+                auto ctx = QNativeInterface::QAndroidApplication::context();
+                return QJniEnvironment::getJniEnv()->NewGlobalRef(ctx.object());
             #else
                 return nullptr;
             #endif

@@ -48,12 +48,12 @@ directories = "5"
 
 qmetaobject = { version = "0.2.10", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.11", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "a698241" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "1b95fcb" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "7.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.4.0"
-parking_lot = "0.12.2"
+parking_lot = "0.12.3"
 
 simplelog = "0.12.2"
 log = "0.4"
