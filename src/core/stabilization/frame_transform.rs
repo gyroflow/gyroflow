@@ -63,17 +63,16 @@ impl FrameTransform {
                 interpolated_lens = Some(params.lens.get_interpolated_lens_at(*val));
             }
         }
-        let mut lens = interpolated_lens.as_ref().unwrap_or(&params.lens);
+        let lens = interpolated_lens.as_ref().unwrap_or(&params.lens);
 
         let mut focal_length = lens.focal_length;
 
         let mut camera_matrix = lens.get_camera_matrix((params.width, params.height), (params.video_width, params.video_height));
-        let mut org_coeffs_len = lens.fisheye_params.distortion_coeffs.len();
         let mut distortion_coeffs = lens.get_distortion_coeffs();
 
         let mut stretch_lens = true;
 
-        if !gyro.file_metadata.lens_params.is_empty() && org_coeffs_len < 4 {
+        if !gyro.file_metadata.lens_params.is_empty() && lens.fisheye_params.distortion_coeffs.len() < 4 {
             use crate::util::MapClosest;
             if let Some(val) = gyro.file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
                 let pixel_focal_length = val.pixel_focal_length.map(|x| x as f64).or_else(|| {
@@ -93,10 +92,6 @@ impl FrameTransform {
                     }
                 }
                 if !val.distortion_coefficients.is_empty() && val.distortion_coefficients.len() <= 12 {
-                    org_coeffs_len = val.distortion_coefficients.len();
-                    if lens.distortion_model.as_deref() == Some("sony") {
-                        org_coeffs_len -= 2; // skip post_scale
-                    }
                     for (i, x) in val.distortion_coefficients.iter().enumerate() {
                         distortion_coeffs[i] = *x;
                     }
