@@ -31,10 +31,14 @@ pub fn rotate_and_distort(pos: Vec2, idx: i32, params: &KernelParams, matrices: 
         }
 
         if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
-            let r = vec2(point_3d.x, point_3d.y).length() / point_3d.z;
-            let sin_theta_d = (r / (1.0 + r * r).sqrt()) * params.light_refraction_coefficient;
-            let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
-            point_3d.z *= r / r_d;
+            if point_3d.z != 0.0 {
+                let r = vec2(point_3d.x, point_3d.y).length() / point_3d.z;
+                let sin_theta_d = (r / (1.0 + r * r).sqrt()) * params.light_refraction_coefficient;
+                let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
+                if r_d != 0.0 {
+                    point_3d.z *= r / r_d;
+                }
+            }
         }
 
         let mut uv = params.f * lens_distort(point_3d, params, distortion_model) + params.c;
@@ -92,9 +96,11 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
         new_out_pos = lens_undistort(new_out_pos, params, distortion_model);
         if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
             let r = new_out_pos.length();
-            let sin_theta_d = (r / (1.0 + r * r).sqrt()) / params.light_refraction_coefficient;
-            let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
-            new_out_pos *= r_d / r;
+            if r != 0.0 {
+                let sin_theta_d = (r / (1.0 + r * r).sqrt()) / params.light_refraction_coefficient;
+                let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
+                new_out_pos *= r_d / r;
+            }
         }
         new_out_pos = new_out_pos * out_f + out_c;
 

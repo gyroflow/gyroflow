@@ -175,10 +175,14 @@ impl Stabilization {
                 }
 
                 if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
-                    let r = (_x.powi(2) + _y.powi(2)).sqrt() / _w;
-                    let sin_theta_d = (r / (1.0 + r * r).sqrt()) * params.light_refraction_coefficient;
-                    let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
-                    _w *= r / r_d;
+                    if _w != 0.0 {
+                        let r = (_x.powi(2) + _y.powi(2)).sqrt() / _w;
+                        let sin_theta_d = (r / (1.0 + r * r).sqrt()) * params.light_refraction_coefficient;
+                        let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
+                        if r_d != 0.0 {
+                            _w *= r / r_d;
+                        }
+                    }
                 }
 
                 let mut uv = distortion_model.distort_point(_x, _y, _w, &params);
@@ -324,11 +328,13 @@ impl Stabilization {
                                 new_out_pos = distortion_model.undistort_point(new_out_pos, &params).unwrap_or_default();
                                 if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
                                     let r = (new_out_pos.0.powi(2) + new_out_pos.1.powi(2)).sqrt();
-                                    let sin_theta_d = (r / (1.0 + r * r).sqrt()) / params.light_refraction_coefficient;
-                                    let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
-                                    let factor = r_d / r;
-                                    new_out_pos.0 *= factor;
-                                    new_out_pos.1 *= factor;
+                                    if r != 0.0 {
+                                        let sin_theta_d = (r / (1.0 + r * r).sqrt()) / params.light_refraction_coefficient;
+                                        let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
+                                        let factor = r_d / r;
+                                        new_out_pos.0 *= factor;
+                                        new_out_pos.1 *= factor;
+                                    }
                                 }
                                 new_out_pos = ((new_out_pos.0 * out_f.0) + out_c.0, (new_out_pos.1 * out_f.1) + out_c.1);
 
@@ -492,10 +498,13 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
         if let Some(mut pt) = params.distortion_model.undistort_point(pw, &kernel_params) {
             if kernel_params.light_refraction_coefficient != 1.0 && kernel_params.light_refraction_coefficient > 0.0 {
                 let r = (pt.0.powi(2) + pt.1.powi(2)).sqrt();
-                let sin_theta_d = (r / (1.0 + r * r).sqrt()) / kernel_params.light_refraction_coefficient;
-                let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
-                pt.0 *= r_d / r;
-                pt.1 *= r_d / r;
+                if r != 0.0 {
+                    let sin_theta_d = (r / (1.0 + r * r).sqrt()) / kernel_params.light_refraction_coefficient;
+                    let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
+                    let factor = r_d / r;
+                    pt.0 *= factor;
+                    pt.1 *= factor;
+                }
             }
 
             // reproject
@@ -511,10 +520,12 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
                 new_pt = ((new_pt.0 - out_c.0) / f.0, (new_pt.1 - out_c.1) / f.1);
                 let mut _w = 1.0;
                 if kernel_params.light_refraction_coefficient != 1.0 && kernel_params.light_refraction_coefficient > 0.0 {
-                    let r = (new_pt.0.powi(2) + new_pt.1.powi(2)).sqrt();
+                    let r = (new_pt.0.powi(2) + new_pt.1.powi(2)).sqrt() / _w;
                     let sin_theta_d = (r / (1.0 + r * r).sqrt()) * kernel_params.light_refraction_coefficient;
                     let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
-                    _w *= r / r_d;
+                    if r_d != 0.0 {
+                        _w *= r / r_d;
+                    }
                 }
                 new_pt = params.distortion_model.distort_point(new_pt.0, new_pt.1, _w, &kernel_params); // TODO: z?
                 new_pt = ((new_pt.0 * f.0) + out_c.0, (new_pt.1 * f.1) + out_c.1);

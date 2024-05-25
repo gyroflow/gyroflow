@@ -218,10 +218,14 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
         }
 
         if (params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
-            let r = length(vec2<f32>(_x, _y)) / _w;
-            let sin_theta_d = (r / sqrt(1.0 + r * r)) * params.light_refraction_coefficient;
-            let r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
-            _w *= r / r_d;
+            if (_w != 0.0) {
+                let r = length(vec2<f32>(_x, _y)) / _w;
+                let sin_theta_d = (r / sqrt(1.0 + r * r)) * params.light_refraction_coefficient;
+                let r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
+                if (r_d != 0.0) {
+                    _w *= r / r_d;
+                }
+            }
         }
 
         var uv = f * distort_point(_x, _y, _w) + c;
@@ -279,9 +283,11 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
         new_out_pos = undistort_point(new_out_pos);
         if (params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
             let r = length(new_out_pos);
-            let sin_theta_d = (r / sqrt(1.0 + r * r)) / params.light_refraction_coefficient;
-            let r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
-            new_out_pos *= r_d / r;
+            if (r != 0.0) {
+                let sin_theta_d = (r / sqrt(1.0 + r * r)) / params.light_refraction_coefficient;
+                let r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
+                new_out_pos *= r_d / r;
+            }
         }
         new_out_pos = out_f * new_out_pos + out_c;
 

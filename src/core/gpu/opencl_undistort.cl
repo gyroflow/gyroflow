@@ -231,10 +231,14 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
         }
 
         if (params->light_refraction_coefficient != 1.0f && params->light_refraction_coefficient > 0.0f) {
-            float r = length((float2)(_x, _y)) / _w;
-            float sin_theta_d = (r / sqrt(1.0f + r * r)) * params->light_refraction_coefficient;
-            float r_d = sin_theta_d / sqrt(1.0f - sin_theta_d * sin_theta_d);
-            _w *= r / r_d;
+            if (_w != 0.0f) {
+                float r = length((float2)(_x, _y)) / _w;
+                float sin_theta_d = (r / sqrt(1.0f + r * r)) * params->light_refraction_coefficient;
+                float r_d = sin_theta_d / sqrt(1.0f - sin_theta_d * sin_theta_d);
+                if (r_d != 0.0f) {
+                    _w *= r / r_d;
+                }
+            }
         }
 
         float2 uv = params->f * distort_point(_x, _y, _w, params) + params->c;
@@ -294,9 +298,11 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
             new_out_pos = undistort_point(new_out_pos, params);
             if (params->light_refraction_coefficient != 1.0f && params->light_refraction_coefficient > 0.0f) {
                 float r = length(new_out_pos);
-                float sin_theta_d = (r / sqrt(1.0f + r * r)) / params->light_refraction_coefficient;
-                float r_d = sin_theta_d / sqrt(1.0f - sin_theta_d * sin_theta_d);
-                new_out_pos *= r_d / r;
+                if (r != 0.0f) {
+                    float sin_theta_d = (r / sqrt(1.0f + r * r)) / params->light_refraction_coefficient;
+                    float r_d = sin_theta_d / sqrt(1.0f - sin_theta_d * sin_theta_d);
+                    new_out_pos *= r_d / r;
+                }
             }
             new_out_pos = out_f * new_out_pos + out_c;
 
