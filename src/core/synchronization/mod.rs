@@ -125,27 +125,29 @@ impl PoseEstimator {
         let mut pose = EstimatePoseMethod::from(self.pose_method.load(SeqCst));
         pose.init(params);
         frames_to_process.par_iter().for_each(move |(ts, next_ts)| {
-            let l = results.read();
-            if let Some(curr) = l.get(ts) {
-                if curr.rotation.is_none() {
-                    //let curr = curr.item.clone();
-                    if let Some(next) = l.get(next_ts) {
-                        // TODO estimate pose should be quick so test if instead of cloning it is faster just to keep the lock for longer
-                        let curr_of = curr.of_method.clone();
-                        let next_of = next.of_method.clone();
+            {
+                let l = results.read();
+                if let Some(curr) = l.get(ts) {
+                    if curr.rotation.is_none() {
+                        //let curr = curr.item.clone();
+                        if let Some(next) = l.get(next_ts) {
+                            // TODO estimate pose should be quick so test if instead of cloning it is faster just to keep the lock for longer
+                            let curr_of = curr.of_method.clone();
+                            let next_of = next.of_method.clone();
 
-                        // Unlock the mutex for estimate_pose
-                        drop(l);
+                            // Unlock the mutex for estimate_pose
+                            drop(l);
 
-                        if let Some(rot) = pose.estimate_pose(&curr_of.optical_flow_to(&next_of), curr_of.size(), params, *ts, *next_ts) {
-                            let mut l = results.write();
-                            if let Some(x) = l.get_mut(ts) {
-                                x.rotation = Some(rot);
-                                x.quat = Some(Quat64::from(rot));
-                                let rotvec = rot.scaled_axis() * (scaled_fps / every_nth_frame);
-                                x.euler = Some((rotvec[0], rotvec[1], rotvec[2]));
-                            } else {
-                                log::warn!("Failed to get ts {}", ts);
+                            if let Some(rot) = pose.estimate_pose(&curr_of.optical_flow_to(&next_of), curr_of.size(), params, *ts, *next_ts) {
+                                let mut l = results.write();
+                                if let Some(x) = l.get_mut(ts) {
+                                    x.rotation = Some(rot);
+                                    x.quat = Some(Quat64::from(rot));
+                                    let rotvec = rot.scaled_axis() * (scaled_fps / every_nth_frame);
+                                    x.euler = Some((rotvec[0], rotvec[1], rotvec[2]));
+                                } else {
+                                    log::warn!("Failed to get ts {}", ts);
+                                }
                             }
                         }
                     }
