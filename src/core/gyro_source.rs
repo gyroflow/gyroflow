@@ -454,10 +454,14 @@ impl GyroSource {
                                         }
 
                                         if md.lens_profile.is_none() {
+                                            let focal_length = tag_map.get(&GroupId::Lens)
+                                                .and_then(|x| x.get_t(TagId::FocalLength) as Option<&f32>)
+                                                .map(|x| format!("{:.2} mm", *x));
                                             md.lens_profile = Some(serde_json::json!({
                                                 "calibrated_by": "Sony",
                                                 "camera_brand": "Sony",
                                                 "camera_model": input.camera_model(),
+                                                "lens_model":   focal_length,
                                                 "calib_dimension":  { "w": size.0, "h": size.1 },
                                                 "orig_dimension":   { "w": size.0, "h": size.1 },
                                                 "output_dimension": { "w": size.0, "h": size.1 },

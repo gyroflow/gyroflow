@@ -155,10 +155,10 @@ MenuItem {
                     const coeffs = obj.fisheye_params.distortion_coeffs;
                     root.distortionCoeffs = coeffs;
                     const mtrx = obj.fisheye_params.camera_matrix;
-                    k1.setInitialValue(coeffs[0]);
-                    k2.setInitialValue(coeffs[1]);
-                    k3.setInitialValue(coeffs[2]);
-                    k4.setInitialValue(coeffs[3]);
+                    k1.setInitialValue(coeffs[0] || 0.0);
+                    k2.setInitialValue(coeffs[1] || 0.0);
+                    k3.setInitialValue(coeffs[2] || 0.0);
+                    k4.setInitialValue(coeffs[3] || 0.0);
                     fx.setInitialValue(mtrx[0][0]);
                     fy.setInitialValue(mtrx[1][1]);
                     cx.setInitialValue(mtrx[0][2]);
