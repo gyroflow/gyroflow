@@ -460,7 +460,7 @@ impl GyroSource {
                                                 "calibrated_by": "Sony",
                                                 "camera_brand": "Sony",
                                                 "camera_model": input.camera_model(),
-                                                "lens_model":   focal_length,
+                                                "lens_model":   focal_length.unwrap_or_default(),
                                                 "calib_dimension":  { "w": size.0, "h": size.1 },
                                                 "orig_dimension":   { "w": size.0, "h": size.1 },
                                                 "output_dimension": { "w": size.0, "h": size.1 },
