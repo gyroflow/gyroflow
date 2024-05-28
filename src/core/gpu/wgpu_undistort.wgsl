@@ -205,7 +205,6 @@ fn sample_input_at(uv_param: vec2<f32>) -> vec4<f32> {
         min(sum.w, params.pixel_value_limit)
     );
 }
-}
 
 fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>) -> vec2<f32> {
     let _x = (pos.x * matrices[idx + 0u]) + (pos.y * matrices[idx + 1u]) + matrices[idx + 2u] + params.translation3d.x;
