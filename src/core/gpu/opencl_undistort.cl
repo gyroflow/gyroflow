@@ -225,19 +225,17 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
     float _x = (pos.x * matrix[0]) + (pos.y * matrix[1]) + matrix[2] + params->translation3d.x;
     float _y = (pos.x * matrix[3]) + (pos.y * matrix[4]) + matrix[5] + params->translation3d.y;
     float _w = (pos.x * matrix[6]) + (pos.y * matrix[7]) + matrix[8] + params->translation3d.z;
-    if (_w > 0) {
+    if (_w > 0.0f) {
         if (params->r_limit > 0.0f && length((float2)(_x, _y) / _w) > params->r_limit) {
             return (float2)(-99999.0f, -99999.0f);
         }
 
         if (params->light_refraction_coefficient != 1.0f && params->light_refraction_coefficient > 0.0f) {
-            if (_w != 0.0f) {
-                float r = length((float2)(_x, _y)) / _w;
-                float sin_theta_d = (r / sqrt(1.0f + r * r)) * params->light_refraction_coefficient;
-                float r_d = sin_theta_d / sqrt(1.0f - sin_theta_d * sin_theta_d);
-                if (r_d != 0.0f) {
-                    _w *= r / r_d;
-                }
+            float r = length((float2)(_x, _y)) / _w;
+            float sin_theta_d = (r / sqrt(1.0f + r * r)) * params->light_refraction_coefficient;
+            float r_d = sin_theta_d / sqrt(1.0f - sin_theta_d * sin_theta_d);
+            if (r_d != 0.0f) {
+                _w *= r / r_d;
             }
         }
 

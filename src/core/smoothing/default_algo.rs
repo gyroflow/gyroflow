@@ -206,7 +206,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
         hasher.finish()
     }
 
-    fn smooth(&self, quats: &TimeQuat, duration: f64, stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat { // TODO Result<>?
+    fn smooth(&self, quats: &TimeQuat, duration: f64, compute_params: &ComputeParams) -> TimeQuat { // TODO Result<>?
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
         const MAX_VELOCITY: f64 = 500.0;
@@ -219,17 +219,24 @@ impl SmoothingAlgorithm for DefaultAlgo {
         };
         let noop = |v| v;
 
-        let quats = Smoothing::get_trimmed_quats(quats, duration, self.trim_range_only, &stabilization_params.trim_ranges);
+        let keyframes = &compute_params.keyframes;
+
+        let quats = Smoothing::get_trimmed_quats(quats, duration, self.trim_range_only, &compute_params.trim_ranges);
         let quats = quats.as_ref();
 
         let get_keyframed_param = |typ: &KeyframeType, def: f64, cb: &dyn Fn(f64) -> f64| -> BTreeMap<i64, f64> {
             let mut ret = BTreeMap::<i64, f64>::new();
-            if keyframes.is_keyframed(typ) || (stabilization_params.video_speed_affects_smoothing && (stabilization_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed))) {
+            let is_limiter_kf = *typ == KeyframeType::SmoothingParamSmoothness || *typ == KeyframeType::SmoothingParamPitch || *typ == KeyframeType::SmoothingParamYaw || *typ == KeyframeType::SmoothingParamRoll;
+            if keyframes.is_keyframed(typ)
+              || (compute_params.video_speed_affects_smoothing && (compute_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed)))
+              || (is_limiter_kf && (keyframes.is_keyframed(&KeyframeType::SmoothnessLimiter) || compute_params.smoothness_limiter != 1.0)) {
+
                 ret = quats.iter().map(|(ts, _)| {
                     let timestamp_ms = *ts as f64 / 1000.0;
-                    let mut val = keyframes.value_at_gyro_timestamp(typ, timestamp_ms).unwrap_or(def);
-                    if stabilization_params.video_speed_affects_smoothing {
-                        let vid_speed = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoSpeed, timestamp_ms).unwrap_or(stabilization_params.video_speed);
+                    let limiter = if is_limiter_kf { keyframes.value_at_gyro_timestamp(&KeyframeType::SmoothnessLimiter, timestamp_ms).unwrap_or(1.0) * compute_params.smoothness_limiter } else { 1.0 };
+                    let mut val = keyframes.value_at_gyro_timestamp(typ, timestamp_ms).unwrap_or(def) * limiter;
+                    if compute_params.video_speed_affects_smoothing {
+                        let vid_speed = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoSpeed, timestamp_ms).unwrap_or(compute_params.video_speed);
                         if typ == &KeyframeType::SmoothingParamTimeConstant || typ == &KeyframeType::SmoothingParamTimeConstant2 {
                             val *= 1.0 + ((vid_speed - 1.0) / 2.0);
                         } else {

@@ -5,7 +5,6 @@ use super::*;
 use nalgebra::*;
 use crate::{ gyro_source::TimeQuat, keyframes::* };
 
-
 pub fn lock_horizon_angle(q: &UnitQuaternion<f64>, roll_correction: f64) -> UnitQuaternion<f64> {
     // z axis points in view direction, use as reference
 
@@ -54,7 +53,8 @@ impl HorizonLock {
         hasher.finish()
     }
 
-    pub fn lock(&self, quats: &mut TimeQuat, org_quats: &TimeQuat, grav: &Option<crate::gyro_source::TimeVec>, use_grav: bool, _int_method: usize, keyframes: &KeyframeManager, params: &StabilizationParams) {
+    pub fn lock(&self, quats: &mut TimeQuat, org_quats: &TimeQuat, grav: &Option<crate::gyro_source::TimeVec>, use_grav: bool, _int_method: usize, compute_params: &ComputeParams) {
+        let keyframes = &compute_params.keyframes;
         if self.lock_enabled || keyframes.is_keyframed(&KeyframeType::LockHorizonAmount) {
             if let Some(gvec) = grav {
                 if !gvec.is_empty() && use_grav {
@@ -71,7 +71,7 @@ impl HorizonLock {
                         let angle_corr = (-correction[(0, 1)]).simd_atan2(correction[(0, 0)]);
 
                         let timestamp_ms = *ts as f64 / 1000.0;
-                        let video_rotation = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
+                        let video_rotation = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(compute_params.video_rotation);
                         let horizonroll = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonRoll, timestamp_ms).unwrap_or(self.horizonroll) + video_rotation;
                         let horizonlockpercent = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonAmount, timestamp_ms).unwrap_or(self.horizonlockpercent);
 
@@ -86,7 +86,7 @@ impl HorizonLock {
 
             for (ts, smoothed_ori) in quats.iter_mut() {
                 let timestamp_ms = *ts as f64 / 1000.0;
-                let video_rotation = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
+                let video_rotation = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(compute_params.video_rotation);
                 let horizonroll = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonRoll, timestamp_ms).unwrap_or(self.horizonroll) + video_rotation;
                 let horizonlockpercent = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonAmount, timestamp_ms).unwrap_or(self.horizonlockpercent);
 

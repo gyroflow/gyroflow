@@ -217,13 +217,11 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
         }
 
         if (params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
-            if (_w != 0.0) {
-                let r = length(vec2<f32>(_x, _y)) / _w;
-                let sin_theta_d = (r / sqrt(1.0 + r * r)) * params.light_refraction_coefficient;
-                let r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
-                if (r_d != 0.0) {
-                    _w *= r / r_d;
-                }
+            let r = length(vec2<f32>(_x, _y)) / _w;
+            let sin_theta_d = (r / sqrt(1.0 + r * r)) * params.light_refraction_coefficient;
+            let r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
+            if (r_d != 0.0) {
+                _w *= r / r_d;
             }
         }
 

@@ -9,7 +9,6 @@ use std::hash::Hasher;
 use std::collections::BTreeMap;
 
 use crate::stabilization::ComputeParams;
-use crate::keyframes::*;
 
 #[derive(Default, Clone, Copy, Debug)]
 pub struct Point2D(f32, f32);
@@ -33,7 +32,7 @@ pub trait FieldOfViewAlgorithm {
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>>;
 }
 
-pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[f64], keyframes: &KeyframeManager, method: ZoomMethod) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>)  {
+pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[f64], method: ZoomMethod) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>)  {
     if timestamps.is_empty() {
         return Default::default();
     }
@@ -61,7 +60,7 @@ pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[f64], keyfra
         (fov_values, fov_minimal)
     } else if compute_params.adaptive_zoom_window > 0.0001 {
         // Dynamic zoom
-        zoom_dynamic::compute(&compute_params, fov_values, timestamps, keyframes, method)
+        zoom_dynamic::compute(&compute_params, fov_values, timestamps, method)
     } else {
         // Disabled zoom
         (vec![1.0; fov_values.len()], fov_values)

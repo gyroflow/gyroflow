@@ -57,6 +57,7 @@ pub struct StabilizationParams {
     pub frame_count: usize,
     pub duration_ms: f64,
     pub video_created_at: Option<u64>,
+    pub smoothness_limiter: f64,
 
     pub trim_ranges: Vec<(f64, f64)>,
 
@@ -138,6 +139,8 @@ impl Default for StabilizationParams {
             frame_count: 0,
             duration_ms: 0.0,
             video_created_at: None,
+
+            smoothness_limiter: 1.0,
         }
     }
 }
@@ -251,7 +254,7 @@ impl StabilizationParams {
             adaptive_zoom_method:      self.adaptive_zoom_method,
             fov_overview:              self.fov_overview,
             show_safe_area:            self.show_safe_area,
-            ..Default::default()
+            ..Self::default()
         };
     }
 }

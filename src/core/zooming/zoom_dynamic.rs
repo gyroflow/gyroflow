@@ -12,10 +12,12 @@ struct DataPerTimestamp {
     gaussian_window: Vec<f64>
 }
 
-pub fn compute(compute_params: &ComputeParams, mut fov_values: Vec<f64>, timestamps: &[f64], keyframes: &KeyframeManager, method: ZoomMethod) -> (Vec<f64>, Vec<f64>) {
+pub fn compute(compute_params: &ComputeParams, mut fov_values: Vec<f64>, timestamps: &[f64], method: ZoomMethod) -> (Vec<f64>, Vec<f64>) {
     let window = compute_params.adaptive_zoom_window;
 
     let fov_minimal = fov_values.clone();
+
+    let keyframes = &compute_params.keyframes;
 
     if keyframes.is_keyframed(&KeyframeType::ZoomingSpeed) || (compute_params.video_speed_affects_zooming && (compute_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed))) {
         // Keyframed window

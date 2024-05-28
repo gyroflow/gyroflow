@@ -48,6 +48,7 @@ define_keyframes! {
     SmoothingParamPitch,         "#59c451", "Pitch smoothness",                 |v| format!("{:.2}", v),
     SmoothingParamRoll,          "#51c485", "Roll smoothness",                  |v| format!("{:.2}", v),
     SmoothingParamYaw,           "#88c451", "Yaw smoothness",                   |v| format!("{:.2}", v),
+    SmoothnessLimiter,           "#EB1313", "Zoom limiter",                     |v| format!("{:.2}", v),
 
     VideoSpeed,                  "#f6e926", "Video speed",                      |v| format!("{:.1}%", v * 100.0),
 }

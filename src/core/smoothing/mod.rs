@@ -16,7 +16,7 @@ use std::borrow::Cow;
 use std::hash::Hasher;
 use std::collections::hash_map::DefaultHasher;
 use crate::keyframes::*;
-use crate::stabilization_params::StabilizationParams;
+use crate::ComputeParams;
 
 pub trait SmoothingAlgorithm: DynClone {
     fn get_name(&self) -> String;
@@ -28,7 +28,7 @@ pub trait SmoothingAlgorithm: DynClone {
 
     fn get_checksum(&self) -> u64;
 
-    fn smooth(&self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat;
+    fn smooth(&self, quats: &TimeQuat, duration: f64, _compute_params: &ComputeParams) -> TimeQuat;
 }
 clone_trait_object!(SmoothingAlgorithm);
 
@@ -158,8 +158,8 @@ impl Smoothing {
         }
     }
 
-    pub fn get_max_angles(quats: &TimeQuat, smoothed_quats: &TimeQuat, params: &StabilizationParams) -> (f64, f64, f64) { // -> (pitch, yaw, roll) in deg
-        let ranges = params.trim_ranges.iter().map(|x| ((x.0 * params.get_scaled_duration_ms() * 1000.0) as i64, (x.1 * params.get_scaled_duration_ms() * 1000.0) as i64)).collect::<Vec<_>>();
+    pub fn get_max_angles(quats: &TimeQuat, smoothed_quats: &TimeQuat, params: &ComputeParams) -> (f64, f64, f64) { // -> (pitch, yaw, roll) in deg
+        let ranges = params.trim_ranges.iter().map(|x| ((x.0 * params.scaled_duration_ms * 1000.0) as i64, (x.1 * params.scaled_duration_ms * 1000.0) as i64)).collect::<Vec<_>>();
         let identity_quat = crate::Quat64::identity();
 
         let mut max_pitch = 0.0;
@@ -167,7 +167,7 @@ impl Smoothing {
         let mut max_roll = 0.0;
 
         for (timestamp, quat) in smoothed_quats.iter() {
-            let within_range = ranges.iter().any(|x| timestamp >= &x.0 && timestamp <= &x.1);
+            let within_range = ranges.is_empty() || ranges.iter().any(|x| timestamp >= &x.0 && timestamp <= &x.1);
             if within_range {
                 let dist = quat.inverse() * quats.get(timestamp).unwrap_or(&identity_quat);
                 let euler_dist = dist.euler_angles();

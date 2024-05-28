@@ -367,19 +367,19 @@ impl StabilizationManager {
         false
     }
 
-    pub fn recompute_adaptive_zoom_static(compute_params: &ComputeParams, params: &RwLock<StabilizationParams>, keyframes: &KeyframeManager) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>) {
+    pub fn recompute_adaptive_zoom_static(compute_params: &ComputeParams, params: &RwLock<StabilizationParams>) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>) {
         let (frames, fps, method) = {
             let params = params.read();
             (params.frame_count, params.get_scaled_fps(), params.adaptive_zoom_method)
         };
         let timestamps = (0..frames).map(|i| i as f64 * 1000.0 / fps).collect::<Vec<f64>>();
 
-        zooming::calculate_fovs(compute_params, &timestamps, &keyframes, method.into())
+        zooming::calculate_fovs(compute_params, &timestamps, method.into())
     }
     pub fn recompute_adaptive_zoom(&self) {
         let params = stabilization::ComputeParams::from_manager(self);
         let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
-        let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &self.params, &self.keyframes.read());
+        let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &self.params);
 
         let mut stab_params = self.params.write();
         stab_params.set_fovs(fovs, lens_fov_adjustment);
@@ -388,12 +388,11 @@ impl StabilizationManager {
     }
 
     pub fn recompute_smoothness(&self) {
-        let params = self.params.read();
-        let keyframes = self.keyframes.read().clone();
+        let params = stabilization::ComputeParams::from_manager(self);
         let smoothing = self.smoothing.read();
         let horizon_lock = smoothing.horizon_lock.clone();
 
-        let (quats, org_quats, max_angles) = self.gyro.read().recompute_smoothness(smoothing.current().as_ref(), horizon_lock, &params, &keyframes);
+        let (quats, org_quats, max_angles) = self.gyro.read().recompute_smoothness(smoothing.current().as_ref(), horizon_lock, &params);
         let mut gyro = self.gyro.write();
         gyro.max_angles = max_angles;
         gyro.org_smoothed_quaternions = org_quats;
@@ -422,7 +421,6 @@ impl StabilizationManager {
 
         let smoothing = self.smoothing.clone();
         let stabilization_params = self.params.clone();
-        let keyframes = self.keyframes.read().clone();
         let gyro = self.gyro.clone();
 
         let compute_id = fastrand::u64(..);
@@ -447,7 +445,7 @@ impl StabilizationManager {
                     let lock = smoothing.read();
                     (lock.current().clone(), lock.horizon_lock.clone())
                 };
-                let (quats, org_quats, max_angles) = gyro.read().recompute_smoothness(smoothing.as_mut(), horizon_lock, &stabilization_params.read(), &keyframes);
+                let (quats, org_quats, max_angles) = gyro.read().recompute_smoothness(smoothing.as_mut(), horizon_lock, &params);
 
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
                 if gyro_checksum != gyro.read().get_checksum() { return cb((compute_id, true)); }
@@ -465,7 +463,7 @@ impl StabilizationManager {
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
             if smoothing_changed || zooming::get_checksum(&params) != zooming_checksum.load(SeqCst) {
-                let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params, &keyframes);
+                let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
                 params.fovs = fovs;
                 params.minimal_fovs = minimal_fovs;
 
@@ -687,8 +685,15 @@ impl StabilizationManager {
     pub fn get_scaling_ratio(&self) -> f64 { let params = self.params.read(); params.video_size.0 as f64 / params.video_output_size.0 as f64 }
     pub fn get_min_fov      (&self) -> f64 { self.params.read().min_fov }
 
-    pub fn invalidate_smoothing(&self) { self.invalidate_ongoing_computations(); self.smoothing_checksum.store(0, SeqCst); self.invalidate_zooming(); }
-    pub fn invalidate_zooming(&self) { self.invalidate_ongoing_computations(); self.zooming_checksum.store(0, SeqCst); }
+    pub fn invalidate_smoothing(&self) {
+        self.invalidate_ongoing_computations();
+        self.smoothing_checksum.store(0, SeqCst);
+        self.invalidate_zooming();
+    }
+    pub fn invalidate_zooming(&self) {
+        self.invalidate_ongoing_computations();
+        self.zooming_checksum.store(0, SeqCst);
+    }
 
     pub fn invalidate_blocking_smoothing(&self) { self.invalidate_ongoing_computations(); self.smoothing_invalidated.store(true, SeqCst); self.zooming_invalidated.store(true, SeqCst); self.undistortion_invalidated.store(true, SeqCst); }
     pub fn invalidate_blocking_zooming(&self) { self.invalidate_ongoing_computations(); self.zooming_invalidated.store(true, SeqCst); self.undistortion_invalidated.store(true, SeqCst); }

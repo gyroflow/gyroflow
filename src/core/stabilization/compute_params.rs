@@ -42,6 +42,7 @@ pub struct ComputeParams {
     pub frame_readout_time: f64,
     pub trim_ranges: Vec<(f64, f64)>,
     pub scaled_fps: f64,
+    pub scaled_duration_ms: f64,
     pub plane_scale: (f64, f64),
     pub adaptive_zoom_window: f64,
     pub adaptive_zoom_center_offset: (f64, f64),
@@ -50,6 +51,7 @@ pub struct ComputeParams {
     pub additional_translation: (f64, f64, f64),
     pub framebuffer_inverted: bool,
     pub horizontal_rs: bool,
+    pub smoothness_limiter: f64,
 
     pub zooming_debug_points: bool,
 
@@ -97,6 +99,7 @@ impl ComputeParams {
             frame_readout_time: params.frame_readout_time,
             trim_ranges: params.trim_ranges.clone(),
             scaled_fps: params.get_scaled_fps(),
+            scaled_duration_ms: params.get_scaled_duration_ms(),
             adaptive_zoom_window: params.adaptive_zoom_window,
             adaptive_zoom_center_offset: params.adaptive_zoom_center_offset,
             additional_rotation: params.additional_rotation,
@@ -109,6 +112,7 @@ impl ComputeParams {
             distortion_model,
             digital_lens,
             digital_lens_params: lens.digital_lens_params.clone(),
+            smoothness_limiter: params.smoothness_limiter,
 
             keyframes: mgr.keyframes.read().clone(),
 

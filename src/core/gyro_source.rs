@@ -10,7 +10,6 @@ use telemetry_parser::{ Input, util };
 use telemetry_parser::tags_impl::{ GetWithType, GroupId, TagId, TimeQuaternion };
 
 use crate::camera_identifier::CameraIdentifier;
-use crate::keyframes::KeyframeManager;
 use crate::filesystem;
 
 use super::imu_integration::*;
@@ -646,19 +645,19 @@ impl GyroSource {
         }
     }
 
-    pub fn recompute_smoothness(&self, alg: &dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> (TimeQuat, TimeQuat, (f64, f64, f64)) {
+    pub fn recompute_smoothness(&self, alg: &dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, compute_params: &crate::ComputeParams) -> (TimeQuat, TimeQuat, (f64, f64, f64)) {
         let mut smoothed_quaternions = self.quaternions.clone();
         if true {
             // Lock horizon, then smooth
-            horizon_lock.lock(&mut smoothed_quaternions, &self.quaternions, &self.file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes, stabilization_params);
-            smoothed_quaternions = alg.smooth(&smoothed_quaternions, self.duration_ms, stabilization_params, keyframes);
+            horizon_lock.lock(&mut smoothed_quaternions, &self.quaternions, &self.file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, compute_params);
+            smoothed_quaternions = alg.smooth(&smoothed_quaternions, self.duration_ms, compute_params);
         } else {
             // Smooth, then lock horizon
-            smoothed_quaternions = alg.smooth(&smoothed_quaternions, self.duration_ms, stabilization_params, keyframes);
-            horizon_lock.lock(&mut smoothed_quaternions, &self.quaternions, &self.file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, keyframes, stabilization_params);
+            smoothed_quaternions = alg.smooth(&smoothed_quaternions, self.duration_ms, compute_params);
+            horizon_lock.lock(&mut smoothed_quaternions, &self.quaternions, &self.file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, compute_params);
         }
 
-        let max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &smoothed_quaternions, stabilization_params);
+        let max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &smoothed_quaternions, compute_params);
 
         let org_smoothed_quaternions = smoothed_quaternions.clone();
         for (sq, q) in smoothed_quaternions.iter_mut().zip(self.quaternions.iter()) {

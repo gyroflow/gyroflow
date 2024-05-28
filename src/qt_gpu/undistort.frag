@@ -118,19 +118,17 @@ vec2 rotate_and_distort(vec2 pos, float idx) {
     float _y = (float(pos.x) * get_param(idx, 3)) + (float(pos.y) * get_param(idx, 4)) + get_param(idx, 5) + params.translation3d.y;
     float _w = (float(pos.x) * get_param(idx, 6)) + (float(pos.y) * get_param(idx, 7)) + get_param(idx, 8) + params.translation3d.z;
 
-    if (_w > 0) {
+    if (_w > 0.0) {
         if (params.r_limit > 0.0 && length(vec2(_x, _y) / _w) > params.r_limit) {
             return vec2(-99999.0, -99999.0);
         }
 
         if (params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
-            if (_w != 0.0) {
-                float r = length(vec2(_x, _y)) / _w;
-                float sin_theta_d = (r / sqrt(1.0 + r * r)) * params.light_refraction_coefficient;
-                float r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
-                if (r_d != 0.0) {
-                    _w *= r / r_d;
-                }
+            float r = length(vec2(_x, _y)) / _w;
+            float sin_theta_d = (r / sqrt(1.0 + r * r)) * params.light_refraction_coefficient;
+            float r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
+            if (r_d != 0.0) {
+                _w *= r / r_d;
             }
         }
 

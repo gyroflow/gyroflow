@@ -80,8 +80,10 @@ impl SmoothingAlgorithm for Fixed {
         hasher.finish()
     }
 
-    fn smooth(&self, quats: &TimeQuat, duration: f64, _stabilization_params: &StabilizationParams, keyframes: &KeyframeManager) -> TimeQuat {
+    fn smooth(&self, quats: &TimeQuat, duration: f64, compute_params: &ComputeParams) -> TimeQuat {
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
+
+        let keyframes = &compute_params.keyframes;
 
         fn quat_for_rpy(roll: f64, pitch: f64, yaw: f64) -> Quat64 {
             const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
@@ -105,8 +107,8 @@ impl SmoothingAlgorithm for Fixed {
         let fixed_quat = quat_for_rpy(self.roll, self.pitch, self.yaw);
 
         let is_keyframed = keyframes.is_keyframed(&KeyframeType::SmoothingParamRoll)
-                             || keyframes.is_keyframed(&KeyframeType::SmoothingParamPitch)
-                             || keyframes.is_keyframed(&KeyframeType::SmoothingParamYaw);
+                        || keyframes.is_keyframed(&KeyframeType::SmoothingParamPitch)
+                        || keyframes.is_keyframed(&KeyframeType::SmoothingParamYaw);
 
         quats.iter().map(|x| {
             if is_keyframed {
