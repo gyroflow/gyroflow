@@ -65,7 +65,12 @@ fn distort_point(x: f32, y: f32, z: f32) -> vec2<f32> {
     let theta5 = theta2*theta3;
     let theta6 = theta3*theta3;
 
-    let theta_d = theta * params.k1.x + theta2 * params.k1.y + theta3 * params.k1.z + theta4 * params.k1.w + theta5 * params.k2.x + theta6 * params.k2.y;
+    let theta_d = theta  * params.k1.x
+                + theta2 * params.k1.y
+                + theta3 * params.k1.z
+                + theta4 * params.k1.w
+                + theta5 * params.k2.x
+                + theta6 * params.k2.y;
 
     var scale: f32 = 1.0;
     if (r != 0.0) {

@@ -64,7 +64,12 @@ vec2 distort_point(float x, float y, float z) {
           theta5 = theta2*theta3,
           theta6 = theta3*theta3;
 
-    float theta_d = theta * params.k1.x + theta2 * params.k1.y + theta3 * params.k1.z + theta4 * params.k1.w + theta5 * params.k2.x + theta6 * params.k2.y;
+    float theta_d = theta  * params.k1.x
+                  + theta2 * params.k1.y
+                  + theta3 * params.k1.z
+                  + theta4 * params.k1.w
+                  + theta5 * params.k2.x
+                  + theta6 * params.k2.y;
 
     float scale = r == 0? 1.0 : theta_d / r;
 

@@ -1018,7 +1018,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2fd0994#2fd09945cd82491492854247a889bbb1b74e089d"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=d9c054c#d9c054c645af0ea9ef81617c3e762fbf0f3fecda"
 dependencies = [
  "bitflags 2.5.0",
  "libloading",
@@ -2297,7 +2297,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2fd0994#2fd09945cd82491492854247a889bbb1b74e089d"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=d9c054c#d9c054c645af0ea9ef81617c3e762fbf0f3fecda"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -2750,9 +2750,9 @@ checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
 name = "opencv"
-version = "0.91.3"
+version = "0.92.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e64b5a733be752a917aa27981c1100fbc7836cf2cfe3fb06f5cac691339837b7"
+checksum = "5e19ccfa4237826b2213bda6dd30875b9ed184c5318ec64d3c269132d128212c"
 dependencies = [
  "cc",
  "dunce",
@@ -2770,9 +2770,9 @@ dependencies = [
 
 [[package]]
 name = "opencv-binding-generator"
-version = "0.89.1"
+version = "0.90.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81af1298c489597ffdbadc7710673ec26f8a2440228992681ffa3b8f00233bd9"
+checksum = "86ddd32f38d5cd32c79a38da363528ced3149a48f1e686b7a12913a184a84cd5"
 dependencies = [
  "clang",
  "clang-sys",
@@ -3682,7 +3682,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.3.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=ca86793#ca867930b2399d36aad170cf4b06dd9453a1c814"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=d1e2a82#d1e2a828a9ef22fdfef418fbd3e8f89d5c10c643"
 dependencies = [
  "argh",
  "byteorder",
@@ -4135,7 +4135,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2fd0994#2fd09945cd82491492854247a889bbb1b74e089d"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=d9c054c#d9c054c645af0ea9ef81617c3e762fbf0f3fecda"
 dependencies = [
  "arrayvec",
  "cfg_aliases",
@@ -4159,7 +4159,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2fd0994#2fd09945cd82491492854247a889bbb1b74e089d"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=d9c054c#d9c054c645af0ea9ef81617c3e762fbf0f3fecda"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4184,7 +4184,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2fd0994#2fd09945cd82491492854247a889bbb1b74e089d"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=d9c054c#d9c054c645af0ea9ef81617c3e762fbf0f3fecda"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4228,7 +4228,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2fd0994#2fd09945cd82491492854247a889bbb1b74e089d"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=d9c054c#d9c054c645af0ea9ef81617c3e762fbf0f3fecda"
 dependencies = [
  "bitflags 2.5.0",
  "js-sys",

@@ -27,8 +27,8 @@ pub type TimeVec = BTreeMap<i64, Vector3<f64>>; // key is timestamp_us
 pub struct LensParams {
     pub focal_length: Option<f32>, // millimeters
     pub pixel_pitch: Option<(u32, u32)>, // nanometers
-    pub capture_area_origin: Option<(u32, u32)>, // pixels
-    pub capture_area_size: Option<(u32, u32)>, // pixels
+    pub capture_area_origin: Option<(f32, f32)>, // pixels
+    pub capture_area_size: Option<(f32, f32)>, // pixels
     pub pixel_focal_length: Option<f32>, // pixels
     pub distortion_coefficients: Vec<f64>,
 }
@@ -217,11 +217,11 @@ impl GyroSource {
                     }
                     if let Some(im) = tag_map.get(&GroupId::Imager) {
                         if input.camera_type() == "RED" {
-                            lens_info.capture_area_size = Some((size.0 as u32, size.1 as u32));
+                            lens_info.capture_area_size = Some((size.0 as f32, size.1 as f32));
                         }
                         if let Some(v) = im.get_t(TagId::PixelPitch) as Option<&(u32, u32)> { lens_info.pixel_pitch = Some(*v); }
-                        if let Some(v) = im.get_t(TagId::CaptureAreaSize) as Option<&(u32, u32)> { lens_info.capture_area_size = Some(*v); }
-                        if let Some(v) = im.get_t(TagId::CaptureAreaOrigin) as Option<&(u32, u32)> { lens_info.capture_area_origin = Some(*v); }
+                        if let Some(v) = im.get_t(TagId::CaptureAreaSize) as Option<&(f32, f32)> { lens_info.capture_area_size = Some(*v); }
+                        if let Some(v) = im.get_t(TagId::CaptureAreaOrigin) as Option<&(f32, f32)> { lens_info.capture_area_origin = Some(*v); }
                     }
                     if let Some(map) = tag_map.get(&GroupId::Lens) {
                         if let Some(v) = map.get_t(TagId::Data) as Option<&serde_json::Value> {
@@ -371,7 +371,7 @@ impl GyroSource {
 
                     if let Some(lmd) = tag_map.get(&GroupId::Custom("LensDistortion".into())) {
                         let pixel_pitch = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::PixelPitch) as Option<&(u32, u32)>).cloned();
-                        let crop_size = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaSize) as Option<&(u32, u32)>).cloned();
+                        let crop_size = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaSize) as Option<&(f32, f32)>).cloned();
                         let mut lens_compensation_enabled = false;
 
                         if let Some(enabled) = lmd.get_t(TagId::Enabled) as Option<&bool> {

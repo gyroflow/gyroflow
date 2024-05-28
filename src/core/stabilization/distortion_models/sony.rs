@@ -79,7 +79,12 @@ impl Sony {
         let theta5 = theta2*theta3;
         let theta6 = theta3*theta3;
 
-        let theta_d = theta * params.k[0] + theta2 * params.k[1] + theta3 * params.k[2] + theta4 * params.k[3] + theta5 * params.k[4] + theta6 * params.k[5];
+        let theta_d = theta  * params.k[0]
+                    + theta2 * params.k[1]
+                    + theta3 * params.k[2]
+                    + theta4 * params.k[3]
+                    + theta5 * params.k[4]
+                    + theta6 * params.k[5];
 
         let scale = if r == 0.0 { 1.0 } else { theta_d / r };
 

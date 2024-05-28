@@ -4,7 +4,7 @@
 float2 undistort_point(float2 pos, __global KernelParams *params) {
     if (params->k[0] == 0.0 && params->k[1] == 0.0 && params->k[2] == 0.0 && params->k[3] == 0.0) return pos;
 
-    float2 post_scale = {params->k[6], params->k[7]};
+    float2 post_scale = (float2)(params->k[6], params->k[7]);
     pos /= post_scale;
 
     // now pos is in meters from center of sensor
@@ -64,7 +64,12 @@ float2 distort_point(float x, float y, float z, __global KernelParams *params) {
           theta5 = theta2*theta3,
           theta6 = theta3*theta3;
 
-    float theta_d =  theta * params->k[0] + theta2 * params->k[1] + theta3 * params->k[2] + theta4 * params->k[3] + theta5 * params->k[4] + theta6 * params->k[5];
+    float theta_d = theta  * params->k[0]
+                  + theta2 * params->k[1]
+                  + theta3 * params->k[2]
+                  + theta4 * params->k[3]
+                  + theta5 * params->k[4]
+                  + theta6 * params->k[5];
 
     float scale = r == 0.0f? 1.0f : theta_d / r;
 
