@@ -37,15 +37,6 @@ OpenCVPath := ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "bin"
 # ――――――――――――――――――――――――――――――――――――――― MacOS ―――――――――――――――――――――――――――――――――――――――――
 export DYLD_FALLBACK_LIBRARY_PATH := if os() == "macos" { if path_exists(`xcode-select --print-path` + "/Toolchains/XcodeDefault.xctoolchain/usr/lib/") == "true" { `xcode-select --print-path` + "/Toolchains/XcodeDefault.xctoolchain/usr/lib/" } else { `xcode-select --print-path` + "/usr/lib/" } } else { "" }
 export MACOSX_DEPLOYMENT_TARGET := "10.15"
-export CPATH := if os() == "macos" {
-    if path_exists(`xcode-select --print-path` + "/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include") == "true" {
-        `xcode-select --print-path` + "/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include"
-    } else {
-        env_var_or_default("CPATH", "")
-    }
-} else {
-    env_var_or_default("CPATH", "")
-}
 # ――――――――――――――――――――――――――――――――――――――― MacOS ―――――――――――――――――――――――――――――――――――――――――
 
 # ――――――――――――――――――――――――――――――――――――――― Clang ―――――――――――――――――――――――――――――――――――――――――

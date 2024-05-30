@@ -12,6 +12,16 @@ DistributionProvisioning      := ProjectDir / "_deployment/mac/Gyroflow_mac_app_
 
 AppBundle := ProjectDir / "_deployment/_binaries/mac/Gyroflow.app"
 
+export CPATH := if os() == "macos" {
+    if path_exists(`xcode-select --print-path` + "/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include") == "true" {
+        `xcode-select --print-path` + "/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include"
+    } else {
+        env_var_or_default("CPATH", "")
+    }
+} else {
+    env_var_or_default("CPATH", "")
+}
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
