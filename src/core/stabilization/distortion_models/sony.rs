@@ -99,6 +99,7 @@ impl Sony {
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
     pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+        if k.len() < 6 { return None; }
         let theta2 = theta*theta;
         let theta3 = theta2*theta;
         let theta4 = theta2*theta2;

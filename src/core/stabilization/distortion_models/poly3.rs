@@ -64,6 +64,7 @@ impl Poly3 {
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
     pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+        if k.len() < 1 { return None; }
         let inv_k1 = 1.0 / k[0];
         let ru = theta;
         Some(

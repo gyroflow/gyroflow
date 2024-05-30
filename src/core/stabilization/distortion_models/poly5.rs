@@ -55,6 +55,7 @@ impl Poly5 {
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
     pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+        if k.len() < 2 { return None; }
         let ru2 = theta * theta;
         Some(
             1.0 + 3.0 * k[0] * ru2 + 5.0 * k[1] * ru2 * ru2

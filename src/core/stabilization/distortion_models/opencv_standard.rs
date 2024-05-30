@@ -49,6 +49,7 @@ impl OpenCVStandard {
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
     pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+        if k.len() < 8 { return None; }
         let r2 = theta * theta;
         Some(
             (1.0 + ((k[7] * r2 + k[6]) * r2 + k[5]) * r2) / (1.0 + ((k[4] * r2 + k[1]) * r2 + k[0]) * r2)

@@ -20,6 +20,12 @@ use nalgebra::*;
 use crate::Quat64;
 use crate::keyframes::*;
 
+const MAX_VELOCITY: f64 = 500.0;
+// Use 90 diagonal FOV as reference. Anything below (long focal length) scales the smoothness down. Anything above (short focal length) scales the smoothness up.
+// This is needed, because the same rotation at long focal length will be much larger actual image rotation than at short focal length.
+const FOV_REFERENCE: f64 = 90.0;
+const RAD_TO_DEG: f64 = 180.0 / std::f64::consts::PI;
+
 #[derive(Clone)]
 pub struct DefaultAlgo {
     pub smoothness: f64,
@@ -209,8 +215,6 @@ impl SmoothingAlgorithm for DefaultAlgo {
     fn smooth(&self, quats: &TimeQuat, duration: f64, compute_params: &ComputeParams) -> TimeQuat { // TODO Result<>?
         if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
 
-        const MAX_VELOCITY: f64 = 500.0;
-        const RAD_TO_DEG: f64 = 180.0 / std::f64::consts::PI;
         let sample_rate: f64 = quats.len() as f64 / (duration / 1000.0);
         let rad_to_deg_per_sec: f64 = sample_rate * RAD_TO_DEG;
 
@@ -220,6 +224,21 @@ impl SmoothingAlgorithm for DefaultAlgo {
         let noop = |v| v;
 
         let keyframes = &compute_params.keyframes;
+
+        let mut camera_diagonal_fovs = Vec::new();
+        let frame_count = if !compute_params.lens_is_dynamic {
+            1 // FOV is constant (ie. lens is fixed focal length)
+        } else {
+            compute_params.frame_count
+        };
+        for f in 0..frame_count as i32 {
+            let timestamp = crate::timestamp_at_frame(f, compute_params.scaled_fps);
+            let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&compute_params, timestamp);
+            let diag_length = ((compute_params.width.pow(2) + compute_params.height.pow(2)) as f64).sqrt();
+            let diag_pixel_focal_length = (camera_matrix[(0, 0)].powi(2) + camera_matrix[(1, 1)].powi(2)).sqrt();
+            let d_fov = 2.0 * ((diag_length / (2.0 * diag_pixel_focal_length)).atan()) * 180.0 / std::f64::consts::PI;
+            camera_diagonal_fovs.push(d_fov);
+        }
 
         let quats = Smoothing::get_trimmed_quats(quats, duration, self.trim_range_only, &compute_params.trim_ranges);
         let quats = quats.as_ref();
@@ -299,14 +318,21 @@ impl SmoothingAlgorithm for DefaultAlgo {
             let smoothness_roll  = smoothness_roll_per_timestamp .get(ts).unwrap_or(&self.smoothness_roll);
             let smoothness       = smoothness_per_timestamp      .get(ts).unwrap_or(&self.smoothness);
 
+            let fov_ratio = if frame_count == 1 {
+                camera_diagonal_fovs[0] / FOV_REFERENCE
+            } else {
+                let frame = crate::frame_at_timestamp(*ts as f64 / 1000.0, compute_params.scaled_fps) as usize;
+                camera_diagonal_fovs.get(frame).map(|x| *x / FOV_REFERENCE).unwrap_or(1.0)
+            };
+
             // Calculate max velocity
             let mut max_velocity = [MAX_VELOCITY, MAX_VELOCITY, MAX_VELOCITY];
             if self.per_axis {
-                max_velocity[0] *= smoothness_pitch;
-                max_velocity[1] *= smoothness_yaw;
-                max_velocity[2] *= smoothness_roll;
+                max_velocity[0] *= smoothness_pitch * fov_ratio;
+                max_velocity[1] *= smoothness_yaw   * fov_ratio;
+                max_velocity[2] *= smoothness_roll  * fov_ratio;
             } else {
-                max_velocity[0] *= smoothness;
+                max_velocity[0] *= smoothness * fov_ratio;
             }
 
             // Doing this to get similar max zoom as without second pass

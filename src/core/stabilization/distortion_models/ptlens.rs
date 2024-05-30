@@ -56,6 +56,7 @@ impl PtLens {
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
     pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+        if k.len() < 3 { return None; }
         let ru = theta;
         Some(
             4.0 * k[0] * ru * ru * ru + 3.0 * k[1] * ru * ru + 2.0 * k[2] * ru + 1.0

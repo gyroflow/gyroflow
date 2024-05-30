@@ -95,6 +95,7 @@ impl OpenCVFisheye {
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
     pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+        if k.len() < 4 { return None; }
         let theta2 = theta * theta;
         let theta4 = theta2 * theta2;
         let theta6 = theta4 * theta2;
