@@ -588,23 +588,6 @@ MenuItem {
             show: processingResolution.currentIndex > 1;
             text: qsTr("Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you're doing.");
         }
-        CheckBoxWithContent {
-            id: rLimitCb;
-            text: qsTr("Radial distortion limit");
-            cb.onCheckedChanged: {
-                controller.set_lens_param("r_limit", checked? rLimit.value : 0);
-            }
-
-            SliderWithField {
-                id: rLimit;
-                defaultValue: 0;
-                width: parent.width;
-                precision: 2;
-                from: 0;
-                to: 10;
-                onValueChanged: controller.set_lens_param("r_limit", rLimitCb.checked? value : 0);
-            }
-        }
         CheckBox {
             text: qsTr("Lens is asymmetrical");
             checked: false;

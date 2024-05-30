@@ -46,6 +46,9 @@ impl GoProHyperview {
         }
         profile.lens_model = "Hyperview".into();
     }
+    pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+        None
+    }
 
     pub fn id()   -> &'static str { "gopro_hyperview" }
     pub fn name() -> &'static str { "GoPro Hyperview" }

@@ -70,6 +70,8 @@ impl FrameTransform {
         let mut camera_matrix = lens.get_camera_matrix((params.width, params.height), (params.video_width, params.video_height));
         let mut distortion_coeffs = lens.get_distortion_coeffs();
 
+        let mut radial_distortion_limit = lens.fisheye_params.radial_distortion_limit.unwrap_or_default();
+
         let mut stretch_lens = true;
 
         if !gyro.file_metadata.lens_params.is_empty() && lens.fisheye_params.distortion_coeffs.len() < 4 {
@@ -95,12 +97,12 @@ impl FrameTransform {
                     for (i, x) in val.distortion_coefficients.iter().enumerate() {
                         distortion_coeffs[i] = *x;
                     }
+
+                    radial_distortion_limit = params.distortion_model.radial_distortion_limit(&distortion_coeffs).unwrap_or_default();
                 }
             }
         }
         drop(gyro);
-
-        let radial_distortion_limit = lens.fisheye_params.radial_distortion_limit.unwrap_or_default();
 
         let (calib_width, calib_height) = if lens.calib_dimension.w > 0 && lens.calib_dimension.h > 0 {
             (lens.calib_dimension.w as f64, lens.calib_dimension.h as f64)
@@ -119,6 +121,7 @@ impl FrameTransform {
             camera_matrix[(0, 2)] *= lens_ratiox;
             camera_matrix[(1, 2)] *= lens_ratioy;
         }
+
         (camera_matrix, distortion_coeffs, radial_distortion_limit, input_horizontal_stretch, input_vertical_stretch, focal_length)
     }
 

@@ -15,7 +15,6 @@ use std::borrow::Cow;
 
 use std::hash::Hasher;
 use std::collections::hash_map::DefaultHasher;
-use crate::keyframes::*;
 use crate::ComputeParams;
 
 pub trait SmoothingAlgorithm: DynClone {

@@ -94,6 +94,16 @@ impl OpenCVFisheye {
 
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
+    pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+        let theta2 = theta * theta;
+        let theta4 = theta2 * theta2;
+        let theta6 = theta4 * theta2;
+        let theta8 = theta6 * theta2;
+        Some(
+            1.0 + 3.0 * k[0] * theta2 + 5.0 * k[1] * theta4 + 7.0 * k[2] * theta6 + 9.0 * k[3] * theta8
+        )
+    }
+
     pub fn id() -> &'static str { "opencv_fisheye" }
     pub fn name() -> &'static str { "OpenCV Fisheye" }
 

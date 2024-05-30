@@ -63,14 +63,16 @@ impl ComputeParams {
     pub fn from_manager(mgr: &StabilizationManager) -> Self {
         let params = mgr.params.read();
 
-        let lens = mgr.lens.read();
+        let lens = mgr.lens.read().clone();
 
         let distortion_model = DistortionModel::from_name(lens.distortion_model.as_deref().unwrap_or("opencv_fisheye"));
         let digital_lens = lens.digital_lens.as_ref().map(|x| DistortionModel::from_name(&x));
 
+        let digital_lens_params = lens.digital_lens_params.clone();
+
         Self {
             gyro: mgr.gyro.clone(),
-            lens: lens.clone(),
+            lens,
 
             frame_count: params.frame_count,
             fov_scale: params.fov,
@@ -111,7 +113,7 @@ impl ComputeParams {
 
             distortion_model,
             digital_lens,
-            digital_lens_params: lens.digital_lens_params.clone(),
+            digital_lens_params,
             smoothness_limiter: params.smoothness_limiter,
 
             keyframes: mgr.keyframes.read().clone(),

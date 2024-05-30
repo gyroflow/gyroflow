@@ -23,6 +23,9 @@ impl DigitalStretch {
     pub fn adjust_lens_profile(&self, _profile: &mut LensProfile) {
         // TODO
     }
+    pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+        None
+    }
 
     pub fn id()   -> &'static str { "digital_stretch" }
     pub fn name() -> &'static str { "Digital stretch" }

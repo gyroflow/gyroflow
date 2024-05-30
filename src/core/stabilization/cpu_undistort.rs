@@ -164,13 +164,13 @@ impl Stabilization {
             return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
         }
 
-        fn rotate_and_distort(pos: (f32, f32), idx: usize, params: &KernelParams, matrices: &[[f32; 12]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit: f32) -> Option<(f32, f32)> {
+        fn rotate_and_distort(pos: (f32, f32), idx: usize, params: &KernelParams, matrices: &[[f32; 12]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit_sq: f32) -> Option<(f32, f32)> {
             let matrices = matrices[idx];
             let _x = (pos.0 * matrices[0]) + (pos.1 * matrices[1]) + matrices[2] + params.translation3d[0];
             let _y = (pos.0 * matrices[3]) + (pos.1 * matrices[4]) + matrices[5] + params.translation3d[1];
             let mut _w = (pos.0 * matrices[6]) + (pos.1 * matrices[7]) + matrices[8] + params.translation3d[2];
             if _w > 0.0 {
-                if params.r_limit > 0.0 && ((_x / _w).powi(2) + (_y / _w).powi(2)).sqrt() > r_limit {
+                if params.r_limit > 0.0 && ((_x / _w).powi(2) + (_y / _w).powi(2)) > r_limit_sq {
                     return None;
                 }
 
@@ -269,7 +269,7 @@ impl Stabilization {
 
         if let BufferSource::Cpu { buffer: input } = &mut buffers.input.data {
             if let BufferSource::Cpu { buffer: output } = &mut buffers.output.data {
-                let r_limit = params.r_limit * params.r_limit; // Square it so we don't have to do sqrt on the point length
+                let r_limit_sq = params.r_limit * params.r_limit; // Square it so we don't have to do sqrt on the point length
 
                 let bg = Vector4::<f32>::new(params.background[0], params.background[1], params.background[2], params.background[3]) * params.max_pixel_value;
                 let bg_t: T = PixelType::from_float(bg);
@@ -354,7 +354,7 @@ impl Stabilization {
                             };
                             if params.matrix_count > 1 {
                                 let idx = params.matrix_count as usize / 2;
-                                if let Some(pt) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit) {
+                                if let Some(pt) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit_sq) {
                                     if (params.flags & 16) == 16 { // Horizontal RS
                                         sy = (pt.0.round() as i32).min(params.width).max(0) as usize;
                                     } else {
@@ -365,7 +365,7 @@ impl Stabilization {
                             ///////////////////////////////////////////////////////////////////
 
                             let idx = sy.min(params.matrix_count as usize - 1);
-                            if let Some(mut uv) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit) {
+                            if let Some(mut uv) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit_sq) {
                                 let width_f = params.width as f32;
                                 let height_f = params.height as f32;
                                 match params.background_mode {

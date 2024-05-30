@@ -63,6 +63,14 @@ impl Poly3 {
     }
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
+    pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+        let inv_k1 = 1.0 / k[0];
+        let ru = theta;
+        Some(
+            3.0 * ru * ru + inv_k1
+        )
+    }
+
     pub fn rescale_coeffs(k: &mut [f64], hugin_scaling: f64) {
         let d = 1.0 - k[0];
         k[0] *= hugin_scaling.powi(2) / d.powi(3);

@@ -54,6 +54,13 @@ impl Poly5 {
     }
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
+    pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+        let ru2 = theta * theta;
+        Some(
+            1.0 + 3.0 * k[0] * ru2 + 5.0 * k[1] * ru2 * ru2
+        )
+    }
+
     pub fn rescale_coeffs(k: &mut [f64], hugin_scaling: f64) {
         k[0] *= hugin_scaling.powi(2);
         k[1] *= hugin_scaling.powi(4);

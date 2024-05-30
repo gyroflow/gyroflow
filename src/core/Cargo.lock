@@ -419,9 +419,9 @@ dependencies = [
 
 [[package]]
 name = "clang-sys"
-version = "1.8.0"
+version = "1.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a483f3cbf7cec2e153d424d0e92329d816becc6421389bd494375c6065921b9b"
+checksum = "f803f94ecf597339c7a34eed2036ef83f86aaba937f001f7c5b5e251f043f1f9"
 dependencies = [
  "glob",
  "libc",
@@ -636,7 +636,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=d9c054c#d9c054c645af0ea9ef81617c3e762fbf0f3fecda"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=9b7a965#9b7a9656670d74d364c359b918b062f814cb5f01"
 dependencies = [
  "bitflags 2.5.0",
  "libloading",
@@ -1520,7 +1520,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=d9c054c#d9c054c645af0ea9ef81617c3e762fbf0f3fecda"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=9b7a965#9b7a9656670d74d364c359b918b062f814cb5f01"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-set",
@@ -2613,7 +2613,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.3.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=d1e2a82#d1e2a828a9ef22fdfef418fbd3e8f89d5c10c643"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=2323643#2323643f8ec5eb5aa3fcbf2f40ffb70b2e556be5"
 dependencies = [
  "argh",
  "byteorder",
@@ -2936,7 +2936,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=d9c054c#d9c054c645af0ea9ef81617c3e762fbf0f3fecda"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=9b7a965#9b7a9656670d74d364c359b918b062f814cb5f01"
 dependencies = [
  "arrayvec 0.7.4",
  "cfg_aliases",
@@ -2960,7 +2960,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=d9c054c#d9c054c645af0ea9ef81617c3e762fbf0f3fecda"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=9b7a965#9b7a9656670d74d364c359b918b062f814cb5f01"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-vec",
@@ -2985,7 +2985,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=d9c054c#d9c054c645af0ea9ef81617c3e762fbf0f3fecda"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=9b7a965#9b7a9656670d74d364c359b918b062f814cb5f01"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.4",
@@ -3029,7 +3029,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=d9c054c#d9c054c645af0ea9ef81617c3e762fbf0f3fecda"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=9b7a965#9b7a9656670d74d364c359b918b062f814cb5f01"
 dependencies = [
  "bitflags 2.5.0",
  "js-sys",

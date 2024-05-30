@@ -55,6 +55,13 @@ impl PtLens {
     }
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
+    pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+        let ru = theta;
+        Some(
+            4.0 * k[0] * ru * ru * ru + 3.0 * k[1] * ru * ru + 2.0 * k[2] * ru + 1.0
+        )
+    }
+
     pub fn rescale_coeffs(k: &mut [f64], hugin_scaling: f64) {
         let d = 1.0 - k[0] - k[1] - k[2];
         k[0] *= hugin_scaling.powi(3) / d.powi(4);

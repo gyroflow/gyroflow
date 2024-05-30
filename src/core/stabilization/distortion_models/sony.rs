@@ -33,7 +33,7 @@ impl Sony {
                 let theta3 = theta2*theta;
                 let theta4 = theta2*theta2;
                 let theta5 = theta2*theta3;
-                let k0  = params.k[0];
+                let k0 = params.k[0];
                 let k1_theta1 = params.k[1] * theta;
                 let k2_theta2 = params.k[2] * theta2;
                 let k3_theta3 = params.k[3] * theta3;
@@ -97,6 +97,16 @@ impl Sony {
     }
 
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
+
+    pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+        let theta2 = theta*theta;
+        let theta3 = theta2*theta;
+        let theta4 = theta2*theta2;
+        let theta5 = theta2*theta3;
+        Some(
+            k[0] + 2.0 * k[1] * theta + 3.0 * k[2] * theta2 + 4.0 * k[3] * theta3 + 5.0 * k[4] * theta4 + 6.0 * k[5] * theta5
+        )
+    }
 
     pub fn id() -> &'static str { "sony" }
     pub fn name() -> &'static str { "Sony" }

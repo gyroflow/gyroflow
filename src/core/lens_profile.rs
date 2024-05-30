@@ -81,11 +81,22 @@ pub struct LensProfile {
 }
 
 impl LensProfile {
+    pub fn init(&mut self) {
+        if !self.fisheye_params.distortion_coeffs.is_empty() {
+            let distortion_model = DistortionModel::from_name(self.distortion_model.as_deref().unwrap_or("opencv_fisheye"));
+            self.fisheye_params.radial_distortion_limit = distortion_model.radial_distortion_limit(&self.get_distortion_coeffs());
+        }
+    }
+
     pub fn from_value(json: serde_json::Value) -> Result<Self, serde_json::Error> {
-        serde_json::from_value(json)
+        let mut lens: Result<Self, serde_json::Error> = serde_json::from_value(json);
+        if let Ok(ref mut lens) = lens { lens.init(); }
+        lens
     }
     pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
-        serde_json::from_str(json)
+        let mut lens: Result<Self, serde_json::Error> = serde_json::from_str(json);
+        if let Ok(ref mut lens) = lens { lens.init(); }
+        lens
     }
 
     pub fn load_from_data(&mut self, data: &str) -> std::result::Result<(), crate::GyroflowCoreError> {
@@ -107,6 +118,7 @@ impl LensProfile {
 
     pub fn load_from_json_value(&mut self, v: &serde_json::Value) -> Option<()> {
         *self = <Self as Deserialize>::deserialize(v).ok()?;
+        self.init();
         Some(())
     }
 
@@ -127,13 +139,9 @@ impl LensProfile {
             RMS_error: cal.rms,
             camera_matrix: cal.k.row_iter().map(|x| [x[0], x[1], x[2]]).collect(),
             distortion_coeffs: cal.d.as_slice().to_vec(),
-            radial_distortion_limit: if cal.r_limit > 0.0 { Some(cal.r_limit) } else { None }
+            radial_distortion_limit: None
         };
 
-        self.init();
-    }
-
-    pub fn init(&mut self) {
         self.calibrator_version = env!("CARGO_PKG_VERSION").to_string();
         self.date = time::OffsetDateTime::now_local().map(|v| v.date().to_string()).unwrap_or_default();
         self.name = self.get_name();

@@ -787,13 +787,6 @@ impl StabilizationManager {
                 "k2" => lens.fisheye_params.distortion_coeffs[1] = value,
                 "k3" => lens.fisheye_params.distortion_coeffs[2] = value,
                 "k4" => lens.fisheye_params.distortion_coeffs[3] = value,
-                "r_limit" => {
-                    #[cfg(feature = "opencv")]
-                    if let Some(ref mut calib) = *self.lens_calibrator.write() {
-                        calib.r_limit = value;
-                    }
-                    lens.fisheye_params.radial_distortion_limit = if value > 0.0 { Some(value) } else { None };
-                }
                 _ => { }
             }
         }

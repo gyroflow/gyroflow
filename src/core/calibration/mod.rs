@@ -51,7 +51,6 @@ pub struct LensCalibrator {
     pub d: Vector4<f64>,
 
     pub sum_sharpness: Arc<RwLock<f64>>,
-    pub r_limit: f64,
 
     pub forced_frames: HashSet<i32>,
 

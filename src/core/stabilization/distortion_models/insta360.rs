@@ -48,6 +48,10 @@ impl Insta360 {
     }
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
 
+    pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+        None
+    }
+
     pub fn id() -> &'static str { "insta360" }
     pub fn name() -> &'static str { "Insta360" }
 

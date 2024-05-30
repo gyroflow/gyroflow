@@ -459,7 +459,7 @@ impl GyroSource {
                                             md.lens_profile = Some(serde_json::json!({
                                                 "calibrated_by": "Sony",
                                                 "camera_brand": "Sony",
-                                                "camera_model": input.camera_model(),
+                                                "camera_model": input.camera_model().map(|x| x.as_str()).unwrap_or(&""),
                                                 "lens_model":   focal_length.unwrap_or_default(),
                                                 "calib_dimension":  { "w": size.0, "h": size.1 },
                                                 "orig_dimension":   { "w": size.0, "h": size.1 },

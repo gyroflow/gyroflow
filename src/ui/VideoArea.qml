@@ -237,7 +237,9 @@ Item {
                     if (!additional_data.contains_raw_gyro && additional_data.contains_quats) timeline.setDisplayMode(3); // Switch to quaternions view
                 }
 
-                if (additional_data.hasOwnProperty("cam_posture") && Math.abs(+additional_data.cam_posture.replace("CameraRotate", "")) > 0) {
+                if (additional_data.hasOwnProperty("cam_posture") && additional_data.camera_type == "Insta360 GO 3S") {
+                    vidInfo.updateEntryWithTrigger("Rotation", 360 - (+additional_data.cam_posture.replace("CameraRotate", "") + 90));
+                } else if (additional_data.hasOwnProperty("cam_posture") && Math.abs(+additional_data.cam_posture.replace("CameraRotate", "")) > 0) {
                     vidInfo.updateEntryWithTrigger("Rotation", +additional_data.cam_posture.replace("CameraRotate", ""));
                 }
                 if (additional_data.hasOwnProperty("realtime_fps") && +additional_data.realtime_fps > 0) {
