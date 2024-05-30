@@ -172,8 +172,6 @@ impl StabilizationManager {
             md.frame_readout_time = None;
         }
 
-        self.params.write().lens_is_dynamic = md.lens_params.len() > 1;
-
         if is_main_video {
             if let Some(ref lens) = md.lens_profile {
                 let mut l = self.lens.write();
@@ -391,7 +389,9 @@ impl StabilizationManager {
     }
 
     pub fn recompute_smoothness(&self) {
-        let params = stabilization::ComputeParams::from_manager(self);
+        let mut params = stabilization::ComputeParams::from_manager(self);
+        params.calculate_camera_fovs();
+
         let smoothing = self.smoothing.read();
         let horizon_lock = smoothing.horizon_lock.clone();
 
@@ -421,6 +421,7 @@ impl StabilizationManager {
         //self.recompute_smoothness();
         //self.recompute_adaptive_zoom();
         let mut params = stabilization::ComputeParams::from_manager(self);
+        params.calculate_camera_fovs();
 
         let smoothing = self.smoothing.clone();
         let stabilization_params = self.params.clone();
@@ -1258,7 +1259,6 @@ impl StabilizationManager {
                 if !org_gyro_url.is_empty() {
                     gyro.file_url = gyro_url.clone();
                 }
-                self.params.write().lens_is_dynamic = gyro.file_metadata.lens_params.len() > 1;
 
                 if let Some(v) = obj.get("lpf").and_then(|x| x.as_f64()) { gyro.imu_lpf = v; }
                 if let Some(v) = obj.get("integration_method").and_then(|x| x.as_u64()) { gyro.integration_method = v as usize; }

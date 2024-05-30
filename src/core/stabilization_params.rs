@@ -58,7 +58,6 @@ pub struct StabilizationParams {
     pub duration_ms: f64,
     pub video_created_at: Option<u64>,
     pub smoothness_limiter: f64,
-    pub lens_is_dynamic: bool,
 
     pub trim_ranges: Vec<(f64, f64)>,
 
@@ -142,7 +141,6 @@ impl Default for StabilizationParams {
             video_created_at: None,
 
             smoothness_limiter: 1.0,
-            lens_is_dynamic: false,
         }
     }
 }

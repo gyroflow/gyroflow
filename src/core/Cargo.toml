@@ -79,10 +79,10 @@ ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.2.0"
 opencv = { version = "0.92.0", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "9b7a965", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "c745863", features = ["spirv", "naga-ir"] }
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "9b7a965"
+rev = "c745863"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]

@@ -1017,7 +1017,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=9b7a965#9b7a9656670d74d364c359b918b062f814cb5f01"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=c745863#c7458638d14921c7562e4197ddeefa17be413587"
 dependencies = [
  "bitflags 2.5.0",
  "libloading",
@@ -2296,7 +2296,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=9b7a965#9b7a9656670d74d364c359b918b062f814cb5f01"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=c745863#c7458638d14921c7562e4197ddeefa17be413587"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -4134,7 +4134,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=9b7a965#9b7a9656670d74d364c359b918b062f814cb5f01"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=c745863#c7458638d14921c7562e4197ddeefa17be413587"
 dependencies = [
  "arrayvec",
  "cfg_aliases",
@@ -4158,7 +4158,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=9b7a965#9b7a9656670d74d364c359b918b062f814cb5f01"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=c745863#c7458638d14921c7562e4197ddeefa17be413587"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4183,7 +4183,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=9b7a965#9b7a9656670d74d364c359b918b062f814cb5f01"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=c745863#c7458638d14921c7562e4197ddeefa17be413587"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4227,7 +4227,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=9b7a965#9b7a9656670d74d364c359b918b062f814cb5f01"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=c745863#c7458638d14921c7562e4197ddeefa17be413587"
 dependencies = [
  "bitflags 2.5.0",
  "js-sys",

@@ -16,7 +16,7 @@ pub struct ComputeParams {
     pub minimal_fovs: Vec<f64>,
     pub keyframes: KeyframeManager,
     pub lens: LensProfile,
-    pub lens_is_dynamic: bool,
+    pub camera_diagonal_fovs: Vec<f64>,
 
     pub frame_count: usize,
     pub fov_scale: f64,
@@ -74,7 +74,7 @@ impl ComputeParams {
         Self {
             gyro: mgr.gyro.clone(),
             lens,
-            lens_is_dynamic: params.lens_is_dynamic,
+            camera_diagonal_fovs: Vec::new(),
 
             frame_count: params.frame_count,
             fov_scale: params.fov,
@@ -121,6 +121,23 @@ impl ComputeParams {
             keyframes: mgr.keyframes.read().clone(),
 
             zooming_debug_points: false
+        }
+    }
+
+    pub fn calculate_camera_fovs(&mut self) {
+        let frame_count = if self.gyro.read().file_metadata.lens_params.len() > 1 {
+            self.frame_count
+        } else {
+            1 // FOV is constant (ie. lens is fixed focal length)
+        };
+        self.camera_diagonal_fovs = Vec::with_capacity(frame_count);
+        for f in 0..frame_count as i32 {
+            let timestamp = crate::timestamp_at_frame(f, self.scaled_fps);
+            let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&self, timestamp);
+            let diag_length = ((self.video_width.pow(2) + self.video_height.pow(2)) as f64).sqrt();
+            let diag_pixel_focal_length = (camera_matrix[(0, 0)].powi(2) + camera_matrix[(1, 1)].powi(2)).sqrt();
+            let d_fov = 2.0 * ((diag_length / (2.0 * diag_pixel_focal_length)).atan()) * 180.0 / std::f64::consts::PI;
+            self.camera_diagonal_fovs.push(d_fov);
         }
     }
 }
