@@ -63,7 +63,6 @@ pub struct ComputeParams {
 impl ComputeParams {
     pub fn from_manager(mgr: &StabilizationManager) -> Self {
         let params = mgr.params.read();
-        let lens_is_dynamic = mgr.gyro.read().file_metadata.lens_params.len() > 1;
 
         let lens = mgr.lens.read().clone();
 
@@ -75,7 +74,7 @@ impl ComputeParams {
         Self {
             gyro: mgr.gyro.clone(),
             lens,
-            lens_is_dynamic,
+            lens_is_dynamic: params.lens_is_dynamic,
 
             frame_count: params.frame_count,
             fov_scale: params.fov,

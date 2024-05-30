@@ -617,7 +617,7 @@ impl GyroSource {
     pub fn integrate(&mut self) {
         match self.integration_method {
             0 => {
-                self.quaternions = if self.file_metadata.detected_source.as_ref().unwrap_or(&"".into()).starts_with("GoPro") && !self.file_metadata.quaternions.is_empty() && (self.file_metadata.gravity_vectors.is_none() || !self.use_gravity_vectors) {
+                self.quaternions = if self.file_metadata.detected_source.as_deref().unwrap_or("").starts_with("GoPro") && !self.file_metadata.quaternions.is_empty() && (self.file_metadata.gravity_vectors.is_none() || !self.use_gravity_vectors) {
                     log::info!("No gravity vectors - using accelerometer");
                     QuaternionConverter::convert(self.horizon_lock_integration_method, &self.file_metadata.quaternions, self.file_metadata.image_orientations.as_ref().unwrap_or(&TimeQuat::default()), &self.raw_imu, self.duration_ms)
                 } else {

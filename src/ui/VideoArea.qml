@@ -343,6 +343,7 @@ Item {
             return;
         }
 
+        window.motionData.lastSelectedFile = "";
         if (!(/\.(png|jpg|exr|dng)$/i.test(filename) && filename.includes("%0"))) {
             root.loadedFileUrl = url;
         }

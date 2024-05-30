@@ -48,7 +48,7 @@ impl GoProSuperview {
         }
         profile.lens_model = "Superview".into();
     }
-    pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+    pub fn distortion_derivative(&self, _theta: f64, _k: &[f64]) -> Option<f64> {
         None
     }
 

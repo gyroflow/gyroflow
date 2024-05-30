@@ -170,7 +170,7 @@ impl Stabilization {
             let _y = (pos.0 * matrices[3]) + (pos.1 * matrices[4]) + matrices[5] + params.translation3d[1];
             let mut _w = (pos.0 * matrices[6]) + (pos.1 * matrices[7]) + matrices[8] + params.translation3d[2];
             if _w > 0.0 {
-                if params.r_limit > 0.0 && ((_x / _w).powi(2) + (_y / _w).powi(2)) > r_limit_sq {
+                if r_limit_sq > 0.0 && (_x.powi(2) + _y.powi(2)) > r_limit_sq * _w {
                     return None;
                 }
 
