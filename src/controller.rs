@@ -242,6 +242,8 @@ pub struct Controller {
     set_keyframe: qt_method!(fn(&self, typ: String, timestamp_us: i64, value: f64)),
     set_keyframe_easing: qt_method!(fn(&self, typ: String, timestamp_us: i64, easing: String)),
     keyframe_easing: qt_method!(fn(&self, typ: String, timestamp_us: i64) -> String),
+    set_keyframe_timestamp: qt_method!(fn(&self, typ: String, id: u32, timestamp_us: i64)),
+    keyframe_id: qt_method!(fn(&self, typ: String, timestamp_us: i64) -> u32),
     remove_keyframe: qt_method!(fn(&self, typ: String, timestamp_us: i64)),
     clear_keyframes_type: qt_method!(fn(&self, typ: String)),
     keyframe_value_at_video_timestamp: qt_method!(fn(&self, typ: String, timestamp_ms: f64) -> QJSValue),
@@ -1906,6 +1908,22 @@ impl Controller {
             }
         }
         String::new()
+    }
+    fn set_keyframe_timestamp(&self, typ: String, id: u32, timestamp_us: i64) {
+        if let Ok(kf) = KeyframeType::from_str(&typ) {
+            self.stabilizer.set_keyframe_timestamp(&kf, id, timestamp_us);
+            self.keyframes_changed();
+            self.request_recompute();
+            self.chart_data_changed();
+        }
+    }
+    fn keyframe_id(&self, typ: String, timestamp_us: i64) -> u32 {
+        if let Ok(kf) = KeyframeType::from_str(&typ) {
+            if let Some(e) = self.stabilizer.keyframe_id(&kf, timestamp_us) {
+                return e;
+            }
+        }
+        0
     }
     fn remove_keyframe(&self, typ: String, timestamp_us: i64) {
         if let Ok(kf) = KeyframeType::from_str(&typ) {

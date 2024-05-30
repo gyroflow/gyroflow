@@ -1561,6 +1561,13 @@ impl StabilizationManager {
     pub fn keyframe_easing(&self, typ: &KeyframeType, timestamp_us: i64) -> Option<Easing> {
         self.keyframes.read().easing(typ, timestamp_us)
     }
+    pub fn set_keyframe_timestamp(&self, typ: &KeyframeType, id: u32, timestamp_us: i64) {
+        self.keyframes.write().set_timestamp(typ, id, timestamp_us);
+        self.keyframes_updated(typ);
+    }
+    pub fn keyframe_id(&self, typ: &KeyframeType, timestamp_us: i64) -> Option<u32> {
+        self.keyframes.read().id(typ, timestamp_us)
+    }
     pub fn remove_keyframe(&self, typ: &KeyframeType, timestamp_us: i64) {
         self.keyframes.write().remove(typ, timestamp_us);
         self.keyframes_updated(typ);

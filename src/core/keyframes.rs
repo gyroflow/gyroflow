@@ -64,6 +64,7 @@ pub enum Easing {
 
 #[derive(Debug, Copy, Clone, Default, ::serde::Serialize, ::serde::Deserialize)]
 pub struct Keyframe {
+    pub id: u32,
     pub value: f64,
     pub easing: Easing
 }
@@ -85,6 +86,7 @@ impl KeyframeManager {
     }
     pub fn set(&mut self, typ: &KeyframeType, timestamp_us: i64, value: f64) {
         let kf = Keyframe {
+            id: fastrand::u32(1..),
             value,
             easing: Easing::EaseInOut
         };
@@ -106,6 +108,24 @@ impl KeyframeManager {
     }
     pub fn easing(&self, typ: &KeyframeType, timestamp_us: i64) -> Option<Easing> {
         Some(self.keyframes.get(typ)?.get(&timestamp_us)?.easing)
+    }
+    pub fn set_timestamp(&mut self, typ: &KeyframeType, id: u32, timestamp_us: i64) {
+        if let Some(x) = self.keyframes.get_mut(typ) {
+            let mut copy = None;
+            for (ts, kf) in x.iter() {
+                if kf.id == id {
+                    copy = Some((*ts, *kf));
+                    break;
+                }
+            }
+            if let Some((ts, kf)) = copy {
+                x.remove(&ts);
+                x.insert(timestamp_us, kf);
+            }
+        }
+    }
+    pub fn id(&self, typ: &KeyframeType, timestamp_us: i64) -> Option<u32> {
+        Some(self.keyframes.get(typ)?.get(&timestamp_us)?.id)
     }
     pub fn remove(&mut self, typ: &KeyframeType, timestamp_us: i64) {
         if let Some(x) = self.keyframes.get_mut(typ) {

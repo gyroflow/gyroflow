@@ -31,6 +31,12 @@ Item {
 
     property real value: 0;
     readonly property real position: vid.timestamp / root.orgDurationMs;
+    onPositionChanged: {
+        if (ma.movingKeyframe && ma.holdingAlt) {
+            let [keyframe, timestamp, name, value, id] = ma.movingKeyframe.split(":", 5);
+            controller.set_keyframe_timestamp(keyframe, id, root.getTimestampUs());
+        }
+    }
 
     function mapToVisibleArea(pos: real): real { return (pos - visibleAreaLeft) / (visibleAreaRight - visibleAreaLeft); }
     function mapFromVisibleArea(pos: real): real { return pos * (visibleAreaRight - visibleAreaLeft) + visibleAreaLeft; }
@@ -487,11 +493,31 @@ Item {
             anchors.topMargin: (root.fullScreen || window.isMobileLayout? -8 : 0) * dpiScale;
             anchors.bottomMargin: (root.fullScreen || window.isMobileLayout? -10 : 0) * dpiScale;
 
+            property bool holdingAlt: false;
+            property string movingKeyframe;
+
             property var panInit: ({ x: 0.0, y: 0.0, visibleAreaLeft: 0.0, visibleAreaWidth: 1.0 });
 
             onMouseXChanged: {
                 if (pressed) {
-                    if (cursorShape == Qt.PointingHandCursor) return; // Don't seek when clicking over a keyframe
+                    if (cursorShape == Qt.PointingHandCursor || movingKeyframe) {
+                        if (holdingAlt && keyframes.item) {
+                            const pt = ma.mapToItem(keyframes.item, mouseX, mouseY);
+                            const kf = movingKeyframe || keyframes.item.keyframeAtXY(pt.x, pt.y);
+                            if (kf) {
+                                let [keyframe, timestamp, name, value, id] = kf.split(":", 5);
+                                if (!id) {
+                                    id = controller.keyframe_id(keyframe, timestamp);
+                                }
+                                if (!movingKeyframe) {
+                                    movingKeyframe = kf + ":" + id;
+                                }
+                                const newPos = Math.max(0.0, Math.min(1.0, root.mapFromVisibleArea(mouseX / parent.width)));
+                                root.setPosition(newPos);
+                            }
+                        }
+                        return; // Don't seek when clicking over a keyframe
+                    }
                     if (pressedButtons & Qt.MiddleButton) {
                         const dx = mouseX - panInit.x;
                         const stepsPerPixel = panInit.visibleAreaWidth / parent.width;
@@ -521,6 +547,11 @@ Item {
                 panInit.y = mouse.y;
                 panInit.visibleAreaLeft  = root.visibleAreaLeft;
                 panInit.visibleAreaWidth = root.visibleAreaRight - root.visibleAreaLeft;
+                holdingAlt = (mouse.modifiers & Qt.AltModifier) || (mouse.modifiers & Qt.MetaModifier);
+            }
+            onReleased: (mouse) => {
+                holdingAlt = false;
+                movingKeyframe = "";
             }
             onPressAndHold: (mouse) => {
                 if (Math.abs(panInit.x - mouse.x) > 15 * dpiScale) { mouse.accepted = false; return; }
