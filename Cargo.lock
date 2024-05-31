@@ -656,9 +656,9 @@ dependencies = [
 
 [[package]]
 name = "clang-sys"
-version = "1.8.2"
+version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f803f94ecf597339c7a34eed2036ef83f86aaba937f001f7c5b5e251f043f1f9"
+checksum = "0b023947811758c97c59bf9d1c188fd619ad4718dcaa767947df1cadb14f39f4"
 dependencies = [
  "glob",
  "libc",
@@ -3681,7 +3681,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.3.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=2323643#2323643f8ec5eb5aa3fcbf2f40ffb70b2e556be5"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=4e9d16b#4e9d16bb3bfce719e84eb822e4a024760647674a"
 dependencies = [
  "argh",
  "byteorder",
