@@ -19,6 +19,8 @@ MenuItem {
     property bool isCalibrator: false;
     property string pixelFormat: "";
     property bool hasAccessToInputDirectory: true;
+    property alias infoList: list;
+    property var orgModel: [];
 
     Component.onCompleted: {
         QT_TRANSLATE_NOOP("TableList", "Created at");
@@ -38,6 +40,30 @@ MenuItem {
         let model = {};
         for (const x of fields) model[x] = "---";
         list.model = model;
+
+        orgModel = JSON.parse(JSON.stringify(model));
+
+        QT_TRANSLATE_NOOP("TableList", "Shutter angle");
+        QT_TRANSLATE_NOOP("TableList", "Shutter speed");
+        QT_TRANSLATE_NOOP("TableList", "Exposure");
+        QT_TRANSLATE_NOOP("TableList", "ISO");
+        QT_TRANSLATE_NOOP("TableList", "Color primaries");
+        QT_TRANSLATE_NOOP("TableList", "Gamma equation");
+        QT_TRANSLATE_NOOP("TableList", "White balance mode");
+        QT_TRANSLATE_NOOP("TableList", "White balance");
+        QT_TRANSLATE_NOOP("TableList", "Iris");
+        QT_TRANSLATE_NOOP("TableList", "Focal length");
+        QT_TRANSLATE_NOOP("TableList", "Focus mode");
+    }
+
+    function cleanupModel() {
+        let model = list.model;
+        for (const x in model) {
+            if (!orgModel[x])
+                delete model[x];
+        }
+        list.model = model;
+        list.modelChanged();
     }
 
     signal selectFileRequest();

@@ -245,6 +245,14 @@ Item {
                 if (additional_data.hasOwnProperty("realtime_fps") && +additional_data.realtime_fps > 0) {
                     vidInfo.updateEntryWithTrigger("Frame rate", +additional_data.realtime_fps);
                 }
+                if (additional_data.hasOwnProperty("recording_settings")) {
+                    let model = vidInfo.infoList.model;
+                    for (const x in additional_data.recording_settings) {
+                        model[x] = additional_data.recording_settings[x];
+                    }
+                    vidInfo.infoList.model = model;
+                    vidInfo.infoList.modelChanged();
+                }
             }
             if (+additional_data.sample_rate > 0.0 && Math.round(+additional_data.sample_rate) < 50) {
                 messageBox(Modal.Warning, qsTr("Motion data sampling rate is too low (%1 Hz).\n50 Hz is an absolute minimum and we recommend at least 200 Hz.").arg(additional_data.sample_rate.toFixed(0)), [ { "text": qsTr("Ok") } ]);
@@ -432,6 +440,7 @@ Item {
         }
 
         dropText.loadingFile = filename;
+        vidInfo.cleanupModel();
         vidInfo.updateEntry("File name", filename);
         vidInfo.updateEntry("Detected camera", "---");
         vidInfo.updateEntry("Detected lens", "---");

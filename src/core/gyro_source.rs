@@ -298,6 +298,34 @@ impl GyroSource {
                             }
                         }
                     }
+                    let mut additional_data = additional_data.as_object_mut().unwrap();
+                    if !additional_data.contains_key("recording_settings") {
+                        let mut settings = serde_json::Map::new();
+                        if let Some(map) = tag_map.get(&GroupId::Exposure) {
+                            if let Some(v) = map.get(&TagId::ShutterAngle) { settings.insert(String::from("Shutter angle"), v.value.to_string().into()); }
+                            if let Some(v) = map.get(&TagId::ShutterSpeed) { settings.insert(String::from("Shutter speed"), v.value.to_string().into()); }
+                            if let Some(v) = map.get(&TagId::AutoExposureMode) { settings.insert(String::from("Exposure"), v.value.to_string().into()); }
+                                 if let Some(v) = map.get(&TagId::Custom("ISOValue3".into())) { settings.insert(String::from("ISO"), v.value.to_string().into()); }
+                            else if let Some(v) = map.get(&TagId::ISOValue) { settings.insert(String::from("ISO"), v.value.to_string().into()); }
+                        }
+                        if let Some(map) = tag_map.get(&GroupId::Colors) {
+                            if let Some(v) = map.get(&TagId::ColorPrimaries)       { settings.insert(String::from("Color primaries"),      v.value.to_string().into()); }
+                            if let Some(v) = map.get(&TagId::CaptureGammaEquation) { settings.insert(String::from("Gamma equation"),       v.value.to_string().into()); }
+                            if let Some(v) = map.get(&TagId::AutoWBMode)           { settings.insert(String::from("White balance mode"), v.value.to_string().into()); }
+                            if let Some(v) = map.get(&TagId::WhiteBalance)         { settings.insert(String::from("White balance"),      v.value.to_string().into()); }
+                        }
+                        if let Some(map) = tag_map.get(&GroupId::Lens) {
+                                 if let Some(v) = map.get(&TagId::IrisTStop) { settings.insert(String::from("Iris"),         v.value.to_string().into()); }
+                            else if let Some(v) = map.get(&TagId::IrisFStop) { settings.insert(String::from("Iris"),         v.value.to_string().into()); }
+                            if let Some(v) = map.get(&TagId::FocalLength)    { settings.insert(String::from("Focal length"), v.value.to_string().into()); }
+                        }
+                        if let Some(map) = tag_map.get(&GroupId::Autofocus) {
+                            if let Some(v) = map.get(&TagId::AutoFocusMode) { settings.insert(String::from("Focus mode"), v.value.to_string().into()); }
+                        }
+                        if !settings.is_empty() {
+                            additional_data.insert("recording_settings".to_owned(), serde_json::Value::Object(settings));
+                        }
+                    }
                 }
             }
 
