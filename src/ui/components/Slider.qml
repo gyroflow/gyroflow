@@ -58,7 +58,7 @@ QQC.Slider {
             return flickable;
         }
         onPressed: (mouse) => {
-            if (mouse.modifiers & Qt.ControlModifier) {
+            if (mouse.modifiers & Qt.AltModifier) {
                 isActive = true;
                 initialValue = slider.value;
                 const flick = closestFlickable();
