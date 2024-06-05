@@ -42,6 +42,7 @@ MenuItem {
         list.model = model;
 
         orgModel = JSON.parse(JSON.stringify(model));
+        orgModel["Created at"] = "---";
 
         QT_TRANSLATE_NOOP("TableList", "Shutter angle");
         QT_TRANSLATE_NOOP("TableList", "Shutter speed");

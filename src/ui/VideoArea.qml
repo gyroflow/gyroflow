@@ -245,8 +245,10 @@ Item {
                 if (additional_data.hasOwnProperty("realtime_fps") && +additional_data.realtime_fps > 0) {
                     vidInfo.updateEntryWithTrigger("Frame rate", +additional_data.realtime_fps);
                 }
-                if (additional_data.hasOwnProperty("recording_settings")) {
+                if (additional_data.hasOwnProperty("recording_settings") && Object.keys(additional_data.recording_settings).length > 0) {
+                    vidInfo.cleanupModel();
                     let model = vidInfo.infoList.model;
+                    model[""] = " ";
                     for (const x in additional_data.recording_settings) {
                         model[x] = additional_data.recording_settings[x];
                     }

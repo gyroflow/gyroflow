@@ -40,7 +40,7 @@ Row {
         Repeater {
             model: col1.keys;
             BasicText {
-                text: qsTr(modelData) + ":";
+                text: modelData? qsTr(modelData) + ":" : " ";
                 onTextChanged: Qt.callLater(updateHeights);
                 anchors.right: parent.right;
                 leftPadding: 0;
@@ -84,6 +84,9 @@ Row {
                 const r = col2.children[i];
                 if (l.objectName == "left" && r.objectName == "right") {
                     r.height = l.height = Math.max(l.height, r.height);
+                    if (l.text == " " && r.children[0].text == " ") {
+                        r.height = l.height = 2 * dpiScale;
+                    }
                 }
             }
         }

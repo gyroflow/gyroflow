@@ -47,6 +47,41 @@ QQC.Slider {
         }
     }
 
+    MouseArea {
+        anchors.fill: parent;
+        property bool isActive: false;
+        property real initialValue: 0;
+        property bool flickableWasInteractive: true;
+        function closestFlickable() {
+            let flickable = slider.parent;
+            while (flickable && !(flickable instanceof Flickable)) flickable = flickable.parent;
+            return flickable;
+        }
+        onPressed: (mouse) => {
+            if (mouse.modifiers & Qt.ControlModifier) {
+                isActive = true;
+                initialValue = slider.value;
+                const flick = closestFlickable();
+                if (flick) {
+                    flickableWasInteractive = flick.interactive;
+                    flick.interactive = false;
+                }
+            } else {
+                mouse.accepted = false;
+            }
+        }
+        onMouseXChanged: {
+            const pos = slider.mapFromItem(this, mouseX, mouseY).x / (slider.width - slider.leftPadding - slider.rightPadding);
+            const val = slider.valueAt(pos);
+            slider.value = initialValue + (val - initialValue) * 0.2;
+        }
+        onReleased: {
+            isActive = false;
+            const flick = closestFlickable();
+            if (flick) flick.interactive = flickableWasInteractive;
+        }
+    }
+
     ToolTip {
         delay: 0;
         parent: handle;
