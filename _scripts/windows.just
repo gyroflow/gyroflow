@@ -62,7 +62,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――― LLVM ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "{{LLVMPath}}\libclang.dll")) {
         echo "Downloading LLVM"
-        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.1/LLVM-17.0.1-win64.exe" -outfile "llvm-win64.exe"
+        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.6/LLVM-18.1.6-win64.exe" -outfile "llvm-win64.exe"
         7z x -y llvm-win64.exe -ollvm
         del "llvm-win64.exe"
     }
