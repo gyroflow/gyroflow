@@ -71,11 +71,13 @@ QQC.Slider {
             }
         }
         onMouseXChanged: {
+            if (!isActive) return;
             const pos = slider.mapFromItem(this, mouseX, mouseY).x / (slider.width - slider.leftPadding - slider.rightPadding);
             const val = slider.valueAt(pos);
             slider.value = initialValue + (val - initialValue) * 0.2;
         }
         onReleased: {
+            if (!isActive) return;
             isActive = false;
             const flick = closestFlickable();
             if (flick) flick.interactive = flickableWasInteractive;
