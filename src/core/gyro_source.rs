@@ -279,8 +279,8 @@ impl GyroSource {
                     }
                     if let Some(map) = tag_map.get(&GroupId::Gyroscope) {
                         let mut io = match map.get_t(TagId::Orientation) as Option<&String> {
-                            Some(v) => v.clone(),
-                            None => "XYZ".into()
+                            Some(v) if v.len() == 3 => v.clone(),
+                            _ => "XYZ".into()
                         };
                         io = input.normalize_imu_orientation(io);
                         imu_orientation = Some(io);
@@ -298,7 +298,7 @@ impl GyroSource {
                             }
                         }
                     }
-                    let mut additional_data = additional_data.as_object_mut().unwrap();
+                    let additional_data = additional_data.as_object_mut().unwrap();
                     if !additional_data.contains_key("recording_settings") {
                         let mut settings = serde_json::Map::new();
                         if let Some(map) = tag_map.get(&GroupId::Exposure) {

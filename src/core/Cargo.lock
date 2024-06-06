@@ -636,7 +636,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=c745863#c7458638d14921c7562e4197ddeefa17be413587"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=583cc6a#583cc6ab04796b8ab29a84920ff5bd42d9736e7a"
 dependencies = [
  "bitflags 2.5.0",
  "libloading",
@@ -1520,7 +1520,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=c745863#c7458638d14921c7562e4197ddeefa17be413587"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=583cc6a#583cc6ab04796b8ab29a84920ff5bd42d9736e7a"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-set",
@@ -2051,9 +2051,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.84"
+version = "1.0.85"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec96c6a92621310b51366f1e28d05ef11489516e93be030060e5fc12024a49d6"
+checksum = "22244ce15aa966053a896d1accb3a6e68469b97c7f33f284b99f0d576879fc23"
 dependencies = [
  "unicode-ident",
 ]
@@ -2601,9 +2601,9 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 
 [[package]]
 name = "tar"
-version = "0.4.40"
+version = "0.4.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b16afcea1f22891c49a00c751c7b63b2233284064f11a200fc624137c51e2ddb"
+checksum = "cb797dad5fb5b76fcf519e702f4a589483b5ef06567f160c392832c1f5e44909"
 dependencies = [
  "filetime",
  "libc",
@@ -2613,7 +2613,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.3.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=4e9d16b#4e9d16bb3bfce719e84eb822e4a024760647674a"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=374783b#374783bf8962628c3073c26f5beb748c98430a28"
 dependencies = [
  "argh",
  "byteorder",
@@ -2764,9 +2764,9 @@ dependencies = [
 
 [[package]]
 name = "unicode-width"
-version = "0.1.12"
+version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68f5e5f3158ecfd4b8ff6fe086db7c8467a2dfdac97fe420f2b7c4aa97af66d6"
+checksum = "0336d538f7abc86d282a4189614dfaa90810dfc2c6f6427eaf88e16311dd225d"
 
 [[package]]
 name = "unicode-xid"
@@ -2926,9 +2926,9 @@ dependencies = [
 
 [[package]]
 name = "webpki-roots"
-version = "0.26.1"
+version = "0.26.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3de34ae270483955a94f4b21bdaaeb83d508bb84a01435f393818edb0012009"
+checksum = "3c452ad30530b54a4d8e71952716a212b08efd0f3562baa66c29a618b07da7c3"
 dependencies = [
  "rustls-pki-types",
 ]
@@ -2936,7 +2936,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=c745863#c7458638d14921c7562e4197ddeefa17be413587"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=583cc6a#583cc6ab04796b8ab29a84920ff5bd42d9736e7a"
 dependencies = [
  "arrayvec 0.7.4",
  "cfg_aliases",
@@ -2960,7 +2960,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=c745863#c7458638d14921c7562e4197ddeefa17be413587"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=583cc6a#583cc6ab04796b8ab29a84920ff5bd42d9736e7a"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-vec",
@@ -2985,7 +2985,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=c745863#c7458638d14921c7562e4197ddeefa17be413587"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=583cc6a#583cc6ab04796b8ab29a84920ff5bd42d9736e7a"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.4",
@@ -3029,7 +3029,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=c745863#c7458638d14921c7562e4197ddeefa17be413587"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=583cc6a#583cc6ab04796b8ab29a84920ff5bd42d9736e7a"
 dependencies = [
  "bitflags 2.5.0",
  "js-sys",
@@ -3038,9 +3038,9 @@ dependencies = [
 
 [[package]]
 name = "wide"
-version = "0.7.21"
+version = "0.7.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cd8dc749a1b03f3c255a3064a4f5c0ee5ed09b7c6bc6d4525d31f779cd74d7fc"
+checksum = "1134eff459f1063780b94cc78b704e2212cac12abd554e4268f5b8f9dfcc1883"
 dependencies = [
  "bytemuck",
  "safe_arch",

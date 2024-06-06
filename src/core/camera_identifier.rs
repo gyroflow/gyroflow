@@ -105,7 +105,7 @@ impl CameraIdentifier {
                     if let Some(info) = samples.iter().next() {
                         if let Some(ref tag_map) = info.tag_map {
                             if let Some(v) = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::FocalLength) as Option<&f32>) {
-                                id.lens_info = format!("{:.2}mm", v);
+                                id.lens_info = format!("{:.2} mm", v);
                                 id.focal_length = Some(*v as f64);
                             }
                             if let Some(v) = tag_map.get(&GroupId::Custom("LensDistortion".into())).and_then(|map| map.get_t(TagId::Data) as Option<&serde_json::Value>) {
@@ -161,7 +161,7 @@ impl CameraIdentifier {
                     for info in samples {
                         if let Some(ref tag_map) = info.tag_map {
                             if let Some(v) = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::FocalLength) as Option<&f32>) {
-                                id.lens_info = format!("{:.2}mm", v);
+                                id.lens_info = format!("{:.2} mm", v);
                                 id.focal_length = Some(*v as f64);
                             }
                             if brand != "Runcam" {
