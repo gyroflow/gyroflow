@@ -279,6 +279,12 @@ impl<'a> FfmpegProcessor<'a> {
             format::output_as_with(&file.path, &output_format, output_options)
         }?;
 
+        // Copy metadata
+        let mut metadata = self.input_context.metadata().to_owned();
+        for (k, v) in self.video.encoder_params.metadata.iter() {
+            metadata.set(k, v);
+        }
+
         for (i, stream) in self.input_context.streams().enumerate() {
             let medium = stream.parameters().medium();
             if medium != media::Type::Audio && medium != media::Type::Video && (!self.preserve_other_tracks || medium != media::Type::Data) {
@@ -292,6 +298,10 @@ impl<'a> FfmpegProcessor<'a> {
             }
             stream_mapping[i] = output_index as isize;
             ist_time_bases[i] = stream.time_base();
+            // Handle Sony MP4 timecode metadata
+            if let Some(timecode) = stream.metadata().get("timecode") {
+                metadata.set("timecode", timecode);
+            }
             if medium == media::Type::Video {
                 self.video.input_index = i;
                 self.video.output_index = Some(output_index);
@@ -333,10 +343,6 @@ impl<'a> FfmpegProcessor<'a> {
                 ost.set_avg_frame_rate(stream.avg_frame_rate());
                 output_index += 1;
             }
-        }
-        let mut metadata = self.input_context.metadata().to_owned();
-        for (k, v) in self.video.encoder_params.metadata.iter() {
-            metadata.set(k, v);
         }
         let mut updated_creation_time = None;
         if let Some(start_ms) = start_ms {
