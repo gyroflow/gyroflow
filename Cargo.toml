@@ -12,7 +12,7 @@ opencv = ["gyroflow-core/use-opencv"]
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 gyroflow-core = { path = "src/core/", features = ["use-opencv", "use-opencl"] }
-system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", rev = "59ca281" }
+system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", rev = "baf27b0" }
 breakpad-sys = "0.2.0"
 trash = "4.1.1"
 
@@ -59,15 +59,15 @@ simplelog = "0.12.2"
 log = "0.4"
 
 ureq = "2.9.7"
-url = "2.5.0"
+url = "2.5.1"
 whoami = "1.5.1"
-tar = "0.4.40"
+tar = "0.4.41"
 lru = "0.12"
 chrono = "0.4"
 
 log-panics = { version = "2.1", features = ["with-backtrace"] }
 
-keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "48b49f0" }
+keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "2893624" }
 
 [patch.crates-io]
 fc-blackbox = { git = "https://github.com/ilya-epifanov/fc-blackbox.git", rev = "357283b" }
@@ -75,7 +75,7 @@ qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = 
 qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "59029b9" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
-version = "0.56.0"
+version = "0.57.0"
 features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation", "Win32_System_LibraryLoader",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry",
@@ -92,7 +92,7 @@ core-foundation-sys = "0.8.6"
 cpp_build = "0.5.9"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.0.98"
+cc = "1.0.99"
 
 [[bin]]
 name = "gyroflow"
