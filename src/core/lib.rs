@@ -395,10 +395,9 @@ impl StabilizationManager {
         let smoothing = self.smoothing.read();
         let horizon_lock = smoothing.horizon_lock.clone();
 
-        let (quats, org_quats, max_angles) = self.gyro.read().recompute_smoothness(smoothing.current().as_ref(), horizon_lock, &params);
+        let (quats, max_angles) = self.gyro.read().recompute_smoothness(smoothing.current().as_ref(), horizon_lock, &params);
         let mut gyro = self.gyro.write();
         gyro.max_angles = max_angles;
-        gyro.org_smoothed_quaternions = org_quats;
         gyro.smoothed_quaternions = quats;
     }
 
@@ -449,14 +448,14 @@ impl StabilizationManager {
                     let lock = smoothing.read();
                     (lock.current().clone(), lock.horizon_lock.clone())
                 };
-                let (quats, org_quats, max_angles) = gyro.read().recompute_smoothness(smoothing.as_mut(), horizon_lock, &params);
+
+                let (quats, max_angles) = gyro.read().recompute_smoothness(smoothing.as_mut(), horizon_lock, &params);
 
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
                 if gyro_checksum != gyro.read().get_checksum() { return cb((compute_id, true)); }
 
                 let mut lib_gyro = gyro.write();
                 lib_gyro.max_angles = max_angles;
-                lib_gyro.org_smoothed_quaternions = org_quats;
                 lib_gyro.smoothed_quaternions = quats;
                 lib_gyro.smoothing_status = smoothing.get_status_json();
                 gyro_checksum = lib_gyro.get_checksum();
@@ -752,19 +751,19 @@ impl StabilizationManager {
     }
 
     pub fn set_imu_lpf(&self, lpf: f64) {
-        self.gyro.write().imu_lpf = lpf;
+        self.gyro.write().imu_transforms.imu_lpf = lpf;
     }
     pub fn set_imu_rotation(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
-        self.gyro.write().imu_rotation_angles = Some([pitch_deg, roll_deg, yaw_deg]);
+        self.gyro.write().imu_transforms.set_imu_rotation(pitch_deg, roll_deg, yaw_deg);
     }
     pub fn set_acc_rotation(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
-        self.gyro.write().acc_rotation_angles = Some([pitch_deg, roll_deg, yaw_deg]);
+        self.gyro.write().imu_transforms.set_acc_rotation(pitch_deg, roll_deg, yaw_deg);
     }
     pub fn set_imu_orientation(&self, orientation: String) {
-        self.gyro.write().imu_orientation = Some(orientation);
+        self.gyro.write().imu_transforms.imu_orientation = Some(orientation);
     }
     pub fn set_imu_bias(&self, bx: f64, by: f64, bz: f64) {
-        self.gyro.write().gyro_bias = Some([bx, by, bz]);
+        self.gyro.write().imu_transforms.gyro_bias = Some([bx, by, bz]);
     }
     pub fn recompute_gyro(&self) {
         self.gyro.write().apply_transforms();
@@ -997,14 +996,14 @@ impl StabilizationManager {
             },
             "gyro_source": {
                 "filepath":           gyro.file_url,
-                "lpf":                gyro.imu_lpf,
-                "rotation":           gyro.imu_rotation_angles,
-                "acc_rotation":       gyro.acc_rotation_angles,
-                "imu_orientation":    gyro.imu_orientation,
-                "gyro_bias":          gyro.gyro_bias,
+                "lpf":                gyro.imu_transforms.imu_lpf,
+                "rotation":           gyro.imu_transforms.imu_rotation_angles,
+                "acc_rotation":       gyro.imu_transforms.acc_rotation_angles,
+                "imu_orientation":    gyro.imu_transforms.imu_orientation,
+                "gyro_bias":          gyro.imu_transforms.gyro_bias,
                 "integration_method": gyro.integration_method,
                 "sample_index":       gyro.file_load_options.sample_index,
-                "detected_source":    gyro.file_metadata.detected_source,
+                "detected_source":    gyro.file_metadata.read().detected_source,
             },
 
             "offsets": gyro.get_offsets(), // timestamp, offset value
@@ -1030,12 +1029,13 @@ impl StabilizationManager {
         }
 
         if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
+            let file_metadata = gyro.file_metadata.read();
             if typ == GyroflowProjectType::Simple {
-                if let Ok(val) = serde_json::to_value(gyro.file_metadata.thin()) {
+                if let Ok(val) = serde_json::to_value(file_metadata.thin()) {
                     obj.insert("file_metadata".into(), val);
                 }
             } else {
-                if let Some(q) = util::compress_to_base91_cbor(&gyro.file_metadata) {
+                if let Some(q) = util::compress_to_base91_cbor(&*file_metadata) {
                     obj.insert("file_metadata".into(), serde_json::Value::String(q));
                 }
             }
@@ -1050,7 +1050,7 @@ impl StabilizationManager {
                     imu_timestamps.push(timestamp_ms);
 
                     let frame = ((timestamp_ms - params.frame_readout_time / 2.0) * (params.get_scaled_fps() / 1000.0)).ceil() as usize;
-                    imu_timestamps_final.push(timestamp_ms - gyro.file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0));
+                    imu_timestamps_final.push(timestamp_ms - file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0));
                 }
                 util::compress_to_base91_cbor(&imu_timestamps)           .and_then(|s| obj.insert("synced_imu_timestamps" .into(), serde_json::Value::String(s)));
                 util::compress_to_base91_cbor(&imu_timestamps_final)     .and_then(|s| obj.insert("synced_imu_timestamps_with_per_frame_offset".into(), serde_json::Value::String(s)));
@@ -1260,12 +1260,12 @@ impl StabilizationManager {
                     gyro.file_url = gyro_url.clone();
                 }
 
-                if let Some(v) = obj.get("lpf").and_then(|x| x.as_f64()) { gyro.imu_lpf = v; }
+                if let Some(v) = obj.get("lpf").and_then(|x| x.as_f64()) { gyro.imu_transforms.imu_lpf = v; }
                 if let Some(v) = obj.get("integration_method").and_then(|x| x.as_u64()) { gyro.integration_method = v as usize; }
-                if let Some(v) = obj.get("imu_orientation").and_then(|x| x.as_str()) { gyro.imu_orientation = Some(v.to_string()); }
-                if let Some(v) = obj.get("rotation")     { gyro.imu_rotation_angles = serde_json::from_value(v.clone()).ok(); }
-                if let Some(v) = obj.get("acc_rotation") { gyro.acc_rotation_angles = serde_json::from_value(v.clone()).ok(); }
-                if let Some(v) = obj.get("gyro_bias")    { gyro.gyro_bias           = serde_json::from_value(v.clone()).ok(); }
+                if let Some(v) = obj.get("imu_orientation").and_then(|x| x.as_str()) { gyro.imu_transforms.imu_orientation = Some(v.to_string()); }
+                if let Some(v) = obj.get("rotation")     { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_imu_rotation(v[0], v[1], v[2]); }
+                if let Some(v) = obj.get("acc_rotation") { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_acc_rotation(v[0], v[1], v[2]); }
+                if let Some(v) = obj.get("gyro_bias")    { gyro.imu_transforms.gyro_bias = serde_json::from_value(v.clone()).ok(); }
 
                 obj.remove("raw_imu");
                 obj.remove("quaternions");

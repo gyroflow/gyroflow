@@ -298,10 +298,14 @@ impl<'a> FfmpegProcessor<'a> {
             }
             stream_mapping[i] = output_index as isize;
             ist_time_bases[i] = stream.time_base();
-            // Handle Sony MP4 timecode metadata
+
+            // Copy timecode from stream if global metadata doesn't have it
             if let Some(timecode) = stream.metadata().get("timecode") {
-                metadata.set("timecode", timecode);
+                if metadata.get("timecode").is_none() {
+                    metadata.set("timecode", timecode);
+                }
             }
+
             if medium == media::Type::Video {
                 self.video.input_index = i;
                 self.video.output_index = Some(output_index);

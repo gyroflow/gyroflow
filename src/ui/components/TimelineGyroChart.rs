@@ -330,35 +330,38 @@ impl TimelineGyroChart {
             self.smoothed_quats.clear();
             self.sync_points = gyro.get_offsets_plus_linear();
 
-            if let Some(x) = gyro.raw_imu.first() {
-                if self.viewMode == 0 && x.gyro.is_some() { self.gyro = Vec::with_capacity(gyro.raw_imu.len()); }
-                if self.viewMode == 1 && x.accl.is_some() { self.accl = Vec::with_capacity(gyro.raw_imu.len()); }
-                if self.viewMode == 2 && x.magn.is_some() { self.magn = Vec::with_capacity(gyro.raw_imu.len()); }
-            }
+            {
+                let file_metadata = gyro.file_metadata.read();
+                let raw_imu = gyro.raw_imu(&file_metadata);
+                let imu_len = raw_imu.len();
 
-            for x in &gyro.raw_imu {
-                if self.viewMode == 0 {
-                    if let Some(g) = x.gyro.as_ref() {
-                        self.gyro.push(ChartData {
-                            timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
-                            values: [g[0], g[1], g[2]]
-                        });
+                for x in raw_imu {
+                    if self.viewMode == 0 {
+                        if let Some(g) = x.gyro.as_ref() {
+                            if self.gyro.is_empty() { self.gyro.reserve(imu_len); }
+                            self.gyro.push(ChartData {
+                                timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
+                                values: [g[0], g[1], g[2]]
+                            });
+                        }
                     }
-                }
-                if self.viewMode == 1 {
-                    if let Some(a) = x.accl.as_ref() {
-                        self.accl.push(ChartData {
-                            timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
-                            values: [a[0], a[1], a[2]]
-                        });
+                    if self.viewMode == 1 {
+                        if let Some(a) = x.accl.as_ref() {
+                            if self.accl.is_empty() { self.accl.reserve(imu_len); }
+                            self.accl.push(ChartData {
+                                timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
+                                values: [a[0], a[1], a[2]]
+                            });
+                        }
                     }
-                }
-                if self.viewMode == 2 {
-                    if let Some(m) = x.magn.as_ref() {
-                        self.magn.push(ChartData {
-                            timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
-                            values: [m[0], m[1], m[2]]
-                        });
+                    if self.viewMode == 2 {
+                        if let Some(m) = x.magn.as_ref() {
+                            if self.magn.is_empty() { self.magn.reserve(imu_len); }
+                            self.magn.push(ChartData {
+                                timestamp_us: ((x.timestamp_ms + gyro.offset_at_gyro_timestamp(x.timestamp_ms)) * 1000.0) as i64,
+                                values: [m[0], m[1], m[2]]
+                            });
+                        }
                     }
                 }
             }
@@ -378,7 +381,14 @@ impl TimelineGyroChart {
                     }
                 };
                 add_quats(&gyro.quaternions, &mut self.quats);
-                add_quats(&gyro.org_smoothed_quaternions, &mut self.smoothed_quats);
+
+                // Reverse the smoothed rotation to get original smoothed quaternions.
+                // This is the inverse of gyro_source.rs:recompute_smoothness
+                let mut org_smoothed_quats = gyro.smoothed_quaternions.clone();
+                for (sq, q) in org_smoothed_quats.iter_mut().zip(gyro.quaternions.iter()) {
+                    *sq.1 = (*sq.1 / q.1).inverse();
+                }
+                add_quats(&org_smoothed_quats, &mut self.smoothed_quats);
             }
 
             match self.viewMode {

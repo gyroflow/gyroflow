@@ -17,7 +17,13 @@ use std::sync::{
 pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64, i64)], sync_params: &SyncParams, params: &ComputeParams, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Vec<(f64, f64, f64)> { // Vec<(timestamp, offset, cost)>
     // Try essential matrix first, because it's much faster
     let mut sync_params = sync_params.clone();
-    if sync_params.calc_initial_fast && !ranges.is_empty() && !params.gyro.read().raw_imu.is_empty() {
+
+    let raw_imu_len = {
+        let gyro = params.gyro.read();
+        let md = gyro.file_metadata.read();
+        gyro.raw_imu(&md).len()
+    };
+    if sync_params.calc_initial_fast && !ranges.is_empty() && raw_imu_len > 0 {
         fn median(mut v: Vec<f64>) -> f64 {
             v.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
             let len = v.len();
@@ -194,7 +200,7 @@ impl FindOffsetsRssync<'_> {
         ];
 
         possible_orientations.iter().map(|orient| {
-            clone_source.imu_orientation = Some(orient.to_string());
+            clone_source.imu_transforms.imu_orientation = Some(orient.to_string());
             clone_source.apply_transforms();
 
             set_quats(&mut self.sync, &clone_source.quaternions);

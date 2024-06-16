@@ -29,19 +29,21 @@ fn blackman(width: usize) -> Vec<f32> {
 
 impl OptimSync {
     pub fn new(gyro: &GyroSource) -> Option<OptimSync> {
-        let duration_ms = gyro.raw_imu.last()?.timestamp_ms - gyro.raw_imu.first()?.timestamp_ms;
-        let samples_total = gyro.raw_imu.iter().filter(|x| x.gyro.is_some()).count();
+        let file_metadata = gyro.file_metadata.read();
+        let raw_imu = gyro.raw_imu(&file_metadata);
+
+        let duration_ms = raw_imu.last()?.timestamp_ms - raw_imu.first()?.timestamp_ms;
+        let samples_total = raw_imu.iter().filter(|x| x.gyro.is_some()).count();
         let avg_sr = samples_total as f64 / duration_ms * 1000.0;
 
         let interp_gyro = |ts| {
-            let i_r = gyro
-                .raw_imu
+            let i_r = raw_imu
                 .partition_point(|sample| sample.timestamp_ms < ts)
-                .min(gyro.raw_imu.len() - 1);
+                .min(raw_imu.len() - 1);
             let i_l = i_r.max(1) - 1;
 
-            let left = &gyro.raw_imu[i_l];
-            let right = &gyro.raw_imu[i_r];
+            let left = &raw_imu[i_l];
+            let right = &raw_imu[i_r];
             if i_l == i_r {
                 return Vector3::from_column_slice(&left.gyro.unwrap_or_default());
             }

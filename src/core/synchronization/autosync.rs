@@ -149,7 +149,7 @@ impl AutosyncProcess {
         {
             let compute_params = compute_params.read();
             let frame = crate::frame_at_timestamp(timestamp_us as f64 / 1000.0, compute_params.scaled_fps) as usize;
-            timestamp_us += (compute_params.gyro.read().file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0) * 1000.0).round() as i64;
+            timestamp_us += (compute_params.gyro.read().file_metadata.read().per_frame_time_offsets.get(frame).unwrap_or(&0.0) * 1000.0).round() as i64;
         }
 
         if let Some(_current_range) = self.scaled_ranges_us.iter().find(|(from, to)| (*from..=*to).contains(&timestamp_us)) {
@@ -201,7 +201,8 @@ impl AutosyncProcess {
             // If no gyro data in file, set the computed optical flow as gyro data
             let compute_params = self.compute_params.write();
             let mut gyro = compute_params.gyro.write();
-            gyro.file_metadata.raw_imu = self.estimator.estimated_gyro.read().values().cloned().collect::<Vec<_>>();
+
+            gyro.file_metadata.set_raw_imu(self.estimator.estimated_gyro.read().values().cloned().collect::<Vec<_>>());
             gyro.apply_transforms();
 
             let timestamps_fract = [0.5];

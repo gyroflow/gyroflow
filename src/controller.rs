@@ -585,7 +585,8 @@ impl Controller {
             let graph = unsafe { &mut *graph.as_ptr() }; // _self.borrow_mut();
 
             let gyro = &self.stabilizer.gyro.read();
-            let raw_imu = &gyro.raw_imu;
+            let file_metadata = gyro.file_metadata.read();
+            let raw_imu = gyro.raw_imu(&file_metadata);
 
             if !raw_imu.is_empty() {
                 let dt_ms = 1000.0 / sr;
@@ -761,24 +762,26 @@ impl Controller {
                     stab.recompute_smoothness();
 
                     let gyro = stab.gyro.read();
-                    let detected = gyro.file_metadata.detected_source.as_ref().map(String::clone).unwrap_or_default();
-                    let has_raw_gyro = !gyro.file_metadata.raw_imu.is_empty();
-                    let has_quats = !gyro.file_metadata.quaternions.is_empty();
+                    let file_metadata = gyro.file_metadata.read();
+                    let detected = file_metadata.detected_source.as_ref().map(String::clone).unwrap_or_default();
+                    let has_raw_gyro = !file_metadata.raw_imu.is_empty();
+                    let has_quats = !file_metadata.quaternions.is_empty();
                     let has_motion = has_raw_gyro || has_quats;
-                    additional_obj.insert("imu_orientation".to_owned(),   serde_json::Value::String(gyro.imu_orientation.clone().unwrap_or_else(|| "XYZ".into())));
+                    additional_obj.insert("imu_orientation".to_owned(),   serde_json::Value::String(gyro.imu_transforms.imu_orientation.clone().unwrap_or_else(|| "XYZ".into())));
                     additional_obj.insert("contains_raw_gyro".to_owned(), serde_json::Value::Bool(has_raw_gyro));
                     additional_obj.insert("contains_quats".to_owned(),    serde_json::Value::Bool(has_quats));
                     additional_obj.insert("contains_motion".to_owned(),   serde_json::Value::Bool(has_motion));
-                    additional_obj.insert("has_accurate_timestamps".to_owned(), serde_json::Value::Bool(gyro.file_metadata.has_accurate_timestamps));
-                    additional_obj.insert("sample_rate".to_owned(),       serde_json::to_value(gyroflow_core::gyro_source::GyroSource::get_sample_rate(&gyro.file_metadata)).unwrap());
-                    let has_builtin_profile = gyro.file_metadata.lens_profile.as_ref().map(|y| y.is_object()).unwrap_or_default();
-                    let md_data = gyro.file_metadata.additional_data.clone();
-                    if let Some(md_fps) = gyro.file_metadata.frame_rate {
+                    additional_obj.insert("has_accurate_timestamps".to_owned(), serde_json::Value::Bool(file_metadata.has_accurate_timestamps));
+                    additional_obj.insert("sample_rate".to_owned(),       serde_json::to_value(gyroflow_core::gyro_source::GyroSource::get_sample_rate(&*file_metadata)).unwrap());
+                    let has_builtin_profile = file_metadata.lens_profile.as_ref().map(|y| y.is_object()).unwrap_or_default();
+                    let md_data = file_metadata.additional_data.clone();
+                    if let Some(md_fps) = file_metadata.frame_rate {
                         let fps = stab.params.read().fps;
                         if (md_fps - fps).abs() > 1.0 {
                             additional_obj.insert("realtime_fps".to_owned(), serde_json::Number::from_f64(md_fps).unwrap().into());
                         }
                     }
+                    drop(file_metadata);
                     drop(gyro);
 
                     let camera_id = stab.camera_id.read();
@@ -1967,7 +1970,7 @@ impl Controller {
     }
 
     fn has_gravity_vectors(&self) -> bool {
-        self.stabilizer.gyro.read().file_metadata.gravity_vectors.as_ref().map(|v| !v.is_empty()).unwrap_or_default()
+        self.stabilizer.gyro.read().file_metadata.read().gravity_vectors.as_ref().map(|v| !v.is_empty()).unwrap_or_default()
     }
 
     fn check_external_sdk(&self, filename: QString) -> bool {
