@@ -57,9 +57,10 @@ impl FrameTransform {
     pub fn get_lens_data_at_timestamp(params: &ComputeParams, timestamp_ms: f64) -> (Matrix3<f64>, [f64; 12], f64, f64, f64, Option<f64>) {
         let mut interpolated_lens = None;
         let gyro = params.gyro.read();
-        if !gyro.file_metadata.lens_positions.is_empty() {
+        let file_metadata = gyro.file_metadata.read();
+        if !file_metadata.lens_positions.is_empty() {
             use crate::util::MapClosest;
-            if let Some(val) = gyro.file_metadata.lens_positions.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
+            if let Some(val) = file_metadata.lens_positions.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
                 interpolated_lens = Some(params.lens.get_interpolated_lens_at(*val));
             }
         }
@@ -73,10 +74,11 @@ impl FrameTransform {
         let mut radial_distortion_limit = lens.fisheye_params.radial_distortion_limit.unwrap_or_default();
 
         let mut stretch_lens = true;
+        let digital_zoom = file_metadata.digital_zoom.unwrap_or_default();
 
-        if !gyro.file_metadata.lens_params.is_empty() && lens.fisheye_params.distortion_coeffs.len() < 4 {
+        if !file_metadata.lens_params.is_empty() && lens.fisheye_params.distortion_coeffs.len() < 4 {
             use crate::util::MapClosest;
-            if let Some(val) = gyro.file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
+            if let Some(val) = file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
                 let pixel_focal_length = val.pixel_focal_length.map(|x| x as f64).or_else(|| {
                     focal_length = Some(val.focal_length? as f64);
                     Some((val.focal_length? as f64 / ((val.pixel_pitch?.1 as f64 / 1000000.0) * val.capture_area_size?.1 as f64)) * params.video_height as f64 / params.plane_scale.1)
@@ -102,6 +104,7 @@ impl FrameTransform {
                 }
             }
         }
+        drop(file_metadata);
         drop(gyro);
 
         let (calib_width, calib_height) = if lens.calib_dimension.w > 0 && lens.calib_dimension.h > 0 {
@@ -120,6 +123,10 @@ impl FrameTransform {
             camera_matrix[(1, 1)] *= lens_ratioy;
             camera_matrix[(0, 2)] *= lens_ratiox;
             camera_matrix[(1, 2)] *= lens_ratioy;
+        }
+        if digital_zoom > 0.0 {
+            camera_matrix[(0, 0)] *= digital_zoom;
+            camera_matrix[(1, 1)] *= digital_zoom;
         }
 
         (camera_matrix, distortion_coeffs, radial_distortion_limit, input_horizontal_stretch, input_vertical_stretch, focal_length)
@@ -169,14 +176,13 @@ impl FrameTransform {
         let scaled_k = camera_matrix * img_dim_ratio;
         let new_k = Self::get_new_k(&params, &camera_matrix, fov);
 
-
         let gyro = params.gyro.read();
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(&params, true);
 
         let row_readout_time = frame_readout_time / if params.horizontal_rs { params.width } else { params.height } as f64;
-        let timestamp_ms = timestamp_ms + gyro.file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
+        let timestamp_ms = timestamp_ms + gyro.file_metadata.read().per_frame_time_offsets.get(frame).unwrap_or(&0.0);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
 
@@ -289,7 +295,7 @@ impl FrameTransform {
         let frame_readout_time = Self::get_frame_readout_time(params, false);
 
         let row_readout_time = frame_readout_time / if params.horizontal_rs { params.width } else { params.height } as f64;
-        let timestamp_ms = timestamp_ms + gyro.file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
+        let timestamp_ms = timestamp_ms + gyro.file_metadata.read().per_frame_time_offsets.get(frame).unwrap_or(&0.0);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
 

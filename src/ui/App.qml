@@ -271,9 +271,8 @@ Rectangle {
                                 ["export",        isAddToQueue? QT_TRANSLATE_NOOP("Popup", "Export") : (render_queue.editing_job_id > 0? QT_TRANSLATE_NOOP("Popup", "Save") : QT_TRANSLATE_NOOP("Popup", "Add to render queue"))],
                                 ["create_preset", QT_TRANSLATE_NOOP("Popup", "Create settings preset")],
                                 ["apply_all",     QT_TRANSLATE_NOOP("Popup", "Apply selected settings to all items in the render queue")],
-                                ["export_proj:WithProcessedData", QT_TRANSLATE_NOOP("Popup", "Export project file (including processed gyro data)")],
-                                ["export_proj:WithGyroData",      QT_TRANSLATE_NOOP("Popup", "Export project file (including gyro data)")],
-                                ["export_proj:Simple",            QT_TRANSLATE_NOOP("Popup", "Export project file")]
+                                ["export_proj:WithGyroData", QT_TRANSLATE_NOOP("Popup", "Export project file (including gyro data)")],
+                                ["export_proj:Simple",       QT_TRANSLATE_NOOP("Popup", "Export project file")]
                             ];
                             if (controller.project_file_url) m.push(["save", QT_TRANSLATE_NOOP("Popup", "Save project file")]);
                             model   = m.map(x => x[1]);
@@ -412,7 +411,7 @@ Rectangle {
                                 break;
                                 case "create_preset": // Create preset
                                 case "apply_all": // Apply settings to render queue
-                                    const el = Qt.createComponent("SettingsSelector.qml").createObject(window, { isPreset: index == 1 });
+                                    const el = Qt.createComponent("SettingsSelector.qml").createObject(window, { type: index == 1? "preset" : "apply" });
                                     el.opened = true;
                                     el.onApply.connect((obj) => {
                                         const allData = JSON.parse(controller.export_gyroflow_data("Simple", window.getAdditionalProjectData()));
@@ -432,7 +431,6 @@ Rectangle {
                                         }
                                     });
                                 break;
-                                case "export_proj:WithProcessedData":
                                 case "export_proj:WithGyroData":
                                 case "export_proj:Simple":
                                     window.saveProject(action.substring(12));

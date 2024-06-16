@@ -482,13 +482,112 @@ MenuItem {
         }
     }
 
-    LinkButton {
-        text: qsTr("Statistics");
+    Row {
         anchors.horizontalCenter: parent.horizontalCenter;
-        //anchors.verticalCenter: parent.verticalCenter;
-        onClicked: {
-            if (window.videoArea.statistics.item) window.videoArea.statistics.item.shown = !window.videoArea.statistics.item.shown;
-            window.videoArea.statistics.active = true;
+        LinkButton {
+            text: qsTr("Statistics");
+            onClicked: {
+                if (window.videoArea.statistics.item) window.videoArea.statistics.item.shown = !window.videoArea.statistics.item.shown;
+                window.videoArea.statistics.active = true;
+            }
+        }
+        LinkButton {
+            id: exportGyroBtn;
+            text: qsTr("Export");
+            onClicked: {
+                menuLoader.toggle(exportGyroBtn, 0, height);
+            }
+            Component {
+                id: menu;
+                Menu {
+                    id: menuInner;
+                    FileDialog {
+                        id: exportFileDialog;
+                        fileMode: FileDialog.SaveFile;
+                        title: qsTr("Select file destination");
+                        nameFilters: ["*.csv", "*.json"];
+                        type: "gyro-csv";
+                        property var exportData: ({});
+                        onAccepted: {
+                           if (exportData === "full") {
+                                controller.export_full_metadata(selectedFile, root.lastSelectedFile.toString()? root.lastSelectedFile : window.videoArea.loadedFileUrl);
+                            } else if (exportData == "parsed") {
+                                controller.export_parsed_metadata(selectedFile);
+                            } else {
+                                controller.export_gyro_data(selectedFile, exportData);
+                            }
+                        }
+                    }
+                    Action {
+                        text: qsTr("Export to CSV or JSON");
+                        onTriggered: {
+                            const el = Qt.createComponent("../SettingsSelector.qml").createObject(window, {
+                                desc: [
+                                    {
+                                        "Original|original": {
+                                            "Gyroscope":     ["gyroscope"],
+                                            "Accelerometer": ["accelerometer"],
+                                            "Quaternion":    ["quaternion"],
+                                            "Euler angles":  ["euler_angles"],
+                                        },
+                                    },
+                                    {
+                                        "Stabilized|stabilized": {
+                                            "Quaternion":    ["quaternion"],
+                                            "Euler angles":  ["euler_angles"],
+                                        },
+                                    },
+                                    {
+                                        "Zooming|zooming": {
+                                            "Minimal FOV scale":  ["minimal_fovs"],
+                                            "Smoothed FOV scale": ["fovs"],
+                                            "Focal length (if available)": ["focal_length"],
+                                        },
+                                    }
+                                ],
+                                type: "gyro_csv"
+                            });
+                            let savedState = settings.value("CSVExportSelection");
+                            if (savedState) {
+                                try {
+                                    el.loadSelection(JSON.parse(savedState));
+                                } catch(e) { }
+                            }
+                            el.opened = true;
+                            el.onApply.connect((obj) => {
+                                settings.setValue("CSVExportSelection", JSON.stringify(obj));
+                                exportFileDialog.nameFilters = ["*.csv", "*.json"];
+                                exportFileDialog.exportData = obj;
+                                exportFileDialog.open2();
+                            });
+                        }
+                    }
+                    Action {
+                        text: qsTr("Export full metadata");
+                        onTriggered: {
+                            exportFileDialog.nameFilters = ["*.json"];
+                            exportFileDialog.exportData = "full";
+                            exportFileDialog.open2();
+                        }
+                    }
+                    Action {
+                        text: qsTr("Export parsed metadata");
+                        onTriggered: {
+                            exportFileDialog.nameFilters = ["*.json"];
+                            exportFileDialog.exportData = "parsed";
+                            exportFileDialog.open2();
+                        }
+                    }
+                    Action {
+                        text: qsTr("Export project file (including processed gyro data)");
+                        onTriggered: window.saveProject("WithProcessedData");
+                    }
+                }
+            }
+            ContextMenuLoader {
+                id: menuLoader;
+                sourceComponent: menu
+            }
         }
     }
 

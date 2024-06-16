@@ -233,6 +233,9 @@ pub struct Controller {
 
     image_to_b64: qt_method!(fn(&self, img: QImage) -> QString),
     export_preset: qt_method!(fn(&self, url: QUrl, data: QJsonObject)),
+    export_full_metadata: qt_method!(fn(&self, url: QUrl, gyro_url: QUrl)),
+    export_parsed_metadata: qt_method!(fn(&self, url: QUrl)),
+    export_gyro_data: qt_method!(fn(&self, url: QUrl, data: QJsonObject)),
 
     message: qt_signal!(text: QString, arg: QString, callback: QString, id: QString),
     error: qt_signal!(text: QString, arg: QString, callback: QString),
@@ -1882,6 +1885,32 @@ impl Controller {
     fn export_preset(&self, url: QUrl, content: QJsonObject) {
         let contents = content.to_json_pretty();
         if let Err(e) = filesystem::write(&util::qurl_to_encoded(url), contents.to_slice()) {
+            self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+        }
+    }
+
+    fn export_full_metadata(&self, url: QUrl, gyro_url: QUrl) {
+        let result = || -> Result<(), core::GyroflowCoreError> {
+            let contents = gyroflow_core::gyro_export::export_full_metadata(&util::qurl_to_encoded(gyro_url), &self.stabilizer)?;
+            Ok(filesystem::write(&util::qurl_to_encoded(url), contents.as_bytes())?)
+        };
+        if let Err(e) = result() {
+            self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+        }
+    }
+    fn export_parsed_metadata(&self, url: QUrl) {
+        if let Ok(contents) = serde_json::to_string_pretty(&self.stabilizer.gyro.read().file_metadata) {
+            if let Err(e) = filesystem::write(&util::qurl_to_encoded(url), contents.as_bytes()) {
+                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+            }
+        }
+    }
+    fn export_gyro_data(&self, url: QUrl, fields: QJsonObject) {
+        let url = util::qurl_to_encoded(url);
+        let is_csv = filesystem::get_filename(&url).ends_with(".csv");
+
+        let contents = gyroflow_core::gyro_export::export_gyro_data(is_csv, fields.to_json().to_str().unwrap(), &self.stabilizer);
+        if let Err(e) = filesystem::write(&url, contents.as_bytes()) {
             self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
         }
     }

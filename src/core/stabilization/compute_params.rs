@@ -125,7 +125,7 @@ impl ComputeParams {
     }
 
     pub fn calculate_camera_fovs(&mut self) {
-        let frame_count = if self.gyro.read().file_metadata.lens_params.len() > 1 {
+        let frame_count = if self.gyro.read().file_metadata.read().lens_params.len() > 1 {
             self.frame_count
         } else {
             1 // FOV is constant (ie. lens is fixed focal length)
@@ -146,12 +146,12 @@ impl std::fmt::Debug for ComputeParams {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let gyro = self.gyro.read();
         f.debug_struct("ComputeParams")
-         .field("gyro.imu_orientation", &gyro.imu_orientation)
-         .field("gyro.imu_rotation", &gyro.imu_rotation_angles)
-         .field("gyro.acc_rotation", &gyro.acc_rotation_angles)
+         .field("gyro.imu_orientation", &gyro.imu_transforms.imu_orientation)
+         .field("gyro.imu_rotation", &gyro.imu_transforms.imu_rotation_angles)
+         .field("gyro.acc_rotation", &gyro.imu_transforms.acc_rotation_angles)
          .field("gyro.duration_ms", &gyro.duration_ms)
-         .field("gyro.imu_lpf", &gyro.imu_lpf)
-         .field("gyro.gyro_bias", &gyro.gyro_bias)
+         .field("gyro.imu_lpf", &gyro.imu_transforms.imu_lpf)
+         .field("gyro.gyro_bias", &gyro.imu_transforms.gyro_bias)
          .field("gyro.integration_method", &gyro.integration_method)
          .field("fovs.len", &self.fovs.len())
          .field("keyframed", &self.keyframes.get_all_keys())

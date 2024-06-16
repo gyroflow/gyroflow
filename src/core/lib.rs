@@ -16,6 +16,7 @@ pub mod zooming;
 pub mod smoothing;
 pub mod filtering;
 pub mod filesystem;
+pub mod gyro_export;
 
 pub mod gpu;
 

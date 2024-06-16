@@ -13,7 +13,7 @@ Modal {
     widthRatio: isMobile? (isLandscape? 0.8 : 0.95) : 0.6;
     iconType: Modal.NoIcon;
 
-    property bool isPreset: true;
+    property string type: "apply";
 
     signal apply(obj: var);
 
@@ -68,8 +68,9 @@ Modal {
 
     property var defaultOff: ["trim_ranges_ms", "offsets", "video_infofps_scale", "video_inforotation", "synchronizationdo_autosync"];
 
-    text: isPreset? qsTr("Select settings you want to include in the preset")
-                  : qsTr("Select settings you want to apply to all items in the render queue");
+    text: type == "preset"? qsTr("Select settings you want to include in the preset")
+        : type == "apply"? qsTr("Select settings you want to apply to all items in the render queue")
+        : qsTr("Select fields to include in the exported file");
     t.font.bold: true;
     t.font.pixelSize: 18 * dpiScale;
 
@@ -85,8 +86,12 @@ Modal {
         });
     }
     Component.onCompleted: {
-        if (!root.isPreset) delete root.desc[1]["Synchronization|synchronization"];
-        groupsRepeater.model = [root.getData(0), root.getData(1)];
+        if (root.type == "apply") delete root.desc[1]["Synchronization|synchronization"];
+        if (root.type == "gyro_csv") {
+            groupsRepeater.model = [root.getData(0), root.getData(1), root.getData(2)];
+        } else {
+            groupsRepeater.model = [root.getData(0), root.getData(1)];
+        }
         QT_TR_NOOP("Video");
             QT_TR_NOOP("Rotation");
             QT_TR_NOOP("Frame rate");
@@ -124,6 +129,17 @@ Modal {
             QT_TR_NOOP("Background");
             QT_TR_NOOP("Playback speed");
             QT_TR_NOOP("Playback mute status");
+
+        QT_TR_NOOP("Original");
+        QT_TR_NOOP("Stabilized");
+        QT_TR_NOOP("Zooming");
+            QT_TR_NOOP("Gyroscope");
+            QT_TR_NOOP("Accelerometer");
+            QT_TR_NOOP("Quaternion");
+            QT_TR_NOOP("Euler angles");
+            QT_TR_NOOP("Minimal FOV scale");
+            QT_TR_NOOP("Smoothed FOV scale");
+            QT_TR_NOOP("Focal length (if available)");
     }
 
     Item { width: 1; height: 10 * dpiScale; }
@@ -132,7 +148,7 @@ Modal {
         id: sectionsArea;
         width: parent.width;
         spacing: 15 * dpiScale;
-        function forAllCheckboxes(node, cb): void {
+        function forAllCheckboxes(node: QtObject, cb: var): void {
             for (let i = node.children.length; i > 0; --i) {
                 const child = node.children[i - 1];
                 if (child) {
@@ -147,7 +163,7 @@ Modal {
             id: groupsRepeater;
             model: 2;
             Column {
-                width: parent.width / 2 - sectionsArea.spacing / 2;
+                width: (parent.width - sectionsArea.spacing * (groupsRepeater.count - 1)) / groupsRepeater.count;
                 spacing: 15 * dpiScale;
                 Repeater {
                     model: modelData;
@@ -200,11 +216,55 @@ Modal {
     }
 
     BasicText {
-        visible: root.isPreset;
+        visible: root.type == "preset";
         text: qsTr("Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.") + "\n\n" +
               qsTr("You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.");
         color: styleTextColor;
         textFormat: Text.MarkdownText;
+    }
+    Column {
+        visible: false && root.type == "preset";
+        width: parent.width;
+        RadioButton {
+            id: saveToFile;
+            checked: true;
+            text: qsTr("Save to file")
+        }
+        RadioButton {
+            id: saveToLensProfiles;
+            text: qsTr("Save to lens profile directory");
+        }
+        RadioButton {
+            id: saveAsDefaultPreset;
+            text: qsTr("Save as default preset");
+        }
+    }
+
+    Column {
+        visible: root.type == "gyro_csv";
+        width: parent.width;
+        RadioButton {
+            id: exportAllSamples;
+            checked: true;
+            text: qsTr("Export all samples");
+        }
+        RadioButton {
+            id: exportPerFrame;
+            text: qsTr("Export one sample per frame");
+            onCheckedChanged: {
+                sectionsArea.forAllCheckboxes(sectionsArea, function(cb) {
+                    if (cb.props[0] == "gyroscope" || cb.props[0] == "accelerometer") {
+                        cb.enabled = !checked;
+                        if (!cb.enabled && cb.checked) cb.checked = false;
+                    }
+                });
+            }
+        }
+    }
+    BasicText {
+        visible: root.type == "gyro_csv" && exportPerFrame.checked;
+        text: qsTr("When exporting one sample per frame, it's the sample in the middle of the frame, and it ignores rolling shutter correction.");
+        color: styleTextColor;
     }
 
     Item { width: 1; height: 10 * dpiScale; }
@@ -212,11 +272,18 @@ Modal {
     onClicked: (index) => {
         if (index == 0) { // Save/Apply
             let finalObj = { };
+
+            if (type == "preset") {
+                finalObj.save_type = saveToFile.checked? "file" : saveToLensProfiles.checked? "lens" : "default";
+            } else if (type == "gyro_csv") {
+                finalObj.export_all_samples = exportAllSamples.checked;
+            }
+
             sectionsArea.forAllCheckboxes(sectionsArea, function(cb) {
                 for (const x of cb.props) {
                     if (cb.group) {
                         if (!finalObj[cb.group]) finalObj[cb.group] = { };
-                        finalObj[cb.group][x] = cb.checked;
+                        finalObj[cb.group][x] = cb.checked && cb.enabled;
                     } else {
                         finalObj[x] = cb.checked;
                     }
@@ -228,7 +295,7 @@ Modal {
         root.opened = false;
         root.destroy(1000);
     }
-    buttons: [isPreset? qsTr("Save") : qsTr("Apply"), qsTr("Cancel")];
+    buttons: [type == "apply"? qsTr("Apply") : qsTr("Save"), qsTr("Cancel")];
     accentButton: 0;
 
     function copyObj(from: var, by: var, to: var): void {
@@ -253,5 +320,31 @@ Modal {
             }
         }
         return finalData;
+    }
+
+    function loadSelection(obj: var): void {
+        if (obj.hasOwnProperty("export_all_samples")) {
+            if (obj.export_all_samples) {
+                exportAllSamples.checked = true;
+            } else {
+                exportPerFrame.checked = true;
+            }
+        }
+        if (obj.hasOwnProperty("save_type")) {
+            if (obj.save_type == "file") saveToFile.checked = true;
+            if (obj.save_type == "lens") saveToLensProfiles.checked = true;
+            if (obj.save_type == "default") saveAsDefaultPreset.checked = true;
+        }
+
+        sectionsArea.forAllCheckboxes(sectionsArea, function(cb) {
+            for (const x of cb.props) {
+                if (cb.group) {
+                    cb.checked = obj[cb.group] && obj[cb.group][x];
+                } else {
+                    cb.checked = obj[x];
+                }
+            }
+        });
+        exportPerFrame.checkedChanged();
     }
 }
