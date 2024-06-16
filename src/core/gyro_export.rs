@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright © 2024 Adrian <adrian.eddy at gmail>
+
 use crate::filesystem;
 use crate::telemetry_parser;
 use std::collections::BTreeMap;

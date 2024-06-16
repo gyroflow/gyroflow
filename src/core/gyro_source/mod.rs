@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
+mod file_metadata;
+mod imu_transforms;
+mod sony;
+pub use file_metadata::*;
+pub use imu_transforms::*;
+
 use nalgebra::*;
 use std::iter::zip;
 use std::collections::BTreeMap;
 use std::collections::btree_map::Entry;
-use parking_lot::RwLock;
 use std::sync::{ Arc, atomic::AtomicBool };
 use telemetry_parser::{ Input, util };
 use telemetry_parser::tags_impl::{ GetWithType, GroupId, TagId, TimeQuaternion };
@@ -24,182 +29,9 @@ pub type TimeIMU = telemetry_parser::util::IMUData;
 pub type TimeQuat = BTreeMap<i64, Quat64>; // key is timestamp_us
 pub type TimeVec = BTreeMap<i64, Vector3<f64>>; // key is timestamp_us
 
-#[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
-#[serde(default)]
-pub struct LensParams {
-    pub focal_length: Option<f32>, // millimeters
-    pub pixel_pitch: Option<(u32, u32)>, // nanometers
-    pub capture_area_origin: Option<(f32, f32)>, // pixels
-    pub capture_area_size: Option<(f32, f32)>, // pixels
-    pub pixel_focal_length: Option<f32>, // pixels
-    pub distortion_coefficients: Vec<f64>,
-}
-
-#[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
-#[serde(default)]
-pub struct FileMetadata {
-    pub imu_orientation:     Option<String>,
-    pub raw_imu:             Vec<TimeIMU>,
-    pub quaternions:         TimeQuat,
-    pub gravity_vectors:     Option<TimeVec>,
-    pub image_orientations:  Option<TimeQuat>,
-    pub detected_source:     Option<String>,
-    pub frame_readout_time:  Option<f64>,
-    pub frame_rate:          Option<f64>,
-    pub camera_identifier:   Option<CameraIdentifier>,
-    pub lens_profile:        Option<serde_json::Value>,
-    pub lens_positions:      BTreeMap<i64, f64>,
-    pub lens_params:         BTreeMap<i64, LensParams>,
-    pub digital_zoom:        Option<f64>,
-    pub has_accurate_timestamps: bool,
-    pub additional_data:     serde_json::Value,
-    pub per_frame_time_offsets: Vec<f64>,
-}
-impl FileMetadata {
-    pub fn thin(&self) -> Self {
-        Self {
-            imu_orientation:         self.imu_orientation.clone(),
-            raw_imu:                 Default::default(),
-            quaternions:             Default::default(),
-            gravity_vectors:         Default::default(),
-            image_orientations:      Default::default(),
-            detected_source:         self.detected_source.clone(),
-            frame_readout_time:      self.frame_readout_time.clone(),
-            frame_rate:              self.frame_rate.clone(),
-            camera_identifier:       self.camera_identifier.clone(),
-            lens_profile:            self.lens_profile.clone(),
-            lens_positions:          Default::default(),
-            lens_params:             Default::default(),
-            has_accurate_timestamps: self.has_accurate_timestamps.clone(),
-            additional_data:         self.additional_data.clone(),
-            per_frame_time_offsets:  Default::default(),
-            digital_zoom:            Default::default(),
-        }
-    }
-    pub fn has_motion(&self) -> bool {
-        !self.raw_imu.is_empty() || !self.quaternions.is_empty()
-    }
-}
-
-// ------------- ReadOnlyFileMetadata -------------
-// Make a thread-safe read-only wrapper for FileMetadata, because once it's read, it's never changed
-#[derive(Clone)]
-pub struct ReadOnlyFileMetadata(pub Arc<RwLock<FileMetadata>>);
-impl Default for ReadOnlyFileMetadata {
-    fn default() -> Self {
-        Self(Arc::new(RwLock::new(Default::default())))
-    }
-}
-impl From<FileMetadata> for ReadOnlyFileMetadata {
-    fn from(v: FileMetadata) -> Self {
-        Self(Arc::new(RwLock::new(v)))
-    }
-}
-impl ReadOnlyFileMetadata {
-    pub fn read(&self) -> parking_lot::RwLockReadGuard<'_, FileMetadata> {
-        self.0.read()
-    }
-    pub fn set_raw_imu(&mut self, v: Vec<TimeIMU>) {
-        self.0.write().raw_imu = v;
-    }
-}
-impl serde::Serialize for ReadOnlyFileMetadata {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: serde::Serializer {
-        self.0.read().serialize(serializer)
-    }
-}
-impl<'de> serde::Deserialize<'de> for ReadOnlyFileMetadata {
-	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: serde::Deserializer<'de> {
-        Ok(Self(Arc::new(RwLock::new(FileMetadata::deserialize(deserializer)?))))
-    }
-}
-// ------------- ReadOnlyFileMetadata -------------
-
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
 pub struct FileLoadOptions {
     pub sample_index: Option<usize>
-}
-
-
-#[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
-pub struct IMUTransforms {
-    pub imu_orientation: Option<String>,
-    pub imu_rotation_angles: Option<[f64; 3]>,
-    pub acc_rotation_angles: Option<[f64; 3]>,
-    pub imu_rotation: Option<Rotation3<f64>>,
-    pub acc_rotation: Option<Rotation3<f64>>,
-    pub imu_lpf: f64,
-    pub gyro_bias: Option<[f64; 3]>,
-}
-impl IMUTransforms {
-    pub fn transform(&self, v: &mut [f64; 3], is_acc: bool) {
-        if let Some(bias) = self.gyro_bias {
-            v[0] += bias[0];
-            v[1] += bias[1];
-            v[2] += bias[2];
-        }
-        if let Some(ref orientation) = self.imu_orientation {
-            if orientation != "XYZ" {
-                *v = Self::orient(v, orientation.as_bytes());
-            }
-        }
-        if is_acc && self.acc_rotation.is_some() {
-            *v = Self::rotate(v, self.acc_rotation.unwrap());
-        } else if self.imu_rotation.is_some() {
-            *v = Self::rotate(v, self.imu_rotation.unwrap());
-        }
-    }
-
-    pub fn has_any(&self) -> bool {
-        self.imu_orientation.as_deref().is_some_and(|x| x != "XYZ")
-            || self.imu_rotation.is_some()
-            || self.acc_rotation.is_some()
-            || self.gyro_bias.is_some_and(|x| x[0].abs() > 0.0 || x[1].abs() > 0.0 || x[2].abs() > 0.0)
-            || self.imu_lpf > 0.0
-    }
-
-    pub fn set_imu_rotation(&mut self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
-        if pitch_deg.abs() > 0.0 || roll_deg.abs() > 0.0 || yaw_deg.abs() > 0.0 {
-            self.imu_rotation_angles = Some([pitch_deg, roll_deg, yaw_deg]);
-            self.imu_rotation = Some(Rotation3::from_euler_angles(
-                yaw_deg * DEG2RAD,
-                pitch_deg * DEG2RAD,
-                roll_deg * DEG2RAD
-            ));
-        } else {
-            self.imu_rotation_angles = None;
-            self.imu_rotation = None;
-        }
-    }
-    pub fn set_acc_rotation(&mut self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
-        if pitch_deg.abs() > 0.0 || roll_deg.abs() > 0.0 || yaw_deg.abs() > 0.0 {
-            self.acc_rotation_angles = Some([pitch_deg, roll_deg, yaw_deg]);
-            self.acc_rotation = Some(Rotation3::from_euler_angles(
-                yaw_deg * DEG2RAD,
-                pitch_deg * DEG2RAD,
-                roll_deg * DEG2RAD
-            ));
-        } else {
-            self.acc_rotation_angles = None;
-            self.acc_rotation = None;
-        }
-    }
-
-    fn orient(inp: &[f64; 3], io: &[u8]) -> [f64; 3] {
-        let map = |o: u8| -> f64 {
-            match o as char {
-                'X' => inp[0], 'x' => -inp[0],
-                'Y' => inp[1], 'y' => -inp[1],
-                'Z' => inp[2], 'z' => -inp[2],
-                err => { panic!("Invalid orientation {}", err); }
-            }
-        };
-        [map(io[0]), map(io[1]), map(io[2]) ]
-    }
-    fn rotate(inp: &[f64; 3], rot: Rotation3<f64>) -> [f64; 3] {
-        let rotated = rot.transform_vector(&Vector3::new(inp[0], inp[1], inp[2]));
-        [rotated[0], rotated[1], rotated[2]]
-    }
 }
 
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
@@ -514,158 +346,13 @@ impl GyroSource {
             for info in samples {
                 if let Some(ref tag_map) = info.tag_map {
                     // --------------------------------- Sony ---------------------------------
-
-                    if let Some(lmd) = tag_map.get(&GroupId::Custom("LensDistortion".into())) {
-                        let pixel_pitch = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::PixelPitch) as Option<&(u32, u32)>).cloned();
-                        let crop_size = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaSize) as Option<&(f32, f32)>).cloned();
-                        let mut lens_compensation_enabled = false;
-
-                        if let Some(enabled) = lmd.get_t(TagId::Enabled) as Option<&bool> {
-                            lens_compensation_enabled = *enabled;
-                        }
-
-                        if let Some(v) = lmd.get_t(TagId::Data) as Option<&serde_json::Value> {
-                            telemetry_parser::try_block!({
-                                let pixel_pitch = pixel_pitch?;
-                                let crop_size = crop_size?;
-                                let sensor_height = v.get("effective_sensor_height_nm")?.as_f64()? / 1e9;
-                                let coeff_scale = v.get("coeff_scale")?.as_f64()?;
-                                // let focal_length_nm = v.get("focal_length_nm")?.as_f64()?;
-                                let mut lens_in_ray_angle: Vec<f64> = v.get("coeffs")?.as_array()?.into_iter().filter_map(|x| Some(x.as_f64()? / coeff_scale.max(1.0) / 180.0 * std::f64::consts::PI)).collect();
-                                lens_in_ray_angle.insert(0, 0.0);
-
-                                let lens_out_radius = nalgebra::DVector::from_iterator(11, (0..11).map(|i| (i as f64) / 10.0 * sensor_height));
-
-                                // Fit polynomial
-                                let mut matrix = nalgebra::DMatrix::<f64>::zeros(11, 6);
-                                for (i, angle) in lens_in_ray_angle.iter().enumerate() {
-                                    for power in 0..6 {
-                                        matrix[(i, power)] = angle.powf((power + 1) as f64);
-                                    }
-                                }
-                                match nalgebra::SVD::new(matrix.clone(), true, true).solve(&lens_out_radius, 1e-18f64) {
-                                    Ok(poly_coeffs) => {
-                                        assert_eq!(poly_coeffs.len(), 6);
-                                        //////////////////////////////////////////////////
-                                        fn a2y(a: f64, params: &nalgebra::DVector<f64>) -> f64 {
-                                            let mut sum = 0.0;
-                                            for i in 0..6 {
-                                                sum += a.powi(i + 1) * params[i as usize];
-                                            }
-                                            sum
-                                        }
-                                        fn a2y_diff(a: f64, params: &nalgebra::DVector<f64>) -> f64 {
-                                            let mut sum = 0.0;
-                                            for i in 0..6 {
-                                                sum += (i as f64 + 1.0) * a.powi(i) * params[i as usize];
-                                            }
-                                            sum
-                                        }
-                                        fn y2a(y: f64, params: &nalgebra::DVector<f64>) -> f64 {
-                                            let mut x = 0.01;
-                                            for _ in 0..50 {
-                                                x = x - (a2y(x, params) - y) / a2y_diff(x, params);
-                                            }
-                                            x
-                                        }
-
-                                        // Calculate max possible fov
-                                        let sensor_crop_px = nalgebra::Vector2::new(crop_size.0 as f64, crop_size.1 as f64);
-                                        let pixel_pitch = nalgebra::Vector2::new(pixel_pitch.0 as f64, pixel_pitch.1 as f64) / 1e9;
-                                        let video_res_px = nalgebra::Vector2::new(size.0 as f64, size.1 as f64);
-
-                                        let sensor_crop = pixel_pitch.component_mul(&sensor_crop_px);
-                                        let pixel_pitch_scaled = sensor_crop.component_div(&video_res_px);
-
-                                        let fov_hor = y2a(sensor_crop.x / 2.0, &poly_coeffs);
-                                        let fov_vert = y2a(sensor_crop.y / 2.0, &poly_coeffs);
-                                        let fov_diag = y2a(sensor_crop.norm() / 2.0, &poly_coeffs);
-
-                                        let focal_length = (video_res_px.x / fov_hor.tan())
-                                            .max(video_res_px.y / fov_vert.tan())
-                                            .max(video_res_px.norm() / fov_diag.tan())
-                                            / 2.0;
-                                        let post_scale = [
-                                            1.0 / pixel_pitch_scaled.x / focal_length,
-                                            1.0 / pixel_pitch_scaled.y / focal_length,
-                                        ];
-
-                                        let timestamp_us = (info.timestamp_ms * 1000.0).round() as i64;
-                                        if let Some(lp) = md.lens_params.get_mut(&timestamp_us) {
-                                            lp.focal_length = Some((focal_length * sensor_height / size.1 as f64 * 1000.0) as f32);
-                                            lp.pixel_focal_length = Some(focal_length as f32);
-                                            if !lens_compensation_enabled {
-                                                lp.distortion_coefficients = poly_coeffs.into_iter().cloned().chain(post_scale).collect();
-                                            }
-                                        }
-
-                                        if md.lens_profile.is_none() {
-                                            let focal_length = tag_map.get(&GroupId::Lens)
-                                                .and_then(|x| x.get_t(TagId::FocalLength) as Option<&f32>)
-                                                .map(|x| format!("{:.2} mm", *x));
-                                            md.lens_profile = Some(serde_json::json!({
-                                                "calibrated_by": "Sony",
-                                                "camera_brand": "Sony",
-                                                "camera_model": input.camera_model().map(|x| x.as_str()).unwrap_or(&""),
-                                                "lens_model":   focal_length.unwrap_or_default(),
-                                                "calib_dimension":  { "w": size.0, "h": size.1 },
-                                                "orig_dimension":   { "w": size.0, "h": size.1 },
-                                                "output_dimension": { "w": size.0, "h": size.1 },
-                                                "frame_readout_time": md.frame_readout_time,
-                                                "official": true,
-                                                "asymmetrical": false,
-                                                "note": format!("Distortion comp.: {}", if lens_compensation_enabled { "On" } else { "Off" }),
-                                                "fisheye_params": {
-                                                    "camera_matrix": [
-                                                        [ 0.0, 0.0, size.0 / 2 ],
-                                                        [ 0.0, 0.0, size.1 / 2 ],
-                                                        [ 0.0, 0.0, 1.0 ]
-                                                    ],
-                                                    "distortion_coeffs": []
-                                                },
-                                                "distortion_model": "sony",
-                                                "sync_settings": {
-                                                    "initial_offset": 0,
-                                                    "initial_offset_inv": false,
-                                                    "search_size": 0.3,
-                                                    "max_sync_points": 5,
-                                                    "every_nth_frame": 1,
-                                                    "time_per_syncpoint": 0.5,
-                                                    "do_autosync": false
-                                                },
-                                                "calibrator_version": "---"
-                                            }));
-                                        }
-                                    },
-                                    Err(e) => {
-                                        log::error!("Error fitting polynomial: {e:?}");
-                                    }
-                                }
-
-                            });
-                        }
+                    if let Some((org_sample_rate, offset)) = sony::get_time_offset(&md, &input, tag_map, sample_rate) {
+                        original_sample_rate = org_sample_rate;
+                        md.per_frame_time_offsets.push(offset);
                     }
+                    sony::init_lens_profile(&mut md, &input, tag_map, size, info);
                     // --------------------------------- Sony ---------------------------------
-                    // Timing
-                    telemetry_parser::try_block!({
-                        let model_offset = if input.camera_model().map(|x| x == "DSC-RX0M2").unwrap_or_default() { 1.5 } else { 0.0 };
-                        let imager = tag_map.get(&GroupId::Imager)?;
-                        let gyro   = tag_map.get(&GroupId::Gyroscope)?;
 
-                        let first_frame_ts     =  (imager.get_t(TagId::FirstFrameTimestamp) as Option<&f64>)?;
-                        let exposure_time      =  (imager.get_t(TagId::ExposureTime)        as Option<&f64>)?;
-                        let offset             =  (gyro  .get_t(TagId::TimeOffset)          as Option<&f64>)?;
-                        let sampling_frequency = *(gyro  .get_t(TagId::Frequency)           as Option<&i32>)? as f64;
-                        let scaler             = *(gyro  .get_t(TagId::Unknown(0xe436))     as Option<&i32>).unwrap_or(&1000000) as f64;
-                        original_sample_rate = sampling_frequency;
-
-                        let rounded_offset = (offset * 1000.0 * (1000000.0 / scaler)).round();
-                        let offset_diff = ((rounded_offset - (1000000.0 / sampling_frequency) * (rounded_offset / (1000000.0 / sampling_frequency)).floor())).round() / 1000.0;
-
-                        let frame_offset = first_frame_ts - (exposure_time / 2.0) + (md.frame_readout_time.unwrap_or_default() / 2.0) + model_offset + offset_diff - offset;
-
-                        md.per_frame_time_offsets.push(frame_offset / sampling_frequency * sample_rate);
-                    });
                     // --------------------------------- Sony ---------------------------------
                     // --------------------------------- Insta360 ---------------------------------
                     // Timing
