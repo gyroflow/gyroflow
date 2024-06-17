@@ -306,7 +306,8 @@ Modal {
                 }
             } else {
                 to[key] = { };
-                copyObj(from[key], by[key], to[key]);
+                if (from.hasOwnProperty(key))
+                    copyObj(from[key], by[key], to[key]);
             }
         }
     }
