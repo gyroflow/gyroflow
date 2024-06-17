@@ -384,6 +384,12 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         proc.video.encoder_params.options.set(key, value);
     }
 
+    if encoder.0.contains("nvenc") {
+        if proc.video.encoder_params.options.get("rc").is_none() {
+            proc.video.encoder_params.options.set("rc", "cbr");
+        }
+    }
+
     if !pixel_format.is_empty() {
         use std::str::FromStr;
         match Pixel::from_str(&pixel_format.to_ascii_lowercase()) {
