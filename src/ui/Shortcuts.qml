@@ -312,4 +312,22 @@ Item {
             });
         }
     }
+
+    // Next file in folder
+    Shortcut {
+        sequence: "Shift+Page Down";
+        onActivated: {
+            const url = filesystem.get_next_file_url(window.videoArea.loadedFileUrl, 1);
+            if (url && url.toString()) window.videoArea.loadFile(url);
+        }
+    }
+
+    // Previous file in folder
+    Shortcut {
+        sequence: "Shift+Page Up";
+        onActivated: {
+            const url = filesystem.get_next_file_url(window.videoArea.loadedFileUrl, -1);
+            if (url && url.toString()) window.videoArea.loadFile(url);
+        }
+    }
 }

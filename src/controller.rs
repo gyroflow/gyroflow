@@ -2208,6 +2208,7 @@ pub struct Filesystem {
     move_to_trash:            qt_method!(fn(&self, url: QUrl)),
     save_allowed_folders:     qt_method!(fn(&self)),
     restore_allowed_folders:  qt_method!(fn(&self)),
+    get_next_file_url:        qt_method!(fn(&self, current_url: QUrl, index: i32) -> QUrl),
     url_opened:               qt_signal!(url: QUrl),
 }
 impl Filesystem {
@@ -2261,5 +2262,22 @@ impl Filesystem {
                 Err(e) => ::log::error!("Failed to move file to trash: {e:?}"),
             }
         }
+    }
+
+    fn get_next_file_url(&self, current_url: QUrl, index: i32) -> QUrl {
+        let current_url = util::qurl_to_encoded(current_url);
+
+        let folder = filesystem::get_folder(&current_url);
+        let filename = filesystem::get_filename(&current_url);
+
+        let list = filesystem::list_folder(&folder);
+        let current_index = list.iter().position(|x| x.0 == filename);
+
+        if let Some(current_index) = current_index {
+            if let Some(next_entry) = list.get((current_index as i32 + index) as usize) {
+                return QUrl::from(QString::from(next_entry.1.clone()));
+            }
+        }
+        QUrl::default()
     }
 }
