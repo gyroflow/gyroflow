@@ -46,7 +46,7 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: 
             let params_ptr = params.as_ptr();
             let params_len = params.len() as u32;
             let matrices_ptr = itm.matrices.as_ptr();
-            let matrices_len = (itm.matrices.len() * 12 * std::mem::size_of::<f32>()) as u32;
+            let matrices_len = (itm.matrices.len() * 14 * std::mem::size_of::<f32>()) as u32;
             let canvas = undist.drawing.get_buffer();
             let canvas_ptr = canvas.as_ptr();
             let canvas_len = canvas.len() as u32;

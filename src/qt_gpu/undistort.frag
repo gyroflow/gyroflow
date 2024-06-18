@@ -110,7 +110,7 @@ void draw_safe_area(inout vec4 out_pix, float x, float y) {
 
 float get_param(float row, float idx) {
     int size = bool(params.flags & 16)? params.width : params.height;
-    return texture(texParams, vec2(idx / 11.0, row / float(size - 1))).r;
+    return texture(texParams, vec2(idx / 13.0, row / float(size - 1))).r;
 }
 
 vec2 rotate_and_distort(vec2 pos, float idx) {

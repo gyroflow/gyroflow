@@ -81,10 +81,10 @@ public:
         m_kernelParams.reset(rhi->newBuffer(QRhiBuffer::Dynamic, QRhiBuffer::UniformBuffer, kernelParmsSize));
         if (!m_kernelParams->create()) { qDebug2("init") << "failed to create m_kernelParams"; return false; }
 
-        m_texMatrices.reset(rhi->newTexture(QRhiTexture::R32F, QSize(12, sizeForRS), 1, QRhiTexture::Flags()));
+        m_texMatrices.reset(rhi->newTexture(QRhiTexture::R32F, QSize(14, sizeForRS), 1, QRhiTexture::Flags()));
         if (!m_texMatrices->create()) { qDebug2("init") << "failed to create m_texMatrices"; return false; }
 
-        matricesBuffer.resize(sizeForRS * 12 * sizeof(float));
+        matricesBuffer.resize(sizeForRS * 14 * sizeof(float));
 
         m_texCanvas.reset(rhi->newTexture(QRhiTexture::R8, canvasSize, 1, QRhiTexture::Flags()));
         if (!m_texCanvas->create()) { qDebug2("init") << "failed to create m_texCanvas"; return false; }

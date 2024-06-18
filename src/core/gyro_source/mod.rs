@@ -336,12 +336,15 @@ impl GyroSource {
             camera_identifier,
             has_accurate_timestamps,
             additional_data,
-            per_frame_time_offsets: Default::default(),
+            per_frame_time_offsets: Vec::new(),
             digital_zoom,
+            camera_stab_data: Vec::new(),
+            mesh_correction:  Vec::new(),
         };
 
         let sample_rate = Self::get_sample_rate(&md);
         let mut original_sample_rate = sample_rate;
+        let mut is_temp = sony::ISTemp::default();
         if let Some(ref samples) = input.samples {
             for info in samples {
                 if let Some(ref tag_map) = info.tag_map {
@@ -351,6 +354,10 @@ impl GyroSource {
                         md.per_frame_time_offsets.push(offset);
                     }
                     sony::init_lens_profile(&mut md, &input, tag_map, size, info);
+                    sony::stab_collect(&mut is_temp, tag_map, info, fps);
+                    if let Some(mesh) = sony::get_mesh_correction(tag_map) {
+                        md.mesh_correction.push(mesh);
+                    }
                     // --------------------------------- Sony ---------------------------------
 
                     // --------------------------------- Sony ---------------------------------
@@ -387,6 +394,7 @@ impl GyroSource {
                 if let Some(frt) = md.frame_readout_time {
                     md.frame_readout_time = Some(frt / original_sample_rate * sample_rate);
                 }
+                md.camera_stab_data = sony::stab_calc_splines(&md, &is_temp, sample_rate, fps, size).unwrap_or_default();
             }
         }
 

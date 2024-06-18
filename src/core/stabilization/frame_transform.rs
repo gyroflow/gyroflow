@@ -10,11 +10,12 @@ const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
 
 #[derive(Default, Clone)]
 pub struct FrameTransform {
-    pub matrices: Vec<[f32; 12]>,
+    pub matrices: Vec<[f32; 14]>,
     pub kernel_params: super::KernelParams,
     pub fov: f64,
     pub minimal_fov: f64,
     pub focal_length: Option<f64>,
+    pub mesh_correction: Vec<f32>,
 }
 
 impl FrameTransform {
@@ -177,6 +178,12 @@ impl FrameTransform {
         let new_k = Self::get_new_k(&params, &camera_matrix, fov);
 
         let gyro = params.gyro.read();
+        let file_metadata = gyro.file_metadata.read();
+
+        let mut mesh_correction = Vec::new();
+        if let Some(mc) = file_metadata.mesh_correction.get(frame) {
+            mesh_correction = mc.clone();
+        }
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(&params, true);
@@ -185,6 +192,16 @@ impl FrameTransform {
         let timestamp_ms = timestamp_ms + gyro.file_metadata.read().per_frame_time_offsets.get(frame).unwrap_or(&0.0);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
+
+        let frame_period = 1000.0 / params.scaled_fps as f64;
+        // dbg!(frame_period);
+
+        let is_scale = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
+            // dbg!(&params.width, &is.crop_area, &is.pixel_pitch);
+            params.width as f64 / is.crop_area.2 as f64 / is.pixel_pitch.0 as f64
+        } else {
+            1.0
+        };
 
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
@@ -216,6 +233,23 @@ impl FrameTransform {
                 r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
             }
 
+            let (sx, sy, ra, ox, oy) = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
+                let ts = ((row_readout_time * y as f64 + frame_period * frame as f64) * 1000.0).round() as i64;
+                let sx = is.ibis_x_spline.clamped_sample(y as f64 + is.offset).unwrap_or_default() * is_scale;
+                let sy = is.ibis_y_spline.clamped_sample(y as f64 + is.offset).unwrap_or_default() * is_scale;
+                let ra = is.ibis_a_spline.clamped_sample(y as f64 + is.offset).unwrap_or_default();
+
+                let ox = is.ois_x_spline.clamped_sample(y as f64 + is.offset).unwrap_or_default() * is_scale;
+                let oy = is.ois_y_spline.clamped_sample(y as f64 + is.offset).unwrap_or_default() * is_scale;
+
+                if y == 0 {
+                    dbg!(frame, ts, sx, sy, ra, ox, oy);
+                }
+                (sx as f32, sy as f32, ra as f32, ox as f32, oy as f32)
+            } else {
+                (0.0, 0.0, 0.0, 0.0, 0.0)
+            };
+
             let i_r = (new_k * r).pseudo_inverse(0.000001);
             if let Err(err) = i_r {
                 log::error!("Failed to multiply matrices: {:?} * {:?}: {}", new_k, r, err);
@@ -225,9 +259,11 @@ impl FrameTransform {
                 i_r[(0, 0)], i_r[(0, 1)], i_r[(0, 2)],
                 i_r[(1, 0)], i_r[(1, 1)], i_r[(1, 2)],
                 i_r[(2, 0)], i_r[(2, 1)], i_r[(2, 2)],
-                0.0, 0.0, 0.0
+                sx, sy, ra,
+                ox, oy
             ]
-        }).collect::<Vec<[f32; 12]>>();
+        }).collect::<Vec<[f32; 14]>>();
+        drop(file_metadata);
         drop(gyro);
 
         let mut digital_lens_params = [0f32; 4];
@@ -265,7 +301,8 @@ impl FrameTransform {
             kernel_params,
             fov: ui_fov,
             minimal_fov: *params.minimal_fovs.get(frame).unwrap_or(&1.0),
-            focal_length
+            focal_length,
+            mesh_correction
         }
     }
 

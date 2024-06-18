@@ -21,6 +21,19 @@ pub struct LensParams {
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
+pub struct CameraStabData {
+    pub offset: f64,
+    pub crop_area: (f32, f32, f32, f32),
+    pub pixel_pitch: (u32, u32),
+    pub ibis_x_spline: splines::Spline<f64, f64>,
+    pub ibis_y_spline: splines::Spline<f64, f64>,
+    pub ibis_a_spline: splines::Spline<f64, f64>,
+    pub ois_x_spline: splines::Spline<f64, f64>,
+    pub ois_y_spline: splines::Spline<f64, f64>,
+}
+
+#[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
 pub struct FileMetadata {
     pub imu_orientation:     Option<String>,
     pub raw_imu:             Vec<TimeIMU>,
@@ -38,6 +51,8 @@ pub struct FileMetadata {
     pub has_accurate_timestamps: bool,
     pub additional_data:     serde_json::Value,
     pub per_frame_time_offsets: Vec<f64>,
+    pub camera_stab_data:    Vec<CameraStabData>,
+    pub mesh_correction:     Vec<Vec<f32>>,
 }
 impl FileMetadata {
     pub fn thin(&self) -> Self {
@@ -54,10 +69,12 @@ impl FileMetadata {
             lens_profile:            self.lens_profile.clone(),
             lens_positions:          Default::default(),
             lens_params:             Default::default(),
+            digital_zoom:            self.digital_zoom.clone(),
             has_accurate_timestamps: self.has_accurate_timestamps.clone(),
             additional_data:         self.additional_data.clone(),
             per_frame_time_offsets:  Default::default(),
-            digital_zoom:            Default::default(),
+            camera_stab_data:        Default::default(),
+            mesh_correction:         Default::default(),
         }
     }
     pub fn has_motion(&self) -> bool {

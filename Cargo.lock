@@ -1017,7 +1017,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e78c33b#e78c33b3099474c272e9c0f2c61dc3db10fca269"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=1ced6c6#1ced6c6165842d0ffeed2c707d66cb7d74f6b69f"
 dependencies = [
  "bitflags 2.5.0",
  "libloading",
@@ -1054,15 +1054,15 @@ dependencies = [
 
 [[package]]
 name = "derive_more"
-version = "0.99.17"
+version = "0.99.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fb810d30a7c1953f91334de7244731fc3f3c10d7fe163338a35b9f640960321"
+checksum = "5f33878137e4dafd7fa914ad4e259e18a4e8e532b9617a2d0150262bf53abfce"
 dependencies = [
  "convert_case",
  "proc-macro2",
  "quote",
  "rustc_version",
- "syn 1.0.109",
+ "syn 2.0.66",
 ]
 
 [[package]]
@@ -1743,6 +1743,7 @@ dependencies = [
  "serde_json",
  "simple-easing",
  "space",
+ "splines",
  "stabilize_spirv",
  "tar",
  "telemetry-parser",
@@ -1812,6 +1813,12 @@ name = "hermit-abi"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
+
+[[package]]
+name = "hermit-abi"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fbf6a919d6cf397374f7dfeeea91d974c7c0a7221d0d0f4f20d859d329e53fcc"
 
 [[package]]
 name = "hex"
@@ -2367,9 +2374,9 @@ checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 
 [[package]]
 name = "miniz_oxide"
-version = "0.7.3"
+version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87dfd01fe195c66b572b37921ad8803d010623c0aca821bea2302239d155cdae"
+checksum = "b8a240ddb74feaf34a79a7add65a741f3167852fba007066dcac1ca548d89c08"
 dependencies = [
  "adler",
 ]
@@ -2401,7 +2408,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e78c33b#e78c33b3099474c272e9c0f2c61dc3db10fca269"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=1ced6c6#1ced6c6165842d0ffeed2c707d66cb7d74f6b69f"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -2686,7 +2693,7 @@ version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4161fcb6d602d4d2081af7c3a45852d875a03dd337a6bfdd6e06407b61342a43"
 dependencies = [
- "hermit-abi",
+ "hermit-abi 0.3.9",
  "libc",
 ]
 
@@ -2995,13 +3002,13 @@ checksum = "d231b230927b5e4ad203db57bbcbee2802f6bce620b1e4a9024a07d94e2907ec"
 
 [[package]]
 name = "polling"
-version = "3.7.1"
+version = "3.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e6a007746f34ed64099e88783b0ae369eaa3da6392868ba262e2af9b8fbaea1"
+checksum = "a3ed00ed3fbf728b5816498ecd316d1716eecaced9c0c8d2c5a6740ca214985b"
 dependencies = [
  "cfg-if",
  "concurrent-queue",
- "hermit-abi",
+ "hermit-abi 0.4.0",
  "pin-project-lite",
  "rustix",
  "tracing",
@@ -3473,9 +3480,9 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
 name = "safe_arch"
-version = "0.7.1"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f398075ce1e6a179b46f51bd88d0598b92b00d3551f1a2d4ac49e771b56ac354"
+checksum = "c3460605018fdc9612bce72735cba0d27efbcd9904780d44c7e3a9948f96148a"
 dependencies = [
  "bytemuck",
 ]
@@ -3711,6 +3718,15 @@ version = "0.9.0"
 source = "git+https://github.com/EmbarkStudios/rust-gpu?rev=54f6978#54f6978c25b7e168ded04e720b996625b3654ebd"
 
 [[package]]
+name = "splines"
+version = "4.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "228c4551e53c672e86439509545dd7ffcb966b6876c58b108e433a30e6117101"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "stabilize_spirv"
 version = "0.0.0"
 dependencies = [
@@ -3803,7 +3819,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.3.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=374783b#374783bf8962628c3073c26f5beb748c98430a28"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=dd4bb29#dd4bb29e79a87cb4e5c6e364e2d0cd657742490b"
 dependencies = [
  "argh",
  "byteorder",
@@ -4253,9 +4269,9 @@ dependencies = [
 
 [[package]]
 name = "webpki-roots"
-version = "0.26.2"
+version = "0.26.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c452ad30530b54a4d8e71952716a212b08efd0f3562baa66c29a618b07da7c3"
+checksum = "bd7c23921eeb1713a4e851530e9b9756e4fb0e89978582942612524cf09f01cd"
 dependencies = [
  "rustls-pki-types",
 ]
@@ -4263,7 +4279,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e78c33b#e78c33b3099474c272e9c0f2c61dc3db10fca269"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=1ced6c6#1ced6c6165842d0ffeed2c707d66cb7d74f6b69f"
 dependencies = [
  "arrayvec",
  "cfg_aliases",
@@ -4287,7 +4303,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e78c33b#e78c33b3099474c272e9c0f2c61dc3db10fca269"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=1ced6c6#1ced6c6165842d0ffeed2c707d66cb7d74f6b69f"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4312,7 +4328,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e78c33b#e78c33b3099474c272e9c0f2c61dc3db10fca269"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=1ced6c6#1ced6c6165842d0ffeed2c707d66cb7d74f6b69f"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4356,7 +4372,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=e78c33b#e78c33b3099474c272e9c0f2c61dc3db10fca269"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=1ced6c6#1ced6c6165842d0ffeed2c707d66cb7d74f6b69f"
 dependencies = [
  "bitflags 2.5.0",
  "js-sys",
@@ -4845,9 +4861,9 @@ dependencies = [
 
 [[package]]
 name = "zbus"
-version = "4.2.2"
+version = "4.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "989c3977a7aafa97b12b9a35d21cdcff9b0d2289762b14683f45d66b1ba6c48f"
+checksum = "23915fcb26e7a9a9dc05fd93a9870d336d6d032cd7e8cebf1c5c37666489fdd5"
 dependencies = [
  "async-broadcast",
  "async-executor",
@@ -4883,9 +4899,9 @@ dependencies = [
 
 [[package]]
 name = "zbus_macros"
-version = "4.2.2"
+version = "4.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6fe9de53245dcf426b7be226a4217dd5e339080e5d46e64a02d6e5dcbf90fca1"
+checksum = "02bcca0b586d2f8589da32347b4784ba424c4891ed86aa5b50d5e88f6b2c4f5d"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",

@@ -21,6 +21,7 @@ pub struct OclWrapper {
 
     buf_params: Buffer<u8>,
     buf_drawing: Buffer<u8>,
+    buf_lens_data: Buffer<f32>,
     buf_matrices: Buffer<f32>,
 }
 
@@ -281,12 +282,13 @@ impl OclWrapper {
                 .devices(ctx.device)
                 .build(&ctx.context)?;
 
-            let max_matrix_count = 12 * if (params.flags & 16) == 16 { params.width } else { params.height };
+            let max_matrix_count = 14 * if (params.flags & 16) == 16 { params.width } else { params.height };
             let flags = MemFlags::new().read_only().host_write_only();
 
             let buf_params   = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(std::mem::size_of::<KernelParams>()).build()?;
             let buf_drawing  = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(drawing_len.max(4)).build()?;
             let buf_matrices = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(max_matrix_count).build()?;
+            let buf_lens_data = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(16*16*2+2).build()?;
 
             let mut builder = Kernel::builder();
             unsafe {
@@ -297,7 +299,8 @@ impl OclWrapper {
                     .arg(&dest_buffer)
                     .arg(&buf_params)
                     .arg(&buf_matrices)
-                    .arg(&buf_drawing);
+                    .arg(&buf_drawing)
+                    .arg(&buf_lens_data);
             }
 
             let kernel = builder.build()?;
@@ -312,6 +315,7 @@ impl OclWrapper {
                 buf_params,
                 buf_drawing,
                 buf_matrices,
+                buf_lens_data,
             })
         } else {
             Err(ocl::BufferCmdError::AlreadyMapped.into())
@@ -319,7 +323,7 @@ impl OclWrapper {
     }
 
     pub fn undistort_image(&self, buffers: &mut Buffers, itm: &crate::stabilization::FrameTransform, drawing_buffer: &[u8]) -> ocl::Result<()> {
-        let matrices = unsafe { std::slice::from_raw_parts(itm.matrices.as_ptr() as *const f32, itm.matrices.len() * 12 ) };
+        let matrices = unsafe { std::slice::from_raw_parts(itm.matrices.as_ptr() as *const f32, itm.matrices.len() * 14 ) };
 
         let mut _temp1 = None;
         let mut _temp2 = None;
@@ -338,6 +342,10 @@ impl OclWrapper {
         if !drawing_buffer.is_empty() {
             if self.buf_drawing.len() != drawing_buffer.len() { log::error!("Buffer size mismatch drawing_buffer! {} vs {}", self.buf_drawing.len(), drawing_buffer.len()); return Ok(()); }
             self.buf_drawing.write(drawing_buffer).enq()?;
+        }
+        if !itm.mesh_correction.is_empty() {
+            if self.buf_lens_data.len() < itm.mesh_correction.len() { log::error!("Buffer size mismatch buf_lens_data! {} vs {}", self.buf_lens_data.len(), itm.mesh_correction.len()); return Ok(()); }
+            self.buf_lens_data.write(&itm.mesh_correction).enq()?;
         }
         match buffers.input.data {
             BufferSource::None => { },
