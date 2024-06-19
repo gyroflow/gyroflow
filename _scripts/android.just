@@ -42,7 +42,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "{{QtVersion}}/android_arm64_v8a")) {
         echo "Downloading Qt {{QtVersion}} for Android"
-        & $Python -m pip install -U pip git+https://github.com/AdrianEddy/aqtinstall.git
+        & $Python -m pip install -U pip aqtinstall
         & $Python -m aqt install-qt windows desktop {{QtVersion}} win64_mingw
         & $Python -m aqt install-qt windows android {{QtVersion}} android_arm64_v8a
     }

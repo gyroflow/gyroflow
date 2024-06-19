@@ -6,7 +6,7 @@ use parking_lot::RwLock;
 use std::sync::Arc;
 
 use crate::camera_identifier::CameraIdentifier;
-use super::{ TimeIMU, TimeQuat, TimeVec };
+use super::{ TimeIMU, TimeQuat, TimeVec, catmull_rom };
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
@@ -25,11 +25,8 @@ pub struct CameraStabData {
     pub offset: f64,
     pub crop_area: (f32, f32, f32, f32),
     pub pixel_pitch: (u32, u32),
-    pub ibis_x_spline: splines::Spline<f64, f64>,
-    pub ibis_y_spline: splines::Spline<f64, f64>,
-    pub ibis_a_spline: splines::Spline<f64, f64>,
-    pub ois_x_spline: splines::Spline<f64, f64>,
-    pub ois_y_spline: splines::Spline<f64, f64>,
+    pub ibis_spline: catmull_rom::CatmullRom<catmull_rom::Vector3f>,
+    pub ois_spline: catmull_rom::CatmullRom<catmull_rom::Vector3f>
 }
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]

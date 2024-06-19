@@ -4,6 +4,7 @@
 mod file_metadata;
 mod imu_transforms;
 mod sony;
+mod catmull_rom;
 pub use file_metadata::*;
 pub use imu_transforms::*;
 

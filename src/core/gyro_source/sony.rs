@@ -3,8 +3,7 @@
 
 use telemetry_parser::tags_impl::{ GroupedTagMap, GetWithType, GroupId, TagId, TimeVector3 };
 
-use super::{ FileMetadata, CameraStabData };
-use splines::{ Key, Spline, Interpolation::CatmullRom };
+use super::{ FileMetadata, CameraStabData, catmull_rom::{ self, Vector3f } };
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 
 pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input, tag_map: &GroupedTagMap, size: (usize, usize), info: &telemetry_parser::util::SampleInfo) {
@@ -315,11 +314,8 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, 
 
         // dbg!(frame, ofs_rows, is_temp.per_frame_crop.get(frame)?);
 
-        let mut ix: Vec<Key<f64, f64>> = Vec::new();
-        let mut iy: Vec<Key<f64, f64>> = Vec::new();
-        let mut iz: Vec<Key<f64, f64>> = Vec::new();
-        let mut oisx: Vec<Key<f64, f64>> = Vec::new();
-        let mut oisy: Vec<Key<f64, f64>> = Vec::new();
+        let mut ibis_spline: catmull_rom::CatmullRom<Vector3f> = catmull_rom::CatmullRom::new();
+        let mut ois_spline: catmull_rom::CatmullRom<Vector3f> = catmull_rom::CatmullRom::new();
 
         for i in 0..n_entries {
             let ts = is_temp.calc_ofs(i)? as f64 * entry_rate;
@@ -327,13 +323,18 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, 
                 //if frame < 3 {
                 //    dbg!(ts, is_temp.x[top_index + i], is_temp.y[top_index + i], is_temp.z[top_index + i]);
                 //}
-                ix.push(Key::new(ts, *is_temp.ibis_x.get(top_index + i)? as f64, CatmullRom));
-                iy.push(Key::new(ts, *is_temp.ibis_y.get(top_index + i)? as f64, CatmullRom));
-                iz.push(Key::new(ts, *is_temp.ibis_a.get(top_index + i)? as f64, CatmullRom));
+                ibis_spline.points.push((ts, Vector3f{
+                    x: *is_temp.ibis_x.get(top_index + i).unwrap_or(&0) as f64,
+                    y: *is_temp.ibis_y.get(top_index + i).unwrap_or(&0) as f64,
+                    z: *is_temp.ibis_a.get(top_index + i).unwrap_or(&0) as f64}
+                ));
             }
             if top_index + i < is_temp.ois_x.len() {
-                oisx.push(Key::new(ts, *is_temp.ois_x.get(top_index + i)? as f64, CatmullRom));
-                oisy.push(Key::new(ts, *is_temp.ois_y.get(top_index + i)? as f64, CatmullRom));
+                ois_spline.points.push((ts, Vector3f{
+                    x: *is_temp.ois_x.get(top_index + i).unwrap_or(&0) as f64,
+                    y: *is_temp.ois_y.get(top_index + i).unwrap_or(&0) as f64,
+                    z: 0.0}
+                ));
             }
         }
 
@@ -341,11 +342,8 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, 
             offset: ofs_rows as f64,
             crop_area: *is_temp.per_frame_crop.get(frame)?,
             pixel_pitch: is_temp.pixel_pitch,
-            ibis_x_spline: Spline::from_vec(ix),
-            ibis_y_spline: Spline::from_vec(iy),
-            ibis_a_spline: Spline::from_vec(iz),
-            ois_x_spline: Spline::from_vec(oisx),
-            ois_y_spline: Spline::from_vec(oisy),
+            ibis_spline,
+            ois_spline
         })
     }).collect();
 
@@ -380,7 +378,7 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap) -> Option<Vec<f32>> {
     let divisions = mesh_data.get("divisions")?.as_array()?;
     let divisions = (divisions[0].as_i64()? as usize, divisions[1].as_i64()? as usize);
 
-    let mut mesh = Vec::with_capacity(divisions.0*divisions.1*2 + 2);
+    let mut mesh = Vec::with_capacity(divisions.0 * divisions.1 * 2 + 2);
     mesh.push(divisions.0 as f32);
     mesh.push(divisions.1 as f32);
     for x in mesh_data.get("inverse_mesh")?.as_array()? {
