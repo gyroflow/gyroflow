@@ -164,6 +164,8 @@ impl FrameTransform {
         // ----------- Lens -----------
 
         let img_dim_ratio = Self::get_ratio(params);
+        let height_scale = params.video_height as f64 / params.height.max(1) as f64;
+
         let mut fov = Self::get_fov(params, frame, true, timestamp_ms, false);
         let mut ui_fov = Self::get_fov(params, frame, true, timestamp_ms, true);
         if let Some(adj) = params.lens.optimal_fov {
@@ -235,12 +237,12 @@ impl FrameTransform {
 
             let (sx, sy, ra, ox, oy) = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
                 let ts = ((row_readout_time * y as f64 + frame_period * frame as f64) * 1000.0).round() as i64;
-                let s = is.ibis_spline.interpolate(y as f64 + is.offset).unwrap_or_default();
+                let s = is.ibis_spline.interpolate(y as f64 * height_scale + is.offset).unwrap_or_default();
                 let sx = s.x * is_scale;
                 let sy = s.y * is_scale;
                 let ra = s.z;
 
-                let o = is.ois_spline.interpolate(y as f64 + is.offset).unwrap_or_default();
+                let o = is.ois_spline.interpolate(y as f64 * height_scale + is.offset).unwrap_or_default();
                 let ox = o.x * is_scale;
                 let oy = o.y * is_scale;
 
