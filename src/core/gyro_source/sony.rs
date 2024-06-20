@@ -81,6 +81,7 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                             1.0 / pixel_pitch_scaled.x / focal_length,
                             1.0 / pixel_pitch_scaled.y / focal_length,
                         ];
+                        let fx = focal_length;
 
                         let timestamp_us = (info.timestamp_ms * 1000.0).round() as i64;
                         if let Some(lp) = md.lens_params.get_mut(&timestamp_us) {
@@ -109,8 +110,8 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                                 "note": format!("Distortion comp.: {}", if lens_compensation_enabled { "On" } else { "Off" }),
                                 "fisheye_params": {
                                     "camera_matrix": [
-                                        [ 0.0, 0.0, size.0 / 2 ],
-                                        [ 0.0, 0.0, size.1 / 2 ],
+                                        [ fx, 0.0, size.0 / 2 ],
+                                        [ 0.0, fx, size.1 / 2 ],
                                         [ 0.0, 0.0, 1.0 ]
                                     ],
                                     "distortion_coeffs": []
@@ -314,8 +315,8 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, 
 
         // dbg!(frame, ofs_rows, is_temp.per_frame_crop.get(frame)?);
 
-        let mut ibis_spline: catmull_rom::CatmullRom<Vector3f> = catmull_rom::CatmullRom::new();
-        let mut ois_spline: catmull_rom::CatmullRom<Vector3f> = catmull_rom::CatmullRom::new();
+        let mut ibis_spline = catmull_rom::CatmullRom::new();
+        let mut ois_spline = catmull_rom::CatmullRom::new();
 
         for i in 0..n_entries {
             let ts = is_temp.calc_ofs(i)? as f64 * entry_rate;
@@ -323,14 +324,14 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, 
                 //if frame < 3 {
                 //    dbg!(ts, is_temp.x[top_index + i], is_temp.y[top_index + i], is_temp.z[top_index + i]);
                 //}
-                ibis_spline.points.push((ts, Vector3f{
+                ibis_spline.points.push((ts, Vector3f {
                     x: *is_temp.ibis_x.get(top_index + i).unwrap_or(&0) as f64,
                     y: *is_temp.ibis_y.get(top_index + i).unwrap_or(&0) as f64,
                     z: *is_temp.ibis_a.get(top_index + i).unwrap_or(&0) as f64}
                 ));
             }
             if top_index + i < is_temp.ois_x.len() {
-                ois_spline.points.push((ts, Vector3f{
+                ois_spline.points.push((ts, Vector3f {
                     x: *is_temp.ois_x.get(top_index + i).unwrap_or(&0) as f64,
                     y: *is_temp.ois_y.get(top_index + i).unwrap_or(&0) as f64,
                     z: 0.0}
@@ -379,13 +380,115 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap) -> Option<Vec<f32>> {
     let divisions = (divisions[0].as_i64()? as usize, divisions[1].as_i64()? as usize);
 
     let mut mesh = Vec::with_capacity(divisions.0 * divisions.1 * 2 + 2);
-    mesh.push(divisions.0 as f32);
-    mesh.push(divisions.1 as f32);
-    for x in mesh_data.get("inverse_mesh")?.as_array()? {
+    mesh.push(divisions.0 as f64);
+    mesh.push(divisions.1 as f64);
+    for x in mesh_data.get("mesh")?.as_array()? {
         let coord = x.as_array()?;
-        mesh.push((coord[0].as_f64()? / size.0) as f32);
-        mesh.push((coord[1].as_f64()? / size.1) as f32);
+        mesh.push(coord[0].as_f64()?);
+        mesh.push(coord[1].as_f64()?);
     }
 
-    Some(mesh)
+    let step = ((size.0 / 8.0), (size.1 / 8.0));
+    let grid: Vec<_> = (0..divisions.1).map(|y| {
+        (0..divisions.0).map(move |x| (x as f64, y as f64))
+    }).flatten().collect();
+
+    let new_mesh: Vec<f32> = grid.into_par_iter().filter_map(|(x, y)| {
+        let new_pos = inverse_interpolate_mesh(step.0 * x, step.1 * y, size, &mesh).ok()?;
+        Some([
+            (new_pos.0 / size.0) as f32,
+            (new_pos.1 / size.1) as f32
+        ])
+    }).flatten().collect();
+
+    let mut inv_mesh = Vec::with_capacity(new_mesh.len() + 2);
+    inv_mesh.push(divisions.0 as f32);
+    inv_mesh.push(divisions.1 as f32);
+    inv_mesh.extend(new_mesh);
+
+    Some(inv_mesh)
+}
+
+use nalgebra::Vector2;
+use argmin::{ core::{ CostFunction, Error, Executor }, solver::neldermead::NelderMead };
+
+fn calc_tbl_itp_i(coord: &[f64], divisions: usize, i: usize, frac: f64) -> f64 {
+    if divisions == 0 {
+        return 0.0;
+    }
+    if i < divisions {
+        let first_coord = coord[i];
+        let next_coord = coord[i + 1];
+        let f_var1 = if i < 1 { 2.0 * first_coord - next_coord } else { coord[i - 1] };
+        let f_var2 = if i + 1 == divisions { 2.0 * next_coord - first_coord } else { coord[i + 2] };
+        return first_coord
+            + (next_coord - f_var1) * 0.5 * frac
+            + ((4.0 * next_coord + 2.0 * f_var1 - 5.0 * first_coord - f_var2) * 0.5 * frac * frac)
+            + ((3.0 * first_coord - 3.0 * next_coord + f_var2 - f_var1) * 0.5 * frac * frac * frac);
+    }
+    coord[divisions]
+}
+
+fn interpolate_mesh(x: f64, y: f64, size: (f64, f64), mesh: &[f64]) -> Vector2<f64> {
+    let divisions_x = mesh[0] as usize;
+    let divisions_y = mesh[1] as usize;
+    let x_scaled = x / (size.0 / (divisions_x as f64 - 1.0));
+    let y_scaled = y / (size.1 / (divisions_y as f64 - 1.0));
+
+    let x_int = (x_scaled.trunc() as usize).min(8 - 1).max(0);
+    let y_int = (y_scaled.trunc() as usize).min(8 - 1).max(0);
+    let x_frac = x_scaled - x_int as f64;
+    let y_frac = y_scaled - y_int as f64;
+
+    let mut row_interp_x = [0.0; 16];
+    let mut row_interp_y = [0.0; 16];
+    let mut temp_row_x = [0.0; 16];
+    let mut temp_row_y = [0.0; 16];
+    for y in 0..divisions_y {
+        for x in 0..divisions_x {
+            temp_row_x[x] = mesh[2 + y * divisions_x * 2 + x * 2];
+            temp_row_y[x] = mesh[2 + y * divisions_x * 2 + x * 2 + 1];
+        }
+        row_interp_x[y] = calc_tbl_itp_i(&temp_row_x, divisions_x - 1, x_int, x_frac);
+        row_interp_y[y] = calc_tbl_itp_i(&temp_row_y, divisions_y - 1, x_int, x_frac);
+    }
+
+    Vector2::new(
+        calc_tbl_itp_i(&row_interp_x, divisions_x - 1, y_int, y_frac),
+        calc_tbl_itp_i(&row_interp_y, divisions_y - 1, y_int, y_frac)
+    )
+}
+
+struct Objective<'a> {
+    x_prime: f64,
+    y_prime: f64,
+    size: (f64, f64),
+    mesh: &'a [f64],
+}
+impl CostFunction for Objective<'_> {
+    type Param = nalgebra::Vector2<f64>;
+    type Output = f64;
+    fn cost(&self, x: &Self::Param) -> Result<Self::Output, Error> {
+        let interp_pos = interpolate_mesh(x[0], x[1], self.size, self.mesh);
+        Ok((interp_pos[0] - self.x_prime).powi(2) + (interp_pos[1] - self.y_prime).powi(2))
+    }
+}
+fn inverse_interpolate_mesh(x_prime: f64, y_prime: f64, size: (f64, f64), mesh: &[f64]) -> Result<(f64, f64), argmin::core::Error> {
+    let operator = Objective { x_prime, y_prime, size, mesh };
+    let solver = NelderMead::new(vec![
+            Vector2::new(x_prime, y_prime),
+            Vector2::new(x_prime + 0.0001, y_prime),
+            Vector2::new(x_prime, y_prime + 0.0001),
+        ])
+        .with_sd_tolerance(1e-6)?;
+
+    let res = Executor::new(operator, solver)
+        .configure(|state| state.max_iters(100))
+        .run()?;
+
+    if let Some(coeffs) = res.state.best_param {
+        Ok((coeffs[0], coeffs[1]))
+    } else {
+        Err(argmin::core::Error::new(argmin::core::ArgminError::InvalidParameter { text: String::new() }))
+    }
 }
