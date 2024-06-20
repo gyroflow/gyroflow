@@ -208,11 +208,9 @@ impl GyroSource {
                         }
                     }
                     if let Some(map) = tag_map.get(&GroupId::Default) {
-                        if let Some(v) = map.get_t(TagId::Unknown(0x445a4f4d/*DZOM*/)) as Option<&String> {
-                            if v == "Y" {
-                                if let Some(v) = map.get_t(TagId::Unknown(0x445a4d58/*DZMX*/)) as Option<&f32> {
-                                    digital_zoom = Some(*v as f64);
-                                }
+                        if let Some(v) = map.get_t(TagId::Unknown(0x445a5354/*DZST*/)) as Option<&u32> {
+                            if *v != 0 {
+                                digital_zoom = Some(1.0 + (*v as f64 / 100.0) * 0.4);
                             }
                         }
                     }
