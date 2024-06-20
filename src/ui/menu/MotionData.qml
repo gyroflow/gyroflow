@@ -501,12 +501,13 @@ MenuItem {
                     const mesh = controller.mesh_at_frame(window.videoArea.vid.currentFrame);
                     if (!mesh.length) { meshCorrection.visible = false; return; }
                     const divisions = [mesh[0], mesh[1]];
+                    const mesh_size = [mesh[2], mesh[3]];
 
                     meshCorrection.visible = divisions[0] > 0;
 
-                    for (let i = 0; i < mesh.length - 2; i += 2) {
-                        const x = margin + (width  - 2*margin) * mesh[2 + i];
-                        const y = margin + (height - 2*margin) * mesh[2 + i + 1];
+                    for (let i = 8; i < mesh.length; i += 2) {
+                        const x = margin + (width  - 2*margin) * mesh[i + 0] / mesh_size[0];
+                        const y = margin + (height - 2*margin) * mesh[i + 1] / mesh_size[1];
                         ctx.beginPath();
                         ctx.arc(x, y, 2 * dpiScale, 0, 2 * Math.PI, false);
                         ctx.fillStyle = maincolor;
@@ -516,17 +517,17 @@ MenuItem {
                     ctx.lineWidth = 1 * dpiScale;
                     ctx.strokeStyle = maincolor;
                     ctx.beginPath();
-                    for (let i = 0; i < mesh.length - 2; i += 2) {
-                        const x = margin + (width  - 2*margin) * mesh[2 + i];
-                        const y = margin + (height - 2*margin) * mesh[2 + i + 1];
+                    for (let i = 8; i < mesh.length; i += 2) {
+                        const x = margin + (width  - 2*margin) * mesh[i + 0] / mesh_size[0];
+                        const y = margin + (height - 2*margin) * mesh[i + 1] / mesh_size[1];
                         ctx.moveTo(x, y);
-                        if (((i + 2) / 2) % divisions[1] != 0) {
-                            const xx = margin + (width  - 2*margin) * mesh[2 + i + 2];
-                            const yy = margin + (height - 2*margin) * mesh[2 + i + 2 + 1];
+                        if (((i - 8 + 2) / 2) % divisions[1] != 0) {
+                            const xx = margin + (width  - 2*margin) * mesh[i + 2 + 0] / mesh_size[0];
+                            const yy = margin + (height - 2*margin) * mesh[i + 2 + 1] / mesh_size[1];
                             ctx.lineTo(xx, yy);
                         }
-                        const xxx = margin + (width  - 2*margin) * mesh[2 + i + 9*2];
-                        const yyy = margin + (height - 2*margin) * mesh[2 + i + 9*2 + 1];
+                        const xxx = margin + (width  - 2*margin) * mesh[i + 9*2 + 0] / mesh_size[0];
+                        const yyy = margin + (height - 2*margin) * mesh[i + 9*2 + 1] / mesh_size[1];
                         ctx.moveTo(x, y);
                         ctx.lineTo(xxx, yyy);
                     }

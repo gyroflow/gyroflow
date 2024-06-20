@@ -359,6 +359,8 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, 
 
 pub fn get_mesh_correction(tag_map: &GroupedTagMap) -> Option<Vec<f32>> {
     let mesh_group = tag_map.get(&GroupId::Custom("MeshCorrection".into()))?;
+    let crop_origin = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaOrigin) as Option<&(f32, f32)>).cloned()?;
+    let crop_size   = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaSize)   as Option<&(f32, f32)>).cloned()?;
 
     let mesh_data = (mesh_group.get_t(TagId::Data) as Option<&serde_json::Value>)?;
 
@@ -388,22 +390,25 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap) -> Option<Vec<f32>> {
         mesh.push(coord[1].as_f64()?);
     }
 
-    let step = ((size.0 / 8.0), (size.1 / 8.0));
+    let step = ((size.0 / (divisions.0 as f64 - 1.0)), (size.1 / (divisions.1 as f64 - 1.0)));
     let grid: Vec<_> = (0..divisions.1).map(|y| {
         (0..divisions.0).map(move |x| (x as f64, y as f64))
     }).flatten().collect();
 
     let new_mesh: Vec<f32> = grid.into_par_iter().filter_map(|(x, y)| {
         let new_pos = inverse_interpolate_mesh(step.0 * x, step.1 * y, size, &mesh).ok()?;
-        Some([
-            (new_pos.0 / size.0) as f32,
-            (new_pos.1 / size.1) as f32
-        ])
+        Some([new_pos.0 as f32, new_pos.1 as f32])
     }).flatten().collect();
 
     let mut inv_mesh = Vec::with_capacity(new_mesh.len() + 2);
     inv_mesh.push(divisions.0 as f32);
     inv_mesh.push(divisions.1 as f32);
+    inv_mesh.push(size.0 as f32);
+    inv_mesh.push(size.1 as f32);
+    inv_mesh.push(crop_origin.0 as f32);
+    inv_mesh.push(crop_origin.1 as f32);
+    inv_mesh.push(crop_size.0 as f32);
+    inv_mesh.push(crop_size.1 as f32);
     inv_mesh.extend(new_mesh);
 
     Some(inv_mesh)
@@ -435,8 +440,8 @@ fn interpolate_mesh(x: f64, y: f64, size: (f64, f64), mesh: &[f64]) -> Vector2<f
     let x_scaled = x / (size.0 / (divisions_x as f64 - 1.0));
     let y_scaled = y / (size.1 / (divisions_y as f64 - 1.0));
 
-    let x_int = (x_scaled.trunc() as usize).min(8 - 1).max(0);
-    let y_int = (y_scaled.trunc() as usize).min(8 - 1).max(0);
+    let x_int = (x_scaled.trunc() as usize).min(divisions_x - 2).max(0);
+    let y_int = (y_scaled.trunc() as usize).min(divisions_y - 2).max(0);
     let x_frac = x_scaled - x_int as f64;
     let y_frac = y_scaled - y_int as f64;
 
