@@ -365,7 +365,7 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, Ve
 
     let mesh_data = (mesh_group.get_t(TagId::Data) as Option<&serde_json::Value>)?;
 
-    let crc = crc32fast::hash(serde_json::to_string(mesh_data).unwrap().as_bytes());
+    let crc = crc32fast::hash(serde_json::to_string(&[mesh_data, &crop_origin.0.into(), &crop_origin.1.into(), &crop_size.0.into(), &crop_size.1.into()]).unwrap().as_bytes());
     if cache.contains_key(&crc) {
         return cache.get(&crc).cloned();
     }
