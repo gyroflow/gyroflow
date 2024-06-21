@@ -20,10 +20,10 @@ QQC.Menu {
 
     // For compatibility with Qt < 6.5
     function setIcon(iconName: string): void {
-        icon.name = iconName;
-        icon.source = "qrc:/resources/icons/svg/" + iconName + ".svg";
         icon.width = 14 * dpiScale;
         icon.height = 14 * dpiScale;
+        icon.name = iconName;
+        icon.source = "qrc:/resources/icons/svg/" + iconName + ".svg";
         icon.color = styleTextColor;
     }
 
