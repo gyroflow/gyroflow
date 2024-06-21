@@ -974,7 +974,7 @@ impl Controller {
                         input:  BufferDescription { size: (width as usize, height as usize, width as usize * 4), ..Default::default() },
                         output: BufferDescription { size: (width as usize, height as usize, width as usize * 4), ..Default::default() },
                     };
-                    if let Some(ret) = qrhi_undistort::render(vid1.get_mdkplayer(), timestamp_ms, width, height, stab.clone(), &mut buffers) {
+                    if let Some(ret) = qrhi_undistort::render(vid1.get_mdkplayer(), timestamp_ms, frame as usize, width, height, stab.clone(), &mut buffers) {
                         update_info2((ret.fov, ret.minimal_fov, ret.focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
                     } else {
                         update_info2((1.0, 1.0, None, QString::from("---")));

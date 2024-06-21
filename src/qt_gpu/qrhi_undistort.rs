@@ -13,7 +13,7 @@ cpp! {{
     #include "src/qt_gpu/qrhi_undistort.cpp"
 }}
 
-pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: u32, stab: Arc<StabilizationManager>, buffers: &mut Buffers) -> Option<ProcessedInfo> {
+pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, frame: usize, width: u32, height: u32, stab: Arc<StabilizationManager>, buffers: &mut Buffers) -> Option<ProcessedInfo> {
     if stab.prevent_recompute.load(std::sync::atomic::Ordering::SeqCst) { return None; }
 
     let mut timestamp_us = (timestamp * 1000.0).round() as i64;
@@ -36,7 +36,7 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, width: u32, height: 
     }
 
     if let Some(mut undist) = stab.stabilization.try_write() {
-        undist.ensure_stab_data_at_timestamp::<RGBA8>(timestamp_us, buffers, true);
+        undist.ensure_stab_data_at_timestamp::<RGBA8>(timestamp_us, Some(frame), buffers, true);
         stab.draw_overlays(&mut undist.drawing, timestamp_us);
     }
 
