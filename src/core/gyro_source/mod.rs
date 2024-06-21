@@ -389,8 +389,79 @@ impl GyroSource {
                         });
                     }
                     // --------------------------------- Insta360 ---------------------------------
+
                 }
             }
+
+            // IBIS
+            telemetry_parser::try_block!({
+            use
+            telemetry_parser::tags_impl::*;
+            let ibis = tag_map.get(&GroupId::IBIS)?;
+
+            let shift = (ibis.get_t(TagID::Data) as Option<&Vec<TimeVector3<i32>>>)?;
+
+            let angle = (ibis.get_t(TagId::Data2) as Option<&Vec<TimeVector3<i32>>>)?;
+
+            let mut xs = BTreeMap::<i64,f64>::new();
+
+            let mut ys = BTreeMap::i64,f64>::new();
+
+            let mut th = BTreeMap::i64,f64>::new()
+
+            let pixel_pitch = (8400.0,8400.0);
+
+            let e406 = 1000000000.0;
+
+            assert_eq!(shift.len(),angle.len());
+
+            for (s,a) in shift.intro_iter().zip(angle.intro_iter())
+            {
+            let x = ((e406 / 1000000000.0) * (4096.0 / pixel_pitch.0)) * s.x as f64;
+
+            let y = ((e406 / 1000000000.0) * (4096.0 / pixel_pitch.1)) * s.y as f64;
+
+            if xx < 100 {
+            dbg!((x, y, s.x, s.y, a.z));
+
+            xx += 1;
+            }
+
+            xs.insert(s.t as i64, x);
+            ys.insert(s.t as i64, y);
+            th.insert(s.t as i64, a.z as f64);
+            }
+
+            let mut xs2 = Vec::new();
+            let mut ys2 = Vec::new();
+            let mut angles = Vec::new();
+
+            for vid_y in 0..2160 {
+
+            let x = telemetry_parser::util::interpolate_at_timestamp((vid_y as f64 * (8850.0 / 2160.0)).round() as i64, &xs);
+
+            let y = telemetry_parser::util::interpolate_at_timestamp((vid_y as f64 * (8850.0 / 2160.0)).round() as i64, &ys);
+
+            let t = telemetry_parser::util::interpolate_at_timestamp((vid_y as f64 * (8850.0 / 2160.0)).round() as i64, &th);
+
+            angles.push(t / 1000.0);
+            xs2.push((x / 4096.0));
+            ys2.push((y / 4096.0));
+            }
+
+
+            md.per_frame_data.push(serde_json::json!({
+            "translatex": xs2,
+            "translatey":ys2,
+            "angle": angles
+            }));
+            });
+
+
+
+
+
+
             if input.camera_type() == "Sony" {
                 if let Some(frt) = md.frame_readout_time {
                     md.frame_readout_time = Some(frt / original_sample_rate * sample_rate);

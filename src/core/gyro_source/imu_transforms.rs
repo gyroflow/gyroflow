@@ -31,6 +31,34 @@ impl IMUTransforms {
         } else if self.imu_rotation.is_some() {
             *v = Self::rotate(v, self.imu_rotation.unwrap());
         }
+
+       let mut angles = Vec::new();
+       let mut xs = Vec::new();
+       let mut ys = Vec::new();
+
+       (|| -> Option<()> {
+                           let frame_md = params.gyro.file_metadata.per_frame_data.get(frame)?;
+
+                           angles.extend(frame_md.get("angle")?.as_array()?.iter().map(|x|x.as_f64().unwrap() as f32));
+
+                           xs.extend(frame_md.get("translatex")?.as_array()?.iter().map(|x|x.as_f64().unwrap() as f32));
+
+                           xy.extend(frame_md.get("translatey")?.as_array()?.iter().map(|x|x.as_f64().unwrap() as f32));
+
+                           Some(())
+                           })();
+
+
+                           let matrices = (0..rows).into_par_iter().map(|y| {
+
+                           let th = *angles.get(y).unwrap_or(&0.0) as f64;
+                           let theta = Matrix3::new_rotation(th * (std::f64::const::PI / 180.0));
+                           let xs = *xs.get(y).unwrap_or(&0.0) as f32;
+                           let ys = *ys.get(y).unwrap_or(&0.0) as f32;
+
+                           sx, sy, th as f32
+                           });
+
     }
 
     pub fn has_any(&self) -> bool {
@@ -84,3 +112,5 @@ impl IMUTransforms {
         [rotated[0], rotated[1], rotated[2]]
     }
 }
+
+
