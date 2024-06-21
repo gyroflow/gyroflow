@@ -962,7 +962,7 @@ impl Controller {
             let update_info2 = update_info.clone();
 
             #[allow(unused_variables)]
-            vid.onProcessTexture(Box::new(move |_frame, timestamp_ms, width, height, backend_id, ptr1, ptr2, ptr3, ptr4, ptr5| -> bool {
+            vid.onProcessTexture(Box::new(move |frame, timestamp_ms, width, height, backend_id, ptr1, ptr2, ptr3, ptr4, ptr5| -> bool {
                 if width < 4 || height < 4 || backend_id == 0 { return false; }
 
                 if !stab.params.read().stab_enabled { return false; }
@@ -1068,7 +1068,7 @@ impl Controller {
                     };
 
                 if let Some((ref mut buffers, backend)) = buffers {
-                    match stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, buffers) {
+                    match stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0).round() as i64, Some(frame as usize), buffers) {
                         Ok(ret) =>  {
                             update_info2((ret.fov, ret.minimal_fov, ret.focal_length, QString::from(format!("Processing {}x{} using {backend}->{} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
                             return true;
@@ -1085,7 +1085,7 @@ impl Controller {
 
             let stab = self.stabilizer.clone();
             let update_info2 = update_info.clone();
-            vid.onProcessPixels(Box::new(move |_frame, timestamp_ms, width, height, stride, pixels: &mut [u8]| -> (u32, u32, u32, *mut u8) {
+            vid.onProcessPixels(Box::new(move |frame, timestamp_ms, width, height, stride, pixels: &mut [u8]| -> (u32, u32, u32, *mut u8) {
                 let _time = std::time::Instant::now();
 
                 // TODO: cache in atomics instead of locking the mutex every time
@@ -1098,7 +1098,7 @@ impl Controller {
                 let mut out_pixels = out_pixels.borrow_mut();
                 out_pixels.resize_with(os*oh, u8::default);
 
-                let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0) as i64, &mut Buffers {
+                let ret = stab.process_pixels::<RGBA8>((timestamp_ms * 1000.0).round() as i64, Some(frame as usize), &mut Buffers {
                     input: BufferDescription {
                         size: (width as usize, height as usize, stride as usize),
                         data: BufferSource::Cpu { buffer: pixels },
@@ -2270,10 +2270,14 @@ impl Filesystem {
         let folder = filesystem::get_folder(&current_url);
         let filename = filesystem::get_filename(&current_url);
 
-        let list = filesystem::list_folder(&folder);
-        let current_index = list.iter().position(|x| x.0 == filename);
+        let extensions = [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "jpg", "exr", "dng", "braw", "r3d" ];
 
-        if let Some(current_index) = current_index {
+        let list: Vec<(String, String)> = filesystem::list_folder(&folder)
+            .into_iter()
+            .filter(|x| { let x = x.0.to_ascii_lowercase(); extensions.iter().any(|ext| x.ends_with(ext)) })
+            .collect();
+
+        if let Some(current_index) = list.iter().position(|x| x.0 == filename) {
             if let Some(next_entry) = list.get((current_index as i32 + index) as usize) {
                 return QUrl::from(QString::from(next_entry.1.clone()));
             }

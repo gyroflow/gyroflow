@@ -584,7 +584,7 @@ impl StabilizationManager {
         }
     }
 
-    pub fn process_pixels<T: PixelType>(&self, mut timestamp_us: i64, buffers: &mut Buffers) -> Result<stabilization::ProcessedInfo, GyroflowCoreError> {
+    pub fn process_pixels<T: PixelType>(&self, mut timestamp_us: i64, frame: Option<usize>, buffers: &mut Buffers) -> Result<stabilization::ProcessedInfo, GyroflowCoreError> {
         if let gpu::BufferSource::Cpu { buffer } = &buffers.input.data  { if buffer.is_empty() { return Err(GyroflowCoreError::InputBufferEmpty); } }
         if let gpu::BufferSource::Cpu { buffer } = &buffers.output.data { if buffer.is_empty() { return Err(GyroflowCoreError::OutputBufferEmpty); } }
 
@@ -607,14 +607,14 @@ impl StabilizationManager {
         {
             if let Some(mut undist) = self.stabilization.try_write_for(std::time::Duration::from_millis(30000)) {
                 self.draw_overlays(&mut undist.drawing, timestamp_us);
-                undist.ensure_ready_for_processing::<T>(timestamp_us, buffers);
+                undist.ensure_ready_for_processing::<T>(timestamp_us, frame, buffers);
             } else {
                 return Err(GyroflowCoreError::Unknown);
             }
         }
 
         if let Some(undist) = self.stabilization.try_read_for(std::time::Duration::from_millis(30000)) {
-            undist.process_pixels::<T>(timestamp_us, buffers, None)
+            undist.process_pixels::<T>(timestamp_us, frame, buffers, None)
         } else {
             Err(GyroflowCoreError::Unknown)
         }

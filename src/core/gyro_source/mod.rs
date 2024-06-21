@@ -345,6 +345,7 @@ impl GyroSource {
         let sample_rate = Self::get_sample_rate(&md);
         let mut original_sample_rate = sample_rate;
         let mut is_temp = sony::ISTemp::default();
+        let mut mesh_cache = BTreeMap::new();
         if let Some(ref samples) = input.samples {
             for info in samples {
                 if let Some(ref tag_map) = info.tag_map {
@@ -355,7 +356,7 @@ impl GyroSource {
                     }
                     sony::init_lens_profile(&mut md, &input, tag_map, size, info);
                     sony::stab_collect(&mut is_temp, tag_map, info, fps);
-                    if let Some(mesh) = sony::get_mesh_correction(tag_map) {
+                    if let Some(mesh) = sony::get_mesh_correction(tag_map, &mut mesh_cache) {
                         md.mesh_correction.push(mesh);
                     }
                     // --------------------------------- Sony ---------------------------------

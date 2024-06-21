@@ -5,6 +5,7 @@ use telemetry_parser::tags_impl::{ GroupedTagMap, GetWithType, GroupId, TagId, T
 
 use super::{ FileMetadata, CameraStabData, catmull_rom::{ self, Vector3f } };
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
+use std::collections::BTreeMap;
 
 pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input, tag_map: &GroupedTagMap, size: (usize, usize), info: &telemetry_parser::util::SampleInfo) {
     if let Some(lmd) = tag_map.get(&GroupId::Custom("LensDistortion".into())) {
@@ -357,12 +358,17 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, 
     Some(per_frame_data)
 }
 
-pub fn get_mesh_correction(tag_map: &GroupedTagMap) -> Option<Vec<f32>> {
+pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, Vec<f32>>) -> Option<Vec<f32>> {
     let mesh_group = tag_map.get(&GroupId::Custom("MeshCorrection".into()))?;
     let crop_origin = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaOrigin) as Option<&(f32, f32)>).cloned()?;
     let crop_size   = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaSize)   as Option<&(f32, f32)>).cloned()?;
 
     let mesh_data = (mesh_group.get_t(TagId::Data) as Option<&serde_json::Value>)?;
+
+    let crc = crc32fast::hash(serde_json::to_string(mesh_data).unwrap().as_bytes());
+    if cache.contains_key(&crc) {
+        return cache.get(&crc).cloned();
+    }
 
     let size = mesh_data.get("size")?.as_array()?;
     let size = (size[0].as_f64()?, size[1].as_f64()?);
@@ -410,6 +416,8 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap) -> Option<Vec<f32>> {
     inv_mesh.push(crop_size.0 as f32);
     inv_mesh.push(crop_size.1 as f32);
     inv_mesh.extend(new_mesh);
+
+    cache.insert(crc, inv_mesh.clone());
 
     Some(inv_mesh)
 }
@@ -485,10 +493,10 @@ fn inverse_interpolate_mesh(x_prime: f64, y_prime: f64, size: (f64, f64), mesh: 
             Vector2::new(x_prime + 0.0001, y_prime),
             Vector2::new(x_prime, y_prime + 0.0001),
         ])
-        .with_sd_tolerance(1e-6)?;
+        .with_sd_tolerance(1e-8)?;
 
     let res = Executor::new(operator, solver)
-        .configure(|state| state.max_iters(100))
+        .configure(|state| state.max_iters(200))
         .run()?;
 
     if let Some(coeffs) = res.state.best_param {

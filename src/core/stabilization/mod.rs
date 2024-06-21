@@ -181,9 +181,9 @@ impl Stabilization {
         ret
     }
 
-    pub fn get_frame_transform_at<T: PixelType>(&mut self, timestamp_us: i64, buffers: &Buffers) -> FrameTransform {
+    pub fn get_frame_transform_at<T: PixelType>(&mut self, timestamp_us: i64, frame: Option<usize>, buffers: &Buffers) -> FrameTransform {
         let timestamp_ms = (timestamp_us as f64) / 1000.0;
-        let frame = crate::frame_at_timestamp(timestamp_ms, self.compute_params.scaled_fps) as usize; // Only for FOVs
+        let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, self.compute_params.scaled_fps) as usize); // Only for FOVs
 
         self.kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, self.compute_params.digital_lens.is_some());
         self.kernel_flags.set(KernelParamsFlags::HORIZONTAL_RS, self.compute_params.horizontal_rs);
@@ -243,7 +243,7 @@ impl Stabilization {
         transform
     }
 
-    pub fn ensure_stab_data_at_timestamp<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers, is_pixel_normalized: bool) {
+    pub fn ensure_stab_data_at_timestamp<T: PixelType>(&mut self, timestamp_us: i64, frame: Option<usize>, buffers: &mut Buffers, is_pixel_normalized: bool) {
         let mut insert = true;
         if let Some(itm) = self.stab_data.get(&timestamp_us) {
             insert = false;
@@ -375,7 +375,7 @@ impl Stabilization {
         false
     }
 
-    pub fn init_backends<T: PixelType>(&mut self, timestamp_us: i64, buffers: &Buffers) {
+    pub fn init_backends<T: PixelType>(&mut self, timestamp_us: i64, frame: Option<usize>, buffers: &Buffers) {
         let hash = self.get_current_checksum(buffers);
         let current_hash = self.initialized_backend.get_hash();
 
@@ -388,7 +388,7 @@ impl Stabilization {
             #[cfg(feature = "use-opencl")]
             if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() && next_backend != "wgpu" && opencl::is_buffer_supported(buffers) {
                 self.cl = None;
-                let params = self.get_frame_transform_at::<T>(timestamp_us, buffers).kernel_params;
+                let params = self.get_frame_transform_at::<T>(timestamp_us, frame, buffers).kernel_params;
                 let distortion_model = self.compute_params.distortion_model.clone();
                 let digital_lens = self.compute_params.digital_lens.clone();
                 let cl = std::panic::catch_unwind(|| {
@@ -419,7 +419,7 @@ impl Stabilization {
                     self.initialized_backend = BackendType::Wgpu(hash);
                 } else {
                     self.wgpu = None;
-                    let params = self.get_frame_transform_at::<T>(timestamp_us, buffers).kernel_params;
+                    let params = self.get_frame_transform_at::<T>(timestamp_us, frame, buffers).kernel_params;
                     let distortion_model = self.compute_params.distortion_model.clone();
                     let digital_lens = self.compute_params.digital_lens.clone();
                     let wgpu = std::panic::catch_unwind(|| {
@@ -452,14 +452,14 @@ impl Stabilization {
         }
     }
 
-    pub fn ensure_ready_for_processing<T: PixelType>(&mut self, timestamp_us: i64, buffers: &mut Buffers) {
+    pub fn ensure_ready_for_processing<T: PixelType>(&mut self, timestamp_us: i64, frame: Option<usize>, buffers: &mut Buffers) {
         if let Some(dev) = self.pending_device_change.take() {
             log::debug!("Setting device {dev}");
             self.update_device(dev, buffers);
         }
 
-        self.init_backends::<T>(timestamp_us, buffers);
-        self.ensure_stab_data_at_timestamp::<T>(timestamp_us, buffers, false);
+        self.init_backends::<T>(timestamp_us, frame, buffers);
+        self.ensure_stab_data_at_timestamp::<T>(timestamp_us, frame, buffers, false);
 
         if self.share_wgpu_instances && CACHED_WGPU.with(|x| !x.0.borrow().is_empty()) {
             let hash = self.get_current_checksum(buffers);
@@ -467,13 +467,13 @@ impl Stabilization {
             if !has_cached {
                 log::warn!("Cached wgpu not found, reinitializing. Key: {}", self.get_current_key(buffers));
                 self.initialized_backend = BackendType::None;
-                self.init_backends::<T>(timestamp_us, buffers);
+                self.init_backends::<T>(timestamp_us, frame, buffers);
             } else {
                 self.initialized_backend = BackendType::Wgpu(hash);
             }
         }
     }
-    pub fn process_pixels<T: PixelType>(&self, timestamp_us: i64, buffers: &mut Buffers, frame_transform: Option<&FrameTransform>) -> Result<ProcessedInfo, GyroflowCoreError> {
+    pub fn process_pixels<T: PixelType>(&self, timestamp_us: i64, frame: Option<usize>, buffers: &mut Buffers, frame_transform: Option<&FrameTransform>) -> Result<ProcessedInfo, GyroflowCoreError> {
         if /*self.size != buffers.input.size || */buffers.input.size.1 < 4 || buffers.output.size.1 < 4 { return Err(GyroflowCoreError::SizeTooSmall); }
 
         let itm = frame_transform.map(|x| Some(x)).unwrap_or_else(|| self.stab_data.get(&timestamp_us));

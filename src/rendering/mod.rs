@@ -522,10 +522,10 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                         };
 
                         if plane.initialized_backend.is_none() || plane.pending_device_change.is_some() {
-                            plane.ensure_ready_for_processing::<$t>(timestamp_us, &mut buffers);
+                            plane.ensure_ready_for_processing::<$t>(timestamp_us, None, &mut buffers);
                             plane.stab_data.clear();
                         }
-                        let mut transform = plane.get_frame_transform_at::<$t>(timestamp_us, &mut buffers);
+                        let mut transform = plane.get_frame_transform_at::<$t>(timestamp_us, None, &mut buffers);
                         transform.kernel_params.pixel_value_limit = $max_val;
                         transform.kernel_params.max_pixel_value = $max_val;
                         if plane.initialized_backend.is_wgpu() && $t::wgpu_format().map(|x| x.2).unwrap_or_default() {
@@ -535,7 +535,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                         if fill_with_background {
                             transform.kernel_params.flags |= KernelParamsFlags::FILL_WITH_BACKGROUND.bits();
                         }
-                        if let Err(e) = plane.process_pixels::<$t>(timestamp_us, &mut buffers, Some(&transform)) {
+                        if let Err(e) = plane.process_pixels::<$t>(timestamp_us, None, &mut buffers, Some(&transform)) {
                             ::log::error!("Failed to process pixels: {e:?}");
                         }
                     }));
