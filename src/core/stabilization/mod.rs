@@ -261,7 +261,7 @@ impl Stabilization {
             }
         }
         if insert {
-            let mut transform = self.get_frame_transform_at::<T>(timestamp_us, buffers);
+            let mut transform = self.get_frame_transform_at::<T>(timestamp_us, frame, buffers);
             if is_pixel_normalized {
                 transform.kernel_params.max_pixel_value = 1.0;
                 transform.kernel_params.pixel_value_limit = 1.0;
