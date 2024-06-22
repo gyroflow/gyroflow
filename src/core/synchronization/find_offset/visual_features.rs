@@ -60,8 +60,8 @@ pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64
                 let timestamp_ms  = *ts as f64 / 1000.0;
                 let timestamp_ms2 = *next_ts as f64 / 1000.0;
 
-                let undistorted_points1 = stabilization::undistort_points_with_rolling_shutter(&pts1, timestamp_ms - offs, params_ref, 1.0, false);
-                let undistorted_points2 = stabilization::undistort_points_with_rolling_shutter(&pts2, timestamp_ms2 - offs, params_ref, 1.0, false);
+                let undistorted_points1 = stabilization::undistort_points_with_rolling_shutter(&pts1, timestamp_ms - offs, None, params_ref, 1.0, false);
+                let undistorted_points2 = stabilization::undistort_points_with_rolling_shutter(&pts2, timestamp_ms2 - offs, None, params_ref, 1.0, false);
 
                 let mut distances = Vec::with_capacity(undistorted_points1.len());
                 for (p1, p2) in undistorted_points1.iter().zip(undistorted_points2.iter()) {

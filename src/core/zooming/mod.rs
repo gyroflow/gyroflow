@@ -28,11 +28,11 @@ impl From<i32> for ZoomMethod {
 }
 
 pub trait FieldOfViewAlgorithm {
-    fn compute(&self, timestamps: &[f64], range: &[(f64, f64)]) -> Vec<f64>;
+    fn compute(&self, timestamps: &[(usize, f64)], range: &[(f64, f64)]) -> Vec<f64>;
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>>;
 }
 
-pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[f64], method: ZoomMethod) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>)  {
+pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)], method: ZoomMethod) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>)  {
     if timestamps.is_empty() {
         return Default::default();
     }

@@ -1435,7 +1435,7 @@ impl Controller {
         let gyro = self.stabilizer.gyro.read();
         let file_metadata = gyro.file_metadata.read();
         if let Some(mc) = file_metadata.mesh_correction.get(frame) {
-            QVariantList::from_iter(mc.iter())
+            QVariantList::from_iter(mc.1.iter())
         } else {
             QVariantList::default()
         }
@@ -2275,6 +2275,7 @@ impl Filesystem {
         let list: Vec<(String, String)> = filesystem::list_folder(&folder)
             .into_iter()
             .filter(|x| { let x = x.0.to_ascii_lowercase(); extensions.iter().any(|ext| x.ends_with(ext)) })
+            .sorted_by(|a, b| human_sort::compare(&a.0, &b.0))
             .collect();
 
         if let Some(current_index) = list.iter().position(|x| x.0 == filename) {

@@ -184,7 +184,7 @@ impl FrameTransform {
 
         let mut mesh_correction = Vec::new();
         if let Some(mc) = file_metadata.mesh_correction.get(frame) {
-            mesh_correction = mc.clone();
+            mesh_correction = mc.1.clone(); // undistorting mesh
         }
 
         // ----------- Rolling shutter correction -----------
@@ -206,7 +206,6 @@ impl FrameTransform {
         };
 
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
-
 
         let quat1 = gyro.org_quat_at_timestamp(timestamp_ms).inverse();
         let smoothed_quat1 = gyro.smoothed_quat_at_timestamp(timestamp_ms);
@@ -310,7 +309,7 @@ impl FrameTransform {
         }
     }
 
-    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64, use_fovs: bool) -> (Matrix3<f64>, [f64; 12], Matrix3<f64>, Vec<Matrix3<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
+    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, use_fovs: bool) -> (Matrix3<f64>, [f64; 12], Matrix3<f64>, Vec<Matrix3<f64>>, Option<Vec<(f32, f32, f32, f32, f32)>>, Option<Vec<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
         // ----------- Keyframes -----------
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
 
@@ -320,7 +319,7 @@ impl FrameTransform {
         let additional_rotation   = crate::gyro_source::Quat64::from_euler_angles(additional_rotation_y, additional_rotation_x, additional_rotation_z);
         // ----------- Keyframes -----------
 
-        let frame = crate::frame_at_timestamp(timestamp_ms, params.scaled_fps) as usize;
+        let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, params.scaled_fps) as usize);
 
         let (camera_matrix, distortion_coeffs, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms);
 
@@ -331,6 +330,12 @@ impl FrameTransform {
         let new_k = Self::get_new_k(params, &camera_matrix, fov);
 
         let gyro = params.gyro.read();
+        let file_metadata = gyro.file_metadata.read();
+
+        let mut mesh_correction = None;
+        if let Some(mc) = file_metadata.mesh_correction.get(frame) {
+            mesh_correction = Some(mc.0.clone()); // distorting mesh
+        }
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(params, false);
@@ -366,6 +371,25 @@ impl FrameTransform {
             new_k * r
         }).collect();
 
-        (scaled_k, distortion_coeffs, new_k, rotations)
+        let height_scale = params.video_height as f64 / params.height.max(1) as f64;
+        let shifts: Option<Vec<(f32, f32, f32, f32, f32)>> = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
+            let is_scale = params.width as f64 / is.crop_area.2 as f64 / is.pixel_pitch.0 as f64;
+            Some(points_iter.iter().map(|&(_x, y)| {
+                let s = is.ibis_spline.interpolate(y as f64 * height_scale + is.offset).unwrap_or_default();
+                let sx = s.x * is_scale;
+                let sy = s.y * is_scale;
+                let ra = s.z;
+
+                let o = is.ois_spline.interpolate(y as f64 * height_scale + is.offset).unwrap_or_default();
+                let ox = o.x * is_scale;
+                let oy = o.y * is_scale;
+
+                (sx as f32, sy as f32, ra as f32, ox as f32, oy as f32)
+            }).collect())
+        } else {
+            None
+        };
+
+        (scaled_k, distortion_coeffs, new_k, rotations, shifts, mesh_correction)
     }
 }

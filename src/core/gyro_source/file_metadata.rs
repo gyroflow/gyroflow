@@ -6,7 +6,7 @@ use parking_lot::RwLock;
 use std::sync::Arc;
 
 use crate::camera_identifier::CameraIdentifier;
-use super::{ TimeIMU, TimeQuat, TimeVec, catmull_rom };
+use super::{ TimeIMU, TimeQuat, TimeVec, splines };
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
@@ -25,8 +25,8 @@ pub struct CameraStabData {
     pub offset: f64,
     pub crop_area: (f32, f32, f32, f32),
     pub pixel_pitch: (u32, u32),
-    pub ibis_spline: catmull_rom::CatmullRom<catmull_rom::Vector3f>,
-    pub ois_spline: catmull_rom::CatmullRom<catmull_rom::Vector3f>
+    pub ibis_spline: splines::CatmullRom<nalgebra::Vector3<f64>>,
+    pub ois_spline: splines::CatmullRom<nalgebra::Vector3<f64>>
 }
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -49,7 +49,7 @@ pub struct FileMetadata {
     pub additional_data:     serde_json::Value,
     pub per_frame_time_offsets: Vec<f64>,
     pub camera_stab_data:    Vec<CameraStabData>,
-    pub mesh_correction:     Vec<Vec<f32>>,
+    pub mesh_correction:     Vec<(Vec<f64>, Vec<f32>)>,
 }
 impl FileMetadata {
     pub fn thin(&self) -> Self {

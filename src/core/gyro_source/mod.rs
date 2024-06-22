@@ -4,9 +4,10 @@
 mod file_metadata;
 mod imu_transforms;
 mod sony;
-mod catmull_rom;
+mod splines;
 pub use file_metadata::*;
 pub use imu_transforms::*;
+pub use sony::interpolate_mesh;
 
 use nalgebra::*;
 use std::iter::zip;

@@ -2,10 +2,11 @@
 // Copyright © 2024 Adrian <adrian.eddy at gmail>, Vladimir Pinchuk
 
 use telemetry_parser::tags_impl::{ GroupedTagMap, GetWithType, GroupId, TagId, TimeVector3 };
-
-use super::{ FileMetadata, CameraStabData, catmull_rom::{ self, Vector3f } };
+use super::{ FileMetadata, CameraStabData, splines };
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use std::collections::BTreeMap;
+use nalgebra::Vector2;
+use argmin::{ core::{ CostFunction, Error, Executor }, solver::neldermead::NelderMead };
 
 pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input, tag_map: &GroupedTagMap, size: (usize, usize), info: &telemetry_parser::util::SampleInfo) {
     if let Some(lmd) = tag_map.get(&GroupId::Custom("LensDistortion".into())) {
@@ -316,8 +317,8 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, 
 
         // dbg!(frame, ofs_rows, is_temp.per_frame_crop.get(frame)?);
 
-        let mut ibis_spline = catmull_rom::CatmullRom::new();
-        let mut ois_spline = catmull_rom::CatmullRom::new();
+        let mut ibis_spline = splines::CatmullRom::new();
+        let mut ois_spline = splines::CatmullRom::new();
 
         for i in 0..n_entries {
             let ts = is_temp.calc_ofs(i)? as f64 * entry_rate;
@@ -325,18 +326,18 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, 
                 //if frame < 3 {
                 //    dbg!(ts, is_temp.x[top_index + i], is_temp.y[top_index + i], is_temp.z[top_index + i]);
                 //}
-                ibis_spline.points.push((ts, Vector3f {
-                    x: *is_temp.ibis_x.get(top_index + i).unwrap_or(&0) as f64,
-                    y: *is_temp.ibis_y.get(top_index + i).unwrap_or(&0) as f64,
-                    z: *is_temp.ibis_a.get(top_index + i).unwrap_or(&0) as f64}
-                ));
+                ibis_spline.points.push((ts, nalgebra::Vector3::new(
+                    *is_temp.ibis_x.get(top_index + i).unwrap_or(&0) as f64,
+                    *is_temp.ibis_y.get(top_index + i).unwrap_or(&0) as f64,
+                    *is_temp.ibis_a.get(top_index + i).unwrap_or(&0) as f64
+                )));
             }
             if top_index + i < is_temp.ois_x.len() {
-                ois_spline.points.push((ts, Vector3f {
-                    x: *is_temp.ois_x.get(top_index + i).unwrap_or(&0) as f64,
-                    y: *is_temp.ois_y.get(top_index + i).unwrap_or(&0) as f64,
-                    z: 0.0}
-                ));
+                ois_spline.points.push((ts, nalgebra::Vector3::new(
+                    *is_temp.ois_x.get(top_index + i).unwrap_or(&0) as f64,
+                    *is_temp.ois_y.get(top_index + i).unwrap_or(&0) as f64,
+                    0.0
+                )));
             }
         }
 
@@ -358,7 +359,7 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, 
     Some(per_frame_data)
 }
 
-pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, Vec<f32>>) -> Option<Vec<f32>> {
+pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (Vec<f64>, Vec<f32>)>) -> Option<(Vec<f64>, Vec<f32>)> {
     let mesh_group = tag_map.get(&GroupId::Custom("MeshCorrection".into()))?;
     let crop_origin = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaOrigin) as Option<&(f32, f32)>).cloned()?;
     let crop_size   = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaSize)   as Option<&(f32, f32)>).cloned()?;
@@ -390,6 +391,12 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, Ve
     let mut mesh = Vec::with_capacity(divisions.0 * divisions.1 * 2 + 2);
     mesh.push(divisions.0 as f64);
     mesh.push(divisions.1 as f64);
+    mesh.push(size.0 as f64);
+    mesh.push(size.1 as f64);
+    mesh.push(crop_origin.0 as f64);
+    mesh.push(crop_origin.1 as f64);
+    mesh.push(crop_size.0 as f64);
+    mesh.push(crop_size.1 as f64);
     for x in mesh_data.get("mesh")?.as_array()? {
         let coord = x.as_array()?;
         mesh.push(coord[0].as_f64()?);
@@ -417,58 +424,16 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, Ve
     inv_mesh.push(crop_size.1 as f32);
     inv_mesh.extend(new_mesh);
 
-    cache.insert(crc, inv_mesh.clone());
+    cache.insert(crc, (mesh.clone(), inv_mesh.clone()));
 
-    Some(inv_mesh)
+    Some((mesh, inv_mesh))
 }
 
-use nalgebra::Vector2;
-use argmin::{ core::{ CostFunction, Error, Executor }, solver::neldermead::NelderMead };
-
-fn calc_tbl_itp_i(coord: &[f64], divisions: usize, i: usize, frac: f64) -> f64 {
-    if divisions == 0 {
-        return 0.0;
-    }
-    if i < divisions {
-        let first_coord = coord[i];
-        let next_coord = coord[i + 1];
-        let f_var1 = if i < 1 { 2.0 * first_coord - next_coord } else { coord[i - 1] };
-        let f_var2 = if i + 1 == divisions { 2.0 * next_coord - first_coord } else { coord[i + 2] };
-        return first_coord
-            + (next_coord - f_var1) * 0.5 * frac
-            + ((4.0 * next_coord + 2.0 * f_var1 - 5.0 * first_coord - f_var2) * 0.5 * frac * frac)
-            + ((3.0 * first_coord - 3.0 * next_coord + f_var2 - f_var1) * 0.5 * frac * frac * frac);
-    }
-    coord[divisions]
-}
-
-fn interpolate_mesh(x: f64, y: f64, size: (f64, f64), mesh: &[f64]) -> Vector2<f64> {
-    let divisions_x = mesh[0] as usize;
-    let divisions_y = mesh[1] as usize;
-    let x_scaled = x / (size.0 / (divisions_x as f64 - 1.0));
-    let y_scaled = y / (size.1 / (divisions_y as f64 - 1.0));
-
-    let x_int = (x_scaled.trunc() as usize).min(divisions_x - 2).max(0);
-    let y_int = (y_scaled.trunc() as usize).min(divisions_y - 2).max(0);
-    let x_frac = x_scaled - x_int as f64;
-    let y_frac = y_scaled - y_int as f64;
-
-    let mut row_interp_x = [0.0; 16];
-    let mut row_interp_y = [0.0; 16];
-    let mut temp_row_x = [0.0; 16];
-    let mut temp_row_y = [0.0; 16];
-    for y in 0..divisions_y {
-        for x in 0..divisions_x {
-            temp_row_x[x] = mesh[2 + y * divisions_x * 2 + x * 2];
-            temp_row_y[x] = mesh[2 + y * divisions_x * 2 + x * 2 + 1];
-        }
-        row_interp_x[y] = calc_tbl_itp_i(&temp_row_x, divisions_x - 1, x_int, x_frac);
-        row_interp_y[y] = calc_tbl_itp_i(&temp_row_y, divisions_y - 1, x_int, x_frac);
-    }
-
+pub fn interpolate_mesh(x: f64, y: f64, size: (f64, f64), mesh: &[f64]) -> Vector2<f64> {
+    let grid_spline = splines::BivariateSpline::new(mesh[0] as usize, mesh[1] as usize);
     Vector2::new(
-        calc_tbl_itp_i(&row_interp_x, divisions_x - 1, y_int, y_frac),
-        calc_tbl_itp_i(&row_interp_y, divisions_y - 1, y_int, y_frac)
+        grid_spline.interpolate(size.0, size.1, mesh, 0, x, y),
+        grid_spline.interpolate(size.0, size.1, mesh, 1, x, y)
     )
 }
 

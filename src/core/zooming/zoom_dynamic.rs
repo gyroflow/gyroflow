@@ -12,7 +12,7 @@ struct DataPerTimestamp {
     gaussian_window: Vec<f64>
 }
 
-pub fn compute(compute_params: &ComputeParams, mut fov_values: Vec<f64>, timestamps: &[f64], method: ZoomMethod) -> (Vec<f64>, Vec<f64>) {
+pub fn compute(compute_params: &ComputeParams, mut fov_values: Vec<f64>, timestamps: &[(usize, f64)], method: ZoomMethod) -> (Vec<f64>, Vec<f64>) {
     let window = compute_params.adaptive_zoom_window;
 
     let fov_minimal = fov_values.clone();
@@ -22,7 +22,7 @@ pub fn compute(compute_params: &ComputeParams, mut fov_values: Vec<f64>, timesta
     if keyframes.is_keyframed(&KeyframeType::ZoomingSpeed) || (compute_params.video_speed_affects_zooming && (compute_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed))) {
         // Keyframed window
         let mut max_window = 0;
-        let data_per_timestamp = timestamps.iter().map(|ts| {
+        let data_per_timestamp = timestamps.iter().map(|(_frame, ts)| {
             let mut window = keyframes.value_at_video_timestamp(&KeyframeType::ZoomingSpeed, *ts).unwrap_or(window);
             if compute_params.video_speed_affects_zooming {
                 let vid_speed = keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, *ts).unwrap_or(compute_params.video_speed);
