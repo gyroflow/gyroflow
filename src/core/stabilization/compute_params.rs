@@ -135,8 +135,8 @@ impl ComputeParams {
             let timestamp = crate::timestamp_at_frame(f, self.scaled_fps);
             let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&self, timestamp);
             let diag_length = ((self.video_width.pow(2) + self.video_height.pow(2)) as f64).sqrt();
-            let diag_pixel_focal_length = (camera_matrix[(0, 0)].powi(2) + camera_matrix[(1, 1)].powi(2)).sqrt();
-            let d_fov = 2.0 * ((diag_length / (2.0 * diag_pixel_focal_length)).atan()) * 180.0 / std::f64::consts::PI;
+            // let diag_pixel_focal_length = (camera_matrix[(0, 0)].powi(2) + camera_matrix[(1, 1)].powi(2)).sqrt();
+            let d_fov = 2.0 * ((diag_length / (2.0 * camera_matrix[(1, 1)])).atan()) * 180.0 / std::f64::consts::PI;
             self.camera_diagonal_fovs.push(d_fov);
         }
     }

@@ -21,9 +21,9 @@ use crate::Quat64;
 use crate::keyframes::*;
 
 const MAX_VELOCITY: f64 = 500.0;
-// Use 90 diagonal FOV as reference. Anything below (long focal length) scales the smoothness down. Anything above (short focal length) scales the smoothness up.
+// Use 105 diagonal FOV as reference. Anything below (long focal length) scales the smoothness down. Anything above (short focal length) scales the smoothness up.
 // This is needed, because the same rotation at long focal length will be much larger actual image rotation than at short focal length.
-const FOV_REFERENCE: f64 = 90.0;
+const FOV_REFERENCE: f64 = 105.0;
 const RAD_TO_DEG: f64 = 180.0 / std::f64::consts::PI;
 
 #[derive(Clone)]

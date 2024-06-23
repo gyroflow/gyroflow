@@ -246,7 +246,7 @@ impl FrameTransform {
                 let oy = o.y * is_scale;
 
                 if y == 0 {
-                    dbg!(frame, ts, sx, sy, ra, ox, oy);
+                    log::debug!("IBIS data at frame: {frame}, ts: {ts}, sx: {sx:.3}, sy: {sy:.3}, ra: {ra:.3}, ox: {ox:.3}, oy: {oy:.3}");
                 }
                 (sx as f32, sy as f32, ra as f32, ox as f32, oy as f32)
             } else {
