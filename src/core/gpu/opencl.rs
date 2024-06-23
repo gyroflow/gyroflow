@@ -288,7 +288,7 @@ impl OclWrapper {
             let buf_params   = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(std::mem::size_of::<KernelParams>()).build()?;
             let buf_drawing  = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(drawing_len.max(4)).build()?;
             let buf_matrices = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(max_matrix_count).build()?;
-            let buf_lens_data = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(16*16*2+2).build()?;
+            let buf_lens_data = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(16*16*2+8 + (9+9+9+9)*9*2).build()?;
 
             let mut builder = Kernel::builder();
             unsafe {
