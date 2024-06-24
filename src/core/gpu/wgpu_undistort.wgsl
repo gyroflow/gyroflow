@@ -310,7 +310,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
             let origin    = vec2<f32>(lens_data[4], lens_data[5]);
             let crop_size = vec2<f32>(lens_data[6], lens_data[7]);
 
-            if (bool(params.flags & 128)) { uv.y = params.height - uv.y; } // framebuffer inverted
+            if (bool(params.flags & 128)) { uv.y = f32(params.height) - uv.y; } // framebuffer inverted
 
             uv.x = map_coord(uv.x, 0.0, f32(params.width),  origin.x, origin.x + crop_size.x);
             uv.y = map_coord(uv.y, 0.0, f32(params.height), origin.y, origin.y + crop_size.y);
@@ -320,7 +320,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
             uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0, f32(params.width));
             uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0, f32(params.height));
 
-            if (bool(params.flags & 128)) { uv.y = params.height - uv.y; } // framebuffer inverted
+            if (bool(params.flags & 128)) { uv.y = f32(params.height) - uv.y; } // framebuffer inverted
         }
 
         if (bool(flags & 2)) { // Has digital lens
