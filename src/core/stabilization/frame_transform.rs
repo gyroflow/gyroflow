@@ -171,7 +171,6 @@ impl FrameTransform {
         // ----------- Lens -----------
 
         let img_dim_ratio = Self::get_ratio(params);
-        let height_scale = params.video_height as f64 / params.height.max(1) as f64;
 
         let mut fov = Self::get_fov(params, frame, true, timestamp_ms, false);
         let mut ui_fov = Self::get_fov(params, frame, true, timestamp_ms, true);
@@ -206,11 +205,14 @@ impl FrameTransform {
         // dbg!(frame_period);
 
         let is_scale = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
-            // dbg!(&params.width, &is.crop_area, &is.pixel_pitch);
-            params.width as f64 / is.crop_area.2 as f64 / is.pixel_pitch.0 as f64
+            (
+                params.width  as f64 / is.crop_area.2 as f64 / is.pixel_pitch.0 as f64,
+                params.height as f64 / is.crop_area.3 as f64 / is.pixel_pitch.1 as f64 * (if params.framebuffer_inverted { -1.0 } else { 1.0 }),
+            )
         } else {
-            1.0
+            (1.0, 1.0)
         };
+        let height_scale = params.video_height as f64 / params.height.max(1) as f64;
 
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
@@ -243,14 +245,17 @@ impl FrameTransform {
 
             let (sx, sy, ra, ox, oy) = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
                 let ts = ((row_readout_time * y as f64 + frame_period * frame as f64) * 1000.0).round() as i64;
-                let s = is.ibis_spline.interpolate(y as f64 * height_scale + is.offset).unwrap_or_default();
-                let sx = s.x * is_scale;
-                let sy = s.y * is_scale;
-                let ra = s.z;
+                let y_sensor = map_coord(y as f64, 0.0, params.height as f64, is.crop_area.1 as f64, is.crop_area.1 as f64 + is.crop_area.3 as f64);
+                let y_sensor = if params.framebuffer_inverted { is.sensor_size.1 as f64 - y_sensor } else { y_sensor };
 
-                let o = is.ois_spline.interpolate(y as f64 * height_scale + is.offset).unwrap_or_default();
-                let ox = o.x * is_scale;
-                let oy = o.y * is_scale;
+                let s = is.ibis_spline.interpolate(y_sensor + is.offset).unwrap_or_default();
+                let sx = s.x * is_scale.0;
+                let sy = s.y * is_scale.1;
+                let ra = s.z * (if params.framebuffer_inverted { -1.0 } else { 1.0 });
+
+                let o = is.ois_spline.interpolate(y_sensor + is.offset).unwrap_or_default();
+                let ox = o.x * is_scale.0;
+                let oy = o.y * is_scale.1;
 
                 if y == 0 {
                     log::debug!("IBIS data at frame: {frame}, ts: {ts}, sx: {sx:.3}, sy: {sy:.3}, ra: {ra:.3}, ox: {ox:.3}, oy: {oy:.3}");
@@ -378,18 +383,21 @@ impl FrameTransform {
             new_k * r
         }).collect();
 
-        let height_scale = params.video_height as f64 / params.height.max(1) as f64;
         let shifts: Option<Vec<(f32, f32, f32, f32, f32)>> = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
-            let is_scale = params.width as f64 / is.crop_area.2 as f64 / is.pixel_pitch.0 as f64;
+            let is_scale = (
+                params.width  as f64 / is.crop_area.2 as f64 / is.pixel_pitch.0 as f64,
+                params.height as f64 / is.crop_area.3 as f64 / is.pixel_pitch.1 as f64,
+            );
             Some(points_iter.iter().map(|&(_x, y)| {
-                let s = is.ibis_spline.interpolate(y as f64 * height_scale + is.offset).unwrap_or_default();
-                let sx = s.x * is_scale;
-                let sy = s.y * is_scale;
+                let y = map_coord(y as f64, 0.0, params.height as f64, is.crop_area.1 as f64, is.crop_area.1 as f64 + is.crop_area.3 as f64);
+                let s = is.ibis_spline.interpolate(y + is.offset).unwrap_or_default();
+                let sx = s.x * is_scale.0;
+                let sy = s.y * is_scale.1;
                 let ra = s.z;
 
-                let o = is.ois_spline.interpolate(y as f64 * height_scale + is.offset).unwrap_or_default();
-                let ox = o.x * is_scale;
-                let oy = o.y * is_scale;
+                let o = is.ois_spline.interpolate(y + is.offset).unwrap_or_default();
+                let ox = o.x * is_scale.0;
+                let oy = o.y * is_scale.1;
 
                 (sx as f32, sy as f32, ra as f32, ox as f32, oy as f32)
             }).collect())
