@@ -198,7 +198,7 @@ impl Stabilization {
 
                 uv = (uv.0 + params.c[0], uv.1 + params.c[1]);
 
-                if lens_data[0] != 0.0 {
+                if !lens_data.is_empty() && lens_data[0] != 0.0 {
                     let mesh_size = (lens_data[2], lens_data[3]);
                     let origin    = (lens_data[4] as f32, lens_data[5] as f32);
                     let crop_size = (lens_data[6] as f32, lens_data[7] as f32);
