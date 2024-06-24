@@ -184,7 +184,37 @@ impl Stabilization {
                 }
 
                 let mut uv = distortion_model.distort_point(_x, _y, _w, &params);
-                uv = ((uv.0 * params.f[0]) + params.c[0], (uv.1 * params.f[1]) + params.c[1]);
+                uv = (uv.0 * params.f[0], uv.1 * params.f[1]);
+
+                if matrices[9] != 0.0 || matrices[10] != 0.0 || matrices[11] != 0.0 || matrices[12] != 0.0 || matrices[13] != 0.0 {
+                    let ang_rad = (matrices[11] / 1000.0).to_radians();
+                    let cos_a = (-ang_rad).cos();
+                    let sin_a = (-ang_rad).sin();
+                    uv = (
+                        cos_a * uv.0 - sin_a * uv.1 - matrices[9]  + matrices[12],
+                        sin_a * uv.0 + cos_a * uv.1 - matrices[10] + matrices[13]
+                    );
+                }
+
+                uv = (uv.0 + params.c[0], uv.1 + params.c[1]);
+
+                if lens_data[0] != 0.0 {
+                    let mesh_size = (lens_data[2], lens_data[3]);
+                    let origin    = (lens_data[4] as f32, lens_data[5] as f32);
+                    let crop_size = (lens_data[6] as f32, lens_data[7] as f32);
+
+                    if (params.flags & 128) == 128 { uv.1 = params.height as f32 - uv.1; } // framebuffer inverted
+
+                    uv.0 = map_coord(uv.0, 0.0, params.width  as f32, origin.0, origin.0 + crop_size.0);
+                    uv.1 = map_coord(uv.1, 0.0, params.height as f32, origin.1, origin.1 + crop_size.1);
+
+                    let new_pos = crate::gyro_source::interpolate_mesh(uv.0 as f64, uv.1 as f64, (mesh_size.0, mesh_size.1), lens_data);
+
+                    uv.0 = map_coord(new_pos.x as f32, origin.0, origin.0 + crop_size.0, 0.0, params.width  as f32);
+                    uv.1 = map_coord(new_pos.y as f32, origin.1, origin.1 + crop_size.1, 0.0, params.height as f32);
+
+                    if (params.flags & 128) == 128 { uv.1 = params.height as f32 - uv.1; } // framebuffer inverted
+                }
 
                 if (params.flags & 2) == 2 { // Has digital lens
                     if let Some(digital) = digital_lens {
@@ -489,6 +519,29 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
                 x = pt2.0;
                 y = pt2.1;
             }
+        }
+
+        if let Some(lens_data) = &mesh {
+            let mesh_size = (lens_data[2], lens_data[3]);
+            let origin    = (lens_data[4] as f32, lens_data[5] as f32);
+            let crop_size = (lens_data[6] as f32, lens_data[7] as f32);
+
+            x = map_coord(x, 0.0, params.width  as f32, origin.0, origin.0 + crop_size.0);
+            y = map_coord(y, 0.0, params.height as f32, origin.1, origin.1 + crop_size.1);
+
+            let new_pos = crate::gyro_source::interpolate_mesh(x as f64, y as f64, (mesh_size.0, mesh_size.1), &lens_data);
+
+            x = map_coord(new_pos.x as f32, origin.0, origin.0 + crop_size.0, 0.0, params.width  as f32);
+            y = map_coord(new_pos.y as f32, origin.1, origin.1 + crop_size.1, 0.0, params.height as f32);
+        }
+        if let Some(shift) = shift_per_point.as_ref().and_then(|v| v.get(index)) {
+            let ang_rad = (shift.2 / 1000.0).to_radians();
+            let cos_a = ang_rad.cos();
+            let sin_a = ang_rad.sin();
+            x = x - c.0 - shift.3 + shift.0;
+            y = y - c.1 - shift.4 + shift.1;
+            x = cos_a * x - sin_a * y + c.0;
+            y = sin_a * x + cos_a * y + c.1;
         }
 
         let pw = ((x - c.0) / f.0, (y - c.1) / f.1); // world point

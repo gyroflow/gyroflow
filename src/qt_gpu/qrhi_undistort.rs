@@ -50,13 +50,15 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, frame: usize, width:
             let canvas = undist.drawing.get_buffer();
             let canvas_ptr = canvas.as_ptr();
             let canvas_len = canvas.len() as u32;
+            let lens_data_ptr = itm.mesh_correction.as_ptr();
+            let lens_data_len = itm.mesh_correction.len() as u32;
 
             let size_for_rs = if (itm.kernel_params.flags & 16) == 16 { itm.kernel_params.width } else { itm.kernel_params.height } as u32;
 
             let canvas_size = undist.drawing.get_size();
             let canvas_size = QSize { width: canvas_size.0 as u32, height: canvas_size.1 as u32 };
 
-            let ok = cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *", output_size as "QSize", shader_path as "QString", width as "uint32_t", height as "uint32_t", params_ptr as "uint8_t*", matrices_ptr as "uint8_t*", canvas_ptr as "uint8_t*", matrices_len as "uint32_t", params_len as "uint32_t", canvas_len as "uint32_t", canvas_size as "QSize", size_for_rs as "uint32_t"] -> bool as "bool" {
+            let ok = cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *", output_size as "QSize", shader_path as "QString", width as "uint32_t", height as "uint32_t", params_ptr as "uint8_t*", matrices_ptr as "uint8_t*", canvas_ptr as "uint8_t*", lens_data_ptr as "float*", lens_data_len as "uint32_t", matrices_len as "uint32_t", params_len as "uint32_t", canvas_len as "uint32_t", canvas_size as "QSize", size_for_rs as "uint32_t"] -> bool as "bool" {
                 if (!mdkplayer || !mdkplayer->mdkplayer || shader_path.isEmpty() || output_size.isEmpty()) return false;
 
                 auto rhiUndistortion = static_cast<QtRHIUndistort *>(mdkplayer->mdkplayer->userData());
@@ -80,7 +82,7 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, frame: usize, width:
                 || rhiUndistortion->itemTexturePtr() != mdkplayer->mdkplayer->rhiTexture()) {
                     delete rhiUndistortion;
                     rhiUndistortion = new QtRHIUndistort();
-                    if (!rhiUndistortion->init(mdkplayer->mdkplayer, QSize(width, height), output_size, shader_path, params_len, size_for_rs, canvas_size)) {
+                    if (!rhiUndistortion->init(mdkplayer->mdkplayer, QSize(width, height), output_size, shader_path, params_len, size_for_rs, canvas_size, lens_data_len)) {
                         qDebug2("render") << "Failed to initialize";
                         delete rhiUndistortion;
                         mdkplayer->mdkplayer->setUserData(nullptr);
@@ -93,7 +95,7 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, frame: usize, width:
                     });
                 }
 
-                return rhiUndistortion->render(mdkplayer->mdkplayer, params_ptr, params_len, matrices_ptr, matrices_len, canvas_ptr, canvas_len);
+                return rhiUndistortion->render(mdkplayer->mdkplayer, params_ptr, params_len, matrices_ptr, matrices_len, canvas_ptr, canvas_len, lens_data_ptr, lens_data_len);
             });
             if ok {
                 return Some(ProcessedInfo {

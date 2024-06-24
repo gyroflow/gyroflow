@@ -167,6 +167,61 @@ float2 rotate_point(float2 pos, float angle, float2 origin) {
                      sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin.y);
 }
 
+void cubic_spline_coefficients(const float* mesh, int step, int offset, float size, int n, float *a, float *b, float *c, float *d, float *h, float *alpha, float *l, float *mu, float *z) {
+    for (int i = 0; i < n; i++) { a[i] = mesh[(i + offset) * step]; }
+    for (int i = 0; i < n - 1; i++) { h[i] = size * (i + 1) / (n - 1) - size * i / (n - 1); }
+    for (int i = 1; i < n - 1; i++) { alpha[i] = (3.0f / h[i] * (a[i + 1] - a[i])) - (3.0f / h[i - 1] * (a[i] - a[i - 1])); }
+
+    l[0] = 1.0f; mu[0] = 0.0f; z[0] = 0.0f;
+
+    for (int i = 1; i < n - 1; i++) {
+        l[i] = 2.0f * (size * (i + 1) / (n - 1) - size * (i - 1) / (n - 1)) - h[i - 1] * mu[i - 1];
+        mu[i] = h[i] / l[i];
+        z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
+    }
+
+    l[n - 1] = 1.0f; z[n - 1] = 0.0f; c[n - 1] = 0.0f;
+
+    for (int j = n - 2; j >= 0; j--) {
+        c[j] = z[j] - mu[j] * c[j + 1];
+        b[j] = (a[j + 1] - a[j]) / h[j] - h[j] * (c[j + 1] + 2.0f * c[j]) / 3.0f;
+        d[j] = (c[j + 1] - c[j]) / (3.0f * h[j]);
+    }
+}
+float cubic_spline_interpolate(const float *a, const float *b, const float *c, const float *d, int n, float x, float size) {
+    int i = max(0.0f, min(n - 2.0f, (n - 1.0f) * x / size));
+    float dx = x - size * i / (n - 1.0f);
+    return a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx;
+}
+#define GRID_SIZE 9
+float bivariate_spline_interpolate(float size_x, float size_y, const float *mesh, int mesh_offset, int n, float x, float y) {
+    __private float intermediate_values[GRID_SIZE];
+    __private float a[GRID_SIZE], b[GRID_SIZE], c[GRID_SIZE], d[GRID_SIZE];
+    __private float h[GRID_SIZE - 1], alpha[GRID_SIZE - 1], l[GRID_SIZE], mu[GRID_SIZE], z[GRID_SIZE];
+
+    for (int j = 0; j < GRID_SIZE; j++) {
+        const int block = GRID_SIZE * 4;
+        const float *aa = &mesh[8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 0 + (j * block) + (block * GRID_SIZE * mesh_offset)];
+        const float *bb = &mesh[8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 1 + (j * block) + (block * GRID_SIZE * mesh_offset)];
+        const float *cc = &mesh[8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 2 + (j * block) + (block * GRID_SIZE * mesh_offset)];
+        const float *dd = &mesh[8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 3 + (j * block) + (block * GRID_SIZE * mesh_offset)];
+        // cubic_spline_coefficients(&mesh[8 + mesh_offset], 2, (j * GRID_SIZE), size_x, GRID_SIZE, a, b, c, d, h, alpha, l, mu, z);
+        intermediate_values[j] = cubic_spline_interpolate(aa, bb, cc, dd, GRID_SIZE, x, size_x);
+    }
+
+    cubic_spline_coefficients(intermediate_values, 1, 0, size_y, GRID_SIZE, a, b, c, d, h, alpha, l, mu, z);
+    return cubic_spline_interpolate(a, b, c, d, GRID_SIZE, y, size_y);
+}
+float2 interpolate_mesh(__global const float *mesh, int width, int height, float2 pos) {
+    if (pos.x < 0 || pos.x > width || pos.y < 0 || pos.y > height) {
+        return pos;
+    }
+    return (float2)(
+        bivariate_spline_interpolate(width, height, mesh, 0, GRID_SIZE, pos.x, pos.y),
+        bivariate_spline_interpolate(width, height, mesh, 1, GRID_SIZE, pos.x, pos.y)
+    );
+}
+
 DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global KernelParams *params, __global const uchar *drawing, DATA_TYPEF bg) {
     bool fix_range = params->flags & 1;
 
@@ -239,7 +294,37 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
             }
         }
 
-        float2 uv = params->f * distort_point(_x, _y, _w, params) + params->c;
+        float2 uv = params->f * distort_point(_x, _y, _w, params);
+
+        if (matrix[9] != 0.0f || matrix[10] != 0.0f || matrix[11] != 0.0f || matrix[12] != 0.0f || matrix[13] != 0.0f) {
+            float ang_rad = matrix[11] / 1000.0f * 3.14159265f / 180.0f;
+            float cos_a = cos(-ang_rad);
+            float sin_a = sin(-ang_rad);
+            uv = (float2)(
+                cos_a * uv.x - sin_a * uv.y - matrix[9]  + matrix[12],
+                sin_a * uv.x + cos_a * uv.y - matrix[10] + matrix[13]
+            );
+        }
+
+        uv += params->c;
+
+        if (lens_data && lens_data[0] != 0.0f) {
+            float2 mesh_size = (float2)(lens_data[2], lens_data[3]);
+            float2 origin    = (float2)(lens_data[4], lens_data[5]);
+            float2 crop_size = (float2)(lens_data[6], lens_data[7]);
+
+            if (params->flags & 128) uv.y = params->height - uv.y; // framebuffer inverted
+
+            uv.x = map_coord(uv.x, 0.0f, params->width,  origin.x, origin.x + crop_size.x);
+            uv.y = map_coord(uv.y, 0.0f, params->height, origin.y, origin.y + crop_size.y);
+
+            uv = interpolate_mesh(lens_data, mesh_size.x, mesh_size.y, uv);
+
+            uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0f, params->width);
+            uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0f, params->height);
+
+            if (params->flags & 128) uv.y = params->height - uv.y; // framebuffer inverted
+        }
 
         if (params->flags & 2) { // Has digital lens
             uv = digital_distort_point(uv, params);

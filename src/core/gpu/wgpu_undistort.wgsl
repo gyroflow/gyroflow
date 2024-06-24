@@ -206,6 +206,72 @@ fn sample_input_at(uv_param: vec2<f32>) -> vec4<f32> {
     );
 }
 
+const GRID_SIZE: i32 = 9;
+var<private> a: array<f32, GRID_SIZE>; var<private> b: array<f32, GRID_SIZE>; var<private> c: array<f32, GRID_SIZE>; var<private> d: array<f32, GRID_SIZE>;
+var<private> h: array<f32, GRID_SIZE>; var<private> alpha: array<f32, GRID_SIZE>; var<private> l: array<f32, GRID_SIZE>; var<private> mu: array<f32, GRID_SIZE>; var<private> z: array<f32, GRID_SIZE>;
+
+fn cubic_spline_coefficients(mesh: ptr<function, array<f32, GRID_SIZE>>, step: i32, offset: i32, size: f32, n: i32) {
+    for (var i = 0; i < n; i++) { a[i] = (*mesh)[(i + offset) * step]; }
+    for (var i = 0; i < n - 1; i++) { h[i] = size * (f32(i) + 1.0) / f32(n - 1) - size * f32(i) / f32(n - 1); }
+    for (var i = 1; i < n - 1; i++) {
+        alpha[i] = (3.0 / h[i] * (a[i + 1] - a[i])) - (3.0 / h[i - 1] * (a[i] - a[i - 1]));
+    }
+
+    l[0] = 1.0; mu[0] = 0.0; z[0] = 0.0;
+
+    for (var i = 1; i < n - 1; i++) {
+        l[i] = 2.0 * (size * (f32(i) + 1.0) / f32(n - 1) - size * (f32(i) - 1.0) / f32(n - 1)) - h[i - 1] * mu[i - 1];
+        mu[i] = h[i] / l[i];
+        z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
+    }
+
+    l[n - 1] = 1.0; z[n - 1] = 0.0; c[n - 1] = 0.0;
+
+    for (var j = n - 2; j >= 0; j--) {
+        c[j] = z[j] - mu[j] * c[j + 1];
+        b[j] = (a[j + 1] - a[j]) / h[j] - h[j] * (c[j + 1] + 2.0 * c[j]) / 3.0;
+        d[j] = (c[j + 1] - c[j]) / (3.0 * h[j]);
+    }
+}
+
+fn cubic_spline_interpolate1(aa: i32, bb: i32, cc: i32, dd: i32, n: i32, x: f32, size: f32) -> f32 {
+    let i = i32(max(0.0, min(f32(n - 2), (f32(n - 1) * x / size))));
+    let dx = x - size * f32(i) / f32(n - 1);
+    return lens_data[aa + i] + lens_data[bb + i] * dx + lens_data[cc + i] * dx * dx + lens_data[dd + i] * dx * dx * dx;
+}
+fn cubic_spline_interpolate2(n: i32, x: f32, size: f32) -> f32 {
+    let i = u32(max(0.0, min(f32(n - 2), (f32(n - 1) * x / size))));
+    let dx = x - size * f32(i) / f32(n - 1);
+    return a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx;
+}
+
+fn bivariate_spline_interpolate(size_x: f32, size_y: f32, mesh_offset: i32, n: i32, x: f32, y: f32) -> f32 {
+    var intermediate_values: array<f32, GRID_SIZE>;
+
+    for (var j = 0; j < GRID_SIZE; j++) {
+        let block_ = GRID_SIZE * 4;
+        let aa = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 0 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        let bb = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 1 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        let cc = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 2 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        let dd = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 3 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        // cubic_spline_coefficients(mesh[8 + mesh_offset..], 2, (j * GRID_SIZE), size_x, GRID_SIZE);
+        intermediate_values[j] = cubic_spline_interpolate1(aa, bb, cc, dd, GRID_SIZE, x, size_x);
+    }
+
+    cubic_spline_coefficients(&intermediate_values, 1, 0, size_y, GRID_SIZE);
+    return cubic_spline_interpolate2(GRID_SIZE, y, size_y);
+}
+
+fn interpolate_mesh(width: f32, height: f32, pos: vec2<f32>) -> vec2<f32> {
+    if (pos.x < 0.0 || pos.x > width || pos.y < 0.0 || pos.y > height) {
+        return pos;
+    }
+    return vec2<f32>(
+        bivariate_spline_interpolate(width, height, 0, GRID_SIZE, pos.x, pos.y),
+        bivariate_spline_interpolate(width, height, 1, GRID_SIZE, pos.x, pos.y)
+    );
+}
+
 fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>) -> vec2<f32> {
     let _x = (pos.x * matrices[idx + 0u]) + (pos.y * matrices[idx + 1u]) + matrices[idx + 2u] + params.translation3d.x;
     let _y = (pos.x * matrices[idx + 3u]) + (pos.y * matrices[idx + 4u]) + matrices[idx + 5u] + params.translation3d.y;
@@ -225,7 +291,37 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
             }
         }
 
-        var uv = f * distort_point(_x, _y, _w) + c;
+        var uv = f * distort_point(_x, _y, _w);
+
+        if (matrices[idx + 9] != 0.0 || matrices[idx + 10] != 0.0 || matrices[idx + 11] != 0.0 || matrices[idx + 12] != 0.0 || matrices[idx + 13] != 0.0) {
+            let ang_rad = matrices[idx + 11] / 1000.0 * 3.14159265 / 180.0;
+            let cos_a = cos(-ang_rad);
+            let sin_a = sin(-ang_rad);
+            uv = vec2<f32>(
+                cos_a * uv.x - sin_a * uv.y - matrices[idx + 9]  + matrices[idx + 12],
+                sin_a * uv.x + cos_a * uv.y - matrices[idx + 10] + matrices[idx + 13]
+            );
+        }
+
+        uv += c;
+
+        if (lens_data[0] != 0.0) {
+            let mesh_size = vec2<f32>(lens_data[2], lens_data[3]);
+            let origin    = vec2<f32>(lens_data[4], lens_data[5]);
+            let crop_size = vec2<f32>(lens_data[6], lens_data[7]);
+
+            if (bool(params.flags & 128)) { uv.y = params.height - uv.y; } // framebuffer inverted
+
+            uv.x = map_coord(uv.x, 0.0, f32(params.width),  origin.x, origin.x + crop_size.x);
+            uv.y = map_coord(uv.y, 0.0, f32(params.height), origin.y, origin.y + crop_size.y);
+
+            uv = interpolate_mesh(mesh_size.x, mesh_size.y, uv);
+
+            uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0, f32(params.width));
+            uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0, f32(params.height));
+
+            if (bool(params.flags & 128)) { uv.y = params.height - uv.y; } // framebuffer inverted
+        }
 
         if (bool(flags & 2)) { // Has digital lens
             uv = digital_distort_point(uv);

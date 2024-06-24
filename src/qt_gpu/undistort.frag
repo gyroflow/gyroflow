@@ -58,6 +58,7 @@ LENS_MODEL_FUNCTIONS;
 
 layout(binding = 3) uniform sampler2D texParams;
 layout(binding = 4) uniform sampler2D texCanvas;
+layout(binding = 5) uniform sampler2D texLensData;
 
 const vec4 colors[9] = vec4[9](
     vec4(0.0,   0.0,   0.0,     0.0), // None
@@ -113,6 +114,71 @@ float get_param(float row, float idx) {
     return texture(texParams, vec2(idx / 13.0, row / float(size - 1))).r;
 }
 
+float get_lens_data(int idx) {
+    return texture(texLensData, vec2(0, idx / 1023.0)).r;
+}
+const int GRID_SIZE = 9;
+float a[GRID_SIZE]; float b[GRID_SIZE]; float c[GRID_SIZE]; float d[GRID_SIZE];
+float h[GRID_SIZE]; float alpha[GRID_SIZE]; float l[GRID_SIZE]; float mu[GRID_SIZE]; float z[GRID_SIZE];
+void cubic_spline_coefficients(float mesh[GRID_SIZE], int step_, int offset, float size, int n) {
+    for (int i = 0; i < n; i++) { a[i] = mesh[(i + offset) * step_]; }
+    for (int i = 0; i < n - 1; i++) { h[i] = size * (i + 1) / (n - 1) - size * i / (n - 1); }
+    for (int i = 1; i < n - 1; i++) { alpha[i] = (3.0 / h[i] * (a[i + 1] - a[i])) - (3.0 / h[i - 1] * (a[i] - a[i - 1])); }
+
+    l[0] = 1.0; mu[0] = 0.0; z[0] = 0.0;
+
+    for (int i = 1; i < n - 1; i++) {
+        l[i] = 2.0 * (size * (i + 1) / (n - 1) - size * (i - 1) / (n - 1)) - h[i - 1] * mu[i - 1];
+        mu[i] = h[i] / l[i];
+        z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
+    }
+
+    l[n - 1] = 1.0; z[n - 1] = 0.0; c[n - 1] = 0.0;
+
+    for (int j = n - 2; j >= 0; j--) {
+        c[j] = z[j] - mu[j] * c[j + 1];
+        b[j] = (a[j + 1] - a[j]) / h[j] - h[j] * (c[j + 1] + 2.0 * c[j]) / 3.0;
+        d[j] = (c[j + 1] - c[j]) / (3.0 * h[j]);
+    }
+}
+float cubic_spline_interpolate1(int aa, int bb, int cc, int dd, int n, float x, float size) {
+    int i = int(max(0.0, min(float(n - 2), (float(n - 1) * x / size))));
+    float dx = x - size * float(i) / float(n - 1);
+    return get_lens_data(aa + i) + get_lens_data(bb + i) * dx + get_lens_data(cc + i) * dx * dx + get_lens_data(dd + i) * dx * dx * dx;
+}
+float cubic_spline_interpolate2(int n, float x, float size) {
+    int i = int(max(0.0, min(float(n - 2), (float(n - 1) * x / size))));
+    float dx = x - size * float(i) / float(n - 1);
+    return a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx;
+}
+float bivariate_spline_interpolate(float size_x, float size_y, int mesh_offset, int n, float x, float y) {
+    float intermediate_values[GRID_SIZE];
+
+    for (int j = 0; j < GRID_SIZE; j++) {
+        int block_ = GRID_SIZE * 4;
+        int aa = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 0 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        int bb = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 1 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        int cc = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 2 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        int dd = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 3 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        intermediate_values[j] = cubic_spline_interpolate1(aa, bb, cc, dd, GRID_SIZE, x, size_x);
+    }
+
+    cubic_spline_coefficients(intermediate_values, 1, 0, size_y, GRID_SIZE);
+    return cubic_spline_interpolate2(GRID_SIZE, y, size_y);
+}
+vec2 interpolate_mesh(int width, int height, vec2 pos) {
+    if (pos.x < 0.0 || pos.x > float(width) || pos.y < 0.0 || pos.y > float(height)) {
+        return pos;
+    }
+    return vec2(
+        bivariate_spline_interpolate(float(width), float(height), 0, GRID_SIZE, pos.x, pos.y),
+        bivariate_spline_interpolate(float(width), float(height), 1, GRID_SIZE, pos.x, pos.y)
+    );
+}
+float map_coord(float x, float in_min, float in_max, float out_min, float out_max) {
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 vec2 rotate_and_distort(vec2 pos, float idx) {
     float _x = (float(pos.x) * get_param(idx, 0)) + (float(pos.y) * get_param(idx, 1)) + get_param(idx, 2) + params.translation3d.x;
     float _y = (float(pos.x) * get_param(idx, 3)) + (float(pos.y) * get_param(idx, 4)) + get_param(idx, 5) + params.translation3d.y;
@@ -132,7 +198,37 @@ vec2 rotate_and_distort(vec2 pos, float idx) {
             }
         }
 
-        vec2 uv = params.f * distort_point(_x, _y, _w) + params.c;
+        vec2 uv = params.f * distort_point(_x, _y, _w);
+
+        if (get_param(idx, 9) != 0.0 || get_param(idx, 10) != 0.0 || get_param(idx, 11) != 0.0 || get_param(idx, 12) != 0.0 || get_param(idx, 13) != 0.0) {
+            float ang_rad = get_param(idx, 11) / 1000.0 * 3.14159265 / 180.0;
+            float cos_a = cos(-ang_rad);
+            float sin_a = sin(-ang_rad);
+            uv = vec2(
+                cos_a * uv.x - sin_a * uv.y - get_param(idx, 9)  + get_param(idx, 12),
+                sin_a * uv.x + cos_a * uv.y - get_param(idx, 10) + get_param(idx, 13)
+            );
+        }
+
+        uv += params.c;
+
+        if (get_lens_data(0) != 0.0) {
+            vec2 mesh_size = vec2(get_lens_data(2), get_lens_data(3));
+            vec2 origin    = vec2(get_lens_data(4), get_lens_data(5));
+            vec2 crop_size = vec2(get_lens_data(6), get_lens_data(7));
+
+            if (bool(params.flags & 128)) { uv.y = params.height - uv.y; } // framebuffer inverted
+
+            uv.x = map_coord(uv.x, 0.0, params.width,  origin.x, origin.x + crop_size.x);
+            uv.y = map_coord(uv.y, 0.0, params.height, origin.y, origin.y + crop_size.y);
+
+            uv = interpolate_mesh(int(mesh_size.x), int(mesh_size.y), uv);
+
+            uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0, params.width);
+            uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0, params.height);
+
+            if (bool(params.flags & 128)) { uv.y = params.height - uv.y; } // framebuffer inverted
+        }
 
         if (bool(params.flags & 2)) { // Has digital lens
             uv = digital_distort_point(uv);
