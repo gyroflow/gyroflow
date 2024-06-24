@@ -4,6 +4,7 @@
 use nalgebra::Matrix3;
 use super::{ ComputeParams, KernelParams };
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
+use crate::gyro_source::FileMetadata;
 use crate::keyframes::KeyframeType;
 use crate::util::{ MapClosest, map_coord };
 
@@ -20,12 +21,10 @@ pub struct FrameTransform {
 }
 
 impl FrameTransform {
-    fn get_frame_readout_time(params: &ComputeParams, can_invert: bool, timestamp_ms: f64) -> f64 {
+    fn get_frame_readout_time(params: &ComputeParams, can_invert: bool, timestamp_ms: f64, file_metadata: &FileMetadata) -> f64 {
         let mut frame_readout_time = params.frame_readout_time;
         let mut scale = 1.0;
         telemetry_parser::try_block!({
-            let gyro = params.gyro.read();
-            let file_metadata = gyro.file_metadata.read();
             let val = file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000)?; // closest within 100ms
             scale = val.capture_area_size?.1 as f64 / val.sensor_size_px?.1 as f64;
         });
@@ -194,7 +193,7 @@ impl FrameTransform {
         }
 
         // ----------- Rolling shutter correction -----------
-        let frame_readout_time = Self::get_frame_readout_time(&params, true, timestamp_ms);
+        let frame_readout_time = Self::get_frame_readout_time(&params, true, timestamp_ms, &file_metadata);
 
         let row_readout_time = frame_readout_time / if params.horizontal_rs { params.width } else { params.height } as f64;
         let timestamp_ms = timestamp_ms + file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
@@ -350,7 +349,7 @@ impl FrameTransform {
         }
 
         // ----------- Rolling shutter correction -----------
-        let frame_readout_time = Self::get_frame_readout_time(params, false, timestamp_ms);
+        let frame_readout_time = Self::get_frame_readout_time(params, false, timestamp_ms, &file_metadata);
 
         let row_readout_time = frame_readout_time / if params.horizontal_rs { params.width } else { params.height } as f64;
         let timestamp_ms = timestamp_ms + gyro.file_metadata.read().per_frame_time_offsets.get(frame).unwrap_or(&0.0);
