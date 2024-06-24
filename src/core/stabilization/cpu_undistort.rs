@@ -6,6 +6,7 @@ use crate::gpu::{ Buffers, BufferSource };
 use super::{ PixelType, Stabilization, ComputeParams, FrameTransform, KernelParams, distortion_models::DistortionModel };
 use nalgebra::{ Vector4, Matrix3 };
 use rayon::{ prelude::ParallelSliceMut, iter::{ ParallelIterator, IndexedParallelIterator } };
+use crate::util::map_coord;
 
 pub const COEFFS: [f32; 64+128+256 + 9*4 + 4] = [
     // Bilinear
@@ -132,7 +133,7 @@ impl Stabilization {
     // Adapted from OpenCV: initUndistortRectifyMap + remap
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
-    pub fn undistort_image_cpu<const I: i32, T: PixelType>(buffers: &mut Buffers, params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, matrices: &[[f32; 14]], drawing: &[u8]) -> bool {
+    pub fn undistort_image_cpu<const I: i32, T: PixelType>(buffers: &mut Buffers, params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, matrices: &[[f32; 14]], drawing: &[u8], lens_data: &[f32]) -> bool {
         // #[cold]
         // fn draw_pixel(pix: &mut Vector4<f32>, x: i32, y: i32, is_input: bool, width: i32, params: &KernelParams, drawing: &[u8]) {
         //     if drawing.is_empty() || (params.flags & 8) == 0 { return; }
@@ -160,11 +161,8 @@ impl Stabilization {
             px[0] += 16.0;
             px[1] += 16.0;
         }
-        fn map_coord(x: f32, in_min: f32, in_max: f32, out_min: f32, out_max: f32) -> f32 {
-            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-        }
 
-        fn rotate_and_distort(pos: (f32, f32), idx: usize, params: &KernelParams, matrices: &[[f32; 14]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit_sq: f32) -> Option<(f32, f32)> {
+        fn rotate_and_distort(pos: (f32, f32), idx: usize, params: &KernelParams, matrices: &[[f32; 14]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit_sq: f32, lens_data: &[f64]) -> Option<(f32, f32)> {
             let matrices = matrices[idx];
             let _x = (pos.0 * matrices[0]) + (pos.1 * matrices[1]) + matrices[2] + params.translation3d[0];
             let _y = (pos.0 * matrices[3]) + (pos.1 * matrices[4]) + matrices[5] + params.translation3d[1];
@@ -287,6 +285,8 @@ impl Stabilization {
                     return false;
                 }
 
+                let lens_data = lens_data.iter().map(|x| *x as f64).collect::<Vec<f64>>();
+
                 output.par_chunks_mut(buffers.output.size.2).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
                     row_bytes.chunks_mut(params.bytes_per_pixel as usize).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
 
@@ -354,7 +354,7 @@ impl Stabilization {
                             };
                             if params.matrix_count > 1 {
                                 let idx = params.matrix_count as usize / 2;
-                                if let Some(pt) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit_sq) {
+                                if let Some(pt) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit_sq, &lens_data) {
                                     if (params.flags & 16) == 16 { // Horizontal RS
                                         sy = (pt.0.round() as i32).min(params.width).max(0) as usize;
                                     } else {
@@ -365,7 +365,7 @@ impl Stabilization {
                             ///////////////////////////////////////////////////////////////////
 
                             let idx = sy.min(params.matrix_count as usize - 1);
-                            if let Some(mut uv) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit_sq) {
+                            if let Some(mut uv) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit_sq, &lens_data) {
                                 let width_f = params.width as f32;
                                 let height_f = params.height as f32;
                                 match params.background_mode {

@@ -56,6 +56,7 @@ bitflags::bitflags! {
         const HORIZONTAL_RS        = 16; // right-to-left or left-to-right rolling shutter
         const HAS_SOURCE_RECT      = 32;
         const HAS_OUTPUT_RECT      = 64;
+        const FRAMEBUFFER_INVERTED = 128;
     }
 }
 
@@ -189,6 +190,7 @@ impl Stabilization {
         self.kernel_flags.set(KernelParamsFlags::HORIZONTAL_RS, self.compute_params.horizontal_rs);
         self.kernel_flags.set(KernelParamsFlags::HAS_SOURCE_RECT, buffers.input.rect.is_some() || self.size.0 != buffers.input.size.0 || self.size.1 != buffers.input.size.1);
         self.kernel_flags.set(KernelParamsFlags::HAS_OUTPUT_RECT, buffers.output.rect.is_some() || self.output_size.0 != buffers.output.size.0 || self.output_size.1 != buffers.output.size.1);
+        self.kernel_flags.set(KernelParamsFlags::FRAMEBUFFER_INVERTED, self.compute_params.framebuffer_inverted);
 
         let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
         transform.kernel_params.pixel_value_limit = T::default_max_value().unwrap_or(f32::MAX);
@@ -388,11 +390,13 @@ impl Stabilization {
             #[cfg(feature = "use-opencl")]
             if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() && next_backend != "wgpu" && opencl::is_buffer_supported(buffers) {
                 self.cl = None;
-                let params = self.get_frame_transform_at::<T>(timestamp_us, frame, buffers).kernel_params;
+                let transform = self.get_frame_transform_at::<T>(timestamp_us, frame, buffers);
+                let params = transform.kernel_params;
                 let distortion_model = self.compute_params.distortion_model.clone();
                 let digital_lens = self.compute_params.digital_lens.clone();
+                let lens_data_len = transform.mesh_correction.len();
                 let cl = std::panic::catch_unwind(|| {
-                    opencl::OclWrapper::new(&params, T::ocl_names(), distortion_model, digital_lens, buffers, canvas_len)
+                    opencl::OclWrapper::new(&params, T::ocl_names(), distortion_model, digital_lens, buffers, canvas_len, lens_data_len)
                 });
                 match cl {
                     Ok(Ok(cl)) => {
@@ -419,11 +423,13 @@ impl Stabilization {
                     self.initialized_backend = BackendType::Wgpu(hash);
                 } else {
                     self.wgpu = None;
-                    let params = self.get_frame_transform_at::<T>(timestamp_us, frame, buffers).kernel_params;
+                    let transform = self.get_frame_transform_at::<T>(timestamp_us, frame, buffers);
+                    let params = transform.kernel_params;
                     let distortion_model = self.compute_params.distortion_model.clone();
                     let digital_lens = self.compute_params.digital_lens.clone();
+                    let lens_data_len = transform.mesh_correction.len();
                     let wgpu = std::panic::catch_unwind(|| {
-                        wgpu::WgpuWrapper::new(&params, T::wgpu_format().unwrap(), distortion_model, digital_lens, buffers, canvas_len)
+                        wgpu::WgpuWrapper::new(&params, T::wgpu_format().unwrap(), distortion_model, digital_lens, buffers, canvas_len, lens_data_len)
                     });
                     match wgpu {
                         Ok(Ok(wgpu)) => {
@@ -473,7 +479,7 @@ impl Stabilization {
             }
         }
     }
-    pub fn process_pixels<T: PixelType>(&self, timestamp_us: i64, frame: Option<usize>, buffers: &mut Buffers, frame_transform: Option<&FrameTransform>) -> Result<ProcessedInfo, GyroflowCoreError> {
+    pub fn process_pixels<T: PixelType>(&self, timestamp_us: i64, _frame: Option<usize>, buffers: &mut Buffers, frame_transform: Option<&FrameTransform>) -> Result<ProcessedInfo, GyroflowCoreError> {
         if /*self.size != buffers.input.size || */buffers.input.size.1 < 4 || buffers.output.size.1 < 4 { return Err(GyroflowCoreError::SizeTooSmall); }
 
         let itm = frame_transform.map(|x| Some(x)).unwrap_or_else(|| self.stab_data.get(&timestamp_us));
@@ -538,9 +544,9 @@ impl Stabilization {
 
             // CPU path
             let ok = match self.interpolation {
-                Interpolation::Bilinear => { Self::undistort_image_cpu::<2, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer) },
-                Interpolation::Bicubic  => { Self::undistort_image_cpu::<4, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer) },
-                Interpolation::Lanczos4 => { Self::undistort_image_cpu::<8, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer) },
+                Interpolation::Bilinear => { Self::undistort_image_cpu::<2, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer, &itm.mesh_correction) },
+                Interpolation::Bicubic  => { Self::undistort_image_cpu::<4, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer, &itm.mesh_correction) },
+                Interpolation::Lanczos4 => { Self::undistort_image_cpu::<8, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer, &itm.mesh_correction) },
             };
             if ok {
                 ret.backend = "CPU";

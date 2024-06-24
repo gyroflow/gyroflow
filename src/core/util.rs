@@ -252,6 +252,11 @@ pub fn init_telemetry_parser() {
     });
 }
 
+pub fn map_coord<T>(x: T, in_min: T, in_max: T, out_min: T, out_max: T) -> T
+where T: std::ops::Sub<Output = T> + std::ops::Mul<Output = T> + std::ops::Div<Output = T> + std::ops::Add<Output = T> + Copy {
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 /*
 pub fn rename_calib_videos() {
     use telemetry_parser::Input;

@@ -2270,7 +2270,7 @@ impl Filesystem {
         let folder = filesystem::get_folder(&current_url);
         let filename = filesystem::get_filename(&current_url);
 
-        let extensions = [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "jpg", "exr", "dng", "braw", "r3d" ];
+        let extensions = [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "braw", "r3d" ];
 
         let list: Vec<(String, String)> = filesystem::list_folder(&folder)
             .into_iter()

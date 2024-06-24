@@ -13,6 +13,7 @@ use super::{ TimeIMU, TimeQuat, TimeVec, splines };
 pub struct LensParams {
     pub focal_length: Option<f32>, // millimeters
     pub pixel_pitch: Option<(u32, u32)>, // nanometers
+    pub sensor_size_px: Option<(u32, u32)>, // pixels
     pub capture_area_origin: Option<(f32, f32)>, // pixels
     pub capture_area_size: Option<(f32, f32)>, // pixels
     pub pixel_focal_length: Option<f32>, // pixels
@@ -23,6 +24,7 @@ pub struct LensParams {
 #[serde(default)]
 pub struct CameraStabData {
     pub offset: f64,
+    pub sensor_size: (u32, u32),
     pub crop_area: (f32, f32, f32, f32),
     pub pixel_pitch: (u32, u32),
     pub ibis_spline: splines::CatmullRom<nalgebra::Vector3<f64>>,

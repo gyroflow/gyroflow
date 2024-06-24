@@ -7,7 +7,7 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-pub fn export_full_metadata(gyro_url: &str, stab: &Arc<crate::StabilizationManager>) -> Result<String, crate::GyroflowCoreError> {
+pub fn export_full_metadata(gyro_url: &str, _stab: &Arc<crate::StabilizationManager>) -> Result<String, crate::GyroflowCoreError> {
     let base = filesystem::get_engine_base();
     let mut file = filesystem::open_file(&base, &gyro_url, false, false)?;
     let filesize = file.size;

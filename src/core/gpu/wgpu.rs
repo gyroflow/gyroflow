@@ -143,7 +143,7 @@ impl WgpuWrapper {
         Some((name, list_name))
     }
 
-    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, bool), distortion_model: DistortionModel, digital_lens: Option<DistortionModel>, buffers: &Buffers, mut drawing_len: usize) -> Result<Self, WgpuError> {
+    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, bool), distortion_model: DistortionModel, digital_lens: Option<DistortionModel>, buffers: &Buffers, mut drawing_len: usize, lens_data_len: usize) -> Result<Self, WgpuError> {
         let max_matrix_count = 14 * if (params.flags & 16) == 16 { params.width } else { params.height } as usize;
 
         if params.height < 4 || params.output_height < 4 || buffers.input.size.0 < 16 || buffers.input.size.2 < 16 || buffers.output.size.0 < 16 || buffers.output.size.2 < 16 || params.width > 16384 || params.output_width > 16384 {
@@ -290,7 +290,7 @@ impl WgpuWrapper {
             let buf_params = device.create_buffer(&wgpu::BufferDescriptor { size: std::mem::size_of::<KernelParams>() as u64, usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_drawing = device.create_buffer(&wgpu::BufferDescriptor { size: drawing_len as u64, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_coeffs  = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: None, contents: bytemuck::cast_slice(&crate::stabilization::COEFFS), usage: wgpu::BufferUsages::STORAGE });
-            let buf_lens_data = device.create_buffer(&wgpu::BufferDescriptor { size: drawing_len as u64, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
+            let buf_lens_data = device.create_buffer(&wgpu::BufferDescriptor { size: lens_data_len.max(4096) as u64, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
 
             let bind_group_layout = if uses_textures {
                 let sample_type = match wgpu_format.1 {
@@ -456,6 +456,10 @@ impl WgpuWrapper {
         if !drawing_buffer.is_empty() {
             if self.drawing_size < drawing_buffer.len() as u64 { log::error!("Buffer size mismatch! {} vs {}", self.drawing_size, drawing_buffer.len()); return false; }
             self.queue.write_buffer(self.buf_drawing.as_ref().unwrap(), 0, drawing_buffer);
+        }
+        if !itm.mesh_correction.is_empty() {
+            if self.buf_lens_data.is_none() || (self.buf_lens_data.as_ref().unwrap().size() as usize * 4) < itm.mesh_correction.len() { log::error!("Buffer size mismatch buf_lens_data! {} vs {}", self.buf_lens_data.as_ref().unwrap().size() * 4, itm.mesh_correction.len()); return false; }
+            self.queue.write_buffer(self.buf_lens_data.as_ref().unwrap(), 0, bytemuck::cast_slice(&itm.mesh_correction));
         }
 
         match &self.pipeline {

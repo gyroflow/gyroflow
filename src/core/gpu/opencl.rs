@@ -175,7 +175,7 @@ impl OclWrapper {
         Ok((name, list_name))
     }
 
-    pub fn new(params: &KernelParams, ocl_names: (&str, &str, &str, &str), distortion_model: DistortionModel, digital_lens: Option<DistortionModel>, buffers: &Buffers, drawing_len: usize) -> ocl::Result<Self> {
+    pub fn new(params: &KernelParams, ocl_names: (&str, &str, &str, &str), distortion_model: DistortionModel, digital_lens: Option<DistortionModel>, buffers: &Buffers, drawing_len: usize, lens_data_len: usize) -> ocl::Result<Self> {
         if params.height < 4 || params.output_height < 4 || params.stride < 1 { return Err(ocl::BufferCmdError::AlreadyMapped.into()); }
 
         let mut kernel = include_str!("opencl_undistort.cl").to_string();
@@ -288,7 +288,7 @@ impl OclWrapper {
             let buf_params   = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(std::mem::size_of::<KernelParams>()).build()?;
             let buf_drawing  = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(drawing_len.max(4)).build()?;
             let buf_matrices = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(max_matrix_count).build()?;
-            let buf_lens_data = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(16*16*2+8 + (9+9+9+9)*9*2).build()?;
+            let buf_lens_data = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(lens_data_len.max(4096)).build()?;
 
             let mut builder = Kernel::builder();
             unsafe {

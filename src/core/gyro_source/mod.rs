@@ -165,6 +165,7 @@ impl GyroSource {
                         if let Some(v) = im.get_t(TagId::PixelPitch) as Option<&(u32, u32)> { lens_info.pixel_pitch = Some(*v); }
                         if let Some(v) = im.get_t(TagId::CaptureAreaSize) as Option<&(f32, f32)> { lens_info.capture_area_size = Some(*v); }
                         if let Some(v) = im.get_t(TagId::CaptureAreaOrigin) as Option<&(f32, f32)> { lens_info.capture_area_origin = Some(*v); }
+                        if let Some(v) = im.get_t(TagId::SensorSizePixels) as Option<&(u32, u32)> { lens_info.sensor_size_px = Some(*v); }
                     }
                     if let Some(map) = tag_map.get(&GroupId::Lens) {
                         if let Some(v) = map.get_t(TagId::Data) as Option<&serde_json::Value> {

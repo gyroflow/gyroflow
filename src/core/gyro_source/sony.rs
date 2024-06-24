@@ -10,8 +10,9 @@ use argmin::{ core::{ CostFunction, Error, Executor }, solver::neldermead::Nelde
 
 pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input, tag_map: &GroupedTagMap, size: (usize, usize), info: &telemetry_parser::util::SampleInfo) {
     if let Some(lmd) = tag_map.get(&GroupId::Custom("LensDistortion".into())) {
-        let pixel_pitch = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::PixelPitch) as Option<&(u32, u32)>).cloned();
-        let crop_size = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaSize) as Option<&(f32, f32)>).cloned();
+        let pixel_pitch    = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::PixelPitch)       as Option<&(u32, u32)>).cloned();
+        let crop_size      = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaSize)  as Option<&(f32, f32)>).cloned();
+        // let sensor_size_px = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::SensorSizePixels) as Option<&(u32, u32)>).cloned();
         let mut lens_compensation_enabled = false;
 
         if let Some(enabled) = lmd.get_t(TagId::Enabled) as Option<&bool> {
@@ -22,6 +23,7 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
             telemetry_parser::try_block!({
                 let pixel_pitch = pixel_pitch?;
                 let crop_size = crop_size?;
+                // let sensor_size_px = sensor_size_px?;
                 let sensor_height = v.get("effective_sensor_height_nm")?.as_f64()? / 1e9;
                 let coeff_scale = v.get("coeff_scale")?.as_f64()?;
                 // let focal_length_nm = v.get("focal_length_nm")?.as_f64()?;
@@ -168,6 +170,7 @@ pub struct ISTemp {
     pub original_sample_rate: f64,
     pub first_frame_ts: f64,
     pub pixel_pitch: (u32, u32),
+    pub sensor_size: (u32, u32),
     pub per_frame_exposure: Vec<f64>,
     pub per_frame_start_idx: Vec<usize>,
     pub per_frame_crop: Vec<(f32, f32, f32, f32)>,
@@ -250,6 +253,7 @@ pub fn stab_collect(is: &mut ISTemp, tag_map: &GroupedTagMap, _info: &telemetry_
     let first_frame_ts = (imager.get_t(TagId::FirstFrameTimestamp) as Option<&f64>)?;
     let exposure_time  = (imager.get_t(TagId::ExposureTime)        as Option<&f64>)?;
 
+    let sensor_size = (imager.get_t(TagId::SensorSizePixels)  as Option<&(u32, u32)>)?;
     let pixel_pitch = (imager.get_t(TagId::PixelPitch)        as Option<&(u32, u32)>)?;
     let crop_origin = (imager.get_t(TagId::CaptureAreaOrigin) as Option<&(f32, f32)>)?;
     let crop_size   = (imager.get_t(TagId::CaptureAreaSize)   as Option<&(f32, f32)>)?;
@@ -293,6 +297,7 @@ pub fn stab_collect(is: &mut ISTemp, tag_map: &GroupedTagMap, _info: &telemetry_
     is.original_sample_rate = original_sample_rate;
     is.first_frame_ts = first_frame_ts * 1000.0;
     is.pixel_pitch = *pixel_pitch;
+    is.sensor_size = *sensor_size;
 
     Some(())
 }
@@ -301,9 +306,10 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, 
     let num_frames = is_temp.per_frame_exposure.len();
 
     let readout_time = md.frame_readout_time.unwrap_or_default() / is_temp.original_sample_rate * sample_rate * 1000.0;
+    let first_timestamp = is_temp.first_frame_ts;
 
     let per_frame_data: Vec<CameraStabData> = (0..num_frames).into_par_iter().filter_map(|frame| {
-        let first_timestamp = is_temp.first_frame_ts;
+        let crop_area = *is_temp.per_frame_crop.get(frame)?; // (x, y, w, h)
         let exposuretime = is_temp.per_frame_exposure.get(frame)?;
         let top_offset = first_timestamp - exposuretime / 2.0;
         let bot_offset = top_offset + readout_time;
@@ -343,7 +349,8 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, 
 
         Some(CameraStabData {
             offset: ofs_rows as f64,
-            crop_area: *is_temp.per_frame_crop.get(frame)?,
+            sensor_size: is_temp.sensor_size,
+            crop_area,
             pixel_pitch: is_temp.pixel_pitch,
             ibis_spline,
             ois_spline
@@ -388,7 +395,7 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (V
     let divisions = mesh_data.get("divisions")?.as_array()?;
     let divisions = (divisions[0].as_i64()? as usize, divisions[1].as_i64()? as usize);
 
-    let mut mesh = Vec::with_capacity(divisions.0 * divisions.1 * 2 + 2);
+    let mut mesh = Vec::with_capacity(divisions.0 * divisions.1 * 2 + 8 + (divisions.1*4*2));
     mesh.push(divisions.0 as f64);
     mesh.push(divisions.1 as f64);
     mesh.push(size.0 as f64);
@@ -434,7 +441,7 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (V
         Some([new_pos.0 as f64, new_pos.1 as f64])
     }).flatten().collect();
 
-    let mut inv_mesh = Vec::with_capacity(new_mesh.len() + 2);
+    let mut inv_mesh = Vec::with_capacity(mesh.len());
     inv_mesh.push(divisions.0 as f64);
     inv_mesh.push(divisions.1 as f64);
     inv_mesh.push(size.0 as f64);

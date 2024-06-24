@@ -144,11 +144,10 @@ impl BivariateSpline {
             // Self::cubic_spline_coefficients(&mesh[8 + mesh_offset..], 2, j * self.grid_size.0, size_x, self.grid_size.0, &mut a, &mut b, &mut c, &mut d, &mut h, &mut alpha, &mut l, &mut mu, &mut z);
             let gs = self.grid_size.1;
             let block = gs * 4;
-            let mesh2 = &mesh[8 + gs*gs*2..];
-            let a = &mesh2[gs * 0 + (j * block) + (block * gs * mesh_offset)..];
-            let b = &mesh2[gs * 1 + (j * block) + (block * gs * mesh_offset)..];
-            let c = &mesh2[gs * 2 + (j * block) + (block * gs * mesh_offset)..];
-            let d = &mesh2[gs * 3 + (j * block) + (block * gs * mesh_offset)..];
+            let a = &mesh[8 + gs*gs*2 + gs * 0 + (j * block) + (block * gs * mesh_offset)..];
+            let b = &mesh[8 + gs*gs*2 + gs * 1 + (j * block) + (block * gs * mesh_offset)..];
+            let c = &mesh[8 + gs*gs*2 + gs * 2 + (j * block) + (block * gs * mesh_offset)..];
+            let d = &mesh[8 + gs*gs*2 + gs * 3 + (j * block) + (block * gs * mesh_offset)..];
             intermediate_values[j] = Self::cubic_spline_interpolate(&a, &b, &c, &d, self.grid_size.0, x, size_x);
         }
 
