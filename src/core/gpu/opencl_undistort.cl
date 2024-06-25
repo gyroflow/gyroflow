@@ -167,7 +167,7 @@ float2 rotate_point(float2 pos, float angle, float2 origin) {
                      sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin.y);
 }
 
-void cubic_spline_coefficients(const float* mesh, int step, int offset, float size, int n, float *a, float *b, float *c, float *d, float *h, float *alpha, float *l, float *mu, float *z) {
+void cubic_spline_coefficients(__private float *mesh, int step, int offset, float size, int n, float *a, float *b, float *c, float *d, float *h, float *alpha, float *l, float *mu, float *z) {
     for (int i = 0; i < n; i++) { a[i] = mesh[(i + offset) * step]; }
     for (int i = 0; i < n - 1; i++) { h[i] = size * (i + 1) / (n - 1) - size * i / (n - 1); }
     for (int i = 1; i < n - 1; i++) { alpha[i] = (3.0f / h[i] * (a[i + 1] - a[i])) - (3.0f / h[i - 1] * (a[i] - a[i - 1])); }
