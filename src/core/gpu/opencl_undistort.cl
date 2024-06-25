@@ -188,29 +188,34 @@ void cubic_spline_coefficients(const float* mesh, int step, int offset, float si
         d[j] = (c[j + 1] - c[j]) / (3.0f * h[j]);
     }
 }
-float cubic_spline_interpolate(const float *a, const float *b, const float *c, const float *d, int n, float x, float size) {
+float cubic_spline_interpolate1(__global const float *mesh, int a, int b, int c, int d, int n, float x, float size) {
+    int i = max(0.0f, min(n - 2.0f, (n - 1.0f) * x / size));
+    float dx = x - size * i / (n - 1.0f);
+    return mesh[a + i] + mesh[b + i] * dx + mesh[c + i] * dx * dx + mesh[d + i] * dx * dx * dx;
+}
+float cubic_spline_interpolate2(__private float *a, __private float *b, __private float *c, __private float *d, int n, float x, float size) {
     int i = max(0.0f, min(n - 2.0f, (n - 1.0f) * x / size));
     float dx = x - size * i / (n - 1.0f);
     return a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx;
 }
 #define GRID_SIZE 9
-float bivariate_spline_interpolate(float size_x, float size_y, const float *mesh, int mesh_offset, int n, float x, float y) {
+float bivariate_spline_interpolate(float size_x, float size_y, __global const float *mesh, int mesh_offset, int n, float x, float y) {
     __private float intermediate_values[GRID_SIZE];
     __private float a[GRID_SIZE], b[GRID_SIZE], c[GRID_SIZE], d[GRID_SIZE];
     __private float h[GRID_SIZE - 1], alpha[GRID_SIZE - 1], l[GRID_SIZE], mu[GRID_SIZE], z[GRID_SIZE];
 
     for (int j = 0; j < GRID_SIZE; j++) {
         const int block = GRID_SIZE * 4;
-        const float *aa = &mesh[8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 0 + (j * block) + (block * GRID_SIZE * mesh_offset)];
-        const float *bb = &mesh[8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 1 + (j * block) + (block * GRID_SIZE * mesh_offset)];
-        const float *cc = &mesh[8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 2 + (j * block) + (block * GRID_SIZE * mesh_offset)];
-        const float *dd = &mesh[8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 3 + (j * block) + (block * GRID_SIZE * mesh_offset)];
+        int aa = 8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 0 + (j * block) + (block * GRID_SIZE * mesh_offset);
+        int bb = 8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 1 + (j * block) + (block * GRID_SIZE * mesh_offset);
+        int cc = 8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 2 + (j * block) + (block * GRID_SIZE * mesh_offset);
+        int dd = 8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 3 + (j * block) + (block * GRID_SIZE * mesh_offset);
         // cubic_spline_coefficients(&mesh[8 + mesh_offset], 2, (j * GRID_SIZE), size_x, GRID_SIZE, a, b, c, d, h, alpha, l, mu, z);
-        intermediate_values[j] = cubic_spline_interpolate(aa, bb, cc, dd, GRID_SIZE, x, size_x);
+        intermediate_values[j] = cubic_spline_interpolate1(mesh, aa, bb, cc, dd, GRID_SIZE, x, size_x);
     }
 
     cubic_spline_coefficients(intermediate_values, 1, 0, size_y, GRID_SIZE, a, b, c, d, h, alpha, l, mu, z);
-    return cubic_spline_interpolate(a, b, c, d, GRID_SIZE, y, size_y);
+    return cubic_spline_interpolate2(a, b, c, d, GRID_SIZE, y, size_y);
 }
 float2 interpolate_mesh(__global const float *mesh, int width, int height, float2 pos) {
     if (pos.x < 0 || pos.x > width || pos.y < 0 || pos.y > height) {
@@ -315,13 +320,13 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
 
             if (params->flags & 128) uv.y = params->height - uv.y; // framebuffer inverted
 
-            uv.x = map_coord(uv.x, 0.0f, params->width,  origin.x, origin.x + crop_size.x);
-            uv.y = map_coord(uv.y, 0.0f, params->height, origin.y, origin.y + crop_size.y);
+            uv.x = map_coord(uv.x, 0.0f, (float)params->width,  origin.x, origin.x + crop_size.x);
+            uv.y = map_coord(uv.y, 0.0f, (float)params->height, origin.y, origin.y + crop_size.y);
 
             uv = interpolate_mesh(lens_data, mesh_size.x, mesh_size.y, uv);
 
-            uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0f, params->width);
-            uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0f, params->height);
+            uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0f, (float)params->width);
+            uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0f, (float)params->height);
 
             if (params->flags & 128) uv.y = params->height - uv.y; // framebuffer inverted
         }

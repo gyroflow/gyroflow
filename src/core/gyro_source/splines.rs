@@ -85,7 +85,7 @@ impl<T: Mul<f64, Output = T> + Sub<T, Output = T> + Add<T, Output = T> + Copy> C
 // ----------------------------------------------------------------
 // ----------------------------------------------------------------
 
-const MAX_GRID_SIZE: usize = 16;
+const MAX_GRID_SIZE: usize = 9;
 pub struct BivariateSpline {
     grid_size: (usize, usize)
 }
