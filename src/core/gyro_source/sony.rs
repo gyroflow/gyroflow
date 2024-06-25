@@ -300,7 +300,7 @@ pub fn stab_collect(is: &mut ISTemp, tag_map: &GroupedTagMap, _info: &telemetry_
     Some(())
 }
 
-pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, _frame_rate: f64, size: (usize, usize)) -> Option<Vec<CameraStabData>> {
+pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, _frame_rate: f64, _size: (usize, usize)) -> Option<Vec<CameraStabData>> {
     let num_frames = is_temp.per_frame_exposure.len();
 
     let readout_time = md.frame_readout_time.unwrap_or_default() / is_temp.original_sample_rate * sample_rate * 1000.0;

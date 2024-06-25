@@ -35,7 +35,7 @@ pub fn export_full_metadata(gyro_url: &str, _stab: &Arc<crate::StabilizationMana
     Ok(serde_json::to_string_pretty(&output)?)
 }
 
-pub fn export_gyro_data(is_csv: bool, fields_json: &str, stab: &Arc<crate::StabilizationManager>) -> String {
+pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::StabilizationManager>) -> String {
     use std::fmt::Write;
     use crate::util::MapClosest;
     const RAD2DEG: f64 = 180.0 / std::f64::consts::PI;
@@ -43,11 +43,23 @@ pub fn export_gyro_data(is_csv: bool, fields_json: &str, stab: &Arc<crate::Stabi
         Milliseconds(f64),
         Microseconds(i64),
     }
+    #[derive(PartialEq, Eq)]
+    enum Format {
+        Csv, Json, Usd, Jsx
+    }
     fn get(f: Option<[f64; 3]>, i: usize) -> f64 { f.map(|x| x[i]).unwrap_or_default() }
+
+    let format = match filename.split('.').last().unwrap_or_default() {
+        "csv"  => Format::Csv,
+        "json" => Format::Json,
+        "usd"  => Format::Usd,
+        "jsx"  => Format::Jsx,
+        _ => Format::Csv,
+    };
 
     let fields: serde_json::Value = serde_json::from_str(fields_json).unwrap();
 
-    let all_samples = fields.get("export_all_samples").and_then(|x| x.as_bool()).unwrap_or_default();
+    let all_samples = fields.get("export_all_samples").and_then(|x| x.as_bool()).unwrap_or_default() && format != Format::Usd && format != Format::Jsx;
 
     let original    = fields.get("original")  .and_then(|x| x.as_object()).unwrap();
     let stabilized  = fields.get("stabilized").and_then(|x| x.as_object()).unwrap();
@@ -65,19 +77,20 @@ pub fn export_gyro_data(is_csv: bool, fields_json: &str, stab: &Arc<crate::Stabi
     let fovs         = zooming.get("fovs")        .and_then(|x| x.as_bool()).unwrap_or_default();
     let minimal_fovs = zooming.get("minimal_fovs").and_then(|x| x.as_bool()).unwrap_or_default();
 
-    let mut csv = String::from("frame,timestamp_ms");
+    let mut output = String::new();
     let mut json = Vec::<std::collections::HashMap<&str, serde_json::Value>>::new();
-    if is_csv {
-        if oaccl { let _ = write!(csv, ",org_acc_x,org_acc_y,org_acc_z"); }
-        if oeulr { let _ = write!(csv, ",org_pitch,org_yaw,org_roll"); }
-        if ogyro { let _ = write!(csv, ",org_gyro_x,org_gyro_y,org_gyro_z"); }
-        if oquat { let _ = write!(csv, ",org_quat_w,org_quat_x,org_quat_y,org_quat_z"); }
-        if seulr { let _ = write!(csv, ",stab_pitch,stab_yaw,stab_roll"); }
-        if squat { let _ = write!(csv, ",stab_quat_w,stab_quat_x,stab_quat_y,stab_quat_z"); }
-        if focal_length { let _ = write!(csv, ",focal_length"); }
-        if fovs         { let _ = write!(csv, ",fov_scale"); }
-        if minimal_fovs { let _ = write!(csv, ",minimal_fov_scale"); }
-        let _ = write!(csv, "\n");
+    if format == Format::Csv {
+        let _ = write!(output, "frame,timestamp_ms");
+        if oaccl { let _ = write!(output, ",org_acc_x,org_acc_y,org_acc_z"); }
+        if oeulr { let _ = write!(output, ",org_pitch,org_yaw,org_roll"); }
+        if ogyro { let _ = write!(output, ",org_gyro_x,org_gyro_y,org_gyro_z"); }
+        if oquat { let _ = write!(output, ",org_quat_w,org_quat_x,org_quat_y,org_quat_z"); }
+        if seulr { let _ = write!(output, ",stab_pitch,stab_yaw,stab_roll"); }
+        if squat { let _ = write!(output, ",stab_quat_w,stab_quat_x,stab_quat_y,stab_quat_z"); }
+        if focal_length { let _ = write!(output, ",focal_length"); }
+        if fovs         { let _ = write!(output, ",fov_scale"); }
+        if minimal_fovs { let _ = write!(output, ",minimal_fov_scale"); }
+        let _ = write!(output, "\n");
     }
 
     let params = stab.params.read();
@@ -110,6 +123,44 @@ pub fn export_gyro_data(is_csv: bool, fields_json: &str, stab: &Arc<crate::Stabi
             (None, frame, TimestampType::Milliseconds(middle_timestamp), timestamp_ms)
         }).collect()
     };
+    let num_frames = params.frame_count;
+    let fps = params.get_scaled_fps();
+    let frame_times = serde_json::to_string(&(0..num_frames).map(|i| i as f64 / fps).collect::<Vec<_>>()).unwrap();
+
+    if format == Format::Usd {
+        output.push_str(&format!(r#"#usda 1.0
+            (
+                defaultPrim = "root"
+                doc = "Gyroflow"
+                endTimeCode = {num_frames}
+                metersPerUnit = 1
+                startTimeCode = 1
+                timeCodesPerSecond = {fps:.6}
+                upAxis = "Z"
+            )
+            def Xform "root" (
+                customData = {{
+                    dictionary Blender = {{
+                        bool generated = 1
+                    }}
+                }}
+            )
+            {{
+                def Xform "GyroflowCamera"
+                {{
+                    matrix4d xformOp:transform.timeSamples = {{
+            "#
+        ));
+    }
+
+    if format == Format::Jsx {
+        let duration_s = params.duration_ms / 1000.0;
+        output.push_str(&format!(r#"var comp = app.project.activeItem;
+            var GyroflowCamera = comp.layers.addCamera("GyroflowCamera",[0,0]);
+            GyroflowCamera.inPoint = 0.0;
+            GyroflowCamera.outPoint = {duration_s};
+            GyroflowCamera.property("orientation").setValuesAtTimes({frame_times}, ["#));
+    }
 
     let raw_imu = gyro.raw_imu(&file_metadata);
 
@@ -123,11 +174,37 @@ pub fn export_gyro_data(is_csv: bool, fields_json: &str, stab: &Arc<crate::Stabi
         let val_ogyro = [get(raw_imu.gyro, 0), get(raw_imu.gyro, 1), get(raw_imu.gyro, 2)];
         let val_oquat = [quatv[3], quatv[0], quatv[1], quatv[2]];
 
+        if format == Format::Jsx && !(seulr && !oeulr) {
+            output.push_str(&format!("[{},{},{}],\n", val_oeulr[0], -val_oeulr[2], val_oeulr[1]));
+        }
+        if format == Format::Usd && !(seulr && !oeulr) {
+            let matrix = nalgebra::Matrix4::from(quat);
+            output.push_str(&format!("                {}: ( ({},{},{}, 0), ({}, {}, {}, 0), ({}, {}, {}, 0), (7.0, -7.0, 1.5, 1) ),\n",
+                frame + 1,
+                matrix[(0, 0)], matrix[(1, 0)], matrix[(2, 0)],
+                matrix[(0, 1)], matrix[(1, 1)], matrix[(2, 1)],
+                matrix[(0, 2)], matrix[(1, 2)], matrix[(2, 2)]
+            ));
+        }
+
         let quat = match ts { TimestampType::Microseconds(ts) => *gyro.smoothed_quaternions.get(&ts).unwrap(), TimestampType::Milliseconds(ts) => gyro.smoothed_quat_at_timestamp(ts) };
         let quate = quat.euler_angles();
         let quatv = quat.as_vector();
         let val_seulr = [quate.0 * RAD2DEG, quate.1 * RAD2DEG, quate.2 * RAD2DEG];
         let val_squat = [quatv[3], quatv[0], quatv[1], quatv[2]];
+
+        if format == Format::Jsx && (seulr && !oeulr) {
+            output.push_str(&format!("[{},{},{}],\n", val_seulr[0], -val_seulr[2], val_seulr[1]));
+        }
+        if format == Format::Usd && (seulr && !oeulr) {
+            let matrix = nalgebra::Matrix4::from(quat);
+            output.push_str(&format!("                {}: ( ({},{},{}, 0), ({}, {}, {}, 0), ({}, {}, {}, 0), (7.0, -7.0, 1.5, 1) ),\n",
+                frame + 1,
+                matrix[(0, 0)], matrix[(1, 0)], matrix[(2, 0)],
+                matrix[(0, 1)], matrix[(1, 1)], matrix[(2, 1)],
+                matrix[(0, 2)], matrix[(1, 2)], matrix[(2, 2)]
+            ));
+        }
 
         if let Some(val) = file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
             if let Some(fl) = val.focal_length {
@@ -138,19 +215,19 @@ pub fn export_gyro_data(is_csv: bool, fields_json: &str, stab: &Arc<crate::Stabi
         let val_fov = *params.fovs.get(frame).unwrap_or(&0.0);
         let val_minimal_fov = *params.minimal_fovs.get(frame).unwrap_or(&0.0);
 
-        if is_csv {
-            let _ = write!(csv, "{frame},{timestamp_ms:.3}");
-            if oaccl { let _ = write!(csv, ",{:.6},{:.6},{:.6}",       val_oaccl[0], val_oaccl[1], val_oaccl[2]); }
-            if oeulr { let _ = write!(csv, ",{:.3},{:.3},{:.3}",       val_oeulr[0], val_oeulr[1], val_oeulr[2]); }
-            if ogyro { let _ = write!(csv, ",{:.6},{:.6},{:.6}",       val_ogyro[0], val_ogyro[1], val_ogyro[2]); }
-            if oquat { let _ = write!(csv, ",{:.6},{:.6},{:.6},{:.6}", val_oquat[0], val_oquat[1], val_oquat[2], val_oquat[3]); }
-            if seulr { let _ = write!(csv, ",{:.3},{:.3},{:.3}",       val_seulr[0], val_seulr[1], val_seulr[2]); }
-            if squat { let _ = write!(csv, ",{:.6},{:.6},{:.6},{:.6}", val_squat[0], val_squat[1], val_squat[2], val_squat[3]); }
-            if focal_length { let _ = write!(csv, ",{val_fl:.3}");  }
-            if fovs         { let _ = write!(csv, ",{val_fov:.3}"); }
-            if minimal_fovs { let _ = write!(csv, ",{val_minimal_fov:.3}"); }
-            let _ = write!(csv, "\n");
-        } else {
+        if format == Format::Csv {
+            let _ = write!(output, "{frame},{timestamp_ms:.3}");
+            if oaccl { let _ = write!(output, ",{:.6},{:.6},{:.6}",       val_oaccl[0], val_oaccl[1], val_oaccl[2]); }
+            if oeulr { let _ = write!(output, ",{:.3},{:.3},{:.3}",       val_oeulr[0], val_oeulr[1], val_oeulr[2]); }
+            if ogyro { let _ = write!(output, ",{:.6},{:.6},{:.6}",       val_ogyro[0], val_ogyro[1], val_ogyro[2]); }
+            if oquat { let _ = write!(output, ",{:.6},{:.6},{:.6},{:.6}", val_oquat[0], val_oquat[1], val_oquat[2], val_oquat[3]); }
+            if seulr { let _ = write!(output, ",{:.3},{:.3},{:.3}",       val_seulr[0], val_seulr[1], val_seulr[2]); }
+            if squat { let _ = write!(output, ",{:.6},{:.6},{:.6},{:.6}", val_squat[0], val_squat[1], val_squat[2], val_squat[3]); }
+            if focal_length { let _ = write!(output, ",{val_fl:.3}");  }
+            if fovs         { let _ = write!(output, ",{val_fov:.3}"); }
+            if minimal_fovs { let _ = write!(output, ",{val_minimal_fov:.3}"); }
+            let _ = write!(output, "\n");
+        } else if format == Format::Json {
             let mut obj = std::collections::HashMap::new();
             obj.insert("frame", frame.into());
             obj.insert("timestamp_ms", timestamp_ms.into());
@@ -166,9 +243,71 @@ pub fn export_gyro_data(is_csv: bool, fields_json: &str, stab: &Arc<crate::Stabi
             json.push(obj);
         }
     }
+    let mut comp_params = crate::stabilization::ComputeParams::from_manager(stab);
 
-    if is_csv {
-        csv
+    if format == Format::Jsx {
+        output = output.trim_end_matches(",\n").to_string();
+        output.push_str("]);\n");
+
+        let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&comp_params, 0.0);
+        output.push_str(&format!("GyroflowCamera.property(\"zoom\").setValue({});\n", camera_matrix[(0, 0)]));
+        if comp_params.gyro.read().file_metadata.read().lens_params.len() > 1 {
+            output.push_str(&format!("GyroflowCamera.property(\"zoom\").setValuesAtTimes({frame_times}, ["));
+            for f in 0..num_frames as i32 {
+                let timestamp = crate::timestamp_at_frame(f, fps);
+                let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&comp_params, timestamp);
+                output.push_str(&format!("{},\n", camera_matrix[(0, 0)]));
+            }
+            output = output.trim_end_matches(",\n").to_string();
+            output.push_str("]);\n");
+        }
+    }
+
+    if format == Format::Csv || format == Format::Jsx {
+        output
+    } else if format == Format::Usd {
+        let aspect = params.video_size.0 as f64 / params.video_size.1 as f64;
+        let width_mm = 35.0;
+        let height_mm = width_mm / aspect;
+
+        comp_params.calculate_camera_fovs();
+
+        output.push_str("\n}");
+        let fov = comp_params.camera_diagonal_fovs.first().unwrap();
+        let diagonal_mm = (width_mm.powi(2) + height_mm.powi(2)).sqrt();
+        let focal_length_mm = diagonal_mm / (2.0 * (fov.to_radians() / 2.0).tan()) / 100.0;
+
+        let focal_lengths = {
+            let mut fls = String::new();
+            if comp_params.camera_diagonal_fovs.len() > 1 {
+                fls.push_str("float focalLength.timeSamples = {\n");
+                for (frame, fov) in comp_params.camera_diagonal_fovs.iter().enumerate() {
+                    let focal_length_mm = diagonal_mm / (2.0 * (fov.to_radians() / 2.0).tan()) / 100.0;
+                    fls.push_str(&format!("                {}: {focal_length_mm},\n", frame + 1));
+                }
+                fls.push_str("}");
+            }
+            fls
+        };
+
+        output.push_str(&format!(r#"
+                uniform token[] xformOpOrder = ["xformOp:transform"]
+
+                def Camera "GyroflowCamera"
+                {{
+                    float2 clippingRange = (0.1, 100)
+                    float focalLength = {focal_length_mm}
+                    {focal_lengths}
+                    float horizontalAperture = {}
+                    float horizontalApertureOffset = 0
+                    token projection = "perspective"
+                    float verticalAperture = {}
+                    float verticalApertureOffset = 0
+                }}
+            }}
+        }}"#, width_mm / 100.0, height_mm / 100.0));
+
+        output
     } else {
         serde_json::to_string(&json).unwrap()
     }

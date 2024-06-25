@@ -575,7 +575,7 @@ MenuItem {
                         }
                     }
                     Action {
-                        text: qsTr("Export to CSV or JSON");
+                        text: qsTr("Export camera data (CSV/JSON/USD/AE)");
                         onTriggered: {
                             const el = Qt.createComponent("../SettingsSelector.qml").createObject(window, {
                                 desc: [
@@ -612,7 +612,7 @@ MenuItem {
                             el.opened = true;
                             el.onApply.connect((obj) => {
                                 settings.setValue("CSVExportSelection", JSON.stringify(obj));
-                                exportFileDialog.nameFilters = ["*.csv", "*.json"];
+                                exportFileDialog.nameFilters = ["CSV (*.csv)", "JSON (*.json)", "Universal Scene Description (*.usd)", "After Effects Script (*.jsx)"];
                                 exportFileDialog.exportData = obj;
                                 exportFileDialog.open2();
                             });
@@ -621,7 +621,7 @@ MenuItem {
                     Action {
                         text: qsTr("Export full metadata");
                         onTriggered: {
-                            exportFileDialog.nameFilters = ["*.json"];
+                            exportFileDialog.nameFilters = ["JSON (*.json)"];
                             exportFileDialog.exportData = "full";
                             exportFileDialog.open2();
                         }
@@ -629,7 +629,7 @@ MenuItem {
                     Action {
                         text: qsTr("Export parsed metadata");
                         onTriggered: {
-                            exportFileDialog.nameFilters = ["*.json"];
+                            exportFileDialog.nameFilters = ["JSON (*.json)"];
                             exportFileDialog.exportData = "parsed";
                             exportFileDialog.open2();
                         }

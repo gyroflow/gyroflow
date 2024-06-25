@@ -1917,9 +1917,9 @@ impl Controller {
     }
     fn export_gyro_data(&self, url: QUrl, fields: QJsonObject) {
         let url = util::qurl_to_encoded(url);
-        let is_csv = filesystem::get_filename(&url).ends_with(".csv");
+        let filename = filesystem::get_filename(&url).to_ascii_lowercase();
 
-        let contents = gyroflow_core::gyro_export::export_gyro_data(is_csv, fields.to_json().to_str().unwrap(), &self.stabilizer);
+        let contents = gyroflow_core::gyro_export::export_gyro_data(&filename, fields.to_json().to_str().unwrap(), &self.stabilizer);
         if let Err(e) = filesystem::write(&url, contents.as_bytes()) {
             self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
         }
@@ -2270,7 +2270,7 @@ impl Filesystem {
         let folder = filesystem::get_folder(&current_url);
         let filename = filesystem::get_filename(&current_url);
 
-        let extensions = [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "braw", "r3d" ];
+        let extensions = [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "braw", "r3d" ];
 
         let list: Vec<(String, String)> = filesystem::list_folder(&folder)
             .into_iter()

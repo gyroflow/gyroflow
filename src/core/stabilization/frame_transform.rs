@@ -211,7 +211,7 @@ impl FrameTransform {
         } else {
             (1.0, 1.0)
         };
-        let height_scale = params.video_height as f64 / params.height.max(1) as f64;
+        // let height_scale = params.video_height as f64 / params.height.max(1) as f64;
 
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
