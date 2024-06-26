@@ -130,6 +130,74 @@ impl Stabilization {
         }
     }
 
+    pub fn rotate_and_distort(pos: (f32, f32), idx: usize, params: &KernelParams, matrices: &[[f32; 14]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit_sq: f32, lens_data: &[f64]) -> Option<(f32, f32)> {
+        let matrices = matrices[idx];
+        let _x = (pos.0 * matrices[0]) + (pos.1 * matrices[1]) + matrices[2] + params.translation3d[0];
+        let _y = (pos.0 * matrices[3]) + (pos.1 * matrices[4]) + matrices[5] + params.translation3d[1];
+        let mut _w = (pos.0 * matrices[6]) + (pos.1 * matrices[7]) + matrices[8] + params.translation3d[2];
+        if _w > 0.0 {
+            if r_limit_sq > 0.0 && (_x.powi(2) + _y.powi(2)) > r_limit_sq * _w {
+                return None;
+            }
+
+            if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
+                if _w != 0.0 {
+                    let r = (_x.powi(2) + _y.powi(2)).sqrt() / _w;
+                    let sin_theta_d = (r / (1.0 + r * r).sqrt()) * params.light_refraction_coefficient;
+                    let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
+                    if r_d != 0.0 {
+                        _w *= r / r_d;
+                    }
+                }
+            }
+
+            let mut uv = distortion_model.distort_point(_x, _y, _w, &params);
+            uv = (uv.0 * params.f[0], uv.1 * params.f[1]);
+
+            if matrices[9] != 0.0 || matrices[10] != 0.0 || matrices[11] != 0.0 || matrices[12] != 0.0 || matrices[13] != 0.0 {
+                let ang_rad = matrices[11];
+                let cos_a = (-ang_rad).cos();
+                let sin_a = (-ang_rad).sin();
+                uv = (
+                    cos_a * uv.0 - sin_a * uv.1 - matrices[9]  + matrices[12],
+                    sin_a * uv.0 + cos_a * uv.1 - matrices[10] + matrices[13]
+                );
+            }
+
+            uv = (uv.0 + params.c[0], uv.1 + params.c[1]);
+
+            if !lens_data.is_empty() && lens_data[0] != 0.0 {
+                let mesh_size = (lens_data[2], lens_data[3]);
+                let origin    = (lens_data[4] as f32, lens_data[5] as f32);
+                let crop_size = (lens_data[6] as f32, lens_data[7] as f32);
+
+                if (params.flags & 128) == 128 { uv.1 = params.height as f32 - uv.1; } // framebuffer inverted
+
+                uv.0 = map_coord(uv.0, 0.0, params.width  as f32, origin.0, origin.0 + crop_size.0);
+                uv.1 = map_coord(uv.1, 0.0, params.height as f32, origin.1, origin.1 + crop_size.1);
+
+                let new_pos = crate::gyro_source::interpolate_mesh(uv.0 as f64, uv.1 as f64, (mesh_size.0, mesh_size.1), lens_data);
+
+                uv.0 = map_coord(new_pos.x as f32, origin.0, origin.0 + crop_size.0, 0.0, params.width  as f32);
+                uv.1 = map_coord(new_pos.y as f32, origin.1, origin.1 + crop_size.1, 0.0, params.height as f32);
+
+                if (params.flags & 128) == 128 { uv.1 = params.height as f32 - uv.1; } // framebuffer inverted
+            }
+
+            if (params.flags & 2) == 2 { // Has digital lens
+                if let Some(digital) = digital_lens {
+                    uv = digital.distort_point(uv.0, uv.1, 1.0, params);
+                }
+            }
+
+            if params.input_horizontal_stretch > 0.001 { uv.0 /= params.input_horizontal_stretch; }
+            if params.input_vertical_stretch   > 0.001 { uv.1 /= params.input_vertical_stretch; }
+
+            return Some(uv);
+        }
+        return None;
+    }
+
     // Adapted from OpenCV: initUndistortRectifyMap + remap
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
     // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
@@ -160,74 +228,6 @@ impl Stabilization {
             else    { *px *= 0.87843137; } // (240 - 16) / 255
             px[0] += 16.0;
             px[1] += 16.0;
-        }
-
-        fn rotate_and_distort(pos: (f32, f32), idx: usize, params: &KernelParams, matrices: &[[f32; 14]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit_sq: f32, lens_data: &[f64]) -> Option<(f32, f32)> {
-            let matrices = matrices[idx];
-            let _x = (pos.0 * matrices[0]) + (pos.1 * matrices[1]) + matrices[2] + params.translation3d[0];
-            let _y = (pos.0 * matrices[3]) + (pos.1 * matrices[4]) + matrices[5] + params.translation3d[1];
-            let mut _w = (pos.0 * matrices[6]) + (pos.1 * matrices[7]) + matrices[8] + params.translation3d[2];
-            if _w > 0.0 {
-                if r_limit_sq > 0.0 && (_x.powi(2) + _y.powi(2)) > r_limit_sq * _w {
-                    return None;
-                }
-
-                if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
-                    if _w != 0.0 {
-                        let r = (_x.powi(2) + _y.powi(2)).sqrt() / _w;
-                        let sin_theta_d = (r / (1.0 + r * r).sqrt()) * params.light_refraction_coefficient;
-                        let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
-                        if r_d != 0.0 {
-                            _w *= r / r_d;
-                        }
-                    }
-                }
-
-                let mut uv = distortion_model.distort_point(_x, _y, _w, &params);
-                uv = (uv.0 * params.f[0], uv.1 * params.f[1]);
-
-                if matrices[9] != 0.0 || matrices[10] != 0.0 || matrices[11] != 0.0 || matrices[12] != 0.0 || matrices[13] != 0.0 {
-                    let ang_rad = (matrices[11] / 1000.0).to_radians();
-                    let cos_a = (-ang_rad).cos();
-                    let sin_a = (-ang_rad).sin();
-                    uv = (
-                        cos_a * uv.0 - sin_a * uv.1 - matrices[9]  + matrices[12],
-                        sin_a * uv.0 + cos_a * uv.1 - matrices[10] + matrices[13]
-                    );
-                }
-
-                uv = (uv.0 + params.c[0], uv.1 + params.c[1]);
-
-                if !lens_data.is_empty() && lens_data[0] != 0.0 {
-                    let mesh_size = (lens_data[2], lens_data[3]);
-                    let origin    = (lens_data[4] as f32, lens_data[5] as f32);
-                    let crop_size = (lens_data[6] as f32, lens_data[7] as f32);
-
-                    if (params.flags & 128) == 128 { uv.1 = params.height as f32 - uv.1; } // framebuffer inverted
-
-                    uv.0 = map_coord(uv.0, 0.0, params.width  as f32, origin.0, origin.0 + crop_size.0);
-                    uv.1 = map_coord(uv.1, 0.0, params.height as f32, origin.1, origin.1 + crop_size.1);
-
-                    let new_pos = crate::gyro_source::interpolate_mesh(uv.0 as f64, uv.1 as f64, (mesh_size.0, mesh_size.1), lens_data);
-
-                    uv.0 = map_coord(new_pos.x as f32, origin.0, origin.0 + crop_size.0, 0.0, params.width  as f32);
-                    uv.1 = map_coord(new_pos.y as f32, origin.1, origin.1 + crop_size.1, 0.0, params.height as f32);
-
-                    if (params.flags & 128) == 128 { uv.1 = params.height as f32 - uv.1; } // framebuffer inverted
-                }
-
-                if (params.flags & 2) == 2 { // Has digital lens
-                    if let Some(digital) = digital_lens {
-                        uv = digital.distort_point(uv.0, uv.1, 1.0, params);
-                    }
-                }
-
-                if params.input_horizontal_stretch > 0.001 { uv.0 /= params.input_horizontal_stretch; }
-                if params.input_vertical_stretch   > 0.001 { uv.1 /= params.input_vertical_stretch; }
-
-                return Some(uv);
-            }
-            return None;
         }
 
         fn rotate_point(pos: (f32, f32), angle: f32, origin: (f32, f32)) -> (f32, f32) {
@@ -384,7 +384,7 @@ impl Stabilization {
                             };
                             if params.matrix_count > 1 {
                                 let idx = params.matrix_count as usize / 2;
-                                if let Some(pt) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit_sq, &lens_data) {
+                                if let Some(pt) = Self::rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit_sq, &lens_data) {
                                     if (params.flags & 16) == 16 { // Horizontal RS
                                         sy = (pt.0.round() as i32).min(params.width).max(0) as usize;
                                     } else {
@@ -395,7 +395,7 @@ impl Stabilization {
                             ///////////////////////////////////////////////////////////////////
 
                             let idx = sy.min(params.matrix_count as usize - 1);
-                            if let Some(mut uv) = rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit_sq, &lens_data) {
+                            if let Some(mut uv) = Self::rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit_sq, &lens_data) {
                                 let width_f = params.width as f32;
                                 let height_f = params.height as f32;
                                 match params.background_mode {
@@ -535,7 +535,7 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
             y = map_coord(new_pos.y as f32, origin.1, origin.1 + crop_size.1, 0.0, params.height as f32);
         }
         if let Some(shift) = shift_per_point.as_ref().and_then(|v| v.get(index)) {
-            let ang_rad = (shift.2 / 1000.0).to_radians();
+            let ang_rad = shift.2;
             let cos_a = ang_rad.cos();
             let sin_a = ang_rad.sin();
             x = x - c.0 - shift.3 + shift.0;

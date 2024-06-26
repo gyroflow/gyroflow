@@ -302,7 +302,7 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
         float2 uv = params->f * distort_point(_x, _y, _w, params);
 
         if (matrix[9] != 0.0f || matrix[10] != 0.0f || matrix[11] != 0.0f || matrix[12] != 0.0f || matrix[13] != 0.0f) {
-            float ang_rad = matrix[11] / 1000.0f * 3.14159265f / 180.0f;
+            float ang_rad = matrix[11];
             float cos_a = cos(-ang_rad);
             float sin_a = sin(-ang_rad);
             uv = (float2)(

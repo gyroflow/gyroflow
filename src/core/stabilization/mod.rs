@@ -394,7 +394,7 @@ impl Stabilization {
                 let params = transform.kernel_params;
                 let distortion_model = self.compute_params.distortion_model.clone();
                 let digital_lens = self.compute_params.digital_lens.clone();
-                let lens_data_len = transform.mesh_correction.len();
+                let lens_data_len = transform.lens_data.len();
                 let cl = std::panic::catch_unwind(|| {
                     opencl::OclWrapper::new(&params, T::ocl_names(), distortion_model, digital_lens, buffers, canvas_len, lens_data_len)
                 });
@@ -427,7 +427,7 @@ impl Stabilization {
                     let params = transform.kernel_params;
                     let distortion_model = self.compute_params.distortion_model.clone();
                     let digital_lens = self.compute_params.digital_lens.clone();
-                    let lens_data_len = transform.mesh_correction.len();
+                    let lens_data_len = transform.lens_data.len();
                     let wgpu = std::panic::catch_unwind(|| {
                         wgpu::WgpuWrapper::new(&params, T::wgpu_format().unwrap(), distortion_model, digital_lens, buffers, canvas_len, lens_data_len)
                     });
@@ -544,9 +544,9 @@ impl Stabilization {
 
             // CPU path
             let ok = match self.interpolation {
-                Interpolation::Bilinear => { Self::undistort_image_cpu::<2, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer, &itm.mesh_correction) },
-                Interpolation::Bicubic  => { Self::undistort_image_cpu::<4, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer, &itm.mesh_correction) },
-                Interpolation::Lanczos4 => { Self::undistort_image_cpu::<8, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer, &itm.mesh_correction) },
+                Interpolation::Bilinear => { Self::undistort_image_cpu::<2, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer, &itm.lens_data) },
+                Interpolation::Bicubic  => { Self::undistort_image_cpu::<4, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer, &itm.lens_data) },
+                Interpolation::Lanczos4 => { Self::undistort_image_cpu::<8, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer, &itm.lens_data) },
             };
             if ok {
                 ret.backend = "CPU";

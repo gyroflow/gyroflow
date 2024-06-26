@@ -294,7 +294,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
         var uv = f * distort_point(_x, _y, _w);
 
         if (matrices[idx + 9] != 0.0 || matrices[idx + 10] != 0.0 || matrices[idx + 11] != 0.0 || matrices[idx + 12] != 0.0 || matrices[idx + 13] != 0.0) {
-            let ang_rad = matrices[idx + 11] / 1000.0 * 3.14159265 / 180.0;
+            let ang_rad = matrices[idx + 11];
             let cos_a = cos(-ang_rad);
             let sin_a = sin(-ang_rad);
             uv = vec2<f32>(

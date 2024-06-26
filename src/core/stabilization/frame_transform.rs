@@ -17,7 +17,7 @@ pub struct FrameTransform {
     pub fov: f64,
     pub minimal_fov: f64,
     pub focal_length: Option<f64>,
-    pub mesh_correction: Vec<f32>,
+    pub lens_data: Vec<f32>,
 }
 
 impl FrameTransform {
@@ -187,9 +187,9 @@ impl FrameTransform {
         let gyro = params.gyro.read();
         let file_metadata = gyro.file_metadata.read();
 
-        let mut mesh_correction = Vec::new();
+        let mut lens_data = Vec::new();
         if let Some(mc) = file_metadata.mesh_correction.get(frame) {
-            mesh_correction = mc.1.clone(); // undistorting mesh
+            lens_data = mc.1.clone(); // undistorting mesh
         }
 
         // ----------- Rolling shutter correction -----------
@@ -242,7 +242,7 @@ impl FrameTransform {
                 r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
             }
 
-            let (sx, sy, ra, ox, oy) = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
+            let (mut sx, mut sy, mut ra, mut ox, mut oy) = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
                 let ts = ((row_readout_time * y as f64 + frame_period * frame as f64) * 1000.0).round() as i64;
                 let y_sensor = map_coord(y as f64, 0.0, params.height as f64, is.crop_area.1 as f64, is.crop_area.1 as f64 + is.crop_area.3 as f64);
                 let y_sensor = if params.framebuffer_inverted { is.sensor_size.1 as f64 - y_sensor } else { y_sensor };
@@ -250,7 +250,7 @@ impl FrameTransform {
                 let s = is.ibis_spline.interpolate(y_sensor + is.offset).unwrap_or_default();
                 let sx = s.x * is_scale.0;
                 let sy = s.y * is_scale.1;
-                let ra = s.z * (if params.framebuffer_inverted { -1.0 } else { 1.0 });
+                let ra = s.z / 1000.0 * (if params.framebuffer_inverted { -1.0 } else { 1.0 });
 
                 let o = is.ois_spline.interpolate(y_sensor + is.offset).unwrap_or_default();
                 let ox = o.x * is_scale.0;
@@ -259,10 +259,15 @@ impl FrameTransform {
                 if y == 0 {
                     log::debug!("IBIS data at frame: {frame}, ts: {ts}, sx: {sx:.3}, sy: {sy:.3}, ra: {ra:.3}, ox: {ox:.3}, oy: {oy:.3}");
                 }
-                (sx as f32, sy as f32, ra as f32, ox as f32, oy as f32)
+                (sx as f32, sy as f32, ra.to_radians() as f32, ox as f32, oy as f32)
             } else {
                 (0.0, 0.0, 0.0, 0.0, 0.0)
             };
+
+            if params.suppress_rotation {
+                r = Matrix3::identity();
+                sx = 0.0; sy = 0.0; ra = 0.0; ox = 0.0; oy = 0.0;
+            }
 
             let i_r = (new_k * r).pseudo_inverse(0.000001);
             if let Err(err) = i_r {
@@ -316,7 +321,7 @@ impl FrameTransform {
             fov: ui_fov,
             minimal_fov: *params.minimal_fovs.get(frame).unwrap_or(&1.0),
             focal_length,
-            mesh_correction
+            lens_data
         }
     }
 
@@ -379,6 +384,10 @@ impl FrameTransform {
             r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
             r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
 
+            if params.suppress_rotation {
+                r = Matrix3::identity();
+            }
+
             new_k * r
         }).collect();
 
@@ -392,13 +401,13 @@ impl FrameTransform {
                 let s = is.ibis_spline.interpolate(y + is.offset).unwrap_or_default();
                 let sx = s.x * is_scale.0;
                 let sy = s.y * is_scale.1;
-                let ra = s.z;
+                let ra = s.z / 1000.0;
 
                 let o = is.ois_spline.interpolate(y + is.offset).unwrap_or_default();
                 let ox = o.x * is_scale.0;
                 let oy = o.y * is_scale.1;
 
-                (sx as f32, sy as f32, ra as f32, ox as f32, oy as f32)
+                (sx as f32, sy as f32, ra.to_radians() as f32, ox as f32, oy as f32)
             }).collect())
         } else {
             None

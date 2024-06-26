@@ -50,8 +50,8 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, frame: usize, width:
             let canvas = undist.drawing.get_buffer();
             let canvas_ptr = canvas.as_ptr();
             let canvas_len = canvas.len() as u32;
-            let lens_data_ptr = itm.mesh_correction.as_ptr();
-            let lens_data_len = itm.mesh_correction.len() as u32;
+            let lens_data_ptr = itm.lens_data.as_ptr();
+            let lens_data_len = itm.lens_data.len() as u32;
 
             let size_for_rs = if (itm.kernel_params.flags & 16) == 16 { itm.kernel_params.width } else { itm.kernel_params.height } as u32;
 

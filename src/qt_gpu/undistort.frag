@@ -201,7 +201,7 @@ vec2 rotate_and_distort(vec2 pos, float idx) {
         vec2 uv = params.f * distort_point(_x, _y, _w);
 
         if (get_param(idx, 9) != 0.0 || get_param(idx, 10) != 0.0 || get_param(idx, 11) != 0.0 || get_param(idx, 12) != 0.0 || get_param(idx, 13) != 0.0) {
-            float ang_rad = get_param(idx, 11) / 1000.0 * 3.14159265 / 180.0;
+            float ang_rad = get_param(idx, 11);
             float cos_a = cos(-ang_rad);
             float sin_a = sin(-ang_rad);
             uv = vec2(

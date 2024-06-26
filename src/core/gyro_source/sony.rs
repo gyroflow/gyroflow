@@ -310,7 +310,7 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, 
         let crop_area = *is_temp.per_frame_crop.get(frame)?; // (x, y, w, h)
         // let crop_scale = (crop_area.2 as f64 / is_temp.sensor_size.0 as f64, crop_area.3 as f64 / is_temp.sensor_size.1 as f64);
         let exposuretime = is_temp.per_frame_exposure.get(frame)?;
-        let top_offset = first_timestamp - exposuretime / 2.0 + ((crop_area.1 as f64 / is_temp.sensor_size.1 as f64) * readout_time);
+        let top_offset = first_timestamp - exposuretime / 2.0;
         let bot_offset = top_offset + readout_time;
         let entry_rate = is_temp.sensor_size.1 as f64 / readout_time; // 2166
         // dbg!(frame_interval, readout_time, first_timestamp, exposuretime, entry_rate);

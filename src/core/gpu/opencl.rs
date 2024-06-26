@@ -343,9 +343,9 @@ impl OclWrapper {
             if self.buf_drawing.len() != drawing_buffer.len() { log::error!("Buffer size mismatch drawing_buffer! {} vs {}", self.buf_drawing.len(), drawing_buffer.len()); return Ok(()); }
             self.buf_drawing.write(drawing_buffer).enq()?;
         }
-        if !itm.mesh_correction.is_empty() {
-            if self.buf_lens_data.len() < itm.mesh_correction.len() { log::error!("Buffer size mismatch buf_lens_data! {} vs {}", self.buf_lens_data.len(), itm.mesh_correction.len()); return Ok(()); }
-            self.buf_lens_data.write(&itm.mesh_correction).enq()?;
+        if !itm.lens_data.is_empty() {
+            if self.buf_lens_data.len() < itm.lens_data.len() { log::error!("Buffer size mismatch buf_lens_data! {} vs {}", self.buf_lens_data.len(), itm.lens_data.len()); return Ok(()); }
+            self.buf_lens_data.write(&itm.lens_data).enq()?;
         }
         match buffers.input.data {
             BufferSource::None => { },

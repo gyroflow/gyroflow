@@ -53,6 +53,8 @@ pub struct ComputeParams {
     pub framebuffer_inverted: bool,
     pub horizontal_rs: bool,
     pub smoothness_limiter: f64,
+    pub suppress_rotation: bool,
+    pub fov_algorithm_margin: f32,
 
     pub zooming_debug_points: bool,
 
@@ -117,6 +119,8 @@ impl ComputeParams {
             digital_lens,
             digital_lens_params,
             smoothness_limiter: params.smoothness_limiter,
+            suppress_rotation: false,
+            fov_algorithm_margin: 2.0,
 
             keyframes: mgr.keyframes.read().clone(),
 

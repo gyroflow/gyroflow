@@ -457,9 +457,9 @@ impl WgpuWrapper {
             if self.drawing_size < drawing_buffer.len() as u64 { log::error!("Buffer size mismatch! {} vs {}", self.drawing_size, drawing_buffer.len()); return false; }
             self.queue.write_buffer(self.buf_drawing.as_ref().unwrap(), 0, drawing_buffer);
         }
-        if !itm.mesh_correction.is_empty() {
-            if self.buf_lens_data.is_none() || (self.buf_lens_data.as_ref().unwrap().size() as usize * 4) < itm.mesh_correction.len() { log::error!("Buffer size mismatch buf_lens_data! {} vs {}", self.buf_lens_data.as_ref().unwrap().size() * 4, itm.mesh_correction.len()); return false; }
-            self.queue.write_buffer(self.buf_lens_data.as_ref().unwrap(), 0, bytemuck::cast_slice(&itm.mesh_correction));
+        if !itm.lens_data.is_empty() {
+            if self.buf_lens_data.is_none() || (self.buf_lens_data.as_ref().unwrap().size() as usize * 4) < itm.lens_data.len() { log::error!("Buffer size mismatch buf_lens_data! {} vs {}", self.buf_lens_data.as_ref().unwrap().size() * 4, itm.lens_data.len()); return false; }
+            self.queue.write_buffer(self.buf_lens_data.as_ref().unwrap(), 0, bytemuck::cast_slice(&itm.lens_data));
         }
 
         match &self.pipeline {

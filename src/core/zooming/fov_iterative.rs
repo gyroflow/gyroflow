@@ -36,7 +36,7 @@ impl FieldOfViewAlgorithm for FovIterative<'_> {
         let l = (timestamps.len() - 1) as f64;
         let keyframes = &self.compute_params.keyframes;
 
-        let rect = points_around_rect(self.input_dim.0, self.input_dim.1, 31, 31);
+        let rect = self.points_around_rect(self.input_dim.0, self.input_dim.1, 31, 31);
 
         let cp = Point2D(self.input_dim.0 / 2.0, self.input_dim.1 / 2.0);
         let mut fov_values: Vec<f64> = if keyframes.is_keyframed(&KeyframeType::ZoomingCenterX) || keyframes.is_keyframed(&KeyframeType::ZoomingCenterY) || keyframes.is_keyframed(&KeyframeType::LensCorrectionStrength) {
@@ -150,31 +150,31 @@ impl<'a>  FovIterative<'a> {
                 mp
             })
     }
-}
 
-// Returns points placed around a rectangle in a continous order
-fn points_around_rect(mut w: f32, mut h: f32, w_div: usize, h_div: usize) -> Vec<(f32, f32)> {
-    let margin = 2.0;
-    w -= margin * 2.0;
-    h -= margin * 2.0;
+    // Returns points placed around a rectangle in a continous order
+    pub fn points_around_rect(&self, mut w: f32, mut h: f32, w_div: usize, h_div: usize) -> Vec<(f32, f32)> {
+        w -= self.compute_params.fov_algorithm_margin * 2.0;
+        h -= self.compute_params.fov_algorithm_margin * 2.0;
 
-    let (wcnt, hcnt) = (w_div.max(2) - 1, h_div.max(2) - 1);
-    let (wstep, hstep) = (w / wcnt as f32, h / hcnt as f32);
+        let (wcnt, hcnt) = (w_div.max(2) - 1, h_div.max(2) - 1);
+        let (wstep, hstep) = (w / wcnt as f32, h / hcnt as f32);
 
-    // ordered!
-    let mut distorted_points: Vec<(f32, f32)> = Vec::with_capacity((wcnt + hcnt) * 2);
-    for i in 0..wcnt { distorted_points.push((i as f32 * wstep,          0.0)); }
-    for i in 0..hcnt { distorted_points.push((w,                         i as f32 * hstep)); }
-    for i in 0..wcnt { distorted_points.push(((wcnt - i) as f32 * wstep, h)); }
-    for i in 0..hcnt { distorted_points.push((0.0,                       (hcnt - i) as f32 * hstep)); }
+        // ordered!
+        let mut distorted_points: Vec<(f32, f32)> = Vec::with_capacity((wcnt + hcnt) * 2);
+        for i in 0..wcnt { distorted_points.push((i as f32 * wstep,          0.0)); }
+        for i in 0..hcnt { distorted_points.push((w,                         i as f32 * hstep)); }
+        for i in 0..wcnt { distorted_points.push(((wcnt - i) as f32 * wstep, h)); }
+        for i in 0..hcnt { distorted_points.push((0.0,                       (hcnt - i) as f32 * hstep)); }
 
-    // Add margin
-    for (x, y) in distorted_points.iter_mut() {
-        *x += margin;
-        *y += margin;
+        // Add margin
+        for (x, y) in distorted_points.iter_mut() {
+            *x += self.compute_params.fov_algorithm_margin;
+            *y += self.compute_params.fov_algorithm_margin;
+        }
+
+        distorted_points
     }
 
-    distorted_points
 }
 
 // linear interpolates steps between points in array
