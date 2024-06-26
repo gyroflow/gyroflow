@@ -95,6 +95,9 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                         }
 
                         if md.lens_profile.is_none() {
+                            let video_rotation = info.video_rotation.unwrap_or_default().abs();
+                            let is_vertical = video_rotation == 90 || video_rotation == 270;
+
                             let focal_length = tag_map.get(&GroupId::Lens)
                                 .and_then(|x| x.get_t(TagId::FocalLength) as Option<&f32>)
                                 .map(|x| format!("{:.2} mm", *x));
@@ -105,7 +108,7 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                                 "lens_model":   focal_length.unwrap_or_default(),
                                 "calib_dimension":  { "w": size.0, "h": size.1 },
                                 "orig_dimension":   { "w": size.0, "h": size.1 },
-                                "output_dimension": { "w": size.0, "h": size.1 },
+                                "output_dimension": { "w": if is_vertical { size.1 } else { size.0 }, "h": if is_vertical { size.0 } else { size.1 } },
                                 "frame_readout_time": md.frame_readout_time,
                                 "official": true,
                                 "asymmetrical": false,

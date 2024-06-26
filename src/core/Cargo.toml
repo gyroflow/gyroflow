@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "cf9c33c" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "5bedfb9" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", rev = "bf7b41d", features = ["field_access"] }
 
@@ -80,10 +80,10 @@ rustfft = "6.2.0"
 exr = "1.72"
 opencv = { version = "0.92.0", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "e92e543", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "82210e1", features = ["spirv", "naga-ir"] }
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "e92e543"
+rev = "82210e1"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
