@@ -11,6 +11,7 @@ pub mod synchronization;
 pub mod stabilization;
 pub mod camera_identifier;
 pub mod keyframes;
+pub mod stmap;
 
 pub mod zooming;
 pub mod smoothing;

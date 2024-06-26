@@ -256,9 +256,7 @@ impl FrameTransform {
                 let ox = o.x * is_scale.0;
                 let oy = o.y * is_scale.1;
 
-                if y == 0 {
-                    log::debug!("IBIS data at frame: {frame}, ts: {ts}, sx: {sx:.3}, sy: {sy:.3}, ra: {ra:.3}, ox: {ox:.3}, oy: {oy:.3}");
-                }
+                // if y == 0 { log::debug!("IBIS data at frame: {frame}, ts: {ts}, sx: {sx:.3}, sy: {sy:.3}, ra: {ra:.3}, ox: {ox:.3}, oy: {oy:.3}"); }
                 (sx as f32, sy as f32, ra.to_radians() as f32, ox as f32, oy as f32)
             } else {
                 (0.0, 0.0, 0.0, 0.0, 0.0)
@@ -266,7 +264,9 @@ impl FrameTransform {
 
             if params.suppress_rotation {
                 r = Matrix3::identity();
-                sx = 0.0; sy = 0.0; ra = 0.0; ox = 0.0; oy = 0.0;
+                if params.frame_readout_time == 0.0 {
+                    sx = 0.0; sy = 0.0; ra = 0.0; ox = 0.0; oy = 0.0;
+                }
             }
 
             let i_r = (new_k * r).pseudo_inverse(0.000001);
@@ -391,7 +391,7 @@ impl FrameTransform {
             new_k * r
         }).collect();
 
-        let shifts: Option<Vec<(f32, f32, f32, f32, f32)>> = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
+        let mut shifts: Option<Vec<(f32, f32, f32, f32, f32)>> = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
             let is_scale = (
                 params.width  as f64 / is.crop_area.2 as f64 / is.pixel_pitch.0 as f64,
                 params.height as f64 / is.crop_area.3 as f64 / is.pixel_pitch.1 as f64,
@@ -412,6 +412,9 @@ impl FrameTransform {
         } else {
             None
         };
+        if params.suppress_rotation && params.frame_readout_time == 0.0 {
+            shifts = None;
+        }
 
         (scaled_k, distortion_coeffs, new_k, rotations, shifts, mesh_correction)
     }

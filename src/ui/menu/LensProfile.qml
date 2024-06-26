@@ -404,6 +404,35 @@ MenuItem {
                 }
             }
         }
+        LinkButton {
+            anchors.horizontalCenter: parent.horizontalCenter;
+            text: qsTr("Export STMap");
+            OutputPathField { id: opf; visible: false; }
+            onClicked: {
+                opf.selectFolder("", function(folder_url) {
+                    if (controller.has_per_frame_lens_data()) {
+                        messageBox(Modal.Question, qsTr("This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?"), [
+                            { text: qsTr("Single frame"), accent: true, clicked: () => { controller.export_stmap(folder_url, false); } },
+                            { text: qsTr("STMap sequence"), clicked: () => { controller.export_stmap(folder_url, true); } },
+                        ]);
+                    } else {
+                        controller.export_stmap(folder_url, false);
+                    }
+                });
+            }
+
+            Connections {
+                target: controller;
+                function onStmap_progress(progress: real, ready: int, total: int): void {
+                    window.videoArea.videoLoader.active = progress < 1;
+                    window.videoArea.videoLoader.currentFrame = ready;
+                    window.videoArea.videoLoader.totalFrames = total;
+                    window.videoArea.videoLoader.text = progress < 1? qsTr("Exporting %1...") : "";
+                    window.videoArea.videoLoader.progress = progress < 1? progress : -1;
+                    window.videoArea.videoLoader.cancelable = true;
+                }
+            }
+        }
     }
 
     DropTarget {

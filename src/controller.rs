@@ -264,6 +264,10 @@ pub struct Controller {
     mp4_merge: qt_method!(fn(&self, file_list: QStringList, output_folder: QUrl, output_filename: QString)),
     mp4_merge_progress: qt_signal!(percent: f64, error_string: QString, url: QString),
 
+    has_per_frame_lens_data: qt_method!(fn(&self) -> bool),
+    export_stmap: qt_method!(fn(&self, folder_url: QUrl, per_frame: bool)),
+    stmap_progress: qt_signal!(progress: f64, ready: usize, total: usize),
+
     // ---------- REDline conversion ----------
     find_redline: qt_method!(fn(&self) -> QString),
     // ---------- REDline conversion ----------
@@ -2175,6 +2179,60 @@ impl Controller {
                 }
                 Ok(())
             })();
+        });
+    }
+
+    fn has_per_frame_lens_data(&self) -> bool {
+        let gyro = self.stabilizer.gyro.read();
+        let md = gyro.file_metadata.read();
+        md.camera_stab_data.len() > 1 || md.lens_params.len() > 1 || md.lens_positions.len() > 1 || md.mesh_correction.len() > 1
+    }
+    fn export_stmap(&self, folder_url: QUrl, per_frame: bool) {
+        let folder_url = util::qurl_to_encoded(folder_url);
+        let frame_count = self.stabilizer.params.read().frame_count;
+        let filename_base = {
+            let lens = self.stabilizer.lens.read();
+            format!("{}-{}-{}-{}", filesystem::get_filename(&self.stabilizer.input_file.read().url), lens.camera_brand, lens.camera_model, lens.lens_model)
+                .replace("/", "-")
+                .replace("\\", "-")
+                .replace(":", "-")
+                .replace("+", "-")
+                .replace("'", "-")
+                .replace("\"", "-")
+                .replace(" ", "-")
+        };
+
+        let progress = util::qt_queued_callback_mut(self, |this, (ready, total): (usize, usize)| {
+            this.stmap_progress(ready as f64 / total as f64, ready, total);
+        });
+        let err = util::qt_queued_callback_mut(self, |this, msg: String| {
+            this.error(QString::from("An error occured: %1"), QString::from(msg), QString::default());
+        });
+
+        self.cancel_flag.store(false, SeqCst);
+        let cancel_flag = self.cancel_flag.clone();
+
+        let total = if per_frame { frame_count } else { 1 };
+        let processed = Arc::new(AtomicUsize::new(0));
+
+        let stab = self.stabilizer.clone();
+
+        core::run_threaded(move || {
+            progress((0, total));
+            for (frame, dist, undist) in gyroflow_core::stmap::generate_stmaps(&stab, per_frame) {
+                if let Err(e) = filesystem::write(&filesystem::get_file_url(&folder_url, &format!("{filename_base}-undistort-{frame}.exr"), true), &undist) {
+                    return err(e.to_string());
+                }
+                if let Err(e) = filesystem::write(&filesystem::get_file_url(&folder_url, &format!("{filename_base}-redistort-{frame}.exr"), true), &dist) {
+                    return err(e.to_string());
+                }
+
+                processed.fetch_add(1, SeqCst);
+                progress((processed.load(SeqCst), total));
+
+                if cancel_flag.load(SeqCst) { break; }
+            }
+            progress((total, total));
         });
     }
 
