@@ -3,10 +3,22 @@ use exr::prelude::*;
 use rayon::{ slice::ParallelSliceMut, iter::IndexedParallelIterator, iter::ParallelIterator };
 use crate::StabilizationManager;
 
-pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Iterator<Item = (usize, Vec<u8>, Vec<u8>)> { // (frame, undistort, redistort)
+pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Iterator<Item = (String, usize, Vec<u8>, Vec<u8>)> { // (frame, undistort, redistort)
     let (width, height) = {
         let params = stab.params.read();
         (params.video_size.0, params.video_size.1)
+    };
+
+    let filename_base = {
+        let lens = stab.lens.read();
+        format!("{}-{}-{}-{}", crate::filesystem::get_filename(&stab.input_file.read().url), lens.camera_brand, lens.camera_model, lens.lens_model)
+            .replace("/", "-")
+            .replace("\\", "-")
+            .replace(":", "-")
+            .replace("+", "-")
+            .replace("'", "-")
+            .replace("\"", "-")
+            .replace(" ", "-")
     };
 
     let mut compute_params = ComputeParams::from_manager(&stab);
@@ -110,7 +122,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
             undistort_points(&distorted, camera_matrix, &distortion_coeffs, rotations[0], None, Some(rotations), &compute_params, 1.0, timestamp, is, mesh).first().copied()
         });
 
-        (frame, dist, undist)
+        (filename_base.clone(), frame, dist, undist)
     })
 }
 

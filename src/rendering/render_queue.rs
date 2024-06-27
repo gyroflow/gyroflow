@@ -5,6 +5,7 @@ use qmetaobject::*;
 
 use crate::{ core, rendering, util };
 use crate::core::StabilizationManager;
+use core::filesystem;
 use std::sync::{ Arc, atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst } };
 use std::cell::RefCell;
 use std::collections::{ HashMap, HashSet };
@@ -144,12 +145,12 @@ impl RenderOptions {
 
             // Backwards compatibility
             if let Some(v) = obj.get("output_path").and_then(|x| x.as_str()) {
-                let url = core::filesystem::path_to_url(v);
-                let folder = core::filesystem::get_folder(&url);
+                let url = filesystem::path_to_url(v);
+                let folder = filesystem::get_folder(&url);
                 if !folder.is_empty() {
                     self.output_folder = folder;
                 }
-                let filename = core::filesystem::get_filename(&url);
+                let filename = filesystem::get_filename(&url);
                 if !filename.is_empty() {
                     self.output_filename = filename;
                 }
@@ -236,6 +237,8 @@ pub struct RenderQueue {
 
     parallel_renders: qt_property!(i32; WRITE set_parallel_renders),
     pub export_project: qt_property!(u32),
+    pub export_metadata: Option<(usize, String, serde_json::Value)>,
+    pub export_stmap: Option<(usize, String)>,
     pub overwrite_mode: qt_property!(u32),
 
     pub request_close: qt_signal!(),
@@ -319,7 +322,7 @@ impl RenderQueue {
         }
         update_model!(self, job_id, itm {
             itm.output_filename = new_filename;
-            itm.display_output_path = QString::from(core::filesystem::display_folder_filename(&itm.output_folder.to_string(), &itm.output_filename.to_string()));
+            itm.display_output_path = QString::from(filesystem::display_folder_filename(&itm.output_folder.to_string(), &itm.output_filename.to_string()));
             itm.error_string = QString::default();
             itm.status = JobStatus::Queued;
         });
@@ -383,7 +386,7 @@ impl RenderQueue {
             update_model!(self, job_id, itm {
                 itm.output_folder = QString::from(render_options.output_folder.as_str());
                 itm.output_filename = QString::from(render_options.output_filename.as_str());
-                itm.display_output_path = QString::from(core::filesystem::display_folder_filename(render_options.output_folder.as_str(), render_options.output_filename.as_str()));
+                itm.display_output_path = QString::from(filesystem::display_folder_filename(render_options.output_folder.as_str(), render_options.output_filename.as_str()));
                 itm.export_settings = QString::from(render_options.settings_string(params.fps));
                 itm.thumbnail_url = thumbnail_url;
                 itm.current_frame = 0;
@@ -401,10 +404,10 @@ impl RenderQueue {
             q.push(RenderQueueItem {
                 job_id,
                 input_file: QString::from(video_url.as_str()),
-                input_filename: QString::from(core::filesystem::get_filename(&video_url)),
+                input_filename: QString::from(filesystem::get_filename(&video_url)),
                 output_folder: QString::from(render_options.output_folder.as_str()),
                 output_filename: QString::from(render_options.output_filename.as_str()),
-                display_output_path: QString::from(core::filesystem::display_folder_filename(render_options.output_folder.as_str(), render_options.output_filename.as_str())),
+                display_output_path: QString::from(filesystem::display_folder_filename(render_options.output_folder.as_str(), render_options.output_filename.as_str())),
                 export_settings: QString::from(render_options.settings_string(params.fps)),
                 thumbnail_url,
                 current_frame: 0,
@@ -422,7 +425,7 @@ impl RenderQueue {
 
         let project_data = Self::get_gyroflow_data_internal(&stab, &additional_data, &render_options);
 
-        render_options.input_filename = core::filesystem::get_filename(&stab.input_file.read().url);
+        render_options.input_filename = filesystem::get_filename(&stab.input_file.read().url);
 
         self.jobs.insert(job_id, Job {
             queue_index: 0,
@@ -676,7 +679,7 @@ impl RenderQueue {
                     let mut project = project.to_string();
                     #[cfg(any(target_os = "macos", target_os = "ios"))]
                     if let Some(bookmark) = x.get("project_file_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
-                        let (resolved, _is_stale) = core::filesystem::apple::resolve_bookmark(bookmark, None);
+                        let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(bookmark, None);
                         if !resolved.is_empty() { project = resolved; }
                     }
                     self.add_file(project, String::new(), additional_data.clone());
@@ -689,10 +692,10 @@ impl RenderQueue {
 
     fn get_gyroflow_data_internal(stab: &StabilizationManager, additional_data: &str, render_options: &RenderOptions) -> Option<String> {
         if let Some(url) = stab.input_file.read().project_file_url.as_ref() {
-            if core::filesystem::exists(url) {
+            if filesystem::exists(url) {
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 {
-                    return Some(serde_json::json!({ "project_file": url, "project_file_bookmark": core::filesystem::apple::create_bookmark(&url, false, None) }).to_string());
+                    return Some(serde_json::json!({ "project_file": url, "project_file_bookmark": filesystem::apple::create_bookmark(&url, false, None) }).to_string());
                 }
                 #[cfg(not(any(target_os = "macos", target_os = "ios")))]
                 {
@@ -857,7 +860,7 @@ impl RenderQueue {
             let total_frame_count = params.frame_count;
             drop(params);
             let mut input_file = stab.input_file.read().clone();
-            let filename = core::filesystem::get_filename(&input_file.url);
+            let filename = filesystem::get_filename(&input_file.url);
             let render_options = job.render_options.clone();
 
             progress((0.0, 0, (total_frame_count as f64 * trim_ratio).round() as usize, false, false));
@@ -865,7 +868,9 @@ impl RenderQueue {
             job.cancel_flag.store(false, SeqCst);
             let cancel_flag = job.cancel_flag.clone();
             let pause_flag = self.pause_flag.clone();
-            let export_project = self.export_project;
+            let export_project  = self.export_project;
+            let export_metadata = self.export_metadata.clone();
+            let export_stmap    = self.export_stmap.clone();
             let default_suffix = self.default_suffix.to_string();
             let mut additional_data = job.additional_data.clone();
             let proc_height = self.processing_resolution;
@@ -873,6 +878,58 @@ impl RenderQueue {
 
             core::run_threaded(move || {
                 Self::do_autosync(stab.clone(), processing, err2, proc_height);
+
+                if let Some((opt, path, fields)) = export_metadata {
+                    let result = || -> Result<(), core::GyroflowCoreError> {
+                        let url = filesystem::path_to_url(&path);
+                        match opt {
+                            1 => {
+                                let gyro_url = stab.input_file.read().url.clone();
+                                let contents = gyroflow_core::gyro_export::export_full_metadata(&gyro_url, &stab)?;
+                                filesystem::write(&url, contents.as_bytes())?;
+                            },
+                            2 => {
+                                if let Ok(contents) = serde_json::to_string_pretty(&stab.gyro.read().file_metadata) {
+                                    filesystem::write(&url, contents.as_bytes())?;
+                                }
+                            },
+                            3 => {
+                                let filename = filesystem::get_filename(&url).to_ascii_lowercase();
+                                let contents = gyroflow_core::gyro_export::export_gyro_data(&filename, &serde_json::to_string(&fields).unwrap(), &stab);
+                                filesystem::write(&url, contents.as_bytes())?
+                            }
+                            _ => { }
+                        }
+                        Ok(())
+                    };
+                    if let Err(e) = result() {
+                        err(("An error occured: %1".to_string(), e.to_string()));
+                    } else {
+                        progress((1.0, 1, 1, true, false));
+                    }
+                    return;
+                }
+                if let Some((opt, path)) = export_stmap {
+                    let per_frame = opt == 2;
+                    let folder_url = filesystem::path_to_url(&path);
+                    let total = if per_frame { stab.params.read().frame_count } else { 1 };
+                    let mut processed = 0;
+                    progress((0.0, processed, total, false, false));
+                    for (fname_base, frame, dist, undist) in core::stmap::generate_stmaps(&stab, per_frame) {
+                        if let Err(e) = filesystem::write(&filesystem::get_file_url(&folder_url, &format!("{fname_base}-undistort-{frame}.exr"), true), &undist) {
+                            return err((e.to_string(), String::new()));
+                        }
+                        if let Err(e) = filesystem::write(&filesystem::get_file_url(&folder_url, &format!("{fname_base}-redistort-{frame}.exr"), true), &dist) {
+                            return err((e.to_string(), String::new()));
+                        }
+                        processed += 1;
+                        progress((processed as f64 / total as f64, processed, total, false, false));
+
+                        if cancel_flag.load(SeqCst) { break; }
+                    }
+                    progress((1.0, total, total, true, false));
+                    return;
+                }
 
                 if export_project > 0 {
                     if let Ok(serde_json::Value::Object(mut obj)) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
@@ -882,8 +939,8 @@ impl RenderQueue {
                         additional_data = serde_json::to_string(&obj).unwrap_or_default();
                     }
                     let gf_folder = render_options.output_folder.to_owned();
-                    let gf_file = core::filesystem::filename_with_extension(&render_options.output_filename.replace(&default_suffix, ""), "gyroflow");
-                    let gf_url = core::filesystem::get_file_url(&gf_folder, &gf_file, true);
+                    let gf_file = filesystem::filename_with_extension(&render_options.output_filename.replace(&default_suffix, ""), "gyroflow");
+                    let gf_url = filesystem::get_file_url(&gf_folder, &gf_file, true);
                     let result = match export_project {
                         1 => stab.export_gyroflow_file(&gf_url, core::GyroflowProjectType::Simple, &additional_data),
                         2 => stab.export_gyroflow_file(&gf_url, core::GyroflowProjectType::WithGyroData, &additional_data),
@@ -903,8 +960,8 @@ impl RenderQueue {
 
                 // Assumes regular filesystem
                 if filename.to_ascii_lowercase().ends_with(".r3d") {
-                    let mov_url = core::filesystem::get_file_url(&core::filesystem::get_folder(&input_file.url), &core::filesystem::filename_with_extension(&core::filesystem::get_filename(&input_file.url), "mov"), false);
-                    if core::filesystem::exists(&mov_url) {
+                    let mov_url = filesystem::get_file_url(&filesystem::get_folder(&input_file.url), &filesystem::filename_with_extension(&filesystem::get_filename(&input_file.url), "mov"), false);
+                    if filesystem::exists(&mov_url) {
                         input_file.url = mov_url.clone();
                     } else {
                         let in_file = input_file.url.clone();
@@ -930,7 +987,7 @@ impl RenderQueue {
                         crate::external_sdk::r3d::REDSdk::convert_r3d(&in_file, format, force_primary > 0, gamma, space, &additional_params, r3d_progress, cancel_flag.clone());
                         if cancel_flag.load(SeqCst) {
                             std::thread::sleep(std::time::Duration::from_secs(2));
-                            let _ = core::filesystem::remove_file(&mov_url);
+                            let _ = filesystem::remove_file(&mov_url);
                             err(("Conversion cancelled%1".to_string(), "".to_string()));
                             return;
                         }
@@ -981,10 +1038,10 @@ impl RenderQueue {
         if !ui_output_folder.is_empty() {
             return ui_output_folder.to_owned();
         }
-        core::filesystem::get_folder(input_url)
+        filesystem::get_folder(input_url)
     }
     fn get_output_filename(input_url: &str, suffix: &str, render_options: &RenderOptions, override_ext: Option<&str>) -> String {
-        let mut filename = core::filesystem::get_filename(input_url);
+        let mut filename = filesystem::get_filename(input_url);
 
         let mut ext = override_ext.unwrap_or(match render_options.codec.as_ref() {
             "ProRes"        => ".mov",
@@ -1017,9 +1074,10 @@ impl RenderQueue {
             });
             this.error(job_id, QString::from(msg), QString::from(arg), QString::default());
         });
+        let is_rendering = self.export_metadata.is_none() && self.export_stmap.is_none();
         let processing_done = util::qt_queued_callback_mut(self, move |this, _: ()| {
             if let Some(job) = this.jobs.get(&job_id) {
-                if core::filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
+                if is_rendering && filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
                     let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
                     update_model!(this, job_id, itm {
                         itm.error_string = msg.clone();
@@ -1117,7 +1175,7 @@ impl RenderQueue {
                         let fetch_thumb = |video_url: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
                             let mut fetched = false;
                             if !crate::cli::will_run_in_console() { // Don't fetch thumbs in the CLI
-                                let fs_base = gyroflow_core::filesystem::get_engine_base();
+                                let fs_base = filesystem::get_engine_base();
                                 let mut proc = rendering::VideoProcessor::from_file(&fs_base, video_url, false, 0, None)?;
                                 proc.on_frame(move |_timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                                     let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
@@ -1134,17 +1192,17 @@ impl RenderQueue {
                             Ok(())
                         };
 
-                        if is_gf_data || core::filesystem::get_filename(&url).ends_with(".gyroflow") {
+                        if is_gf_data || filesystem::get_filename(&url).ends_with(".gyroflow") {
                             if !is_gf_data {
                                 let video_url = || -> Option<String> {
-                                    let data = core::filesystem::read(&url).ok()?;
+                                    let data = filesystem::read(&url).ok()?;
                                     let obj: serde_json::Value = serde_json::from_slice(&data).ok()?;
                                     Some(obj.get("videofile")?.as_str()?.to_string())
                                 }().unwrap_or_default();
 
                                 if video_url.is_empty() {
                                     // It's a preset
-                                    if let Ok(data) = core::filesystem::read_to_string(&url) {
+                                    if let Ok(data) = filesystem::read_to_string(&url) {
                                         apply_preset((data, 0));
                                     }
                                     return;
@@ -1366,7 +1424,7 @@ impl RenderQueue {
                         }
                         ::log::debug!("Decoder options: {:?}", decoder_options);
 
-                        let fs_base = gyroflow_core::filesystem::get_engine_base();
+                        let fs_base = filesystem::get_engine_base();
                         match VideoProcessor::from_file(&fs_base, &url, gpu_decoding, 0, Some(decoder_options)) {
                             Ok(mut proc) => {
                                 let err2 = err.clone();
@@ -1456,9 +1514,9 @@ impl RenderQueue {
                         itm.export_settings = QString::from(job.render_options.settings_string(job.stab.params.read().fps));
                         itm.output_filename = QString::from(job.render_options.output_filename.as_str());
                         itm.output_folder   = QString::from(job.render_options.output_folder.as_str());
-                        itm.display_output_path = QString::from(core::filesystem::display_folder_filename(job.render_options.output_folder.as_str(), job.render_options.output_filename.as_str()));
+                        itm.display_output_path = QString::from(filesystem::display_folder_filename(job.render_options.output_folder.as_str(), job.render_options.output_filename.as_str()));
                         job.project_data = Self::get_gyroflow_data_internal(&job.stab, &job.additional_data, &job.render_options);
-                        if core::filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
+                        if filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
                             let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
                             itm.error_string = msg.clone();
                             itm.status = JobStatus::Error;

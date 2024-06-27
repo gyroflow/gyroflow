@@ -2190,17 +2190,6 @@ impl Controller {
     fn export_stmap(&self, folder_url: QUrl, per_frame: bool) {
         let folder_url = util::qurl_to_encoded(folder_url);
         let frame_count = self.stabilizer.params.read().frame_count;
-        let filename_base = {
-            let lens = self.stabilizer.lens.read();
-            format!("{}-{}-{}-{}", filesystem::get_filename(&self.stabilizer.input_file.read().url), lens.camera_brand, lens.camera_model, lens.lens_model)
-                .replace("/", "-")
-                .replace("\\", "-")
-                .replace(":", "-")
-                .replace("+", "-")
-                .replace("'", "-")
-                .replace("\"", "-")
-                .replace(" ", "-")
-        };
 
         let progress = util::qt_queued_callback_mut(self, |this, (ready, total): (usize, usize)| {
             this.stmap_progress(ready as f64 / total as f64, ready, total);
@@ -2213,22 +2202,22 @@ impl Controller {
         let cancel_flag = self.cancel_flag.clone();
 
         let total = if per_frame { frame_count } else { 1 };
-        let processed = Arc::new(AtomicUsize::new(0));
+        let mut processed = 0;
 
         let stab = self.stabilizer.clone();
 
         core::run_threaded(move || {
             progress((0, total));
-            for (frame, dist, undist) in gyroflow_core::stmap::generate_stmaps(&stab, per_frame) {
-                if let Err(e) = filesystem::write(&filesystem::get_file_url(&folder_url, &format!("{filename_base}-undistort-{frame}.exr"), true), &undist) {
+            for (fname_base, frame, dist, undist) in gyroflow_core::stmap::generate_stmaps(&stab, per_frame) {
+                if let Err(e) = filesystem::write(&filesystem::get_file_url(&folder_url, &format!("{fname_base}-undistort-{frame}.exr"), true), &undist) {
                     return err(e.to_string());
                 }
-                if let Err(e) = filesystem::write(&filesystem::get_file_url(&folder_url, &format!("{filename_base}-redistort-{frame}.exr"), true), &dist) {
+                if let Err(e) = filesystem::write(&filesystem::get_file_url(&folder_url, &format!("{fname_base}-redistort-{frame}.exr"), true), &dist) {
                     return err(e.to_string());
                 }
 
-                processed.fetch_add(1, SeqCst);
-                progress((processed.load(SeqCst), total));
+                processed += 1;
+                progress((processed, total));
 
                 if cancel_flag.load(SeqCst) { break; }
             }

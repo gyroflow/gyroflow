@@ -59,6 +59,18 @@ struct Opts {
     #[argh(option, default = "0")]
     export_project: u32,
 
+    /// export metadata instead of rendering. <type>:<path>, where type is 1 - full metadata, 2 - parsed metadata, 3 - camera data. Eg. "3:camera.json"
+    #[argh(option)]
+    export_metadata: Option<String>,
+
+    /// fields to include in the exported camera metadata file. Defaults to all: "{{ 'original': {{ 'gyroscope': true, 'accelerometer': true, 'quaternion': true, 'euler_angles': true }}, 'stabilized': {{ 'quaternion': true, 'euler_angles': true }}, 'zooming': {{ 'minimal_fovs': true, 'fovs': true, 'focal_length': true }} }}"
+    #[argh(option)]
+    export_metadata_fields: Option<String>,
+
+    /// export STmap instead of rendering. <type>:<folder_path>, where type is 1 - single frame, 2 - all frames. Eg. "1:C:/stmaps/"
+    #[argh(option)]
+    export_stmap: Option<String>,
+
     /// preset (file or content directly), eg. "{{ 'version': 2, 'stabilization': {{ 'fov': 1.5 }} }}"
     #[argh(option)]
     preset: Option<String>,
@@ -169,12 +181,42 @@ pub fn run(open_file: &mut String) -> bool {
             gyroflow_core::util::merge_json(additional_data.get_mut("output").unwrap(), &serde_json::from_str(&outp).expect("Invalid json"));
         }
 
+        let export_metadata_fields = serde_json::from_str(
+            &opts.export_metadata_fields.unwrap_or(
+                "{ 'original':   { 'quaternion': true, 'euler_angles': true, 'gyroscope': true, 'accelerometer': true },
+                   'stabilized': { 'quaternion': true, 'euler_angles': true },
+                   'zooming':    { 'minimal_fovs': true, 'fovs': true, 'focal_length': true } }".into()
+            ).replace('\'', "\"")
+        ).expect("Invalid json");
+
         queue.set_parallel_renders(opts.parallel_renders.max(1));
         queue.set_when_done(opts.when_done);
         let suffix = format!("{}.", queue.default_suffix);
 
         if opts.export_project > 0 {
             queue.export_project = opts.export_project;
+        }
+        if let Some(export_metadata) = opts.export_metadata {
+            if !export_metadata.is_empty() {
+                if let Some((opt, path)) = export_metadata.split_once(':') {
+                    if let Ok(opt) = opt.parse::<usize>() {
+                        if !path.is_empty() {
+                            queue.export_metadata = Some((opt, path.to_string(), export_metadata_fields));
+                        }
+                    }
+                }
+            }
+        }
+        if let Some(export_stmap) = opts.export_stmap {
+            if !export_stmap.is_empty() {
+                if let Some((opt, path)) = export_stmap.split_once(':') {
+                    if let Ok(opt) = opt.parse::<usize>() {
+                        if !path.is_empty() {
+                            queue.export_stmap = Some((opt, path.to_string()));
+                        }
+                    }
+                }
+            }
         }
 
         let mut pbs = HashMap::<u32, ProgressBar>::new();
