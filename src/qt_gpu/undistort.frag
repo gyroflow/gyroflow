@@ -58,7 +58,7 @@ LENS_MODEL_FUNCTIONS;
 
 layout(binding = 3) uniform sampler2D texParams;
 layout(binding = 4) uniform sampler2D texCanvas;
-layout(binding = 5) uniform sampler2D texLensData;
+layout(binding = 5) uniform sampler2D texMeshData;
 
 const vec4 colors[9] = vec4[9](
     vec4(0.0,   0.0,   0.0,     0.0), // None
@@ -114,8 +114,8 @@ float get_param(float row, float idx) {
     return texture(texParams, vec2(idx / 13.0, row / float(size - 1))).r;
 }
 
-float get_lens_data(int idx) {
-    return texture(texLensData, vec2(0, idx / 1023.0)).r;
+float get_mesh_data(int idx) {
+    return texture(texMeshData, vec2(0, idx / 1023.0)).r;
 }
 const int GRID_SIZE = 9;
 float a[GRID_SIZE]; float b[GRID_SIZE]; float c[GRID_SIZE]; float d[GRID_SIZE];
@@ -144,7 +144,7 @@ void cubic_spline_coefficients(float mesh[GRID_SIZE], int step_, int offset, flo
 float cubic_spline_interpolate1(int aa, int bb, int cc, int dd, int n, float x, float size) {
     int i = int(max(0.0, min(float(n - 2), (float(n - 1) * x / size))));
     float dx = x - size * float(i) / float(n - 1);
-    return get_lens_data(aa + i) + get_lens_data(bb + i) * dx + get_lens_data(cc + i) * dx * dx + get_lens_data(dd + i) * dx * dx * dx;
+    return get_mesh_data(aa + i) + get_mesh_data(bb + i) * dx + get_mesh_data(cc + i) * dx * dx + get_mesh_data(dd + i) * dx * dx * dx;
 }
 float cubic_spline_interpolate2(int n, float x, float size) {
     int i = int(max(0.0, min(float(n - 2), (float(n - 1) * x / size))));
@@ -212,10 +212,10 @@ vec2 rotate_and_distort(vec2 pos, float idx) {
 
         uv += params.c;
 
-        if (get_lens_data(0) != 0.0) {
-            vec2 mesh_size = vec2(get_lens_data(2), get_lens_data(3));
-            vec2 origin    = vec2(get_lens_data(4), get_lens_data(5));
-            vec2 crop_size = vec2(get_lens_data(6), get_lens_data(7));
+        if (get_mesh_data(0) != 0.0) {
+            vec2 mesh_size = vec2(get_mesh_data(2), get_mesh_data(3));
+            vec2 origin    = vec2(get_mesh_data(4), get_mesh_data(5));
+            vec2 crop_size = vec2(get_mesh_data(6), get_mesh_data(7));
 
             if (bool(params.flags & 128)) { uv.y = params.height - uv.y; } // framebuffer inverted
 

@@ -53,7 +53,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
         transform.kernel_params.output_height = height as i32;
         transform.kernel_params.flags = kernel_flags.bits();
 
-        let lens_data = transform.lens_data.iter().map(|x| *x as f64).collect::<Vec<f64>>();
+        let mesh_data = transform.mesh_data.iter().map(|x| *x as f64).collect::<Vec<f64>>();
 
         let bbox = fov_iterative::FovIterative::new(&compute_params).points_around_rect(width as f32, height as f32, 31, 31);
         let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh) = FrameTransform::at_timestamp_for_points(&compute_params, &bbox, timestamp, Some(frame), false);
@@ -97,7 +97,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
             };
             if transform.kernel_params.matrix_count > 1 {
                 let idx = transform.kernel_params.matrix_count as usize / 2;
-                if let Some(pt) = Stabilization::rotate_and_distort((x as f32, y as f32), idx, &transform.kernel_params, &transform.matrices, &compute_params.distortion_model, compute_params.digital_lens.as_ref(), r_limit_sq, &lens_data) {
+                if let Some(pt) = Stabilization::rotate_and_distort((x as f32, y as f32), idx, &transform.kernel_params, &transform.matrices, &compute_params.distortion_model, compute_params.digital_lens.as_ref(), r_limit_sq, &mesh_data) {
                     if compute_params.horizontal_rs {
                         sy = (pt.0.round() as i32).min(transform.kernel_params.width).max(0) as usize;
                     } else {
@@ -108,7 +108,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
             ///////////////////////////////////////////////////////////////////
 
             let idx = sy.min(transform.kernel_params.matrix_count as usize - 1);
-            Stabilization::rotate_and_distort((x as f32, y as f32), idx, &transform.kernel_params, &transform.matrices, &compute_params.distortion_model, compute_params.digital_lens.as_ref(), r_limit_sq, &lens_data)
+            Stabilization::rotate_and_distort((x as f32, y as f32), idx, &transform.kernel_params, &transform.matrices, &compute_params.distortion_model, compute_params.digital_lens.as_ref(), r_limit_sq, &mesh_data)
         });
 
         compute_params.width              = width; compute_params.height              = height;

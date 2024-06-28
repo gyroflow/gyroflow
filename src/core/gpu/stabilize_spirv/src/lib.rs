@@ -43,7 +43,7 @@ pub fn undistort_fragment(
     #[spirv(uniform, descriptor_set = 0, binding = 0)] params: &KernelParams,
     #[spirv(storage_buffer, descriptor_set = 0, binding = 1)] matrices: &[f32],
     #[spirv(storage_buffer, descriptor_set = 0, binding = 2)] coeffs: &[f32],
-    #[spirv(storage_buffer, descriptor_set = 0, binding = 3)] lens_data: &[f32],
+    #[spirv(storage_buffer, descriptor_set = 0, binding = 3)] mesh_data: &[f32],
     #[spirv(storage_buffer, descriptor_set = 0, binding = 4)] drawing: &[u32],
     #[spirv(descriptor_set = 0, binding = 5)] input_texture: &ImageType,
     #[spirv(spec_constant(id = 100, default = 8))] interpolation: u32,
@@ -52,7 +52,7 @@ pub fn undistort_fragment(
     #[spirv(spec_constant(id = 103))] flags: u32,
     output: &mut ScalarVec4,
 ) {
-    *output = from_float(undistort(vec2(in_frag_coord.x, in_frag_coord.y), params, matrices, coeffs, lens_data, drawing, input_texture, 0.0, interpolation, distortion_model, digital_distortion_model, flags));
+    *output = from_float(undistort(vec2(in_frag_coord.x, in_frag_coord.y), params, matrices, coeffs, mesh_data, drawing, input_texture, 0.0, interpolation, distortion_model, digital_distortion_model, flags));
 }
 
 #[spirv(vertex)]

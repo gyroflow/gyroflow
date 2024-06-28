@@ -17,7 +17,7 @@ pub struct FrameTransform {
     pub fov: f64,
     pub minimal_fov: f64,
     pub focal_length: Option<f64>,
-    pub lens_data: Vec<f32>,
+    pub mesh_data: Vec<f32>,
 }
 
 impl FrameTransform {
@@ -187,9 +187,9 @@ impl FrameTransform {
         let gyro = params.gyro.read();
         let file_metadata = gyro.file_metadata.read();
 
-        let mut lens_data = Vec::new();
+        let mut mesh_data = Vec::new();
         if let Some(mc) = file_metadata.mesh_correction.get(frame) {
-            lens_data = mc.1.clone(); // undistorting mesh
+            mesh_data = mc.1.clone(); // undistorting mesh
         }
 
         // ----------- Rolling shutter correction -----------
@@ -321,7 +321,7 @@ impl FrameTransform {
             fov: ui_fov,
             minimal_fov: *params.minimal_fovs.get(frame).unwrap_or(&1.0),
             focal_length,
-            lens_data
+            mesh_data
         }
     }
 

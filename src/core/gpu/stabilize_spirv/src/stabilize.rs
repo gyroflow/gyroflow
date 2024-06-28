@@ -55,7 +55,7 @@ pub fn rotate_and_distort(pos: Vec2, idx: i32, params: &KernelParams, matrices: 
     vec2(-99999.0, -99999.0)
 }
 
-pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeffs: &[f32], _lens_data: &[f32], drawing: &DrawingType, input: &ImageType, sampler: SamplerType, interpolation: u32, distortion_model: u32, digital_distortion_model: u32, flags: u32) -> Vec4 {
+pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeffs: &[f32], _mesh_data: &[f32], drawing: &DrawingType, input: &ImageType, sampler: SamplerType, interpolation: u32, distortion_model: u32, digital_distortion_model: u32, flags: u32) -> Vec4 {
     let bg = params.background * params.max_pixel_value;
 
     if (params.flags & 4) == 4 { // Fill with background

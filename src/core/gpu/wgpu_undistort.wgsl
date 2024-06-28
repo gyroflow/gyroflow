@@ -52,7 +52,7 @@ struct KernelParams {
 @group(0) @binding(0) @fragment var<uniform> params: KernelParams;
 @group(0) @binding(1) @fragment var<storage, read> matrices: array<f32>;
 @group(0) @binding(2) @fragment var<storage, read> coeffs: array<f32>;
-@group(0) @binding(3) @fragment var<storage, read> lens_data: array<f32>;
+@group(0) @binding(3) @fragment var<storage, read> mesh_data: array<f32>;
 @group(0) @binding(4) @fragment var<storage, read> drawing: array<u32>;
 // {texture_input}
 @group(0) @binding(5) @fragment var input_texture: texture_2d<SCALAR>;
@@ -237,7 +237,7 @@ fn cubic_spline_coefficients(mesh: ptr<function, array<f32, GRID_SIZE>>, step: i
 fn cubic_spline_interpolate1(aa: i32, bb: i32, cc: i32, dd: i32, n: i32, x: f32, size: f32) -> f32 {
     let i = i32(max(0.0, min(f32(n - 2), (f32(n - 1) * x / size))));
     let dx = x - size * f32(i) / f32(n - 1);
-    return lens_data[aa + i] + lens_data[bb + i] * dx + lens_data[cc + i] * dx * dx + lens_data[dd + i] * dx * dx * dx;
+    return mesh_data[aa + i] + mesh_data[bb + i] * dx + mesh_data[cc + i] * dx * dx + mesh_data[dd + i] * dx * dx * dx;
 }
 fn cubic_spline_interpolate2(n: i32, x: f32, size: f32) -> f32 {
     let i = u32(max(0.0, min(f32(n - 2), (f32(n - 1) * x / size))));
@@ -305,10 +305,10 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
 
         uv += c;
 
-        if (lens_data[0] != 0.0) {
-            let mesh_size = vec2<f32>(lens_data[2], lens_data[3]);
-            let origin    = vec2<f32>(lens_data[4], lens_data[5]);
-            let crop_size = vec2<f32>(lens_data[6], lens_data[7]);
+        if (mesh_data[0] != 0.0) {
+            let mesh_size = vec2<f32>(mesh_data[2], mesh_data[3]);
+            let origin    = vec2<f32>(mesh_data[4], mesh_data[5]);
+            let crop_size = vec2<f32>(mesh_data[6], mesh_data[7]);
 
             if (bool(params.flags & 128)) { uv.y = f32(params.height) - uv.y; } // framebuffer inverted
 

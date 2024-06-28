@@ -280,7 +280,7 @@ DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global Ker
     return min(sum, (DATA_TYPEF)(params->pixel_value_limit));
 }
 
-float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, __global const float *matrices, __global const float *lens_data) {
+float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, __global const float *matrices, __global const float *mesh_data) {
     __global const float *matrix = &matrices[idx];
     float _x = (pos.x * matrix[0]) + (pos.y * matrix[1]) + matrix[2] + params->translation3d.x;
     float _y = (pos.x * matrix[3]) + (pos.y * matrix[4]) + matrix[5] + params->translation3d.y;
@@ -313,17 +313,17 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
 
         uv += params->c;
 
-        if (lens_data && lens_data[0] != 0.0f) {
-            float2 mesh_size = (float2)(lens_data[2], lens_data[3]);
-            float2 origin    = (float2)(lens_data[4], lens_data[5]);
-            float2 crop_size = (float2)(lens_data[6], lens_data[7]);
+        if (mesh_data && mesh_data[0] != 0.0f) {
+            float2 mesh_size = (float2)(mesh_data[2], mesh_data[3]);
+            float2 origin    = (float2)(mesh_data[4], mesh_data[5]);
+            float2 crop_size = (float2)(mesh_data[6], mesh_data[7]);
 
             if (params->flags & 128) uv.y = (float)params->height - uv.y; // framebuffer inverted
 
             uv.x = map_coord(uv.x, 0.0f, (float)params->width,  origin.x, origin.x + crop_size.x);
             uv.y = map_coord(uv.y, 0.0f, (float)params->height, origin.y, origin.y + crop_size.y);
 
-            uv = interpolate_mesh(lens_data, mesh_size.x, mesh_size.y, uv);
+            uv = interpolate_mesh(mesh_data, mesh_size.x, mesh_size.y, uv);
 
             uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0f, (float)params->width);
             uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0f, (float)params->height);
@@ -346,7 +346,7 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
 // Adapted from OpenCV: initUndistortRectifyMap + remap
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
-__kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstptr, __global const void *params_buf, __global const float *matrices, __global const uchar *drawing, __global const float *lens_data) {
+__kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstptr, __global const void *params_buf, __global const float *matrices, __global const uchar *drawing, __global const float *mesh_data) {
     int buf_x = get_global_id(0);
     int buf_y = get_global_id(1);
 
@@ -408,7 +408,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
         }
         if (params->matrix_count > 1) {
             int idx = (params->matrix_count / 2) * 14; // Use middle matrix
-            float2 uv = rotate_and_distort(out_pos, idx, params, matrices, lens_data);
+            float2 uv = rotate_and_distort(out_pos, idx, params, matrices, mesh_data);
             if (uv.x > -99998.0f) {
                 if ((params->flags & 16) == 16) { // Horizontal RS
                     sy = min((int)params->width, max(0, (int)round(uv.x)));
@@ -422,7 +422,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
         DATA_TYPE final_pix;
 
         int idx = min(sy, params->matrix_count - 1) * 14;
-        float2 uv = rotate_and_distort(out_pos, idx, params, matrices, lens_data);
+        float2 uv = rotate_and_distort(out_pos, idx, params, matrices, mesh_data);
         if (uv.x > -99998.0f) {
             switch (params->background_mode) {
                 case 1: { // edge repeat

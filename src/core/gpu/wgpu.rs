@@ -29,7 +29,7 @@ pub struct WgpuWrapper  {
     staging_buffer: Option<wgpu::Buffer>,
     buf_matrices: Option<wgpu::Buffer>,
     buf_params: Option<wgpu::Buffer>,
-    buf_lens_data: Option<wgpu::Buffer>,
+    buf_mesh_data: Option<wgpu::Buffer>,
     buf_drawing: Option<wgpu::Buffer>,
 
     in_texture: TextureHolder,
@@ -54,7 +54,7 @@ impl Drop for WgpuWrapper {
         self.staging_buffer = None;
         self.buf_matrices = None;
         self.buf_params = None;
-        self.buf_lens_data = None;
+        self.buf_mesh_data = None;
         self.buf_drawing = None;
         self.in_texture = TextureHolder::default();
         self.out_texture = TextureHolder::default();
@@ -143,7 +143,7 @@ impl WgpuWrapper {
         Some((name, list_name))
     }
 
-    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, bool), distortion_model: DistortionModel, digital_lens: Option<DistortionModel>, buffers: &Buffers, mut drawing_len: usize, lens_data_len: usize) -> Result<Self, WgpuError> {
+    pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, bool), distortion_model: DistortionModel, digital_lens: Option<DistortionModel>, buffers: &Buffers, mut drawing_len: usize) -> Result<Self, WgpuError> {
         let max_matrix_count = 14 * if (params.flags & 16) == 16 { params.width } else { params.height } as usize;
 
         if params.height < 4 || params.output_height < 4 || buffers.input.size.0 < 16 || buffers.input.size.2 < 16 || buffers.output.size.0 < 16 || buffers.output.size.2 < 16 || params.width > 16384 || params.output_width > 16384 {
@@ -253,8 +253,6 @@ impl WgpuWrapper {
             kernel = kernel.replace("LENS_MODEL_FUNCTIONS;", &lens_model_functions);
             kernel = kernel.replace("SCALAR", wgpu_format.1);
 
-            let lens_data_len = 16; // TODO
-
             if !drawing_enabled {
                 drawing_len = 16;
             }
@@ -290,7 +288,7 @@ impl WgpuWrapper {
             let buf_params = device.create_buffer(&wgpu::BufferDescriptor { size: std::mem::size_of::<KernelParams>() as u64, usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_drawing = device.create_buffer(&wgpu::BufferDescriptor { size: drawing_len as u64, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_coeffs  = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: None, contents: bytemuck::cast_slice(&crate::stabilization::COEFFS), usage: wgpu::BufferUsages::STORAGE });
-            let buf_lens_data = device.create_buffer(&wgpu::BufferDescriptor { size: lens_data_len.max(4096) as u64, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
+            let buf_mesh_data = device.create_buffer(&wgpu::BufferDescriptor { size: 4096 as u64, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
 
             let bind_group_layout = if uses_textures {
                 let sample_type = match wgpu_format.1 {
@@ -303,7 +301,7 @@ impl WgpuWrapper {
                         wgpu::BindGroupLayoutEntry { binding: 0, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Uniform, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(std::mem::size_of::<KernelParams>() as _) }, count: None },
                         wgpu::BindGroupLayoutEntry { binding: 1, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(params_size as _) }, count: None },
                         wgpu::BindGroupLayoutEntry { binding: 2, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new((crate::stabilization::COEFFS.len() * std::mem::size_of::<f32>()) as _) }, count: None },
-                        wgpu::BindGroupLayoutEntry { binding: 3, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(lens_data_len as _) }, count: None },
+                        wgpu::BindGroupLayoutEntry { binding: 3, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(1024) }, count: None },
                         wgpu::BindGroupLayoutEntry { binding: 4, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(drawing_len as _) }, count: None },
                         wgpu::BindGroupLayoutEntry { binding: 5, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Texture { sample_type, view_dimension: wgpu::TextureViewDimension::D2, multisampled: false }, count: None },
                     ],
@@ -315,7 +313,7 @@ impl WgpuWrapper {
                         wgpu::BindGroupLayoutEntry { binding: 0, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Uniform, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(std::mem::size_of::<KernelParams>() as _) }, count: None },
                         wgpu::BindGroupLayoutEntry { binding: 1, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(params_size as _) }, count: None },
                         wgpu::BindGroupLayoutEntry { binding: 2, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new((crate::stabilization::COEFFS.len() * std::mem::size_of::<f32>()) as _) }, count: None },
-                        wgpu::BindGroupLayoutEntry { binding: 3, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(lens_data_len as _) }, count: None },
+                        wgpu::BindGroupLayoutEntry { binding: 3, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(1024) }, count: None },
                         wgpu::BindGroupLayoutEntry { binding: 4, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(drawing_len as _) }, count: None },
                         wgpu::BindGroupLayoutEntry { binding: 5, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: true }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(in_size as _) }, count: None },
                         wgpu::BindGroupLayoutEntry { binding: 6, visibility: wgpu::ShaderStages::COMPUTE, ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Storage { read_only: false }, has_dynamic_offset: false, min_binding_size: wgpu::BufferSize::new(out_size as _) }, count: None },
@@ -390,7 +388,7 @@ impl WgpuWrapper {
                             wgpu::BindGroupEntry { binding: 0, resource: buf_params.as_entire_binding() },
                             wgpu::BindGroupEntry { binding: 1, resource: buf_matrices.as_entire_binding() },
                             wgpu::BindGroupEntry { binding: 2, resource: buf_coeffs.as_entire_binding() },
-                            wgpu::BindGroupEntry { binding: 3, resource: buf_lens_data.as_entire_binding() },
+                            wgpu::BindGroupEntry { binding: 3, resource: buf_mesh_data.as_entire_binding() },
                             wgpu::BindGroupEntry { binding: 4, resource: buf_drawing.as_entire_binding() },
                             wgpu::BindGroupEntry { binding: 5, resource: wgpu::BindingResource::TextureView(&in_texture.wgpu_texture.as_ref().unwrap().create_view(&wgpu::TextureViewDescriptor::default())) },
                         ],
@@ -404,7 +402,7 @@ impl WgpuWrapper {
                             wgpu::BindGroupEntry { binding: 0, resource: buf_params.as_entire_binding() },
                             wgpu::BindGroupEntry { binding: 1, resource: buf_matrices.as_entire_binding() },
                             wgpu::BindGroupEntry { binding: 2, resource: buf_coeffs.as_entire_binding() },
-                            wgpu::BindGroupEntry { binding: 3, resource: buf_lens_data.as_entire_binding() },
+                            wgpu::BindGroupEntry { binding: 3, resource: buf_mesh_data.as_entire_binding() },
                             wgpu::BindGroupEntry { binding: 4, resource: buf_drawing.as_entire_binding() },
                             wgpu::BindGroupEntry { binding: 5, resource: in_texture.wgpu_buffer.as_ref().unwrap().as_entire_binding() },
                             wgpu::BindGroupEntry { binding: 6, resource: out_texture.wgpu_buffer.as_ref().unwrap().as_entire_binding() },
@@ -422,7 +420,7 @@ impl WgpuWrapper {
                 buf_matrices: Some(buf_matrices),
                 buf_params: Some(buf_params),
                 buf_drawing: Some(buf_drawing),
-                buf_lens_data: Some(buf_lens_data),
+                buf_mesh_data: Some(buf_mesh_data),
                 bind_group,
                 pipeline,
                 in_size,
@@ -457,9 +455,9 @@ impl WgpuWrapper {
             if self.drawing_size < drawing_buffer.len() as u64 { log::error!("Buffer size mismatch! {} vs {}", self.drawing_size, drawing_buffer.len()); return false; }
             self.queue.write_buffer(self.buf_drawing.as_ref().unwrap(), 0, drawing_buffer);
         }
-        if !itm.lens_data.is_empty() {
-            if self.buf_lens_data.is_none() || (self.buf_lens_data.as_ref().unwrap().size() as usize * 4) < itm.lens_data.len() { log::error!("Buffer size mismatch buf_lens_data! {} vs {}", self.buf_lens_data.as_ref().unwrap().size() * 4, itm.lens_data.len()); return false; }
-            self.queue.write_buffer(self.buf_lens_data.as_ref().unwrap(), 0, bytemuck::cast_slice(&itm.lens_data));
+        if !itm.mesh_data.is_empty() {
+            if self.buf_mesh_data.is_none() || (self.buf_mesh_data.as_ref().unwrap().size() as usize * 4) < itm.mesh_data.len() { log::error!("Buffer size mismatch buf_mesh_data! {} vs {}", self.buf_mesh_data.as_ref().unwrap().size() * 4, itm.mesh_data.len()); return false; }
+            self.queue.write_buffer(self.buf_mesh_data.as_ref().unwrap(), 0, bytemuck::cast_slice(&itm.mesh_data));
         }
 
         match &self.pipeline {

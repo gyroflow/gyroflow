@@ -21,7 +21,7 @@ pub struct OclWrapper {
 
     buf_params: Buffer<u8>,
     buf_drawing: Buffer<u8>,
-    buf_lens_data: Buffer<f32>,
+    buf_mesh_data: Buffer<f32>,
     buf_matrices: Buffer<f32>,
 }
 
@@ -175,7 +175,7 @@ impl OclWrapper {
         Ok((name, list_name))
     }
 
-    pub fn new(params: &KernelParams, ocl_names: (&str, &str, &str, &str), distortion_model: DistortionModel, digital_lens: Option<DistortionModel>, buffers: &Buffers, drawing_len: usize, lens_data_len: usize) -> ocl::Result<Self> {
+    pub fn new(params: &KernelParams, ocl_names: (&str, &str, &str, &str), distortion_model: DistortionModel, digital_lens: Option<DistortionModel>, buffers: &Buffers, drawing_len: usize) -> ocl::Result<Self> {
         if params.height < 4 || params.output_height < 4 || params.stride < 1 { return Err(ocl::BufferCmdError::AlreadyMapped.into()); }
 
         let mut kernel = include_str!("opencl_undistort.cl").to_string();
@@ -288,7 +288,7 @@ impl OclWrapper {
             let buf_params   = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(std::mem::size_of::<KernelParams>()).build()?;
             let buf_drawing  = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(drawing_len.max(4)).build()?;
             let buf_matrices = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(max_matrix_count).build()?;
-            let buf_lens_data = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(lens_data_len.max(4096)).build()?;
+            let buf_mesh_data = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(1024).build()?;
 
             let mut builder = Kernel::builder();
             unsafe {
@@ -300,7 +300,7 @@ impl OclWrapper {
                     .arg(&buf_params)
                     .arg(&buf_matrices)
                     .arg(&buf_drawing)
-                    .arg(&buf_lens_data);
+                    .arg(&buf_mesh_data);
             }
 
             let kernel = builder.build()?;
@@ -315,7 +315,7 @@ impl OclWrapper {
                 buf_params,
                 buf_drawing,
                 buf_matrices,
-                buf_lens_data,
+                buf_mesh_data,
             })
         } else {
             Err(ocl::BufferCmdError::AlreadyMapped.into())
@@ -343,9 +343,9 @@ impl OclWrapper {
             if self.buf_drawing.len() != drawing_buffer.len() { log::error!("Buffer size mismatch drawing_buffer! {} vs {}", self.buf_drawing.len(), drawing_buffer.len()); return Ok(()); }
             self.buf_drawing.write(drawing_buffer).enq()?;
         }
-        if !itm.lens_data.is_empty() {
-            if self.buf_lens_data.len() < itm.lens_data.len() { log::error!("Buffer size mismatch buf_lens_data! {} vs {}", self.buf_lens_data.len(), itm.lens_data.len()); return Ok(()); }
-            self.buf_lens_data.write(&itm.lens_data).enq()?;
+        if !itm.mesh_data.is_empty() {
+            if self.buf_mesh_data.len() < itm.mesh_data.len() { log::error!("Buffer size mismatch buf_mesh_data! {} vs {}", self.buf_mesh_data.len(), itm.mesh_data.len()); return Ok(()); }
+            self.buf_mesh_data.write(&itm.mesh_data).enq()?;
         }
         match buffers.input.data {
             BufferSource::None => { },
