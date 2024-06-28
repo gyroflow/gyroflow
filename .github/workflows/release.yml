@@ -109,7 +109,7 @@ jobs:
           SIGN_KEY: FA062BFB7CB1A27FA0EC5CC7C03D9447DF15F92A
           PKG_SIGN_KEY: DC70831576E7B2345E78A516BEA2FC34D18F42F5
           PROVISIONING_PROFILE: /Users/runner/Library/MobileDevice/Provisioning Profiles/${{ matrix.targets.type == 'macstore' && fromJSON(steps.provisioning_mac.outputs.profiles)[0].udid || '' }}.mobileprovision
-          FORCE_QT_VERSION: 6.7.1
+          FORCE_QT_VERSION: 6.7.2
           DONT_BUILD_DMG: true
         run: |
           /usr/libexec/PlistBuddy -x -c "Set :LSMinimumSystemVersion \"11.0\"" ${{ github.workspace }}/_deployment/mac/Gyroflow.app/Contents/Info.plist

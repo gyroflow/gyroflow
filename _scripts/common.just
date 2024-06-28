@@ -8,7 +8,7 @@ ProjectDir := if path_exists(justfile_directory() / "Cargo.toml") == "true" { ju
 ExtDir := ProjectDir / "ext"
 
 # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
-QtVersion := env_var_or_default("FORCE_QT_VERSION", if os() == "windows" { "6.7.1" } else { "6.4.3" })
+QtVersion := env_var_or_default("FORCE_QT_VERSION", if os() == "windows" { "6.7.2" } else { "6.4.3" })
 QtArch := if os() == "windows" { "msvc2019_64"
    } else if os() == "macos"   { "macos"
    } else                      { "gcc_64" }
