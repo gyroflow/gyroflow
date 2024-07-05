@@ -29,7 +29,7 @@ define_keyframes! {
     ZoomingSpeed,                "#32e595", "Zooming speed",                    |v| format!("{:.2}s", v),
     ZoomingCenterX,              "#6fefb6", "Zooming center offset X",          |v| format!("{:.0}%", v * 100.0),
     ZoomingCenterY,              "#5ddba2", "Zooming center offset Y",          |v| format!("{:.0}%", v * 100.0),
-    MaxZoom,                     "#184CC5", "Max zoom",                         |v| format!("{:.0}%", v * 100.0),
+    MaxZoom,                     "#184CC5", "Zoom limit",                       |v| format!("{:.0}%", v * 100.0),
     AdditionalRotationX,         "#7817ef", "Additional 3D yaw",                |v| format!("{:.2}°", v),
     AdditionalRotationY,         "#9248ec", "Additional 3D pitch",              |v| format!("{:.2}°", v),
     AdditionalRotationZ,         "#ab7ce4", "Additional 3D roll",               |v| format!("{:.2}°", v),

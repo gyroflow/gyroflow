@@ -400,6 +400,7 @@ impl StabilizationManager {
             for _ in params.fovs.iter() {
                 params.smoothing_fov_limit_per_frame.push(1.0);
             }
+            let thresholds = [0.95, 0.9, 0.85, 0.8, 0.75];
             for iter in 0..max_zoom_iters {
                 let mut any_above_limit = false;
                 for (i, fov) in params.fovs.iter().enumerate() {
@@ -407,7 +408,7 @@ impl StabilizationManager {
                     let fov_limit = 1.0 / (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0);
                     if *fov < fov_limit {
                         any_above_limit = true;
-                        params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(0.95);
+                        params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(*thresholds.get(iter).unwrap_or(thresholds.last().unwrap()));
                     }
                 }
                 log::debug!("Max zoom iteration {iter}/{max_zoom_iters}, any above limit: {any_above_limit}");
@@ -547,6 +548,7 @@ impl StabilizationManager {
                     for _ in params.fovs.iter() {
                         params.smoothing_fov_limit_per_frame.push(1.0);
                     }
+                    let thresholds = [0.95, 0.9, 0.85, 0.8, 0.75];
                     for iter in 0..max_zoom_iters {
                         let mut any_above_limit = false;
                         for (i, fov) in params.fovs.iter().enumerate() {
@@ -554,7 +556,7 @@ impl StabilizationManager {
                             let fov_limit = 1.0 / (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0);
                             if *fov < fov_limit {
                                 any_above_limit = true;
-                                params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(0.95);
+                                params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(*thresholds.get(iter).unwrap_or(thresholds.last().unwrap()));
                             }
                         }
                         log::debug!("Max zoom iteration {iter}/{max_zoom_iters}, any above limit: {any_above_limit}");
