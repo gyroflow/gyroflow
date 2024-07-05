@@ -135,6 +135,18 @@ pub fn get_setting(_key: &str) -> Option<String> {
                                     if let Some(Ok(key_node)) = root.subpath("Software\\Gyroflow\\Gyroflow") {
                                         if let Some(Ok(key_value)) = key_node.value(_key) {
                                             if let Ok(sz) = key_value.string_data() {
+                                                if _key == "exeLocation" {
+                                                    let parts = sz.split("\\").collect::<Vec<_>>();
+                                                    let parts = parts.into_iter().rev().skip(1).next().unwrap_or("").split("_").collect::<Vec<_>>();
+                                                    if let Some(publisher) = parts.first() {
+                                                        if let Some(app_id) = parts.last() {
+                                                            if !publisher.is_empty() && !app_id.is_empty() {
+                                                                return Some(format!("shell:AppsFolder\\{publisher}_{app_id}!Gyroflow"));
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
                                                 return Some(sz);
                                             }
                                         }
