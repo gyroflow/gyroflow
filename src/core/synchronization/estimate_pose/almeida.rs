@@ -57,8 +57,8 @@ impl Camera {
         na::matrix![tan.x.atan(); tan.y.atan()]
     }
     fn delta(&self, coords: na::Point2<f32>, rotation: na::Matrix4<f32>, timestamp_ms: f64) -> na::Vector2<f32> {
-        let vw = self.compute_params.video_width as f32;
-        let vh = self.compute_params.video_height as f32;
+        let vw = self.compute_params.width as f32;
+        let vh = self.compute_params.height as f32;
         let (camera_matrix, distortion_coeffs, _, _, _, _) = FrameTransform::get_lens_data_at_timestamp(&self.compute_params, timestamp_ms);
 
         let rot = na::Matrix3::<f32>::from(rotation.fixed_view::<3, 3>(0, 0));

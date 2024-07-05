@@ -942,7 +942,7 @@ impl Controller {
             vid.onResize(Box::new(move |width, height| {
                 let current_size = stab.params.read().size;
                 if current_size.0 != width as usize || current_size.1 != height as usize {
-                    stab.set_size(width as usize, height as usize);
+                    stab.init_size();
                     request_recompute(());
                 }
             }));
@@ -1510,7 +1510,7 @@ impl Controller {
                 let lens = stab.lens.read();
                 let input_horizontal_stretch = if lens.input_horizontal_stretch > 0.01 { lens.input_horizontal_stretch } else { 1.0 };
                 let input_vertical_stretch = if lens.input_vertical_stretch > 0.01 { lens.input_vertical_stretch } else { 1.0 };
-                (params.fps, params.frame_count, params.trim_ranges.iter().map(|x| (x.0 * params.duration_ms, x.1 * params.duration_ms)).collect(), params.get_trim_ratio(), params.video_size, input_horizontal_stretch, input_vertical_stretch)
+                (params.fps, params.frame_count, params.trim_ranges.iter().map(|x| (x.0 * params.duration_ms, x.1 * params.duration_ms)).collect(), params.get_trim_ratio(), params.size, input_horizontal_stretch, input_vertical_stretch)
             };
 
             let is_forced = custom_timestamp_ms > -0.5;

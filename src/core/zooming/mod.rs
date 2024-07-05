@@ -44,12 +44,11 @@ pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)
 
     // Use original video dimensions, because this is used to undistort points, and we need to find original image bounding box
     // Then we can use real `output_dim` to fit the fov
-    compute_params.width = compute_params.video_width;
-    compute_params.height = compute_params.video_height;
-    compute_params.output_width = compute_params.video_width;
-    compute_params.output_height = compute_params.video_height;
+    let org_output_size = (compute_params.output_width, compute_params.output_height);
+    compute_params.output_width = compute_params.width;
+    compute_params.output_height = compute_params.height;
 
-    let fov_estimator = fov_iterative::FovIterative::new(&compute_params);
+    let fov_estimator = fov_iterative::FovIterative::new(&compute_params, org_output_size);
     let mut fov_values = fov_estimator.compute(timestamps, &compute_params.trim_ranges);
     let (final_fovs, final_fovs_minimal) = if compute_params.adaptive_zoom_window < -0.9 {
         // Static zoom
@@ -74,10 +73,10 @@ pub fn get_checksum(compute_params: &ComputeParams) -> u64 {
         hasher.write_u64(x.to_bits());
     }
 
-    hasher.write_usize(compute_params.video_width);
-    hasher.write_usize(compute_params.video_height);
-    hasher.write_usize(compute_params.video_output_width);
-    hasher.write_usize(compute_params.video_output_height);
+    hasher.write_usize(compute_params.width);
+    hasher.write_usize(compute_params.height);
+    hasher.write_usize(compute_params.output_width);
+    hasher.write_usize(compute_params.output_height);
     hasher.write_u64(compute_params.scaled_fps.to_bits());
     for x in compute_params.trim_ranges.iter() {
         hasher.write_u64(x.0.to_bits());

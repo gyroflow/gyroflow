@@ -26,10 +26,6 @@ pub struct ComputeParams {
     pub height: usize,
     pub output_width: usize,
     pub output_height: usize,
-    pub video_output_width: usize,
-    pub video_output_height: usize,
-    pub video_width: usize,
-    pub video_height: usize,
     pub video_rotation: f64,
     pub lens_correction_amount: f64,
     pub light_refraction_coefficient: f64,
@@ -44,7 +40,6 @@ pub struct ComputeParams {
     pub trim_ranges: Vec<(f64, f64)>,
     pub scaled_fps: f64,
     pub scaled_duration_ms: f64,
-    pub plane_scale: (f64, f64),
     pub adaptive_zoom_window: f64,
     pub adaptive_zoom_center_offset: (f64, f64),
     pub adaptive_zoom_method: i32,
@@ -86,13 +81,8 @@ impl ComputeParams {
             minimal_fovs: params.minimal_fovs.clone(),
             width: params.size.0.max(1),
             height: params.size.1.max(1),
-            video_width: params.video_size.0.max(1),
-            video_height: params.video_size.1.max(1),
-            video_output_width: params.video_output_size.0.max(1),
-            video_output_height: params.video_output_size.1.max(1),
             output_width: params.output_size.0.max(1),
             output_height: params.output_size.1.max(1),
-            plane_scale: params.plane_scale.unwrap_or((1.0, 1.0)),
             video_rotation: params.video_rotation,
             background: params.background,
             background_mode: params.background_mode,
@@ -138,7 +128,7 @@ impl ComputeParams {
         for f in 0..frame_count as i32 {
             let timestamp = crate::timestamp_at_frame(f, self.scaled_fps);
             let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&self, timestamp);
-            let diag_length = ((self.video_width.pow(2) + self.video_height.pow(2)) as f64).sqrt();
+            let diag_length = ((self.width.pow(2) + self.height.pow(2)) as f64).sqrt();
             // let diag_pixel_focal_length = (camera_matrix[(0, 0)].powi(2) + camera_matrix[(1, 1)].powi(2)).sqrt();
             let d_fov = 2.0 * ((diag_length / (2.0 * camera_matrix[(1, 1)])).atan()) * 180.0 / std::f64::consts::PI;
             self.camera_diagonal_fovs.push(d_fov);
@@ -167,10 +157,6 @@ impl std::fmt::Debug for ComputeParams {
          .field("height",               &self.height)
          .field("output_width",         &self.output_width)
          .field("output_height",        &self.output_height)
-         .field("video_output_width",   &self.video_output_width)
-         .field("video_output_height",  &self.video_output_height)
-         .field("video_width",          &self.video_width)
-         .field("video_height",         &self.video_height)
          .field("video_rotation",       &self.video_rotation)
          .field("lens_correction_amount",    &self.lens_correction_amount)
          .field("light_refraction_coefficient", &self.light_refraction_coefficient)

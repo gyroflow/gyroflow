@@ -28,10 +28,8 @@ impl From<i32> for BackgroundMode {
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct StabilizationParams {
-    pub size: (usize, usize), // Processing input size
-    pub output_size: (usize, usize), // Processing output size
-    pub video_size: (usize, usize), // Full resolution input size
-    pub video_output_size: (usize, usize), // Full resoution output size
+    pub size: (usize, usize), // Full resolution input size
+    pub output_size: (usize, usize), // Full resoution output size
 
     pub background: Vector4<f32>,
 
@@ -49,7 +47,6 @@ pub struct StabilizationParams {
     pub min_fov: f64,
     pub fps: f64,
     pub fps_scale: Option<f64>,
-    pub plane_scale: Option<(f64, f64)>,
     pub video_speed: f64,
     pub video_speed_affects_smoothing: bool,
     pub video_speed_affects_zooming: bool,
@@ -104,8 +101,6 @@ impl Default for StabilizationParams {
 
             size: (0, 0),
             output_size: (0, 0),
-            video_size: (0, 0),
-            video_output_size: (0, 0),
 
             video_rotation: 0.0,
 
@@ -131,7 +126,6 @@ impl Default for StabilizationParams {
 
             fps: 0.0,
             fps_scale: None,
-            plane_scale: None,
             video_speed: 1.0,
             video_speed_affects_smoothing: true,
             video_speed_affects_zooming: true,
@@ -168,7 +162,7 @@ impl StabilizationParams {
 
     pub fn set_fovs(&mut self, fovs: Vec<f64>, mut lens_fov_adjustment: f64) {
         if let Some(mut min_fov) = fovs.iter().copied().reduce(f64::min) {
-            min_fov *= self.video_size.0 as f64 / self.video_output_size.0.max(1) as f64;
+            min_fov *= self.size.0 as f64 / self.output_size.0.max(1) as f64;
             if lens_fov_adjustment <= 0.0001 { lens_fov_adjustment = 1.0 };
             self.min_fov = min_fov / lens_fov_adjustment;
         }

@@ -6,7 +6,7 @@ use crate::StabilizationManager;
 pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Iterator<Item = (String, usize, Vec<u8>, Vec<u8>)> { // (frame, undistort, redistort)
     let (width, height) = {
         let params = stab.params.read();
-        (params.video_size.0, params.video_size.1)
+        (params.size.0, params.size.1)
     };
 
     let filename_base = {
@@ -40,11 +40,10 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
     (0..compute_params.frame_count).map(move |frame| {
         let timestamp = crate::timestamp_at_frame(frame as i32, compute_params.scaled_fps);
 
+        let org_output_size = (width, height);
         compute_params.fov_scale = 1.0;
         compute_params.width              = width; compute_params.height              = height;
-        compute_params.video_width        = width; compute_params.video_height        = height;
         compute_params.output_width       = width; compute_params.output_height       = height;
-        compute_params.video_output_width = width; compute_params.video_output_height = height;
 
         let mut transform = FrameTransform::at_timestamp(&compute_params, timestamp, frame);
         transform.kernel_params.width  = width as i32;
@@ -55,7 +54,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
 
         let mesh_data = transform.mesh_data.iter().map(|x| *x as f64).collect::<Vec<f64>>();
 
-        let bbox = fov_iterative::FovIterative::new(&compute_params).points_around_rect(width as f32, height as f32, 31, 31);
+        let bbox = fov_iterative::FovIterative::new(&compute_params, org_output_size).points_around_rect(width as f32, height as f32, 31, 31);
         let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh) = FrameTransform::at_timestamp_for_points(&compute_params, &bbox, timestamp, Some(frame), false);
         let undistorted_bbox = undistort_points(&bbox, camera_matrix, &distortion_coeffs, rotations[0], None, Some(rotations), &compute_params, 1.0, timestamp, is, mesh);
 
@@ -74,9 +73,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
 
         compute_params.fov_scale = (new_width as f32 / width as f32).max(new_height as f32 / height as f32) as f64;
         compute_params.width              = new_width; compute_params.height              = new_height;
-        compute_params.video_width        = new_width; compute_params.video_height        = new_height;
         compute_params.output_width       = new_width; compute_params.output_height       = new_height;
-        compute_params.video_output_width = new_width; compute_params.video_output_height = new_height;
 
         transform = FrameTransform::at_timestamp(&compute_params, timestamp, frame);
         transform.kernel_params.width  = new_width as i32;
@@ -112,9 +109,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
         });
 
         compute_params.width              = width; compute_params.height              = height;
-        compute_params.video_width        = width; compute_params.video_height        = height;
         compute_params.output_width       = width; compute_params.output_height       = height;
-        compute_params.video_output_width = width; compute_params.video_output_height = height;
 
         let dist = parallel_exr(width, height, |x, y| {
             let distorted = [(x as f32, y as f32)];

@@ -36,7 +36,7 @@ impl FrameTransform {
     fn get_new_k(params: &ComputeParams, camera_matrix: &Matrix3<f64>, fov: f64) -> Matrix3<f64> {
         let horizontal_ratio = if params.lens.input_horizontal_stretch > 0.01 { params.lens.input_horizontal_stretch } else { 1.0 };
 
-        let img_dim_ratio = Self::get_ratio(params) / horizontal_ratio;
+        let img_dim_ratio = 1.0 / horizontal_ratio;
 
         let out_dim = (params.output_width as f64, params.output_height as f64);
         //let focal_center = (params.video_width as f64 / 2.0, params.video_height as f64 / 2.0);
@@ -48,15 +48,11 @@ impl FrameTransform {
         new_k[(1, 2)] = /*(params.video_height as f64 / 2.0 - new_k[(1, 2)]) * img_dim_ratio / fov + */out_dim.1 / 2.0;
         new_k
     }
-    pub fn get_ratio(params: &ComputeParams) -> f64 {
-        params.width as f64 / params.video_width.max(1) as f64
-    }
     fn get_fov(params: &ComputeParams, frame: usize, use_fovs: bool, timestamp_ms: f64, for_ui: bool) -> f64 {
         let mut fov_scale = params.keyframes.value_at_video_timestamp(&KeyframeType::Fov, timestamp_ms).unwrap_or(params.fov_scale);
         fov_scale += if params.fov_overview && use_fovs && !for_ui { 1.0 } else { 0.0 };
         let mut fov = if use_fovs { params.fovs.get(frame).unwrap_or(&1.0) * fov_scale } else { 1.0 }.max(0.001);
         if !for_ui {
-            //fov *= params.video_width as f64 / params.video_output_width.max(1) as f64;
             fov *= params.width as f64 / params.output_width.max(1) as f64;
         }
         fov
@@ -76,7 +72,7 @@ impl FrameTransform {
 
         let mut focal_length = lens.focal_length;
 
-        let mut camera_matrix = lens.get_camera_matrix((params.width, params.height), (params.video_width, params.video_height));
+        let mut camera_matrix = lens.get_camera_matrix((params.width, params.height));
         let mut distortion_coeffs = lens.get_distortion_coeffs();
 
         let mut radial_distortion_limit = lens.fisheye_params.radial_distortion_limit.unwrap_or_default();
@@ -88,14 +84,14 @@ impl FrameTransform {
             if let Some(val) = file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
                 let pixel_focal_length = val.pixel_focal_length.map(|x| x as f64).or_else(|| {
                     focal_length = Some(val.focal_length? as f64);
-                    Some((val.focal_length? as f64 / ((val.pixel_pitch?.1 as f64 / 1000000.0) * val.capture_area_size?.1 as f64)) * params.video_height as f64 / params.plane_scale.1)
+                    Some((val.focal_length? as f64 / ((val.pixel_pitch?.1 as f64 / 1000000.0) * val.capture_area_size?.1 as f64)) * params.height as f64)
                 });
                 if let Some(pfl) = pixel_focal_length {
                     // println!("pfl: {pfl:.3}px, lens: {:?}", val);
-                    camera_matrix[(0, 0)] = pfl * params.plane_scale.0;
-                    camera_matrix[(1, 1)] = pfl * params.plane_scale.1;
-                    camera_matrix[(0, 2)] = params.video_width as f64 / 2.0;
-                    camera_matrix[(1, 2)] = params.video_height as f64 / 2.0;
+                    camera_matrix[(0, 0)] = pfl;
+                    camera_matrix[(1, 1)] = pfl;
+                    camera_matrix[(0, 2)] = params.width as f64 / 2.0;
+                    camera_matrix[(1, 2)] = params.height as f64 / 2.0;
                     stretch_lens = false;
 
                     if let Some(fl) = val.focal_length {
@@ -117,15 +113,15 @@ impl FrameTransform {
         let (calib_width, calib_height) = if lens.calib_dimension.w > 0 && lens.calib_dimension.h > 0 {
             (lens.calib_dimension.w as f64, lens.calib_dimension.h as f64)
         } else {
-            (params.video_width.max(1) as f64, params.video_height.max(1) as f64)
+            (params.width.max(1) as f64, params.height.max(1) as f64)
         };
 
         let input_horizontal_stretch = if lens.input_horizontal_stretch > 0.01 { lens.input_horizontal_stretch } else { 1.0 };
         let input_vertical_stretch = if lens.input_vertical_stretch > 0.01 { lens.input_vertical_stretch } else { 1.0 };
 
         if stretch_lens {
-            let lens_ratiox = (params.video_width as f64 / calib_width) * input_horizontal_stretch;
-            let lens_ratioy = (params.video_height as f64 / calib_height) * input_vertical_stretch;
+            let lens_ratiox = (params.width as f64 / calib_width) * input_horizontal_stretch;
+            let lens_ratioy = (params.height as f64 / calib_height) * input_vertical_stretch;
             camera_matrix[(0, 0)] *= lens_ratiox;
             camera_matrix[(1, 1)] *= lens_ratioy;
             camera_matrix[(0, 2)] *= lens_ratiox;
@@ -169,8 +165,6 @@ impl FrameTransform {
             focal_length) = Self::get_lens_data_at_timestamp(params, timestamp_ms);
         // ----------- Lens -----------
 
-        let img_dim_ratio = Self::get_ratio(params);
-
         let mut fov = Self::get_fov(params, frame, true, timestamp_ms, false);
         let mut ui_fov = Self::get_fov(params, frame, true, timestamp_ms, true);
         if let Some(adj) = params.lens.optimal_fov {
@@ -181,7 +175,7 @@ impl FrameTransform {
             }
         }
 
-        let scaled_k = camera_matrix * img_dim_ratio;
+        let scaled_k = camera_matrix;
         let new_k = Self::get_new_k(&params, &camera_matrix, fov);
 
         let gyro = params.gyro.read();
@@ -339,10 +333,9 @@ impl FrameTransform {
 
         let (camera_matrix, distortion_coeffs, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms);
 
-        let img_dim_ratio = Self::get_ratio(params);
         let fov = Self::get_fov(params, 0, use_fovs, timestamp_ms, false);
 
-        let scaled_k = camera_matrix * img_dim_ratio;
+        let scaled_k = camera_matrix;
         let new_k = Self::get_new_k(params, &camera_matrix, fov);
 
         let gyro = params.gyro.read();

@@ -373,7 +373,7 @@ impl RenderQueue {
     }
 
     pub fn add_internal(&mut self, job_id: u32, stab: Arc<StabilizationManager>, mut render_options: RenderOptions, additional_data: String, thumbnail_url: QString) {
-        let size = stab.params.read().video_size;
+        let size = stab.params.read().size;
         stab.set_render_params(size, (render_options.output_width, render_options.output_height));
 
         let params = stab.params.read();
@@ -1227,7 +1227,7 @@ impl RenderQueue {
                                     if let Some(out) = obj.get("videofile").and_then(|x| x.as_str()) {
                                         let ratio = {
                                             let params = stab.params.read();
-                                            params.video_size.0 as f64 / params.video_size.1 as f64
+                                            params.size.0 as f64 / params.size.1 as f64
                                         };
 
                                         if let Err(e) = fetch_thumb(out, ratio) {
@@ -1385,7 +1385,7 @@ impl RenderQueue {
 
                     let every_nth_frame = sync_params.every_nth_frame.max(1);
 
-                    let size = stab.params.read().video_size;
+                    let size = stab.params.read().size;
 
                     if let Ok(mut sync) = AutosyncProcess::from_manager(&stab, &timestamps_fract, sync_params, "synchronize".into(), cancel_flag.clone()) {
                         let processing_cb2 = processing_cb.clone();

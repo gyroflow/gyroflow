@@ -266,7 +266,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
     if format == Format::Csv || format == Format::Jsx {
         output
     } else if format == Format::Usd {
-        let aspect = params.video_size.0 as f64 / params.video_size.1 as f64;
+        let aspect = params.size.0 as f64 / params.size.1 as f64;
         let width_mm = 35.0;
         let height_mm = width_mm / aspect;
 

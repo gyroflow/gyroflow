@@ -134,7 +134,7 @@ impl StabilizationManager {
             params.fps = fps;
             params.frame_count = frame_count;
             params.duration_ms = duration_ms;
-            params.video_size = video_size;
+            params.size = video_size;
         }
 
         self.pose_estimator.sync_results.write().clear();
@@ -164,7 +164,7 @@ impl StabilizationManager {
 
         let (fps, size) = {
             let params = self.params.read();
-            (params.fps, params.video_size)
+            (params.fps, params.size)
         };
 
         let cancel_flag2 = cancel_flag.clone();
@@ -256,7 +256,7 @@ impl StabilizationManager {
         };
         let (width, height, aspect, id, fps) = {
             let params = self.params.read();
-            (params.video_size.0, params.video_size.1, ((params.video_size.0 * 100) as f64 / params.video_size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.get_identifier_for_autoload()).unwrap_or_default(), (params.fps * 100.0).round() as i32)
+            (params.size.0, params.size.1, ((params.size.0 * 100) as f64 / params.size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.get_identifier_for_autoload()).unwrap_or_default(), (params.fps * 100.0).round() as i32)
         };
 
         let mut lens = self.lens.write();
@@ -324,7 +324,7 @@ impl StabilizationManager {
         result
     }
 
-    fn init_size(&self) {
+    pub fn init_size(&self) {
         let (w, h, ow, oh) = {
             let params = self.params.read();
             (params.size.0, params.size.1, params.output_size.0, params.output_size.1)
@@ -342,9 +342,6 @@ impl StabilizationManager {
         {
             let mut params = self.params.write();
             params.size = (width, height);
-
-            let ratio = params.size.0 as f64 / params.video_output_size.0 as f64;
-            params.output_size = ((params.video_output_size.0 as f64 * ratio) as usize, (params.video_output_size.1 as f64 * ratio) as usize);
         }
         self.init_size();
     }
@@ -352,15 +349,12 @@ impl StabilizationManager {
         if width > 0 && height > 0 {
             let params = self.params.upgradable_read();
 
-            let ratio = params.size.0 as f64 / width as f64;
-            let output_size = ((width as f64 * ratio) as usize, (height as f64 * ratio) as usize);
-            let video_output_size = (width, height);
+            let output_size = (width, height);
 
-            if params.output_size != output_size || params.video_output_size != video_output_size {
+            if params.output_size != output_size {
                 {
                     let mut params = RwLockUpgradableReadGuard::upgrade(params);
                     params.output_size = output_size;
-                    params.video_output_size = video_output_size;
                 }
                 self.init_size();
 
@@ -569,7 +563,8 @@ impl StabilizationManager {
             if !p.zooming_debug_points.is_empty() {
                 if let Some((_, points)) = p.zooming_debug_points.range(timestamp_us - 1000..).next() {
                     for i in 0..points.len() {
-                        let fov = ((p.fov + if p.fov_overview { 1.0 } else { 0.0 }) * p.fovs.get(frame).unwrap_or(&1.0)).max(0.0001);
+                        let mut fov = ((p.fov + if p.fov_overview { 1.0 } else { 0.0 }) * p.fovs.get(frame).unwrap_or(&1.0)).max(0.0001);
+                        fov *= p.size.0 as f64 / p.output_size.0.max(1) as f64;
                         let mut pt = points[i];
                         let width_ratio = p.size.0 as f64 / p.output_size.0 as f64;
                         let height_ratio = p.size.1 as f64 / p.output_size.1 as f64;
@@ -676,8 +671,8 @@ impl StabilizationManager {
         if (x_stretch > 0.01 && x_stretch != 1.0) || (y_stretch > 0.01 && y_stretch != 1.0) {
             {
                 let mut params = self.params.write();
-                params.video_size.0 = (params.video_size.0 as f64 * x_stretch).round() as usize;
-                params.video_size.1 = (params.video_size.1 as f64 * y_stretch).round() as usize;
+                params.size.0 = (params.size.0 as f64 * x_stretch).round() as usize;
+                params.size.1 = (params.size.1 as f64 * y_stretch).round() as usize;
             }
             {
                 let mut lens = self.lens.write();
@@ -687,7 +682,7 @@ impl StabilizationManager {
         }
     }
 
-    pub fn get_scaling_ratio(&self) -> f64 { let params = self.params.read(); params.video_size.0 as f64 / params.video_output_size.0 as f64 }
+    pub fn get_scaling_ratio(&self) -> f64 { let params = self.params.read(); params.size.0 as f64 / params.output_size.0 as f64 }
     pub fn get_min_fov      (&self) -> f64 { self.params.read().min_fov }
 
     pub fn invalidate_smoothing(&self) {
@@ -965,8 +960,8 @@ impl StabilizationManager {
             "light_refraction_coefficient": params.light_refraction_coefficient,
 
             "video_info": {
-                "width":       params.video_size.0,
-                "height":      params.video_size.1,
+                "width":       params.size.0,
+                "height":      params.size.1,
                 "rotation":    params.video_rotation,
                 "num_frames":  params.frame_count,
                 "fps":         params.fps,
@@ -1136,10 +1131,10 @@ impl StabilizationManager {
                 let mut params = self.params.write();
                 if let Some(w) = vid_info.get("width").and_then(|x| x.as_u64()) {
                     if let Some(h) = vid_info.get("height").and_then(|x| x.as_u64()) {
-                        params.video_size = (w as usize, h as usize);
+                        params.size = (w as usize, h as usize);
                     }
                 }
-                output_size = Some(params.video_size);
+                output_size = Some(params.size);
                 if let Some(v) = vid_info.get("rotation")   .and_then(|x| x.as_f64()) { params.video_rotation = v; }
                 if let Some(v) = vid_info.get("num_frames") .and_then(|x| x.as_u64()) { params.frame_count    = v as usize; }
                 if let Some(v) = vid_info.get("fps")        .and_then(|x| x.as_f64()) { params.fps            = v; }
@@ -1451,7 +1446,6 @@ impl StabilizationManager {
 
                 if let Some(output_size) = output_size {
                     if output_size.0 > 0 && output_size.1 > 0 {
-                        self.set_size(output_size.0, output_size.1);
                         self.set_output_size(output_size.0, output_size.1);
                     }
                 }

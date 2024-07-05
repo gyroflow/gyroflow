@@ -74,10 +74,10 @@ impl FieldOfViewAlgorithm for FovIterative<'_> {
 }
 
 impl<'a>  FovIterative<'a> {
-    pub fn new(compute_params: &'a ComputeParams) -> Self {
-        let ratio = compute_params.video_width as f32 / compute_params.video_output_width.max(1) as f32;
-        let input_dim = (compute_params.video_width as f32, compute_params.video_height as f32);
-        let output_dim = (compute_params.video_output_width as f32 * ratio, compute_params.video_output_height as f32 * ratio);
+    pub fn new(compute_params: &'a ComputeParams, org_output_size: (usize, usize)) -> Self {
+        let ratio = compute_params.width as f32 / org_output_size.0.max(1) as f32;
+        let input_dim = (compute_params.width as f32, compute_params.height as f32);
+        let output_dim = (org_output_size.0 as f32 * ratio, org_output_size.1 as f32 * ratio);
         let output_inv_aspect = output_dim.1 / output_dim.0;
 
         Self {

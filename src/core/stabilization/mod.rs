@@ -225,12 +225,12 @@ impl Stabilization {
             } else {
                 1.0
             };
-        let pos_x = (self.output_size.0 as f32 - (self.output_size.0 as f32 / sa_fov)) / 2.0;
-        let pos_y = (self.output_size.1 as f32 - (self.output_size.1 as f32 / sa_fov)) / 2.0;
+        let pos_x = (transform.kernel_params.output_width as f32 - (transform.kernel_params.output_width as f32 / sa_fov)) / 2.0;
+        let pos_y = (transform.kernel_params.output_height as f32 - (transform.kernel_params.output_height as f32 / sa_fov)) / 2.0;
         transform.kernel_params.safe_area_rect[0] = pos_x;
         transform.kernel_params.safe_area_rect[1] = pos_y;
-        transform.kernel_params.safe_area_rect[2] = self.output_size.0 as f32 - pos_x;
-        transform.kernel_params.safe_area_rect[3] = self.output_size.1 as f32 - pos_y;
+        transform.kernel_params.safe_area_rect[2] = transform.kernel_params.output_width as f32 - pos_x;
+        transform.kernel_params.safe_area_rect[3] = transform.kernel_params.output_height as f32 - pos_y;
 
         if let Some(r) = buffers.input.rotation {
             transform.kernel_params.input_rotation = r;
@@ -494,8 +494,8 @@ impl Stabilization {
             if self.size        != (itm.kernel_params.width        as usize, itm.kernel_params.height        as usize) { return Err(GyroflowCoreError::SizeMismatch(self.size, (itm.kernel_params.width        as usize, itm.kernel_params.height        as usize))); }
             if self.output_size != (itm.kernel_params.output_width as usize, itm.kernel_params.output_height as usize) { return Err(GyroflowCoreError::SizeMismatch(self.size, (itm.kernel_params.output_width as usize, itm.kernel_params.output_height as usize))); }
 
-            if self.size.0 as i32        > itm.kernel_params.stride        { return Err(GyroflowCoreError::InvalidStride(itm.kernel_params.stride, self.size.0 as i32)); }
-            if self.output_size.0 as i32 > itm.kernel_params.output_stride { return Err(GyroflowCoreError::InvalidStride(itm.kernel_params.output_stride, self.output_size.0 as i32)); }
+            if buffers.input.size.0  as i32 > itm.kernel_params.stride        { return Err(GyroflowCoreError::InvalidStride(itm.kernel_params.stride, buffers.input.size.0 as i32)); }
+            if buffers.output.size.0 as i32 > itm.kernel_params.output_stride { return Err(GyroflowCoreError::InvalidStride(itm.kernel_params.output_stride, buffers.output.size.0 as i32)); }
 
             // OpenCL path
             #[cfg(feature = "use-opencl")]

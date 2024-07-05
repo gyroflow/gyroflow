@@ -88,7 +88,7 @@ impl KeyframeManager {
     }
     pub fn set(&mut self, typ: &KeyframeType, timestamp_us: i64, value: f64) {
         let kf = Keyframe {
-            id: fastrand::u32(1..),
+            id: default_id(),
             value,
             easing: Easing::EaseInOut
         };
