@@ -64,10 +64,12 @@ pub enum Easing {
 
 #[derive(Debug, Copy, Clone, Default, ::serde::Serialize, ::serde::Deserialize)]
 pub struct Keyframe {
+    #[serde(default = "default_id")]
     pub id: u32,
     pub value: f64,
     pub easing: Easing
 }
+fn default_id() -> u32 { fastrand::u32(1..) }
 
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
 pub struct KeyframeManager {
