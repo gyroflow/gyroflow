@@ -289,7 +289,7 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
                 raw_device.bind_image_memory(raw_image, allocated_memory, 0)?;
 
                 #[cfg(target_os = "windows")]
-                let _ = windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(cuda_mem.shared_handle));
+                let _ = windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(cuda_mem.shared_handle as *mut _));
                 #[cfg(target_os = "linux")]
                 libc::close(cuda_mem.shared_handle as i32);
 
@@ -368,7 +368,7 @@ pub fn create_vk_buffer_backed_by_cuda_memory(device: &wgpu::Device, size: (usiz
                 }));
 
                 #[cfg(target_os = "windows")]
-                let _ = windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(cuda_mem.shared_handle as isize));
+                let _ = windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(cuda_mem.shared_handle as *mut _));
                 #[cfg(target_os = "linux")]
                 libc::close(cuda_mem.shared_handle as i32);
 

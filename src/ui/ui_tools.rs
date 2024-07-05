@@ -180,7 +180,7 @@ impl UITools {
             use windows::Win32::Foundation::*;
             use windows::Win32::Graphics::Dwm::*;
             let is_dark = BOOL::from(self.is_dark);
-            let _ = DwmSetWindowAttribute(HWND(hwnd), DWMWA_USE_IMMERSIVE_DARK_MODE, &is_dark as *const _ as _, std::mem::size_of_val(&is_dark) as _);
+            let _ = DwmSetWindowAttribute(HWND(hwnd as *mut _), DWMWA_USE_IMMERSIVE_DARK_MODE, &is_dark as *const _ as _, std::mem::size_of_val(&is_dark) as _);
         }
     }
 
@@ -191,7 +191,7 @@ impl UITools {
             let progress = (_progress.clamp(0.0, 1.0) * MAX_PROGRESS as f64) as u64;
             unsafe {
                 if let Some(ref tb) = self.taskbar {
-                    let _ = tb.SetProgressValue(HWND(hwnd), progress, MAX_PROGRESS);
+                    let _ = tb.SetProgressValue(HWND(hwnd as *mut _), progress, MAX_PROGRESS);
                 }
             }
         }

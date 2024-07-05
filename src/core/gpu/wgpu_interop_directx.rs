@@ -17,6 +17,7 @@ pub struct DirectX11Fence {
     event: HANDLE,
     fence_value: std::sync::atomic::AtomicU64
 }
+unsafe impl Send for DirectX11Fence {}
 impl DirectX11Fence {
     pub fn new(device: &ID3D11Device) -> windows::core::Result<Self> {
         unsafe {
@@ -83,8 +84,8 @@ pub fn get_shared_texture_d3d11(device: &ID3D11Device, texture: &ID3D11Texture2D
     unsafe {
         // Try to open or create shared handle if possible
         if let Ok(dxgi_resource) = texture.cast::<IDXGIResource1>() {
-            if let Ok(handle) = dxgi_resource.CreateSharedHandle(None, DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE, None) {
-                if handle.0 > 0 {
+            if let Ok(handle) = dxgi_resource.CreateSharedHandle(None, DXGI_SHARED_RESOURCE_READ.0 | DXGI_SHARED_RESOURCE_WRITE.0, None) {
+                if !handle.is_invalid() {
                     return Ok((handle, None));
                 }
             }
@@ -100,7 +101,7 @@ pub fn get_shared_texture_d3d11(device: &ID3D11Device, texture: &ID3D11Texture2D
         device.CreateTexture2D(&desc, None, Some(&mut new_texture))?;
         if let Some(new_texture) = new_texture {
             let dxgi_resource: IDXGIResource1 = new_texture.cast::<IDXGIResource1>()?;
-            let handle = dxgi_resource.CreateSharedHandle(None, DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE, None)?;
+            let handle = dxgi_resource.CreateSharedHandle(None, DXGI_SHARED_RESOURCE_READ.0 | DXGI_SHARED_RESOURCE_WRITE.0, None)?;
 
             Ok((handle, Some(DirectX11SharedTexture {
                 intermediate_texture: new_texture,
@@ -126,7 +127,7 @@ pub fn create_vk_image_from_d3d11_texture(device: &wgpu::Device, d3d11_device: &
 
                 let mut import_memory_info = vk::ImportMemoryWin32HandleInfoKHR::default()
                     .handle_type(handle_type)
-                    .handle(handle.0);
+                    .handle(handle.0 as isize);
 
                 let allocate_info = vk::MemoryAllocateInfo::default()
                     .push_next(&mut import_memory_info)
