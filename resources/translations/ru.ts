@@ -1071,8 +1071,28 @@ Do you want to submit your profile?</source>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="409"/>
-      <source>Export as STMap</source>
-      <translation type="unfinished">Export as STMap</translation>
+      <source>Export STMap</source>
+      <translation type="unfinished">Export STMap</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="414"/>
+      <source>This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?</source>
+      <translation type="unfinished">This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="415"/>
+      <source>Single frame</source>
+      <translation type="unfinished">Single frame</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="416"/>
+      <source>STMap sequence</source>
+      <translation type="unfinished">STMap sequence</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="430"/>
+      <source>Exporting %1...</source>
+      <translation type="unfinished">Exporting %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="368"/>
@@ -1290,37 +1310,37 @@ Do you want to submit your profile?</source>
       <translation>Индикатор ориентации</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="488"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="545"/>
       <source>Statistics</source>
       <translation>Статистика</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="496"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="553"/>
       <source>Export</source>
       <translation type="unfinished">Export</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="507"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="564"/>
       <source>Select file destination</source>
       <translation type="unfinished">Select file destination</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="522"/>
-      <source>Export to CSV or JSON</source>
-      <translation type="unfinished">Export to CSV or JSON</translation>
+      <location filename="../../src/ui/menu/MotionData.qml" line="578"/>
+      <source>Export camera data (CSV/JSON/USD/AE)</source>
+      <translation type="unfinished">Export camera data (CSV/JSON/USD/AE)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="566"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="622"/>
       <source>Export full metadata</source>
       <translation type="unfinished">Export full metadata</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="574"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="630"/>
       <source>Export parsed metadata</source>
       <translation type="unfinished">Export parsed metadata</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/MotionData.qml" line="582"/>
+      <location filename="../../src/ui/menu/MotionData.qml" line="638"/>
       <source>Export project file (including processed gyro data)</source>
       <translation type="unfinished">Export project file (including processed gyro data)</translation>
     </message>
@@ -1458,37 +1478,37 @@ Do you want to submit your profile?</source>
       <translation>Отсутствует</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="206"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="218"/>
       <source>No smoothing</source>
       <translation>Без сглаживания</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="207"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="219"/>
       <source>Default</source>
       <translation>По-умолчанию</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="208"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="220"/>
       <source>Plain 3D</source>
       <translation>Plain 3D</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="209"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="221"/>
       <source>Fixed camera</source>
       <translation>Фиксированная камера</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="435"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="445"/>
       <source>No zooming</source>
       <translation>Без зума</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="435"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="445"/>
       <source>Dynamic zooming</source>
       <translation>Динамический зум</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="435"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="445"/>
       <source>Static zoom</source>
       <translation>Статический зум</translation>
     </message>
@@ -2143,253 +2163,270 @@ Click Ok and select the destination folder.</translation>
       <translation>Стабилизация</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="211"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="223"/>
       <source>Pitch smoothness</source>
       <translation>Плавность по Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="212"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="224"/>
       <source>Yaw smoothness</source>
       <translation>Плавность по Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="213"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="225"/>
       <source>Roll smoothness</source>
       <translation>Плавность по Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="214"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="226"/>
       <source>Smoothness</source>
       <translation>Плавность</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="215"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="227"/>
       <source>Per axis</source>
       <translation>По каждой оси</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="216"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="228"/>
       <source>Max smoothness</source>
       <translation>Максимальная плавность</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="217"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="229"/>
       <source>Max smoothness at high velocity</source>
       <translation>Максимальная плавность при высокой скорости</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="218"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="230"/>
       <source>Second smoothing pass</source>
       <translation>Второй проход сглаживания</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="219"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="231"/>
       <source>Only within trim range</source>
       <translation>Только в пределах диапазона обрезки</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="220"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="232"/>
       <source>Yaw angle correction</source>
       <translation>Коррекция угла рысканья (Yaw)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="221"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="233"/>
       <source>Pitch angle correction</source>
       <translation>Коррекция угла тангажа (Pitch)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="222"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="358"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="234"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="368"/>
       <source>Roll angle correction</source>
       <translation>Коррекция угла крена (Roll)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="223"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="235"/>
       <source>Yaw angle</source>
       <translation>Угол рысканья (Yaw)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="224"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="236"/>
       <source>Pitch angle</source>
       <translation>Угол тангажа (Pitch)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="225"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="237"/>
       <source>Roll angle</source>
       <translation>Угол крена (Roll)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="227"/>
-      <source>Max zoom</source>
-      <translation type="unfinished">Max zoom</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="487"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="519"/>
       <source>FOV is greater than 1.0, you may see black borders</source>
       <translation>Угол обзора (FOV) больше единицы, могут появиться черные края</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="492"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="524"/>
       <source>FOV</source>
       <translation>Угол обзора (FOV)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="669"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="702"/>
       <source>Additional 3D rotation</source>
       <translation type="unfinished">Additional 3D rotation</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="673"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="706"/>
       <source>Pitch</source>
       <translation type="unfinished">Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="678"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="711"/>
       <source>Yaw</source>
       <translation type="unfinished">Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="683"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="716"/>
       <source>Roll</source>
       <translation type="unfinished">Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="690"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="723"/>
       <source>Additional 3D translation</source>
       <translation type="unfinished">Additional 3D translation</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="705"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="738"/>
       <source>Z</source>
       <translation type="unfinished">Z</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="334"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="344"/>
       <source>Lock horizon</source>
       <translation>Блокировка горизонта</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="339"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="349"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
       <translation>Степень блокировки</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="347"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="642"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="659"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="357"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="675"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="692"/>
       <source>%</source>
       <translation>%</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="366"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="376"/>
       <source>°</source>
       <translation>°</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="374"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="384"/>
       <source>Use gravity vectors</source>
       <translation>Использовать векторы гравитации</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="382"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="392"/>
       <source>Integration method</source>
       <translation>Способ встраивания</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="392"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="402"/>
       <source>IMU integration method for keeping track of the horizon and adjust built-in quaternions</source>
       <translation>Метод интеграции IMU для отслеживания горизонта и регулировки встроенных кватернинов</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="401"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="411"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
       <translation>Если блокировка горизонта не дала хорошего результата, попробуйте другой способ встраиваниея в разделе &quot;Данные движения&quot;.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="422"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="432"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
       <translation>Макс. вращение: Pitch: %1, Yaw: %2, Roll: %3</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="427"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="437"/>
       <source>Max zoom: %1</source>
       <translation>Макс. зум: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="450"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="460"/>
+      <source>Zoom limit</source>
+      <translation type="unfinished">Zoom limit</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="463"/>
+      <source>Zoom limit is calculated approximately.
+If you need more accuracy, increase the number of iterations in &quot;Advanced&quot; below.</source>
+      <translation type="unfinished">Zoom limit is calculated approximately.
+If you need more accuracy, increase the number of iterations in &quot;Advanced&quot; below.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="479"/>
       <source>Zooming speed</source>
       <translation>Скорость приближения</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="458"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="488"/>
       <source>s</source>
       <translation>с</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="603"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="497"/>
+      <source>Lens correction</source>
+      <translation type="unfinished">Lens correction</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="636"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
       <translation>При настройке ключевых кадров скорости приближения рекомендуется использовать метод следования за огибающей. Фильтр Гаусса может привести к появлению черных границ в поле зрения.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="608"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="641"/>
       <source>Zooming method</source>
       <translation>Метод приближения</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="628"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="661"/>
       <source>Zooming center offset</source>
       <translation>Смещение центра приближения</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="633"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="695"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="666"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="728"/>
       <source>X</source>
       <translation>X</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="650"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="700"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="683"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="733"/>
       <source>Y</source>
       <translation>Y</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="507"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="746"/>
+      <source>Zoom limit iterations</source>
+      <translation type="unfinished">Zoom limit iterations</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="747"/>
+      <source>More iterations = more accurate limit, but also slower to calculate.</source>
+      <translation type="unfinished">More iterations = more accurate limit, but also slower to calculate.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="539"/>
       <source>Rolling shutter correction</source>
       <translation>Корректировка роллинг-шаттера</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="513"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="545"/>
       <source>Frame readout time</source>
       <translation>Время чтения кадра</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="519"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="551"/>
       <source>ms</source>
       <translation>мс</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="531"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="563"/>
       <source>Bottom to top</source>
       <translation>Снизу вверх</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="467"/>
-      <source>Lens correction strength</source>
-      <translation>Уровень коррекции объектива</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="538"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="570"/>
       <source>Video speed</source>
       <translation>Скорость видео</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="583"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="616"/>
       <source>Link with smoothing</source>
       <translation>Связать со сглаживанием</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="596"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="629"/>
       <source>Link with zooming speed</source>
       <translation>Связать со скоростью приближения</translation>
     </message>
