@@ -44,7 +44,7 @@ struct KernelParams {
     digital_lens:             i32, // 12
     pixel_value_limit:        f32, // 16
     light_refraction_coefficient: f32, // 4
-    reserved0:                f32, // 8
+    plane_index:              i32, // 8
     reserved1:                f32, // 12
     reserved2:                f32, // 16
 }
@@ -186,7 +186,7 @@ fn sample_input_at(uv_param: vec2<f32>) -> vec4<f32> {
                     pixel = read_input_at(vec2<i32>(sx + xp, sy + yp));
                     pixel = draw_pixel(pixel, u32(sx + xp), u32(sy + yp), true);
                     if (fix_range) {
-                        pixel = remap_colorrange(pixel, bytes_per_pixel == 1);
+                        pixel = remap_colorrange(pixel, params.plane_index == 0);
                     }
                 } else {
                     pixel = bg;

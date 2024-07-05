@@ -49,7 +49,7 @@ layout(std140, binding = 2) uniform KernelParams {
     int digital_lens;               // 12
     float pixel_value_limit;        // 16
     float light_refraction_coefficient; // 4
-    float reserved0;                // 8
+    int plane_index;                // 8
     float reserved1;                // 12
     float reserved2;                // 16
 } params;

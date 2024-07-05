@@ -46,7 +46,7 @@ typedef struct {
     int digital_lens;                // 12
     float pixel_value_limit;         // 16
     float light_refraction_coefficient; // 4
-    float reserved0;                 // 8
+    int plane_index;                 // 8
     float reserved1;                 // 12
     float reserved2;                 // 16
 } KernelParams;
@@ -152,9 +152,9 @@ void draw_safe_area(DATA_TYPE *pix, float x, float y, __global KernelParams *par
 }
 
 // From 0-255(JPEG/Full) to 16-235(MPEG/Limited)
-DATA_TYPEF remap_colorrange(DATA_TYPEF px, bool isY) {
-    if (isY) { return 16.0f + (px * 0.85882352f); } // (235 - 16) / 255
-    else     { return 16.0f + (px * 0.87843137f); } // (240 - 16) / 255
+DATA_TYPEF remap_colorrange(DATA_TYPEF px, bool isY, __global KernelParams *params) {
+    if (isY) { return ((16.0f / 255.0f) * params->max_pixel_value) + (px * 0.85882352f); } // (235 - 16) / 255
+    else     { return ((16.0f / 255.0f) * params->max_pixel_value) + (px * 0.87843137f); } // (240 - 16) / 255
 }
 float map_coord(float x, float in_min, float in_max, float out_min, float out_max) {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -167,7 +167,7 @@ float2 rotate_point(float2 pos, float angle, float2 origin) {
                      sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin.y);
 }
 
-void cubic_spline_coefficients(__private float *mesh, int step, int offset, float size, int n, float *a, float *b, float *c, float *d, float *h, float *alpha, float *l, float *mu, float *z) {
+void cubic_spline_coefficients(__private float *mesh, int step, int offset, float size, int n, __private float *a, __private float *b, __private float *c, __private float *d, __private float *h, __private float *alpha, __private float *l, __private float *mu, __private float *z) {
     for (int i = 0; i < n; i++) { a[i] = mesh[(i + offset) * step]; }
     for (int i = 0; i < n - 1; i++) { h[i] = size * (i + 1) / (n - 1) - size * i / (n - 1); }
     for (int i = 1; i < n - 1; i++) { alpha[i] = (3.0f / h[i] * (a[i + 1] - a[i])) - (3.0f / h[i - 1] * (a[i] - a[i - 1])); }
@@ -264,7 +264,7 @@ DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global Ker
                     draw_pixel(&src_px, sx + xp, sy + yp, true, max(params->width, params->output_width), params, drawing);
                     DATA_TYPEF srcpx = DATA_CONVERTF(src_px);
                     if (fix_range) {
-                        srcpx = remap_colorrange(srcpx, PIXEL_BYTES == 1);
+                        srcpx = remap_colorrange(srcpx, params->plane_index == 0, params);
                     }
                     xsum += srcpx * coeffs_x[xp];
                 } else {

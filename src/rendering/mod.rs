@@ -532,6 +532,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                             transform.kernel_params.pixel_value_limit = 1.0;
                             transform.kernel_params.max_pixel_value = 1.0;
                         }
+                        transform.kernel_params.plane_index = plane_index as i32;
                         if fill_with_background {
                             transform.kernel_params.flags |= KernelParamsFlags::FILL_WITH_BACKGROUND.bits();
                         }

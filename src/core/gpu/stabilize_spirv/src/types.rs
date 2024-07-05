@@ -71,7 +71,7 @@ pub struct KernelParams {
     pub digital_lens:             u32, // 12
     pub pixel_value_limit:        f32, // 16
     pub light_refraction_coefficient: f32, // 4
-    pub reserved0:                f32, // 8
+    pub plane_index:              i32, // 8
     pub reserved1:                f32, // 12
     pub reserved2:                f32, // 16
 }

@@ -75,7 +75,7 @@ fn remap_colorrange(px: Vec4, is_y: bool, max_value: f32) -> Vec4 {
 
 pub fn process_final_pixel(mut pixel: Vec4, src_pos: Vec2, out_pos: Vec2, params: &KernelParams, coeffs: &[f32], drawing: &DrawingType, sampler: SamplerType, flags: u32) -> Vec4 {
     if (flags & 1) == 1 {
-        pixel = remap_colorrange(pixel, params.bytes_per_pixel == 1, params.max_pixel_value);
+        pixel = remap_colorrange(pixel, params.plane_index == 0, params.max_pixel_value);
     }
 
     #[cfg(feature="for_qtrhi")]

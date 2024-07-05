@@ -309,7 +309,7 @@ impl Stabilization {
                 // let drawing_enabled = !drawing.is_empty() && (params.flags & 8) == 8;
                 let fill_bg = (params.flags & 4) == 4;
                 let fix_range = (params.flags & 1) == 1;
-                let is_y = params.bytes_per_pixel == 1;
+                let is_y = params.plane_index == 0;
                 if buffers.output.size.2 <= 0 {
                     log::error!("buffers.output_size: {:?}", buffers.output.size);
                     return false;
