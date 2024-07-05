@@ -47,9 +47,11 @@ pub struct ComputeParams {
     pub additional_translation: (f64, f64, f64),
     pub framebuffer_inverted: bool,
     pub horizontal_rs: bool,
-    pub smoothness_limiter: f64,
     pub suppress_rotation: bool,
     pub fov_algorithm_margin: f32,
+    pub smoothing_fov_limit_per_frame: Vec<f64>,
+    pub max_zoom: Option<f64>,
+    pub max_zoom_iterations: usize,
 
     pub zooming_debug_points: bool,
 
@@ -72,6 +74,10 @@ impl ComputeParams {
             gyro: mgr.gyro.clone(),
             lens,
             camera_diagonal_fovs: Vec::new(),
+
+            smoothing_fov_limit_per_frame: Vec::new(),
+            max_zoom: params.max_zoom.clone(),
+            max_zoom_iterations: params.max_zoom_iterations,
 
             frame_count: params.frame_count,
             fov_scale: params.fov,
@@ -108,7 +114,6 @@ impl ComputeParams {
             distortion_model,
             digital_lens,
             digital_lens_params,
-            smoothness_limiter: params.smoothness_limiter,
             suppress_rotation: false,
             fov_algorithm_margin: 2.0,
 

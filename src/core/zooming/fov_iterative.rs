@@ -4,7 +4,6 @@
 use super::*;
 use crate::stabilization::undistort_points_with_rolling_shutter;
 use crate::keyframes::*;
-use std::collections::BTreeMap;
 use parking_lot::RwLock;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 

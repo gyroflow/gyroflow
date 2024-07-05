@@ -78,6 +78,8 @@ pub fn get_checksum(compute_params: &ComputeParams) -> u64 {
     hasher.write_usize(compute_params.output_width);
     hasher.write_usize(compute_params.output_height);
     hasher.write_u64(compute_params.scaled_fps.to_bits());
+    hasher.write_u64(compute_params.max_zoom.unwrap_or_default().to_bits());
+    hasher.write_usize(compute_params.max_zoom_iterations);
     for x in compute_params.trim_ranges.iter() {
         hasher.write_u64(x.0.to_bits());
         hasher.write_u64(x.1.to_bits());

@@ -3,7 +3,6 @@
 
 use super::*;
 
-use crate::gyro_source::TimeQuat;
 use crate::keyframes::*;
 use std::collections::BTreeMap;
 
@@ -90,15 +89,11 @@ impl SmoothingAlgorithm for Plain {
         let quats = quats.as_ref();
 
         let mut alpha_per_timestamp = BTreeMap::<i64, f64>::new();
-        if keyframes.is_keyframed(&KeyframeType::SmoothingParamTimeConstant)
-          || (compute_params.video_speed_affects_smoothing && (compute_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed)))
-          || (keyframes.is_keyframed(&KeyframeType::SmoothnessLimiter) || compute_params.smoothness_limiter != 1.0) {
+        if keyframes.is_keyframed(&KeyframeType::SmoothingParamTimeConstant) || (compute_params.video_speed_affects_smoothing && (compute_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed))) {
             alpha_per_timestamp = quats.iter().map(|(ts, _)| {
                 let timestamp_ms = *ts as f64 / 1000.0;
 
                 let mut val = keyframes.value_at_gyro_timestamp(&KeyframeType::SmoothingParamTimeConstant, timestamp_ms).unwrap_or(self.time_constant);
-
-                val *= keyframes.value_at_gyro_timestamp(&KeyframeType::SmoothnessLimiter, timestamp_ms).unwrap_or(1.0) * compute_params.smoothness_limiter;
 
                 if compute_params.video_speed_affects_smoothing {
                     let vid_speed = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoSpeed, timestamp_ms).unwrap_or(compute_params.video_speed);
@@ -109,16 +104,50 @@ impl SmoothingAlgorithm for Plain {
             }).collect();
         }
 
+        let mut scalers: BTreeMap<i64, f64> = quats.iter().map(|x| {
+            let mut scale = 1.0;
+
+            let frame = crate::frame_at_timestamp(*x.0 as f64 / 1000.0, compute_params.scaled_fps) as usize;
+            if let Some(fov_limit_ratio) = compute_params.smoothing_fov_limit_per_frame.get(frame) {
+                scale *= *fov_limit_ratio;
+            }
+            (*x.0, scale)
+        }).collect();
+
+        // Smooth the scalers
+        let mut prev_scaler = *scalers.iter().next().unwrap().1;
+        for (timestamp, scaler) in scalers.iter_mut().skip(1) {
+            let alpha = *alpha_per_timestamp.get(timestamp).unwrap_or(&alpha);
+            *scaler = prev_scaler * (1.0 - alpha) + *scaler * alpha;
+            prev_scaler = *scaler;
+        }
+        for (timestamp, scaler) in scalers.iter_mut().rev().skip(1) {
+            let alpha = *alpha_per_timestamp.get(timestamp).unwrap_or(&alpha);
+            *scaler = prev_scaler * (1.0 - alpha) + *scaler * alpha;
+            prev_scaler = *scaler;
+        }
+
         let mut q = *quats.iter().next().unwrap().1;
         let smoothed1: TimeQuat = quats.iter().map(|x| {
-            q = q.slerp(x.1, *alpha_per_timestamp.get(x.0).unwrap_or(&alpha));
+            let mut alpha = *alpha_per_timestamp.get(x.0).unwrap_or(&alpha);
+
+            if let Some(scaler) = scalers.get(x.0) {
+                alpha /= *scaler;
+            }
+            q = q.slerp(x.1, alpha);
             (*x.0, q)
         }).collect();
 
-        // Reverse pass, while leveling horizon
+        // Reverse pass
         let mut q = *smoothed1.iter().next_back().unwrap().1;
         smoothed1.iter().rev().map(|x| {
-            q = q.slerp(x.1, *alpha_per_timestamp.get(x.0).unwrap_or(&alpha));
+            let mut alpha = *alpha_per_timestamp.get(x.0).unwrap_or(&alpha);
+
+            if let Some(scaler) = scalers.get(x.0) {
+                alpha /= *scaler;
+            }
+
+            q = q.slerp(x.1, alpha);
             (*x.0, q)
         }).collect()
     }

@@ -3,7 +3,6 @@
 
 use super::*;
 use nalgebra::*;
-use crate::gyro_source::{TimeQuat, Quat64};
 use crate::keyframes::*;
 
 #[derive(Default, Clone)]

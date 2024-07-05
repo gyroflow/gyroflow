@@ -26,6 +26,8 @@ Grid {
         verticalAlignment: Text.AlignVCenter;
         height: root.position === Label.TopPosition? undefined : inner.height;
         MouseArea {
+            id: ma;
+            hoverEnabled: tt.text.length > 0;
             anchors.fill: t;
             acceptedButtons: Qt.LeftButton;
 
@@ -52,4 +54,7 @@ Grid {
         width: parent.width - (root.position === Label.TopPosition? 0 : t.width + root.spacing);
         height: children[0].height + 2 * dpiScale;
     }
+
+    property alias tooltip: tt.text;
+    ToolTip { id: tt; visible: !isMobile && text.length > 0 && ma.containsMouse; }
 }

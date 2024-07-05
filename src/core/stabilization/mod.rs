@@ -6,8 +6,6 @@ use std::cell::RefCell;
 
 use crate::GyroflowCoreError;
 
-#[cfg(feature = "use-opencl")]
-use super::gpu::opencl;
 use super::gpu::*;
 use super::StabilizationManager;
 use drawing::DrawCanvas;

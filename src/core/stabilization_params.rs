@@ -41,6 +41,8 @@ pub struct StabilizationParams {
     pub additional_translation: (f64, f64, f64),
     pub fov: f64,
     pub fov_overview: bool,
+    pub max_zoom: Option<f64>,
+    pub max_zoom_iterations: usize,
     pub show_safe_area: bool,
     pub fovs: Vec<f64>,
     pub minimal_fovs: Vec<f64>,
@@ -54,7 +56,6 @@ pub struct StabilizationParams {
     pub frame_count: usize,
     pub duration_ms: f64,
     pub video_created_at: Option<u64>,
-    pub smoothness_limiter: f64,
 
     pub trim_ranges: Vec<(f64, f64)>,
 
@@ -104,6 +105,9 @@ impl Default for StabilizationParams {
 
             video_rotation: 0.0,
 
+            max_zoom: Some(140.0),
+            max_zoom_iterations: 5,
+
             lens_correction_amount: 1.0,
             light_refraction_coefficient: 1.0,
             background_mode: BackgroundMode::SolidColor,
@@ -133,8 +137,6 @@ impl Default for StabilizationParams {
             frame_count: 0,
             duration_ms: 0.0,
             video_created_at: None,
-
-            smoothness_limiter: 1.0,
         }
     }
 }
@@ -248,6 +250,8 @@ impl StabilizationParams {
             adaptive_zoom_method:      self.adaptive_zoom_method,
             fov_overview:              self.fov_overview,
             show_safe_area:            self.show_safe_area,
+            max_zoom:                  self.max_zoom,
+            max_zoom_iterations:       self.max_zoom_iterations,
             ..Self::default()
         };
     }

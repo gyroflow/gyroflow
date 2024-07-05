@@ -5,7 +5,6 @@ use nalgebra::Rotation3;
 use std::ops::Range;
 use std::sync::Arc;
 use std::sync::atomic::{ AtomicBool, AtomicU32, Ordering::SeqCst };
-use std::vec::Vec;
 use parking_lot::RwLock;
 use std::cell::RefCell;
 use std::collections::BTreeMap;

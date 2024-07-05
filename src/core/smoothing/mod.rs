@@ -8,7 +8,7 @@ pub mod fixed;
 pub mod default_algo;
 
 pub use nalgebra::*;
-use super::gyro_source::TimeQuat;
+use super::gyro_source::{ TimeQuat, Quat64 };
 pub use std::collections::HashMap;
 use dyn_clone::{ clone_trait_object, DynClone };
 use std::borrow::Cow;
@@ -159,7 +159,7 @@ impl Smoothing {
 
     pub fn get_max_angles(quats: &TimeQuat, smoothed_quats: &TimeQuat, params: &ComputeParams) -> (f64, f64, f64) { // -> (pitch, yaw, roll) in deg
         let ranges = params.trim_ranges.iter().map(|x| ((x.0 * params.scaled_duration_ms * 1000.0) as i64, (x.1 * params.scaled_duration_ms * 1000.0) as i64)).collect::<Vec<_>>();
-        let identity_quat = crate::Quat64::identity();
+        let identity_quat = Quat64::identity();
 
         let mut max_pitch = 0.0;
         let mut max_yaw = 0.0;

@@ -6,7 +6,7 @@ use super::{ OpticalFlowTrait, OpticalFlowMethod };
 
 use akaze::Akaze;
 use bitarray::{ BitArray, Hamming };
-use std::{ vec::Vec, sync::Arc };
+use std::sync::Arc;
 
 use space::{ Knn, LinearKnn };
 

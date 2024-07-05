@@ -15,15 +15,13 @@
 use std::collections::BTreeMap;
 
 use super::*;
-use crate::gyro_source::TimeQuat;
 use nalgebra::*;
-use crate::Quat64;
 use crate::keyframes::*;
 
 const MAX_VELOCITY: f64 = 500.0;
-// Use 105 diagonal FOV as reference. Anything below (long focal length) scales the smoothness down. Anything above (short focal length) scales the smoothness up.
+// Use 120 diagonal FOV as reference. Anything below (long focal length) scales the smoothness down. Anything above (short focal length) scales the smoothness up.
 // This is needed, because the same rotation at long focal length will be much larger actual image rotation than at short focal length.
-const FOV_REFERENCE: f64 = 105.0;
+const FOV_REFERENCE: f64 = 120.0;
 const RAD_TO_DEG: f64 = 180.0 / std::f64::consts::PI;
 
 #[derive(Clone)]
@@ -230,15 +228,10 @@ impl SmoothingAlgorithm for DefaultAlgo {
 
         let get_keyframed_param = |typ: &KeyframeType, def: f64, cb: &dyn Fn(f64) -> f64| -> BTreeMap<i64, f64> {
             let mut ret = BTreeMap::<i64, f64>::new();
-            let is_limiter_kf = *typ == KeyframeType::SmoothingParamSmoothness || *typ == KeyframeType::SmoothingParamPitch || *typ == KeyframeType::SmoothingParamYaw || *typ == KeyframeType::SmoothingParamRoll;
-            if keyframes.is_keyframed(typ)
-              || (compute_params.video_speed_affects_smoothing && (compute_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed)))
-              || (is_limiter_kf && (keyframes.is_keyframed(&KeyframeType::SmoothnessLimiter) || compute_params.smoothness_limiter != 1.0)) {
-
+            if keyframes.is_keyframed(typ) || (compute_params.video_speed_affects_smoothing && (compute_params.video_speed != 1.0 || keyframes.is_keyframed(&KeyframeType::VideoSpeed))) {
                 ret = quats.iter().map(|(ts, _)| {
                     let timestamp_ms = *ts as f64 / 1000.0;
-                    let limiter = if is_limiter_kf { keyframes.value_at_gyro_timestamp(&KeyframeType::SmoothnessLimiter, timestamp_ms).unwrap_or(1.0) * compute_params.smoothness_limiter } else { 1.0 };
-                    let mut val = keyframes.value_at_gyro_timestamp(typ, timestamp_ms).unwrap_or(def) * limiter;
+                    let mut val = keyframes.value_at_gyro_timestamp(typ, timestamp_ms).unwrap_or(def);
                     if compute_params.video_speed_affects_smoothing {
                         let vid_speed = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoSpeed, timestamp_ms).unwrap_or(compute_params.video_speed);
                         if typ == &KeyframeType::SmoothingParamTimeConstant || typ == &KeyframeType::SmoothingParamTimeConstant2 {
@@ -303,12 +296,16 @@ impl SmoothingAlgorithm for DefaultAlgo {
             let smoothness_roll  = smoothness_roll_per_timestamp .get(ts).unwrap_or(&self.smoothness_roll);
             let smoothness       = smoothness_per_timestamp      .get(ts).unwrap_or(&self.smoothness);
 
-            let fov_ratio = if compute_params.camera_diagonal_fovs.len() == 1 {
+            let frame = crate::frame_at_timestamp(*ts as f64 / 1000.0, compute_params.scaled_fps) as usize;
+            let mut fov_ratio = if compute_params.camera_diagonal_fovs.len() == 1 {
                 compute_params.camera_diagonal_fovs[0] / FOV_REFERENCE
             } else {
-                let frame = crate::frame_at_timestamp(*ts as f64 / 1000.0, compute_params.scaled_fps) as usize;
                 compute_params.camera_diagonal_fovs.get(frame).map(|x| *x / FOV_REFERENCE).unwrap_or(1.0)
             };
+
+            if let Some(fov_limit_ratio) = compute_params.smoothing_fov_limit_per_frame.get(frame) {
+                fov_ratio *= *fov_limit_ratio;
+            }
 
             // Calculate max velocity
             let mut max_velocity = [MAX_VELOCITY, MAX_VELOCITY, MAX_VELOCITY];

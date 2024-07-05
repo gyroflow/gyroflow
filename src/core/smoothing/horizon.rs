@@ -3,7 +3,7 @@
 
 use super::*;
 use nalgebra::*;
-use crate::{ gyro_source::TimeQuat, keyframes::* };
+use crate::keyframes::*;
 
 pub fn lock_horizon_angle(q: &UnitQuaternion<f64>, roll_correction: f64) -> UnitQuaternion<f64> {
     // z axis points in view direction, use as reference

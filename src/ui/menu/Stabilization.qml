@@ -33,6 +33,8 @@ MenuItem {
         property alias videoSpeedAffectsSmoothing: videoSpeedAffectsSmoothing.checked;
         property alias videoSpeedAffectsZooming: videoSpeedAffectsZooming.checked;
         property alias zoomingMethod: zoomingMethod.currentIndex;
+        property alias maxZoom: maxZoomSlider.value;
+        property alias maxZoomIterations: maxZoomIterations.value;
     }
 
     function loadGyroflow(obj: var): void {
@@ -85,6 +87,16 @@ MenuItem {
                 additionalTranslationX.value = stab.additional_translation[0];
                 additionalTranslationY.value = stab.additional_translation[1];
                 additionalTranslationZ.value = stab.additional_translation[2];
+            }
+            if (stab.hasOwnProperty("max_zoom") && +stab.max_zoom >= 100) {
+                maxZoomSlider.value = +stab.max_zoom;
+            } else {
+                maxZoomSlider.value = +settings.maxZoom;
+            }
+            if (stab.hasOwnProperty("max_zoom_terations") && +stab.max_zoom_terations > 0) {
+                maxZoomIterations.value = +stab.max_zoom_terations;
+            } else {
+                maxZoomIterations.value = +settings.maxZoomIterations;
             }
             if (stab.hasOwnProperty("adaptive_zoom_method")) zoomingMethod.currentIndex = +stab.adaptive_zoom_method;
             if (stab.hasOwnProperty("use_gravity_vectors")) {
@@ -445,8 +457,28 @@ MenuItem {
         }
     }
     Label {
+        text: qsTr("Zoom limit");
+        visible: smoothingMethod.currentIndex == 1 || smoothingMethod.currentIndex == 2;
+        position: Label.LeftPosition;
+        tooltip: qsTr("Zoom limit is calculated approximately.\nIf you need more accuracy, increase the number of iterations in \"Advanced\" below.");
+        SliderWithField {
+            id: maxZoomSlider;
+            value: 140;
+            defaultValue: 140;
+            from: 110;
+            to: 300;
+            unit: "%";
+            precision: 0;
+            slider.stepSize: 1;
+            width: parent.width;
+            keyframe: "MaxZoom";
+            onValueChanged: controller.set_max_zoom(maxZoomSlider.value, maxZoomIterations.value);
+        }
+    }
+    Label {
         text: qsTr("Zooming speed");
         visible: croppingMode.currentIndex == 1;
+        position: Label.LeftPosition;
         SliderWithField {
             id: adaptiveZoom;
             value: 4;
@@ -462,7 +494,8 @@ MenuItem {
     }
 
     Label {
-        text: qsTr("Lens correction strength");
+        text: qsTr("Lens correction");
+        position: Label.LeftPosition;
         SliderWithField {
             id: correctionAmount;
             from: 0.0;
@@ -471,6 +504,7 @@ MenuItem {
             unit: "%";
             defaultValue: 100.0;
             precision: 0;
+            slider.stepSize: 1;
             width: parent.width;
             keyframe: "LensCorrectionStrength";
             scaler: 100.0;
@@ -542,6 +576,7 @@ MenuItem {
                 unit: "%";
                 defaultValue: 100.0;
                 precision: 0;
+                slider.stepSize: 1;
                 width: parent.width;
                 keyframe: "VideoSpeed";
                 scaler: 100.0;
@@ -704,6 +739,24 @@ MenuItem {
                     SliderWithField { id: additionalTranslationZ; precision: 0; value: 0; defaultValue: 0; from: -1000; to: 1000; unit: "px"; width: parent.width; keyframe: "AdditionalTranslationZ";
                                       onValueChanged: controller.additional_translation_z = value; }
                 }
+            }
+        }
+        Label {
+            visible: smoothingMethod.currentIndex == 1 || smoothingMethod.currentIndex == 2;
+            text: qsTr("Zoom limit iterations");
+            tooltip: qsTr("More iterations = more accurate limit, but also slower to calculate.");
+            position: Label.LeftPosition;
+            SliderWithField {
+                id: maxZoomIterations;
+                value: 5;
+                defaultValue: 5;
+                from: 1;
+                to: 15;
+                precision: 0;
+                width: parent.width;
+                slider.snapMode: Slider.SnapAlways;
+                slider.stepSize: 1;
+                onValueChanged: controller.set_max_zoom(maxZoomSlider.value, maxZoomIterations.value);
             }
         }
     }

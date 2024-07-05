@@ -2,7 +2,6 @@
 // Copyright © 2024 Adrian <adrian.eddy at gmail>
 
 use crate::filesystem;
-use crate::telemetry_parser;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;

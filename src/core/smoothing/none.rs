@@ -2,7 +2,6 @@
 // Copyright © 2021-2022 Elvin Chen
 
 use super::*;
-use crate::gyro_source::TimeQuat;
 
 #[derive(Default, Clone)]
 pub struct None;

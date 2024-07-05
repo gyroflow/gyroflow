@@ -374,14 +374,74 @@ impl StabilizationManager {
         zooming::calculate_fovs(compute_params, &timestamps, method.into())
     }
     pub fn recompute_adaptive_zoom(&self) {
-        let params = stabilization::ComputeParams::from_manager(self);
+        let mut params = stabilization::ComputeParams::from_manager(self);
+        params.calculate_camera_fovs();
+
         let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
         let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &self.params);
+        params.fovs = fovs;
+        params.minimal_fovs = minimal_fovs;
 
-        let mut stab_params = self.params.write();
-        stab_params.set_fovs(fovs, lens_fov_adjustment);
-        stab_params.minimal_fovs = minimal_fovs;
-        stab_params.zooming_debug_points = debug_points;
+        let (max_zoom_param, max_zoom_max, max_zoom_iters) = {
+            let mut stab_params = self.params.write();
+            stab_params.set_fovs( params.fovs.clone(), lens_fov_adjustment);
+            stab_params.minimal_fovs = params.minimal_fovs.clone();
+            stab_params.zooming_debug_points = debug_points;
+            (
+                stab_params.max_zoom.unwrap_or(0.0),
+                params.keyframes.get_keyframes(&KeyframeType::MaxZoom).map(|x| x.iter().map(|x| x.1.value).max_by(|a, b| a.total_cmp(b)).unwrap_or(stab_params.max_zoom.unwrap_or(0.0))).unwrap_or(stab_params.max_zoom.unwrap_or(0.0)),
+                stab_params.max_zoom_iterations
+            )
+        };
+
+        // Max zoom
+        if max_zoom_max > 100.0 && max_zoom_iters > 0 {
+            params.smoothing_fov_limit_per_frame.clear();
+            for _ in params.fovs.iter() {
+                params.smoothing_fov_limit_per_frame.push(1.0);
+            }
+            for iter in 0..max_zoom_iters {
+                let mut any_above_limit = false;
+                for (i, fov) in params.fovs.iter().enumerate() {
+                    let ts = crate::timestamp_at_frame(i as i32, params.scaled_fps);
+                    let fov_limit = 1.0 / (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0);
+                    if *fov < fov_limit {
+                        any_above_limit = true;
+                        params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(0.95);
+                    }
+                }
+                log::debug!("Max zoom iteration {iter}/{max_zoom_iters}, any above limit: {any_above_limit}");
+                if !any_above_limit {
+                    if iter == 0 {
+                        params.smoothing_fov_limit_per_frame.clear();
+                    }
+                    break;
+                }
+
+                // Smoothing
+                {
+                    let smoothing = self.smoothing.read();
+                    let horizon_lock = smoothing.horizon_lock.clone();
+
+                    let (quats, max_angles) = self.gyro.read().recompute_smoothness(smoothing.current().as_ref(), horizon_lock, &params);
+                    let mut gyro = self.gyro.write();
+                    gyro.max_angles = max_angles;
+                    gyro.smoothed_quaternions = quats;
+                }
+
+                // Zooming
+                let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
+                let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &self.params);
+                params.fovs = fovs;
+                params.minimal_fovs = minimal_fovs;
+                {
+                    let mut stab_params = self.params.write();
+                    stab_params.set_fovs(params.fovs.clone(), lens_fov_adjustment);
+                    stab_params.minimal_fovs = params.minimal_fovs.clone();
+                    stab_params.zooming_debug_points = debug_points;
+                }
+            }
+        }
     }
 
     pub fn recompute_smoothness(&self) {
@@ -468,11 +528,77 @@ impl StabilizationManager {
 
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
-                let mut stab_params = stabilization_params.write();
-                stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
-                stab_params.minimal_fovs = params.minimal_fovs.clone();
-                stab_params.zooming_debug_points = debug_points;
-                zooming_checksum.store(zooming::get_checksum(&params), SeqCst);
+                let (max_zoom_param, max_zoom_max, max_zoom_iters) = {
+                    let mut stab_params = stabilization_params.write();
+                    stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
+                    stab_params.minimal_fovs = params.minimal_fovs.clone();
+                    stab_params.zooming_debug_points = debug_points;
+                    zooming_checksum.store(zooming::get_checksum(&params), SeqCst);
+                    (
+                        stab_params.max_zoom.unwrap_or(0.0),
+                        params.keyframes.get_keyframes(&KeyframeType::MaxZoom).map(|x| x.iter().map(|x| x.1.value).max_by(|a, b| a.total_cmp(b)).unwrap_or(stab_params.max_zoom.unwrap_or(0.0))).unwrap_or(stab_params.max_zoom.unwrap_or(0.0)),
+                        stab_params.max_zoom_iterations
+                    )
+                };
+
+                // Max zoom
+                if max_zoom_max > 100.0 && max_zoom_iters > 0 {
+                    params.smoothing_fov_limit_per_frame.clear();
+                    for _ in params.fovs.iter() {
+                        params.smoothing_fov_limit_per_frame.push(1.0);
+                    }
+                    for iter in 0..max_zoom_iters {
+                        let mut any_above_limit = false;
+                        for (i, fov) in params.fovs.iter().enumerate() {
+                            let ts = crate::timestamp_at_frame(i as i32, params.scaled_fps);
+                            let fov_limit = 1.0 / (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0);
+                            if *fov < fov_limit {
+                                any_above_limit = true;
+                                params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(0.95);
+                            }
+                        }
+                        log::debug!("Max zoom iteration {iter}/{max_zoom_iters}, any above limit: {any_above_limit}");
+                        if !any_above_limit {
+                            if iter == 0 {
+                                params.smoothing_fov_limit_per_frame.clear();
+                            }
+                            break;
+                        }
+
+                        if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
+
+                        // Smoothing
+                        let (mut smoothing, horizon_lock) = {
+                            let lock = smoothing.read();
+                            (lock.current().clone(), lock.horizon_lock.clone())
+                        };
+                        let (quats, max_angles) = gyro.read().recompute_smoothness(smoothing.as_mut(), horizon_lock, &params);
+
+                        if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
+
+                        {
+                            let mut lib_gyro = gyro.write();
+                            lib_gyro.max_angles = max_angles;
+                            lib_gyro.smoothed_quaternions = quats;
+                            lib_gyro.smoothing_status = smoothing.get_status_json();
+                        }
+
+                        // Zooming
+                        let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
+                        params.fovs = fovs;
+                        params.minimal_fovs = minimal_fovs;
+
+                        if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
+
+                        {
+                            let mut stab_params = stabilization_params.write();
+                            stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
+                            stab_params.minimal_fovs = params.minimal_fovs.clone();
+                            stab_params.zooming_debug_points = debug_points;
+                            zooming_checksum.store(zooming::get_checksum(&params), SeqCst);
+                        }
+                    }
+                }
             }
 
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
@@ -654,6 +780,12 @@ impl StabilizationManager {
     pub fn set_background_margin_feather(&self, v: f64) { self.params.write().background_margin_feather = v; }
     pub fn set_input_horizontal_stretch (&self, v: f64) { self.lens.write().input_horizontal_stretch = v; self.invalidate_zooming(); }
     pub fn set_input_vertical_stretch   (&self, v: f64) { self.lens.write().input_vertical_stretch   = v; self.invalidate_zooming(); }
+    pub fn set_max_zoom(&self, v: f64, iters: usize)  {
+        let mut params = self.params.write();
+        params.max_zoom = if v > 100.0 { Some(v) } else { None };
+        params.max_zoom_iterations = iters.max(1);
+        self.invalidate_smoothing();
+    }
 
     pub fn set_video_speed(&self, v: f64, link_with_smoothness: bool, link_with_zooming: bool) {
         let mut params = self.params.write();
@@ -990,6 +1122,8 @@ impl StabilizationManager {
                 "video_speed_affects_smoothing": params.video_speed_affects_smoothing,
                 "video_speed_affects_zooming":   params.video_speed_affects_zooming,
                 "horizontal_rs":          params.horizontal_rs,
+                "max_zoom":               params.max_zoom,
+                "max_zoom_iterations":    params.max_zoom_iterations,
             },
             "gyro_source": {
                 "filepath":           gyro.file_url,
@@ -1284,6 +1418,8 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("adaptive_zoom_window")  .and_then(|x| x.as_f64()) { params.adaptive_zoom_window    = v; }
                 if let Some(v) = obj.get("lens_correction_amount").and_then(|x| x.as_f64()) { params.lens_correction_amount  = v; }
                 if let Some(v) = obj.get("horizontal_rs")         .and_then(|x| x.as_bool()) { params.horizontal_rs          = v; }
+                if let Some(v) = obj.get("max_zoom")              .and_then(|x| x.as_f64()) { params.max_zoom                = Some(v); }
+                if let Some(v) = obj.get("max_zoom_iterations")   .and_then(|x| x.as_i64()) { params.max_zoom_iterations     = v as _; }
 
                 if let Some(v) = obj.get("video_speed").and_then(|x| x.as_f64()) { params.video_speed = v; }
                 if let Some(v) = obj.get("video_speed_affects_smoothing").and_then(|x| x.as_bool()) { params.video_speed_affects_smoothing = v; }
@@ -1449,6 +1585,7 @@ impl StabilizationManager {
                         self.set_output_size(output_size.0, output_size.1);
                     }
                 }
+                self.init_size();
                 self.recompute_blocking();
             }
         }
