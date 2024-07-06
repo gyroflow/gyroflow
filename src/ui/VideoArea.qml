@@ -602,8 +602,8 @@ Item {
                 property real ratio: orgW / Math.max(1, orgH);
                 property real w: vidParentParent.width  / parent.columns - (root.fullScreen? 0 : 20 * dpiScale);
                 property real h: vidParentParent.height / parent.rows    - (root.fullScreen? 0 : 20 * dpiScale);
-                property real trigger: 0;
-                width:  (ratio * h) > w? w : (ratio * h) + trigger;
+
+                width:  (ratio * h) > w? w : (ratio * h);
                 height: (w / ratio) > h? h : (w / ratio);
                 opacity: da.containsDrag? 0.5 : 1.0;
                 clip: !vid.stabEnabled;
@@ -762,13 +762,14 @@ Item {
             Item {
                 id: secondPreview;
                 property bool show: false;
+                onShowChanged: window.settings.setValue("stabOverviewSplit", show);
+                Component.onCompleted: show = window.settings.value("stabOverviewSplit", false);
                 visible: show && fovOverviewBtn.checked;
                 readonly property real ratio: 1 + 1 / window.stab.fovSlider.value;
                 onRatioChanged: {
                     if (visible) {
                         vid.forceRedraw();
-                        vidParent.trigger = 1;
-                        vidParent.trigger = 0;
+                        vidParent.widthChanged();
                     }
                 }
                 width: vidParent.width;
