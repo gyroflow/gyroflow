@@ -24,6 +24,7 @@ Item {
     property alias statistics: statistics;
     property alias infoMessages: infoMessages;
     property alias gridGuide: gridGuide;
+    property alias secondPreview: secondPreview;
 
     property int outWidth: window? window.exportSettings.outWidth : 0;
     property int outHeight: window? window.exportSettings.outHeight : 0;
@@ -587,171 +588,205 @@ Item {
         id: vidParentParent;
         width: parent.width;
         height: parent.height - (root.fullScreen || window.isMobileLayout? 0 : tlcol.height);
-        Item {
-            id: vidParent;
-            property real orgW: root.outWidth || vid.videoWidth;
-            property real orgH: root.outHeight || vid.videoHeight;
-            property real ratio: orgW / Math.max(1, orgH);
-            property real w: parent.width  - (root.fullScreen? 0 : 20 * dpiScale);
-            property real h: parent.height - (root.fullScreen? 0 : 20 * dpiScale);
 
-            width:  (ratio * h) > w? w : (ratio * h);
-            height: (w / ratio) > h? h : (w / ratio);
+        Grid {
+            property bool vertical: vidParentParent.height - vidParent.height * 2 > vidParentParent.width - vidParent.width * 2;
+            columns: secondPreview.visible? (vertical? 1 : 2) : 1;
+            rows:    secondPreview.visible? (vertical? 2 : 1) : 1;
             anchors.centerIn: parent;
-            opacity: da.containsDrag? 0.5 : 1.0;
-            clip: !vid.stabEnabled;
+            spacing: 10 * dpiScale;
+            Item {
+                id: vidParent;
+                property real orgW: root.outWidth || vid.videoWidth;
+                property real orgH: root.outHeight || vid.videoHeight;
+                property real ratio: orgW / Math.max(1, orgH);
+                property real w: vidParentParent.width  / parent.columns - (root.fullScreen? 0 : 20 * dpiScale);
+                property real h: vidParentParent.height / parent.rows    - (root.fullScreen? 0 : 20 * dpiScale);
+                property real trigger: 0;
+                width:  (ratio * h) > w? w : (ratio * h) + trigger;
+                height: (w / ratio) > h? h : (w / ratio);
+                opacity: da.containsDrag? 0.5 : 1.0;
+                clip: !vid.stabEnabled;
 
-            /*Image {
-                // Transparency grid
-                fillMode: Image.Tile;
-                anchors.fill: parent;
-                source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><rect fill='%23fff' x='0' y='0' width='7' height='7'/><rect fill='%23aaa' x='7' y='0' width='7' height='7'/><rect fill='%23aaa' x='0' y='7' width='7' height='7'/><rect fill='%23fff' x='7' y='7' width='7' height='7'/></svg>"
-            }*/
-
-            MDKVideo {
-                id: vid;
-                visible: opacity > 0;
-                opacity: loaded? 1 : 0;
-                Ease on opacity { }
-                anchors.fill: parent;
-                property bool loaded: false;
-
-                property bool stabEnabled: stabEnabledBtn.checked;
-                transform: [
-                    Scale {
-                        origin.x: vid.width / 2; origin.y: vid.height / 2;
-                        xScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outHeight / Math.max(1, root.outWidth)) / ((vid.videoHeight * window.lensProfile.input_vertical_stretch) / Math.max(1, vid.videoWidth * window.lensProfile.input_horizontal_stretch))) * (fovOverviewBtn.checked? 0.5 : 1);
-                        yScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outWidth / Math.max(1, root.outHeight)) / ((vid.videoWidth * window.lensProfile.input_horizontal_stretch) / Math.max(1, vid.videoHeight * window.lensProfile.input_vertical_stretch))) * (fovOverviewBtn.checked? 0.5 : 1);
-                    },
-                    Rotation {
-                        origin.x: vid.width / 2; origin.y: vid.height / 2;
-                        angle: vid.stabEnabled? 0 : -vidInfo.videoRotation;
-                    }
-                ]
-
-                function fovChanged(): void {
-                    const fov = controller.current_fov;
-                    const focal_length = controller.current_focal_length;
-                    const crop_factor = window.lensProfile?.cropFactor || 1.0;
-                    // const ratio = controller.get_scaling_ratio(); // this shouldn't be called every frame because it locks the params mutex
-                    currentFovText.text = qsTr("Zoom: %1").arg(fov > 0? (100 / fov).toFixed(2) + "%" : "---");
-
-                    if (+focal_length > 0) {
-                        const fl = +focal_length / fov;
-                        currentFovText.text += "\n" + qsTr("Focal length: %1 mm").arg(fl.toFixed(2));
-                        if (crop_factor && crop_factor != 1.0) {
-                            currentFovText.text += " (" + qsTr("full frame equiv.: %1 mm").arg((fl * crop_factor).toFixed(2)) + ")";
-                        }
-                    }
-                }
-
-                onCurrentFrameChanged: {
-                    fovChanged();
-                    controller.update_keyframe_values(timestamp);
-                    window.motionData.orientationIndicator.updateOrientation(timeline.position * timeline.durationMs * 1000);
-                }
-                onMetadataLoaded: (md) => {
-                    Qt.callLater(fileLoaded, md);
-                }
-                function fileLoaded(md: var): void {
-                    loaded = vid.videoWidth > 0;
-                    videoLoader.active = false;
-                    vidInfo.loader = false;
-                    timeline.resetTrim();
-                    timeline.resetZoom();
-
-                    controller.video_file_loaded(vid);
-                    window.motionData.filename = "";
-
-                    if (root.pendingGyroflowData) {
-                        Qt.callLater(root.loadGyroflowData, root.pendingGyroflowData, root.pendingQueueJobId);
-                    } else {
-                        controller.load_telemetry(root.loadedFileUrl, true, vid, -1);
-                    }
-                    vidInfo.loadFromVideoMetadata(md, vid.videoWidth, vid.videoHeight);
-                    window.sync.customSyncTimestamps = [];
-
-                    if (root.mergedFiles.length > 1) {
-                        if (loaded) {
-                            const copy = [...root.mergedFiles];
-                            messageBox(Modal.Question, qsTr("Files merged successfully, do you want to delete the original ones?"), [
-                                { text: qsTr("Yes"), accent: true, clicked: function() {
-                                    for (const x of copy) {
-                                        filesystem.move_to_trash(x);
-                                    }
-                                    return true;
-                                } },
-                                { text: qsTr("No") },
-                            ], null, undefined, "delete-after-join");
-                        }
-                        root.mergedFiles = [];
-                    }
-
-                    window.lensProfile.selected_manually = false;
-
-                    // for (var i in md) console.info(i, md[i]);
-                }
-                property bool errorShown: false;
-                onMetadataChanged: {
-                    if (vid.videoWidth > 0) {
-                        // Trigger seek to buffer the video frames
-                        if (vid.duration == 0) {
-                            vid.play();
-                            Qt.callLater(function() {
-                                stabEnabledBtn.checked = true;
-                                vid.volume = volumeSlider.value / 100.0;
-                            })
-                        } else {
-                            bufferTrigger.start();
-                        }
-                    } else if (!errorShown) {
-                        messageBox(Modal.Error, qsTr("Failed to load the selected file, it may be unsupported or invalid."), [ { "text": qsTr("Ok") } ]);
-                        errorShown = true;
-                        dropText.loadingFile = "";
-                        root.pendingGyroflowData = null;
-                        stabEnabledBtn.checked = true;
-                    }
-                }
-                Timer {
-                    id: bufferTrigger;
-                    interval: 150;
-                    onTriggered: {
-                        if (!vid.videoWidth) bufferTrigger.start();
-                        Qt.callLater(() => {
-                            vid.currentFrame++;
-                            Qt.callLater(() => vid.currentFrame = 0);
-                            if (vid.videoWidth) {
-                                stabEnabledBtn.checked = true;
-                                vid.volume = volumeSlider.value / 100.0;
-                            }
-                        });
-                    }
-                }
-
-                backgroundColor: "#111111";
-                Component.onCompleted: {
-                    controller.init_player(this);
-                }
-                Rectangle {
-                    border.color: styleVideoBorderColor;
-                    border.width: 1 * dpiScale;
-                    color: "transparent";
-                    radius: 5 * dpiScale;
+                /*Image {
+                    // Transparency grid
+                    fillMode: Image.Tile;
                     anchors.fill: parent;
-                    anchors.margins: -border.width;
+                    source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><rect fill='%23fff' x='0' y='0' width='7' height='7'/><rect fill='%23aaa' x='7' y='0' width='7' height='7'/><rect fill='%23aaa' x='0' y='7' width='7' height='7'/><rect fill='%23fff' x='7' y='7' width='7' height='7'/></svg>"
+                }*/
+
+                MDKVideo {
+                    id: vid;
+                    visible: opacity > 0;
+                    opacity: loaded? 1 : 0;
+                    Ease on opacity { }
+                    anchors.fill: parent;
+                    property bool loaded: false;
+
+                    property bool stabEnabled: stabEnabledBtn.checked;
+                    transform: [
+                        Scale {
+                            origin.x: vid.width / 2; origin.y: vid.height / 2;
+                            xScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outHeight / Math.max(1, root.outWidth)) / ((vid.videoHeight * window.lensProfile.input_vertical_stretch) / Math.max(1, vid.videoWidth * window.lensProfile.input_horizontal_stretch))) * (fovOverviewBtn.checked? 0.5 : 1);
+                            yScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outWidth / Math.max(1, root.outHeight)) / ((vid.videoWidth * window.lensProfile.input_horizontal_stretch) / Math.max(1, vid.videoHeight * window.lensProfile.input_vertical_stretch))) * (fovOverviewBtn.checked? 0.5 : 1);
+                        },
+                        Rotation {
+                            origin.x: vid.width / 2; origin.y: vid.height / 2;
+                            angle: vid.stabEnabled? 0 : -vidInfo.videoRotation;
+                        }
+                    ]
+
+                    function fovChanged(): void {
+                        const fov = controller.current_fov;
+                        const focal_length = controller.current_focal_length;
+                        const crop_factor = window.lensProfile?.cropFactor || 1.0;
+                        // const ratio = controller.get_scaling_ratio(); // this shouldn't be called every frame because it locks the params mutex
+                        currentFovText.text = qsTr("Zoom: %1").arg(fov > 0? (100 / fov).toFixed(2) + "%" : "---");
+
+                        if (+focal_length > 0) {
+                            const fl = +focal_length / fov;
+                            currentFovText.text += "\n" + qsTr("Focal length: %1 mm").arg(fl.toFixed(2));
+                            if (crop_factor && crop_factor != 1.0) {
+                                currentFovText.text += " (" + qsTr("full frame equiv.: %1 mm").arg((fl * crop_factor).toFixed(2)) + ")";
+                            }
+                        }
+                    }
+
+                    onCurrentFrameChanged: {
+                        fovChanged();
+                        controller.update_keyframe_values(timestamp);
+                        window.motionData.orientationIndicator.updateOrientation(timeline.position * timeline.durationMs * 1000);
+                    }
+                    onMetadataLoaded: (md) => {
+                        Qt.callLater(fileLoaded, md);
+                    }
+                    function fileLoaded(md: var): void {
+                        loaded = vid.videoWidth > 0;
+                        videoLoader.active = false;
+                        vidInfo.loader = false;
+                        timeline.resetTrim();
+                        timeline.resetZoom();
+
+                        controller.video_file_loaded(vid);
+                        window.motionData.filename = "";
+
+                        if (root.pendingGyroflowData) {
+                            Qt.callLater(root.loadGyroflowData, root.pendingGyroflowData, root.pendingQueueJobId);
+                        } else {
+                            controller.load_telemetry(root.loadedFileUrl, true, vid, -1);
+                        }
+                        vidInfo.loadFromVideoMetadata(md, vid.videoWidth, vid.videoHeight);
+                        window.sync.customSyncTimestamps = [];
+
+                        if (root.mergedFiles.length > 1) {
+                            if (loaded) {
+                                const copy = [...root.mergedFiles];
+                                messageBox(Modal.Question, qsTr("Files merged successfully, do you want to delete the original ones?"), [
+                                    { text: qsTr("Yes"), accent: true, clicked: function() {
+                                        for (const x of copy) {
+                                            filesystem.move_to_trash(x);
+                                        }
+                                        return true;
+                                    } },
+                                    { text: qsTr("No") },
+                                ], null, undefined, "delete-after-join");
+                            }
+                            root.mergedFiles = [];
+                        }
+
+                        window.lensProfile.selected_manually = false;
+
+                        // for (var i in md) console.info(i, md[i]);
+                    }
+                    property bool errorShown: false;
+                    onMetadataChanged: {
+                        if (vid.videoWidth > 0) {
+                            // Trigger seek to buffer the video frames
+                            if (vid.duration == 0) {
+                                vid.play();
+                                Qt.callLater(function() {
+                                    stabEnabledBtn.checked = true;
+                                    vid.volume = volumeSlider.value / 100.0;
+                                })
+                            } else {
+                                bufferTrigger.start();
+                            }
+                        } else if (!errorShown) {
+                            messageBox(Modal.Error, qsTr("Failed to load the selected file, it may be unsupported or invalid."), [ { "text": qsTr("Ok") } ]);
+                            errorShown = true;
+                            dropText.loadingFile = "";
+                            root.pendingGyroflowData = null;
+                            stabEnabledBtn.checked = true;
+                        }
+                    }
+                    Timer {
+                        id: bufferTrigger;
+                        interval: 150;
+                        onTriggered: {
+                            if (!vid.videoWidth) bufferTrigger.start();
+                            Qt.callLater(() => {
+                                vid.currentFrame++;
+                                Qt.callLater(() => vid.currentFrame = 0);
+                                if (vid.videoWidth) {
+                                    stabEnabledBtn.checked = true;
+                                    vid.volume = volumeSlider.value / 100.0;
+                                }
+                            });
+                        }
+                    }
+
+                    backgroundColor: "#111111";
+                    Component.onCompleted: {
+                        controller.init_player(this);
+                    }
+                    Rectangle {
+                        border.color: styleVideoBorderColor;
+                        border.width: 1 * dpiScale;
+                        color: "transparent";
+                        radius: 5 * dpiScale;
+                        anchors.fill: parent;
+                        anchors.margins: -border.width;
+                    }
+                }
+
+                TapHandler {
+                    onTapped: timeline.focus = true;
+                    onDoubleTapped: root.fullScreen = root.fullScreen? 0 : 1;
+                }
+                GridGuide {
+                    id: gridGuide;
+                    anchors.fill: vid;
+                    canShow: vid.loaded;
                 }
             }
-
-            TapHandler {
-                onTapped: timeline.focus = true;
-                onDoubleTapped: root.fullScreen = root.fullScreen? 0 : 1;
-            }
-            GridGuide {
-                id: gridGuide;
-                anchors.fill: vid;
-                canShow: vid.loaded;
+            Item {
+                id: secondPreview;
+                property bool show: false;
+                visible: show && fovOverviewBtn.checked;
+                readonly property real ratio: 1 + 1 / window.stab.fovSlider.value;
+                onRatioChanged: {
+                    if (visible) {
+                        vid.forceRedraw();
+                        vidParent.trigger = 1;
+                        vidParent.trigger = 0;
+                    }
+                }
+                width: vidParent.width;
+                height: vidParent.height;
+                ShaderEffectSource {
+                    id: secondPreviewSource;
+                    live: secondPreview.visible;
+                    width: parent.width; height: parent.height;
+                    sourceItem: vidParent;
+                    sourceRect: Qt.rect((vidParent.width - (vidParent.width / secondPreview.ratio)) / 2, (vidParent.height - (vidParent.height / secondPreview.ratio)) / 2, vidParent.width / secondPreview.ratio, vidParent.height / secondPreview.ratio);
+                }
+                TapHandler {
+                    onTapped: timeline.focus = true;
+                    onDoubleTapped: root.fullScreen = root.fullScreen? 0 : 1;
+                }
             }
         }
+
         Rectangle {
             id: dropRect;
             border.width: vid.loaded? 0 : (3 * dpiScale);
@@ -940,6 +975,10 @@ Item {
                     checked: false;
                     onCheckedChanged: { controller.fov_overview = checked; vid.forceRedraw(); }
                     tooltip: qsTr("Toggle stabilization overview");
+                    TapHandler {
+                        acceptedModifiers: Qt.ControlModifier
+                        onTapped: { if (fovOverviewBtn.checked) { secondPreview.show = !secondPreview.show; fovOverviewBtn.checked = false; vid.forceRedraw(); } }
+                    }
                 }
 
                 SmallLinkButton {

@@ -104,6 +104,12 @@ Item {
         onActivated: videoArea.fovOverviewBtn.checked = !videoArea.fovOverviewBtn.checked;
     }
 
+    // Stabilization overview split view
+    Shortcut {
+        sequence: "v";
+        onActivated: videoArea.secondPreview.show = !videoArea.secondPreview.show;
+    }
+
     // Hide chart axis X
     Shortcut {
         sequence: "x";
