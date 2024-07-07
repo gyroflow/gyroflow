@@ -382,7 +382,7 @@ impl StabilizationManager {
         params.fovs = fovs;
         params.minimal_fovs = minimal_fovs;
 
-        let (max_zoom_param, max_zoom_max, max_zoom_iters) = {
+        let (max_zoom_param, max_zoom_max, max_zoom_iters, scaling_factor) = {
             let mut stab_params = self.params.write();
             stab_params.set_fovs( params.fovs.clone(), lens_fov_adjustment);
             stab_params.minimal_fovs = params.minimal_fovs.clone();
@@ -390,7 +390,8 @@ impl StabilizationManager {
             (
                 stab_params.max_zoom.unwrap_or(0.0),
                 params.keyframes.get_keyframes(&KeyframeType::MaxZoom).map(|x| x.iter().map(|x| x.1.value).max_by(|a, b| a.total_cmp(b)).unwrap_or(stab_params.max_zoom.unwrap_or(0.0))).unwrap_or(stab_params.max_zoom.unwrap_or(0.0)),
-                stab_params.max_zoom_iterations
+                stab_params.max_zoom_iterations,
+                stab_params.size.0 as f64 / stab_params.output_size.0 as f64
             )
         };
 
@@ -405,7 +406,8 @@ impl StabilizationManager {
                 let mut any_above_limit = false;
                 for (i, fov) in params.fovs.iter().enumerate() {
                     let ts = crate::timestamp_at_frame(i as i32, params.scaled_fps);
-                    let fov_limit = 1.0 / (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0);
+                    let zoom_limit = (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0) * scaling_factor;
+                    let fov_limit = 1.0 / zoom_limit;
                     if *fov < fov_limit {
                         any_above_limit = true;
                         params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(*thresholds.get(iter).unwrap_or(thresholds.last().unwrap()));
@@ -529,7 +531,7 @@ impl StabilizationManager {
 
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
-                let (max_zoom_param, max_zoom_max, max_zoom_iters) = {
+                let (max_zoom_param, max_zoom_max, max_zoom_iters, scaling_factor) = {
                     let mut stab_params = stabilization_params.write();
                     stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                     stab_params.minimal_fovs = params.minimal_fovs.clone();
@@ -538,7 +540,8 @@ impl StabilizationManager {
                     (
                         stab_params.max_zoom.unwrap_or(0.0),
                         params.keyframes.get_keyframes(&KeyframeType::MaxZoom).map(|x| x.iter().map(|x| x.1.value).max_by(|a, b| a.total_cmp(b)).unwrap_or(stab_params.max_zoom.unwrap_or(0.0))).unwrap_or(stab_params.max_zoom.unwrap_or(0.0)),
-                        stab_params.max_zoom_iterations
+                        stab_params.max_zoom_iterations,
+                        stab_params.size.0 as f64 / stab_params.output_size.0 as f64
                     )
                 };
 
@@ -553,7 +556,8 @@ impl StabilizationManager {
                         let mut any_above_limit = false;
                         for (i, fov) in params.fovs.iter().enumerate() {
                             let ts = crate::timestamp_at_frame(i as i32, params.scaled_fps);
-                            let fov_limit = 1.0 / (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0);
+                            let zoom_limit = (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0) * scaling_factor;
+                            let fov_limit = 1.0 / zoom_limit;
                             if *fov < fov_limit {
                                 any_above_limit = true;
                                 params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(*thresholds.get(iter).unwrap_or(thresholds.last().unwrap()));
