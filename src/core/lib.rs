@@ -395,7 +395,7 @@ impl StabilizationManager {
         };
 
         // Max zoom
-        if max_zoom_max > 100.0 && max_zoom_iters > 0 {
+        if max_zoom_max > 50.0 && max_zoom_iters > 0 {
             params.smoothing_fov_limit_per_frame.clear();
             for _ in params.fovs.iter() {
                 params.smoothing_fov_limit_per_frame.push(1.0);
@@ -543,7 +543,7 @@ impl StabilizationManager {
                 };
 
                 // Max zoom
-                if max_zoom_max > 100.0 && max_zoom_iters > 0 {
+                if max_zoom_max > 50.0 && max_zoom_iters > 0 {
                     params.smoothing_fov_limit_per_frame.clear();
                     for _ in params.fovs.iter() {
                         params.smoothing_fov_limit_per_frame.push(1.0);
@@ -784,7 +784,7 @@ impl StabilizationManager {
     pub fn set_input_vertical_stretch   (&self, v: f64) { self.lens.write().input_vertical_stretch   = v; self.invalidate_zooming(); }
     pub fn set_max_zoom(&self, v: f64, iters: usize)  {
         let mut params = self.params.write();
-        params.max_zoom = if v > 100.0 { Some(v) } else { None };
+        params.max_zoom = if v > 50.0 { Some(v) } else { None };
         params.max_zoom_iterations = iters.max(1);
         self.invalidate_smoothing();
     }
