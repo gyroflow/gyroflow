@@ -374,10 +374,13 @@ MenuItem {
                     let arr = [[qsTr("Original"), root.originalWidth, root.originalHeight]];
                     const parts = k.split(":");
                     if (parts.length == 2 && +parts[0].trim() > 0 && +parts[1].trim() > 0) {
+                        const r = Math.abs(window.vidInfo.videoRotation);
+                        const ow = r == 90 || r == 270? root.originalHeight : root.originalWidth;
+                        const oh = r == 90 || r == 270? root.originalWidth  : root.originalHeight;
                         const wp = +parts[0].trim();
                         const hp = +parts[1].trim();
-                        const sw = root.originalWidth / wp;
-                        const sh = root.originalHeight / hp;
+                        const sw = ow / wp;
+                        const sh = oh / hp;
                         const scale = Math.min(sw, sh);
                         let nw = Math.round(wp * scale);
                         let nh = Math.round(hp * scale);
