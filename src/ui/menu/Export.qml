@@ -370,7 +370,23 @@ MenuItem {
                 editTooltip: qsTr("Edit sizes");
                 formatItem: x => `${x[0]} (${x[1]} x ${x[2]})`;
                 property var items: outputSizePresets;
-                model: Object.assign({}, ...Object.entries(items).map(([k, v]) => ({[k]: [[qsTr("Original"), root.originalWidth, root.originalHeight]].concat(v)})));
+                model: Object.assign({}, ...Object.entries(items).map(([k, v]) => {
+                    let arr = [[qsTr("Original"), root.originalWidth, root.originalHeight]];
+                    const parts = k.split(":");
+                    if (parts.length == 2 && +parts[0].trim() > 0 && +parts[1].trim() > 0) {
+                        const wp = +parts[0].trim();
+                        const hp = +parts[1].trim();
+                        const sw = root.originalWidth / wp;
+                        const sh = root.originalHeight / hp;
+                        const scale = Math.min(sw, sh);
+                        let nw = Math.round(wp * scale);
+                        let nh = Math.round(hp * scale);
+                        if (nw % 2 != 0) nw -= 1;
+                        if (nh % 2 != 0) nh -= 1;
+                        arr.push([qsTr("Proportional"), nw, nh]);
+                    }
+                    return {[k]: arr.concat(v)};
+                }));
                 onClicked: function(index) {
                     const item = model[tabs[currentTab]][index];
                     sizeMenu.setSize(item[1], item[2]);
