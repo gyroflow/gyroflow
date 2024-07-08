@@ -369,48 +369,62 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, 
 }
 
 pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (Vec<f64>, Vec<f32>)>) -> Option<(Vec<f64>, Vec<f32>)> {
-    let mesh_group = tag_map.get(&GroupId::Custom("MeshCorrection".into()))?;
+    let mesh_group = tag_map.get(&GroupId::Custom("MeshCorrection".into()));
+    let focal_plane_group = tag_map.get(&GroupId::Custom("FocalPlaneDistortion".into()));
     let crop_origin = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaOrigin) as Option<&(f32, f32)>).cloned()?;
     let crop_size   = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaSize)   as Option<&(f32, f32)>).cloned()?;
 
-    let mesh_data = (mesh_group.get_t(TagId::Data) as Option<&serde_json::Value>)?;
+    let mesh_data = mesh_group.and_then(|x| x.get_t(TagId::Data) as Option<&serde_json::Value>);
+    let focal_plane_data = focal_plane_group.and_then(|x| x.get_t(TagId::Data) as Option<&serde_json::Value>);
 
-    let crc = crc32fast::hash(serde_json::to_string(&[mesh_data, &crop_origin.0.into(), &crop_origin.1.into(), &crop_size.0.into(), &crop_size.1.into()]).unwrap().as_bytes());
+    let crc = crc32fast::hash(serde_json::to_string(&[mesh_data.unwrap_or(&serde_json::Value::Null), focal_plane_data.unwrap_or(&serde_json::Value::Null), &crop_origin.0.into(), &crop_origin.1.into(), &crop_size.0.into(), &crop_size.1.into()]).unwrap().as_bytes());
     if cache.contains_key(&crc) {
         return cache.get(&crc).cloned();
     }
 
-    let size = mesh_data.get("size")?.as_array()?;
-    let size = (size[0].as_f64()?, size[1].as_f64()?);
-
-    let mut has_any_value = false;
-    for x in mesh_data.get("raw_mesh")?.as_array()? {
-        let coord = x.as_array()?;
-        if coord[0].as_f64()? != 0.0 || coord[1].as_f64()? != 0.0 {
-            has_any_value = true;
-            break;
+    let mut has_any_mesh_value = false;
+    let mut has_any_focal_plane_value = false;
+    if let Some(mesh_data) = mesh_data {
+        for x in mesh_data.get("raw_mesh")?.as_array()? {
+            let coord = x.as_array()?;
+            if coord[0].as_f64()? != 0.0 || coord[1].as_f64()? != 0.0 {
+                has_any_mesh_value = true;
+                break;
+            }
         }
     }
-    if !has_any_value {
+    let focal_plane_data = if let Some(focal_plane_data) = focal_plane_data {
+        let unk1 = focal_plane_data.get("unk1")?.as_i64()? as f64;
+        let unk2 = focal_plane_data.get("unk2")?.as_i64()? as f64;
+        let scale = focal_plane_data.get("scale")?.as_f64()? as f64;
+        let mut coords = vec![focal_plane_data.get("unk4")?.as_array()?.len() as f64, unk1, unk2, scale];
+        for x in focal_plane_data.get("unk4")?.as_array()? {
+            let coord = x.as_array()?;
+            has_any_focal_plane_value = true;
+            coords.push(coord[0].as_f64()?);
+            coords.push(coord[1].as_f64()?);
+        }
+        if coords.len() == 4 { coords.clear(); coords.push(0.0); }
+        coords
+    } else {
+        vec![0.0]
+    };
+
+    if !has_any_mesh_value && !has_any_focal_plane_value {
         return None;
     }
-    let divisions = mesh_data.get("divisions")?.as_array()?;
-    let divisions = (divisions[0].as_i64()? as usize, divisions[1].as_i64()? as usize);
 
-    let mut mesh = Vec::with_capacity(divisions.0 * divisions.1 * 2 + 8 + (divisions.1*4*2));
-    mesh.push(divisions.0 as f64);
-    mesh.push(divisions.1 as f64);
-    mesh.push(size.0 as f64);
-    mesh.push(size.1 as f64);
-    mesh.push(crop_origin.0 as f64);
-    mesh.push(crop_origin.1 as f64);
-    mesh.push(crop_size.0 as f64);
-    mesh.push(crop_size.1 as f64);
-    for x in mesh_data.get("mesh")?.as_array()? {
-        let coord = x.as_array()?;
-        mesh.push(coord[0].as_f64()?);
-        mesh.push(coord[1].as_f64()?);
-    }
+    let (size, divisions) = if has_any_mesh_value {
+        let mesh_data = mesh_data?;
+        let size = mesh_data.get("size")?.as_array()?;
+        let divisions = mesh_data.get("divisions")?.as_array()?;
+        (
+            (size[0].as_f64()?, size[1].as_f64()?),
+            (divisions[0].as_i64()? as usize, divisions[1].as_i64()? as usize)
+        )
+    } else {
+        ((0.0, 0.0), (0, 0))
+    };
 
     // Precompute spline coeffs for the y coordinate
     const MAX_GRID_SIZE: usize = 9;
@@ -423,47 +437,75 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (V
     let mut l = [0.0; MAX_GRID_SIZE];
     let mut mu = [0.0; MAX_GRID_SIZE];
     let mut z = [0.0; MAX_GRID_SIZE];
-    for mesh_offset in 0..=1 {
-        for j in 0..divisions.1 {
-            splines::BivariateSpline::cubic_spline_coefficients(&mesh[8 + mesh_offset..], 2, j * divisions.0, size.0, divisions.0, &mut a, &mut b, &mut c, &mut d, &mut h, &mut alpha, &mut l, &mut mu, &mut z);
-            for aa in a { mesh.push(aa); }
-            for bb in b { mesh.push(bb); }
-            for cc in c { mesh.push(cc); }
-            for dd in d { mesh.push(dd); }
+
+    let mut mesh = Vec::with_capacity(divisions.0 * divisions.1 * 2 + 9 + (divisions.1*4*2));
+    mesh.push(0.0); // offset to focal_plane_data
+    if has_any_mesh_value {
+        let mesh_data = mesh_data?;
+        mesh.push(divisions.0 as f64);
+        mesh.push(divisions.1 as f64);
+        mesh.push(size.0 as f64);
+        mesh.push(size.1 as f64);
+        mesh.push(crop_origin.0 as f64);
+        mesh.push(crop_origin.1 as f64);
+        mesh.push(crop_size.0 as f64);
+        mesh.push(crop_size.1 as f64);
+        for x in mesh_data.get("mesh")?.as_array()? {
+            let coord = x.as_array()?;
+            mesh.push(coord[0].as_f64()?);
+            mesh.push(coord[1].as_f64()?);
+        }
+
+        for mesh_offset in 0..=1 {
+            for j in 0..divisions.1 {
+                splines::BivariateSpline::cubic_spline_coefficients(&mesh[9 + mesh_offset..], 2, j * divisions.0, size.0, divisions.0, &mut a, &mut b, &mut c, &mut d, &mut h, &mut alpha, &mut l, &mut mu, &mut z);
+                for aa in a { mesh.push(aa); }
+                for bb in b { mesh.push(bb); }
+                for cc in c { mesh.push(cc); }
+                for dd in d { mesh.push(dd); }
+            }
         }
     }
-
-    let step = ((size.0 / (divisions.0 as f64 - 1.0)), (size.1 / (divisions.1 as f64 - 1.0)));
-    let grid: Vec<_> = (0..divisions.1).map(|y| {
-        (0..divisions.0).map(move |x| (x as f64, y as f64))
-    }).flatten().collect();
-
-    let new_mesh: Vec<f64> = grid.into_par_iter().filter_map(|(x, y)| {
-        let new_pos = inverse_interpolate_mesh(step.0 * x, step.1 * y, size, &mesh).ok()?;
-        Some([new_pos.0 as f64, new_pos.1 as f64])
-    }).flatten().collect();
+    mesh[0] = mesh.len() as f64;
+    mesh.extend(focal_plane_data.iter());
 
     let mut inv_mesh = Vec::with_capacity(mesh.len());
-    inv_mesh.push(divisions.0 as f64);
-    inv_mesh.push(divisions.1 as f64);
-    inv_mesh.push(size.0 as f64);
-    inv_mesh.push(size.1 as f64);
-    inv_mesh.push(crop_origin.0 as f64);
-    inv_mesh.push(crop_origin.1 as f64);
-    inv_mesh.push(crop_size.0 as f64);
-    inv_mesh.push(crop_size.1 as f64);
-    inv_mesh.extend(new_mesh);
+    inv_mesh.push(0.0); // offset to focal_plane_data
+    if has_any_mesh_value {
+        inv_mesh.push(divisions.0 as f64);
+        inv_mesh.push(divisions.1 as f64);
+        inv_mesh.push(size.0 as f64);
+        inv_mesh.push(size.1 as f64);
+        inv_mesh.push(crop_origin.0 as f64);
+        inv_mesh.push(crop_origin.1 as f64);
+        inv_mesh.push(crop_size.0 as f64);
+        inv_mesh.push(crop_size.1 as f64);
 
-    // Precompute spline coeffs for the y coordinate
-    for mesh_offset in 0..=1 {
-        for j in 0..divisions.1 {
-            splines::BivariateSpline::cubic_spline_coefficients(&inv_mesh[8 + mesh_offset..], 2, j * divisions.0, size.0, divisions.0, &mut a, &mut b, &mut c, &mut d, &mut h, &mut alpha, &mut l, &mut mu, &mut z);
-            for aa in a { inv_mesh.push(aa); }
-            for bb in b { inv_mesh.push(bb); }
-            for cc in c { inv_mesh.push(cc); }
-            for dd in d { inv_mesh.push(dd); }
+        let step = ((size.0 / (divisions.0 as f64 - 1.0)), (size.1 / (divisions.1 as f64 - 1.0)));
+        let grid: Vec<_> = (0..divisions.1).map(|y| {
+            (0..divisions.0).map(move |x| (x as f64, y as f64))
+        }).flatten().collect();
+
+        let new_mesh: Vec<f64> = grid.into_par_iter().filter_map(|(x, y)| {
+            let new_pos = inverse_interpolate_mesh(step.0 * x, step.1 * y, size, &mesh).ok()?;
+            Some([new_pos.0 as f64, new_pos.1 as f64])
+        }).flatten().collect();
+
+        inv_mesh.extend(new_mesh);
+
+        // Precompute spline coeffs for the y coordinate
+        for mesh_offset in 0..=1 {
+            for j in 0..divisions.1 {
+                splines::BivariateSpline::cubic_spline_coefficients(&inv_mesh[9 + mesh_offset..], 2, j * divisions.0, size.0, divisions.0, &mut a, &mut b, &mut c, &mut d, &mut h, &mut alpha, &mut l, &mut mu, &mut z);
+                for aa in a { inv_mesh.push(aa); }
+                for bb in b { inv_mesh.push(bb); }
+                for cc in c { inv_mesh.push(cc); }
+                for dd in d { inv_mesh.push(dd); }
+            }
         }
     }
+    inv_mesh[0] = inv_mesh.len() as f64;
+    inv_mesh.extend(focal_plane_data.iter());
 
     let inv_mesh = inv_mesh.iter().map(|x| *x as f32).collect::<Vec<_>>();
 
@@ -473,7 +515,7 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (V
 }
 
 pub fn interpolate_mesh(x: f64, y: f64, size: (f64, f64), mesh: &[f64]) -> Vector2<f64> {
-    let grid_spline = splines::BivariateSpline::new(mesh[0] as usize, mesh[1] as usize);
+    let grid_spline = splines::BivariateSpline::new(mesh[1] as usize, mesh[2] as usize);
     Vector2::new(
         grid_spline.interpolate(size.0, size.1, mesh, 0, x, y),
         grid_spline.interpolate(size.0, size.1, mesh, 1, x, y)

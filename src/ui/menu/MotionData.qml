@@ -479,6 +479,7 @@ MenuItem {
                 currentTimestamp = timestamp;
                 requestPaint();
                 meshCorrection.requestPaint();
+                focalPlaneDistortion.requestPaint();
             }
         }
         Canvas {
@@ -499,15 +500,15 @@ MenuItem {
                     const margin = 15 * dpiScale;
 
                     const mesh = controller.mesh_at_frame(window.videoArea.vid.currentFrame);
-                    if (!mesh.length) { meshCorrection.visible = false; return; }
-                    const divisions = [mesh[0], mesh[1]];
-                    const mesh_size = [mesh[2], mesh[3]];
+                    if (!mesh.length || mesh[0] < 9) { meshCorrection.visible = false; return; }
+                    const divisions = [mesh[1], mesh[2]];
+                    const mesh_size = [mesh[3], mesh[4]];
 
                     meshCorrection.visible = divisions[0] > 0;
 
                     for (let i = 0; i < (divisions[0]*divisions[1]*2); i += 2) {
-                        const x = margin + (width  - 2*margin) * mesh[8 + i + 0] / mesh_size[0];
-                        const y = margin + (height - 2*margin) * mesh[8 + i + 1] / mesh_size[1];
+                        const x = margin + (width  - 2*margin) * mesh[9 + i + 0] / mesh_size[0];
+                        const y = margin + (height - 2*margin) * mesh[9 + i + 1] / mesh_size[1];
                         ctx.beginPath();
                         ctx.arc(x, y, 2 * dpiScale, 0, 2 * Math.PI, false);
                         ctx.fillStyle = maincolor;
@@ -518,20 +519,97 @@ MenuItem {
                     ctx.strokeStyle = maincolor;
                     ctx.beginPath();
                     for (let i = 0; i < (divisions[0]*divisions[1]*2); i += 2) {
-                        const x = margin + (width  - 2*margin) * (mesh[8 + i + 0] / mesh_size[0]);
-                        const y = margin + (height - 2*margin) * (mesh[8 + i + 1] / mesh_size[1]);
+                        const x = margin + (width  - 2*margin) * (mesh[9 + i + 0] / mesh_size[0]);
+                        const y = margin + (height - 2*margin) * (mesh[9 + i + 1] / mesh_size[1]);
                         ctx.moveTo(x, y);
                         if (((i + 2) / 2) % divisions[1] != 0) {
-                            const xx = margin + (width  - 2*margin) * mesh[8 + i + 2 + 0] / mesh_size[0];
-                            const yy = margin + (height - 2*margin) * mesh[8 + i + 2 + 1] / mesh_size[1];
+                            const xx = margin + (width  - 2*margin) * mesh[9 + i + 2 + 0] / mesh_size[0];
+                            const yy = margin + (height - 2*margin) * mesh[9 + i + 2 + 1] / mesh_size[1];
                             ctx.lineTo(xx, yy);
                         }
                         if (i + 9*2 < divisions[0]*divisions[1]*2) {
-                            const xxx = margin + (width  - 2*margin) * (mesh[8 + i + divisions[0]*2 + 0] / mesh_size[0]);
-                            const yyy = margin + (height - 2*margin) * (mesh[8 + i + divisions[0]*2 + 1] / mesh_size[1]);
+                            const xxx = margin + (width  - 2*margin) * (mesh[9 + i + divisions[0]*2 + 0] / mesh_size[0]);
+                            const yyy = margin + (height - 2*margin) * (mesh[9 + i + divisions[0]*2 + 1] / mesh_size[1]);
                             ctx.moveTo(x, y);
                             ctx.lineTo(xxx, yyy);
                         }
+                    }
+                    ctx.stroke();
+                }
+            }
+        }
+        Canvas {
+            id: focalPlaneDistortion;
+            width: parent.width
+            height: width * (orgH / orgW);
+            visible: false;
+
+            property real orgW: window.videoArea.outWidth  || window.videoArea.vid.videoWidth;
+            property real orgH: window.videoArea.outHeight || window.videoArea.vid.videoHeight;
+            property bool initialDraw: false
+            onPaint: {
+                if (orientationCheckbox.checked || !initialDraw) {
+                    initialDraw = true
+                    let ctx = getContext("2d");
+                    ctx.reset();
+                    const maincolor = style === "light" ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,0.9)";
+                    const margin = 15 * dpiScale;
+
+                    const mesh = controller.mesh_at_frame(window.videoArea.vid.currentFrame);
+                    if (!mesh.length || mesh[0] == 0 || mesh[mesh[0]] == 0) { focalPlaneDistortion.visible = false; return; }
+                    const mesh_size = [mesh[3], mesh[4]];
+
+                    focalPlaneDistortion.visible = true;
+
+                    ctx.lineWidth = 1 * dpiScale;
+                    ctx.strokeStyle = maincolor;
+                    const o = mesh[0];
+                    const len = mesh[mesh[0]];
+                    let start = [mesh[o + 1], mesh[o + 2]];
+                    let scale = mesh[o + 3];
+                    let stblz_grid = mesh_size[1] / 8;
+
+                    let points = [];
+                    for (let i = 0; i < 8; ++i) {
+                        // corners of the rectangle
+                        points.push([0, i * stblz_grid]);
+                        points.push([mesh_size[0], i * stblz_grid]);
+                        points.push([mesh_size[0], (i + 1) * stblz_grid]);
+                        points.push([0, (i + 1) * stblz_grid]);
+
+                        points.push([0, i * stblz_grid]);
+                    }
+
+                    for (let i = 0; i < points.length; ++i) {
+                        let fp_pos = (points[i][1]/* - start[1]*/) / stblz_grid; // what's the start coord?
+                        let idx = Math.floor(fp_pos);
+                        let delta = (fp_pos - idx) * stblz_grid;
+                        if (idx < 0) {
+                            idx = 0;
+                            delta = 0.0;
+                        } else if (idx > 6) {
+                            idx = 7;
+                            delta = 0.0;
+                        }
+                        let dist2out = [
+                            mesh[o + 4 + idx * 2 + 0] * delta,
+                            mesh[o + 4 + idx * 2 + 1] * delta,
+                        ];
+                        for (let j = 0; j < 8; j++) {
+                            if (j == idx) break;
+                            dist2out[0] += (mesh[o + 4 + j * 2 + 0] / mesh_size[0]) * stblz_grid;
+                            dist2out[1] += (mesh[o + 4 + j * 2 + 1] / mesh_size[1]) * stblz_grid;
+                        }
+                        points[i][0] += dist2out[0];
+                        points[i][1] += dist2out[1];
+                    }
+
+                    ctx.beginPath();
+                    for (let i = 0; i < points.length; ++i) {
+                        const x = margin + (width  - 2*margin) * points[i][0] / mesh_size[0];
+                        const y = margin + (height - 2*margin) * points[i][1] / mesh_size[1];
+                        if (i == 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
                     }
                     ctx.stroke();
                 }

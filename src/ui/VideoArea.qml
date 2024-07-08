@@ -763,7 +763,7 @@ Item {
                 id: secondPreview;
                 property bool show: false;
                 onShowChanged: window.settings.setValue("stabOverviewSplit", show);
-                Component.onCompleted: show = window.settings.value("stabOverviewSplit", false);
+                Component.onCompleted: show = window.settings.value("stabOverviewSplit", "false") == "true";
                 visible: show && fovOverviewBtn.checked;
                 readonly property real ratio: 1 + 1 / window.stab.fovSlider.value;
                 onRatioChanged: {

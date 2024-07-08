@@ -156,10 +156,10 @@ float bivariate_spline_interpolate(float size_x, float size_y, int mesh_offset, 
 
     for (int j = 0; j < GRID_SIZE; j++) {
         int block_ = GRID_SIZE * 4;
-        int aa = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 0 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        int bb = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 1 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        int cc = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 2 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        int dd = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 3 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        int aa = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 0 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        int bb = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 1 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        int cc = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 2 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        int dd = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 3 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
         intermediate_values[j] = cubic_spline_interpolate1(aa, bb, cc, dd, GRID_SIZE, x, size_x);
     }
 
@@ -212,10 +212,10 @@ vec2 rotate_and_distort(vec2 pos, float idx) {
 
         uv += params.c;
 
-        if (get_mesh_data(0) != 0.0) {
-            vec2 mesh_size = vec2(get_mesh_data(2), get_mesh_data(3));
-            vec2 origin    = vec2(get_mesh_data(4), get_mesh_data(5));
-            vec2 crop_size = vec2(get_mesh_data(6), get_mesh_data(7));
+        if (get_mesh_data(0) > 9.0) {
+            vec2 mesh_size = vec2(get_mesh_data(3), get_mesh_data(4));
+            vec2 origin    = vec2(get_mesh_data(5), get_mesh_data(6));
+            vec2 crop_size = vec2(get_mesh_data(7), get_mesh_data(8));
 
             if (bool(params.flags & 128)) { uv.y = params.height - uv.y; } // framebuffer inverted
 

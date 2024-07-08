@@ -206,11 +206,11 @@ float bivariate_spline_interpolate(float size_x, float size_y, __global const fl
 
     for (int j = 0; j < GRID_SIZE; j++) {
         const int block = GRID_SIZE * 4;
-        int aa = 8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 0 + (j * block) + (block * GRID_SIZE * mesh_offset);
-        int bb = 8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 1 + (j * block) + (block * GRID_SIZE * mesh_offset);
-        int cc = 8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 2 + (j * block) + (block * GRID_SIZE * mesh_offset);
-        int dd = 8 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 3 + (j * block) + (block * GRID_SIZE * mesh_offset);
-        // cubic_spline_coefficients(&mesh[8 + mesh_offset], 2, (j * GRID_SIZE), size_x, GRID_SIZE, a, b, c, d, h, alpha, l, mu, z);
+        int aa = 9 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 0 + (j * block) + (block * GRID_SIZE * mesh_offset);
+        int bb = 9 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 1 + (j * block) + (block * GRID_SIZE * mesh_offset);
+        int cc = 9 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 2 + (j * block) + (block * GRID_SIZE * mesh_offset);
+        int dd = 9 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 3 + (j * block) + (block * GRID_SIZE * mesh_offset);
+        // cubic_spline_coefficients(&mesh[9 + mesh_offset], 2, (j * GRID_SIZE), size_x, GRID_SIZE, a, b, c, d, h, alpha, l, mu, z);
         intermediate_values[j] = cubic_spline_interpolate1(mesh, aa, bb, cc, dd, GRID_SIZE, x, size_x);
     }
 
@@ -313,10 +313,11 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
 
         uv += params->c;
 
-        if (mesh_data && mesh_data[0] != 0.0f) {
-            float2 mesh_size = (float2)(mesh_data[2], mesh_data[3]);
-            float2 origin    = (float2)(mesh_data[4], mesh_data[5]);
-            float2 crop_size = (float2)(mesh_data[6], mesh_data[7]);
+        // MeshDistortion
+        if (mesh_data && mesh_data[0] > 9.0f) {
+            float2 mesh_size = (float2)(mesh_data[3], mesh_data[4]);
+            float2 origin    = (float2)(mesh_data[5], mesh_data[6]);
+            float2 crop_size = (float2)(mesh_data[7], mesh_data[8]);
 
             if (params->flags & 128) uv.y = (float)params->height - uv.y; // framebuffer inverted
 
@@ -329,6 +330,47 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
             uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0f, (float)params->height);
 
             if (params->flags & 128) uv.y = (float)params->height - uv.y; // framebuffer inverted
+        }
+
+        // FocalPlaneDistortion
+        if (mesh_data && mesh_data[0] > 0.0f && mesh_data[(int)(mesh_data[0])] > 0.0f) {
+            int o = (int)(mesh_data[0]); // offset to focal plane distortion data
+            float2 start = (float2)(mesh_data[o + 1], mesh_data[o + 2]);
+            float scale = mesh_data[o + 3];
+            int len = (int)mesh_data[(int)(mesh_data[0])];
+
+            float2 mesh_size = (float2)(mesh_data[3], mesh_data[4]);
+            float2 origin    = (float2)(mesh_data[5], mesh_data[6]);
+            float2 crop_size = (float2)(mesh_data[7], mesh_data[8]);
+            float stblz_grid = mesh_size.y / 8.0f;
+
+            /*uv.x = map_coord(uv.x, 0.0f, (float)params->width,  origin.x, origin.x + crop_size.x);
+            uv.y = map_coord(uv.y, 0.0f, (float)params->height, origin.y, origin.y + crop_size.y);
+
+            float fp_pos = (uv.y - start.y) / stblz_grid; // what's the start coord?
+            int idx = (int)floor(fp_pos);
+            float delta = (fp_pos - (float)idx) * stblz_grid;
+            if (idx < 0) {
+                idx = 0;
+                delta = 0.0;
+            } else if (idx > 6) {
+                idx = 7;
+                delta = 0.0;
+            }
+            float2 dist2out = (float2)(
+                -(mesh_data[o + 4 + idx * 2 + 0] * scale / mesh_size.x) * delta,
+                (mesh_data[o + 4 + idx * 2 + 1] * scale / mesh_size.y) * delta
+            );
+            for (int j = 0; j < 8; j++) {
+                if (j == idx) break;
+                dist2out.x += -(mesh_data[o + 4 + j * 2 + 0] * scale / mesh_size.x) * stblz_grid;
+                dist2out.y += (mesh_data[o + 4 + j * 2 + 1] * scale / mesh_size.y) * stblz_grid;
+            }
+            uv += dist2out;
+
+            uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0f, (float)params->width);
+            uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0f, (float)params->height);*/
+
         }
 
         if (params->flags & 2) { // Has digital lens

@@ -166,10 +166,10 @@ impl Stabilization {
 
             uv = (uv.0 + params.c[0], uv.1 + params.c[1]);
 
-            if !mesh_data.is_empty() && mesh_data[0] != 0.0 {
-                let mesh_size = (mesh_data[2], mesh_data[3]);
-                let origin    = (mesh_data[4] as f32, mesh_data[5] as f32);
-                let crop_size = (mesh_data[6] as f32, mesh_data[7] as f32);
+            if !mesh_data.is_empty() && mesh_data[0] > 9.0 {
+                let mesh_size = (mesh_data[3], mesh_data[4]);
+                let origin    = (mesh_data[5] as f32, mesh_data[6] as f32);
+                let crop_size = (mesh_data[7] as f32, mesh_data[8] as f32);
 
                 if (params.flags & 128) == 128 { uv.1 = params.height as f32 - uv.1; } // framebuffer inverted
 
@@ -522,17 +522,19 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
         }
 
         if let Some(mesh_data) = &mesh {
-            let mesh_size = (mesh_data[2], mesh_data[3]);
-            let origin    = (mesh_data[4] as f32, mesh_data[5] as f32);
-            let crop_size = (mesh_data[6] as f32, mesh_data[7] as f32);
+            if mesh_data[0] > 9.0 {
+                let mesh_size = (mesh_data[3], mesh_data[4]);
+                let origin    = (mesh_data[5] as f32, mesh_data[6] as f32);
+                let crop_size = (mesh_data[7] as f32, mesh_data[8] as f32);
 
-            x = map_coord(x, 0.0, params.width  as f32, origin.0, origin.0 + crop_size.0);
-            y = map_coord(y, 0.0, params.height as f32, origin.1, origin.1 + crop_size.1);
+                x = map_coord(x, 0.0, params.width  as f32, origin.0, origin.0 + crop_size.0);
+                y = map_coord(y, 0.0, params.height as f32, origin.1, origin.1 + crop_size.1);
 
-            let new_pos = crate::gyro_source::interpolate_mesh(x as f64, y as f64, (mesh_size.0, mesh_size.1), &mesh_data);
+                let new_pos = crate::gyro_source::interpolate_mesh(x as f64, y as f64, (mesh_size.0, mesh_size.1), &mesh_data);
 
-            x = map_coord(new_pos.x as f32, origin.0, origin.0 + crop_size.0, 0.0, params.width  as f32);
-            y = map_coord(new_pos.y as f32, origin.1, origin.1 + crop_size.1, 0.0, params.height as f32);
+                x = map_coord(new_pos.x as f32, origin.0, origin.0 + crop_size.0, 0.0, params.width  as f32);
+                y = map_coord(new_pos.y as f32, origin.1, origin.1 + crop_size.1, 0.0, params.height as f32);
+            }
         }
         if let Some(shift) = shift_per_point.as_ref().and_then(|v| v.get(index)) {
             let ang_rad = shift.2;

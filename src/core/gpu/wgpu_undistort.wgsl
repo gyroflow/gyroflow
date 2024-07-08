@@ -250,11 +250,11 @@ fn bivariate_spline_interpolate(size_x: f32, size_y: f32, mesh_offset: i32, n: i
 
     for (var j = 0; j < GRID_SIZE; j++) {
         let block_ = GRID_SIZE * 4;
-        let aa = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 0 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        let bb = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 1 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        let cc = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 2 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        let dd = 8 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 3 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        // cubic_spline_coefficients(mesh[8 + mesh_offset..], 2, (j * GRID_SIZE), size_x, GRID_SIZE);
+        let aa = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 0 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        let bb = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 1 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        let cc = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 2 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        let dd = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 3 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
+        // cubic_spline_coefficients(mesh[9 + mesh_offset..], 2, (j * GRID_SIZE), size_x, GRID_SIZE);
         intermediate_values[j] = cubic_spline_interpolate1(aa, bb, cc, dd, GRID_SIZE, x, size_x);
     }
 
@@ -305,10 +305,10 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
 
         uv += c;
 
-        if (mesh_data[0] != 0.0) {
-            let mesh_size = vec2<f32>(mesh_data[2], mesh_data[3]);
-            let origin    = vec2<f32>(mesh_data[4], mesh_data[5]);
-            let crop_size = vec2<f32>(mesh_data[6], mesh_data[7]);
+        if (mesh_data[0] > 9.0) {
+            let mesh_size = vec2<f32>(mesh_data[3], mesh_data[4]);
+            let origin    = vec2<f32>(mesh_data[5], mesh_data[6]);
+            let crop_size = vec2<f32>(mesh_data[7], mesh_data[8]);
 
             if (bool(params.flags & 128)) { uv.y = f32(params.height) - uv.y; } // framebuffer inverted
 
