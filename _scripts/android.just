@@ -237,7 +237,7 @@ deploy *param:
         "architectures": {"arm64-v8a":"aarch64-linux-android"},
         "android-min-sdk-version": "26",
         "android-package-source-directory": "$PROJECT_DIR_UNIX/_deployment/android",
-        "android-target-sdk-version": "33",
+        "android-target-sdk-version": "34",
         "qml-importscanner-binary": "$PROJECT_DIR_UNIX/ext/{{QtVersion}}/mingw_64/bin/qmlimportscanner.exe",
         "rcc-binary": "$PROJECT_DIR_UNIX/ext/{{QtVersion}}/mingw_64/bin/rcc.exe",
         "qml-root-path": "$PROJECT_DIR_UNIX/src",
@@ -275,7 +275,7 @@ deploy *param:
         $ApkName = "apk\release\android-build-release-signed.apk"
     }
 
-    $cmd = "androiddeployqt --input `"$ProjectDir\target\android-build\android-deploy.json`" --output `"$ProjectDir\target\android-build`" --deployment bundled $Sign --android-platform android-33 --jdk ${Env:JAVA_HOME} --gradle"
+    $cmd = "androiddeployqt --input `"$ProjectDir\target\android-build\android-deploy.json`" --output `"$ProjectDir\target\android-build`" --deployment bundled $Sign --android-platform android-34 --jdk ${Env:JAVA_HOME} --gradle"
 
     iex "$cmd"
     if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") {
