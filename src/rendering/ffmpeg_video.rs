@@ -225,6 +225,9 @@ impl<'a> VideoTranscoder<'a> {
                             self.encoder_params.pixel_format = Some(format::Pixel::NV12);
                             self.processing_order = ProcessingOrder::PostConversion;
                         }
+                        if self.encoder_name == "hevc_videotoolbox" && input_frame.format() == format::Pixel::P210LE {
+                            self.encoder_params.options.set("profile", "main42210");
+                        }
 
                         if input_frame.format() == format::Pixel::RGB24 || input_frame.format() == format::Pixel::RGB48 {
                             self.processing_order = ProcessingOrder::PostConversion;
