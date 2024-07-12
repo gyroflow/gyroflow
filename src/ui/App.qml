@@ -521,7 +521,7 @@ Rectangle {
                 return null;
             } else {
                 console.log("previously clicked", clickedButton);
-                if (clickedButton != buttons.length - 1) { // Don't auto-click the last button (it's always Cancel/Close)
+                if (clickedButton != buttons.length - 1 || identifier == "delete-after-join") { // Don't auto-click the last button (it's always Cancel/Close)
                     Qt.callLater(function() {
                         if (el)
                             el.clicked(clickedButton, true);
