@@ -196,6 +196,7 @@ impl WgpuWrapper {
                                 max_storage_buffer_binding_size: (1 << 31) - 1,
                                 ..wgpu::Limits::default()
                             },
+                            memory_hints: wgpu::MemoryHints::Performance,
                         }, None).map_err(|e| WgpuError::RequestDevice(e))?
                     }
                 },
@@ -216,6 +217,7 @@ impl WgpuWrapper {
                             label: None,
                             required_features: wgpu::Features::empty(),
                             required_limits: limits.clone(),
+                            memory_hints: wgpu::MemoryHints::Performance,
                         }, None));
                         if let Err(e) = &device {
                             let e_str = format!("{e:?}");
