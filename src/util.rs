@@ -121,9 +121,8 @@ cpp! {{
 #[allow(non_snake_case)]
 #[no_mangle]
 pub extern "system" fn Java_xyz_gyroflow_MainActivity_urlReceived(_vm: *mut c_void, _: *mut c_void, jstr: *mut c_void) {
-    #[cfg(target_os = "android")]
-    {
-        cpp!(unsafe [jstr as "void*"] {
+    cpp!(unsafe [jstr as "void*"] {     
+        #ifdef Q_OS_ANDROID
             QString str = QJniObject((jstring)jstr).toString();
             qDebug() << "c " << str << globalUrlCatcherPtr;
             if (globalUrlCatcherPtr) {
@@ -131,8 +130,8 @@ pub extern "system" fn Java_xyz_gyroflow_MainActivity_urlReceived(_vm: *mut c_vo
             } else {
                 pendingUrl = str;
             }
-        });
-    }
+        #endif
+    });
 }
 pub fn set_url_catcher(ctlptr: *mut c_void) {
     cpp!(unsafe [ctlptr as "QObject *"] {
