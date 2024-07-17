@@ -121,15 +121,18 @@ cpp! {{
 #[allow(non_snake_case)]
 #[no_mangle]
 pub extern "system" fn Java_xyz_gyroflow_MainActivity_urlReceived(_vm: *mut c_void, _: *mut c_void, jstr: *mut c_void) {
-    cpp!(unsafe [jstr as "jstring"] {
-        QString str = QJniObject(jstr).toString();
-        qDebug() << "c " << str << globalUrlCatcherPtr;
-        if (globalUrlCatcherPtr) {
-            QMetaObject::invokeMethod(globalUrlCatcherPtr, "catch_url_open", Qt::QueuedConnection, Q_ARG(QUrl, QUrl(str)));
-        } else {
-            pendingUrl = str;
-        }
-    });
+    #[cfg(target_os = "android")]
+    {
+        cpp!(unsafe [jstr as "jstring"] {
+            QString str = QJniObject(jstr).toString();
+            qDebug() << "c " << str << globalUrlCatcherPtr;
+            if (globalUrlCatcherPtr) {
+                QMetaObject::invokeMethod(globalUrlCatcherPtr, "catch_url_open", Qt::QueuedConnection, Q_ARG(QUrl, QUrl(str)));
+            } else {
+                pendingUrl = str;
+            }
+        });
+    }
 }
 pub fn set_url_catcher(ctlptr: *mut c_void) {
     cpp!(unsafe [ctlptr as "QObject *"] {
