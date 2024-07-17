@@ -48,7 +48,7 @@ Item {
                 Menu {
                     Component.onCompleted: this.setIcon("grid");
                     title: qsTr("Grid guide");
-                    Action { text: qsTr("Enabled"); checkable: true; checked: root.shown; onTriggered: root.shown = checked; }
+                    Action { text: checked? qsTr("Disable") : qsTr("Enable"); checkable: true; checked: root.shown; onTriggered: root.shown = checked; }
                     Menu {
                         Component.onCompleted: this.setIcon("pencil");
                         title: qsTr("Color");

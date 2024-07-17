@@ -293,6 +293,6 @@ deploy *param:
     if ("{{param}}" -eq "install") {
         adb install "$ProjectDir\_deployment\_binaries\Gyroflow.apk"
         adb logcat -c
-        adb shell am start -n xyz.gyroflow/org.qtproject.qt.android.bindings.QtActivity
+        adb shell am start -n xyz.gyroflow/xyz.gyroflow.MainActivity
         adb logcat -s Gyroflow
     }

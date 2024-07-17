@@ -26,10 +26,10 @@
         android:allowBackup="true"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
         <activity
-            android:name="org.qtproject.qt.android.bindings.QtActivity"
+            android:name="xyz.gyroflow.MainActivity"
             android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density"
             android:label="Gyroflow"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:screenOrientation="unspecified"
             android:exported="true">
             <intent-filter>
@@ -63,6 +63,11 @@
                 <data android:mimeType="video/quicktime" />
                 <data android:scheme="content" />
                 <data android:scheme="file" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="video/*" />
             </intent-filter>
 
             <meta-data android:name="android.app.lib_name" android:value="gyroflow" />

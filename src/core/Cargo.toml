@@ -80,14 +80,14 @@ rustfft = "6.2.0"
 exr = "1.72"
 opencv = { version = "0.92.0", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "25bc704", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "a3d2d31", features = ["spirv", "naga-ir"] }
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "25bc704"
+rev = "a3d2d31"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
-metal = { version = "0.28.0" }
+metal = { version = "0.29.0" }
 objc-foundation = "0.1.1"
 core-foundation-sys = "0.8.6"
 

@@ -3,6 +3,7 @@
 
 use cpp::*;
 use qmetaobject::*;
+use std::ffi::c_void;
 
 pub fn serde_json_to_qt_array(v: &serde_json::Value) -> QJsonArray {
     let mut ret = QJsonArray::default();
@@ -102,6 +103,7 @@ cpp! {{
     #endif
 
     static QObject *globalUrlCatcherPtr = nullptr;
+    static QString pendingUrl;
 
     class QtEventFilter : public QObject {
     public:
@@ -115,9 +117,28 @@ cpp! {{
         std::function<void(QUrl)> m_cb;
     };
 }}
-
-pub fn set_url_catcher(ctlptr: *mut std::ffi::c_void) {
-    cpp!(unsafe [ctlptr as "QObject *"] { globalUrlCatcherPtr = ctlptr; });
+#[cfg(target_os = "android")]
+#[allow(non_snake_case)]
+#[no_mangle]
+pub extern "system" fn Java_xyz_gyroflow_MainActivity_urlReceived(_vm: *mut c_void, _: *mut c_void, jstr: *mut c_void) {
+    cpp!(unsafe [jstr as "jstring"] {
+        QString str = QJniObject(jstr).toString();
+        qDebug() << "c " << str << globalUrlCatcherPtr;
+        if (globalUrlCatcherPtr) {
+            QMetaObject::invokeMethod(globalUrlCatcherPtr, "catch_url_open", Qt::QueuedConnection, Q_ARG(QUrl, QUrl(str)));
+        } else {
+            pendingUrl = str;
+        }
+    });
+}
+pub fn set_url_catcher(ctlptr: *mut c_void) {
+    cpp!(unsafe [ctlptr as "QObject *"] {
+        globalUrlCatcherPtr = ctlptr;
+        if (!pendingUrl.isEmpty()) {
+            QMetaObject::invokeMethod(globalUrlCatcherPtr, "catch_url_open", Qt::QueuedConnection, Q_ARG(QUrl, QUrl(pendingUrl)));
+            pendingUrl.clear();
+        }
+    });
 }
 pub fn register_url_handlers() {
     cpp!(unsafe [] {
@@ -194,14 +215,14 @@ pub fn update_rlimit() {
 pub fn set_android_context() {
     #[cfg(target_os = "android")]
     {
-        let jvm = cpp!(unsafe [] -> *mut std::ffi::c_void as "void *" {
+        let jvm = cpp!(unsafe [] -> *mut c_void as "void *" {
             #ifdef Q_OS_ANDROID
                 return QJniEnvironment::javaVM();
             #else
                 return nullptr;
             #endif
         });
-        let activity = cpp!(unsafe [] -> *mut std::ffi::c_void as "void *" {
+        let activity = cpp!(unsafe [] -> *mut c_void as "void *" {
             #ifdef Q_OS_ANDROID
                 auto ctx = QNativeInterface::QAndroidApplication::context();
                 return QJniEnvironment::getJniEnv()->NewGlobalRef(ctx.object());
@@ -286,7 +307,7 @@ pub fn install_crash_handler() -> std::io::Result<()> {
         };
 
         unsafe {
-            extern "C" fn callback(path: *const breakpad_sys::PathChar, path_len: usize, _ctx: *mut std::ffi::c_void) {
+            extern "C" fn callback(path: *const breakpad_sys::PathChar, path_len: usize, _ctx: *mut c_void) {
                 let path_slice = unsafe { std::slice::from_raw_parts(path, path_len) };
 
                 let path = {
