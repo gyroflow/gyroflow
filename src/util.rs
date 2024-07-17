@@ -123,8 +123,8 @@ cpp! {{
 pub extern "system" fn Java_xyz_gyroflow_MainActivity_urlReceived(_vm: *mut c_void, _: *mut c_void, jstr: *mut c_void) {
     #[cfg(target_os = "android")]
     {
-        cpp!(unsafe [jstr as "jstring"] {
-            QString str = QJniObject(jstr).toString();
+        cpp!(unsafe [jstr as "void*"] {
+            QString str = QJniObject((jstring)jstr).toString();
             qDebug() << "c " << str << globalUrlCatcherPtr;
             if (globalUrlCatcherPtr) {
                 QMetaObject::invokeMethod(globalUrlCatcherPtr, "catch_url_open", Qt::QueuedConnection, Q_ARG(QUrl, QUrl(str)));
