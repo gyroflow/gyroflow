@@ -84,7 +84,7 @@ impl TimelineKeyframesView {
         for v in self.series.values_mut() {
             let mut new_idx: i32 = -1;
 
-            if let Some(idx) = v.points.iter().position(|pt| pt.timestamp == vid_ts) {
+            if let Some(idx) = v.points.iter().position(|pt| (pt.timestamp - vid_ts).abs() < 2000) { // 2ms
                 new_idx = idx as i32;
             }
             if new_idx != v.playback_keyframe_idx {

@@ -418,17 +418,26 @@ Item {
                             QT_TR_NOOP("Zooming speed");
                             QT_TR_NOOP("Zooming center offset X");
                             QT_TR_NOOP("Zooming center offset Y");
+                            QT_TR_NOOP("Zoom limit");
+                            QT_TR_NOOP("Additional 3D yaw");
+                            QT_TR_NOOP("Additional 3D pitch");
+                            QT_TR_NOOP("Additional 3D roll");
+                            QT_TR_NOOP("Additional 3D translation X");
+                            QT_TR_NOOP("Additional 3D translation Y");
+                            QT_TR_NOOP("Additional 3D translation Z");
                             QT_TR_NOOP("Background margin");
                             QT_TR_NOOP("Background feather");
                             QT_TR_NOOP("Horizon lock amount");
                             QT_TR_NOOP("Horizon lock roll correction");
                             QT_TR_NOOP("Lens correction strength");
+                            QT_TR_NOOP("Light refraction coefficient");
                             QT_TR_NOOP("Max smoothness");
                             QT_TR_NOOP("Max smoothness at high velocity");
                             QT_TR_NOOP("Smoothness");
                             QT_TR_NOOP("Pitch smoothness");
                             QT_TR_NOOP("Roll smoothness");
                             QT_TR_NOOP("Yaw smoothness");
+                            QT_TR_NOOP("Video speed");
                         }
                     }
                 }

@@ -29,7 +29,7 @@ define_keyframes! {
     ZoomingSpeed,                "#32e595", "Zooming speed",                    |v| format!("{:.2}s", v),
     ZoomingCenterX,              "#6fefb6", "Zooming center offset X",          |v| format!("{:.0}%", v * 100.0),
     ZoomingCenterY,              "#5ddba2", "Zooming center offset Y",          |v| format!("{:.0}%", v * 100.0),
-    MaxZoom,                     "#184CC5", "Zoom limit",                       |v| format!("{:.0}%", v * 100.0),
+    MaxZoom,                     "#184CC5", "Zoom limit",                       |v| format!("{:.0}%", v),
     AdditionalRotationX,         "#7817ef", "Additional 3D yaw",                |v| format!("{:.2}°", v),
     AdditionalRotationY,         "#9248ec", "Additional 3D pitch",              |v| format!("{:.2}°", v),
     AdditionalRotationZ,         "#ab7ce4", "Additional 3D roll",               |v| format!("{:.2}°", v),
@@ -83,15 +83,25 @@ pub struct KeyframeManager {
 impl KeyframeManager {
     pub fn new() -> Self { Self::default() }
 
+    fn get_closest_timestamp(&self, typ: &KeyframeType, timestamp_us: i64) -> i64 {
+        if let Some(x) = self.keyframes.get(typ) {
+            if let Some(existing) = x.range(timestamp_us-1000..=timestamp_us+1000).next() {
+                return *existing.0;
+            }
+        }
+        timestamp_us
+    }
+
     pub fn set_custom_provider(&mut self, cb: impl FnMut(&KeyframeManager, &KeyframeType, f64) -> Option<f64> + Send + 'static) {
         self.custom_provider = Some(Arc::new(Mutex::new(cb)));
     }
-    pub fn set(&mut self, typ: &KeyframeType, timestamp_us: i64, value: f64) {
+    pub fn set(&mut self, typ: &KeyframeType, mut timestamp_us: i64, value: f64) {
         let kf = Keyframe {
             id: default_id(),
             value,
             easing: Easing::EaseInOut
         };
+        timestamp_us = self.get_closest_timestamp(typ, timestamp_us);
         if let Some(x) = self.keyframes.get_mut(typ) {
             match x.entry(timestamp_us) {
                 Entry::Occupied(o) => { o.into_mut().value = value; }
@@ -101,14 +111,16 @@ impl KeyframeManager {
             self.keyframes.insert(typ.clone(), BTreeMap::from([(timestamp_us, kf)]));
         }
     }
-    pub fn set_easing(&mut self, typ: &KeyframeType, timestamp_us: i64, easing: Easing) {
+    pub fn set_easing(&mut self, typ: &KeyframeType, mut timestamp_us: i64, easing: Easing) {
+        timestamp_us = self.get_closest_timestamp(typ, timestamp_us);
         if let Some(x) = self.keyframes.get_mut(typ) {
             if let Some(kf) = x.get_mut(&timestamp_us) {
                 kf.easing = easing;
             }
         }
     }
-    pub fn easing(&self, typ: &KeyframeType, timestamp_us: i64) -> Option<Easing> {
+    pub fn easing(&self, typ: &KeyframeType, mut timestamp_us: i64) -> Option<Easing> {
+        timestamp_us = self.get_closest_timestamp(typ, timestamp_us);
         Some(self.keyframes.get(typ)?.get(&timestamp_us)?.easing)
     }
     pub fn set_timestamp(&mut self, typ: &KeyframeType, id: u32, timestamp_us: i64) {
@@ -126,10 +138,12 @@ impl KeyframeManager {
             }
         }
     }
-    pub fn id(&self, typ: &KeyframeType, timestamp_us: i64) -> Option<u32> {
+    pub fn id(&self, typ: &KeyframeType, mut timestamp_us: i64) -> Option<u32> {
+        timestamp_us = self.get_closest_timestamp(typ, timestamp_us);
         Some(self.keyframes.get(typ)?.get(&timestamp_us)?.id)
     }
-    pub fn remove(&mut self, typ: &KeyframeType, timestamp_us: i64) {
+    pub fn remove(&mut self, typ: &KeyframeType, mut timestamp_us: i64) {
+        timestamp_us = self.get_closest_timestamp(typ, timestamp_us);
         if let Some(x) = self.keyframes.get_mut(typ) {
             x.remove(&timestamp_us);
         }
