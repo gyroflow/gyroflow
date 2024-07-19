@@ -569,7 +569,7 @@ Môžeš zvýšit ostrosť vzorku v pokročilých nastaveniach.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="389"/>
       <source>Proportional</source>
-      <translation type="unfinished">Proportional</translation>
+      <translation>Proporcionálne</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="440"/>
@@ -685,7 +685,7 @@ Môžeš zvýšit ostrosť vzorku v pokročilých nastaveniach.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="374"/>
       <source>Original</source>
-      <translation>Pôvodná</translation>
+      <translation>Pôvodné</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="400"/>
@@ -766,12 +766,12 @@ Môžeš zvýšit ostrosť vzorku v pokročilých nastaveniach.</translation>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Disable</source>
-      <translation type="unfinished">Disable</translation>
+      <translation>Zakázať</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Enable</source>
-      <translation type="unfinished">Enable</translation>
+      <translation>Zobraziť</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="54"/>
@@ -791,7 +791,7 @@ Môžeš zvýšit ostrosť vzorku v pokročilých nastaveniach.</translation>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="60"/>
       <source>Lines</source>
-      <translation>Čiary</translation>
+      <translation>Počet čiar</translation>
     </message>
   </context>
   <context>
@@ -1337,7 +1337,7 @@ Chceš nahrať tvoj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="656"/>
       <source>Export camera data (CSV/JSON/USD/AE)</source>
-      <translation>Exportuj dáta kamery (CSV/JSON/USD/AE)</translation>
+      <translation>Exportovať dáta kamery (CSV/JSON/USD/AE)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="700"/>
@@ -1525,7 +1525,7 @@ Chceš nahrať tvoj profil?</translation>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="369"/>
       <source>rs-sync</source>
-      <translation>rolling-shutter synchronizácia</translation>
+      <translation>Rolling - shutter synchr.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="369"/>
@@ -2366,7 +2366,7 @@ Ak potrebuješ vyššiu presnosť, môžeš zvýšiť počet iterácií v &quot;
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="497"/>
       <source>Lens correction</source>
-      <translation>Korekcia objektívu</translation>
+      <translation>Korekcia skreslenia</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="636"/>
@@ -3447,7 +3447,7 @@ Ak je Gyroflow umiestnený v "C:\Program Files" je potrebné ho spustiť ako Adm
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="937"/>
       <source>Next frame</source>
-      <translation>Ďalší snímok</translation>
+      <translation>Nasledujúci snímok</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="938"/>
