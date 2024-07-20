@@ -18,7 +18,8 @@ install-deps:
         sudo apt-get install -y libc++-dev libva-dev libvdpau-dev libvdpau1 mesa-va-drivers ocl-icd-opencl-dev opencl-headers
         sudo apt-get install -y libpulse-dev libasound-dev libxkbcommon-dev
         sudo apt-get install -y libfontconfig1 libfreetype6
-        sudo apt-get install -y libstdc++-12-dev
+        sudo apt-get install -y libstdc++-12-dev || true
+        sudo apt-get install -y libstdc++-8-dev || true
     fi
 
     mkdir -p {{ExtDir}}
