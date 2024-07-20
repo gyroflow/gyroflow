@@ -200,7 +200,7 @@ fn main() {
         },
         "linux" => {
             println!("cargo:rustc-link-search={}", std::env::var("OPENCV_LINK_PATHS").unwrap());
-            println!("cargo:rustc-link-search={}/lib/amd64", std::env::var("FFMPEG_DIR").unwrap());
+            println!("cargo:rustc-link-search={}/lib/{}", std::env::var("FFMPEG_DIR").unwrap(), std::env::var("FFMPEG_ARCH").unwrap_or("amd64".into()));
             println!("cargo:rustc-link-search={}/lib", std::env::var("FFMPEG_DIR").unwrap());
             println!("cargo:rustc-link-lib=static:+whole-archive=z");
             if std::env::var("OPENCV_LINK_PATHS").unwrap_or_default().contains("vcpkg") {
@@ -208,11 +208,11 @@ fn main() {
             } else {
                 std::env::var("OPENCV_LINK_LIBS").unwrap().split(',').for_each(|lib| println!("cargo:rustc-link-lib={}", lib.trim()));
             }
-        },
-        "windows" => {
+        }, 
+        "windows" => {  
             println!("cargo:rustc-link-arg=/EXPORT:NvOptimusEnablement");
             println!("cargo:rustc-link-arg=/EXPORT:AmdPowerXpressRequestHighPerformance");
-            println!("cargo:rustc-link-search={}\\lib\\x64", std::env::var("FFMPEG_DIR").unwrap());
+            println!("cargo:rustc-link-search={}\\lib\\{}", std::env::var("FFMPEG_DIR").unwrap(), std::env::var("FFMPEG_ARCH").unwrap_or("x64".into()));
             println!("cargo:rustc-link-search={}\\lib", std::env::var("FFMPEG_DIR").unwrap());
             let mut res = winres::WindowsResource::new();
             res.set_icon("resources/app_icon.ico");

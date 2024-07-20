@@ -63,8 +63,8 @@ install-deps:
     if [ ! -f "{{ExtDir}}/vcpkg/installed/arm64-ios/lib/libopencv_core4.a" ]; then
         echo "Installing OpenCV from vcpkg"
         # Install OpenCV
-        ./vcpkg/vcpkg install "flatbuffers:arm64-ios"
-        ./vcpkg/vcpkg install "opencv4[core]:arm64-ios"
+        ./vcpkg/vcpkg install "flatbuffers:arm64-ios" --cmake-args=-DVCPKG_BUILD_TYPE=release
+        ./vcpkg/vcpkg install "opencv4[core]:arm64-ios" --cmake-args=-DVCPKG_BUILD_TYPE=release
         rm -rf ./vcpkg/buildtrees
         rm -rf ./vcpkg/downloads
     fi

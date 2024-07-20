@@ -9,25 +9,34 @@ ExtDir := ProjectDir / "ext"
 
 # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
 QtVersion := env_var_or_default("FORCE_QT_VERSION", if os() == "windows" { "6.7.2" } else { "6.4.3" })
-QtArch := if os() == "windows" { "msvc2019_64"
-   } else if os() == "macos"   { "macos"
-   } else                      { "gcc_64" }
+QtArch := if os() + arch() == "windowsx86_64"  { "msvc2019_64"
+   } else if os() + arch() == "windowsaarch64" { "msvc2019_arm64"
+   } else if os() == "macos"     { "macos"
+   } else if arch() == "aarch64" { "gcc_arm64"
+   } else                        { "gcc_64" }
 QtPath := ProjectDir / "ext/" / QtVersion / QtArch / "bin"
+export QMAKE := env_var_or_default("QMAKE", if path_exists(QtPath / "qmake.bat") == "true" { QtPath / "qmake.bat" } else { QtPath / "qmake" })
 # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
 
 # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
-FFmpeg := if os() == "windows" { "ffmpeg-7.0-windows-desktop-vs2022-gpl-lite"
-   } else if os() + arch() == "macosaarch64" { "ffmpeg-arm64"
-   } else if os() + arch() == "macosx86_64"  { "ffmpeg-x64_64"
-   } else                      { "ffmpeg-7.0-linux-clang-gpl-lite" }
+FFmpeg := if os() + arch() == "windowsx86_64"  { "ffmpeg-7.0-windows-desktop-vs2022-gpl-lite"
+   } else if os() + arch() == "windowsaarch64" { "ffmpeg-7.0-windows-desktop-vs2022-default"
+   } else if os() + arch() == "macosaarch64"   { "ffmpeg-arm64"
+   } else if os() + arch() == "macosx86_64"    { "ffmpeg-x64_64"
+   } else if arch() == "aarch64"               { "ffmpeg-7.0-linux-clang-default"
+   } else                                      { "ffmpeg-7.0-linux-clang-gpl-lite" }
 export FFMPEG_DIR := ProjectDir / "ext" / FFmpeg
+FfmpegArch := if arch() == "aarch64" { "arm64" } else { if os() == "windows" { "x64" } else { "amd64" } }
+export FFMPEG_ARCH := "{{FfmpegArch}}"
 # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
 
 # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
-VcpkgArch := if os() == "windows"               { "x64-windows-release"
-      } else if os() + arch() == "macosaarch64" { "arm64-osx"
-      } else if os() + arch() == "macosx86_64"  { "x64-osx-release"
-      } else                                    { "x64-linux-release" }
+VcpkgArch := if os() + arch() == "windowsx86_64"  { "x64-windows"
+      } else if os() + arch() == "windowsaarch64" { "arm64-windows"
+      } else if os() + arch() == "macosaarch64"   { "arm64-osx"
+      } else if os() + arch() == "macosx86_64"    { "x64-osx"
+      } else if arch() == "aarch64"               { "arm64-linux"
+      } else                                      { "x64-linux" }
 export OPENCV_LINK_LIBS := "opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4,opencv_imgcodecs4,opencv_objdetect4,opencv_stitching4" + if os() == "linux" { ",png" } else if os() + arch() == "macosaarch64" { ",tegra_hal" } else { "" }
 export OPENCV_LINK_PATHS := ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "lib," + ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "lib/manual-link/opencv4_thirdparty"
 export OPENCV_INCLUDE_PATHS := ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "include"
@@ -57,8 +66,9 @@ export LIBCLANG_PATH := if os() == "macos" {
 LLVMPath := LIBCLANG_PATH
 # ――――――――――――――――――――――――――――――――――――――― Clang ―――――――――――――――――――――――――――――――――――――――――
 
-export LD_LIBRARY_PATH := ProjectDir / "target/release:" + QtPath / "../lib:" + FFMPEG_DIR + "/lib:" + FFMPEG_DIR + "/lib/amd64"
 
-export PATH := QtPath + PathSep + FFMPEG_DIR + "/bin" + PathSep + FFMPEG_DIR + "/bin/amd64" + PathSep + OpenCVPath + PathSep + LLVMPath + PathSep + env_var('PATH')
+export LD_LIBRARY_PATH := ProjectDir / "target/release:" + QtPath / "../lib:" + FFMPEG_DIR + "/lib:" + FFMPEG_DIR + "/lib/{{FfmpegArch}}"
+
+export PATH := QtPath + PathSep + FFMPEG_DIR + "/bin" + PathSep + FFMPEG_DIR + "/bin/{{FfmpegArch}}" + PathSep + OpenCVPath + PathSep + LLVMPath + PathSep + env_var('PATH')
 
 # export VULKAN_SDK := "D:/Programy/VulkanSDK/1.3.236.0"

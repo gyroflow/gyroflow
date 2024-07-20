@@ -34,8 +34,8 @@ install-deps:
         {{ExtDir}}/vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
         # Install OpenCV
-        {{ExtDir}}/vcpkg/vcpkg install "flatbuffers:{{VcpkgArch}}"
-        {{ExtDir}}/vcpkg/vcpkg install "opencv4[core]:{{VcpkgArch}}"
+        {{ExtDir}}/vcpkg/vcpkg install "flatbuffers:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
+        {{ExtDir}}/vcpkg/vcpkg install "opencv4[core]:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
         rm -rf {{ExtDir}}/vcpkg/buildtrees
         rm -rf {{ExtDir}}/vcpkg/downloads
     fi

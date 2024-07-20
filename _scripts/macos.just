@@ -55,8 +55,8 @@ install-deps:
     if [ ! -f "{{OpenCVPath}}/../lib/libopencv_core4.a" ]; then
         echo "Installing OpenCV from vcpkg"
         # Install OpenCV
-        ./vcpkg/vcpkg install "opencv4[core]:x64-osx-release"
-        ./vcpkg/vcpkg install "opencv4[core]:arm64-osx"
+        ./vcpkg/vcpkg install "opencv4[core]:x64-osx" --cmake-args=-DVCPKG_BUILD_TYPE=release
+        ./vcpkg/vcpkg install "opencv4[core]:arm64-osx" --cmake-args=-DVCPKG_BUILD_TYPE=release
         rm -rf ./vcpkg/buildtrees
         rm -rf ./vcpkg/downloads
     fi
@@ -153,8 +153,8 @@ deploy *param:
         export MACOSX_DEPLOYMENT_TARGET="10.11"
 
         export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-x86_64
-        export OPENCV_LINK_PATHS=$OPENCV_DIR/x64-osx-release/lib
-        export OPENCV_INCLUDE_PATHS=$OPENCV_DIR/x64-osx-release/include/
+        export OPENCV_LINK_PATHS=$OPENCV_DIR/x64-osx/lib
+        export OPENCV_INCLUDE_PATHS=$OPENCV_DIR/x64-osx/include/
         rustup target add x86_64-apple-darwin
         cargo build --target x86_64-apple-darwin --profile deploy
         #strip $PROJECT_DIR/target/x86_64-apple-darwin/deploy/gyroflow

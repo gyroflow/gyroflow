@@ -29,10 +29,15 @@ install-deps:
     }
 
     # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
-    if (-not (Test-Path -Path "{{QtVersion}}/msvc2019_64")) {
+    if (-not (Test-Path -Path "{{QtVersion}}/{{QtArch}}")) {
         echo "Downloading Qt {{QtVersion}}"
         & $Python -m pip install -U pip aqtinstall
-        & $Python -m aqt install-qt windows desktop {{QtVersion}} win64_msvc2019_64 -m qtshadertools
+        if (-not (Test-Path -Path "{{QtVersion}}/msvc2019_64")) {
+            & $Python -m aqt install-qt windows desktop {{QtVersion}} win64_msvc2019_64 -m qtshadertools
+        }
+        if ("{{QtArch}}" -eq "msvc2019_arm64") {
+            & $Python -m aqt install-qt windows desktop {{QtVersion}} win64_{{QtArch}}
+        }
     }
     # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
 
@@ -51,9 +56,9 @@ install-deps:
         rm -Recurse -Force \vcpkg -ErrorAction SilentlyContinue
         git clone --depth 1 https://github.com/Microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
-        .\vcpkg\vcpkg install "flatbuffers:{{VcpkgArch}}"
-        .\vcpkg\vcpkg install "opencv4[core]:{{VcpkgArch}}"
-        .\vcpkg\vcpkg install "opencl:{{VcpkgArch}}"
+        .\vcpkg\vcpkg install "flatbuffers:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
+        .\vcpkg\vcpkg install "opencv4[core]:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
+        .\vcpkg\vcpkg install "opencl:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
         rm -Recurse -Force .\vcpkg\buildtrees
         rm -Recurse -Force .\vcpkg\downloads
     }
@@ -61,10 +66,14 @@ install-deps:
 
     # ――――――――――――――――――――――――――――――――――――――― LLVM ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "{{LLVMPath}}\libclang.dll")) {
+        $Arch = "win64"
+        if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") {
+            $Arch = "woa64";
+        }
         echo "Downloading LLVM"
-        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.6/LLVM-18.1.6-win64.exe" -outfile "llvm-win64.exe"
-        7z x -y llvm-win64.exe -ollvm
-        del "llvm-win64.exe"
+        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/LLVM-18.1.8-$Arch.exe" -outfile "llvm.exe"
+        7z x -y llvm.exe -ollvm
+        del "llvm.exe"
     }
     # ――――――――――――――――――――――――――――――――――――――― LLVM ――――――――――――――――――――――――――――――――――――――――
 
