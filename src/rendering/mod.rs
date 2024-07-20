@@ -728,9 +728,9 @@ lazy_static::lazy_static! {
     pub static ref LAST_PREFIX: Arc<RwLock<i32>> = Arc::new(RwLock::new(1));
 }
 
-#[cfg(not(any(target_os = "linux", all(target_os = "macos", target_arch = "x86_64"))))]
+#[cfg(not(any(all(target_os = "linux", target_arch = "x86_64"), all(target_os = "macos", target_arch = "x86_64"))))]
 type VaList = ffi::va_list;
-#[cfg(any(target_os = "linux", all(target_os = "macos", target_arch = "x86_64")))]
+#[cfg(any(all(target_os = "linux", target_arch = "x86_64"), all(target_os = "macos", target_arch = "x86_64")))]
 type VaList = *mut ffi::__va_list_tag;
 
 #[allow(improper_ctypes_definitions)]
@@ -740,9 +740,9 @@ unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_cha
         let mut prefix: i32 = *LAST_PREFIX.read();
 
         ffi::av_log_default_callback(avcl, level, fmt, vl);
-        #[cfg(target_os = "android")]
+        #[cfg(any(target_os = "android", all(target_os = "linux", target_arch = "aarch64")))]
         let written = ffi::av_log_format_line2(avcl, level, fmt, vl, line.as_mut_ptr() as *mut u8, line.len() as i32, &mut prefix);
-        #[cfg(not(target_os = "android"))]
+        #[cfg(not(any(target_os = "android", all(target_os = "linux", target_arch = "aarch64"))))]
         let written = ffi::av_log_format_line2(avcl, level, fmt, vl, line.as_mut_ptr() as *mut i8, line.len() as i32, &mut prefix);
         if written > 0 {
             line.resize(written as usize, 0u8);

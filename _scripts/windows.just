@@ -130,7 +130,7 @@ deploy:
     $QtDir       = resolve-path "{{QtPath}}\.."
     $CargoTarget = resolve-path "{{ProjectDir}}\target\deploy"
     $FFmpegDir   = resolve-path "{{FFMPEG_DIR}}"
-    $OpenCVDir   = resolve-path "{{OpenCVPath}}"
+    $OpenCVDir   = resolve-path "{{OpenCVPath}}\bin"
 
     # Copy Qt
     xcopy /Y "$QtDir\plugins\platforms\qwindows.dll"                                                 "$TargetDir\platforms\"

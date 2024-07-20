@@ -1,6 +1,7 @@
 import 'common.just'
 
 AptGetExists := `which apt-get > /dev/null && echo true || echo false`
+QtLinuxArch := if arch() == "aarch64" { "linux_arm64" } else { "linux" }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -17,18 +18,20 @@ install-deps:
         sudo apt-get install -y libc++-dev libva-dev libvdpau-dev libvdpau1 mesa-va-drivers ocl-icd-opencl-dev opencl-headers
         sudo apt-get install -y libpulse-dev libasound-dev libxkbcommon-dev
         sudo apt-get install -y libfontconfig1 libfreetype6
+        sudo apt-get install -y libstdc++-12-dev
     fi
 
     mkdir -p {{ExtDir}}
 
-    if [ ! -f "{{OpenCVPath}}/../lib/libopencv_core4.a" ]; then
+    if [ ! -f "{{OpenCVPath}}/lib/libopencv_core4.a" ]; then
         echo "Installing OpenCV from vcpkg"
         # OpenCV dependencies
         if [ "{{AptGetExists}}" == "true" ]; then
-            sudo apt-get install -y libx11-dev libxft-dev libxext-dev autoconf libtool libglfw3 libgles2-mesa-dev libxrandr-dev libxi-dev libxcursor-dev libxdamage-dev libxinerama-dev libxxf86vm-dev libdbus-1-dev libxtst-dev libdbus-1-dev libxi-dev libxtst-dev libsystemd-dev
+            sudo apt-get install -y libx11-dev libxft-dev libxext-dev autoconf libtool libglfw3 libgles2-mesa-dev libxrandr-dev libxi-dev libxcursor-dev libxdamage-dev libxinerama-dev libxxf86vm-dev libdbus-1-dev libxtst-dev libdbus-1-dev libxi-dev libxtst-dev libsystemd-dev cmake ninja-build
         fi
 
         # Install vcpkg
+        export VCPKG_FORCE_SYSTEM_BINARIES=1
         git clone --depth 1 https://github.com/Microsoft/vcpkg.git {{ExtDir}}/vcpkg || true
 
         {{ExtDir}}/vcpkg/bootstrap-vcpkg.sh -disableMetrics
@@ -57,7 +60,7 @@ install-deps:
         # Install Qt
         pip3 install -U pip
         pip3 install -U aqtinstall
-        python3 -m aqt install-qt linux desktop {{QtVersion}}
+        python3 -m aqt install-qt {{QtLinuxArch}} desktop {{QtVersion}}
 
         # For VMware: sudo apt install libpocl2
     fi

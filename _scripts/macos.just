@@ -52,7 +52,7 @@ install-deps:
         python3 -m aqt install-qt mac desktop {{QtVersion}}
     fi
 
-    if [ ! -f "{{OpenCVPath}}/../lib/libopencv_core4.a" ]; then
+    if [ ! -f "{{OpenCVPath}}/lib/libopencv_core4.a" ]; then
         echo "Installing OpenCV from vcpkg"
         # Install OpenCV
         ./vcpkg/vcpkg install "opencv4[core]:x64-osx" --cmake-args=-DVCPKG_BUILD_TYPE=release
