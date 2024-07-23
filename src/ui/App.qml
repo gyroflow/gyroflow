@@ -378,11 +378,15 @@ Rectangle {
                                 }
 
                                 const job_id = render_queue.add(window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
-                                if (renderBtn.isAddToQueue || renderBtn.tempIsAddToQueue) {
+                                if (renderBtn.isAddToQueue || renderBtn.tempIsAddToQueue || render_queue.get_active_render_count() >= render_queue.parallel_renders) {
                                     // Add to queue
                                     renderBtn.addQueueDelayed = true;
                                     renderBtn.btn.enabled = false;
                                     delayAddQueue.start();
+
+                                    if (render_queue.get_active_render_count() >= render_queue.parallel_renders) {
+                                        render_queue.start();
+                                    }
 
                                     if (+settings.value("showQueueWhenAdding", "1"))
                                         videoArea.queue.shown = true;
