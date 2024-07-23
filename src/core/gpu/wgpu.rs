@@ -171,7 +171,7 @@ impl WgpuWrapper {
         }
 
         if let Some(adapter) = lock.get(adapter_id) {
-            log::debug!("WGPU initializing adapter #{adapter_id}");
+            log::debug!("WGPU initializing adapter #{adapter_id}: {:?}", adapter.get_info());
             let (device, queue) = match &buffers.input.data {
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 BufferSource::Metal { command_queue, .. } |

@@ -673,6 +673,7 @@ impl CudaFunctions {
             vec![
                 "cudart64_121.dll",
                 "cudart64_120.dll",
+                "cudart64_12.dll",
                 "cudart64_110.dll",
                 "cudart64_101.dll",
                 "cudart64_91.dll",
