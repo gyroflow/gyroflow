@@ -19,6 +19,7 @@ install-deps:
         sudo apt-get install -y libpulse-dev libasound-dev libxkbcommon-dev
         sudo apt-get install -y libfontconfig1 libfreetype6
         sudo apt-get install -y libstdc++-12-dev || true
+        sudo apt-get install -y libstdc++-8-dev || true
     fi
 
     mkdir -p {{ExtDir}}
@@ -31,7 +32,9 @@ install-deps:
         fi
 
         # Install vcpkg
-        export VCPKG_FORCE_SYSTEM_BINARIES=1
+        if [ "$IN_DOCKER" != "1" ]; then
+            export VCPKG_FORCE_SYSTEM_BINARIES=1
+        fi
         git clone --depth 1 https://github.com/Microsoft/vcpkg.git {{ExtDir}}/vcpkg || true
 
         {{ExtDir}}/vcpkg/bootstrap-vcpkg.sh -disableMetrics
@@ -145,7 +148,7 @@ deploy *param:
             export IN_DOCKER=1
             curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal
             source \$HOME/.cargo/env
-            cargo install --version '>=1.13' just
+            cargo install --force just
             cd $PROJECT_DIR
             just install-deps
             just deploy
