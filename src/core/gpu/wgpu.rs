@@ -346,13 +346,13 @@ impl WgpuWrapper {
                     layout: Some(&pipeline_layout),
                     vertex: wgpu::VertexState {
                         module: &shader,
-                        entry_point: "undistort_vertex",
+                        entry_point: Some("undistort_vertex"),
                         buffers: &[],
                         compilation_options: compilation_options.clone(),
                     },
                     fragment: Some(wgpu::FragmentState {
                         module: &shader,
-                        entry_point: "undistort_fragment",
+                        entry_point: Some("undistort_fragment"),
                         targets: &[Some(wgpu::ColorTargetState {
                             format: wgpu_format.0,
                             blend: None,
@@ -372,7 +372,7 @@ impl WgpuWrapper {
             } else {
                 PipelineType::Compute(device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
                     module: &shader,
-                    entry_point: "undistort_compute",
+                    entry_point: Some("undistort_compute"),
                     label: None,
                     layout: Some(&pipeline_layout),
                     compilation_options,

@@ -312,6 +312,20 @@ name = "bytemuck"
 version = "1.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b236fc92302c97ed75b38da1f4917b5cdda4984745740f153a5d3059e48d725e"
+dependencies = [
+ "bytemuck_derive",
+]
+
+[[package]]
+name = "bytemuck_derive"
+version = "1.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1ee891b04274a59bd38b412188e24b849617b2e45a0fd8d057deb63e7403761b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.72",
+]
 
 [[package]]
 name = "byteorder"
@@ -641,7 +655,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=205f1e3#205f1e3ab60a4c8c6b6f901803eb9cfc3a5b62f3"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=55ae943#55ae943086a1224a0bbf74e807ea5e12af72e6b2"
 dependencies = [
  "bitflags 2.6.0",
  "libloading",
@@ -1332,9 +1346,9 @@ checksum = "8eaf4bc02d17cbdd7ff4c7438cafcdf7fb9a4613313ad11b4f8fefe7d3fa0130"
 
 [[package]]
 name = "jobserver"
-version = "0.1.31"
+version = "0.1.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2b099aaa34a9751c5bf0878add70444e1ed2dd73f347be99003d4577277de6e"
+checksum = "48d1dbcbbeb6a7fec7e059840aa538bd62aaccf972c7346c4d9d2059312853d0"
 dependencies = [
  "libc",
 ]
@@ -1485,9 +1499,9 @@ dependencies = [
 
 [[package]]
 name = "matrixmultiply"
-version = "0.3.8"
+version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7574c1cf36da4798ab73da5b215bbf444f50718207754cb522201d78d1cd0ff2"
+checksum = "9380b911e3e96d10c1f415da0876389aaf1b56759054eeb0de7df940c456ba1a"
 dependencies = [
  "autocfg",
  "rawpointer",
@@ -1557,7 +1571,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=205f1e3#205f1e3ab60a4c8c6b6f901803eb9cfc3a5b62f3"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=55ae943#55ae943086a1224a0bbf74e807ea5e12af72e6b2"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-set",
@@ -2355,9 +2369,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.23.11"
+version = "0.23.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4828ea528154ae444e5a642dbb7d5623354030dc9822b83fd9bb79683c7399d0"
+checksum = "c58f8c84392efc0a126acce10fa59ff7b3d2ac06ab451a33f2741989b806b044"
 dependencies = [
  "log",
  "once_cell",
@@ -2449,12 +2463,13 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.120"
+version = "1.0.121"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e0d21c9a8cae1235ad58a00c11cb40d4b1e5c784f1ef2c537876ed6ffd8b7c5"
+checksum = "4ab380d7d9f22ef3f21ad3e6c1ebe8e4fc7a2000ccba2e4d71fc96f15b2cb609"
 dependencies = [
  "indexmap",
  "itoa",
+ "memchr",
  "ryu",
  "serde",
 ]
@@ -2749,9 +2764,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "toml_datetime"
-version = "0.6.6"
+version = "0.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4badfd56924ae69bcc9039335b2e017639ce3f9b001c393c1b2d1ef846ce2cbf"
+checksum = "f8fb9f64314842840f1d940ac544da178732128f1c78c21772e876579e0da1db"
 
 [[package]]
 name = "toml_edit"
@@ -2875,9 +2890,9 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "version_check"
-version = "0.9.4"
+version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
+checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "walkdir"
@@ -2983,7 +2998,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=205f1e3#205f1e3ab60a4c8c6b6f901803eb9cfc3a5b62f3"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=55ae943#55ae943086a1224a0bbf74e807ea5e12af72e6b2"
 dependencies = [
  "arrayvec 0.7.4",
  "cfg_aliases",
@@ -3007,7 +3022,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=205f1e3#205f1e3ab60a4c8c6b6f901803eb9cfc3a5b62f3"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=55ae943#55ae943086a1224a0bbf74e807ea5e12af72e6b2"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-vec",
@@ -3032,7 +3047,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=205f1e3#205f1e3ab60a4c8c6b6f901803eb9cfc3a5b62f3"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=55ae943#55ae943086a1224a0bbf74e807ea5e12af72e6b2"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.4",
@@ -3071,12 +3086,13 @@ dependencies = [
  "web-sys",
  "wgpu-types",
  "winapi",
+ "windows 0.58.0",
 ]
 
 [[package]]
 name = "wgpu-types"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=205f1e3#205f1e3ab60a4c8c6b6f901803eb9cfc3a5b62f3"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=55ae943#55ae943086a1224a0bbf74e807ea5e12af72e6b2"
 dependencies = [
  "bitflags 2.6.0",
  "js-sys",

@@ -47,7 +47,7 @@ enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.4.1"
 lru = "0.12"
-thiserror = "1.0.61"
+thiserror = "1.0.63"
 ciborium = "0.2.2"
 nt-hive = "0.2"
 dyn-clone = "1.0.17"
@@ -78,12 +78,12 @@ ocl = { version = "0.19.7", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.2.0"
 exr = "1.72"
-opencv = { version = "0.92.0", features = ["clang-runtime"], optional = true }
+opencv = { version = "0.92.1", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "205f1e3", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "55ae943", features = ["spirv", "naga-ir"] }
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "205f1e3"
+rev = "55ae943"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
@@ -122,7 +122,7 @@ ndk-sys = { version = "0.6.0" }
 ndk-context = { version = "0.1.1" }
 
 [build-dependencies]
-ureq = "2.9.7"
+ureq = "2.10.0"
 flate2 = "1.0.30"
 tar = "0.4.41"
 walkdir = "2.5"

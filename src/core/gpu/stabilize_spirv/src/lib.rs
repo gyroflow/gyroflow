@@ -2,6 +2,7 @@
 // Copyright © 2023 Adrian <adrian.eddy at gmail>
 
 #![deny(warnings)]
+#![allow(unexpected_cfgs)]
 #![no_std]
 
 // TODO: compute stage with buffer
