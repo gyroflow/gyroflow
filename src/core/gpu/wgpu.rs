@@ -167,7 +167,7 @@ impl WgpuWrapper {
 
         #[cfg(any(target_os = "windows", target_os = "linux"))]
         if let BufferSource::CUDABuffer { .. } = buffers.input.data {
-            adapter_id = super::wgpu_interop_cuda::get_current_cuda_device() as usize;
+            adapter_id = super::wgpu_interop_cuda::get_current_device_id_by_uuid(&lock);
         }
 
         if let Some(adapter) = lock.get(adapter_id) {

@@ -6,6 +6,8 @@
 
 use wgpu::hal::api::Vulkan;
 use ash::vk::{ self, ImageCreateInfo, BufferCreateInfo };
+use std::collections::HashMap;
+use parking_lot::RwLock;
 
 use CUmemAllocationType::*;
 use CUmemAllocationHandleType::*;
@@ -20,6 +22,10 @@ macro_rules! cuda {
             log::error!("Call to {} failed: {:?}", stringify!($func), err);
         }
     };
+}
+
+lazy_static::lazy_static! {
+    static ref UUIDMAP: RwLock<HashMap<String, usize>> = RwLock::new(HashMap::new());
 }
 
 pub struct CudaSharedMemory {
@@ -56,6 +62,61 @@ pub fn get_current_cuda_device() -> i32 {
         unsafe { (cuda.cudaGetDevice)(&mut dev); }
     }
     dev
+}
+pub fn get_device_uuid(device: usize) -> String {
+    let mut uuid = CUuuid::default();
+    if let Ok(cuda) = CUDA.as_ref() {
+        unsafe { (cuda.cuDeviceGetUuid)(&mut uuid, device as _); }
+    }
+    uuid.bytes.iter().map(|x| format!("{:02x}", x)).collect()
+}
+
+pub fn get_current_device_id_by_uuid(adapters: &Vec<wgpu::Adapter>) -> usize {
+    let mut adapter_id = get_current_cuda_device() as usize;
+
+    let uuid = get_device_uuid(adapter_id);
+    log::debug!("Current device UUID: {uuid}, adapter_id: {adapter_id}");
+
+    let mut found = false;
+    {
+        let uuidmap = UUIDMAP.read();
+        if !uuidmap.is_empty() {
+            if let Some(id) = uuidmap.get(&uuid) {
+                adapter_id = *id;
+                found = true;
+            }
+        }
+    }
+
+    if !found {
+        for (i, adapter) in adapters.iter().enumerate() {
+            let device = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
+                label: None,
+                required_features: wgpu::Features::empty(),
+                required_limits: wgpu::Limits::default(),
+                memory_hints: wgpu::MemoryHints::Performance,
+            }, None));
+            if let Ok((device, _q)) = device {
+                unsafe {
+                    device.as_hal::<wgpu::hal::api::Vulkan, _, _>(|device| {
+                        device.map(|device| {
+                            let mut id_props = ash::vk::PhysicalDeviceIDProperties::default();
+                            let mut device_properties = ash::vk::PhysicalDeviceProperties2::default().push_next(&mut id_props);
+                            device.shared_instance().raw_instance().get_physical_device_properties2(device.raw_physical_device(), &mut device_properties);
+
+                            let dev_uuid = id_props.device_uuid.iter().map(|x| format!("{:02x}", x)).collect::<String>();
+                            UUIDMAP.write().insert(dev_uuid.clone(), i);
+                            log::debug!("Device #{i} uuid: {dev_uuid}");
+                            if dev_uuid == uuid {
+                                adapter_id = i;
+                            }
+                        })
+                    }).unwrap().unwrap(); // TODO: unwrap
+                }
+            }
+        }
+    }
+    adapter_id
 }
 
 fn align(a: usize, b: usize) -> usize { ((a + b - 1) / b) * b }
@@ -147,6 +208,10 @@ pub fn allocate_shared_cuda_memory(size: usize) -> Result<CudaSharedMemory, Box<
     let mut dev = 0;
     unsafe { (cuda.cudaGetDevice)(&mut dev); }
     let location = CUmemLocation { type_: CU_MEM_LOCATION_TYPE_DEVICE, id: dev };
+
+    let mut uuid = CUuuid::default();
+    unsafe { (cuda.cuDeviceGetUuid)(&mut uuid, dev); }
+    log::debug!("Device #{dev} UUID: {}", uuid.bytes.iter().map(|x| format!("{:02x}", x)).collect::<String>());
 
     let mut device_ptr: CUdeviceptr = 0u64;
     let mut shared_handle = 0isize;
@@ -635,6 +700,12 @@ pub struct CUDA_EXTERNAL_MEMORY_BUFFER_DESC_st {
     pub reserved: [::std::os::raw::c_uint; 16usize],
 }
 
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
+pub struct CUuuid {
+    pub bytes: [::core::ffi::c_char; 16usize],
+}
+
 #[cfg(target_os = "windows")]
 use libloading::os::windows as dl;
 #[cfg(target_os = "linux")]
@@ -661,6 +732,8 @@ pub struct CudaFunctions {
     pub cuMemAddressFree:                dl::Symbol<unsafe extern "C" fn(ptr: CUdeviceptr, size: usize) -> CUresult>,
     pub cuCtxSynchronize:                dl::Symbol<unsafe extern "C" fn() -> CUresult>,
     pub cuMemGetAddressRange_v2:         dl::Symbol<unsafe extern "C" fn(pbase: *mut CUdeviceptr, psize: *mut usize, dptr: CUdeviceptr) -> CUresult>,
+
+    pub cuDeviceGetUuid:                 dl::Symbol<unsafe extern "C" fn(uuid: *mut CUuuid, dev: c_int) -> CUresult>,
 
     pub cuImportExternalMemory:          dl::Symbol<unsafe extern "C" fn(extMem_out: *mut CUexternalMemory, memHandleDesc: *const CUDA_EXTERNAL_MEMORY_HANDLE_DESC_st) -> CUresult>,
     pub cuExternalMemoryGetMappedBuffer: dl::Symbol<unsafe extern "C" fn(devPtr: *mut CUdeviceptr, extMem: CUexternalMemory, bufferDesc: *const CUDA_EXTERNAL_MEMORY_BUFFER_DESC_st) -> CUresult>,
@@ -721,6 +794,8 @@ impl CudaFunctions {
             cuMemAddressFree:                nvcuda.get(b"cuMemAddressFree")?,
             cuCtxSynchronize:                nvcuda.get(b"cuCtxSynchronize")?,
             cuMemGetAddressRange_v2:         nvcuda.get(b"cuMemGetAddressRange_v2")?,
+
+            cuDeviceGetUuid:                 nvcuda.get(b"cuDeviceGetUuid_v2").or_else(|_| nvcuda.get(b"cuDeviceGetUuid"))?,
 
             cuImportExternalMemory:          nvcuda.get(b"cuImportExternalMemory")?,
             cuExternalMemoryGetMappedBuffer: nvcuda.get(b"cuExternalMemoryGetMappedBuffer")?,
