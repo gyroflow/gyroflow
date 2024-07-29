@@ -129,6 +129,8 @@ pub extern "system" fn Java_xyz_gyroflow_MainActivity_urlReceived(_vm: *mut c_vo
             } else {
                 pendingUrl = str;
             }
+        #else
+            (void)jstr;
         #endif
     });
 }

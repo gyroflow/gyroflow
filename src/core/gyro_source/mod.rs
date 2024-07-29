@@ -394,10 +394,10 @@ impl GyroSource {
                 }
             }
             if input.camera_type() == "Sony" {
+                md.camera_stab_data = sony::stab_calc_splines(&md, &is_temp, sample_rate, fps, size).unwrap_or_default();
                 if let Some(frt) = md.frame_readout_time {
                     md.frame_readout_time = Some(frt / original_sample_rate * sample_rate);
                 }
-                md.camera_stab_data = sony::stab_calc_splines(&md, &is_temp, sample_rate, fps, size).unwrap_or_default();
             }
         }
 

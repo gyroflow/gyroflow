@@ -169,7 +169,7 @@ pub fn get_time_offset(md: &FileMetadata, input: &telemetry_parser::Input, tag_m
 pub struct ISTemp {
     pub frame_interval: i32,
     pub original_sample_rate: f64,
-    pub first_frame_ts: f64,
+    pub first_frame_ts: Vec<f64>,
     pub pixel_pitch: (u32, u32),
     pub sensor_size: (u32, u32),
     pub per_frame_exposure: Vec<f64>,
@@ -296,7 +296,7 @@ pub fn stab_collect(is: &mut ISTemp, tag_map: &GroupedTagMap, _info: &telemetry_
     is.per_frame_start_idx.push(start_idx);
     is.per_frame_crop.push((crop_origin.0, crop_origin.1, crop_size.0, crop_size.1));
     is.original_sample_rate = original_sample_rate;
-    is.first_frame_ts = first_frame_ts * 1000.0;
+    is.first_frame_ts.push(first_frame_ts * 1000.0);
     is.pixel_pitch = *pixel_pitch;
     is.sensor_size = *sensor_size;
 
@@ -306,13 +306,13 @@ pub fn stab_collect(is: &mut ISTemp, tag_map: &GroupedTagMap, _info: &telemetry_
 pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, _frame_rate: f64, _size: (usize, usize)) -> Option<Vec<CameraStabData>> {
     let num_frames = is_temp.per_frame_exposure.len();
 
-    let readout_time = md.frame_readout_time.unwrap_or_default() / is_temp.original_sample_rate * sample_rate * 1000.0;
-    let first_timestamp = is_temp.first_frame_ts;
+    let readout_time = md.frame_readout_time.unwrap_or_default() * 1000.0;
 
     let per_frame_data: Vec<CameraStabData> = (0..num_frames).into_par_iter().filter_map(|frame| {
         let crop_area = *is_temp.per_frame_crop.get(frame)?; // (x, y, w, h)
         // let crop_scale = (crop_area.2 as f64 / is_temp.sensor_size.0 as f64, crop_area.3 as f64 / is_temp.sensor_size.1 as f64);
         let exposuretime = is_temp.per_frame_exposure.get(frame)?;
+        let first_timestamp = is_temp.first_frame_ts.get(frame)?;
         let top_offset = first_timestamp - exposuretime / 2.0;
         let bot_offset = top_offset + readout_time;
         let entry_rate = is_temp.sensor_size.1 as f64 / readout_time; // 2166
