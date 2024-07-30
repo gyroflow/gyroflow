@@ -231,7 +231,10 @@ impl UITools {
 
 pub fn modify_digit_impl(num_str: &str, cursor_position: usize, increase: bool) -> (String, usize) {
     // Convert the string to a number and find its decimal point
-    let number = num_str.parse::<f64>().unwrap();
+    let number = match num_str.parse::<f64>() {
+        Ok(n) => n,
+        Err(_) => return (num_str.to_string(), cursor_position),
+    };
     let number_length = num_str.len();
     let decimal_pos = num_str.find('.').unwrap_or(number_length);
     let has_decimal_part = number_length > decimal_pos;
