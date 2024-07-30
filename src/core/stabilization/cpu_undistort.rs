@@ -184,6 +184,35 @@ impl Stabilization {
                 if (params.flags & 128) == 128 { uv.1 = params.height as f32 - uv.1; } // framebuffer inverted
             }
 
+            // FocalPlaneDistortion
+            if !mesh_data.is_empty() && mesh_data[0] > 0.0 && mesh_data[mesh_data[0] as usize] > 0.0 {
+                let o = mesh_data[0] as usize; // offset to focal plane distortion data
+
+                let mesh_size = (mesh_data[3], mesh_data[4]);
+                let origin    = (mesh_data[5] as f32, mesh_data[6] as f32);
+                let crop_size = (mesh_data[7] as f32, mesh_data[8] as f32);
+                let stblz_grid = mesh_size.1 / 8.0;
+
+                if (params.flags & 128) == 128 { uv.1 = params.height as f32 - uv.1; } // framebuffer inverted
+
+                uv.0 = map_coord(uv.0, 0.0, params.width  as f32, origin.0, origin.0 + crop_size.0);
+                uv.1 = map_coord(uv.1, 0.0, params.height as f32, origin.1, origin.1 + crop_size.1);
+
+                let idx = (uv.1 as f64 / stblz_grid).floor().max(0.0).min(7.0) as usize;
+                let delta = uv.1 as f64 - stblz_grid * idx as f64;
+                uv.0 -= (mesh_data[o + 4 + idx * 2 + 0] * delta) as f32;
+                uv.1 -= (mesh_data[o + 4 + idx * 2 + 1] * delta) as f32;
+                for j in 0..idx {
+                    uv.0 -= (mesh_data[o + 4 + j * 2 + 0] * stblz_grid) as f32;
+                    uv.1 -= (mesh_data[o + 4 + j * 2 + 1] * stblz_grid) as f32;
+                }
+
+                uv.0 = map_coord(uv.0, origin.0, origin.0 + crop_size.0, 0.0, params.width  as f32);
+                uv.1 = map_coord(uv.1, origin.1, origin.1 + crop_size.1, 0.0, params.height as f32);
+
+                if (params.flags & 128) == 128 { uv.1 = params.height as f32 - uv.1; } // framebuffer inverted
+            }
+
             if (params.flags & 2) == 2 { // Has digital lens
                 if let Some(digital) = digital_lens {
                     uv = digital.distort_point(uv.0, uv.1, 1.0, params);
@@ -522,6 +551,31 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
         }
 
         if let Some(mesh_data) = &mesh {
+            // FocalPlaneDistortion
+            if mesh_data[0] > 0.0 && mesh_data[mesh_data[0] as usize] > 0.0 {
+                let o = mesh_data[0] as usize; // offset to focal plane distortion data
+
+                let mesh_size = (mesh_data[3], mesh_data[4]);
+                let origin    = (mesh_data[5] as f32, mesh_data[6] as f32);
+                let crop_size = (mesh_data[7] as f32, mesh_data[8] as f32);
+                let stblz_grid = mesh_size.1 / 8.0;
+
+                x = map_coord(x, 0.0, params.width  as f32, origin.0, origin.0 + crop_size.0);
+                y = map_coord(y, 0.0, params.height as f32, origin.1, origin.1 + crop_size.1);
+
+                let idx = (y as f64 / stblz_grid).floor().max(0.0).min(7.0) as usize;
+                let delta = y as f64 - stblz_grid * idx as f64;
+                x += (mesh_data[o + 4 + idx * 2 + 0] * delta) as f32;
+                y += (mesh_data[o + 4 + idx * 2 + 1] * delta) as f32;
+                for j in 0..idx {
+                    x += (mesh_data[o + 4 + j * 2 + 0] * stblz_grid) as f32;
+                    y += (mesh_data[o + 4 + j * 2 + 1] * stblz_grid) as f32;
+                }
+
+                x = map_coord(x, origin.0, origin.0 + crop_size.0, 0.0, params.width  as f32);
+                y = map_coord(y, origin.1, origin.1 + crop_size.1, 0.0, params.height as f32);
+            }
+
             if mesh_data[0] > 9.0 {
                 let mesh_size = (mesh_data[3], mesh_data[4]);
                 let origin    = (mesh_data[5] as f32, mesh_data[6] as f32);

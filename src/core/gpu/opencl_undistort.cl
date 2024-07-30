@@ -335,42 +335,30 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
         // FocalPlaneDistortion
         if (mesh_data && mesh_data[0] > 0.0f && mesh_data[(int)(mesh_data[0])] > 0.0f) {
             int o = (int)(mesh_data[0]); // offset to focal plane distortion data
-            float2 start = (float2)(mesh_data[o + 1], mesh_data[o + 2]);
-            float scale = mesh_data[o + 3];
-            int len = (int)mesh_data[(int)(mesh_data[0])];
 
             float2 mesh_size = (float2)(mesh_data[3], mesh_data[4]);
             float2 origin    = (float2)(mesh_data[5], mesh_data[6]);
             float2 crop_size = (float2)(mesh_data[7], mesh_data[8]);
             float stblz_grid = mesh_size.y / 8.0f;
 
-            /*uv.x = map_coord(uv.x, 0.0f, (float)params->width,  origin.x, origin.x + crop_size.x);
+            if (params->flags & 128) uv.y = (float)params->height - uv.y; // framebuffer inverted
+
+            uv.x = map_coord(uv.x, 0.0f, (float)params->width,  origin.x, origin.x + crop_size.x);
             uv.y = map_coord(uv.y, 0.0f, (float)params->height, origin.y, origin.y + crop_size.y);
 
-            float fp_pos = (uv.y - start.y) / stblz_grid; // what's the start coord?
-            int idx = (int)floor(fp_pos);
-            float delta = (fp_pos - (float)idx) * stblz_grid;
-            if (idx < 0) {
-                idx = 0;
-                delta = 0.0;
-            } else if (idx > 6) {
-                idx = 7;
-                delta = 0.0;
+            int idx = min(7, max(0, (int)floor(uv.y / stblz_grid)));
+            float delta = uv.y - stblz_grid * (float)idx;
+            uv.x -= mesh_data[o + 4 + idx * 2 + 0] * delta;
+            uv.y -= mesh_data[o + 4 + idx * 2 + 1] * delta;
+            for (int j = 0; j < idx; j++) {
+                uv.x -= mesh_data[o + 4 + j * 2 + 0] * stblz_grid;
+                uv.y -= mesh_data[o + 4 + j * 2 + 1] * stblz_grid;
             }
-            float2 dist2out = (float2)(
-                -(mesh_data[o + 4 + idx * 2 + 0] * scale / mesh_size.x) * delta,
-                (mesh_data[o + 4 + idx * 2 + 1] * scale / mesh_size.y) * delta
-            );
-            for (int j = 0; j < 8; j++) {
-                if (j == idx) break;
-                dist2out.x += -(mesh_data[o + 4 + j * 2 + 0] * scale / mesh_size.x) * stblz_grid;
-                dist2out.y += (mesh_data[o + 4 + j * 2 + 1] * scale / mesh_size.y) * stblz_grid;
-            }
-            uv += dist2out;
 
             uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0f, (float)params->width);
-            uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0f, (float)params->height);*/
+            uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0f, (float)params->height);
 
+            if (params->flags & 128) uv.y = (float)params->height - uv.y; // framebuffer inverted
         }
 
         if (params->flags & 2) { // Has digital lens

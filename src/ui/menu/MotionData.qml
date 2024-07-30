@@ -564,10 +564,7 @@ MenuItem {
                     ctx.lineWidth = 1 * dpiScale;
                     ctx.strokeStyle = maincolor;
                     const o = mesh[0];
-                    const len = mesh[mesh[0]];
-                    let start = [mesh[o + 1], mesh[o + 2]];
-                    let scale = mesh[o + 3];
-                    let stblz_grid = mesh_size[1] / 8;
+                    const stblz_grid = mesh_size[1] / 8;
 
                     let points = [];
                     for (let i = 0; i < 8; ++i) {
@@ -581,27 +578,14 @@ MenuItem {
                     }
 
                     for (let i = 0; i < points.length; ++i) {
-                        let fp_pos = (points[i][1]/* - start[1]*/) / stblz_grid; // what's the start coord?
-                        let idx = Math.floor(fp_pos);
-                        let delta = (fp_pos - idx) * stblz_grid;
-                        if (idx < 0) {
-                            idx = 0;
-                            delta = 0.0;
-                        } else if (idx > 6) {
-                            idx = 7;
-                            delta = 0.0;
+                        const idx = Math.min(7, Math.max(0, Math.floor(points[i][1] / stblz_grid)));
+                        const delta = points[i][1] - stblz_grid * idx;
+                        points[i][0] += mesh[o + 4 + idx * 2 + 0] * delta;
+                        points[i][1] += mesh[o + 4 + idx * 2 + 1] * delta;
+                        for (let j = 0; j < idx; j++) {
+                            points[i][0] += mesh[o + 4 + j * 2 + 0] * stblz_grid;
+                            points[i][1] += mesh[o + 4 + j * 2 + 1] * stblz_grid;
                         }
-                        let dist2out = [
-                            mesh[o + 4 + idx * 2 + 0] * delta,
-                            mesh[o + 4 + idx * 2 + 1] * delta,
-                        ];
-                        for (let j = 0; j < 8; j++) {
-                            if (j == idx) break;
-                            dist2out[0] += (mesh[o + 4 + j * 2 + 0] / mesh_size[0]) * stblz_grid;
-                            dist2out[1] += (mesh[o + 4 + j * 2 + 1] / mesh_size[1]) * stblz_grid;
-                        }
-                        points[i][0] += dist2out[0];
-                        points[i][1] += dist2out[1];
                     }
 
                     ctx.beginPath();

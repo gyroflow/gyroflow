@@ -303,7 +303,7 @@ pub fn stab_collect(is: &mut ISTemp, tag_map: &GroupedTagMap, _info: &telemetry_
     Some(())
 }
 
-pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, sample_rate: f64, _frame_rate: f64, _size: (usize, usize)) -> Option<Vec<CameraStabData>> {
+pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, _sample_rate: f64, _frame_rate: f64, _size: (usize, usize)) -> Option<Vec<CameraStabData>> {
     let num_frames = is_temp.per_frame_exposure.len();
 
     let readout_time = md.frame_readout_time.unwrap_or_default() * 1000.0;
@@ -401,8 +401,8 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (V
         for x in focal_plane_data.get("unk4")?.as_array()? {
             let coord = x.as_array()?;
             has_any_focal_plane_value = true;
-            coords.push(coord[0].as_f64()?);
-            coords.push(coord[1].as_f64()?);
+            coords.push(coord[0].as_f64()? / 32768.0);
+            coords.push(coord[1].as_f64()? / 32768.0);
         }
         if coords.len() == 4 { coords.clear(); coords.push(0.0); }
         coords

@@ -230,6 +230,35 @@ vec2 rotate_and_distort(vec2 pos, float idx) {
             if (bool(params.flags & 128)) { uv.y = params.height - uv.y; } // framebuffer inverted
         }
 
+        // FocalPlaneDistortion
+        if (get_mesh_data(0) > 0.0 && get_mesh_data(int(get_mesh_data(0))) > 0.0) {
+            int o = int(get_mesh_data(0)); // offset to focal plane distortion data
+
+            vec2 mesh_size = vec2(get_mesh_data(3), get_mesh_data(4));
+            vec2 origin    = vec2(get_mesh_data(5), get_mesh_data(6));
+            vec2 crop_size = vec2(get_mesh_data(7), get_mesh_data(8));
+            float stblz_grid = mesh_size.y / 8.0;
+
+            if (bool(params.flags & 128)) { uv.y = params.height - uv.y; } // framebuffer inverted
+
+            uv.x = map_coord(uv.x, 0.0, params.width,  origin.x, origin.x + crop_size.x);
+            uv.y = map_coord(uv.y, 0.0, params.height, origin.y, origin.y + crop_size.y);
+
+            int idx = min(7, max(0, int(floor(uv.y / stblz_grid))));
+            float delta = uv.y - stblz_grid * float(idx);
+            uv.x -= get_mesh_data(o + 4 + idx * 2 + 0) * delta;
+            uv.y -= get_mesh_data(o + 4 + idx * 2 + 1) * delta;
+            for (int j = 0; j < idx; j++) {
+                uv.x -= get_mesh_data(o + 4 + j * 2 + 0) * stblz_grid;
+                uv.y -= get_mesh_data(o + 4 + j * 2 + 1) * stblz_grid;
+            }
+
+            uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0, params.width);
+            uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0, params.height);
+
+            if (bool(params.flags & 128)) { uv.y = params.height - uv.y; } // framebuffer inverted
+        }
+
         if (bool(params.flags & 2)) { // Has digital lens
             uv = digital_distort_point(uv);
         }
