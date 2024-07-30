@@ -337,11 +337,11 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
             uv.x = map_coord(uv.x, 0.0, f32(params.width),  origin.x, origin.x + crop_size.x);
             uv.y = map_coord(uv.y, 0.0, f32(params.height), origin.y, origin.y + crop_size.y);
 
-            let idx = u32(min(7, max(0, i32(floor(uv.y / stblz_grid)))));
-            let delta = uv.y - stblz_grid * f32(idx);
-            uv.x -= mesh_data[o + 4 + idx * 2 + 0] * delta;
-            uv.y -= mesh_data[o + 4 + idx * 2 + 1] * delta;
-            for (var j = 0; j < idx; j++) {
+            let idx2 = u32(min(7, max(0, i32(floor(uv.y / stblz_grid)))));
+            let delta = uv.y - stblz_grid * f32(idx2);
+            uv.x -= mesh_data[o + 4 + idx2 * 2 + 0] * delta;
+            uv.y -= mesh_data[o + 4 + idx2 * 2 + 1] * delta;
+            for (var j = 0u; j < idx2; j++) {
                 uv.x -= mesh_data[o + 4 + j * 2 + 0] * stblz_grid;
                 uv.y -= mesh_data[o + 4 + j * 2 + 1] * stblz_grid;
             }
