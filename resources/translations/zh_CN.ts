@@ -569,7 +569,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="389"/>
       <source>Proportional</source>
-      <translation type="unfinished">Proportional</translation>
+      <translation>比例</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="440"/>
@@ -766,12 +766,12 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Disable</source>
-      <translation type="unfinished">Disable</translation>
+      <translation>关闭</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Enable</source>
-      <translation type="unfinished">Enable</translation>
+      <translation>启用</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="54"/>
@@ -1067,7 +1067,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="305"/>
       <source>Enable if you&apos;re filming under water. This will adjust the refraction coefficient.</source>
-      <translation>如果您在水下摄制请启用。这将调整折射系数</translation>
+      <translation>如果您在水下摄制请启用。这将调整折射系数。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="326"/>
