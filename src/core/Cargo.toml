@@ -30,7 +30,7 @@ biquad = "0.4.2"
 fastrand = "2.1.0"
 lazy_static = "1.5.0"
 parking_lot = "0.12.3"
-regex = "1.10.5"
+regex = "1.10.6"
 bincode = "1.3.3"
 serde = "1.0"
 serde_json = "1.0"
@@ -65,11 +65,11 @@ bitarray = { version = "0.9", features = ["space"] }
 enterpolation = "0.2.1"
 libloading = "0.8"
 libc = "0.2"
-bytemuck = "1.16.1"
+bytemuck = "1.16.3"
 ash = "0.38.0"
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"
-flate2 = "1.0.30"
+flate2 = "1.0.31"
 walkdir = "2.5.0"
 url = "2.5.2"
 urlencoding = "2.1.3"
@@ -78,12 +78,12 @@ ocl = { version = "0.19.7", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.2.0"
 exr = "1.72"
-opencv = { version = "0.92.1", features = ["clang-runtime"], optional = true }
+opencv = { version = "0.92.2", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "bfad205", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "7b4cbc2", features = ["spirv", "naga-ir"] }
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "bfad205"
+rev = "7b4cbc2"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
@@ -123,7 +123,7 @@ ndk-context = { version = "0.1.1" }
 
 [build-dependencies]
 ureq = "2.10.0"
-flate2 = "1.0.30"
+flate2 = "1.0.31"
 tar = "0.4.41"
 walkdir = "2.5"
 ciborium = "0.2"
