@@ -396,7 +396,7 @@ bundle *param:
         rm tmp.tar tmp.tar.gz
     fi
     if [ ! -f "$FrameworksDir/BlackmagicRawAPI.framework/Versions/A/BlackmagicRawAPI" ]; then
-        curl -L https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_MacOS_4.0.0.tar.gz -o tmp.tar.gz
+        curl -L https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_MacOS_4.2.0.tar.gz -o tmp.tar.gz
         7z x -aoa tmp.tar.gz
         7z x -o"$FrameworksDir/" tmp.tar
         rm tmp.tar tmp.tar.gz
