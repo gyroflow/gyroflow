@@ -80,10 +80,10 @@ rustfft = "6.2.0"
 exr = "1.72"
 opencv = { version = "0.92.2", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "7b4cbc2", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "594476c", features = ["spirv", "naga-ir"] }
 [target.'cfg(target_os = "windows")'.dependencies.d3d12]
 git = "https://github.com/gfx-rs/wgpu.git"
-rev = "7b4cbc2"
+rev = "594476c"
 features = ["libloading"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]

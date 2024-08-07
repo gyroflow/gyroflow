@@ -1051,7 +1051,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=7b4cbc2#7b4cbc26192d6d56a31f8e67769e656a6627b222"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=594476c#594476c991f0cd3389ecf970b59d690e7d8d5be7"
 dependencies = [
  "bitflags 2.6.0",
  "libloading",
@@ -2347,7 +2347,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=7b4cbc2#7b4cbc26192d6d56a31f8e67769e656a6627b222"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=594476c#594476c991f0cd3389ecf970b59d690e7d8d5be7"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -3435,9 +3435,9 @@ dependencies = [
 
 [[package]]
 name = "rustls-pki-types"
-version = "1.7.0"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "976295e77ce332211c0d24d92c0e83e50f5c5f046d11082cea19f3df13a3562d"
+checksum = "fc0a2ce646f8655401bb81e7927b812614bd5d91dbc968696be50603510fcaf0"
 
 [[package]]
 name = "rustls-webpki"
@@ -3804,15 +3804,15 @@ dependencies = [
 
 [[package]]
 name = "tempfile"
-version = "3.11.0"
+version = "3.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8fcd239983515c23a32fb82099f97d0b11b8c72f654ed659363a95c3dad7a53"
+checksum = "04cbcdd0c794ebb0d4cf35e88edd2f7d2c4c3e9a5a6dab322839b321c6a87a64"
 dependencies = [
  "cfg-if",
  "fastrand",
  "once_cell",
  "rustix",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -4235,7 +4235,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=7b4cbc2#7b4cbc26192d6d56a31f8e67769e656a6627b222"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=594476c#594476c991f0cd3389ecf970b59d690e7d8d5be7"
 dependencies = [
  "arrayvec",
  "cfg_aliases 0.1.1",
@@ -4259,7 +4259,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=7b4cbc2#7b4cbc26192d6d56a31f8e67769e656a6627b222"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=594476c#594476c991f0cd3389ecf970b59d690e7d8d5be7"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4284,7 +4284,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=7b4cbc2#7b4cbc26192d6d56a31f8e67769e656a6627b222"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=594476c#594476c991f0cd3389ecf970b59d690e7d8d5be7"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4329,7 +4329,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=7b4cbc2#7b4cbc26192d6d56a31f8e67769e656a6627b222"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=594476c#594476c991f0cd3389ecf970b59d690e7d8d5be7"
 dependencies = [
  "bitflags 2.6.0",
  "js-sys",
@@ -4795,9 +4795,9 @@ dependencies = [
 
 [[package]]
 name = "xml-rs"
-version = "0.8.20"
+version = "0.8.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "791978798f0597cfc70478424c2b4fdc2b7a8024aaff78497ef00f24ef674193"
+checksum = "539a77ee7c0de333dcc6da69b177380a0b81e0dacfa4f7344c465a36871ee601"
 
 [[package]]
 name = "zbus"
