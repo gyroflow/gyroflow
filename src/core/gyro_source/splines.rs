@@ -6,7 +6,7 @@ use std::ops::{ Add, Mul, Sub };
 
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct CatmullRom<T> {
-    pub points: Vec<(f64, T)>,
+    points: Vec<(f64, T)>,
 }
 
 impl<T> CatmullRom<T> {
@@ -59,7 +59,7 @@ impl<T: Mul<f64, Output = T> + Sub<T, Output = T> + Add<T, Output = T> + Copy> C
 
     fn search_lower_cp(&self, t: f64) -> Option<usize> {
         let len = self.points.len();
-        if len < 2 {
+        if len < 2 || t.is_nan() {
             return None;
         }
         match self

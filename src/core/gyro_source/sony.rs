@@ -306,7 +306,7 @@ pub fn stab_collect(is: &mut ISTemp, tag_map: &GroupedTagMap, _info: &telemetry_
 pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, _sample_rate: f64, _frame_rate: f64, _size: (usize, usize)) -> Option<Vec<CameraStabData>> {
     let num_frames = is_temp.per_frame_exposure.len();
 
-    let readout_time = md.frame_readout_time.unwrap_or_default() * 1000.0;
+    let readout_time = (md.frame_readout_time.unwrap_or_default() * 1000.0).max(1.0);
 
     let per_frame_data: Vec<CameraStabData> = (0..num_frames).into_par_iter().filter_map(|frame| {
         let crop_area = *is_temp.per_frame_crop.get(frame)?; // (x, y, w, h)
@@ -334,18 +334,18 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, _sample_rate: f64,
                 //if frame < 3 {
                 //    dbg!(ts, is_temp.x[top_index + i], is_temp.y[top_index + i], is_temp.z[top_index + i]);
                 //}
-                ibis_spline.points.push((ts, nalgebra::Vector3::new(
+                ibis_spline.add_point(ts, nalgebra::Vector3::new(
                     *is_temp.ibis_x.get(top_index + i).unwrap_or(&0) as f64,
                     *is_temp.ibis_y.get(top_index + i).unwrap_or(&0) as f64,
                     *is_temp.ibis_a.get(top_index + i).unwrap_or(&0) as f64
-                )));
+                ));
             }
             if top_index + i < is_temp.ois_x.len() {
-                ois_spline.points.push((ts, nalgebra::Vector3::new(
+                ois_spline.add_point(ts, nalgebra::Vector3::new(
                     *is_temp.ois_x.get(top_index + i).unwrap_or(&0) as f64,
                     *is_temp.ois_y.get(top_index + i).unwrap_or(&0) as f64,
                     0.0
-                )));
+                ));
             }
         }
 
