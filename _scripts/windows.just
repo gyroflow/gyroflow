@@ -11,6 +11,9 @@ install-deps:
     #!powershell
     $ProgressPreference = 'SilentlyContinue'
     $ErrorActionPreference = 'Stop'
+    if ("{{Arch}}" -eq "aarch64") {
+        rustup target add aarch64-pc-windows-msvc
+    }
 
     mkdir "{{ExtDir}}" -ErrorAction SilentlyContinue
     cd {{ExtDir}}
