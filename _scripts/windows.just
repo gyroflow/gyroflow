@@ -1,5 +1,7 @@
 import 'common.just'
 
+NameSuffix := if Arch == "aarch64" { "windows-arm64" } else { "windows64" }
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -124,13 +126,28 @@ deploy:
     cd $ProjectDir
     mkdir "$ProjectDir\_deployment\_binaries\win64" -Force
 
-    cargo build --profile deploy
+    if ("{{Arch}}" -eq "aarch64") {
+        $Target = "aarch64-pc-windows-msvc"
+    } else {
+        $Target = "x86_64-pc-windows-msvc"
+    }
+
+    cargo build --profile deploy --target $Target
 
     $TargetDir   = resolve-path "{{ProjectDir}}\_deployment\_binaries\win64"
     $QtDir       = resolve-path "{{QtPath}}\.."
-    $CargoTarget = resolve-path "{{ProjectDir}}\target\deploy"
-    $FFmpegDir   = resolve-path "{{FFMPEG_DIR}}"
+    $CargoTarget = resolve-path "{{ProjectDir}}\target\$Target\deploy"
+    $FFmpegDir   = resolve-path "{{FFMPEG_DIR}}\bin"
     $OpenCVDir   = resolve-path "{{OpenCVPath}}\bin"
+
+    $ffmpeg_files = Get-ChildItem "$FFmpegDir\*.dll"
+    if (!$ffmpeg_files) {
+        if ("{{Arch}}" -eq "aarch64") {
+            $FFmpegDir = resolve-path "{{FFMPEG_DIR}}\bin\arm64"
+        } else {
+            $FFmpegDir = resolve-path "{{FFMPEG_DIR}}\bin\x64"
+        }
+    }
 
     # Copy Qt
     xcopy /Y "$QtDir\plugins\platforms\qwindows.dll"                                                 "$TargetDir\platforms\"
@@ -210,14 +227,14 @@ deploy:
     xcopy /Y "$QtDir\qml\QtQuick\Window\quickwindowplugin.dll"                                       "$TargetDir\QtQuick\Window\"
 
     # Copy ffmpeg
-    xcopy /Y "$FFmpegDir\bin\avcodec-*.dll"     "$TargetDir\"
-    xcopy /Y "$FFmpegDir\bin\avdevice-*.dll"    "$TargetDir\"
-    xcopy /Y "$FFmpegDir\bin\avfilter-*.dll"    "$TargetDir\"
-    xcopy /Y "$FFmpegDir\bin\avformat-*.dll"    "$TargetDir\"
-    xcopy /Y "$FFmpegDir\bin\avutil-*.dll"      "$TargetDir\"
-    xcopy /Y "$FFmpegDir\bin\swresample-*.dll"  "$TargetDir\"
-    xcopy /Y "$FFmpegDir\bin\swscale-*.dll"     "$TargetDir\"
-    # xcopy /Y "$FFmpegDir\bin\postproc-*.dll"  "$TargetDir\"
+    xcopy /Y "$FFmpegDir\avcodec-*.dll"     "$TargetDir\"
+    xcopy /Y "$FFmpegDir\avdevice-*.dll"    "$TargetDir\"
+    xcopy /Y "$FFmpegDir\avfilter-*.dll"    "$TargetDir\"
+    xcopy /Y "$FFmpegDir\avformat-*.dll"    "$TargetDir\"
+    xcopy /Y "$FFmpegDir\avutil-*.dll"      "$TargetDir\"
+    xcopy /Y "$FFmpegDir\swresample-*.dll"  "$TargetDir\"
+    xcopy /Y "$FFmpegDir\swscale-*.dll"     "$TargetDir\"
+    # xcopy /Y "$FFmpegDir\postproc-*.dll"  "$TargetDir\"
 
     # Copy OpenCV
     xcopy /Y "$OpenCVDir\opencv_calib*.dll"      "$TargetDir\"
@@ -241,9 +258,15 @@ deploy:
 
     # Other
     xcopy /Y "$QtDir\bin\d3dcompiler_47.dll"                             "$TargetDir\"
-    xcopy /Y "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\d3dcompiler_47.dll" "$TargetDir\"
+    if ("{{Arch}}" -eq "aarch64") {
+        tree "C:\Program Files (x86)\Windows Kits\10\bin\"
+        tree "C:\Program Files (x86)\Windows Kits\11\bin\"
+        xcopy /Y "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\arm64\d3dcompiler_47.dll" "$TargetDir\"
+    } else {
+        xcopy /Y "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\d3dcompiler_47.dll" "$TargetDir\"
+    }
 
-    7z a $ProjectDir\_deployment\_binaries\Gyroflow-windows64.zip $TargetDir\*
+    7z a $ProjectDir\_deployment\_binaries\Gyroflow-{{NameSuffix}}.zip $TargetDir\*
 
 [no-cd]
 bundle:
@@ -268,17 +291,19 @@ bundle:
     }
 
     # Bundle BRAW and RED SDK
-    if (-not (Test-Path -Path "$TargetDir\REDR3D-x64.dll")) {
-        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/RED_SDK_Windows_8.5.1.tar.gz" -OutFile tmp.tar.gz
-        7z x tmp.tar.gz
-        7z x -o"$TargetDir\" tmp.tar
-        Remove-Item -Path tmp.ta* -Force
-    }
-    if (-not (Test-Path -Path "$TargetDir\BlackmagicRawAPI.dll")) {
-        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_Windows_4.2.0.tar.gz" -OutFile tmp.tar.gz
-        7z x tmp.tar.gz
-        7z x -o"$TargetDir\" tmp.tar
-        Remove-Item -Path tmp.ta* -Force
+    if ("{{Arch}}" -eq "x86_64") {
+        if (-not (Test-Path -Path "$TargetDir\REDR3D-x64.dll")) {
+            Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/RED_SDK_Windows_8.5.1.tar.gz" -OutFile tmp.tar.gz
+            7z x tmp.tar.gz
+            7z x -o"$TargetDir\" tmp.tar
+            Remove-Item -Path tmp.ta* -Force
+        }
+        if (-not (Test-Path -Path "$TargetDir\BlackmagicRawAPI.dll")) {
+            Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_Windows_4.2.0.tar.gz" -OutFile tmp.tar.gz
+            7z x tmp.tar.gz
+            7z x -o"$TargetDir\" tmp.tar
+            Remove-Item -Path tmp.ta* -Force
+        }
     }
 
     # Generate self-signed key
@@ -291,7 +316,7 @@ bundle:
     # MsixPackagingTool.exe create-package --template installer_msix.xml
 
     # Build .msix
-    Remove-Item -Path "..\_binaries\Gyroflow.msix" -ErrorAction SilentlyContinue
+    Remove-Item -Path "..\_binaries\Gyroflow-{{NameSuffix}}.msix" -ErrorAction SilentlyContinue
     mkdir -Force "bundle"
     cp -Recurse -Force $TargetDir\* bundle\
     cp -Recurse -Force Assets bundle\Assets
@@ -303,11 +328,15 @@ bundle:
         (Get-Content bundle\AppxManifest.xml) -replace 'Identity Version="[0-9\.]+"', "Identity Version=`"$VersionNoDots.$Env:GITHUB_RUN_NUMBER.0`"" | Out-File bundle\AppxManifest.xml -Encoding Utf8
     }
 
+    if ("{{Arch}}" -eq "aarch64") {
+        (Get-Content bundle\AppxManifest.xml) -replace 'ProcessorArchitecture="x64"', 'ProcessorArchitecture="arm64"' | Out-File bundle\AppxManifest.xml -Encoding Utf8
+    }
+
     makepri.exe createconfig /cf priconfig.xml /dq en-us
     makepri.exe new /pr bundle\Assets\ /cf priconfig.xml /mn bundle\AppxManifest.xml /of bundle\resources.pri /o
 
-    makeappx.exe pack /d bundle /p ..\_binaries\Gyroflow.msix
-    signtool.exe sign /f msix_signing_key.pfx /p $Env:MS_STORE_SIGNING_PASS /fd sha256 ..\_binaries\Gyroflow.msix
+    makeappx.exe pack /d bundle /p ..\_binaries\Gyroflow-{{NameSuffix}}.msix
+    signtool.exe sign /f msix_signing_key.pfx /p $Env:MS_STORE_SIGNING_PASS /fd sha256 ..\_binaries\Gyroflow-{{NameSuffix}}.msix
 
     Remove-Item -Path "priconfig.xml" -ErrorAction SilentlyContinue
     Remove-Item -Path "bundle" -Recurse -ErrorAction SilentlyContinue

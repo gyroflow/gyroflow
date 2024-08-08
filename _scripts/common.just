@@ -6,37 +6,38 @@ ProjectDir := if path_exists(justfile_directory() / "Cargo.toml") == "true" { ju
        } else if path_exists(justfile_directory() / ".." / "Cargo.toml") == "true" { justfile_directory() / "../"
        } else { justfile_directory() }
 ExtDir := ProjectDir / "ext"
+Arch := env("FORCE_ARCH", arch())
 
 # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
-QtVersion := env_var_or_default("FORCE_QT_VERSION", if os() == "windows" { "6.7.2" } else { if arch() == "aarch64" { "6.7.2" } else { "6.4.3" } })
-QtArch := if os() + arch() == "windowsx86_64"  { "msvc2019_64"
-   } else if os() + arch() == "windowsaarch64" { "msvc2019_arm64"
-   } else if os() == "macos"     { "macos"
-   } else if arch() == "aarch64" { "gcc_arm64"
-   } else                        { "gcc_64" }
+QtVersion := env_var_or_default("FORCE_QT_VERSION", if os() == "windows" { "6.7.2" } else { if Arch == "aarch64" { "6.7.2" } else { "6.4.3" } })
+QtArch := if os() + Arch == "windowsx86_64"  { "msvc2019_64"
+   } else if os() + Arch == "windowsaarch64" { "msvc2019_arm64"
+   } else if os() == "macos"   { "macos"
+   } else if Arch == "aarch64" { "gcc_arm64"
+   } else                      { "gcc_64" }
 QtPath := ProjectDir / "ext/" / QtVersion / QtArch / "bin"
 export QMAKE := env_var_or_default("QMAKE", if path_exists(QtPath / "qmake.bat") == "true" { QtPath / "qmake.bat" } else { QtPath / "qmake" })
 # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
 
 # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
-FFmpeg := if os() + arch() == "windowsx86_64"  { "ffmpeg-7.0-windows-desktop-vs2022-gpl-lite"
-   } else if os() + arch() == "windowsaarch64" { "ffmpeg-7.0-windows-desktop-vs2022-default"
-   } else if os() + arch() == "macosaarch64"   { "ffmpeg-arm64"
-   } else if os() + arch() == "macosx86_64"    { "ffmpeg-x64_64"
-   } else if arch() == "aarch64"               { "ffmpeg-7.0-linux-clang-default"
+FFmpeg := if os() + Arch == "windowsx86_64"  { "ffmpeg-7.0-windows-desktop-vs2022-gpl-lite"
+   } else if os() + Arch == "windowsaarch64" { "ffmpeg-7.0-windows-desktop-vs2022-default"
+   } else if os() + Arch == "macosaarch64"   { "ffmpeg-arm64"
+   } else if os() + Arch == "macosx86_64"    { "ffmpeg-x64_64"
+   } else if Arch == "aarch64"               { "ffmpeg-7.0-linux-clang-default"
    } else                                      { "ffmpeg-7.0-linux-clang-gpl-lite" }
 export FFMPEG_DIR := ProjectDir / "ext" / FFmpeg
-export FFMPEG_ARCH := if arch() == "aarch64" { "arm64" } else { if os() == "windows" { "x64" } else { "amd64" } }
+export FFMPEG_ARCH := if Arch == "aarch64" { "arm64" } else { if os() == "windows" { "x64" } else { "amd64" } }
 # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
 
 # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
-VcpkgArch := if os() + arch() == "windowsx86_64"  { "x64-windows"
-      } else if os() + arch() == "windowsaarch64" { "arm64-windows"
-      } else if os() + arch() == "macosaarch64"   { "arm64-osx"
-      } else if os() + arch() == "macosx86_64"    { "x64-osx"
-      } else if arch() == "aarch64"               { "arm64-linux"
-      } else                                      { "x64-linux" }
-export OPENCV_LINK_LIBS := "opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4,opencv_imgcodecs4,opencv_objdetect4,opencv_stitching4" + if os() == "linux" { if arch() == "aarch64" { ",tegra_hal,png" } else { ",png" } } else if os() + arch() == "macosaarch64" { ",tegra_hal" } else { "" }
+VcpkgArch := if os() + Arch == "windowsx86_64"  { "x64-windows"
+      } else if os() + Arch == "windowsaarch64" { "arm64-windows"
+      } else if os() + Arch == "macosaarch64"   { "arm64-osx"
+      } else if os() + Arch == "macosx86_64"    { "x64-osx"
+      } else if Arch == "aarch64"               { "arm64-linux"
+      } else                                    { "x64-linux" }
+export OPENCV_LINK_LIBS := "opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4,opencv_imgcodecs4,opencv_objdetect4,opencv_stitching4" + if os() == "linux" { if Arch == "aarch64" { ",tegra_hal,png" } else { ",png" } } else if os() + Arch == "macosaarch64" { ",tegra_hal" } else { "" }
 export OPENCV_LINK_PATHS := ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "lib," + ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "lib/manual-link/opencv4_thirdparty"
 export OPENCV_INCLUDE_PATHS := ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "include"
 OpenCVPath := ProjectDir / "ext/vcpkg/installed" / VcpkgArch

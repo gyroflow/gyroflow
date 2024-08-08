@@ -11,10 +11,11 @@ jobs:
       matrix:
         targets: [
           { os: ubuntu-latest, type: linux },
-          { os: macos-13,  type: macos },
-          { os: macos-13,  type: macstore },
+          { os: macos-13,      type: macos },
+          { os: macos-13,      type: macstore },
           { os: windows-2022,  type: windows },
-          { os: macos-13,  type: ios },
+          { os: windows-2022,  type: windows-arm },
+          { os: macos-13,      type: ios },
           { os: windows-2022,  type: android }
         ]
     name: Gyroflow for ${{ matrix.targets.type }}
@@ -51,7 +52,8 @@ jobs:
       - name: Force qml-video-rs rebuild (Win)
         if: ${{ matrix.targets.os == 'windows-2022' }}
         run: |
-          rm -r -force ${{ github.workspace }}/target/deploy/build/qml-video-rs* -ErrorAction SilentlyContinue
+          rm -r -force ${{ github.workspace }}/target/x86_64-pc-windows-msvc/deploy/build/qml-video-rs* -ErrorAction SilentlyContinue
+          rm -r -force ${{ github.workspace }}/target/aarch64-pc-windows-msvc/deploy/build/qml-video-rs* -ErrorAction SilentlyContinue
           rm -r -force ${{ github.workspace }}/target/release/build/qml-video-rs* -ErrorAction SilentlyContinue
 
       - name: Install Mac certificates
@@ -131,6 +133,16 @@ jobs:
           just deploy
           if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") { just bundle }
 
+      - name: Build Gyroflow (Windows arm64)
+        if: ${{ matrix.targets.type == 'windows-arm' }}
+        env:
+          MS_STORE_SIGNING_PASS: ${{ secrets.MS_STORE_SIGNING_PASS }}
+          FORCE_ARCH: aarch64
+        run: |
+          just install-deps
+          just deploy
+          if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") { just bundle }
+
       - name: Build Gyroflow (Android)
         if: ${{ matrix.targets.type == 'android' }}
         env:
@@ -157,13 +169,13 @@ jobs:
           just ios build-ipa
 
       - name: Save debug symbols
-        if: ${{ matrix.targets.type == 'windows' }}
+        if: ${{ matrix.targets.type == 'windows' || matrix.targets.type == 'windows-arm' }}
         uses: actions/upload-artifact@v3
         with:
           name: Gyroflow-debug-symbols
           path: |
-            ${{ github.workspace }}/target/deploy/deps/gyroflow.pdb
-            ${{ github.workspace }}/target/deploy/*.pdb
+            ${{ github.workspace }}/target/${{ matrix.targets.type == 'windows' && 'x86_64-pc-windows-msvc' || 'aarch64-pc-windows-msvc' }}/deploy/deps/gyroflow.pdb
+            ${{ github.workspace }}/target/${{ matrix.targets.type == 'windows' && 'x86_64-pc-windows-msvc' || 'aarch64-pc-windows-msvc' }}/deploy/*.pdb
       - name: Save Binaries
         uses: actions/upload-artifact@v3
         with:

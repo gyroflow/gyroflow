@@ -46,6 +46,8 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
         qt_path.join("libexec/qmlcachegen").to_string_lossy().to_string()
     } else if qt_path.join("../macos/libexec/qmlcachegen").exists() {
         qt_path.join("../macos/libexec/qmlcachegen").to_string_lossy().to_string()
+    } else if cfg!(target_os = "windows") && env::var("CARGO_CFG_TARGET_ARCH").unwrap() == "aarch64" {
+        qt_path.join("../msvc2019_64/bin/qmlcachegen").to_string_lossy().to_string()
     } else {
         "qmlcachegen".to_string()
     };
@@ -213,6 +215,7 @@ fn main() {
         "windows" => {
             println!("cargo:rustc-link-arg=/EXPORT:NvOptimusEnablement");
             println!("cargo:rustc-link-arg=/EXPORT:AmdPowerXpressRequestHighPerformance");
+            println!("cargo:rustc-link-search={}", std::env::var("OPENCV_LINK_PATHS").unwrap());
             println!("cargo:rustc-link-search={}\\lib\\{}", std::env::var("FFMPEG_DIR").unwrap(), std::env::var("FFMPEG_ARCH").unwrap_or("x64".into()));
             println!("cargo:rustc-link-search={}\\lib", std::env::var("FFMPEG_DIR").unwrap());
             let mut res = winres::WindowsResource::new();
