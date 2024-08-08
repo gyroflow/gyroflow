@@ -21,7 +21,8 @@ pub struct LensProfileDatabase {
     map: HashMap<String, LensProfile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
     list_for_ui: Vec<(String, String, String, bool, f64, i32)>,
-    pub loaded: bool
+    pub loaded: bool,
+    pub version: u32,
 }
 impl Clone for LensProfileDatabase {
     fn clone(&self) -> Self {
@@ -145,6 +146,8 @@ impl LensProfileDatabase {
             if let Ok(_) = e.read_to_end(&mut decompressed) {
                 if let Ok(array) = ciborium::from_reader::<Vec<(String, serde_json::Value)>, _>(std::io::Cursor::new(decompressed)) {
                     for (f_name, profile) in array {
+                        if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
+                        if f_name.starts_with("__") { continue; }
                         load(DataSource::SerdeValue(profile), &f_name);
                     }
                 }
@@ -167,6 +170,8 @@ impl LensProfileDatabase {
                         if let Ok(_) = e.read_to_end(&mut decompressed) {
                             if let Ok(array) = ciborium::from_reader::<Vec<(String, serde_json::Value)>, _>(std::io::Cursor::new(decompressed)) {
                                 for (f_name, profile) in array {
+                                    if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
+                                    if f_name.starts_with("__") { continue; }
                                     load(DataSource::SerdeValue(profile), &f_name);
                                 }
                             }
@@ -189,6 +194,7 @@ impl LensProfileDatabase {
         self.map = b.map;
         self.preset_map = b.preset_map;
         self.loaded = b.loaded;
+        self.version = b.version;
         if self.loaded {
             let cbs: Vec<_> = self.loaded_callbacks.drain(..).collect();
             for cb in cbs {

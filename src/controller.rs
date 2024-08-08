@@ -1829,40 +1829,36 @@ impl Controller {
             this.lens_profiles_updated(true);
         });
 
-        let existing_keys = self.stabilizer.lens_profile_db.read().get_all_filenames();
+        let current_version = self.stabilizer.lens_profile_db.read().version;
 
-        core::run_threaded(move || {
-            if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/lens_profiles/git/trees/main?recursive=1").call().map(|x| x.into_string()) {
-                (|| -> Option<()> {
-                    let v: serde_json::Value = serde_json::from_str(&body).ok()?;
-                    for obj in v.get("tree")?.as_array()? {
-                        let obj = obj.as_object()?;
-                        let path = obj.get("path")?.as_str()?;
-                        if path.ends_with(".json") || path.ends_with(".gyroflow") {
-                            let local_path = LensProfileDatabase::get_path().join(path);
-                            if !local_path.exists() && !existing_keys.contains(&path.to_string()) {
-                                ::log::info!("Downloading lens profile {:?}", local_path.file_name()?);
-
-                                let url = obj.get("url")?.as_str()?.to_string();
-                                let _ = std::fs::create_dir_all(local_path.parent()?);
-                                let update = update.clone();
-                                core::run_threaded(move || {
-                                    let content = ureq::get(&url)
-                                        .set("Accept", "application/vnd.github.v3.raw")
-                                        .call().map(|x| x.into_string());
-                                    if let Ok(Ok(content)) = content {
-                                        if std::fs::write(local_path, content.into_bytes()).is_ok() {
-                                           update(());
+        let db_path = LensProfileDatabase::get_path().join("profiles.cbor.gz");
+        if db_path.exists() {
+            core::run_threaded(move || {
+                if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/lens_profiles/releases").call().map(|x| x.into_string()) {
+                    (|| -> Option<()> {
+                        let v: Vec<serde_json::Value> = serde_json::from_str(&body).ok()?;
+                        if let Some(obj) = v.first() {
+                            let obj = obj.as_object()?;
+                            if let Ok(tag) = obj.get("tag_name")?.as_str()?.trim_start_matches("v").parse::<u32>() {
+                                if tag > current_version {
+                                    ::log::info!("Updating lens profile database from v{current_version} to v{tag}.");
+                                    if let Some(download_url) = obj["assets"][0]["browser_download_url"].as_str() {
+                                        if let Ok(mut content) = ureq::get(&download_url).call().map(|x| x.into_reader()) {
+                                            if let Ok(mut file) = std::fs::File::create(&db_path) {
+                                                if std::io::copy(&mut content, &mut file).is_ok() {
+                                                    update(());
+                                                }
+                                            }
                                         }
                                     }
-                                });
+                                }
                             }
                         }
-                    }
-                    Some(())
-                }());
-            }
-        });
+                        Some(())
+                    }());
+                }
+            });
+        }
     }
 
     fn rate_profile(&self, name: QString, json: QString, checksum: QString, is_good: bool) {

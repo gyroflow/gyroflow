@@ -77,6 +77,7 @@ fn main() {
     let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap();
 
     if let Ok(out_dir) = env::var("OUT_DIR") {
+        println!("cargo::rustc-check-cfg=cfg(compiled_qml)");
         if out_dir.contains("\\deploy\\build\\") || out_dir.contains("/deploy/build/") || target_os == "android" || target_os == "ios" {
             compile_qml("src/ui/", &qt_include_path, &qt_library_path);
             println!("cargo:rustc-cfg=compiled_qml");
@@ -208,8 +209,8 @@ fn main() {
             } else {
                 std::env::var("OPENCV_LINK_LIBS").unwrap().split(',').for_each(|lib| println!("cargo:rustc-link-lib={}", lib.trim()));
             }
-        }, 
-        "windows" => {  
+        },
+        "windows" => {
             println!("cargo:rustc-link-arg=/EXPORT:NvOptimusEnablement");
             println!("cargo:rustc-link-arg=/EXPORT:AmdPowerXpressRequestHighPerformance");
             println!("cargo:rustc-link-search={}\\lib\\{}", std::env::var("FFMPEG_DIR").unwrap(), std::env::var("FFMPEG_ARCH").unwrap_or("x64".into()));
