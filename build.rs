@@ -46,7 +46,7 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
         qt_path.join("libexec/qmlcachegen").to_string_lossy().to_string()
     } else if qt_path.join("../macos/libexec/qmlcachegen").exists() {
         qt_path.join("../macos/libexec/qmlcachegen").to_string_lossy().to_string()
-    } else if cfg!(target_os = "windows") && env::var("CARGO_CFG_TARGET_ARCH").unwrap() == "aarch64" {
+    } else if env::var("CARGO_CFG_TARGET_OS").unwrap() == "windows" && env::var("CARGO_CFG_TARGET_ARCH").unwrap() == "aarch64" {
         qt_path.join("../msvc2019_64/bin/qmlcachegen").to_string_lossy().to_string()
     } else {
         "qmlcachegen".to_string()

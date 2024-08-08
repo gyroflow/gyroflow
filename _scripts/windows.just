@@ -262,8 +262,6 @@ deploy:
     # Other
     xcopy /Y "$QtDir\bin\d3dcompiler_47.dll"                             "$TargetDir\"
     if ("{{Arch}}" -eq "aarch64") {
-        tree "C:\Program Files (x86)\Windows Kits\10\bin\"
-        tree "C:\Program Files (x86)\Windows Kits\11\bin\"
         xcopy /Y "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\arm64\d3dcompiler_47.dll" "$TargetDir\"
     } else {
         xcopy /Y "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\d3dcompiler_47.dll" "$TargetDir\"
