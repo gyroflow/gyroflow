@@ -1103,8 +1103,8 @@ impl RenderQueue {
                 sync_options = sync.clone();
             }
             if let Some(out) = additional_data.get("output") {
-                let has_output_width  = out.as_object().map(|x| x.contains_key("output_width")).unwrap_or_default();
-                let has_output_height = out.as_object().map(|x| x.contains_key("output_height")).unwrap_or_default();
+                let has_output_width  = out.as_object().map(|x| x.contains_key("output_width")).unwrap_or_default() && out.get("output_width").and_then(|x| x.as_i64()).unwrap_or_default() > 0;
+                let has_output_height = out.as_object().map(|x| x.contains_key("output_height")).unwrap_or_default() && out.get("output_height").and_then(|x| x.as_i64()).unwrap_or_default() > 0;
 
                 let override_ext = out.get("output_extension").and_then(|x| x.as_str()).map(|x| x.to_owned());
                 if let Ok(mut render_options) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
