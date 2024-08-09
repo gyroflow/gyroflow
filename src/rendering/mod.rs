@@ -533,6 +533,10 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
             // https://gist.github.com/Jim-Bar/3cbba684a71d1a9d468a6711a6eddbeb
 
             let mut format = input_frame.format();
+            if input_frame.width() == 0 || input_frame.height() == 0 || output_frame.width() == 0 || output_frame.height() == 0 {
+                return Err(FFmpegError::FrameEmpty);
+            }
+
             if let Some(underlying_format) = zero_copy::map_hardware_format(format, input_frame) {
                 log::debug!("HW frame ({:?}) underlying format: {:?}", format, underlying_format);
                 format = underlying_format;
