@@ -500,6 +500,18 @@ impl GyroSource {
     pub fn recompute_smoothness(&self, alg: &dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, compute_params: &crate::ComputeParams) -> (TimeQuat, (f64, f64, f64)) {
         let file_metadata = self.file_metadata.read();
         let mut smoothed_quaternions = self.quaternions.clone();
+
+        for (ts, q) in smoothed_quaternions.iter_mut() {
+            use crate::KeyframeType;
+            let timestamp_ms = *ts as f64 / 1000.0;
+            let additional_rotation_x = compute_params.keyframes.value_at_gyro_timestamp(&KeyframeType::AdditionalRotationX, timestamp_ms).unwrap_or(compute_params.additional_rotation.0) * DEG2RAD;
+            let additional_rotation_y = compute_params.keyframes.value_at_gyro_timestamp(&KeyframeType::AdditionalRotationY, timestamp_ms).unwrap_or(compute_params.additional_rotation.1) * DEG2RAD;
+            let additional_rotation_z = compute_params.keyframes.value_at_gyro_timestamp(&KeyframeType::AdditionalRotationZ, timestamp_ms).unwrap_or(compute_params.additional_rotation.2) * DEG2RAD;
+            let additional_rotation   = Quat64::from_euler_angles(additional_rotation_y, additional_rotation_x, additional_rotation_z);
+
+            *q *= additional_rotation;
+        }
+
         if true {
             // Lock horizon, then smooth
             horizon_lock.lock(&mut smoothed_quaternions, &self.quaternions, &file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, compute_params);

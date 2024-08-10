@@ -145,11 +145,6 @@ impl FrameTransform {
 
         let light_refraction_coefficient = params.keyframes.value_at_video_timestamp(&KeyframeType::LightRefractionCoeff, timestamp_ms).unwrap_or(params.light_refraction_coefficient);
 
-        let additional_rotation_x = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalRotationX, timestamp_ms).unwrap_or(params.additional_rotation.0) * DEG2RAD;
-        let additional_rotation_y = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalRotationY, timestamp_ms).unwrap_or(params.additional_rotation.1) * DEG2RAD;
-        let additional_rotation_z = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalRotationZ, timestamp_ms).unwrap_or(params.additional_rotation.2) * DEG2RAD;
-        let additional_rotation   = crate::gyro_source::Quat64::from_euler_angles(additional_rotation_y, additional_rotation_x, additional_rotation_z);
-
         // let additional_translation_x = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalTranslationX, timestamp_ms).unwrap_or(params.additional_translation.0) as f32;
         // let additional_translation_y = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalTranslationY, timestamp_ms).unwrap_or(params.additional_translation.1) as f32;
         // let additional_translation_z = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalTranslationZ, timestamp_ms).unwrap_or(params.additional_translation.2) as f32;
@@ -220,8 +215,7 @@ impl FrameTransform {
             } else {
                 start_ts
             };
-            let quat = additional_rotation
-                     * smoothed_quat1
+            let quat = smoothed_quat1
                      * quat1
                      * gyro.org_quat_at_timestamp(quat_time);
 
@@ -321,11 +315,6 @@ impl FrameTransform {
     pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, use_fovs: bool) -> (Matrix3<f64>, [f64; 12], Matrix3<f64>, Vec<Matrix3<f64>>, Option<Vec<(f32, f32, f32, f32, f32)>>, Option<Vec<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
         // ----------- Keyframes -----------
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
-
-        let additional_rotation_x = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalRotationX, timestamp_ms).unwrap_or(params.additional_rotation.0) * DEG2RAD;
-        let additional_rotation_y = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalRotationY, timestamp_ms).unwrap_or(params.additional_rotation.1) * DEG2RAD;
-        let additional_rotation_z = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalRotationZ, timestamp_ms).unwrap_or(params.additional_rotation.2) * DEG2RAD;
-        let additional_rotation   = crate::gyro_source::Quat64::from_euler_angles(additional_rotation_y, additional_rotation_x, additional_rotation_z);
         // ----------- Keyframes -----------
 
         let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, params.scaled_fps) as usize);
@@ -367,8 +356,7 @@ impl FrameTransform {
             } else {
                 start_ts
             };
-            let quat = additional_rotation
-                     * smoothed_quat1
+            let quat = smoothed_quat1
                      * quat1
                      * gyro.org_quat_at_timestamp(quat_time);
 
