@@ -2,6 +2,9 @@ import 'common.just'
 
 AptGetExists := `which apt-get > /dev/null && echo true || echo false`
 QtLinuxArch := if arch() == "aarch64" { "linux_arm64" } else { "linux" }
+FFmpegLinuxArch := if arch() == "aarch64" { "arm64" } else { "amd64" }
+ArchName := if arch() == "aarch64" { "arm64" } else { "x86_64" }
+AppImageToolArch := if arch() == "aarch64" { "aarch64" } else { "x86_64" }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -74,7 +77,7 @@ install-deps:
         sudo apt-get install -y debian-keyring debian-archive-keyring
         sudo apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
         sudo apt-get install -y python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse gtk-update-icon-cache
-        sudo curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -o /opt/appimagetool
+        sudo curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-{{AppImageToolArch}}.AppImage -o /opt/appimagetool
 
         # workaround AppImage issues with Docker
         pushd /opt/ ; sudo chmod +x appimagetool; sed -i 's|AI\x02|\x00\x00\x00|' appimagetool; sudo ./appimagetool --appimage-extract ; popd
@@ -301,18 +304,12 @@ deploy *param:
     cp -f "$CARGO_TARGET/libmdk-r3d.so"                    "$TARGET/lib/"
     #cp -f "$CARGO_TARGET/libffmpeg.so.6"                  "$TARGET/"
 
-    cp -f "$FFMPEG_DIR/lib/libavcodec.so.61"               "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/libavfilter.so.10"               "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/libavformat.so.61"              "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/libavutil.so.59"                "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/libswresample.so.5"             "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/libswscale.so.8"                "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/amd64/libavcodec.so.61"         "$TARGET/lib/" || true
-    cp -f "$FFMPEG_DIR/lib/amd64/libavfilter.so.10"         "$TARGET/lib/" || true
-    cp -f "$FFMPEG_DIR/lib/amd64/libavformat.so.61"        "$TARGET/lib/" || true
-    cp -f "$FFMPEG_DIR/lib/amd64/libavutil.so.59"          "$TARGET/lib/" || true
-    cp -f "$FFMPEG_DIR/lib/amd64/libswresample.so.5"       "$TARGET/lib/" || true
-    cp -f "$FFMPEG_DIR/lib/amd64/libswscale.so.8"          "$TARGET/lib/" || true
+    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libavcodec.so.61"         "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libavfilter.so.10"        "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libavformat.so.61"        "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libavutil.so.59"          "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libswresample.so.5"       "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libswscale.so.8"          "$TARGET/lib/"
 
     cp -f "$CARGO_TARGET/gyroflow"                         "$TARGET/"
     strip "$TARGET/gyroflow"
@@ -336,18 +333,18 @@ deploy *param:
 
     cp -rf $TARGET/* $APP_DIR/
     appimage-builder --recipe $PROJECT_DIR/_deployment/linux/AppImageBuilder.yml
-    chmod +x Gyroflow-${APP_VERSION}-x86_64.AppImage
+    chmod +x Gyroflow-${APP_VERSION}-{{ArchName}}.AppImage
 
     # Try to fix AppImage permissions
-    ./Gyroflow-${APP_VERSION}-x86_64.AppImage --appimage-extract
-    rm -f Gyroflow-${APP_VERSION}-x86_64.AppImage
+    ./Gyroflow-${APP_VERSION}-{{ArchName}}.AppImage --appimage-extract
+    rm -f Gyroflow-${APP_VERSION}-{{ArchName}}.AppImage
     sudo chmod 755 squashfs-root
     find ./squashfs-root -type d -exec sudo chmod 755 {} \;
     mv squashfs-root Gyroflow.AppDir
-    ARCH=x86_64 appimagetool ./Gyroflow.AppDir
+    ARCH={{AppImageToolArch}} appimagetool ./Gyroflow.AppDir
     rm -rf Gyroflow.AppDir
 
-    mv Gyroflow-x86_64.AppImage Gyroflow-linux64.AppImage
+    mv Gyroflow-{{ArchName}}.AppImage Gyroflow-linux64.AppImage
     # ---- Build AppImage ----
 
     rm -rf $APP_DIR
