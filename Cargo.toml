@@ -51,7 +51,7 @@ qttypes     = { version = "0.2.11", default-features = false, features = ["requi
 qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "67e6e3a" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
-ffmpeg-next = { version = "7.0.4", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
+ffmpeg-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg", vversion = "7.0.4", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.5.0"
 parking_lot = "0.12.3"
 
@@ -86,15 +86,16 @@ oslog = "0.2"
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 metal = { version = "0.29.0" }
-core-foundation-sys = "0.8.6"
+core-foundation-sys = "0.8.7"
 
 [build-dependencies]
 cpp_build = "0.5.9"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.1.8"
+cc = "1.1.10"
 
-[[bin]]
+[lib]
+crate-type = ["cdylib"]
 name = "gyroflow"
 path = "src/gyroflow.rs"
 

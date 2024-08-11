@@ -194,13 +194,6 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
 
     let mut output_width = render_options.output_width;
     let mut output_height = render_options.output_height;
-    if cfg!(target_os = "android") {
-        // Workaround for MediaCodec alignment requirement, until more proper fix is found
-        // TODO: investigate and find proper fix in the MediaCodec encoder
-        fn aligned_to_16(mut x: usize) -> usize { if (x % 16) != 0 { x += 16 - x % 16; } x }
-        output_width = aligned_to_16(output_width);
-        output_height = aligned_to_16(output_height);
-    }
 
     let duration_ms = params.duration_ms;
     let fps = params.fps;

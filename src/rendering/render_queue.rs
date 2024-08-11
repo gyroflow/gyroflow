@@ -836,7 +836,7 @@ impl RenderQueue {
                 use itertools::Itertools;
                 supported = supported
                     .split(',')
-                    .filter(|v| !["CUDA", "D3D11", "BGRZ", "RGBZ", "BGRA", "UYVY422", "VIDEOTOOLBOX", "DXVA2", "MEDIACODEC", "VULKAN", "OPENCL", "QSV"].contains(v))
+                    .filter(|v| !["CUDA", "D3D11", "D3D12","BGRZ", "RGBZ", "BGRA", "UYVY422", "VIDEOTOOLBOX", "DXVA2", "MEDIACODEC", "VULKAN", "OPENCL", "QSV"].contains(v))
                     .join(",");
 
                 update_model!(this, job_id, itm {

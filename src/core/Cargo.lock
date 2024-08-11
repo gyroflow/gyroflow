@@ -114,7 +114,7 @@ dependencies = [
  "argh_shared",
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]
@@ -324,7 +324,7 @@ checksum = "1ee891b04274a59bd38b412188e24b849617b2e45a0fd8d057deb63e7403761b"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]
@@ -341,9 +341,9 @@ checksum = "8318a53db07bb3f8dca91a600466bdb3f2eaadeedfdbcf02e1accbad9271ba50"
 
 [[package]]
 name = "cc"
-version = "1.1.8"
+version = "1.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "504bdec147f2cc13c8b57ed9401fd8a147cc66b67ad5cb241394244f2c947549"
+checksum = "e9e8aabfac534be767c909e0690571677d49f41bd8465ae876fe043d52ba5292"
 dependencies = [
  "jobserver",
  "libc",
@@ -522,9 +522,9 @@ dependencies = [
 
 [[package]]
 name = "core-foundation-sys"
-version = "0.8.6"
+version = "0.8.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06ea2b9bc92be3c2baa9334a323ebca2d6f074ff852cd1d7b11064035cd3868f"
+checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
 name = "core-graphics-types"
@@ -655,7 +655,7 @@ dependencies = [
 [[package]]
 name = "d3d12"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=f6a3eef#f6a3eef77e216597bcac64026f0ff7173c1d925b"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=28be38c#28be38c73b585f4f82b86fbd661c587b6726570d"
 dependencies = [
  "bitflags 2.6.0",
  "libloading",
@@ -681,7 +681,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "rustc_version",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]
@@ -692,7 +692,7 @@ checksum = "97369cbbc041bc366949bc74d34658d6cda5621039731c6310521892a3a20ae0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]
@@ -794,7 +794,7 @@ checksum = "2f9ed6b3789237c8a0c1c505af1c7eb2c560df6186f01b098c3a1064ea532f38"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]
@@ -920,7 +920,7 @@ checksum = "1a5c6c585bc94aaf2c7b51dd4c2ba22680844aba4c687be581871a6f518c5742"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]
@@ -1582,7 +1582,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=f6a3eef#f6a3eef77e216597bcac64026f0ff7173c1d925b"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=28be38c#28be38c73b585f4f82b86fbd661c587b6726570d"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-set",
@@ -1640,7 +1640,7 @@ checksum = "254a5372af8fc138e36684761d3c0cdb758a4410e938babcff1c860ce14ddbfc"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]
@@ -1845,7 +1845,7 @@ dependencies = [
  "proc-macro-crate",
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]
@@ -2150,7 +2150,7 @@ dependencies = [
  "itertools 0.12.1",
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]
@@ -2448,22 +2448,22 @@ checksum = "61697e0a1c7e512e84a621326239844a24d8207b4669b41bc18b32ea5cbf988b"
 
 [[package]]
 name = "serde"
-version = "1.0.205"
+version = "1.0.206"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e33aedb1a7135da52b7c21791455563facbbcc43d0f0f66165b42c21b3dfb150"
+checksum = "5b3e4cd94123dd520a128bcd11e34d9e9e423e7e3e50425cb1b4b1e3549d0284"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.205"
+version = "1.0.206"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "692d6f5ac90220161d6774db30c662202721e64aed9058d2c394f451261420c1"
+checksum = "fabfb6138d2383ea8208cf98ccf69cdfb1aff4088460681d84189aa259762f97"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]
@@ -2652,9 +2652,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.72"
+version = "2.0.73"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc4b9b9bf2add8093d3f2c0204471e951b2285580335de42f9d2534f3ae7a8af"
+checksum = "837a7e8026c6ce912ff01cefbe8cafc2f8010ac49682e2a3d9decc3bce1ecaaf"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2728,7 +2728,7 @@ checksum = "a4558b58466b9ad7ca0f102865eccc95938dca1a74a856f2b57b6629050da261"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]
@@ -2936,7 +2936,7 @@ dependencies = [
  "once_cell",
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
  "wasm-bindgen-shared",
 ]
 
@@ -2970,7 +2970,7 @@ checksum = "e94f17b526d0a461a191c78ea52bbce64071ed5c04c9ffe424dcb38f74171bb7"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
  "wasm-bindgen-backend",
  "wasm-bindgen-shared",
 ]
@@ -3003,7 +3003,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=f6a3eef#f6a3eef77e216597bcac64026f0ff7173c1d925b"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=28be38c#28be38c73b585f4f82b86fbd661c587b6726570d"
 dependencies = [
  "arrayvec 0.7.4",
  "cfg_aliases",
@@ -3027,7 +3027,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=f6a3eef#f6a3eef77e216597bcac64026f0ff7173c1d925b"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=28be38c#28be38c73b585f4f82b86fbd661c587b6726570d"
 dependencies = [
  "arrayvec 0.7.4",
  "bit-vec",
@@ -3052,7 +3052,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=f6a3eef#f6a3eef77e216597bcac64026f0ff7173c1d925b"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=28be38c#28be38c73b585f4f82b86fbd661c587b6726570d"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.4",
@@ -3097,7 +3097,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=f6a3eef#f6a3eef77e216597bcac64026f0ff7173c1d925b"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=28be38c#28be38c73b585f4f82b86fbd661c587b6726570d"
 dependencies = [
  "bitflags 2.6.0",
  "js-sys",
@@ -3191,7 +3191,7 @@ checksum = "2bbd5b46c938e506ecbce286b6628a02171d56153ba733b6c741fc627ec9579b"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]
@@ -3202,7 +3202,7 @@ checksum = "053c4c462dc91d3b1504c6fe5a726dd15e216ba718e84a0e46a88fbe5ded3515"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]
@@ -3432,7 +3432,7 @@ checksum = "125139de3f6b9d625c39e2efdd73d41bdac468ccd556556440e322be0e1bbd91"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]
@@ -3443,7 +3443,7 @@ checksum = "fa4f8080344d4671fb4e831a13ad1e68092748387dfc4f55e356242fae12ce3e"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.72",
+ "syn 2.0.73",
 ]
 
 [[package]]

@@ -240,6 +240,7 @@ pub fn is_hardware_format(format: ffi::AVPixelFormat) -> bool {
     format == ffi::AVPixelFormat::AV_PIX_FMT_VDPAU ||
     format == ffi::AVPixelFormat::AV_PIX_FMT_D3D11 ||
     format == ffi::AVPixelFormat::AV_PIX_FMT_D3D11VA_VLD ||
+    format == ffi::AVPixelFormat::AV_PIX_FMT_D3D12 ||
     format == ffi::AVPixelFormat::AV_PIX_FMT_VIDEOTOOLBOX ||
     format == ffi::AVPixelFormat::AV_PIX_FMT_MEDIACODEC ||
     format == ffi::AVPixelFormat::AV_PIX_FMT_OPENCL ||
