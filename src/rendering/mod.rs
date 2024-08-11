@@ -192,8 +192,8 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     #[cfg(any(target_os = "ios", target_os = "android"))]
     let _prevent_system_sleep = keep_awake::inhibit_display("Gyroflow", "Rendering video");
 
-    let mut output_width = render_options.output_width;
-    let mut output_height = render_options.output_height;
+    let output_width = render_options.output_width;
+    let output_height = render_options.output_height;
 
     let duration_ms = params.duration_ms;
     let fps = params.fps;

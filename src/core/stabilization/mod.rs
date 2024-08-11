@@ -455,6 +455,7 @@ impl Stabilization {
     }
 
     pub fn ensure_ready_for_processing<T: PixelType>(&mut self, timestamp_us: i64, frame: Option<usize>, buffers: &mut Buffers) {
+        let pending_dev = self.pending_device_change.clone();
         if let Some(dev) = self.pending_device_change.take() {
             log::debug!("Setting device {dev}");
             self.update_device(dev, buffers);
@@ -469,6 +470,10 @@ impl Stabilization {
             if !has_cached {
                 log::warn!("Cached wgpu not found, reinitializing. Key: {}", self.get_current_key(buffers));
                 self.initialized_backend = BackendType::None;
+                if let Some(dev) = pending_dev {
+                    log::debug!("Setting device {dev}");
+                    self.update_device(dev, buffers);
+                }
                 self.init_backends::<T>(timestamp_us, frame, buffers);
             } else {
                 self.initialized_backend = BackendType::Wgpu(hash);

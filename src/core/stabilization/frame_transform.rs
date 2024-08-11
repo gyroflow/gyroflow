@@ -8,8 +8,6 @@ use crate::gyro_source::FileMetadata;
 use crate::keyframes::KeyframeType;
 use crate::util::{ MapClosest, map_coord };
 
-const DEG2RAD: f64 = std::f64::consts::PI / 180.0;
-
 #[derive(Default, Clone)]
 pub struct FrameTransform {
     pub matrices: Vec<[f32; 14]>,

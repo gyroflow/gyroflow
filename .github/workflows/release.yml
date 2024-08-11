@@ -52,6 +52,7 @@ jobs:
       - name: Force qml-video-rs rebuild (Win)
         if: ${{ matrix.targets.os == 'windows-2022' }}
         run: |
+          rm -r -force ${{ github.workspace }}/target/deploy/build/qml-video-rs* -ErrorAction SilentlyContinue
           rm -r -force ${{ github.workspace }}/target/x86_64-pc-windows-msvc/deploy/build/qml-video-rs* -ErrorAction SilentlyContinue
           rm -r -force ${{ github.workspace }}/target/aarch64-pc-windows-msvc/deploy/build/qml-video-rs* -ErrorAction SilentlyContinue
           rm -r -force ${{ github.workspace }}/target/release/build/qml-video-rs* -ErrorAction SilentlyContinue
