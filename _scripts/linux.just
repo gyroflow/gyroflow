@@ -1,10 +1,10 @@
 import 'common.just'
 
 AptGetExists := `which apt-get > /dev/null && echo true || echo false`
-QtLinuxArch := if arch() == "aarch64" { "linux_arm64" } else { "linux" }
-FFmpegLinuxArch := if arch() == "aarch64" { "arm64" } else { "amd64" }
-ArchName := if arch() == "aarch64" { "arm64" } else { "x86_64" }
-AppImageToolArch := if arch() == "aarch64" { "aarch64" } else { "x86_64" }
+QtLinuxArch      := if Arch == "aarch64" { "linux_arm64" } else { "linux" }
+FFmpegLinuxArch  := if Arch == "aarch64" { "arm64"       } else { "amd64" }
+ArchName         := if Arch == "aarch64" { "arm64"       } else { "x86_64" }
+PackageSuffix    := if Arch == "aarch64" { "linux-arm64" } else { "linux64" }
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -77,7 +77,8 @@ install-deps:
         sudo apt-get install -y debian-keyring debian-archive-keyring
         sudo apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
         sudo apt-get install -y python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse gtk-update-icon-cache
-        sudo curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-{{AppImageToolArch}}.AppImage -o /opt/appimagetool
+        export HOST_ARCH=`lscpu | grep Architecture | awk {'print $2'}`
+        sudo curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${HOST_ARCH}.AppImage -o /opt/appimagetool
 
         # workaround AppImage issues with Docker
         pushd /opt/ ; sudo chmod +x appimagetool; sed -i 's|AI\x02|\x00\x00\x00|' appimagetool; sudo ./appimagetool --appimage-extract ; popd
@@ -152,6 +153,11 @@ deploy *param:
             curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal
             source \$HOME/.cargo/env
             cargo install --force just
+            if [ "$FORCE_ARCH" == "aarch64" ]; then
+                export FORCE_ARCH=aarch64
+                rustup target add aarch64-unknown-linux-gnu
+                apt install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+            fi
             cd $PROJECT_DIR
             just install-deps
             just deploy
@@ -165,9 +171,9 @@ deploy *param:
 
     cargo build --profile deploy
 
-    rm -rf "$PROJECT_DIR/_deployment/_binaries/linux64"
+    rm -rf "$PROJECT_DIR/_deployment/_binaries/{{PackageSuffix}}"
 
-    TARGET="$PROJECT_DIR/_deployment/_binaries/linux64"
+    TARGET="$PROJECT_DIR/_deployment/_binaries/{{PackageSuffix}}"
     mkdir -p $TARGET
     mkdir -p $TARGET/camera_presets
     mkdir -p $TARGET/lib
@@ -320,7 +326,7 @@ deploy *param:
     cp -f "$PROJECT_DIR/resources/camera_presets/profiles.cbor.gz" "$TARGET/camera_presets/profiles.cbor.gz"
 
     pushd $TARGET/..
-    tar -czf Gyroflow-linux64.tar.gz --transform 's!linux64!Gyroflow!' linux64
+    tar -czf Gyroflow-{{PackageSuffix}}.tar.gz --transform 's!{{PackageSuffix}}!Gyroflow!' {{PackageSuffix}}
 
     # ---- Build AppImage ----
     export APP_DIR=$TARGET/../AppDir
@@ -332,7 +338,15 @@ deploy *param:
     cp -f $PROJECT_DIR/_deployment/linux/gyroflow.svg $APP_DIR/usr/share/icons/
 
     cp -rf $TARGET/* $APP_DIR/
-    appimage-builder --recipe $PROJECT_DIR/_deployment/linux/AppImageBuilder.yml
+    if [ "{{Arch}}" == "aarch64" ]; then
+        cp $PROJECT_DIR/_deployment/linux/AppImageBuilder.yml AppImageBuilder-arm64.yml
+        sed -i 's|x86_64|aarch64|' AppImageBuilder-arm64.yml
+        sed -i 's|amd64|aarch64|' AppImageBuilder-arm64.yml
+        appimage-builder --recipe AppImageBuilder-arm64.yml
+        rm AppImageBuilder-arm64.yml
+    else
+        appimage-builder --recipe $PROJECT_DIR/_deployment/linux/AppImageBuilder.yml
+    fi
     chmod +x Gyroflow-${APP_VERSION}-{{ArchName}}.AppImage
 
     # Try to fix AppImage permissions
@@ -341,10 +355,10 @@ deploy *param:
     sudo chmod 755 squashfs-root
     find ./squashfs-root -type d -exec sudo chmod 755 {} \;
     mv squashfs-root Gyroflow.AppDir
-    ARCH={{AppImageToolArch}} appimagetool ./Gyroflow.AppDir
+    ARCH={{Arch}} appimagetool ./Gyroflow.AppDir
     rm -rf Gyroflow.AppDir
 
-    mv Gyroflow-{{ArchName}}.AppImage Gyroflow-linux64.AppImage
+    mv Gyroflow-{{ArchName}}.AppImage Gyroflow-{{PackageSuffix}}.AppImage
     # ---- Build AppImage ----
 
     rm -rf $APP_DIR
