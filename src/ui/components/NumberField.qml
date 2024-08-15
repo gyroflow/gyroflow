@@ -58,11 +58,13 @@ TextField {
     }
     function updateValue(): void {
         if (allowText) return;
+        const textNoSpace = text.replace(/\s+/g, "");
+        if (textNoSpace.length === 0) return;
         preventChange = true;
         let locale = Qt.locale();
         locale.numberOptions = Locale.OmitGroupSeparator;
         try {
-            value = Number.fromLocaleString(locale, text.replace(/\s+/g, ""));
+            value = Number.fromLocaleString(locale, textNoSpace);
         } catch(e) {
             let locale = Qt.locale();
             locale.numberOptions = Locale.OmitGroupSeparator;
