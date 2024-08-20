@@ -158,9 +158,9 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
                             mapped_at_creation: false
                         });
 
-                        let cuda_mem = import_external_d3d12_resource(shared_handle as *mut _, actual_size as usize).unwrap(); // TODO: unwrap
+                        let cuda_mem = import_external_d3d12_resource(shared_handle.0, actual_size as usize).unwrap(); // TODO: unwrap
 
-                        let _ = windows::Win32::Foundation::CloseHandle(windows::Win32::Foundation::HANDLE(shared_handle as *mut _));
+                        let _ = windows::Win32::Foundation::CloseHandle(shared_handle);
 
                         TextureHolder {
                             wgpu_texture: if use_buffer_directly { None } else { Some(device.create_texture(&desc)) },

@@ -4,10 +4,8 @@
 use wgpu::TextureFormat;
 use wgpu::hal::api::Vulkan;
 use wgpu::hal::api::Dx12;
-use windows::Win32::Graphics::Dxgi::Common::*;
-use windows::Win32::Graphics::Dxgi::*;
-use windows::Win32::Graphics::Direct3D11::*;
-use windows::Win32::Foundation::{ CloseHandle, HANDLE, E_NOINTERFACE, E_FAIL };
+use windows::Win32::Graphics::{ Dxgi::*, Dxgi::Common::*, Direct3D11::*, Direct3D12 };
+use windows::Win32::Foundation::{ CloseHandle, HANDLE, E_NOINTERFACE, E_FAIL, GENERIC_ALL };
 use windows::Win32::System::Threading::{ CreateEventA, WaitForSingleObject };
 use windows::core::Interface;
 use ash::vk::{ self, ImageCreateInfo };
@@ -163,21 +161,18 @@ pub fn create_vk_image_from_d3d11_texture(device: &wgpu::Device, d3d11_device: &
     }
 }
 
-pub fn create_dx12_resource_from_d3d11_texture(device: &wgpu::Device, d3d11_device: &ID3D11Device, texture: &ID3D11Texture2D) -> Result<(::d3d12::Resource, Option<DirectX11SharedTexture>), Box<dyn std::error::Error>> {
+pub fn create_dx12_resource_from_d3d11_texture(device: &wgpu::Device, d3d11_device: &ID3D11Device, texture: &ID3D11Texture2D) -> Result<(Direct3D12::ID3D12Resource, Option<DirectX11SharedTexture>), Box<dyn std::error::Error>> {
     unsafe {
         let (handle, shared_texture) = get_shared_texture_d3d11(d3d11_device, texture)?;
 
         let raw_image = device.as_hal::<Dx12, _, _>(|hdevice| {
             hdevice.map(|hdevice| {
                 let raw_device = hdevice.raw_device();
-                use winapi::Interface;
 
-                let mut resource = ::d3d12::Resource::null();
-                let hr = raw_device.OpenSharedHandle(handle.0 as *mut std::ffi::c_void, &winapi::um::d3d12::ID3D12Resource::uuidof(), resource.mut_void());
-                if hr == 0 {
-                    Ok::<::d3d12::Resource, String>(resource)
-                } else {
-                    Err::<::d3d12::Resource, String>("Failed to OpenSharedHandle".into())
+                let mut resource = None::<Direct3D12::ID3D12Resource>;
+                match raw_device.OpenSharedHandle(handle, &mut resource) {
+                    Ok(_) => Ok(resource.unwrap()),
+                    Err(e) => Err(e)
                 }
             })
         }).unwrap().unwrap()?; // TODO: unwrap
@@ -186,7 +181,7 @@ pub fn create_dx12_resource_from_d3d11_texture(device: &wgpu::Device, d3d11_devi
     }
 }
 
-pub fn create_texture_from_dx12_resource(device: &wgpu::Device, resource: ::d3d12::Resource, desc: &wgpu::TextureDescriptor) -> wgpu::Texture {
+pub fn create_texture_from_dx12_resource(device: &wgpu::Device, resource: Direct3D12::ID3D12Resource, desc: &wgpu::TextureDescriptor) -> wgpu::Texture {
     unsafe {
         let texture = <Dx12 as wgpu::hal::Api>::Device::texture_from_raw(resource, desc.format, desc.dimension, desc.size, 1, 1);
 
@@ -199,125 +194,110 @@ pub fn create_texture_from_dx12_resource(device: &wgpu::Device, resource: ::d3d1
         device.as_hal::<Dx12, _, _>(|hdevice| {
             hdevice.map(|hdevice| {
                 let raw_device = hdevice.raw_device();
-                use winapi::um::d3d12;
-                use winapi::shared::dxgitype;
-                use winapi::Interface;
 
-                let mut resource = ::d3d12::Resource::null();
+                let mut resource = None::<Direct3D12::ID3D12Resource>;
 
                 { // Texture
-                    let raw_desc = d3d12::D3D12_RESOURCE_DESC {
-                        Dimension: d3d12::D3D12_RESOURCE_DIMENSION_TEXTURE2D,
+                    let raw_desc = Direct3D12::D3D12_RESOURCE_DESC {
+                        Dimension: Direct3D12::D3D12_RESOURCE_DIMENSION_TEXTURE2D,
                         Alignment: 0,
                         Width: desc.size.width as u64,
                         Height: desc.size.height,
                         DepthOrArraySize: 1,
                         MipLevels: 1,
                         Format: format_wgpu_to_dxgi(desc.format).0,
-                        SampleDesc: dxgitype::DXGI_SAMPLE_DESC {
+                        SampleDesc: DXGI_SAMPLE_DESC {
                             Count: desc.sample_count,
                             Quality: 0,
                         },
-                        Layout: d3d12::D3D12_TEXTURE_LAYOUT_UNKNOWN,
-                        Flags: d3d12::D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET,
+                        Layout: Direct3D12::D3D12_TEXTURE_LAYOUT_UNKNOWN,
+                        Flags: Direct3D12::D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET,
                     };
-                    let heap_properties = d3d12::D3D12_HEAP_PROPERTIES {
-                        Type: d3d12::D3D12_HEAP_TYPE_CUSTOM,
-                        CPUPageProperty: d3d12::D3D12_CPU_PAGE_PROPERTY_NOT_AVAILABLE,
-                        MemoryPoolPreference: d3d12::D3D12_MEMORY_POOL_L0,
+                    let heap_properties = Direct3D12::D3D12_HEAP_PROPERTIES {
+                        Type: Direct3D12::D3D12_HEAP_TYPE_CUSTOM,
+                        CPUPageProperty: Direct3D12::D3D12_CPU_PAGE_PROPERTY_NOT_AVAILABLE,
+                        MemoryPoolPreference: Direct3D12::D3D12_MEMORY_POOL_L0,
                         CreationNodeMask: 0,
                         VisibleNodeMask: 0,
                     };
 
-                    let hr = raw_device.CreateCommittedResource(
+                    raw_device.CreateCommittedResource(
                         &heap_properties,
-                        d3d12::D3D12_HEAP_FLAG_SHARED,
+                        Direct3D12::D3D12_HEAP_FLAG_SHARED,
                         &raw_desc,
-                        d3d12::D3D12_RESOURCE_STATE_COMMON,
-                        std::ptr::null(), // clear value
-                        &d3d12::ID3D12Resource::uuidof(),
-                        resource.mut_void(),
-                    );
-                    if hr != 0 {
-                        return Err(format!("CreateCommittedResource returned error: {}", hr));
-                    }
+                        Direct3D12::D3D12_RESOURCE_STATE_COMMON,
+                        None, // clear value
+                        &mut resource,
+                    ).map_err(|e| format!("{e:?}"))?;
                 }
 
-                let ai = raw_device.GetResourceAllocationInfo(0, 1, &resource.GetDesc());
+                let resource = resource.unwrap();
+
+                let actual_desc = resource.GetDesc();
+                let ai = raw_device.GetResourceAllocationInfo(0, &[actual_desc]);
                 let actual_size = ai.SizeInBytes as usize;
 
-                let mut handle: usize = 0;
-                let hr = raw_device.CreateSharedHandle(resource.as_mut_ptr() as *mut _, std::ptr::null(), windows::Win32::System::SystemServices::GENERIC_ALL, std::ptr::null(), (&mut handle) as *mut _ as *mut *mut std::ffi::c_void);
-                if hr != 0 {
-                    return Err(format!("CreateSharedHandle returned error: {}", hr));
+                match raw_device.CreateSharedHandle(&resource, None, GENERIC_ALL.0, windows::core::PCWSTR::null()) {
+                    Ok(handle) => Ok::<(Direct3D12::ID3D12Resource, HANDLE, usize), String>((resource, handle, actual_size)),
+                    Err(e) => Err(e.to_string())
                 }
-
-                Ok::<(::d3d12::Resource, usize, usize), String>((resource, handle, actual_size))
             })
         }).unwrap() // TODO: unwrap
     }
 }*/
 
-pub fn create_native_shared_buffer_dx12(device: &wgpu::Device, size: usize) -> Result<(::d3d12::Resource, usize, usize), String> {
+pub fn create_native_shared_buffer_dx12(device: &wgpu::Device, size: usize) -> Result<(Direct3D12::ID3D12Resource, HANDLE, usize), String> {
     unsafe {
         device.as_hal::<Dx12, _, _>(|hdevice| {
             hdevice.map(|hdevice| {
                 let raw_device = hdevice.raw_device();
-                use winapi::um::d3d12;
-                use winapi::shared::dxgitype;
-                use winapi::Interface;
 
-                let mut resource = ::d3d12::Resource::null();
+                let mut resource = None::<Direct3D12::ID3D12Resource>;
 
                 {
-                    let raw_desc = d3d12::D3D12_RESOURCE_DESC {
-                        Dimension: d3d12::D3D12_RESOURCE_DIMENSION_BUFFER,
+                    let raw_desc = Direct3D12::D3D12_RESOURCE_DESC {
+                        Dimension: Direct3D12::D3D12_RESOURCE_DIMENSION_BUFFER,
                         Alignment: 0,
                         Width: size as u64,
                         Height: 1,
                         DepthOrArraySize: 1,
                         MipLevels: 1,
-                        Format: winapi::shared::dxgiformat::DXGI_FORMAT_UNKNOWN,
-                        SampleDesc: dxgitype::DXGI_SAMPLE_DESC {
+                        Format: DXGI_FORMAT_UNKNOWN,
+                        SampleDesc: DXGI_SAMPLE_DESC {
                             Count: 1,
                             Quality: 0,
                         },
-                        Layout: d3d12::D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
-                        Flags: d3d12::D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
+                        Layout: Direct3D12::D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
+                        Flags: Direct3D12::D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
                     };
-                    let heap_properties = d3d12::D3D12_HEAP_PROPERTIES {
-                        Type: d3d12::D3D12_HEAP_TYPE_CUSTOM,
-                        CPUPageProperty: d3d12::D3D12_CPU_PAGE_PROPERTY_NOT_AVAILABLE,
-                        MemoryPoolPreference: d3d12::D3D12_MEMORY_POOL_L0,
+                    let heap_properties = Direct3D12::D3D12_HEAP_PROPERTIES {
+                        Type: Direct3D12::D3D12_HEAP_TYPE_CUSTOM,
+                        CPUPageProperty: Direct3D12::D3D12_CPU_PAGE_PROPERTY_NOT_AVAILABLE,
+                        MemoryPoolPreference: Direct3D12::D3D12_MEMORY_POOL_L0,
                         CreationNodeMask: 0,
                         VisibleNodeMask: 0,
                     };
 
-                    let hr = raw_device.CreateCommittedResource(
+                    raw_device.CreateCommittedResource(
                         &heap_properties,
-                        d3d12::D3D12_HEAP_FLAG_SHARED,
+                        Direct3D12::D3D12_HEAP_FLAG_SHARED,
                         &raw_desc,
-                        d3d12::D3D12_RESOURCE_STATE_COMMON,
-                        std::ptr::null(), // clear value
-                        &d3d12::ID3D12Resource::uuidof(),
-                        resource.mut_void(),
-                    );
-                    if hr != 0 {
-                        return Err(format!("CreateCommittedResource returned error: {}", hr));
-                    }
+                        Direct3D12::D3D12_RESOURCE_STATE_COMMON,
+                        None, // clear value
+                        &mut resource,
+                    ).map_err(|e| format!("{e:?}"))?;
                 }
+
+                let resource = resource.unwrap();
 
                 let actual_desc = resource.GetDesc();
-                let ai = raw_device.GetResourceAllocationInfo(0, 1, &actual_desc);
+                let ai = raw_device.GetResourceAllocationInfo(0, &[actual_desc]);
                 let actual_size = ai.SizeInBytes as usize;
 
-                let mut handle: usize = 0;
-                let hr = raw_device.CreateSharedHandle(resource.as_mut_ptr() as *mut _, std::ptr::null(), winapi::um::winnt::GENERIC_ALL, std::ptr::null(), (&mut handle) as *mut _ as *mut *mut std::ffi::c_void);
-                if hr != 0 {
-                    return Err(format!("CreateSharedHandle returned error: {}", hr));
+                match raw_device.CreateSharedHandle(&resource, None, GENERIC_ALL.0, windows::core::PCWSTR::null()) {
+                    Ok(handle) => Ok::<(Direct3D12::ID3D12Resource, HANDLE, usize), String>((resource, handle, actual_size)),
+                    Err(e) => Err(e.to_string())
                 }
-
-                Ok::<(::d3d12::Resource, usize, usize), String>((resource, handle, actual_size))
             })
         }).unwrap().unwrap() // TODO: unwrap
     }
@@ -356,7 +336,7 @@ pub fn format_dxgi_to_wgpu(format: DXGI_FORMAT) -> TextureFormat {
         DXGI_FORMAT_R8G8B8A8_SINT => TextureFormat::Rgba8Sint,
         DXGI_FORMAT_R10G10B10A2_UNORM => TextureFormat::Rgb10a2Unorm,
         DXGI_FORMAT_R10G10B10A2_UINT => TextureFormat::Rgb10a2Uint,
-        DXGI_FORMAT_R11G11B10_FLOAT => TextureFormat::Rg11b10Float,
+        DXGI_FORMAT_R11G11B10_FLOAT => TextureFormat::Rg11b10UFloat,
         DXGI_FORMAT_R32G32_UINT => TextureFormat::Rg32Uint,
         DXGI_FORMAT_R32G32_SINT => TextureFormat::Rg32Sint,
         DXGI_FORMAT_R32G32_FLOAT => TextureFormat::Rg32Float,
@@ -420,7 +400,7 @@ pub fn format_wgpu_to_dxgi(format: TextureFormat) -> DXGI_FORMAT {
         TextureFormat::Rgba8Uint => DXGI_FORMAT_R8G8B8A8_UINT,
         TextureFormat::Rgba8Sint => DXGI_FORMAT_R8G8B8A8_SINT,
         TextureFormat::Rgb10a2Unorm => DXGI_FORMAT_R10G10B10A2_UNORM,
-        TextureFormat::Rg11b10Float => DXGI_FORMAT_R11G11B10_FLOAT,
+        TextureFormat::Rg11b10UFloat => DXGI_FORMAT_R11G11B10_FLOAT,
         TextureFormat::Rg32Uint => DXGI_FORMAT_R32G32_UINT,
         TextureFormat::Rg32Sint => DXGI_FORMAT_R32G32_SINT,
         TextureFormat::Rg32Float => DXGI_FORMAT_R32G32_FLOAT,
