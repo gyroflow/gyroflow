@@ -124,7 +124,7 @@ pub fn format_wgpu_to_metal(format: wgpu::TextureFormat) -> metal::MTLPixelForma
         Tf::Rgba8Sint => RGBA8Sint,
         Tf::Rgb10a2Unorm => RGB10A2Unorm,
         Tf::Rgb10a2Uint => RGB10A2Uint,
-        Tf::Rg11b10Float => RG11B10Float,
+        Tf::Rg11b10UFloat => RG11B10Float,
         Tf::Rg32Uint => RG32Uint,
         Tf::Rg32Sint => RG32Sint,
         Tf::Rg32Float => RG32Float,
