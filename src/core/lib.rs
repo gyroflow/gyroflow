@@ -349,7 +349,27 @@ impl StabilizationManager {
         if width > 0 && height > 0 {
             let params = self.params.upgradable_read();
 
-            let output_size = (width, height);
+            let r = (params.video_rotation as f64).abs();
+            let (ow, oh) = if r == 90.0 || r == 270.0 {
+                (params.size.1, params.size.0)
+            } else {
+                params.size
+            };
+
+            let wp = width as f64;
+            let hp = height as f64;
+
+            let sw = ow as f64 / wp;
+            let sh = oh as f64 / hp;
+            let scale = sw.min(sh);
+
+            let mut nw = (wp * scale).round() as usize;
+            let mut nh = (hp * scale).round() as usize;
+
+            if nw % 2 != 0 { nw -= 1; }
+            if nh % 2 != 0 { nh -= 1; }
+
+            let output_size = (nw, nh);
 
             if params.output_size != output_size {
                 {
