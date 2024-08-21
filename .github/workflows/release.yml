@@ -171,14 +171,14 @@ jobs:
 
       - name: Save debug symbols
         if: ${{ matrix.targets.type == 'windows' || matrix.targets.type == 'windows-arm' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: Gyroflow-debug-symbols
+          name: Gyroflow-debug-symbols-${{ matrix.targets.type }}
           path: |
             ${{ github.workspace }}/target/${{ matrix.targets.type == 'windows' && 'x86_64-pc-windows-msvc' || 'aarch64-pc-windows-msvc' }}/deploy/deps/gyroflow.pdb
             ${{ github.workspace }}/target/${{ matrix.targets.type == 'windows' && 'x86_64-pc-windows-msvc' || 'aarch64-pc-windows-msvc' }}/deploy/*.pdb
       - name: Save Binaries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Gyroflow-${{ matrix.targets.type }}
           path: _deployment/_binaries/*.*
@@ -189,7 +189,7 @@ jobs:
     runs-on: macos-13
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
 
       - run: find . -type f
 
@@ -212,7 +212,7 @@ jobs:
           track: ${{ startsWith(github.ref, 'refs/tags/') && 'production' || 'beta' }}
 
       - name: Publish
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
          files: ./**/*
