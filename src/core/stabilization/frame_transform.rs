@@ -226,7 +226,7 @@ impl FrameTransform {
             }
 
             let (mut sx, mut sy, mut ra, mut ox, mut oy) = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
-                let ts = ((row_readout_time * y as f64 + frame_period * frame as f64) * 1000.0).round() as i64;
+                // let ts = ((row_readout_time * y as f64 + frame_period * frame as f64) * 1000.0).round() as i64;
                 let y_sensor = map_coord(y as f64, 0.0, params.height as f64, is.crop_area.1 as f64, is.crop_area.1 as f64 + is.crop_area.3 as f64);
                 let y_sensor = if params.framebuffer_inverted { is.sensor_size.1 as f64 - y_sensor } else { y_sensor };
 

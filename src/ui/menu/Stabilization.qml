@@ -463,8 +463,8 @@ MenuItem {
         tooltip: qsTr("Zoom limit is calculated approximately.\nIf you need more accuracy, increase the number of iterations in \"Advanced\" below.");
         SliderWithField {
             id: maxZoomSlider;
-            value: 140;
-            defaultValue: 140;
+            value: 130;
+            defaultValue: 130;
             from: 110;
             to: 300;
             unit: "%";
