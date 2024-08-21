@@ -184,7 +184,7 @@ impl FrameTransform {
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
 
-        let frame_period = 1000.0 / params.scaled_fps as f64;
+        // let frame_period = 1000.0 / params.scaled_fps as f64;
         // dbg!(frame_period);
 
         let is_scale = if let Some(is) = file_metadata.camera_stab_data.get(frame) {

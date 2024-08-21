@@ -10,6 +10,7 @@ use std::io::Read;
 #[cfg(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles"))]
 static LENS_PROFILES_STATIC: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../resources/camera_presets/profiles.cbor.gz"));
 
+#[allow(dead_code)]
 enum DataSource {
     String(String),
     SerdeValue(serde_json::Value)
