@@ -38,7 +38,7 @@ jobs:
           key: ${{ matrix.targets.type }}-gyroflow-ext-0
 
       - name: Prepare Vulkan SDK
-        uses: humbletim/setup-vulkan-sdk@v1.2.0
+        uses: humbletim/setup-vulkan-sdk@main
         with:
           vulkan-query-version: 1.3.204.0
           vulkan-components: Vulkan-Headers
