@@ -91,16 +91,16 @@ MenuItem {
     //     "gap": "100ms"     // ms
     // }
     // Keep in sync with render_queue.rs
-    function resolveDurationToMs(d: var): real {
+    function resolveDurationToMs(d: var, fps: real): real {
         if (!d) return 0;
              if (d.toString().endsWith("ms")) return +(d.replace("ms", ""));
         else if (d.toString().endsWith("s"))  return +(d.replace("s", "")) * 1000.0;
         else                                  return (+d / fps) * 1000.0;
     }
-    function resolveItem(x: var): list<var> {
-        const start = x.hasOwnProperty("start")? resolveDurationToMs(x.start) : 0;
-        const interval = x.hasOwnProperty("interval")? resolveDurationToMs(x.interval) : duration;
-        const gap = resolveDurationToMs(x.gap);
+    function resolveItem(x: var, duration: real, fps: real): list<var> {
+        const start = x.hasOwnProperty("start")? resolveDurationToMs(x.start, fps) : 0;
+        const interval = x.hasOwnProperty("interval")? resolveDurationToMs(x.interval, fps) : duration;
+        const gap = resolveDurationToMs(x.gap, fps);
         let out = [];
         for (let i = start; i < duration; i += interval) {
             out.push(i - gap / 2.0);
@@ -117,10 +117,10 @@ MenuItem {
         let timestamps = [];
         if (Array.isArray(o)) {
             for (const x of o) {
-                timestamps.push(...resolveItem(x));
+                timestamps.push(...resolveItem(x, duration, fps));
             }
         } else if (Object.isObject(o)) {
-            timestamps.push(...resolveItem(o));
+            timestamps.push(...resolveItem(o, duration, fps));
         }
         timestamps.sort((a, b) => a - b);
 

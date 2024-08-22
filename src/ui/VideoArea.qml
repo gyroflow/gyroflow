@@ -590,23 +590,22 @@ Item {
         height: parent.height - (root.fullScreen || window.isMobileLayout? 0 : tlcol.height);
 
         Grid {
-            property bool vertical: vidParentParent.height - vidParent.height * 2 > vidParentParent.width - vidParent.width * 2;
+            readonly property bool vertical: vidParentParent.height - vidParent.height * 2 > vidParentParent.width - vidParent.width * 2;
             columns: secondPreview.visible? (vertical? 1 : 2) : 1;
             rows:    secondPreview.visible? (vertical? 2 : 1) : 1;
             anchors.centerIn: parent;
             spacing: 10 * dpiScale;
             Item {
                 id: vidParent;
-                property real orgW: root.outWidth || vid.videoWidth;
-                property real orgH: root.outHeight || vid.videoHeight;
-                property real ratio: orgW / Math.max(1, orgH);
-                property real w: vidParentParent.width  / parent.columns - (root.fullScreen? 0 : 20 * dpiScale);
-                property real h: vidParentParent.height / parent.rows    - (root.fullScreen? 0 : 20 * dpiScale);
+                readonly property real orgW: (stabEnabledBtn.checked && root.outWidth > 0? root.outWidth : (vid.videoWidth * window.lensProfile.input_horizontal_stretch));
+                readonly property real orgH: (stabEnabledBtn.checked && root.outHeight > 0? root.outHeight : (vid.videoHeight * window.lensProfile.input_vertical_stretch));
+                readonly property real ratio: orgW / Math.max(1, orgH);
+                readonly property real w: vidParentParent.width  / parent.columns - (root.fullScreen? 0 : 20 * dpiScale);
+                readonly property real h: vidParentParent.height / parent.rows    - (root.fullScreen? 0 : 20 * dpiScale);
 
-                width:  (ratio * h) > w? w : (ratio * h);
-                height: (w / ratio) > h? h : (w / ratio);
+                width:  (ratio * h) > w ? w : (ratio * h)
+                height: (ratio * h) > w ? (w / ratio) : h
                 opacity: da.containsDrag? 0.5 : 1.0;
-                clip: !vid.stabEnabled;
 
                 /*Image {
                     // Transparency grid
@@ -626,9 +625,12 @@ Item {
                     property bool stabEnabled: stabEnabledBtn.checked;
                     transform: [
                         Scale {
+                            readonly property real r: vidInfo.videoRotation * (Math.PI / 180);
+                            readonly property real rotW: Math.abs(vidParent.width * Math.cos(r)) + Math.abs(vidParent.height * Math.sin(r));
+                            readonly property real rotH: Math.abs(vidParent.width * Math.sin(r)) + Math.abs(vidParent.height * Math.cos(r));
                             origin.x: vid.width / 2; origin.y: vid.height / 2;
-                            xScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outHeight / Math.max(1, root.outWidth)) / ((vid.videoHeight * window.lensProfile.input_vertical_stretch) / Math.max(1, vid.videoWidth * window.lensProfile.input_horizontal_stretch))) * (fovOverviewBtn.checked? 0.5 : 1);
-                            yScale: vid.stabEnabled? 1 : Math.max(1.0, (root.outWidth / Math.max(1, root.outHeight)) / ((vid.videoWidth * window.lensProfile.input_horizontal_stretch) / Math.max(1, vid.videoHeight * window.lensProfile.input_vertical_stretch))) * (fovOverviewBtn.checked? 0.5 : 1);
+                            xScale: vid.stabEnabled? 1 : Math.min(vidParent.h / rotH, vidParent.w / rotW) * (fovOverviewBtn.checked? 0.5 : 1);
+                            yScale: xScale;
                         },
                         Rotation {
                             origin.x: vid.width / 2; origin.y: vid.height / 2;
