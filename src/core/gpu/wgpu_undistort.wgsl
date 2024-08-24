@@ -282,7 +282,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
             return vec2<f32>(-99999.0, -99999.0);
         }
 
-        if (params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
+        if (bool(flags & 2048) && params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
             let r = length(vec2<f32>(_x, _y)) / _w;
             let sin_theta_d = (r / sqrt(1.0 + r * r)) * params.light_refraction_coefficient;
             let r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
@@ -293,7 +293,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
 
         var uv = f * distort_point(_x, _y, _w);
 
-        if (matrices[idx + 9] != 0.0 || matrices[idx + 10] != 0.0 || matrices[idx + 11] != 0.0 || matrices[idx + 12] != 0.0 || matrices[idx + 13] != 0.0) {
+        if (bool(flags & 256) && (matrices[idx + 9] != 0.0 || matrices[idx + 10] != 0.0 || matrices[idx + 11] != 0.0 || matrices[idx + 12] != 0.0 || matrices[idx + 13] != 0.0)) {
             let ang_rad = matrices[idx + 11];
             let cos_a = cos(-ang_rad);
             let sin_a = sin(-ang_rad);
@@ -305,12 +305,12 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
 
         uv += c;
 
-        if (mesh_data[0] > 9.0) {
+        if (bool(flags & 512) && mesh_data[0] > 9.0) {
             let mesh_size = vec2<f32>(mesh_data[3], mesh_data[4]);
             let origin    = vec2<f32>(mesh_data[5], mesh_data[6]);
             let crop_size = vec2<f32>(mesh_data[7], mesh_data[8]);
 
-            if (bool(params.flags & 128)) { uv.y = f32(params.height) - uv.y; } // framebuffer inverted
+            if (bool(flags & 128)) { uv.y = f32(params.height) - uv.y; } // framebuffer inverted
 
             uv.x = map_coord(uv.x, 0.0, f32(params.width),  origin.x, origin.x + crop_size.x);
             uv.y = map_coord(uv.y, 0.0, f32(params.height), origin.y, origin.y + crop_size.y);
@@ -320,11 +320,11 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
             uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0, f32(params.width));
             uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0, f32(params.height));
 
-            if (bool(params.flags & 128)) { uv.y = f32(params.height) - uv.y; } // framebuffer inverted
+            if (bool(flags & 128)) { uv.y = f32(params.height) - uv.y; } // framebuffer inverted
         }
 
         // FocalPlaneDistortion
-        if (mesh_data[0] > 0.0 && mesh_data[u32(mesh_data[0])] > 0.0) {
+        if (bool(flags & 1024) && mesh_data[0] > 0.0 && mesh_data[u32(mesh_data[0])] > 0.0) {
             let o = u32(mesh_data[0]); // offset to focal plane distortion data
 
             let mesh_size = vec2<f32>(mesh_data[3], mesh_data[4]);
@@ -332,7 +332,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
             let crop_size = vec2<f32>(mesh_data[7], mesh_data[8]);
             let stblz_grid = mesh_size.y / 8.0;
 
-            if (bool(params.flags & 128)) { uv.y = f32(params.height) - uv.y; } // framebuffer inverted
+            if (bool(flags & 128)) { uv.y = f32(params.height) - uv.y; } // framebuffer inverted
 
             uv.x = map_coord(uv.x, 0.0, f32(params.width),  origin.x, origin.x + crop_size.x);
             uv.y = map_coord(uv.y, 0.0, f32(params.height), origin.y, origin.y + crop_size.y);
@@ -349,7 +349,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
             uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0, f32(params.width));
             uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0, f32(params.height));
 
-            if (bool(params.flags & 128)) { uv.y = f32(params.height) - uv.y; } // framebuffer inverted
+            if (bool(flags & 128)) { uv.y = f32(params.height) - uv.y; } // framebuffer inverted
         }
         if (bool(flags & 2)) { // Has digital lens
             uv = digital_distort_point(uv);
@@ -402,7 +402,7 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
 
         new_out_pos = (new_out_pos - out_c) / out_f;
         new_out_pos = undistort_point(new_out_pos);
-        if (params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
+        if (bool(flags & 2048) && params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
             let r = length(new_out_pos);
             if (r != 0.0) {
                 let sin_theta_d = (r / sqrt(1.0 + r * r)) / params.light_refraction_coefficient;

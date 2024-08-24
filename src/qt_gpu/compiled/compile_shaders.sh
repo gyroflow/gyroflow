@@ -21,10 +21,19 @@ do
             FUNCS=`cat ../../core/stabilization/distortion_models/$d.glsl`
             d=_$d
         fi
+
+        if [ "$i" != "sony" ]; then
+            FUNCS="$FUNCS vec2 process_coord(vec2 uv, float idx) { return uv; } "
+        fi
+
         FUNCS="$FUNCS `cat ../../core/stabilization/distortion_models/$i.glsl`"
         SHADER=`cat ../undistort.frag`
 
         echo "${SHADER/LENS_MODEL_FUNCTIONS;/"$FUNCS"}" > tmp.frag
+
+        if [ "$i" = "sony" ]; then
+           echo " float get_mesh_data(int idx) { return texture(texMeshData, vec2(0, idx / 1023.0)).r; } " >> tmp.frag
+        fi
 
         eval "$QSB -o undistort_$i$d.frag.qsb tmp.frag"
         rm tmp.frag

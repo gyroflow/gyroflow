@@ -47,14 +47,18 @@ thread_local! {
 bitflags::bitflags! {
     #[derive(Default)]
     pub struct KernelParamsFlags: i32 {
-        const FIX_COLOR_RANGE      = 1;
-        const HAS_DIGITAL_LENS     = 2;
-        const FILL_WITH_BACKGROUND = 4;
-        const DRAWING_ENABLED      = 8;
-        const HORIZONTAL_RS        = 16; // right-to-left or left-to-right rolling shutter
-        const HAS_SOURCE_RECT      = 32;
-        const HAS_OUTPUT_RECT      = 64;
-        const FRAMEBUFFER_INVERTED = 128;
+        const FIX_COLOR_RANGE      = 1 << 0; // 1
+        const HAS_DIGITAL_LENS     = 1 << 1; // 2
+        const FILL_WITH_BACKGROUND = 1 << 2; // 4
+        const DRAWING_ENABLED      = 1 << 3; // 8
+        const HORIZONTAL_RS        = 1 << 4; // 16, right-to-left or left-to-right rolling shutter
+        const HAS_SOURCE_RECT      = 1 << 5; // 32
+        const HAS_OUTPUT_RECT      = 1 << 6; // 64
+        const FRAMEBUFFER_INVERTED = 1 << 7; // 128
+        const HAS_IBIS_DATA        = 1 << 8; // 256
+        const HAS_MESH_DATA        = 1 << 9; // 512
+        const HAS_FPD_DATA         = 1 << 10; // 1024
+        const ANY_UNDERWATER       = 1 << 11; // 2048
     }
 }
 
@@ -189,6 +193,7 @@ impl Stabilization {
         self.kernel_flags.set(KernelParamsFlags::HAS_SOURCE_RECT, buffers.input.rect.is_some() || self.size.0 != buffers.input.size.0 || self.size.1 != buffers.input.size.1);
         self.kernel_flags.set(KernelParamsFlags::HAS_OUTPUT_RECT, buffers.output.rect.is_some() || self.output_size.0 != buffers.output.size.0 || self.output_size.1 != buffers.output.size.1);
         self.kernel_flags.set(KernelParamsFlags::FRAMEBUFFER_INVERTED, self.compute_params.framebuffer_inverted);
+        self.kernel_flags.set(KernelParamsFlags::ANY_UNDERWATER, (self.compute_params.light_refraction_coefficient != 1.0 && self.compute_params.light_refraction_coefficient > 0.0) || self.compute_params.keyframes.is_keyframed(&crate::KeyframeType::LightRefractionCoeff));
 
         let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
         transform.kernel_params.pixel_value_limit = T::default_max_value().unwrap_or(f32::MAX);
@@ -207,7 +212,7 @@ impl Stabilization {
         transform.kernel_params.bytes_per_pixel = (T::COUNT * T::SCALAR_BYTES) as i32;
         transform.kernel_params.pix_element_count = T::COUNT as i32;
         transform.kernel_params.canvas_scale = self.drawing.scale as f32;
-        transform.kernel_params.flags = self.kernel_flags.bits();
+        transform.kernel_params.flags |= self.kernel_flags.bits();
 
         transform.kernel_params.stride        = buffers.input.size.2 as i32;
         transform.kernel_params.output_stride = buffers.output.size.2 as i32;

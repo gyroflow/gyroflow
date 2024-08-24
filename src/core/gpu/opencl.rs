@@ -204,8 +204,10 @@ impl OclWrapper {
                        .replace("PIXEL_BYTES", &format!("{}", params.bytes_per_pixel))
                        .replace("INTERPOLATION", &format!("{}", params.interpolation));
 
-        if (params.flags & 8) == 0 { // Drawing not enabled
-            kernel = kernel.replace("params->flags & 8", "false"); // It makes it much faster for some reason
+        for i in 0..31 {
+            let v = 1 << i;
+            if v == 4 { continue; } // Fill with background can be different per frame
+            kernel = kernel.replace(&format!("(params->flags & {v})"), &format!("{}", if (params.flags & v) == v { "true" } else { "false" }));
         }
 
         {

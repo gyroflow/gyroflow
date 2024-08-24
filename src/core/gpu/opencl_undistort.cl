@@ -228,7 +228,7 @@ float2 interpolate_mesh(__global const float *mesh, int width, int height, float
 }
 
 DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global KernelParams *params, __global const uchar *drawing, DATA_TYPEF bg) {
-    bool fix_range = params->flags & 1;
+    bool fix_range = (params->flags & 1);
 
     if (params->input_rotation != 0.0) {
         uv = rotate_point(uv, params->input_rotation * (M_PI_F / 180.0), (float2)((float)params->width / 2.0, (float)params->height / 2.0));
@@ -290,7 +290,7 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
             return (float2)(-99999.0f, -99999.0f);
         }
 
-        if (params->light_refraction_coefficient != 1.0f && params->light_refraction_coefficient > 0.0f) {
+        if ((params->flags & 2048) && params->light_refraction_coefficient != 1.0f && params->light_refraction_coefficient > 0.0f) {
             float r = length((float2)(_x, _y)) / _w;
             float sin_theta_d = (r / sqrt(1.0f + r * r)) * params->light_refraction_coefficient;
             float r_d = sin_theta_d / sqrt(1.0f - sin_theta_d * sin_theta_d);
@@ -301,7 +301,7 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
 
         float2 uv = params->f * distort_point(_x, _y, _w, params);
 
-        if (matrix[9] != 0.0f || matrix[10] != 0.0f || matrix[11] != 0.0f || matrix[12] != 0.0f || matrix[13] != 0.0f) {
+        if ((params->flags & 256) && (matrix[9] != 0.0f || matrix[10] != 0.0f || matrix[11] != 0.0f || matrix[12] != 0.0f || matrix[13] != 0.0f)) {
             float ang_rad = matrix[11];
             float cos_a = cos(-ang_rad);
             float sin_a = sin(-ang_rad);
@@ -314,12 +314,12 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
         uv += params->c;
 
         // MeshDistortion
-        if (mesh_data && mesh_data[0] > 9.0f) {
+        if ((params->flags & 512) && mesh_data && mesh_data[0] > 9.0f) {
             float2 mesh_size = (float2)(mesh_data[3], mesh_data[4]);
             float2 origin    = (float2)(mesh_data[5], mesh_data[6]);
             float2 crop_size = (float2)(mesh_data[7], mesh_data[8]);
 
-            if (params->flags & 128) uv.y = (float)params->height - uv.y; // framebuffer inverted
+            if ((params->flags & 128)) uv.y = (float)params->height - uv.y; // framebuffer inverted
 
             uv.x = map_coord(uv.x, 0.0f, (float)params->width,  origin.x, origin.x + crop_size.x);
             uv.y = map_coord(uv.y, 0.0f, (float)params->height, origin.y, origin.y + crop_size.y);
@@ -329,11 +329,11 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
             uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0f, (float)params->width);
             uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0f, (float)params->height);
 
-            if (params->flags & 128) uv.y = (float)params->height - uv.y; // framebuffer inverted
+            if ((params->flags & 128)) uv.y = (float)params->height - uv.y; // framebuffer inverted
         }
 
         // FocalPlaneDistortion
-        if (mesh_data && mesh_data[0] > 0.0f && mesh_data[(int)(mesh_data[0])] > 0.0f) {
+        if ((params->flags & 1024) && mesh_data && mesh_data[0] > 0.0f && mesh_data[(int)(mesh_data[0])] > 0.0f) {
             int o = (int)(mesh_data[0]); // offset to focal plane distortion data
 
             float2 mesh_size = (float2)(mesh_data[3], mesh_data[4]);
@@ -341,7 +341,7 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
             float2 crop_size = (float2)(mesh_data[7], mesh_data[8]);
             float stblz_grid = mesh_size.y / 8.0f;
 
-            if (params->flags & 128) uv.y = (float)params->height - uv.y; // framebuffer inverted
+            if ((params->flags & 128)) uv.y = (float)params->height - uv.y; // framebuffer inverted
 
             uv.x = map_coord(uv.x, 0.0f, (float)params->width,  origin.x, origin.x + crop_size.x);
             uv.y = map_coord(uv.y, 0.0f, (float)params->height, origin.y, origin.y + crop_size.y);
@@ -358,10 +358,10 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
             uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0f, (float)params->width);
             uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0f, (float)params->height);
 
-            if (params->flags & 128) uv.y = (float)params->height - uv.y; // framebuffer inverted
+            if ((params->flags & 128)) uv.y = (float)params->height - uv.y; // framebuffer inverted
         }
 
-        if (params->flags & 2) { // Has digital lens
+        if ((params->flags & 2)) { // Has digital lens
             uv = digital_distort_point(uv, params);
         }
 
@@ -409,12 +409,12 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
 
             float2 new_out_pos = out_pos;
 
-            if (params->flags & 2) { // Has digital lens
+            if ((params->flags & 2)) { // Has digital lens
                 new_out_pos = digital_undistort_point(new_out_pos, params);
             }
             new_out_pos = (new_out_pos - out_c) / out_f;
             new_out_pos = undistort_point(new_out_pos, params);
-            if (params->light_refraction_coefficient != 1.0f && params->light_refraction_coefficient > 0.0f) {
+            if ((params->flags & 2048) && params->light_refraction_coefficient != 1.0f && params->light_refraction_coefficient > 0.0f) {
                 float r = length(new_out_pos);
                 if (r != 0.0f) {
                     float sin_theta_d = (r / sqrt(1.0f + r * r)) / params->light_refraction_coefficient;
@@ -431,7 +431,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
         ///////////////////////////////////////////////////////////////////
         // Calculate source `y` for rolling shutter
         int sy = 0;
-        if ((params->flags & 16) == 16) { // Horizontal RS
+        if ((params->flags & 16)) { // Horizontal RS
             sy = min((int)params->width, max(0, (int)round(out_pos.x)));
         } else {
             sy = min((int)params->height, max(0, (int)round(out_pos.y)));
@@ -440,7 +440,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
             int idx = (params->matrix_count / 2) * 14; // Use middle matrix
             float2 uv = rotate_and_distort(out_pos, idx, params, matrices, mesh_data);
             if (uv.x > -99998.0f) {
-                if ((params->flags & 16) == 16) { // Horizontal RS
+                if ((params->flags & 16)) { // Horizontal RS
                     sy = min((int)params->width, max(0, (int)round(uv.x)));
                 } else {
                     sy = min((int)params->height, max(0, (int)round(uv.y)));
