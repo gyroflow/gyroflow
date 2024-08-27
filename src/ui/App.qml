@@ -497,7 +497,7 @@ Rectangle {
     }
 
     function showNotification(type: int, text: string, textFormat: var): void {
-        if (typeof textFormat === "undefined") textFormat = Text.AutoText; // default
+        if (typeof textFormat === "undefined" || !textFormat) textFormat = text.includes("<b>")? Text.StyledText : Text.AutoText; // default
         const im = Qt.createComponent("components/InfoMessage.qml").createObject(window.videoArea.infoMessages, {
             text: text,
             type: type - 1,
@@ -513,7 +513,7 @@ Rectangle {
     }
 
     function messageBox(type: int, text: string, buttons: list<var>, parent: QtObject, textFormat: var, identifier: var): Modal {
-        if (typeof textFormat === "undefined") textFormat = Text.AutoText; // default
+        if (typeof textFormat === "undefined" || !textFormat) textFormat = text.includes("<b>")? Text.StyledText : Text.AutoText; // default
         if (typeof identifier === "undefined") identifier = "";
 
         let el = null;
