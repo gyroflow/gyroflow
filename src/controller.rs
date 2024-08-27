@@ -1602,7 +1602,7 @@ impl Controller {
                             if (frame % every_nth_frame as i32) == 0 {
                                 let mut width = (input_frame.width() as f64 * input_horizontal_stretch).round() as u32;
                                 let mut height = (input_frame.height() as f64 * input_vertical_stretch).round() as u32;
-                                let org_size = (org_size.0 as u32, org_size.1 as u32);
+                                let org_size = ((org_size.0 as f64 * input_horizontal_stretch).round() as u32, (org_size.1 as f64 * input_vertical_stretch).round() as u32);
                                 let mut pt_scale = 1.0;
                                 if processing_resolution > 0 && height > processing_resolution as u32 {
                                     pt_scale = height as f32 / processing_resolution as f32;
