@@ -36,7 +36,7 @@ pollster = "0.3.0"
 futures-intrusive = "0.5.0"
 flate2 = "1.0.31"
 walkdir = "2.5.0"
-mp4-merge = "0.1.9"
+mp4-merge = "0.1.10"
 human-sort = "0.2.2"
 argh = "0.1.12"
 indicatif = "0.17"
@@ -48,7 +48,7 @@ directories = "5"
 
 qmetaobject = { version = "0.2.10", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.11", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "d696c36" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "2a3bd8b" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { git = "https://github.com/AdrianEddy/rust-ffmpeg", version = "7.0.4", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
@@ -92,7 +92,7 @@ core-foundation-sys = "0.8.7"
 cpp_build = "0.5.9"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.1.13"
+cc = "1.1.15"
 
 [[bin]]
 name = "gyroflow"

@@ -1493,6 +1493,8 @@ impl Controller {
             *self.stabilizer.lens_calibrator.write() = Some(LensCalibrator::new());
             self.stabilizer.set_smoothing_method(2); // Plain 3D
             self.stabilizer.set_smoothing_param("time_constant", 2.0);
+            self.stabilizer.set_max_zoom(0.0, 0);
+            self.stabilizer.set_adaptive_zoom(0.0);
         }
     }
 
