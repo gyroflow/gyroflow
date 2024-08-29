@@ -117,7 +117,7 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
         BufferSource::CUDABuffer { .. } => {
             match backend {
                 wgpu::Backend::Vulkan => {
-                    let use_buffer_directly = true;
+                    let use_buffer_directly = format != wgpu::TextureFormat::Rgba16Float;
                     if use_buffer_directly {
                         let (buffer, mem) = super::wgpu_interop_cuda::create_vk_buffer_backed_by_cuda_memory(&device, buf.size).unwrap(); // TODO: unwrap
                         TextureHolder {

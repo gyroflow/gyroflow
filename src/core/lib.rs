@@ -1670,8 +1670,14 @@ impl StabilizationManager {
 
             let camera_id = self.camera_id.read();
 
+            let has_builtin_profile = {
+                let gyro = self.gyro.read();
+                let file_metadata = gyro.file_metadata.read();
+                file_metadata.lens_profile.as_ref().map(|y| y.is_object()).unwrap_or_default()
+            };
+
             let id_str = camera_id.as_ref().map(|v| v.get_identifier_for_autoload()).unwrap_or_default();
-            if !id_str.is_empty() {
+            if !id_str.is_empty() && !has_builtin_profile {
                 let mut db = self.lens_profile_db.read();
                 if !db.loaded {
                     drop(db);
@@ -1749,9 +1755,6 @@ impl StabilizationManager {
         match typ {
             KeyframeType::VideoRotation |
             KeyframeType::ZoomingSpeed |
-            KeyframeType::AdditionalRotationX |
-            KeyframeType::AdditionalRotationY |
-            KeyframeType::AdditionalRotationZ |
             KeyframeType::AdditionalTranslationX |
             KeyframeType::AdditionalTranslationY |
             KeyframeType::AdditionalTranslationZ |
@@ -1760,6 +1763,9 @@ impl StabilizationManager {
 
             KeyframeType::LockHorizonAmount |
             KeyframeType::LockHorizonRoll |
+            KeyframeType::AdditionalRotationX |
+            KeyframeType::AdditionalRotationY |
+            KeyframeType::AdditionalRotationZ |
             KeyframeType::SmoothingParamTimeConstant |
             KeyframeType::SmoothingParamTimeConstant2 |
             KeyframeType::SmoothingParamSmoothness |

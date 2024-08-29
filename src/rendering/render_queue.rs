@@ -1280,8 +1280,14 @@ impl RenderQueue {
 
                                 let camera_id = stab.camera_id.read();
 
+                                let has_builtin_profile = {
+                                    let gyro = stab.gyro.read();
+                                    let file_metadata = gyro.file_metadata.read();
+                                    file_metadata.lens_profile.as_ref().map(|y| y.is_object()).unwrap_or_default()
+                                };
+
                                 let id_str = camera_id.as_ref().map(|v| v.get_identifier_for_autoload()).unwrap_or_default();
-                                if !id_str.is_empty() {
+                                if !id_str.is_empty() && !has_builtin_profile {
                                     let db = stab.lens_profile_db.read();
                                     if db.contains_id(&id_str) {
                                         match stab.load_lens_profile(&id_str) {
