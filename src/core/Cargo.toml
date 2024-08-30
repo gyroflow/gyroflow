@@ -65,7 +65,7 @@ bitarray = { version = "0.9", features = ["space"] }
 enterpolation = "0.2.1"
 libloading = "0.8"
 libc = "0.2"
-bytemuck = "1.17.0"
+bytemuck = "1.17.1"
 ash = "0.38.0"
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"
@@ -80,7 +80,7 @@ rustfft = "6.2.0"
 exr = "1.72"
 opencv = { version = "0.92.2", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "a93dcb6", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "bbdbafd", features = ["spirv", "naga-ir"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 metal = { version = "0.29.0" }

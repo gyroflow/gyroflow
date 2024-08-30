@@ -11,7 +11,7 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
         height: height,
         depth_or_array_layers: 1,
     };
-    let drop_guard = Box::new(());
+    let drop_guard = Box::new(|| ());
 
     let texture = unsafe {
         <Vulkan as wgpu::hal::Api>::Device::texture_from_raw(

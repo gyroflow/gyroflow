@@ -346,6 +346,8 @@ impl Stabilization {
 
                 let mesh_data = mesh_data.iter().map(|x| *x as f64).collect::<Vec<f64>>();
 
+                assert_eq!(params.bytes_per_pixel as usize, std::mem::size_of::<T>());
+
                 output.par_chunks_mut(buffers.output.size.2).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
                     row_bytes.chunks_mut(params.bytes_per_pixel as usize).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
 
@@ -355,7 +357,6 @@ impl Stabilization {
                         );
 
                         if out_pos.0 >= 0.0 && out_pos.1 >= 0.0 && (out_pos.0 as i32) < params.output_width && (out_pos.1 as i32) < params.output_height {
-                            assert!(pix_chunk.len() == std::mem::size_of::<T>());
 
                             // let p = out_pos;
                             let mut pixel = bg;

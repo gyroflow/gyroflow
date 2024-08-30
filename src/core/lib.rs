@@ -421,7 +421,7 @@ impl StabilizationManager {
             for _ in params.fovs.iter() {
                 params.smoothing_fov_limit_per_frame.push(1.0);
             }
-            let thresholds = [0.95, 0.9, 0.85, 0.8, 0.75];
+            let thresholds = [0.95, 0.9, 0.85, 0.8];
             for iter in 0..max_zoom_iters {
                 let mut any_above_limit = false;
                 for (i, fov) in params.fovs.iter().enumerate() {
@@ -571,7 +571,7 @@ impl StabilizationManager {
                     for _ in params.fovs.iter() {
                         params.smoothing_fov_limit_per_frame.push(1.0);
                     }
-                    let thresholds = [0.95, 0.9, 0.85, 0.8, 0.75];
+                    let thresholds = [0.95, 0.9, 0.85, 0.8];
                     for iter in 0..max_zoom_iters {
                         let mut any_above_limit = false;
                         for (i, fov) in params.fovs.iter().enumerate() {
@@ -752,7 +752,13 @@ impl StabilizationManager {
             self.recompute_undistortion();
             self.undistortion_invalidated.store(false, SeqCst);
         }
-        {
+
+        let (use_cache, hash, current_hash) = {
+            let stab = self.stabilization.read();
+            (stab.cache_frame_transform, stab.get_current_checksum(buffers), stab.initialized_backend.get_hash())
+        };
+
+        if use_cache || hash != current_hash {
             if let Some(mut undist) = self.stabilization.try_write_for(std::time::Duration::from_millis(30000)) {
                 self.draw_overlays(&mut undist.drawing, timestamp_us);
                 undist.ensure_ready_for_processing::<T>(timestamp_us, frame, buffers);

@@ -935,7 +935,11 @@ impl Controller {
 
             let bg_color = vid.getBackgroundColor().get_rgba_f();
             self.stabilizer.params.write().background = Vector4::new(bg_color.0 as f32, bg_color.1 as f32, bg_color.2 as f32, bg_color.3 as f32);
-            self.stabilizer.stabilization.write().kernel_flags.set(KernelParamsFlags::DRAWING_ENABLED, true);
+            {
+                let mut stab = self.stabilizer.stabilization.write();
+                stab.kernel_flags.set(KernelParamsFlags::DRAWING_ENABLED, true);
+                stab.cache_frame_transform = true;
+            }
             let request_recompute = util::qt_queued_callback_mut(self, move |this, _: ()| {
                 this.request_recompute();
             });

@@ -207,7 +207,7 @@ impl OclWrapper {
         for i in 0..31 {
             let v = 1 << i;
             if v == 4 { continue; } // Fill with background can be different per frame
-            kernel = kernel.replace(&format!("(params->flags & {v})"), &format!("{}", if (params.flags & v) == v { "true" } else { "false" }));
+            kernel = kernel.replace(&format!("(params->flags & {v})"), if (params.flags & v) == v { "true" } else { "false" });
         }
 
         {

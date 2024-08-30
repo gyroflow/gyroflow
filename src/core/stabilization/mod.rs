@@ -45,7 +45,7 @@ thread_local! {
 }
 
 bitflags::bitflags! {
-    #[derive(Default)]
+    #[derive(Default, Clone)]
     pub struct KernelParamsFlags: i32 {
         const FIX_COLOR_RANGE      = 1 << 0; // 1
         const HAS_DIGITAL_LENS     = 1 << 1; // 2
@@ -150,6 +150,7 @@ pub struct Stabilization {
     pub pending_device_change: Option<isize>,
 
     pub share_wgpu_instances: bool,
+    pub cache_frame_transform: bool,
     next_backend: Option<&'static str>
 }
 
@@ -184,16 +185,17 @@ impl Stabilization {
         ret
     }
 
-    pub fn get_frame_transform_at<T: PixelType>(&mut self, timestamp_us: i64, frame: Option<usize>, buffers: &Buffers) -> FrameTransform {
+    pub fn get_frame_transform_at<T: PixelType>(&self, timestamp_us: i64, frame: Option<usize>, buffers: &Buffers) -> FrameTransform {
         let timestamp_ms = (timestamp_us as f64) / 1000.0;
         let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, self.compute_params.scaled_fps) as usize); // Only for FOVs
 
-        self.kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, self.compute_params.digital_lens.is_some());
-        self.kernel_flags.set(KernelParamsFlags::HORIZONTAL_RS, self.compute_params.horizontal_rs);
-        self.kernel_flags.set(KernelParamsFlags::HAS_SOURCE_RECT, buffers.input.rect.is_some() || self.size.0 != buffers.input.size.0 || self.size.1 != buffers.input.size.1);
-        self.kernel_flags.set(KernelParamsFlags::HAS_OUTPUT_RECT, buffers.output.rect.is_some() || self.output_size.0 != buffers.output.size.0 || self.output_size.1 != buffers.output.size.1);
-        self.kernel_flags.set(KernelParamsFlags::FRAMEBUFFER_INVERTED, self.compute_params.framebuffer_inverted);
-        self.kernel_flags.set(KernelParamsFlags::ANY_UNDERWATER, (self.compute_params.light_refraction_coefficient != 1.0 && self.compute_params.light_refraction_coefficient > 0.0) || self.compute_params.keyframes.is_keyframed(&crate::KeyframeType::LightRefractionCoeff));
+        let mut kernel_flags = self.kernel_flags.clone();
+        kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, self.compute_params.digital_lens.is_some());
+        kernel_flags.set(KernelParamsFlags::HORIZONTAL_RS, self.compute_params.horizontal_rs);
+        kernel_flags.set(KernelParamsFlags::HAS_SOURCE_RECT, buffers.input.rect.is_some() || self.size.0 != buffers.input.size.0 || self.size.1 != buffers.input.size.1);
+        kernel_flags.set(KernelParamsFlags::HAS_OUTPUT_RECT, buffers.output.rect.is_some() || self.output_size.0 != buffers.output.size.0 || self.output_size.1 != buffers.output.size.1);
+        kernel_flags.set(KernelParamsFlags::FRAMEBUFFER_INVERTED, self.compute_params.framebuffer_inverted);
+        kernel_flags.set(KernelParamsFlags::ANY_UNDERWATER, (self.compute_params.light_refraction_coefficient != 1.0 && self.compute_params.light_refraction_coefficient > 0.0) || self.compute_params.keyframes.is_keyframed(&crate::KeyframeType::LightRefractionCoeff));
 
         let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
         transform.kernel_params.pixel_value_limit = T::default_max_value().unwrap_or(f32::MAX);
@@ -212,7 +214,7 @@ impl Stabilization {
         transform.kernel_params.bytes_per_pixel = (T::COUNT * T::SCALAR_BYTES) as i32;
         transform.kernel_params.pix_element_count = T::COUNT as i32;
         transform.kernel_params.canvas_scale = self.drawing.scale as f32;
-        transform.kernel_params.flags |= self.kernel_flags.bits();
+        transform.kernel_params.flags |= kernel_flags.bits();
 
         transform.kernel_params.stride        = buffers.input.size.2 as i32;
         transform.kernel_params.output_stride = buffers.output.size.2 as i32;
@@ -485,10 +487,20 @@ impl Stabilization {
             }
         }
     }
-    pub fn process_pixels<T: PixelType>(&self, timestamp_us: i64, _frame: Option<usize>, buffers: &mut Buffers, frame_transform: Option<&FrameTransform>) -> Result<ProcessedInfo, GyroflowCoreError> {
-        if /*self.size != buffers.input.size || */buffers.input.size.1 < 4 || buffers.output.size.1 < 4 { return Err(GyroflowCoreError::SizeTooSmall); }
+    pub fn process_pixels<T: PixelType>(&self, timestamp_us: i64, frame: Option<usize>, buffers: &mut Buffers, frame_transform: Option<&FrameTransform>) -> Result<ProcessedInfo, GyroflowCoreError> {
+        if buffers.input.size.1 < 4 || buffers.output.size.1 < 4 { return Err(GyroflowCoreError::SizeTooSmall); }
 
-        let itm = frame_transform.map(|x| Some(x)).unwrap_or_else(|| self.stab_data.get(&timestamp_us));
+        let mut _tmp_transform = None;
+        if frame_transform.is_none() && !self.cache_frame_transform {
+            _tmp_transform = Some(self.get_frame_transform_at::<T>(timestamp_us, frame, buffers));
+        }
+        let itm = frame_transform.map(|x| Some(x)).unwrap_or_else(||
+            if !self.cache_frame_transform {
+                _tmp_transform.as_ref()
+            } else {
+                self.stab_data.get(&timestamp_us)
+            }
+        );
 
         if let Some(itm) = itm {
             let mut ret = ProcessedInfo {
