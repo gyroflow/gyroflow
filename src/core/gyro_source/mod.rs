@@ -14,6 +14,7 @@ use std::iter::zip;
 use std::collections::BTreeMap;
 use std::collections::btree_map::Entry;
 use std::sync::{ Arc, atomic::AtomicBool };
+use parking_lot::RwLock;
 use telemetry_parser::{ Input, util };
 use telemetry_parser::tags_impl::{ GetWithType, GroupId, TagId, TimeQuaternion };
 
@@ -31,7 +32,7 @@ pub type TimeIMU = telemetry_parser::util::IMUData;
 pub type TimeQuat = BTreeMap<i64, Quat64>; // key is timestamp_us
 pub type TimeVec = BTreeMap<i64, Vector3<f64>>; // key is timestamp_us
 
-#[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Default, Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct FileLoadOptions {
     pub sample_index: Option<usize>
 }
@@ -78,9 +79,11 @@ impl GyroSource {
             ..Default::default()
         }
     }
+    
     pub fn has_motion(&self) -> bool {
         self.file_metadata.read().has_motion()
     }
+
     pub fn set_use_gravity_vectors(&mut self, v: bool) {
         if self.use_gravity_vectors != v {
             self.use_gravity_vectors = v;
@@ -88,6 +91,7 @@ impl GyroSource {
         }
         self.use_gravity_vectors = v;
     }
+
     pub fn set_horizon_lock_integration_method(&mut self, v: i32) {
         if self.horizon_lock_integration_method != v {
             self.horizon_lock_integration_method = v;
@@ -95,10 +99,21 @@ impl GyroSource {
         }
         self.horizon_lock_integration_method = v;
     }
+
     pub fn init_from_params(&mut self, stabilization_params: &StabilizationParams) {
         self.duration_ms = stabilization_params.get_scaled_duration_ms();
     }
+
     pub fn parse_telemetry_file<F: Fn(f64)>(url: &str, options: &FileLoadOptions, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Result<FileMetadata, crate::GyroflowCoreError> {
+        let key = format!("{url}{options:?}{size:?}{fps}");
+        static CACHE: RwLock<BTreeMap<String, FileMetadata>> = RwLock::new(BTreeMap::new());
+        {
+            let cache = CACHE.read();
+            if let Some(md) = cache.get(&key) {
+                return Ok(md.clone());
+            }
+        }
+
         let base = filesystem::get_engine_base();
         let mut file = filesystem::open_file(&base, url, false, false)?;
         let filesize = file.size;
@@ -399,6 +414,11 @@ impl GyroSource {
                     md.frame_readout_time = Some(frt / original_sample_rate * sample_rate);
                 }
             }
+        }
+
+        {
+            let mut cache = CACHE.write();
+            cache.insert(key, md.clone());
         }
 
         Ok(md)
