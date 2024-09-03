@@ -81,6 +81,7 @@ impl<'a> BufferDescription<'a> {
             hasher.write_usize(r.2);
             hasher.write_usize(r.3);
         }
+        hasher.write_u32(self.rotation.unwrap_or_default().to_bits());
         match &self.data {
             BufferSource::None => { }
             BufferSource::Cpu { .. } => { }

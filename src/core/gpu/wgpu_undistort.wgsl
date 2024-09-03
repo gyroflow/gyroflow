@@ -137,9 +137,9 @@ fn read_input_at(uv: vec2<i32>) -> vec4<f32> {
     // {/buffer_input}
 }
 
-fn rotate_point(pos: vec2<f32>, angle: f32, origin: vec2<f32>) -> vec2<f32> {
-     return vec2<f32>(cos(angle) * (pos.x - origin.x) - sin(angle) * (pos.y - origin.y) + origin.x,
-                      sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin.y);
+fn rotate_point(pos: vec2<f32>, angle: f32, origin: vec2<f32>, origin2: vec2<f32>) -> vec2<f32> {
+     return vec2<f32>(cos(angle) * (pos.x - origin.x) - sin(angle) * (pos.y - origin.y) + origin2.x,
+                      sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin2.y);
 }
 
 fn sample_input_at(uv_param: vec2<f32>) -> vec4<f32> {
@@ -155,14 +155,18 @@ fn sample_input_at(uv_param: vec2<f32>) -> vec4<f32> {
     let offset = offsets[interpolation >> 2u];
 
     var uv = uv_param;
+    var frame_size = vec2<f32>(f32(params.width), f32(params.height));
     if (params.input_rotation != 0.0) {
-        uv = rotate_point(uv, params.input_rotation * (3.14159265359 / 180.0), vec2<f32>(f32(params.width) / 2.0, f32(params.height) / 2.0));
+        let rotation = params.input_rotation * (3.14159265359 / 180.0);
+        let size = frame_size;
+        frame_size = abs(round(rotate_point(size, rotation, vec2<f32>(0.0, 0.0), vec2<f32>(0.0, 0.0))));
+        uv = rotate_point(uv, rotation, size / 2.0, frame_size / 2.0);
     }
 
     if (bool(flags & 32)) { // Uses source rect
         uv = vec2<f32>(
-            map_coord(uv.x, 0.0, f32(params.width),  f32(params.source_rect.x), f32(params.source_rect.x + params.source_rect.z)),
-            map_coord(uv.y, 0.0, f32(params.height), f32(params.source_rect.y), f32(params.source_rect.y + params.source_rect.w))
+            map_coord(uv.x, 0.0, f32(frame_size.x), f32(params.source_rect.x), f32(params.source_rect.x + params.source_rect.z)),
+            map_coord(uv.y, 0.0, f32(frame_size.y), f32(params.source_rect.y), f32(params.source_rect.y + params.source_rect.w))
         );
     }
 

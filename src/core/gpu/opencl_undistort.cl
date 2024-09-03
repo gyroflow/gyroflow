@@ -162,9 +162,9 @@ float map_coord(float x, float in_min, float in_max, float out_min, float out_ma
 
 LENS_MODEL_FUNCTIONS;
 
-float2 rotate_point(float2 pos, float angle, float2 origin) {
-     return (float2)(cos(angle) * (pos.x - origin.x) - sin(angle) * (pos.y - origin.y) + origin.x,
-                     sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin.y);
+float2 rotate_point(float2 pos, float angle, float2 origin, float2 origin2) {
+     return (float2)(cos(angle) * (pos.x - origin.x) - sin(angle) * (pos.y - origin.y) + origin2.x,
+                     sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin2.y);
 }
 
 void cubic_spline_coefficients(__private float *mesh, int step, int offset, float size, int n, __private float *a, __private float *b, __private float *c, __private float *d, __private float *h, __private float *alpha, __private float *l, __private float *mu, __private float *z) {
@@ -230,12 +230,16 @@ float2 interpolate_mesh(__global const float *mesh, int width, int height, float
 DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global KernelParams *params, __global const uchar *drawing, DATA_TYPEF bg) {
     bool fix_range = (params->flags & 1);
 
+    float2 frame_size = (float2)((float)params->width, (float)params->height);
     if (params->input_rotation != 0.0) {
-        uv = rotate_point(uv, params->input_rotation * (M_PI_F / 180.0), (float2)((float)params->width / 2.0, (float)params->height / 2.0));
+        float rotation = params->input_rotation * (M_PI_F / 180.0);
+        float2 size = frame_size;
+        frame_size = abs(round(rotate_point(size, rotation, (float2)(0.0, 0.0), (float2)(0.0, 0.0))));
+        uv = rotate_point(uv, rotation, size / (float2)2.0, frame_size / (float2)2.0);
     }
 
-    uv.x = map_coord(uv.x, 0.0f, (float)params->width,  (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
-    uv.y = map_coord(uv.y, 0.0f, (float)params->height, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
+    uv.x = map_coord(uv.x, 0.0f, (float)frame_size.x, (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
+    uv.y = map_coord(uv.y, 0.0f, (float)frame_size.y, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
 
     uv -= S_OFFSET;
 

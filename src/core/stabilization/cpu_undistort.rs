@@ -259,9 +259,9 @@ impl Stabilization {
             px[1] += 16.0;
         }
 
-        fn rotate_point(pos: (f32, f32), angle: f32, origin: (f32, f32)) -> (f32, f32) {
-             return (angle.cos() * (pos.0 - origin.0) - angle.sin() * (pos.1 - origin.1) + origin.0,
-                     angle.sin() * (pos.0 - origin.0) + angle.cos() * (pos.1 - origin.1) + origin.1);
+        fn rotate_point(pos: (f32, f32), angle: f32, origin: (f32, f32), origin2: (f32, f32)) -> (f32, f32) {
+             return (angle.cos() * (pos.0 - origin.0) - angle.sin() * (pos.1 - origin.1) + origin2.0,
+                     angle.sin() * (pos.0 - origin.0) + angle.cos() * (pos.1 - origin.1) + origin2.1);
         }
 
         fn sample_input_at<const I: i32, T: PixelType>(mut uv: (f32, f32), input: &[u8], params: &KernelParams, bg: &Vector4<f32>, _drawing: &[u8]) -> Vector4<f32> {
@@ -271,13 +271,18 @@ impl Stabilization {
             let offset: f32 = [0.0, 1.0, 3.0][I as usize >> 2];
             let ind: usize = [0, 64, 64 + 128][I as usize >> 2];
 
+            let mut frame_size = (params.width as f32, params.height as f32);
             if params.input_rotation != 0.0 {
-                uv = rotate_point(uv, params.input_rotation * (std::f32::consts::PI / 180.0), (params.width as f32 / 2.0, params.height as f32 / 2.0));
+                let rotation = params.input_rotation * (std::f32::consts::PI / 180.0);
+                let size = frame_size;
+                frame_size = rotate_point(size, rotation, (0.0, 0.0), (0.0, 0.0));
+                frame_size = (frame_size.0.abs().round(), frame_size.1.abs().round());
+                uv = rotate_point(uv, rotation, (size.0 / 2.0, size.1 / 2.0), (frame_size.0 / 2.0, frame_size.1 / 2.0));
             }
 
             uv = (
-                map_coord(uv.0, 0.0, params.width  as f32, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),
-                map_coord(uv.1, 0.0, params.height as f32, params.source_rect[1] as f32, (params.source_rect[1] + params.source_rect[3]) as f32)
+                map_coord(uv.0, 0.0, frame_size.0, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),
+                map_coord(uv.1, 0.0, frame_size.1, params.source_rect[1] as f32, (params.source_rect[1] + params.source_rect[3]) as f32)
             );
 
             let u = uv.0 - offset;
