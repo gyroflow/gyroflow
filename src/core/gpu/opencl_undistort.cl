@@ -234,7 +234,7 @@ DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global Ker
     if (params->input_rotation != 0.0) {
         float rotation = params->input_rotation * (M_PI_F / 180.0);
         float2 size = frame_size;
-        frame_size = abs(round(rotate_point(size, rotation, (float2)(0.0, 0.0), (float2)(0.0, 0.0))));
+        frame_size = fabs(round(rotate_point(size, rotation, (float2)(0.0, 0.0), (float2)(0.0, 0.0))));
         uv = rotate_point(uv, rotation, size / (float2)2.0, frame_size / (float2)2.0);
     }
 
