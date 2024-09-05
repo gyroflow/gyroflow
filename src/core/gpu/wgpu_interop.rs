@@ -329,7 +329,7 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
             }
         },
         #[cfg(any(target_os = "macos", target_os = "ios"))]
-        BufferSource::MetalBuffer { .. } => {
+        BufferSource::MetalBuffer { buffer, .. } => {
             if buf.texture_copy {
                 if let Some(NativeTexture::Metal(mtl_texture)) = &in_texture.native_texture {
                     if !mtl_texture.as_ptr().is_null() {
@@ -341,6 +341,17 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
                             size
                         );
                     }
+                } else {
+                    let metal_usage = metal::MTLTextureUsage::ShaderRead;
+                    let texture = create_metal_texture_from_buffer(*buffer, buf.size.0 as u32, buf.size.1 as u32, buf.size.2 as u32, format, metal_usage);
+                        
+                    temp_texture = Some(create_texture_from_metal(device, texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_SRC));
+
+                    encoder.copy_texture_to_texture(
+                        ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        ImageCopyTexture { texture: in_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        size
+                    );
                 }
             }
         },
@@ -401,7 +412,7 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
             }
         },
         #[cfg(any(target_os = "macos", target_os = "ios"))]
-        BufferSource::MetalBuffer { .. } => {
+        BufferSource::MetalBuffer { buffer, .. } => {
             if buf.texture_copy {
                 if let Some(NativeTexture::Metal(mtl_texture)) = &out_texture.native_texture {
                     if !mtl_texture.as_ptr().is_null() {
@@ -413,6 +424,17 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
                             size
                         );
                     }
+                } else {
+                    let metal_usage = metal::MTLTextureUsage::RenderTarget;
+                    let texture = create_metal_texture_from_buffer(*buffer, buf.size.0 as u32, buf.size.1 as u32, buf.size.2 as u32, format, metal_usage);
+                        
+                    temp_texture = Some(create_texture_from_metal(device, texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
+
+                    encoder.copy_texture_to_texture(
+                        ImageCopyTexture { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        size
+                    );
                 }
             }
         }
