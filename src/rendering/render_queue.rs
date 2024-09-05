@@ -197,8 +197,8 @@ pub struct RenderQueue {
 
     file_exists_in_folder: qt_method!(fn(&self, folder: QUrl, filename: QString) -> bool),
 
-    render_queue_json: qt_method!(fn(&self) -> QString),
-    restore_render_queue: qt_method!(fn(&mut self, json: String, additional_data: String)),
+    save_render_queue: qt_method!(fn(&self)),
+    restore_render_queue: qt_method!(fn(&mut self, additional_data: String) -> bool),
 
     main_job_id: qt_property!(u32),
     editing_job_id: qt_property!(u32; NOTIFY queue_changed),
@@ -660,7 +660,7 @@ impl RenderQueue {
         self.status_changed();
     }
 
-    pub fn render_queue_json(&self) -> QString {
+    pub fn save_render_queue(&self) {
         let mut all = Vec::new();
         for v in self.queue.borrow().iter() {
             if v.total_frames > 0 && v.status != JobStatus::Finished {
@@ -669,12 +669,18 @@ impl RenderQueue {
                 }
             }
         }
-        QString::from(serde_json::to_string(&all).unwrap_or_default())
+        gyroflow_core::settings::set("renderQueue", serde_json::to_value(&all).unwrap_or_default());
     }
 
-    pub fn restore_render_queue(&mut self, json: String, additional_data: String) {
-        if let Ok(serde_json::Value::Array(val)) = serde_json::from_str(&json) as serde_json::Result<serde_json::Value> {
-            for x in val {
+    pub fn restore_render_queue(&mut self, additional_data: String) -> bool {
+        let rq = gyroflow_core::settings::get("renderQueue", Default::default());
+        let rqv = match rq {
+            serde_json::Value::String(v) => serde_json::from_str(&v) as serde_json::Result<Vec<serde_json::Value>>,
+            serde_json::Value::Array(v) => Ok(v),
+            _ => return false
+        };
+        if let Ok(val) = rqv {
+            for x in &val {
                 if let Some(project) = x.get("project_file").and_then(|x| x.as_str()) {
                     #[allow(unused_mut)]
                     let mut project = project.to_string();
@@ -688,7 +694,9 @@ impl RenderQueue {
                     self.add_file(data, String::new(), additional_data.clone());
                 }
             }
+            return !val.is_empty();
         }
+        false
     }
 
     fn get_gyroflow_data_internal(stab: &StabilizationManager, additional_data: &str, render_options: &RenderOptions) -> Option<String> {
@@ -977,14 +985,14 @@ impl RenderQueue {
                                 frame += 1;
                             }
                         };
-                        let format = crate::util::get_setting("r3dConvertFormat").parse::<i32>().unwrap_or(0);
-                        let force_primary = crate::util::get_setting("r3dColorMode").parse::<i32>().unwrap_or(0);
+                        let format = gyroflow_core::settings::get_u64("r3dConvertFormat", 0) as i32;
+                        let force_primary = gyroflow_core::settings::get_u64("r3dColorMode", 0) as i32;
 
                         let gamma_curves = [-1, 1, 2, 3, 4, 5, 6, 14, 15, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37];
                         let color_spaces = [2, 0, 1, 14, 15, 5, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27];
-                        let gamma = gamma_curves[crate::util::get_setting("r3dGammaCurve").parse::<usize>().unwrap_or(7)];
-                        let space = color_spaces[crate::util::get_setting("r3dColorSpace").parse::<usize>().unwrap_or(0)];
-                        let additional_params = crate::util::get_setting("r3dRedlineParams");
+                        let gamma = gamma_curves[gyroflow_core::settings::get_u64("r3dGammaCurve", 7) as usize];
+                        let space = color_spaces[gyroflow_core::settings::get_u64("r3dColorSpace", 0) as usize];
+                        let additional_params = gyroflow_core::settings::get_str("r3dRedlineParams", "");
                         crate::external_sdk::r3d::REDSdk::convert_r3d(&in_file, format, force_primary > 0, gamma, space, &additional_params, r3d_progress, cancel_flag.clone());
                         if cancel_flag.load(SeqCst) {
                             std::thread::sleep(std::time::Duration::from_secs(2));

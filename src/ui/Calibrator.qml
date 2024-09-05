@@ -5,7 +5,6 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls.Material
 import QtQuick.Dialogs
-import Qt.labs.settings
 
 import "."
 import "components/"

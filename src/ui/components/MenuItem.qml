@@ -21,7 +21,7 @@ Item {
     property bool canEnsureVisible: false;
 
     Component.onCompleted: {
-        const val = window.settings.value(root.objectName + "-opened", root.opened);
+        const val = settings.value(root.objectName + "-opened", root.opened);
         root.opened = (val == true || val == 1 || val == "true");
     }
 
@@ -100,7 +100,7 @@ Item {
             if (col.children.length > 0) {
                 root.opened = !root.opened;
                 canEnsureVisible = true;
-                window.settings.setValue(root.objectName + "-opened", root.opened);
+                settings.setValue(root.objectName + "-opened", root.opened);
             } else {
                 root.clicked();
             }

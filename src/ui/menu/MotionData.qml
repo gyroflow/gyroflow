@@ -665,7 +665,7 @@ MenuItem {
                                 ],
                                 type: "gyro_csv"
                             });
-                            let savedState = settings.value("CSVExportSelection");
+                            let savedState = settings.value("CSVExportSelection", "");
                             if (savedState) {
                                 try {
                                     el.loadSelection(JSON.parse(savedState));

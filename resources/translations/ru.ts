@@ -296,7 +296,7 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="331"/>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>Added to queue</source>
-      <translation type="unfinished">Added to queue</translation>
+      <translation>Добавлено в очередь</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="331"/>
@@ -306,21 +306,21 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
     <message>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>file will be rendered to %1</source>
-      <translation type="unfinished">file will be rendered to %1</translation>
+      <translation>файл будет отрендрирован %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="364"/>
       <source>Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>Из-за ограничений доступа к файлам необходимо выбрать папку назначения вручную.
+Нажмите Ok и выберите папку назначения.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="375"/>
       <source>Keep this app in the foreground and don&apos;t lock the screen.
 Due to limitations of the system video encoders, rendering in the background is not supported.</source>
-      <translation type="unfinished">Keep this app in the foreground and don&apos;t lock the screen.
-Due to limitations of the system video encoders, rendering in the background is not supported.</translation>
+      <translation>Держите это приложение на переднем плане и не блокируйте экран.
+Из-за ограничений системных кодировщиков рендеринг в фоновом режиме не поддерживается.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="635"/>
@@ -400,7 +400,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/App.qml" line="688"/>
       <source>GPU decoder failed to decode this file. Disable GPU decoding in &quot;Advanced&quot; and try again.</source>
-      <translation type="unfinished">GPU decoder failed to decode this file. Disable GPU decoding in &quot;Advanced&quot; and try again.</translation>
+      <translation>Декодеру GPU не удалось декодировать этот файл. Отключите декодирование GPU в разделе &quot;Расширенные настройки&quot; и повторите попытку.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="691"/>
@@ -569,7 +569,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="389"/>
       <source>Proportional</source>
-      <translation type="unfinished">Proportional</translation>
+      <translation>Пропорционально</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="440"/>
@@ -644,12 +644,12 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="568"/>
       <source>Export trim ranges as separate videos</source>
-      <translation type="unfinished">Export trim ranges as separate videos</translation>
+      <translation>Экспортировать обрезанные части как отдельные видео</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="587"/>
       <source>Interpolation method</source>
-      <translation type="unfinished">Interpolation method</translation>
+      <translation>Метод интерполяции</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="651"/>
@@ -664,12 +664,12 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="664"/>
       <source>Preserve export path</source>
-      <translation type="unfinished">Preserve export path</translation>
+      <translation>Сохранить путь экспорта</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="666"/>
       <source>Save output path in settings and use it for all files.</source>
-      <translation type="unfinished">Save output path in settings and use it for all files.</translation>
+      <translation>Сохранить выходной путь в настройках и использовать его для всех файлов.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="408"/>

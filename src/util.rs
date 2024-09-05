@@ -93,7 +93,6 @@ cpp! {{
     #include <QStandardPaths>
     #include <QBuffer>
     #include <QImage>
-    #include <QSettings>
     #include <QGuiApplication>
     #include <QObject>
     #include <QClipboard>
@@ -418,18 +417,6 @@ pub fn get_version() -> String {
         ver.to_string()
     }
 }
-pub fn clear_settings() {
-    cpp!(unsafe [] { QSettings().clear(); })
-}
-pub fn get_setting(key: &str) -> String {
-    let key = QString::from(key);
-    cpp!(unsafe [key as "QString"] -> QString as "QString" { return QSettings().value(key).toString(); }).to_string()
-}
-pub fn set_setting(key: &str, value: &str) {
-    let key = QString::from(key);
-    let value = QString::from(value);
-    cpp!(unsafe [key as "QString", value as "QString"] { QSettings().setValue(key, value); });
-}
 pub fn copy_to_clipboard(text: QString) {
     cpp!(unsafe [text as "QString"] { QGuiApplication::clipboard()->setText(text); })
 }
@@ -440,12 +427,12 @@ pub fn save_exe_location() {
             if let Some(parent) = exe_path.parent() { // MacOS
                 if let Some(parent) = parent.parent() { // Contents
                     if let Some(parent) = parent.parent() { // Gyroflow.app
-                        set_setting("exeLocation", &parent.to_string_lossy());
+                        gyroflow_core::settings::set("exeLocation", parent.to_string_lossy().into());
                     }
                 }
             }
         } else {
-            set_setting("exeLocation", &exe_path.to_string_lossy());
+            gyroflow_core::settings::set("exeLocation", exe_path.to_string_lossy().into());
         }
     }
 }

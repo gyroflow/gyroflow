@@ -61,10 +61,10 @@ Item {
                         NumberField {
                             width: 80 * dpiScale;
                             height: 25 * dpiScale;
-                            value: +window.settings.value("gridLines", "2");
+                            value: +settings.value("gridLines", 2);
                             from: 1;
                             to: 100;
-                            onValueChanged: { root.hlines = value + 1; root.vlines = value + 1; window.settings.setValue("gridLines", value); }
+                            onValueChanged: { root.hlines = value + 1; root.vlines = value + 1; settings.setValue("gridLines", value); }
                         }
                     }
                 }

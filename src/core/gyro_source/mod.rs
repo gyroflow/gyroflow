@@ -79,7 +79,7 @@ impl GyroSource {
             ..Default::default()
         }
     }
-    
+
     pub fn has_motion(&self) -> bool {
         self.file_metadata.read().has_motion()
     }

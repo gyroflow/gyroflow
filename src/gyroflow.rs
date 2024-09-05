@@ -18,12 +18,13 @@ mod cli;
 mod resources;
 #[cfg(not(compiled_qml))]
 mod resources_qml;
-pub mod ui { pub mod ui_tools; pub mod components { pub mod TimelineGyroChart; pub mod TimelineKeyframesView; pub mod FrequencyGraph; } }
+pub mod ui { pub mod ui_tools; pub mod components { pub mod TimelineGyroChart; pub mod TimelineKeyframesView; pub mod FrequencyGraph; pub mod Settings; } }
 pub mod qt_gpu { pub mod qrhi_undistort; }
 
 use ui::components::TimelineGyroChart::TimelineGyroChart;
 use ui::components::TimelineKeyframesView::TimelineKeyframesView;
 use ui::components::FrequencyGraph::FrequencyGraph;
+use ui::components::Settings::Settings;
 use ui::ui_tools::UITools;
 
 cpp! {{
@@ -32,7 +33,6 @@ cpp! {{
     #include <QQmlContext>
     #include <QtGui/QGuiApplication>
     #include <QIcon>
-    #include <QSettings>
 
     #include "src/ui_live_reload.cpp"
 
@@ -107,20 +107,19 @@ fn entry() {
             // av_jni_set_android_app_ctx(QNativeInterface::QAndroidApplication::context(), nullptr);
         #endif
 
-        #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
-            QSettings sett;
-            if (!sett.contains("defaultCodec"))
-                sett.setValue("defaultCodec", 0); // default to H.264 on mobile
-        #endif
-
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
         // QQuickWindow::setGraphicsApi(QSGRendererInterface::Direct3D12);
     });
 
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    if !gyroflow_core::settings::contains("defaultCodec") {
+        gyroflow_core::settings::set("defaultCodec", 0.into()); // default to H.264 on mobile
+    }
+
     util::save_exe_location();
     let sdk_path = external_sdk::SDK_PATH.as_ref().map(|x| x.to_string_lossy().to_string()).unwrap_or_default();
-    ::log::debug!("Executable path: {:?}", gyroflow_core::util::get_setting("exeLocation"));
+    ::log::debug!("Executable path: {:?}", gyroflow_core::settings::try_get("exeLocation"));
     ::log::debug!("SDK path: {:?}", sdk_path);
 
     //crate::core::util::rename_calib_videos();
@@ -147,6 +146,9 @@ fn entry() {
     let ui_tools = RefCell::new(UITools::default());
     let ui_tools_pinned = unsafe { QObjectPinned::new(&ui_tools) };
 
+    let settings = RefCell::new(Settings::default());
+    let settings_pinned = unsafe { QObjectPinned::new(&settings) };
+
     let rq = RefCell::new(rendering::render_queue::RenderQueue::new(ctl.borrow().stabilizer.clone()));
     let rqpinned = unsafe { QObjectPinned::new(&rq) };
 
@@ -171,6 +173,7 @@ fn entry() {
     engine.set_property("graphics_api".into(), util::qt_graphics_api().into());
     engine.set_object_property("main_controller".into(), ctlpinned);
     engine.set_object_property("ui_tools".into(), ui_tools_pinned);
+    engine.set_object_property("settings".into(), settings_pinned);
     engine.set_object_property("render_queue".into(), rqpinned);
     engine.set_object_property("filesystem".into(), fspinned);
     {

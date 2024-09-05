@@ -49,8 +49,8 @@ half = "2.4.1"
 lru = "0.12"
 thiserror = "1.0.63"
 ciborium = "0.2.2"
-nt-hive = "0.2"
 dyn-clone = "1.0.17"
+app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }
 
 akaze = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee", features = ["rayon"] }
 eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee" }

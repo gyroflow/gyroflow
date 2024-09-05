@@ -422,7 +422,7 @@ Item {
             const suffix = window.advanced.defaultSuffix.text;
             window.outputFile.setFilename(filesystem.filename_with_suffix(filename, suffix).replace(/%0[0-9]+d/, ""));
 
-            const preservedPath = settings.value("preservedOutputPath");
+            const preservedPath = settings.value("preservedOutputPath", "");
             if (window.exportSettings.preserveOutputPath.checked && preservedPath) {
                 window.outputFile.setFolder(preservedPath);
             } else {
@@ -764,8 +764,8 @@ Item {
             Item {
                 id: secondPreview;
                 property bool show: false;
-                onShowChanged: window.settings.setValue("stabOverviewSplit", show);
-                Component.onCompleted: show = window.settings.value("stabOverviewSplit", "false") == "true";
+                onShowChanged: settings.setValue("stabOverviewSplit", show);
+                Component.onCompleted: show = settings.value("stabOverviewSplit", false);
                 visible: show && fovOverviewBtn.checked;
                 readonly property real ratio: 1 + 1 / window.stab.fovSlider.value;
                 onRatioChanged: {
@@ -1021,9 +1021,9 @@ Item {
                                 unit: "%";
                                 from: 0;
                                 to: 100;
-                                value: window.settings.value("volume", 100);
+                                value: settings.value("volume", 100);
                                 precision: 0;
-                                onValueChanged: { vid.volume = value / 100.0; window.settings.setValue("volume", value); }
+                                onValueChanged: { vid.volume = value / 100.0; settings.setValue("volume", value); }
                             }
                         }
                     }
@@ -1057,12 +1057,12 @@ Item {
             additionalHeight: timeline.additionalHeight;
             defaultHeight: (window.isMobileLayout? 50 : 165) * dpiScale;
             minHeight: (root.fullScreen || window.isMobileLayout? 50 : 100) * dpiScale;
-            lastHeight: window.settings.value("bottomPanelSize" + (root.fullScreen? "-full" : ""), defaultHeight);
-            onHeightAdjusted: window.settings.setValue("bottomPanelSize" + (root.fullScreen? "-full" : ""), height);
+            lastHeight: settings.value("bottomPanelSize" + (root.fullScreen? "-full" : ""), defaultHeight);
+            onHeightAdjusted: settings.setValue("bottomPanelSize" + (root.fullScreen? "-full" : ""), height);
             Connections {
                 target: root;
                 function onFullScreenChanged(): void {
-                    bottomPanel.lastHeight = window.settings.value("bottomPanelSize" + (root.fullScreen? "-full" : ""), bottomPanel.defaultHeight);
+                    bottomPanel.lastHeight = settings.value("bottomPanelSize" + (root.fullScreen? "-full" : ""), bottomPanel.defaultHeight);
                     if (root.fullScreen == 2) {
                         main_window.visibility = Window.FullScreen;
                     } else {

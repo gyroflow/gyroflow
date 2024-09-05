@@ -295,7 +295,7 @@ Compruebe la tasa de bits del archivo después de procesarlo y si se ve afectado
       <location filename="../../src/ui/App.qml" line="331"/>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>Added to queue</source>
-      <translation type="unfinished">Added to queue</translation>
+      <translation>Añadido a la cola</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="331"/>

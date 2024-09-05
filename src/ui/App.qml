@@ -5,7 +5,6 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls as QQC
 import QtQuick.Dialogs
-import Qt.labs.settings
 
 import "."
 import "components/"
@@ -93,12 +92,9 @@ Rectangle {
     property alias exportSettings: exportSettings.item;
     property alias advanced: advanced.item;
     property alias renderBtn: renderBtn;
-    property alias settings: settings;
 
     readonly property bool wasModified: window.videoArea.vid.loaded;
     property bool isDialogOpened: false;
-
-    Settings { id: settings; }
 
     FileDialog {
         id: fileDialog;
@@ -518,8 +514,8 @@ Rectangle {
 
         let el = null;
 
-        if (identifier && +window.settings.value("dontShowAgain-" + identifier, 0)) {
-            const clickedButton = +window.settings.value("dontShowAgain-" + identifier, 0) - 1;
+        if (identifier && +settings.value("dontShowAgain-" + identifier, 0)) {
+            const clickedButton = +settings.value("dontShowAgain-" + identifier, 0) - 1;
             if (buttons.length == 1) {
                 showNotification(type, text, textFormat);
                 return null;
@@ -540,7 +536,7 @@ Rectangle {
         el.text = text;
         el.onClicked.connect((index, dontShowAgain) => {
             if (identifier && dontShowAgain) {
-                window.settings.setValue("dontShowAgain-" + identifier, index + 1);
+                settings.setValue("dontShowAgain-" + identifier, index + 1);
             }
 
             let returnVal = undefined;

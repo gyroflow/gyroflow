@@ -6,7 +6,7 @@ use cpp::*;
 use gyroflow_core::*;
 use std::sync::Arc;
 use std::time::Instant;
-use qmetaobject::{ QString, QStringList };
+use qmetaobject::QString;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use crate::rendering;
@@ -438,27 +438,8 @@ fn detect_types(all_files: &[String]) -> (Vec<String>, Vec<String>, Vec<String>)
     (videos, lens_profiles, presets)
 }
 
-fn get_saved_settings() -> HashMap<String, String> {
-    let settings = cpp!(unsafe [] -> (QStringList, QStringList) as "std::pair<QStringList, QStringList>" {
-        QSettings sett;
-        QStringList keys, values;
-        for (const auto &key : sett.allKeys()) {
-            keys.append(key);
-            values.append(sett.value(key).toString());
-        }
-        return { keys, values };
-    });
-    let mut map = HashMap::new();
-    for (k, v) in settings.0.into_iter().zip(settings.1.into_iter()) {
-        map.insert(k.to_string(), v.to_string());
-    }
-    map
-}
-
 fn setup_defaults(stab: Arc<StabilizationManager>, queue: &mut RenderQueue) -> serde_json::Value {
-    let settings = get_saved_settings();
-    dbg!(&settings);
-
+    use gyroflow_core::settings;
     let codecs = [
         "H.264/AVC",
         "H.265/HEVC",
@@ -472,36 +453,35 @@ fn setup_defaults(stab: Arc<StabilizationManager>, queue: &mut RenderQueue) -> s
 
     // Default settings - project file will override this
 
-    match settings.get("croppingMode").unwrap_or(&"1".into()).parse::<u32>() {
-        Ok(0) => stab.set_adaptive_zoom(0.0), // No zooming
-        Ok(1) => stab.set_adaptive_zoom(settings.get("adaptiveZoom").unwrap_or(&"4".into()).parse::<f64>().unwrap()),
-        Ok(2) => stab.set_adaptive_zoom(-1.0), // Static zoom
+    match settings::get_u64("croppingMode", 1) {
+        0 => stab.set_adaptive_zoom(0.0), // No zooming
+        1 => stab.set_adaptive_zoom(settings::get_f64("adaptiveZoom", 4.0)),
+        2 => stab.set_adaptive_zoom(-1.0), // Static zoom
         _ => { }
     }
-    stab.set_lens_correction_amount(settings.get("correctionAmount").unwrap_or(&"1".into()).parse::<f64>().unwrap());
-    let smoothing_method = settings.get("smoothingMethod").unwrap_or(&"1".into()).parse::<usize>().unwrap();
+    stab.set_lens_correction_amount(settings::get_f64("correctionAmount", 1.0));
+    let smoothing_method = settings::get_u64("smoothingMethod", 1) as usize;
     let smoothing_method_prefix = format!("smoothing-{}-", smoothing_method);
     stab.set_smoothing_method(smoothing_method);
-    for (k, v) in &settings {
+    for (k, v) in gyroflow_core::settings::get_all() {
         if k.starts_with(&smoothing_method_prefix) {
-            stab.set_smoothing_param(k.strip_prefix(&smoothing_method_prefix).unwrap(), v.parse::<f64>().unwrap());
+            if let Some(v) = v.as_f64() {
+                stab.set_smoothing_param(k.strip_prefix(&smoothing_method_prefix).unwrap(), v);
+            }
         }
     }
 
     // TODO: set more params from `settings`
 
-    if let Some(gdec) = settings.get("gpudecode").and_then(|x| x.parse::<bool>().ok()) {
-        *rendering::GPU_DECODING.write() = gdec;
-    }
-    if let Some(suffix) = settings.get("defaultSuffix") {
-        queue.default_suffix = QString::from(suffix.as_str());
-    }
+    *rendering::GPU_DECODING.write() = settings::get_bool("gpudecode", true);
 
-    let codec = settings.get("defaultCodec").unwrap_or(&"0".into()).parse::<usize>().unwrap().min(codecs.len() - 1);
+    queue.default_suffix = QString::from(settings::get_str("defaultSuffix", "_stabilized"));
+
+    let codec = (settings::get_u64("defaultCodec", 0) as usize).min(codecs.len() - 1);
     let codec_name = codecs[codec];
 
-    if let Some(processing_device) = settings.get("processingDeviceIndex").and_then(|x| x.parse::<i32>().ok()) {
-        stab.set_device(processing_device);
+    if let Some(processing_device) = settings::try_get("processingDeviceIndex").and_then(|x| x.as_u64()) {
+        stab.set_device(processing_device as i32);
     }
 
     let audio_codecs = ["AAC", "PCM (s16le)", "PCM (s16be)", "PCM (s24le)", "PCM (s24be)"];
@@ -516,19 +496,19 @@ fn setup_defaults(stab: Arc<StabilizationManager>, queue: &mut RenderQueue) -> s
             // "output_width":   3840,
             // "output_height":  2160,
             // "bitrate":        150,
-            "use_gpu":        settings.get(&format!("exportGpu-{}", codec)).unwrap_or(&"1".into()).parse::<u32>().unwrap() > 0,
-            "audio":          settings.get("exportAudio").unwrap_or(&"true".into()).parse::<bool>().unwrap(),
+            "use_gpu":        settings::get_u64(&format!("exportGpu-{}", codec), 1) > 0,
+            "audio":          settings::get_bool("exportAudio", true),
             "pixel_format":   "",
 
             // Advanced
-            "encoder_options":       settings.get(&format!("encoderOptions-{}", codec)).unwrap_or(&"".into()),
-            "metadata":              { "comment": settings.get("metadataComment").unwrap_or(&"".into()) },
-            "keyframe_distance":     settings.get("keyframeDistance").unwrap_or(&"1".into()).parse::<u32>().unwrap(),
-            "preserve_other_tracks": settings.get("preserveOtherTracks").unwrap_or(&"false".into()).parse::<bool>().unwrap(),
-            "pad_with_black":        settings.get("padWithBlack").unwrap_or(&"false".into()).parse::<bool>().unwrap(),
-            "export_trims_separately":settings.get("exportTrimsSeparately").unwrap_or(&"false".into()).parse::<bool>().unwrap(),
-            "audio_codec":           audio_codecs.get(settings.get("audioCodec").unwrap_or(&"0".into()).parse::<usize>().unwrap()).unwrap_or(&"AAC"),
-            "interpolation":         interpolations.get(settings.get("interpolationMethod").unwrap_or(&"2".into()).parse::<usize>().unwrap()).unwrap_or(&"Lanczos4"),
+            "encoder_options":       settings::get_str(&format!("encoderOptions-{}", codec), ""),
+            "metadata":              { "comment": settings::get_str("metadataComment", "") },
+            "keyframe_distance":     settings::get_u64("keyframeDistance", 1),
+            "preserve_other_tracks": settings::get_bool("preserveOtherTracks", false),
+            "pad_with_black":        settings::get_bool("padWithBlack", false),
+            "export_trims_separately":settings::get_bool("exportTrimsSeparately", false),
+            "audio_codec":           audio_codecs.get(settings::get_u64("audioCodec", 0) as usize).unwrap_or(&"AAC"),
+            "interpolation":         interpolations.get(settings::get_u64("interpolationMethod", 2) as usize).unwrap_or(&"Lanczos4"),
         },
         "synchronization": {
             "initial_offset":     0,

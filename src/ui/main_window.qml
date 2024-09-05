@@ -5,7 +5,6 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls as QQC
 import QtQuick.Controls.Material
-import Qt.labs.settings
 
 import "components/"
 
@@ -15,7 +14,7 @@ Window {
     height: isMobile? Screen.desktopAvailableHeight : Math.min(Screen.height, 950 * dpiScale);
     minimumWidth: 900 * dpiScale;
     minimumHeight: 400 * dpiScale;
-    visible: true;
+    visible: false;
     color: styleBackground;
     property var safeAreaMargins: ({});
     onWidthChanged: updateMargins.start();
@@ -35,13 +34,15 @@ Window {
         });
     }
 
-    Settings {
+    Item {
         id: sett;
-        property alias x: main_window.x;
-        property alias y: main_window.y;
-        property alias width: main_window.width;
-        property alias height: main_window.height;
+        property alias windowX: main_window.x;
+        property alias windowY: main_window.y;
+        property alias windowWidth: main_window.width;
+        property alias windowHeight: main_window.height;
         property int visibility: 0;
+        Component.onCompleted: { settings.init(this); main_window.visible = true; }
+        function propChanged() { settings.propChanged(this); }
     }
 
     Material.theme: Material.Dark;

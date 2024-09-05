@@ -179,8 +179,8 @@ impl Stabilization {
             // Stretch to the buffer by default
             ret[0] = 0;
             ret[1] = 0;
-            ret[2] = desc.size.0  as i32;
-            ret[3] = desc.size.1  as i32;
+            ret[2] = desc.size.0 as i32;
+            ret[3] = desc.size.1 as i32;
         }
         ret
     }

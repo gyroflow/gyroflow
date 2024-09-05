@@ -4,7 +4,6 @@
 import QtQuick
 import QtQuick.Controls as QQC
 import QtQuick.Controls.Material as QQCM
-import Qt.labs.settings
 
 import Gyroflow
 
@@ -231,9 +230,11 @@ Item {
         menuLoader.toggle(el, 0, el.height);
     }
 
-    Settings {
+    Item {
         property alias timelineChart: chart.viewMode;
         property alias restrictTrimRange: root.restrictTrim;
+        Component.onCompleted: settings.init(this);
+        function propChanged() { settings.propChanged(this); }
     }
 
     focus: true;

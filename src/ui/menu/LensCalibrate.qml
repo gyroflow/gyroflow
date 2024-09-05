@@ -3,7 +3,6 @@
 
 import QtQuick
 import QtQuick.Dialogs
-import Qt.labs.settings
 
 import "../components/"
 
@@ -124,12 +123,14 @@ MenuItem {
         }
     }
 
-    Settings {
-        id: settings;
+    Item {
         property alias calib_maxPoints: maxPoints.value;
         property alias calib_everyNthFrame: everyNthFrame.value;
         property alias calib_iterations: iterations.value;
         property alias calib_maxSharpness: maxSharpness.value;
+
+        Component.onCompleted: settings.init(this);
+        function propChanged() { settings.propChanged(this); }
     }
 
     FileDialog {

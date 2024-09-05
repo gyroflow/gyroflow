@@ -2,7 +2,6 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 import QtQuick
-import Qt.labs.settings
 
 import "../components/"
 
@@ -12,8 +11,8 @@ MenuItem {
     opened: false;
     objectName: "advanced";
 
-    Settings {
-        id: settings;
+    Item {
+        id: sett;
         property alias previewPipeline: previewPipeline.currentIndex;
         property alias renderBackground: renderBackground.text;
         property alias uiScaling: uiScaling.currentIndex;
@@ -30,6 +29,15 @@ MenuItem {
         property alias r3dColorSpace: r3dColorSpace.currentIndex;
         property alias r3dRedlineParams: r3dRedlineParams.text;
         property string lang: ui_tools.get_default_language();
+
+        Component.onCompleted: {
+            settings.init(this);
+            let selectedIndex = 0;
+            let i = 0;
+            langList.model = langList.langs.map((x) => { if (x[1] == sett.lang) { selectedIndex = i; } i++; return x[0]; });
+            langList.currentIndex = selectedIndex;
+        }
+        function propChanged() { settings.propChanged(this); }
     }
     property alias defaultSuffix: defaultSuffix;
     property alias previewResolution: previewResolution.currentIndex;
@@ -204,20 +212,14 @@ MenuItem {
                 ["Turkish (Türkçe)",             "tr"],
                 ["Ukrainian (Українська мова)",  "uk"]
             ];
-            Component.onCompleted: {
-                let selectedIndex = 0;
-                let i = 0;
-                model = langs.map((x) => { if (x[1] == settings.lang) { selectedIndex = i; } i++; return x[0]; });
-                currentIndex = selectedIndex;
-            }
             font.pixelSize: 12 * dpiScale;
             width: parent.width;
             function setLang(): void {
-                settings.lang = langs[currentIndex][1];
+                sett.lang = langs[currentIndex][1];
 
-                window.LayoutMirroring.enabled = settings.lang == "ar" || settings.lang == "fa" || settings.lang == "he";
+                window.LayoutMirroring.enabled = sett.lang == "ar" || sett.lang == "fa" || sett.lang == "he";
                 window.LayoutMirroring.childrenInherit = true;
-                ui_tools.set_language(settings.lang);
+                ui_tools.set_language(sett.lang);
             }
             onCurrentIndexChanged: Qt.callLater(setLang);
         }
@@ -405,11 +407,11 @@ MenuItem {
             messageBox(Modal.Warning, qsTr("Are you sure you want to clear all settings and restore the defaults?"), [
                 { text: qsTr("Yes"), clicked: () => {
                     // Preserve lens profile favorites
-                    const lenses = window.settings.value("lensProfileFavorites");
+                    const lenses = settings.value("lensProfileFavorites", "");
 
                     controller.clear_settings();
 
-                    if (lenses) window.settings.setValue("lensProfileFavorites", lenses);
+                    if (lenses) settings.setValue("lensProfileFavorites", lenses);
 
                     messageBox(Modal.Info, qsTr("Settings cleared, please restart Gyroflow for the changes to take effect."), [
                         { text: qsTr("Exit"), accent: true, clicked: Qt.quit},

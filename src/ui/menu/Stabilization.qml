@@ -2,7 +2,6 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 import QtQuick
-import Qt.labs.settings
 
 import "../components/"
 
@@ -22,8 +21,7 @@ MenuItem {
     property alias zoomingCenterY: zoomingCenterY;
     property alias croppingMode: croppingMode;
 
-    Settings {
-        id: settings;
+    Item {
         property alias smoothingMethod: smoothingMethod.currentIndex;
         property alias croppingMode: croppingMode.currentIndex;
         property alias adaptiveZoom: adaptiveZoom.value;
@@ -35,6 +33,9 @@ MenuItem {
         property alias zoomingMethod: zoomingMethod.currentIndex;
         property alias maxZoom: maxZoomSlider.value;
         property alias maxZoomIterations: maxZoomIterations.value;
+
+        Component.onCompleted: settings.init(this);
+        function propChanged() { settings.propChanged(this); }
     }
 
     function loadGyroflow(obj: var): void {
@@ -88,16 +89,8 @@ MenuItem {
                 additionalTranslationY.value = stab.additional_translation[1];
                 additionalTranslationZ.value = stab.additional_translation[2];
             }
-            if (stab.hasOwnProperty("max_zoom") && +stab.max_zoom >= 100) {
-                maxZoomSlider.value = +stab.max_zoom;
-            } else {
-                maxZoomSlider.value = +settings.maxZoom;
-            }
-            if (stab.hasOwnProperty("max_zoom_terations") && +stab.max_zoom_terations > 0) {
-                maxZoomIterations.value = +stab.max_zoom_terations;
-            } else {
-                maxZoomIterations.value = +settings.maxZoomIterations;
-            }
+            if (stab.hasOwnProperty("max_zoom") && +stab.max_zoom > 50) maxZoomSlider.value = +stab.max_zoom;
+            if (stab.hasOwnProperty("max_zoom_terations") && +stab.max_zoom_terations > 0) maxZoomIterations.value = +stab.max_zoom_terations;
             if (stab.hasOwnProperty("adaptive_zoom_method")) zoomingMethod.currentIndex = +stab.adaptive_zoom_method;
             if (stab.hasOwnProperty("use_gravity_vectors")) {
                 useGravityVectors.checked = !!stab.use_gravity_vectors;
@@ -114,7 +107,6 @@ MenuItem {
             if (stab.hasOwnProperty("video_speed")) videoSpeed.value = +stab.video_speed;
             if (stab.hasOwnProperty("video_speed_affects_smoothing")) videoSpeedAffectsSmoothing.checked = !!stab.video_speed_affects_smoothing;
             if (stab.hasOwnProperty("video_speed_affects_zooming"))   videoSpeedAffectsZooming.checked   = !!stab.video_speed_affects_zooming;
-
         }
     }
 

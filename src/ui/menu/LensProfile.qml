@@ -125,7 +125,7 @@ MenuItem {
                         window.motionData.opened = false;
                     }
 
-                    officialInfo.show = !obj.official && !+window.settings.value("rated-profile-" + checksum, "0");
+                    officialInfo.show = !obj.official && !settings.value("rated-profile-" + checksum, false);
                     officialInfo.canRate = true;
                     officialInfo.thankYou = false;
                     root.profileName = (filepath || obj.name || "").replace(/^.*?[\/\\]([^\/\\]+?)$/, "$1");
@@ -184,7 +184,7 @@ MenuItem {
 
     property var favorites: ({});
     function loadFavorites(): void {
-        const list = window.settings.value("lensProfileFavorites") || "";
+        const list = settings.value("lensProfileFavorites", "");
         let fav = {};
         for (const x of list.split(",")) {
             if (x)
@@ -193,7 +193,7 @@ MenuItem {
         favorites = fav;
     }
     function updateFavorites(): void {
-        window.settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
+        settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
     }
 
     SearchField {
@@ -266,7 +266,7 @@ MenuItem {
             function onLinkActivated(link: url): void {
                 controller.rate_profile(root.profileName, root.profileOriginalJson, root.profileChecksum, link === "#good");
                 if (link === "#good")
-                    window.settings.setValue("rated-profile-" + root.profileChecksum, "1");
+                    settings.setValue("rated-profile-" + root.profileChecksum, true);
                 officialInfo.thankYou = true;
                 officialInfo.canRate = false;
                 tyTimer.start();

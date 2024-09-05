@@ -3,7 +3,6 @@
 
 import QtQuick
 import QtQuick.Controls as QQC
-import Qt.labs.settings
 
 import "components/"
 import "Util.js" as Util;
@@ -246,28 +245,26 @@ Item {
             interval: 100;
             running: !isCalibrator && window.exportSettings != null && window.sync != null;
             onTriggered: {
-                const saved = window.settings.value("renderQueue");
-                if (saved && saved.length > 10) {
-                    Qt.callLater(() => {
-                        render_queue.restore_render_queue(saved, window.getAdditionalProjectDataJson());
+                Qt.callLater(() => {
+                    if (render_queue.restore_render_queue(window.getAdditionalProjectDataJson())) {
                         messageBox(Modal.Info, qsTr("You have unfinished tasks in the render queue."), [
                             { text: qsTr("Open render queue"), accent: true, clicked: function() {
                                 videoArea.queue.shown = true;
                             } },
                             { text: qsTr("Ok") }
                         ]);
-                    });
-                }
+                    }
+                });
             }
         }
 
         Connections {
             target: render_queue;
             function onQueue_changed(): void {
-                window.settings.setValue("renderQueue", render_queue.render_queue_json());
+                render_queue.save_render_queue();
             }
             function onStatus_changed(): void {
-                window.settings.setValue("renderQueue", render_queue.render_queue_json());
+                render_queue.save_render_queue();
             }
         }
         spacing: 5 * dpiScale;
@@ -728,7 +725,7 @@ Item {
             for (let i = 0; i < menuItem.count; ++i) {
                 if (menuItem.itemAt(i) instanceof QQC.MenuItem) { menuItem.actionAt(i).checked = i == v - 1; }
             }
-            window.settings.setValue("parallelRenders", v);
+            settings.setValue("parallelRenders", v);
         }
         function setOverwriteAction(v: int, menuItem: Menu): void {
             v = Math.min(3, Math.max(v, 0));
@@ -738,7 +735,7 @@ Item {
             for (let i = 0, j = 0; i < menuItem.count; ++i) {
                 if (menuItem.itemAt(i) instanceof QQC.MenuItem) { menuItem.actionAt(i).checked = j == v; j++;  }
             }
-            window.settings.setValue("defaultOverwriteAction", v);
+            settings.setValue("defaultOverwriteAction", v);
 
         }
         function setExportMode(v: int, menuItem: Menu): void {
@@ -749,7 +746,7 @@ Item {
             for (let i = 0; i < menuItem.count; ++i) {
                 if (menuItem.itemAt(i) instanceof QQC.MenuItem) { menuItem.actionAt(i).checked = i == v; }
             }
-            window.settings.setValue("exportMode", v);
+            settings.setValue("exportMode", v);
         }
 
         Menu {
@@ -763,7 +760,7 @@ Item {
                 Action { text: "4"; onTriggered: queueSettings.setParallelRenders(4, parallelRendersMenu);  }
                 Action { text: "5"; onTriggered: queueSettings.setParallelRenders(5, parallelRendersMenu);  }
                 Action { text: "6"; onTriggered: queueSettings.setParallelRenders(6, parallelRendersMenu);  }
-                Component.onCompleted: queueSettings.setParallelRenders(+window.settings.value("parallelRenders", "1"), parallelRendersMenu);
+                Component.onCompleted: queueSettings.setParallelRenders(+settings.value("parallelRenders", 1), parallelRendersMenu);
             }
             Menu {
                 id: overwriteActionMenu;
@@ -773,7 +770,7 @@ Item {
                 Action { text: qsTr("Overwrite file"); onTriggered: queueSettings.setOverwriteAction(1, overwriteActionMenu); }
                 Action { text: qsTr("Rename file");    onTriggered: queueSettings.setOverwriteAction(2, overwriteActionMenu); }
                 Action { text: qsTr("Skip file");      onTriggered: queueSettings.setOverwriteAction(3, overwriteActionMenu); }
-                Component.onCompleted: queueSettings.setOverwriteAction(+window.settings.value("defaultOverwriteAction", "0"), overwriteActionMenu);
+                Component.onCompleted: queueSettings.setOverwriteAction(+settings.value("defaultOverwriteAction", 0), overwriteActionMenu);
             }
             Menu {
                 id: exportModeMenu;
@@ -783,10 +780,10 @@ Item {
                 Action { text: qsTr("Project file (including gyro data)");             onTriggered: queueSettings.setExportMode(2, exportModeMenu); }
                 Action { text: qsTr("Project file (including processed gyro data)");   onTriggered: queueSettings.setExportMode(3, exportModeMenu); }
                 Action { text: qsTr("Stabilized video + Project file with gyro data"); onTriggered: queueSettings.setExportMode(4, exportModeMenu); }
-                Component.onCompleted: queueSettings.setExportMode(+window.settings.value("exportMode", "0"), exportModeMenu);
+                Component.onCompleted: queueSettings.setExportMode(+settings.value("exportMode", 0), exportModeMenu);
             }
             QQC.MenuSeparator { verticalPadding: 5 * dpiScale; }
-            Action { checked: +settings.value("showQueueWhenAdding", "1") > 0; text: qsTr("Show queue when adding an item"); onTriggered: { checked = !checked; window.settings.setValue("showQueueWhenAdding", checked? 1 : 0); } }
+            Action { checked: settings.value("showQueueWhenAdding", true); text: qsTr("Show queue when adding an item"); onTriggered: { checked = !checked; settings.setValue("showQueueWhenAdding", checked); } }
             Action { text: qsTr("Clear render queue"); onTriggered: {
                 messageBox(Modal.Warning, qsTr("Are you sure you want to remove all items from the render queue?"), [
                     { text: qsTr("Yes"), clicked: render_queue.clear },

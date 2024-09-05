@@ -44,7 +44,6 @@ rustfft = "6.2.0"
 crc32fast = "1.4.2"
 rodio = { default-features = false, features = ["vorbis"], version = "0.19.0" }
 filetime_creation = "0.2"
-directories = "5"
 
 qmetaobject = { version = "0.2.10", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.11", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
@@ -71,8 +70,8 @@ keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "0
 
 [patch.crates-io]
 fc-blackbox = { git = "https://github.com/ilya-epifanov/fc-blackbox.git", rev = "de08350" }
-qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "59029b9" }
-qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "59029b9" }
+qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "ee6f5dc" }
+qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "ee6f5dc" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.58.0"
@@ -92,7 +91,7 @@ core-foundation-sys = "0.8.7"
 cpp_build = "0.5.9"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.1.15"
+cc = "1.1.16"
 
 [[bin]]
 name = "gyroflow"

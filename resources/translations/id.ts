@@ -297,7 +297,7 @@ Harap periksa kecepatan bit file setelah perenderan dan jika Anda terpengaruh ol
       <location filename="../../src/ui/App.qml" line="331"/>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>Added to queue</source>
-      <translation type="unfinished">Added to queue</translation>
+      <translation>Ditambahkan ke antrian</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="331"/>
@@ -307,7 +307,7 @@ Harap periksa kecepatan bit file setelah perenderan dan jika Anda terpengaruh ol
     <message>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>file will be rendered to %1</source>
-      <translation type="unfinished">file will be rendered to %1</translation>
+      <translation>file akan di render %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="364"/>
@@ -567,7 +567,7 @@ Anda dapat meningkatkan batas ketajaman di bagian Lanjutan.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="389"/>
       <source>Proportional</source>
-      <translation type="unfinished">Proportional</translation>
+      <translation>Proposional</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="440"/>
@@ -642,12 +642,12 @@ Anda dapat meningkatkan batas ketajaman di bagian Lanjutan.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="568"/>
       <source>Export trim ranges as separate videos</source>
-      <translation type="unfinished">Export trim ranges as separate videos</translation>
+      <translation>Ekspor range gabungan sebagai video terpisah</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="587"/>
       <source>Interpolation method</source>
-      <translation type="unfinished">Interpolation method</translation>
+      <translation>Metode interpolasi</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="651"/>
@@ -764,12 +764,12 @@ Anda dapat meningkatkan batas ketajaman di bagian Lanjutan.</translation>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Disable</source>
-      <translation type="unfinished">Disable</translation>
+      <translation>Nonaktifkan</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Enable</source>
-      <translation type="unfinished">Enable</translation>
+      <translation>Aktifkan</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="54"/>
@@ -1054,12 +1054,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="298"/>
       <source>Advanced</source>
-      <translation type="unfinished">Advanced</translation>
+      <translation>Lanjutan</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="303"/>
       <source>Lens is under water</source>
-      <translation type="unfinished">Lens is under water</translation>
+      <translation>Lensa dibawah air</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="305"/>
@@ -1069,37 +1069,37 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="326"/>
       <source>Enable keyframing</source>
-      <translation type="unfinished">Enable keyframing</translation>
+      <translation>Aktifkan keyframing</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="339"/>
       <source>Add keyframe</source>
-      <translation type="unfinished">Add keyframe</translation>
+      <translation>Tambahkan keyframe</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="409"/>
       <source>Export STMap</source>
-      <translation type="unfinished">Export STMap</translation>
+      <translation>Ekspor STMap</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="414"/>
       <source>This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?</source>
-      <translation type="unfinished">This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?</translation>
+      <translation>File ini berisi metadata lensa per-frame. Apakah anda ingin mengekspor sekuen STMap atau single frame?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="415"/>
       <source>Single frame</source>
-      <translation type="unfinished">Single frame</translation>
+      <translation>Single frame</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="416"/>
       <source>STMap sequence</source>
-      <translation type="unfinished">STMap sequence</translation>
+      <translation>Sekuen STMap</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="430"/>
       <source>Exporting %1...</source>
-      <translation type="unfinished">Exporting %1...</translation>
+      <translation>Mengekspor %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="368"/>
@@ -1324,22 +1324,22 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="631"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>Ekspor</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="642"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>Pilih jalur file</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="656"/>
       <source>Export camera data (CSV/JSON/USD/AE)</source>
-      <translation type="unfinished">Export camera data (CSV/JSON/USD/AE)</translation>
+      <translation>Ekspor data kamera (CSV/JSON/USD/AE)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="700"/>
       <source>Export full metadata</source>
-      <translation type="unfinished">Export full metadata</translation>
+      <translation>Ekspor penuh metadata</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="708"/>
@@ -1349,7 +1349,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="716"/>
       <source>Export project file (including processed gyro data)</source>
-      <translation type="unfinished">Export project file (including processed gyro data)</translation>
+      <translation>Ekspor file projek (termasuk data pemrosesan gyro)</translation>
     </message>
   </context>
   <context>
@@ -1467,12 +1467,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="148"/>
       <source>Mobile Light</source>
-      <translation type="unfinished">Mobile Light</translation>
+      <translation>Mobile Terang</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="149"/>
       <source>Mobile Dark</source>
-      <translation type="unfinished">Mobile Dark</translation>
+      <translation>Mobile Gelap</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="185"/>
@@ -1736,8 +1736,8 @@ Do you want to convert to a different supported pixel format or keep the origina
       <location filename="../../src/ui/RenderQueue.qml" line="654"/>
       <source>Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>Karena keterbatasan akses file, anda harus memilih lokasi folder manual.
+Klik Ok dan pilih folder tujuan.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="720"/>
@@ -1866,7 +1866,7 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="73"/>
       <source>Select fields to include in the exported file</source>
-      <translation type="unfinished">Select fields to include in the exported file</translation>
+      <translation>Pilih bidang yang akan disertakan dalam file yang diekspor</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="95"/>
@@ -2023,17 +2023,17 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="133"/>
       <source>Original</source>
-      <translation type="unfinished">Original</translation>
+      <translation>Asli</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="134"/>
       <source>Stabilized</source>
-      <translation type="unfinished">Stabilized</translation>
+      <translation>Stabilkan</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="136"/>
       <source>Gyroscope</source>
-      <translation type="unfinished">Gyroscope</translation>
+      <translation>Gyroscope</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="137"/>
@@ -2053,7 +2053,7 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="140"/>
       <source>Minimal FOV scale</source>
-      <translation type="unfinished">Minimal FOV scale</translation>
+      <translation>Minimal skala FOV</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="141"/>
@@ -2063,7 +2063,7 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="142"/>
       <source>Focal length (if available)</source>
-      <translation type="unfinished">Focal length (if available)</translation>
+      <translation>Panjang focal (jika tersedia)</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="235"/>
@@ -2115,12 +2115,12 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="249"/>
       <source>Export all samples</source>
-      <translation type="unfinished">Export all samples</translation>
+      <translation>Ekspor semua sampel</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="253"/>
       <source>Export one sample per frame</source>
-      <translation type="unfinished">Export one sample per frame</translation>
+      <translation>Ekspor salah satu sampel per frame</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="266"/>
@@ -2257,32 +2257,32 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="702"/>
       <source>Additional 3D rotation</source>
-      <translation type="unfinished">Additional 3D rotation</translation>
+      <translation>Tambahan rotasi 3D</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="706"/>
       <source>Pitch</source>
-      <translation type="unfinished">Pitch</translation>
+      <translation>Pitch</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="711"/>
       <source>Yaw</source>
-      <translation type="unfinished">Yaw</translation>
+      <translation>Yaw</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="716"/>
       <source>Roll</source>
-      <translation type="unfinished">Roll</translation>
+      <translation>Gulung</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="723"/>
       <source>Additional 3D translation</source>
-      <translation type="unfinished">Additional 3D translation</translation>
+      <translation>Tambahan translasi 3D</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="738"/>
       <source>Z</source>
-      <translation type="unfinished">Z</translation>
+      <translation>Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="344"/>
@@ -2340,7 +2340,7 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="460"/>
       <source>Zoom limit</source>
-      <translation type="unfinished">Zoom limit</translation>
+      <translation>Batas zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="463"/>
@@ -2394,7 +2394,7 @@ If you need more accuracy, increase the number of iterations in &quot;Advanced&q
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="746"/>
       <source>Zoom limit iterations</source>
-      <translation type="unfinished">Zoom limit iterations</translation>
+      <translation>Batas literasi zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="747"/>
@@ -2477,12 +2477,12 @@ If you need more accuracy, increase the number of iterations in &quot;Advanced&q
     <message>
       <location filename="../../src/ui/Statistics.qml" line="173"/>
       <source>Logarithmic value axis</source>
-      <translation type="unfinished">Logarithmic value axis</translation>
+      <translation>Logaritma value axis</translation>
     </message>
     <message>
       <location filename="../../src/ui/Statistics.qml" line="179"/>
       <source>Sample rate</source>
-      <translation type="unfinished">Sample rate</translation>
+      <translation>Sample rate</translation>
     </message>
   </context>
   <context>
@@ -2800,47 +2800,47 @@ Pastikan Anda mengatur nilai Rolling shutter yang tepat sebelum menyinkronkan.</
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="48"/>
       <source>Shutter speed</source>
-      <translation type="unfinished">Shutter speed</translation>
+      <translation>Kecepatan shutter</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="49"/>
       <source>Exposure</source>
-      <translation type="unfinished">Exposure</translation>
+      <translation>Eksposur</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="50"/>
       <source>ISO</source>
-      <translation type="unfinished">ISO</translation>
+      <translation>ISO</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="51"/>
       <source>Color primaries</source>
-      <translation type="unfinished">Color primaries</translation>
+      <translation>Warna primer</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="52"/>
       <source>Gamma equation</source>
-      <translation type="unfinished">Gamma equation</translation>
+      <translation>Ekuasi Gamma</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="53"/>
       <source>White balance mode</source>
-      <translation type="unfinished">White balance mode</translation>
+      <translation>Mode keseimbangan putih</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="54"/>
       <source>White balance</source>
-      <translation type="unfinished">White balance</translation>
+      <translation>Keseimbangan putib</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="55"/>
       <source>Iris</source>
-      <translation type="unfinished">Iris</translation>
+      <translation>Iris</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="57"/>
       <source>Focus mode</source>
-      <translation type="unfinished">Focus mode</translation>
+      <translation>Mode fokus</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="90"/>
@@ -2863,17 +2863,17 @@ Pastikan Anda mengatur nilai Rolling shutter yang tepat sebelum menyinkronkan.</
     <message>
       <location filename="../../src/ui/App.qml" line="472"/>
       <source>Inputs</source>
-      <translation type="unfinished">Inputs</translation>
+      <translation>Input</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="472"/>
       <source>Parameters</source>
-      <translation type="unfinished">Parameters</translation>
+      <translation>Parameter</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="472"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>Ekspor</translation>
     </message>
   </context>
   <context>
@@ -2923,7 +2923,7 @@ Apakah anda yakin ingin melanjutkan?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="250"/>
       <source>Zooming</source>
-      <translation type="unfinished">Zooming</translation>
+      <translation>Zooming</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="297"/>
@@ -2935,19 +2935,19 @@ Apakah anda yakin ingin melanjutkan?</translation>
       <location filename="../../src/ui/components/Timeline.qml" line="298"/>
       <location filename="../../src/ui/components/Timeline.qml" line="301"/>
       <source>Pitch axis</source>
-      <translation type="unfinished">Pitch axis</translation>
+      <translation>Pitch axis</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="299"/>
       <location filename="../../src/ui/components/Timeline.qml" line="302"/>
       <source>Roll axis</source>
-      <translation type="unfinished">Roll axis</translation>
+      <translation>Gulir axis</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="310"/>
       <location filename="../../src/ui/components/Timeline.qml" line="314"/>
       <source>Angle</source>
-      <translation type="unfinished">Angle</translation>
+      <translation>Angle</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="385"/>
@@ -3077,7 +3077,7 @@ Apakah anda yakin ingin melanjutkan?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="1008"/>
       <source>Option+Scroll</source>
-      <translation type="unfinished">Option+Scroll</translation>
+      <translation>Opsi+Gulir</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="1009"/>
@@ -3112,27 +3112,27 @@ Apakah anda yakin ingin melanjutkan?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="696"/>
       <source>Trim range</source>
-      <translation type="unfinished">Trim range</translation>
+      <translation>Range trim</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="711"/>
       <source>Add new range</source>
-      <translation type="unfinished">Add new range</translation>
+      <translation>Tambah range baru</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="720"/>
       <source>Delete this range</source>
-      <translation type="unfinished">Delete this range</translation>
+      <translation>Hapus range ini</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="729"/>
       <source>Clear all</source>
-      <translation type="unfinished">Clear all</translation>
+      <translation>Hapus semua</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="736"/>
       <source>Restrict playback to trim range</source>
-      <translation type="unfinished">Restrict playback to trim range</translation>
+      <translation>Batasi pemutaran untuk range trim</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="1007"/>
@@ -3183,7 +3183,7 @@ Apakah anda yakin ingin melanjutkan?</translation>
     <message>
       <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="96"/>
       <source>Zoom in and loop</source>
-      <translation type="unfinished">Zoom in and loop</translation>
+      <translation>Perbesar dan loop</translation>
     </message>
   </context>
   <context>
@@ -3378,17 +3378,17 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="511"/>
       <source>Same as the original file</source>
-      <translation type="unfinished">Same as the original file</translation>
+      <translation>Sama dengan file aslinya</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="512"/>
       <source>Custom path</source>
-      <translation type="unfinished">Custom path</translation>
+      <translation>Kustom jalur</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="489"/>
       <source>Please enter the output path:</source>
-      <translation type="unfinished">Please enter the output path:</translation>
+      <translation>Silahkan masukkan jalur output:</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="363"/>
@@ -3398,7 +3398,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="364"/>
       <source>OK</source>
-      <translation type="unfinished">OK</translation>
+      <translation>OK</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="648"/>
@@ -3418,7 +3418,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="809"/>
       <source>Click here to open a video file</source>
-      <translation type="unfinished">Click here to open a video file</translation>
+      <translation>Klik disini untuk membuka file video</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="929"/>
@@ -3453,7 +3453,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="939"/>
       <source>Show timeline menu</source>
-      <translation type="unfinished">Show timeline menu</translation>
+      <translation>Tampilkan menu timeline</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="978"/>
@@ -3478,7 +3478,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="1013"/>
       <source>Volume</source>
-      <translation type="unfinished">Volume</translation>
+      <translation>Volume</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="1043"/>

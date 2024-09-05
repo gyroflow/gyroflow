@@ -1197,7 +1197,7 @@ impl Controller {
 
         #[cfg(not(any(target_os = "ios", target_os = "android")))]
         {
-            util::set_setting("lastProject", &filesystem::url_to_path(&url));
+            gyroflow_core::settings::set("lastProject", filesystem::url_to_path(&url).into());
         }
         let finished = util::qt_queued_callback(self, move |this, (res, arg): (&str, String)| {
             match res {
@@ -2232,7 +2232,7 @@ impl Controller {
     // Utilities
     fn get_username(&self) -> QString { let realname = whoami::realname(); QString::from(if realname.is_empty() { whoami::username() } else { realname }) }
     fn image_to_b64(&self, img: QImage) -> QString { util::image_to_b64(img) }
-    fn clear_settings(&self) { util::clear_settings() }
+    fn clear_settings(&self) { gyroflow_core::settings::clear() }
     fn copy_to_clipboard(&self, text: QString) { util::copy_to_clipboard(text) }
 }
 
@@ -2283,12 +2283,12 @@ impl Filesystem {
         let list = filesystem::get_allowed_folders();
         if !list.is_empty() {
             if let Ok(serialized) = serde_json::to_string((&list).into()) {
-                util::set_setting("allowedUrls", &serialized);
+                gyroflow_core::settings::set("allowedUrls", serialized.into());
             }
         }
     }
     fn restore_allowed_folders(&self) {
-        let saved = util::get_setting("allowedUrls");
+        let saved = gyroflow_core::settings::get("allowedUrls", Default::default()).to_string();
         if !saved.is_empty() {
             if let Ok(deserialized) = serde_json::from_str::<Vec<String>>(&saved) {
                 filesystem::restore_allowed_folders(&deserialized);
