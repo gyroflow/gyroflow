@@ -8,10 +8,20 @@ use std::sync::{ Arc, atomic::{ AtomicUsize, Ordering::SeqCst } };
 use std::path::PathBuf;
 
 pub fn data_dir() -> PathBuf {
-    let mut path = app_dirs2::get_app_dir(AppDataType::UserData, &AppInfo { name: "Gyroflow", author: "Gyroflow" }, "").unwrap();
-    if path.file_name().unwrap() == path.parent().unwrap().file_name().unwrap() {
-        path = path.parent().unwrap().to_path_buf();
-    }
+    let mut path = 
+    if cfg!(target_os = "macos") {
+        let mut path = PathBuf::from("/Users/");
+        path.push(std::env::var("USER").unwrap_or_else(|_| whoami::username()));
+        path.push(".config");
+        path.push("Gyroflow");
+        path
+    } else {
+        let mut path = app_dirs2::get_app_dir(AppDataType::UserData, &AppInfo { name: "Gyroflow", author: "Gyroflow" }, "").unwrap();
+        if path.file_name().unwrap() == path.parent().unwrap().file_name().unwrap() {
+            path = path.parent().unwrap().to_path_buf();
+        }
+        path
+    };
     let _ = std::fs::create_dir_all(&path);
     path
 }
