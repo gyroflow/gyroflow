@@ -2282,16 +2282,13 @@ impl Filesystem {
     fn save_allowed_folders(&self) {
         let list = filesystem::get_allowed_folders();
         if !list.is_empty() {
-            if let Ok(serialized) = serde_json::to_string((&list).into()) {
-                gyroflow_core::settings::set("allowedUrls", serialized.into());
-            }
+            gyroflow_core::settings::set("allowedUrls", list.into());
         }
     }
     fn restore_allowed_folders(&self) {
-        let saved = gyroflow_core::settings::get("allowedUrls", Default::default()).to_string();
-        if !saved.is_empty() {
-            if let Ok(deserialized) = serde_json::from_str::<Vec<String>>(&saved) {
-                filesystem::restore_allowed_folders(&deserialized);
+        if let Ok(saved) = serde_json::from_value::<Vec<String>>(gyroflow_core::settings::get("allowedUrls", Default::default())) {
+            if !saved.is_empty() {
+                filesystem::restore_allowed_folders(&saved);
             }
         }
     }
@@ -2301,7 +2298,7 @@ impl Filesystem {
          {
             let url = QString::from(url).to_string();
             if let Err(e) = filesystem::remove_file(&url) {
-                ::log::error!("Failed to remoev file: {e:?}");
+                ::log::error!("Failed to remove file: {e:?}");
             }
         }
         #[cfg(not(any(target_os = "android", target_os = "ios")))]
