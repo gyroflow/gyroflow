@@ -37,6 +37,10 @@ impl Settings {
     fn propChanged(&self, v: QJSValue) {
         let props = cpp!(unsafe [v as "QJSValue"] -> QVariantMap as "QVariantMap" {
             QObject *obj = v.toQObject();
+            if (!obj) {
+                qDebug() << "settings.propChanged(): null QObject!";
+                return QVariantMap();
+            }
             const QMetaObject *mo = obj->metaObject();
             const int offset = mo->propertyOffset();
             const int count = mo->propertyCount();
@@ -60,6 +64,10 @@ impl Settings {
         let sett = self.get_cpp_object();
         cpp!(unsafe [sett as "QObject *", v as "QJSValue"] {
             QObject *obj = v.toQObject();
+            if (!obj) {
+                qDebug() << "settings.init(): null QObject!";
+                return;
+            }
             const QMetaObject *mo = obj->metaObject();
             const int offset = mo->propertyOffset();
             const int count = mo->propertyCount();

@@ -77,6 +77,7 @@ MenuItem {
     }
 
     Item {
+        id: sett;
         property alias defaultCodec: codec.currentIndex;
         property alias exportAudio: audio.checked;
         property alias keyframeDistance: keyframeDistance.value;
@@ -89,8 +90,8 @@ MenuItem {
         property alias preserveOutputSettings: preserveOutputSettings.checked;
         property alias preserveOutputPath: preserveOutputPath.checked;
 
-        Component.onCompleted: settings.init(this);
-        function propChanged() { settings.propChanged(this); }
+        Component.onCompleted: settings.init(sett);
+        function propChanged() { settings.propChanged(sett); }
     }
 
     property real aspectRatio: 1.0;

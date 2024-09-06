@@ -41,8 +41,8 @@ Window {
         property alias windowWidth: main_window.width;
         property alias windowHeight: main_window.height;
         property int visibility: 0;
-        Component.onCompleted: { settings.init(this); main_window.visible = true; }
-        function propChanged() { settings.propChanged(this); }
+        Component.onCompleted: { settings.init(sett); main_window.visible = true; }
+        function propChanged() { settings.propChanged(sett); }
     }
 
     Material.theme: Material.Dark;

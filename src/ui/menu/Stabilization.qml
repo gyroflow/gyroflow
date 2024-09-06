@@ -22,6 +22,7 @@ MenuItem {
     property alias croppingMode: croppingMode;
 
     Item {
+        id: sett;
         property alias smoothingMethod: smoothingMethod.currentIndex;
         property alias croppingMode: croppingMode.currentIndex;
         property alias adaptiveZoom: adaptiveZoom.value;
@@ -34,8 +35,8 @@ MenuItem {
         property alias maxZoom: maxZoomSlider.value;
         property alias maxZoomIterations: maxZoomIterations.value;
 
-        Component.onCompleted: settings.init(this);
-        function propChanged() { settings.propChanged(this); }
+        Component.onCompleted: settings.init(sett);
+        function propChanged() { settings.propChanged(sett); }
     }
 
     function loadGyroflow(obj: var): void {

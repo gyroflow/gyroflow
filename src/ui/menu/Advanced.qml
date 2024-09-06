@@ -31,13 +31,13 @@ MenuItem {
         property string lang: ui_tools.get_default_language();
 
         Component.onCompleted: {
-            settings.init(this);
+            settings.init(sett);
             let selectedIndex = 0;
             let i = 0;
             langList.model = langList.langs.map((x) => { if (x[1] == sett.lang) { selectedIndex = i; } i++; return x[0]; });
             langList.currentIndex = selectedIndex;
         }
-        function propChanged() { settings.propChanged(this); }
+        function propChanged() { settings.propChanged(sett); }
     }
     property alias defaultSuffix: defaultSuffix;
     property alias previewResolution: previewResolution.currentIndex;

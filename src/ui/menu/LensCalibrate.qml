@@ -124,13 +124,14 @@ MenuItem {
     }
 
     Item {
+        id: sett;
         property alias calib_maxPoints: maxPoints.value;
         property alias calib_everyNthFrame: everyNthFrame.value;
         property alias calib_iterations: iterations.value;
         property alias calib_maxSharpness: maxSharpness.value;
 
-        Component.onCompleted: settings.init(this);
-        function propChanged() { settings.propChanged(this); }
+        Component.onCompleted: settings.init(sett);
+        function propChanged() { settings.propChanged(sett); }
     }
 
     FileDialog {

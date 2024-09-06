@@ -14,6 +14,7 @@ MenuItem {
     objectName: "synchronization";
 
     Item {
+        id: sett;
         property alias processingResolution: processingResolution.currentIndex;
         property alias initialOffset: initialOffset.value;
         property alias syncSearchSize: syncSearchSize.value;
@@ -30,8 +31,8 @@ MenuItem {
         // This is a specific use case and I don't think we should remember that setting, especially that it's hidden under "Advanced"
         //property alias everyNthFrame: everyNthFrame.value;
 
-        Component.onCompleted: settings.init(this);
-        function propChanged() { settings.propChanged(this); }
+        Component.onCompleted: settings.init(sett);
+        function propChanged() { settings.propChanged(sett); }
     }
 
     property alias timePerSyncpoint: timePerSyncpoint;

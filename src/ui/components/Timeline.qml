@@ -231,10 +231,11 @@ Item {
     }
 
     Item {
+        id: sett;
         property alias timelineChart: chart.viewMode;
         property alias restrictTrimRange: root.restrictTrim;
-        Component.onCompleted: settings.init(this);
-        function propChanged() { settings.propChanged(this); }
+        Component.onCompleted: settings.init(sett);
+        function propChanged() { settings.propChanged(sett); }
     }
 
     focus: true;
