@@ -8,8 +8,7 @@ use std::sync::{ Arc, atomic::{ AtomicUsize, Ordering::SeqCst } };
 use std::path::PathBuf;
 
 pub fn data_dir() -> PathBuf {
-    let mut path = 
-    if cfg!(target_os = "macos") {
+    let path = if cfg!(target_os = "macos") {
         let mut path = PathBuf::from("/Users/");
         path.push(std::env::var("USER").unwrap_or_else(|_| whoami::username()));
         path.push(".config");
