@@ -11,7 +11,8 @@ pub fn data_dir() -> PathBuf {
     let path = if cfg!(target_os = "macos") {
         let mut path = PathBuf::from("/Users/");
         path.push(std::env::var("USER").unwrap_or_else(|_| whoami::username()));
-        path.push(".config");
+        path.push("Library");
+        path.push("Application Support");
         path.push("Gyroflow");
         path
     } else {

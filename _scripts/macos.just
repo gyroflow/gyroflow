@@ -405,7 +405,7 @@ bundle *param:
     PlistBuddy -x -c "Add :com.apple.security.files.bookmarks.document-scope bool true" {{AppBundle}}/../entitlements.xcent
     PlistBuddy -x -c "Add :com.apple.security.get-task-allow bool true" {{AppBundle}}/../entitlements.xcent
     PlistBuddy -x -c "Add :com.apple.security.temporary-exception.files.home-relative-path.read-write array" {{AppBundle}}/../entitlements.xcent
-    PlistBuddy -x -c "Add :com.apple.security.temporary-exception.files.home-relative-path.read-write:0 string /.config/Gyroflow/" {{AppBundle}}/../entitlements.xcent
+    PlistBuddy -x -c "Add :com.apple.security.temporary-exception.files.home-relative-path.read-write:0 string /Library/Application Support/Gyroflow/" {{AppBundle}}/../entitlements.xcent
 
     actool {{ProjectDir}}/_deployment/ios/Resources/Images.xcassets --compile {{AppBundle}}/Contents --platform macosx --minimum-deployment-target 10.14 --app-icon AppIcon --output-partial-info-plist {{AppBundle}}/../AppIcon.plist
 
