@@ -467,7 +467,7 @@ impl WgpuWrapper {
             PipelineType::Compute(p) => {
                 let mut cpass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor { label: None, timestamp_writes: None });
                 cpass.set_pipeline(p);
-                cpass.set_bind_group(0, self.bind_group.as_ref().unwrap(), &[]);
+                cpass.set_bind_group(0, self.bind_group.as_ref(), &[]);
                 cpass.dispatch_workgroups((buffers.output.size.0 as f32 / 8.0).ceil() as u32, (buffers.output.size.1 as f32 / 8.0).ceil() as u32, 1);
             },
             PipelineType::Render(p) => {
@@ -487,7 +487,7 @@ impl WgpuWrapper {
                     depth_stencil_attachment: None,
                 });
                 rpass.set_pipeline(p);
-                rpass.set_bind_group(0, self.bind_group.as_ref().unwrap(), &[]);
+                rpass.set_bind_group(0, self.bind_group.as_ref(), &[]);
                 rpass.draw(0..6, 0..1);
             }
         }

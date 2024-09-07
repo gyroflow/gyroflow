@@ -199,6 +199,7 @@ impl CameraIdentifier {
 
     pub fn get_identifier_for_autoload(&self) -> String {
         self.identifier.replace("hero12", "hero11")
+                       .replace("hero13", "hero11")
                        .replace("hero11blackmini", "hero11black")
     }
 

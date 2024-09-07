@@ -416,6 +416,7 @@ impl GyroSource {
             }
         }
 
+        #[cfg(feature = "cache-gyro-metadata")]
         {
             let mut cache = CACHE.write();
             cache.insert(key, md.clone());

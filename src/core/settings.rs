@@ -8,20 +8,36 @@ use std::sync::{ Arc, atomic::{ AtomicUsize, Ordering::SeqCst } };
 use std::path::PathBuf;
 
 pub fn data_dir() -> PathBuf {
-    let path = if cfg!(target_os = "macos") {
-        let mut path = PathBuf::from("/Users/");
-        path.push(std::env::var("USER").unwrap_or_else(|_| whoami::username()));
-        path.push("Library");
-        path.push("Application Support");
-        path.push("Gyroflow");
-        path
-    } else {
-        let mut path = app_dirs2::get_app_dir(AppDataType::UserData, &AppInfo { name: "Gyroflow", author: "Gyroflow" }, "").unwrap();
-        if path.file_name().unwrap() == path.parent().unwrap().file_name().unwrap() {
-            path = path.parent().unwrap().to_path_buf();
+    let mut path = app_dirs2::get_app_dir(AppDataType::UserData, &AppInfo { name: "Gyroflow", author: "Gyroflow" }, "").unwrap();
+    if path.file_name().unwrap() == path.parent().unwrap().file_name().unwrap() {
+        path = path.parent().unwrap().to_path_buf();
+    }
+
+    #[cfg(target_os = "macos")]
+    unsafe {
+        use std::ffi::{CStr, OsString};
+        use std::mem::MaybeUninit;
+        use std::os::unix::ffi::OsStringExt;
+        let init_size = match libc::sysconf(libc::_SC_GETPW_R_SIZE_MAX) {
+            -1 => 1024,
+            n => n as usize,
+        };
+        let mut buf = Vec::with_capacity(init_size);
+        let mut pwd: MaybeUninit<libc::passwd> = MaybeUninit::uninit();
+        let mut pwdp = std::ptr::null_mut();
+        match libc::getpwuid_r(libc::geteuid(), pwd.as_mut_ptr(), buf.as_mut_ptr(), buf.capacity(), &mut pwdp) {
+            0 if !pwdp.is_null() => {
+                let pwd = pwd.assume_init();
+                let bytes = CStr::from_ptr(pwd.pw_dir).to_bytes().to_vec();
+                let pw_dir = OsString::from_vec(bytes);
+                path = PathBuf::from(pw_dir);
+                path.push("Library");
+                path.push("Application Support");
+                path.push("Gyroflow");
+            }
+            _ => { },
         }
-        path
-    };
+    }
     let _ = std::fs::create_dir_all(&path);
     path
 }
