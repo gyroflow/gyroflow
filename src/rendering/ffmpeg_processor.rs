@@ -267,11 +267,12 @@ impl<'a> FfmpegProcessor<'a> {
         }
 
         let mut output_options = Dictionary::new();
-        let output_format = if let Some(pos) = output_filename.rfind('.') { &output_filename[pos+1..] } else { "mp4" }.to_ascii_lowercase();
+        let mut output_format = if let Some(pos) = output_filename.rfind('.') { &output_filename[pos+1..] } else { "mp4" }.to_ascii_lowercase();
         if file.path.starts_with("fd:") {
             output_options.set("fd", &file.path[3..]);
             file.path = "fd:".into();
         }
+        if output_format == "mkv" { output_format = String::from("matroska"); }
 
         let mut octx = if output_format == "exr" || output_format == "png" {
             format::output_with(&file.path, output_options)
