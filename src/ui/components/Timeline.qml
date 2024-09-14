@@ -165,7 +165,8 @@ Item {
         triggerUpdateChart("");
     }
     function triggerUpdateChart(series: string): void {
-        chartUpdateTimer.series = series || "";
+        if (series == "8") chartUpdateTimer.zooming = true;
+        else chartUpdateTimer.axes = true;
         chartUpdateTimer.start();
     }
     Timer {
@@ -173,10 +174,16 @@ Item {
         repeat: false;
         running: false;
         interval: 100;
-        property string series;
+        property bool axes: false;
+        property bool zooming: false;
         onTriggered: {
-            if (!controller.update_chart(chart, series)) {
-                chartUpdateTimer.start(); // try again
+            if (axes) {
+                if (controller.update_chart(chart, "")) axes = false;
+                else chartUpdateTimer.start(); // try again
+            }
+            if (zooming) {
+                if (controller.update_chart(chart, "8")) zooming = false;
+                else chartUpdateTimer.start(); // try again
             }
         }
     }
@@ -857,6 +864,9 @@ Item {
                 if (isCalibrator) {
                     calibRepeater.model = controller.calib_model;
                 }
+            }
+            function onCompute_progress(id: real, progress: real): void {
+                chartUpdateTimer.start();
             }
         }
         Repeater {

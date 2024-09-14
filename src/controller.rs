@@ -557,6 +557,10 @@ impl Controller {
     }
 
     fn update_chart(&mut self, chart: QJSValue, series: String) -> bool {
+        // Only update the chart if we're finished recomputing
+        if !self.ongoing_computations.is_empty() {
+            return false;
+        }
         if let Some(chart) = chart.to_qobject::<TimelineGyroChart>() {
             let chart = unsafe { &mut *chart.as_ptr() }; // _self.borrow_mut();
 
