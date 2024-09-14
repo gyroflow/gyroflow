@@ -500,7 +500,7 @@ MenuItem {
                     const margin = 15 * dpiScale;
 
                     const mesh = controller.mesh_at_frame(window.videoArea.vid.currentFrame);
-                    if (!mesh.length || mesh[0] < 9) { meshCorrection.visible = false; return; }
+                    if (!mesh.length || mesh[0] < 10) { meshCorrection.visible = false; return; }
                     const divisions = [mesh[1], mesh[2]];
                     const mesh_size = [mesh[3], mesh[4]];
 

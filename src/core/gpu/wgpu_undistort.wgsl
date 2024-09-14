@@ -309,7 +309,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
 
         uv += c;
 
-        if (bool(flags & 512) && mesh_data[0] > 9.0) {
+        if (bool(flags & 512) && mesh_data[0] > 10.0) {
             let mesh_size = vec2<f32>(mesh_data[3], mesh_data[4]);
             let origin    = vec2<f32>(mesh_data[5], mesh_data[6]);
             let crop_size = vec2<f32>(mesh_data[7], mesh_data[8]);

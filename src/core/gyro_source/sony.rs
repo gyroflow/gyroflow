@@ -414,17 +414,16 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (V
         return None;
     }
 
-    let (size, divisions) = if has_any_mesh_value {
+    let size = (|| -> Option<(f64, f64)> {
         let mesh_data = mesh_data?;
         let size = mesh_data.get("size")?.as_array()?;
+        Some((size[0].as_f64()?, size[1].as_f64()?))
+    })().unwrap_or((0.0, 0.0));
+    let divisions = (|| -> Option<(usize, usize)> {
+        let mesh_data = mesh_data?;
         let divisions = mesh_data.get("divisions")?.as_array()?;
-        (
-            (size[0].as_f64()?, size[1].as_f64()?),
-            (divisions[0].as_i64()? as usize, divisions[1].as_i64()? as usize)
-        )
-    } else {
-        ((0.0, 0.0), (0, 0))
-    };
+        Some((divisions[0].as_i64()? as usize, divisions[1].as_i64()? as usize))
+    })().unwrap_or((0, 0));
 
     // Precompute spline coeffs for the y coordinate
     const MAX_GRID_SIZE: usize = 9;
@@ -440,16 +439,16 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (V
 
     let mut mesh = Vec::with_capacity(divisions.0 * divisions.1 * 2 + 9 + (divisions.1*4*2));
     mesh.push(0.0); // offset to focal_plane_data
+    mesh.push(divisions.0 as f64);
+    mesh.push(divisions.1 as f64);
+    mesh.push(size.0 as f64);
+    mesh.push(size.1 as f64);
+    mesh.push(crop_origin.0 as f64);
+    mesh.push(crop_origin.1 as f64);
+    mesh.push(crop_size.0 as f64);
+    mesh.push(crop_size.1 as f64);
     if has_any_mesh_value {
         let mesh_data = mesh_data?;
-        mesh.push(divisions.0 as f64);
-        mesh.push(divisions.1 as f64);
-        mesh.push(size.0 as f64);
-        mesh.push(size.1 as f64);
-        mesh.push(crop_origin.0 as f64);
-        mesh.push(crop_origin.1 as f64);
-        mesh.push(crop_size.0 as f64);
-        mesh.push(crop_size.1 as f64);
         for x in mesh_data.get("mesh")?.as_array()? {
             let coord = x.as_array()?;
             mesh.push(coord[0].as_f64()?);
@@ -471,16 +470,15 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (V
 
     let mut inv_mesh = Vec::with_capacity(mesh.len());
     inv_mesh.push(0.0); // offset to focal_plane_data
+    inv_mesh.push(divisions.0 as f64);
+    inv_mesh.push(divisions.1 as f64);
+    inv_mesh.push(size.0 as f64);
+    inv_mesh.push(size.1 as f64);
+    inv_mesh.push(crop_origin.0 as f64);
+    inv_mesh.push(crop_origin.1 as f64);
+    inv_mesh.push(crop_size.0 as f64);
+    inv_mesh.push(crop_size.1 as f64);
     if has_any_mesh_value {
-        inv_mesh.push(divisions.0 as f64);
-        inv_mesh.push(divisions.1 as f64);
-        inv_mesh.push(size.0 as f64);
-        inv_mesh.push(size.1 as f64);
-        inv_mesh.push(crop_origin.0 as f64);
-        inv_mesh.push(crop_origin.1 as f64);
-        inv_mesh.push(crop_size.0 as f64);
-        inv_mesh.push(crop_size.1 as f64);
-
         let step = ((size.0 / (divisions.0 as f64 - 1.0)), (size.1 / (divisions.1 as f64 - 1.0)));
         let grid: Vec<_> = (0..divisions.1).map(|y| {
             (0..divisions.0).map(move |x| (x as f64, y as f64))

@@ -154,7 +154,7 @@ vec2 process_coord(vec2 uv, float idx) {
         uv += params.c;
     }
 
-    if (get_mesh_data(0) > 9.0) {
+    if (get_mesh_data(0) > 10.0) {
         vec2 mesh_size = vec2(get_mesh_data(3), get_mesh_data(4));
         vec2 origin    = vec2(get_mesh_data(5), get_mesh_data(6));
         vec2 crop_size = vec2(get_mesh_data(7), get_mesh_data(8));

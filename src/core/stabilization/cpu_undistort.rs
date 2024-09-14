@@ -166,7 +166,7 @@ impl Stabilization {
 
             uv = (uv.0 + params.c[0], uv.1 + params.c[1]);
 
-            if !mesh_data.is_empty() && mesh_data[0] > 9.0 {
+            if !mesh_data.is_empty() && mesh_data[0] > 10.0 {
                 let mesh_size = (mesh_data[3], mesh_data[4]);
                 let origin    = (mesh_data[5] as f32, mesh_data[6] as f32);
                 let crop_size = (mesh_data[7] as f32, mesh_data[8] as f32);
@@ -582,7 +582,7 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
                 y = map_coord(y, origin.1, origin.1 + crop_size.1, 0.0, params.height as f32);
             }
 
-            if mesh_data[0] > 9.0 {
+            if mesh_data[0] > 10.0 {
                 let mesh_size = (mesh_data[3], mesh_data[4]);
                 let origin    = (mesh_data[5] as f32, mesh_data[6] as f32);
                 let crop_size = (mesh_data[7] as f32, mesh_data[8] as f32);

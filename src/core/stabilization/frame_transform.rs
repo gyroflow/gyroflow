@@ -176,7 +176,7 @@ impl FrameTransform {
         let mut mesh_data = Vec::new();
         if let Some(mc) = file_metadata.mesh_correction.get(frame) {
             mesh_data = mc.1.clone(); // undistorting mesh
-            if mesh_data[0] > 9.0 {
+            if mesh_data[0] > 10.0 {
                 flags |= 1 << 9; // HAS_MESH_DATA
             }
             if mesh_data[0] > 0.0 && mesh_data[mesh_data[0] as usize] > 0.0 {
