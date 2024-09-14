@@ -493,6 +493,10 @@ Item {
                     if (dlg.mainColumn.children[1].children[1].checked) { const opf = dlg.mainColumn.children[1].children[3]; cb(opf.folderUrl, opf.filename, opf.fullFileUrl); }
                 } else {
                     const opf = dlg.mainColumn.children[1];
+                    if (!opf.folderUrl.toString() && !opf.fullFileUrl.toString()) {
+                        opf.prompt();
+                        return false;
+                    }
                     cb(opf.folderUrl, opf.filename, opf.fullFileUrl);
                 }
             } },

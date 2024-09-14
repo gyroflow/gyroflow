@@ -35,6 +35,10 @@ TextField {
         }
     }
 
+    function prompt(): void {
+        linkBtn.clicked();
+    }
+
     function updateText(): void {
         preventChange = true;
         if (!filename && root.folderOnly && root.folderUrl.toString()) {

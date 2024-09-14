@@ -106,8 +106,8 @@ fn serde_json_to_qvariant(v: serde_json::Value) -> QVariant {
         serde_json::Value::Number(v) => { v.as_f64().unwrap().into() },
         serde_json::Value::Bool(v)   => { v.into() },
         serde_json::Value::String(v) => { QString::from(v.clone()).into() },
-        serde_json::Value::Array(v)  => { panic!("Array {v:?}"); },
-        serde_json::Value::Object(v) => { panic!("Object {v:?}"); },
+        serde_json::Value::Array(v)  => { ::log::error!("Array {v:?}"); QVariant::default() },
+        serde_json::Value::Object(v) => { ::log::error!("Object {v:?}"); QVariant::default() },
         serde_json::Value::Null      => { QVariant::default() }
     }
 }
@@ -155,7 +155,8 @@ fn qvariant_to_serde_json(v: QVariant) -> serde_json::Value {
         // 37 | QMetaType::UChar      | unsigned char
         // 41 | QMetaType::QVariant   | QVariant
         _ => {
-            panic!("Unknown QVariant type: {}", v.user_type());
+            ::log::error!("Unknown QVariant type: {}", v.user_type());
+            Value::Null
         }
     }
 }
