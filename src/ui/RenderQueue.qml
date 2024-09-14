@@ -11,6 +11,7 @@ Item {
     id: root;
 
     property alias dt: dt;
+    property alias isDragging: lv.isDragging;
     property bool shown: false;
     opacity: shown? 1 : 0;
     visible: opacity > 0;
@@ -269,6 +270,19 @@ Item {
         }
         spacing: 5 * dpiScale;
         QQC.ScrollIndicator.vertical: QQC.ScrollIndicator { }
+
+        property bool isDragging: false;
+        property int dragTargetIndex: -1;
+        Rectangle {
+            id: dragIndicator;
+            width: parent.width;
+            height: 3 * dpiScale;
+            radius: 2 * dpiScale;
+            color: styleAccentColor;
+            visible: opacity > 0;
+            opacity: lv.isDragging? 0.9 : 0;
+            Ease on opacity { duration: 300; }
+        }
         delegate: Item {
             // https://doc.qt.io/qt-6/qtquick-tutorials-dynamicview-dynamicview3-example.html
             implicitHeight: innerItm.height + 2*innerItm.y + messageAreaParent.height;
@@ -309,8 +323,49 @@ Item {
                 }
             }
 
+            property bool dragging: false;
+            opacity: dragging? 0.5 : 1;
+            Ease on opacity { }
+
             ContextMenuMouseArea {
+                acceptedButtons: Qt.LeftButton | Qt.RightButton;
                 onContextMenu: (isHold, x, y) => contextMenu.popup(dlg, x, y)
+
+                onPressed: (mouse) => {
+                    if ((mouse.modifiers & Qt.ControlModifier) && mouse.button === Qt.LeftButton) {
+                        dragIndicator.y = lv.mapFromItem(dlg, 0, 0).y;
+                        lv.isDragging = dlg.dragging = true;
+                        lv.dragTargetIndex = index;
+                    }
+                }
+                onReleased: {
+                    if (dlg.dragging) {
+                        let diff = lv.dragTargetIndex - index;
+                        if (lv.dragTargetIndex > index) {
+                            diff--;
+                        }
+                        render_queue.move_item(job_id, diff);
+                    }
+                    lv.isDragging = dlg.dragging = false;
+                    lv.dragTargetIndex = -1;
+                }
+
+                drag.target: dlg.dragging? parent : undefined;
+                drag.axis: Drag.YAxis;
+            }
+            Drag.active: dragging;
+            DropArea {
+                anchors.fill: parent;
+                enabled: lv.isDragging;
+                onEntered: (drag) => {
+                    if (drag.y > dlg.height / 2) {
+                        lv.dragTargetIndex = index + 1;
+                        dragIndicator.y = lv.mapFromItem(dlg, 0, dlg.height + lv.spacing).y;
+                    } else {
+                        lv.dragTargetIndex = index;
+                        dragIndicator.y = lv.mapFromItem(dlg, 0, 0).y;
+                    }
+                }
             }
             Menu {
                 id: contextMenu;
@@ -325,13 +380,23 @@ Item {
                     iconName: "pencil";
                     text: qsTr("Edit");
                     enabled: !isInProgress;
-                    onTriggered:{
+                    onTriggered: {
                         const data = render_queue.get_gyroflow_data(job_id);
                         if (data) {
                             window.videoArea.loadGyroflowData(JSON.parse(data), job_id);
                         }
                         root.shown = false;
                     }
+                }
+                Action {
+                    iconName: "arrow-up";
+                    text: qsTr("Move up");
+                    onTriggered: render_queue.move_item(job_id, -1);
+                }
+                Action {
+                    iconName: "arrow-down";
+                    text: qsTr("Move down");
+                    onTriggered: render_queue.move_item(job_id, 1);
                 }
                 Action {
                     iconName: isInProgress? "close" : "spinner";
@@ -603,15 +668,15 @@ Item {
         }
         highlight: Item { }
         add: Transition {
-            NumberAnimation { properties: "y"; from: (lv.count - 1.5) * (70 * dpiScale); duration: 700; easing.type: Easing.OutExpo; }
+            NumberAnimation { properties: "y"; from: (lv.count - 1.5) * (70 * dpiScale); duration: 500; easing.type: Easing.OutExpo; }
             NumberAnimation { properties: "opacity"; from: 0; to: 1; duration: 700; easing.type: Easing.OutExpo; }
         }
         remove: Transition {
             NumberAnimation { properties: "opacity"; from: 1; to: 0; duration: 700; easing.type: Easing.OutExpo; }
-            NumberAnimation { properties: "implicitHeight"; from: 65 * dpiScale; to: 0; duration: 700; easing.type: Easing.OutExpo; }
+            NumberAnimation { properties: "implicitHeight"; from: 65 * dpiScale; to: 0; duration: 500; easing.type: Easing.OutExpo; }
         }
         displaced: Transition {
-            NumberAnimation { properties: "y"; duration: 700; easing.type: Easing.OutExpo; }
+            NumberAnimation { properties: "y"; duration: 500; easing.type: Easing.OutExpo; }
         }
     }
 
@@ -621,6 +686,7 @@ Item {
         anchors.margins: 0 * dpiScale;
         anchors.topMargin: lv.y;
         extensions: fileDialog.extensions;
+        visible: !lv.isDragging;
         function add(outFolder: string, urls: list<url>): void {
             let foldersWithoutAccess = [];
             let additional = window.getAdditionalProjectData();

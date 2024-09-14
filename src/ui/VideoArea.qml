@@ -841,9 +841,10 @@ Item {
         DropArea {
             id: da;
             anchors.fill: dropRect;
-            enabled: queue.item && !queue.item.shown;
+            enabled: queue.item && !queue.item.shown && !queue.item.isDragging;
 
             onEntered: (drag) => {
+                if (!drag.urls.length) return;
                 const ext = drag.urls[0].toString().split(".").pop().toLowerCase();
                 drag.accepted = fileDialog.extensions.indexOf(ext) > -1 || ext == "rdc";
             }

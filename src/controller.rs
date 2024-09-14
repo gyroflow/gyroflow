@@ -2295,7 +2295,7 @@ impl Filesystem {
 
     fn move_to_trash(&self, url: QUrl) {
         #[cfg(any(target_os = "android", target_os = "ios"))]
-         {
+        {
             let url = QString::from(url).to_string();
             if let Err(e) = filesystem::remove_file(&url) {
                 ::log::error!("Failed to remove file: {e:?}");

@@ -33,7 +33,9 @@ Rectangle {
     DropArea {
         id: da;
         anchors.fill: parent;
+        enabled: root.visible;
         onEntered: (drag) => {
+            if (!drag.urls.length) return;
             const ext = drag.urls[0].toString().split(".").pop().toLowerCase();
             drag.accepted = root.extensions.indexOf(ext) > -1;
         }

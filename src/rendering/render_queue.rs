@@ -196,6 +196,7 @@ pub struct RenderQueue {
     set_processing_resolution: qt_method!(fn(&mut self, target_height: i32)),
 
     file_exists_in_folder: qt_method!(fn(&self, folder: QUrl, filename: QString) -> bool),
+    move_item: qt_method!(fn(&mut self, job_id: u32, step: i32)),
 
     save_render_queue: qt_method!(fn(&self)),
     restore_render_queue: qt_method!(fn(&mut self, additional_data: String) -> bool),
@@ -293,10 +294,10 @@ impl RenderQueue {
     }
 
     pub fn get_total_frames(&self) -> u64 {
-        self.queue.borrow().iter().map(|v| v.total_frames).sum::<u64>() - self.start_frame
+        self.queue.try_borrow().map(|x| x.iter().map(|v| v.total_frames).sum::<u64>() - self.start_frame).unwrap_or_default()
     }
     pub fn get_current_frame(&self) -> u64 {
-        self.queue.borrow().iter().map(|v| v.current_frame).sum::<u64>() - self.start_frame
+        self.queue.try_borrow().map(|x| x.iter().map(|v| v.current_frame).sum::<u64>() - self.start_frame).unwrap_or_default()
     }
 
     pub fn set_pixel_format(&mut self, job_id: u32, format: String) {
@@ -330,6 +331,26 @@ impl RenderQueue {
         if start && self.status.to_string() != "active" {
             self.start();
         }
+    }
+
+    pub fn move_item(&mut self, job_id: u32, step: i32) {
+        if let Some(job) = self.jobs.get_mut(&job_id) {
+            if let Ok(mut q) = self.queue.try_borrow_mut() {
+                let old_index = job.queue_index;
+                let new_index = ((old_index as i32) + step).max(0).min(q.row_count() - 1) as usize;
+                let itm = q[old_index].clone();
+                q.remove(old_index);
+                q.insert(new_index, itm);
+
+                // Update all indices
+                for (i, v) in q.iter().enumerate() {
+                    if let Some(job) = self.jobs.get_mut(&v.job_id) {
+                        job.queue_index = i;
+                    }
+                }
+            }
+        }
+        self.queue_changed();
     }
 
     pub fn set_error_string(&mut self, job_id: u32, err: QString) {
