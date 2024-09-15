@@ -369,6 +369,16 @@ impl LensProfile {
                 if x.contains_key("digital_lens")   { cpy.digital_lens   = x.get("digital_lens").and_then(|x| x.as_str().map(|x| x.to_owned())); }
                 if x.contains_key("focal_length")   { cpy.focal_length   = x.get("focal_length").and_then(|x| x.as_f64()); }
                 if x.contains_key("crop_factor")    { cpy.crop_factor    = x.get("crop_factor").and_then(|x| x.as_f64()); }
+                if let Some(v) = x.get("input_horizontal_stretch").and_then(|x| x.as_f64()) { cpy.input_horizontal_stretch = v; }
+                if let Some(v) = x.get("input_vertical_stretch")  .and_then(|x| x.as_f64()) { cpy.input_vertical_stretch   = v; }
+                if let Some(v) = x.get("lens_model")  .and_then(|x| x.as_str()) { cpy.lens_model = v.to_owned(); }
+                if let Some(row) = x.get("distortion_coeffs").and_then(|x| x.as_array()) {
+                    for (i, v) in row.iter().enumerate() {
+                        if let Some(v) = v.as_f64() {
+                            cpy.fisheye_params.distortion_coeffs[i] = v;
+                        }
+                    }
+                }
 
                 if x.contains_key("sync_settings") {
                     if let Some(obj) = x.get("sync_settings") {
