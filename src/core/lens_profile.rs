@@ -379,6 +379,11 @@ impl LensProfile {
                         }
                     }
                 }
+                if let Some(odim) = x.get("output_dimension").and_then(|x| x.as_object()) {
+                    if let (Some(w), Some(h)) = (odim.get("w").and_then(|x| x.as_u64()), odim.get("h").and_then(|x| x.as_u64())) {
+                        cpy.output_dimension = Some(Dimensions { w: w as usize, h: h as usize });
+                    }
+                }
 
                 if x.contains_key("sync_settings") {
                     if let Some(obj) = x.get("sync_settings") {
