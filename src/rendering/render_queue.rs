@@ -903,8 +903,13 @@ impl RenderQueue {
             let export_stmap    = self.export_stmap.clone();
             let default_suffix = self.default_suffix.to_string();
             let mut additional_data = job.additional_data.clone();
-            let proc_height = self.processing_resolution;
+            let mut proc_height = self.processing_resolution;
             let err2 = err.clone();
+            if let Some(ref ss) = stab.lens.read().sync_settings {
+                if let Some(pr) = ss.get("processing_resolution").and_then(|x| x.as_u64()) {
+                    proc_height = pr as i32;
+                }
+            }
 
             core::run_threaded(move || {
                 Self::do_autosync(stab.clone(), processing, err2, proc_height);
@@ -1160,6 +1165,9 @@ impl RenderQueue {
                             video_speed_affects_smoothing: params.video_speed_affects_smoothing,
                             video_speed_affects_zooming:   params.video_speed_affects_zooming,
                             of_method:                 params.of_method,
+                            adaptive_zoom_method:      params.adaptive_zoom_method,
+                            max_zoom:                  params.max_zoom,
+                            max_zoom_iterations:       params.max_zoom_iterations,
                             ..Default::default()
                         })),
                         input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { url: if is_gf_data { String::new() } else { url.clone() }, project_file_url: None, image_sequence_start: 0, image_sequence_fps: 0.0 })),
@@ -1446,7 +1454,7 @@ impl RenderQueue {
                             }
                         });
 
-                        let (sw, sh) = ((720.0 * (size.0 as f64 / size.1 as f64)).round() as u32, 720);
+                        let (sw, sh) = ((proc_height as f64 * (size.0 as f64 / size.1 as f64)).round() as u32, proc_height as u32);
 
                         let gpu_decoding = *rendering::GPU_DECODING.read();
 

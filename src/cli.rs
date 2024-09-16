@@ -55,6 +55,10 @@ struct Opts {
     #[argh(option, short = 'p')]
     out_params: Option<String>,
 
+    /// synchronization parameters, eg. "{{ 'search_size': 3, 'processing_resolution': 720 }}"
+    #[argh(option, short = 's')]
+    sync_params: Option<String>,
+
     /// export project file instead of rendering: 1 - default project, 2 - with gyro data, 3 - with processed gyro data, 4 - video + project file
     #[argh(option, default = "0")]
     export_project: u32,
@@ -179,6 +183,10 @@ pub fn run(open_file: &mut String) -> bool {
         if let Some(mut outp) = opts.out_params {
             outp = outp.replace('\'', "\"");
             gyroflow_core::util::merge_json(additional_data.get_mut("output").unwrap(), &serde_json::from_str(&outp).expect("Invalid json"));
+        }
+        if let Some(mut x) = opts.sync_params {
+            x = x.replace('\'', "\"");
+            gyroflow_core::util::merge_json(additional_data.get_mut("synchronization").unwrap(), &serde_json::from_str(&x).expect("Invalid json"));
         }
 
         let export_metadata_fields = serde_json::from_str(
