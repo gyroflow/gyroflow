@@ -1083,27 +1083,27 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="409"/>
       <source>Export STMap</source>
-      <translation type="unfinished">Export STMap</translation>
+      <translation>STMap形式でエクスポート</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="414"/>
       <source>This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?</source>
-      <translation type="unfinished">This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?</translation>
+      <translation>このファイルには、フレーム毎のレンズメタデータが含まれています。STMap シーケンスまたは単一のフレームをエクスポートしますか？</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="415"/>
       <source>Single frame</source>
-      <translation type="unfinished">Single frame</translation>
+      <translation>シングルフレーム</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="416"/>
       <source>STMap sequence</source>
-      <translation type="unfinished">STMap sequence</translation>
+      <translation>STMapシーケンス</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="430"/>
       <source>Exporting %1...</source>
-      <translation type="unfinished">Exporting %1...</translation>
+      <translation>エクスポート中... %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="368"/>
@@ -1338,7 +1338,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="640"/>
       <source>Export camera data (CSV/JSON/USD/AE)</source>
-      <translation type="unfinished">Export camera data (CSV/JSON/USD/AE)</translation>
+      <translation>カメラデータをエクスポート (CSV/JSON/USD/AE)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="684"/>
@@ -1693,12 +1693,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="393"/>
       <source>Move up</source>
-      <translation type="unfinished">Move up</translation>
+      <translation>上へ</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="398"/>
       <source>Move down</source>
-      <translation type="unfinished">Move down</translation>
+      <translation>下へ</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="403"/>
@@ -2355,14 +2355,14 @@ OKをクリックして保存先フォルダを選択します。</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="453"/>
       <source>Zoom limit</source>
-      <translation type="unfinished">Zoom limit</translation>
+      <translation>ズーム制限</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="456"/>
       <source>Zoom limit is calculated approximately.
 If you need more accuracy, increase the number of iterations in &quot;Advanced&quot; below.</source>
-      <translation type="unfinished">Zoom limit is calculated approximately.
-If you need more accuracy, increase the number of iterations in &quot;Advanced&quot; below.</translation>
+      <translation>ズームリミットは概算で計算されます。
+より精度が必要な場合は、 &quot;Advanced&quot; の反復回数を増やしてください。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="472"/>
@@ -2377,7 +2377,7 @@ If you need more accuracy, increase the number of iterations in &quot;Advanced&q
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="490"/>
       <source>Lens correction</source>
-      <translation type="unfinished">Lens correction</translation>
+      <translation>レンズ補正</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="629"/>
@@ -2409,12 +2409,12 @@ If you need more accuracy, increase the number of iterations in &quot;Advanced&q
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="739"/>
       <source>Zoom limit iterations</source>
-      <translation type="unfinished">Zoom limit iterations</translation>
+      <translation>ズーム制限の繰り返し処理</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="740"/>
       <source>More iterations = more accurate limit, but also slower to calculate.</source>
-      <translation type="unfinished">More iterations = more accurate limit, but also slower to calculate.</translation>
+      <translation>より多くの反復=より正確な制限だけでなく、計算が遅くなります。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="532"/>
@@ -3009,37 +3009,37 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="430"/>
       <source>Zoom limit</source>
-      <translation type="unfinished">Zoom limit</translation>
+      <translation>ズームの上限</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="431"/>
       <source>Additional 3D yaw</source>
-      <translation type="unfinished">Additional 3D yaw</translation>
+      <translation>追加 3D ヨー</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="432"/>
       <source>Additional 3D pitch</source>
-      <translation type="unfinished">Additional 3D pitch</translation>
+      <translation>追加 3D ピッチ</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="433"/>
       <source>Additional 3D roll</source>
-      <translation type="unfinished">Additional 3D roll</translation>
+      <translation>追加 3D ロール</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="434"/>
       <source>Additional 3D translation X</source>
-      <translation type="unfinished">Additional 3D translation X</translation>
+      <translation>追加 3D X回転</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="435"/>
       <source>Additional 3D translation Y</source>
-      <translation type="unfinished">Additional 3D translation Y</translation>
+      <translation>追加 3D Y回転</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="436"/>
       <source>Additional 3D translation Z</source>
-      <translation type="unfinished">Additional 3D translation Z</translation>
+      <translation>追加 3D Z回転</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="437"/>
@@ -3069,7 +3069,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="442"/>
       <source>Light refraction coefficient</source>
-      <translation type="unfinished">Light refraction coefficient</translation>
+      <translation>光屈折率</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="443"/>
@@ -3089,7 +3089,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="449"/>
       <source>Video speed</source>
-      <translation type="unfinished">Video speed</translation>
+      <translation>動画の速度</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="674"/>

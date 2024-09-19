@@ -352,15 +352,15 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "bytes"
-version = "1.7.1"
+version = "1.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8318a53db07bb3f8dca91a600466bdb3f2eaadeedfdbcf02e1accbad9271ba50"
+checksum = "428d9aa8fbc0670b7b8d6030a7fadd0f86151cae55e4dbbece15f3780a3dfaf3"
 
 [[package]]
 name = "cc"
-version = "1.1.19"
+version = "1.1.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d74707dde2ba56f86ae90effb3b43ddd369504387e718014de010cec7959800"
+checksum = "07b1695e2c7e8fc85310cde85aeaab7e3097f593c91d209d3f9df76c928100f0"
 dependencies = [
  "jobserver",
  "libc",
@@ -939,9 +939,9 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "glow"
-version = "0.14.0"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f865cbd94bd355b89611211e49508da98a1fce0ad755c1e8448fb96711b24528"
+checksum = "2f4a888dbe8181a7535853469c21c67ca9a1cea9460b16808fc018ea9e55d248"
 dependencies = [
  "js-sys",
  "slotmap",
@@ -1136,9 +1136,9 @@ checksum = "140a09c9305e6d5e557e2ed7cbc68e05765a7d4213975b87cb04920689cc6219"
 
 [[package]]
 name = "iana-time-zone"
-version = "0.1.60"
+version = "0.1.61"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7ffbb5a1b541ea2561f8c41c087286cc091e21e556a4f09a8f6cbf17b69b141"
+checksum = "235e081f3925a06703c2d0117ea8b91f042756fd6e7a6e5d901e8ca1a996b220"
 dependencies = [
  "android_system_properties",
  "core-foundation-sys",
@@ -1471,7 +1471,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2fac5e9#2fac5e983e0f0d33f127bde04c2c3b0621faa685"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=dfc384a#dfc384a7fd4ab7250a75d59c6f831d9ffb220f7e"
 dependencies = [
  "arrayvec 0.7.6",
  "bit-set",
@@ -1813,15 +1813,15 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.20.0"
+version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33ea5043e58958ee56f3e15a90aee535795cd7dfd319846288d93c5b57d85cbe"
+checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
 name = "opencv"
-version = "0.92.3"
+version = "0.93.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c01f7646f18911737aa3d721dec4a0060d044ef1224eb54a439ae6fa716ccb86"
+checksum = "4651dfd0e41f668c137d9156c2626c221b5a85bea8adca87c05df82cfff5c025"
 dependencies = [
  "cc",
  "dunce",
@@ -1839,9 +1839,9 @@ dependencies = [
 
 [[package]]
 name = "opencv-binding-generator"
-version = "0.90.2"
+version = "0.91.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c238fe1b9e78bf939dfab14184464a25acaf42d634fd502dc9ccc445f5bad1b9"
+checksum = "984e10d6fda4aadda32e3723b7f59775fa7ecef1154a01d8273724e76657fec0"
 dependencies = [
  "clang",
  "clang-sys",
@@ -1849,6 +1849,7 @@ dependencies = [
  "once_cell",
  "percent-encoding",
  "regex",
+ "shlex",
 ]
 
 [[package]]
@@ -2626,9 +2627,9 @@ checksum = "0dd7358ecb8fc2f8d014bf86f6f638ce72ba252a2c3a2572f2a795f1d23efb41"
 
 [[package]]
 name = "toml_edit"
-version = "0.22.20"
+version = "0.22.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "583c44c02ad26b0c3f3066fe629275e50627026c51ac2e595cca4c230ce1ce1d"
+checksum = "3b072cee73c449a636ffd6f32bd8de3a9f7119139aff882f44943ce2986dc5cf"
 dependencies = [
  "indexmap",
  "toml_datetime",
@@ -2674,9 +2675,9 @@ checksum = "e91b56cd4cadaeb79bbf1a5645f6b4f8dc5bde8834ad5894a8db35fda9efa1fe"
 
 [[package]]
 name = "unicode-normalization"
-version = "0.1.23"
+version = "0.1.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a56d1686db2308d901306f92a263857ef59ea39678a5458e7cb17f01415101f5"
+checksum = "5033c97c4262335cded6d6fc3e5c18ab755e1a3dc96376350f3d8e9f009ad956"
 dependencies = [
  "tinyvec",
 ]
@@ -2851,9 +2852,9 @@ dependencies = [
 
 [[package]]
 name = "webpki-roots"
-version = "0.26.5"
+version = "0.26.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0bd24728e5af82c6c4ec1b66ac4844bdf8156257fccda846ec58b42cd0cdbe6a"
+checksum = "841c67bff177718f1d4dfefde8d8f0e78f9b6589319ba88312f567fc5841a958"
 dependencies = [
  "rustls-pki-types",
 ]
@@ -2861,7 +2862,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2fac5e9#2fac5e983e0f0d33f127bde04c2c3b0621faa685"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=dfc384a#dfc384a7fd4ab7250a75d59c6f831d9ffb220f7e"
 dependencies = [
  "arrayvec 0.7.6",
  "cfg_aliases",
@@ -2885,7 +2886,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2fac5e9#2fac5e983e0f0d33f127bde04c2c3b0621faa685"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=dfc384a#dfc384a7fd4ab7250a75d59c6f831d9ffb220f7e"
 dependencies = [
  "arrayvec 0.7.6",
  "bit-vec",
@@ -2910,7 +2911,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2fac5e9#2fac5e983e0f0d33f127bde04c2c3b0621faa685"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=dfc384a#dfc384a7fd4ab7250a75d59c6f831d9ffb220f7e"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.6",
@@ -2953,7 +2954,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=2fac5e9#2fac5e983e0f0d33f127bde04c2c3b0621faa685"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=dfc384a#dfc384a7fd4ab7250a75d59c6f831d9ffb220f7e"
 dependencies = [
  "bitflags 2.6.0",
  "js-sys",

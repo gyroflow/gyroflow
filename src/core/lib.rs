@@ -828,13 +828,13 @@ impl StabilizationManager {
         self.invalidate_smoothing();
     }
 
-    pub fn disable_lens_stretch(&self) {
+    pub fn disable_lens_stretch(&self, adjust_size: bool) {
         let (x_stretch, y_stretch) = {
             let lens = self.lens.read();
             (lens.input_horizontal_stretch, lens.input_vertical_stretch)
         };
         if (x_stretch > 0.01 && x_stretch != 1.0) || (y_stretch > 0.01 && y_stretch != 1.0) {
-            {
+            if adjust_size {
                 let mut params = self.params.write();
                 params.size.0 = (params.size.0 as f64 * x_stretch).round() as usize;
                 params.size.1 = (params.size.1 as f64 * y_stretch).round() as usize;
