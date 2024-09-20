@@ -424,8 +424,30 @@ Rectangle {
                                             finalData.synchronization.do_autosync = true;
                                         }
                                         if (action == "create_preset") { // Preset
-                                            presetFileDialog.presetData = finalData;
-                                            presetFileDialog.open2();
+                                            if (obj.save_type == "file") {
+                                                presetFileDialog.presetData = finalData;
+                                                presetFileDialog.open2();
+                                            } else if (obj.save_type == "default") {
+                                                const saved_to = controller.export_preset("", finalData, obj.save_type, "");
+                                                showNotification(Modal.Info, qsTr("Preset saved to <b>%1</b>").arg(saved_to))
+                                            } else {
+                                                const dlg = messageBox(Modal.Info, qsTr("Enter the name for the preset: "), [
+                                                    { text: qsTr("Ok"), accent: true, clicked: function() {
+                                                        let name = dlg.mainColumn.children[1].text;
+                                                        console.log(name);
+                                                        if (!name) {
+                                                            messageBox(Modal.Error, qsTr("Name cannot be empty."), [ { text: qsTr("Ok") } ]);
+                                                            return false;
+                                                        }
+                                                        const saved_to = controller.export_preset("", finalData, obj.save_type, name);
+                                                        showNotification(Modal.Info, qsTr("Preset saved to <b>%1</b>").arg(saved_to))
+                                                    } },
+                                                    { text: qsTr("Cancel") },
+                                                ]);
+                                                const tf = Qt.createComponent("components/TextField.qml").createObject(dlg.mainColumn, { });
+                                                tf.anchors.horizontalCenter = dlg.mainColumn.horizontalCenter;
+                                                tf.focus = true;
+                                            }
                                         } else { // Apply
                                             render_queue.apply_to_all(JSON.stringify(finalData), window.getAdditionalProjectDataJson(), 0);
                                         }
@@ -626,7 +648,10 @@ Rectangle {
         nameFilters: ["*.gyroflow"];
         type: "output-preset";
         property var presetData: ({});
-        onAccepted: controller.export_preset(selectedFile, presetData);
+        onAccepted: {
+            const saved_to = controller.export_preset(selectedFile, presetData, "file", "");
+            showNotification(Modal.Info, qsTr("Preset saved to <b>%1</b>").arg(saved_to))
+        }
     }
 
     Component.onCompleted: {

@@ -140,8 +140,45 @@ impl LensProfileDatabase {
             }
         };
 
+        let mut bundle_loaded = false;
+
+        let mut load_from_dir = |dir: PathBuf| {
+            walkdir::WalkDir::new(dir).into_iter().for_each(|e| {
+                if let Ok(entry) = e {
+                    let f_name = entry.path().to_string_lossy().replace('\\', "/");
+                    if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
+                        if let Ok(data) = std::fs::read_to_string(&f_name) {
+                            load(DataSource::String(data), &f_name);
+                        }
+                    }
+                    if !bundle_loaded && f_name.ends_with(".cbor.gz") {
+                        if let Ok(data) = std::fs::read(&f_name) {
+                            let mut e = flate2::read::GzDecoder::new(std::io::Cursor::new(data));
+                            let mut decompressed = Vec::new();
+                            if let Ok(_) = e.read_to_end(&mut decompressed) {
+                                if let Ok(array) = ciborium::from_reader::<Vec<(String, serde_json::Value)>, _>(std::io::Cursor::new(decompressed)) {
+                                    bundle_loaded = true;
+                                    for (f_name, profile) in array {
+                                        if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
+                                        if f_name.starts_with("__") { continue; }
+                                        load(DataSource::SerdeValue(profile), &f_name);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        };
+
+        let preferred_path = crate::settings::data_dir().join("lens_profiles");
+        if preferred_path.exists() && std::fs::read_dir(&preferred_path).map(|x| x.count()).unwrap_or(0) > 0 {
+            ::log::info!("Loading lens profiles from {}", preferred_path.display());
+            load_from_dir(preferred_path);
+        }
+
         #[cfg(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles"))]
-        {
+        if !bundle_loaded {
             let mut e = flate2::read::GzDecoder::new(LENS_PROFILES_STATIC);
             let mut decompressed = Vec::new();
             if let Ok(_) = e.read_to_end(&mut decompressed) {
@@ -156,31 +193,9 @@ impl LensProfileDatabase {
         }
 
         #[cfg(not(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles")))]
-        walkdir::WalkDir::new(Self::get_path()).into_iter().for_each(|e| {
-            if let Ok(entry) = e {
-                let f_name = entry.path().to_string_lossy().replace('\\', "/");
-                if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
-                    if let Ok(data) = std::fs::read_to_string(&f_name) {
-                        load(DataSource::String(data), &f_name);
-                    }
-                }
-                if f_name.ends_with(".cbor.gz") {
-                    if let Ok(data) = std::fs::read(&f_name) {
-                        let mut e = flate2::read::GzDecoder::new(std::io::Cursor::new(data));
-                        let mut decompressed = Vec::new();
-                        if let Ok(_) = e.read_to_end(&mut decompressed) {
-                            if let Ok(array) = ciborium::from_reader::<Vec<(String, serde_json::Value)>, _>(std::io::Cursor::new(decompressed)) {
-                                for (f_name, profile) in array {
-                                    if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
-                                    if f_name.starts_with("__") { continue; }
-                                    load(DataSource::SerdeValue(profile), &f_name);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        {
+            load_from_dir(Self::get_path());
+        }
 
         let copy = self.clone();
         for (_, v) in self.map.iter_mut() {

@@ -1675,15 +1675,13 @@ impl StabilizationManager {
             self.init_from_video_data(metadata.duration_s * 1000.0, metadata.fps, frame_count, video_size);
             let _ = self.load_gyro_data(url, true, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
 
-            let camera_id = self.camera_id.read();
-
             let has_builtin_profile = {
                 let gyro = self.gyro.read();
                 let file_metadata = gyro.file_metadata.read();
                 file_metadata.lens_profile.as_ref().map(|y| y.is_object()).unwrap_or_default()
             };
 
-            let id_str = camera_id.as_ref().map(|v| v.get_identifier_for_autoload()).unwrap_or_default();
+            let id_str = self.camera_id.read().as_ref().map(|v| v.get_identifier_for_autoload()).unwrap_or_default();
             if !id_str.is_empty() && !has_builtin_profile {
                 let mut db = self.lens_profile_db.read();
                 if !db.loaded {
@@ -1716,6 +1714,15 @@ impl StabilizationManager {
             }
             self.set_size(video_size.0, video_size.1);
             self.set_output_size(output_width, output_height);
+
+            // Apply default preset
+            let local_path = lens_profile_database::LensProfileDatabase::get_path().join("default.gyroflow");
+            let settings_path = settings::data_dir().join("lens_profiles").join("default.gyroflow");
+            if settings_path.exists() {
+                let _ = self.import_gyroflow_file(&settings_path.to_str().unwrap(), true, |_|(), Arc::new(AtomicBool::new(false)));
+            } else if local_path.exists() {
+                let _ = self.import_gyroflow_file(&local_path.to_str().unwrap(), true, |_|(), Arc::new(AtomicBool::new(false)));
+            }
         }
         Ok(metadata)
     }

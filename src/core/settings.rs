@@ -39,6 +39,9 @@ pub fn data_dir() -> PathBuf {
         }
     }
     let _ = std::fs::create_dir_all(&path);
+    if let Err(e) = std::fs::create_dir_all(&path.join("lens_profiles")) {
+        ::log::error!("Failed to create lens profiles directory at {:?}: {e:?}", path.join("lens_profiles"));
+    }
     path
 }
 

@@ -217,13 +217,13 @@ Modal {
 
     BasicText {
         visible: root.type == "preset";
-        text: qsTr("Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the `camera_presets` directory.") + "\n\n" +
-              qsTr("You can also save your preset as `default.gyroflow` in the `camera_presets` directory and it will be always applied to every loaded video file.");
+        text: qsTr("Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the directory with lens profiles.") + "\n\n" +
+              qsTr("You can also save your preset as `default.gyroflow` in the directory with lens profiles and it will be always applied to every loaded video file (also in plugins).");
         color: styleTextColor;
         textFormat: Text.MarkdownText;
     }
     Column {
-        visible: false && root.type == "preset";
+        visible: root.type == "preset";
         width: parent.width;
         RadioButton {
             id: saveToFile;

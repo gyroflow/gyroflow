@@ -234,7 +234,7 @@ pub struct Controller {
     copy_to_clipboard: qt_method!(fn(&self, text: QString)),
 
     image_to_b64: qt_method!(fn(&self, img: QImage) -> QString),
-    export_preset: qt_method!(fn(&self, url: QUrl, data: QJsonObject)),
+    export_preset: qt_method!(fn(&self, url: QUrl, data: QJsonObject, save_type: QString, preset_name: QString) -> QString),
     export_full_metadata: qt_method!(fn(&self, url: QUrl, gyro_url: QUrl)),
     export_parsed_metadata: qt_method!(fn(&self, url: QUrl)),
     export_gyro_data: qt_method!(fn(&self, url: QUrl, data: QJsonObject)),
@@ -842,7 +842,11 @@ impl Controller {
     fn load_default_preset(&mut self) {
         // Assumes regular filesystem
         let local_path = gyroflow_core::lens_profile_database::LensProfileDatabase::get_path().join("default.gyroflow");
-        if local_path.exists() {
+
+        let settings_path = gyroflow_core::settings::data_dir().join("lens_profiles").join("default.gyroflow");
+        if settings_path.exists() {
+            self.import_gyroflow_file(QUrl::from(QString::from(filesystem::path_to_url(&settings_path.to_string_lossy()))));
+        } else if local_path.exists() {
             self.import_gyroflow_file(QUrl::from(QString::from(filesystem::path_to_url(&local_path.to_string_lossy()))));
         }
     }
@@ -1823,11 +1827,6 @@ impl Controller {
 
     #[allow(unreachable_code)]
     fn fetch_profiles_from_github(&self) {
-        #[cfg(any(target_os = "android", target_os = "ios"))]
-        {
-            return;
-        }
-
         use crate::core::lens_profile_database::LensProfileDatabase;
 
         if LensProfileDatabase::get_path().join("noupdate").exists() {
@@ -1842,7 +1841,7 @@ impl Controller {
         let current_version = self.stabilizer.lens_profile_db.read().version;
 
         let db_path = LensProfileDatabase::get_path().join("profiles.cbor.gz");
-        if db_path.exists() {
+        if db_path.exists() || gyroflow_core::settings::data_dir().join("lens_profiles").exists() {
             core::run_threaded(move || {
                 if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/lens_profiles/releases").call().map(|x| x.into_string()) {
                     (|| -> Option<()> {
@@ -1854,9 +1853,20 @@ impl Controller {
                                     ::log::info!("Updating lens profile database from v{current_version} to v{tag}.");
                                     if let Some(download_url) = obj["assets"][0]["browser_download_url"].as_str() {
                                         if let Ok(mut content) = ureq::get(&download_url).call().map(|x| x.into_reader()) {
-                                            if let Ok(mut file) = std::fs::File::create(&db_path) {
-                                                if std::io::copy(&mut content, &mut file).is_ok() {
-                                                    update(());
+                                            let mut updated = false;
+                                            if db_path.exists() {
+                                                if let Ok(mut file) = std::fs::File::create(&db_path) {
+                                                    if std::io::copy(&mut content, &mut file).is_ok() {
+                                                        updated = true;
+                                                        update(());
+                                                    }
+                                                }
+                                            }
+                                            if !updated {
+                                                if let Ok(mut file) = std::fs::File::create(gyroflow_core::settings::data_dir().join("lens_profiles").join("profiles.cbor.gz")) {
+                                                    if std::io::copy(&mut content, &mut file).is_ok() {
+                                                        update(());
+                                                    }
                                                 }
                                             }
                                         }
@@ -1904,11 +1914,26 @@ impl Controller {
         rendering::set_gpu_type_from_name(&name);
     }
 
-    fn export_preset(&self, url: QUrl, content: QJsonObject) {
+    fn export_preset(&self, url: QUrl, content: QJsonObject, save_type: QString, preset_name: QString) -> QString {
+        let save_type = save_type.to_string();
+        let mut url = util::qurl_to_encoded(url);
+        if url.is_empty() {
+            let path = gyroflow_core::settings::data_dir().join("lens_profiles");
+            match save_type.as_ref() {
+                "lens" => {
+                    url = filesystem::path_to_url(path.join(&format!("{preset_name}.gyroflow")).to_str().unwrap_or_default())
+                },
+                "default" => {
+                    url = filesystem::path_to_url(path.join("default.gyroflow").to_str().unwrap_or_default())
+                }
+                _ => { ::log::error!("Unknown save_type: {save_type}"); }
+            }
+        }
         let contents = content.to_json_pretty();
-        if let Err(e) = filesystem::write(&util::qurl_to_encoded(url), contents.to_slice()) {
+        if let Err(e) = filesystem::write(&url, contents.to_slice()) {
             self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
         }
+        QString::from(filesystem::display_url(&url))
     }
 
     fn export_full_metadata(&self, url: QUrl, gyro_url: QUrl) {

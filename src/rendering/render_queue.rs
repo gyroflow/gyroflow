@@ -1360,9 +1360,12 @@ impl RenderQueue {
 
                                 Self::update_sync_settings(&stab, &sync_options);
 
+                                // Apply default preset
                                 let default_preset = gyroflow_core::lens_profile_database::LensProfileDatabase::get_path().join("default.gyroflow");
-                                if let Ok(data) = std::fs::read_to_string(default_preset) {
-                                    // Apply default preset
+                                let default_preset2 = gyroflow_core::settings::data_dir().join("lens_profiles").join("default.gyroflow");
+                                if let Ok(data) = std::fs::read_to_string(default_preset2) {
+                                    apply_preset((data, job_id));
+                                } else if let Ok(data) = std::fs::read_to_string(default_preset) {
                                     apply_preset((data, job_id));
                                 }
 
