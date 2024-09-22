@@ -77,8 +77,7 @@ fn copy_files(tempdir: &str, extract_path: &str) -> io::Result<()> {
     let output = if cfg!(target_os = "windows") {
         Command::new("xcopy").args(&[tempdir, extract_path, "/Y", "/E", "/H", "/I"]).output()
     } else if cfg!(target_os = "macos") {
-        let _ = Command::new("mkdir").args(&["-p", extract_path]).output();
-        Command::new("cp").args(&["-R", tempdir, extract_path]).output()
+        Command::new("osascript").args(&["-e", &format!("do shell script \"mkdir -p \\\"{extract_path}\\\" ; cp -Rf \\\"{tempdir}\\\" \\\"{extract_path}\\\"\"")]).output()
     } else {
         return Err(io::Error::new(io::ErrorKind::Other, "Unsupported OS"));
     }?;
@@ -91,8 +90,7 @@ fn copy_files(tempdir: &str, extract_path: &str) -> io::Result<()> {
         let status = if cfg!(target_os = "windows") {
             runas::Command::new("xcopy").args(&[tempdir, extract_path, "/Y", "/E", "/H", "/I"]).status()
         } else if cfg!(target_os = "macos") {
-            let _ = runas::Command::new("mkdir").args(&["-p", extract_path]).status();
-            runas::Command::new("cp").args(&["-R", tempdir, extract_path]).status()
+            Command::new("osascript").args(&["-e", &format!("do shell script \"mkdir -p \\\"{extract_path}\\\" ; cp -Rf \\\"{tempdir}\\\" \\\"{extract_path}\\\"\" with administrator privileges")]).status()
         } else {
             return Err(io::Error::new(io::ErrorKind::Other, "Unsupported OS"));
         }?;
