@@ -79,9 +79,9 @@ ocl = { version = "0.19.7", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.2.0"
 exr = "1.72"
-opencv = { version = "0.93.0", features = ["clang-runtime"], optional = true }
+opencv = { version = "0.93.1", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "dfc384a", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "390a416", features = ["spirv", "naga-ir"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 metal = { version = "0.29.0" }

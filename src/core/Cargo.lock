@@ -1471,7 +1471,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=dfc384a#dfc384a7fd4ab7250a75d59c6f831d9ffb220f7e"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=390a416#390a4169fb9c9c538f57ec221e01221f2e8a099b"
 dependencies = [
  "arrayvec 0.7.6",
  "bit-set",
@@ -1819,9 +1819,9 @@ checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
 name = "opencv"
-version = "0.93.0"
+version = "0.93.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4651dfd0e41f668c137d9156c2626c221b5a85bea8adca87c05df82cfff5c025"
+checksum = "ef60b95350049ceccc83f859e1fbf40875fc9b9c4fbffe33b340e099d05a56b2"
 dependencies = [
  "cc",
  "dunce",
@@ -2008,9 +2008,9 @@ checksum = "43d84d1d7a6ac92673717f9f6d1518374ef257669c24ebc5ac25d5033828be58"
 
 [[package]]
 name = "prost"
-version = "0.13.2"
+version = "0.13.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b2ecbe40f08db5c006b5764a2645f7f3f141ce756412ac9e1dd6087e6d32995"
+checksum = "7b0487d90e047de87f984913713b85c601c05609aad5b0df4b4573fbf69aa13f"
 dependencies = [
  "bytes",
  "prost-derive",
@@ -2018,9 +2018,9 @@ dependencies = [
 
 [[package]]
 name = "prost-derive"
-version = "0.13.2"
+version = "0.13.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "acf0c195eebb4af52c752bec4f52f645da98b6e92077a04110c7f349477ae5ac"
+checksum = "e9552f850d5f0964a4e4d0bf306459ac29323ddfbae05e35a7c0d35cb0803cc5"
 dependencies = [
  "anyhow",
  "itertools 0.13.0",
@@ -2565,18 +2565,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.63"
+version = "1.0.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c0342370b38b6a11b6cc11d6a805569958d54cfa061a29969c3b5ce2ea405724"
+checksum = "d50af8abc119fb8bb6dbabcfa89656f46f84aa0ac7688088608076ad2b459a84"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.63"
+version = "1.0.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4558b58466b9ad7ca0f102865eccc95938dca1a74a856f2b57b6629050da261"
+checksum = "08904e7672f5eb876eaaf87e0ce17857500934f4981c4a0ab2b4aa98baac7fc3"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2684,15 +2684,15 @@ dependencies = [
 
 [[package]]
 name = "unicode-width"
-version = "0.1.13"
+version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0336d538f7abc86d282a4189614dfaa90810dfc2c6f6427eaf88e16311dd225d"
+checksum = "7dd6e30e90baa6f72411720665d41d89b9a3d039dc45b8faea1ddd07f617f6af"
 
 [[package]]
 name = "unicode-xid"
-version = "0.2.5"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "229730647fbc343e3a80e463c1db7f78f3855d3f3739bee0dda773c9a037c90a"
+checksum = "ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853"
 
 [[package]]
 name = "unsafe-libyaml"
@@ -2862,7 +2862,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=dfc384a#dfc384a7fd4ab7250a75d59c6f831d9ffb220f7e"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=390a416#390a4169fb9c9c538f57ec221e01221f2e8a099b"
 dependencies = [
  "arrayvec 0.7.6",
  "cfg_aliases",
@@ -2886,7 +2886,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=dfc384a#dfc384a7fd4ab7250a75d59c6f831d9ffb220f7e"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=390a416#390a4169fb9c9c538f57ec221e01221f2e8a099b"
 dependencies = [
  "arrayvec 0.7.6",
  "bit-vec",
@@ -2911,7 +2911,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=dfc384a#dfc384a7fd4ab7250a75d59c6f831d9ffb220f7e"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=390a416#390a4169fb9c9c538f57ec221e01221f2e8a099b"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.6",
@@ -2954,7 +2954,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=dfc384a#dfc384a7fd4ab7250a75d59c6f831d9ffb220f7e"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=390a416#390a4169fb9c9c538f57ec221e01221f2e8a099b"
 dependencies = [
  "bitflags 2.6.0",
  "js-sys",
