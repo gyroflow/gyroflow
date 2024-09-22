@@ -385,22 +385,28 @@ impl GyroSource {
                         telemetry_parser::try_block!({
                             use telemetry_parser::tags_impl::TimeScalar;
                             let exp = (tag_map.get(&GroupId::Exposure)?.get_t(TagId::Data) as Option<&Vec<TimeScalar<f64>>>)?;
+                            let tm = (tag_map.get(&GroupId::Default)?.get_t(TagId::Custom("TimeMap".into())) as Option<&Vec<TimeScalar<f64>>>).cloned().unwrap_or_default();
 
                             let mut video_ts = 0.0;
                             let mut zero_ref = None;
                             let mut prev_t = 0.0;
+                            let mut i = 0;
                             for x in exp {
                                 if x.t > prev_t || x.t == 0.0 {
                                     if zero_ref.is_none() {
                                         zero_ref = Some(x.t * 1000.0);
                                         log::debug!("Insta360 first frame reference time: {:.4}", x.t * 1000.0);
                                     }
+                                    let tm_diff = tm.get(i).map(|tm| tm.t - tm.v).unwrap_or_default();
+
                                     // The additional 0.9 ms is a mystery
                                     let diff = (video_ts - x.t) * 1000.0;
-                                    md.per_frame_time_offsets.push(-(x.v * 1000.0 / 2.0) - 0.9 - diff - zero_ref.unwrap());
+
+                                    md.per_frame_time_offsets.push(-(x.v * 1000.0 / 2.0) - 0.9 - diff - tm_diff - zero_ref.unwrap());
 
                                     video_ts += 1.0 / fps;
                                     prev_t = x.t;
+                                    i += 1;
                                 }
                             }
                         });

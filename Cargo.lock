@@ -1350,7 +1350,7 @@ dependencies = [
 [[package]]
 name = "ffmpeg-next"
 version = "7.0.4"
-source = "git+https://github.com/AdrianEddy/rust-ffmpeg#79564c6b9e6286b690635b499f1c5b3c7908230c"
+source = "git+https://github.com/AdrianEddy/rust-ffmpeg#caaba58dfdaf84454e913ea67af4d613350a6440"
 dependencies = [
  "bitflags 2.6.0",
  "ffmpeg-sys-next",
@@ -1359,8 +1359,8 @@ dependencies = [
 
 [[package]]
 name = "ffmpeg-sys-next"
-version = "7.0.2"
-source = "git+https://github.com/AdrianEddy/rust-ffmpeg-sys.git#09e510214af403c9dea599f341fe3e6d648475c8"
+version = "7.0.3"
+source = "git+https://github.com/AdrianEddy/rust-ffmpeg-sys.git#66a37af054a2b1f74014d651fa2c5ca9c6333493"
 dependencies = [
  "bindgen 0.69.4",
  "cc",
@@ -2954,9 +2954,9 @@ checksum = "22686f4785f02a4fcc856d3b3bb19bf6c8160d103f7a99cc258bddd0251dc7f2"
 
 [[package]]
 name = "portable-atomic"
-version = "1.7.0"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da544ee218f0d287a911e9c99a39a8c9bc8fcad3cb8db5959940044ecfc67265"
+checksum = "d30538d42559de6b034bc76fd6dd4c38961b1ee5c6c56e3808c50128fdbc22ce"
 
 [[package]]
 name = "powerfmt"
@@ -3057,9 +3057,9 @@ checksum = "43d84d1d7a6ac92673717f9f6d1518374ef257669c24ebc5ac25d5033828be58"
 
 [[package]]
 name = "prost"
-version = "0.13.2"
+version = "0.13.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b2ecbe40f08db5c006b5764a2645f7f3f141ce756412ac9e1dd6087e6d32995"
+checksum = "7b0487d90e047de87f984913713b85c601c05609aad5b0df4b4573fbf69aa13f"
 dependencies = [
  "bytes",
  "prost-derive",
@@ -3067,9 +3067,9 @@ dependencies = [
 
 [[package]]
 name = "prost-derive"
-version = "0.13.2"
+version = "0.13.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "acf0c195eebb4af52c752bec4f52f645da98b6e92077a04110c7f349477ae5ac"
+checksum = "e9552f850d5f0964a4e4d0bf306459ac29323ddfbae05e35a7c0d35cb0803cc5"
 dependencies = [
  "anyhow",
  "itertools 0.13.0",
@@ -3740,7 +3740,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.3.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=8ec4bc9#8ec4bc9a28c0518ad393ea3a31e98c5eaede222f"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=be20635#be20635ac87a1c009ca8b10b64664bd028a8294e"
 dependencies = [
  "argh",
  "byteorder",
@@ -3818,18 +3818,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.63"
+version = "1.0.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c0342370b38b6a11b6cc11d6a805569958d54cfa061a29969c3b5ce2ea405724"
+checksum = "d50af8abc119fb8bb6dbabcfa89656f46f84aa0ac7688088608076ad2b459a84"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.63"
+version = "1.0.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4558b58466b9ad7ca0f102865eccc95938dca1a74a856f2b57b6629050da261"
+checksum = "08904e7672f5eb876eaaf87e0ce17857500934f4981c4a0ab2b4aa98baac7fc3"
 dependencies = [
  "proc-macro2",
  "quote",
