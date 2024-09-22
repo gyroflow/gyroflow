@@ -265,6 +265,10 @@ pub struct Controller {
     mp4_merge: qt_method!(fn(&self, file_list: QStringList, output_folder: QUrl, output_filename: QString)),
     mp4_merge_progress: qt_signal!(percent: f64, error_string: QString, url: QString),
 
+    is_nle_installed: qt_method!(fn(&self) -> bool),
+    nle_plugins: qt_method!(fn(&self, command: QString, typ: QString) -> QString),
+    nle_plugins_result: qt_signal!(command: QString, result: QString),
+
     has_per_frame_lens_data: qt_method!(fn(&self) -> bool),
     export_stmap: qt_method!(fn(&self, folder_url: QUrl, per_frame: bool)),
     stmap_progress: qt_signal!(progress: f64, ready: usize, total: usize),
@@ -2256,6 +2260,47 @@ impl Controller {
             }
             progress((total, total));
         });
+    }
+
+    fn is_nle_installed(&self) -> bool {
+        #[cfg(not(any(target_os = "android", target_os = "ios")))] {
+            crate::nle_plugins::is_nle_installed("openfx") || crate::nle_plugins::is_nle_installed("adobe")
+        }
+        #[cfg(any(target_os = "android", target_os = "ios"))] { false }
+    }
+    fn nle_plugins(&self, command: QString, typ: QString) -> QString {
+        #[cfg(not(any(target_os = "android", target_os = "ios")))] {
+            let typ = typ.to_string();
+            let command = command.to_string();
+            let result = match command.as_ref() {
+                "install" | "latest_version" => {
+                    let command2 = QString::from(command.clone());
+                    let signal = util::qt_queued_callback_mut(self, move |this, r: String| {
+                        this.nle_plugins_result(command2.clone(), QString::from(r));
+                    });
+                    core::run_threaded(move || {
+                        let result = match command.as_ref() {
+                            "install" => crate::nle_plugins::install(&typ),
+                            "latest_version" => crate::nle_plugins::latest_version().ok_or(std::io::Error::new(std::io::ErrorKind::Other, "Failed to check version")),
+                            _ => Err(std::io::Error::new(std::io::ErrorKind::Other, format!("Unknown command {command}")))
+                        };
+                        match result {
+                            Ok(r) => signal(r),
+                            Err(e) => signal(format!("An error occured: {e:?}"))
+                        }
+                    });
+                    Ok(String::new())
+                }
+                "detect" => crate::nle_plugins::detect(&typ),
+                "is_nle_installed" => Ok(format!("{}", crate::nle_plugins::is_nle_installed(&typ))),
+                _ => Err(std::io::Error::new(std::io::ErrorKind::Other, format!("Unknown command {command}")))
+            };
+            match result {
+                Ok(r) => QString::from(r),
+                Err(e) => QString::from(format!("An error occured: {e:?}"))
+            }
+        }
+        #[cfg(any(target_os = "android", target_os = "ios"))] { QString::new() }
     }
 
     // Utilities

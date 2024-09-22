@@ -59,6 +59,8 @@ Rectangle {
             stab    .parent = paramsTab.inner;
             stabHr  .parent = paramsTab.inner;
             advanced.parent = paramsTab.inner;
+            advancedHr.parent = paramsTab.inner;
+            nlePlugins.parent = paramsTab.inner;
 
             outputPathLabel.parent = exportTab.inner;
             renderBtnRow   .parent = exportTab.inner;
@@ -77,6 +79,8 @@ Rectangle {
             exportSettings.parent = rightPanel.col;
             exportHr      .parent = rightPanel.col;
             advanced      .parent = rightPanel.col;
+            advancedHr    .parent = rightPanel.col;
+            nlePlugins    .parent = rightPanel.col;
 
             outputPathLabel.parent = exportbar;
             renderBtnRow   .parent = exportbar;
@@ -507,6 +511,8 @@ Rectangle {
             ItemLoader { id: exportSettings; sourceComponent: Component { Menu.Export { showBtn: !window.isMobileLayout; } } }
             Hr { id: exportHr; visible: !isMobileLayout; }
             ItemLoader { id: advanced; sourceComponent: Component { Menu.Advanced { } } }
+            Hr { id: advancedHr; visible: nlePlugins.active }
+            ItemLoader { id: nlePlugins; active: controller.is_nle_installed(); sourceComponent: Component { Menu.NlePlugins { } } }
         }
     }
 
