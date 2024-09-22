@@ -158,6 +158,14 @@ impl<'a> VideoTranscoder<'a> {
             }
         }
 
+        for (k, v) in options.iter() {
+            unsafe {
+                let k = std::ffi::CString::new(k).unwrap_or_default();
+                let v = std::ffi::CString::new(v).unwrap_or_default();
+                ffmpeg_next::ffi::av_opt_set((*ctx_ptr).priv_data, k.as_ptr(), v.as_ptr(), 0);
+            }
+        }
+
         let encoder = encoder.open_with(options)?;
         ost.set_parameters(&encoder);
         let context = unsafe { codec::context::Context::wrap(ctx_ptr, None) };
