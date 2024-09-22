@@ -14,7 +14,7 @@ pub mod util;
 pub mod controller;
 pub mod rendering;
 pub mod external_sdk;
-#[cfg(not(any(target_os = "android", target_os = "ios")))]
+#[cfg(any(target_os = "windows", target_os = "macos"))]
 pub mod nle_plugins;
 mod cli;
 mod resources;
