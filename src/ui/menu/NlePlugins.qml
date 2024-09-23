@@ -28,7 +28,7 @@ MenuItem {
         dialog.accepted.connect(function() {
             if (Qt.resolvedUrl(dialog.selectedFolder) != Qt.resolvedUrl(initialFolder)) {
                 root.loader = false;
-                messageBox(Modal.Error, qsTr("You selected the wrong folder.\nMake sure to select <b>%1</b>.").arg(folder), [ { text: qsTr("Ok"), accent: true } ]);
+                messageBox(Modal.Error, qsTr("You selected the wrong folder.\nMake sure to select %1.").arg("<b>" + folder + "</b>"), [ { text: qsTr("Ok"), accent: true } ]);
             } else {
                 filesystem.folder_access_granted(dialog.selectedFolder);
                 controller.nle_plugins("install", type);
@@ -97,7 +97,7 @@ MenuItem {
                 root.loader = true;
                 if (Qt.platform.os == "osx" && isSandboxed) {
                     const folder = "/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore";
-                    messageBox(Modal.Info, qsTr("At the next prompt, click <b>\"Open\"</b> to grant access to the <b>\"%1\"</b> folder in order for Gyroflow to install the plugin.").arg(folder), [ { text: qsTr("Ok"), accent: true, clicked: () => {
+                    messageBox(Modal.Info, qsTr("At the next prompt, click <b>\"Open\"</b> to grant access to the %1 folder in order for Gyroflow to install the plugin.").arg("<b>\"" + folder + "\"</b>"), [ { text: qsTr("Ok"), accent: true, clicked: () => {
                         root.selectFolder("adobe", folder);
                     } } ]);
                 } else {
@@ -126,7 +126,7 @@ MenuItem {
                 if (Qt.platform.os == "osx" && isSandboxed) {
                     const folder = "/Library/OFX/Plugins";
                     if (!filesystem.exists("file://" + folder)) {
-                        const mb = messageBox(Modal.Info, qsTr("<b>\"%1\"</b> folder doesn't exist.\nDue to sandbox limitations, you have to create it yourself.\nOpen <b>Terminal</b> and enter the following command:").arg(folder), [ { text: qsTr("Ok"), accent: true, clicked: () => {
+                        const mb = messageBox(Modal.Info, qsTr("%1 folder doesn't exist.\nDue to sandbox limitations, you have to create it yourself.\nOpen <b>Terminal</b> and enter the following command:").arg("<b>\"" + folder + "\"</b>"), [ { text: qsTr("Ok"), accent: true, clicked: () => {
                             openfxInstall.clicked();
                         } }, { text: qsTr("Cancel"), clicked: function() { root.loader = false; } } ]);
                         mb.isWide = true;
@@ -134,7 +134,7 @@ MenuItem {
                         tf.text = "sudo install -m 0755 -o $USER -d /Library/OFX/Plugins";
                         tf.width = mb.mainColumn.width;
                     } else {
-                        messageBox(Modal.Info, qsTr("At the next prompt, click <b>\"Open\"</b> to grant access to the <b>\"%1\"</b> folder in order for Gyroflow to install the plugin.").arg(folder), [ { text: qsTr("Ok"), accent: true, clicked: () => {
+                        messageBox(Modal.Info, qsTr("At the next prompt, click <b>\"Open\"</b> to grant access to the %1 folder in order for Gyroflow to install the plugin.").arg("<b>\"" + folder + "\"</b>"), [ { text: qsTr("Ok"), accent: true, clicked: () => {
                             root.selectFolder("openfx", folder);
                         } } ]);
                     }

@@ -433,7 +433,7 @@ Rectangle {
                                                 presetFileDialog.open2();
                                             } else if (obj.save_type == "default") {
                                                 const saved_to = controller.export_preset("", finalData, obj.save_type, "");
-                                                showNotification(Modal.Info, qsTr("Preset saved to <b>%1</b>").arg(saved_to))
+                                                showNotification(Modal.Info, qsTr("Preset saved to %1").arg("<b>" + saved_to + "</b>"))
                                             } else {
                                                 const dlg = messageBox(Modal.Info, qsTr("Enter the name for the preset: "), [
                                                     { text: qsTr("Ok"), accent: true, clicked: function() {
@@ -444,7 +444,7 @@ Rectangle {
                                                             return false;
                                                         }
                                                         const saved_to = controller.export_preset("", finalData, obj.save_type, name);
-                                                        showNotification(Modal.Info, qsTr("Preset saved to <b>%1</b>").arg(saved_to))
+                                                        showNotification(Modal.Info, qsTr("Preset saved to %1").arg("<b>" + saved_to + "</b>"))
                                                     } },
                                                     { text: qsTr("Cancel") },
                                                 ]);
@@ -656,7 +656,7 @@ Rectangle {
         property var presetData: ({});
         onAccepted: {
             const saved_to = controller.export_preset(selectedFile, presetData, "file", "");
-            showNotification(Modal.Info, qsTr("Preset saved to <b>%1</b>").arg(saved_to))
+            showNotification(Modal.Info, qsTr("Preset saved to %1").arg("<b>" + saved_to + "</b>"))
         }
     }
 
