@@ -77,7 +77,6 @@ MenuItem {
                 adobe_latest  = adobe_version && compare_ver(latest_version, adobe_version);
                 root.loader = false;
             }
-            console.log("nle_plugins_result", command, result);
         }
     }
 

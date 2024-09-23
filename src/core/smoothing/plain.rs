@@ -15,7 +15,7 @@ pub struct Plain {
 impl Default for Plain {
     fn default() -> Self { Self {
         time_constant: 0.25,
-        trim_range_only: false,
+        trim_range_only: true,
     } }
 }
 
