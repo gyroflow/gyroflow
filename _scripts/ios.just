@@ -190,6 +190,16 @@ build-and-package profile is_dist:
 
         cat {{AppBundle}}/Info.plist
 
+        # Bundle BRAW SDK
+        FrameworksDir={{AppBundle}}/Frameworks
+        if [ ! -f "$FrameworksDir/BlackmagicRawAPI.framework/Versions/A/BlackmagicRawAPI" ]; then
+            curl -L https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_iOS_4.2.0.tar.gz -o tmp.tar.gz
+            7z x -aoa tmp.tar.gz
+            7z x -o"$FrameworksDir/" tmp.tar
+            rm tmp.tar tmp.tar.gz
+        fi
+        chmod -R 0755 $FrameworksDir/*
+
         # Generate entitlements
         PlistBuddy -x -c "Add :application-identifier string {{TeamID}}.{{BundleIdentifier}}" {{AppBundle}}/../../entitlements.xcent
         PlistBuddy -x -c "Add :com.apple.developer.team-identifier string {{TeamID}}" {{AppBundle}}/../../entitlements.xcent
@@ -214,7 +224,7 @@ build-and-package profile is_dist:
         xcrun symbols -noTextInSOD -noDaemon -arch all -symbolsPackageDir {{AppBundle}}/../../Symbols {{AppBundle}}/../../../Gyroflow.app.dSYM
         rm -rf {{AppBundle}}/../../../Gyroflow.app.dSYM
 
-        codesign -vvvv --force --generate-entitlement-der --preserve-metadata=identifier,flags,runtime --sign $SIGN_KEY {{AppBundle}}/Frameworks/mdk.framework
+        codesign -vvvv --force --generate-entitlement-der --preserve-metadata=identifier,flags,runtime --sign $SIGN_KEY {{AppBundle}}/Frameworks/*.framework
         codesign -vvvv --force --generate-entitlement-der --preserve-metadata=identifier,flags,runtime --sign $SIGN_KEY --entitlements {{AppBundle}}/../../entitlements.xcent {{AppBundle}}
 
         codesign -vvvv --deep --strict --verify {{AppBundle}}
