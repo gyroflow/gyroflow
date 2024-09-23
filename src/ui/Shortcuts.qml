@@ -294,13 +294,13 @@ Item {
 
     // Save and open next queue item
     Shortcut {
-        sequence: "Ctrl+D";
+        sequence: "Ctrl+Shift+D";
         onActivated: loadQueueItem(render_queue.get_next_item_id(render_queue.editing_job_id));
     }
 
     // Save and open prev queue item
     Shortcut {
-        sequence: "Ctrl+A";
+        sequence: "Ctrl+Shift+A";
         onActivated: loadQueueItem(render_queue.get_prev_item_id(render_queue.editing_job_id));
     }
 
@@ -321,7 +321,7 @@ Item {
 
     // Next file in folder
     Shortcut {
-        sequence: "Shift+Page Down";
+        sequence: "Ctrl+D";
         onActivated: {
             const url = filesystem.get_next_file_url(window.videoArea.loadedFileUrl, 1);
             if (url && url.toString()) window.videoArea.loadFile(url);
@@ -330,7 +330,7 @@ Item {
 
     // Previous file in folder
     Shortcut {
-        sequence: "Shift+Page Up";
+        sequence: "Ctrl+A";
         onActivated: {
             const url = filesystem.get_next_file_url(window.videoArea.loadedFileUrl, -1);
             if (url && url.toString()) window.videoArea.loadFile(url);
