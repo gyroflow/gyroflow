@@ -126,7 +126,7 @@ MenuItem {
                 if (Qt.platform.os == "osx" && isSandboxed) {
                     const folder = "/Library/OFX/Plugins";
                     if (!filesystem.exists("file://" + folder)) {
-                        const mb = messageBox(Modal.Info, qsTr("<b>\"%1\"</b> folder doesn't exists.\nDue to sandbox limitations, you have to create it yourself.\nOpen <b>Terminal</b> and enter the following command:").arg(folder), [ { text: qsTr("Ok"), accent: true, clicked: () => {
+                        const mb = messageBox(Modal.Info, qsTr("<b>\"%1\"</b> folder doesn't exist.\nDue to sandbox limitations, you have to create it yourself.\nOpen <b>Terminal</b> and enter the following command:").arg(folder), [ { text: qsTr("Ok"), accent: true, clicked: () => {
                             openfxInstall.clicked();
                         } }, { text: qsTr("Cancel"), clicked: function() { root.loader = false; } } ]);
                         mb.isWide = true;
