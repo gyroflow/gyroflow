@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2024 Adrian <adrian.eddy at gmail>
 
-// TODO: macos sandbox
-
 use zip_extensions::*;
 use std::io::{ self, Cursor };
 use std::process::Command;
@@ -73,24 +71,48 @@ fn query_file_version_from_plist(path: &str) -> Option<String> {
     Some(cap.get(1)?.as_str().to_owned())
 }
 
-fn copy_files(tempdir: &str, extract_path: &str) -> io::Result<()> {
+fn copy_files(tempdir: &str, extract_path: &str, typ: &str) -> io::Result<()> {
     let output = if cfg!(target_os = "windows") {
-        Command::new("xcopy").args(&[tempdir, extract_path, "/Y", "/E", "/H", "/I"]).output()
+        Command::new("xcopy").args(&[tempdir, extract_path, "/Y", "/E", "/H", "/I"]).output()?.status.success()
     } else if cfg!(target_os = "macos") {
-        Command::new("osascript").args(&["-e", &format!("do shell script \"mkdir -p \\\"{extract_path}\\\" ; cp -Rpf \\\"{tempdir}/\\\" \\\"{extract_path}\\\"\"")]).output()
+        if gyroflow_core::filesystem::is_sandboxed() {
+            let macosname = match typ {
+                "openfx" => "Gyroflow.ofx.bundle",
+                "adobe" => "Gyroflow.plugin",
+                _ => unreachable!()
+            };
+            let src = Path::new(tempdir).join(macosname);
+            let target = Path::new(extract_path).join(macosname);
+            gyroflow_core::filesystem::start_accessing_url(extract_path, true);
+            match std::fs::create_dir_all(&target) {
+                Ok(_) => log::info!("Folder created at {target:?}"),
+                Err(e) => log::error!("Failed to create folder at {target:?}: {e:?}")
+            }
+            let result = fs_extra::copy_items(&[src.as_path()], &extract_path, &fs_extra::dir::CopyOptions::new().overwrite(true).copy_inside(true));
+            gyroflow_core::filesystem::stop_accessing_url(extract_path, true);
+            match result {
+                Ok(_) => log::info!("Folder copied from {src:?} to {extract_path:?}"),
+                Err(e) => {
+                    return Err(io::Error::new(io::ErrorKind::Other, format!("Failed to copy files from {src:?} to {extract_path:?}: {e:?}")));
+                }
+            }
+            true
+        } else {
+            Command::new("osascript").args(&["-e", &format!("do shell script \"mkdir -p \\\"{extract_path}\\\" ; cp -Rpf \\\"{tempdir}/\\\" \\\"{extract_path}\\\"\"")]).output()?.status.success()
+        }
     } else {
         return Err(io::Error::new(io::ErrorKind::Other, "Unsupported OS"));
-    }?;
+    };
     // let stderr = String::from_utf8_lossy(&output.stderr);
 
-    if output.status.success() {
+    if output {
         Ok(())
     } else {
         // Retry with elevated privileges
         let status = if cfg!(target_os = "windows") {
             runas::Command::new("xcopy").args(&[tempdir, extract_path, "/Y", "/E", "/H", "/I"]).status()
         } else if cfg!(target_os = "macos") {
-            Command::new("osascript").args(&["-e", &format!("do shell script \"mkdir -p \\\"{extract_path}\\\" ; cp -Rpf \\\"{tempdir}/\\\" \\\"{extract_path}\\\"\" with administrator privileges")]).status()
+            Command::new("osascript").args(&["-e", &format!("do shell script \"install -m 0755 -o $USER -d \\\"{extract_path}\\\" ; cp -Rpf \\\"{tempdir}/\\\" \\\"{extract_path}\\\"\" with administrator privileges")]).status()
         } else {
             return Err(io::Error::new(io::ErrorKind::Other, "Unsupported OS"));
         }?;
@@ -144,11 +166,11 @@ pub fn install(typ: &str) -> io::Result<String> {
             } else {
                 archive.extract(tempdir.path())?;
             }
-            copy_files(tempdir.path().to_str().unwrap(), &extract_path)?;
+            copy_files(tempdir.path().to_str().unwrap(), &extract_path, typ)?;
         } else {
             let tempfile = tempfile::NamedTempFile::new()?;
             std::fs::write(tempfile.path(), content)?;
-            copy_files(tempfile.path().to_str().unwrap(), &extract_path)?;
+            copy_files(tempfile.path().to_str().unwrap(), &extract_path, typ)?;
         }
     }
     detect(typ)
