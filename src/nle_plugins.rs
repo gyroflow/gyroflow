@@ -64,6 +64,7 @@ fn query_file_version(path: &str) -> Option<String> {
     }
 }
 
+#[cfg_attr(target_os = "windows", allow(dead_code))]
 fn query_file_version_from_plist(path: &str) -> Option<String> {
     let file = std::fs::read_to_string(path).ok()?;
     let re = regex::Regex::new(r#"<key>CFBundleShortVersionString</key>\s*<string>([^<]+)</string>"#).unwrap();

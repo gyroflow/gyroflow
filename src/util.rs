@@ -420,7 +420,23 @@ pub fn save_exe_location() {
                 }
             }
         } else {
-            gyroflow_core::settings::set("exeLocation", exe_path.to_string_lossy().into());
+            #[allow(unused_mut)]
+            let mut exe_str = exe_path.to_string_lossy().to_string();
+
+            #[cfg(target_os = "windows")]
+            if exe_str.contains("29160AdrianRoss.Gyroflow") {
+                let parts = exe_str.split("\\").collect::<Vec<_>>();
+                let parts = parts.into_iter().rev().skip(1).next().unwrap_or("").split("_").collect::<Vec<_>>();
+                if let Some(publisher) = parts.first() {
+                    if let Some(app_id) = parts.last() {
+                        if !publisher.is_empty() && !app_id.is_empty() {
+                            exe_str = format!("shell:AppsFolder\\{publisher}_{app_id}!Gyroflow");
+                        }
+                    }
+                }
+            }
+
+            gyroflow_core::settings::set("exeLocation", exe_str.into());
         }
     }
 }
