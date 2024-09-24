@@ -1164,6 +1164,7 @@ impl RenderQueue {
                             video_speed:               params.video_speed,
                             video_speed_affects_smoothing: params.video_speed_affects_smoothing,
                             video_speed_affects_zooming:   params.video_speed_affects_zooming,
+                            video_speed_affects_zooming_limit: params.video_speed_affects_zooming_limit,
                             of_method:                 params.of_method,
                             adaptive_zoom_method:      params.adaptive_zoom_method,
                             max_zoom:                  params.max_zoom,

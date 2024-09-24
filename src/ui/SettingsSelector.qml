@@ -50,7 +50,7 @@ Modal {
             "Rolling shutter correction": ["frame_readout_time"],
             "Zooming":                    ["adaptive_zoom_window", "adaptive_zoom_center_offset", "adaptive_zoom_method", "additional_rotation", "additional_translation", "max_zoom", "max_zoom_iterations"],
             "Lens correction strength":   ["lens_correction_amount"],
-            "Video speed":                ["video_speed", "video_speed_affects_smoothing", "video_speed_affects_zooming"],
+            "Video speed":                ["video_speed", "video_speed_affects_smoothing", "video_speed_affects_zooming", "video_speed_affects_zooming_limit"],
         },
         "Export settings|output": {
             "Codec":       ["codec", "codec_options", "bitrate", "use_gpu"],

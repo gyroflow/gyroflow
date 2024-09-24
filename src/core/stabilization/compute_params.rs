@@ -32,6 +32,7 @@ pub struct ComputeParams {
     pub video_speed: f64,
     pub video_speed_affects_smoothing: bool,
     pub video_speed_affects_zooming: bool,
+    pub video_speed_affects_zooming_limit: bool,
     pub background: nalgebra::Vector4<f32>,
     pub background_mode: crate::stabilization_params::BackgroundMode,
     pub background_margin: f64,
@@ -110,6 +111,7 @@ impl ComputeParams {
             video_speed: params.video_speed,
             video_speed_affects_smoothing: params.video_speed_affects_smoothing,
             video_speed_affects_zooming: params.video_speed_affects_zooming,
+            video_speed_affects_zooming_limit: params.video_speed_affects_zooming_limit,
 
             distortion_model,
             digital_lens,

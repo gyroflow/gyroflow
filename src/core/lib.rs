@@ -427,7 +427,13 @@ impl StabilizationManager {
                 let mut any_above_limit = false;
                 for (i, fov) in params.fovs.iter().enumerate() {
                     let ts = crate::timestamp_at_frame(i as i32, params.scaled_fps);
-                    let zoom_limit = (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0) * scaling_factor;
+                    let mut zoom_limit = (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0) * scaling_factor;
+
+                    if params.video_speed_affects_zooming_limit && (params.video_speed != 1.0 || params.keyframes.is_keyframed(&KeyframeType::VideoSpeed)) {
+                        let vid_speed = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(params.video_speed);
+                        zoom_limit *= 1.0 + ((vid_speed - 1.0) / 2.0);
+                    }
+
                     let fov_limit = 1.0 / zoom_limit;
                     if *fov < fov_limit {
                         any_above_limit = true;
@@ -577,7 +583,13 @@ impl StabilizationManager {
                         let mut any_above_limit = false;
                         for (i, fov) in params.fovs.iter().enumerate() {
                             let ts = crate::timestamp_at_frame(i as i32, params.scaled_fps);
-                            let zoom_limit = (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0) * scaling_factor;
+                            let mut zoom_limit = (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0) * scaling_factor;
+
+                            if params.video_speed_affects_zooming_limit && (params.video_speed != 1.0 || params.keyframes.is_keyframed(&KeyframeType::VideoSpeed)) {
+                                let vid_speed = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(params.video_speed);
+                                zoom_limit *= 1.0 + ((vid_speed - 1.0) / 2.0);
+                            }
+
                             let fov_limit = 1.0 / zoom_limit;
                             if *fov < fov_limit {
                                 any_above_limit = true;
@@ -820,11 +832,12 @@ impl StabilizationManager {
         self.invalidate_smoothing();
     }
 
-    pub fn set_video_speed(&self, v: f64, link_with_smoothness: bool, link_with_zooming: bool) {
+    pub fn set_video_speed(&self, v: f64, link_with_smoothness: bool, link_with_zooming: bool, link_with_zooming_limit: bool) {
         let mut params = self.params.write();
         params.video_speed = v;
         params.video_speed_affects_smoothing = link_with_smoothness;
         params.video_speed_affects_zooming = link_with_zooming;
+        params.video_speed_affects_zooming_limit = link_with_zooming_limit;
         self.invalidate_smoothing();
     }
 
@@ -1154,6 +1167,7 @@ impl StabilizationManager {
                 "video_speed":                   params.video_speed,
                 "video_speed_affects_smoothing": params.video_speed_affects_smoothing,
                 "video_speed_affects_zooming":   params.video_speed_affects_zooming,
+                "video_speed_affects_zooming_limit": params.video_speed_affects_zooming_limit,
                 "horizontal_rs":          params.horizontal_rs,
                 "max_zoom":               params.max_zoom,
                 "max_zoom_iterations":    params.max_zoom_iterations,
@@ -1455,8 +1469,9 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("max_zoom_iterations")   .and_then(|x| x.as_i64()) { params.max_zoom_iterations     = v as _; }
 
                 if let Some(v) = obj.get("video_speed").and_then(|x| x.as_f64()) { params.video_speed = v; }
-                if let Some(v) = obj.get("video_speed_affects_smoothing").and_then(|x| x.as_bool()) { params.video_speed_affects_smoothing = v; }
-                if let Some(v) = obj.get("video_speed_affects_zooming")  .and_then(|x| x.as_bool()) { params.video_speed_affects_zooming   = v; }
+                if let Some(v) = obj.get("video_speed_affects_smoothing")    .and_then(|x| x.as_bool()) { params.video_speed_affects_smoothing     = v; }
+                if let Some(v) = obj.get("video_speed_affects_zooming")      .and_then(|x| x.as_bool()) { params.video_speed_affects_zooming       = v; }
+                if let Some(v) = obj.get("video_speed_affects_zooming_limit").and_then(|x| x.as_bool()) { params.video_speed_affects_zooming_limit = v; }
 
                 if let Some(center_offs) = obj.get("adaptive_zoom_center_offset").and_then(|x| x.as_array()) {
                     params.adaptive_zoom_center_offset = (

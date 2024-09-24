@@ -139,7 +139,7 @@ pub struct Controller {
 
     lens_correction_amount: qt_property!(f64; WRITE set_lens_correction_amount),
     light_refraction_coefficient: qt_property!(f64; WRITE set_light_refraction_coefficient),
-    set_video_speed: qt_method!(fn(&self, v: f64, s: bool, z: bool)),
+    set_video_speed: qt_method!(fn(&self, v: f64, s: bool, z: bool, zl: bool)),
     set_max_zoom: qt_method!(fn(&self, v: f64, iters: usize)),
 
     input_horizontal_stretch: qt_property!(f64; WRITE set_input_horizontal_stretch),
@@ -1411,7 +1411,7 @@ impl Controller {
     wrap_simple_method!(set_background_mode,           v: i32; recompute);
     wrap_simple_method!(set_background_margin,         v: f64; recompute);
     wrap_simple_method!(set_background_margin_feather, v: f64; recompute);
-    wrap_simple_method!(set_video_speed,               v: f64, s: bool, z: bool; recompute; zooming_data_changed);
+    wrap_simple_method!(set_video_speed,               v: f64, s: bool, z: bool, zl: bool; recompute; zooming_data_changed);
 
     wrap_simple_method!(set_offset, timestamp_us: i64, offset_ms: f64; recompute; update_offset_model);
     wrap_simple_method!(clear_offsets,; recompute; update_offset_model);

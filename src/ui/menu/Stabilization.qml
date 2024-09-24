@@ -31,6 +31,7 @@ MenuItem {
         property alias hlIntegrationMethod: integrationMethod.currentIndex;
         property alias videoSpeedAffectsSmoothing: videoSpeedAffectsSmoothing.checked;
         property alias videoSpeedAffectsZooming: videoSpeedAffectsZooming.checked;
+        property alias videoSpeedAffectsZoomingLimit: videoSpeedAffectsZoomingLimit.checked;
         property alias zoomingMethod: zoomingMethod.currentIndex;
         property alias maxZoom: maxZoomSlider.value;
         property alias maxZoomIterations: maxZoomIterations.value;
@@ -106,8 +107,9 @@ MenuItem {
             Qt.callLater(updateHorizonLock);
 
             if (stab.hasOwnProperty("video_speed")) videoSpeed.value = +stab.video_speed;
-            if (stab.hasOwnProperty("video_speed_affects_smoothing")) videoSpeedAffectsSmoothing.checked = !!stab.video_speed_affects_smoothing;
-            if (stab.hasOwnProperty("video_speed_affects_zooming"))   videoSpeedAffectsZooming.checked   = !!stab.video_speed_affects_zooming;
+            if (stab.hasOwnProperty("video_speed_affects_smoothing"))     videoSpeedAffectsSmoothing.checked    = !!stab.video_speed_affects_smoothing;
+            if (stab.hasOwnProperty("video_speed_affects_zooming"))       videoSpeedAffectsZooming.checked      = !!stab.video_speed_affects_zooming;
+            if (stab.hasOwnProperty("video_speed_affects_zooming_limit")) videoSpeedAffectsZoomingLimit.checked = !!stab.video_speed_affects_zooming_limit;
         }
     }
 
@@ -576,7 +578,7 @@ MenuItem {
                 property bool isKeyframed: false;
                 function updateVideoSpeed(): void {
                     window.videoArea.vid.playbackRate = videoSpeed.value;
-                    controller.set_video_speed(videoSpeed.value, videoSpeedAffectsSmoothing.checked, videoSpeedAffectsZooming.checked);
+                    controller.set_video_speed(videoSpeed.value, videoSpeedAffectsSmoothing.checked, videoSpeedAffectsZooming.checked, videoSpeedAffectsZoomingLimit.checked);
                     isKeyframed = controller.is_keyframed("VideoSpeed");
                 }
                 Timer {
@@ -620,6 +622,19 @@ MenuItem {
                 contentItem.visible: false;
                 scale: 0.7;
                 tooltip: qsTr("Link with zooming speed");
+                checked: true;
+                onCheckedChanged: Qt.callLater(videoSpeed.updateVideoSpeed);
+            }
+            CheckBox {
+                id: videoSpeedAffectsZoomingLimit;
+                anchors.right: parent.right;
+                anchors.top: parent.top;
+                anchors.topMargin: -30 * dpiScale;
+                anchors.rightMargin: 36 * dpiScale;
+                width: 25 * dpiScale;
+                contentItem.visible: false;
+                scale: 0.7;
+                tooltip: qsTr("Link with zooming limit");
                 checked: true;
                 onCheckedChanged: Qt.callLater(videoSpeed.updateVideoSpeed);
             }
