@@ -427,10 +427,10 @@ impl StabilizationManager {
                 let mut any_above_limit = false;
                 for (i, fov) in params.fovs.iter().enumerate() {
                     let ts = crate::timestamp_at_frame(i as i32, params.scaled_fps);
-                    let mut zoom_limit = (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0);
+                    let mut zoom_limit = params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0;
 
                     if params.video_speed_affects_zooming_limit && (params.video_speed != 1.0 || params.keyframes.is_keyframed(&KeyframeType::VideoSpeed)) {
-                        let vid_speed = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(params.video_speed);
+                        let vid_speed = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(params.video_speed).abs();
                         zoom_limit *= (1.0 + ((vid_speed - 1.0) / 4.0)).min(1.8);
                     }
 
@@ -583,10 +583,10 @@ impl StabilizationManager {
                         let mut any_above_limit = false;
                         for (i, fov) in params.fovs.iter().enumerate() {
                             let ts = crate::timestamp_at_frame(i as i32, params.scaled_fps);
-                            let mut zoom_limit = (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0);
+                            let mut zoom_limit = params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0;
 
                             if params.video_speed_affects_zooming_limit && (params.video_speed != 1.0 || params.keyframes.is_keyframed(&KeyframeType::VideoSpeed)) {
-                                let vid_speed = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(params.video_speed);
+                                let vid_speed = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(params.video_speed).abs();
                                 zoom_limit *= (1.0 + ((vid_speed - 1.0) / 4.0)).min(1.8);
                             }
 

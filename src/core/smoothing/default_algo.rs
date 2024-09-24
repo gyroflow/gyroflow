@@ -233,7 +233,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
                     let timestamp_ms = *ts as f64 / 1000.0;
                     let mut val = keyframes.value_at_gyro_timestamp(typ, timestamp_ms).unwrap_or(def);
                     if compute_params.video_speed_affects_smoothing {
-                        let vid_speed = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoSpeed, timestamp_ms).unwrap_or(compute_params.video_speed);
+                        let vid_speed = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoSpeed, timestamp_ms).unwrap_or(compute_params.video_speed).abs();
                         if typ == &KeyframeType::SmoothingParamTimeConstant || typ == &KeyframeType::SmoothingParamTimeConstant2 {
                             val *= 1.0 + ((vid_speed - 1.0) / 2.0);
                         } else {

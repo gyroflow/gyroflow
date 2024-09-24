@@ -25,7 +25,7 @@ pub fn compute(compute_params: &ComputeParams, mut fov_values: Vec<f64>, timesta
         let data_per_timestamp = timestamps.iter().map(|(_frame, ts)| {
             let mut window = keyframes.value_at_video_timestamp(&KeyframeType::ZoomingSpeed, *ts).unwrap_or(window);
             if compute_params.video_speed_affects_zooming {
-                let vid_speed = keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, *ts).unwrap_or(compute_params.video_speed);
+                let vid_speed = keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, *ts).unwrap_or(compute_params.video_speed).abs();
                 window *= vid_speed;
             }
             let frames = get_frames_per_window(compute_params);

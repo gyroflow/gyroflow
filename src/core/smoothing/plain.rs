@@ -96,7 +96,7 @@ impl SmoothingAlgorithm for Plain {
                 let mut val = keyframes.value_at_gyro_timestamp(&KeyframeType::SmoothingParamTimeConstant, timestamp_ms).unwrap_or(self.time_constant);
 
                 if compute_params.video_speed_affects_smoothing {
-                    let vid_speed = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoSpeed, timestamp_ms).unwrap_or(compute_params.video_speed);
+                    let vid_speed = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoSpeed, timestamp_ms).unwrap_or(compute_params.video_speed).abs();
                     val *= vid_speed;
                 }
 
