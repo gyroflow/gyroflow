@@ -427,14 +427,14 @@ impl StabilizationManager {
                 let mut any_above_limit = false;
                 for (i, fov) in params.fovs.iter().enumerate() {
                     let ts = crate::timestamp_at_frame(i as i32, params.scaled_fps);
-                    let mut zoom_limit = (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0) * scaling_factor;
+                    let mut zoom_limit = (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0);
 
                     if params.video_speed_affects_zooming_limit && (params.video_speed != 1.0 || params.keyframes.is_keyframed(&KeyframeType::VideoSpeed)) {
                         let vid_speed = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(params.video_speed);
-                        zoom_limit *= 1.0 + ((vid_speed - 1.0) / 2.0);
+                        zoom_limit *= (1.0 + ((vid_speed - 1.0) / 4.0)).min(1.8);
                     }
 
-                    let fov_limit = 1.0 / zoom_limit;
+                    let fov_limit = 1.0 / (zoom_limit * scaling_factor);
                     if *fov < fov_limit {
                         any_above_limit = true;
                         params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(*thresholds.get(iter).unwrap_or(thresholds.last().unwrap()));
@@ -583,14 +583,14 @@ impl StabilizationManager {
                         let mut any_above_limit = false;
                         for (i, fov) in params.fovs.iter().enumerate() {
                             let ts = crate::timestamp_at_frame(i as i32, params.scaled_fps);
-                            let mut zoom_limit = (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0) * scaling_factor;
+                            let mut zoom_limit = (params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0);
 
                             if params.video_speed_affects_zooming_limit && (params.video_speed != 1.0 || params.keyframes.is_keyframed(&KeyframeType::VideoSpeed)) {
                                 let vid_speed = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(params.video_speed);
-                                zoom_limit *= 1.0 + ((vid_speed - 1.0) / 2.0);
+                                zoom_limit *= (1.0 + ((vid_speed - 1.0) / 4.0)).min(1.8);
                             }
 
-                            let fov_limit = 1.0 / zoom_limit;
+                            let fov_limit = 1.0 / (zoom_limit * scaling_factor);
                             if *fov < fov_limit {
                                 any_above_limit = true;
                                 params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(*thresholds.get(iter).unwrap_or(thresholds.last().unwrap()));
