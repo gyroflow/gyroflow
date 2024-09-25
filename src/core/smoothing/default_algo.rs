@@ -210,10 +210,10 @@ impl SmoothingAlgorithm for DefaultAlgo {
         hasher.finish()
     }
 
-    fn smooth(&self, quats: &TimeQuat, duration: f64, compute_params: &ComputeParams) -> TimeQuat { // TODO Result<>?
-        if quats.is_empty() || duration <= 0.0 { return quats.clone(); }
+    fn smooth(&self, quats: &TimeQuat, duration_ms: f64, compute_params: &ComputeParams) -> TimeQuat { // TODO Result<>?
+        if quats.is_empty() || duration_ms <= 0.0 { return quats.clone(); }
 
-        let sample_rate: f64 = quats.len() as f64 / (duration / 1000.0);
+        let sample_rate: f64 = quats.len() as f64 / (duration_ms / 1000.0);
         let rad_to_deg_per_sec: f64 = sample_rate * RAD_TO_DEG;
 
         let get_alpha = |time_constant: f64| {
@@ -223,7 +223,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
 
         let keyframes = &compute_params.keyframes;
 
-        let quats = Smoothing::get_trimmed_quats(quats, duration, self.trim_range_only, &compute_params.trim_ranges);
+        let quats = Smoothing::get_trimmed_quats(quats, compute_params.scaled_duration_ms, self.trim_range_only, &compute_params.trim_ranges);
         let quats = quats.as_ref();
 
         let get_keyframed_param = |typ: &KeyframeType, def: f64, cb: &dyn Fn(f64) -> f64| -> BTreeMap<i64, f64> {

@@ -116,24 +116,24 @@ impl Smoothing {
         self.algs.0.iter().map(|x| x.get_name()).collect()
     }
 
-    pub fn get_trimmed_quats<'a>(quats: &'a TimeQuat, duration: f64, trim_range_only: bool, trim_ranges: &[(f64, f64)]) -> Cow<'a, TimeQuat> {
+    pub fn get_trimmed_quats<'a>(quats: &'a TimeQuat, duration_ms: f64, trim_range_only: bool, trim_ranges: &[(f64, f64)]) -> Cow<'a, TimeQuat> {
         if trim_range_only && !trim_ranges.is_empty() {
             let mut quats_copy = quats.clone();
-            let ranges = trim_ranges.iter().map(|x| ((x.0 * duration * 1000.0).round() as i64, (x.1 * duration * 1000.0).round() as i64)).collect::<Vec<_>>();
+            let ranges = trim_ranges.iter().map(|x| ((x.0 * duration_ms * 1000.0).round() as i64, (x.1 * duration_ms * 1000.0).round() as i64)).collect::<Vec<_>>();
             let mut prev_q = quats.range(ranges.first().unwrap().0..).next().map(|(&a, &b)| (a, b));
             let mut next_q = prev_q;
             let mut range = ranges.first().unwrap();
             let mut current_range = 0;
             for (ts, q) in quats_copy.iter_mut() {
                 while *ts > range.1 {
-                    if current_range + 1 >= ranges.len() {
+                    if let Some(next_range) = ranges.get(current_range + 1) {
+                        current_range += 1;
+                        range = next_range;
+                    } else {
                         prev_q = quats.range(..ranges.last().unwrap().1).next_back().map(|(&a, &b)| (a, b));
                         next_q = prev_q;
                         range = &(i64::MAX, i64::MAX);
                         break;
-                    } else {
-                        current_range += 1;
-                        range = ranges.get(current_range).unwrap();
                     }
                     prev_q = Some((*ts, q.clone()));
                     next_q = quats.range(range.0..).next().map(|(&a, &b)| (a, b));
