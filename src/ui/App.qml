@@ -432,17 +432,18 @@ Rectangle {
                                                 presetFileDialog.presetData = finalData;
                                                 presetFileDialog.open2();
                                             } else if (obj.save_type == "default") {
+                                                finalData.name = "Default preset";
                                                 const saved_to = controller.export_preset("", finalData, obj.save_type, "");
                                                 showNotification(Modal.Info, qsTr("Preset saved to %1").arg("<b>" + saved_to + "</b>"))
                                             } else {
                                                 const dlg = messageBox(Modal.Info, qsTr("Enter the name for the preset: "), [
                                                     { text: qsTr("Ok"), accent: true, clicked: function() {
                                                         let name = dlg.mainColumn.children[1].text;
-                                                        console.log(name);
                                                         if (!name) {
                                                             messageBox(Modal.Error, qsTr("Name cannot be empty."), [ { text: qsTr("Ok") } ]);
                                                             return false;
                                                         }
+                                                        finalData.name = name;
                                                         const saved_to = controller.export_preset("", finalData, obj.save_type, name);
                                                         showNotification(Modal.Info, qsTr("Preset saved to %1").arg("<b>" + saved_to + "</b>"))
                                                     } },
@@ -655,6 +656,7 @@ Rectangle {
         type: "output-preset";
         property var presetData: ({});
         onAccepted: {
+            presetData.name = filesystem.get_filename(selectedFile).replace(".gyroflow", "");
             const saved_to = controller.export_preset(selectedFile, presetData, "file", "");
             showNotification(Modal.Info, qsTr("Preset saved to %1").arg("<b>" + saved_to + "</b>"))
         }

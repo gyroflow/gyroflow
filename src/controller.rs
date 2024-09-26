@@ -330,7 +330,8 @@ impl Controller {
             url: url.clone(),
             project_file_url: None,
             image_sequence_start: self.image_sequence_start,
-            image_sequence_fps: self.image_sequence_fps
+            image_sequence_fps: self.image_sequence_fps,
+            preset_name: None
         };
         self.input_file_url_changed();
         self.project_file_url_changed();

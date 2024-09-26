@@ -55,11 +55,13 @@ lazy_static::lazy_static! {
 }
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
 pub struct InputFile {
     pub url: String,
     pub project_file_url: Option<String>,
     pub image_sequence_fps: f64,
-    pub image_sequence_start: i32
+    pub image_sequence_start: i32,
+    pub preset_name: Option<String>,
 }
 
 #[derive(Clone)]
@@ -1610,6 +1612,15 @@ impl StabilizationManager {
 
             {
                 let mut input_file = self.input_file.write();
+                if *is_preset {
+                    if let Some(name) = obj.get("name").and_then(|x| x.as_str()) {
+                        input_file.preset_name = Some(name.into());
+                    } else if let Some(url) = url {
+                        input_file.preset_name = Some(filesystem::get_filename(url).replace(".gyroflow", ""));
+                    } else {
+                        input_file.preset_name = Some("Untitled".into());
+                    }
+                }
                 if let Some(seq_start) = obj.get("image_sequence_start").and_then(|x| x.as_i64()) {
                     input_file.image_sequence_start = seq_start as i32;
                 }

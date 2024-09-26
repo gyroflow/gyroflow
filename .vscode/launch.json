@@ -10,7 +10,7 @@
                 "environment": [
                     {
                         "name": "PATH",
-                        "value": "${env:Path};${workspaceFolder}/ext/6.7.2/msvc2019_64/bin;${workspaceFolder}/ext/ffmpeg-master-windows-desktop-clang-gpl-lite/bin;${workspaceFolder}/ext/vcpkg/installed/x64-windows/bin"
+                        "value": "${env:Path};${workspaceFolder}/ext/6.7.2/msvc2019_64/bin;${workspaceFolder}/ext/ffmpeg-7.1-windows-desktop-clang-gpl-lite/bin;${workspaceFolder}/ext/vcpkg/installed/x64-windows/bin"
                     }
                 ],
             },
@@ -35,7 +35,7 @@
                 "environment": [
                     {
                         "name": "PATH",
-                        "value": "${env:Path};${workspaceFolder}/ext/6.7.2/msvc2019_64/bin;${workspaceFolder}/ext/ffmpeg-master-windows-desktop-clang-gpl-lite/bin;${workspaceFolder}/ext/vcpkg/installed/x64-windows/bin"
+                        "value": "${env:Path};${workspaceFolder}/ext/6.7.2/msvc2019_64/bin;${workspaceFolder}/ext/ffmpeg-7.1-windows-desktop-clang-gpl-lite/bin;${workspaceFolder}/ext/vcpkg/installed/x64-windows/bin"
                     }
                 ],
             },

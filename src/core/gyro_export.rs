@@ -78,6 +78,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
 
     let mut output = String::new();
     let mut json = Vec::<std::collections::HashMap<&str, serde_json::Value>>::new();
+    let mut jsx = std::collections::HashMap::<&str, serde_json::Value>::new();
     if format == Format::Csv {
         let _ = write!(output, "frame,timestamp_ms");
         if oaccl { let _ = write!(output, ",org_acc_x,org_acc_y,org_acc_z"); }
@@ -124,7 +125,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
     };
     let num_frames = params.frame_count;
     let fps = params.get_scaled_fps();
-    let frame_times = serde_json::to_string(&(0..num_frames).map(|i| i as f64 / fps).collect::<Vec<_>>()).unwrap();
+    let frame_times = (0..num_frames).map(|i| i as f64 / fps).collect::<Vec<_>>();
 
     if format == Format::Usd {
         output.push_str(&format!(r#"#usda 1.0
@@ -154,30 +155,28 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
 
     if format == Format::Jsx {
         let duration_s = params.duration_ms / 1000.0;
-        output.push_str(&format!(r#"var comp = app.project.activeItem;
-            var GyroflowCamera = comp.layers.addCamera("GyroflowCamera",[0,0]);
-            GyroflowCamera.inPoint = 0.0;
-            GyroflowCamera.outPoint = {duration_s};
-            GyroflowCamera.property("orientation").setValuesAtTimes({frame_times}, ["#));
+        jsx.insert("duration_s", duration_s.into());
+        jsx.insert("frame_times", frame_times.into());
+        jsx.insert("orientations", Vec::<serde_json::Value>::new().into());
     }
 
     let raw_imu = gyro.raw_imu(&file_metadata);
 
     for (i, frame, ts, timestamp_ms) in timestamps {
         let raw_imu = raw_imu.get(i.unwrap_or(usize::MAX)).cloned().unwrap_or_default();
-        let quat = match ts { TimestampType::Microseconds(ts) => *gyro.quaternions.get(&ts).unwrap(), TimestampType::Milliseconds(ts) => gyro.org_quat_at_timestamp(ts) };
-        let quate = quat.euler_angles();
-        let quatv = quat.as_vector();
+        let quat_org = match ts { TimestampType::Microseconds(ts) => *gyro.quaternions.get(&ts).unwrap(), TimestampType::Milliseconds(ts) => gyro.org_quat_at_timestamp(ts) };
+        let quate = quat_org.euler_angles();
+        let quatv = quat_org.as_vector();
         let val_oaccl = [get(raw_imu.accl, 0), get(raw_imu.accl, 1), get(raw_imu.accl, 2)];
         let val_oeulr = [quate.0 * RAD2DEG, quate.1 * RAD2DEG, quate.2 * RAD2DEG];
         let val_ogyro = [get(raw_imu.gyro, 0), get(raw_imu.gyro, 1), get(raw_imu.gyro, 2)];
         let val_oquat = [quatv[3], quatv[0], quatv[1], quatv[2]];
 
         if format == Format::Jsx && !(seulr && !oeulr) {
-            output.push_str(&format!("[{},{},{}],\n", val_oeulr[0], -val_oeulr[2], val_oeulr[1]));
+            jsx.get_mut("orientations").unwrap().as_array_mut().unwrap().push(serde_json::to_value([val_oeulr[0], -val_oeulr[2], val_oeulr[1]]).unwrap());
         }
         if format == Format::Usd && !(seulr && !oeulr) {
-            let matrix = nalgebra::Matrix4::from(quat);
+            let matrix = nalgebra::Matrix4::from(quat_org);
             output.push_str(&format!("                {}: ( ({},{},{}, 0), ({}, {}, {}, 0), ({}, {}, {}, 0), (7.0, -7.0, 1.5, 1) ),\n",
                 frame + 1,
                 matrix[(0, 0)], matrix[(1, 0)], matrix[(2, 0)],
@@ -186,17 +185,22 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
             ));
         }
 
-        let quat = match ts { TimestampType::Microseconds(ts) => *gyro.smoothed_quaternions.get(&ts).unwrap(), TimestampType::Milliseconds(ts) => gyro.smoothed_quat_at_timestamp(ts) };
-        let quate = quat.euler_angles();
-        let quatv = quat.as_vector();
+        let quat_smooth = match ts { TimestampType::Microseconds(ts) => *gyro.smoothed_quaternions.get(&ts).unwrap(), TimestampType::Milliseconds(ts) => gyro.smoothed_quat_at_timestamp(ts) };
+
+        // smoothed_quaternions is the quaternion needed to stabilize, but in this case we want to get the stabilized camera motion
+        // we need to reverse the calculation done by gyroflow to get original smoothed quaternion
+        let quat_smooth = (quat_smooth / quat_org).inverse();
+
+        let quate = quat_smooth.euler_angles();
+        let quatv = quat_smooth.as_vector();
         let val_seulr = [quate.0 * RAD2DEG, quate.1 * RAD2DEG, quate.2 * RAD2DEG];
         let val_squat = [quatv[3], quatv[0], quatv[1], quatv[2]];
 
         if format == Format::Jsx && (seulr && !oeulr) {
-            output.push_str(&format!("[{},{},{}],\n", val_seulr[0], -val_seulr[2], val_seulr[1]));
+            jsx.get_mut("orientations").unwrap().as_array_mut().unwrap().push(serde_json::to_value([val_seulr[0], -val_seulr[2], val_seulr[1]]).unwrap());
         }
         if format == Format::Usd && (seulr && !oeulr) {
-            let matrix = nalgebra::Matrix4::from(quat);
+            let matrix = nalgebra::Matrix4::from(quat_smooth);
             output.push_str(&format!("                {}: ( ({},{},{}, 0), ({}, {}, {}, 0), ({}, {}, {}, 0), (7.0, -7.0, 1.5, 1) ),\n",
                 frame + 1,
                 matrix[(0, 0)], matrix[(1, 0)], matrix[(2, 0)],
@@ -249,20 +253,28 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
         output.push_str("]);\n");
 
         let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&comp_params, 0.0);
-        output.push_str(&format!("GyroflowCamera.property(\"zoom\").setValue({});\n", camera_matrix[(0, 0)]));
+        jsx.insert("zoom", camera_matrix[(0, 0)].into());
         if comp_params.gyro.read().file_metadata.read().lens_params.len() > 1 {
-            output.push_str(&format!("GyroflowCamera.property(\"zoom\").setValuesAtTimes({frame_times}, ["));
+            jsx.insert("zooms", Vec::<serde_json::Value>::new().into());
             for f in 0..num_frames as i32 {
                 let timestamp = crate::timestamp_at_frame(f, fps);
                 let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&comp_params, timestamp);
-                output.push_str(&format!("{},\n", camera_matrix[(0, 0)]));
+                jsx.get_mut("zooms").unwrap().as_array_mut().unwrap().push(camera_matrix[(0, 0)].into());
             }
-            output = output.trim_end_matches(",\n").to_string();
-            output.push_str("]);\n");
         }
     }
 
-    if format == Format::Csv || format == Format::Jsx {
+    if format == Format::Jsx {
+        format!(r#"var data = {};
+            var comp = app.project.activeItem;
+            var GyroflowCamera = comp.layers.addCamera("GyroflowCamera",[0,0]);
+            GyroflowCamera.inPoint = 0.0;
+            GyroflowCamera.outPoint = data["duration_s"];
+            GyroflowCamera.property("orientation").setValuesAtTimes(data["frame_times"], data["orientations"]);
+            GyroflowCamera.property("zoom").setValue(data["zoom"]);
+            if (data["zooms"].length)
+                GyroflowCamera.property("zoom").setValuesAtTimes(data["frame_times"], data["zooms"]);"#, serde_json::to_string(&jsx).unwrap())
+    } else if format == Format::Csv {
         output
     } else if format == Format::Usd {
         let aspect = params.size.0 as f64 / params.size.1 as f64;

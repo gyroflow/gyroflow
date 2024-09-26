@@ -1312,9 +1312,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.158"
+version = "0.2.159"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8adc4bb1803a324070e64a98ae98f38934d91957a99cfb3a43dcbc01bc56439"
+checksum = "561d97a539a36e26a9a5fad1ea11a3039a67714694aaa379433e580854bc3dc5"
 
 [[package]]
 name = "libloading"
@@ -1471,7 +1471,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=390a416#390a4169fb9c9c538f57ec221e01221f2e8a099b"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=765c202#765c20235ea712fd14ad1b9e36bbb2071a86e319"
 dependencies = [
  "arrayvec 0.7.6",
  "bit-set",
@@ -1899,9 +1899,9 @@ dependencies = [
 
 [[package]]
 name = "pkg-config"
-version = "0.3.30"
+version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d231b230927b5e4ad203db57bbcbee2802f6bce620b1e4a9024a07d94e2907ec"
+checksum = "953ec861398dccce10c670dfeaf3ec4911ca479e9c02154b3a215178c5f566f2"
 
 [[package]]
 name = "pollster"
@@ -2133,9 +2133,9 @@ dependencies = [
 
 [[package]]
 name = "redox_syscall"
-version = "0.5.4"
+version = "0.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0884ad60e090bf1345b93da0a5de8923c93884cd03f40dfcfddd3b4bee661853"
+checksum = "355ae415ccd3a04315d3f8246e86d67689ea74d88d915576e1589a351062a13b"
 dependencies = [
  "bitflags 2.6.0",
 ]
@@ -2533,7 +2533,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.3.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=be20635#be20635ac87a1c009ca8b10b64664bd028a8294e"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=5914978#59149789958b831b0276214e262db38dc3521574"
 dependencies = [
  "argh",
  "byteorder",
@@ -2627,9 +2627,9 @@ checksum = "0dd7358ecb8fc2f8d014bf86f6f638ce72ba252a2c3a2572f2a795f1d23efb41"
 
 [[package]]
 name = "toml_edit"
-version = "0.22.21"
+version = "0.22.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b072cee73c449a636ffd6f32bd8de3a9f7119139aff882f44943ce2986dc5cf"
+checksum = "4ae48d6208a266e853d946088ed816055e556cc6028c5e8e2b84d9fa5dd7c7f5"
 dependencies = [
  "indexmap",
  "toml_datetime",
@@ -2862,7 +2862,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=390a416#390a4169fb9c9c538f57ec221e01221f2e8a099b"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=765c202#765c20235ea712fd14ad1b9e36bbb2071a86e319"
 dependencies = [
  "arrayvec 0.7.6",
  "cfg_aliases",
@@ -2886,7 +2886,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=390a416#390a4169fb9c9c538f57ec221e01221f2e8a099b"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=765c202#765c20235ea712fd14ad1b9e36bbb2071a86e319"
 dependencies = [
  "arrayvec 0.7.6",
  "bit-vec",
@@ -2911,7 +2911,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=390a416#390a4169fb9c9c538f57ec221e01221f2e8a099b"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=765c202#765c20235ea712fd14ad1b9e36bbb2071a86e319"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.6",
@@ -2954,7 +2954,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=390a416#390a4169fb9c9c538f57ec221e01221f2e8a099b"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=765c202#765c20235ea712fd14ad1b9e36bbb2071a86e319"
 dependencies = [
  "bitflags 2.6.0",
  "js-sys",
@@ -3214,9 +3214,9 @@ checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
 
 [[package]]
 name = "winnow"
-version = "0.6.18"
+version = "0.6.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68a9bda4691f099d435ad181000724da8e5899daa10713c2d432552b9ccd3a6f"
+checksum = "36c1fec1a2bb5866f07c25f68c26e565c4c200aebb96d7e55710c19d3e8ac49b"
 dependencies = [
  "memchr",
 ]

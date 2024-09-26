@@ -65,13 +65,13 @@ install-deps:
         echo "Downloading ffmpeg"
 
         # Download and extract ffmpeg
-        curl -L https://sourceforge.net/projects/avbuild/files/macOS/ffmpeg-master-macOS-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
+        curl -L https://sourceforge.net/projects/avbuild/files/macOS/ffmpeg-7.1-macOS-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
         7z x -aoa ffmpeg.tar.xz
         tar -xf ffmpeg.tar
         rm ffmpeg.tar ffmpeg.tar.xz
         mkdir -p ffmpeg-x86_64/lib
         mkdir -p ffmpeg-arm64/lib
-        cd ffmpeg-master-macOS-gpl-lite
+        cd ffmpeg-7.1-macOS-gpl-lite
         lipo lib/libavcodec.a    -thin x86_64 -output ../ffmpeg-x86_64/lib/libavcodec.a
         lipo lib/libavformat.a   -thin x86_64 -output ../ffmpeg-x86_64/lib/libavformat.a
         lipo lib/libavdevice.a   -thin x86_64 -output ../ffmpeg-x86_64/lib/libavdevice.a
