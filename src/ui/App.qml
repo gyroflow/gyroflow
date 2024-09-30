@@ -419,7 +419,7 @@ Rectangle {
                                     el.opened = true;
                                     el.onApply.connect((obj) => {
                                         const allData = JSON.parse(controller.export_gyroflow_data("Simple", window.getAdditionalProjectData()));
-                                        const finalData = el.getFilteredObject(allData, obj);
+                                        let finalData = el.getFilteredObject(allData, obj);
 
                                         if (finalData.hasOwnProperty("output")) {
                                             finalData.output.output_filename = ""; // Don't modify filenames, only target folder

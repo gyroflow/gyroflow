@@ -267,7 +267,7 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="447"/>
       <location filename="../../src/ui/App.qml" line="659"/>
       <source>Preset saved to %1</source>
-      <translation type="unfinished">Preset saved to %1</translation>
+      <translation>プリセットが %1に保存されました</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="625"/>
@@ -335,12 +335,12 @@ Due to limitations of the system video encoders, rendering in the background is 
     <message>
       <location filename="../../src/ui/App.qml" line="438"/>
       <source>Enter the name for the preset: </source>
-      <translation type="unfinished">Enter the name for the preset: </translation>
+      <translation>プリセットの名前を入力: </translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="443"/>
       <source>Name cannot be empty.</source>
-      <translation type="unfinished">Name cannot be empty.</translation>
+      <translation>名前は空にできません</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="666"/>
@@ -1381,12 +1381,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="9"/>
       <source>Video editor plugins</source>
-      <translation type="unfinished">Video editor plugins</translation>
+      <translation>ビデオエディタのプラグイン</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="25"/>
       <source>Select %1</source>
-      <translation type="unfinished">Select %1</translation>
+      <translation>%1 を選択</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="31"/>
@@ -1395,51 +1395,51 @@ Do you want to submit your profile?</source>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="129"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="137"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>OK</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="31"/>
       <source>You selected the wrong folder.
 Make sure to select %1.</source>
-      <translation type="unfinished">You selected the wrong folder.
-Make sure to select %1.</translation>
+      <translation>間違ったフォルダを選択しました。
+ %1を必ず選択してください。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="93"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="121"/>
       <source>Update</source>
-      <translation type="unfinished">Update</translation>
+      <translation>更新</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="93"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="121"/>
       <source>Install</source>
-      <translation type="unfinished">Install</translation>
+      <translation>インストール</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="100"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="137"/>
       <source>At the next prompt, click &lt;b&gt;&quot;Open&quot;&lt;/b&gt; to grant access to the %1 folder in order for Gyroflow to install the plugin.</source>
-      <translation type="unfinished">At the next prompt, click &lt;b&gt;&quot;Open&quot;&lt;/b&gt; to grant access to the %1 folder in order for Gyroflow to install the plugin.</translation>
+      <translation>次のプロンプトで、「開く」をクリックして、Gyroflowがプラグインをインストールするために%1フォルダへのアクセスを許可します。</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="129"/>
       <source>%1 folder doesn&apos;t exist.
 Due to sandbox limitations, you have to create it yourself.
 Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</source>
-      <translation type="unfinished">%1 folder doesn&apos;t exist.
-Due to sandbox limitations, you have to create it yourself.
-Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
+      <translation>%1フォルダが存在しません。
+サンドボックスの制限により、自分で作成する必要があります。
+&lt;b&gt;Terminal&lt;/b&gt; を開き、以下のコマンドを入力します：</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="131"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>キャンセル</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="150"/>
       <source>More information</source>
-      <translation type="unfinished">More information</translation>
+      <translation>詳細情報</translation>
     </message>
   </context>
   <context>
@@ -2169,12 +2169,12 @@ OKをクリックして保存先フォルダを選択します。</translation>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="220"/>
       <source>Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the directory with lens profiles.</source>
-      <translation type="unfinished">Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the directory with lens profiles.</translation>
+      <translation>ヒント: プリセット(”.gyroflow”ファイル)をレンズプロファイルのディレクトリに保存すると、レンズプロファイル検索ボックスに作成したプリセットを保存できます。</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="221"/>
       <source>You can also save your preset as `default.gyroflow` in the directory with lens profiles and it will be always applied to every loaded video file (also in plugins).</source>
-      <translation type="unfinished">You can also save your preset as `default.gyroflow` in the directory with lens profiles and it will be always applied to every loaded video file (also in plugins).</translation>
+      <translation>プリセットを ”default.gyroflow” としてレンズプロファイルのディレクトリに保存することもできます。こうすると常に読み込まれたすべてのビデオファイルに適用されます。（プラグインでも）</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="235"/>
