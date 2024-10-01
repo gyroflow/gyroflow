@@ -240,12 +240,12 @@ Item {
     // Toggle grid guide
     Shortcut {
         sequence: "G";
-        onActivated: window.videoArea.gridGuide.shown = !window.videoArea.gridGuide.shown;
+        onActivated: videoArea.gridGuide.shown = !videoArea.gridGuide.shown;
     }
     // Grid guide color white/black
     Shortcut {
         sequence: "Ctrl+G";
-        onActivated: window.videoArea.gridGuide.isBlack = !window.videoArea.gridGuide.isBlack;
+        onActivated: videoArea.gridGuide.isBlack = !videoArea.gridGuide.isBlack;
     }
 
     // Play backwards
@@ -309,11 +309,11 @@ Item {
         if (current_id > 0) {
             // Save
             window.renderBtn.isAddToQueue = true;
-            window.videoArea.vid.grabToImage(function(result) {
+            videoArea.vid.grabToImage(function(result) {
                 render_queue.add(window.getAdditionalProjectDataJson(), controller.image_to_b64(result.image));
                 if (new_id > 0) {
                     const data = render_queue.get_gyroflow_data(new_id);
-                    window.videoArea.loadGyroflowData(JSON.parse(data), new_id);
+                    videoArea.loadGyroflowData(JSON.parse(data), new_id);
                 }
             });
         }
@@ -323,8 +323,8 @@ Item {
     Shortcut {
         sequence: "Ctrl+D";
         onActivated: {
-            const url = filesystem.get_next_file_url(window.videoArea.loadedFileUrl, 1);
-            if (url && url.toString()) window.videoArea.loadFile(url);
+            const url = filesystem.get_next_file_url(videoArea.loadedFileUrl, 1);
+            if (url && url.toString()) videoArea.loadFile(url);
         }
     }
 
@@ -332,8 +332,8 @@ Item {
     Shortcut {
         sequence: "Ctrl+A";
         onActivated: {
-            const url = filesystem.get_next_file_url(window.videoArea.loadedFileUrl, -1);
-            if (url && url.toString()) window.videoArea.loadFile(url);
+            const url = filesystem.get_next_file_url(videoArea.loadedFileUrl, -1);
+            if (url && url.toString()) videoArea.loadFile(url);
         }
     }
 }

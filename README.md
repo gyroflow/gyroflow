@@ -87,7 +87,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - [x] GoPro (HERO 5 and later)
 - [x] Sony (a1, a7c, a7r V, a7 IV, a7s III, a9 II, a9 III, FX3, FX6, FX9, RX0 II, RX100 VII, ZV1, ZV-E10, ZV-E10 II, ZV-E1, a6700)
 - [x] Insta360 (OneR, OneRS, SMO 4k, Go, GO2, GO3, GO3S, Caddx Peanut, Ace, Ace Pro)
-- [x] DJI (Avata, Avata 2, O3 Air Unit, Action 2/4/5)
+- [x] DJI (Avata, Avata 2, O3 Air Unit, Action 2/4/5, Neo)
 - [x] Blackmagic RAW (*.braw)
 - [x] RED RAW (V-Raptor, KOMODO) (*.r3d)
 - [x] Betaflight blackbox (*.bfl, *.bbl, *.csv)
@@ -109,7 +109,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - For cameras which don't have built-in gyro, you can use any other device which records gyro data. It may be a phone, an action camera, or an external device like a Betaflight FC, [flowshutter](https://github.com/gyroflow/flowshutter), [esp-gyrologger](https://github.com/VladimirP1/esp-gyrologger) (eg. on an [AtomS3](https://shop.m5stack.com/products/atoms3-dev-kit-w-0-85-inch-screen)). You just have to mount it on your main camera.
 
 ## Installation
-### Windows - [Microsoft store](https://apps.microsoft.com/store/detail/gyroflow/9NZG7T0JCG9H) or:
+### Windows - [Microsoft Store](https://apps.microsoft.com/store/detail/gyroflow/9NZG7T0JCG9H) or:
 - Download `Gyroflow-windows64.zip` from the [Releases](https://github.com/gyroflow/gyroflow/releases) page, extract the files somewhere and run `Gyroflow.exe`
 - If it shows an error about `VCRUNTIME140.dll` or `0xc0000142`, [install VC redist](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
