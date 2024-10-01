@@ -50,41 +50,44 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 </p>
 
 ## Features
-- Real time preview, params adjustments and all calculations
+- Real-time preview, parameter adjustments and all calculations
 - GPU processing and rendering, all algorithms fully multi-threaded
 - Rolling shutter correction
+- [Video editor plugins](https://github.com/gyroflow/gyroflow-plugins) (Adobe Premiere/Ae, DaVinci Resolve, Final Cut Pro and more), allowing you to apply stabilization directly in a video editor without transcoding
+- Supports full Sony metadata (recording params, automatic lens, support for IBIS, OIS, EIS - you can have IBIS enabled in camera and still apply Gyroflow on top)
 - Supports already stabilized GoPro videos (captured with Hypersmooth enabled) (Hero 8 and up)
-- Supports and renders 10-bit videos (up to 16-bit 4:4:4:4 for regular codecs and 32-bit float for OpenEXR - works directly on YUV data to keep maximum quality)
+- Supports and renders 10-bit videos (up to 16-bit 4:4:4:4 for regular codecs and 32-bit float for OpenEXR - working directly on YUV data to maintain maximum quality)
 - Customizable lens correction strength
 - Render queue
 - Keyframes
 - Ability to create custom settings presets
-- [OpenFX plugin](https://github.com/gyroflow/gyroflow-ofx) (eg. for DaVinci Resolve), which allows you to apply stabilization in video editor without any transcoding
-- [Gyroflow Toolbox](https://gyroflowtoolbox.io) - A Final Cut Pro effect which allows you to import a Gyroflow Project without transcoding
-- Visual chart with gyro data (can display gyro, accel, magnetometer and quaternions)
-- Visual display of smoothed quaternions
+- Visual chart with gyro data (displays gyro, accelerometer, magnetometer, and quaternions, including smoothed quaternions)
+- Supports underwater footage (corrects underwater distortions)
 - Modern responsive user interface with Dark and Light theme
 - Adaptive zoom (dynamic cropping)
-- Support for image sequences (PNG, OpenEXR, CinemaDNG)
+- Zoom limit
+- Supports image sequences (PNG, OpenEXR, CinemaDNG)
 - Based on [telemetry-parser](https://github.com/AdrianEddy/telemetry-parser) - supports all gyro sources out of the box
 - Gyro low pass filter, arbitrary rotation (pitch, roll, yaw angles) and orientation
 - Multiple gyro integration methods for orientation determination
 - Multiple video orientation smoothing algorithms, including horizon levelling and per-axis smoothness adjustment.
 - Cross-platform - works on Windows/Linux/Mac/Android/iOS
 - Multiple UI languages
-- Supports variable and high frame rate videos, all calculations are done on timestamps
+- Supports variable and high frame rate videos - all calculations are done on timestamps
 - H.264/AVC, H.265/HEVC, ProRes, DNxHD, CineForm, PNG and OpenEXR outputs, with H.264 and H.265 fully GPU accelerated (ProRes also accelerated on Apple Silicon)
-- Automatic lens calibration process
+- Easy lens calibration process
 - Fully zero-copy GPU preview rendering
 - Core engine is a separate library without external dependencies (no Qt, no ffmpeg, no OpenCV), and can be used to create OpenFX and Adobe plugins (on the TODO list)
 - Automatic updates of lens profile database
-- Built-in official lens profiles for GoPro: HERO 6, 7, 8, 9, 10, 11, 12; RunCam: Thumb, ThumbPro, 5 Orange; Insta360: GO 2, GO 3 in all shooting modes
+- Built-in official lens profiles for GoPro HERO 6-13; Sony; DJI; Insta360 action cameras; RunCam: Thumb series, 5 Orange
+- Easy management of the video editor plugins from within the app
+- Ability to add an additional 3D rotation (useful for framing vertical videos)
 
 ## Supported gyro sources
 - [x] GoPro (HERO 5 and later)
-- [x] Sony (a1, a7c, a7r V, a7 IV, a7s III, a9 II, a9 III, FX3, FX6, FX9, RX0 II, RX100 VII, ZV1, ZV-E10, ZV-E1, a6700)
-- [x] Insta360 (OneR, OneRS, SMO 4k, Go, GO2, GO3, Caddx Peanut, Ace, Ace Pro)
-- [x] DJI (Avata, Avata 2, O3 Air Unit, Action 2, Action 4)
+- [x] Sony (a1, a7c, a7r V, a7 IV, a7s III, a9 II, a9 III, FX3, FX6, FX9, RX0 II, RX100 VII, ZV1, ZV-E10, ZV-E10 II, ZV-E1, a6700)
+- [x] Insta360 (OneR, OneRS, SMO 4k, Go, GO2, GO3, GO3S, Caddx Peanut, Ace, Ace Pro)
+- [x] DJI (Avata, Avata 2, O3 Air Unit, Action 2/4/5)
 - [x] Blackmagic RAW (*.braw)
 - [x] RED RAW (V-Raptor, KOMODO) (*.r3d)
 - [x] Betaflight blackbox (*.bfl, *.bbl, *.csv)
@@ -103,14 +106,14 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 ### Info for cameras not on the list
 
 - For cameras which do have built-in gyro, please contact us and we will implement support for that camera. Refer to the [documentation](https://docs.gyroflow.xyz) for information about the gyro logging process.
-- For cameras which don't have built-in gyro, please consider using Betaflight FC or check out our [flowshutter](https://github.com/gyroflow/flowshutter) project.
+- For cameras which don't have built-in gyro, you can use any other device which records gyro data. It may be a phone, an action camera, or an external device like a Betaflight FC, [flowshutter](https://github.com/gyroflow/flowshutter), [esp-gyrologger](https://github.com/VladimirP1/esp-gyrologger) (eg. on an [AtomS3](https://shop.m5stack.com/products/atoms3-dev-kit-w-0-85-inch-screen)). You just have to mount it on your main camera.
 
 ## Installation
-### Windows
+### Windows - [Microsoft store](https://apps.microsoft.com/store/detail/gyroflow/9NZG7T0JCG9H) or:
 - Download `Gyroflow-windows64.zip` from the [Releases](https://github.com/gyroflow/gyroflow/releases) page, extract the files somewhere and run `Gyroflow.exe`
-- If it shows an error about `VCRUNTIME140.dll`, [install VC redist](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+- If it shows an error about `VCRUNTIME140.dll` or `0xc0000142`, [install VC redist](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
-### MacOS
+### MacOS - [App Store](https://apps.apple.com/us/app/gyroflow/id6447994244) or:
 - Download `Gyroflow-mac-universal.dmg` from the [Releases](https://github.com/gyroflow/gyroflow/releases) page, run the downloaded file, and drag & drop `Gyroflow` app to the Applications folder (or anywhere you want, like on Desktop)
 - You can also install using brew: `brew install gyroflow`. To upgrade Gyroflow, run `brew update` then `brew upgrade gyroflow`
 
@@ -124,6 +127,12 @@ Gyroflow is an application that can stabilize your video by using motion data fr
     - Intel: `intel-media-va-driver i965-va-driver beignet-opencl-icd intel-opencl-icd`
     - AMD: `mesa-vdpau-drivers mesa-va-drivers mesa-opencl-icd libegl-mesa0 mesa-vulkan-drivers`
 
+### Android
+- [Google Play](https://play.google.com/store/apps/details?id=xyz.gyroflow)
+
+### iOS
+- [App Store](https://apps.apple.com/us/app/gyroflow/id6447994244)
+
 ### Nightly build
 Latest development version is always available here: https://gyroflow.xyz/devbuild/.
 
@@ -135,6 +144,7 @@ Latest development version is always available here: https://gyroflow.xyz/devbui
     - `.tar.gz` package (recommended): Debian 10+, Ubuntu 18.10+, CentOS 8.2+, openSUSE 15.3+. Other distros require glibc 2.28+ (`ldd --version` to check)
     - `.AppImage` should work everywhere
 - Android 6+
+- iOS 14+
 
 ## Help and support
 For general support and discussion, you can find the developers and other users on the [Gyroflow Discord server](https://discord.gg/BBJ2UVAr2D).
@@ -150,11 +160,11 @@ See the [open issues](https://github.com/gyroflow/gyroflow/issues) for a list of
 There's also a ton of TODO comments throughout the code.
 
 ### Video editor plugins
-Gyroflow OpenFX plugin is available [here](https://github.com/gyroflow/gyroflow-ofx). OpenFX plugin was tested in DaVinci Resolve
+Gyroflow OpenFX plugin is available [here](https://github.com/gyroflow/gyroflow-plugins). OpenFX plugin was tested in DaVinci Resolve
 
-[Gyroflow Toolbox](https://github.com/latenitefilms/GyroflowToolbox) allows you to import Gyroflow Projects into a Final Cut Pro effect.
+Adobe Premiere and After Effects plugin is available [here](https://github.com/gyroflow/gyroflow-plugins)
 
-Adobe After Effects plugin is planned, but not ready yet
+Final Cut Pro plugin is available as [Gyroflow Toolbox](https://gyroflowtoolbox.io).
 
 ## Contributing
 
@@ -208,7 +218,7 @@ For GPU processing we use *OpenCL* or *wgpu*, with highly parallelized CPU imple
 ### Code structure
 1. Entire GUI is in the `src/ui` directory
 2. `src/controller.rs` is a bridge between UI and core, it takes all commands from QML and calls functions in core
-3. `src/core` contains the whole gyroflow engine and doesn't depend on *Qt* or *ffmpeg*, and *OpenCV* is optional
+3. `src/core` contains the whole gyroflow engine and doesn't depend on *Qt* or *ffmpeg*. *OpenCV* is optional
 4. `src/rendering` contains all FFmpeg related code for rendering final video and processing for synchronization
 5. `src/core/gpu` contains GPU implementations of the undistortion
 6. `src/qt_gpu` contains zero-copy GPU undistortion path, using Qt RHI and GLSL compute shader
@@ -290,7 +300,7 @@ As additional permission under section 7, you are allowed to distribute [`gyrofl
 
 ## Authors
 
-* [AdrianEddy](https://github.com/AdrianEddy/) - *Author of the Rust implementation (code in this repository), author of the UI, GPU processing, rolling shutter correction and advanced rendering features*
+* [AdrianEddy](https://github.com/AdrianEddy/) - *Author of the Rust implementation (code in this repository), author of the UI, GPU processing, rolling shutter correction, advanced rendering features and the Adobe plugin*
 * [Elvin Chen](https://github.com/ElvinC/) - *Author of the first version in Python, laid the groundwork to make all this possible*
 
 ### Notable contributors
@@ -298,7 +308,7 @@ As additional permission under section 7, you are allowed to distribute [`gyrofl
 * [Aphobius](https://github.com/Aphobius/) - *Author of the velocity dampened smoothing algorithm*
 * [Marc Roeschlin](https://github.com/marcroe/) - *Author of the adaptive zoom algorithm*
 * [Ilya Epifanov](https://github.com/ilya-epifanov/) - *Author of the OpenFX plugin*
-* [Vladimir Pinchuk](https://github.com/VladimirP1/) - *Author of robust gyro-to-video synchronization algorithm*
+* [Vladimir Pinchuk](https://github.com/VladimirP1/) - *Author of robust gyro-to-video synchronization algorithm and Sony lens/IBIS data*
 * [Chris Hocking](https://github.com/latenitefilms) - *Author of the [Gyroflow Toolbox](https://gyroflowtoolbox.io) Final Cut Pro Plugin*
 
 ## Acknowledgements
