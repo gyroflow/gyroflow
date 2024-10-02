@@ -264,6 +264,13 @@ deploy:
         xcopy /Y "C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\d3dcompiler_47.dll" "$TargetDir\"
     }
 
+    # VC Redist
+    xcopy /Y "C:\Windows\System32\vcruntime140.dll"     "$TargetDir\"
+    xcopy /Y "C:\Windows\System32\vcruntime140_1.dll"   "$TargetDir\"
+    xcopy /Y "C:\Windows\System32\msvcp140.dll"         "$TargetDir\"
+    xcopy /Y "C:\Windows\System32\msvcp140_1.dll"       "$TargetDir\"
+    xcopy /Y "C:\Windows\System32\msvcp140_2.dll"       "$TargetDir\"
+
     7z a $ProjectDir\_deployment\_binaries\Gyroflow-{{NameSuffix}}.zip $TargetDir\*
 
 [no-cd]
