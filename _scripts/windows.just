@@ -265,11 +265,13 @@ deploy:
     }
 
     # VC Redist
-    xcopy /Y "C:\Windows\System32\vcruntime140.dll"     "$TargetDir\"
-    xcopy /Y "C:\Windows\System32\vcruntime140_1.dll"   "$TargetDir\"
-    xcopy /Y "C:\Windows\System32\msvcp140.dll"         "$TargetDir\"
-    xcopy /Y "C:\Windows\System32\msvcp140_1.dll"       "$TargetDir\"
-    xcopy /Y "C:\Windows\System32\msvcp140_2.dll"       "$TargetDir\"
+    if ("{{Arch}}" -eq "x86_64") {
+        xcopy /Y "C:\Windows\System32\vcruntime140.dll"     "$TargetDir\"
+        xcopy /Y "C:\Windows\System32\vcruntime140_1.dll"   "$TargetDir\"
+        xcopy /Y "C:\Windows\System32\msvcp140.dll"         "$TargetDir\"
+        xcopy /Y "C:\Windows\System32\msvcp140_1.dll"       "$TargetDir\"
+        xcopy /Y "C:\Windows\System32\msvcp140_2.dll"       "$TargetDir\"
+    }
 
     7z a $ProjectDir\_deployment\_binaries\Gyroflow-{{NameSuffix}}.zip $TargetDir\*
 
@@ -326,6 +328,8 @@ bundle:
     cp -Recurse -Force $TargetDir\* bundle\
     cp -Recurse -Force Assets bundle\Assets
     cp -Force AppxManifest.xml bundle\
+    Remove-Item -Path "bundle\vcruntime14*.dll" -ErrorAction SilentlyContinue
+    Remove-Item -Path "bundle\msvcp14*.dll"     -ErrorAction SilentlyContinue
 
     # Apps are not allowed to have a Version with a revision number other than zero specified in the app manifest.
     if ("$Env:GITHUB_RUN_NUMBER") {
