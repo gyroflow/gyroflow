@@ -408,6 +408,9 @@ impl LensProfile {
     }
 
     pub fn get_display_name(&self) -> String {
+        if self.calib_dimension.w == 0 || self.calib_dimension.h == 0 {
+            return String::from("---");
+        }
         let mut all_sizes = HashSet::new();
         let mut all_fps = HashSet::new();
         all_sizes.insert(self.calib_dimension.w * 10000 + self.calib_dimension.h);
