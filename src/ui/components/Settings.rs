@@ -14,6 +14,8 @@ pub struct Settings {
     value: qt_method!(fn(&self, key: QString, default: QVariant) -> QVariant),
     contains: qt_method!(fn(&self, key: QString) -> bool),
     setValue: qt_method!(fn(&mut self, key: QString, value: QVariant)),
+    clear: qt_method!(fn(&mut self)),
+    dataDir: qt_method!(fn(&self, path: QString) -> QString),
 
     propChanged: qt_method!(fn(&self, obj: QJSValue)),
 }
@@ -31,7 +33,13 @@ impl Settings {
         let key = key.to_string();
         gyroflow_core::settings::set(&key, qvariant_to_serde_json(val))
     }
-
+    fn clear(&self) {
+        gyroflow_core::settings::clear()
+    }
+    fn dataDir(&self, path: QString) -> QString {
+        let path = path.to_string();
+        QString::from(gyroflow_core::settings::data_dir().join(path).to_string_lossy().to_string())
+    }
     ///////////////////////////////////////////////////////////////////
 
     fn propChanged(&self, v: QJSValue) {

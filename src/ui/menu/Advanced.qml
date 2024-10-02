@@ -409,7 +409,7 @@ MenuItem {
                     // Preserve lens profile favorites
                     const lenses = settings.value("lensProfileFavorites", "");
 
-                    controller.clear_settings();
+                    settings.clear();
 
                     if (lenses) settings.setValue("lensProfileFavorites", lenses);
 

@@ -230,7 +230,6 @@ pub struct Controller {
     set_digital_lens_param: qt_method!(fn(&self, index: usize, value: f64)),
 
     get_username: qt_method!(fn(&self) -> QString),
-    clear_settings: qt_method!(fn(&self)),
     copy_to_clipboard: qt_method!(fn(&self, text: QString)),
 
     image_to_b64: qt_method!(fn(&self, img: QImage) -> QString),
@@ -2307,7 +2306,6 @@ impl Controller {
     // Utilities
     fn get_username(&self) -> QString { let realname = whoami::realname(); QString::from(if realname.is_empty() { whoami::username() } else { realname }) }
     fn image_to_b64(&self, img: QImage) -> QString { util::image_to_b64(img) }
-    fn clear_settings(&self) { gyroflow_core::settings::clear() }
     fn copy_to_clipboard(&self, text: QString) { util::copy_to_clipboard(text) }
 }
 

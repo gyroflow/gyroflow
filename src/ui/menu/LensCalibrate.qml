@@ -152,6 +152,11 @@ MenuItem {
                 controller.export_lens_profile(selectedFile, calib.calibrationInfo, uploadProfile.checked);
             }
         }
+        Component.onCompleted: {
+            if (Qt.platform.os != "android" && Qt.platform.os != "ios") {
+                currentFolder = filesystem.path_to_url(settings.dataDir("lens_profiles"));
+            }
+        }
     }
 
     InfoMessageSmall {
