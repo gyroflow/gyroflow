@@ -2242,6 +2242,13 @@ impl Controller {
         let mut processed = 0;
 
         let stab = self.stabilizer.clone();
+        {
+            let params = stab.params.read();
+            if params.size.0 <= 0 || params.size.1 <= 0 {
+                self.error(QString::from("An error occured: %1"), QString::from("Video is not loaded"), QString::default());
+                return;
+            }
+        }
 
         core::run_threaded(move || {
             progress((0, total));

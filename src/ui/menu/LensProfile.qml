@@ -408,6 +408,7 @@ MenuItem {
             anchors.horizontalCenter: parent.horizontalCenter;
             text: qsTr("Export STMap");
             OutputPathField { id: opf; visible: false; }
+            enabled: window.videoArea.vid.loaded;
             onClicked: {
                 opf.selectFolder("", function(folder_url) {
                     if (controller.has_per_frame_lens_data()) {
@@ -474,7 +475,7 @@ MenuItem {
         sequences: ["Delete"];
         onActivated: {
             console.log("deleting " + root.files[root.fileno]);
-            filesystem.remove_file("file:///d:/lens_review/" + root.files[root.fileno]);
+            filesystem.move_to_trash("file:///d:/lens_review/" + root.files[root.fileno]);
         }
     }
     */
