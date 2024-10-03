@@ -21,7 +21,7 @@ pub struct LensProfileDatabase {
     preset_map: HashMap<String, String>,
     map: HashMap<String, LensProfile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
-    list_for_ui: Vec<(String, String, String, bool, f64, i32)>,
+    list_for_ui: Vec<(String, String, String, bool, f64, i32, String)>,
     pub loaded: bool,
     pub version: u32,
 }
@@ -231,19 +231,19 @@ impl LensProfileDatabase {
     }
 
     pub fn prepare_list_for_ui(&mut self) {
-        // (name, path_to_file, crc32, official, rating, aspect_ratio*1000)
+        // (name, path_to_file, crc32, official, rating, aspect_ratio*1000, author)
         let mut set = HashSet::with_capacity(self.map.len());
         let mut checksum_map = HashMap::with_capacity(self.map.len());
         self.list_for_ui = Vec::with_capacity(self.map.len());
         for (k, v) in &self.map {
             if v.path_to_file.ends_with(".gyroflow") {
-                self.list_for_ui.push((v.name.clone(), k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), 0));
+                self.list_for_ui.push((v.name.clone(), k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), 0, v.calibrated_by.clone()));
             } else if !v.camera_brand.is_empty() && !v.camera_model.is_empty() {
                 if !v.is_copy {
                     let mut name = v.get_display_name();
                     let mut new_name = name.clone();
                     if set.contains(&new_name) {
-                        if let Some((kk, vv, _, _, _, _)) = self.list_for_ui.iter_mut().find(|(k, _, _, _, _, _)| *k == new_name) {
+                        if let Some((kk, vv, _, _, _, _, _)) = self.list_for_ui.iter_mut().find(|(k, _, _, _, _, _, _)| *k == new_name) {
                             set.remove(kk);
                             *kk = format!("{} by {}", *kk, self.map[vv].calibrated_by);
                             set.insert(kk.clone());
@@ -262,7 +262,7 @@ impl LensProfileDatabase {
                     let vstretch = if v.input_vertical_stretch   > 0.01 { v.input_vertical_stretch   } else { 1.0 };
 
                     let aspect_ratio = (((v.calib_dimension.w as f64 / hstretch) / (v.calib_dimension.h.max(1) as f64 / vstretch)) * 1000.0).round() as i32;
-                    self.list_for_ui.push((new_name, k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), aspect_ratio));
+                    self.list_for_ui.push((new_name, k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), aspect_ratio, v.calibrated_by.clone()));
                 }
             } else {
                 log::debug!("Unknown camera model: {:?}", v);
@@ -276,7 +276,7 @@ impl LensProfileDatabase {
         self.list_for_ui.sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
     }
 
-    pub fn search(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<(String, String, String, bool, f64, i32)> {
+    pub fn search(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<(String, String, String, bool, f64, i32, String)> {
         let text = text.to_ascii_lowercase()
             .replace("bmpcc4k",  "blackmagic pocket cinema camera 4k")
             .replace("bmpcc6k",  "blackmagic pocket cinema camera 6k")
@@ -307,10 +307,11 @@ impl LensProfileDatabase {
             return Vec::new();
         }
 
-        let mut filtered = self.list_for_ui.iter().filter(|(name, _, _, _, _, _)| {
+        let mut filtered = self.list_for_ui.iter().filter(|(name, _, _, _, _, _, author)| {
             let name = name.to_ascii_lowercase();
+            let author = author.to_ascii_lowercase();
             for word in &words {
-                if !name.contains(word) {
+                if !name.contains(word) && !author.contains(word) {
                     return false;
                 }
             }

@@ -1813,7 +1813,7 @@ impl Controller {
         let text = text.to_string();
         let favorites = HashSet::<String>::from_iter(favorites.into_iter().map(|x| x.to_qbytearray().to_string()));
         core::run_threaded(move || {
-            let profiles = db.read().search(&text, &favorites, aspect_ratio, aspect_ratio_swapped).into_iter().map(|(name, file, crc, official, rating, aspect_ratio)| {
+            let profiles = db.read().search(&text, &favorites, aspect_ratio, aspect_ratio_swapped).into_iter().map(|(name, file, crc, official, rating, aspect_ratio, _author)| {
                 let mut list = QVariantList::from_iter([
                     QString::from(name),
                     QString::from(file),
