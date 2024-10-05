@@ -329,20 +329,6 @@ name = "bytemuck"
 version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94bbb0ad554ad961ddc5da507a12a29b14e4ae5bda06b19f575a3e6079d2e2ae"
-dependencies = [
- "bytemuck_derive",
-]
-
-[[package]]
-name = "bytemuck_derive"
-version = "1.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0cc8b54b395f2fcfbb3d90c47b01c7f444d94d05bdeb775811dec868ac3bbc26"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.79",
-]
 
 [[package]]
 name = "byteorder"
@@ -1477,7 +1463,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=71b4f36#71b4f361e244d8b4be79c67207e19a2c267c73f2"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=ee0d170#ee0d1703e5f4a267ce9b87d50b824190b45b5a79"
 dependencies = [
  "arrayvec 0.7.6",
  "bit-set",
@@ -2252,9 +2238,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.23.13"
+version = "0.23.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2dabaac7466917e566adb06783a81ca48944c6898a1b08b9374106dd671f4c8"
+checksum = "415d9944693cb90382053259f89fbb077ea730ad7273047ec63b19bc9b160ba8"
 dependencies = [
  "log",
  "once_cell",
@@ -2548,7 +2534,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "telemetry-parser"
 version = "0.3.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=5914978#59149789958b831b0276214e262db38dc3521574"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=966e187#966e187f70f80a780d711a764a7cff417793e39e"
 dependencies = [
  "argh",
  "byteorder",
@@ -2678,9 +2664,9 @@ checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 
 [[package]]
 name = "unicode-bidi"
-version = "0.3.15"
+version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "08f95100a766bf4f8f28f90d77e0a5461bbdb219042e7679bebe79004fed8d75"
+checksum = "5ab17db44d7388991a428b2ee655ce0c212e862eff1768a455c58f9aad6e7893"
 
 [[package]]
 name = "unicode-ident"
@@ -2877,7 +2863,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=71b4f36#71b4f361e244d8b4be79c67207e19a2c267c73f2"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=ee0d170#ee0d1703e5f4a267ce9b87d50b824190b45b5a79"
 dependencies = [
  "arrayvec 0.7.6",
  "cfg_aliases",
@@ -2901,7 +2887,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=71b4f36#71b4f361e244d8b4be79c67207e19a2c267c73f2"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=ee0d170#ee0d1703e5f4a267ce9b87d50b824190b45b5a79"
 dependencies = [
  "arrayvec 0.7.6",
  "bit-vec",
@@ -2926,7 +2912,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=71b4f36#71b4f361e244d8b4be79c67207e19a2c267c73f2"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=ee0d170#ee0d1703e5f4a267ce9b87d50b824190b45b5a79"
 dependencies = [
  "android_system_properties",
  "arrayvec 0.7.6",
@@ -2934,6 +2920,7 @@ dependencies = [
  "bit-set",
  "bitflags 2.6.0",
  "block",
+ "bytemuck",
  "cfg_aliases",
  "core-graphics-types",
  "glow",
@@ -2969,7 +2956,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=71b4f36#71b4f361e244d8b4be79c67207e19a2c267c73f2"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=ee0d170#ee0d1703e5f4a267ce9b87d50b824190b45b5a79"
 dependencies = [
  "bitflags 2.6.0",
  "js-sys",

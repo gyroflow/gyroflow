@@ -16,7 +16,7 @@ use std::collections::btree_map::Entry;
 use std::sync::{ Arc, atomic::AtomicBool };
 use parking_lot::RwLock;
 use telemetry_parser::{ Input, util };
-use telemetry_parser::tags_impl::{ GetWithType, GroupId, TagId, TimeQuaternion };
+use telemetry_parser::tags_impl::{ GetWithType, GroupId, TagId, TimeQuaternion, TimeVector3 };
 
 use crate::camera_identifier::CameraIdentifier;
 use crate::filesystem;
@@ -376,6 +376,15 @@ impl GyroSource {
                     if let Some(mesh) = sony::get_mesh_correction(tag_map, &mut mesh_cache) {
                         md.mesh_correction.push(mesh);
                     }
+
+                    if let Some(ois) = tag_map.get(&GroupId::LensOSS).and_then(|x| x.get_t(TagId::Data) as Option<&Vec<TimeVector3<i32>>>) {
+                        if ois.len() == 1 && *ois.first().unwrap() == (TimeVector3 { t: -1, x: -1, y: -1, z: -1 }) {
+                            if let serde_json::Value::Object(o) = &mut md.additional_data {
+                                o.insert("unsupported_lens".into(), true.into());
+                            }
+                        }
+                    }
+
                     // --------------------------------- Sony ---------------------------------
 
                     // --------------------------------- Sony ---------------------------------
