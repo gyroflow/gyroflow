@@ -52,6 +52,8 @@ layout(std140, binding = 2) uniform KernelParams {
     int plane_index;                // 8
     float reserved1;                // 12
     float reserved2;                // 16
+    vec4 ewa_coefs_p;               // 16
+    vec4 ewa_coefs_q;               // 16
 } params;
 
 LENS_MODEL_FUNCTIONS;

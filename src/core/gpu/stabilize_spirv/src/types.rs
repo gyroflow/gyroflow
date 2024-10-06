@@ -74,6 +74,8 @@ pub struct KernelParams {
     pub plane_index:              i32, // 8
     pub reserved1:                f32, // 12
     pub reserved2:                f32, // 16
+    pub ewa_coeffs_p:             Vec4, // 16
+    pub ewa_coeffs_q:             Vec4, // 16
 }
 
 // #[inline] pub fn fast_floor(x: f32) -> i32 { x as i32 }

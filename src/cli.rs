@@ -493,7 +493,7 @@ fn setup_defaults(stab: Arc<StabilizationManager>, queue: &mut RenderQueue) -> s
     }
 
     let audio_codecs = ["AAC", "PCM (s16le)", "PCM (s16be)", "PCM (s24le)", "PCM (s24be)"];
-    let interpolations = ["Bilinear", "Bicubic", "Lanczos4"];
+    let interpolations = ["Bilinear", "Bicubic", "Lanczos4", "EWA: RobidouxSharp", "EWA: Robidoux", "EWA: Mitchell", "EWA: Catmull-Rom"];
 
     // Sync and export settings
     serde_json::json!({

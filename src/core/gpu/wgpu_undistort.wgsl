@@ -47,6 +47,8 @@ struct KernelParams {
     plane_index:              i32, // 8
     reserved1:                f32, // 12
     reserved2:                f32, // 16
+    ewa_coeffs_p:             vec4<f32>, // 16
+    ewa_coeffs_q:             vec4<f32>, // 16
 }
 
 @group(0) @binding(0) @fragment var<uniform> params: KernelParams;
@@ -142,65 +144,148 @@ fn rotate_point(pos: vec2<f32>, angle: f32, origin: vec2<f32>, origin2: vec2<f32
                       sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin2.y);
 }
 
-fn sample_input_at(uv_param: vec2<f32>) -> vec4<f32> {
+////////////////////////////// EWA (Elliptical Weighted Average) CubicBC sampling //////////////////////////////
+// Keys Cubic Filter Family https://imagemagick.org/Usage/filter/#robidoux
+// https://github.com/ImageMagick/ImageMagick/blob/main/MagickCore/resize.c
+
+// Gives a bounding box in the source image containing pixels that cover a circle of radius 2 completely in both the source and destination images
+fn affine_bbox(jac: vec4<f32>) -> vec2<f32> {
+    return vec2<f32>(
+        2.0 * max(1.0, max(abs(jac.x + jac.y), abs(jac.x - jac.y))),
+        2.0 * max(1.0, max(abs(jac.z + jac.w), abs(jac.z - jac.w)))
+    );
+}
+// Computes minimum area ellipse which covers a unit circle in both the source and destination image
+fn clamped_ellipse(jac: vec4<f32>) -> vec3<f32> {
+    // find ellipse
+    let F0 = abs(jac.x * jac.w - jac.y * jac.z);
+    let F = max(0.1, F0 * F0);
+    let A = (jac.z * jac.z + jac.w * jac.w) / F;
+    let B = -2.0 * (jac.x * jac.z + jac.y * jac.w) / F;
+    let C = (jac.x * jac.x + jac.y * jac.y) / F;
+    // find the angle to rotate ellipse
+    let v = vec2<f32>(C - A, -B);
+    let lv = length(v);
+    var v0 = 1.0;
+    var v1 = 1.0;
+    if (lv > 0.01) { v0 = v.x / lv; }
+    if (lv > 0.01) { v1 = v.y / lv; }
+    let c = sqrt(max(0.0, 1.0 + v0) / 2.0);
+    var s = sqrt(max(1.0 - v0, 0.0) / 2.0);
+    // rotate the ellipse to align it with axes
+    var A0 = (A * c * c - B * c * s + C * s * s);
+    var C0 = (A * s * s + B * c * s + C * c * c);
+    let Bt1 = B * (c * c - s * s);
+    let Bt2 = 2.0 * (A - C) * c * s;
+    var B0 = Bt1 + Bt2;
+    let B0v2 = Bt1 - Bt2;
+    if (abs(B0) > abs(B0v2)) {
+        s = -s;
+        B0 = B0v2;
+    }
+    // clamp A,C
+    A0 = min(A0, 1.0);
+    C0 = min(C0, 1.0);
+    let sn = -s;
+    // rotate it back
+    return vec3<f32>(
+        (A0 * c * c - B0 * c * sn + C0 * sn * sn),
+        (2.0 * A0 * c * sn + B0 * c * c - B0 * sn * sn - 2.0 * C0 * c * sn),
+        (A0 * sn * sn + B0 * c * sn + C0 * c * c)
+    );
+}
+fn bc2(x_param: f32) -> f32 {
+    let x = abs(x_param);
+    if (x < 1.0) {
+        return params.ewa_coeffs_p.x + params.ewa_coeffs_p.y * x + params.ewa_coeffs_p.z * x * x + params.ewa_coeffs_p.w * x * x * x;
+    } else if (x < 2.0) {
+        return params.ewa_coeffs_q.x + params.ewa_coeffs_q.y * x + params.ewa_coeffs_q.z * x * x + params.ewa_coeffs_q.w * x * x * x;
+    }
+    return 0.0;
+}
+////////////////////////////// EWA (Elliptical Weighted Average) CubicBC sampling //////////////////////////////
+
+fn sample_input_at(uv_param: vec2<f32>, jac: vec4<f32>) -> vec4<f32> {
+    var uv = uv_param;
     let fix_range = bool(flags & 1);
 
     let bg = params.background * params.max_pixel_value;
     var sum = vec4<f32>(0.0);
 
-    let shift = (interpolation >> 2u) + 1u;
-    var indices: array<i32, 3> = array<i32, 3>(0, 64, 192);
-    let ind = indices[interpolation >> 2u];
-    var offsets: array<f32, 3> = array<f32, 3>(0.0, 1.0, 3.0);
-    let offset = offsets[interpolation >> 2u];
-
-    var uv = uv_param;
-    var frame_size = vec2<f32>(f32(params.width), f32(params.height));
-    if (params.input_rotation != 0.0) {
-        let rotation = params.input_rotation * (3.14159265359 / 180.0);
-        let size = frame_size;
-        frame_size = abs(round(rotate_point(size, rotation, vec2<f32>(0.0, 0.0), vec2<f32>(0.0, 0.0))));
-        uv = rotate_point(uv, rotation, size / 2.0, frame_size / 2.0);
-    }
-
-    if (bool(flags & 32)) { // Uses source rect
-        uv = vec2<f32>(
-            map_coord(uv.x, 0.0, f32(frame_size.x), f32(params.source_rect.x), f32(params.source_rect.x + params.source_rect.z)),
-            map_coord(uv.y, 0.0, f32(frame_size.y), f32(params.source_rect.y), f32(params.source_rect.y + params.source_rect.w))
+    if (interpolation > 8u) {
+        // find how many pixels we need around that pixel in each direction
+        let trans_size = affine_bbox(jac);
+        let bounds = vec4<i32>(
+            i32(floor(uv.x - trans_size.x)),
+            i32(ceil(uv.x + trans_size.x)),
+            i32(floor(uv.y - trans_size.y)),
+            i32(ceil(uv.y + trans_size.y))
         );
-    }
+        var sum_div = 0.0;
 
-    uv = uv - offset;
-
-    let sx0 = i32(round(uv.x * f32(INTER_TAB_SIZE)));
-    let sy0 = i32(round(uv.y * f32(INTER_TAB_SIZE)));
-
-    let sx = i32(sx0 >> INTER_BITS);
-    let sy = i32(sy0 >> INTER_BITS);
-
-    let coeffs_x = i32(ind + ((sx0 & (INTER_TAB_SIZE - 1)) << shift));
-    let coeffs_y = i32(ind + ((sy0 & (INTER_TAB_SIZE - 1)) << shift));
-
-    for (var yp: i32 = 0; yp < i32(interpolation); yp = yp + 1) {
-        if (sy + yp >= params.source_rect.y && sy + yp < params.source_rect.y + params.source_rect.w) {
-            var xsum = vec4<f32>(0.0, 0.0, 0.0, 0.0);
-            for (var xp: i32 = 0; xp < i32(interpolation); xp = xp + 1) {
+        // See: Andreas Gustafsson. "Interactive Image Warping", section 3.6 http://www.gson.org/thesis/warping-thesis.pdf
+        let abc = clamped_ellipse(jac);
+        for (var in_y: i32 = bounds.z; in_y <= bounds.w; in_y = in_y + 1) {
+            let in_fy = f32(in_y) - uv.y;
+            for (var in_x: i32 = bounds.x; in_x <= bounds.y; in_x = in_x + 1) {
+                let in_fx = f32(in_x) - uv.x;
+                let dr = in_fx * in_fx * abc.x + in_fx * in_fy * abc.y + in_fy * in_fy * abc.z;
+                let k = bc2(sqrt(dr)); // cylindrical filtering
+                if (k == 0) {
+                    continue;
+                }
                 var pixel: vec4<f32>;
-                if (sx + xp >= params.source_rect.x && sx + xp < params.source_rect.x + params.source_rect.z) {
-                    pixel = read_input_at(vec2<i32>(sx + xp, sy + yp));
-                    pixel = draw_pixel(pixel, u32(sx + xp), u32(sy + yp), true);
-                    if (fix_range) {
-                        pixel = remap_colorrange(pixel, params.plane_index == 0);
-                    }
+                if (in_y >= params.source_rect.y && in_y < params.source_rect.y + params.source_rect.w && in_x >= params.source_rect.x && in_x < params.source_rect.x + params.source_rect.z) {
+                    pixel = read_input_at(vec2<i32>(in_x, in_y));
+                    pixel = draw_pixel(pixel, u32(in_x), u32(in_y), true);
                 } else {
                     pixel = bg;
                 }
-                xsum = xsum + (pixel * coeffs[coeffs_x + xp]);
+                sum += k * pixel;
+                sum_div += k;
             }
-            sum = sum + xsum * coeffs[coeffs_y + yp];
-        } else {
-            sum = sum + bg * coeffs[coeffs_y + yp];
         }
+        sum /= sum_div;
+    } else {
+        let shift = (interpolation >> 2u) + 1u;
+        var indices: array<i32, 6> = array<i32, 6>(0, 64, 192, 0, 0, 0);
+        let ind = indices[interpolation >> 2u];
+        var offsets: array<f32, 6> = array<f32, 6>(0.0, 1.0, 3.0, 0.0, 0.0, 0.0);
+        let offset = offsets[interpolation >> 2u];
+
+        uv = uv - offset;
+
+        let sx0 = i32(round(uv.x * f32(INTER_TAB_SIZE)));
+        let sy0 = i32(round(uv.y * f32(INTER_TAB_SIZE)));
+
+        let sx = i32(sx0 >> INTER_BITS);
+        let sy = i32(sy0 >> INTER_BITS);
+
+        let coeffs_x = i32(ind + ((sx0 & (INTER_TAB_SIZE - 1)) << shift));
+        let coeffs_y = i32(ind + ((sy0 & (INTER_TAB_SIZE - 1)) << shift));
+
+        for (var yp: i32 = 0; yp < i32(interpolation); yp = yp + 1) {
+            if (sy + yp >= params.source_rect.y && sy + yp < params.source_rect.y + params.source_rect.w) {
+                var xsum = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+                for (var xp: i32 = 0; xp < i32(interpolation); xp = xp + 1) {
+                    var pixel: vec4<f32>;
+                    if (sx + xp >= params.source_rect.x && sx + xp < params.source_rect.x + params.source_rect.z) {
+                        pixel = read_input_at(vec2<i32>(sx + xp, sy + yp));
+                        pixel = draw_pixel(pixel, u32(sx + xp), u32(sy + yp), true);
+                    } else {
+                        pixel = bg;
+                    }
+                    xsum = xsum + (pixel * coeffs[coeffs_x + xp]);
+                }
+                sum = sum + xsum * coeffs[coeffs_y + yp];
+            } else {
+                sum = sum + bg * coeffs[coeffs_y + yp];
+            }
+        }
+    }
+
+    if (fix_range) {
+        sum = remap_colorrange(sum, params.plane_index == 0);
     }
     return vec4<f32>(
         min(sum.x, params.pixel_value_limit),
@@ -367,16 +452,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
     return vec2<f32>(-99999.0, -99999.0);
 }
 
-// Adapted from OpenCV: initUndistortRectifyMap + remap
-// https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
-// https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
-fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
-    let bg = vec4<f32>(params.background.x, params.background.y, params.background.z, params.background.w) * params.max_pixel_value;
-
-    if (bool(params.flags & 4)) { // Fill with background
-        return vec4<SCALAR>(bg);
-    }
-
+fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
     var out_pos = position;
     if (bool(flags & 64)) { // Uses output rect
         out_pos = vec2<f32>(
@@ -384,12 +460,7 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
             map_coord(position.y, f32(params.output_rect.y), f32(params.output_rect.y + params.output_rect.w), 0.0, f32(params.output_height))
         );
     }
-
-    let p = out_pos;
-
-    if (out_pos.x < 0.0 || out_pos.y < 0.0 || out_pos.x > f32(params.output_width) || out_pos.y > f32(params.output_height)) { return vec4<SCALAR>(bg); }
-
-    out_pos = out_pos + params.translation2d;
+    out_pos += params.translation2d;
 
     ///////////////////////////////////////////////////////////////////
     // Add lens distortion back
@@ -442,10 +513,60 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
     ///////////////////////////////////////////////////////////////////
 
     let idx: u32 = min(sy, u32(params.matrix_count - 1)) * 14u;
+    var uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k1, params.k2, params.k3);
+
+    var frame_size = vec2<f32>(f32(params.width), f32(params.height));
+    if (params.input_rotation != 0.0) {
+        let rotation = params.input_rotation * (3.14159265359 / 180.0);
+        let size = frame_size;
+        frame_size = abs(round(rotate_point(size, rotation, vec2<f32>(0.0, 0.0), vec2<f32>(0.0, 0.0))));
+        uv = rotate_point(uv, rotation, size / 2.0, frame_size / 2.0);
+    }
+
+    if (bool(flags & 32)) { // Uses source rect
+        uv = vec2<f32>(
+            map_coord(uv.x, 0.0, f32(frame_size.x), f32(params.source_rect.x), f32(params.source_rect.x + params.source_rect.z)),
+            map_coord(uv.y, 0.0, f32(frame_size.y), f32(params.source_rect.y), f32(params.source_rect.y + params.source_rect.w))
+        );
+    }
+
+    return uv;
+}
+
+// Adapted from OpenCV: initUndistortRectifyMap + remap
+// https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
+// https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
+fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
+    let bg = vec4<f32>(params.background.x, params.background.y, params.background.z, params.background.w) * params.max_pixel_value;
+
+    if (bool(params.flags & 4)) { // Fill with background
+        return vec4<SCALAR>(bg);
+    }
+
+    var out_pos = position;
+    if (bool(flags & 64)) { // Uses output rect
+        out_pos = vec2<f32>(
+            map_coord(position.x, f32(params.output_rect.x), f32(params.output_rect.x + params.output_rect.z), 0.0, f32(params.output_width) ),
+            map_coord(position.y, f32(params.output_rect.y), f32(params.output_rect.y + params.output_rect.w), 0.0, f32(params.output_height))
+        );
+    }
+
+    let p = out_pos;
+
+    if (out_pos.x < 0.0 || out_pos.y < 0.0 || out_pos.x > f32(params.output_width) || out_pos.y > f32(params.output_height)) { return vec4<SCALAR>(bg); }
+
+    var uv = undistort_coord(position);
+    var jac = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+
+    if (interpolation > 8u) {
+        let eps = 0.01;
+        let xyx = undistort_coord(position + vec2<f32>(eps, 0.0)) - uv;
+        let xyy = undistort_coord(position + vec2<f32>(0.0, eps)) - uv;
+        jac = vec4<f32>(xyx.x / eps, xyy.x / eps, xyx.y / eps, xyy.y / eps);
+    }
 
     var pixel: vec4<f32> = bg;
 
-    var uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k1, params.k2, params.k3);
     if (uv.x > -99998.0) {
         let width_f = f32(params.width);
         let height_f = f32(params.height);
@@ -475,15 +596,15 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
                 pt2 *= vec2<f32>(width_f, height_f);
             }
 
-            let c1 = sample_input_at(uv);
-            let c2 = sample_input_at(pt2);
+            let c1 = sample_input_at(uv, jac);
+            let c2 = sample_input_at(pt2, jac);
             pixel = c1 * alpha + c2 * (1.0 - alpha);
             pixel = draw_pixel(pixel, u32(p.x), u32(p.y), false);
             pixel = draw_safe_area(pixel, p.x, p.y);
             return vec4<SCALAR>(pixel);
         }
 
-        pixel = sample_input_at(uv);
+        pixel = sample_input_at(uv, jac);
     }
     pixel = draw_pixel(pixel, u32(p.x), u32(p.y), false);
     pixel = draw_safe_area(pixel, p.x, p.y);

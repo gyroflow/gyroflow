@@ -241,8 +241,13 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     }
 
     let interpolation = match render_options.interpolation.as_ref() {
-        "Bilinear"  => Interpolation::Bilinear,
-        "Bicubic"   => Interpolation::Bicubic,
+        "Bilinear"           => Interpolation::Bilinear,
+        "Bicubic"            => Interpolation::Bicubic,
+        "Lanczos4"           => Interpolation::Lanczos4,
+        "EWA: RobidouxSharp" => Interpolation::RobidouxSharp,
+        "EWA: Robidoux"      => Interpolation::Robidoux,
+        "EWA: Mitchell"      => Interpolation::Mitchell,
+        "EWA: Catmull-Rom"   => Interpolation::CatmullRom,
         _ => Interpolation::Lanczos4
     };
     let ffmpeg_interpolation = match interpolation {

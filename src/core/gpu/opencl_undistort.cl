@@ -49,6 +49,8 @@ typedef struct {
     int plane_index;                 // 8
     float reserved1;                 // 12
     float reserved2;                 // 16
+    float4 ewa_coeffs_p;             // 16
+    float4 ewa_coeffs_q;             // 16
 } KernelParams;
 
 #if INTERPOLATION == 2 // Bilinear
@@ -227,61 +229,153 @@ float2 interpolate_mesh(__global const float *mesh, int width, int height, float
     );
 }
 
-DATA_TYPEF sample_input_at(float2 uv, __global const uchar *srcptr, __global KernelParams *params, __global const uchar *drawing, DATA_TYPEF bg) {
+////////////////////////////// EWA (Elliptical Weighted Average) CubicBC sampling //////////////////////////////
+// Keys Cubic Filter Family https://imagemagick.org/Usage/filter/#robidoux
+// https://github.com/ImageMagick/ImageMagick/blob/main/MagickCore/resize.c
+#if INTERPOLATION > 8
+// Gives a bounding box in the source image containing pixels that cover a circle of radius 2 completely in both the source and destination images
+float2 affine_bbox(float4 jac) {
+    return (float2)(
+        2.0f * fmax(1.0f, fmax(fabs(jac.x + jac.y), fabs(jac.x - jac.y))),
+        2.0f * fmax(1.0f, fmax(fabs(jac.z + jac.w), fabs(jac.z - jac.w)))
+    );
+}
+// Computes minimum area ellipse which covers a unit circle in both the source and destination image
+float3 clamped_ellipse(float4 jac) {
+    // find ellipse
+    const float F0 = fabs(jac.x * jac.w - jac.y * jac.z);
+    const float F = fmax(0.1f, F0 * F0);
+    const float A = (jac.z * jac.z + jac.w * jac.w) / F;
+    const float B = -2.0f * (jac.x * jac.z + jac.y * jac.w) / F;
+    const float C = (jac.x * jac.x + jac.y * jac.y) / F;
+    // find the angle to rotate ellipse
+    const float2 v = (float2)(C - A, -B);
+    const float lv = length(v);
+    const float v0 = (lv > 0.01f) ? v.x / lv : 1.0f;
+    const float v1 = (lv > 0.01f) ? v.y / lv : 1.0f;
+    const float c = sqrt(fmax(0.0f, 1.0f + v0) / 2.0f);
+    float s = sqrt(fmax(1.0f - v0, 0.0f) / 2.0f);
+    // rotate the ellipse to align it with axes
+    float A0 = (A * c * c - B * c * s + C * s * s);
+    float C0 = (A * s * s + B * c * s + C * c * c);
+    const float Bt1 = B * (c * c - s * s);
+    const float Bt2 = 2.0f * (A - C) * c * s;
+    float B0 = Bt1 + Bt2;
+    const float B0v2 = Bt1 - Bt2;
+    if (fabs(B0) > fabs(B0v2)) {
+        s = -s;
+        B0 = B0v2;
+    }
+    // clamp A,C
+    A0 = fmin(A0, 1.0f);
+    C0 = fmin(C0, 1.0f);
+    const float sn = -s;
+    // rotate it back
+    return (float3)(
+        (A0 * c * c - B0 * c * sn + C0 * sn * sn),
+        (2.0f * A0 * c * sn + B0 * c * c - B0 * sn * sn - 2.0f * C0 * c * sn),
+        (A0 * sn * sn + B0 * c * sn + C0 * c * c)
+    );
+}
+inline float bc2(float x, __global KernelParams *params) {
+    x = fabs(x);
+    if (x < 1.0f)
+        return params->ewa_coeffs_p.x + params->ewa_coeffs_p.y * x + params->ewa_coeffs_p.z * x * x + params->ewa_coeffs_p.w * x * x * x;
+    if (x < 2.0f)
+        return params->ewa_coeffs_q.x + params->ewa_coeffs_q.y * x + params->ewa_coeffs_q.z * x * x + params->ewa_coeffs_q.w * x * x * x;
+    return 0.0f;
+}
+#endif
+////////////////////////////// EWA (Elliptical Weighted Average) CubicBC sampling //////////////////////////////
+
+DATA_TYPEF sample_input_at(float2 uv, float4 jac, __global const uchar *srcptr, __global KernelParams *params, __global const uchar *drawing, DATA_TYPEF bg) {
     bool fix_range = (params->flags & 1);
 
-    float2 frame_size = (float2)((float)params->width, (float)params->height);
-    if (params->input_rotation != 0.0) {
-        float rotation = params->input_rotation * (M_PI_F / 180.0);
-        float2 size = frame_size;
-        frame_size = fabs(round(rotate_point(size, rotation, (float2)(0.0, 0.0), (float2)(0.0, 0.0))));
-        uv = rotate_point(uv, rotation, size / (float2)2.0, frame_size / (float2)2.0);
-    }
-
-    uv.x = map_coord(uv.x, 0.0f, (float)frame_size.x, (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
-    uv.y = map_coord(uv.y, 0.0f, (float)frame_size.y, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
-
-    uv -= S_OFFSET;
-
-    const int shift = (INTERPOLATION >> 2) + 1;
-
-    int sx0 = convert_int_sat_rtz(0.5f + uv.x * INTER_TAB_SIZE);
-    int sy0 = convert_int_sat_rtz(0.5f + uv.y * INTER_TAB_SIZE);
-
-    int sx = sx0 >> INTER_BITS;
-    int sy = sy0 >> INTER_BITS;
-
-    __constant float *coeffs_x = &coeffs[(sx0 & (INTER_TAB_SIZE - 1)) << shift];
-    __constant float *coeffs_y = &coeffs[(sy0 & (INTER_TAB_SIZE - 1)) << shift];
-
     DATA_TYPEF sum = 0;
-    int src_index = sy * params->stride + sx * PIXEL_BYTES;
 
-    #pragma unroll
-    for (int yp = 0; yp < INTERPOLATION; ++yp) {
-        if (sy + yp >= params->source_rect.y && sy + yp < params->source_rect.y + params->source_rect.w) {
-            DATA_TYPEF xsum = 0.0f;
+#   if INTERPOLATION > 8
+        // find how many pixels we need around that pixel in each direction
+        float2 trans_size = affine_bbox(jac);
+        int4 bounds = (int4)(
+            floor(uv.x - trans_size.x),
+            ceil(uv.x + trans_size.x),
+            floor(uv.y - trans_size.y),
+            ceil(uv.y + trans_size.y)
+        );
+        float sum_div = 0.0f;
+        int src_index = bounds.z * params->stride;
+
+        // See: Andreas Gustafsson. "Interactive Image Warping", section 3.6 http://www.gson.org/thesis/warping-thesis.pdf
+        float3 abc = clamped_ellipse(jac);
+        #pragma unroll
+        for (int in_y = bounds.z; in_y <= bounds.w; ++in_y) {
+            const float in_fy = in_y - uv.y;
             #pragma unroll
-            for (int xp = 0; xp < INTERPOLATION; ++xp) {
-                if (sx + xp >= params->source_rect.x && sx + xp < params->source_rect.x + params->source_rect.z) {
-                    DATA_TYPE src_px = *(__global const DATA_TYPE *)&srcptr[src_index + PIXEL_BYTES * xp];
-                    draw_pixel(&src_px, sx + xp, sy + yp, true, max(params->width, params->output_width), params, drawing);
-                    DATA_TYPEF srcpx = DATA_CONVERTF(src_px);
-                    if (fix_range) {
-                        srcpx = remap_colorrange(srcpx, params->plane_index == 0, params);
-                    }
-                    xsum += srcpx * coeffs_x[xp];
+            for (int in_x = bounds.x; in_x <= bounds.y; ++in_x) {
+                const float in_fx = in_x - uv.x;
+                const float dr = in_fx * in_fx * abc.x + in_fx * in_fy * abc.y + in_fy * in_fy * abc.z;
+                const float k = bc2(sqrt(dr), params); // cylindrical filtering
+                if (k == 0)
+                    continue;
+                DATA_TYPEF srcpx;
+                if (in_y >= params->source_rect.y && in_y < params->source_rect.y + params->source_rect.w && in_x >= params->source_rect.x && in_x < params->source_rect.x + params->source_rect.z) {
+                    DATA_TYPE src_px = *(__global const DATA_TYPE *)&srcptr[src_index + in_x * PIXEL_BYTES];
+                    draw_pixel(&src_px, in_x, in_y, true, max(params->width, params->output_width), params, drawing);
+                    srcpx = DATA_CONVERTF(src_px);
                 } else {
-                    xsum += bg * coeffs_x[xp];
+                    srcpx = bg;
                 }
+                sum += k * srcpx;
+                sum_div += k;
             }
-            sum += xsum * coeffs_y[yp];
-        } else {
-            sum += bg * coeffs_y[yp];
+            src_index += params->stride;
         }
-        src_index += params->stride;
+        sum /= sum_div;
+#   else
+        uv -= S_OFFSET;
+        // uv -= (INTERPOLATION >> 1) - 1;
+
+        const int shift = (INTERPOLATION >> 2) + 1;
+
+        int sx0 = convert_int_sat_rtz(0.5f + uv.x * INTER_TAB_SIZE);
+        int sy0 = convert_int_sat_rtz(0.5f + uv.y * INTER_TAB_SIZE);
+
+        int sx = sx0 >> INTER_BITS;
+        int sy = sy0 >> INTER_BITS;
+
+        __constant float *coeffs_x = &coeffs[(sx0 & (INTER_TAB_SIZE - 1)) << shift];
+        __constant float *coeffs_y = &coeffs[(sy0 & (INTER_TAB_SIZE - 1)) << shift];
+
+        int src_index = sy * params->stride + sx * PIXEL_BYTES;
+
+        #pragma unroll
+        for (int yp = 0; yp < INTERPOLATION; ++yp) {
+            if (sy + yp >= params->source_rect.y && sy + yp < params->source_rect.y + params->source_rect.w) {
+                DATA_TYPEF xsum = 0.0f;
+                #pragma unroll
+                for (int xp = 0; xp < INTERPOLATION; ++xp) {
+                    if (sx + xp >= params->source_rect.x && sx + xp < params->source_rect.x + params->source_rect.z) {
+                        DATA_TYPE src_px = *(__global const DATA_TYPE *)&srcptr[src_index + PIXEL_BYTES * xp];
+                        draw_pixel(&src_px, sx + xp, sy + yp, true, max(params->width, params->output_width), params, drawing);
+                        DATA_TYPEF srcpx = DATA_CONVERTF(src_px);
+                        xsum += srcpx * coeffs_x[xp];
+                    } else {
+                        xsum += bg * coeffs_x[xp];
+                    }
+                }
+                sum += xsum * coeffs_y[yp];
+            } else {
+                sum += bg * coeffs_y[yp];
+            }
+            src_index += params->stride;
+        }
+#   endif
+
+    sum = min(sum, (DATA_TYPEF)(params->pixel_value_limit));
+    if (fix_range) {
+        sum = remap_colorrange(sum, params->plane_index == 0, params);
     }
-    return min(sum, (DATA_TYPEF)(params->pixel_value_limit));
+    return sum;
 }
 
 float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, __global const float *matrices, __global const float *mesh_data) {
@@ -318,7 +412,7 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
         uv += params->c;
 
         // MeshDistortion
-        if ((params->flags & 512) && mesh_data && mesh_data[0] > 9.0f) {
+        if ((params->flags & 512) && mesh_data && mesh_data[0] > 10.0f) {
             float2 mesh_size = (float2)(mesh_data[3], mesh_data[4]);
             float2 origin    = (float2)(mesh_data[5], mesh_data[6]);
             float2 crop_size = (float2)(mesh_data[7], mesh_data[8]);
@@ -377,6 +471,75 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
     return (float2)(-99999.0f, -99999.0f);
 }
 
+float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global const float *matrices, __global const float *mesh_data) {
+    out_pos.x = map_coord(out_pos.x, (float)params->output_rect.x, (float)(params->output_rect.x + params->output_rect.z), 0.0f, (float)params->output_width ) + params->translation2d.x;
+    out_pos.y = map_coord(out_pos.y, (float)params->output_rect.y, (float)(params->output_rect.y + params->output_rect.w), 0.0f, (float)params->output_height) + params->translation2d.y;
+
+    ///////////////////////////////////////////////////////////////////
+    // Add lens distortion back
+    if (params->lens_correction_amount < 1.0f) {
+        float2 factor = (float2)max(1.0f - params->lens_correction_amount, 0.001f); // FIXME: this is close but wrong
+        float2 out_c = (float2)(params->output_width / 2.0f, params->output_height / 2.0f);
+        float2 out_f = (params->f / params->fov) / factor;
+
+        float2 new_out_pos = out_pos;
+
+        if ((params->flags & 2)) { // Has digital lens
+            new_out_pos = digital_undistort_point(new_out_pos, params);
+        }
+        new_out_pos = (new_out_pos - out_c) / out_f;
+        new_out_pos = undistort_point(new_out_pos, params);
+        if ((params->flags & 2048) && params->light_refraction_coefficient != 1.0f && params->light_refraction_coefficient > 0.0f) {
+            float r = length(new_out_pos);
+            if (r != 0.0f) {
+                float sin_theta_d = (r / sqrt(1.0f + r * r)) / params->light_refraction_coefficient;
+                float r_d = sin_theta_d / sqrt(1.0f - sin_theta_d * sin_theta_d);
+                new_out_pos *= r_d / r;
+            }
+        }
+        new_out_pos = out_f * new_out_pos + out_c;
+
+        out_pos = new_out_pos * (1.0f - params->lens_correction_amount) + (out_pos * params->lens_correction_amount);
+    }
+    ///////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////////
+    // Calculate source `y` for rolling shutter
+    int sy = 0;
+    if ((params->flags & 16)) { // Horizontal RS
+        sy = min((int)params->width, max(0, (int)round(out_pos.x)));
+    } else {
+        sy = min((int)params->height, max(0, (int)round(out_pos.y)));
+    }
+    if (params->matrix_count > 1) {
+        int idx = (params->matrix_count / 2) * 14; // Use middle matrix
+        float2 uv = rotate_and_distort(out_pos, idx, params, matrices, mesh_data);
+        if (uv.x > -99998.0f) {
+            if ((params->flags & 16)) { // Horizontal RS
+                sy = min((int)params->width, max(0, (int)round(uv.x)));
+            } else {
+                sy = min((int)params->height, max(0, (int)round(uv.y)));
+            }
+        }
+    }
+    ///////////////////////////////////////////////////////////////////
+
+    int idx = min(sy, params->matrix_count - 1) * 14;
+    float2 uv = rotate_and_distort(out_pos, idx, params, matrices, mesh_data);
+
+    float2 frame_size = (float2)((float)params->width, (float)params->height);
+    if (params->input_rotation != 0.0f) {
+        float rotation = params->input_rotation * (M_PI_F / 180.0f);
+        float2 size = frame_size;
+        frame_size = fabs(round(rotate_point(size, rotation, (float2)(0.0f, 0.0f), (float2)(0.0f, 0.0f))));
+        uv = rotate_point(uv, rotation, size / (float2)2.0f, frame_size / (float2)2.0f);
+    }
+
+    uv.x = map_coord(uv.x, 0.0f, (float)frame_size.x, (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
+    uv.y = map_coord(uv.y, 0.0f, (float)frame_size.y, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
+    return uv;
+}
+
 // Adapted from OpenCV: initUndistortRectifyMap + remap
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L465-L567
 // https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/imgproc/src/opencl/remap.cl#L390-L498
@@ -388,7 +551,6 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
 
     float x = map_coord((float)buf_x, (float)params->output_rect.x, (float)(params->output_rect.x + params->output_rect.z), 0.0f, (float)params->output_width );
     float y = map_coord((float)buf_y, (float)params->output_rect.y, (float)(params->output_rect.y + params->output_rect.w), 0.0f, (float)params->output_height);
-
 
     DATA_TYPEF bg = (*(__global DATA_TYPEF *)&params->background) * params->max_pixel_value;
 
@@ -402,61 +564,18 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
             return;
         }
 
-        float2 out_pos = (float2)(x, y) + params->translation2d;
+        float2 out_pos = (float2)((float)buf_x, (float)buf_y);
+        float2 uv = undistort_coord(out_pos, params, matrices, mesh_data);
+        float4 jac = (float4)(1.0f, 0.0f, 0.0f, 1.0f);
 
-        ///////////////////////////////////////////////////////////////////
-        // Add lens distortion back
-        if (params->lens_correction_amount < 1.0f) {
-            float2 factor = (float2)max(1.0f - params->lens_correction_amount, 0.001f); // FIXME: this is close but wrong
-            float2 out_c = (float2)(params->output_width / 2.0f, params->output_height / 2.0f);
-            float2 out_f = (params->f / params->fov) / factor;
-
-            float2 new_out_pos = out_pos;
-
-            if ((params->flags & 2)) { // Has digital lens
-                new_out_pos = digital_undistort_point(new_out_pos, params);
-            }
-            new_out_pos = (new_out_pos - out_c) / out_f;
-            new_out_pos = undistort_point(new_out_pos, params);
-            if ((params->flags & 2048) && params->light_refraction_coefficient != 1.0f && params->light_refraction_coefficient > 0.0f) {
-                float r = length(new_out_pos);
-                if (r != 0.0f) {
-                    float sin_theta_d = (r / sqrt(1.0f + r * r)) / params->light_refraction_coefficient;
-                    float r_d = sin_theta_d / sqrt(1.0f - sin_theta_d * sin_theta_d);
-                    new_out_pos *= r_d / r;
-                }
-            }
-            new_out_pos = out_f * new_out_pos + out_c;
-
-            out_pos = new_out_pos * (1.0f - params->lens_correction_amount) + (out_pos * params->lens_correction_amount);
-        }
-        ///////////////////////////////////////////////////////////////////
-
-        ///////////////////////////////////////////////////////////////////
-        // Calculate source `y` for rolling shutter
-        int sy = 0;
-        if ((params->flags & 16)) { // Horizontal RS
-            sy = min((int)params->width, max(0, (int)round(out_pos.x)));
-        } else {
-            sy = min((int)params->height, max(0, (int)round(out_pos.y)));
-        }
-        if (params->matrix_count > 1) {
-            int idx = (params->matrix_count / 2) * 14; // Use middle matrix
-            float2 uv = rotate_and_distort(out_pos, idx, params, matrices, mesh_data);
-            if (uv.x > -99998.0f) {
-                if ((params->flags & 16)) { // Horizontal RS
-                    sy = min((int)params->width, max(0, (int)round(uv.x)));
-                } else {
-                    sy = min((int)params->height, max(0, (int)round(uv.y)));
-                }
-            }
-        }
-        ///////////////////////////////////////////////////////////////////
+#       if INTERPOLATION > 8
+            const float eps = 0.01f;
+            float2 xyx = undistort_coord(out_pos + (float2)(eps, 0.0f), params, matrices, mesh_data) - uv;
+            float2 xyy = undistort_coord(out_pos + (float2)(0.0f, eps), params, matrices, mesh_data) - uv;
+            jac = (float4)(xyx.x / eps, xyy.x / eps, xyx.y / eps, xyy.y / eps);
+#       endif
 
         DATA_TYPE final_pix;
-
-        int idx = min(sy, params->matrix_count - 1) * 14;
-        float2 uv = rotate_and_distort(out_pos, idx, params, matrices, mesh_data);
         if (uv.x > -99998.0f) {
             switch (params->background_mode) {
                 case 1: { // edge repeat
@@ -486,8 +605,8 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
                         pt2 *= (float2)(widthf, heightf);
                     }
 
-                    DATA_TYPEF c1 = sample_input_at(uv,  srcptr, params, drawing, bg);
-                    DATA_TYPEF c2 = sample_input_at(pt2, srcptr, params, drawing, bg);
+                    DATA_TYPEF c1 = sample_input_at(uv,  jac, srcptr, params, drawing, bg);
+                    DATA_TYPEF c2 = sample_input_at(pt2, jac, srcptr, params, drawing, bg);
                     final_pix = DATA_CONVERT(c1 * alpha + c2 * (1.0f - alpha));
                     draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params, drawing);
                     draw_safe_area(&final_pix, x, y, params);
@@ -496,7 +615,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
                 } break;
             }
 
-            final_pix = DATA_CONVERT(sample_input_at(uv, srcptr, params, drawing, bg));
+            final_pix = DATA_CONVERT(sample_input_at(uv, jac, srcptr, params, drawing, bg));
         } else {
             final_pix = DATA_CONVERT(bg);
         }

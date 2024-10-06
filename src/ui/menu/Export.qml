@@ -589,7 +589,7 @@ MenuItem {
             text: qsTr("Interpolation method");
             ComboBox {
                 id: interpolationMethod;
-                model: ["Bilinear", "Bicubic", "Lanczos4"];
+                model: ["Bilinear", "Bicubic", "Lanczos4", "EWA: RobidouxSharp", "EWA: Robidoux", "EWA: Mitchell", "EWA: Catmull-Rom"];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 2;
