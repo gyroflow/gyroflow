@@ -2127,6 +2127,37 @@ impl Controller {
         let mut sync_points = Vec::new();
         let mut time_scale = 0.001; // default to millisecond
         let mut headers_end_position = None;
+
+        let do_add_timestamp = || -> Option<bool> {
+            let mut last_timestamp = None;
+            for x in file_list {
+                let gcsv_name = filesystem::filename_with_extension(&filesystem::get_filename(x), "gcsv");
+                let gcsv_url = filesystem::get_file_url(&filesystem::get_folder(x), &gcsv_name, false);
+                let mut file = filesystem::open_file(&base, &gcsv_url, false, false).ok()?;
+                let mut is_data = false;
+                for line in std::io::BufReader::new(file.get_file()).lines() {
+                    let line = line.ok()?;
+                    if !is_data {
+                        if line.starts_with("t,") || line.starts_with("time,") {
+                            is_data = true;
+                            continue;
+                        }
+                    } else if line.contains(',') {
+                        if let Ok(timestamp) = line.split(',').next().unwrap().parse::<f64>() {
+                            if let Some(last_timestamp) = last_timestamp {
+                                // If timestamp is not continuous
+                                if timestamp < last_timestamp {
+                                    return Some(true);
+                                }
+                            }
+                            last_timestamp = Some(timestamp);
+                        }
+                    }
+                }
+            }
+            Some(false)
+        }().unwrap_or(true);
+
         for x in file_list {
             let filename = filesystem::get_filename(x);
             let folder = filesystem::get_folder(x);
@@ -2168,9 +2199,6 @@ impl Controller {
                             if let Ok(timestamp) = line.split(',').next().unwrap().parse::<f64>() {
                                 last_diff = timestamp - last_timestamp;
                                 last_timestamp = timestamp;
-                                if timestamp >= add_timestamp {
-                                    add_timestamp = 0.0;
-                                }
                                 let new_timestamp = timestamp + add_timestamp;
                                 line = [new_timestamp.to_string()].into_iter().chain(line.split(',').skip(1).map(str::to_string)).join(",");
                             }
@@ -2180,7 +2208,9 @@ impl Controller {
                         }
                     }
                 }
-                add_timestamp += last_timestamp + last_diff;
+                if do_add_timestamp {
+                    add_timestamp += last_timestamp + last_diff;
+                }
                 last_timestamp = 0.0;
             }
             first_file = false;
