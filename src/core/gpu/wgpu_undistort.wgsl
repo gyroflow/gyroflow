@@ -167,9 +167,9 @@ fn clamped_ellipse(jac: vec4<f32>) -> vec3<f32> {
     let v = vec2<f32>(C - A, -B);
     let lv = length(v);
     var v0 = 1.0;
-    var v1 = 1.0;
+    //var v1 = 1.0;
     if (lv > 0.01) { v0 = v.x / lv; }
-    if (lv > 0.01) { v1 = v.y / lv; }
+    //if (lv > 0.01) { v1 = v.y / lv; }
     let c = sqrt(max(0.0, 1.0 + v0) / 2.0);
     var s = sqrt(max(1.0 - v0, 0.0) / 2.0);
     // rotate the ellipse to align it with axes
@@ -189,17 +189,20 @@ fn clamped_ellipse(jac: vec4<f32>) -> vec3<f32> {
     let sn = -s;
     // rotate it back
     return vec3<f32>(
-        (A0 * c * c - B0 * c * sn + C0 * sn * sn),
-        (2.0 * A0 * c * sn + B0 * c * c - B0 * sn * sn - 2.0 * C0 * c * sn),
-        (A0 * sn * sn + B0 * c * sn + C0 * c * c)
+        A0 * c * c - B0 * c * sn + C0 * sn * sn,
+        2.0 * A0 * c * sn + B0 * c * c - B0 * sn * sn - 2.0 * C0 * c * sn,
+        A0 * sn * sn + B0 * c * sn + C0 * c * c
     );
 }
 fn bc2(x_param: f32) -> f32 {
     let x = abs(x_param);
+    let x2 = x * x;
+    let x3 = x2 * x;
+    let powers = vec4<f32>(1.0, x, x2, x3);
     if (x < 1.0) {
-        return params.ewa_coeffs_p.x + params.ewa_coeffs_p.y * x + params.ewa_coeffs_p.z * x * x + params.ewa_coeffs_p.w * x * x * x;
+        return dot(params.ewa_coeffs_p, powers);
     } else if (x < 2.0) {
-        return params.ewa_coeffs_q.x + params.ewa_coeffs_q.y * x + params.ewa_coeffs_q.z * x * x + params.ewa_coeffs_q.w * x * x * x;
+        return dot(params.ewa_coeffs_q, powers);
     }
     return 0.0;
 }
@@ -231,7 +234,7 @@ fn sample_input_at(uv_param: vec2<f32>, jac: vec4<f32>) -> vec4<f32> {
                 let in_fx = f32(in_x) - uv.x;
                 let dr = in_fx * in_fx * abc.x + in_fx * in_fy * abc.y + in_fy * in_fy * abc.z;
                 let k = bc2(sqrt(dr)); // cylindrical filtering
-                if (k == 0) {
+                if (k == 0.0) {
                     continue;
                 }
                 var pixel: vec4<f32>;
@@ -597,7 +600,7 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
             }
 
             let c1 = sample_input_at(uv, jac);
-            let c2 = sample_input_at(pt2, jac);
+            let c2 = sample_input_at(pt2, jac); // FIXME: jac should be adjusted for pt2
             pixel = c1 * alpha + c2 * (1.0 - alpha);
             pixel = draw_pixel(pixel, u32(p.x), u32(p.y), false);
             pixel = draw_safe_area(pixel, p.x, p.y);

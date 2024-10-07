@@ -252,7 +252,7 @@ float3 clamped_ellipse(float4 jac) {
     const float2 v = (float2)(C - A, -B);
     const float lv = length(v);
     const float v0 = (lv > 0.01f) ? v.x / lv : 1.0f;
-    const float v1 = (lv > 0.01f) ? v.y / lv : 1.0f;
+    //const float v1 = (lv > 0.01f) ? v.y / lv : 1.0f;
     const float c = sqrt(fmax(0.0f, 1.0f + v0) / 2.0f);
     float s = sqrt(fmax(1.0f - v0, 0.0f) / 2.0f);
     // rotate the ellipse to align it with axes
@@ -309,13 +309,13 @@ DATA_TYPEF sample_input_at(float2 uv, float4 jac, __global const uchar *srcptr, 
         float3 abc = clamped_ellipse(jac);
         #pragma unroll
         for (int in_y = bounds.z; in_y <= bounds.w; ++in_y) {
-            const float in_fy = in_y - uv.y;
+            const float in_fy = (float)in_y - uv.y;
             #pragma unroll
             for (int in_x = bounds.x; in_x <= bounds.y; ++in_x) {
-                const float in_fx = in_x - uv.x;
+                const float in_fx = (float)in_x - uv.x;
                 const float dr = in_fx * in_fx * abc.x + in_fx * in_fy * abc.y + in_fy * in_fy * abc.z;
                 const float k = bc2(sqrt(dr), params); // cylindrical filtering
-                if (k == 0)
+                if (k == 0.0f)
                     continue;
                 DATA_TYPEF srcpx;
                 if (in_y >= params->source_rect.y && in_y < params->source_rect.y + params->source_rect.w && in_x >= params->source_rect.x && in_x < params->source_rect.x + params->source_rect.z) {
@@ -606,7 +606,7 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
                     }
 
                     DATA_TYPEF c1 = sample_input_at(uv,  jac, srcptr, params, drawing, bg);
-                    DATA_TYPEF c2 = sample_input_at(pt2, jac, srcptr, params, drawing, bg);
+                    DATA_TYPEF c2 = sample_input_at(pt2, jac, srcptr, params, drawing, bg); // FIXME: jac should be adjusted for pt2
                     final_pix = DATA_CONVERT(c1 * alpha + c2 * (1.0f - alpha));
                     draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params, drawing);
                     draw_safe_area(&final_pix, x, y, params);

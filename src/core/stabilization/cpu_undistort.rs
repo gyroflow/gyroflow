@@ -4,7 +4,7 @@
 use crate::gpu::{ Buffers, BufferSource };
 
 use super::{ PixelType, Stabilization, ComputeParams, FrameTransform, KernelParams, distortion_models::DistortionModel };
-use nalgebra::{ Vector4, Matrix3 };
+use nalgebra::{ Vector2, Vector3, Vector4, Matrix3 };
 use rayon::{ prelude::ParallelSliceMut, iter::{ ParallelIterator, IndexedParallelIterator } };
 use crate::util::map_coord;
 
@@ -264,13 +264,219 @@ impl Stabilization {
                      angle.sin() * (pos.0 - origin.0) + angle.cos() * (pos.1 - origin.1) + origin2.1);
         }
 
-        fn sample_input_at<const I: i32, T: PixelType>(mut uv: (f32, f32), input: &[u8], params: &KernelParams, bg: &Vector4<f32>, _drawing: &[u8]) -> Vector4<f32> {
-            const INTER_BITS: usize = 5;
-            const INTER_TAB_SIZE: usize = 1 << INTER_BITS;
-            let shift: i32 = (I >> 2) + 1;
-            let offset: f32 = [0.0, 1.0, 3.0][I as usize >> 2];
-            let ind: usize = [0, 64, 64 + 128][I as usize >> 2];
+        ////////////////////////////// EWA (Elliptical Weighted Average) CubicBC sampling //////////////////////////////
+        // Keys Cubic Filter Family https://imagemagick.org/Usage/filter/#robidoux
+        // https://github.com/ImageMagick/ImageMagick/blob/main/MagickCore/resize.c
 
+        // Gives a bounding box in the source image containing pixels that cover a circle of radius 2 completely in both the source and destination images
+        fn affine_bbox(jac: &Vector4<f32>) -> Vector2<f32> {
+            return Vector2::new(
+                2.0 * ((jac.x + jac.y).abs().max((jac.x - jac.y).abs()).max(1.0)),
+                2.0 * ((jac.z + jac.w).abs().max((jac.z - jac.w).abs()).max(1.0))
+            );
+        }
+        // Computes minimum area ellipse which covers a unit circle in both the source and destination image
+        fn clamped_ellipse(jac: &Vector4<f32>) -> Vector3<f32> {
+            // find ellipse
+            let f0 = (jac.x * jac.w - jac.y * jac.z).abs();
+            let f = (f0 * f0).max(0.1);
+            let a = (jac.z * jac.z + jac.w * jac.w) / f;
+            let b = -2.0 * (jac.x * jac.z + jac.y * jac.w) / f;
+            let c = (jac.x * jac.x + jac.y * jac.y) / f;
+            // find the angle to rotate ellipse
+            let v = Vector2::<f32>::new(c - a, -b);
+            let lv = v.norm();
+            let v0 = if lv > 0.01 { v.x / lv } else { 1.0 };
+            // let v1 = if lv > 0.01 { v.y / lv } else { 1.0 };
+            let cc = ((1.0 + v0).max(0.0) / 2.0).sqrt();
+            let mut s = ((1.0 - v0).max(0.0) / 2.0).sqrt();
+            // rotate the ellipse to align it with axes
+            let mut a0 = a * cc * cc - b * cc * s + c * s * s;
+            let mut c0 = a * s * s + b * cc * s + c * cc * cc;
+            let bt1 = b * (cc * cc - s * s);
+            let bt2 = 2.0 * (a - c) * cc * s;
+            let mut b0 = bt1 + bt2;
+            let b0v2 = bt1 - bt2;
+            if b0.abs() > b0v2.abs() {
+                s = -s;
+                b0 = b0v2;
+            }
+            // clamp A,C
+            a0 = a0.min(1.0);
+            c0 = c0.min(1.0);
+            let sn = -s;
+            // rotate it back
+            Vector3::new(
+                a0 * cc * cc - b0 * cc * sn + c0 * sn * sn,
+                2.0 * a0 * cc * sn + b0 * cc * cc - b0 * sn * sn - 2.0 * c0 * cc * sn,
+                a0 * sn * sn + b0 * cc * sn + c0 * cc * cc
+            )
+        }
+        fn bc2(x: f32, params: &KernelParams) -> f32 {
+            let x = x.abs();
+            if x < 1.0 {
+                return params.ewa_coeffs_p[0] + params.ewa_coeffs_p[1] * x + params.ewa_coeffs_p[2] * x * x + params.ewa_coeffs_p[3] * x * x * x;
+            } else if x < 2.0 {
+                return params.ewa_coeffs_q[0] + params.ewa_coeffs_q[1] * x + params.ewa_coeffs_q[2] * x * x + params.ewa_coeffs_q[3] * x * x * x;
+            }
+            0.0
+        }
+        ////////////////////////////// EWA (Elliptical Weighted Average) CubicBC sampling //////////////////////////////
+
+        fn sample_input_at<const I: i32, T: PixelType>(uv: Vector2<f32>, jac: &Vector4<f32>, input: &[u8], params: &KernelParams, bg: &Vector4<f32>, _drawing: &[u8]) -> Vector4<f32> {
+            let input_pixels: &[T] = bytemuck::cast_slice(input);
+            let mut sum = Vector4::from_element(0.0);
+            if I > 8 {
+                // find how many pixels we need around that pixel in each direction
+                let trans_size = affine_bbox(jac);
+                let bounds = (
+                    (uv.x - trans_size.x).floor() as i32,
+                    (uv.x + trans_size.x).ceil() as i32,
+                    (uv.y - trans_size.y).floor() as i32,
+                    (uv.y + trans_size.y).ceil() as i32
+                );
+                let mut sum_div = 0.0;
+                let mut src_index = bounds.2 * params.stride;
+
+                // See: Andreas Gustafsson. "Interactive Image Warping", section 3.6 http://www.gson.org/thesis/warping-thesis.pdf
+                let abc = clamped_ellipse(jac);
+                for in_y in bounds.2..=bounds.3 {
+                    let in_fy = in_y as f32 - uv.y;
+                    let in_fy2 = in_fy * abc.y;
+                    let in_fy3 = in_fy * in_fy * abc.z;
+                    for in_x in bounds.0..=bounds.1 {
+                        let in_fx = in_x as f32 - uv.x;
+                        let dr = in_fx * in_fx * abc.x + in_fx * in_fy2 + in_fy3;
+                        let k = bc2(dr.sqrt(), params); // cylindrical filtering
+                        if k == 0.0 {
+                            continue;
+                        }
+                        let pixel = if in_y >= params.source_rect[1] && in_y < params.source_rect[1] + params.source_rect[3] && in_x >= params.source_rect[0] && in_x < params.source_rect[0] + params.source_rect[2] {
+                            let px1: &T = bytemuck::from_bytes(&input[src_index as usize + (params.bytes_per_pixel * in_x) as usize..src_index as usize + (params.bytes_per_pixel * (in_x + 1)) as usize]);
+                            let src_px = PixelType::to_float(*px1);
+                            // draw_pixel(&mut src_px, sx + xp, sy + yp, true, params.width, params, drawing);
+                            src_px
+                        } else {
+                            *bg
+                        };
+                        sum += k * pixel;
+                        sum_div += k;
+                    }
+                    src_index += params.stride;
+                }
+                sum /= sum_div;
+            } else {
+                const INTER_BITS: usize = 5;
+                const INTER_TAB_SIZE: usize = 1 << INTER_BITS;
+                let shift: i32 = (I >> 2) + 1;
+                let offset: f32 = [0.0, 1.0, 3.0][I as usize >> 2];
+                let ind: usize = [0, 64, 64 + 128][I as usize >> 2];
+
+                let u = uv.x - offset;
+                let v = uv.y - offset;
+
+                let sx0 = (u * INTER_TAB_SIZE as f32).round() as i32;
+                let sy0 = (v * INTER_TAB_SIZE as f32).round() as i32;
+
+                let sx = sx0 >> INTER_BITS;
+                let sy = sy0 >> INTER_BITS;
+
+                let coeffs_x = &COEFFS[ind + ((sx0 as usize & (INTER_TAB_SIZE - 1)) << shift)..];
+                let coeffs_y = &COEFFS[ind + ((sy0 as usize & (INTER_TAB_SIZE - 1)) << shift)..];
+
+                let mut src_index = sy as isize * params.stride as isize + sx as isize * params.bytes_per_pixel as isize;
+
+                for yp in 0..I {
+                    if sy + yp >= params.source_rect[1] && sy + yp < params.source_rect[1] + params.source_rect[3] {
+                        let mut xsum = Vector4::<f32>::from_element(0.0);
+                        for xp in 0..I {
+                            let pixel = if sx + xp >= params.source_rect[0] && sx + xp < params.source_rect[0] + params.source_rect[2] {
+                                let px1: &T = bytemuck::from_bytes(&input[src_index as usize + (params.bytes_per_pixel * xp) as usize..src_index as usize + (params.bytes_per_pixel * (xp + 1)) as usize]);
+                                let src_px = PixelType::to_float(*px1);
+                                // draw_pixel(&mut src_px, sx + xp, sy + yp, true, params.width, params, drawing);
+                                src_px
+                            } else {
+                                *bg
+                            };
+                            xsum += pixel * coeffs_x[xp as usize];
+                        }
+
+                        sum += xsum * coeffs_y[yp as usize];
+                    } else {
+                        sum += bg * coeffs_y[yp as usize];
+                    }
+                    src_index += params.stride as isize;
+                }
+            }
+            Vector4::new(
+                sum.x.min(params.pixel_value_limit),
+                sum.y.min(params.pixel_value_limit),
+                sum.z.min(params.pixel_value_limit),
+                sum.w.min(params.pixel_value_limit),
+            )
+        }
+
+        fn undistort_coord(mut out_pos: Vector2<f32>, params: &KernelParams, matrices: &[[f32; 14]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit_sq: f32, mesh_data: &[f64], out_c: &Vector2<f32>, out_f: &Vector2<f32>) -> Option<Vector2<f32>> {
+            out_pos.x = map_coord(out_pos.x, params.output_rect[0] as f32, (params.output_rect[0] + params.output_rect[2]) as f32, 0.0, params.output_width  as f32);
+            out_pos.y = map_coord(out_pos.y, params.output_rect[1] as f32, (params.output_rect[1] + params.output_rect[3]) as f32, 0.0, params.output_height as f32);
+            out_pos.x += params.translation2d[0];
+            out_pos.y += params.translation2d[1];
+
+            ///////////////////////////////////////////////////////////////////
+            // Add lens distortion back
+            if params.lens_correction_amount < 1.0 {
+                let mut new_out_pos = out_pos;
+
+                if (params.flags & 2) == 2 { // Has digial lens
+                    if let Some(digital) = digital_lens {
+                        if let Some(pt) = digital.undistort_point((new_out_pos.x, new_out_pos.y), params) {
+                            new_out_pos.x = pt.0;
+                            new_out_pos.y = pt.1;
+                        }
+                    }
+                }
+
+                new_out_pos = (new_out_pos - out_c).component_div(out_f);
+                if let Some(pt) = distortion_model.undistort_point((new_out_pos.x, new_out_pos.y), params) {
+                    new_out_pos.x = pt.0;
+                    new_out_pos.y = pt.1;
+                }
+                if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
+                    let r = new_out_pos.norm();
+                    if r != 0.0 {
+                        let sin_theta_d = (r / (1.0 + r * r).sqrt()) / params.light_refraction_coefficient;
+                        let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
+                        let factor = r_d / r;
+                        new_out_pos *= factor;
+                    }
+                }
+                new_out_pos = (new_out_pos.component_mul(out_f)) + out_c;
+
+                out_pos = new_out_pos * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);
+            }
+            ///////////////////////////////////////////////////////////////////
+
+            ///////////////////////////////////////////////////////////////////
+            // Calculate source `y` for rolling shutter
+            let mut sy = if (params.flags & 16) == 16 { // Horizontal RS
+                (out_pos.x.round() as i32).min(params.width).max(0) as usize
+            } else {
+                (out_pos.y.round() as i32).min(params.height).max(0) as usize
+            };
+            if params.matrix_count > 1 {
+                let idx = params.matrix_count as usize / 2;
+                if let Some(pt) = Stabilization::rotate_and_distort((out_pos.x, out_pos.y), idx, params, matrices, distortion_model, digital_lens, r_limit_sq, mesh_data) {
+                    if (params.flags & 16) == 16 { // Horizontal RS
+                        sy = (pt.0.round() as i32).min(params.width).max(0) as usize;
+                    } else {
+                        sy = (pt.1.round() as i32).min(params.height).max(0) as usize;
+                    }
+                }
+            }
+            ///////////////////////////////////////////////////////////////////
+
+            let idx = sy.min(params.matrix_count as usize - 1);
+            let mut uv = Stabilization::rotate_and_distort((out_pos.x, out_pos.y), idx, params, matrices, distortion_model, digital_lens, r_limit_sq, mesh_data)?;
             let mut frame_size = (params.width as f32, params.height as f32);
             if params.input_rotation != 0.0 {
                 let rotation = params.input_rotation * (std::f32::consts::PI / 180.0);
@@ -284,49 +490,7 @@ impl Stabilization {
                 map_coord(uv.0, 0.0, frame_size.0, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),
                 map_coord(uv.1, 0.0, frame_size.1, params.source_rect[1] as f32, (params.source_rect[1] + params.source_rect[3]) as f32)
             );
-
-            let u = uv.0 - offset;
-            let v = uv.1 - offset;
-
-            let sx0 = (u * INTER_TAB_SIZE as f32).round() as i32;
-            let sy0 = (v * INTER_TAB_SIZE as f32).round() as i32;
-
-            let sx = sx0 >> INTER_BITS;
-            let sy = sy0 >> INTER_BITS;
-
-            let coeffs_x = &COEFFS[ind + ((sx0 as usize & (INTER_TAB_SIZE - 1)) << shift)..];
-            let coeffs_y = &COEFFS[ind + ((sy0 as usize & (INTER_TAB_SIZE - 1)) << shift)..];
-
-            let mut sum = Vector4::from_element(0.0);
-            let mut src_index = sy as isize * params.stride as isize + sx as isize * params.bytes_per_pixel as isize;
-
-            for yp in 0..I {
-                if sy + yp >= params.source_rect[1] && sy + yp < params.source_rect[1] + params.source_rect[3] {
-                    let mut xsum = Vector4::<f32>::from_element(0.0);
-                    for xp in 0..I {
-                        let pixel = if sx + xp >= params.source_rect[0] && sx + xp < params.source_rect[0] + params.source_rect[2] {
-                            let px1: &T = bytemuck::from_bytes(&input[src_index as usize + (params.bytes_per_pixel * xp) as usize..src_index as usize + (params.bytes_per_pixel * (xp + 1)) as usize]);
-                            let src_px = PixelType::to_float(*px1);
-                            // draw_pixel(&mut src_px, sx + xp, sy + yp, true, params.width, params, drawing);
-                            src_px
-                        } else {
-                            *bg
-                        };
-                        xsum += pixel * coeffs_x[xp as usize];
-                    }
-
-                    sum += xsum * coeffs_y[yp as usize];
-                } else {
-                    sum += bg * coeffs_y[yp as usize];
-                }
-                src_index += params.stride as isize;
-            }
-            Vector4::new(
-                sum.x.min(params.pixel_value_limit),
-                sum.y.min(params.pixel_value_limit),
-                sum.z.min(params.pixel_value_limit),
-                sum.w.min(params.pixel_value_limit),
-            )
+            Some(Vector2::new(uv.0, uv.1))
         }
 
         if let BufferSource::Cpu { buffer: input } = &mut buffers.input.data {
@@ -337,8 +501,8 @@ impl Stabilization {
                 let bg_t: T = PixelType::from_float(bg);
 
                 let factor = (1.0 - params.lens_correction_amount).max(0.001); // FIXME: this is close but wrong
-                let out_c = (params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
-                let out_f = ((params.f[0] / params.fov / factor), (params.f[1] / params.fov / factor));
+                let out_c = Vector2::new(params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
+                let out_f = Vector2::new(params.f[0] / params.fov / factor, params.f[1] / params.fov / factor);
 
                 // let drawing_enabled = !drawing.is_empty() && (params.flags & 8) == 8;
                 let fill_bg = (params.flags & 4) == 4;
@@ -356,7 +520,7 @@ impl Stabilization {
                 output.par_chunks_mut(buffers.output.size.2).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
                     row_bytes.chunks_mut(params.bytes_per_pixel as usize).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
 
-                        let mut out_pos = (
+                        let out_pos = (
                             map_coord(x as f32, params.output_rect[0] as f32, (params.output_rect[0] + params.output_rect[2]) as f32, 0.0, params.output_width  as f32),
                             map_coord(y as f32, params.output_rect[1] as f32, (params.output_rect[1] + params.output_rect[3]) as f32, 0.0, params.output_height as f32)
                         );
@@ -366,9 +530,6 @@ impl Stabilization {
                             // let p = out_pos;
                             let mut pixel = bg;
 
-                            out_pos.0 += params.translation2d[0];
-                            out_pos.1 += params.translation2d[1];
-
                             let pix_out = bytemuck::from_bytes_mut(pix_chunk); // treat this byte chunk as `T`
 
                             if fill_bg {
@@ -376,79 +537,35 @@ impl Stabilization {
                                 return;
                             }
 
-                            ///////////////////////////////////////////////////////////////////
-                            // Add lens distortion back
-                            if params.lens_correction_amount < 1.0 {
-                                let mut new_out_pos = out_pos;
+                            let position = Vector2::new(x as f32, y as f32);
 
-                                if (params.flags & 2) == 2 { // Has digial lens
-                                    if let Some(digital) = digital_lens {
-                                        if let Some(pt) = digital.undistort_point(new_out_pos, params) {
-                                            new_out_pos = pt;
-                                        }
-                                    }
+                            if let Some(mut uv) = undistort_coord(position, params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f) {
+                                let mut jac = Vector4::new(1.0, 0.0, 0.0, 1.0);
+                                if I > 8 {
+                                    let eps = 0.01;
+                                    let xyx = undistort_coord(position + Vector2::new(eps, 0.0), params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f).unwrap_or_default() - uv;
+                                    let xyy = undistort_coord(position + Vector2::new(0.0, eps), params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f).unwrap_or_default() - uv;
+                                    jac = Vector4::new(xyx.x / eps, xyy.x / eps, xyx.y / eps, xyy.y / eps);
                                 }
 
-                                new_out_pos = ((new_out_pos.0 - out_c.0) / out_f.0, (new_out_pos.1 - out_c.1) / out_f.1);
-                                new_out_pos = distortion_model.undistort_point(new_out_pos, &params).unwrap_or_default();
-                                if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
-                                    let r = (new_out_pos.0.powi(2) + new_out_pos.1.powi(2)).sqrt();
-                                    if r != 0.0 {
-                                        let sin_theta_d = (r / (1.0 + r * r).sqrt()) / params.light_refraction_coefficient;
-                                        let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
-                                        let factor = r_d / r;
-                                        new_out_pos.0 *= factor;
-                                        new_out_pos.1 *= factor;
-                                    }
-                                }
-                                new_out_pos = ((new_out_pos.0 * out_f.0) + out_c.0, (new_out_pos.1 * out_f.1) + out_c.1);
-
-                                out_pos = (
-                                    new_out_pos.0 * (1.0 - params.lens_correction_amount) + (out_pos.0 * params.lens_correction_amount),
-                                    new_out_pos.1 * (1.0 - params.lens_correction_amount) + (out_pos.1 * params.lens_correction_amount),
-                                );
-                            }
-                            ///////////////////////////////////////////////////////////////////
-
-                            ///////////////////////////////////////////////////////////////////
-                            // Calculate source `y` for rolling shutter
-                            let mut sy = if (params.flags & 16) == 16 { // Horizontal RS
-                                (out_pos.0.round() as i32).min(params.width).max(0) as usize
-                            } else {
-                                (out_pos.1.round() as i32).min(params.height).max(0) as usize
-                            };
-                            if params.matrix_count > 1 {
-                                let idx = params.matrix_count as usize / 2;
-                                if let Some(pt) = Self::rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data) {
-                                    if (params.flags & 16) == 16 { // Horizontal RS
-                                        sy = (pt.0.round() as i32).min(params.width).max(0) as usize;
-                                    } else {
-                                        sy = (pt.1.round() as i32).min(params.height).max(0) as usize;
-                                    }
-                                }
-                            }
-                            ///////////////////////////////////////////////////////////////////
-
-                            let idx = sy.min(params.matrix_count as usize - 1);
-                            if let Some(mut uv) = Self::rotate_and_distort(out_pos, idx, params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data) {
                                 let width_f = params.width as f32;
                                 let height_f = params.height as f32;
                                 match params.background_mode {
                                     1 => { // Edge repeat
-                                        uv = (
-                                            uv.0.max(0.0).min(width_f  - 1.0),
-                                            uv.1.max(0.0).min(height_f - 1.0),
+                                        uv = Vector2::new(
+                                            uv.x.max(0.0).min(width_f  - 1.0),
+                                            uv.y.max(0.0).min(height_f - 1.0),
                                         );
                                     },
                                     2 => { // Edge mirror
-                                        let rx = uv.0.round();
-                                        let ry = uv.1.round();
+                                        let rx = uv.x.round();
+                                        let ry = uv.y.round();
                                         let width3 = width_f - 3.0;
                                         let height3 = height_f - 3.0;
-                                        if rx > width3  { uv.0 = width3  - (rx - width3); }
-                                        if rx < 3.0     { uv.0 = 3.0 + width_f - (width3  + rx); }
-                                        if ry > height3 { uv.1 = height3 - (ry - height3); }
-                                        if ry < 3.0     { uv.1 = 3.0 + height_f - (height3 + ry); }
+                                        if rx > width3  { uv.x = width3  - (rx - width3); }
+                                        if rx < 3.0     { uv.x = 3.0 + width_f - (width3  + rx); }
+                                        if ry > height3 { uv.y = height3 - (ry - height3); }
+                                        if ry < 3.0     { uv.y = 3.0 + height_f - (height3 + ry); }
                                     },
                                     3 => { // Margin with feather
                                         let widthf  = width_f - 1.0;
@@ -457,18 +574,17 @@ impl Stabilization {
                                         let feather = (params.background_margin_feather * heightf).max(0.0001);
                                         let mut pt2 = uv;
                                         let mut alpha = 1.0;
-                                        if (uv.0 > widthf - feather) || (uv.0 < feather) || (uv.1 > heightf - feather) || (uv.1 < feather) {
-                                            alpha = ((widthf - uv.0).min(heightf - uv.1).min(uv.0).min(uv.1) / feather).min(1.0).max(0.0);
-                                            pt2 = (pt2.0 / width_f, pt2.1 / height_f);
-                                            pt2 = (
-                                                ((pt2.0 - 0.5) * (1.0 - params.background_margin)) + 0.5,
-                                                ((pt2.1 - 0.5) * (1.0 - params.background_margin)) + 0.5
-                                            );
-                                            pt2 = (pt2.0 * width_f, pt2.1 * height_f);
+                                        if (uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather) {
+                                            alpha = ((widthf - uv.x).min(heightf - uv.y).min(uv.x).min(uv.y) / feather).min(1.0).max(0.0);
+                                            let size_f = Vector2::new(width_f, height_f);
+                                            let half = Vector2::from_element(0.5);
+                                            pt2.component_div_assign(&size_f);
+                                            pt2 = ((pt2 - half) * (1.0 - params.background_margin)) + half;
+                                            pt2.component_mul_assign(&size_f);
                                         }
 
-                                        let c1 = sample_input_at::<I, T>(uv, input, params, &bg, drawing);
-                                        let c2 = sample_input_at::<I, T>(pt2, input, params, &bg, drawing);
+                                        let c1 = sample_input_at::<I, T>(uv, &jac, input, params, &bg, drawing);
+                                        let c2 = sample_input_at::<I, T>(pt2, &jac, input, params, &bg, drawing); // FIXME: jac should be adjusted for pt2
                                         pixel = c1 * alpha + c2 * (1.0 - alpha);
                                         // draw_pixel(&mut pixel, p.0 as i32, p.1 as i32, false, params.output_width, params, drawing);
                                         if fix_range {
@@ -480,7 +596,7 @@ impl Stabilization {
                                     _ => { }
                                 }
 
-                                pixel = sample_input_at::<I, T>(uv, input, params, &bg, drawing);
+                                pixel = sample_input_at::<I, T>(uv, &jac, input, params, &bg, drawing);
                             }
                             // draw_pixel(&mut pixel, p.0 as i32, p.1 as i32, false, params.output_width, params, drawing);
 
