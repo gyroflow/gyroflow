@@ -314,17 +314,19 @@ impl Stabilization {
         }
         fn bc2(x: f32, params: &KernelParams) -> f32 {
             let x = x.abs();
-            if x < 1.0 {
-                return params.ewa_coeffs_p[0] + params.ewa_coeffs_p[1] * x + params.ewa_coeffs_p[2] * x * x + params.ewa_coeffs_p[3] * x * x * x;
-            } else if x < 2.0 {
-                return params.ewa_coeffs_q[0] + params.ewa_coeffs_q[1] * x + params.ewa_coeffs_q[2] * x * x + params.ewa_coeffs_q[3] * x * x * x;
+            unsafe {
+                let x2 = x * x;
+                if x < 1.0 {
+                    return params.ewa_coeffs_p.get_unchecked(0) + params.ewa_coeffs_p.get_unchecked(1) * x + params.ewa_coeffs_p.get_unchecked(2) * x2 + params.ewa_coeffs_p.get_unchecked(3) * x2 * x;
+                } else if x < 2.0 {
+                    return params.ewa_coeffs_q.get_unchecked(0) + params.ewa_coeffs_q.get_unchecked(1) * x + params.ewa_coeffs_q.get_unchecked(2) * x2 + params.ewa_coeffs_q.get_unchecked(3) * x2 * x;
+                }
             }
             0.0
         }
         ////////////////////////////// EWA (Elliptical Weighted Average) CubicBC sampling //////////////////////////////
 
         fn sample_input_at<const I: i32, T: PixelType>(uv: Vector2<f32>, jac: &Vector4<f32>, input: &[u8], params: &KernelParams, bg: &Vector4<f32>, _drawing: &[u8]) -> Vector4<f32> {
-            let input_pixels: &[T] = bytemuck::cast_slice(input);
             let mut sum = Vector4::from_element(0.0);
             if I > 8 {
                 // find how many pixels we need around that pixel in each direction
