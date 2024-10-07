@@ -192,7 +192,7 @@ impl<'a> FfmpegProcessor<'a> {
                 return Err(FFmpegError::DecoderNotFound);
             }
         }
-        decoder_ctx.set_threading(ffmpeg_next::threading::Config { kind: ffmpeg_next::threading::Type::Frame, count: 4 });
+        decoder_ctx.set_threading(ffmpeg_next::threading::Config { kind: ffmpeg_next::threading::Type::Frame, count: 5 });
 
         let codec = decoder_ctx.codec().ok_or(FFmpegError::DecoderNotFound)?;
 
