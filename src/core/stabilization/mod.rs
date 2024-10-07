@@ -31,6 +31,20 @@ pub enum Interpolation {
     Mitchell = 12,
     CatmullRom = 13
 }
+impl From<&str> for Interpolation {
+    fn from(s: &str) -> Self {
+        match s {
+            "Bilinear"           => Interpolation::Bilinear,
+            "Bicubic"            => Interpolation::Bicubic,
+            "Lanczos4"           => Interpolation::Lanczos4,
+            "EWA: RobidouxSharp" => Interpolation::RobidouxSharp,
+            "EWA: Robidoux"      => Interpolation::Robidoux,
+            "EWA: Mitchell"      => Interpolation::Mitchell,
+            "EWA: Catmull-Rom"   => Interpolation::CatmullRom,
+            _ => Interpolation::Lanczos4
+        }
+    }
+}
 
 struct ThreadLocalWgpuCache(RefCell<lru::LruCache<u32, wgpu::WgpuWrapper>>);
 impl Drop for ThreadLocalWgpuCache {

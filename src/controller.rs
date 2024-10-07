@@ -1319,7 +1319,7 @@ impl Controller {
                 std::thread::sleep(std::time::Duration::from_millis(200));
             }
             cancel_flag.store(false, SeqCst);
-            finished(stab.import_gyroflow_file(&url, false, progress, cancel_flag));
+            finished(stab.import_gyroflow_file(&url, false, progress, cancel_flag, false));
         });
     }
     fn import_gyroflow_data(&mut self, data: QString) {
@@ -1347,7 +1347,7 @@ impl Controller {
             }
             cancel_flag.store(false, SeqCst);
             let mut is_preset = false;
-            finished(stab.import_gyroflow_data(data.to_string().as_bytes(), false, None, progress, cancel_flag, &mut is_preset));
+            finished(stab.import_gyroflow_data(data.to_string().as_bytes(), false, None, progress, cancel_flag, &mut is_preset, false));
         });
     }
     fn import_gyroflow_internal(&mut self, result: Result<serde_json::Value, gyroflow_core::GyroflowCoreError>) -> QJsonObject {

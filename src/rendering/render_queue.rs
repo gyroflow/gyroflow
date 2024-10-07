@@ -1250,9 +1250,9 @@ impl RenderQueue {
 
                             let result = if is_gf_data {
                                 let mut is_preset = false;
-                                stab.import_gyroflow_data(url.as_bytes(), true, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset)
+                                stab.import_gyroflow_data(url.as_bytes(), true, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset, false)
                             } else {
-                                stab.import_gyroflow_file(&url, true, |_|(), Arc::new(AtomicBool::new(false)))
+                                stab.import_gyroflow_file(&url, true, |_|(), Arc::new(AtomicBool::new(false)), false)
                             };
 
                             match result {
@@ -1573,7 +1573,7 @@ impl RenderQueue {
                     }
 
                     let mut is_preset = false;
-                    if let Err(e) = stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset) {
+                    if let Err(e) = stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset, false) {
                         ::log::error!("Failed to update queue stab data: {:?}", e);
                     }
 

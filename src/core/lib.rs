@@ -1269,17 +1269,17 @@ impl StabilizationManager {
         org_video_url.to_string()
     }
 
-    pub fn import_gyroflow_file<F: Fn(f64)>(&self, url: &str, blocking: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::result::Result<serde_json::Value, GyroflowCoreError> {
+    pub fn import_gyroflow_file<F: Fn(f64)>(&self, url: &str, blocking: bool, progress_cb: F, cancel_flag: Arc<AtomicBool>, is_plugin: bool) -> std::result::Result<serde_json::Value, GyroflowCoreError> {
         let data = filesystem::read(url)?;
 
         let mut is_preset = false;
-        let result = self.import_gyroflow_data(&data, blocking, Some(url), progress_cb, cancel_flag, &mut is_preset);
+        let result = self.import_gyroflow_data(&data, blocking, Some(url), progress_cb, cancel_flag, &mut is_preset, is_plugin);
         if !is_preset && result.is_ok() {
             self.input_file.write().project_file_url = Some(url.to_string());
         }
         result
     }
-    pub fn import_gyroflow_data<F: Fn(f64)>(&self, data: &[u8], blocking: bool, url: Option<&str>, progress_cb: F, cancel_flag: Arc<AtomicBool>, is_preset: &mut bool) -> std::result::Result<serde_json::Value, GyroflowCoreError> {
+    pub fn import_gyroflow_data<F: Fn(f64)>(&self, data: &[u8], blocking: bool, url: Option<&str>, progress_cb: F, cancel_flag: Arc<AtomicBool>, is_preset: &mut bool, is_plugin: bool) -> std::result::Result<serde_json::Value, GyroflowCoreError> {
         let mut obj: serde_json::Value = serde_json::from_slice(&data)?;
         if let serde_json::Value::Object(ref mut obj) = obj {
             let mut output_size = None;
@@ -1541,6 +1541,11 @@ impl StabilizationManager {
                         output_size = Some((w as usize, h as usize));
                     }
                 }
+                if is_plugin {
+                    if let Some(i) = obj.get("interpolation").and_then(|x| x.as_str()) {
+                        self.stabilization.write().interpolation = i.into();
+                    }
+                }
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 if let Some(v) = obj.get("output_folder_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
                     let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v, url);
@@ -1687,7 +1692,7 @@ impl StabilizationManager {
         false
     }
 
-    pub fn load_video_file(&self, url: &str, mut metadata: Option<telemetry_parser::util::VideoMetadata>) -> Result<telemetry_parser::util::VideoMetadata, GyroflowCoreError> {
+    pub fn load_video_file(&self, url: &str, mut metadata: Option<telemetry_parser::util::VideoMetadata>, is_plugin: bool) -> Result<telemetry_parser::util::VideoMetadata, GyroflowCoreError> {
         if metadata.is_none() {
             metadata = Some(util::get_video_metadata(url)?);
         }
@@ -1745,9 +1750,9 @@ impl StabilizationManager {
             let local_path = lens_profile_database::LensProfileDatabase::get_path().join("default.gyroflow");
             let settings_path = settings::data_dir().join("lens_profiles").join("default.gyroflow");
             if settings_path.exists() {
-                let _ = self.import_gyroflow_file(&settings_path.to_str().unwrap(), true, |_|(), Arc::new(AtomicBool::new(false)));
+                let _ = self.import_gyroflow_file(&settings_path.to_str().unwrap(), true, |_|(), Arc::new(AtomicBool::new(false)), is_plugin);
             } else if local_path.exists() {
-                let _ = self.import_gyroflow_file(&local_path.to_str().unwrap(), true, |_|(), Arc::new(AtomicBool::new(false)));
+                let _ = self.import_gyroflow_file(&local_path.to_str().unwrap(), true, |_|(), Arc::new(AtomicBool::new(false)), is_plugin);
             }
         }
         Ok(metadata)
