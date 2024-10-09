@@ -9,7 +9,7 @@ ExtDir := ProjectDir / "ext"
 Arch := env("FORCE_ARCH", arch())
 
 # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
-QtVersion := env_var_or_default("FORCE_QT_VERSION", if os() == "windows" { "6.7.2" } else { if Arch == "aarch64" { "6.7.2" } else { "6.4.3" } })
+QtVersion := env_var_or_default("FORCE_QT_VERSION", if os() == "windows" { "6.7.3" } else { if Arch == "aarch64" { "6.7.3" } else { "6.4.3" } })
 QtArch := if os() + Arch == "windowsx86_64"  { "msvc2019_64"
    } else if os() + Arch == "windowsaarch64" { "msvc2019_arm64"
    } else if os() == "macos"   { "macos"
