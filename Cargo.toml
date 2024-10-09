@@ -97,7 +97,7 @@ core-foundation-sys = "0.8.7"
 cpp_build = "0.5.9"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.1.24"
+cc = "1.1.28"
 
 [[bin]]
 name = "gyroflow"

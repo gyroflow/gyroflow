@@ -533,6 +533,7 @@ fn setup_defaults(stab: Arc<StabilizationManager>, queue: &mut RenderQueue) -> s
     })
 }
 
+// TODO: replace with `notify` crate
 fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> bool {
     if path.is_empty() { return false; }
     if !std::path::Path::new(&path).exists() { log::info!("{} doesn't exist.", path); return false; }

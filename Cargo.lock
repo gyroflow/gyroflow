@@ -509,9 +509,9 @@ checksum = "b048fb63fd8b5923fc5aa7b340d8e156aec7ec02f0c78fa8a6ddc2613f6f71de"
 
 [[package]]
 name = "bitreader"
-version = "0.3.8"
+version = "0.3.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bdd859c9d97f7c468252795b35aeccc412bdbb1e90ee6969c4fa6328272eaeff"
+checksum = "b1123451be0f8ada15415fbb4e0fe50775be531f61a432c18168a4f96e470ce1"
 dependencies = [
  "cfg-if",
 ]
@@ -588,9 +588,9 @@ checksum = "428d9aa8fbc0670b7b8d6030a7fadd0f86151cae55e4dbbece15f3780a3dfaf3"
 
 [[package]]
 name = "cc"
-version = "1.1.24"
+version = "1.1.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "812acba72f0a070b003d3697490d2b55b837230ae7c6c6497f05cc2ddbb8d938"
+checksum = "2e80e3b6a3ab07840e1cae9b0666a63970dc28e8ed5ffbcdacbfc760c281bfc1"
 dependencies = [
  "jobserver",
  "libc",
@@ -1393,6 +1393,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "foldhash"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f81ec6369c545a7d40e4589b5597581fa1c441fe1cce96dd1de43159910a36a2"
+
+[[package]]
 name = "foreign-types"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1442,9 +1448,9 @@ checksum = "3a471a38ef8ed83cd6e40aa59c1ffe17db6855c18e3604d9c4ed8c08ebc28678"
 
 [[package]]
 name = "futures-core"
-version = "0.3.30"
+version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfc6580bb841c5a68e9ef15c77ccc837b40a7504914d52e47b8b0e9bbda25a1d"
+checksum = "05f29059c0c2090612e8d742178b0580d2dc940c837851ad723096f87af6663e"
 
 [[package]]
 name = "futures-intrusive"
@@ -1459,9 +1465,9 @@ dependencies = [
 
 [[package]]
 name = "futures-io"
-version = "0.3.30"
+version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a44623e20b9681a318efdd71c299b6b222ed6f231972bfe2f224ebad6311f0c1"
+checksum = "9e5c1b78ca4aae1ac06c48a526a655760685149f0d465d21f37abfe57ce075c6"
 
 [[package]]
 name = "futures-lite"
@@ -1478,21 +1484,21 @@ dependencies = [
 
 [[package]]
 name = "futures-sink"
-version = "0.3.30"
+version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9fb8e00e87438d937621c1c6269e53f536c14d3fbd6a042bb24879e57d474fb5"
+checksum = "e575fab7d1e0dcb8d0c7bcf9a63ee213816ab51902e6d244a95819acacf1d4f7"
 
 [[package]]
 name = "futures-task"
-version = "0.3.30"
+version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38d84fa142264698cdce1a9f9172cf383a0c82de1bddcf3092901442c4097004"
+checksum = "f90f7dce0722e95104fcb095585910c0977252f286e354b5e3bd38902cd99988"
 
 [[package]]
 name = "futures-util"
-version = "0.3.30"
+version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d6401deb83407ab3da39eba7e33987a73c3df0c82b4bb5813ee871c19c41d48"
+checksum = "9fa08315bb612088cc391249efdc3bc77536f16c91f6cf495e6fbe85b20a4a81"
 dependencies = [
  "futures-core",
  "futures-io",
@@ -1559,9 +1565,9 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "glow"
-version = "0.14.1"
+version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f4a888dbe8181a7535853469c21c67ca9a1cea9460b16808fc018ea9e55d248"
+checksum = "d51fa363f025f5c111e03f13eda21162faeacb6911fe8caa0c0349f9cf0c4483"
 dependencies = [
  "js-sys",
  "slotmap",
@@ -1813,6 +1819,11 @@ name = "hashbrown"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1e087f84d4f86bf4b218b927129862374b72199ae7d8657835f1e89000eea4fb"
+dependencies = [
+ "allocator-api2",
+ "equivalent",
+ "foldhash",
+]
 
 [[package]]
 name = "hermit-abi"
@@ -2155,11 +2166,11 @@ dependencies = [
 
 [[package]]
 name = "lru"
-version = "0.12.4"
+version = "0.12.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37ee39891760e7d94734f6f63fedc29a2e4a152f836120753a72503f09fcf904"
+checksum = "234cf4f4a04dc1f57e24b96cc0cd600cf2af460d4161ac5ecdd0af8e1f3b2a38"
 dependencies = [
- "hashbrown 0.14.5",
+ "hashbrown 0.15.0",
 ]
 
 [[package]]
@@ -2289,7 +2300,7 @@ dependencies = [
 [[package]]
 name = "naga"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=ee0d170#ee0d1703e5f4a267ce9b87d50b824190b45b5a79"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=3693da2#3693da27f956681200ed0d64334b05df827546a1"
 dependencies = [
  "arrayvec",
  "bit-set",
@@ -2757,12 +2768,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.20.1"
+version = "1.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "82881c4be219ab5faaf2ad5e5e5ecdff8c66bd7402ca3160975c93b24961afd1"
-dependencies = [
- "portable-atomic",
-]
+checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
 
 [[package]]
 name = "opencv"
@@ -3011,9 +3019,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.86"
+version = "1.0.87"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e719e8df665df0d1c8fbfd238015744736151d4445ec0836b8e628aae103b77"
+checksum = "b3e4daa0dcf6feba26f985457cdf104d4b4256fc5a09547140f3631bb076b19a"
 dependencies = [
  "unicode-ident",
 ]
@@ -4164,7 +4172,7 @@ dependencies = [
 [[package]]
 name = "wgpu"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=ee0d170#ee0d1703e5f4a267ce9b87d50b824190b45b5a79"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=3693da2#3693da27f956681200ed0d64334b05df827546a1"
 dependencies = [
  "arrayvec",
  "cfg_aliases 0.1.1",
@@ -4188,7 +4196,7 @@ dependencies = [
 [[package]]
 name = "wgpu-core"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=ee0d170#ee0d1703e5f4a267ce9b87d50b824190b45b5a79"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=3693da2#3693da27f956681200ed0d64334b05df827546a1"
 dependencies = [
  "arrayvec",
  "bit-vec",
@@ -4213,7 +4221,7 @@ dependencies = [
 [[package]]
 name = "wgpu-hal"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=ee0d170#ee0d1703e5f4a267ce9b87d50b824190b45b5a79"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=3693da2#3693da27f956681200ed0d64334b05df827546a1"
 dependencies = [
  "android_system_properties",
  "arrayvec",
@@ -4257,7 +4265,7 @@ dependencies = [
 [[package]]
 name = "wgpu-types"
 version = "22.0.0"
-source = "git+https://github.com/gfx-rs/wgpu.git?rev=ee0d170#ee0d1703e5f4a267ce9b87d50b824190b45b5a79"
+source = "git+https://github.com/gfx-rs/wgpu.git?rev=3693da2#3693da27f956681200ed0d64334b05df827546a1"
 dependencies = [
  "bitflags 2.6.0",
  "js-sys",
