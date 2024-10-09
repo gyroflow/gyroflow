@@ -319,8 +319,9 @@ impl Stabilization {
 
     pub fn get_current_key(&self, buffers: &Buffers) -> String {
         format!(
-            "{}|{}|{}|{}|{}|{:?}|{:?}|{:?}|{:?}",
-            buffers.get_checksum(),
+            "{:?}|{:?}|{}|{}|{}|{}|{:?}|{:?}|{:?}|{:?}",
+            buffers.input,
+            buffers.output,
             self.compute_params.distortion_model.id(),
             self.compute_params.digital_lens.as_ref().map(|x| x.id()).unwrap_or_default(),
             self.interpolation as u32,

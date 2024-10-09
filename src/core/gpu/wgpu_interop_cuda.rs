@@ -98,7 +98,7 @@ pub fn get_current_device_id_by_uuid(adapters: &Vec<wgpu::Adapter>) -> usize {
             }, None));
             if let Ok((device, _q)) = device {
                 unsafe {
-                    device.as_hal::<wgpu::hal::api::Vulkan, _, _>(|device| {
+                    let _ = device.as_hal::<wgpu::hal::api::Vulkan, _, _>(|device| {
                         device.map(|device| {
                             let mut id_props = ash::vk::PhysicalDeviceIDProperties::default();
                             let mut device_properties = ash::vk::PhysicalDeviceProperties2::default().push_next(&mut id_props);
@@ -111,7 +111,7 @@ pub fn get_current_device_id_by_uuid(adapters: &Vec<wgpu::Adapter>) -> usize {
                                 adapter_id = i;
                             }
                         })
-                    }).unwrap().unwrap(); // TODO: unwrap
+                    });
                 }
             }
         }

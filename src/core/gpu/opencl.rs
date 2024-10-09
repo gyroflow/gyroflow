@@ -229,7 +229,7 @@ impl OclWrapper {
                 match &buf.data {
                     BufferSource::Cpu { buffer } => {
                         let flags = if is_in { MemFlags::new().read_only().host_write_only() }
-                                           else     { MemFlags::new().write_only().host_read_only().alloc_host_ptr() };
+                                    else     { MemFlags::new().write_only().host_read_only().alloc_host_ptr() };
                         Ok((Buffer::builder().queue(ocl_queue.clone()).len(buffer.len()).flags(flags).build()?, None))
                     },
                     BufferSource::OpenCL { queue, .. } => {
@@ -244,17 +244,17 @@ impl OclWrapper {
                             *ocl_queue.deref_mut() = queue_core;
                         }
                         let flags = if is_in { MemFlags::new().read_only().host_no_access() }
-                                           else     { MemFlags::new().read_write().host_no_access() };
+                                    else     { MemFlags::new().read_write().host_no_access() };
                         Ok((Buffer::builder().queue(ocl_queue.clone()).len(buf.size.1 * buf.size.2).flags(flags).build()?, None))
                     },
                     BufferSource::OpenGL { texture, .. } => {
                         let flags = if is_in { MemFlags::new().read_only() }
-                                           else     { MemFlags::new().write_only() };
+                                    else     { MemFlags::new().write_only() };
 
                         let img = Image::from_gl_texture(ocl_queue.clone(), flags, desc, GlTextureTarget::GlTexture2d, 0, *texture)?;
 
                         let flags = if is_in { MemFlags::new().read_only().host_no_access() }
-                                           else     { MemFlags::new().read_write().host_no_access() };
+                                    else     { MemFlags::new().read_write().host_no_access() };
 
                         Ok((Buffer::builder().queue(ocl_queue.clone()).len(buf.size.1 * buf.size.2).flags(flags).build()?, Some((img, *texture as u64))))
                     },

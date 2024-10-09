@@ -14,7 +14,7 @@ pub mod wgpu_interop;
 pub mod drawing;
 use std::hash::Hasher;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct BufferDescription<'a> {
     pub size: (usize, usize, usize), // width, height, stride
     pub rect: Option<(usize, usize, usize, usize)>, // x, y, width, height
