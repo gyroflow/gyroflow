@@ -60,6 +60,7 @@ lazy_static::lazy_static! {
 }
 thread_local! {
     static CACHED_WGPU: ThreadLocalWgpuCache = ThreadLocalWgpuCache(RefCell::new(lru::LruCache::new(std::num::NonZeroUsize::new(15).unwrap())));
+    #[cfg(feature = "use-opencl")]
     static CACHED_OPENCL: RefCell<lru::LruCache<u32, opencl::OclWrapper>> = RefCell::new(lru::LruCache::new(std::num::NonZeroUsize::new(15).unwrap()));
 }
 
@@ -386,7 +387,9 @@ impl Stabilization {
         let hash = self.get_current_checksum(buffers);
         if i < 0 { // CPU
             CACHED_WGPU.with(|x| x.0.borrow_mut().clear());
-            CACHED_OPENCL.with(|x| x.borrow_mut().clear());
+            #[cfg(feature = "use-opencl")] {
+                CACHED_OPENCL.with(|x| x.borrow_mut().clear());
+            }
             self.initialized_backend = BackendType::Cpu(hash);
             return true;
         }
@@ -413,7 +416,9 @@ impl Stabilization {
                     match wgpu::WgpuWrapper::set_device(wgpu_ind as usize) {
                         Some(_) => {
                             self.next_backend = Some("wgpu");
-                            CACHED_OPENCL.with(|x| x.borrow_mut().clear());
+                            #[cfg(feature = "use-opencl")] {
+                                CACHED_OPENCL.with(|x| x.borrow_mut().clear());
+                            }
                             return true;
                         },
                         None => {
@@ -540,19 +545,22 @@ impl Stabilization {
                 } else {
                     self.initialized_backend = BackendType::Wgpu(hash);
                 }
-            } else if opencl::is_buffer_supported(buffers) && CACHED_OPENCL.with(|x| !x.borrow().is_empty()) {
-                let hash = self.get_current_checksum(buffers);
-                let has_cached = CACHED_OPENCL.with(|x| x.borrow().contains(&hash));
-                if !has_cached {
-                    log::warn!("Cached OpenCL not found, reinitializing. Key: {}", self.get_current_key(buffers));
-                    self.initialized_backend = BackendType::None;
-                    if let Some(dev) = pending_dev {
-                        log::debug!("Setting device {dev}");
-                        self.update_device(dev, buffers);
+            } else {
+                #[cfg(feature = "use-opencl")]
+                if opencl::is_buffer_supported(buffers) && CACHED_OPENCL.with(|x| !x.borrow().is_empty()) {
+                    let hash = self.get_current_checksum(buffers);
+                    let has_cached = CACHED_OPENCL.with(|x| x.borrow().contains(&hash));
+                    if !has_cached {
+                        log::warn!("Cached OpenCL not found, reinitializing. Key: {}", self.get_current_key(buffers));
+                        self.initialized_backend = BackendType::None;
+                        if let Some(dev) = pending_dev {
+                            log::debug!("Setting device {dev}");
+                            self.update_device(dev, buffers);
+                        }
+                        self.init_backends::<T>(timestamp_us, frame, buffers);
+                    } else {
+                        self.initialized_backend = BackendType::OpenCL(hash);
                     }
-                    self.init_backends::<T>(timestamp_us, frame, buffers);
-                } else {
-                    self.initialized_backend = BackendType::OpenCL(hash);
                 }
             }
         }
