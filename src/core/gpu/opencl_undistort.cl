@@ -371,10 +371,10 @@ DATA_TYPEF sample_input_at(float2 uv, float4 jac, __global const uchar *srcptr, 
         }
 #   endif
 
-    sum = min(sum, (DATA_TYPEF)(params->pixel_value_limit));
     if (fix_range) {
         sum = remap_colorrange(sum, params->plane_index == 0, params);
     }
+    sum = min(sum, (DATA_TYPEF)(params->pixel_value_limit));
     return sum;
 }
 
