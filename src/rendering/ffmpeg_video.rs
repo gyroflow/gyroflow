@@ -325,7 +325,7 @@ impl<'a> VideoTranscoder<'a> {
                                     use std::os::raw::c_int;
                                     // let mut dummy: [c_int; 4] = [0; 4];
                                     let mut src_range: c_int = 0;
-                                    let dst_range: c_int = 0;
+                                    let mut dst_range: c_int = 0;
                                     // let mut brightness: c_int = 0;
                                     // let mut contrast: c_int = 0;
                                     // let mut saturation: c_int = 0;
@@ -334,9 +334,9 @@ impl<'a> VideoTranscoder<'a> {
                                     if final_frame.color_range() == util::color::Range::JPEG {
                                         src_range |= 1;
                                     }
-                                    // if self.buffers.converted_frame.color_range() == util::color::Range::JPEG {
-                                    //     dst_range |= 1;
-                                    // }
+                                    if self.buffers.converted_frame.color_range() == util::color::Range::JPEG {
+                                        dst_range |= 1;
+                                    }
                                     ffi::sws_setColorspaceDetails(conv.as_mut_ptr(), coefs, src_range, coefs, dst_range, 0, 1 << 16, 1 << 16);
                                     //self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?.set_color_range(self.buffers.converted_frame.color_range());
                                 }
