@@ -59,7 +59,8 @@ lazy_static::lazy_static! {
     pub static ref GPU_LIST: parking_lot::RwLock<Vec<String>> = parking_lot::RwLock::new(Vec::new());
 }
 thread_local! {
-    static CACHED_WGPU: ThreadLocalWgpuCache = ThreadLocalWgpuCache(RefCell::new(lru::LruCache::new(std::num::NonZeroUsize::new(20).unwrap())));
+    static CACHED_WGPU: ThreadLocalWgpuCache = ThreadLocalWgpuCache(RefCell::new(lru::LruCache::new(std::num::NonZeroUsize::new(15).unwrap())));
+    static CACHED_OPENCL: RefCell<lru::LruCache<u32, opencl::OclWrapper>> = RefCell::new(lru::LruCache::new(std::num::NonZeroUsize::new(15).unwrap()));
 }
 
 bitflags::bitflags! {
@@ -385,6 +386,7 @@ impl Stabilization {
         let hash = self.get_current_checksum(buffers);
         if i < 0 { // CPU
             CACHED_WGPU.with(|x| x.0.borrow_mut().clear());
+            CACHED_OPENCL.with(|x| x.borrow_mut().clear());
             self.initialized_backend = BackendType::Cpu(hash);
             return true;
         }
@@ -409,7 +411,11 @@ impl Stabilization {
                 let wgpu_ind = i - first_ind as isize;
                 if wgpu_ind >= 0 {
                     match wgpu::WgpuWrapper::set_device(wgpu_ind as usize) {
-                        Some(_) => { self.next_backend = Some("wgpu"); return true; },
+                        Some(_) => {
+                            self.next_backend = Some("wgpu");
+                            CACHED_OPENCL.with(|x| x.borrow_mut().clear());
+                            return true;
+                        },
                         None => {
                             log::error!("Failed to set wgpu device {}", name);
                         }
@@ -432,29 +438,39 @@ impl Stabilization {
 
             #[cfg(feature = "use-opencl")]
             if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() && next_backend != "wgpu" && opencl::is_buffer_supported(buffers) {
-                self.cl = None;
-                let transform = self.get_frame_transform_at::<T>(timestamp_us, frame, buffers);
-                let params = transform.kernel_params;
-                let distortion_model = self.compute_params.distortion_model.clone();
-                let digital_lens = self.compute_params.digital_lens.clone();
-                let cl = std::panic::catch_unwind(|| {
-                    opencl::OclWrapper::new(&params, T::ocl_names(), distortion_model, digital_lens, buffers, canvas_len)
-                });
-                match cl {
-                    Ok(Ok(cl)) => {
-                        self.cl = Some(cl);
-                        self.initialized_backend = BackendType::OpenCL(hash);
-                        log::info!("Initialized OpenCL for {:?} -> {:?}, key: {}", buffers.input.size, buffers.output.size, self.get_current_key(buffers));
-                    },
-                    Ok(Err(e)) => { next_backend = ""; log::error!("OpenCL error init_backends: {:?}", e); },
-                    Err(e) => {
-                        next_backend = "";
-                        if let Some(s) = e.downcast_ref::<&str>() {
-                            log::error!("Failed to initialize OpenCL {}", s);
-                        } else if let Some(s) = e.downcast_ref::<String>() {
-                            log::error!("Failed to initialize OpenCL {}", s);
-                        } else {
-                            log::error!("Failed to initialize OpenCL {:?}", e);
+                if self.share_wgpu_instances && CACHED_OPENCL.with(|x| x.borrow().contains(&hash)) {
+                    self.cl = None;
+                    self.initialized_backend = BackendType::OpenCL(hash);
+                } else {
+                    self.cl = None;
+                    let transform = self.get_frame_transform_at::<T>(timestamp_us, frame, buffers);
+                    let params = transform.kernel_params;
+                    let distortion_model = self.compute_params.distortion_model.clone();
+                    let digital_lens = self.compute_params.digital_lens.clone();
+                    let cl = std::panic::catch_unwind(|| {
+                        opencl::OclWrapper::new(&params, T::ocl_names(), distortion_model, digital_lens, buffers, canvas_len)
+                    });
+                    match cl {
+                        Ok(Ok(cl)) => {
+                            if self.share_wgpu_instances {
+                                CACHED_OPENCL.with(|x| x.borrow_mut().put(hash, cl));
+                            } else {
+                                self.cl = Some(cl);
+                            }
+                            self.initialized_backend = BackendType::OpenCL(hash);
+                            log::info!("Initialized OpenCL for {:?} -> {:?}, key: {}", buffers.input.size, buffers.output.size, self.get_current_key(buffers));
+                        },
+                        Ok(Err(e)) => { next_backend = ""; log::error!("OpenCL error init_backends: {:?}", e); if self.share_wgpu_instances { CACHED_OPENCL.with(|x| x.borrow_mut().clear()) } },
+                        Err(e) => {
+                            next_backend = "";
+                            if let Some(s) = e.downcast_ref::<&str>() {
+                                log::error!("Failed to initialize OpenCL {}", s);
+                            } else if let Some(s) = e.downcast_ref::<String>() {
+                                log::error!("Failed to initialize OpenCL {}", s);
+                            } else {
+                                log::error!("Failed to initialize OpenCL {:?}", e);
+                            }
+                            if self.share_wgpu_instances { CACHED_OPENCL.with(|x| x.borrow_mut().clear()); }
                         }
                     }
                 }
@@ -509,19 +525,35 @@ impl Stabilization {
         self.init_backends::<T>(timestamp_us, frame, buffers);
         self.ensure_stab_data_at_timestamp::<T>(timestamp_us, frame, buffers, false);
 
-        if self.share_wgpu_instances && CACHED_WGPU.with(|x| !x.0.borrow().is_empty()) {
-            let hash = self.get_current_checksum(buffers);
-            let has_cached = CACHED_WGPU.with(|x| x.0.borrow().contains(&hash));
-            if !has_cached {
-                log::warn!("Cached wgpu not found, reinitializing. Key: {}", self.get_current_key(buffers));
-                self.initialized_backend = BackendType::None;
-                if let Some(dev) = pending_dev {
-                    log::debug!("Setting device {dev}");
-                    self.update_device(dev, buffers);
+        if self.share_wgpu_instances {
+            if wgpu::is_buffer_supported(buffers) && CACHED_WGPU.with(|x| !x.0.borrow().is_empty()) {
+                let hash = self.get_current_checksum(buffers);
+                let has_cached = CACHED_WGPU.with(|x| x.0.borrow().contains(&hash));
+                if !has_cached {
+                    log::warn!("Cached wgpu not found, reinitializing. Key: {}", self.get_current_key(buffers));
+                    self.initialized_backend = BackendType::None;
+                    if let Some(dev) = pending_dev {
+                        log::debug!("Setting device {dev}");
+                        self.update_device(dev, buffers);
+                    }
+                    self.init_backends::<T>(timestamp_us, frame, buffers);
+                } else {
+                    self.initialized_backend = BackendType::Wgpu(hash);
                 }
-                self.init_backends::<T>(timestamp_us, frame, buffers);
-            } else {
-                self.initialized_backend = BackendType::Wgpu(hash);
+            } else if opencl::is_buffer_supported(buffers) && CACHED_OPENCL.with(|x| !x.borrow().is_empty()) {
+                let hash = self.get_current_checksum(buffers);
+                let has_cached = CACHED_OPENCL.with(|x| x.borrow().contains(&hash));
+                if !has_cached {
+                    log::warn!("Cached OpenCL not found, reinitializing. Key: {}", self.get_current_key(buffers));
+                    self.initialized_backend = BackendType::None;
+                    if let Some(dev) = pending_dev {
+                        log::debug!("Setting device {dev}");
+                        self.update_device(dev, buffers);
+                    }
+                    self.init_backends::<T>(timestamp_us, frame, buffers);
+                } else {
+                    self.initialized_backend = BackendType::OpenCL(hash);
+                }
             }
         }
     }
@@ -557,13 +589,32 @@ impl Stabilization {
 
             // OpenCL path
             #[cfg(feature = "use-opencl")]
-            if let Some(ref cl) = self.cl {
-                if !matches!(self.initialized_backend, BackendType::Cpu(_)) && opencl::is_buffer_supported(buffers) {
-                    if let Err(err) = cl.undistort_image(buffers, &itm, drawing_buffer) {
-                        log::error!("OpenCL error undistort: {:?}", err);
-                    } else {
-                        ret.backend = "OpenCL";
-                        return Ok(ret);
+            if !matches!(self.initialized_backend, BackendType::Cpu(_)) && opencl::is_buffer_supported(buffers) {
+                if self.share_wgpu_instances {
+                    let hash = self.get_current_checksum(buffers);
+                    let has_cache = CACHED_OPENCL.with(|lru| lru.borrow().contains(&hash));
+                    if has_cache {
+                        return CACHED_OPENCL.with(|x| {
+                            let mut cached = x.borrow_mut();
+                            if let Some(cl) = cached.get(&hash) {
+                                if let Err(err) = cl.undistort_image(buffers, &itm, drawing_buffer) {
+                                    log::error!("OpenCL error undistort: {:?}", err);
+                                }
+                                ret.backend = "OpenCL";
+                                Ok(ret)
+                            } else {
+                                Err(GyroflowCoreError::NoCachedWgpuInstance(self.get_current_key(buffers)))
+                            }
+                        });
+                    }
+                } else {
+                    if let Some(ref cl) = self.cl {
+                        if let Err(err) = cl.undistort_image(buffers, &itm, drawing_buffer) {
+                            log::error!("OpenCL error undistort: {:?}", err);
+                        } else {
+                            ret.backend = "OpenCL";
+                            return Ok(ret);
+                        }
                     }
                 }
             }
