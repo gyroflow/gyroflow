@@ -75,7 +75,6 @@ log-panics = { version = "2.1", features = ["with-backtrace"] }
 keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "04ce779" }
 
 [patch.crates-io]
-fc-blackbox = { git = "https://github.com/ilya-epifanov/fc-blackbox.git", rev = "de08350" }
 qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "ee6f5dc" }
 qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "ee6f5dc" }
 
