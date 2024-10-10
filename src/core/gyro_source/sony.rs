@@ -431,9 +431,7 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (V
     let mut b = [0.0; MAX_GRID_SIZE];
     let mut c = [0.0; MAX_GRID_SIZE];
     let mut d = [0.0; MAX_GRID_SIZE];
-    let mut h = [0.0; MAX_GRID_SIZE - 1];
     let mut alpha = [0.0; MAX_GRID_SIZE - 1];
-    let mut l = [0.0; MAX_GRID_SIZE];
     let mut mu = [0.0; MAX_GRID_SIZE];
     let mut z = [0.0; MAX_GRID_SIZE];
 
@@ -457,7 +455,7 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (V
 
         for mesh_offset in 0..=1 {
             for j in 0..divisions.1 {
-                splines::BivariateSpline::cubic_spline_coefficients(&mesh[9 + mesh_offset..], 2, j * divisions.0, size.0, divisions.0, &mut a, &mut b, &mut c, &mut d, &mut h, &mut alpha, &mut l, &mut mu, &mut z);
+                splines::BivariateSpline::cubic_spline_coefficients(&mesh[9 + mesh_offset..], 2, j * divisions.0, size.0, divisions.0, &mut a, &mut b, &mut c, &mut d, &mut alpha, &mut mu, &mut z);
                 for aa in a { mesh.push(aa); }
                 for bb in b { mesh.push(bb); }
                 for cc in c { mesh.push(cc); }
@@ -494,7 +492,7 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (V
         // Precompute spline coeffs for the y coordinate
         for mesh_offset in 0..=1 {
             for j in 0..divisions.1 {
-                splines::BivariateSpline::cubic_spline_coefficients(&inv_mesh[9 + mesh_offset..], 2, j * divisions.0, size.0, divisions.0, &mut a, &mut b, &mut c, &mut d, &mut h, &mut alpha, &mut l, &mut mu, &mut z);
+                splines::BivariateSpline::cubic_spline_coefficients(&inv_mesh[9 + mesh_offset..], 2, j * divisions.0, size.0, divisions.0, &mut a, &mut b, &mut c, &mut d, &mut alpha, &mut mu, &mut z);
                 for aa in a { inv_mesh.push(aa); }
                 for bb in b { inv_mesh.push(bb); }
                 for cc in c { inv_mesh.push(cc); }

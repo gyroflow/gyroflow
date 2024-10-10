@@ -96,29 +96,29 @@ impl BivariateSpline {
         Self { grid_size: (width, height) }
     }
 
-    pub fn cubic_spline_coefficients(mesh: &[f64], step: usize, offset: usize, size: f64, n: usize, a: &mut [f64], b: &mut [f64], c: &mut [f64], d: &mut [f64], h: &mut [f64], alpha: &mut [f64], l: &mut [f64], mu: &mut [f64], z: &mut [f64]) {
-        for i in 0..n   { a[i] = mesh[(i + offset) * step]; }
-        for i in 0..n-1 { h[i] = size * (i + 1) as f64 / (n - 1) as f64 - size * i as f64 / (n - 1) as f64; }
-        for i in 1..n-1 { alpha[i] = (3.0 / h[i] * (a[i + 1] - a[i])) - (3.0 / h[i - 1] * (a[i] - a[i - 1])); }
+    pub fn cubic_spline_coefficients(mesh: &[f64], step: usize, offset: usize, size: f64, n: usize, a: &mut [f64], b: &mut [f64], c: &mut [f64], d: &mut [f64], alpha: &mut [f64], mu: &mut [f64], z: &mut [f64]) {
+        let h = size / (n - 1) as f64;
+        let inv_h = 1.0 / h;
+        let three_inv_h = 3.0 * inv_h;
+        let h_over_3 = h / 3.0;
+        let inv_3h = 1.0 / (3.0 * h);
+        for i in 0..n { a[i] = mesh[(i + offset) * step]; }
+        for i in 1..n - 1 { alpha[i] = three_inv_h * (a[i + 1] - 2.0 * a[i] + a[i - 1]); }
 
-        l[0] = 1.0;
         mu[0] = 0.0;
         z[0] = 0.0;
 
-        for i in 1..n-1 {
-            l[i] = 2.0 * (size * (i + 1) as f64 / (n - 1) as f64 - size * (i - 1) as f64 / (n - 1) as f64) - h[i - 1] * mu[i - 1];
-            mu[i] = h[i] / l[i];
-            z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
+        for i in 1..n - 1 {
+            mu[i] = 1.0 / (4.0 - mu[i - 1]);
+            z[i] = (alpha[i] * inv_h - z[i - 1]) * mu[i];
         }
 
-        l[n - 1] = 1.0;
-        z[n - 1] = 0.0;
         c[n - 1] = 0.0;
 
-        for j in (0..n-1).rev() {
+        for j in (0..n - 1).rev() {
             c[j] = z[j] - mu[j] * c[j + 1];
-            b[j] = (a[j + 1] - a[j]) / h[j] - h[j] * (c[j + 1] + 2.0 * c[j]) / 3.0;
-            d[j] = (c[j + 1] - c[j]) / (3.0 * h[j]);
+            b[j] = (a[j + 1] - a[j]) * inv_h - h_over_3 * (c[j + 1] + 2.0 * c[j]);
+            d[j] = (c[j + 1] - c[j]) * inv_3h;
         }
     }
 
@@ -134,14 +134,12 @@ impl BivariateSpline {
         let mut b = [0.0; MAX_GRID_SIZE];
         let mut c = [0.0; MAX_GRID_SIZE];
         let mut d = [0.0; MAX_GRID_SIZE];
-        let mut h = [0.0; MAX_GRID_SIZE - 1];
         let mut alpha = [0.0; MAX_GRID_SIZE - 1];
-        let mut l = [0.0; MAX_GRID_SIZE];
         let mut mu = [0.0; MAX_GRID_SIZE];
         let mut z = [0.0; MAX_GRID_SIZE];
 
         for j in 0..self.grid_size.1 {
-            // Self::cubic_spline_coefficients(&mesh[9 + mesh_offset..], 2, j * self.grid_size.0, size_x, self.grid_size.0, &mut a, &mut b, &mut c, &mut d, &mut h, &mut alpha, &mut l, &mut mu, &mut z);
+            // Self::cubic_spline_coefficients(&mesh[9 + mesh_offset..], 2, j * self.grid_size.0, size_x, self.grid_size.0, &mut a, &mut b, &mut c, &mut d, &mut alpha, &mut mu, &mut z);
             let gs = self.grid_size.1;
             let block = gs * 4;
             let a = &mesh[9 + gs*gs*2 + gs * 0 + (j * block) + (block * gs * mesh_offset)..];
@@ -151,7 +149,8 @@ impl BivariateSpline {
             intermediate_values[j] = Self::cubic_spline_interpolate(&a, &b, &c, &d, self.grid_size.0, x, size_x);
         }
 
-        Self::cubic_spline_coefficients(&intermediate_values, 1, 0, size_y, self.grid_size.1, &mut a, &mut b, &mut c, &mut d, &mut h, &mut alpha, &mut l, &mut mu, &mut z);
+        Self::cubic_spline_coefficients(&intermediate_values, 1, 0, size_y, self.grid_size.1, &mut a, &mut b, &mut c, &mut d, &mut alpha, &mut mu, &mut z);
+
         Self::cubic_spline_interpolate(&a, &b, &c, &d, self.grid_size.1, y, size_y)
     }
 }

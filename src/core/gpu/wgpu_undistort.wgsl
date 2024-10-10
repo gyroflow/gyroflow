@@ -300,29 +300,31 @@ fn sample_input_at(uv_param: vec2<f32>, jac: vec4<f32>) -> vec4<f32> {
 
 const GRID_SIZE: i32 = 9;
 var<private> a: array<f32, GRID_SIZE>; var<private> b: array<f32, GRID_SIZE>; var<private> c: array<f32, GRID_SIZE>; var<private> d: array<f32, GRID_SIZE>;
-var<private> h: array<f32, GRID_SIZE>; var<private> alpha: array<f32, GRID_SIZE>; var<private> l: array<f32, GRID_SIZE>; var<private> mu: array<f32, GRID_SIZE>; var<private> z: array<f32, GRID_SIZE>;
+var<private> alpha: array<f32, GRID_SIZE>; var<private> mu: array<f32, GRID_SIZE>; var<private> z: array<f32, GRID_SIZE>;
 
 fn cubic_spline_coefficients(mesh: ptr<function, array<f32, GRID_SIZE>>, step: i32, offset: i32, size: f32, n: i32) {
+    let h = size / f32(n - 1);
+    let inv_h = 1.0 / h;
+    let three_inv_h = 3.0 * inv_h;
+    let h_over_3 = h / 3.0;
+    let inv_3h = 1.0 / (3.0 * h);
     for (var i = 0; i < n; i++) { a[i] = (*mesh)[(i + offset) * step]; }
-    for (var i = 0; i < n - 1; i++) { h[i] = size * (f32(i) + 1.0) / f32(n - 1) - size * f32(i) / f32(n - 1); }
-    for (var i = 1; i < n - 1; i++) {
-        alpha[i] = (3.0 / h[i] * (a[i + 1] - a[i])) - (3.0 / h[i - 1] * (a[i] - a[i - 1]));
-    }
+    for (var i = 1; i < n - 1; i++) {alpha[i] = three_inv_h * (a[i + 1] - 2.0 * a[i] + a[i - 1]); }
 
-    l[0] = 1.0; mu[0] = 0.0; z[0] = 0.0;
+    mu[0] = 0.0;
+    z[0] = 0.0;
 
     for (var i = 1; i < n - 1; i++) {
-        l[i] = 2.0 * (size * (f32(i) + 1.0) / f32(n - 1) - size * (f32(i) - 1.0) / f32(n - 1)) - h[i - 1] * mu[i - 1];
-        mu[i] = h[i] / l[i];
-        z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
+        mu[i] = 1.0 / (4.0 - mu[i - 1]);
+        z[i] = (alpha[i] * inv_h - z[i - 1]) * mu[i];
     }
 
-    l[n - 1] = 1.0; z[n - 1] = 0.0; c[n - 1] = 0.0;
+    c[n - 1] = 0.0;
 
     for (var j = n - 2; j >= 0; j--) {
         c[j] = z[j] - mu[j] * c[j + 1];
-        b[j] = (a[j + 1] - a[j]) / h[j] - h[j] * (c[j + 1] + 2.0 * c[j]) / 3.0;
-        d[j] = (c[j + 1] - c[j]) / (3.0 * h[j]);
+        b[j] = (a[j + 1] - a[j]) * inv_h - h_over_3 * (c[j + 1] + 2.0 * c[j]);
+        d[j] = (c[j + 1] - c[j]) * inv_3h;
     }
 }
 

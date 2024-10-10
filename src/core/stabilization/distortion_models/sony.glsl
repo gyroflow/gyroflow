@@ -84,26 +84,30 @@ vec2 distort_point(float x, float y, float z) {
 
 const int GRID_SIZE = 9;
 float a[GRID_SIZE]; float b[GRID_SIZE]; float c[GRID_SIZE]; float d[GRID_SIZE];
-float h[GRID_SIZE]; float alpha[GRID_SIZE]; float l[GRID_SIZE]; float mu[GRID_SIZE]; float z[GRID_SIZE];
+float alpha[GRID_SIZE]; float mu[GRID_SIZE]; float z[GRID_SIZE];
 void cubic_spline_coefficients(float mesh[GRID_SIZE], int step_, int offset, float size, int n) {
+    float h = size / float(n - 1);
+    float inv_h = 1.0 / h;
+    float three_inv_h = 3.0 * inv_h;
+    float h_over_3 = h / 3.0;
+    float inv_3h = 1.0 / (3.0 * h);
     for (int i = 0; i < n; i++) { a[i] = mesh[(i + offset) * step_]; }
-    for (int i = 0; i < n - 1; i++) { h[i] = size * (i + 1) / (n - 1) - size * i / (n - 1); }
-    for (int i = 1; i < n - 1; i++) { alpha[i] = (3.0 / h[i] * (a[i + 1] - a[i])) - (3.0 / h[i - 1] * (a[i] - a[i - 1])); }
+    for (int i = 1; i < n - 1; i++) { alpha[i] = three_inv_h * (a[i + 1] - 2.0 * a[i] + a[i - 1]); }
 
-    l[0] = 1.0; mu[0] = 0.0; z[0] = 0.0;
+    mu[0] = 0.0;
+    z[0] = 0.0;
 
     for (int i = 1; i < n - 1; i++) {
-        l[i] = 2.0 * (size * (i + 1) / (n - 1) - size * (i - 1) / (n - 1)) - h[i - 1] * mu[i - 1];
-        mu[i] = h[i] / l[i];
-        z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
+        mu[i] = 1.0 / (4.0 - mu[i - 1]);
+        z[i] = (alpha[i] * inv_h - z[i - 1]) * mu[i];
     }
 
-    l[n - 1] = 1.0; z[n - 1] = 0.0; c[n - 1] = 0.0;
+    c[n - 1] = 0.0;
 
     for (int j = n - 2; j >= 0; j--) {
         c[j] = z[j] - mu[j] * c[j + 1];
-        b[j] = (a[j + 1] - a[j]) / h[j] - h[j] * (c[j + 1] + 2.0 * c[j]) / 3.0;
-        d[j] = (c[j + 1] - c[j]) / (3.0 * h[j]);
+        b[j] = (a[j + 1] - a[j]) * inv_h - h_over_3 * (c[j + 1] + 2.0 * c[j]);
+        d[j] = (c[j + 1] - c[j]) * inv_3h;
     }
 }
 float cubic_spline_interpolate1(int aa, int bb, int cc, int dd, int n, float x, float size) {

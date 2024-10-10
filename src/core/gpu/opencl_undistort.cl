@@ -169,25 +169,29 @@ float2 rotate_point(float2 pos, float angle, float2 origin, float2 origin2) {
                      sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin2.y);
 }
 
-void cubic_spline_coefficients(__private float *mesh, int step, int offset, float size, int n, __private float *a, __private float *b, __private float *c, __private float *d, __private float *h, __private float *alpha, __private float *l, __private float *mu, __private float *z) {
+void cubic_spline_coefficients(__private float *mesh, int step, int offset, float size, int n, __private float *a, __private float *b, __private float *c, __private float *d, __private float *alpha, __private float *mu, __private float *z) {
+    float h = size / (float)(n - 1);
+    float inv_h = 1.0f / h;
+    float three_inv_h = 3.0f * inv_h;
+    float h_over_3 = h / 3.0f;
+    float inv_3h = 1.0f / (3.0f * h);
     for (int i = 0; i < n; i++) { a[i] = mesh[(i + offset) * step]; }
-    for (int i = 0; i < n - 1; i++) { h[i] = size * (i + 1) / (n - 1) - size * i / (n - 1); }
-    for (int i = 1; i < n - 1; i++) { alpha[i] = (3.0f / h[i] * (a[i + 1] - a[i])) - (3.0f / h[i - 1] * (a[i] - a[i - 1])); }
+    for (int i = 1; i < n - 1; i++) { alpha[i] = three_inv_h * (a[i + 1] - 2.0f * a[i] + a[i - 1]); }
 
-    l[0] = 1.0f; mu[0] = 0.0f; z[0] = 0.0f;
+    mu[0] = 0.0f;
+    z[0] = 0.0f;
 
     for (int i = 1; i < n - 1; i++) {
-        l[i] = 2.0f * (size * (i + 1) / (n - 1) - size * (i - 1) / (n - 1)) - h[i - 1] * mu[i - 1];
-        mu[i] = h[i] / l[i];
-        z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
+        mu[i] = 1.0f / (4.0f - mu[i - 1]);
+        z[i] = (alpha[i] * inv_h - z[i - 1]) * mu[i];
     }
 
-    l[n - 1] = 1.0f; z[n - 1] = 0.0f; c[n - 1] = 0.0f;
+    c[n - 1] = 0.0f;
 
     for (int j = n - 2; j >= 0; j--) {
         c[j] = z[j] - mu[j] * c[j + 1];
-        b[j] = (a[j + 1] - a[j]) / h[j] - h[j] * (c[j + 1] + 2.0f * c[j]) / 3.0f;
-        d[j] = (c[j + 1] - c[j]) / (3.0f * h[j]);
+        b[j] = (a[j + 1] - a[j]) * inv_h - h_over_3 * (c[j + 1] + 2.0f * c[j]);
+        d[j] = (c[j + 1] - c[j]) * inv_3h;
     }
 }
 float cubic_spline_interpolate1(__global const float *mesh, int a, int b, int c, int d, int n, float x, float size) {
@@ -204,7 +208,7 @@ float cubic_spline_interpolate2(__private float *a, __private float *b, __privat
 float bivariate_spline_interpolate(float size_x, float size_y, __global const float *mesh, int mesh_offset, int n, float x, float y) {
     __private float intermediate_values[GRID_SIZE];
     __private float a[GRID_SIZE], b[GRID_SIZE], c[GRID_SIZE], d[GRID_SIZE];
-    __private float h[GRID_SIZE - 1], alpha[GRID_SIZE - 1], l[GRID_SIZE], mu[GRID_SIZE], z[GRID_SIZE];
+    __private float alpha[GRID_SIZE - 1], mu[GRID_SIZE], z[GRID_SIZE];
 
     for (int j = 0; j < GRID_SIZE; j++) {
         const int block = GRID_SIZE * 4;
@@ -212,11 +216,11 @@ float bivariate_spline_interpolate(float size_x, float size_y, __global const fl
         int bb = 9 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 1 + (j * block) + (block * GRID_SIZE * mesh_offset);
         int cc = 9 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 2 + (j * block) + (block * GRID_SIZE * mesh_offset);
         int dd = 9 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 3 + (j * block) + (block * GRID_SIZE * mesh_offset);
-        // cubic_spline_coefficients(&mesh[9 + mesh_offset], 2, (j * GRID_SIZE), size_x, GRID_SIZE, a, b, c, d, h, alpha, l, mu, z);
+        // cubic_spline_coefficients(&mesh[9 + mesh_offset], 2, (j * GRID_SIZE), size_x, GRID_SIZE, a, b, c, d, alpha, mu, z);
         intermediate_values[j] = cubic_spline_interpolate1(mesh, aa, bb, cc, dd, GRID_SIZE, x, size_x);
     }
 
-    cubic_spline_coefficients(intermediate_values, 1, 0, size_y, GRID_SIZE, a, b, c, d, h, alpha, l, mu, z);
+    cubic_spline_coefficients(intermediate_values, 1, 0, size_y, GRID_SIZE, a, b, c, d, alpha, mu, z);
     return cubic_spline_interpolate2(a, b, c, d, GRID_SIZE, y, size_y);
 }
 float2 interpolate_mesh(__global const float *mesh, int width, int height, float2 pos) {
