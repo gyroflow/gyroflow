@@ -158,7 +158,13 @@ impl<'a> VideoTranscoder<'a> {
             }
         }
 
+        let mut new_options = Dictionary::new();
+        log::info!("Encoder options: {options:?}");
+
         for (k, v) in options.iter() {
+            if k != "profile" {
+                new_options.set(k, v);
+            }
             unsafe {
                 let k = std::ffi::CString::new(k).unwrap_or_default();
                 let v = std::ffi::CString::new(v).unwrap_or_default();
@@ -166,7 +172,7 @@ impl<'a> VideoTranscoder<'a> {
             }
         }
 
-        let encoder = encoder.open_with(options)?;
+        let encoder = encoder.open_with(new_options)?;
         ost.set_parameters(&encoder);
         let context = unsafe { codec::context::Context::wrap(ctx_ptr, None) };
 
