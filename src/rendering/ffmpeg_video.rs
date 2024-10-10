@@ -162,7 +162,7 @@ impl<'a> VideoTranscoder<'a> {
         log::info!("Encoder options: {options:?}");
 
         for (k, v) in options.iter() {
-            if k != "profile" {
+            if !(k == "profile" && v == "main42210") {
                 new_options.set(k, v);
             }
             unsafe {
