@@ -207,10 +207,7 @@ impl Stabilization {
         ret
     }
 
-    pub fn get_frame_transform_at<T: PixelType>(&self, timestamp_us: i64, frame: Option<usize>, buffers: &Buffers) -> FrameTransform {
-        let timestamp_ms = (timestamp_us as f64) / 1000.0;
-        let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, self.compute_params.scaled_fps) as usize); // Only for FOVs
-
+    pub fn get_kernel_flags(&self, timestamp_us: i64, frame: usize, buffers: &Buffers) -> KernelParamsFlags {
         let mut kernel_flags = self.kernel_flags.clone();
         kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, self.compute_params.digital_lens.is_some());
         kernel_flags.set(KernelParamsFlags::HORIZONTAL_RS, self.compute_params.horizontal_rs);
@@ -218,6 +215,28 @@ impl Stabilization {
         kernel_flags.set(KernelParamsFlags::HAS_OUTPUT_RECT, buffers.output.rect.is_some() || self.output_size.0 != buffers.output.size.0 || self.output_size.1 != buffers.output.size.1);
         kernel_flags.set(KernelParamsFlags::FRAMEBUFFER_INVERTED, self.compute_params.framebuffer_inverted);
         kernel_flags.set(KernelParamsFlags::ANY_UNDERWATER, (self.compute_params.light_refraction_coefficient != 1.0 && self.compute_params.light_refraction_coefficient > 0.0) || self.compute_params.keyframes.is_keyframed(&crate::KeyframeType::LightRefractionCoeff));
+
+        {
+            let gyro = self.compute_params.gyro.read();
+            let file_metadata = gyro.file_metadata.read();
+            if let Some(mc) = file_metadata.mesh_correction.get(frame) {
+                if mc.1[0] > 10.0 {
+                    kernel_flags.set(KernelParamsFlags::HAS_MESH_DATA, true);
+                }
+                if mc.1[0] > 0.0 && mc.1[mc.1[0] as usize] > 0.0 {
+                    kernel_flags.set(KernelParamsFlags::HAS_FPD_DATA, true);
+                }
+            }
+            if file_metadata.camera_stab_data.len() > frame {
+                kernel_flags.set(KernelParamsFlags::HAS_IBIS_DATA, true);
+            }
+        }
+        kernel_flags
+    }
+
+    pub fn get_frame_transform_at<T: PixelType>(&self, timestamp_us: i64, frame: Option<usize>, buffers: &Buffers) -> FrameTransform {
+        let timestamp_ms = (timestamp_us as f64) / 1000.0;
+        let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, self.compute_params.scaled_fps) as usize);
 
         let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
         transform.kernel_params.pixel_value_limit = T::default_max_value().unwrap_or(f32::MAX);
@@ -236,7 +255,7 @@ impl Stabilization {
         transform.kernel_params.bytes_per_pixel = (T::COUNT * T::SCALAR_BYTES) as i32;
         transform.kernel_params.pix_element_count = T::COUNT as i32;
         transform.kernel_params.canvas_scale = self.drawing.scale as f32;
-        transform.kernel_params.flags |= kernel_flags.bits();
+        transform.kernel_params.flags = self.get_kernel_flags(timestamp_us, frame, buffers).bits();
 
         transform.kernel_params.stride        = buffers.input.size.2 as i32;
         transform.kernel_params.output_stride = buffers.output.size.2 as i32;
@@ -318,13 +337,15 @@ impl Stabilization {
     }
 
     pub fn get_current_key(&self, buffers: &Buffers) -> String {
+        let mut flags = self.get_kernel_flags(0, 0, buffers);
+        flags.set(KernelParamsFlags::FILL_WITH_BACKGROUND, false);
         format!(
             "{}|{}|{}|{}|{}|{:?}|{:?}|{:?}|{:?}",
             buffers.get_checksum(),
             self.compute_params.distortion_model.id(),
             self.compute_params.digital_lens.as_ref().map(|x| x.id()).unwrap_or_default(),
             self.interpolation as u32,
-            self.kernel_flags.bits(),
+            flags.bits(),
             self.size,
             self.output_size,
             self.interpolation,

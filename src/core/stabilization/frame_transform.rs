@@ -146,8 +146,6 @@ impl FrameTransform {
         // let additional_translation_z = params.keyframes.value_at_video_timestamp(&KeyframeType::AdditionalTranslationZ, timestamp_ms).unwrap_or(params.additional_translation.2) as f32;
         // ----------- Keyframes -----------
 
-        let mut flags = 0;
-
         // ----------- Lens -----------
         let (camera_matrix,
             distortion_coeffs,
@@ -176,12 +174,6 @@ impl FrameTransform {
         let mut mesh_data = Vec::new();
         if let Some(mc) = file_metadata.mesh_correction.get(frame) {
             mesh_data = mc.1.clone(); // undistorting mesh
-            if mesh_data[0] > 10.0 {
-                flags |= 1 << 9; // HAS_MESH_DATA
-            }
-            if mesh_data[0] > 0.0 && mesh_data[mesh_data[0] as usize] > 0.0 {
-                flags |= 1 << 10; // HAS_FPD_DATA
-            }
         }
 
         // ----------- Rolling shutter correction -----------
@@ -212,10 +204,6 @@ impl FrameTransform {
 
         // Only compute 1 matrix if not using rolling shutter correction
         let rows = if frame_readout_time.abs() > 0.0 { if params.horizontal_rs { params.width } else { params.height } } else { 1 };
-
-        if file_metadata.camera_stab_data.len() > frame {
-            flags |= 1 << 8; // HAS_IBIS_DATA
-        }
 
         let matrices = (0..rows).into_par_iter().map(|y| {
             let quat_time = if frame_readout_time.abs() > 0.0 {
@@ -307,7 +295,6 @@ impl FrameTransform {
             translation3d: [0.0, 0.0, 0.0, 0.0], // currently unused
             digital_lens_params,
             light_refraction_coefficient: light_refraction_coefficient as f32,
-            flags,
             ..Default::default()
         };
 
