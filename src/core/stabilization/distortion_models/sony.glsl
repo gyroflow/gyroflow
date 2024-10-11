@@ -110,11 +110,6 @@ void cubic_spline_coefficients(float mesh[GRID_SIZE], int step_, int offset, flo
         d[j] = (c[j + 1] - c[j]) * inv_3h;
     }
 }
-float cubic_spline_interpolate1(int aa, int bb, int cc, int dd, int n, float x, float size) {
-    int i = int(max(0.0, min(float(n - 2), (float(n - 1) * x / size))));
-    float dx = x - size * float(i) / float(n - 1);
-    return get_mesh_data(aa + i) + get_mesh_data(bb + i) * dx + get_mesh_data(cc + i) * dx * dx + get_mesh_data(dd + i) * dx * dx * dx;
-}
 float cubic_spline_interpolate2(int n, float x, float size) {
     int i = int(max(0.0, min(float(n - 2), (float(n - 1) * x / size))));
     float dx = x - size * float(i) / float(n - 1);
@@ -123,13 +118,17 @@ float cubic_spline_interpolate2(int n, float x, float size) {
 float bivariate_spline_interpolate(float size_x, float size_y, int mesh_offset, int n, float x, float y) {
     float intermediate_values[GRID_SIZE];
 
+    int i = int(max(0.0, min(float(GRID_SIZE - 2), (float(GRID_SIZE - 1) * x / size_x))));
+    float dx = x - size_x * float(i) / float(GRID_SIZE - 1);
+    float dx2 = dx * dx;
+    int block_ = GRID_SIZE * 4;
+    int offs = 9 + GRID_SIZE * GRID_SIZE * 2 + (block_ * GRID_SIZE * mesh_offset) + i;
+
     for (int j = 0; j < GRID_SIZE; j++) {
-        int block_ = GRID_SIZE * 4;
-        int aa = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 0 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        int bb = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 1 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        int cc = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 2 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        int dd = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 3 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        intermediate_values[j] = cubic_spline_interpolate1(aa, bb, cc, dd, GRID_SIZE, x, size_x);
+        intermediate_values[j] = get_mesh_data(offs + GRID_SIZE * 0 + (j * block_))
+                               + get_mesh_data(offs + GRID_SIZE * 1 + (j * block_)) * dx
+                               + get_mesh_data(offs + GRID_SIZE * 2 + (j * block_)) * dx2
+                               + get_mesh_data(offs + GRID_SIZE * 3 + (j * block_)) * dx2 * dx;
     }
 
     cubic_spline_coefficients(intermediate_values, 1, 0, size_y, GRID_SIZE);

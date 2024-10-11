@@ -169,7 +169,9 @@ float2 rotate_point(float2 pos, float angle, float2 origin, float2 origin2) {
                      sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin2.y);
 }
 
-void cubic_spline_coefficients(__private float *mesh, int step, int offset, float size, int n, __private float *a, __private float *b, __private float *c, __private float *d, __private float *alpha, __private float *mu, __private float *z) {
+#define GRID_SIZE 9
+void cubic_spline_coefficients(__private float *mesh, int step, int offset, float size, __private float *a, __private float *b, __private float *c, __private float *d, __private float *alpha, __private float *mu, __private float *z) {
+    #define n GRID_SIZE
     float h = size / (float)(n - 1);
     float inv_h = 1.0f / h;
     float three_inv_h = 3.0f * inv_h;
@@ -193,34 +195,35 @@ void cubic_spline_coefficients(__private float *mesh, int step, int offset, floa
         b[j] = (a[j + 1] - a[j]) * inv_h - h_over_3 * (c[j + 1] + 2.0f * c[j]);
         d[j] = (c[j + 1] - c[j]) * inv_3h;
     }
-}
-float cubic_spline_interpolate1(__global const float *mesh, int a, int b, int c, int d, int n, float x, float size) {
-    int i = max(0.0f, min(n - 2.0f, (n - 1.0f) * x / size));
-    float dx = x - size * i / (n - 1.0f);
-    return mesh[a + i] + mesh[b + i] * dx + mesh[c + i] * dx * dx + mesh[d + i] * dx * dx * dx;
+    #undef n
 }
 float cubic_spline_interpolate2(__private float *a, __private float *b, __private float *c, __private float *d, int n, float x, float size) {
     int i = max(0.0f, min(n - 2.0f, (n - 1.0f) * x / size));
     float dx = x - size * i / (n - 1.0f);
     return a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx;
 }
-#define GRID_SIZE 9
 float bivariate_spline_interpolate(float size_x, float size_y, __global const float *mesh, int mesh_offset, int n, float x, float y) {
     __private float intermediate_values[GRID_SIZE];
     __private float a[GRID_SIZE], b[GRID_SIZE], c[GRID_SIZE], d[GRID_SIZE];
     __private float alpha[GRID_SIZE - 1], mu[GRID_SIZE], z[GRID_SIZE];
 
+    const int i = max(0.0f, min((float)(GRID_SIZE - 2), (float)(GRID_SIZE - 1) * x / size_x));
+    const float dx = x - size_x * i / (float)(GRID_SIZE - 1);
+    const float dx2 = dx * dx;
+    const int block = GRID_SIZE * 4;
+    const int offs = 9 + GRID_SIZE*GRID_SIZE*2 + (block * GRID_SIZE * mesh_offset) + i;
+
+    #pragma unroll
     for (int j = 0; j < GRID_SIZE; j++) {
-        const int block = GRID_SIZE * 4;
-        int aa = 9 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 0 + (j * block) + (block * GRID_SIZE * mesh_offset);
-        int bb = 9 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 1 + (j * block) + (block * GRID_SIZE * mesh_offset);
-        int cc = 9 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 2 + (j * block) + (block * GRID_SIZE * mesh_offset);
-        int dd = 9 + GRID_SIZE*GRID_SIZE*2 + GRID_SIZE * 3 + (j * block) + (block * GRID_SIZE * mesh_offset);
+        intermediate_values[j] = mesh[offs + (GRID_SIZE * 0) + (j * block)]
+                               + mesh[offs + (GRID_SIZE * 1) + (j * block)] * dx
+                               + mesh[offs + (GRID_SIZE * 2) + (j * block)] * dx2
+                               + mesh[offs + (GRID_SIZE * 3) + (j * block)] * dx2 * dx;
         // cubic_spline_coefficients(&mesh[9 + mesh_offset], 2, (j * GRID_SIZE), size_x, GRID_SIZE, a, b, c, d, alpha, mu, z);
-        intermediate_values[j] = cubic_spline_interpolate1(mesh, aa, bb, cc, dd, GRID_SIZE, x, size_x);
+        // intermediate_values[j] = cubic_spline_interpolate1(mesh, aa, bb, cc, dd, GRID_SIZE, x, size_x);
     }
 
-    cubic_spline_coefficients(intermediate_values, 1, 0, size_y, GRID_SIZE, a, b, c, d, alpha, mu, z);
+    cubic_spline_coefficients(intermediate_values, 1, 0, size_y, a, b, c, d, alpha, mu, z);
     return cubic_spline_interpolate2(a, b, c, d, GRID_SIZE, y, size_y);
 }
 float2 interpolate_mesh(__global const float *mesh, int width, int height, float2 pos) {

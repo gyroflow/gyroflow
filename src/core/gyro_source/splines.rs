@@ -138,15 +138,20 @@ impl BivariateSpline {
         let mut mu = [0.0; MAX_GRID_SIZE];
         let mut z = [0.0; MAX_GRID_SIZE];
 
+        let i = (self.grid_size.0 - 2).min(((self.grid_size.0 as f64 - 1.0) * x / size_x) as usize).max(0);
+        let dx = x - size_x * i as f64 / (self.grid_size.0 - 1) as f64;
+        let dx2 = dx*dx;
+        let gs = self.grid_size.1;
+        let block = gs * 4;
+        let offs = 9 + gs*gs*2 + (block * gs * mesh_offset) + i;
+
         for j in 0..self.grid_size.1 {
+            intermediate_values[j] = mesh[offs + (gs * 0) + (j * block)]
+                                   + mesh[offs + (gs * 1) + (j * block)] * dx
+                                   + mesh[offs + (gs * 2) + (j * block)] * dx2
+                                   + mesh[offs + (gs * 3) + (j * block)] * dx2 * dx;
             // Self::cubic_spline_coefficients(&mesh[9 + mesh_offset..], 2, j * self.grid_size.0, size_x, self.grid_size.0, &mut a, &mut b, &mut c, &mut d, &mut alpha, &mut mu, &mut z);
-            let gs = self.grid_size.1;
-            let block = gs * 4;
-            let a = &mesh[9 + gs*gs*2 + gs * 0 + (j * block) + (block * gs * mesh_offset)..];
-            let b = &mesh[9 + gs*gs*2 + gs * 1 + (j * block) + (block * gs * mesh_offset)..];
-            let c = &mesh[9 + gs*gs*2 + gs * 2 + (j * block) + (block * gs * mesh_offset)..];
-            let d = &mesh[9 + gs*gs*2 + gs * 3 + (j * block) + (block * gs * mesh_offset)..];
-            intermediate_values[j] = Self::cubic_spline_interpolate(&a, &b, &c, &d, self.grid_size.0, x, size_x);
+            // intermediate_values[j] = Self::cubic_spline_interpolate(&a, &b, &c, &d, self.grid_size.0, x, size_x, i, dx);
         }
 
         Self::cubic_spline_coefficients(&intermediate_values, 1, 0, size_y, self.grid_size.1, &mut a, &mut b, &mut c, &mut d, &mut alpha, &mut mu, &mut z);

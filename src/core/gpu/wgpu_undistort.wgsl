@@ -302,7 +302,8 @@ const GRID_SIZE: i32 = 9;
 var<private> a: array<f32, GRID_SIZE>; var<private> b: array<f32, GRID_SIZE>; var<private> c: array<f32, GRID_SIZE>; var<private> d: array<f32, GRID_SIZE>;
 var<private> alpha: array<f32, GRID_SIZE>; var<private> mu: array<f32, GRID_SIZE>; var<private> z: array<f32, GRID_SIZE>;
 
-fn cubic_spline_coefficients(mesh: ptr<function, array<f32, GRID_SIZE>>, step: i32, offset: i32, size: f32, n: i32) {
+fn cubic_spline_coefficients(mesh: ptr<function, array<f32, GRID_SIZE>>, step: i32, offset: i32, size: f32) {
+    const n: i32 = GRID_SIZE;
     let h = size / f32(n - 1);
     let inv_h = 1.0 / h;
     let three_inv_h = 3.0 * inv_h;
@@ -328,11 +329,6 @@ fn cubic_spline_coefficients(mesh: ptr<function, array<f32, GRID_SIZE>>, step: i
     }
 }
 
-fn cubic_spline_interpolate1(aa: i32, bb: i32, cc: i32, dd: i32, n: i32, x: f32, size: f32) -> f32 {
-    let i = i32(max(0.0, min(f32(n - 2), (f32(n - 1) * x / size))));
-    let dx = x - size * f32(i) / f32(n - 1);
-    return mesh_data[aa + i] + mesh_data[bb + i] * dx + mesh_data[cc + i] * dx * dx + mesh_data[dd + i] * dx * dx * dx;
-}
 fn cubic_spline_interpolate2(n: i32, x: f32, size: f32) -> f32 {
     let i = u32(max(0.0, min(f32(n - 2), (f32(n - 1) * x / size))));
     let dx = x - size * f32(i) / f32(n - 1);
@@ -342,17 +338,22 @@ fn cubic_spline_interpolate2(n: i32, x: f32, size: f32) -> f32 {
 fn bivariate_spline_interpolate(size_x: f32, size_y: f32, mesh_offset: i32, n: i32, x: f32, y: f32) -> f32 {
     var intermediate_values: array<f32, GRID_SIZE>;
 
+    let i = i32(max(0.0, min(f32(GRID_SIZE - 2), (f32(GRID_SIZE - 1) * x / size_x))));
+    let dx = x - size_x * f32(i) / f32(GRID_SIZE - 1);
+    let dx2 = dx * dx;
+    let block_ = GRID_SIZE * 4;
+    let offs = 9 + GRID_SIZE * GRID_SIZE * 2 + (block_ * GRID_SIZE * mesh_offset) + i;
+
     for (var j = 0; j < GRID_SIZE; j++) {
-        let block_ = GRID_SIZE * 4;
-        let aa = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 0 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        let bb = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 1 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        let cc = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 2 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        let dd = 9 + GRID_SIZE * GRID_SIZE * 2 + GRID_SIZE * 3 + (j * block_) + (block_ * GRID_SIZE * mesh_offset);
-        // cubic_spline_coefficients(mesh[9 + mesh_offset..], 2, (j * GRID_SIZE), size_x, GRID_SIZE);
-        intermediate_values[j] = cubic_spline_interpolate1(aa, bb, cc, dd, GRID_SIZE, x, size_x);
+        intermediate_values[j] = mesh_data[offs + (GRID_SIZE * 0) + (j * block_)]
+                               + mesh_data[offs + (GRID_SIZE * 1) + (j * block_)] * dx
+                               + mesh_data[offs + (GRID_SIZE * 2) + (j * block_)] * dx2
+                               + mesh_data[offs + (GRID_SIZE * 3) + (j * block_)] * dx2 * dx;
+        // cubic_spline_coefficients(mesh[9 + mesh_offset..], 2, (j * GRID_SIZE), size_x);
+        // intermediate_values[j] = cubic_spline_interpolate1(aa, bb, cc, dd, GRID_SIZE, x, size_x);
     }
 
-    cubic_spline_coefficients(&intermediate_values, 1, 0, size_y, GRID_SIZE);
+    cubic_spline_coefficients(&intermediate_values, 1, 0, size_y);
     return cubic_spline_interpolate2(GRID_SIZE, y, size_y);
 }
 
