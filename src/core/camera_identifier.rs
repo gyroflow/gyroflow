@@ -192,7 +192,7 @@ impl CameraIdentifier {
 
         id.identifier = id.get_identifier();
 
-        log::info!("{:#?}", id);
+        log::debug!("{:#?}", id);
 
         Ok(id)
     }

@@ -159,7 +159,7 @@ impl<'a> VideoTranscoder<'a> {
         }
 
         let mut new_options = Dictionary::new();
-        log::info!("Encoder options: {options:?}");
+        log::debug!("Encoder options: {options:?}");
 
         for (k, v) in options.iter() {
             if !(k == "profile" && v == "main42210") {

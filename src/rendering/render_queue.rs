@@ -1288,7 +1288,7 @@ impl RenderQueue {
                                 }
                             }
                         } else if let Ok(info) = rendering::VideoProcessor::get_video_info(&url) {
-                            ::log::info!("Loaded {:?}", &info);
+                            ::log::debug!("Loaded {:?}", &info);
 
                             render_options.bitrate = render_options.bitrate.max(info.bitrate);
                             if !has_output_width {

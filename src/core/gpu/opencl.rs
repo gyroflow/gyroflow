@@ -97,7 +97,7 @@ impl OclWrapper {
                 for d in devs {
                     if EXCLUSIONS.iter().any(|x| d.name().unwrap_or_default().contains(x)) { continue; }
                     if i == index {
-                        ::log::info!("OpenCL Platform: {}, Device: {} {}", p.name()?, d.vendor()?, d.name()?);
+                        ::log::debug!("OpenCL Platform: {}, Device: {} {}", p.name()?, d.vendor()?, d.name()?);
 
                         let context = Context::builder()
                             .properties(Self::get_properties(Some(buffers)))
@@ -159,7 +159,7 @@ impl OclWrapper {
         if device.is_none() { return Err(ocl::BufferCmdError::MapUnavailable.into()); }
         let platform = platform.unwrap();
         let device = device.unwrap();
-        ::log::info!("OpenCL Platform: {}, ext: {:?} Device: {} {}", platform.name()?, platform.extensions()?, device.vendor()?, device.name()?);
+        ::log::debug!("OpenCL Platform: {}, ext: {:?} Device: {} {}", platform.name()?, platform.extensions()?, device.vendor()?, device.name()?);
 
         let context = Context::builder()
             .properties(Self::get_properties(buffers))
