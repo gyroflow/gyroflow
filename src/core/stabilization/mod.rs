@@ -207,7 +207,7 @@ impl Stabilization {
         ret
     }
 
-    pub fn get_kernel_flags(&self, timestamp_us: i64, frame: usize, buffers: &Buffers) -> KernelParamsFlags {
+    pub fn get_kernel_flags(&self, frame: usize, buffers: &Buffers) -> KernelParamsFlags {
         let mut kernel_flags = self.kernel_flags.clone();
         kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, self.compute_params.digital_lens.is_some());
         kernel_flags.set(KernelParamsFlags::HORIZONTAL_RS, self.compute_params.horizontal_rs);
@@ -255,7 +255,7 @@ impl Stabilization {
         transform.kernel_params.bytes_per_pixel = (T::COUNT * T::SCALAR_BYTES) as i32;
         transform.kernel_params.pix_element_count = T::COUNT as i32;
         transform.kernel_params.canvas_scale = self.drawing.scale as f32;
-        transform.kernel_params.flags = self.get_kernel_flags(timestamp_us, frame, buffers).bits();
+        transform.kernel_params.flags = self.get_kernel_flags(frame, buffers).bits();
 
         transform.kernel_params.stride        = buffers.input.size.2 as i32;
         transform.kernel_params.output_stride = buffers.output.size.2 as i32;
@@ -337,7 +337,7 @@ impl Stabilization {
     }
 
     pub fn get_current_key(&self, buffers: &Buffers) -> String {
-        let mut flags = self.get_kernel_flags(0, 0, buffers);
+        let mut flags = self.get_kernel_flags(0, buffers);
         flags.set(KernelParamsFlags::FILL_WITH_BACKGROUND, false);
         format!(
             "{}|{}|{}|{}|{}|{:?}|{:?}|{:?}|{:?}",
