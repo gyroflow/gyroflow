@@ -55,6 +55,10 @@ struct Opts {
     #[argh(option, short = 'p')]
     out_params: Option<String>,
 
+    /// default output suffix, eg. "_stabilized"
+    #[argh(option, short = 't')]
+    suffix: Option<String>,
+
     /// synchronization parameters, eg. "{{ 'search_size': 3, 'processing_resolution': 720 }}"
     #[argh(option, short = 's')]
     sync_params: Option<String>,
@@ -179,6 +183,9 @@ pub fn run(open_file: &mut String) -> bool {
             rendering::set_gpu_type_from_name(&name);
         }
         let mut additional_data = setup_defaults(stab, &mut queue);
+        if let Some(suffix) = opts.suffix {
+            queue.default_suffix = QString::from(suffix);
+        }
 
         if let Some(mut outp) = opts.out_params {
             outp = outp.replace('\'', "\"");
