@@ -6,8 +6,8 @@ Button 1.0 Button.qml
 CheckBox 1.0 CheckBox.qml
 CheckBoxWithContent 1.0 CheckBoxWithContent.qml
 ComboBox 1.0 ComboBox.qml
-ContextMenuMouseArea 1.0 ContextMenuMouseArea.qml
 ContextMenuLoader 1.0 ContextMenuLoader.qml
+ContextMenuMouseArea 1.0 ContextMenuMouseArea.qml
 DropdownChevron 1.0 DropdownChevron.qml
 DropTarget 1.0 DropTarget.qml
 DropTargetRect 1.0 DropTargetRect.qml
@@ -31,6 +31,7 @@ OutputPathField 1.0 OutputPathField.qml
 Popup 1.0 Popup.qml
 PopupDelegate 1.0 PopupDelegate.qml
 RadioButton 1.0 RadioButton.qml
+ReadoutDirection 1.0 ReadoutDirection.qml
 ResizablePanel 1.0 ResizablePanel.qml
 SearchField 1.0 SearchField.qml
 SidePanel 1.0 SidePanel.qml
@@ -38,9 +39,9 @@ Slider 1.0 Slider.qml
 SliderWithField 1.0 SliderWithField.qml
 SplitButton 1.0 SplitButton.qml
 TabbedPopup 1.0 TabbedPopup.qml
+TabColumn 1.0 TabColumn.qml
 TableList 1.0 TableList.qml
 Tabs 1.0 Tabs.qml
-TabColumn 1.0 TabColumn.qml
 TextArea 1.0 TextArea.qml
 TextField 1.0 TextField.qml
 Timeline 1.0 Timeline.qml

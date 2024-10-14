@@ -35,7 +35,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
 
     let mut kernel_flags = KernelParamsFlags::empty();
     kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, compute_params.digital_lens.is_some());
-    kernel_flags.set(KernelParamsFlags::HORIZONTAL_RS, compute_params.horizontal_rs);
+    kernel_flags.set(KernelParamsFlags::HORIZONTAL_RS, compute_params.frame_readout_direction.is_horizontal());
 
     (0..compute_params.frame_count).map(move |frame| {
         let timestamp = crate::timestamp_at_frame(frame as i32, compute_params.scaled_fps);
@@ -87,7 +87,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
         let undist = parallel_exr(new_width, new_height, |x, y| {
             ///////////////////////////////////////////////////////////////////
             // Calculate source `y` for rolling shutter
-            let mut sy = if compute_params.horizontal_rs {
+            let mut sy = if compute_params.frame_readout_direction.is_horizontal() {
                 (x.round() as i32).min(transform.kernel_params.width).max(0) as usize
             } else {
                 (y.round() as i32).min(transform.kernel_params.height).max(0) as usize
@@ -95,7 +95,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
             if transform.kernel_params.matrix_count > 1 {
                 let idx = transform.kernel_params.matrix_count as usize / 2;
                 if let Some(pt) = Stabilization::rotate_and_distort((x as f32, y as f32), idx, &transform.kernel_params, &transform.matrices, &compute_params.distortion_model, compute_params.digital_lens.as_ref(), r_limit_sq, &mesh_data) {
-                    if compute_params.horizontal_rs {
+                    if compute_params.frame_readout_direction.is_horizontal() {
                         sy = (pt.0.round() as i32).min(transform.kernel_params.width).max(0) as usize;
                     } else {
                         sy = (pt.1.round() as i32).min(transform.kernel_params.height).max(0) as usize;

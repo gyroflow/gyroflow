@@ -197,7 +197,9 @@ void main() {
     // Calculate source `y` for rolling shutter
     float sy = texPos.y;
     if (bool(params.flags & 16)) { // Horizontal RS
-        sy = texPos.x;
+        sy = min(params.width, max(0, floor(0.5 + texPos.x)));
+    } else {
+        sy = min(params.height, max(0, floor(0.5 + texPos.y)));
     }
     if (params.matrix_count > 1) {
         float idx = params.matrix_count / 2.0; // Use middle matrix

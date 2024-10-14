@@ -31,7 +31,7 @@ use keyframes::*;
 use parking_lot::{ RwLock, RwLockUpgradableReadGuard };
 use nalgebra::Vector4;
 use gyro_source::{ GyroSource, Quat64, TimeQuat, TimeVec };
-use stabilization_params::StabilizationParams;
+use stabilization_params::{ ReadoutDirection, StabilizationParams };
 use lens_profile::LensProfile;
 use lens_profile_database::LensProfileDatabase;
 use smoothing::Smoothing;
@@ -206,20 +206,21 @@ impl StabilizationManager {
                     self.override_video_fps(md_fps, false);
                 }
             }
+            self.params.write().frame_readout_direction = md.frame_readout_direction;
             if md.detected_source.as_ref().map(|v| v.starts_with("Blackmagic ")).unwrap_or_default() {
                 if let Some(rot) = md.additional_data.get("rotation").and_then(|x| x.as_u64()) {
                     if rot == 90 || rot == 270 {
                         log::info!("Using horizontal rolling shutter correction");
-                        self.params.write().horizontal_rs = true;
                         if rot == 90 {
+                            self.params.write().frame_readout_direction = ReadoutDirection::RightToLeft;
                             md.imu_orientation = Some("xYz".into());
-                            md.frame_readout_time = md.frame_readout_time.map(|x| -x);
                         } else {
+                            self.params.write().frame_readout_direction = ReadoutDirection::LeftToRight;
                             md.imu_orientation = Some("Xyz".into());
                         }
                     }
                     if rot == 180 {
-                        md.frame_readout_time = md.frame_readout_time.map(|x| -x);
+                        self.params.write().frame_readout_direction = ReadoutDirection::BottomToTop;
                         md.imu_orientation = Some("YXz".into());
                     }
                 }
@@ -806,6 +807,7 @@ impl StabilizationManager {
     pub fn set_show_optical_flow     (&self, v: bool) { self.params.write().show_optical_flow      = v; }
     pub fn set_stab_enabled          (&self, v: bool) { self.params.write().stab_enabled           = v; }
     pub fn set_frame_readout_time    (&self, v: f64)  { self.params.write().frame_readout_time     = v; }
+    pub fn set_frame_readout_direction(&self, v: impl Into<ReadoutDirection>) { self.params.write().frame_readout_direction = v.into(); }
     pub fn set_adaptive_zoom         (&self, v: f64)  { self.params.write().adaptive_zoom_window   = v; self.invalidate_zooming(); }
     pub fn set_zooming_center_x      (&self, v: f64)  { self.params.write().adaptive_zoom_center_offset.0 = v; self.invalidate_zooming(); }
     pub fn set_zooming_center_y      (&self, v: f64)  { self.params.write().adaptive_zoom_center_offset.1 = v; self.invalidate_zooming(); }
@@ -1155,7 +1157,8 @@ impl StabilizationManager {
                 "fov":                    params.fov,
                 "method":                 smoothing_name,
                 "smoothing_params":       smoothing_params,
-                "frame_readout_time":     params.frame_readout_time,
+                "frame_readout_time":     params.frame_readout_time.abs(),
+                "frame_readout_direction": params.frame_readout_direction,
                 "adaptive_zoom_window":   params.adaptive_zoom_window,
                 "adaptive_zoom_center_offset": params.adaptive_zoom_center_offset,
                 "adaptive_zoom_method":   params.adaptive_zoom_method,
@@ -1170,7 +1173,6 @@ impl StabilizationManager {
                 "video_speed_affects_smoothing": params.video_speed_affects_smoothing,
                 "video_speed_affects_zooming":   params.video_speed_affects_zooming,
                 "video_speed_affects_zooming_limit": params.video_speed_affects_zooming_limit,
-                "horizontal_rs":          params.horizontal_rs,
                 "max_zoom":               params.max_zoom,
                 "max_zoom_iterations":    params.max_zoom_iterations,
             },
@@ -1463,10 +1465,12 @@ impl StabilizationManager {
             if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("stabilization") {
                 let mut params = self.params.write();
                 if let Some(v) = obj.get("fov")                   .and_then(|x| x.as_f64()) { params.fov                     = v; }
-                if let Some(v) = obj.get("frame_readout_time")    .and_then(|x| x.as_f64()) { params.frame_readout_time      = v; }
+                if let Some(v) = obj.get("frame_readout_time")    .and_then(|x| x.as_f64()) { params.frame_readout_time      = v; if v < 0.0 { params.frame_readout_direction = ReadoutDirection::BottomToTop; } }
+                if let Some(v) = obj.get("frame_readout_direction").and_then(|x| x.as_i64()) { params.frame_readout_direction = (v as i32).into(); }
+                if let Some(v) = obj.get("frame_readout_direction").and_then(|x| x.as_str()) { params.frame_readout_direction = v.into(); }
                 if let Some(v) = obj.get("adaptive_zoom_window")  .and_then(|x| x.as_f64()) { params.adaptive_zoom_window    = v; }
                 if let Some(v) = obj.get("lens_correction_amount").and_then(|x| x.as_f64()) { params.lens_correction_amount  = v; }
-                if let Some(v) = obj.get("horizontal_rs")         .and_then(|x| x.as_bool()) { params.horizontal_rs          = v; }
+                if let Some(v) = obj.get("horizontal_rs")         .and_then(|x| x.as_bool()) { if v { params.frame_readout_direction = if params.frame_readout_time < 0.0 { ReadoutDirection::RightToLeft } else { ReadoutDirection::LeftToRight }; } }
                 if let Some(v) = obj.get("max_zoom")              .and_then(|x| x.as_f64()) { params.max_zoom                = Some(v); }
                 if let Some(v) = obj.get("max_zoom_iterations")   .and_then(|x| x.as_i64()) { params.max_zoom_iterations     = v as _; }
 
@@ -1726,8 +1730,11 @@ impl StabilizationManager {
                 if db.contains_id(&id_str) {
                     match self.load_lens_profile(&id_str) {
                         Ok(_) => {
-                            if let Some(fr) = self.lens.read().frame_readout_time {
-                                self.params.write().frame_readout_time = fr;
+                            let (fr, frd) = { let lens = self.lens.read(); (lens.frame_readout_time, lens.frame_readout_direction) };
+                            if let Some(fr) = fr {
+                                let mut params = self.params.write();
+                                params.frame_readout_time = fr.abs();
+                                params.frame_readout_direction = frd.unwrap_or(if fr < 0.0 { ReadoutDirection::BottomToTop } else { ReadoutDirection::TopToBottom });
                             }
                         }
                         Err(e) => {

@@ -6,6 +6,7 @@ use qmetaobject::*;
 use crate::{ core, rendering, util };
 use crate::core::StabilizationManager;
 use core::filesystem;
+use core::stabilization_params::ReadoutDirection;
 use std::sync::{ Arc, atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst } };
 use std::cell::RefCell;
 use std::collections::{ HashMap, HashSet };
@@ -1330,8 +1331,11 @@ impl RenderQueue {
                                     if db.contains_id(&id_str) {
                                         match stab.load_lens_profile(&id_str) {
                                             Ok(_) => {
-                                                if let Some(fr) = stab.lens.read().frame_readout_time {
-                                                    stab.params.write().frame_readout_time = fr;
+                                                let (fr, frd) = { let lens = stab.lens.read(); (lens.frame_readout_time, lens.frame_readout_direction) };
+                                                if let Some(fr) = fr {
+                                                    let mut params = stab.params.write();
+                                                    params.frame_readout_time = fr.abs();
+                                                    params.frame_readout_direction = frd.unwrap_or(if fr < 0.0 { ReadoutDirection::BottomToTop } else { ReadoutDirection::TopToBottom });
                                                 }
                                             }
                                             Err(e) => {

@@ -19,6 +19,7 @@ use telemetry_parser::{ Input, util };
 use telemetry_parser::tags_impl::{ GetWithType, GroupId, TagId, TimeQuaternion, TimeVector3 };
 
 use crate::camera_identifier::CameraIdentifier;
+use crate::stabilization_params::ReadoutDirection;
 use crate::filesystem;
 
 use super::imu_integration::*;
@@ -338,6 +339,8 @@ impl GyroSource {
             o.remove("has_accurate_timestamps");
         }
 
+        let fr = input.frame_readout_time().unwrap_or_default();
+
         let mut md = FileMetadata {
             imu_orientation,
             detected_source: Some(detected_source),
@@ -347,7 +350,12 @@ impl GyroSource {
             lens_positions,
             lens_params,
             raw_imu,
-            frame_readout_time: input.frame_readout_time(),
+            frame_readout_time: if fr != 0.0 { Some(if fr.abs() > 10000.0 { fr.abs() - 10000.0 } else { fr.abs() }) } else { None },
+            frame_readout_direction: if fr < 0.0 {
+                if fr.abs() > 10000.0 { ReadoutDirection::RightToLeft } else { ReadoutDirection::BottomToTop }
+            } else {
+                if fr.abs() > 10000.0 { ReadoutDirection::LeftToRight } else { ReadoutDirection::TopToBottom }
+            },
             frame_rate,
             lens_profile,
             camera_identifier,

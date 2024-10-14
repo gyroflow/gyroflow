@@ -61,7 +61,7 @@ MenuItem {
                 });
             }
             if (typeof stab.frame_readout_time === 'number') {
-                setFrameReadoutTime(+stab.frame_readout_time);
+                setFrameReadoutTime(+stab.frame_readout_time, stab.frame_readout_direction);
             }
 
             if (typeof stab.lens_correction_amount !== "undefined") {
@@ -113,10 +113,10 @@ MenuItem {
         }
     }
 
-    function setFrameReadoutTime(v: real): void {
+    function setFrameReadoutTime(v: real, direction: var): void {
         shutter.value = Math.abs(v);
         shutterCb.checked = Math.abs(v) > 0;
-        bottomToTop.checked = v < 0;
+        readoutDirection.set(direction);
     }
 
     function setSmoothingParam(name: string, value: real): void {
@@ -198,14 +198,15 @@ MenuItem {
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
             if (is_main_video) {
                 if (Math.abs(+additional_data.frame_readout_time) > 0) {
-                    root.setFrameReadoutTime(additional_data.frame_readout_time);
+                    root.setFrameReadoutTime(additional_data.frame_readout_time, additional_data.frame_readout_direction);
                 } else {
                     controller.frame_readout_time = shutter.value;
+                    controller.frame_readout_direction = readoutDirection.getInt();
                 }
             }
         }
         function onRolling_shutter_estimated(rolling_shutter: real): void {
-            root.setFrameReadoutTime(rolling_shutter);
+            root.setFrameReadoutTime(rolling_shutter, 0);
         }
     }
 
@@ -533,7 +534,8 @@ MenuItem {
             id: shutterCb;
             text: qsTr("Rolling shutter correction");
             cb.onCheckedChanged: {
-                controller.frame_readout_time = cb.checked? (bottomToTop.checked? -shutter.value : shutter.value) : 0.0;
+                controller.frame_readout_time = cb.checked? shutter.value : 0.0;
+                controller.frame_readout_direction = readoutDirection.getInt();
             }
 
             Label {
@@ -545,18 +547,14 @@ MenuItem {
                     width: parent.width;
                     unit: qsTr("ms");
                     precision: 2;
-                    onValueChanged: controller.frame_readout_time = bottomToTop.checked? -value : value;
+                    onValueChanged: {
+                        controller.frame_readout_time = value;
+                        controller.frame_readout_direction = readoutDirection.getInt();
+                    }
                 }
-                CheckBox {
-                    id: bottomToTop;
-                    anchors.right: parent.right;
-                    anchors.top: parent.top;
-                    anchors.topMargin: -30 * dpiScale;
-                    anchors.rightMargin: -10 * dpiScale;
-                    contentItem.visible: false;
-                    scale: 0.7;
-                    tooltip: qsTr("Bottom to top")
-                    onCheckedChanged: controller.frame_readout_time = bottomToTop.checked? -shutter.value : shutter.value;
+                ReadoutDirection {
+                    id: readoutDirection;
+                    onDirectionChanged: controller.frame_readout_direction = readoutDirection.getInt();
                 }
             }
         }

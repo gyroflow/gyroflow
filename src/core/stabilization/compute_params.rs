@@ -3,6 +3,7 @@
 
 use super::StabilizationManager;
 use super::distortion_models::DistortionModel;
+use crate::stabilization_params::ReadoutDirection;
 use crate::GyroSource;
 use crate::keyframes::KeyframeManager;
 use crate::lens_profile::LensProfile;
@@ -38,6 +39,7 @@ pub struct ComputeParams {
     pub background_margin: f64,
     pub background_margin_feather: f64,
     pub frame_readout_time: f64,
+    pub frame_readout_direction: ReadoutDirection,
     pub trim_ranges: Vec<(f64, f64)>,
     pub scaled_fps: f64,
     pub scaled_duration_ms: f64,
@@ -47,7 +49,6 @@ pub struct ComputeParams {
     pub additional_rotation: (f64, f64, f64),
     pub additional_translation: (f64, f64, f64),
     pub framebuffer_inverted: bool,
-    pub horizontal_rs: bool,
     pub suppress_rotation: bool,
     pub fov_algorithm_margin: f32,
     pub smoothing_fov_limit_per_frame: Vec<f64>,
@@ -98,8 +99,8 @@ impl ComputeParams {
             lens_correction_amount: params.lens_correction_amount,
             light_refraction_coefficient: params.light_refraction_coefficient,
             framebuffer_inverted: params.framebuffer_inverted,
-            horizontal_rs: params.horizontal_rs,
             frame_readout_time: params.frame_readout_time,
+            frame_readout_direction: params.frame_readout_direction,
             trim_ranges: params.trim_ranges.clone(),
             scaled_fps: params.get_scaled_fps(),
             scaled_duration_ms: params.get_scaled_duration_ms(),
@@ -171,6 +172,7 @@ impl std::fmt::Debug for ComputeParams {
          .field("background_margin",         &self.background_margin)
          .field("background_margin_feather", &self.background_margin_feather)
          .field("frame_readout_time",        &self.frame_readout_time)
+         .field("frame_readout_direction",   &self.frame_readout_direction)
          .field("trim_ranges",               &self.trim_ranges)
          .field("scaled_fps",                &self.scaled_fps)
          .field("adaptive_zoom_window",      &self.adaptive_zoom_window)

@@ -88,7 +88,11 @@ MenuItem {
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
             shutter.value = Math.abs(additional_data.frame_readout_time);
             shutterCb.checked = Math.abs(additional_data.frame_readout_time) > 0;
-            bottomToTop.checked = additional_data.frame_readout_time < 0;
+            if (additional_data.frame_readout_direction) {
+                readoutDirection.set(additional_data.frame_readout_direction);
+            } else {
+                readoutDirection.set(+additional_data.frame_readout_time < 0? "BottomToTop" : "TopToBottom");
+            }
 
             calib.resetMetadata();
             if (additional_data.camera_identifier) {
@@ -119,7 +123,7 @@ MenuItem {
         function onRolling_shutter_estimated(rolling_shutter: real): void {
             shutter.value = Math.abs(rolling_shutter);
             shutterCb.checked = Math.abs(rolling_shutter) > 0;
-            bottomToTop.checked = rolling_shutter < 0;
+            readoutDirection.set(rolling_shutter < 0? "BottomToTop" : "TopToBottom");
         }
     }
 
@@ -267,9 +271,11 @@ MenuItem {
         id: shutterCb;
         text: qsTr("Rolling shutter correction");
         cb.onCheckedChanged: {
-            const v = cb.checked? (bottomToTop.checked? -shutter.value : shutter.value) : 0.0;
+            const v = cb.checked? shutter.value : 0.0;
             controller.frame_readout_time = v;
             calib.calibrationInfo.frame_readout_time = v;
+            controller.frame_readout_direction = readoutDirection.getInt();
+            calib.calibrationInfo.frame_readout_direction = readoutDirection.get();
         }
 
         Label {
@@ -277,29 +283,21 @@ MenuItem {
             SliderWithField {
                 id: shutter;
                 defaultValue: 0.0;
+                from: 0.0;
                 to: 1000 / Math.max(1, calibrator_window.videoArea.vid.frameRate);
                 width: parent.width;
                 unit: qsTr("ms");
                 precision: 2;
                 onValueChanged: {
-                    const v = bottomToTop.checked? -value : value;
-                    controller.frame_readout_time = v;
-                    calib.calibrationInfo.frame_readout_time = v;
+                    controller.frame_readout_time = value;
+                    calib.calibrationInfo.frame_readout_time = value;
                 }
             }
-            CheckBox {
-                id: bottomToTop;
-                anchors.right: parent.right;
-                anchors.top: parent.top;
-                anchors.topMargin: -30 * dpiScale;
-                anchors.rightMargin: -10 * dpiScale;
-                contentItem.visible: false;
-                scale: 0.7;
-                tooltip: qsTr("Bottom to top")
-                onCheckedChanged: {
-                    const v = bottomToTop.checked? -shutter.value : shutter.value;
-                    controller.frame_readout_time = v;
-                    calib.calibrationInfo.frame_readout_time = v;
+            ReadoutDirection {
+                id: readoutDirection;
+                onDirectionChanged: {
+                    controller.frame_readout_direction = readoutDirection.getInt();
+                    calib.calibrationInfo.frame_readout_direction = readoutDirection.get();
                 }
             }
         }

@@ -79,6 +79,7 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, frame: usize, width:
                 || rhiUndistortion->outSize() != output_size
                 || rhiUndistortion->texSize() != QSize(width, height)
                 || rhiUndistortion->shaderPath() != shader_path
+                || rhiUndistortion->sizeForRS() != size_for_rs
                 || rhiUndistortion->itemTexturePtr() != mdkplayer->mdkplayer->rhiTexture()) {
                     delete rhiUndistortion;
                     rhiUndistortion = new QtRHIUndistort();

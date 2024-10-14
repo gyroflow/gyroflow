@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "720398f" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "3ec732f" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", rev = "bf7b41d", features = ["field_access"] }
 
@@ -66,7 +66,7 @@ bitarray = { version = "0.9", features = ["space"] }
 enterpolation = "0.2.1"
 libloading = "0.8"
 libc = "0.2"
-bytemuck = "1.18.0"
+bytemuck = "1.19.0"
 ash = "0.38.0"
 pollster = "0.3.0"
 futures-intrusive = "0.5.0"
@@ -81,7 +81,7 @@ rustfft = "6.2.0"
 exr = "1.72"
 opencv = { version = "0.93.1", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "d70ef62", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "fe7fbd4", features = ["spirv", "naga-ir"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 metal = { version = "0.29.0" }

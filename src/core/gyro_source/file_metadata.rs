@@ -6,6 +6,7 @@ use parking_lot::RwLock;
 use std::sync::Arc;
 
 use crate::camera_identifier::CameraIdentifier;
+use crate::stabilization_params::ReadoutDirection;
 use super::{ TimeIMU, TimeQuat, TimeVec, splines };
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -41,6 +42,7 @@ pub struct FileMetadata {
     pub image_orientations:  Option<TimeQuat>,
     pub detected_source:     Option<String>,
     pub frame_readout_time:  Option<f64>,
+    pub frame_readout_direction: ReadoutDirection,
     pub frame_rate:          Option<f64>,
     pub camera_identifier:   Option<CameraIdentifier>,
     pub lens_profile:        Option<serde_json::Value>,
@@ -63,6 +65,7 @@ impl FileMetadata {
             image_orientations:      Default::default(),
             detected_source:         self.detected_source.clone(),
             frame_readout_time:      self.frame_readout_time.clone(),
+            frame_readout_direction: self.frame_readout_direction.clone(),
             frame_rate:              self.frame_rate.clone(),
             camera_identifier:       self.camera_identifier.clone(),
             lens_profile:            self.lens_profile.clone(),

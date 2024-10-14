@@ -25,6 +25,42 @@ impl From<i32> for BackgroundMode {
         }
     }
 }
+#[derive(Default, Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
+pub enum ReadoutDirection {
+    #[default]
+    TopToBottom = 0,
+    BottomToTop = 1,
+    LeftToRight = 2,
+    RightToLeft = 3,
+}
+impl From<i32> for ReadoutDirection {
+    fn from(v: i32) -> Self {
+        match v {
+            1 => Self::BottomToTop,
+            2 => Self::LeftToRight,
+            3 => Self::RightToLeft,
+            _ => Self::TopToBottom
+        }
+    }
+}
+impl From<&str> for ReadoutDirection {
+    fn from(v: &str) -> Self {
+        match v {
+            "BottomToTop" => Self::BottomToTop,
+            "LeftToRight" => Self::LeftToRight,
+            "RightToLeft" => Self::RightToLeft,
+            _ => Self::TopToBottom
+        }
+    }
+}
+impl ReadoutDirection {
+    pub fn is_horizontal(&self) -> bool {
+        matches!(self, Self::LeftToRight | Self::RightToLeft)
+    }
+    pub fn is_inverted(&self) -> bool {
+        matches!(self, Self::BottomToTop | Self::RightToLeft)
+    }
+}
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct StabilizationParams {
@@ -34,6 +70,7 @@ pub struct StabilizationParams {
     pub background: Vector4<f32>,
 
     pub frame_readout_time: f64,
+    pub frame_readout_direction: ReadoutDirection,
     pub adaptive_zoom_window: f64,
     pub adaptive_zoom_center_offset: (f64, f64),
     pub adaptive_zoom_method: i32,
@@ -68,7 +105,6 @@ pub struct StabilizationParams {
     pub background_margin: f64,
     pub background_margin_feather: f64,
 
-    pub horizontal_rs: bool,
     pub framebuffer_inverted: bool,
     pub is_calibrator: bool,
 
@@ -94,6 +130,7 @@ impl Default for StabilizationParams {
             show_detected_features: true,
             show_optical_flow: true,
             frame_readout_time: 0.0,
+            frame_readout_direction: ReadoutDirection::TopToBottom,
             adaptive_zoom_window: 4.0,
             adaptive_zoom_center_offset: (0.0, 0.0),
             adaptive_zoom_method: 1,
@@ -115,7 +152,6 @@ impl Default for StabilizationParams {
             background_margin: 0.0,
             background_margin_feather: 0.0,
 
-            horizontal_rs: false,
             framebuffer_inverted: false,
             is_calibrator: false,
 

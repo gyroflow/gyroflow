@@ -7,6 +7,7 @@ use itertools::Itertools;
 use serde::{ Serialize, Deserialize };
 
 use crate::stabilization::distortion_models::DistortionModel;
+use crate::stabilization_params::ReadoutDirection;
 
 #[cfg(feature = "opencv")]
 use super::LensCalibrator;
@@ -36,6 +37,7 @@ pub struct LensProfile {
     pub output_dimension: Option<Dimensions>,
 
     pub frame_readout_time: Option<f64>,
+    pub frame_readout_direction: Option<ReadoutDirection>,
     pub gyro_lpf: Option<f64>,
 
     pub input_horizontal_stretch: f64,

@@ -20,13 +20,16 @@ pub struct FrameTransform {
 
 impl FrameTransform {
     fn get_frame_readout_time(params: &ComputeParams, can_invert: bool, timestamp_ms: f64, file_metadata: &FileMetadata) -> f64 {
-        let mut frame_readout_time = params.frame_readout_time;
+        let mut frame_readout_time = params.frame_readout_time.abs();
         let mut scale = 1.0;
         telemetry_parser::try_block!({
             let val = file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000)?; // closest within 100ms
             scale = val.capture_area_size?.1 as f64 / val.sensor_size_px?.1 as f64;
         });
-        if can_invert && params.framebuffer_inverted && !params.horizontal_rs {
+        if can_invert && params.framebuffer_inverted && !params.frame_readout_direction.is_horizontal() {
+            frame_readout_time *= -1.0;
+        }
+        if params.frame_readout_direction.is_inverted() {
             frame_readout_time *= -1.0;
         }
         frame_readout_time * scale
@@ -179,7 +182,7 @@ impl FrameTransform {
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(&params, true, timestamp_ms, &file_metadata);
 
-        let row_readout_time = frame_readout_time / if params.horizontal_rs { params.width } else { params.height } as f64;
+        let row_readout_time = frame_readout_time / if params.frame_readout_direction.is_horizontal() { params.width } else { params.height } as f64;
         let timestamp_ms = timestamp_ms + file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
@@ -203,7 +206,7 @@ impl FrameTransform {
         let smoothed_quat1 = gyro.smoothed_quat_at_timestamp(timestamp_ms);
 
         // Only compute 1 matrix if not using rolling shutter correction
-        let rows = if frame_readout_time.abs() > 0.0 { if params.horizontal_rs { params.width } else { params.height } } else { 1 };
+        let rows = if frame_readout_time.abs() > 0.0 { if params.frame_readout_direction.is_horizontal() { params.width } else { params.height } } else { 1 };
 
         let matrices = (0..rows).into_par_iter().map(|y| {
             let quat_time = if frame_readout_time.abs() > 0.0 {
@@ -333,7 +336,7 @@ impl FrameTransform {
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(params, false, timestamp_ms, &file_metadata);
 
-        let row_readout_time = frame_readout_time / if params.horizontal_rs { params.width } else { params.height } as f64;
+        let row_readout_time = frame_readout_time / if params.frame_readout_direction.is_horizontal() { params.width } else { params.height } as f64;
         let timestamp_ms = timestamp_ms + gyro.file_metadata.read().per_frame_time_offsets.get(frame).unwrap_or(&0.0);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
@@ -348,7 +351,7 @@ impl FrameTransform {
 
         let rotations: Vec<Matrix3<f64>> = points_iter.iter().map(|&(x, y)| {
             let quat_time = if frame_readout_time.abs() > 0.0 {
-                start_ts + row_readout_time * if params.horizontal_rs { x } else { y } as f64
+                start_ts + row_readout_time * if params.frame_readout_direction.is_horizontal() { x } else { y } as f64
             } else {
                 start_ts
             };

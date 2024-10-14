@@ -136,7 +136,7 @@ MenuItem {
                         Qt.callLater(window.exportSettings.lensProfileLoaded, obj.output_dimension.w, obj.output_dimension.h);
                     }
                     if (+obj.frame_readout_time && Math.abs(+obj.frame_readout_time) > 0) {
-                        window.stab.setFrameReadoutTime(obj.frame_readout_time);
+                        window.stab.setFrameReadoutTime(obj.frame_readout_time, obj.frame_readout_direction);
                     }
                     if (+obj.gyro_lpf && Math.abs(+obj.gyro_lpf) > 0) {
                         window.motionData.setGyroLpf(obj.gyro_lpf);
