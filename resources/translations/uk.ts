@@ -822,194 +822,189 @@ You can increase the sharpness limit in the Advanced section.</source>
       <translation>Калібрування</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="164"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="168"/>
       <source>For a good lens calibration, this value should be less than 5, ideally less than 1.</source>
       <translation>Для якісного калібрування обʼєктиву, це значення має бути менш як 5, в ідеалі менш як 1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="181"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="185"/>
       <source>Auto calibrate</source>
       <translation>Автокалібровка</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="193"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="197"/>
       <source>Max calibration points</source>
       <translation>Максимальна кількість точок калібрування</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="142"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="309"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="146"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="307"/>
       <source>Export lens profile</source>
       <translation>Експортувати профіль об'єктиву</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="143"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="147"/>
       <source>Lens profiles</source>
       <translation>Профілі обʼєктиву</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="147"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="151"/>
       <source>By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.
 Do you want to submit your profile?</source>
       <translation>Завантажуючи профіль обʼєктиву в базу даних, ви погоджуєтесь опублікувати та поширювати його за допомогою Gyroflow під ліцензією GPLv3.
 Ви дійсно бажаєте надіслати свій профіль?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="148"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="473"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="152"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="471"/>
       <source>Yes</source>
       <translation>Так</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="149"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="476"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="153"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="474"/>
       <source>No</source>
       <translation>Ні</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="254"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="258"/>
       <source>Invalid format</source>
       <translation>Невірний формат</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="254"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="258"/>
       <source>Ok</source>
       <translation>Ок</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="322"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="320"/>
       <source>Upload lens profile to the database</source>
       <translation>Завантажити профіль обʼєктиву до бази даних</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="328"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="326"/>
       <source>FOV</source>
       <translation>FOV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="341"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="339"/>
       <source>Analyze every n-th frame</source>
       <translation>Аналізувати кожен n-ий кадр</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="353"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="351"/>
       <source>Sharpness limit</source>
       <translation>Ліміт чіткості</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="362"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="360"/>
       <source>px</source>
       <translation>пікселів</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="370"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="368"/>
       <source>Digital lens</source>
       <translation>Лінза</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="431"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="429"/>
       <source>Input horizontal stretch</source>
       <translation>Введіть горизонтальне розтягування</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="448"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="446"/>
       <source>Input vertical stretch</source>
       <translation>Введіть вертикальне розтягування</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="472"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="470"/>
       <source>Do you want to update the output resolution to %1?</source>
       <translation>Ви бажаєте оновити роздільну здатність виводу до %1?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="483"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="481"/>
       <source>Iterations</source>
       <translation>Ітерації</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="495"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="493"/>
       <source>Low pass filter</source>
       <translation>Фільтр низьких частот</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="504"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="502"/>
       <source>Hz</source>
       <translation>Гц</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="519"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="517"/>
       <source>Focal length</source>
       <translation>Фокусна відстань</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="521"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="519"/>
       <source>Lens native focal length</source>
       <translation>Рідна фокальна довжина лінзи</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="525"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="523"/>
       <source>mm</source>
       <translation>мм</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="534"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="532"/>
       <source>Crop factor</source>
       <translation>Кроп-фактор</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="538"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="536"/>
       <source>x</source>
       <translation>x</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="550"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="548"/>
       <source>Preview resolution</source>
       <translation>Роздільна здатність попереднього перегляду</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="573"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="571"/>
       <source>Processing resolution</source>
       <translation>Обробка роздільності</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="596"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="594"/>
       <source>Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</source>
       <translation>Калібрування об’єктива має виконуватись із повною роздільною здатністю або принаймні з 4k. Змінюйте це налаштування, лише якщо знаєте, що робите.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="599"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="597"/>
       <source>Lens is asymmetrical</source>
       <translation>Лінза асиметрична</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="606"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="604"/>
       <source>Sensor is global shutter</source>
       <translation>Сенсор є глобальним затвором</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="613"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="611"/>
       <source>Plain chessboard pattern (previous version without dots in the middle)</source>
       <translation>Шаблон звичайної шахівниці (попередня версія без крапок посередині)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="268"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="272"/>
       <source>Rolling shutter correction</source>
       <translation>Корекція руху затвору</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="276"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="282"/>
       <source>Frame readout time</source>
       <translation>Час читання кадру</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="282"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="289"/>
       <source>ms</source>
       <translation>мс</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="298"/>
-      <source>Bottom to top</source>
-      <translation>Знизу вгору</translation>
     </message>
   </context>
   <context>
@@ -1517,8 +1512,8 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="59"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="554"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="576"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="552"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="574"/>
       <location filename="../../src/ui/menu/Synchronization.qml" line="317"/>
       <source>Full</source>
       <translation>Повна</translation>
@@ -1574,37 +1569,37 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
       <translation>Нічого</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="213"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="214"/>
       <source>No smoothing</source>
       <translation>Без згладжування</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="214"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="215"/>
       <source>Default</source>
       <translation>За умовчанням</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="215"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="216"/>
       <source>Plain 3D</source>
       <translation>Простий 3D</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="216"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="217"/>
       <source>Fixed camera</source>
       <translation>Фіксована камера</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="440"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="441"/>
       <source>No zooming</source>
       <translation>Без наближення</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="440"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="441"/>
       <source>Dynamic zooming</source>
       <translation>Динамічне наближення</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="440"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="441"/>
       <source>Static zoom</source>
       <translation>Статичне збільшення</translation>
     </message>
@@ -1657,6 +1652,34 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
       <location filename="../../src/ui/RenderQueue.qml" line="760"/>
       <source>Close Gyroflow</source>
       <translation>Закрити Gyroflow</translation>
+    </message>
+  </context>
+  <context>
+    <name>ReadoutDirection</name>
+    <message>
+      <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
+      <source>Frame readout direction: %1</source>
+      <translation type="unfinished">Frame readout direction: %1</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
+      <source>Top to bottom</source>
+      <translation type="unfinished">Top to bottom</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
+      <source>Bottom to top</source>
+      <translation type="unfinished">Bottom to top</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
+      <source>Left to right</source>
+      <translation type="unfinished">Left to right</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
+      <source>Right to left</source>
+      <translation type="unfinished">Right to left</translation>
     </message>
   </context>
   <context>
@@ -2269,275 +2292,270 @@ Click Ok and select the destination folder.</source>
       <translation>Стабілізація</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="218"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="219"/>
       <source>Pitch smoothness</source>
       <translation>Згладжування по Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="219"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="220"/>
       <source>Yaw smoothness</source>
       <translation>Згладжування по Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="220"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="221"/>
       <source>Roll smoothness</source>
       <translation>Згладжування по Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="221"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="222"/>
       <source>Smoothness</source>
       <translation>Згладжування</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="222"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="223"/>
       <source>Per axis</source>
       <translation>За вісь</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="223"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="224"/>
       <source>Max smoothness</source>
       <translation>Максимальне згладжування</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="224"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="225"/>
       <source>Max smoothness at high velocity</source>
       <translation>Максимальна плавність на високій швидкості</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="225"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="226"/>
       <source>Second smoothing pass</source>
       <translation>Другий згладжуваний прохід</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="226"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="227"/>
       <source>Only within trim range</source>
       <translation>Тільки в межах обрізки</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="227"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="228"/>
       <source>Yaw angle correction</source>
       <translation>Корекція кута Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="228"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="229"/>
       <source>Pitch angle correction</source>
       <translation>Корекція кута Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="229"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="363"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="230"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="364"/>
       <source>Roll angle correction</source>
       <translation>Корекція кута Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="230"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="231"/>
       <source>Yaw angle</source>
       <translation>Кут Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="231"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="232"/>
       <source>Pitch angle</source>
       <translation>Кут Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="232"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="233"/>
       <source>Roll angle</source>
       <translation>Кут Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="514"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="515"/>
       <source>FOV is greater than 1.0, you may see black borders</source>
       <translation>FOV більший, ніж 1.0, ви можете побачити чорні кордони</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="519"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="520"/>
       <source>FOV</source>
       <translation>FOV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="637"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="636"/>
       <source>Link with zooming limit</source>
       <translation type="unfinished">Link with zooming limit</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="710"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="709"/>
       <source>Additional 3D rotation</source>
       <translation>Додаткове 3D обертання</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="714"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="713"/>
       <source>Pitch</source>
       <translation>Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="719"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="718"/>
       <source>Yaw</source>
       <translation>Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="724"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="723"/>
       <source>Roll</source>
       <translation>Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="731"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="730"/>
       <source>Additional 3D translation</source>
       <translation>Додатковий 3D переклад</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="746"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="745"/>
       <source>Z</source>
       <translation>Z</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="339"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="340"/>
       <source>Lock horizon</source>
       <translation>Зафіксувати горизонт</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="344"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="345"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
       <translation>Рівень блокування горизонту</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="352"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="683"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="700"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="353"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="682"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="699"/>
       <source>%</source>
       <translation>%</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="371"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="372"/>
       <source>°</source>
       <translation>°</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="379"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="380"/>
       <source>Use gravity vectors</source>
       <translation>Використовувати гравітаційні вектори</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="387"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="388"/>
       <source>Integration method</source>
       <translation>Метод інтеграції</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="397"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="398"/>
       <source>IMU integration method for keeping track of the horizon and adjust built-in quaternions</source>
       <translation>Метод інтеграції IMU для відстеження горизонту та налаштування вбудованих квотерніонів</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="406"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="407"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
       <translation>Якщо горизонт не повністю заблокований, спробуйте інший метод у розділі &quot;Motion data&quot;.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="427"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="428"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
       <translation>Макс. обертання: Pitch: %1, Yaw: %2, Roll: %3</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="432"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="433"/>
       <source>Max zoom: %1</source>
       <translation>Макс. збільшення: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="455"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="456"/>
       <source>Zoom limit</source>
       <translation>Обмеження масштабу</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="458"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="459"/>
       <source>Zoom limit is calculated approximately.
 If you need more accuracy, increase the number of iterations in &quot;Advanced&quot; below.</source>
       <translation>Обмеження масштабу розраховується приблизно.
 Якщо вам потрібна більша точність, збільште кількість ітерацій у &quot;Розширені&quot; нижче.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="474"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="475"/>
       <source>Zooming speed</source>
       <translation>Швидкість збільшення</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="483"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="484"/>
       <source>s</source>
       <translation>с</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="492"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="493"/>
       <source>Lens correction</source>
       <translation>Корекція лінз</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="644"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="643"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
       <translation>Під час масштабування ключових кадрів рекомендується використовувати метод Envelope повторення конверта. Фільтр Гауса може призвести до появи чорних рамок у полі зору.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="649"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="648"/>
       <source>Zooming method</source>
       <translation>Метод масштабування</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="669"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="668"/>
       <source>Zooming center offset</source>
       <translation>Зміщення центру масштабування</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="674"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="736"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="673"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="735"/>
       <source>X</source>
       <translation>X</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="691"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="741"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="690"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="740"/>
       <source>Y</source>
       <translation>Y</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="754"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="753"/>
       <source>Zoom limit iterations</source>
       <translation>Обмеження масштабу ітерацій</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="755"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="754"/>
       <source>More iterations = more accurate limit, but also slower to calculate.</source>
       <translation>Більше ітерацій = точніше обмеження, але також повільніше обчислення.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="534"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="535"/>
       <source>Rolling shutter correction</source>
       <translation>Корекція руху затвору</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="540"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="542"/>
       <source>Frame readout time</source>
       <translation>Час читання кадру</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="546"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="549"/>
       <source>ms</source>
       <translation>мс</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="558"/>
-      <source>Bottom to top</source>
-      <translation>Знизу до початку</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="565"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="564"/>
       <source>Video speed</source>
       <translation>Швидкість відео</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="611"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="610"/>
       <source>Link with smoothing</source>
       <translation>Зв'язок з згладжуванням</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="624"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="623"/>
       <source>Link with zooming speed</source>
       <translation>Зв'язок зі швидкістю збільшення</translation>
     </message>

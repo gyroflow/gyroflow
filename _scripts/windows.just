@@ -347,5 +347,9 @@ bundle:
     makeappx.exe pack /d bundle /p ..\_binaries\Gyroflow-{{NameSuffix}}.msix
     signtool.exe sign /f msix_signing_key.pfx /p $Env:MS_STORE_SIGNING_PASS /fd sha256 ..\_binaries\Gyroflow-{{NameSuffix}}.msix
 
+    # To bundle
+    # makeappx.exe bundle /d bundle /p Gyroflow.msixbundle
+    # signtool.exe sign /fd sha256 /a /f msix_signing_key.pfx /p $Env:MS_STORE_SIGNING_PASS Gyroflow.msixbundle
+
     Remove-Item -Path "priconfig.xml" -ErrorAction SilentlyContinue
     Remove-Item -Path "bundle" -Recurse -ErrorAction SilentlyContinue

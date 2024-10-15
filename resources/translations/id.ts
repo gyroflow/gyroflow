@@ -820,193 +820,188 @@ Anda dapat meningkatkan batas ketajaman di bagian Lanjutan.</translation>
       <translation>Kalibrasi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="164"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="168"/>
       <source>For a good lens calibration, this value should be less than 5, ideally less than 1.</source>
       <translation>Untuk kalibrasi lensa yang terbaik, isi angka ini dibawah 5, idealnya dibawah 1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="181"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="185"/>
       <source>Auto calibrate</source>
       <translation>Kalibrasi otomatis</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="193"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="197"/>
       <source>Max calibration points</source>
       <translation>Titik kalibrasi maximum</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="142"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="309"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="146"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="307"/>
       <source>Export lens profile</source>
       <translation>Ekspor profil lensa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="143"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="147"/>
       <source>Lens profiles</source>
       <translation>Profil lensa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="147"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="151"/>
       <source>By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.
 Do you want to submit your profile?</source>
       <translation>Dengan mengupload profil lensa anda ke database, anda setuju untuk di publikasi dan didistribusikan dengan Gyroflow dibawah ketentuan GPLv3. Apakah anda akan submit profil anda?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="148"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="473"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="152"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="471"/>
       <source>Yes</source>
       <translation>Ya</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="149"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="476"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="153"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="474"/>
       <source>No</source>
       <translation>No</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="254"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="258"/>
       <source>Invalid format</source>
       <translation>Format tidak valid</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="254"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="258"/>
       <source>Ok</source>
       <translation>Ok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="322"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="320"/>
       <source>Upload lens profile to the database</source>
       <translation>Upload profil lensa ke dalam database</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="328"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="326"/>
       <source>FOV</source>
       <translation>FOV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="341"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="339"/>
       <source>Analyze every n-th frame</source>
       <translation>Menganalisa setiap n-th frame</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="353"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="351"/>
       <source>Sharpness limit</source>
       <translation>Batas ketajaman</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="362"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="360"/>
       <source>px</source>
       <translation>px</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="370"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="368"/>
       <source>Digital lens</source>
       <translation>Lensa digital</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="431"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="429"/>
       <source>Input horizontal stretch</source>
       <translation>Masukkan peregangan horizontal</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="448"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="446"/>
       <source>Input vertical stretch</source>
       <translation>Masukkan peregangan vertikal</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="472"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="470"/>
       <source>Do you want to update the output resolution to %1?</source>
       <translation>Apa anda ingin memperbarui resolusi output ke %1?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="483"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="481"/>
       <source>Iterations</source>
       <translation>Pengulangan</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="495"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="493"/>
       <source>Low pass filter</source>
       <translation>Filter Low pass</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="504"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="502"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="519"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="517"/>
       <source>Focal length</source>
       <translation>Focal length</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="521"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="519"/>
       <source>Lens native focal length</source>
       <translation>Panjang asli focal lengh</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="525"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="523"/>
       <source>mm</source>
       <translation>mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="534"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="532"/>
       <source>Crop factor</source>
       <translation>Krop faktor</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="538"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="536"/>
       <source>x</source>
       <translation>x</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="550"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="548"/>
       <source>Preview resolution</source>
       <translation>Resolusi layar preview</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="573"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="571"/>
       <source>Processing resolution</source>
       <translation>Resolusi pemrosesan</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="596"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="594"/>
       <source>Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</source>
       <translation>Kalibrasi lensa harus diproses dengan resolusi penuh atau setidaknya 4k. Ubah pengaturan ini hanya jika Anda tahu apa yang Anda lakukan.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="599"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="597"/>
       <source>Lens is asymmetrical</source>
       <translation>Lensa tidak simetris</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="606"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="604"/>
       <source>Sensor is global shutter</source>
       <translation>Sensor adalah rana global</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="613"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="611"/>
       <source>Plain chessboard pattern (previous version without dots in the middle)</source>
       <translation>Pola papan catur polos (versi sebelumnya tanpa titik di tengah)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="268"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="272"/>
       <source>Rolling shutter correction</source>
       <translation>Koreksi Rolling shutter</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="276"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="282"/>
       <source>Frame readout time</source>
       <translation>Waktu pembacaan frame</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="282"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="289"/>
       <source>ms</source>
       <translation>ms</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="298"/>
-      <source>Bottom to top</source>
-      <translation>Bawah ke Atas</translation>
     </message>
   </context>
   <context>
@@ -1514,8 +1509,8 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="59"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="554"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="576"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="552"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="574"/>
       <location filename="../../src/ui/menu/Synchronization.qml" line="317"/>
       <source>Full</source>
       <translation>Penuh</translation>
@@ -1571,37 +1566,37 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
       <translation>Tidak ada</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="213"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="214"/>
       <source>No smoothing</source>
       <translation>Tidak menghaluskan</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="214"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="215"/>
       <source>Default</source>
       <translation>Bawaan</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="215"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="216"/>
       <source>Plain 3D</source>
       <translation>3D polos</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="216"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="217"/>
       <source>Fixed camera</source>
       <translation>Kamera fix</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="440"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="441"/>
       <source>No zooming</source>
       <translation>Tidak zooming</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="440"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="441"/>
       <source>Dynamic zooming</source>
       <translation>Zooming dinamis</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="440"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="441"/>
       <source>Static zoom</source>
       <translation>Perbesar statis</translation>
     </message>
@@ -1654,6 +1649,34 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
       <location filename="../../src/ui/RenderQueue.qml" line="760"/>
       <source>Close Gyroflow</source>
       <translation>Tutup Gyroflow</translation>
+    </message>
+  </context>
+  <context>
+    <name>ReadoutDirection</name>
+    <message>
+      <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
+      <source>Frame readout direction: %1</source>
+      <translation type="unfinished">Frame readout direction: %1</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
+      <source>Top to bottom</source>
+      <translation type="unfinished">Top to bottom</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
+      <source>Bottom to top</source>
+      <translation type="unfinished">Bottom to top</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
+      <source>Left to right</source>
+      <translation type="unfinished">Left to right</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
+      <source>Right to left</source>
+      <translation type="unfinished">Right to left</translation>
     </message>
   </context>
   <context>
@@ -2265,275 +2288,270 @@ Klik Ok dan pilih folder tujuan.</translation>
       <translation>Stabilisasi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="218"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="219"/>
       <source>Pitch smoothness</source>
       <translation>Tingkat kehalusan Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="219"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="220"/>
       <source>Yaw smoothness</source>
       <translation>Tingkat kehalusan yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="220"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="221"/>
       <source>Roll smoothness</source>
       <translation>Tingkat kehalusan Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="221"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="222"/>
       <source>Smoothness</source>
       <translation>Tingkat Kehalusan</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="222"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="223"/>
       <source>Per axis</source>
       <translation>Per sumbu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="223"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="224"/>
       <source>Max smoothness</source>
       <translation>Kehalusan maksimal</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="224"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="225"/>
       <source>Max smoothness at high velocity</source>
       <translation>Tingkat kehalusan pada kecepatan (velocity) tinggi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="225"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="226"/>
       <source>Second smoothing pass</source>
       <translation>Penghalusan kedua</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="226"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="227"/>
       <source>Only within trim range</source>
       <translation>Hanya dalam rentang trim</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="227"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="228"/>
       <source>Yaw angle correction</source>
       <translation>Koreksi sudut Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="228"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="229"/>
       <source>Pitch angle correction</source>
       <translation>Koreksi sudut Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="229"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="363"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="230"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="364"/>
       <source>Roll angle correction</source>
       <translation>Koreksi sudut Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="230"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="231"/>
       <source>Yaw angle</source>
       <translation>Sudut Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="231"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="232"/>
       <source>Pitch angle</source>
       <translation>Sudut Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="232"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="233"/>
       <source>Roll angle</source>
       <translation>Sudut Roll</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="514"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="515"/>
       <source>FOV is greater than 1.0, you may see black borders</source>
       <translation>FOV lebih besar dari 1.0, anda akan melihat bingkai hitam</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="519"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="520"/>
       <source>FOV</source>
       <translation>FOV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="637"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="636"/>
       <source>Link with zooming limit</source>
       <translation type="unfinished">Link with zooming limit</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="710"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="709"/>
       <source>Additional 3D rotation</source>
       <translation>Tambahan rotasi 3D</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="714"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="713"/>
       <source>Pitch</source>
       <translation>Pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="719"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="718"/>
       <source>Yaw</source>
       <translation>Yaw</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="724"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="723"/>
       <source>Roll</source>
       <translation>Gulung</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="731"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="730"/>
       <source>Additional 3D translation</source>
       <translation>Tambahan translasi 3D</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="746"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="745"/>
       <source>Z</source>
       <translation>Z</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="339"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="340"/>
       <source>Lock horizon</source>
       <translation>Kunci horizon</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="344"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="345"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
       <translation>Kunci nilai</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="352"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="683"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="700"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="353"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="682"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="699"/>
       <source>%</source>
       <translation>%</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="371"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="372"/>
       <source>°</source>
       <translation>°</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="379"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="380"/>
       <source>Use gravity vectors</source>
       <translation>Gunakan vektor gravitasi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="387"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="388"/>
       <source>Integration method</source>
       <translation>Metode integrasi</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="397"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="398"/>
       <source>IMU integration method for keeping track of the horizon and adjust built-in quaternions</source>
       <translation>Metode integrasi IMU untuk mengamabkan pelacakan horizon dan sesuaikan built-in quaternions</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="406"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="407"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
       <translation>Jika horizon tidak terkunci sempurna, coba metode integrasi lainnya di bagian &quot;Motion data&quot;.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="427"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="428"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
       <translation>Rotasi maksimal: Pitch: %1, Yaw: %2, Roll: %3</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="432"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="433"/>
       <source>Max zoom: %1</source>
       <translation>Perbesar maksimal: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="455"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="456"/>
       <source>Zoom limit</source>
       <translation>Batas zoom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="458"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="459"/>
       <source>Zoom limit is calculated approximately.
 If you need more accuracy, increase the number of iterations in &quot;Advanced&quot; below.</source>
       <translation type="unfinished">Zoom limit is calculated approximately.
 If you need more accuracy, increase the number of iterations in &quot;Advanced&quot; below.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="474"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="475"/>
       <source>Zooming speed</source>
       <translation>Kecepatan zooming</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="483"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="484"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="492"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="493"/>
       <source>Lens correction</source>
       <translation type="unfinished">Lens correction</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="644"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="643"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
       <translation>Saat memperbesar kecepatan keyframing, disarankan untuk menggunakan metode Envelope follower. Filter Gaussian dapat menyebabkan batas hitam terlihat.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="649"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="648"/>
       <source>Zooming method</source>
       <translation>Metode pembesaran</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="669"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="668"/>
       <source>Zooming center offset</source>
       <translation>Perbesar offset tengah</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="674"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="736"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="673"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="735"/>
       <source>X</source>
       <translation>X</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="691"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="741"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="690"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="740"/>
       <source>Y</source>
       <translation>Y</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="754"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="753"/>
       <source>Zoom limit iterations</source>
       <translation>Batas literasi zoom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="755"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="754"/>
       <source>More iterations = more accurate limit, but also slower to calculate.</source>
       <translation type="unfinished">More iterations = more accurate limit, but also slower to calculate.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="534"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="535"/>
       <source>Rolling shutter correction</source>
       <translation>Koreksi Rolling shutter</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="540"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="542"/>
       <source>Frame readout time</source>
       <translation>Waktu pembacaan frame</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="546"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="549"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="558"/>
-      <source>Bottom to top</source>
-      <translation>Bawah ke Atas</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="565"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="564"/>
       <source>Video speed</source>
       <translation>Kecepatan video</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="611"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="610"/>
       <source>Link with smoothing</source>
       <translation>Hubungkan dengan smoothing</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="624"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="623"/>
       <source>Link with zooming speed</source>
       <translation>Hubungkan dengan kecepatan zoom</translation>
     </message>
