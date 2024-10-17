@@ -94,6 +94,14 @@ struct Opts {
     /// gyro file path
     #[argh(option, short = 'g')]
     gyro_file: Option<String>,
+
+    /// processing device index. By default it uses the one set in the GUI
+    #[argh(option, short = 'b')]
+    processing_device: Option<i32>,
+
+    /// rendering device, specify the GPU type. Eg. "nvidia", "intel", "amd", "apple m"
+    #[argh(option, short = 'r')]
+    rendering_device: Option<String>,
 }
 
 pub fn will_run_in_console() -> bool {
@@ -186,6 +194,13 @@ pub fn run(open_file: &mut String) -> bool {
         if let Some(suffix) = opts.suffix {
             queue.default_suffix = QString::from(suffix);
         }
+
+        if let Some(rendering_device) = opts.rendering_device {
+            rendering::set_gpu_type_from_name(&rendering_device);
+        } else if let Some(rendering_device) = settings::try_get("renderingDevice") {
+            rendering::set_gpu_type_from_name(&rendering_device.as_str().unwrap_or_default());
+        }
+
 
         if let Some(mut outp) = opts.out_params {
             outp = outp.replace('\'', "\"");
@@ -348,6 +363,15 @@ pub fn run(open_file: &mut String) -> bool {
             connect!(queue_ptr, q, added, |job_id: &u32| {
                 let queue = &mut *queue.as_ptr();
                 let fname = queue.get_job_output_filename(*job_id).to_string();
+
+                if let Some(stab) = queue.get_stab_for_job(*job_id) {
+                    if let Some(processing_device) = opts.processing_device {
+                        stab.set_device(processing_device as i32);
+                    } else if let Some(processing_device) = settings::try_get("processingDeviceIndex").and_then(|x| x.as_u64()) {
+                        stab.set_device(processing_device as i32);
+                    }
+                }
+
                 //log::info!("[{:08x}] Job added: {}", job_id, fname);
                 let pb = m.add(ProgressBar::new(1));
                 pb.set_style(sty.clone());
@@ -494,10 +518,6 @@ fn setup_defaults(stab: Arc<StabilizationManager>, queue: &mut RenderQueue) -> s
 
     let codec = (settings::get_u64("defaultCodec", 0) as usize).min(codecs.len() - 1);
     let codec_name = codecs[codec];
-
-    if let Some(processing_device) = settings::try_get("processingDeviceIndex").and_then(|x| x.as_u64()) {
-        stab.set_device(processing_device as i32);
-    }
 
     let audio_codecs = ["AAC", "PCM (s16le)", "PCM (s16be)", "PCM (s24le)", "PCM (s24be)"];
     let interpolations = ["Bilinear", "Bicubic", "Lanczos4", "EWA: RobidouxSharp", "EWA: Robidoux", "EWA: Mitchell", "EWA: Catmull-Rom"];
