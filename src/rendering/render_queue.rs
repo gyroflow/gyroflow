@@ -445,6 +445,7 @@ impl RenderQueue {
                 status: JobStatus::Queued,
             });
         }
+        drop(params);
 
         let project_data = Self::get_gyroflow_data_internal(&stab, &additional_data, &render_options);
 
