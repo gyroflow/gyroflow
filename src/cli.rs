@@ -209,6 +209,13 @@ pub fn run(open_file: &mut String) -> bool {
         if let Some(mut x) = opts.sync_params {
             x = x.replace('\'', "\"");
             gyroflow_core::util::merge_json(additional_data.get_mut("synchronization").unwrap(), &serde_json::from_str(&x).expect("Invalid json"));
+        } else if let Some(preset) = presets.first() {
+            let content = if preset.starts_with('{') { preset.clone() } else { std::fs::read_to_string(preset).expect("Reading preset file") };
+            if let Ok(parsed_preset) = serde_json::from_str::<serde_json::Value>(&content) {
+                if let Some(sync) = parsed_preset.get("synchronization") {
+                    gyroflow_core::util::merge_json(additional_data.get_mut("synchronization").unwrap(), sync);
+                }
+            }
         }
 
         let export_metadata_fields = serde_json::from_str(
