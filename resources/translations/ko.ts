@@ -153,7 +153,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/App.qml" line="211"/>
       <source>Output path:</source>
-      <translation>출력 위치:</translation>
+      <translation>출력 경로:</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="242"/>
@@ -170,7 +170,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
       <source>This format is not available for rendering.
 The recommended workflow is to export project file and use one of [video editor plugins] (%1).</source>
       <translation>이 형식으로 렌더링할 수 없습니다.
-권장되는 작업 방법은 프로젝트 파일을 내보내어 [영상 편집기 플러그인] 중 하나를 사용하는 것입니다 (%1).</translation>
+권장되는 작업 방법은 프로젝트 파일을 내보내어 [영상 편집 소프트웨어 플러그인] 중 하나를 사용하는 것입니다 (%1).</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="336"/>
@@ -245,11 +245,11 @@ The recommended workflow is to export project file and use one of [video editor 
 Please check the file bitrate after rendering and if you&apos;re affected by this bug, you can either:
 - Set output bitrate to less than 100 Mbps
 - Use &quot;Custom encoder options&quot;: `-rc cqp -qp_i 28 -qp_p 28`</source>
-      <translation>일부 AMD GPU 인코더는 100Mbps보다 큰 비트 전송률을 20Mbps로 제한하는 버그가 있습니다.
+      <translation>일부 AMD GPU 인코더에는 100Mbps보다 큰 비트레이트를 20Mbps로 제한하는 버그가 있습니다.
 
-렌더링 후 파일의 비트 전송률을 확인하시고, 이 버그의 영향을 받은 경우 다음을 시도해 볼 수 있습니다:
-- 비트 전송률을 100Mbps 미만으로 설정
-- '사용자 지정 인코더 옵션' 항목을 다음으로 설정: `-rc cqp -qp_i 28 -qp_p 28`</translation>
+렌더링 후 파일의 비트레이트를 확인하시고, 이 버그의 영향을 받은 경우 다음을 시도해 볼 수 있습니다:
+- 출력 비트레이트를 100Mbps 미만으로 설정하기
+- '사용자 지정 인코더 옵션' 항목을 다음으로 설정하기: `-rc cqp -qp_i 28 -qp_p 28`</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="765"/>
@@ -266,7 +266,7 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="448"/>
       <location filename="../../src/ui/App.qml" line="661"/>
       <source>Preset saved to %1</source>
-      <translation type="unfinished">Preset saved to %1</translation>
+      <translation>프리셋이 %1에 저장됨</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="626"/>
@@ -334,12 +334,12 @@ Due to limitations of the system video encoders, rendering in the background is 
     <message>
       <location filename="../../src/ui/App.qml" line="439"/>
       <source>Enter the name for the preset: </source>
-      <translation type="unfinished">Enter the name for the preset: </translation>
+      <translation>프리셋 이름 입력: </translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="443"/>
       <source>Name cannot be empty.</source>
-      <translation type="unfinished">Name cannot be empty.</translation>
+      <translation>이름은 비워둘 수 없습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="668"/>
@@ -385,7 +385,7 @@ Do you agree with the [GPL license] and want to download the additional codec?</
 Change the output path or run the program as administrator.
 Make sure you have write permissions to the target directory and make sure target file is not used by any other application.</source>
       <translation>파일을 만들거나 쓸 권한이 없습니다.
-출력 위치를 변경하거나 프로그램을 관리자 권한으로 실행하세요.
+출력 경로를 변경하거나 프로그램을 관리자 권한으로 실행하세요.
 대상 디렉터리에 쓰기 권한이 있는지, 다른 프로그램이 대상 파일을 사용 중인지 확인하세요.</translation>
     </message>
     <message>
@@ -476,7 +476,7 @@ If you have a modern device, latest GPU drivers and you think this shouldn&apos;
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="96"/>
       <source>Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</source>
-      <translation>일부 패턴이 감지되었으나 평균 선명도가 &lt;b&gt;%1 px&lt;/b&gt; 이고, 최대 허용치는 &lt;b&gt;%2 px&lt;/b&gt; 입니다.</translation>
+      <translation>일부 패턴이 감지되었으나 평균 선명도가 &lt;b&gt;%1 px&lt;/b&gt; 이고, 최대 한계는 &lt;b&gt;%2 px&lt;/b&gt; 입니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="97"/>
@@ -608,7 +608,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="454"/>
       <source>Bitrate</source>
-      <translation>비트 전송률</translation>
+      <translation>비트레이트</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="461"/>
@@ -628,7 +628,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="483"/>
       <source>They require a higher bitrate to make output with the same perceptual quality, or they make output with a lower perceptual quality at the same bitrate.</source>
-      <translation>시각적으로 동일한 품질을 얻으려면 더 높은 비트 전송률이 필요합니다. 비트 전송률이 동일하면 출력 화질이 열화됩니다.</translation>
+      <translation>동일한 화질을 체감하려면 더 높은 비트레이트가 필요합니다. 비트레이트가 동일하면 체감 화질이 열화됩니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="484"/>
@@ -678,17 +678,17 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="655"/>
       <source>Save output size and bitrate in settings and use it for all files.</source>
-      <translation>출력 해상도와 비트 전송률을 설정에 저장하고 모든 파일에 적용합니다.</translation>
+      <translation>설정에 출력 해상도와 비트레이트를 저장하고, 모든 파일에 대해 적용합니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="666"/>
       <source>Preserve export path</source>
-      <translation>내보내기 위치 유지</translation>
+      <translation>내보내기 경로 유지</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="668"/>
       <source>Save output path in settings and use it for all files.</source>
-      <translation>출력 위치를 설정에 저장하고 모든 파일에 적용합니다.</translation>
+      <translation>설정에 출력 경로를 저장하고, 모든 파일에 대해 적용합니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="410"/>
@@ -1374,12 +1374,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="9"/>
       <source>Video editor plugins</source>
-      <translation type="unfinished">Video editor plugins</translation>
+      <translation>영상 편집 소프트웨어 플러그인</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="25"/>
       <source>Select %1</source>
-      <translation type="unfinished">Select %1</translation>
+      <translation>%1 선택</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="31"/>
@@ -1388,51 +1388,51 @@ Do you want to submit your profile?</source>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="128"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="136"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>확인</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="31"/>
       <source>You selected the wrong folder.
 Make sure to select %1.</source>
-      <translation type="unfinished">You selected the wrong folder.
-Make sure to select %1.</translation>
+      <translation>잘못된 폴더를 선택했습니다.
+%1 이(가) 선택되었는지 확인하세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="92"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="120"/>
       <source>Update</source>
-      <translation type="unfinished">Update</translation>
+      <translation>업데이트</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="92"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="120"/>
       <source>Install</source>
-      <translation type="unfinished">Install</translation>
+      <translation>설치</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="99"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="136"/>
       <source>At the next prompt, click &lt;b&gt;&quot;Open&quot;&lt;/b&gt; to grant access to the %1 folder in order for Gyroflow to install the plugin.</source>
-      <translation type="unfinished">At the next prompt, click &lt;b&gt;&quot;Open&quot;&lt;/b&gt; to grant access to the %1 folder in order for Gyroflow to install the plugin.</translation>
+      <translation>다음 대화 상자에서, Gyroflow가 플러그인을 설치할 수 있도록 &lt;b&gt;&quot;열기&quot;&lt;/b&gt;를 눌러 %1 폴더에 권한을 주세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="128"/>
       <source>%1 folder doesn&apos;t exist.
 Due to sandbox limitations, you have to create it yourself.
 Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</source>
-      <translation type="unfinished">%1 folder doesn&apos;t exist.
-Due to sandbox limitations, you have to create it yourself.
-Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
+      <translation>폴더 %1이(가) 존재하지 않습니다.
+샌드박스 환경의 한계로 인해 폴더를 직접 생성해야 합니다.
+&lt;b&gt;터미널&lt;/b&gt;을 열고, 다음 명령어를 입력하세요:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="130"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>취소</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="149"/>
       <source>More information</source>
-      <translation type="unfinished">More information</translation>
+      <translation>추가 정보</translation>
     </message>
   </context>
   <context>
@@ -1459,7 +1459,7 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
       <location filename="../../src/ui/components/OutputPathField.qml" line="112"/>
       <location filename="../../src/ui/components/OutputPathField.qml" line="122"/>
       <source>Select file destination</source>
-      <translation>파일을 저장할 위치 선택</translation>
+      <translation>파일을 저장할 경로 선택</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="113"/>
@@ -1590,17 +1590,17 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="441"/>
       <source>No zooming</source>
-      <translation>확대 없음</translation>
+      <translation>줌 없음</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="441"/>
       <source>Dynamic zooming</source>
-      <translation>동적 확대</translation>
+      <translation>동적 줌</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="441"/>
       <source>Static zoom</source>
-      <translation>확대 값 고정</translation>
+      <translation>줌 값 고정</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Synchronization.qml" line="372"/>
@@ -1658,27 +1658,27 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Frame readout direction: %1</source>
-      <translation type="unfinished">Frame readout direction: %1</translation>
+      <translation>프레임 리드아웃 방향: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Top to bottom</source>
-      <translation type="unfinished">Top to bottom</translation>
+      <translation>위에서 아래</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Bottom to top</source>
-      <translation type="unfinished">Bottom to top</translation>
+      <translation>아래에서 위</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Left to right</source>
-      <translation type="unfinished">Left to right</translation>
+      <translation>왼쪽에서 오른쪽</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Right to left</source>
-      <translation type="unfinished">Right to left</translation>
+      <translation>오른쪽에서 왼쪽</translation>
     </message>
   </context>
   <context>
@@ -1800,12 +1800,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="393"/>
       <source>Move up</source>
-      <translation type="unfinished">Move up</translation>
+      <translation>위로 이동</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="398"/>
       <source>Move down</source>
-      <translation type="unfinished">Move down</translation>
+      <translation>아래로 이동</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="403"/>
@@ -2105,7 +2105,7 @@ Click Ok and select the destination folder.</source>
       <location filename="../../src/ui/SettingsSelector.qml" line="119"/>
       <location filename="../../src/ui/SettingsSelector.qml" line="135"/>
       <source>Zooming</source>
-      <translation>확대</translation>
+      <translation>줌</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="120"/>
@@ -2135,7 +2135,7 @@ Click Ok and select the destination folder.</source>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="125"/>
       <source>Output path</source>
-      <translation>출력 위치</translation>
+      <translation>출력 경로</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="126"/>
@@ -2190,12 +2190,12 @@ Click Ok and select the destination folder.</source>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="220"/>
       <source>Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the directory with lens profiles.</source>
-      <translation type="unfinished">Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the directory with lens profiles.</translation>
+      <translation>힌트: 렌즈 프로필이 있는 디렉터리에 프리셋 파일('.gyroflow' 파일)을 저장하면, 렌즈 프로필 검색 상자에 프리셋이 표시됩니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="221"/>
       <source>You can also save your preset as `default.gyroflow` in the directory with lens profiles and it will be always applied to every loaded video file (also in plugins).</source>
-      <translation type="unfinished">You can also save your preset as `default.gyroflow` in the directory with lens profiles and it will be always applied to every loaded video file (also in plugins).</translation>
+      <translation>프리셋을 `default.gyroflow` 로 지정하여 렌즈 프로필이 있는 디렉터리에 저장하면, 불러오는 영상 파일(및 플러그인)마다 항상 적용됩니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="235"/>
@@ -2379,7 +2379,7 @@ Click Ok and select the destination folder.</source>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="636"/>
       <source>Link with zooming limit</source>
-      <translation type="unfinished">Link with zooming limit</translation>
+      <translation>줌 한계에 맞춤</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="709"/>
@@ -2467,19 +2467,19 @@ Click Ok and select the destination folder.</source>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="456"/>
       <source>Zoom limit</source>
-      <translation>확대 한계</translation>
+      <translation>줌 한계</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="459"/>
       <source>Zoom limit is calculated approximately.
 If you need more accuracy, increase the number of iterations in &quot;Advanced&quot; below.</source>
-      <translation>확대 한계는 대략적으로 계산됩니다.
+      <translation>줌 한계는 대략적으로 계산됩니다.
 더 높은 정확도를 얻으려면, 하단에 있는 &quot;고급&quot;의 반복 횟수를 증가시킵니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="475"/>
       <source>Zooming speed</source>
-      <translation>확대 속도</translation>
+      <translation>줌 속도</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="484"/>
@@ -2494,17 +2494,17 @@ If you need more accuracy, increase the number of iterations in &quot;Advanced&q
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="643"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
-      <translation>확대 속도를 키프레이밍할 때, 엔벨로프 팔로워 방식 사용을 권장합니다. 가우시안 필터는 검은 경계가 보일 수 있습니다.</translation>
+      <translation>줌 속도를 키프레이밍할 때, 엔벨로프 팔로워 방식 사용을 권장합니다. 가우시안 필터는 검은 경계가 보일 수 있습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="648"/>
       <source>Zooming method</source>
-      <translation>확대 방식</translation>
+      <translation>줌 방식</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="668"/>
       <source>Zooming center offset</source>
-      <translation>확대 중심 오프셋</translation>
+      <translation>줌 중심 오프셋</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="673"/>
@@ -2521,7 +2521,7 @@ If you need more accuracy, increase the number of iterations in &quot;Advanced&q
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="753"/>
       <source>Zoom limit iterations</source>
-      <translation>확대 한계 반복 횟수</translation>
+      <translation>줌 한계 반복 횟수</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="754"/>
@@ -2556,7 +2556,7 @@ If you need more accuracy, increase the number of iterations in &quot;Advanced&q
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="623"/>
       <source>Link with zooming speed</source>
-      <translation>확대 속도에 맞춤</translation>
+      <translation>줌 속도에 맞춤</translation>
     </message>
   </context>
   <context>
@@ -2887,7 +2887,7 @@ Make sure you have proper rolling shutter value set before syncing.</source>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="33"/>
       <source>Frame rate</source>
-      <translation>프레임률</translation>
+      <translation>프레임 레이트</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="34"/>
@@ -3046,7 +3046,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="259"/>
       <source>Zooming</source>
-      <translation>확대</translation>
+      <translation>줌</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="306"/>
@@ -3100,52 +3100,52 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="427"/>
       <source>Zooming speed</source>
-      <translation>확대 속도</translation>
+      <translation>줌 속도</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="428"/>
       <source>Zooming center offset X</source>
-      <translation>확대 중심 X축 오프셋</translation>
+      <translation>줌 중심 X축 오프셋</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="429"/>
       <source>Zooming center offset Y</source>
-      <translation>확대 중심 Y축 오프셋</translation>
+      <translation>줌 중심 Y축 오프셋</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="430"/>
       <source>Zoom limit</source>
-      <translation type="unfinished">Zoom limit</translation>
+      <translation>줌 한계</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="431"/>
       <source>Additional 3D yaw</source>
-      <translation type="unfinished">Additional 3D yaw</translation>
+      <translation>추가적인 3D 요 축 회전</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="432"/>
       <source>Additional 3D pitch</source>
-      <translation type="unfinished">Additional 3D pitch</translation>
+      <translation>추가적인 3D 피치 축 회전</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="433"/>
       <source>Additional 3D roll</source>
-      <translation type="unfinished">Additional 3D roll</translation>
+      <translation>추가적인 3D 롤 축 회전</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="434"/>
       <source>Additional 3D translation X</source>
-      <translation type="unfinished">Additional 3D translation X</translation>
+      <translation>추가적인 3D X축 평행 이동</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="435"/>
       <source>Additional 3D translation Y</source>
-      <translation type="unfinished">Additional 3D translation Y</translation>
+      <translation>추가적인 3D Y축 평행 이동</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="436"/>
       <source>Additional 3D translation Z</source>
-      <translation type="unfinished">Additional 3D translation Z</translation>
+      <translation>추가적인 3D Z축 평행 이동</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="437"/>
@@ -3175,7 +3175,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="442"/>
       <source>Light refraction coefficient</source>
-      <translation type="unfinished">Light refraction coefficient</translation>
+      <translation>빛 굴절 계수</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="443"/>
@@ -3195,7 +3195,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="449"/>
       <source>Video speed</source>
-      <translation type="unfinished">Video speed</translation>
+      <translation>영상 속도</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="674"/>
@@ -3255,7 +3255,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="1027"/>
       <source>%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom</source>
-      <translation>%1로 수평 확대, %2로 수직 확대, %3로 타임라인 이동, 더블 클릭하여 확대 재설정</translation>
+      <translation>%1로 수평 줌, %2로 수직 줌, %3로 타임라인 이동, 더블 클릭하여 줌 재설정</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="271"/>
@@ -3351,7 +3351,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/components/TimelineSyncPoint.qml" line="96"/>
       <source>Zoom in and loop</source>
-      <translation>확대 및 루프</translation>
+      <translation>줌 및 루프</translation>
     </message>
   </context>
   <context>
@@ -3407,7 +3407,7 @@ Are you sure you want to continue?</source>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="653"/>
       <source>Zoom: %1</source>
-      <translation>확대: %1</translation>
+      <translation>줌: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="724"/>
@@ -3557,14 +3557,14 @@ Gyroflow가 C:Program Files에 있다면, Gyroflow를 관리자 권한으로 실
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="492"/>
       <source>Please enter the output path:</source>
-      <translation>출력 위치 입력:</translation>
+      <translation>출력 경로 입력:</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="238"/>
       <source>This video cannot be stabilized, because this lens doesn&apos;t support OSS metadata.
 Disable lens stabilization (Optical SteadyShot) in order to use Gyroflow.</source>
-      <translation type="unfinished">This video cannot be stabilized, because this lens doesn&apos;t support OSS metadata.
-Disable lens stabilization (Optical SteadyShot) in order to use Gyroflow.</translation>
+      <translation>영상을 안정화할 수 없습니다. 렌즈가 OSS 메타데이터를 지원하지 않습니다.
+Gyroflow를 사용하려면 렌즈 안정화(광학 SteadyShot)를 비활성화하세요.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="366"/>
