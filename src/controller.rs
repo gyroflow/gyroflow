@@ -820,6 +820,7 @@ impl Controller {
                     if let Some(cam_id) = camera_id.as_ref() {
                         additional_obj.insert("camera_identifier".to_owned(), serde_json::to_value(cam_id).unwrap());
                     }
+                    drop(camera_id);
 
                     if md_data.is_object() {
                         gyroflow_core::util::merge_json(&mut additional_data, &md_data);

@@ -103,7 +103,7 @@ MenuItem {
             if (!additional_data.contains_quats) {
                 integrator.currentIndex = 1; // Default to VQF
                 // Default to Complementary if video is shorter than 10s
-                if (window.videoArea.timeline.durationMs < 10000) {
+                if (controller.get_scaled_duration_ms() < 10000) {
                     integrator.currentIndex = 0;
                 }
             }
