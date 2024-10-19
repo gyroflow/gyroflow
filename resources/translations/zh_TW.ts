@@ -1659,27 +1659,27 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</source>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Frame readout direction: %1</source>
-      <translation type="unfinished">Frame readout direction: %1</translation>
+      <translation>幀讀出方向： %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Top to bottom</source>
-      <translation type="unfinished">Top to bottom</translation>
+      <translation>從上到下</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Bottom to top</source>
-      <translation type="unfinished">Bottom to top</translation>
+      <translation>從下到上</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Left to right</source>
-      <translation type="unfinished">Left to right</translation>
+      <translation>從左到右</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Right to left</source>
-      <translation type="unfinished">Right to left</translation>
+      <translation>從右到左</translation>
     </message>
   </context>
   <context>
@@ -2380,7 +2380,7 @@ Click Ok and select the destination folder.</source>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="636"/>
       <source>Link with zooming limit</source>
-      <translation type="unfinished">Link with zooming limit</translation>
+      <translation>連結到縮放限額</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="709"/>
@@ -3564,8 +3564,8 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
       <location filename="../../src/ui/VideoArea.qml" line="238"/>
       <source>This video cannot be stabilized, because this lens doesn&apos;t support OSS metadata.
 Disable lens stabilization (Optical SteadyShot) in order to use Gyroflow.</source>
-      <translation type="unfinished">This video cannot be stabilized, because this lens doesn&apos;t support OSS metadata.
-Disable lens stabilization (Optical SteadyShot) in order to use Gyroflow.</translation>
+      <translation>影片無法增穩，因為此鏡頭不支援OSS元資料。
+若要使用 Gyroflow 請關閉鏡頭增穩 (Optical SteadyShot)。</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="366"/>

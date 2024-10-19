@@ -29,7 +29,7 @@ pub type OpticalFlowPoints = Vec<(f32, f32)>; // timestamp_us, points
 pub type OpticalFlowPair = Option<(OpticalFlowPoints, OpticalFlowPoints)>;
 pub type OpticalFlowPairWithTs = Option<((i64, OpticalFlowPoints), (i64, OpticalFlowPoints))>;
 
-#[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Default, Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
 pub struct SyncParams {
     pub initial_offset: f64,

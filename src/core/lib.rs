@@ -139,6 +139,10 @@ impl StabilizationManager {
             params.duration_ms = duration_ms;
             params.size = video_size;
         }
+        if duration_ms < 10000.0 { // If the video is shorter than 10s, use Complementary
+            let mut gyro_source = self.gyro.write();
+            gyro_source.integration_method = 1; // Complementary
+        }
 
         self.pose_estimator.sync_results.write().clear();
         self.keyframes.write().clear();

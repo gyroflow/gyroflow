@@ -102,6 +102,10 @@ MenuItem {
             }
             if (!additional_data.contains_quats) {
                 integrator.currentIndex = 1; // Default to VQF
+                // Default to Complementary if video is shorter than 10s
+                if (window.videoArea.timeline.durationMs < 10000) {
+                    integrator.currentIndex = 0;
+                }
             }
 
             controller.set_imu_lpf(lpfcb.checked? lpf.value : 0);

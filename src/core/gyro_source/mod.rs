@@ -74,7 +74,7 @@ pub struct GyroSource {
 impl GyroSource {
     pub fn new() -> Self {
         Self {
-            integration_method: 1,
+            integration_method: 2, // VQF
             use_gravity_vectors: false,
             horizon_lock_integration_method: 1, // VQF
             ..Default::default()
