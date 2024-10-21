@@ -114,7 +114,7 @@ public:
         if (!m_matricesSampler->create()) { qDebug2("init") << "failed to create m_matricesSampler"; return false; }
 
         m_meshDataSampler.reset(rhi->newSampler(QRhiSampler::Nearest, QRhiSampler::Nearest, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge));
-        if (!m_meshDataSampler->create()) { qDebug2("init") << "failed to create m_matricesSampler"; return false; }
+        if (!m_meshDataSampler->create()) { qDebug2("init") << "failed to create m_meshDataSampler"; return false; }
 
         m_srb.reset(rhi->newShaderResourceBindings());
         m_srb->setBindings({
