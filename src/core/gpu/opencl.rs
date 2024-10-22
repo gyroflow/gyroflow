@@ -307,6 +307,9 @@ impl OclWrapper {
 
             let kernel = builder.build()?;
 
+            // Clear the drawing buffer
+            buf_drawing.write(&vec![0u8; buf_drawing.len()]).enq()?;
+
             Ok(Self {
                 kernel,
                 queue: ocl_queue,
