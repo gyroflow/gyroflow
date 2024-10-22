@@ -990,7 +990,7 @@ impl Controller {
             vid.onProcessTexture(Box::new(move |frame, timestamp_ms, width, height, backend_id, ptr1, ptr2, ptr3, ptr4, ptr5| -> bool {
                 if width < 4 || height < 4 || backend_id == 0 { return false; }
 
-                if !stab.params.read().stab_enabled { return false; }
+                if !stab.params.read().stab_enabled { return true; }
 
                 let _time = std::time::Instant::now();
 
