@@ -52,6 +52,10 @@ publish version:
     sed -i'' -E "/<key>CFBundleShortVersionString<.key>/ s/<string>[0-9\.a-z-]+<.string>/<string>{{version}}<\/string>/" _deployment/ios/Info.plist
     sed -i'' -E "/<key>CFBundleVersion<.key>/ s/<string>[0-9\.a-z-]+<.string>/<string>{{version}}<\/string>/" _deployment/ios/Info.plist
     sed -i'' -E "0,/Identity Version=\"[0-9\.a-z-]+\"/s//Identity Version=\"{{version}}.0\"/" _deployment/windows/AppxManifest.xml
+    pushd src/core
+        cargo update
+    popd
+    cargo update
     git commit -a -m "Release v{{version}}"
     git tag -a "v{{version}}" -m "Release v{{version}}"
     git push origin
