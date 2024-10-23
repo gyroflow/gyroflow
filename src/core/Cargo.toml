@@ -1,6 +1,6 @@
 [package]
 name = "gyroflow-core"
-version = "1.5.4"
+version = "1.6.0"
 authors = ["Adrian <adrian.eddy@gmail.com>", "Elvin Chen"]
 edition = "2021"
 build = "build.rs"

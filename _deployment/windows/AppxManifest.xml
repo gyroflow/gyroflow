@@ -9,7 +9,7 @@
          xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
          xmlns:desktop2="http://schemas.microsoft.com/appx/manifest/desktop/windows10/2"
          IgnorableNamespaces="uap rescap uap4 uap3 uap10 rescap6 desktop desktop2">
-  <Identity Version="1.5.4.0" Name="29160AdrianRoss.Gyroflow" Publisher="CN=10F1B828-8298-48D5-8164-662492DBDECB" ProcessorArchitecture="x64" />
+  <Identity Version="1.6.0.0" Name="29160AdrianRoss.Gyroflow" Publisher="CN=10F1B828-8298-48D5-8164-662492DBDECB" ProcessorArchitecture="x64" />
   <Properties>
     <DisplayName>Gyroflow</DisplayName>
     <PublisherDisplayName>Adrian Ross</PublisherDisplayName>
