@@ -45,7 +45,7 @@ MenuItem {
         function compare_ver(version: string, existing: string): bool {
             const last_part = existing.split(".").pop();
             const is_app_nightly = +version == version;
-            if (+last_part > 70) {
+            if (+last_part > 100) {
                 // Nightly plugin is installed
                 if (is_app_nightly) {
                     return +last_part >= +version;
@@ -57,7 +57,7 @@ MenuItem {
                 if (is_app_nightly) {
                     return false;
                 } else {
-                    return version == existing;
+                    return version == existing || version + ".0" == existing;
                 }
             }
         }

@@ -142,7 +142,7 @@ pub fn install(typ: &str) -> io::Result<String> {
         "adobe" => {
             if cfg!(target_os = "windows") {
                 if is_nightly() { (format!("{nightly_base}Gyroflow-Adobe-windows.zip"), "C:/Program Files/Adobe/Common/Plug-ins/7.0/MediaCore/") }
-                else            { (format!("{release_base}Gyroflow-Adobe-windows.aex"), "C:/Program Files/Adobe/Common/Plug-ins/7.0/MediaCore/Gyroflow-Adobe-windows.aex") }
+                else            { (format!("{release_base}Gyroflow-Adobe-windows.aex"), "C:/Program Files/Adobe/Common/Plug-ins/7.0/MediaCore/") }
             } else {
                 if is_nightly() { (format!("{nightly_base}Gyroflow-Adobe-macos-zip.zip"), "/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore/") }
                 else            { (format!("{release_base}Gyroflow-Adobe-macos.zip"),     "/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore/") }
@@ -155,10 +155,10 @@ pub fn install(typ: &str) -> io::Result<String> {
         let mut content = Vec::new();
         reader.read_to_end(&mut content)?;
 
+        let tempdir = tempfile::tempdir()?;
         if download_url.ends_with(".zip") {
             let mut archive = zip::ZipArchive::new(Cursor::new(content))?;
             let mut inner = Vec::new();
-            let tempdir = tempfile::tempdir()?;
 
             if archive.name_for_index(0).map(|x| x.ends_with(".zip")).unwrap_or_default() {
                 archive.extract_file_to_memory(0, &mut inner)?;
@@ -169,9 +169,9 @@ pub fn install(typ: &str) -> io::Result<String> {
             }
             copy_files(tempdir.path().to_str().unwrap(), &extract_path, typ)?;
         } else {
-            let tempfile = tempfile::NamedTempFile::new()?;
-            std::fs::write(tempfile.path(), content)?;
-            copy_files(tempfile.path().to_str().unwrap(), &extract_path, typ)?;
+            let tempfile = tempdir.path().join(download_url.split('/').rev().next().unwrap());
+            std::fs::write(tempfile, content)?;
+            copy_files(tempdir.path().to_str().unwrap(), &extract_path, typ)?;
         }
     }
     detect(typ)
