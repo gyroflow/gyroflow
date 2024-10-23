@@ -194,7 +194,7 @@ jobs:
       - run: find . -type f
 
       - if: startsWith(github.ref, 'refs/tags/')
-        run: rm -rf ./Gyroflow-debug-symbols
+        run: rm -rf ./Gyroflow-debug-symbols*
 
       - name: Upload to App Store
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
@@ -216,4 +216,10 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           prerelease: true
-          files: ./**/*
+          files: |
+            ./Gyroflow-windows/Gyroflow-windows64.zip
+            ./Gyroflow-windows-arm/Gyroflow-windows-arm64.zip
+            ./Gyroflow-macos/Gyroflow-mac-universal.dmg
+            ./Gyroflow-linux/Gyroflow-linux64.AppImage
+            ./Gyroflow-linux/Gyroflow-linux64.tar.gz
+            ./Gyroflow-android/Gyroflow.apk
