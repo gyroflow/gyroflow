@@ -47,7 +47,7 @@ enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.4.1"
 lru = "0.12"
-thiserror = "1.0.63"
+thiserror = "1.0.65"
 ciborium = "0.2.2"
 dyn-clone = "1.0.17"
 app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }
@@ -81,7 +81,7 @@ rustfft = "6.2.0"
 exr = "1.72"
 opencv = { version = "0.93.3", features = ["clang-runtime"], optional = true }
 
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "b3f665b", features = ["spirv", "naga-ir"] }
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "fe8a9b2", features = ["spirv", "naga-ir"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 metal = { version = "0.29.0" }
