@@ -86,10 +86,10 @@ impl<'a> BufferDescription<'a> {
             BufferSource::None => { }
             BufferSource::Cpu { .. } => { }
             #[cfg(feature = "use-opencl")]
-            BufferSource::OpenCL { texture, queue } => {
-                if !self.texture_copy {
-                    hasher.write_u64(*texture as u64);
-                }
+            BufferSource::OpenCL { texture: _, queue } => {
+                // if !self.texture_copy {
+                //     hasher.write_u64(*texture as u64);
+                // }
                 hasher.write_u64(*queue as u64);
             }
             BufferSource::OpenGL { texture, context } => {

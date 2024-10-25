@@ -358,8 +358,13 @@ impl OclWrapper {
                 if self.src.len() != buffer.len() { log::error!("Buffer size mismatch input! {} vs {}", self.src.len(), buffer.len());  return Ok(()); }
                 self.src.write(buffer as &[u8]).enq()?;
             },
-            BufferSource::OpenCL { texture, .. } => {
-                unsafe {
+            BufferSource::OpenCL { texture, .. } => unsafe {
+                if buffers.input.texture_copy {
+                    let len = self.src.len();
+
+                    use ocl::core::AsMem;
+                    ocl::ffi::clEnqueueCopyBuffer(self.queue.as_ptr(), texture, self.src.as_mem().as_ptr(), 0, 0, len, 0, std::ptr::null(), std::ptr::null_mut());
+                } else {
                     let siz = std::mem::size_of::<ocl::ffi::cl_mem>() as usize;
                     self.kernel.set_arg_unchecked(0, core::ArgVal::from_raw(siz, &texture as *const _ as *const std::ffi::c_void, true))?;
                 }
