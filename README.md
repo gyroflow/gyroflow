@@ -90,6 +90,7 @@ Gyroflow is an application that can stabilize your video by using motion data fr
 - [x] DJI (Avata, Avata 2, O3 Air Unit, Action 2/4/5, Neo)
 - [x] Blackmagic RAW (*.braw)
 - [x] RED RAW (V-Raptor, KOMODO) (*.r3d)
+- [x] Freefly (Ember)
 - [x] Betaflight blackbox (*.bfl, *.bbl, *.csv)
 - [x] ArduPilot logs (*.bin, *.log)
 - [x] Gyroflow [.gcsv log](https://docs.gyroflow.xyz/app/technical-details/gcsv-format)
