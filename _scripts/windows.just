@@ -328,8 +328,6 @@ bundle:
     cp -Recurse -Force $TargetDir\* bundle\
     cp -Recurse -Force Assets bundle\Assets
     cp -Force AppxManifest.xml bundle\
-    Remove-Item -Path "bundle\vcruntime14*.dll" -ErrorAction SilentlyContinue
-    Remove-Item -Path "bundle\msvcp14*.dll"     -ErrorAction SilentlyContinue
 
     # Apps are not allowed to have a Version with a revision number other than zero specified in the app manifest.
     if ("$Env:GITHUB_RUN_NUMBER") {
