@@ -36,7 +36,7 @@ By participating, you are expected to uphold this code.
 
 Before you ask a question, it is best to search for existing [Issues](https://github.com/gyroflow/gyroflow/issues) that might help you. In case you have found a suitable issue and still need clarification, you can write your question in this issue. It is also advisable to search the internet for answers first.
 
-The best place to ask questions is the [Discord server](https://discord.com/invite/BBJ2UVAr2D).
+The best place to ask questions is the [Discord server](https://discord.gg/YaUtNpWTUh).
 
 If you don't want to use Discord, you can also use the issue tracker, however Discord is encouraged.
 
