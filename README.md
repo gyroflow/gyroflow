@@ -15,7 +15,7 @@
     <a href="https://gyroflow.xyz">Homepage</a> •
     <a href="https://github.com/gyroflow/gyroflow/releases">Download</a> •
     <a href="https://docs.gyroflow.xyz">Documentation</a> •
-    <a href="https://discord.gg/WfxZZXjpke">Discord</a> •
+    <a href="https://discord.gg/YaUtNpWTUh">Discord</a> •
     <a href="https://github.com/gyroflow/gyroflow/issues">Report bug</a> •
     <a href="https://github.com/gyroflow/gyroflow/issues">Request feature</a>
   </p>
@@ -148,7 +148,7 @@ Latest development version is always available here: https://gyroflow.xyz/devbui
 - iOS 14+
 
 ## Help and support
-For general support and discussion, you can find the developers and other users on the [Gyroflow Discord server](https://discord.gg/BBJ2UVAr2D).
+For general support and discussion, you can find the developers and other users on the [Gyroflow Discord server](https://discord.gg/YaUtNpWTUh).
 
 For companies or people wishing to get in touch with the team privately for collaborative purposes: devteam@gyroflow.xyz.
 
