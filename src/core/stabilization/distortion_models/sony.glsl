@@ -145,18 +145,6 @@ vec2 interpolate_mesh(int width, int height, vec2 pos) {
 }
 
 vec2 process_coord(vec2 uv, float idx) {
-    if (get_param(idx, 9) != 0.0 || get_param(idx, 10) != 0.0 || get_param(idx, 11) != 0.0 || get_param(idx, 12) != 0.0 || get_param(idx, 13) != 0.0) {
-        float ang_rad = get_param(idx, 11);
-        float cos_a = cos(-ang_rad);
-        float sin_a = sin(-ang_rad);
-        uv -= params.c;
-        uv = vec2(
-            cos_a * uv.x - sin_a * uv.y - get_param(idx, 9)  + get_param(idx, 12),
-            sin_a * uv.x + cos_a * uv.y - get_param(idx, 10) + get_param(idx, 13)
-        );
-        uv += params.c;
-    }
-
     if (get_mesh_data(0) > 10.0) {
         vec2 mesh_size = vec2(get_mesh_data(3), get_mesh_data(4));
         vec2 origin    = vec2(get_mesh_data(5), get_mesh_data(6));

@@ -14,7 +14,7 @@ opencv = ["gyroflow-core/use-opencv"]
 gyroflow-core = { path = "src/core/", features = ["use-opencv", "use-opencl"] }
 system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", rev = "48ac516" }
 breakpad-sys = "0.2.0"
-trash = "5.1"
+trash = "5.2"
 # For nle_plugins
 zip = { version = "2.2", default-features = false, features = ["deflate-flate2"] }
 zip-extensions = { version = "0.8", default-features = false, features = ["deflate-flate2"] }
@@ -38,7 +38,7 @@ itertools = "0.13.0"
 regex = "1.10.6"
 rayon = "1.10"
 
-pollster = "0.3.0"
+pollster = "0.4.0"
 futures-intrusive = "0.5.0"
 flate2 = "1.0.34"
 walkdir = "2.5.0"
