@@ -73,7 +73,11 @@ fn query_file_version_from_plist(path: &str) -> Option<String> {
     let file = std::fs::read_to_string(path).ok()?;
     let re = regex::Regex::new(r#"<key>CFBundleShortVersionString</key>\s*<string>([^<]+)</string>"#).unwrap();
     let cap = re.captures(&file)?;
-    Some(cap.get(1)?.as_str().to_owned())
+    let mut v = cap.get(1)?.as_str();
+    if v.split('.').count() == 4 && v.ends_with(".0") {
+        v = v.strip_suffix(".0").unwrap();
+    }
+    Some(v.to_owned())
 }
 
 fn copy_files(tempdir: &str, extract_path: &str, typ: &str) -> io::Result<()> {
