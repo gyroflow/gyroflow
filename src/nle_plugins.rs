@@ -60,7 +60,11 @@ fn query_file_version(path: &str) -> Option<String> {
             }
         }
 
-        file_version_item(pblock, lang_id, "ProductVersion")
+        let v = file_version_item(pblock, lang_id, "ProductVersion")?;
+        if v.split('.').count() == 4 && v.ends_with(".0") {
+            return Some(v.strip_suffix(".0").unwrap().to_owned());
+        }
+        Some(v)
     }
 }
 
@@ -199,7 +203,7 @@ pub fn is_nle_installed(typ: &str) -> bool {
             if cfg!(target_os = "windows") {
                 Path::new("C:/Program Files/Adobe/Common/Plug-ins/7.0/MediaCore/").exists()
             } else {
-                (2022..(Utc::now().year()+1)).any(|y| {
+                (2019..(Utc::now().year()+1)).any(|y| {
                     Path::new(&format!("/Applications/Adobe Premiere Pro {y}/")).exists() ||
                     Path::new(&format!("/Applications/Adobe After Effects {y}/")).exists()
                 })
