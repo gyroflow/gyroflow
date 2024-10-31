@@ -102,6 +102,10 @@ struct Opts {
     /// rendering device, specify the GPU type. Eg. "nvidia", "intel", "amd", "apple m"
     #[argh(option, short = 'r')]
     rendering_device: Option<String>,
+
+    /// print app version
+    #[argh(switch)]
+    version: bool,
 }
 
 pub fn will_run_in_console() -> bool {
@@ -120,6 +124,11 @@ pub fn will_run_in_console() -> bool {
 pub fn run(open_file: &mut String) -> bool {
     if std::env::args().len() > 1 {
         let opts: Opts = argh::from_env();
+
+        if opts.version {
+            println!("Gyroflow v{}", crate::util::get_version());
+            return true;
+        }
 
         let (videos, mut lens_profiles, mut presets) = detect_types(&opts.input);
         if let Some(mut preset) = opts.preset {
