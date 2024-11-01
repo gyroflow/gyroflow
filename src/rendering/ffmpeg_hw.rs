@@ -340,10 +340,10 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
     Ok(())
 }
 
-pub fn find_best_matching_codec(codec: format::Pixel, supported: &[format::Pixel]) -> format::Pixel {
-    if supported.is_empty() { return format::Pixel::None; }
+pub fn find_best_matching_codec(codec: format::Pixel, supported: &[format::Pixel]) -> Option<format::Pixel> {
+    if supported.is_empty() { return None; }
 
-    if supported.contains(&codec) { return codec; }
+    if supported.contains(&codec) { return Some(codec); }
 
     let pairs = vec![
         (format::Pixel::P210LE, format::Pixel::YUV422P10LE),
@@ -352,13 +352,13 @@ pub fn find_best_matching_codec(codec: format::Pixel, supported: &[format::Pixel
         (format::Pixel::NV21,   format::Pixel::YUV420P),
     ];
     for (a, b) in pairs {
-        if codec == a && supported.contains(&b) { return b; }
-        if codec == b && supported.contains(&a) { return a; }
+        if codec == a && supported.contains(&b) { return Some(b); }
+        if codec == b && supported.contains(&a) { return Some(a); }
     }
 
     super::append_log(&format!("No matching codec, we need {:?} and supported are: {:?}\n", codec, supported));
 
-    *supported.first().unwrap()
+    None
 }
 
 // pub fn get_supported_pixel_formats(name: &str) -> Vec<ffi::AVPixelFormat> {

@@ -351,7 +351,7 @@ impl Controller {
         };
 
         if filename.to_ascii_lowercase().ends_with("braw") {
-            let gpu = if *rendering::GPU_DECODING.read() { "auto" } else { "no" }; // Disable GPU decoding for BRAW
+            let gpu = if self.stabilizer.gpu_decoding.load(SeqCst) { "auto" } else { "no" }; // Disable GPU decoding for BRAW
             custom_decoder = format!("BRAW:gpu={}{}", gpu, options);
         }
         if filename.to_ascii_lowercase().ends_with("r3d") {
@@ -466,9 +466,8 @@ impl Controller {
 
             let input_file = self.stabilizer.input_file.read().clone();
             let proc_height = self.processing_resolution;
+            let gpu_decoding = self.stabilizer.gpu_decoding.load(SeqCst);
             core::run_threaded(move || {
-                let gpu_decoding = *rendering::GPU_DECODING.read();
-
                 let mut frame_no = 0;
                 let mut abs_frame_no = 0;
 
@@ -926,7 +925,7 @@ impl Controller {
     }
 
     fn set_gpu_decoding(&self, enabled: bool) {
-        *rendering::GPU_DECODING.write() = enabled;
+        self.stabilizer.set_gpu_decoding(enabled);
     }
 
     fn reset_player(&self, player: QJSValue) {
@@ -1602,7 +1601,7 @@ impl Controller {
                 }
 
                 ::log::debug!("Decoder options: {:?}", decoder_options);
-                let gpu_decoding = *rendering::GPU_DECODING.read();
+                let gpu_decoding = stab.gpu_decoding.load(SeqCst);
                 let fs_base = gyroflow_core::filesystem::get_engine_base();
                 match VideoProcessor::from_file(&fs_base, &input_file.url, gpu_decoding, 0, Some(decoder_options)) {
                     Ok(mut proc) => {

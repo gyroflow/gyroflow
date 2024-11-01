@@ -76,7 +76,7 @@ pub enum FFmpegError {
     NoFramesContext,
     GPUDecodingFailed,
     ToHWBufferError(i32),
-    PixelFormatNotSupported((format::Pixel, Vec<format::Pixel>)),
+    PixelFormatNotSupported((format::Pixel, Vec<format::Pixel>, Option<format::Pixel>)),
     UnknownPixelFormat(format::Pixel),
     InternalError(ffmpeg_next::Error),
     CannotOpenInputFile((String, FilesystemError)),
@@ -102,7 +102,7 @@ impl std::fmt::Display for FFmpegError {
             FFmpegError::CannotCreateGPUDecoding     => write!(f, "Unable to create HW devices context"),
             FFmpegError::NoGPUDecodingDevice         => write!(f, "Unable to create any HW decoding context"),
             FFmpegError::UnknownPixelFormat(v) => write!(f, "Unknown pixel format: {:?}", v),
-            FFmpegError::PixelFormatNotSupported(v) => write!(f, "Pixel format {:?} is not supported. Supported ones: {:?}", v.0, v.1),
+            FFmpegError::PixelFormatNotSupported(v) => write!(f, "Pixel format {:?} is not supported. Supported ones: {:?}. Optimal choice: {:?}", v.0, v.1, v.2),
             FFmpegError::InternalError(e)     => write!(f, "ffmpeg error: {:?}", e),
             FFmpegError::CannotOpenInputFile((url, e))   => write!(f, "Cannot open input file {url}: {e:?}"),
             FFmpegError::CannotOpenOutputFile((url, e))   => write!(f, "Cannot open output file {url}: {e:?}"),
@@ -425,7 +425,7 @@ impl<'a> FfmpegProcessor<'a> {
                             let decoder = self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?;
                             packet.rescale_ts(stream.time_base(), (1, 1000000)); // rescale to microseconds
                             if let Err(err) = decoder.send_packet(&packet) {
-                                if self.gpu_decoding && !*GPU_DECODING.read() {
+                                if self.gpu_decoding && FFMPEG_LOG.read().contains("failed to decode picture") {
                                     return Err(FFmpegError::GPUDecodingFailed);
                                 }
                                 if !any_encoded {
@@ -556,7 +556,7 @@ impl<'a> FfmpegProcessor<'a> {
 
                     if let Err(err) = decoder.send_packet(&packet) {
                         ::log::error!("Decoder error {:?}", err);
-                        if self.gpu_decoding && !*GPU_DECODING.read() {
+                        if self.gpu_decoding && FFMPEG_LOG.read().contains("failed to decode picture") {
                             return Err(FFmpegError::GPUDecodingFailed);
                         }
                         if !any_encoded {

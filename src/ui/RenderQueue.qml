@@ -170,10 +170,11 @@ Item {
                     }
                 }
             }
-            function onConvert_format(job_id: real, format: string, supported: string): void {
+            function onConvert_format(job_id: real, format: string, supported: string, candidate: string): void {
                 if (job_id == render_queue.main_job_id) {
                     let buttons = supported.split(",").map(f => ({
                         text: f,
+                        accent: f.toLowerCase() == candidate,
                         clicked: () => {
                             render_queue.set_pixel_format(job_id, f);
                             render_queue.render_job(job_id);
@@ -181,7 +182,7 @@ Item {
                     }));
                     buttons.push({
                         text: qsTr("Render using CPU"),
-                        accent: true,
+                        accent: candidate == 'none',
                         clicked: () => {
                             render_queue.set_pixel_format(job_id, "cpu");
                             render_queue.render_job(job_id);
@@ -472,14 +473,16 @@ Item {
 
                                 if (errorString.startsWith("convert_format:")) {
                                     const params = errorString.split(":")[1].split(";");
+                                    const candidate = params[2];
                                     const supported = params[1].split(",");
                                     let buttons = supported.map(f => ({
                                         text: f,
+                                        accent: f.toLowerCase() == candidate,
                                         clicked: () => { render_queue.set_pixel_format(job_id, f); }
                                     }));
                                     buttons.push({
                                         text: qsTr("Render using CPU"),
-                                        accent: true,
+                                        accent: candidate == 'none',
                                         clicked: () => { render_queue.set_pixel_format(job_id, "cpu"); }
                                     });
                                     btns.model = buttons;

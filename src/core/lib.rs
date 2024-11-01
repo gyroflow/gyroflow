@@ -83,6 +83,7 @@ pub struct StabilizationManager {
     pub smoothing_invalidated: Arc<AtomicBool>,
     pub zooming_invalidated: Arc<AtomicBool>,
     pub undistortion_invalidated: Arc<AtomicBool>,
+    pub gpu_decoding: Arc<AtomicBool>,
 
     pub camera_id: Arc<RwLock<Option<CameraIdentifier>>>,
     pub lens_profile_db: Arc<RwLock<LensProfileDatabase>>,
@@ -113,6 +114,8 @@ impl Default for StabilizationManager {
             smoothing_invalidated: Arc::new(AtomicBool::new(false)),
             zooming_invalidated: Arc::new(AtomicBool::new(false)),
             undistortion_invalidated: Arc::new(AtomicBool::new(false)),
+
+            gpu_decoding: Arc::new(AtomicBool::new(settings::get_bool("gpudecode", true))),
 
             pose_estimator: Arc::new(synchronization::PoseEstimator::default()),
 
@@ -978,6 +981,9 @@ impl StabilizationManager {
         }
     }
 
+    pub fn set_gpu_decoding(&self, v: bool) {
+        self.gpu_decoding.store(v, SeqCst);
+    }
     pub fn set_smoothing_method(&self, index: usize) -> serde_json::Value {
         let mut smooth = self.smoothing.write();
         smooth.set_current(index);

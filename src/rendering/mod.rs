@@ -35,7 +35,6 @@ enum GpuType {
 }
 lazy_static::lazy_static! {
     static ref GPU_TYPE: RwLock<GpuType> = RwLock::new(GpuType::Unknown);
-    pub static ref GPU_DECODING: RwLock<bool> = RwLock::new(true);
 }
 pub fn set_gpu_type_from_name(name: &str) {
     let name = name.to_ascii_lowercase();
@@ -65,7 +64,7 @@ pub fn set_gpu_type_from_name(name: &str) {
         #[cfg(target_os = "macos")]
         if !name.contains("apple m") {
             // Disable GPU decoding on Intel macOS by default
-            *GPU_DECODING.write() = false;
+            gyroflow_core::settings::set("gpudecode", false.into());
         }
         ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VIDEOTOOLBOX);
     }
@@ -224,7 +223,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     if cfg!(target_os = "android") {
         decoder_options.set("ndk_codec", "1");
     }
-    let gpu_decoding = *GPU_DECODING.read();
+    let gpu_decoding = stab.gpu_decoding.load(std::sync::atomic::Ordering::SeqCst);
     let fs_base = gyroflow_core::filesystem::get_engine_base();
     let mut proc = FfmpegProcessor::from_file(&fs_base, &input_file.url, gpu_decoding && gpu_decoder_index >= 0, gpu_decoder_index as usize, Some(decoder_options))?;
 

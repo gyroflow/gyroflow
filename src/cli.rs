@@ -364,7 +364,7 @@ pub fn run(open_file: &mut String) -> bool {
                     pb.set_position((*progress * 100.0).round() as u64);
                 }
             });
-            connect!(queue_ptr, q, convert_format, |job_id: &u32, format: &QString, supported: &QString| {
+            connect!(queue_ptr, q, convert_format, |job_id: &u32, format: &QString, supported: &QString, _candidate: &QString| {
                 log::error!("[{:08x}] Pixel format {} is not supported. Supported are: {}", job_id, format.to_string(), supported.to_string());
             });
             connect!(queue_ptr, q, error, |job_id: &u32, text: &QString, arg: &QString, _callback: &QString| {
@@ -528,7 +528,7 @@ fn setup_defaults(stab: Arc<StabilizationManager>, queue: &mut RenderQueue) -> s
 
     // TODO: set more params from `settings`
 
-    *rendering::GPU_DECODING.write() = settings::get_bool("gpudecode", true);
+    stab.set_gpu_decoding(settings::get_bool("gpudecode", true));
 
     queue.default_suffix = QString::from(settings::get_str("defaultSuffix", "_stabilized"));
 

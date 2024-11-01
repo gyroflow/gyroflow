@@ -218,7 +218,7 @@ pub struct RenderQueue {
     pub render_progress: qt_signal!(job_id: u32, progress: f64, current_frame: usize, total_frames: usize, finished: bool, start_time: f64, is_conversion: bool),
     pub encoder_initialized: qt_signal!(job_id: u32, encoder_name: String),
 
-    pub convert_format: qt_signal!(job_id: u32, format: QString, supported: QString),
+    pub convert_format: qt_signal!(job_id: u32, format: QString, supported: QString, candidate: QString),
     pub error: qt_signal!(job_id: u32, text: QString, arg: QString, callback: QString),
     pub added: qt_signal!(job_id: u32),
     pub processing_done: qt_signal!(job_id: u32, by_preset: bool),
@@ -863,7 +863,7 @@ impl RenderQueue {
                 this.update_status();
             });
 
-            let convert_format = util::qt_queued_callback_mut(self, move |this, (format, mut supported): (String, String)| {
+            let convert_format = util::qt_queued_callback_mut(self, move |this, (format, mut supported, candidate): (String, String, String)| {
                 use itertools::Itertools;
                 supported = supported
                     .split(',')
@@ -871,11 +871,11 @@ impl RenderQueue {
                     .join(",");
 
                 update_model!(this, job_id, itm {
-                    itm.error_string = QString::from(format!("convert_format:{};{}", format, supported));
+                    itm.error_string = QString::from(format!("convert_format:{format};{supported};{candidate}"));
                     itm.status = JobStatus::Error;
                 });
 
-                this.convert_format(job_id, QString::from(format), QString::from(supported));
+                this.convert_format(job_id, QString::from(format), QString::from(supported), QString::from(candidate));
                 this.render_progress(job_id, 1.0, 0, 0, true, 0.0, false);
 
                 if this.get_pending_count() > 0 {
@@ -1037,15 +1037,20 @@ impl RenderQueue {
                 } else {
                     vec![None]
                 };
+                let original_gpu_decode = stab.gpu_decoding.load(SeqCst);
                 'ranges: for range in ranges_to_render {
                     if cancel_flag.load(SeqCst) { break; }
                     let mut i = 0;
                     loop {
                         let result = rendering::render(stab.clone(), progress.clone(), &input_file, &render_options, i, range, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone());
                         if let Err(e) = result {
-                            if let rendering::FFmpegError::PixelFormatNotSupported((fmt, supported)) = e {
-                                convert_format((format!("{:?}", fmt), supported.into_iter().map(|v| format!("{:?}", v)).collect::<Vec<String>>().join(",")));
+                            if let rendering::FFmpegError::PixelFormatNotSupported((fmt, supported, candidate)) = e {
+                                convert_format((format!("{fmt:?}"), supported.into_iter().map(|v| format!("{:?}", v)).collect::<Vec<String>>().join(","), format!("{candidate:?}").to_ascii_lowercase().to_string()));
                                 break 'ranges;
+                            }
+                            if original_gpu_decode && stab.gpu_decoding.load(SeqCst) && matches!(e, rendering::FFmpegError::GPUDecodingFailed) {
+                                stab.gpu_decoding.store(false, SeqCst);
+                                continue;
                             }
                             if rendered_frames.load(SeqCst) == 0 {
                                 if (0..4).contains(&i) {
@@ -1067,6 +1072,7 @@ impl RenderQueue {
                         }
                     }
                 }
+                stab.gpu_decoding.store(original_gpu_decode, SeqCst);
             });
         }
     }
@@ -1465,7 +1471,7 @@ impl RenderQueue {
 
                         let (sw, sh) = ((proc_height as f64 * (size.0 as f64 / size.1 as f64)).round() as u32, proc_height as u32);
 
-                        let gpu_decoding = *rendering::GPU_DECODING.read();
+                        let gpu_decoding = stab.gpu_decoding.load(SeqCst);
 
                         let mut frame_no = 0;
                         let mut abs_frame_no = 0;

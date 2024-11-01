@@ -28,7 +28,7 @@ impl Drop for MDKProcessor {
 }
 
 impl MDKProcessor {
-    pub fn from_file(url: &str, decoder_options: Option<Dictionary>) -> Self {
+    pub fn from_file(url: &str, decoder_options: Option<Dictionary>, gpu_edcoding: bool) -> Self {
         gyroflow_core::filesystem::start_accessing_url(url, false);
 
         let mut mdk = qml_video_rs::video_item::MDKVideoItem::default();
@@ -40,7 +40,7 @@ impl MDKProcessor {
         if !options.is_empty() { options.insert(0, ':'); }
 
         if filename.to_ascii_lowercase().ends_with("braw") {
-            let gpu = if *super::GPU_DECODING.read() { "auto" } else { "no" }; // Disable GPU decoding for BRAW
+            let gpu = if gpu_edcoding { "auto" } else { "no" }; // Disable GPU decoding for BRAW
             custom_decoder = format!("BRAW:gpu={}{}", gpu, options);
         }
         if filename.to_ascii_lowercase().ends_with("r3d") {

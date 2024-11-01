@@ -277,7 +277,8 @@ impl<'a> VideoTranscoder<'a> {
                             if let Some(hw_formats) = &hw_formats {
                                 if !hw_formats.is_empty() {
                                     let dl_format = *hw_formats.first().ok_or(FFmpegError::NoHWTransferFormats)?;
-                                    let picked = super::ffmpeg_hw::find_best_matching_codec(dl_format, &self.codec_supported_formats);
+                                    let picked = super::ffmpeg_hw::find_best_matching_codec(dl_format, &self.codec_supported_formats)
+                                        .unwrap_or_else(|| *self.codec_supported_formats.first().unwrap_or(&format::Pixel::None));
                                     if super::ffmpeg_hw::is_hardware_format(picked.into()) {
                                         hw_upload_format = Some(picked);
                                         self.encoder_params.pixel_format = Some(dl_format);
@@ -374,7 +375,7 @@ impl<'a> VideoTranscoder<'a> {
                             log::debug!("hw_device_type: {:?}, encoder_pixel_format: {:?}", self.encoder_params.hw_device_type, self.encoder_params.pixel_format);
                             let pixel_format = self.encoder_params.pixel_format.unwrap_or_else(|| final_frame.format());
                             if !self.codec_supported_formats.contains(&pixel_format) && hw_upload_format.is_none() {
-                                return Err(FFmpegError::PixelFormatNotSupported((pixel_format, self.codec_supported_formats.clone())));
+                                return Err(FFmpegError::PixelFormatNotSupported((pixel_format, self.codec_supported_formats.clone(), super::ffmpeg_hw::find_best_matching_codec(pixel_format, &self.codec_supported_formats))));
                             }
 
                             // let mut stderr_buf  = gag::BufferRedirect::stderr().unwrap();
