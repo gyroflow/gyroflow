@@ -1045,7 +1045,8 @@ impl RenderQueue {
                         let result = rendering::render(stab.clone(), progress.clone(), &input_file, &render_options, i, range, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone());
                         if let Err(e) = result {
                             if let rendering::FFmpegError::PixelFormatNotSupported((fmt, supported, candidate)) = e {
-                                convert_format((format!("{fmt:?}"), supported.into_iter().map(|v| format!("{:?}", v)).collect::<Vec<String>>().join(","), format!("{candidate:?}").to_ascii_lowercase().to_string()));
+                                let candidate = if let Some(c) = candidate { format!("{c:?}").to_ascii_lowercase().to_string() } else { String::new() };
+                                convert_format((format!("{fmt:?}"), supported.into_iter().map(|v| format!("{:?}", v)).collect::<Vec<String>>().join(","), candidate));
                                 break 'ranges;
                             }
                             if original_gpu_decode && stab.gpu_decoding.load(SeqCst) && matches!(e, rendering::FFmpegError::GPUDecodingFailed) {

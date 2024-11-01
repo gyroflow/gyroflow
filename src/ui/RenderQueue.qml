@@ -182,7 +182,7 @@ Item {
                     }));
                     buttons.push({
                         text: qsTr("Render using CPU"),
-                        accent: candidate == 'none',
+                        accent: candidate == '',
                         clicked: () => {
                             render_queue.set_pixel_format(job_id, "cpu");
                             render_queue.render_job(job_id);
@@ -482,7 +482,7 @@ Item {
                                     }));
                                     buttons.push({
                                         text: qsTr("Render using CPU"),
-                                        accent: candidate == 'none',
+                                        accent: candidate == '',
                                         clicked: () => { render_queue.set_pixel_format(job_id, "cpu"); }
                                     });
                                     btns.model = buttons;
