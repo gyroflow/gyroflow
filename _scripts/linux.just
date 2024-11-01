@@ -78,7 +78,7 @@ install-deps:
         sudo apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
         sudo apt-get install -y python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse gtk-update-icon-cache
         export HOST_ARCH=`lscpu | grep Architecture | awk {'print $2'}`
-        sudo curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${HOST_ARCH}.AppImage -o /opt/appimagetool
+        sudo curl -L https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${HOST_ARCH}.AppImage -o /opt/appimagetool
 
         # workaround AppImage issues with Docker
         pushd /opt/ ; sudo chmod +x appimagetool; sed -i 's|AI\x02|\x00\x00\x00|' appimagetool; sudo ./appimagetool --appimage-extract ; popd
