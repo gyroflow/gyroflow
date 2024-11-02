@@ -97,7 +97,11 @@ MenuItem {
             integrator.hasQuaternions = additional_data.contains_quats;
             root.hasAccurateTimestamps = additional_data.has_accurate_timestamps || false;
             if (additional_data.contains_quats && !is_main_video) {
-                integrator.currentIndex = 2;
+                if (integrator.hasRawGyro) {
+                    integrator.currentIndex = 2;
+                } else {
+                    integrator.currentIndex = 0;
+                }
                 integrateTimer.start();
             }
             if (!additional_data.contains_quats) {
