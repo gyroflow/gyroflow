@@ -102,7 +102,18 @@ fn copy_files(tempdir: &str, extract_path: &str, typ: &str) -> io::Result<()> {
             match result {
                 Ok(_) => log::info!("Folder copied from {src:?} to {extract_path:?}"),
                 Err(e) => {
-                    return Err(io::Error::new(e.kind, format!("Failed to copy files from {src:?} to {extract_path:?}: {e:?}")));
+                    fn to_io(e: &fs_extra::error::ErrorKind) -> std::io::ErrorKind {
+                        match e {
+                            fs_extra::error::ErrorKind::NotFound         => std::io::ErrorKind::NotFound,
+                            fs_extra::error::ErrorKind::PermissionDenied => std::io::ErrorKind::PermissionDenied,
+                            fs_extra::error::ErrorKind::AlreadyExists    => std::io::ErrorKind::AlreadyExists,
+                            fs_extra::error::ErrorKind::Interrupted      => std::io::ErrorKind::Interrupted,
+                            fs_extra::error::ErrorKind::Other            => std::io::ErrorKind::Other,
+                            fs_extra::error::ErrorKind::Io(ioe)          => ioe.kind(),
+                            _ => std::io::ErrorKind::Other
+                        }
+                    }
+                    return Err(io::Error::new(to_io(&e.kind), format!("Failed to copy files from {src:?} to {extract_path:?}: {e:?}")));
                 }
             }
             true
