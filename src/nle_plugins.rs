@@ -102,7 +102,7 @@ fn copy_files(tempdir: &str, extract_path: &str, typ: &str) -> io::Result<()> {
             match result {
                 Ok(_) => log::info!("Folder copied from {src:?} to {extract_path:?}"),
                 Err(e) => {
-                    return Err(io::Error::new(e.kind(), format!("Failed to copy files from {src:?} to {extract_path:?}: {e:?}")));
+                    return Err(io::Error::new(e.kind, format!("Failed to copy files from {src:?} to {extract_path:?}: {e:?}")));
                 }
             }
             true
