@@ -250,7 +250,7 @@ impl WgpuWrapper {
 
             let mut lens_model_functions = distortion_model.wgsl_functions().to_string();
             let default_digital_lens = "fn digital_undistort_point(uv: vec2<f32>) -> vec2<f32> { return uv; }
-                                            fn digital_distort_point(uv: vec2<f32>) -> vec2<f32> { return uv; }";
+                                        fn digital_distort_point  (uv: vec2<f32>) -> vec2<f32> { return uv; }";
             lens_model_functions.push_str(digital_lens.as_ref().map(|x| x.wgsl_functions()).unwrap_or(default_digital_lens));
             kernel = kernel.replace("LENS_MODEL_FUNCTIONS;", &lens_model_functions);
             kernel = kernel.replace("SCALAR", wgpu_format.1);

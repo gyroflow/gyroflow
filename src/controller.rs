@@ -2091,6 +2091,25 @@ impl Controller {
             this.mp4_merge_progress(percent, QString::from(error_string), QString::from(out.as_str()));
         });
         core::run_threaded(move || {
+            let mut vidinfo = None;
+            for x in &file_list {
+                match rendering::ffmpeg_processor::FfmpegProcessor::get_video_info(x) {
+                    Ok(x) => {
+                        if vidinfo.is_none() {
+                            vidinfo = Some(x);
+                            continue;
+                        }
+                        if let Some(vidinfo) = &vidinfo {
+                            if vidinfo.width != x.width || vidinfo.height != x.height || (vidinfo.fps * 100.0).round() as i32 != (x.fps * 100.0).round() as i32 || vidinfo.rotation != x.rotation {
+                                progress((1.0, format!("Video metadata mismatch: {}x{}@{:.2} {}° vs {}x{}@{:.2} {}°", vidinfo.width, vidinfo.height, vidinfo.fps, vidinfo.rotation, x.width, x.height, x.fps, x.rotation)));
+                                return;
+                            }
+                        }
+                    },
+                    Err(e) => { progress((1.0, format!("Failed to read file metadata: {x}: {e:?}"))); return; }
+                }
+            }
+
             let base = filesystem::get_engine_base();
             let mut opened = Vec::with_capacity(file_list.len());
             for x in &file_list {
