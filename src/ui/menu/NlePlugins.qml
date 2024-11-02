@@ -69,7 +69,23 @@ MenuItem {
             }
             if (command == "install") {
                 if (result.startsWith("An error occured")) {
-                    messageBox(Modal.Error, result, [ { text: qsTr("Ok"), accent: true } ]);
+                    if (result.includes("Failed to copy files from ") && result.includes("PermissionDenied")) {
+                        const parts = result.split("Failed to copy files from \\\"").pop().split("\\\" to \\\"");
+                        const from = '"' + parts[0] + '"';
+                        const to = '"' + parts[1].split("\\\": Error").shift() + '"';
+
+                        const mb = messageBox(Modal.Error, qsTr("Unable to copy the plugin due to sandbox limitations.\nOpen <b>Terminal</b> and enter the following command:"), [ { text: qsTr("Ok"), accent: true, clicked: () => {
+                            openfx_version = controller.nle_plugins("detect", "openfx");
+                            adobe_version = controller.nle_plugins("detect", "adobe");
+                            root.loader = false;
+                        } } ]);
+                        mb.isWide = true;
+                        const tf = Qt.createComponent("../components/TextField.qml").createObject(mb.mainColumn, { readOnly: true });
+                        tf.text = "sudo mv " + from + " " + to;
+                        tf.width = mb.mainColumn.width;
+                    } else {
+                        messageBox(Modal.Error, result, [ { text: qsTr("Ok"), accent: true } ]);
+                    }
                 }
                 openfx_version = controller.nle_plugins("detect", "openfx");
                 adobe_version = controller.nle_plugins("detect", "adobe");

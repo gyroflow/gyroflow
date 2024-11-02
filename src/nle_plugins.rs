@@ -102,7 +102,7 @@ fn copy_files(tempdir: &str, extract_path: &str, typ: &str) -> io::Result<()> {
             match result {
                 Ok(_) => log::info!("Folder copied from {src:?} to {extract_path:?}"),
                 Err(e) => {
-                    return Err(io::Error::new(io::ErrorKind::Other, format!("Failed to copy files from {src:?} to {extract_path:?}: {e:?}")));
+                    return Err(io::Error::new(e.kind(), format!("Failed to copy files from {src:?} to {extract_path:?}: {e:?}")));
                 }
             }
             true
@@ -175,7 +175,14 @@ pub fn install(typ: &str) -> io::Result<String> {
             } else {
                 archive.extract(tempdir.path())?;
             }
-            copy_files(tempdir.path().to_str().unwrap(), &extract_path, typ)?;
+            let result = copy_files(tempdir.path().to_str().unwrap(), &extract_path, typ);
+            if let Err(e) = result {
+                if e.kind() == std::io::ErrorKind::PermissionDenied {
+                    // Don't delete tempdir if permission was denied
+                    let _tmpdir = tempdir.into_path();
+                }
+                return Err(e);
+            }
         } else {
             let tempfile = tempdir.path().join(download_url.split('/').rev().next().unwrap());
             std::fs::write(tempfile, content)?;

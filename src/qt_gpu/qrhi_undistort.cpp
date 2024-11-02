@@ -54,9 +54,9 @@ public:
     QSize texSize() { return m_textureSize; }
     QString shaderPath() { return m_shaderPath; }
     QRhiTexture *itemTexturePtr() { return m_itemTexturePtr; }
-    int sizeForRS() { return m_sizeForRS; }
+    unsigned int sizeForRS() { return m_sizeForRS; }
 
-    bool init(MDKPlayer *item, QSize textureSize, QSize outputSize, const QString &shaderPath, int kernelParmsSize, int sizeForRS, QSize canvasSize) {
+    bool init(MDKPlayer *item, QSize textureSize, QSize outputSize, const QString &shaderPath, int kernelParmsSize, unsigned int sizeForRS, QSize canvasSize) {
         if (!item) return false;
         auto context = item->rhiContext();
         auto rhi = context->rhi();
@@ -230,7 +230,7 @@ public:
     QSize m_outputSize;
     QSize m_textureSize;
     QString m_shaderPath;
-    int m_sizeForRS{0};
+    unsigned int m_sizeForRS{0};
 
     QScopedPointer<QRhiBuffer> m_vertexBuffer;
     QScopedPointer<QRhiBuffer> m_indexBuffer;
