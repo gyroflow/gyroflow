@@ -77,6 +77,8 @@ MenuItem {
                         const mb = messageBox(Modal.Error, qsTr("Unable to copy the plugin due to sandbox limitations.\nOpen <b>Terminal</b> and enter the following command:"), [ { text: qsTr("Ok"), accent: true, clicked: () => {
                             openfx_version = controller.nle_plugins("detect", "openfx");
                             adobe_version = controller.nle_plugins("detect", "adobe");
+                            openfx_latest = openfx_version && compare_ver(latest_version, openfx_version);
+                            adobe_latest  = adobe_version && compare_ver(latest_version, adobe_version);
                             root.loader = false;
                         } } ]);
                         mb.isWide = true;
