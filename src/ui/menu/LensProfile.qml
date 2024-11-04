@@ -165,10 +165,10 @@ MenuItem {
                     cy.setInitialValue(mtrx[1][2]);
 
                     // Set asymmetrical lens center bias
-                    if (obj.asymmetrical) {
+                    /*if (obj.asymmetrical) {
                         window.stab.zoomingCenterX.value = -((mtrx[0][2] / (obj.calib_dimension.w / 2.0)) - 1.0);
                         window.stab.zoomingCenterY.value = -((mtrx[1][2] / (obj.calib_dimension.h / 2.0)) - 1.0);
-                    }
+                    }*/
                     // If focal length in pixels is large, it's more likely that Almeida pose estimator will yield better results
                     if (mtrx[0][0] > 10000) {
                         window.sync.poseMethod.currentIndex = 1; // Almeida
