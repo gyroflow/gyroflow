@@ -57,7 +57,7 @@ impl FrameTransform {
         fov
     }
 
-    pub fn get_lens_data_at_timestamp(params: &ComputeParams, timestamp_ms: f64) -> (Matrix3<f64>, [f64; 12], f64, f64, f64, Option<f64>) {
+    pub fn get_lens_data_at_timestamp(params: &ComputeParams, timestamp_ms: f64, invert_asym_lens: bool) -> (Matrix3<f64>, [f64; 12], f64, f64, f64, Option<f64>) {
         let mut interpolated_lens = None;
         let gyro = params.gyro.read();
         let file_metadata = gyro.file_metadata.read();
@@ -70,7 +70,7 @@ impl FrameTransform {
 
         let mut focal_length = lens.focal_length;
 
-        let mut camera_matrix = lens.get_camera_matrix((params.width, params.height));
+        let mut camera_matrix = lens.get_camera_matrix((params.width, params.height), invert_asym_lens);
         let mut distortion_coeffs = lens.get_distortion_coeffs();
 
         let mut radial_distortion_limit = lens.fisheye_params.radial_distortion_limit.unwrap_or_default();
@@ -155,7 +155,7 @@ impl FrameTransform {
             radial_distortion_limit,
             input_horizontal_stretch,
             input_vertical_stretch,
-            focal_length) = Self::get_lens_data_at_timestamp(params, timestamp_ms);
+            focal_length) = Self::get_lens_data_at_timestamp(params, timestamp_ms, false);
         // ----------- Lens -----------
 
         let mut fov = Self::get_fov(params, frame, true, timestamp_ms, false);
@@ -318,7 +318,7 @@ impl FrameTransform {
 
         let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, params.scaled_fps) as usize);
 
-        let (camera_matrix, distortion_coeffs, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms);
+        let (camera_matrix, distortion_coeffs, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, params.framebuffer_inverted);
 
         let fov = Self::get_fov(params, 0, use_fovs, timestamp_ms, false);
 

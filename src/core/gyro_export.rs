@@ -252,13 +252,13 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
         output = output.trim_end_matches(",\n").to_string();
         output.push_str("]);\n");
 
-        let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&comp_params, 0.0);
+        let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&comp_params, 0.0, false);
         jsx.insert("zoom", camera_matrix[(0, 0)].into());
         if comp_params.gyro.read().file_metadata.read().lens_params.len() > 1 {
             jsx.insert("zooms", Vec::<serde_json::Value>::new().into());
             for f in 0..num_frames as i32 {
                 let timestamp = crate::timestamp_at_frame(f, fps);
-                let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&comp_params, timestamp);
+                let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&comp_params, timestamp, false);
                 jsx.get_mut("zooms").unwrap().as_array_mut().unwrap().push(camera_matrix[(0, 0)].into());
             }
         }
