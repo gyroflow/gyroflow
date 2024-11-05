@@ -542,8 +542,26 @@ float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global c
         uv = rotate_point(uv, rotation, size / (float2)2.0f, frame_size / (float2)2.0f);
     }
 
-    uv.x = map_coord(uv.x, 0.0f, (float)frame_size.x, (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
-    uv.y = map_coord(uv.y, 0.0f, (float)frame_size.y, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
+    switch (params->background_mode) {
+        case 1: { // edge repeat
+            uv = max((float2)(3.0f, 3.0f), min((float2)(params->width - 3, params->height - 3), uv));
+        } break;
+        case 2: { // edge mirror
+            int rx = round(uv.x);
+            int ry = round(uv.y);
+            int width3 = (params->width - 3);
+            int height3 = (params->height - 3);
+            if (rx > width3)  uv.x = width3  - (rx - width3);
+            if (rx < 3)       uv.x = 3 + params->width - (width3  + rx);
+            if (ry > height3) uv.y = height3 - (ry - height3);
+            if (ry < 3)       uv.y = 3 + params->height - (height3 + ry);
+        } break;
+    }
+
+    if (params->background_mode != 3) {
+        uv.x = map_coord(uv.x, 0.0f, (float)frame_size.x, (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
+        uv.y = map_coord(uv.y, 0.0f, (float)frame_size.y, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
+    }
     return uv;
 }
 
@@ -584,42 +602,38 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
 
         DATA_TYPE final_pix;
         if (uv.x > -99998.0f) {
-            switch (params->background_mode) {
-                case 1: { // edge repeat
-                    uv = max((float2)(0, 0), min((float2)(params->width - 1, params->height - 1), uv));
-                } break;
-                case 2: { // edge mirror
-                    int rx = round(uv.x);
-                    int ry = round(uv.y);
-                    int width3 = (params->width - 3);
-                    int height3 = (params->height - 3);
-                    if (rx > width3)  uv.x = width3  - (rx - width3);
-                    if (rx < 3)       uv.x = 3 + params->width - (width3  + rx);
-                    if (ry > height3) uv.y = height3 - (ry - height3);
-                    if (ry < 3)       uv.y = 3 + params->height - (height3 + ry);
-                } break;
-                case 3: { // margin with feather
-                    float widthf  = (params->width  - 1);
-                    float heightf = (params->height - 1);
+            if (params->background_mode == 3) { // margin with feather
+                float widthf  = (params->width  - 1);
+                float heightf = (params->height - 1);
 
-                    float feather = max(0.0001f, params->background_margin_feather * heightf);
-                    float2 pt2 = uv;
-                    float alpha = 1.0f;
-                    if ((uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather)) {
-                        alpha = fmax(0.0f, fmin(1.0f, fmin(fmin(widthf - uv.x, heightf - uv.y), fmin(uv.x, uv.y)) / feather));
-                        pt2 /= (float2)(widthf, heightf);
-                        pt2 = ((pt2 - 0.5f) * (1.0f - params->background_margin)) + 0.5f;
-                        pt2 *= (float2)(widthf, heightf);
-                    }
+                float feather = max(0.0001f, params->background_margin_feather * heightf);
+                float2 pt2 = uv;
+                float alpha = 1.0f;
+                if ((uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather)) {
+                    alpha = fmax(0.0f, fmin(1.0f, fmin(fmin(widthf - uv.x, heightf - uv.y), fmin(uv.x, uv.y)) / feather));
+                    pt2 /= (float2)(widthf, heightf);
+                    pt2 = ((pt2 - 0.5f) * (1.0f - params->background_margin)) + 0.5f;
+                    pt2 *= (float2)(widthf, heightf);
+                }
 
-                    DATA_TYPEF c1 = sample_input_at(uv,  jac, srcptr, params, drawing, bg);
-                    DATA_TYPEF c2 = sample_input_at(pt2, jac, srcptr, params, drawing, bg); // FIXME: jac should be adjusted for pt2
-                    final_pix = DATA_CONVERT(c1 * alpha + c2 * (1.0f - alpha));
-                    draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params, drawing);
-                    draw_safe_area(&final_pix, x, y, params);
-                    *out_pix = final_pix;
-                    return;
-                } break;
+                float2 frame_size = (float2)((float)params->width, (float)params->height);
+                if (params->input_rotation != 0.0f) {
+                    float rotation = params->input_rotation * (M_PI_F / 180.0f);
+                    float2 size = frame_size;
+                    frame_size = fabs(round(rotate_point(size, rotation, (float2)(0.0f, 0.0f), (float2)(0.0f, 0.0f))));
+                }
+                uv.x  = map_coord(uv.x,  0.0f, (float)frame_size.x, (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
+                uv.y  = map_coord(uv.y,  0.0f, (float)frame_size.y, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
+                pt2.x = map_coord(pt2.x, 0.0f, (float)frame_size.x, (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
+                pt2.y = map_coord(pt2.y, 0.0f, (float)frame_size.y, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
+
+                DATA_TYPEF c1 = sample_input_at(uv,  jac, srcptr, params, drawing, bg);
+                DATA_TYPEF c2 = sample_input_at(pt2, jac, srcptr, params, drawing, bg); // FIXME: jac should be adjusted for pt2
+                final_pix = DATA_CONVERT(c1 * alpha + c2 * (1.0f - alpha));
+                draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params, drawing);
+                draw_safe_area(&final_pix, x, y, params);
+                *out_pix = final_pix;
+                return;
             }
 
             final_pix = DATA_CONVERT(sample_input_at(uv, jac, srcptr, params, drawing, bg));

@@ -529,7 +529,22 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
         uv = rotate_point(uv, rotation, size / 2.0, frame_size / 2.0);
     }
 
-    if (bool(flags & 32)) { // Uses source rect
+    let width_f = f32(params.width);
+    let height_f = f32(params.height);
+    if (params.background_mode == 1) { // edge repeat
+        uv = max(vec2<f32>(3.0, 3.0), min(vec2<f32>(width_f - 3.0, height_f - 3.0), uv));
+    } else if (params.background_mode == 2) { // edge mirror
+        let rx = round(uv.x);
+        let ry = round(uv.y);
+        let width3 = (width_f - 3.0);
+        let height3 = (height_f - 3.0);
+        if (rx > width3)  { uv.x = width3  - (rx - width3); }
+        if (rx < 3.0)     { uv.x = 3.0 + width_f - (width3 + rx); }
+        if (ry > height3) { uv.y = height3 - (ry - height3); }
+        if (ry < 3.0)     { uv.y = 3.0 + height_f - (height3 + ry); }
+    }
+
+    if (bool(flags & 32) && params.background_mode != 3) { // Uses source rect
         uv = vec2<f32>(
             map_coord(uv.x, 0.0, f32(frame_size.x), f32(params.source_rect.x), f32(params.source_rect.x + params.source_rect.z)),
             map_coord(uv.y, 0.0, f32(frame_size.y), f32(params.source_rect.y), f32(params.source_rect.y + params.source_rect.w))
@@ -576,19 +591,7 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
     if (uv.x > -99998.0) {
         let width_f = f32(params.width);
         let height_f = f32(params.height);
-
-        if (params.background_mode == 1) { // edge repeat
-            uv = max(vec2<f32>(0.0, 0.0), min(vec2<f32>(width_f - 1.0, height_f - 1.0), uv));
-        } else if (params.background_mode == 2) { // edge mirror
-            let rx = round(uv.x);
-            let ry = round(uv.y);
-            let width3 = (width_f - 3.0);
-            let height3 = (height_f - 3.0);
-            if (rx > width3)  { uv.x = width3  - (rx - width3); }
-            if (rx < 3.0)     { uv.x = 3.0 + width_f - (width3 + rx); }
-            if (ry > height3) { uv.y = height3 - (ry - height3); }
-            if (ry < 3.0)     { uv.y = 3.0 + height_f - (height3 + ry); }
-        } else if (params.background_mode == 3) { // margin with feather
+        if (params.background_mode == 3) { // margin with feather
             let widthf  = (width_f - 1.0);
             let heightf = (height_f - 1.0);
 
@@ -600,6 +603,19 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
                 pt2 /= vec2<f32>(width_f, height_f);
                 pt2 = ((pt2 - 0.5) * (1.0 - params.background_margin)) + 0.5;
                 pt2 *= vec2<f32>(width_f, height_f);
+            }
+
+            var frame_size = vec2<f32>(f32(params.width), f32(params.height));
+            if (params.input_rotation != 0.0) {
+                let rotation = params.input_rotation * (3.14159265359 / 180.0);
+                let size = frame_size;
+                frame_size = abs(round(rotate_point(size, rotation, vec2<f32>(0.0, 0.0), vec2<f32>(0.0, 0.0))));
+            }
+            if (bool(flags & 32)) { // Uses source rect
+                uv  = vec2<f32>(map_coord(uv.x,  0.0, f32(frame_size.x), f32(params.source_rect.x), f32(params.source_rect.x + params.source_rect.z)),
+                                map_coord(uv.y,  0.0, f32(frame_size.y), f32(params.source_rect.y), f32(params.source_rect.y + params.source_rect.w)));
+                pt2 = vec2<f32>(map_coord(pt2.x, 0.0, f32(frame_size.x), f32(params.source_rect.x), f32(params.source_rect.x + params.source_rect.z)),
+                                map_coord(pt2.y, 0.0, f32(frame_size.y), f32(params.source_rect.y), f32(params.source_rect.y + params.source_rect.w)));
             }
 
             let c1 = sample_input_at(uv, jac);

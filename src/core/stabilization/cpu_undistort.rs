@@ -488,10 +488,29 @@ impl Stabilization {
                 uv = rotate_point(uv, rotation, (size.0 / 2.0, size.1 / 2.0), (frame_size.0 / 2.0, frame_size.1 / 2.0));
             }
 
-            uv = (
-                map_coord(uv.0, 0.0, frame_size.0, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),
-                map_coord(uv.1, 0.0, frame_size.1, params.source_rect[1] as f32, (params.source_rect[1] + params.source_rect[3]) as f32)
-            );
+            let width_f = params.width as f32;
+            let height_f = params.height as f32;
+            if params.background_mode == 1 { // Edge repeat
+                uv = (
+                    uv.0.max(3.0).min(width_f  - 3.0),
+                    uv.1.max(3.0).min(height_f - 3.0),
+                );
+            } else if params.background_mode == 2 { // Edge mirror
+                let rx = uv.0.round();
+                let ry = uv.1.round();
+                let width3 = width_f - 3.0;
+                let height3 = height_f - 3.0;
+                if rx > width3  { uv.0 = width3  - (rx - width3); }
+                if rx < 3.0     { uv.0 = 3.0 + width_f - (width3  + rx); }
+                if ry > height3 { uv.1 = height3 - (ry - height3); }
+                if ry < 3.0     { uv.1 = 3.0 + height_f - (height3 + ry); }
+            }
+            if params.background_mode != 3 {
+                uv = (
+                    map_coord(uv.0, 0.0, frame_size.0, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),
+                    map_coord(uv.1, 0.0, frame_size.1, params.source_rect[1] as f32, (params.source_rect[1] + params.source_rect[3]) as f32)
+                );
+            }
             Some(Vector2::new(uv.0, uv.1))
         }
 
@@ -552,50 +571,43 @@ impl Stabilization {
 
                                 let width_f = params.width as f32;
                                 let height_f = params.height as f32;
-                                match params.background_mode {
-                                    1 => { // Edge repeat
-                                        uv = Vector2::new(
-                                            uv.x.max(0.0).min(width_f  - 1.0),
-                                            uv.y.max(0.0).min(height_f - 1.0),
-                                        );
-                                    },
-                                    2 => { // Edge mirror
-                                        let rx = uv.x.round();
-                                        let ry = uv.y.round();
-                                        let width3 = width_f - 3.0;
-                                        let height3 = height_f - 3.0;
-                                        if rx > width3  { uv.x = width3  - (rx - width3); }
-                                        if rx < 3.0     { uv.x = 3.0 + width_f - (width3  + rx); }
-                                        if ry > height3 { uv.y = height3 - (ry - height3); }
-                                        if ry < 3.0     { uv.y = 3.0 + height_f - (height3 + ry); }
-                                    },
-                                    3 => { // Margin with feather
-                                        let widthf  = width_f - 1.0;
-                                        let heightf = height_f - 1.0;
+                                if params.background_mode == 3 { // Margin with feather
+                                    let widthf  = width_f - 1.0;
+                                    let heightf = height_f - 1.0;
 
-                                        let feather = (params.background_margin_feather * heightf).max(0.0001);
-                                        let mut pt2 = uv;
-                                        let mut alpha = 1.0;
-                                        if (uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather) {
-                                            alpha = ((widthf - uv.x).min(heightf - uv.y).min(uv.x).min(uv.y) / feather).min(1.0).max(0.0);
-                                            let size_f = Vector2::new(width_f, height_f);
-                                            let half = Vector2::from_element(0.5);
-                                            pt2.component_div_assign(&size_f);
-                                            pt2 = ((pt2 - half) * (1.0 - params.background_margin)) + half;
-                                            pt2.component_mul_assign(&size_f);
-                                        }
+                                    let feather = (params.background_margin_feather * heightf).max(0.0001);
+                                    let mut pt2 = uv;
+                                    let mut alpha = 1.0;
+                                    if (uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather) {
+                                        alpha = ((widthf - uv.x).min(heightf - uv.y).min(uv.x).min(uv.y) / feather).min(1.0).max(0.0);
+                                        let size_f = Vector2::new(width_f, height_f);
+                                        let half = Vector2::from_element(0.5);
+                                        pt2.component_div_assign(&size_f);
+                                        pt2 = ((pt2 - half) * (1.0 - params.background_margin)) + half;
+                                        pt2.component_mul_assign(&size_f);
+                                    }
 
-                                        let c1 = sample_input_at::<I, T>(uv, &jac, input, params, &bg, drawing);
-                                        let c2 = sample_input_at::<I, T>(pt2, &jac, input, params, &bg, drawing); // FIXME: jac should be adjusted for pt2
-                                        pixel = c1 * alpha + c2 * (1.0 - alpha);
-                                        // draw_pixel(&mut pixel, p.0 as i32, p.1 as i32, false, params.output_width, params, drawing);
-                                        if fix_range {
-                                            remap_colorrange(&mut pixel, is_y)
-                                        }
-                                        *pix_out = PixelType::from_float(pixel);
-                                        return;
-                                    },
-                                    _ => { }
+                                    let mut frame_size = (params.width as f32, params.height as f32);
+                                    if params.input_rotation != 0.0 {
+                                        let rotation = params.input_rotation * (std::f32::consts::PI / 180.0);
+                                        let size = frame_size;
+                                        frame_size = rotate_point(size, rotation, (0.0, 0.0), (0.0, 0.0));
+                                        frame_size = (frame_size.0.abs().round(), frame_size.1.abs().round());
+                                    }
+                                    uv  = Vector2::new(map_coord(uv.x,  0.0, frame_size.0, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),
+                                                       map_coord(uv.y,  0.0, frame_size.1, params.source_rect[1] as f32, (params.source_rect[1] + params.source_rect[3]) as f32));
+                                    pt2 = Vector2::new(map_coord(pt2.x, 0.0, frame_size.0, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),
+                                                       map_coord(pt2.y, 0.0, frame_size.1, params.source_rect[1] as f32, (params.source_rect[1] + params.source_rect[3]) as f32));
+
+                                    let c1 = sample_input_at::<I, T>(uv, &jac, input, params, &bg, drawing);
+                                    let c2 = sample_input_at::<I, T>(pt2, &jac, input, params, &bg, drawing); // FIXME: jac should be adjusted for pt2
+                                    pixel = c1 * alpha + c2 * (1.0 - alpha);
+                                    // draw_pixel(&mut pixel, p.0 as i32, p.1 as i32, false, params.output_width, params, drawing);
+                                    if fix_range {
+                                        remap_colorrange(&mut pixel, is_y)
+                                    }
+                                    *pix_out = PixelType::from_float(pixel);
+                                    return;
                                 }
 
                                 pixel = sample_input_at::<I, T>(uv, &jac, input, params, &bg, drawing);
