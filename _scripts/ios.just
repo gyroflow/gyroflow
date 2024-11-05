@@ -64,7 +64,7 @@ install-deps:
         echo "Installing OpenCV from vcpkg"
         # Install OpenCV
         ./vcpkg/vcpkg install "flatbuffers:arm64-ios" --cmake-args=-DVCPKG_BUILD_TYPE=release
-        ./vcpkg/vcpkg install "opencv4[core,calib3d,opencl,thread,intrinsics]:arm64-ios" --cmake-args=-DVCPKG_BUILD_TYPE=release
+        ./vcpkg/vcpkg install "opencv4[core,calib3d,thread,intrinsics]:arm64-ios" --cmake-args=-DVCPKG_BUILD_TYPE=release
         rm -rf ./vcpkg/buildtrees
         rm -rf ./vcpkg/downloads
     fi
