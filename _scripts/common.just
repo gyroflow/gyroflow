@@ -37,7 +37,7 @@ VcpkgArch := if os() + Arch == "windowsx86_64"  { "x64-windows"
       } else                                    { "x64-linux" }
 export OPENCV_LINK_LIBS := "opencv_core4,opencv_calib3d4,opencv_features2d4,opencv_imgproc4,opencv_video4,opencv_flann4,opencv_imgcodecs4,opencv_objdetect4,opencv_stitching4" + if os() == "linux" { if Arch == "aarch64" { ",tegra_hal,png" } else { ",png" } } else if os() + Arch == "macosaarch64" { ",tegra_hal" } else { "" }
 export OPENCV_LINK_PATHS := ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "lib," + ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "lib/manual-link/opencv4_thirdparty"
-export OPENCV_INCLUDE_PATHS := ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "include"
+export OPENCV_INCLUDE_PATHS := ProjectDir / "ext/vcpkg/installed" / VcpkgArch / "include/opencv4"
 OpenCVPath := ProjectDir / "ext/vcpkg/installed" / VcpkgArch
 # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
 

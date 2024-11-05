@@ -64,7 +64,7 @@ install-deps:
         git clone --depth 1 https://github.com/Microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
         .\vcpkg\vcpkg install "flatbuffers:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
-        .\vcpkg\vcpkg install "opencv4[core]:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
+        .\vcpkg\vcpkg install "opencv4[core,calib3d,opencl,thread,intrinsics]:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
         .\vcpkg\vcpkg install "opencl:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
         rm -Recurse -Force .\vcpkg\buildtrees
         rm -Recurse -Force .\vcpkg\downloads

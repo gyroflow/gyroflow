@@ -44,7 +44,7 @@ install-deps:
 
         # Install OpenCV
         {{ExtDir}}/vcpkg/vcpkg install "flatbuffers:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
-        {{ExtDir}}/vcpkg/vcpkg install "opencv4[core]:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
+        {{ExtDir}}/vcpkg/vcpkg install "opencv4[core,calib3d,opencl,thread,intrinsics]:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
         rm -rf {{ExtDir}}/vcpkg/buildtrees
         rm -rf {{ExtDir}}/vcpkg/downloads
     fi
