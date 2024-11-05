@@ -62,6 +62,7 @@ pub struct InputFile {
     pub image_sequence_fps: f64,
     pub image_sequence_start: i32,
     pub preset_name: Option<String>,
+    pub preset_output_size: Option<(usize, usize)>,
 }
 
 #[derive(Clone)]
@@ -1553,6 +1554,9 @@ impl StabilizationManager {
                 if let Some(w) =  obj.get("output_width").and_then(|x| x.as_u64()) {
                     if let Some(h) =  obj.get("output_height").and_then(|x| x.as_u64()) {
                         output_size = Some((w as usize, h as usize));
+                        if *is_preset {
+                            self.input_file.write().preset_output_size = Some((w as usize, h as usize));
+                        }
                     }
                 }
                 if is_plugin {
