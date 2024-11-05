@@ -154,7 +154,7 @@ deploy *param:
 
         export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-x86_64
         export OPENCV_LINK_PATHS=$OPENCV_DIR/x64-osx/lib
-        export OPENCV_INCLUDE_PATHS=$OPENCV_DIR/x64-osx/include/
+        export OPENCV_INCLUDE_PATHS=$OPENCV_DIR/x64-osx/include/opencv4/
         rustup target add x86_64-apple-darwin
         cargo build --target x86_64-apple-darwin --profile deploy
         #strip $PROJECT_DIR/target/x86_64-apple-darwin/deploy/gyroflow
@@ -162,7 +162,7 @@ deploy *param:
         export OPENCV_LINK_LIBS="$OPENCV_LINK_LIBS,tegra_hal"
         export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-arm64
         export OPENCV_LINK_PATHS=$OPENCV_DIR/arm64-osx/lib,$OPENCV_DIR/arm64-osx/lib/manual-link/opencv4_thirdparty
-        export OPENCV_INCLUDE_PATHS=$OPENCV_DIR/arm64-osx/include/
+        export OPENCV_INCLUDE_PATHS=$OPENCV_DIR/arm64-osx/include/opencv4/
         export MACOSX_DEPLOYMENT_TARGET="11.0"
         rustup target add aarch64-apple-darwin
         cargo build --target aarch64-apple-darwin --profile deploy
