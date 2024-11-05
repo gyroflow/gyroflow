@@ -331,7 +331,8 @@ impl Controller {
             project_file_url: None,
             image_sequence_start: self.image_sequence_start,
             image_sequence_fps: self.image_sequence_fps,
-            preset_name: None
+            preset_name: None,
+            preset_output_size: None,
         };
         self.input_file_url_changed();
         self.project_file_url_changed();
