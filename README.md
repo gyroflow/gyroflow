@@ -34,6 +34,9 @@
     <a href="https://github.com/gyroflow/gyroflow/blob/master/LICENSE">
       <img src="https://img.shields.io/github/license/gyroflow/gyroflow" alt="License">
     </a>
+    <a href="https://gurubase.io/g/gyroflow">
+      <img src="https://img.shields.io/badge/Gurubase-Ask%20Gyroflow%20Guru-006BFF" alt="Gurubase">
+    </a>
   </p>
 </p>
 
