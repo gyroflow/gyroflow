@@ -90,6 +90,9 @@ pub fn get_current_device_id_by_uuid(adapters: &Vec<wgpu::Adapter>) -> usize {
 
     if !found {
         for (i, adapter) in adapters.iter().enumerate() {
+            if adapter.get_info().backend != wgpu::Backend::Vulkan {
+                continue;
+            }
             let device = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
                 label: None,
                 required_features: wgpu::Features::empty(),
