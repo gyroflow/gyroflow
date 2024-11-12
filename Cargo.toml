@@ -48,7 +48,7 @@ argh = "0.1.12"
 indicatif = "0.17"
 rustfft = "6.2.0"
 crc32fast = "1.4.2"
-rodio = { default-features = false, features = ["vorbis"], version = "0.19.0" }
+rodio = { default-features = false, features = ["vorbis"], version = "0.20.1" }
 filetime_creation = "0.2"
 
 qmetaobject = { version = "0.2.10", default-features = false, features = ["log"] }
@@ -96,7 +96,7 @@ core-foundation-sys = "0.8.7"
 cpp_build = "0.5.9"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.1.31"
+cc = "1.2.0"
 
 [[bin]]
 name = "gyroflow"

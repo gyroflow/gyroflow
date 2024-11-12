@@ -27,7 +27,7 @@ mimalloc = { version = "0.1.43", default-features = false }
 nalgebra = { version = "0.32", features = ["serde-serialize"] }
 rayon = "1.10"
 biquad = "0.4.2"
-fastrand = "2.1.1"
+fastrand = "2.2.0"
 lazy_static = "1.5.0"
 parking_lot = "0.12.3"
 regex = "1.11"
@@ -47,7 +47,7 @@ enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.4.1"
 lru = "0.12"
-thiserror = "1.0.68"
+thiserror = "2.0.3"
 ciborium = "0.2.2"
 dyn-clone = "1.0.17"
 app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }

@@ -88,9 +88,9 @@ Window {
             if (!close.accepted && !closeConfirmationModal) {
                 closeConfirmationModal = true;
                 app.messageBox(Modal.Question, qsTr("Are you sure you want to exit?"), [
-                    { text: qsTr("Yes"), accent: true, clicked: () => { main_window.closeConfirmed = true; main_window.close(); } },
+                    { text: qsTr("Yes"), accent: true, clicked: () => { main_window.closeConfirmed = true; settings.flush(); main_window.close(); } },
                     { text: qsTr("No"), clicked: () => { main_window.closeConfirmationModal = false; } }
-                ]);
+                ], null, undefined, "quit");
             }
         }
     }

@@ -66,6 +66,9 @@ pub fn clear() {
     map().write().clear();
     store();
 }
+pub fn flush() {
+    store();
+}
 
 pub fn try_get(key: &str) -> Option<serde_json::Value> { map().read().get(key).map(Clone::clone) }
 pub fn get_u64(key: &str, default: u64) -> u64 { map().read().get(key).and_then(|x| x.as_u64()).unwrap_or(default) }

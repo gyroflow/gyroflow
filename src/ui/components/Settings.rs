@@ -15,6 +15,7 @@ pub struct Settings {
     contains: qt_method!(fn(&self, key: QString) -> bool),
     setValue: qt_method!(fn(&mut self, key: QString, value: QVariant)),
     clear: qt_method!(fn(&mut self)),
+    flush: qt_method!(fn(&mut self)),
     dataDir: qt_method!(fn(&self, path: QString) -> QString),
 
     propChanged: qt_method!(fn(&self, obj: QJSValue)),
@@ -35,6 +36,9 @@ impl Settings {
     }
     fn clear(&self) {
         gyroflow_core::settings::clear()
+    }
+    fn flush(&self) {
+        gyroflow_core::settings::flush()
     }
     fn dataDir(&self, path: QString) -> QString {
         let path = path.to_string();
