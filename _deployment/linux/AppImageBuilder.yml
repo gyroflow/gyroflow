@@ -5,6 +5,7 @@ AppDir:
     env:
       XDG_DATA_DIRS: $APPDIR/usr/share:$APPDIR/usr/local/share:$HOME/.local/share:/usr/local/share/:/usr/share:$XDG_DATA_DIRS
       QT_QPA_PLATFORMTHEME: gtk3
+      APPDIR_LIBRARY_PATH: $APPDIR/lib:$APPDIR/lib/x86_64-linux-gnu:$APPDIR/lib/x86_64-linux-gnu/security:$APPDIR/usr/lib/llvm-7/lib:$APPDIR/lib/x86_64
   app_info:
     id: xyz.gyroflow
     name: Gyroflow
