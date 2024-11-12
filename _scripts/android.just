@@ -63,7 +63,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "OpenCV-android-sdk/")) {
         echo "Downloading OpenCV for Android"
-        wget "https://github.com/opencv/opencv/releases/download/4.9.0/opencv-4.9.0-android-sdk.zip" -outfile "opencv.zip"
+        wget "https://github.com/opencv/opencv/releases/download/4.10.0/opencv-4.10.0-android-sdk.zip" -outfile "opencv.zip"
         7z x -aoa opencv.zip
         del opencv.zip
     }
