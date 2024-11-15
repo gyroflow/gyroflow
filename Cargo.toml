@@ -40,7 +40,7 @@ rayon = "1.10"
 
 pollster = "0.4.0"
 futures-intrusive = "0.5.0"
-flate2 = "1.0.34"
+flate2 = "1.0.35"
 walkdir = "2.5.0"
 mp4-merge = "0.1.10"
 human-sort = "0.2.2"
@@ -96,7 +96,7 @@ core-foundation-sys = "0.8.7"
 cpp_build = "0.5.9"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.2.0"
+cc = "1.2.1"
 
 [[bin]]
 name = "gyroflow"

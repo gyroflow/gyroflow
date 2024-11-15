@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "8500bb3" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "d2d519b" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", rev = "bf7b41d", features = ["field_access"] }
 
@@ -70,7 +70,7 @@ bytemuck = "1.19.0"
 ash = "0.38.0"
 pollster = "0.4.0"
 futures-intrusive = "0.5.0"
-flate2 = "1.0.34"
+flate2 = "1.0.35"
 walkdir = "2.5.0"
 url = "2.5.3"
 urlencoding = "2.1.3"
