@@ -16,7 +16,7 @@ system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", re
 breakpad-sys = "0.2.0"
 trash = "5.2"
 # For nle_plugins
-zip = { version = "2.2", default-features = false, features = ["deflate-flate2"] }
+zip = { version = "2.2", default-features = false, features = ["deflate-flate2", "flate2"] }
 zip-extensions = { version = "0.8", default-features = false, features = ["deflate-flate2"] }
 runas = "1.2"
 tempfile = "3"
