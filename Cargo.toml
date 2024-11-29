@@ -63,10 +63,10 @@ parking_lot = "0.12.3"
 simplelog = "0.12.2"
 log = "0.4"
 
-ureq = "2.10"
-url = "2.5.2"
+ureq = "2.11"
+url = "2.5.4"
 whoami = "1.5.2"
-tar = "0.4.41"
+tar = "0.4.43"
 lru = "0.12"
 chrono = "0.4"
 
@@ -96,7 +96,7 @@ core-foundation-sys = "0.8.7"
 cpp_build = "0.5.9"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.2.1"
+cc = "1.2"
 
 [[bin]]
 name = "gyroflow"
