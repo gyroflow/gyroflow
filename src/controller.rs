@@ -278,6 +278,7 @@ pub struct Controller {
     // ---------- REDline conversion ----------
 
     play_sound: qt_method!(fn(&mut self, typ: String)),
+    data_folder: qt_method!(fn(&self) -> QUrl),
 
     image_sequence_start: qt_property!(i32),
     image_sequence_fps: qt_property!(f64),
@@ -2368,6 +2369,7 @@ impl Controller {
     fn get_username(&self) -> QString { let realname = whoami::realname(); QString::from(if realname.is_empty() { whoami::username() } else { realname }) }
     fn image_to_b64(&self, img: QImage) -> QString { util::image_to_b64(img) }
     fn copy_to_clipboard(&self, text: QString) { util::copy_to_clipboard(text) }
+    fn data_folder(&self) -> QUrl { QUrl::from(QString::from(gyroflow_core::filesystem::path_to_url(gyroflow_core::settings::data_dir().to_str().unwrap_or_default()))) }
 }
 
 #[derive(Default, QObject)]

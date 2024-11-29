@@ -422,4 +422,10 @@ MenuItem {
             ]);
         }
     }
+    LinkButton {
+        visible: Qt.platform.os != "android" && Qt.platform.os != "ios";
+        text: qsTr("Open data folder");
+        anchors.horizontalCenter: parent.horizontalCenter;
+        onClicked: filesystem.open_file_externally(controller.data_folder());
+    }
 }
