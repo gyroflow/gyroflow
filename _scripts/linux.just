@@ -82,7 +82,6 @@ install-deps:
 
         sudo chmod +x /usr/local/bin/appimagetool
 
-
         sudo pip3 install -U pip
         sudo pip3 install appimage-builder==0.9.2
     fi

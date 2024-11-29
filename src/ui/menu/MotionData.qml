@@ -704,6 +704,27 @@ MenuItem {
                             el.opened = true;
                             el.onApply.connect((obj) => {
                                 settings.setValue("CSVExportSelection", JSON.stringify(obj));
+
+                                if (Qt.platform.os == "ios") {
+                                    const exportToFolder = ext => {
+                                        const folder = filesystem.get_folder(root.lastSelectedFile.toString()? root.lastSelectedFile : window.videoArea.loadedFileUrl);
+                                        const opf = Qt.createComponent("../components/OutputPathField.qml").createObject(window, { visible: false });
+                                        opf.selectFolder(folder, function(folder_url) {
+                                            const filename = root.filename.replace(/\.[^/.]+$/, "." + ext);
+                                            controller.export_gyro_data(filesystem.get_file_url(folder_url, filename, true), obj);
+                                            opf.destroy();
+                                        });
+                                    };
+                                    messageBox(Modal.Question, qsTr("Which format do you want to use?"), [
+                                        { text: "CSV",                         clicked: function() { exportToFolder("csv"); } },
+                                        { text: "JSON", accent: true,          clicked: function() { exportToFolder("json"); } },
+                                        { text: "Universal Scene Description", clicked: function() { exportToFolder("usd"); } },
+                                        { text: "After Effects Script",        clicked: function() { exportToFolder("jsx"); } },
+                                        { text: qsTr("Cancel") },
+                                    ]);
+                                    return;
+                                }
+
                                 exportFileDialog.nameFilters = ["CSV (*.csv)", "JSON (*.json)", "Universal Scene Description (*.usd)", "After Effects Script (*.jsx)"];
                                 exportFileDialog.exportData = obj;
                                 exportFileDialog.open2();
@@ -713,6 +734,17 @@ MenuItem {
                     Action {
                         text: qsTr("Export full metadata");
                         onTriggered: {
+                            if (Qt.platform.os == "ios") {
+                                const folder = filesystem.get_folder(root.lastSelectedFile.toString()? root.lastSelectedFile : window.videoArea.loadedFileUrl);
+                                const opf = Qt.createComponent("../components/OutputPathField.qml").createObject(window, { visible: false });
+                                opf.selectFolder(folder, function(folder_url) {
+                                    const filename = root.filename.replace(/\.[^/.]+$/, ".json");
+                                    controller.export_full_metadata(filesystem.get_file_url(folder_url, filename, true), root.lastSelectedFile.toString()? root.lastSelectedFile : window.videoArea.loadedFileUrl);
+                                    opf.destroy();
+                                });
+                                return;
+                            }
+
                             exportFileDialog.nameFilters = ["JSON (*.json)"];
                             exportFileDialog.exportData = "full";
                             exportFileDialog.open2();
@@ -721,6 +753,16 @@ MenuItem {
                     Action {
                         text: qsTr("Export parsed metadata");
                         onTriggered: {
+                            if (Qt.platform.os == "ios") {
+                                const folder = filesystem.get_folder(root.lastSelectedFile.toString()? root.lastSelectedFile : window.videoArea.loadedFileUrl);
+                                const opf = Qt.createComponent("../components/OutputPathField.qml").createObject(window, { visible: false });
+                                opf.selectFolder(folder, function(folder_url) {
+                                    const filename = root.filename.replace(/\.[^/.]+$/, ".json");
+                                    controller.export_parsed_metadata(filesystem.get_file_url(folder_url, filename, true));
+                                    opf.destroy();
+                                });
+                                return;
+                            }
                             exportFileDialog.nameFilters = ["JSON (*.json)"];
                             exportFileDialog.exportData = "parsed";
                             exportFileDialog.open2();
