@@ -78,12 +78,10 @@ install-deps:
         sudo apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
         sudo apt-get install -y python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse gtk-update-icon-cache
         export HOST_ARCH=`lscpu | grep Architecture | awk {'print $2'}`
-        sudo curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${HOST_ARCH}.AppImage -o /opt/appimagetool
+        sudo curl -L https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${HOST_ARCH}.AppImage -o /usr/local/bin/appimagetool
 
-        # workaround AppImage issues with Docker
-        pushd /opt/ ; sudo chmod +x appimagetool; sed -i 's|AI\x02|\x00\x00\x00|' appimagetool; sudo ./appimagetool --appimage-extract ; popd
-        sudo mv /opt/squashfs-root /opt/appimagetool.AppDir
-        sudo ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
+        sudo chmod +x /usr/local/bin/appimagetool
+
 
         sudo pip3 install -U pip
         sudo pip3 install appimage-builder==0.9.2
@@ -330,6 +328,11 @@ deploy *param:
     mkdir -p $APP_DIR/usr/share/icons
     cp -f $PROJECT_DIR/_deployment/linux/gyroflow.png $APP_DIR/usr/share/icons/
     cp -f $PROJECT_DIR/_deployment/linux/gyroflow.svg $APP_DIR/usr/share/icons/
+
+    if [ "$IN_DOCKER" == "1" ]; then
+        # Docker doesn't support FUSE
+        export APPIMAGE_EXTRACT_AND_RUN=1
+    fi
 
     cp -rf $TARGET/* $APP_DIR/
     if [ "{{Arch}}" == "aarch64" ]; then
