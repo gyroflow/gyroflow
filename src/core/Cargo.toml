@@ -80,6 +80,7 @@ ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.2.0"
 exr = "1.73"
 opencv = { version = "0.93.3", features = ["clang-runtime"], optional = true }
+median = "0.3"
 
 wgpu = { version = "23", features = ["spirv", "naga-ir"] }
 

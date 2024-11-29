@@ -455,6 +455,7 @@ impl GyroSource {
         self.imu_transforms.imu_rotation = None;
         self.imu_transforms.acc_rotation = None;
         self.imu_transforms.imu_lpf = 0.0;
+        self.imu_transforms.imu_mf = 0;
         self.file_metadata = Default::default();
         self.clear_offsets();
     }
@@ -730,6 +731,10 @@ impl GyroSource {
                     log::error!("Filter error {:?}", e);
                 }
             }
+            if self.imu_transforms.imu_mf > 0 && !file_metadata.raw_imu.is_empty() && self.duration_ms > 0.0 {
+                let sample_rate = file_metadata.raw_imu.len() as f64 / (self.duration_ms / 1000.0);
+                super::filtering::Median::filter_gyro_forward_backward(self.imu_transforms.imu_mf, sample_rate, &mut self.raw_imu);
+            }
         } else {
             self.raw_imu.clear();
         }
@@ -807,6 +812,7 @@ impl GyroSource {
         hasher.write(self.file_url.as_bytes());
         hasher.write_u64(self.duration_ms.to_bits());
         hasher.write_u64(self.imu_transforms.imu_lpf.to_bits());
+        hasher.write_i32(self.imu_transforms.imu_mf);
         hasher.write_usize(self.raw_imu.len());
         hasher.write_usize(file_metadata.raw_imu.len());
         hasher.write_usize(self.quaternions.len());

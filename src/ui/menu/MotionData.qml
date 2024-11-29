@@ -113,6 +113,7 @@ MenuItem {
             }
 
             controller.set_imu_lpf(lpfcb.checked? lpf.value : 0);
+            controller.set_imu_median_filter(mfcb.checked? mf.value : 0);
             controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
             controller.set_acc_rotation(arot.checked? ap.value : 0, arot.checked? ar.value : 0, arot.checked? ay.value : 0);
             Qt.callLater(controller.recompute_gyro);
@@ -218,6 +219,27 @@ MenuItem {
             tooltip: qsTr("Lower cutoff frequency means more filtering");
             onValueChanged: {
                 controller.set_imu_lpf(lpfcb.checked? value : 0);
+                Qt.callLater(controller.recompute_gyro);
+            }
+        }
+    }
+    CheckBoxWithContent {
+        id: mfcb;
+        text: qsTr("Median filter");
+        onCheckedChanged: {
+            controller.set_imu_median_filter(checked? mf.value : 0);
+            Qt.callLater(controller.recompute_gyro);
+        }
+
+        NumberField {
+            id: mf;
+            unit: qsTr("samples");
+            precision: 0;
+            value: 5;
+            from: 0;
+            width: parent.width;
+            onValueChanged: {
+                controller.set_imu_median_filter(mfcb.checked? value : 0);
                 Qt.callLater(controller.recompute_gyro);
             }
         }
@@ -635,7 +657,7 @@ MenuItem {
                         type: "gyro-csv";
                         property var exportData: ({});
                         onAccepted: {
-                           if (exportData === "full") {
+                            if (exportData === "full") {
                                 controller.export_full_metadata(selectedFile, root.lastSelectedFile.toString()? root.lastSelectedFile : window.videoArea.loadedFileUrl);
                             } else if (exportData == "parsed") {
                                 controller.export_parsed_metadata(selectedFile);

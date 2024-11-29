@@ -26,6 +26,7 @@ Modal {
         "Lens profile": ["calibration_data", "light_refraction_coefficient"],
         "Motion data|gyro_source": {
             "Low pass filter":    ["lpf"],
+            "Median filter":      ["mf"],
             "Rotation":           ["rotation", "acc_rotation"],
             "Gyro bias":          ["gyro_bias"],
             "IMU orientation":    ["imu_orientation"],
@@ -98,6 +99,7 @@ Modal {
         QT_TR_NOOP("Lens profile");
         QT_TR_NOOP("Motion data");
             QT_TR_NOOP("Low pass filter");
+            QT_TR_NOOP("Median filter");
             QT_TR_NOOP("Rotation");
             QT_TR_NOOP("Gyro bias");
             QT_TR_NOOP("IMU orientation");

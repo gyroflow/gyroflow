@@ -1726,6 +1726,7 @@ dependencies = [
  "line_drawing",
  "log",
  "lru",
+ "median",
  "metal",
  "mimalloc",
  "nalgebra 0.32.6",
@@ -2327,6 +2328,15 @@ checksum = "9380b911e3e96d10c1f415da0876389aaf1b56759054eeb0de7df940c456ba1a"
 dependencies = [
  "autocfg",
  "rawpointer",
+]
+
+[[package]]
+name = "median"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "993f81eac178937d7d54dc7ba7bddd70a526bca92b36d95016add46f59d19754"
+dependencies = [
+ "generic-array",
 ]
 
 [[package]]
