@@ -672,11 +672,22 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     }
 
     let start_ms = proc.ranges_ms.first().and_then(|x| x.0);
-    proc.render(&fs_base, folder, &filename, (output_width as u32, output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
+    let mut render_filename = filename.clone();
+    if cfg!(not(any(target_os = "android", target_os = "ios"))) {
+        render_filename = format!("{filename}.tmp");
+    }
+    proc.render(&fs_base, folder, &render_filename, (output_width as u32, output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
 
     drop(proc);
 
     let output_url = gyroflow_core::filesystem::get_file_url(folder, &filename, false);
+
+    if render_filename != filename {
+        let output_url_temp = gyroflow_core::filesystem::get_file_url(folder, &render_filename, false);
+        if let Err(e) = std::fs::rename(&gyroflow_core::filesystem::url_to_path(&output_url_temp), &gyroflow_core::filesystem::url_to_path(&output_url)) {
+            ::log::error!("Failed to rename file from {output_url_temp} to {output_url}: {e:?}");
+        }
+    }
 
     let re = regex::Regex::new(r#"%[0-9]+d"#).unwrap();
     if re.is_match(&filename) {

@@ -266,6 +266,8 @@ impl<'a> FfmpegProcessor<'a> {
             self.ranges_ms.remove(0);
         }
 
+        let output_filename = output_filename.strip_suffix(".tmp").unwrap_or(output_filename);
+
         let mut output_options = Dictionary::new();
         let mut output_format = if let Some(pos) = output_filename.rfind('.') { &output_filename[pos+1..] } else { "mp4" }.to_ascii_lowercase();
         if file.path.starts_with("fd:") {
