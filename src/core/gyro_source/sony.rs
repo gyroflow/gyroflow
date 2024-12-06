@@ -593,7 +593,7 @@ fn inverse_interpolate_mesh(x_prime: f64, y_prime: f64, size: (f64, f64), mesh: 
         .with_sd_tolerance(1e-10)?;
 
     let res = Executor::new(operator, solver)
-        .configure(|state| state.max_iters(200))
+        .configure(|state| state.max_iters(400))
         .run()?;
 
     if let Some(coeffs) = res.state.best_param {
