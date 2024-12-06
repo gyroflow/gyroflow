@@ -38,7 +38,7 @@ crc32fast = "1.4.2"
 byteorder = "1.5.0"
 line_drawing = "1.0.0"
 rand = "0.8.5"
-time = { version = "0.3.36", features = ["local-offset"] }
+time = { version = "0.3.37", features = ["local-offset"] }
 itertools = "0.13.0"
 num = "0.4.3"
 base91 = "0.1.0"
@@ -47,7 +47,7 @@ enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.4.1"
 lru = "0.12"
-thiserror = "2.0.3"
+thiserror = "2.0.4"
 ciborium = "0.2.2"
 dyn-clone = "1.0.17"
 app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }
@@ -79,7 +79,7 @@ ocl = { version = "0.19.7", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.2.0"
 exr = "1.73"
-opencv = { version = "0.93.3", features = ["clang-runtime"], optional = true }
+opencv = { version = "0.93.5", features = ["clang-runtime"], optional = true }
 median = "0.3"
 
 wgpu = { version = "23", features = ["spirv", "naga-ir"] }
@@ -118,4 +118,4 @@ ndk-sys = { version = "0.6.0" }
 ndk-context = { version = "0.1.1" }
 
 [build-dependencies]
-ureq = "2.11"
+ureq = "2.12"

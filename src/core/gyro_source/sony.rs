@@ -405,6 +405,11 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (V
             coords.push(coord[1].as_f64()? / 32768.0);
         }
         if coords.len() == 4 { coords.clear(); coords.push(0.0); }
+        else if coords[0] != 8.0 {
+            log::error!("Invalid FocalPlaneDistortion data: {coords:?}");
+            coords.clear();
+            coords.push(0.0);
+        }
         coords
     } else {
         vec![0.0]
