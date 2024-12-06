@@ -12,7 +12,6 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
     if let Some(lmd) = tag_map.get(&GroupId::Custom("LensDistortion".into())) {
         let pixel_pitch    = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::PixelPitch)       as Option<&(u32, u32)>).cloned();
         let crop_size      = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::CaptureAreaSize)  as Option<&(f32, f32)>).cloned();
-        // let sensor_size_px = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::SensorSizePixels) as Option<&(u32, u32)>).cloned();
         let mut lens_compensation_enabled = false;
 
         if let Some(enabled) = lmd.get_t(TagId::Enabled) as Option<&bool> {
@@ -23,11 +22,64 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
             telemetry_parser::try_block!({
                 let pixel_pitch = pixel_pitch?;
                 let crop_size = crop_size?;
-                // let sensor_size_px = sensor_size_px?;
+
+                let video_rotation = info.video_rotation.unwrap_or_default().abs();
+                let is_vertical = video_rotation == 90 || video_rotation == 270;
+
+                let focal_length_str = tag_map.get(&GroupId::Lens)
+                    .and_then(|x| x.get_t(TagId::FocalLength) as Option<&f32>)
+                    .map(|x| format!("{:.2} mm", *x));
+
                 let sensor_height = v.get("effective_sensor_height_nm")?.as_f64()? / 1e9;
                 let coeff_scale = v.get("coeff_scale")?.as_f64()?;
-                // let focal_length_nm = v.get("focal_length_nm")?.as_f64()?;
                 let mut lens_in_ray_angle: Vec<f64> = v.get("coeffs")?.as_array()?.into_iter().filter_map(|x| Some(x.as_f64()? / coeff_scale.max(1.0) / 180.0 * std::f64::consts::PI)).collect();
+                if lens_in_ray_angle.is_empty() || sensor_height == 0.0 {
+                    let sensor_size_px = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::SensorSizePixels) as Option<&(u32, u32)>).cloned()?;
+
+                    let focal_length_mm = v.get("focal_length_nm")?.as_f64()? / 1000000.0;
+                    let sws = crop_size.0 as f64 / (sensor_size_px.0 as f64).max(1.0);
+                    let shs = crop_size.1 as f64 / (sensor_size_px.1 as f64).max(1.0);
+
+                    let sw = tag_map.get(&GroupId::Default).and_then(|x| x.get_t(TagId::SensorWidth)  as Option<&f32>).map(|x| *x).unwrap_or_default() as f64 * sws;
+                    let sh = tag_map.get(&GroupId::Default).and_then(|x| x.get_t(TagId::SensorHeight) as Option<&f32>).map(|x| *x).unwrap_or_default() as f64 * shs;
+
+                    // Create fallback lens profile without distortion correction, but only with focal length
+                    if focal_length_mm > 0.0 && sw > 0.0 && sh > 0.0 {
+                        let fx = focal_length_mm / sw * size.0 as f64;
+                        let fy = focal_length_mm / sh * size.1 as f64;
+                        let timestamp_us = (info.timestamp_ms * 1000.0).round() as i64;
+                        if let Some(lp) = md.lens_params.get_mut(&timestamp_us) {
+                            lp.focal_length = Some(focal_length_mm as f32);
+                            lp.pixel_focal_length = Some(fx as f32);
+                        }
+                        if md.lens_profile.is_none() {
+                            md.lens_profile = Some(serde_json::json!({
+                                "calibrated_by": "Not calibrated",
+                                "camera_brand": "Sony",
+                                "camera_model": input.camera_model().map(|x| x.as_str()).unwrap_or(&""),
+                                "lens_model":   focal_length_str.unwrap_or_default(),
+                                "calib_dimension":  { "w": size.0, "h": size.1 },
+                                "orig_dimension":   { "w": size.0, "h": size.1 },
+                                "output_dimension": { "w": if is_vertical { size.1 } else { size.0 }, "h": if is_vertical { size.0 } else { size.1 } },
+                                "frame_readout_time": md.frame_readout_time,
+                                "official": false,
+                                "asymmetrical": false,
+                                "note": format!("Distortion comp.: {}", if lens_compensation_enabled { "On" } else { "Off" }),
+                                "fisheye_params": {
+                                    "camera_matrix": [
+                                        [ fx, 0.0, size.0 / 2 ],
+                                        [ 0.0, fy, size.1 / 2 ],
+                                        [ 0.0, 0.0, 1.0 ]
+                                    ],
+                                    "distortion_coeffs": []
+                                },
+                                "sync_settings": { },
+                                "calibrator_version": "---"
+                            }));
+                        }
+                    }
+                    return None;
+                }
                 lens_in_ray_angle.insert(0, 0.0);
 
                 let lens_out_radius = nalgebra::DVector::from_iterator(11, (0..11).map(|i| (i as f64) / 10.0 * sensor_height));
@@ -95,17 +147,11 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                         }
 
                         if md.lens_profile.is_none() {
-                            let video_rotation = info.video_rotation.unwrap_or_default().abs();
-                            let is_vertical = video_rotation == 90 || video_rotation == 270;
-
-                            let focal_length = tag_map.get(&GroupId::Lens)
-                                .and_then(|x| x.get_t(TagId::FocalLength) as Option<&f32>)
-                                .map(|x| format!("{:.2} mm", *x));
                             md.lens_profile = Some(serde_json::json!({
                                 "calibrated_by": "Sony",
                                 "camera_brand": "Sony",
                                 "camera_model": input.camera_model().map(|x| x.as_str()).unwrap_or(&""),
-                                "lens_model":   focal_length.unwrap_or_default(),
+                                "lens_model":   focal_length_str.unwrap_or_default(),
                                 "calib_dimension":  { "w": size.0, "h": size.1 },
                                 "orig_dimension":   { "w": size.0, "h": size.1 },
                                 "output_dimension": { "w": if is_vertical { size.1 } else { size.0 }, "h": if is_vertical { size.0 } else { size.1 } },
