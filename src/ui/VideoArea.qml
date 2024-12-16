@@ -559,14 +559,18 @@ Item {
         return false;
     }
     function detectVideoSequence(folder: url, filename: string): var {
-        // url pattern, new path function, additional condition
+        // url pattern, 1st file index, new path function
         const patterns = [
-            // GoPro
-            [/(G[XH](01).+\.MP4)$/i, function(match, i) {
+            // GoPro 1-5
+            [/((?:GOPR|GP\d{2})(\d{4})\.MP4)$/i, 0, function(match, i) {
+                return (i == 0 ? "GOPR" : "GP" + i.toString().padStart(2, '0')) + match.substring(4);
+            }],
+            // GoPro 6+
+            [/(G[XH]\d{2}(\d{4})\.MP4)$/i, 1, function(match, i) {
                 return match.substring(0, 2) + i.toString().padStart(2, '0') + match.substring(4);
             }],
             // DJI Action
-            [/(DJI_\d+_(\d+)\.MP4)$/i, function(match, i) {
+            [/(DJI_\d+_(\d+)\.MP4)$/i, null, function(match, i) {
                 return match.substring(0, 9) + i.toString().padStart(3, '0') + match.substring(12);
             }],
         ];
@@ -574,9 +578,9 @@ Item {
             let match = filename.match(x[0]);
             if (match && match[1]) {
                 let list = [];
-                const firstNum = parseInt(match[2], 10);
+                const firstNum = (x[1] !== null ? x[1] : parseInt(match[2], 10));
                 for (let i = firstNum; i < firstNum + 99; ++i) { // Max 99 parts
-                    const newName = filename.replace(match[1], x[1](match[1], i));
+                    const newName = filename.replace(match[1], x[2](match[1], i));
                     if (filesystem.exists_in_folder(folder, newName)) {
                         list.push(newName);
                     } else {
