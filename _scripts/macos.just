@@ -160,7 +160,7 @@ deploy *param:
         #strip $PROJECT_DIR/target/x86_64-apple-darwin/deploy/gyroflow
 
         export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-arm64
-        export OPENCV_LINK_PATHS=$OPENCV_DIR/arm64-osx/lib,$OPENCV_DIR/arm64-osx/lib/manual-link/opencv4_thirdparty
+        export OPENCV_LINK_PATHS=$OPENCV_DIR/arm64-osx/lib
         export OPENCV_INCLUDE_PATHS=$OPENCV_DIR/arm64-osx/include/opencv4/
         export MACOSX_DEPLOYMENT_TARGET="11.0"
         rustup target add aarch64-apple-darwin
