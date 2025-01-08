@@ -7,6 +7,15 @@ use crate::{ stabilization::KernelParams, lens_profile::LensProfile };
 pub struct GoProHyperview { }
 
 impl GoProHyperview {
+    fn hyperview(uv: (f32, f32)) -> (f32, f32) {
+        let x2 = uv.0 * uv.0;
+        let y2 = uv.1 * uv.1;
+        (
+            uv.0 * (1.5805143 + x2 * (-8.1668825 + x2 * (74.5198746 + x2 * (-451.5002441 + x2 * (1551.2922363 + x2 * (-2735.5422363 + x2 * 1923.1572266))))) + y2 * -0.1086027),
+            uv.1 * (1.0238225 + y2 * -0.1025671 + x2 * (-0.2639930 + x2 * 0.2979266))
+        )
+    }
+
     /// `uv` range: (0,0)...(width, height)
     /// From hyperview to wide
     pub fn undistort_point(&self, mut uv: (f32, f32), params: &KernelParams) -> Option<(f32, f32)> {
@@ -14,9 +23,9 @@ impl GoProHyperview {
         uv = ((uv.0 / out_c2.0) - 0.5,
               (uv.1 / out_c2.1) - 0.5);
 
-        uv.0 *= 1.0 - 0.64 * uv.0.abs();
-        uv.0 *= 1.0101 * (1.0 - 0.0294118 * uv.0.abs());
-        uv.1 *= 1.0101 * (1.0 - 0.0200000 * uv.1.abs());
+        uv = Self::hyperview(uv);
+
+        uv.0 = uv.0 / 1.555555555;
 
         Some(((uv.0 + 0.5) * out_c2.0,
               (uv.1 + 0.5) * out_c2.1))
@@ -29,15 +38,21 @@ impl GoProHyperview {
         x = (x / size.0) - 0.5;
         y = (y / size.1) - 0.5;
 
-        let xs = if x < 0.0 { -1.0 } else { 1.0 };
-        let ys = if y < 0.0 { -1.0 } else { 1.0 };
+        x = x * 1.555555555;
 
-        y = ys * (-25.0 * ((1.0 - 0.0792 * y.abs()).sqrt() - 1.0));
-        x = xs * (-25.0 * (0.824621 * (0.68 - 0.0792 * x.abs()).sqrt() - 0.68));
-        x = xs * (-0.78125 * ((1.0 - 2.56 * x.abs()).sqrt() - 1.0));
+        let mut pp = (x, y);
+        for _ in 0..12 {
+            let dp = Self::hyperview(pp);
+            let diff = (dp.0 - x, dp.1 - y);
+            if diff.0.abs() < 1e-6 && diff.1.abs() < 1e-6 {
+                break;
+            }
+            pp.0 -= diff.0;
+            pp.1 -= diff.1;
+        }
 
-        ((x + 0.5) * size.0,
-         (y + 0.5) * size.1)
+        ((pp.0 + 0.5) * size.0,
+         (pp.1 + 0.5) * size.1)
     }
     pub fn adjust_lens_profile(&self, profile: &mut LensProfile) {
         let aspect = (profile.calib_dimension.w as f64 / profile.calib_dimension.h as f64 * 100.0) as usize;
@@ -55,45 +70,62 @@ impl GoProHyperview {
 
     pub fn opencl_functions(&self) -> &'static str {
         r#"
+        float2 hyperview(float2 uv) {
+            float x2 = uv.x * uv.x;
+            float y2 = uv.y * uv.y;
+            return (float2)(
+                uv.x * (1.5805143f + x2 * (-8.1668825f + x2 * (74.5198746f + x2 * (-451.5002441f + x2 * (1551.2922363f + x2 * (-2735.5422363f + x2 * 1923.1572266f))))) + y2 * -0.1086027f),
+                uv.y * (1.0238225f + y2 * -0.1025671f + x2 * (-0.2639930f + x2 * 0.2979266f))
+            );
+        }
+
         float2 digital_undistort_point(float2 uv, __global KernelParams *params) {
             float2 out_c2 = (float2)(params->output_width, params->output_height);
             uv = (uv / out_c2) - 0.5f;
 
-            uv.x *= 1.0f - 0.64f * fabs(uv.x);
-            uv.x *= 1.0101f * (1.0f - 0.0294118f * fabs(uv.x));
-            uv.y *= 1.0101f * (1.0f - 0.0200000f * fabs(uv.y));
+            uv = hyperview(uv);
 
+            uv.x = uv.x / 1.555555555f;
             uv = (uv + 0.5f) * out_c2;
-
             return uv;
         }
         float2 digital_distort_point(float2 uv, __global KernelParams *params) {
             float2 size = (float2)(params->width, params->height);
             uv = (uv / size) - 0.5f;
+            uv.x = uv.x * 1.555555555f;
 
-            float xs = uv.x < 0.0f? -1.0f : 1.0f;
-            float ys = uv.y < 0.0f? -1.0f : 1.0f;
+            float2 P = uv;
+            for (int i = 0; i < 12; ++i) {
+                float2 diff = hyperview(P) - uv;
+                if (fabs(diff.x) < 1e-6f && fabs(diff.y) < 1e-6f) {
+                    break;
+                }
+                P -= diff;
+            }
 
-            uv.y = ys * (-25.0f * (sqrt(1.0f - 0.0792f * fabs(uv.y)) - 1.0f));
-            uv.x = xs * (-25.0f * (0.824621f * sqrt(0.68f - 0.0792f * fabs(uv.x)) - 0.68f));
-            uv.x = xs * (-0.78125f * (sqrt(1.0f - 2.56f * fabs(uv.x)) - 1.0f));
-
-            uv = (uv + 0.5f) * size;
+            uv = (P + 0.5f) * size;
 
             return uv;
         }"#
     }
     pub fn wgsl_functions(&self) -> &'static str {
         r#"
+        fn hyperview(uv: vec2<f32>) -> vec2<f32> {
+            let x2 = uv.x * uv.x;
+            let y2 = uv.y * uv.y;
+            return vec2<f32>(
+                uv.x * (1.5805143 + x2 * (-8.1668825 + x2 * (74.5198746 + x2 * (-451.5002441 + x2 * (1551.2922363 + x2 * (-2735.5422363 + x2 * 1923.1572266))))) + y2 * -0.1086027),
+                uv.y * (1.0238225 + y2 * -0.1025671 + x2 * (-0.2639930 + x2 * 0.2979266))
+            );
+        }
         fn digital_undistort_point(_uv: vec2<f32>) -> vec2<f32> {
             let out_c2 = vec2<f32>(f32(params.output_width), f32(params.output_height));
             var uv = _uv;
             uv = (uv / out_c2) - 0.5;
 
-            uv.x = uv.x * (1.0 - 0.64 * abs(uv.x));
-            uv.x = uv.x * (1.0101 * (1.0 - 0.0294118 * abs(uv.x)));
-            uv.y = uv.y * (1.0101 * (1.0 - 0.0200000 * abs(uv.y)));
+            uv = hyperview(uv);
 
+            uv.x = uv.x / 1.555555555;
             uv = (uv + 0.5) * out_c2;
 
             return uv;
@@ -103,14 +135,18 @@ impl GoProHyperview {
             var uv = _uv;
             uv = (uv / size) - 0.5;
 
-            let xs = uv.x / max(0.000001, abs(uv.x));
-            let ys = uv.y / max(0.000001, abs(uv.y));
+            uv.x = uv.x * 1.555555555;
 
-            uv.y = ys * (-25.0 * (sqrt(1.0 - 0.0792 * abs(uv.y)) - 1.0));
-            uv.x = xs * (-25.0 * (0.824621 * sqrt(0.68 - 0.0792 * abs(uv.x)) - 0.68));
-            uv.x = xs * (-0.78125 * (sqrt(1.0 - 2.56 * abs(uv.x)) - 1.0));
+            var P = uv;
+            for (var i: i32 = 0; i < 12; i = i + 1) {
+                let diff = hyperview(P) - uv;
+                if (abs(diff.x) < 1e-6 && abs(diff.y) < 1e-6) {
+                    break;
+                }
+                P -= diff;
+            }
 
-            uv = (uv + 0.5) * size;
+            uv = (P + 0.5) * size;
 
             return uv;
         }"#
