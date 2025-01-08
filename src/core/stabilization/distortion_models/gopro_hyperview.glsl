@@ -1,31 +1,40 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
+vec2 hyperview(vec2 uv) {
+    float x2 = uv.x * uv.x;
+    float y2 = uv.y * uv.y;
+    return vec2(
+        uv.x * (1.5805143 + x2 * (-8.1668825 + x2 * (74.5198746 + x2 * (-451.5002441 + x2 * (1551.2922363 + x2 * (-2735.5422363 + x2 * 1923.1572266))))) + y2 * -0.1086027),
+        uv.y * (1.0238225 + y2 * -0.1025671 + x2 * (-0.2639930 + x2 * 0.2979266))
+    );
+}
+
 vec2 digital_undistort_point(vec2 uv) {
     vec2 out_c2 = vec2(params.output_width, params.output_height);
     uv = (uv / out_c2) - 0.5;
 
-    uv.x *= 1.0 - 0.64 * abs(uv.x);
-    uv.x *= 1.0101 * (1.0 - 0.0294118 * abs(uv.x));
-    uv.y *= 1.0101 * (1.0 - 0.0200000 * abs(uv.y));
+    uv = hyperview(uv);
 
-    uv = (uv + 0.5f) * out_c2;
-
+    uv.x = uv.x / 1.555555555;
+    uv = (uv + 0.5) * out_c2;
     return uv;
 }
-
 vec2 digital_distort_point(vec2 uv) {
     vec2 size = vec2(params.width, params.height);
     uv = (uv / size) - 0.5;
+    uv.x = uv.x * 1.555555555;
 
-    float xs = uv.x / max(0.000001, abs(uv.x));
-    float ys = uv.y / max(0.000001, abs(uv.y));
+    vec2 P = uv;
+    for (int i = 0; i < 12; ++i) {
+        vec2 diff = hyperview(P) - uv;
+        if (abs(diff.x) < 1e-6 && abs(diff.y) < 1e-6) {
+            break;
+        }
+        P -= diff;
+    }
 
-    uv.y = ys * (-25.0 * (sqrt(1.0 - 0.0792 * abs(uv.y)) - 1.0));
-    uv.x = xs * (-25.0 * (0.824621 * sqrt(0.68 - 0.0792 * abs(uv.x)) - 0.68));
-    uv.x = xs * (-0.78125 * (sqrt(1.0 - 2.56 * abs(uv.x)) - 1.0));
-
-    uv = (uv + 0.5) * size;
+    uv = (P + 0.5) * size;
 
     return uv;
 }

@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "e6cd33c" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "c0eeb3b" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", rev = "bf7b41d", features = ["field_access"] }
 
@@ -26,7 +26,7 @@ argmin-math = { version = "0.4.0", default-features = false, features = ["nalgeb
 mimalloc = { version = "0.1.43", default-features = false }
 nalgebra = { version = "0.32", features = ["serde-serialize"] }
 rayon = "1.10"
-biquad = "0.4.2"
+biquad = "0.5.0"
 fastrand = "2.3.0"
 lazy_static = "1.5.0"
 parking_lot = "0.12.3"
@@ -39,7 +39,7 @@ byteorder = "1.5.0"
 line_drawing = "1.0.0"
 rand = "0.8.5"
 time = { version = "0.3.37", features = ["local-offset"] }
-itertools = "0.13.0"
+itertools = "0.14.0"
 num = "0.4.3"
 base91 = "0.1.0"
 bitflags = "2.6.0"
