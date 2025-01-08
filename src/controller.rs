@@ -286,6 +286,8 @@ pub struct Controller {
 
     preview_resolution: i32,
     processing_resolution: i32,
+    sync_rank: Vec<f32>,
+    sync_ratio: f64,
 
     current_fov: qt_property!(f64; NOTIFY processing_info_changed),
     current_minimal_fov: qt_property!(f64; NOTIFY processing_info_changed),
@@ -306,6 +308,8 @@ impl Controller {
         Self {
             preview_resolution: -1,
             processing_resolution: 720,
+            sync_rank: vec![],
+            sync_ratio: 0.016,
             ..Default::default()
         }
     }
@@ -421,6 +425,14 @@ impl Controller {
                 for x in offsets {
                     ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
                     let new_ts = ((x.0 - x.1) * 1000.0) as i64;
+                    //Here the offsets are checked
+                    if !this.sync_rank.is_empty(){
+                        let index = ((x.0 - x.1) as f64 / (this.sync_ratio*1000.0)).round() as usize;
+                        if index < this.sync_rank.len() && this.sync_rank[index] < 20.0{
+                            println!("be={}",this.sync_rank[index]);
+                            continue
+                        }
+                    }
                     // Remove existing offsets within 100ms range
                     gyro.remove_offsets_near(new_ts, 100.0);
                     gyro.set_offset(new_ts, x.1);
@@ -554,9 +566,22 @@ impl Controller {
 
     fn get_optimal_sync_points(&mut self, target_sync_points: usize) -> QString {
         let dur_ms = self.stabilizer.params.read().get_scaled_duration_ms();
-        let trim_ranges = self.stabilizer.params.read().trim_ranges.iter().map(|x| (x.0 * dur_ms / 1000.0, x.1 * dur_ms / 1000.0)).collect::<Vec<_>>();
+        //let trim_ranges = self.stabilizer.params.read().trim_ranges.iter().map(|x| (x.0 * dur_ms / 1000.0, x.1 * dur_ms / 1000.0)).collect::<Vec<_>>();
+        let trim_ranges = {
+            let params = self.stabilizer.params.read();
+            let original_trim_ranges = params.trim_ranges.iter();
+            if original_trim_ranges.clone().next().is_none() {
+                vec![(0.0, dur_ms as f64 / 1000.0)]
+            } else {
+                original_trim_ranges.map(|x| (x.0 * dur_ms as f64 / 1000.0, x.1 * dur_ms as f64 / 1000.0)).collect()
+            }
+        };
+
         if let Some(mut optsync) = core::synchronization::optimsync::OptimSync::new(&self.stabilizer.gyro.read()) {
-            let s: String = optsync.run(target_sync_points, trim_ranges).iter().map(|x| x / dur_ms).map(|x| x.to_string()).join(";").chars().collect();
+            let (points, rank,ratio) = optsync.run(target_sync_points, trim_ranges);
+            self.sync_rank = rank.clone();
+            self.sync_ratio = ratio;
+            let s: String = points.iter().map(|x| x / dur_ms).map(|x| x.to_string()).join(";").chars().collect();
             QString::from(s)
         } else {
             QString::default()

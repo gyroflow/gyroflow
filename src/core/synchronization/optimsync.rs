@@ -70,7 +70,7 @@ impl OptimSync {
         &mut self,
         target_sync_points: usize,
         trim_ranges_s: Vec<(f64, f64)>,
-    ) -> Vec<f64> {
+    ) -> (Vec<f64>, Vec<f32>, f64) {
         let gyro_c32: Vec<Vec<Complex<f32>>> = self
             .gyro
             .iter()
@@ -139,6 +139,8 @@ impl OptimSync {
             })
             .collect();
 
+        let rank_clone = rank.clone();
+
         for i in 0..rank.len() {
             let time = (i * step_size_samples) as f64 / self.sample_rate;
             if rank[i] < 100.0 || !trim_ranges_s.iter().any(|x| time >= x.0 && time <= x.1) {
@@ -203,7 +205,7 @@ impl OptimSync {
         //     plt.show()
         // }
         selected_sync_points.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-        selected_sync_points
+        (selected_sync_points, rank_clone, (step_size_samples as f64 / self.sample_rate))
     }
 }
 

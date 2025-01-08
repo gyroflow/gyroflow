@@ -151,11 +151,10 @@ MenuItem {
         function doSync(): void {
             let maxPoints = maxSyncPoints.value;
             let sync_points = null;
+            //where the data is used to check offsets.
+            sync_points = controller.get_optimal_sync_points(maxPoints);
 
-            if (experimentalAutoSyncPoints.checked) {
-                sync_points = controller.get_optimal_sync_points(maxPoints);
-            }
-            if (!sync_points) {
+            if (!sync_points || !experimentalAutoSyncPoints.checked) {
                 let ranges = [];
                 const trimRanges = videoArea.timeline.getTrimRanges();
                 if (trimRanges.length > 1) {
