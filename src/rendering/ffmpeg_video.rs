@@ -337,7 +337,7 @@ impl<'a> VideoTranscoder<'a> {
                                     // let mut contrast: c_int = 0;
                                     // let mut saturation: c_int = 0;
                                     // ffi::sws_getColorspaceDetails(conv.as_mut_ptr(), &mut dummy.as_mut_ptr(), &mut src_range, &mut dummy.as_mut_ptr(), &mut dst_range, &mut brightness, &mut contrast, &mut saturation);
-                                    let coefs = ffi::sws_getCoefficients(ffi::SWS_CS_DEFAULT);
+                                    let coefs = ffi::sws_getCoefficients(ffi::SWS_CS_ITU709);
                                     if final_frame.color_range() == util::color::Range::JPEG {
                                         src_range |= 1;
                                     }
