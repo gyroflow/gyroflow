@@ -47,7 +47,7 @@ enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.4.1"
 lru = "0.12"
-thiserror = "2.0.9"
+thiserror = "2.0.10"
 ciborium = "0.2.2"
 dyn-clone = "1.0.17"
 app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }
@@ -93,7 +93,8 @@ core-foundation-sys = "0.8.7"
 version = "0.58.0"
 features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation", "Win32_System_LibraryLoader",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
-             "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry" ]
+             "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry",
+             "Win32_Storage_Packaging_Appx", "Win32_Storage_FileSystem" ]
 
 [features]
 default = []
