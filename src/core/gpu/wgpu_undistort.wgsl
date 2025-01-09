@@ -45,8 +45,8 @@ struct KernelParams {
     pixel_value_limit:        f32, // 16
     light_refraction_coefficient: f32, // 4
     plane_index:              i32, // 8
-    reserved1:                f32, // 12
-    reserved2:                f32, // 16
+    shutter_speed:            f32, // 12
+    shutter_samples:          i32, // 16
     ewa_coeffs_p:             vec4<f32>, // 16
     ewa_coeffs_q:             vec4<f32>, // 16
 }
@@ -506,7 +506,7 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
         sy = u32(min(params.height, max(0, i32(floor(0.5 + out_pos.y)))));
     }
     if (params.matrix_count > 1) {
-        let idx: u32 = u32((params.matrix_count / 2) * 14); // Use middle matrix
+        let idx: u32 = u32((params.matrix_count / 2) * 14 * params.shutter_samples); // Use middle matrix
         let uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k1, params.k2, params.k3);
         if (uv.x > -99998.0) {
             if (bool(flags & 16)) { // Horizontal RS

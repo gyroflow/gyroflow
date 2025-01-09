@@ -50,8 +50,8 @@ layout(std140, binding = 2) uniform KernelParams {
     float pixel_value_limit;        // 16
     float light_refraction_coefficient; // 4
     int plane_index;                // 8
-    float reserved1;                // 12
-    float reserved2;                // 16
+    float shutter_speed;            // 12
+    int shutter_samples;            // 16
     vec4 ewa_coefs_p;               // 16
     vec4 ewa_coefs_q;               // 16
 } params;
@@ -112,7 +112,7 @@ void draw_safe_area(inout vec4 out_pix, float x, float y) {
 }
 
 float get_param(float row, float idx) {
-    int size = bool(params.flags & 16)? params.width : params.height;
+    int size = (bool(params.flags & 16)? params.width : params.height) * params.shutter_samples;
     return texture(texParams, vec2(idx / 13.0, row / float(size - 1))).r;
 }
 
@@ -213,7 +213,7 @@ void main() {
         sy = min(params.height, max(0, floor(0.5 + texPos.y)));
     }
     if (params.matrix_count > 1) {
-        float idx = params.matrix_count / 2.0; // Use middle matrix
+        float idx = (params.matrix_count / 2.0) * params.shutter_samples; // Use middle matrix
         vec2 uv = rotate_and_distort(texPos, idx);
         if (uv.x > -99998.0) {
             if (bool(params.flags & 16)) { // Horizontal RS
@@ -225,7 +225,7 @@ void main() {
     }
     ///////////////////////////////////////////////////////////////////
 
-    float idx = min(sy, params.matrix_count - 1.0);
+    float idx = min(sy, params.matrix_count - 1.0) * params.shutter_samples;
 
     vec2 uv = rotate_and_distort(texPos, idx);
     if (uv.x > -99998.0) {

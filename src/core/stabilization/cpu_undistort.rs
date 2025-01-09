@@ -466,7 +466,7 @@ impl Stabilization {
                 (out_pos.y.round() as i32).min(params.height).max(0) as usize
             };
             if params.matrix_count > 1 {
-                let idx = params.matrix_count as usize / 2;
+                let idx = (params.matrix_count as usize / 2) * params.shutter_samples as usize;
                 if let Some(pt) = Stabilization::rotate_and_distort((out_pos.x, out_pos.y), idx, params, matrices, distortion_model, digital_lens, r_limit_sq, mesh_data) {
                     if (params.flags & 16) == 16 { // Horizontal RS
                         sy = (pt.0.round() as i32).min(params.width).max(0) as usize;
@@ -477,7 +477,7 @@ impl Stabilization {
             }
             ///////////////////////////////////////////////////////////////////
 
-            let idx = sy.min(params.matrix_count as usize - 1);
+            let idx = sy.min(params.matrix_count as usize - 1) * params.shutter_samples as usize;
             let mut uv = Stabilization::rotate_and_distort((out_pos.x, out_pos.y), idx, params, matrices, distortion_model, digital_lens, r_limit_sq, mesh_data)?;
             let mut frame_size = (params.width as f32, params.height as f32);
             if params.input_rotation != 0.0 {

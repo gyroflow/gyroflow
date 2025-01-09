@@ -93,7 +93,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
                 (y.round() as i32).min(transform.kernel_params.height).max(0) as usize
             };
             if transform.kernel_params.matrix_count > 1 {
-                let idx = transform.kernel_params.matrix_count as usize / 2;
+                let idx = (transform.kernel_params.matrix_count as usize / 2) * transform.kernel_params.shutter_samples as usize;
                 if let Some(pt) = Stabilization::rotate_and_distort((x as f32, y as f32), idx, &transform.kernel_params, &transform.matrices, &compute_params.distortion_model, compute_params.digital_lens.as_ref(), r_limit_sq, &mesh_data) {
                     if compute_params.frame_readout_direction.is_horizontal() {
                         sy = (pt.0.round() as i32).min(transform.kernel_params.width).max(0) as usize;
@@ -104,7 +104,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
             }
             ///////////////////////////////////////////////////////////////////
 
-            let idx = sy.min(transform.kernel_params.matrix_count as usize - 1);
+            let idx = sy.min(transform.kernel_params.matrix_count as usize - 1) * transform.kernel_params.shutter_samples as usize;
             Stabilization::rotate_and_distort((x as f32, y as f32), idx, &transform.kernel_params, &transform.matrices, &compute_params.distortion_model, compute_params.digital_lens.as_ref(), r_limit_sq, &mesh_data)
         });
 

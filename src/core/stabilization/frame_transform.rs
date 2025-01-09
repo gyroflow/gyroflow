@@ -200,24 +200,38 @@ impl FrameTransform {
         };
         // let height_scale = params.video_height as f64 / params.height.max(1) as f64;
 
+        let shutter_speed_ms = 1000.0 / 60.0;
+        let shutter_samples = 15;
+
+
+        let shutter_start_time = -(shutter_speed_ms / 2.0);
+        let shutter_time_step = shutter_speed_ms / shutter_samples as f64;
+
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
-        let quat1 = gyro.org_quat_at_timestamp(timestamp_ms).inverse();
-        let smoothed_quat1 = gyro.smoothed_quat_at_timestamp(timestamp_ms);
+        //let quat1 = gyro.org_quat_at_timestamp(timestamp_ms).inverse();
+        //let smoothed_quat1 = gyro.smoothed_quat_at_timestamp(timestamp_ms);
 
         // Only compute 1 matrix if not using rolling shutter correction
         let rows = if frame_readout_time.abs() > 0.0 { if params.frame_readout_direction.is_horizontal() { params.width } else { params.height } } else { 1 };
 
-        let matrices = (0..rows).into_par_iter().map(|y| {
+        let matrices = (0..rows * shutter_samples).into_par_iter().map(|i| {
+            let y = i / shutter_samples;
+            let shutter_sample = i % shutter_samples;
+
             let quat_time = if frame_readout_time.abs() > 0.0 {
                 start_ts + row_readout_time * y as f64
             } else {
                 start_ts
             };
-            let quat = smoothed_quat1
-                     * quat1
-                     * gyro.org_quat_at_timestamp(quat_time);
 
+            let shutter_sample_time = shutter_start_time + (shutter_sample as f64) * shutter_time_step;
+
+            // let diff = gyro.org_quat_at_timestamp(timestamp_ms).inverse() * gyro.org_quat_at_timestamp(timestamp_ms + shutter_sample_time);
+
+            let quat = gyro.smoothed_quat_at_timestamp(timestamp_ms)
+                    * gyro.org_quat_at_timestamp(timestamp_ms).inverse()
+                    * gyro.org_quat_at_timestamp(quat_time + shutter_sample_time);
 
             let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
             if params.framebuffer_inverted {
@@ -282,7 +296,7 @@ impl FrameTransform {
         }
 
         let kernel_params = KernelParams {
-            matrix_count:  matrices.len() as i32,
+            matrix_count:  matrices.len() as i32 / shutter_samples as i32,
             f:             [scaled_k[(0, 0)] as f32, scaled_k[(1, 1)] as f32],
             c:             [scaled_k[(0, 2)] as f32, scaled_k[(1, 2)] as f32],
             k:             distortion_coeffs.iter().map(|x| *x as f32).collect::<Vec<f32>>().try_into().unwrap(),
@@ -298,6 +312,8 @@ impl FrameTransform {
             translation3d: [0.0, 0.0, 0.0, 0.0], // currently unused
             digital_lens_params,
             light_refraction_coefficient: light_refraction_coefficient as f32,
+            shutter_speed: shutter_speed_ms as f32,
+            shutter_samples: shutter_samples as i32,
             ..Default::default()
         };
 

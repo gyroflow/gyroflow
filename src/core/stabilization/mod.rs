@@ -125,8 +125,8 @@ pub struct KernelParams {
     pub pixel_value_limit:        f32, // 16
     pub light_refraction_coefficient: f32, // 4
     pub plane_index:              i32, // 8
-    pub reserved1:                f32, // 12
-    pub reserved2:                f32, // 16
+    pub shutter_speed:            f32, // 12
+    pub shutter_samples:          i32, // 16
     pub ewa_coeffs_p:             [f32; 4], // 16
     pub ewa_coeffs_q:             [f32; 4], // 16
 }

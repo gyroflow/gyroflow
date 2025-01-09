@@ -47,8 +47,8 @@ typedef struct {
     float pixel_value_limit;         // 16
     float light_refraction_coefficient; // 4
     int plane_index;                 // 8
-    float reserved1;                 // 12
-    float reserved2;                 // 16
+    float shutter_speed;             // 12
+    int shutter_samples;             // 16
     float4 ewa_coeffs_p;             // 16
     float4 ewa_coeffs_q;             // 16
 } KernelParams;
@@ -478,7 +478,7 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
     return (float2)(-99999.0f, -99999.0f);
 }
 
-float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global const float *matrices, __global const float *mesh_data) {
+float2 undistort_coord(int sample, float2 out_pos, __global KernelParams *params, __global const float *matrices, __global const float *mesh_data) {
     out_pos.x = map_coord(out_pos.x, (float)params->output_rect.x, (float)(params->output_rect.x + params->output_rect.z), 0.0f, (float)params->output_width ) + params->translation2d.x;
     out_pos.y = map_coord(out_pos.y, (float)params->output_rect.y, (float)(params->output_rect.y + params->output_rect.w), 0.0f, (float)params->output_height) + params->translation2d.y;
 
@@ -519,7 +519,7 @@ float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global c
         sy = min((int)params->height, max(0, (int)round(out_pos.y)));
     }
     if (params->matrix_count > 1) {
-        int idx = (params->matrix_count / 2) * 14; // Use middle matrix
+        int idx = (params->matrix_count / 2) * 14 * params->shutter_samples + 14 * sample; // Use middle matrix
         float2 uv = rotate_and_distort(out_pos, idx, params, matrices, mesh_data);
         if (uv.x > -99998.0f) {
             if ((params->flags & 16)) { // Horizontal RS
@@ -531,7 +531,7 @@ float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global c
     }
     ///////////////////////////////////////////////////////////////////
 
-    int idx = min(sy, params->matrix_count - 1) * 14;
+    int idx = min(sy, params->matrix_count - 1) * 14 * params->shutter_samples + 14 * sample;
     float2 uv = rotate_and_distort(out_pos, idx, params, matrices, mesh_data);
 
     float2 frame_size = (float2)((float)params->width, (float)params->height);
@@ -589,57 +589,68 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
             return;
         }
 
-        float2 out_pos = (float2)((float)buf_x, (float)buf_y);
-        float2 uv = undistort_coord(out_pos, params, matrices, mesh_data);
-        float4 jac = (float4)(1.0f, 0.0f, 0.0f, 1.0f);
+        float weight = 1.0f / (float)params->shutter_samples;
 
-#       if INTERPOLATION > 8
-            const float eps = 0.01f;
-            float2 xyx = undistort_coord(out_pos + (float2)(eps, 0.0f), params, matrices, mesh_data) - uv;
-            float2 xyy = undistort_coord(out_pos + (float2)(0.0f, eps), params, matrices, mesh_data) - uv;
-            jac = (float4)(xyx.x / eps, xyy.x / eps, xyx.y / eps, xyy.y / eps);
-#       endif
+        DATA_TYPEF tmp_pix;
 
-        DATA_TYPE final_pix;
-        if (uv.x > -99998.0f) {
-            if (params->background_mode == 3) { // margin with feather
-                float widthf  = (params->width  - 1);
-                float heightf = (params->height - 1);
+        for (int sample = 0; sample < params->shutter_samples; ++sample) {
 
-                float feather = max(0.0001f, params->background_margin_feather * heightf);
-                float2 pt2 = uv;
-                float alpha = 1.0f;
-                if ((uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather)) {
-                    alpha = fmax(0.0f, fmin(1.0f, fmin(fmin(widthf - uv.x, heightf - uv.y), fmin(uv.x, uv.y)) / feather));
-                    pt2 /= (float2)(widthf, heightf);
-                    pt2 = ((pt2 - 0.5f) * (1.0f - params->background_margin)) + 0.5f;
-                    pt2 *= (float2)(widthf, heightf);
-                }
+            float2 out_pos = (float2)((float)buf_x, (float)buf_y);
+            float2 uv = undistort_coord(sample, out_pos, params, matrices, mesh_data);
+            float4 jac = (float4)(1.0f, 0.0f, 0.0f, 1.0f);
 
-                float2 frame_size = (float2)((float)params->width, (float)params->height);
-                if (params->input_rotation != 0.0f) {
-                    float rotation = params->input_rotation * (M_PI_F / 180.0f);
-                    float2 size = frame_size;
-                    frame_size = fabs(round(rotate_point(size, rotation, (float2)(0.0f, 0.0f), (float2)(0.0f, 0.0f))));
-                }
-                uv.x  = map_coord(uv.x,  0.0f, (float)frame_size.x, (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
-                uv.y  = map_coord(uv.y,  0.0f, (float)frame_size.y, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
-                pt2.x = map_coord(pt2.x, 0.0f, (float)frame_size.x, (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
-                pt2.y = map_coord(pt2.y, 0.0f, (float)frame_size.y, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
+    #       if INTERPOLATION > 8
+                const float eps = 0.01f;
+                float2 xyx = undistort_coord(sample, out_pos + (float2)(eps, 0.0f), params, matrices, mesh_data) - uv;
+                float2 xyy = undistort_coord(sample, out_pos + (float2)(0.0f, eps), params, matrices, mesh_data) - uv;
+                jac = (float4)(xyx.x / eps, xyy.x / eps, xyx.y / eps, xyy.y / eps);
+    #       endif
 
-                DATA_TYPEF c1 = sample_input_at(uv,  jac, srcptr, params, drawing, bg);
-                DATA_TYPEF c2 = sample_input_at(pt2, jac, srcptr, params, drawing, bg); // FIXME: jac should be adjusted for pt2
-                final_pix = DATA_CONVERT(c1 * alpha + c2 * (1.0f - alpha));
-                draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params, drawing);
-                draw_safe_area(&final_pix, x, y, params);
-                *out_pix = final_pix;
-                return;
+            DATA_TYPEF sample_pix;
+            if (uv.x > -99998.0f) {
+                /*if (params->background_mode == 3) { // margin with feather
+                    float widthf  = (params->width  - 1);
+                    float heightf = (params->height - 1);
+
+                    float feather = max(0.0001f, params->background_margin_feather * heightf);
+                    float2 pt2 = uv;
+                    float alpha = 1.0f;
+                    if ((uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather)) {
+                        alpha = fmax(0.0f, fmin(1.0f, fmin(fmin(widthf - uv.x, heightf - uv.y), fmin(uv.x, uv.y)) / feather));
+                        pt2 /= (float2)(widthf, heightf);
+                        pt2 = ((pt2 - 0.5f) * (1.0f - params->background_margin)) + 0.5f;
+                        pt2 *= (float2)(widthf, heightf);
+                    }
+
+                    float2 frame_size = (float2)((float)params->width, (float)params->height);
+                    if (params->input_rotation != 0.0f) {
+                        float rotation = params->input_rotation * (M_PI_F / 180.0f);
+                        float2 size = frame_size;
+                        frame_size = fabs(round(rotate_point(size, rotation, (float2)(0.0f, 0.0f), (float2)(0.0f, 0.0f))));
+                    }
+                    uv.x  = map_coord(uv.x,  0.0f, (float)frame_size.x, (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
+                    uv.y  = map_coord(uv.y,  0.0f, (float)frame_size.y, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
+                    pt2.x = map_coord(pt2.x, 0.0f, (float)frame_size.x, (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
+                    pt2.y = map_coord(pt2.y, 0.0f, (float)frame_size.y, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
+
+                    DATA_TYPEF c1 = sample_input_at(uv,  jac, srcptr, params, drawing, bg);
+                    DATA_TYPEF c2 = sample_input_at(pt2, jac, srcptr, params, drawing, bg); // FIXME: jac should be adjusted for pt2
+                    final_pix = DATA_CONVERT(c1 * alpha + c2 * (1.0f - alpha));
+                    draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params, drawing);
+                    draw_safe_area(&final_pix, x, y, params);
+                    *out_pix = final_pix;
+                    return;
+                }*/
+
+                sample_pix = sample_input_at(uv, jac, srcptr, params, drawing, bg);
+            } else {
+                sample_pix = bg;
             }
 
-            final_pix = DATA_CONVERT(sample_input_at(uv, jac, srcptr, params, drawing, bg));
-        } else {
-            final_pix = DATA_CONVERT(bg);
+            tmp_pix += sample_pix * weight;
         }
+        DATA_TYPE final_pix = DATA_CONVERT(tmp_pix);
+
         draw_pixel(&final_pix, x, y, false, max(params->width, params->output_width), params, drawing);
         draw_safe_area(&final_pix, x, y, params);
 

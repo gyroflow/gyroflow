@@ -144,7 +144,7 @@ impl WgpuWrapper {
     }
 
     pub fn new(params: &KernelParams, wgpu_format: (wgpu::TextureFormat, &str, bool), distortion_model: DistortionModel, digital_lens: Option<DistortionModel>, buffers: &Buffers, mut drawing_len: usize) -> Result<Self, WgpuError> {
-        let max_matrix_count = 14 * if (params.flags & 16) == 16 { params.width } else { params.height } as usize;
+        let max_matrix_count = 14 * params.shutter_samples as usize * if (params.flags & 16) == 16 { params.width } else { params.height } as usize;
 
         if params.height < 4 || params.output_height < 4 || buffers.input.size.0 < 16 || buffers.input.size.2 < 16 || buffers.output.size.0 < 16 || buffers.output.size.2 < 16 || params.width > 16384 || params.output_width > 16384 {
             return Err(WgpuError::ParamCheck);

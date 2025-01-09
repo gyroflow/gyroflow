@@ -284,7 +284,7 @@ impl OclWrapper {
                 .devices(ctx.device)
                 .build(&ctx.context)?;
 
-            let max_matrix_count = 14 * if (params.flags & 16) == 16 { params.width } else { params.height };
+            let max_matrix_count = 14 * params.shutter_samples * if (params.flags & 16) == 16 { params.width } else { params.height };
             let flags = MemFlags::new().read_only().host_write_only();
 
             let buf_params   = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(std::mem::size_of::<KernelParams>()).build()?;
