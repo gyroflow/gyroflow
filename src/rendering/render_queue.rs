@@ -1424,13 +1424,17 @@ impl RenderQueue {
 
             if let Ok(mut sync_params) = serde_json::from_value(sync_settings) as serde_json::Result<synchronization::SyncParams> {
                 if sync_params.max_sync_points > 0 {
-                    let chunks = 1.0 / sync_params.max_sync_points as f64;
-                    let start = chunks / 2.0;
-                    let mut timestamps_fract: Vec<f64> = (0..sync_params.max_sync_points).map(|i| start + (i as f64 * chunks)).collect();
+                    let mut timestamps_fract = stab.get_optimal_sync_points(sync_params.max_sync_points);
 
-                    if !sync_params.custom_sync_pattern.is_null() {
-                        let v = Self::resolve_syncpoint_pattern(&sync_params.custom_sync_pattern, duration_ms, fps);
-                        timestamps_fract = v.into_iter().filter(|v| *v <= duration_ms).map(|v| v / duration_ms).collect();
+                    if timestamps_fract.is_empty() || !sync_params.auto_sync_points {
+                        let chunks = 1.0 / sync_params.max_sync_points as f64;
+                        let start = chunks / 2.0;
+                        timestamps_fract = (0..sync_params.max_sync_points).map(|i| start + (i as f64 * chunks)).collect();
+
+                        if !sync_params.custom_sync_pattern.is_null() {
+                            let v = Self::resolve_syncpoint_pattern(&sync_params.custom_sync_pattern, duration_ms, fps);
+                            timestamps_fract = v.into_iter().filter(|v| *v <= duration_ms).map(|v| v / duration_ms).collect();
+                        }
                     }
 
                     #[cfg(not(any(target_os = "ios", target_os = "android")))]
@@ -1460,6 +1464,15 @@ impl RenderQueue {
                                 for x in offsets {
                                     ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
                                     let new_ts = ((x.0 - x.1) * 1000.0) as i64;
+                                    { // Check the offset
+                                        let sync_data = stab2.sync_data.read();
+                                        if !sync_data.rank.is_empty() {
+                                            let index = ((x.0 - x.1) as f64 / (sync_data.ratio * 1000.0)).round() as usize;
+                                            if index < sync_data.rank.len() && sync_data.rank[index] < 20.0 {
+                                                continue;
+                                            }
+                                        }
+                                    }
                                     // Remove existing offsets within 100ms range
                                     gyro.remove_offsets_near(new_ts, 100.0);
                                     gyro.set_offset(new_ts, x.1);

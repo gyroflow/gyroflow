@@ -66,6 +66,20 @@ pub struct InputFile {
 }
 
 #[derive(Clone)]
+pub struct SyncData {
+    pub rank: Vec<f32>,
+    pub ratio: f64,
+}
+impl Default for SyncData {
+    fn default() -> Self {
+        Self {
+            rank: vec![],
+            ratio: 0.016,
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct StabilizationManager {
     pub gyro: Arc<RwLock<GyroSource>>,
     pub lens: Arc<RwLock<LensProfile>>,
@@ -93,7 +107,9 @@ pub struct StabilizationManager {
 
     pub keyframes: Arc<RwLock<KeyframeManager>>,
 
-    pub params: Arc<RwLock<StabilizationParams>>
+    pub params: Arc<RwLock<StabilizationParams>>,
+
+    pub sync_data: Arc<RwLock<SyncData>>,
 }
 
 impl Default for StabilizationManager {
@@ -130,6 +146,8 @@ impl Default for StabilizationManager {
             keyframes: Arc::new(RwLock::new(KeyframeManager::new())),
 
             camera_id: Arc::new(RwLock::new(None)),
+
+            sync_data: Arc::new(RwLock::new(SyncData::default())),
         }
     }
 }
@@ -1844,6 +1862,30 @@ impl StabilizationManager {
             KeyframeType::SmoothingParamRoll |
             KeyframeType::SmoothingParamYaw => self.invalidate_smoothing(),
             _ => { }
+        }
+    }
+
+    pub fn get_optimal_sync_points(&self, target_sync_points: usize) -> Vec<f64> {
+        let dur_ms = self.params.read().get_scaled_duration_ms();
+        let trim_ranges = {
+            let params = self.params.read();
+            if params.trim_ranges.is_empty() {
+                vec![(0.0, dur_ms as f64 / 1000.0)]
+            } else {
+                params.trim_ranges.iter().map(|x| (x.0 * dur_ms / 1000.0, x.1 * dur_ms / 1000.0)).collect()
+            }
+        };
+
+        if let Some(mut optsync) = synchronization::optimsync::OptimSync::new(&self.gyro.read()) {
+            let (points, rank, ratio) = optsync.run(target_sync_points, trim_ranges);
+            {
+                let mut sync_data = self.sync_data.write();
+                sync_data.rank = rank;
+                sync_data.ratio = ratio;
+            }
+            points.iter().map(|x| x / dur_ms).collect()
+        } else {
+            Vec::new()
         }
     }
 }

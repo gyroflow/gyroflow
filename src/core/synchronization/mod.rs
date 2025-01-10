@@ -42,7 +42,8 @@ pub struct SyncParams {
     pub of_method: usize,
     pub offset_method: usize,
     pub pose_method: usize,
-    pub custom_sync_pattern: serde_json::Value
+    pub custom_sync_pattern: serde_json::Value,
+    pub auto_sync_points: bool
 }
 
 #[derive(Clone)]

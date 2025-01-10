@@ -9,7 +9,6 @@ import QtQuick.Dialogs
 import "."
 import "components/"
 import "menu/" as Menu
-import "Util.js" as Util
 
 Rectangle {
     id: window;
