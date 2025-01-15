@@ -477,14 +477,13 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (V
     })().unwrap_or((0, 0));
 
     // Precompute spline coeffs for the y coordinate
-    const MAX_GRID_SIZE: usize = 9;
-    let mut a = [0.0; MAX_GRID_SIZE];
-    let mut b = [0.0; MAX_GRID_SIZE];
-    let mut c = [0.0; MAX_GRID_SIZE];
-    let mut d = [0.0; MAX_GRID_SIZE];
-    let mut alpha = [0.0; MAX_GRID_SIZE - 1];
-    let mut mu = [0.0; MAX_GRID_SIZE];
-    let mut z = [0.0; MAX_GRID_SIZE];
+    let mut a = [0.0; splines::MAX_GRID_SIZE];
+    let mut b = [0.0; splines::MAX_GRID_SIZE];
+    let mut c = [0.0; splines::MAX_GRID_SIZE];
+    let mut d = [0.0; splines::MAX_GRID_SIZE];
+    let mut alpha = [0.0; splines::MAX_GRID_SIZE - 1];
+    let mut mu = [0.0; splines::MAX_GRID_SIZE];
+    let mut z = [0.0; splines::MAX_GRID_SIZE];
 
     let mut mesh = Vec::with_capacity(divisions.0 * divisions.1 * 2 + 9 + (divisions.1*4*2));
     mesh.push(0.0); // offset to focal_plane_data

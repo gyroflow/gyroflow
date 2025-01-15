@@ -14,7 +14,7 @@ use crate::gpu::{ BufferDescription, BufferSource };
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 use metal::foreign_types::ForeignTypeRef;
 
-use wgpu::{ Origin3d, Extent3d, TextureAspect, ImageCopyTexture, ImageCopyBuffer, ImageDataLayout };
+use wgpu::{ Origin3d, Extent3d, TextureAspect, TexelCopyTextureInfo, TexelCopyBufferInfo, TexelCopyBufferLayout };
 
 pub enum NativeTexture {
     #[cfg(any(target_os = "windows", target_os = "linux"))]
@@ -274,7 +274,7 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
             queue.write_texture(
                 in_texture.wgpu_texture.as_ref().unwrap().as_image_copy(),
                 bytemuck::cast_slice(buffer),
-                ImageDataLayout { offset: 0, bytes_per_row: Some(buf.size.2 as u32), rows_per_image: None },
+                TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(buf.size.2 as u32), rows_per_image: None },
                 size,
             );
         },
@@ -296,8 +296,8 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
             if let Some(in_buf) = &in_texture.wgpu_buffer {
                 if let Some(in_tex) = &in_texture.wgpu_texture {
                     encoder.copy_buffer_to_texture(
-                        ImageCopyBuffer { buffer: in_buf, layout: ImageDataLayout { offset: 0, bytes_per_row: Some(padded_stride), rows_per_image: None } },
-                        ImageCopyTexture { texture: in_tex, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        TexelCopyBufferInfo { buffer: in_buf, layout: TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(padded_stride), rows_per_image: None } },
+                        TexelCopyTextureInfo { texture: in_tex, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                         size
                     );
                 }
@@ -309,8 +309,8 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
                 temp_texture = Some(create_texture_from_metal(device, *texture as *mut metal::MTLTexture, buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_SRC));
 
                 encoder.copy_texture_to_texture(
-                    ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                    ImageCopyTexture { texture: in_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    TexelCopyTextureInfo { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    TexelCopyTextureInfo { texture: in_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                     size
                 );
             }
@@ -322,8 +322,8 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
                 temp_texture = Some(create_texture_from_vk_image(&device, vk::Image::from_raw(*texture), buf.size.0 as u32, buf.size.1 as u32, format, true, false));
 
                 encoder.copy_texture_to_texture(
-                    ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                    ImageCopyTexture { texture: in_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    TexelCopyTextureInfo { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    TexelCopyTextureInfo { texture: in_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                     size
                 );
             }
@@ -336,20 +336,20 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
                         temp_texture = Some(create_texture_from_metal(device, mtl_texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_SRC));
 
                         encoder.copy_texture_to_texture(
-                            ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                            ImageCopyTexture { texture: in_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                            TexelCopyTextureInfo { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                            TexelCopyTextureInfo { texture: in_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                             size
                         );
                     }
                 } else {
                     let metal_usage = metal::MTLTextureUsage::ShaderRead;
                     let texture = create_metal_texture_from_buffer(*buffer, buf.size.0 as u32, buf.size.1 as u32, buf.size.2 as u32, format, metal_usage);
-                        
+
                     temp_texture = Some(create_texture_from_metal(device, texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_SRC));
 
                     encoder.copy_texture_to_texture(
-                        ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                        ImageCopyTexture { texture: in_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        TexelCopyTextureInfo { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        TexelCopyTextureInfo { texture: in_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                         size
                     );
                 }
@@ -369,8 +369,8 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
     match &buf.data {
         BufferSource::Cpu { .. } => {
             encoder.copy_texture_to_buffer(
-                ImageCopyTexture { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                ImageCopyBuffer { buffer: staging_buffer, layout: ImageDataLayout { offset: 0, bytes_per_row: Some(padded_stride), rows_per_image: None } },
+                TexelCopyTextureInfo { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                TexelCopyBufferInfo { buffer: staging_buffer, layout: TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(padded_stride), rows_per_image: None } },
                 size
             );
         },
@@ -379,8 +379,8 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
             if let Some(out_buf) = &out_texture.wgpu_buffer {
                 if let Some(out_tex) = &out_texture.wgpu_texture {
                     encoder.copy_texture_to_buffer(
-                        ImageCopyTexture { texture: out_tex, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                        ImageCopyBuffer { buffer: out_buf, layout: ImageDataLayout { offset: 0, bytes_per_row: Some(padded_stride), rows_per_image: None } },
+                        TexelCopyTextureInfo { texture: out_tex, mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        TexelCopyBufferInfo { buffer: out_buf, layout: TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(padded_stride), rows_per_image: None } },
                         size
                     );
                 }
@@ -392,8 +392,8 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
                 temp_texture = Some(create_texture_from_metal(&device, *texture as *mut metal::MTLTexture, buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
 
                 encoder.copy_texture_to_texture(
-                    ImageCopyTexture { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                    ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    TexelCopyTextureInfo { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    TexelCopyTextureInfo { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                     size
                 );
             }
@@ -405,8 +405,8 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
                 temp_texture = Some(create_texture_from_vk_image(&device, vk::Image::from_raw(*texture), buf.size.0 as u32, buf.size.1 as u32, format, false, false));
 
                 encoder.copy_texture_to_texture(
-                    ImageCopyTexture { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                    ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    TexelCopyTextureInfo { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                    TexelCopyTextureInfo { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                     size
                 );
             }
@@ -419,20 +419,20 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
                         temp_texture = Some(create_texture_from_metal(device, mtl_texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
 
                         encoder.copy_texture_to_texture(
-                            ImageCopyTexture { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                            ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                            TexelCopyTextureInfo { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                            TexelCopyTextureInfo { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                             size
                         );
                     }
                 } else {
                     let metal_usage = metal::MTLTextureUsage::RenderTarget;
                     let texture = create_metal_texture_from_buffer(*buffer, buf.size.0 as u32, buf.size.1 as u32, buf.size.2 as u32, format, metal_usage);
-                        
+
                     temp_texture = Some(create_texture_from_metal(device, texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
 
                     encoder.copy_texture_to_texture(
-                        ImageCopyTexture { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                        ImageCopyTexture { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        TexelCopyTextureInfo { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        TexelCopyTextureInfo { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
                         size
                     );
                 }

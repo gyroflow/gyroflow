@@ -13,18 +13,18 @@ path = "lib.rs"
 #telemetry-parser = { path = "../../../telemetry-parser" }
 telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "c0eeb3b" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
-ahrs = { git = "https://github.com/jmagnuson/ahrs-rs.git", rev = "bf7b41d", features = ["field_access"] }
+ahrs = { version = "0.7", features = ["field_access"] }
 
 stabilize_spirv = { path = "./gpu/stabilize_spirv" }
 
 #rs-sync = { path = "../../../rs-sync" }
-rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "0d22978" }
+rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "0e9d885" }
 
-argmin = { version = "0.10.0", default-features = false }
-argmin-math = { version = "0.4.0", default-features = false, features = ["nalgebra_v0_32"] }
+argmin = { version = "0.10.0", git = "https://github.com/argmin-rs/argmin.git", default-features = false }
+argmin-math = { version = "0.4.0", git = "https://github.com/argmin-rs/argmin.git", default-features = false, features = ["nalgebra_v0_33"] }
 
 mimalloc = { version = "0.1.43", default-features = false }
-nalgebra = { version = "0.32", features = ["serde-serialize"] }
+nalgebra = { version = "0.33", features = ["serde-serialize"] }
 rayon = "1.10"
 biquad = "0.5.0"
 fastrand = "2.3.0"
@@ -42,12 +42,12 @@ time = { version = "0.3.37", features = ["local-offset"] }
 itertools = "0.14.0"
 num = "0.4.3"
 base91 = "0.1.0"
-bitflags = "2.6.0"
+bitflags = "2.8.0"
 enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.4.1"
 lru = "0.12"
-thiserror = "2.0.10"
+thiserror = "2.0.11"
 ciborium = "0.2.2"
 dyn-clone = "1.0.17"
 app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }
@@ -79,13 +79,13 @@ ocl = { version = "0.19.7", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.2.0"
 exr = "1.73"
-opencv = { version = "0.93.5", features = ["clang-runtime"], optional = true }
+opencv = { version = "0.94.1", features = ["clang-runtime"], optional = true }
 median = "0.3"
 
-wgpu = { version = "23", features = ["spirv", "naga-ir"] }
+wgpu = { version = "24", features = ["spirv", "naga-ir"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
-metal = { version = "0.29.0" }
+metal = { version = "0.31.0" }
 objc-foundation = "0.1.1"
 core-foundation-sys = "0.8.7"
 

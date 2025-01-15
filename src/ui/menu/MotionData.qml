@@ -557,7 +557,7 @@ MenuItem {
                             const yy = margin + (height - 2*margin) * mesh[9 + i + 2 + 1] / mesh_size[1];
                             ctx.lineTo(xx, yy);
                         }
-                        if (i + 9*2 < divisions[0]*divisions[1]*2) {
+                        if (i + divisions[1]*2 < divisions[0]*divisions[1]*2) {
                             const xxx = margin + (width  - 2*margin) * (mesh[9 + i + divisions[0]*2 + 0] / mesh_size[0]);
                             const yyy = margin + (height - 2*margin) * (mesh[9 + i + divisions[0]*2 + 1] / mesh_size[1]);
                             ctx.moveTo(x, y);

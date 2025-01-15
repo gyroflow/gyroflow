@@ -86,6 +86,7 @@ pub fn format_wgpu_to_vulkan(format: wgpu::TextureFormat) -> vk::Format {
         Tf::R16Unorm => F::R16_UNORM,
         Tf::R16Snorm => F::R16_SNORM,
         Tf::R16Float => F::R16_SFLOAT,
+        Tf::R64Uint => F::R64_UINT,
         Tf::Rg8Unorm => F::R8G8_UNORM,
         Tf::Rg8Snorm => F::R8G8_SNORM,
         Tf::Rg8Uint => F::R8G8_UINT,

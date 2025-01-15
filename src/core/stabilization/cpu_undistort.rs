@@ -777,11 +777,11 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
 
                 if let Some(digital) = &params.digital_lens {
                     new_pt = digital.distort_point(new_pt.0, new_pt.1, 1.0, &kernel_params);
-                    if digital.id() == "gopro_superview" || digital.id() == "gopro_hyperview" {
+                    if digital.id() == "gopro_superview" || digital.id() == "gopro6_superview" || digital.id() == "gopro_hyperview" {
                         // TODO: This calculation is wrong but it somewhat works
                         let size = (params.width as f32, params.height as f32);
                         new_pt = (new_pt.0 / size.0 - 0.5, new_pt.1 / size.1 - 0.5);
-                        if digital.id() == "gopro_superview" {
+                        if digital.id() == "gopro_superview" || digital.id() == "gopro6_superview" {
                             new_pt.0 *= 0.91;
                         } else if digital.id() == "gopro_hyperview"{
                             new_pt.0 *= 0.81;
