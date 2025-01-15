@@ -151,7 +151,7 @@ impl OptimSync {
         //as most of the distortion occurs from button presses.
         let total_duration = rank.len() as f64 * ratio;
         println!("total_duration:{}",total_duration);
-        if total_duration > 8.0 {
+        if total_duration > 12.0 {
             for i in 0..rank.len() {
                 let time = i as f64 * ratio;
                 if time < 2.0 || time >= (total_duration - 2.0) {
@@ -183,9 +183,15 @@ impl OptimSync {
                     .iter()
                     .enumerate()
                     .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-                max_pair.map(|(relative_idx, _)| {
-                    let absolute_idx = start + relative_idx;
-                    (absolute_idx as f64 * step_size_samples as f64 + fft_size as f64 / 2.0) / self.sample_rate * 1000.0
+                max_pair.and_then(|(relative_idx, &value)| {
+                    if value < 0.1 {
+                        return None;
+                    } else {
+                        let absolute_idx = start + relative_idx;
+                        Some(
+                            (absolute_idx as f64 * step_size_samples as f64 + fft_size as f64 / 2.0) / self.sample_rate * 1000.0
+                        )
+                    }
                 })
             })
             .collect();
