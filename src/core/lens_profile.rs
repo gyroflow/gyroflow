@@ -332,6 +332,7 @@ impl LensProfile {
                         let ratioh = new_h as f64 / cpy.calib_dimension.h as f64;
                         match x.get("digital_lens").and_then(|x| x.as_str()) {
                             Some("gopro_superview") => { ratiow /= 1.33333333333; },
+                            Some("gopro6_superview") => { ratiow /= 1.33333333333; },
                             Some("gopro_hyperview") => { ratiow /= 1.55555555555; },
                             _ => { }
                         }

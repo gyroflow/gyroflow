@@ -10,6 +10,7 @@ mod insta360;
 mod sony;
 
 mod gopro_superview;
+mod gopro6_superview;
 mod gopro_hyperview;
 mod digital_stretch;
 
@@ -97,6 +98,7 @@ impl_models! {
 
     // Digital lenses (ie. post-processing)
     GoProSuperview => gopro_superview::GoProSuperview,
+    GoPro6Superview => gopro6_superview::GoPro6Superview,
     GoProHyperview => gopro_hyperview::GoProHyperview,
     DigitalStretch => digital_stretch::DigitalStretch,
 }
