@@ -363,7 +363,7 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
 
                 Ok::<ash::vk::Image, vk::Result>(raw_image)
             })
-        }).unwrap().unwrap(); // TODO: unwrap
+        }).unwrap()?; // TODO: unwrap
 
         Ok((raw_image, cuda_mem))
     }
@@ -442,7 +442,7 @@ pub fn create_vk_buffer_backed_by_cuda_memory(device: &wgpu::Device, size: (usiz
 
                 Ok::<ash::vk::Buffer, vk::Result>(raw_buffer)
             })
-        }).unwrap().unwrap(); // TODO: unwrap
+        }).unwrap()?; // TODO: unwrap
 
         Ok((raw_buffer, cuda_mem))
     }

@@ -1660,7 +1660,7 @@ dependencies = [
  "log",
  "log-panics",
  "lru",
- "metal 0.29.0",
+ "metal",
  "mp4-merge",
  "nalgebra 0.33.2",
  "ndk 0.9.0",
@@ -1738,7 +1738,7 @@ dependencies = [
  "log",
  "lru",
  "median",
- "metal 0.31.0",
+ "metal",
  "mimalloc",
  "nalgebra 0.33.2",
  "ndk 0.9.0",
@@ -2360,21 +2360,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "488016bfae457b036d996092f6cb448677611ce4449e970ceaf42695203f218a"
 dependencies = [
  "autocfg",
-]
-
-[[package]]
-name = "metal"
-version = "0.29.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ecfd3296f8c56b7c1f6fbac3c71cefa9d78ce009850c45000015f206dc7fa21"
-dependencies = [
- "bitflags 2.8.0",
- "block",
- "core-graphics-types",
- "foreign-types",
- "log",
- "objc",
- "paste",
 ]
 
 [[package]]
@@ -4496,7 +4481,7 @@ dependencies = [
  "libc",
  "libloading",
  "log",
- "metal 0.31.0",
+ "metal",
  "naga",
  "ndk-sys 0.5.0+25.2.9519653",
  "objc",

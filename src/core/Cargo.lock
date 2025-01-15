@@ -1074,7 +1074,7 @@ dependencies = [
  "walkdir",
  "wgpu",
  "whoami",
- "windows 0.59.0",
+ "windows 0.58.0",
 ]
 
 [[package]]

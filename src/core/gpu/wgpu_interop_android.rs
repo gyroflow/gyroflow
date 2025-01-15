@@ -70,7 +70,7 @@ pub fn create_vk_image_from_android_hw_buffer(hw_buffer: *mut std::ffi::c_void, 
 
                 Ok::<ash::vk::Image, vk::Result>(raw_image)
             })
-        }).unwrap()?; // TODO: unwrap
+        })?;
 
         Ok((raw_image, cuda_mem))
     }

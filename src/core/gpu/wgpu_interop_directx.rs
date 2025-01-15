@@ -155,7 +155,7 @@ pub fn create_vk_image_from_d3d11_texture(device: &wgpu::Device, d3d11_device: &
 
                 Ok::<ash::vk::Image, vk::Result>(raw_image)
             })
-        }).unwrap().unwrap(); // TODO: unwrap
+        }).unwrap()?; // TODO: unwrap
 
         Ok((raw_image, shared_texture))
     }
@@ -175,7 +175,7 @@ pub fn create_dx12_resource_from_d3d11_texture(device: &wgpu::Device, d3d11_devi
                     Err(e) => Err(e)
                 }
             })
-        }).unwrap().unwrap(); // TODO: unwrap
+        }).unwrap()?; // TODO: unwrap
 
         Ok((raw_image, shared_texture))
     }
