@@ -9,5 +9,8 @@ ext/*
 gyroflow.log
 .DS_Store
 *.mobileprovision
+*.provisionprofile
 *.pfx
 resources/camera_presets
+*.exe
+.qmlls.ini

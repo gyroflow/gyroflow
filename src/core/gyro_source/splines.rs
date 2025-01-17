@@ -86,6 +86,7 @@ impl<T: Mul<f64, Output = T> + Sub<T, Output = T> + Add<T, Output = T> + Copy> C
 // ----------------------------------------------------------------
 
 pub const MAX_GRID_SIZE: usize = 9;
+pub const MAX_BUFFER_SIZE: usize = 9 + MAX_GRID_SIZE * MAX_GRID_SIZE * 2 + (MAX_GRID_SIZE*MAX_GRID_SIZE*4*2) + /*focal plane data*/20;
 pub struct BivariateSpline {
     grid_size: (usize, usize)
 }

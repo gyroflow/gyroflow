@@ -290,7 +290,7 @@ impl OclWrapper {
             let buf_params   = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(std::mem::size_of::<KernelParams>()).build()?;
             let buf_drawing  = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(drawing_len.max(4)).build()?;
             let buf_matrices = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(max_matrix_count).build()?;
-            let buf_mesh_data = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(1024).build()?;
+            let buf_mesh_data = Buffer::builder().queue(ocl_queue.clone()).flags(flags).len(crate::gyro_source::splines::MAX_BUFFER_SIZE).build()?;
 
             let mut builder = Kernel::builder();
             unsafe {

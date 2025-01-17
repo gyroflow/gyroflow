@@ -485,7 +485,7 @@ pub fn get_mesh_correction(tag_map: &GroupedTagMap, cache: &mut BTreeMap<u32, (V
     let mut mu = [0.0; splines::MAX_GRID_SIZE];
     let mut z = [0.0; splines::MAX_GRID_SIZE];
 
-    let mut mesh = Vec::with_capacity(divisions.0 * divisions.1 * 2 + 9 + (divisions.1*4*2));
+    let mut mesh = Vec::with_capacity(9 + divisions.0 * divisions.1 * 2 + (divisions.1*divisions.0*4*2));
     mesh.push(0.0); // offset to focal_plane_data
     mesh.push(divisions.0 as f64);
     mesh.push(divisions.1 as f64);

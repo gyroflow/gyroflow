@@ -14,6 +14,7 @@ mod compute_params;
 mod frame_transform;
 mod cpu_undistort;
 mod pixel_formats;
+// mod interpolation;
 pub mod distortion_models;
 pub use pixel_formats::*;
 pub use compute_params::ComputeParams;
@@ -678,6 +679,7 @@ impl Stabilization {
                 }
             }
 
+            //let ok = Self::undistort_image_cpu_spirv::<T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer);
             // CPU path
             let ok = match self.interpolation {
                 Interpolation::Bilinear => { Self::undistort_image_cpu::<2, T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer, &itm.mesh_data) },

@@ -3763,7 +3763,7 @@ dependencies = [
 [[package]]
 name = "spirv-std"
 version = "0.9.0"
-source = "git+https://github.com/EmbarkStudios/rust-gpu?rev=54f6978#54f6978c25b7e168ded04e720b996625b3654ebd"
+source = "git+https://github.com/Rust-GPU/rust-gpu?rev=854e9ba#854e9ba7da26d52ca0038ab2c7b252652e4d6b1e"
 dependencies = [
  "bitflags 1.3.2",
  "glam",
@@ -3775,18 +3775,18 @@ dependencies = [
 [[package]]
 name = "spirv-std-macros"
 version = "0.9.0"
-source = "git+https://github.com/EmbarkStudios/rust-gpu?rev=54f6978#54f6978c25b7e168ded04e720b996625b3654ebd"
+source = "git+https://github.com/Rust-GPU/rust-gpu?rev=854e9ba#854e9ba7da26d52ca0038ab2c7b252652e4d6b1e"
 dependencies = [
  "proc-macro2",
  "quote",
  "spirv-std-types",
- "syn 1.0.109",
+ "syn 2.0.96",
 ]
 
 [[package]]
 name = "spirv-std-types"
 version = "0.9.0"
-source = "git+https://github.com/EmbarkStudios/rust-gpu?rev=54f6978#54f6978c25b7e168ded04e720b996625b3654ebd"
+source = "git+https://github.com/Rust-GPU/rust-gpu?rev=854e9ba#854e9ba7da26d52ca0038ab2c7b252652e4d6b1e"
 
 [[package]]
 name = "stabilize_spirv"

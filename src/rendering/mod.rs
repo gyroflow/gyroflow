@@ -326,6 +326,8 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         _ => { }
     }
 
+    let is_sequence = matches!(proc.video_codec.as_deref(), Some("png") | Some("exr"));
+
     if cfg!(any(target_os = "macos", target_os = "ios")) {
         proc.video.encoder_params.options.set("allow_sw", "1");
         proc.video.encoder_params.options.set("realtime", "0");
@@ -673,7 +675,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
 
     let start_ms = proc.ranges_ms.first().and_then(|x| x.0);
     let mut render_filename = filename.clone();
-    if cfg!(not(any(target_os = "android", target_os = "ios"))) {
+    if cfg!(not(any(target_os = "android", target_os = "ios"))) && !is_sequence {
         render_filename = format!("{filename}.tmp");
     }
     proc.render(&fs_base, folder, &render_filename, (output_width as u32, output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;

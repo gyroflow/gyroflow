@@ -38,7 +38,7 @@ fn main() {
     println!("SPIR-V shader (u32) len: {}, {main_u32_shader_path}", main_u32_shader.len());
     println!("GLSL shader len: {}, {glsl_shader_path}", glsl_shader.len());
 
-    let options = spv::Options {
+    let in_spv_options = spv::Options {
         adjust_coordinate_space: false,
         strict_capabilities: true,
         block_ctx_dump_prefix: None,
@@ -61,7 +61,7 @@ fn main() {
 
     // Emit HLSL
     /*{
-        let module = spv::parse_u8_slice(&glsl_shader, &options).unwrap();
+        let module = spv::parse_u8_slice(&glsl_shader, &in_spv_options).unwrap();
         let info = Validator::new(ValidationFlags::default(), Capabilities::all()).validate(&module).unwrap_pretty();
 
         let options = naga::back::hlsl::Options {
@@ -82,13 +82,13 @@ fn main() {
             zero_initialize_workgroup_memory: false,
         };
         let mut code = String::new();
-        naga::back::hlsl::Writer::new(&mut code, &options).write(&module, &info).unwrap();
+        naga::back::hlsl::Writer::new(&mut code, &_options).write(&module, &info).unwrap();
 
         std::fs::write(frag_out_path.replace(".frag", ".hlsl"), &code).unwrap();
     }*/
     // Emit WGSL
     /*{
-        let module = spv::parse_u8_slice(&main_shader, &options).unwrap();
+        let module = spv::parse_u8_slice(&main_shader, &in_spv_options).unwrap();
         let info = Validator::new(ValidationFlags::default(), Capabilities::all()).validate(&module).unwrap_pretty();
 
         let wgsl = naga::back::wgsl::write_string(&module, &info, naga::back::wgsl::WriterFlags::empty()).unwrap();
@@ -98,7 +98,7 @@ fn main() {
     }*/
     // Emit GLSL
     {
-        let module = spv::parse_u8_slice(&glsl_shader, &options).unwrap();
+        let module = spv::parse_u8_slice(&glsl_shader, &in_spv_options).unwrap();
         let info = Validator::new(ValidationFlags::default(), Capabilities::all()).validate(&module).unwrap_pretty();
 
         let mut buffer = String::new();
@@ -130,9 +130,44 @@ fn main() {
             index:         naga::proc::BoundsCheckPolicy::Unchecked,
             buffer:        naga::proc::BoundsCheckPolicy::Unchecked,
             image_load:    naga::proc::BoundsCheckPolicy::Unchecked,
-            image_store:   naga::proc::BoundsCheckPolicy::Unchecked,
             binding_array: naga::proc::BoundsCheckPolicy::Unchecked,
         };
+
+
+        /*let spvoptions = naga::back::spv::Options {
+            lang_version: (1, 0),
+            flags: naga::back::spv::WriterFlags::ADJUST_COORDINATE_SPACE
+                 | naga::back::spv::WriterFlags::LABEL_VARYINGS
+                 | naga::back::spv::WriterFlags::CLAMP_FRAG_DEPTH,
+            binding_map: Default::default(),
+            capabilities: None,
+            bounds_check_policies: policies,
+            zero_initialize_workgroup_memory: naga::back::spv::ZeroInitializeWorkgroupMemoryMode::Polyfill,
+            debug_info: None,
+        };
+        let mut writer = naga::back::spv::Writer::new(&spvoptions).unwrap();
+        let mut spv_buffer = Vec::new();
+        writer.write(&module, &info, None, &None, &mut spv_buffer).unwrap();
+        let bytes = spv_buffer.iter().fold(Vec::with_capacity(spv_buffer.len() * 4), |mut v, w| { v.extend_from_slice(&w.to_le_bytes()); v });
+        let tmp = format!("{}/../compiled/stabilize.spv.temp", env!("CARGO_MANIFEST_DIR"));
+        std::fs::write(&tmp, bytes).unwrap();
+
+        let _ = std::process::Command::new("spirv-opt")
+            .arg("-O")
+            .arg("--ccp")
+            .arg("--cfg-cleanup")
+            .arg("--eliminate-dead-branches")
+            .arg("--eliminate-dead-code-aggressive")
+            .arg("--eliminate-dead-const")
+            .arg("--eliminate-dead-functions")
+            .arg("--if-conversion")
+
+            .arg(&tmp)
+            .args(["-o", &format!("{tmp}-opt")])
+            .status().unwrap().success();
+
+        let module = spv::parse_u8_slice(&std::fs::read(format!("{tmp}-opt")).unwrap(), &in_spv_options).unwrap();
+        let info = Validator::new(ValidationFlags::default(), Capabilities::all()).validate(&module).unwrap_pretty();*/
 
         let mut writer = glsl::Writer::new(&mut buffer, &module, &info, &options, &pipeline_options, policies).unwrap();
         writer.write().unwrap();
@@ -152,16 +187,25 @@ fn main() {
 
         // Remove nested member
         let re = regex::Regex::new(r"struct (type_\d+) \{\s+(type_\d+) member;\s+\};").unwrap();
-        let (_, [type1, type2]) = re.captures(&buffer).unwrap().extract();
-        buffer = buffer.replace(&format!("{type1} _group_0_binding_2_fs"), &format!("{type2} _group_0_binding_2_fs"));
-        buffer = buffer.replace("_group_0_binding_2_fs.member", "_group_0_binding_2_fs");
+        for _ in 0..2 {
+            for cap in re.captures_iter(&buffer.clone()) {
+                let (org, [type1, type2]) = cap.extract();
+                if buffer.contains(&format!("{type1} _group_0_binding_2_fs")) {
+                    let org = org.to_owned();
+                    buffer = buffer.replace(&format!("{type1} _group_0_binding_2_fs"), &format!("{type2} _group_0_binding_2_fs"));
+                    buffer = buffer.replace("_group_0_binding_2_fs.member", "_group_0_binding_2_fs");
+                    buffer = buffer.replace(&org, "");
+                }
+            }
+        }
 
         std::fs::write(&frag_out_path, &buffer).unwrap();
-        // println!("{}", buffer);
     }
+    // let qsb_out_path = format!("{}/../compiled/stabilize-{}-{}-{}.frag.qsb", env!("CARGO_MANIFEST_DIR"), distortion_model as u32, digital_distortion_model as u32, flags as u32);
 
-    let _ = std::process::Command::new("../../../../ext/6.7.0/msvc2019_64/bin/qsb.exe")
+    let _ = std::process::Command::new("../../../../ext/6.7.3/msvc2019_64/bin/qsb.exe")
             .args(["--glsl", "120,300 es,310 es,320 es,310,320,330,400,410,420"])
+            //.args(["--glsl", "120,300 es,310 es,320 es,310"])
             .args(["--hlsl", "50"])
             .args(["--msl", "12"])
             .arg("-O")

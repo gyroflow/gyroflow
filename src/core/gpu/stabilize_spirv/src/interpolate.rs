@@ -4,7 +4,7 @@
 use glam::{ vec2, Vec2, Vec4 };
 use super::types::*;
 
-pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &KernelParams, _sampler: SamplerType, interpolation: u32, flags: u32) -> Vec4 {
+pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &KernelParams, _sampler: SamplerType, _interpolation: u32, _flags: u32) -> Vec4 {
     let bg = params.background * params.max_pixel_value;
     #[cfg(feature = "for_qtrhi")]
     {
@@ -21,7 +21,7 @@ pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &Ke
         const INTER_BITS: usize = 5;
         const INTER_TAB_SIZE: usize = 1 << INTER_BITS;
 
-        let interpolation = interpolation as i32;
+        let interpolation = _interpolation as i32;
 
         let shift: i32 = (interpolation >> 2) + 1;
         let offset: f32 = ((interpolation >> 1) - 1) as f32;
@@ -32,7 +32,7 @@ pub fn sample_input_at(uv: Vec2, _coeffs: &[f32], input: &ImageType, params: &Ke
             uv = rotate_point(uv, params.input_rotation * (core::f32::consts::PI / 180.0), vec2(params.width as f32 / 2.0, params.height as f32 / 2.0));
         }
 
-        if (flags & 32) == 32 { // Uses source rect
+        if (_flags & 32) == 32 { // Uses source rect
             uv = vec2(
                 map_coord(uv.x, 0.0, params.width  as f32, params.source_rect.x as f32, (params.source_rect.x + params.source_rect.z) as f32),
                 map_coord(uv.y, 0.0, params.height as f32, params.source_rect.y as f32, (params.source_rect.y + params.source_rect.w) as f32)

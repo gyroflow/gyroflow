@@ -212,6 +212,13 @@ public:
 
     std::vector<uint8_t> matricesBuffer;
     std::vector<uint8_t> meshDataBuffer;
+
+    /*QByteArray getContents(const QString &name) {
+        QFile f(name);
+        if (f.open(QIODevice::ReadOnly))
+            return f.readAll();
+        return QByteArray();
+    }*/
     QShader getShader(const QString &name) {
         QFile f(name);
         if (f.open(QIODevice::ReadOnly))

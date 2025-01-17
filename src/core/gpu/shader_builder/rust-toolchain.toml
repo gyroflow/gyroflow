@@ -1,7 +1,7 @@
 [toolchain]
-channel = "nightly-2023-09-30"
+channel = "nightly-2024-11-22"
 components = ["rust-src", "rustc-dev", "llvm-tools"]
-# commit_hash = 8ce4540bd6fe7d58d4bc05f1b137d61937d3cf72
+# commit_hash = b19329a37cedf2027517ae22c87cf201f93d776e
 
 # Whenever changing the nightly channel, update the commit hash above, and make
 # sure to change `REQUIRED_TOOLCHAIN` in `crates/rustc_codegen_spirv/build.rs` also.
