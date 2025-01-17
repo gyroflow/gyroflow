@@ -147,10 +147,9 @@ impl OptimSync {
                 rank[i] = 0.0;
             }
         }
-        //If the time exceeds 8 seconds, clear the data for the first 2 seconds and last 2 seconds, 
-        //as most of the distortion occurs from button presses.
+        // If the time exceeds 8 seconds, clear the data for the first 2 seconds and last 2 seconds,
+        // as most of the distortion occurs from button presses.
         let total_duration = rank.len() as f64 * ratio;
-        println!("total_duration:{}",total_duration);
         if total_duration > 12.0 {
             for i in 0..rank.len() {
                 let time = i as f64 * ratio;
@@ -162,22 +161,20 @@ impl OptimSync {
 
         let mut rank_nms = rank.clone();
         for i in 0..rank.len() {
-            for j in
-                (i as i64 - nms_radius as i64).max(0) as usize..(i + nms_radius).min(rank.len() - 1)
-            {
+            for j in (i as i64 - nms_radius as i64).max(0) as usize..(i + nms_radius).min(rank.len() - 1) {
                 if rank[j] < rank[i] {
                     rank_nms[j] = 0.0;
                 }
             }
         }
-        
-        //Divide rank_nms evenly according to target_sync_points, and choose the point from each interval to sync_points.
+
+        // Divide rank_nms evenly according to target_sync_points, and choose the point from each interval to sync_points.
         let segment_size = (rank_nms.len() + target_sync_points - 1) / target_sync_points;
         let selected_sync_points: Vec<f64> = (0..target_sync_points)
             .filter_map(|i| {
                 let start = i * segment_size;
                 let end = std::cmp::min(start + segment_size, rank_nms.len());
-    
+
                 // Find the maximum value within the current interval along with its index.
                 let max_pair = rank_nms[start..end]
                     .iter()
