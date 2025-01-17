@@ -224,3 +224,13 @@ jobs:
             ./Gyroflow-linux/Gyroflow-linux64.AppImage
             ./Gyroflow-linux/Gyroflow-linux64.tar.gz
             ./Gyroflow-android/Gyroflow.apk
+  winget_release:
+    name: Publish to WinGet
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: windows-latest
+    steps:
+      - uses: vedantmgoyal9/winget-releaser@v2
+        with:
+          identifier: Gyroflow.Gyroflow
+          token: ${{ secrets.WINGET_TOKEN }}
+          installers-regex: 'Gyroflow\-windows64\.zip$'
