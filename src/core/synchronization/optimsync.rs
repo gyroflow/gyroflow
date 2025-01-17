@@ -4,7 +4,6 @@
 use crate::gyro_source::GyroSource;
 use itertools::izip;
 use nalgebra::{ComplexField, Vector3};
-use rand::Rng;
 use rustfft::{num_complex::Complex, FftPlanner};
 use std::f32::consts::PI;
 use std::iter::zip;
@@ -141,10 +140,23 @@ impl OptimSync {
 
         let rank_clone = rank.clone();
 
+        let ratio = step_size_samples as f64 / self.sample_rate;
         for i in 0..rank.len() {
-            let time = (i * step_size_samples) as f64 / self.sample_rate;
+            let time = i as f64 * ratio;
             if rank[i] < 100.0 || !trim_ranges_s.iter().any(|x| time >= x.0 && time <= x.1) {
                 rank[i] = 0.0;
+            }
+        }
+        //If the time exceeds 8 seconds, clear the data for the first 2 seconds and last 2 seconds, 
+        //as most of the distortion occurs from button presses.
+        let total_duration = rank.len() as f64 * ratio;
+        println!("total_duration:{}",total_duration);
+        if total_duration > 12.0 {
+            for i in 0..rank.len() {
+                let time = i as f64 * ratio;
+                if time < 2.0 || time >= (total_duration - 2.0) {
+                    rank[i] = 0.0;
+                }
             }
         }
 
@@ -158,33 +170,31 @@ impl OptimSync {
                 }
             }
         }
-
-        let mut sync_points = Vec::<f64>::new();
-        for i in 0..rank.len() {
-            if rank_nms[i] > 0.1 {
-                sync_points.push(
-                    (i as f64 * step_size_samples as f64 + fft_size as f64 / 2.0)
-                        / self.sample_rate
-                        * 1000.0,
-                );
-            }
-        }
-
-        let mut selected_sync_points = Vec::<f64>::new();
-        let mut rng = rand::thread_rng();
-        use rand::seq::SliceRandom;
-        for _ in 0..target_sync_points {
-            if sync_points.is_empty() { break; }
-            let rands = trim_ranges_s.iter().map(|x| rng.gen_range(x.0 * 1000.0..x.1 * 1000.0)).collect::<Vec<_>>();
-            if let Some(rnd) = rands.choose(&mut rng) {
-                let mut p = sync_points.partition_point(|x| x < &rnd).min(sync_points.len() - 1);
-                if (sync_points[(p as i64-1).max(0) as usize] - rnd).abs() < (sync_points[p] - rnd) {
-                    p -= 1;
-                }
-                selected_sync_points.push(sync_points[p]);
-                sync_points.remove(p);
-            }
-        }
+        
+        //Divide rank_nms evenly according to target_sync_points, and choose the point from each interval to sync_points.
+        let segment_size = (rank_nms.len() + target_sync_points - 1) / target_sync_points;
+        let selected_sync_points: Vec<f64> = (0..target_sync_points)
+            .filter_map(|i| {
+                let start = i * segment_size;
+                let end = std::cmp::min(start + segment_size, rank_nms.len());
+    
+                // Find the maximum value within the current interval along with its index.
+                let max_pair = rank_nms[start..end]
+                    .iter()
+                    .enumerate()
+                    .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+                max_pair.and_then(|(relative_idx, &value)| {
+                    if value < 0.1 {
+                        return None;
+                    } else {
+                        let absolute_idx = start + relative_idx;
+                        Some(
+                            (absolute_idx as f64 * step_size_samples as f64 + fft_size as f64 / 2.0) / self.sample_rate * 1000.0
+                        )
+                    }
+                })
+            })
+            .collect();
 
         // use inline_python::python;
         // python! {
@@ -204,8 +214,7 @@ impl OptimSync {
         //     fig.set_size_inches(10, 5)
         //     plt.show()
         // }
-        selected_sync_points.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-        (selected_sync_points, rank_clone, (step_size_samples as f64 / self.sample_rate))
+        (selected_sync_points, rank_clone, ratio)
     }
 }
 
