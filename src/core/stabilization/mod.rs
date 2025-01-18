@@ -423,7 +423,6 @@ impl Stabilization {
                 match opencl::OclWrapper::set_device(i as usize, buffers) {
                     Ok(_) => {
                         self.next_backend = Some("opencl");
-                        CACHED_WGPU.with(|x| x.0.borrow_mut().clear());
                         return true;
                     },
                     Err(e) => {
@@ -438,9 +437,6 @@ impl Stabilization {
                     match wgpu::WgpuWrapper::set_device(wgpu_ind as usize) {
                         Some(_) => {
                             self.next_backend = Some("wgpu");
-                            #[cfg(feature = "use-opencl")] {
-                                CACHED_OPENCL.with(|x| x.borrow_mut().clear());
-                            }
                             return true;
                         },
                         None => {
@@ -486,8 +482,13 @@ impl Stabilization {
                             }
                             self.initialized_backend = BackendType::OpenCL(hash);
                             log::info!("Initialized OpenCL for {:?} -> {:?}, key: {}", buffers.input.size, buffers.output.size, self.get_current_key(buffers));
+                            CACHED_WGPU.with(|x| x.0.borrow_mut().clear());
                         },
-                        Ok(Err(e)) => { next_backend = ""; log::error!("OpenCL error init_backends: {:?}", e); if self.share_wgpu_instances { CACHED_OPENCL.with(|x| x.borrow_mut().clear()) } },
+                        Ok(Err(e)) => {
+                            next_backend = "";
+                            log::error!("OpenCL error init_backends: {:?}", e);
+                            if self.share_wgpu_instances { CACHED_OPENCL.with(|x| x.borrow_mut().clear()) }
+                        },
                         Err(e) => {
                             next_backend = "";
                             if let Some(s) = e.downcast_ref::<&str>() {
@@ -524,8 +525,14 @@ impl Stabilization {
                             }
                             self.initialized_backend = BackendType::Wgpu(hash);
                             log::info!("Initialized wgpu for {:?} -> {:?} | key: {}", buffers.input.size, buffers.output.size, self.get_current_key(buffers));
+                            #[cfg(feature = "use-opencl")] {
+                                CACHED_OPENCL.with(|x| x.borrow_mut().clear());
+                            }
                         },
-                        Ok(Err(e)) => { log::error!("Failed to initialize wgpu {:?}", e); if self.share_wgpu_instances { CACHED_WGPU.with(|x| x.0.borrow_mut().clear()) } },
+                        Ok(Err(e)) => {
+                            log::error!("Failed to initialize wgpu {:?}", e);
+                            if self.share_wgpu_instances { CACHED_WGPU.with(|x| x.0.borrow_mut().clear()) }
+                        },
                         Err(e) => {
                             if let Some(s) = e.downcast_ref::<&str>() {
                                 log::error!("Failed to initialize wgpu {}", s);
