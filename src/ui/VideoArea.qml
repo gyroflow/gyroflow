@@ -87,7 +87,7 @@ Item {
             root.pendingQueueJobId = +queueJobId;
             console.log("Loading gyro file", urls[1]);
             window.motionData.lastSelectedFile = urls[1];
-            controller.load_telemetry(urls[1], urls[0] == urls[1], window.videoArea.vid, -1);
+            controller.load_telemetry(urls[1], urls[0] == urls[1] || window.motionData.allMetadata, window.videoArea.vid, -1);
             return;
         }
 

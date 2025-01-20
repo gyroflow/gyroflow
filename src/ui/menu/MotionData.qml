@@ -18,6 +18,7 @@ MenuItem {
     property alias hasRawGyro: integrator.hasRawGyro;
     property alias integrationMethod: integrator.currentIndex;
     property alias orientationIndicator: orientationIndicator;
+    property bool allMetadata: allMetadataCb.visible && allMetadataCb.checked;
     property string filename: "";
     property string detectedFormat: "";
     property url lastSelectedFile: "";
@@ -37,7 +38,7 @@ MenuItem {
             return;
         }
         lastSelectedFile = url;
-        controller.load_telemetry(url, false, window.videoArea.vid, currentLog.visible && currentLog.currentIndex > 0? currentLog.currentIndex - 1 : -1);
+        controller.load_telemetry(url, root.allMetadata, window.videoArea.vid, currentLog.visible && currentLog.currentIndex > 0? currentLog.currentIndex - 1 : -1);
     }
 
     function loadGyroflow(obj: var): void {
@@ -199,6 +200,20 @@ MenuItem {
                     root.loadFile(root.lastSelectedFile);
                 }
             }
+        }
+    }
+    CheckBox {
+        id: allMetadataCb;
+        text: qsTr("Load all metadata");
+        visible: root.lastSelectedFile.toString() && root.lastSelectedFile != window.videoArea.loadedFileUrl;
+        checked: false;
+        onCheckedChanged: allMetadataDebounce.start();
+        Timer {
+            id: allMetadataDebounce;
+            interval: 1;
+            running: false;
+            repeat: false;
+            onTriggered: root.loadFile(root.lastSelectedFile);
         }
     }
     CheckBoxWithContent {
