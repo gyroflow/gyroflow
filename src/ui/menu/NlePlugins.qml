@@ -71,8 +71,8 @@ MenuItem {
                 if (result.startsWith("An error occured")) {
                     if (result.includes("Failed to copy files from ") && result.includes("PermissionDenied")) {
                         const parts = result.split("Failed to copy files from \\\"").pop().split("\\\" to \\\"");
-                        const from = '"' + parts[0] + '"';
-                        const to = '"' + parts[1].split("\\\": Error").shift() + '"';
+                        const from = parts[0];
+                        const to = parts[1].split("\\\": Error").shift();
 
                         const mb = messageBox(Modal.Error, qsTr("Unable to copy the plugin due to sandbox limitations.\nOpen <b>Terminal</b> and enter the following command:"), [ { text: qsTr("Ok"), accent: true, clicked: () => {
                             openfx_version = controller.nle_plugins("detect", "openfx");
@@ -83,7 +83,7 @@ MenuItem {
                         } } ]);
                         mb.isWide = true;
                         const tf = Qt.createComponent("../components/TextField.qml").createObject(mb.mainColumn, { readOnly: true });
-                        tf.text = "sudo mv " + from + " " + to;
+                        tf.text = 'sudo mkdir -p "' + to + '" ; sudo mv -f "' + from + '" "' + to + '"';
                         tf.width = mb.mainColumn.width;
                     } else {
                         messageBox(Modal.Error, result, [ { text: qsTr("Ok"), accent: true } ]);
