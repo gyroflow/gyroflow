@@ -30,13 +30,23 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                     .and_then(|x| x.get_t(TagId::FocalLength) as Option<&f32>)
                     .map(|x| format!("{:.2} mm", *x));
 
+                let focal_length_mm = v.get("focal_length_nm")?.as_f64()? / 1000000.0;
+                let approx_focal_length_mm = tag_map.get(&GroupId::Lens).and_then(|x| x.get_t(TagId::FocalLength) as Option<&f32>).map(|x| *x as f64).unwrap_or(focal_length_mm);
+
+                let ratio = approx_focal_length_mm / focal_length_mm.max(0.000001);
+
+                let is_bad_focal_length = (ratio - 1.0).abs() > 0.5;
+                if is_bad_focal_length {
+                    log::error!("Bad focal length: {approx_focal_length_mm} -> {focal_length_mm}");
+                }
+
                 let sensor_height = v.get("effective_sensor_height_nm")?.as_f64()? / 1e9;
                 let coeff_scale = v.get("coeff_scale")?.as_f64()?;
                 let mut lens_in_ray_angle: Vec<f64> = v.get("coeffs")?.as_array()?.into_iter().filter_map(|x| Some(x.as_f64()? / coeff_scale.max(1.0) / 180.0 * std::f64::consts::PI)).collect();
-                if lens_in_ray_angle.is_empty() || sensor_height == 0.0 {
+                if lens_in_ray_angle.is_empty() || sensor_height == 0.0 || is_bad_focal_length {
                     let sensor_size_px = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::SensorSizePixels) as Option<&(u32, u32)>).cloned()?;
 
-                    let focal_length_mm = v.get("focal_length_nm")?.as_f64()? / 1000000.0;
+                    let focal_length_mm = if is_bad_focal_length { approx_focal_length_mm } else { v.get("focal_length_nm")?.as_f64()? / 1000000.0 };
                     let sws = crop_size.0 as f64 / (sensor_size_px.0 as f64).max(1.0);
                     let shs = crop_size.1 as f64 / (sensor_size_px.1 as f64).max(1.0);
 
