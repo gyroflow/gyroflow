@@ -11,10 +11,10 @@ body:
         required: true
   - type: checkboxes
     attributes:
-      label: Have you tried the latest build?
+      label: Have you tried the latest dev build?
       description: Please [download the latest development build](https://gyroflow.xyz/devbuild/) to see if the issue still persists.
       options:
-      - label: I have tried the latest build
+      - label: I have tried the latest dev build from [here](https://gyroflow.xyz/devbuild/)
         required: true
   - type: checkboxes
     attributes:
