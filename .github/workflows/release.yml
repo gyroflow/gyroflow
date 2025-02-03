@@ -226,6 +226,7 @@ jobs:
             ./Gyroflow-android/Gyroflow.apk
   winget_release:
     name: Publish to WinGet
+    needs: build
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: windows-latest
     steps:
