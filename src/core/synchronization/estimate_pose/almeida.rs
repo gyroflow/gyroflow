@@ -6,7 +6,6 @@ use super::EstimatePoseTrait;
 
 use nalgebra as na;
 use crate::stabilization::*;
-use rand::prelude::SliceRandom;
 const EPS: f32 = 0.001 * std::f32::consts::PI / 180.0;
 const ALPHA: f32 = 0.5;
 
@@ -193,10 +192,11 @@ fn solve_ypr_given(input: &[MotionEntry], camera: &Camera, timestamp_ms: f64) ->
 }
 
 fn solve_ypr_ransac(field: &[MotionEntry], camera: &Camera, timestamp_ms: f64, num_iters: usize, target_delta: f32, num_samples: usize) -> na::UnitQuaternion<f32> {
+    use rand::prelude::*;
     let mut best_inliers = vec![];
     let target_delta = target_delta.to_radians();
 
-    let rng = &mut rand::thread_rng();
+    let rng = &mut rand::rng();
 
     for _ in 0..num_iters {
         let samples = field.choose_multiple(rng, 3).copied().collect::<Vec<_>>();

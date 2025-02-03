@@ -239,7 +239,7 @@ impl LensCalibrator {
                         let mut val = *min;
                         for _ in 0..max_images {
                             let range = found_frames.range(val..val + step);
-                            if let Some(el) = range.choose(&mut rand::thread_rng()) {
+                            if let Some(el) = range.choose(&mut rand::rng()) {
                                 choosen.insert(*el);
                             }
                             val += step;
@@ -253,7 +253,7 @@ impl LensCalibrator {
             } else {
                 // Pick `max_images` random frames from the entire range
                 found_frames.iter().copied()
-                    .choose_multiple(&mut rand::thread_rng(), max_images).into_iter()
+                    .choose_multiple(&mut rand::rng(), max_images).into_iter()
                     .collect()
             };
 

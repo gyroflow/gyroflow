@@ -170,7 +170,8 @@ pub fn install(typ: &str) -> io::Result<String> {
         _ => unreachable!()
     };
 
-    if let Ok(mut reader) = ureq::get(&download_url).call().map(|x| x.into_reader()) {
+    if let Ok(mut reader) = ureq::get(&download_url).call().map(|x| x.into_body().into_reader()) {
+        use std::io::Read;
         let mut content = Vec::new();
         reader.read_to_end(&mut content)?;
 
@@ -237,7 +238,7 @@ pub fn is_nle_installed(typ: &str) -> bool {
 
 pub fn latest_version() -> Option<String> {
     if is_nightly() {
-        let body = ureq::get("https://api.github.com/repos/gyroflow/gyroflow-plugins/actions/runs").call().ok()?.into_string().ok()?;
+        let body = ureq::get("https://api.github.com/repos/gyroflow/gyroflow-plugins/actions/runs").call().ok()?.into_body().read_to_string().ok()?;
         let v: serde_json::Value = serde_json::from_str(&body).ok()?;
         for obj in v.get("workflow_runs")?.as_array()? {
             let obj = obj.as_object()?;
@@ -246,7 +247,7 @@ pub fn latest_version() -> Option<String> {
             }
         }
     } else {
-        let body = ureq::get("https://api.github.com/repos/gyroflow/gyroflow-plugins/releases").call().ok()?.into_string().ok()?;
+        let body = ureq::get("https://api.github.com/repos/gyroflow/gyroflow-plugins/releases").call().ok()?.into_body().read_to_string().ok()?;
         let v: Vec<serde_json::Value> = serde_json::from_str(&body).ok()?;
         for obj in v {
             let obj = obj.as_object()?;

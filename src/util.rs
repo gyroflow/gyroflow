@@ -333,7 +333,7 @@ pub fn install_crash_handler() -> std::io::Result<()> {
                 let path = path.path();
                 if path.to_string_lossy().ends_with(".dmp") {
                     if let Ok(content) = std::fs::read(&path) {
-                        if let Ok(Ok(body)) = ureq::post("https://api.gyroflow.xyz/upload_dump").set("Content-Type", "application/octet-stream").send_bytes(&content).map(|x| x.into_string()) {
+                        if let Ok(Ok(body)) = ureq::post("https://api.gyroflow.xyz/upload_dump").header("Content-Type", "application/octet-stream").send(&content).map(|x| x.into_body().read_to_string()) {
                             ::log::debug!("Minidump uploaded: {}", body.as_str());
                             let _ = std::fs::remove_file(path);
                         }
@@ -552,10 +552,10 @@ pub fn report_lens_profile_usage(checksum: Option<String>) {
     if let Some(checksum) = checksum {
         if !checksum.is_empty() {
             gyroflow_core::run_threaded(move || {
-                let url = url::Url::parse(&format!("https://api.gyroflow.xyz/usage?checksum={checksum}")).unwrap();
+                let url = format!("https://api.gyroflow.xyz/usage?checksum={checksum}");
 
-                if let Ok(body) = ureq::request_url("GET", &url).call() {
-                    ::log::debug!("Lens profile usage stats: {:?}", body.into_string());
+                if let Ok(body) = ureq::get(url).call() {
+                    ::log::debug!("Lens profile usage stats: {:?}", body.into_body().read_to_string());
                 }
             });
         }

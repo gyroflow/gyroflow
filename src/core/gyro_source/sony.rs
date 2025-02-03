@@ -63,11 +63,15 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                             lp.pixel_focal_length = Some(fx as f32);
                         }
                         if md.lens_profile.is_none() {
+                            let mut lens_name = String::new();
+                            if let Some(v) = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::DisplayName) as Option<&String>) {
+                                lens_name = v.clone();
+                            }
                             md.lens_profile = Some(serde_json::json!({
                                 "calibrated_by": "Not calibrated",
                                 "camera_brand": "Sony",
                                 "camera_model": input.camera_model().map(|x| x.as_str()).unwrap_or(&""),
-                                "lens_model":   focal_length_str.unwrap_or_default(),
+                                "lens_model":   if !lens_name.is_empty() && focal_length_str.is_some() { format!("{lens_name} ({})", focal_length_str.unwrap()) } else if !lens_name.is_empty() { lens_name } else { focal_length_str.unwrap_or_default() },
                                 "calib_dimension":  { "w": size.0, "h": size.1 },
                                 "orig_dimension":   { "w": size.0, "h": size.1 },
                                 "output_dimension": { "w": if is_vertical { size.1 } else { size.0 }, "h": if is_vertical { size.0 } else { size.1 } },
@@ -157,11 +161,15 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                         }
 
                         if md.lens_profile.is_none() {
+                            let mut lens_name = String::new();
+                            if let Some(v) = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::DisplayName) as Option<&String>) {
+                                lens_name = v.clone();
+                            }
                             md.lens_profile = Some(serde_json::json!({
                                 "calibrated_by": "Sony",
                                 "camera_brand": "Sony",
                                 "camera_model": input.camera_model().map(|x| x.as_str()).unwrap_or(&""),
-                                "lens_model":   focal_length_str.unwrap_or_default(),
+                                "lens_model":   if !lens_name.is_empty() && focal_length_str.is_some() { format!("{lens_name} ({})", focal_length_str.unwrap()) } else if !lens_name.is_empty() { lens_name } else { focal_length_str.unwrap_or_default() },
                                 "calib_dimension":  { "w": size.0, "h": size.1 },
                                 "orig_dimension":   { "w": size.0, "h": size.1 },
                                 "output_dimension": { "w": if is_vertical { size.1 } else { size.0 }, "h": if is_vertical { size.0 } else { size.1 } },

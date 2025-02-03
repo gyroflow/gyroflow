@@ -1482,7 +1482,7 @@ impl Controller {
             this.updates_available(QString::from(version), QString::from(changelog))
         });
         core::run_threaded(move || {
-            if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/gyroflow/releases").call().map(|x| x.into_string()) {
+            if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/gyroflow/releases").call().map(|x| x.into_body().read_to_string()) {
                 if let Ok(v) = serde_json::from_str(&body) as serde_json::Result<serde_json::Value> {
                     if let Some(v) = v.as_array() {
                         for itm in v {
@@ -1780,7 +1780,7 @@ impl Controller {
                         ::log::debug!("Lens profile json: {}", json);
                         if upload {
                             core::run_threaded(move || {
-                                if let Ok(Ok(body)) = ureq::post("https://api.gyroflow.xyz/upload_profile").set("Content-Type", "application/json; charset=utf-8").send_string(&json).map(|x| x.into_string()) {
+                                if let Ok(Ok(body)) = ureq::post("https://api.gyroflow.xyz/upload_profile").header("Content-Type", "application/json; charset=utf-8").send(&json).map(|x| x.into_body().read_to_string()) {
                                     ::log::debug!("Lens profile uploaded: {}", body.as_str());
                                 }
                             });
@@ -1857,7 +1857,7 @@ impl Controller {
         let db_path = LensProfileDatabase::get_path().join("profiles.cbor.gz");
         if db_path.exists() || gyroflow_core::settings::data_dir().join("lens_profiles").exists() {
             core::run_threaded(move || {
-                if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/lens_profiles/releases").call().map(|x| x.into_string()) {
+                if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/lens_profiles/releases").call().map(|x| x.into_body().read_to_string()) {
                     (|| -> Option<()> {
                         let v: Vec<serde_json::Value> = serde_json::from_str(&body).ok()?;
                         if let Some(obj) = v.first() {
@@ -1866,7 +1866,7 @@ impl Controller {
                                 if tag > current_version {
                                     ::log::info!("Updating lens profile database from v{current_version} to v{tag}.");
                                     if let Some(download_url) = obj["assets"][0]["browser_download_url"].as_str() {
-                                        if let Ok(mut content) = ureq::get(&download_url).call().map(|x| x.into_reader()) {
+                                        if let Ok(mut content) = ureq::get(download_url).call().map(|x| x.into_body().into_reader()) {
                                             let mut updated = false;
                                             if db_path.exists() {
                                                 if let Ok(mut file) = std::fs::File::create(&db_path) {
@@ -1900,7 +1900,7 @@ impl Controller {
             let mut url = url::Url::parse(&format!("https://api.gyroflow.xyz/rate?good={}&checksum={}", is_good, checksum)).unwrap();
             url.query_pairs_mut().append_pair("filename", &name.to_string());
 
-            if let Ok(Ok(body)) = ureq::request_url("POST", &url).set("Content-Type", "application/json; charset=utf-8").send_string(&json.to_string()).map(|x| x.into_string()) {
+            if let Ok(Ok(body)) = ureq::post(url.to_string()).header("Content-Type", "application/json; charset=utf-8").send(&json.to_string()).map(|x| x.into_body().read_to_string()) {
                 ::log::debug!("Lens profile rated: {}", body.as_str());
             }
         });
@@ -1911,7 +1911,7 @@ impl Controller {
         });
         let db = self.stabilizer.lens_profile_db.clone();
         core::run_threaded(move || {
-            if let Ok(Ok(body)) = ureq::get("https://api.gyroflow.xyz/rate?get_ratings=1").call().map(|x| x.into_string()) {
+            if let Ok(Ok(body)) = ureq::get("https://api.gyroflow.xyz/rate?get_ratings=1").call().map(|x| x.into_body().read_to_string()) {
                 db.write().set_profile_ratings(body.as_str());
                 update(());
             }

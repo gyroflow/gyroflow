@@ -64,8 +64,8 @@ pub fn install<F: Fn((f64, &'static str, String)) + Send + Sync + Clone + 'stati
             let result = (|| -> Result<()> {
                 log::info!("Downloading from {}", url);
                 let reader = ureq::get(url).call().map_err(|e| Error::new(ErrorKind::Other, e.to_string()))?;
-                let size = reader.header("content-length").and_then(|x| x.parse::<usize>().ok()).unwrap_or(1).max(1);
-                let mut reader = ProgressReader::new(reader.into_reader(), |read| {
+                let size = reader.headers().get("content-length").and_then(|x| x.to_str().unwrap().parse::<usize>().ok()).unwrap_or(1).max(1);
+                let mut reader = ProgressReader::new(reader.into_body().into_reader(), |read| {
                     cb(((read as f64 / size as f64) * 0.5, sdk_name, "".into()));
                 });
                 let mut buf = Vec::with_capacity(4*1024*1024);

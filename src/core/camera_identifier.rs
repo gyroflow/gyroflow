@@ -108,6 +108,9 @@ impl CameraIdentifier {
                                 id.lens_info = format!("{:.2} mm", v);
                                 id.focal_length = Some(*v as f64);
                             }
+                            if let Some(v) = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::DisplayName) as Option<&String>) {
+                                id.lens_model = v.clone();
+                            }
                             if let Some(v) = tag_map.get(&GroupId::Custom("LensDistortion".into())).and_then(|map| map.get_t(TagId::Data) as Option<&serde_json::Value>) {
                                 if id.lens_info.is_empty() {
                                     let mut hasher = crc32fast::Hasher::new();

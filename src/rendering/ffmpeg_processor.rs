@@ -289,6 +289,13 @@ impl<'a> FfmpegProcessor<'a> {
         }
 
         for (i, stream) in self.input_context.streams().enumerate() {
+            // Copy timecode from stream if global metadata doesn't have it
+            if let Some(timecode) = stream.metadata().get("timecode") {
+                if metadata.get("timecode").is_none() {
+                    metadata.set("timecode", timecode);
+                }
+            }
+
             let medium = stream.parameters().medium();
             if medium != media::Type::Audio && medium != media::Type::Video && (!self.preserve_other_tracks || medium != media::Type::Data) {
                 stream_mapping[i] = -1;
@@ -301,13 +308,6 @@ impl<'a> FfmpegProcessor<'a> {
             }
             stream_mapping[i] = output_index as isize;
             ist_time_bases[i] = stream.time_base();
-
-            // Copy timecode from stream if global metadata doesn't have it
-            if let Some(timecode) = stream.metadata().get("timecode") {
-                if metadata.get("timecode").is_none() {
-                    metadata.set("timecode", timecode);
-                }
-            }
 
             if medium == media::Type::Video {
                 self.video.input_index = i;

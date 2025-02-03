@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "c0eeb3b" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "47f7ea9" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { version = "0.7", features = ["field_access"] }
 
@@ -37,7 +37,7 @@ serde_json = "1.0"
 crc32fast = "1.4.2"
 byteorder = "1.5.0"
 line_drawing = "1.0.0"
-rand = "0.8.5"
+rand = "0.9.0"
 time = { version = "0.3.37", features = ["local-offset"] }
 itertools = "0.14.0"
 num = "0.4.3"
@@ -46,10 +46,10 @@ bitflags = "2.8.0"
 enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.4.1"
-lru = "0.12"
+lru = "0.13"
 thiserror = "2.0.11"
 ciborium = "0.2.2"
-dyn-clone = "1.0.17"
+dyn-clone = "1.0"
 app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }
 whoami = "1.5.2"
 
@@ -79,7 +79,7 @@ ocl = { version = "0.19.7", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.2.0"
 exr = "1.73"
-opencv = { version = "0.94.1", features = ["clang-runtime"], optional = true }
+opencv = { version = "0.94", features = ["clang-runtime"], optional = true }
 median = "0.3"
 
 wgpu = { version = "24", features = ["spirv", "naga-ir"] }
@@ -119,4 +119,4 @@ ndk-sys = { version = "0.6.0" }
 ndk-context = { version = "0.1.1" }
 
 [build-dependencies]
-ureq = "2.12"
+ureq = "3.0"
