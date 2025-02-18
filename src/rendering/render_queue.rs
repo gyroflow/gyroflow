@@ -1424,7 +1424,7 @@ impl RenderQueue {
 
             if let Ok(mut sync_params) = serde_json::from_value(sync_settings) as serde_json::Result<synchronization::SyncParams> {
                 if sync_params.max_sync_points > 0 {
-                    let mut timestamps_fract = stab.get_optimal_sync_points(sync_params.max_sync_points);
+                    let mut timestamps_fract = stab.get_optimal_sync_points(sync_params.max_sync_points, sync_params.initial_offset * 1000.0);
 
                     if timestamps_fract.is_empty() || !sync_params.auto_sync_points {
                         let chunks = 1.0 / sync_params.max_sync_points as f64;

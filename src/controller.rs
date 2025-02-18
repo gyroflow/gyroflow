@@ -67,7 +67,7 @@ pub struct Controller {
     estimate_bias: qt_method!(fn(&self, timestamp_fract: QString)),
     bias_estimated: qt_signal!(bx: f64, by: f64, bz: f64),
     orientation_guessed: qt_signal!(orientation: QString),
-    get_optimal_sync_points: qt_method!(fn(&mut self, target_sync_points: usize) -> QString),
+    get_optimal_sync_points: qt_method!(fn(&mut self, target_sync_points: usize, initial_offset: f64) -> QString),
 
     start_autocalibrate: qt_method!(fn(&self, max_points: usize, every_nth_frame: usize, iterations: usize, max_sharpness: f64, custom_timestamp_ms: f64, no_marker: bool)),
 
@@ -561,8 +561,8 @@ impl Controller {
         }
     }
 
-    fn get_optimal_sync_points(&mut self, target_sync_points: usize) -> QString {
-        QString::from(self.stabilizer.get_optimal_sync_points(target_sync_points).into_iter().map(|x| x.to_string()).join(";"))
+    fn get_optimal_sync_points(&mut self, target_sync_points: usize, initial_offset: f64) -> QString {
+        QString::from(self.stabilizer.get_optimal_sync_points(target_sync_points, initial_offset * 1000.0).into_iter().map(|x| x.to_string()).join(";"))
     }
 
     fn update_chart(&mut self, chart: QJSValue, series: String) -> bool {

@@ -1865,7 +1865,7 @@ impl StabilizationManager {
         }
     }
 
-    pub fn get_optimal_sync_points(&self, target_sync_points: usize) -> Vec<f64> {
+    pub fn get_optimal_sync_points(&self, target_sync_points: usize, initial_offset: f64) -> Vec<f64> {
         let dur_ms = self.params.read().get_scaled_duration_ms();
         let trim_ranges = {
             let params = self.params.read();
@@ -1883,7 +1883,7 @@ impl StabilizationManager {
                 sync_data.rank = rank;
                 sync_data.ratio = ratio;
             }
-            points.iter().map(|x| x / dur_ms).collect()
+            points.iter().map(|x| (x + initial_offset) / dur_ms).filter(|&v| v >= 0.0 && v <= 1.0).collect()
         } else {
             Vec::new()
         }

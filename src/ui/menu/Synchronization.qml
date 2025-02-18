@@ -150,7 +150,7 @@ MenuItem {
         tooltip: !enabled? qsTr("No motion data loaded, cannot sync.") : "";
         function doSync(): void {
             let maxPoints = maxSyncPoints.value;
-            let sync_points = controller.get_optimal_sync_points(maxPoints);
+            let sync_points = controller.get_optimal_sync_points(maxPoints, initialOffset.value);
 
             if (!sync_points || !experimentalAutoSyncPoints.checked) {
                 let ranges = [];
