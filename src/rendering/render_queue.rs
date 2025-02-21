@@ -914,7 +914,7 @@ impl RenderQueue {
             }
 
             core::run_threaded(move || {
-                Self::do_autosync(stab.clone(), processing, err2, proc_height);
+                Self::do_autosync(stab.clone(), processing, &input_file, err2, proc_height);
 
                 if let Some((opt, path, fields)) = export_metadata {
                     let result = || -> Result<(), core::GyroflowCoreError> {
@@ -1400,7 +1400,7 @@ impl RenderQueue {
         job_id
     }
 
-    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(stab: Arc<StabilizationManager>, processing_cb: F, err: F2, proc_height: i32) {
+    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(stab: Arc<StabilizationManager>, processing_cb: F, input_file: &gyroflow_core::InputFile, err: F2, proc_height: i32) {
         let (url, duration_ms) = {
             (stab.input_file.read().url.clone(), stab.params.read().duration_ms)
         };
@@ -1494,6 +1494,21 @@ impl RenderQueue {
                         let mut decoder_options = ffmpeg_next::Dictionary::new();
                         if proc_height > 0 {
                             decoder_options.set("scale", &format!("{}x{}", (proc_height * 16) / 9, proc_height));
+                        }
+               
+                        if input_file.image_sequence_fps > 0.0 {
+                            let fps = if input_file.image_sequence_fps.fract() > 0.1 {
+                                ffmpeg_next::Rational::new((fps * 1001.0).round() as i32, 1001)
+                            } else {
+                                ffmpeg_next::Rational::new(fps.round() as i32, 1)
+                            };
+                            decoder_options.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
+                        }
+                        if input_file.image_sequence_start > 0 {
+                            decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
+                        }
+                        if cfg!(target_os = "android") {
+                            decoder_options.set("ndk_codec", "1");
                         }
                         ::log::debug!("Decoder options: {:?}", decoder_options);
 
