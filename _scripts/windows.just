@@ -78,7 +78,7 @@ install-deps:
             $Arch = "woa64";
         }
         echo "Downloading LLVM"
-        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/LLVM-18.1.8-$Arch.exe" -outfile "llvm.exe"
+        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-$Arch.exe" -outfile "llvm.exe"
         7z x -y llvm.exe -ollvm
         del "llvm.exe"
     }

@@ -42,7 +42,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "{{QtVersion}}/android_arm64_v8a")) {
         echo "Downloading Qt {{QtVersion}} for Android"
-        & $Python -m pip install -U pip aqtinstall==3.1.16
+        & $Python -m pip install -U pip aqtinstall
         & $Python -m aqt install-qt windows desktop {{QtVersion}} win64_mingw
         & $Python -m aqt install-qt windows android {{QtVersion}} android_arm64_v8a
     }
@@ -63,7 +63,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "OpenCV-android-sdk/")) {
         echo "Downloading OpenCV for Android"
-        wget "https://github.com/opencv/opencv/releases/download/4.10.0/opencv-4.10.0-android-sdk.zip" -outfile "opencv.zip"
+        wget "https://github.com/opencv/opencv/releases/download/4.11.0/opencv-4.11.0-android-sdk.zip" -outfile "opencv.zip"
         7z x -aoa opencv.zip
         del opencv.zip
     }
@@ -72,7 +72,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――― LLVM ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "{{LLVMPath}}\libclang.dll")) {
         echo "Downloading LLVM"
-        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.6/LLVM-18.1.6-win64.exe" -outfile "llvm-win64.exe"
+        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-win64.exe" -outfile "llvm-win64.exe"
         7z x -y llvm-win64.exe -ollvm
         del "llvm-win64.exe"
     }
