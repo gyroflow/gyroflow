@@ -435,6 +435,14 @@ pub fn save_exe_location() {
                     }
                 }
             }
+            #[cfg(target_os = "linux")]
+            if exe_str.contains("/tmp/.mount") {
+                if let Ok(appimg) = std::env::var("APPIMAGE") {
+                    if !appimg.is_empty() {
+                        exe_str = appimg;
+                    }
+                }
+            }
 
             gyroflow_core::settings::set("exeLocation", exe_str.into());
         }
