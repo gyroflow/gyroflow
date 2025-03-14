@@ -425,7 +425,7 @@ impl Controller {
                         let sync_data = this.stabilizer.sync_data.read();
                         if !sync_data.rank.is_empty() {
                             let index = ((x.0 - x.1) as f64 / (sync_data.ratio * 1000.0)).round() as usize;
-                            if index < sync_data.rank.len() && sync_data.rank[index] < 20.0 {
+                            if index < sync_data.rank.len() && sync_data.rank[index] < 13.0 {
                                 continue;
                             }
                         }

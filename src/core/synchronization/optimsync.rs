@@ -143,7 +143,7 @@ impl OptimSync {
         let ratio = step_size_samples as f64 / self.sample_rate;
         for i in 0..rank.len() {
             let time = i as f64 * ratio;
-            if rank[i] < 100.0 || !trim_ranges_s.iter().any(|x| time >= x.0 && time <= x.1) {
+            if rank[i] < 50.0 || !trim_ranges_s.iter().any(|x| time >= x.0 && time <= x.1) {
                 rank[i] = 0.0;
             }
         }
