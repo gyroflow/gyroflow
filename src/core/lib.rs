@@ -1870,9 +1870,9 @@ impl StabilizationManager {
         let trim_ranges = {
             let params = self.params.read();
             if params.trim_ranges.is_empty() {
-                vec![(0.0, dur_ms as f64 / 1000.0)]
+                vec![((0.0 - initial_offset)/1000.0, (dur_ms - initial_offset) / 1000.0)]
             } else {
-                params.trim_ranges.iter().map(|x| (x.0 * dur_ms / 1000.0, x.1 * dur_ms / 1000.0)).collect()
+                params.trim_ranges.iter().map(|x| ((x.0 * dur_ms - initial_offset) / 1000.0, (x.1 * dur_ms - initial_offset) / 1000.0)).collect()
             }
         };
 
