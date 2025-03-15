@@ -38,7 +38,7 @@ lazy_static::lazy_static! {
 }
 pub fn set_gpu_type_from_name(name: &str) {
     let name = name.to_ascii_lowercase();
-         if name.contains("nvidia") || name.contains("quadro") { *GPU_TYPE.write() = GpuType::Nvidia; }
+         if name.contains("nvidia") || name.contains("quadro") || name.contains("grid") { *GPU_TYPE.write() = GpuType::Nvidia; }
     else if name.contains("amd") || name.contains("advanced micro devices") { *GPU_TYPE.write() = GpuType::Amd; }
     else if name.contains("intel") && !name.contains("intel(r) core(tm)") { *GPU_TYPE.write() = GpuType::Intel; }
     else if name.contains("apple m") { *GPU_TYPE.write() = GpuType::AppleSilicon; }
