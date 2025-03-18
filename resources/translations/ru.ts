@@ -267,7 +267,7 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
       <location filename="../../src/ui/App.qml" line="448"/>
       <location filename="../../src/ui/App.qml" line="661"/>
       <source>Preset saved to %1</source>
-      <translation type="unfinished">Preset saved to %1</translation>
+      <translation>Пресет сохранен в %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="626"/>
@@ -311,7 +311,7 @@ Please check the file bitrate after rendering and if you&apos;re affected by thi
     <message>
       <location filename="../../src/ui/App.qml" line="331"/>
       <source>file %1 will be overwritten</source>
-      <translation type="unfinished">file %1 will be overwritten</translation>
+      <translation>файл %1 будет перезаписан</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="334"/>
@@ -335,12 +335,12 @@ Due to limitations of the system video encoders, rendering in the background is 
     <message>
       <location filename="../../src/ui/App.qml" line="439"/>
       <source>Enter the name for the preset: </source>
-      <translation type="unfinished">Enter the name for the preset: </translation>
+      <translation>Введите имя для пресета: </translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="443"/>
       <source>Name cannot be empty.</source>
-      <translation type="unfinished">Name cannot be empty.</translation>
+      <translation>Название не может быть пустым.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="668"/>
@@ -564,7 +564,7 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="295"/>
       <source>Output size</source>
-      <translation>Размер выходного файла</translation>
+      <translation>Разрешение</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="301"/>
@@ -781,37 +781,37 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="50"/>
       <source>Grid guide</source>
-      <translation type="unfinished">Grid guide</translation>
+      <translation>Сетка</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Disable</source>
-      <translation type="unfinished">Disable</translation>
+      <translation>Отключить</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Enable</source>
-      <translation type="unfinished">Enable</translation>
+      <translation>Включить</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="54"/>
       <source>Color</source>
-      <translation type="unfinished">Color</translation>
+      <translation>Цвет</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="55"/>
       <source>White</source>
-      <translation type="unfinished">White</translation>
+      <translation>Белый</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="56"/>
       <source>Black</source>
-      <translation type="unfinished">Black</translation>
+      <translation>Чёрный</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="60"/>
       <source>Lines</source>
-      <translation type="unfinished">Lines</translation>
+      <translation>Линии</translation>
     </message>
   </context>
   <context>
@@ -1072,52 +1072,52 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="298"/>
       <source>Advanced</source>
-      <translation type="unfinished">Advanced</translation>
+      <translation>Дополнительно</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="303"/>
       <source>Lens is under water</source>
-      <translation type="unfinished">Lens is under water</translation>
+      <translation>Линза под водой</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="305"/>
       <source>Enable if you&apos;re filming under water. This will adjust the refraction coefficient.</source>
-      <translation type="unfinished">Enable if you&apos;re filming under water. This will adjust the refraction coefficient.</translation>
+      <translation>Включите, если вы&apos;снимаете под водой. Это изменит коэффициент преломления.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="326"/>
       <source>Enable keyframing</source>
-      <translation type="unfinished">Enable keyframing</translation>
+      <translation>Включить покадровое отображение</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="339"/>
       <source>Add keyframe</source>
-      <translation type="unfinished">Add keyframe</translation>
+      <translation>Добавить ключевой кадр</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="409"/>
       <source>Export STMap</source>
-      <translation type="unfinished">Export STMap</translation>
+      <translation>Экспорт STMap</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="415"/>
       <source>This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?</source>
-      <translation type="unfinished">This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?</translation>
+      <translation>Этот файл содержит метаданные для каждого кадра. Вы хотите экспортировать последовательность STMap или один фрейм?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="416"/>
       <source>Single frame</source>
-      <translation type="unfinished">Single frame</translation>
+      <translation>Одиночный кадр</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="417"/>
       <source>STMap sequence</source>
-      <translation type="unfinished">STMap sequence</translation>
+      <translation>Серия STMap</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="431"/>
       <source>Exporting %1...</source>
-      <translation type="unfinished">Exporting %1...</translation>
+      <translation>Экспорт %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="368"/>
@@ -1176,7 +1176,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="200"/>
       <source>Troubleshooting</source>
-      <translation type="unfinished">Troubleshooting</translation>
+      <translation>Устранение неполадок</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Modal.qml" line="212"/>
@@ -1342,22 +1342,22 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="615"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>Экспорт</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="626"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>Выберите файл</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="640"/>
       <source>Export camera data (CSV/JSON/USD/AE)</source>
-      <translation type="unfinished">Export camera data (CSV/JSON/USD/AE)</translation>
+      <translation>Экспорт данных камеры (CSV/JSON/USD/AE)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="684"/>
       <source>Export full metadata</source>
-      <translation type="unfinished">Export full metadata</translation>
+      <translation>Экспорт полных метаданных</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="692"/>
@@ -1367,7 +1367,7 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="700"/>
       <source>Export project file (including processed gyro data)</source>
-      <translation type="unfinished">Export project file (including processed gyro data)</translation>
+      <translation>Экспортировать проект в файл (с преобразованными данными гироскопа)</translation>
     </message>
   </context>
   <context>
@@ -1375,12 +1375,12 @@ Do you want to submit your profile?</source>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="9"/>
       <source>Video editor plugins</source>
-      <translation type="unfinished">Video editor plugins</translation>
+      <translation>Видео редактор плагинов</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="25"/>
       <source>Select %1</source>
-      <translation type="unfinished">Select %1</translation>
+      <translation>Выбрать %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="31"/>
@@ -1389,32 +1389,32 @@ Do you want to submit your profile?</source>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="128"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="136"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Ок</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="31"/>
       <source>You selected the wrong folder.
 Make sure to select %1.</source>
-      <translation type="unfinished">You selected the wrong folder.
-Make sure to select %1.</translation>
+      <translation>Вы выбрали не правильную папку. 
+Убедитесь что вы правильно выбрали %1.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="92"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="120"/>
       <source>Update</source>
-      <translation type="unfinished">Update</translation>
+      <translation>Обновление</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="92"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="120"/>
       <source>Install</source>
-      <translation type="unfinished">Install</translation>
+      <translation>Установить</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="99"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="136"/>
       <source>At the next prompt, click &lt;b&gt;&quot;Open&quot;&lt;/b&gt; to grant access to the %1 folder in order for Gyroflow to install the plugin.</source>
-      <translation type="unfinished">At the next prompt, click &lt;b&gt;&quot;Open&quot;&lt;/b&gt; to grant access to the %1 folder in order for Gyroflow to install the plugin.</translation>
+      <translation>При следующем запросе нажмите &lt;b&gt;&quot;Open&quot;&lt;/b&gt; для предоставления доступа к папке %1 , чтобы Gyroflow установил плагин.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="128"/>
@@ -1428,12 +1428,12 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="130"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Отменить</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="149"/>
       <source>More information</source>
-      <translation type="unfinished">More information</translation>
+      <translation>Больше информации</translation>
     </message>
   </context>
   <context>
@@ -1454,7 +1454,7 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="46"/>
       <source>[Selected folder]</source>
-      <translation type="unfinished">[Selected folder]</translation>
+      <translation>[Выбранная папка]</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/OutputPathField.qml" line="112"/>
@@ -1664,22 +1664,22 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Top to bottom</source>
-      <translation type="unfinished">Top to bottom</translation>
+      <translation>Сверху вниз</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Bottom to top</source>
-      <translation type="unfinished">Bottom to top</translation>
+      <translation>Снизу вверх</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Left to right</source>
-      <translation type="unfinished">Left to right</translation>
+      <translation>Слева направо</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Right to left</source>
-      <translation type="unfinished">Right to left</translation>
+      <translation>Справа налево</translation>
     </message>
   </context>
   <context>
@@ -1801,12 +1801,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="393"/>
       <source>Move up</source>
-      <translation type="unfinished">Move up</translation>
+      <translation>Переместить вверх</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="398"/>
       <source>Move down</source>
-      <translation type="unfinished">Move down</translation>
+      <translation>Переместить вниз</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="403"/>
