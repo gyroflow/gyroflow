@@ -208,7 +208,7 @@ pub fn run(open_file: &mut String) -> bool {
             queue.default_suffix = QString::from(suffix);
         }
         if opts.no_gpu_decoding {
-            queue.set_gpu_decoding(false);
+            stab.set_gpu_decoding(false);
         }
 
         if let Some(rendering_device) = opts.rendering_device {
