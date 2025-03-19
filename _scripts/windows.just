@@ -19,10 +19,12 @@ install-deps:
     cd {{ExtDir}}
 
     $Python = "python";
-    if (Get-Command "python.exe" -ErrorAction SilentlyContinue) {
-        $Python = "python";
+    if (Get-Command "python3.10.exe" -ErrorAction SilentlyContinue) {
+        $Python = "python3.10";
     } elseif (Get-Command "python3.exe" -ErrorAction SilentlyContinue) {
         $Python = "python3";
+    } elseif if (Get-Command "python.exe" -ErrorAction SilentlyContinue) {
+        $Python = "python";
     } else {
         if (-not (Test-Path -Path "{{ExtDir}}/WPy64-310100b3")) {
             echo "Downloading WinPython"
