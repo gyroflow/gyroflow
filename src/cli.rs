@@ -103,6 +103,10 @@ struct Opts {
     #[argh(option, short = 'r')]
     rendering_device: Option<String>,
 
+    /// don't use gpu video decoding, default: false
+    #[argh(switch)]
+    no_gpu_decoding: bool,
+
     /// print app version
     #[argh(switch)]
     version: bool,
@@ -202,6 +206,9 @@ pub fn run(open_file: &mut String) -> bool {
         let mut additional_data = setup_defaults(stab, &mut queue);
         if let Some(suffix) = opts.suffix {
             queue.default_suffix = QString::from(suffix);
+        }
+        if opts.no_gpu_decoding {
+            queue.set_gpu_decoding(false);
         }
 
         if let Some(rendering_device) = opts.rendering_device {
