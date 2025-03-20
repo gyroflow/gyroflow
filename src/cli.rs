@@ -203,7 +203,7 @@ pub fn run(open_file: &mut String) -> bool {
         if let Some((name, _list_name)) = gyroflow_core::gpu::initialize_contexts() {
             rendering::set_gpu_type_from_name(&name);
         }
-        let mut additional_data = setup_defaults(stab, &mut queue);
+        let mut additional_data = setup_defaults(&stab, &mut queue);
         if let Some(suffix) = opts.suffix {
             queue.default_suffix = QString::from(suffix);
         }
@@ -500,7 +500,7 @@ fn detect_types(all_files: &[String]) -> (Vec<String>, Vec<String>, Vec<String>)
     (videos, lens_profiles, presets)
 }
 
-fn setup_defaults(stab: Arc<StabilizationManager>, queue: &mut RenderQueue) -> serde_json::Value {
+fn setup_defaults(stab: &Arc<StabilizationManager>, queue: &mut RenderQueue) -> serde_json::Value {
     use gyroflow_core::settings;
     let codecs = [
         "H.264/AVC",
