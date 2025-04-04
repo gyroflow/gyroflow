@@ -695,13 +695,13 @@ Item {
                             if (loaded) {
                                 const copy = [...root.mergedFiles];
                                 messageBox(Modal.Question, qsTr("Files merged successfully, do you want to delete the original ones?"), [
-                                    { text: qsTr("Yes"), accent: true, clicked: function() {
+                                    { text: qsTr("Yes"), clicked: function() {
                                         for (const x of copy) {
                                             filesystem.move_to_trash(x);
                                         }
                                         return true;
                                     } },
-                                    { text: qsTr("No") },
+                                    { text: qsTr("No"), accent: true },
                                 ], null, undefined, "delete-after-join");
                             }
                             root.mergedFiles = [];

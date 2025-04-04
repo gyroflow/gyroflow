@@ -30,7 +30,7 @@ pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64
 
         let mut matched_points = Vec::new();
         for ts in &keys {
-            if (*from_ts..*to_ts).contains(&ts) {
+            if (*from_ts..*to_ts).contains(ts) {
                 match estimator.get_of_lines_for_timestamp(&ts, 0, 1.0, next_frame_no, true) {
                     (Some(lines), Some(_frame_size)) => {
                         if !lines.0.1.is_empty() && lines.0.1.len() == lines.1.1.len() {

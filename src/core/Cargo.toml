@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "292b312" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "d11d876" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { version = "0.7", features = ["field_access"] }
 
@@ -23,7 +23,7 @@ rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "0e9d885" }
 argmin = { version = "0.10.0", git = "https://github.com/argmin-rs/argmin.git", default-features = false }
 argmin-math = { version = "0.4.0", git = "https://github.com/argmin-rs/argmin.git", default-features = false, features = ["nalgebra_v0_33"] }
 
-mimalloc = { version = "0.1.43", default-features = false }
+mimalloc = { version = "0.1.45", default-features = false }
 nalgebra = { version = "0.33", features = ["serde-serialize"] }
 rayon = "1.10"
 biquad = "0.5.0"
@@ -38,20 +38,20 @@ crc32fast = "1.4.2"
 byteorder = "1.5.0"
 line_drawing = "1.0.1"
 rand = "0.9.0"
-time = { version = "0.3.39", features = ["local-offset"] }
+time = { version = "0.3.41", features = ["local-offset"] }
 itertools = "0.14.0"
 num = "0.4.3"
 base91 = "0.1.0"
 bitflags = "2.9.0"
 enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
-half = "2.4.1"
+half = "2.5.0"
 lru = "0.13"
 thiserror = "2.0.12"
 ciborium = "0.2.2"
 dyn-clone = "1.0"
 app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }
-whoami = "1.5.2"
+whoami = "1.6.0"
 
 akaze = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee", features = ["rayon"] }
 eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee" }
@@ -70,7 +70,7 @@ bytemuck = "1.22"
 ash = "0.38.0"
 pollster = "0.4.0"
 futures-intrusive = "0.5.0"
-flate2 = "1.1.0"
+flate2 = "1.1.1"
 walkdir = "2.5.0"
 url = "2.5.4"
 urlencoding = "2.1.3"
