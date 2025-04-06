@@ -1495,7 +1495,7 @@ impl RenderQueue {
                         if proc_height > 0 {
                             decoder_options.set("scale", &format!("{}x{}", (proc_height * 16) / 9, proc_height));
                         }
-               
+
                         if input_file.image_sequence_fps > 0.0 {
                             let fps = if input_file.image_sequence_fps.fract() > 0.1 {
                                 ffmpeg_next::Rational::new((fps * 1001.0).round() as i32, 1001)
