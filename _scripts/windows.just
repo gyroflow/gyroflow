@@ -3,6 +3,7 @@ import 'common.just'
 NameSuffix := if Arch == "aarch64" { "windows-arm64" } else { "windows64" }
 
 export VCPKG_CMAKE_SYSTEM_VERSION := "10.0.22621.0"
+export VCPKG_CMAKE_CONFIGURE_OPTIONS := "-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.22621.0"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
