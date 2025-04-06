@@ -379,13 +379,14 @@ Item {
                 const dlg = messageBox(Modal.Info, qsTr("Image sequence has been detected.\nPlease provide frame rate: "), [
                     { text: qsTr("Ok"), accent: true, clicked: function() {
                         const fps = dlg.mainColumn.children[1].value;
+                        settings.setValue("imageSequenceFps", fps);
                         controller.image_sequence_fps = fps;
                         loadFile(newUrl, true);
                         vid.setFrameRate(fps);
                     } },
                     { text: qsTr("Cancel") },
                 ]);
-                const nf = Qt.createComponent("components/NumberField.qml").createObject(dlg.mainColumn, { precision: 3, unit: "fps", value: 30.0 });
+                const nf = Qt.createComponent("components/NumberField.qml").createObject(dlg.mainColumn, { precision: 3, unit: "fps", value: +settings.value("imageSequenceFps", "30") });
                 nf.anchors.horizontalCenter = dlg.mainColumn.horizontalCenter;
                 return;
             }
