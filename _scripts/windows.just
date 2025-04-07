@@ -65,9 +65,10 @@ install-deps:
         rm -Recurse -Force \vcpkg -ErrorAction SilentlyContinue
         git clone --depth 1 https://github.com/Microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
-        .\vcpkg\vcpkg install "flatbuffers:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release --x-cmake-args="-DCMAKE_SYSTEM_VERSION=10.0.22621.0"
-        .\vcpkg\vcpkg install "opencv4[core,calib3d,opencl,thread,intrinsics]:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release --x-cmake-args="-DCMAKE_SYSTEM_VERSION=10.0.22621.0"
-        .\vcpkg\vcpkg install "opencl:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release --x-cmake-args="-DCMAKE_SYSTEM_VERSION=10.0.22621.0"
+        Add-Content .\vcpkg\triplets\arm64-windows.cmake -Value  "`nset(VCPKG_CMAKE_SYSTEM_VERSION 10.0.22621.0)
+        .\vcpkg\vcpkg install "flatbuffers:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
+        .\vcpkg\vcpkg install "opencv4[core,calib3d,opencl,thread,intrinsics]:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
+        .\vcpkg\vcpkg install "opencl:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
         rm -Recurse -Force .\vcpkg\buildtrees
         rm -Recurse -Force .\vcpkg\downloads
     }
