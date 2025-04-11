@@ -134,7 +134,16 @@ pub fn run(open_file: &mut String) -> bool {
             return true;
         }
 
-        let (videos, mut lens_profiles, mut presets) = detect_types(&opts.input);
+        let absolute_paths: Vec<String> = opts.input.iter().map(|file| {
+            let path = std::path::PathBuf::from(file);
+            if path.is_relative() {
+                std::fs::canonicalize(&path).unwrap_or_else(|_| path).to_string_lossy().to_string()
+            } else {
+                file.clone()
+            }
+        }).collect();
+
+        let (videos, mut lens_profiles, mut presets) = detect_types(&absolute_paths);
         if let Some(mut preset) = opts.preset {
             if !preset.is_empty() {
                 if preset.starts_with('{') { preset = preset.replace('\'', "\""); }
