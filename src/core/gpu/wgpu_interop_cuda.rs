@@ -98,7 +98,8 @@ pub fn get_current_device_id_by_uuid(adapters: &Vec<wgpu::Adapter>) -> usize {
                 required_features: wgpu::Features::empty(),
                 required_limits: wgpu::Limits::default(),
                 memory_hints: wgpu::MemoryHints::Performance,
-            }, None));
+                trace: wgpu::Trace::Off
+            }));
             if let Ok((device, _q)) = device {
                 unsafe {
                     let _ = device.as_hal::<wgpu::hal::api::Vulkan, _, _>(|device| {

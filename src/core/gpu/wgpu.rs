@@ -61,7 +61,7 @@ impl Drop for WgpuWrapper {
         self.pipeline = PipelineType::None;
         self.bind_group = None;
 
-        self.device.poll(wgpu::Maintain::Wait);
+        let _ = self.device.poll(wgpu::PollType::Wait);
     }
 }
 
@@ -127,7 +127,7 @@ impl WgpuWrapper {
             power_preference: wgpu::PowerPreference::HighPerformance,
             force_fallback_adapter: false,
             compatible_surface: None,
-        }))?;
+        })).ok()?;
         let info = adapter.get_info();
         log::debug!("WGPU adapter: {:?}", &info);
         if info.device_type == wgpu::DeviceType::Cpu {
@@ -218,7 +218,8 @@ impl WgpuWrapper {
                             required_features: wgpu::Features::empty(),
                             required_limits: limits.clone(),
                             memory_hints: wgpu::MemoryHints::Performance,
-                        }, None));
+                            trace: wgpu::Trace::Off
+                        }));
                         if let Err(e) = &device {
                             let e_str = format!("{e:?}");
                             let re = regex::Regex::new("FailedLimit \\{ name: \"(.*?)\", requested: [0-9]+, allowed: ([0-9]+)").unwrap();
@@ -331,12 +332,12 @@ impl WgpuWrapper {
             });
 
             let compilation_options = wgpu::PipelineCompilationOptions {
-                constants: &std::collections::HashMap::from([
-                    (String::from("100"), params.interpolation     as f64),
-                    (String::from("101"), params.pix_element_count as f64),
-                    (String::from("102"), params.bytes_per_pixel   as f64),
-                    (String::from("103"), params.flags             as f64),
-                ]),
+                constants: &[
+                    ("100", params.interpolation     as f64),
+                    ("101", params.pix_element_count as f64),
+                    ("102", params.bytes_per_pixel   as f64),
+                    ("103", params.flags             as f64),
+                ],
                 ..Default::default()
             };
 
@@ -502,7 +503,7 @@ impl WgpuWrapper {
                 let (sender, receiver) = futures_intrusive::channel::shared::oneshot_channel();
                 buffer_slice.map_async(wgpu::MapMode::Read, move |v| sender.send(v).unwrap());
 
-                self.device.poll(wgpu::Maintain::Wait);
+                let _ = self.device.poll(wgpu::PollType::Wait);
 
                 if let Some(Ok(())) = pollster::block_on(receiver.receive()) {
                     let data = buffer_slice.get_mapped_range();

@@ -25,9 +25,9 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
                 format,
                 view_formats: vec![],
                 usage: if is_in {
-                    wgpu::hal::TextureUses::RESOURCE | wgpu::hal::TextureUses::COPY_SRC
+                    wgpu::TextureUses::RESOURCE | wgpu::TextureUses::COPY_SRC
                 } else {
-                    wgpu::hal::TextureUses::COLOR_TARGET | wgpu::hal::TextureUses::COPY_DST
+                    wgpu::TextureUses::COLOR_TARGET | wgpu::TextureUses::COPY_DST
                 },
                 memory_flags: wgpu::hal::MemoryFlags::empty(),
             },
