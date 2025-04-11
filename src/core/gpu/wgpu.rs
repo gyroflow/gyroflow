@@ -197,7 +197,8 @@ impl WgpuWrapper {
                                 ..wgpu::Limits::default()
                             },
                             memory_hints: wgpu::MemoryHints::Performance,
-                        }, None).map_err(|e| WgpuError::RequestDevice(e))?
+                            trace: wgpu::Trace::Off
+                        }).map_err(|e| WgpuError::RequestDevice(e))?
                     }
                 },
                 _ => {
