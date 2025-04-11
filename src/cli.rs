@@ -153,7 +153,12 @@ pub fn run(open_file: &mut String) -> bool {
 
         if let Some(open) = opts.open {
             if !open.is_empty() {
-                *open_file = open;
+                let path = std::path::PathBuf::from(&open);
+                *open_file = if path.is_relative() {
+                    std::fs::canonicalize(&path).unwrap_or_else(|_| path).to_string_lossy().to_string()
+                } else {
+                    open
+                };
                 return false;
             }
         }
@@ -461,7 +466,14 @@ pub fn run(open_file: &mut String) -> bool {
 
         if !watching {
             let mut queue = queue.borrow_mut();
-            let gyro_file = opts.gyro_file.unwrap_or_default();
+            let gyro_file = opts.gyro_file.map(|file| {
+                let path = std::path::PathBuf::from(&file);
+                if path.is_relative() {
+                    std::fs::canonicalize(&path).unwrap_or_else(|_| path).to_string_lossy().to_string()
+                } else {
+                    file.clone()
+                }
+            }).unwrap_or_default();
             for file in &videos {
                 queue.add_file(path_to_url(file), path_to_url(&gyro_file), additional_data.to_string());
             }
