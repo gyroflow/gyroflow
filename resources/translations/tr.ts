@@ -266,7 +266,7 @@ Lütfen render işlemi sonrası dosyanızın bitrate'ini kontrol edin ve bu bug'
       <location filename="../../src/ui/App.qml" line="448"/>
       <location filename="../../src/ui/App.qml" line="661"/>
       <source>Preset saved to %1</source>
-      <translation type="unfinished">Preset saved to %1</translation>
+      <translation>Önayar %1'e kaydedildi</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="626"/>
@@ -333,12 +333,12 @@ Sisteminizin video enkoderlerinin sınırlarından ötürü arkaplanda render i�
     <message>
       <location filename="../../src/ui/App.qml" line="439"/>
       <source>Enter the name for the preset: </source>
-      <translation type="unfinished">Enter the name for the preset: </translation>
+      <translation>Önayar için bir isim girin: </translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="443"/>
       <source>Name cannot be empty.</source>
-      <translation type="unfinished">Name cannot be empty.</translation>
+      <translation>İsim boş bırakılamaz.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="668"/>
@@ -1371,12 +1371,12 @@ Profilinizi yüklemek istiyor musunuz?</translation>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="9"/>
       <source>Video editor plugins</source>
-      <translation type="unfinished">Video editor plugins</translation>
+      <translation>Video editörü eklentileri</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="25"/>
       <source>Select %1</source>
-      <translation type="unfinished">Select %1</translation>
+      <translation>%1'i seç</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="31"/>
@@ -1385,51 +1385,50 @@ Profilinizi yüklemek istiyor musunuz?</translation>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="128"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="136"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Tamam</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="31"/>
       <source>You selected the wrong folder.
 Make sure to select %1.</source>
-      <translation type="unfinished">You selected the wrong folder.
-Make sure to select %1.</translation>
+      <translation>Yanlış klasörü seçtiniz.
+%1'i seçtiğinizden emin olun.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="92"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="120"/>
       <source>Update</source>
-      <translation type="unfinished">Update</translation>
+      <translation>Güncelle</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="92"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="120"/>
       <source>Install</source>
-      <translation type="unfinished">Install</translation>
+      <translation>Yükle</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="99"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="136"/>
       <source>At the next prompt, click &lt;b&gt;&quot;Open&quot;&lt;/b&gt; to grant access to the %1 folder in order for Gyroflow to install the plugin.</source>
-      <translation type="unfinished">At the next prompt, click &lt;b&gt;&quot;Open&quot;&lt;/b&gt; to grant access to the %1 folder in order for Gyroflow to install the plugin.</translation>
+      <translation>Gyroflow'un eklentiyi kurabilmesi için bir sonraki adımda &lt;b&gt;&quot;pAç&quot;&lt;/b&gt; 'a tıklayıp %1 klasörüne erişim izni verin.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="128"/>
       <source>%1 folder doesn&apos;t exist.
 Due to sandbox limitations, you have to create it yourself.
 Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</source>
-      <translation type="unfinished">%1 folder doesn&apos;t exist.
-Due to sandbox limitations, you have to create it yourself.
-Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
+      <translation>%1 klasörü bulunamadı. Sandbox kısıtlamasından ötürü kendiniz oluşturmalısınız.
+&lt;b&gt;Terminal&lt;/b&gt; 'i açıp aşağıdaki komutu yazın:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="130"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>İptal et</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="149"/>
       <source>More information</source>
-      <translation type="unfinished">More information</translation>
+      <translation>Daha fazla bilgi</translation>
     </message>
   </context>
   <context>
@@ -1655,27 +1654,27 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Frame readout direction: %1</source>
-      <translation type="unfinished">Frame readout direction: %1</translation>
+      <translation>Frame okuma yönü: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Top to bottom</source>
-      <translation type="unfinished">Top to bottom</translation>
+      <translation>Yukarıdan aşağıya</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Bottom to top</source>
-      <translation type="unfinished">Bottom to top</translation>
+      <translation>Aşağıdan yukarıya</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Left to right</source>
-      <translation type="unfinished">Left to right</translation>
+      <translation>Soldan sağa</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Right to left</source>
-      <translation type="unfinished">Right to left</translation>
+      <translation>Sağdan sola</translation>
     </message>
   </context>
   <context>
@@ -1796,12 +1795,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="393"/>
       <source>Move up</source>
-      <translation type="unfinished">Move up</translation>
+      <translation>Yukarı taşı</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="398"/>
       <source>Move down</source>
-      <translation type="unfinished">Move down</translation>
+      <translation>Aşağı taşı</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="403"/>
@@ -2185,12 +2184,12 @@ Click Ok and select the destination folder.</source>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="220"/>
       <source>Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the directory with lens profiles.</source>
-      <translation type="unfinished">Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the directory with lens profiles.</translation>
+      <translation>İpucu: Önayarlarınıza (`.gyroflow` dosyası) lens profilleriyle aynı klasöre kaydetmeniz halinde lens profili arama kutucuğuyla ulaşabilirsiniz.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="221"/>
       <source>You can also save your preset as `default.gyroflow` in the directory with lens profiles and it will be always applied to every loaded video file (also in plugins).</source>
-      <translation type="unfinished">You can also save your preset as `default.gyroflow` in the directory with lens profiles and it will be always applied to every loaded video file (also in plugins).</translation>
+      <translation>Önayarlarınız `default.gyroflow` adıyla lens profillerinizin olduğu klasöre kaydetmeniz halinde her projenizde otomatik olarak aktif edilir.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="235"/>
@@ -2374,7 +2373,7 @@ Click Ok and select the destination folder.</source>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="636"/>
       <source>Link with zooming limit</source>
-      <translation type="unfinished">Link with zooming limit</translation>
+      <translation>Zoomlama sınırıyla ilişkilendir</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="709"/>
@@ -3106,37 +3105,37 @@ Bu özellik deneyseldir, sonuçlar hiç düzgün görünmeyebilir. Devam etmek i
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="430"/>
       <source>Zoom limit</source>
-      <translation type="unfinished">Zoom limit</translation>
+      <translation>Zoomlama sınırı</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="431"/>
       <source>Additional 3D yaw</source>
-      <translation type="unfinished">Additional 3D yaw</translation>
+      <translation>İlave 3D yaw</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="432"/>
       <source>Additional 3D pitch</source>
-      <translation type="unfinished">Additional 3D pitch</translation>
+      <translation>İlave 3D pitch</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="433"/>
       <source>Additional 3D roll</source>
-      <translation type="unfinished">Additional 3D roll</translation>
+      <translation>İlave 3D roll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="434"/>
       <source>Additional 3D translation X</source>
-      <translation type="unfinished">Additional 3D translation X</translation>
+      <translation>İlave 3D öteleme X</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="435"/>
       <source>Additional 3D translation Y</source>
-      <translation type="unfinished">Additional 3D translation Y</translation>
+      <translation>İlave 3D öteleme Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="436"/>
       <source>Additional 3D translation Z</source>
-      <translation type="unfinished">Additional 3D translation Z</translation>
+      <translation>İlave 3D öteleme Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="437"/>
@@ -3166,7 +3165,7 @@ Bu özellik deneyseldir, sonuçlar hiç düzgün görünmeyebilir. Devam etmek i
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="442"/>
       <source>Light refraction coefficient</source>
-      <translation type="unfinished">Light refraction coefficient</translation>
+      <translation>Işık sapma katsayısı</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="443"/>
@@ -3186,7 +3185,7 @@ Bu özellik deneyseldir, sonuçlar hiç düzgün görünmeyebilir. Devam etmek i
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="449"/>
       <source>Video speed</source>
-      <translation type="unfinished">Video speed</translation>
+      <translation>Video hızı</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="674"/>
@@ -3552,8 +3551,7 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
       <location filename="../../src/ui/VideoArea.qml" line="238"/>
       <source>This video cannot be stabilized, because this lens doesn&apos;t support OSS metadata.
 Disable lens stabilization (Optical SteadyShot) in order to use Gyroflow.</source>
-      <translation type="unfinished">This video cannot be stabilized, because this lens doesn&apos;t support OSS metadata.
-Disable lens stabilization (Optical SteadyShot) in order to use Gyroflow.</translation>
+      <translation>Kullanılan lens OSS metadata'sını desteklemediği için bu video stabilize edilemiyor. Devam etmek için lens stabilizasyonunu devre dışı bırakın (Optik SteadyShot).</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="366"/>
