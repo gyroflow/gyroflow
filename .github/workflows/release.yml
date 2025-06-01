@@ -12,11 +12,11 @@ jobs:
       matrix:
         targets: [
           { os: ubuntu-latest, type: linux },
-          { os: macos-15,      type: macos },
-          { os: macos-15,      type: macstore },
+          { os: macos-14-large,type: macos },
+          { os: macos-14-large,type: macstore },
           { os: windows-2022,  type: windows },
           { os: windows-2022,  type: windows-arm },
-          { os: macos-15,      type: ios },
+          { os: macos-14-large,type: ios },
           { os: windows-2022,  type: android }
         ]
     name: Gyroflow for ${{ matrix.targets.type }}
@@ -59,7 +59,7 @@ jobs:
           rm -r -force ${{ github.workspace }}/target/release/build/qml-video-rs* -ErrorAction SilentlyContinue
 
       - name: Install Mac certificates
-        if: ${{ matrix.targets.os == 'macos-15' }}
+        if: ${{ matrix.targets.os == 'macos-14-large' }}
         uses: apple-actions/import-codesign-certs@v3
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATES }}
@@ -117,7 +117,7 @@ jobs:
           DONT_BUILD_DMG: true
         run: |
           /usr/libexec/PlistBuddy -x -c "Set :LSMinimumSystemVersion \"11.0\"" ${{ github.workspace }}/_deployment/mac/Gyroflow.app/Contents/Info.plist
-          sed -i -e 's/"10.12"/"11.0"/' ${{ github.workspace }}/_scripts/macos.just
+          sed -i -e 's/"10.14"/"11.0"/' ${{ github.workspace }}/_scripts/macos.just
           just install-deps
           just deploy universal
           just bundle
@@ -187,7 +187,7 @@ jobs:
   github_release:
     name: Create GitHub release
     needs: build
-    runs-on: macos-15
+    runs-on: macos-14-large
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4

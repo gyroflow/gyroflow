@@ -150,7 +150,7 @@ deploy *param:
         #export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/usr/lib/"
         export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/lib/"
         #export LD_LIBRARY_PATH="$PROJECT_DIR/ext/{{QtVersion}}/macos/lib"
-        export MACOSX_DEPLOYMENT_TARGET="10.12"
+        export MACOSX_DEPLOYMENT_TARGET="10.14"
 
         export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-x86_64
         export OPENCV_LINK_PATHS=$OPENCV_DIR/x64-osx/lib
