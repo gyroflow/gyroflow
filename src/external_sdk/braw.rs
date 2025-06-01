@@ -33,11 +33,11 @@ impl BrawSdk {
 
     pub fn get_download_url() -> Option<&'static str> {
         if cfg!(target_os = "windows") {
-            Some("https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_Windows_4.2.0.tar.gz")
+            Some("https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_Windows_4.5.0.tar.gz")
         } else if cfg!(target_os = "macos") {
-            Some("https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_MacOS_4.2.0.tar.gz")
+            Some("https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_MacOS_4.5.0.tar.gz")
         } else if cfg!(target_os = "linux") {
-            Some("https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_Linux_4.2.0.tar.gz")
+            Some("https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_Linux_4.5.0.tar.gz")
         } else {
             None
         }
