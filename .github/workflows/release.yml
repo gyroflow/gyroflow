@@ -12,11 +12,11 @@ jobs:
       matrix:
         targets: [
           { os: ubuntu-latest, type: linux },
-          { os: macos-13,      type: macos },
-          { os: macos-13,      type: macstore },
+          { os: macos-15,      type: macos },
+          { os: macos-15,      type: macstore },
           { os: windows-2022,  type: windows },
           { os: windows-2022,  type: windows-arm },
-          { os: macos-13,      type: ios },
+          { os: macos-15,      type: ios },
           { os: windows-2022,  type: android }
         ]
     name: Gyroflow for ${{ matrix.targets.type }}
@@ -59,7 +59,7 @@ jobs:
           rm -r -force ${{ github.workspace }}/target/release/build/qml-video-rs* -ErrorAction SilentlyContinue
 
       - name: Install Mac certificates
-        if: ${{ matrix.targets.os == 'macos-13' }}
+        if: ${{ matrix.targets.os == 'macos-15' }}
         uses: apple-actions/import-codesign-certs@v3
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATES }}
@@ -187,7 +187,7 @@ jobs:
   github_release:
     name: Create GitHub release
     needs: build
-    runs-on: macos-13
+    runs-on: macos-15
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
