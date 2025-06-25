@@ -191,7 +191,7 @@ pub fn install(typ: &str) -> io::Result<String> {
             if let Err(e) = result {
                 if e.kind() == std::io::ErrorKind::PermissionDenied {
                     // Don't delete tempdir if permission was denied
-                    let _tmpdir = tempdir.into_path();
+                    let _tmpdir = tempdir.keep();
                 }
                 return Err(e);
             }
