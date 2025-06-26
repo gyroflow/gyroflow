@@ -307,7 +307,7 @@ bundle:
     # Bundle BRAW and RED SDK
     if ("{{Arch}}" -eq "x86_64") {
         if (-not (Test-Path -Path "$TargetDir\REDR3D-x64.dll")) {
-            Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/RED_SDK_Windows_9.0.1.tar.gz" -OutFile tmp.tar.gz
+            Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/RED_SDK_Windows_8.6.0.tar.gz" -OutFile tmp.tar.gz
             7z x tmp.tar.gz
             7z x -o"$TargetDir\" tmp.tar
             Remove-Item -Path tmp.ta* -Force
