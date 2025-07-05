@@ -1085,6 +1085,9 @@ impl RenderQueue {
         filesystem::get_folder(input_url)
     }
     fn get_output_filename(input_url: &str, suffix: &str, render_options: &RenderOptions, override_ext: Option<&str>) -> String {
+        if !render_options.output_filename.is_empty() {
+            return render_options.output_filename.to_owned();
+        }
         let mut filename = filesystem::get_filename(input_url);
 
         let mut ext = override_ext.unwrap_or(match render_options.codec.as_ref() {
