@@ -137,7 +137,7 @@ deploy *param:
     echo "Cargo target dir: $CARGO_TARGET"
 
     if [ "{{param}}" == "docker" ]; then
-        sudo docker run -v $PROJECT_DIR:$PROJECT_DIR -v $HOME/.cargo:/root/.cargo debian:10 bash -c "
+        sudo docker run -v $PROJECT_DIR:$PROJECT_DIR -v $HOME/.cargo:/root/.cargo debian/eol:buster bash -c "
             set -e
             apt update
             echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
