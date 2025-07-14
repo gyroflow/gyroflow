@@ -18,9 +18,9 @@ AppDir:
     - amd64
     allow_unauthenticated: true
     sources:
-    - sourceline: deb http://deb.debian.org/debian/ buster main
-    - sourceline: deb http://security.debian.org/debian-security buster/updates main
-    - sourceline: deb http://deb.debian.org/debian/ buster-updates main
+    - sourceline: deb http://archive.debian.org/debian/ buster main
+    - sourceline: deb http://archive.debian.org/debian-security buster/updates main
+    - sourceline: deb http://archive.debian.org/debian/ buster-updates main
     include:
     - adwaita-icon-theme
     - fonts-dejavu-core
