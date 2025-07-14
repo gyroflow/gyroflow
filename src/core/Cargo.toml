@@ -34,7 +34,7 @@ regex = "1.11"
 bincode = "1.3.3"
 serde = "1.0"
 serde_json = "1.0"
-crc32fast = "1.4.2"
+crc32fast = "1.5.0"
 byteorder = "1.5.0"
 line_drawing = "1.0.1"
 rand = "0.9.1"
@@ -46,7 +46,7 @@ bitflags = "2.9.1"
 enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.6.0"
-lru = "0.14"
+lru = "0.16"
 thiserror = "2.0.12"
 ciborium = "0.2.2"
 dyn-clone = "1.0"
@@ -79,13 +79,13 @@ ocl = { version = "0.19.7", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.4.0"
 exr = "1.73"
-opencv = { version = "0.94", features = ["clang-runtime"], optional = true }
+opencv = { version = "0.95", features = ["clang-runtime"], optional = true }
 median = "0.3"
 
-wgpu = { version = "25", features = ["spirv", "naga-ir"] }
+wgpu = { version = "26", features = ["spirv", "naga-ir"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
-metal = { version = "0.31.0" }
+metal = { version = "0.32.0" }
 objc-foundation = "0.1.1"
 core-foundation-sys = "0.8.7"
 

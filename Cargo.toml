@@ -45,10 +45,10 @@ walkdir = "2.5.0"
 mp4-merge = "0.1.10"
 human-sort = "0.2.2"
 argh = "0.1.13"
-indicatif = "0.17"
+indicatif = "0.18"
 rustfft = "6.2.0"
-crc32fast = "1.4.2"
-rodio = { default-features = false, features = ["vorbis"], version = "0.20.1" }
+crc32fast = "1.5.0"
+rodio = { default-features = false, features = ["vorbis", "playback"], version = "0.21" }
 filetime_creation = "0.2"
 
 qmetaobject = { version = "0.2.10", default-features = false, features = ["log"] }
@@ -67,7 +67,7 @@ ureq = "3.0"
 url = "2.5.4"
 whoami = "1.5.2"
 tar = "0.4.44"
-lru = "0.14"
+lru = "0.16"
 chrono = "0.4"
 
 log-panics = { version = "2.1", features = ["with-backtrace"] }
@@ -89,7 +89,7 @@ features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemSer
 oslog = "0.2"
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
-metal = { version = "0.31.0" }
+metal = { version = "0.32.0" }
 core-foundation-sys = "0.8.7"
 
 [build-dependencies]

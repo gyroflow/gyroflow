@@ -6,7 +6,7 @@ use wgpu::hal::api::Metal;
 use metal::foreign_types::ForeignTypeRef;
 
 pub fn check_metal_stride(device: &Device, format: wgpu::TextureFormat, stride: usize) -> bool {
-    let alignment = unsafe { device.as_hal::<Metal, _, _>(|device| {
+    let alignment = unsafe { device.as_hal::<Metal>().and_then(|device| {
         let raw_device = device?.raw_device().lock();
         Some(raw_device.minimum_linear_texture_alignment_for_pixel_format(format_wgpu_to_metal(format)))
     }).unwrap_or(16) as usize };

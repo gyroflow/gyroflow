@@ -102,20 +102,18 @@ pub fn get_current_device_id_by_uuid(adapters: &Vec<wgpu::Adapter>) -> usize {
             }));
             if let Ok((device, _q)) = device {
                 unsafe {
-                    let _ = device.as_hal::<wgpu::hal::api::Vulkan, _, _>(|device| {
-                        device.map(|device| {
-                            let mut id_props = ash::vk::PhysicalDeviceIDProperties::default();
-                            let mut device_properties = ash::vk::PhysicalDeviceProperties2::default().push_next(&mut id_props);
-                            device.shared_instance().raw_instance().get_physical_device_properties2(device.raw_physical_device(), &mut device_properties);
+                    if let Some(device) = device.as_hal::<Vulkan>() {
+                        let mut id_props = ash::vk::PhysicalDeviceIDProperties::default();
+                        let mut device_properties = ash::vk::PhysicalDeviceProperties2::default().push_next(&mut id_props);
+                        device.shared_instance().raw_instance().get_physical_device_properties2(device.raw_physical_device(), &mut device_properties);
 
-                            let dev_uuid = id_props.device_uuid.iter().map(|x| format!("{:02x}", x)).collect::<String>();
-                            UUIDMAP.write().insert(dev_uuid.clone(), i);
-                            log::debug!("Device #{i} uuid: {dev_uuid}");
-                            if dev_uuid == uuid {
-                                adapter_id = i;
-                            }
-                        })
-                    });
+                        let dev_uuid = id_props.device_uuid.iter().map(|x| format!("{:02x}", x)).collect::<String>();
+                        UUIDMAP.write().insert(dev_uuid.clone(), i);
+                        log::debug!("Device #{i} uuid: {dev_uuid}");
+                        if dev_uuid == uuid {
+                            adapter_id = i;
+                        }
+                    }
                 }
             }
         }
@@ -298,8 +296,9 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
     };
 
     unsafe {
-        let raw_image = device.as_hal::<Vulkan, _, _>(|device| {
-            device.map(|device| {
+        let hdevice = device.as_hal::<Vulkan>();
+        let raw_image = {
+            hdevice.map(|device| {
                 let raw_device = device.raw_device();
 
                 #[cfg(target_os = "windows")]
@@ -364,7 +363,7 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
 
                 Ok::<ash::vk::Image, vk::Result>(raw_image)
             })
-        }).unwrap()?; // TODO: unwrap
+        }.unwrap()?; // TODO: unwrap
 
         Ok((raw_image, cuda_mem))
     }
@@ -381,8 +380,9 @@ pub fn create_vk_buffer_backed_by_cuda_memory(device: &wgpu::Device, size: (usiz
     };
 
     unsafe {
-        let raw_buffer = device.as_hal::<Vulkan, _, _>(|device| {
-            device.map(|device| {
+        let hdevice = device.as_hal::<Vulkan>();
+        let raw_buffer = {
+            hdevice.map(|device| {
                 let raw_device = device.raw_device();
 
                 #[cfg(target_os = "windows")]
@@ -443,7 +443,7 @@ pub fn create_vk_buffer_backed_by_cuda_memory(device: &wgpu::Device, size: (usiz
 
                 Ok::<ash::vk::Buffer, vk::Result>(raw_buffer)
             })
-        }).unwrap()?; // TODO: unwrap
+        }.unwrap()?; // TODO: unwrap
 
         Ok((raw_buffer, cuda_mem))
     }

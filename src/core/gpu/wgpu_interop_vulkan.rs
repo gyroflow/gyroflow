@@ -57,7 +57,7 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
 }
 
 pub fn create_buffer_from_vk_buffer(device: &Device, buffer: vk::Buffer, size: u64, is_in: bool) -> wgpu::Buffer {
-    let buffer = unsafe { <Vulkan as wgpu::hal::Api>::Device::buffer_from_raw(buffer) };
+    let buffer = unsafe { <Vulkan as wgpu::hal::Api>::Buffer::from_raw(buffer) };
 
     unsafe {
         device.create_buffer_from_hal::<Vulkan>(

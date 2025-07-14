@@ -9,8 +9,9 @@ pub fn create_vk_image_from_android_hw_buffer(hw_buffer: *mut std::ffi::c_void, 
     let handle_type =  vk::ExternalMemoryHandleTypeFlags::ANDROID_HARDWARE_BUFFER_ANDROID;
 
     unsafe {
-        let raw_image = device.as_hal::<Vulkan, _, _>(|device| {
-            device.map(|device| {
+        let hdevice = device.as_hal::<Vulkan>();
+        let raw_image = {
+            hdevice.map(|device| {
                 let raw_device = device.raw_device();
 
                 let mut import_memory_info = vk::ImportAndroidHardwareBufferInfoANDROID::default()
@@ -70,7 +71,7 @@ pub fn create_vk_image_from_android_hw_buffer(hw_buffer: *mut std::ffi::c_void, 
 
                 Ok::<ash::vk::Image, vk::Result>(raw_image)
             })
-        })?;
+        }?;
 
         Ok((raw_image, cuda_mem))
     }

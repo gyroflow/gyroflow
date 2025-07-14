@@ -290,7 +290,7 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
         BufferSource::CUDABuffer { buffer } => {
             super::wgpu_interop_cuda::cuda_synchronize();
             if let Some(NativeTexture::Cuda(cuda_mem)) = &in_texture.native_texture {
-                super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size, cuda_mem.device_ptr, *buffer as CUdeviceptr, cuda_mem.vulkan_pitch_alignment, 1);
+                super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size, cuda_mem.device_ptr, *buffer as CUdeviceptr, /*cuda_mem.vulkan_pitch_alignment*/buf.size.2, 1);
                 super::wgpu_interop_cuda::cuda_synchronize();
             }
             if let Some(in_buf) = &in_texture.wgpu_buffer {
@@ -461,7 +461,7 @@ pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription
         BufferSource::CUDABuffer { buffer } => {
             let _ = device.poll(wgpu::PollType::WaitForSubmissionIndex(sub_index));
             if let Some(NativeTexture::Cuda(cuda_mem)) = &out_texture.native_texture {
-                super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size, *buffer as CUdeviceptr, cuda_mem.device_ptr, 1, cuda_mem.vulkan_pitch_alignment);
+                super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size, *buffer as CUdeviceptr, cuda_mem.device_ptr, 1, buf.size.2/*cuda_mem.vulkan_pitch_alignment*/);
             }
             super::wgpu_interop_cuda::cuda_synchronize();
         },
