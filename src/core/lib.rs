@@ -778,6 +778,13 @@ impl StabilizationManager {
         if let gpu::BufferSource::Cpu { buffer } = &buffers.input.data  { if buffer.is_empty() { return Err(GyroflowCoreError::InputBufferEmpty); } }
         if let gpu::BufferSource::Cpu { buffer } = &buffers.output.data { if buffer.is_empty() { return Err(GyroflowCoreError::OutputBufferEmpty); } }
 
+        let (offset, fps) = {
+            let params = self.params.read();
+            (params.frame_offset, params.fps)
+        };
+        let frame = frame.map(|x| (x as i32 + offset).max(0) as usize);
+        timestamp_us += (offset as f64 / fps * 1000000.0).round() as i64;
+
         if let Some(scale) = self.params.read().fps_scale {
             timestamp_us = (timestamp_us as f64 / scale).round() as i64;
         }
@@ -843,11 +850,12 @@ impl StabilizationManager {
     pub fn set_additional_translation_x(&self, v: f64){ self.params.write().additional_translation.0 = v; self.invalidate_zooming(); }
     pub fn set_additional_translation_y(&self, v: f64){ self.params.write().additional_translation.1 = v; self.invalidate_zooming(); }
     pub fn set_additional_translation_z(&self, v: f64){ self.params.write().additional_translation.2 = v; self.invalidate_zooming(); }
-    pub fn set_zooming_method        (&self, v: i32)  { self.params.write().adaptive_zoom_method   = v;        self.invalidate_zooming(); }
+    pub fn set_zooming_method        (&self, v: i32)  { self.params.write().adaptive_zoom_method   = v;   self.invalidate_zooming(); }
     pub fn set_fov                   (&self, v: f64)  { self.params.write().fov                    = v; }
     pub fn set_fov_overview          (&self, v: bool) { self.params.write().fov_overview           = v; }
     pub fn set_show_safe_area        (&self, v: bool) { self.params.write().show_safe_area         = v; }
     pub fn set_lens_correction_amount(&self, v: f64)  { self.params.write().lens_correction_amount = v; self.invalidate_zooming(); }
+    pub fn set_frame_offset          (&self, v: i32)  { self.params.write().frame_offset           = v; }
     pub fn set_light_refraction_coefficient(&self, v: f64) { self.params.write().light_refraction_coefficient = v; self.invalidate_zooming(); }
     pub fn set_background_color      (&self, bg: Vector4<f32>) { self.params.write().background = bg; }
     pub fn set_background_mode       (&self, v: i32)  { self.params.write().background_mode = stabilization_params::BackgroundMode::from(v); }
@@ -1207,6 +1215,7 @@ impl StabilizationManager {
                 "video_speed_affects_zooming_limit": params.video_speed_affects_zooming_limit,
                 "max_zoom":               params.max_zoom,
                 "max_zoom_iterations":    params.max_zoom_iterations,
+                "frame_offset":           params.frame_offset,
             },
             "gyro_source": {
                 "filepath":           gyro.file_url,
@@ -1504,6 +1513,7 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("frame_readout_direction").and_then(|x| x.as_str()) { params.frame_readout_direction = v.into(); }
                 if let Some(v) = obj.get("adaptive_zoom_window")  .and_then(|x| x.as_f64()) { params.adaptive_zoom_window    = v; }
                 if let Some(v) = obj.get("lens_correction_amount").and_then(|x| x.as_f64()) { params.lens_correction_amount  = v; }
+                if let Some(v) = obj.get("frame_offset")          .and_then(|x| x.as_i64()) { params.frame_offset            = v as i32; }
                 if let Some(v) = obj.get("horizontal_rs")         .and_then(|x| x.as_bool()) { if v { params.frame_readout_direction = if params.frame_readout_time < 0.0 { ReadoutDirection::RightToLeft } else { ReadoutDirection::LeftToRight }; } }
                 if let Some(v) = obj.get("max_zoom")              .and_then(|x| x.as_f64()) { params.max_zoom                = Some(v); }
                 if let Some(v) = obj.get("max_zoom_iterations")   .and_then(|x| x.as_i64()) { params.max_zoom_iterations     = v as _; }

@@ -70,6 +70,11 @@ MenuItem {
                 currentLog.currentIndex = gyro.sample_index + 1;
             }
         }
+        const stab = obj.stabilization || { };
+        if (stab && Object.keys(stab).length > 0) {
+            focb.checked = +stab.frame_offset > 0;
+            fo.value = +stab.frame_offset;
+        }
     }
     function setGyroLpf(v: real): void {
         lpf.value = v;
@@ -214,6 +219,27 @@ MenuItem {
             running: false;
             repeat: false;
             onTriggered: root.loadFile(root.lastSelectedFile);
+        }
+    }
+    CheckBoxWithContent {
+        id: focb;
+        text: qsTr("Frame offset");
+        visible: allMetadataCb.visible;
+        onCheckedChanged: {
+            controller.frame_offset = focb.checked? fo.value : 0;
+        }
+        NumberField {
+            id: fo;
+            unit: qsTr("frames");
+            precision: 0;
+            value: 0;
+            from: -100000;
+            to: 100000;
+            width: parent.width;
+            tooltip: qsTr("Add or subtract frames from the video to align with motion data");
+            onValueChanged: {
+                controller.frame_offset = focb.checked? fo.value : 0;
+            }
         }
     }
     CheckBoxWithContent {

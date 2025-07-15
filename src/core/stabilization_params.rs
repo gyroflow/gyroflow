@@ -112,6 +112,8 @@ pub struct StabilizationParams {
     pub show_detected_features: bool,
     pub show_optical_flow: bool,
 
+    pub frame_offset: i32,
+
     pub of_method: u32,
     pub current_device: i32,
 
@@ -154,6 +156,8 @@ impl Default for StabilizationParams {
 
             framebuffer_inverted: false,
             is_calibrator: false,
+
+            frame_offset: 0,
 
             trim_ranges: Vec::new(),
 

@@ -483,12 +483,18 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                     let is_limited_range = $out_frame.color_range() == ffmpeg_next::util::color::Range::MPEG;
                     compute_params.background = <$t as PixelType>::from_rgb_color(compute_params.background, &$yuvi, is_limited_range);
 
+                    let offset_us = {
+                        let params = stab.params.read();
+                        (params.frame_offset as f64 / params.fps * 1000000.0).round() as i64
+                    };
+
                     plane.init_size(org_sizes.0, org_sizes.1);
                     plane.set_compute_params(compute_params);
                     let render_globals = render_globals.clone();
                     $planes.push(Box::new(move |timestamp_us: i64, in_frame_data: &mut Video, out_frame_data: &mut Video, plane_index: usize, fill_with_background: bool| {
                         let mut g = render_globals.borrow_mut();
                         let wgpu_format = $t::wgpu_format().map(|x| x.0);
+                        let timestamp_us = timestamp_us + offset_us;
 
                         let mut buffers = Buffers {
                             input:  get_plane_buffer(in_frame_data, in_size, plane_index, &mut g, wgpu_format),

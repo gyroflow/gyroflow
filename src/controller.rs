@@ -140,6 +140,7 @@ pub struct Controller {
     additional_translation_z: qt_property!(f64; WRITE set_additional_translation_z),
 
     lens_correction_amount: qt_property!(f64; WRITE set_lens_correction_amount),
+    frame_offset: qt_property!(i32; WRITE set_frame_offset),
     light_refraction_coefficient: qt_property!(f64; WRITE set_light_refraction_coefficient),
     set_video_speed: qt_method!(fn(&self, v: f64, s: bool, z: bool, zl: bool)),
     set_max_zoom: qt_method!(fn(&self, v: f64, iters: usize)),
@@ -1003,6 +1004,14 @@ impl Controller {
                         input:  BufferDescription { size: (width as usize, height as usize, width as usize * 4), ..Default::default() },
                         output: BufferDescription { size: (width as usize, height as usize, width as usize * 4), ..Default::default() },
                     };
+
+                    let (offset, fps) = {
+                        let params = stab.params.read();
+                        (params.frame_offset, params.fps)
+                    };
+                    let frame = (frame as i32 + offset).max(0) as u32;
+                    let timestamp_ms = timestamp_ms + (offset as f64 / fps * 1000.0).round();
+
                     if let Some(ret) = qrhi_undistort::render(vid1.get_mdkplayer(), timestamp_ms, frame as usize, width, height, stab.clone(), &mut buffers) {
                         update_info2((ret.fov, ret.minimal_fov, ret.focal_length, QString::from(format!("Processing {}x{} using {} took {:.2}ms", width, height, ret.backend, _time.elapsed().as_micros() as f64 / 1000.0))));
                     } else {
@@ -1413,6 +1422,7 @@ impl Controller {
     wrap_simple_method!(set_of_method,          v: u32; recompute; chart_data_changed);
 
     wrap_simple_method!(set_lens_correction_amount,    v: f64; recompute; zooming_data_changed);
+    wrap_simple_method!(set_frame_offset,              v: i32; recompute);
     wrap_simple_method!(set_light_refraction_coefficient, v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_input_horizontal_stretch,  v: f64; recompute);
     wrap_simple_method!(set_lens_is_asymmetrical,      v: bool; recompute);
