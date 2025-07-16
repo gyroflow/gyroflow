@@ -15,7 +15,7 @@ use std::collections::BTreeMap;
 use std::collections::btree_map::Entry;
 use std::sync::{ Arc, atomic::AtomicBool };
 use parking_lot::RwLock;
-use telemetry_parser::{ Input, util };
+use telemetry_parser::{ Input, util, InputOptions, TagFilter };
 use telemetry_parser::tags_impl::{ GetWithType, GroupId, TagId, TimeQuaternion, TimeVector3 };
 
 use crate::camera_identifier::CameraIdentifier;
@@ -118,7 +118,15 @@ impl GyroSource {
         let base = filesystem::get_engine_base();
         let mut file = filesystem::open_file(&base, url, false, false)?;
         let filesize = file.size;
-        let mut input = Input::from_stream(file.get_file(), filesize, &url, progress_cb, cancel_flag)?;
+        let tpoptions = InputOptions {
+            blackbox_gyro_only: true,
+            tag_blacklist: [
+                TagFilter::EntireGroup(GroupId::UnknownGroup(0xf000)),
+                TagFilter::EntireGroup(GroupId::UnknownGroup(0x0))
+            ].into(),
+            ..Default::default()
+        };
+        let mut input = Input::from_stream_with_options(file.get_file(), filesize, &url, progress_cb, cancel_flag, tpoptions)?;
 
         let camera_identifier = CameraIdentifier::from_telemetry_parser(&input, size.0, size.1, fps).ok();
 

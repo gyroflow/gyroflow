@@ -133,7 +133,6 @@ pub fn init_telemetry_parser() {
 
     static TP_INITED: std::sync::Once = std::sync::Once::new();
     TP_INITED.call_once(|| {
-        telemetry_parser::util::set_load_gyro_only(true);
         unsafe {
             tp_fs::set_filesystem_functions(tp_fs::FilesystemFunctions {
                 get_filename: crate::filesystem::get_filename,
