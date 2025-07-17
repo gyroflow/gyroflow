@@ -29,10 +29,14 @@ use ui::components::FrequencyGraph::FrequencyGraph;
 use ui::components::Settings::Settings;
 use ui::ui_tools::UITools;
 
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 cpp! {{
     #include <QQuickStyle>
     #include <QQuickWindow>
     #include <QQmlContext>
+    #include <QLoggingCategory>
     #include <QtGui/QGuiApplication>
     #include <QIcon>
 

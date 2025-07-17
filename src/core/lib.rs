@@ -47,9 +47,6 @@ pub use telemetry_parser;
 #[cfg(feature = "opencv")]
 use calibration::LensCalibrator;
 
-#[global_allocator]
-static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
-
 lazy_static::lazy_static! {
     static ref THREAD_POOL: rayon::ThreadPool = rayon::ThreadPoolBuilder::new().build().unwrap();
 }
