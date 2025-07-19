@@ -166,6 +166,10 @@ vec2 rotate_and_distort(vec2 pos, float idx) {
     return vec2(-99999.0, -99999.0);
 }
 
+vec2 rotate_point(vec2 pos, float angle, vec2 origin, vec2 origin2) {
+     return vec2(cos(angle) * (pos.x - origin.x) - sin(angle) * (pos.y - origin.y) + origin2.x,
+                 sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin2.y);
+}
 void main() {
     vec2 texPos = v_texcoord.xy * vec2(params.output_width, params.output_height) + params.translation2d;
     vec2 outPos = v_texcoord.xy * vec2(params.output_width, params.output_height);
@@ -228,6 +232,14 @@ void main() {
     float idx = min(sy, params.matrix_count - 1.0);
 
     vec2 uv = rotate_and_distort(texPos, idx);
+    vec2 frame_size = vec2(params.width, params.height);
+    if (params.input_rotation != 0.0) {
+        float rotation = params.input_rotation * (3.1415926535897 / 180.0);
+        vec2 size = frame_size;
+        frame_size = abs(round(rotate_point(size, rotation, vec2(0.0, 0.0), vec2(0.0, 0.0))));
+        uv = rotate_point(uv, rotation, size / vec2(2.0), frame_size / vec2(2.0));
+    }
+
     if (uv.x > -99998.0) {
         if (params.background_mode == 1) { // edge repeat
             uv = max(vec2(0, 0), min(vec2(params.width - 1, params.height - 1), uv));
@@ -265,8 +277,8 @@ void main() {
             return;
         }
 
-        if ((uv.x >= 0 && uv.x < params.width) && (uv.y >= 0 && uv.y < params.height)) {
-            fragColor = texture(texIn, vec2(uv.x / params.width, uv.y / params.height));
+        if ((uv.x >= 0 && uv.x < frame_size.x) && (uv.y >= 0 && uv.y < frame_size.y)) {
+            fragColor = texture(texIn, vec2(uv.x / frame_size.x, uv.y / frame_size.y));
             draw_pixel(fragColor, uv.x, uv.y, true);
             draw_pixel(fragColor, outPos.x, outPos.y, false);
             draw_safe_area(fragColor, outPos.x, outPos.y);
