@@ -251,7 +251,7 @@ MenuItem {
         show: false;
         property bool canRate: true;
         property bool thankYou: false;
-        text: qsTr("This lens profile is unofficial, we can't guarantee it's correctness. Use at your own risk.") + (canRate? "<br>" +
+        text: qsTr("This lens profile is unofficial, we can't guarantee its correctness. Use at your own risk.") + (canRate? "<br>" +
               qsTr("Rate this profile: [Good] | [Bad]")
               .replace(/\[(.*?)\]/, "<a href=\"#good\">$1</a>")
               .replace(/\[(.*?)\]/, "<a href=\"#bad\">$1</a>") : (thankYou? "<br>" + qsTr("Thank you for rating this profile.") : ""));
