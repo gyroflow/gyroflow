@@ -83,7 +83,7 @@ install-deps:
         sudo chmod +x /usr/local/bin/appimagetool
 
         sudo pip3 install -U pip
-        sudo pip3 install appimage-builder==1.1.0
+        sudo pip3 install appimage-builder==1.1.0 importlib-metadata
     fi
 
     if [ ! -d "{{FFmpeg}}" ]; then
