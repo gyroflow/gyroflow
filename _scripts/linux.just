@@ -82,6 +82,16 @@ install-deps:
 
         sudo chmod +x /usr/local/bin/appimagetool
 
+        sudo apt-get install build-essential checkinstall
+        sudo apt-get install libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
+        wget https://www.python.org/ftp/python/3.8.6/Python-3.8.6.tgz
+        tar xzf Python-3.8.6.tgz
+        cd Python-3.8.6
+        ./configure --enable-optimizations --prefix=/opt/python/3.8
+        make -j$(nproc)
+        sudo make altinstall
+        export PATH=/opt/python/3.8/bin:$PATH
+
         sudo pip3 install -U pip
         sudo pip3 install appimage-builder==1.1.0 importlib-metadata
     fi
@@ -334,7 +344,6 @@ deploy *param:
     fi
 
     cp -rf $TARGET/* $APP_DIR/
-    sed -i 's/importlib\.metadata/importlib_metadata/g' /usr/local/lib/python3.7/dist-packages/appimagebuilder/__main__.py || true
     if [ "{{Arch}}" == "aarch64" ]; then
         cp $PROJECT_DIR/_deployment/linux/AppImageBuilder.yml AppImageBuilder-arm64.yml
         sed -i 's|x86_64|aarch64|' AppImageBuilder-arm64.yml
