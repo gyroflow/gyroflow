@@ -334,6 +334,7 @@ deploy *param:
     fi
 
     cp -rf $TARGET/* $APP_DIR/
+    sed -i 's/importlib\.metadata/importlib_metadata/g' /usr/local/lib/python3.7/dist-packages/appimagebuilder/__main__.py || true
     if [ "{{Arch}}" == "aarch64" ]; then
         cp $PROJECT_DIR/_deployment/linux/AppImageBuilder.yml AppImageBuilder-arm64.yml
         sed -i 's|x86_64|aarch64|' AppImageBuilder-arm64.yml
