@@ -15,6 +15,7 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
 
     let texture = unsafe {
         <Vulkan as wgpu::hal::Api>::Device::texture_from_raw(
+            device.as_hal::<Vulkan>().as_ref().unwrap(),
             image,
             &wgpu::hal::TextureDescriptor {
                 label: None,
