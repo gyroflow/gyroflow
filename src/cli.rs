@@ -63,6 +63,10 @@ struct Opts {
     #[argh(option, short = 's')]
     sync_params: Option<String>,
 
+    /// print progress to stdout in addition to progress bars
+    #[argh(switch)]
+    stdout_progress: bool,
+
     /// export project file instead of rendering: 1 - default project, 2 - with gyro data, 3 - with processed gyro data, 4 - video + project file
     #[argh(option, default = "0")]
     export_project: u32,
@@ -332,8 +336,14 @@ pub fn run(open_file: &mut String) -> bool {
                     }
                     if ok {
                         pb.set_message(format!("\x1B[1;32m{}\x1B[0m", pb.message())); // Green
+                        if opts.stdout_progress {
+                            println!("[{:08x}] Rendering completed: {}", job_id, pb.message());
+                        }
                     } else {
                         pb.set_message(format!("\x1B[1;31m{}\x1B[0m", pb.message())); // Red
+                        if opts.stdout_progress {
+                            println!("[{:08x}] Rendering failed: {}", job_id, pb.message());
+                        }
                     }
                     m.set_draw_target(indicatif::ProgressDrawTarget::hidden());
                 } else if *current_frame > 0 && m.is_hidden() {
@@ -356,6 +366,12 @@ pub fn run(open_file: &mut String) -> bool {
                     m.set_draw_target(indicatif::ProgressDrawTarget::stdout());
                 }
 
+                if opts.stdout_progress && *current_frame > 0 && *total_frames > 0 {
+                    let pb = pbs.get(job_id).unwrap();
+                    let eta = pb.eta();
+                    println!("[{:08x}] Rendering progress: {}/{} frames ({:.1}%) ETA {:.1}s", job_id, current_frame, total_frames, (*current_frame as f64 / *total_frames as f64) * 100.0, eta.as_secs_f64());
+                }
+
                 pb.set_length(*total_frames as u64);
                 pb.set_position(*current_frame as u64);
             });
@@ -374,9 +390,16 @@ pub fn run(open_file: &mut String) -> bool {
 
                 if *progress == 1.0 && !m.is_hidden() && !any_other_in_progress {
                     m.set_draw_target(indicatif::ProgressDrawTarget::hidden());
+                    if opts.stdout_progress {
+                        println!("[{:08x}] Synchronization completed", job_id);
+                    }
                 } else if *progress > 0.01 && *progress < 1.0 && m.is_hidden() {
                     pbh.set_message("Synchronizing:");
                     m.set_draw_target(indicatif::ProgressDrawTarget::stdout());
+                }
+
+                if opts.stdout_progress && *progress > 0.01 && *progress < 1.0 {
+                    println!("[{:08x}] Synchronization progress: {:.1}%", job_id, progress * 100.0);
                 }
 
                 let pb = pbs.get(job_id).unwrap();
