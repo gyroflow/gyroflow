@@ -76,24 +76,40 @@ install-deps:
 
         sudo apt-get install -y debian-keyring debian-archive-keyring
         sudo apt-key adv --refresh-keys --keyserver keyserver.ubuntu.com
-        sudo apt-get install -y python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse gtk-update-icon-cache
+        sudo apt-get install -y python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace fuse gtk-update-icon-cache zsync
         export HOST_ARCH=`lscpu | grep Architecture | awk {'print $2'}`
         sudo curl -L https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${HOST_ARCH}.AppImage -o /usr/local/bin/appimagetool
 
         sudo chmod +x /usr/local/bin/appimagetool
 
-        sudo apt-get install -y build-essential libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev wget
-        wget https://www.python.org/ftp/python/3.8.6/Python-3.8.6.tgz
-        tar xzf Python-3.8.6.tgz
-        cd Python-3.8.6
-        ./configure --enable-optimizations --prefix=/opt/python/3.8
-        make -j$(nproc)
-        sudo make altinstall
-        export PATH=/opt/python/3.8/bin:$PATH
+        # Compile squashfs-tools
+        if [[ ! -d "{{ExtDir}}/squashfs-tools-squashfs-tools-4.6.1/squashfs-tools" ]]; then
+            sudo apt-get install -y unzip wget liblzma-dev zlib1g-dev
+            wget https://github.com/plougher/squashfs-tools/archive/refs/tags/squashfs-tools-4.6.1.zip
+            unzip squashfs-tools-4.6.1.zip
+            pushd squashfs-tools-squashfs-tools-4.6.1/squashfs-tools
+                sed -i 's/#XZ_SUPPORT/XZ_SUPPORT/' Makefile
+                make
+                sudo make install
+            popd
+        fi
 
-        sudo pip3 install -U pip
-        sudo pip3 install appimage-builder==1.1.0
-        cd ..
+        # Compile python 3.8
+        if [[ ! -d "{{ExtDir}}/python3.8" ]]; then
+            sudo apt-get install -y build-essential libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev wget
+            wget https://www.python.org/ftp/python/3.8.6/Python-3.8.6.tgz
+            tar xzf Python-3.8.6.tgz
+            pushd Python-3.8.6
+                ./configure --enable-optimizations --prefix="{{ExtDir}}/python3.8"
+                make -j$(nproc)
+                sudo make install
+                sudo ln -sf "{{ExtDir}}/python3.8/bin/python3" "{{ExtDir}}/python3.8/bin/python"
+                export PATH="{{ExtDir}}/python3.8/bin":$PATH
+
+                python -m pip install -U pip
+                python -m pip install appimage-builder==1.1.0
+            popd
+        fi
     fi
 
     if [ ! -d "{{FFmpeg}}" ]; then
@@ -174,9 +190,6 @@ deploy *param:
         sudo chown -R $(stat -c "%U:%G" $PROJECT_DIR/Cargo.toml) $HOME/.cargo
         sudo chown -R $(stat -c "%U:%G" $PROJECT_DIR/Cargo.toml) $PROJECT_DIR
         exit;
-    fi
-    if [ "$IN_DOCKER" == "1" ]; then
-        export PATH=/opt/python/3.8/bin:$PATH
     fi
 
     cargo build --profile deploy
@@ -344,6 +357,7 @@ deploy *param:
     if [ "$IN_DOCKER" == "1" ]; then
         # Docker doesn't support FUSE
         export APPIMAGE_EXTRACT_AND_RUN=1
+        export PATH="{{ExtDir}}/python3.8/bin":$PATH
     fi
 
     cp -rf $TARGET/* $APP_DIR/
