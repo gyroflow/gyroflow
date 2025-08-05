@@ -714,10 +714,11 @@ MenuItem {
                                 desc: [
                                     {
                                         "Original|original": {
-                                            "Gyroscope":     ["gyroscope"],
-                                            "Accelerometer": ["accelerometer"],
-                                            "Quaternion":    ["quaternion"],
-                                            "Euler angles":  ["euler_angles"],
+                                            "Gyroscope":       ["gyroscope"],
+                                            "Accelerometer":   ["accelerometer"],
+                                            "Quaternion":      ["quaternion"],
+                                            "Euler angles":    ["euler_angles"],
+                                            "Focus distances": ["focus_distances"],
                                         },
                                     },
                                     {

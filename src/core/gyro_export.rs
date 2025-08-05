@@ -64,10 +64,11 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
     let stabilized  = fields.get("stabilized").and_then(|x| x.as_object()).unwrap();
     let zooming     = fields.get("zooming")   .and_then(|x| x.as_object()).unwrap();
 
-    let oaccl = original.get("accelerometer").and_then(|x| x.as_bool()).unwrap_or_default();
-    let oeulr = original.get("euler_angles") .and_then(|x| x.as_bool()).unwrap_or_default();
-    let ogyro = original.get("gyroscope")    .and_then(|x| x.as_bool()).unwrap_or_default();
-    let oquat = original.get("quaternion")   .and_then(|x| x.as_bool()).unwrap_or_default();
+    let oaccl = original.get("accelerometer")  .and_then(|x| x.as_bool()).unwrap_or_default();
+    let oeulr = original.get("euler_angles")   .and_then(|x| x.as_bool()).unwrap_or_default();
+    let ogyro = original.get("gyroscope")      .and_then(|x| x.as_bool()).unwrap_or_default();
+    let oquat = original.get("quaternion")     .and_then(|x| x.as_bool()).unwrap_or_default();
+    let ofd   = original.get("focus_distances").and_then(|x| x.as_bool()).unwrap_or_default();
 
     let seulr = stabilized.get("euler_angles").and_then(|x| x.as_bool()).unwrap_or_default();
     let squat = stabilized.get("quaternion")  .and_then(|x| x.as_bool()).unwrap_or_default();
@@ -85,6 +86,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
         if oeulr { let _ = write!(output, ",org_pitch,org_yaw,org_roll"); }
         if ogyro { let _ = write!(output, ",org_gyro_x,org_gyro_y,org_gyro_z"); }
         if oquat { let _ = write!(output, ",org_quat_w,org_quat_x,org_quat_y,org_quat_z"); }
+        if ofd   { let _ = write!(output, ",focus_distance"); }
         if seulr { let _ = write!(output, ",stab_pitch,stab_yaw,stab_roll"); }
         if squat { let _ = write!(output, ",stab_quat_w,stab_quat_x,stab_quat_y,stab_quat_z"); }
         if focal_length { let _ = write!(output, ",focal_length"); }
@@ -171,6 +173,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
         let val_oeulr = [quate.0 * RAD2DEG, quate.1 * RAD2DEG, quate.2 * RAD2DEG];
         let val_ogyro = [get(raw_imu.gyro, 0), get(raw_imu.gyro, 1), get(raw_imu.gyro, 2)];
         let val_oquat = [quatv[3], quatv[0], quatv[1], quatv[2]];
+        let mut val_ofd = 0.0_f32;
 
         if format == Format::Jsx && !(seulr && !oeulr) {
             jsx.get_mut("orientations").unwrap().as_array_mut().unwrap().push(serde_json::to_value([val_oeulr[0], -val_oeulr[2], val_oeulr[1]]).unwrap());
@@ -213,6 +216,9 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
             if let Some(fl) = val.focal_length {
                 focal_length_value = Some(fl as f64);
             }
+            if let Some(fd) = val.focus_distance {
+		        val_ofd = fd;
+            }
         }
         let val_fl = focal_length_value.unwrap_or(0.0);
         let val_fov = *params.fovs.get(frame).unwrap_or(&0.0);
@@ -224,6 +230,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
             if oeulr { let _ = write!(output, ",{:.3},{:.3},{:.3}",       val_oeulr[0], val_oeulr[1], val_oeulr[2]); }
             if ogyro { let _ = write!(output, ",{:.6},{:.6},{:.6}",       val_ogyro[0], val_ogyro[1], val_ogyro[2]); }
             if oquat { let _ = write!(output, ",{:.6},{:.6},{:.6},{:.6}", val_oquat[0], val_oquat[1], val_oquat[2], val_oquat[3]); }
+            if ofd   { let _ = write!(output, ",{:.3}", val_ofd); }
             if seulr { let _ = write!(output, ",{:.3},{:.3},{:.3}",       val_seulr[0], val_seulr[1], val_seulr[2]); }
             if squat { let _ = write!(output, ",{:.6},{:.6},{:.6},{:.6}", val_squat[0], val_squat[1], val_squat[2], val_squat[3]); }
             if focal_length { let _ = write!(output, ",{val_fl:.3}");  }
@@ -238,6 +245,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
             if oeulr { obj.insert("org_euler",  serde_json::to_value(val_oeulr).unwrap()); }
             if ogyro { obj.insert("org_gyro",   serde_json::to_value(val_ogyro).unwrap()); }
             if oquat { obj.insert("org_quat",   serde_json::to_value(val_oquat).unwrap()); }
+            if ofd   { obj.insert("focus_distance", serde_json::to_value(val_ofd).unwrap()); }
             if seulr { obj.insert("stab_euler", serde_json::to_value(val_seulr).unwrap()); }
             if squat { obj.insert("stab_quat",  serde_json::to_value(val_squat).unwrap()); }
             if focal_length { obj.insert("focal_length",      val_fl.into()); }

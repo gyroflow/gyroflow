@@ -19,6 +19,7 @@ pub struct LensParams {
     pub capture_area_size: Option<(f32, f32)>, // pixels
     pub pixel_focal_length: Option<f32>, // pixels
     pub distortion_coefficients: Vec<f64>,
+    pub focus_distance: Option<f32>
 }
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
