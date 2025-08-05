@@ -93,6 +93,7 @@ install-deps:
 
         sudo pip3 install -U pip
         sudo pip3 install appimage-builder==1.1.0
+        cd ..
     fi
 
     if [ ! -d "{{FFmpeg}}" ]; then
