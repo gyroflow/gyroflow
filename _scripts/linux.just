@@ -92,7 +92,7 @@ install-deps:
         export PATH=/opt/python/3.8/bin:$PATH
 
         sudo pip3 install -U pip
-        sudo pip3 install appimage-builder==1.1.0 importlib-metadata
+        sudo pip3 install appimage-builder==1.1.0
     fi
 
     if [ ! -d "{{FFmpeg}}" ]; then

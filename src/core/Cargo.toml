@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "0dbb3ed" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "697d57d" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { version = "0.7", features = ["field_access"] }
 
@@ -36,7 +36,7 @@ serde_json = "1.0"
 crc32fast = "1.5.0"
 byteorder = "1.5.0"
 line_drawing = "1.0.1"
-rand = "0.9.1"
+rand = "0.9.2"
 time = { version = "0.3.41", features = ["local-offset"] }
 itertools = "0.14.0"
 num = "0.4.3"
@@ -57,7 +57,7 @@ eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = 
 cv-pinhole = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee" }
 cv-core = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee" }
 sample-consensus = "1.0.2"
-arrsac = "0.10.0"
+arrsac = "0.10"
 rand_xoshiro = "0.6.0"
 image = { version = "0.24", default-features = false }
 space = { version = "0.17", features = ["alloc"] }
