@@ -167,7 +167,6 @@ deploy *param:
             fi
             cd $PROJECT_DIR
             just install-deps
-            export PATH=/opt/python/3.8/bin:$PATH
             just deploy
         "
         stat $HOME/.cargo
@@ -175,6 +174,9 @@ deploy *param:
         sudo chown -R $(stat -c "%U:%G" $PROJECT_DIR/Cargo.toml) $HOME/.cargo
         sudo chown -R $(stat -c "%U:%G" $PROJECT_DIR/Cargo.toml) $PROJECT_DIR
         exit;
+    fi
+    if [ "$IN_DOCKER" == "1" ]; then
+        export PATH=/opt/python/3.8/bin:$PATH
     fi
 
     cargo build --profile deploy
