@@ -167,6 +167,7 @@ deploy *param:
             fi
             cd $PROJECT_DIR
             just install-deps
+            export PATH=/opt/python/3.8/bin:$PATH
             just deploy
         "
         stat $HOME/.cargo
