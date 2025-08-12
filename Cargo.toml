@@ -66,7 +66,7 @@ log = "0.4"
 
 ureq = "3.0"
 url = "2.5.4"
-whoami = "1.5.2"
+whoami = "1.6.1"
 tar = "0.4.44"
 lru = "0.16"
 chrono = "0.4"

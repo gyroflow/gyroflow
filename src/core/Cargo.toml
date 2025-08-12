@@ -46,11 +46,11 @@ enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.6.0"
 lru = "0.16"
-thiserror = "2.0.12"
+thiserror = "2.0.14"
 ciborium = "0.2.2"
 dyn-clone = "1.0"
 app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }
-whoami = "1.6.0"
+whoami = "1.6.1"
 
 akaze = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee", features = ["rayon"] }
 eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee" }

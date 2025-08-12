@@ -193,7 +193,7 @@ build-and-package profile is_dist:
         # Bundle BRAW SDK
         FrameworksDir={{AppBundle}}/Frameworks
         if [ ! -f "$FrameworksDir/BlackmagicRawAPI.framework/Versions/A/BlackmagicRawAPI" ]; then
-            curl -L https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_iOS_4.6.0.tar.gz -o tmp.tar.gz
+            curl -L https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_iOS_5.0.0.tar.gz -o tmp.tar.gz
             7z x -aoa tmp.tar.gz
             7z x -o"$FrameworksDir/" tmp.tar
             rm tmp.tar tmp.tar.gz
