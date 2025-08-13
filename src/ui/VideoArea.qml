@@ -271,6 +271,10 @@ Item {
                     controller.load_default_preset();
                 }
             }
+            if (window.pendingLoadPreset) {
+                Qt.callLater(loadGyroflowData, JSON.parse(window.pendingLoadPreset), 0);
+                window.pendingLoadPreset = "";
+            }
         }
         function onChart_data_changed(): void {
             timeline.triggerUpdateChart("");

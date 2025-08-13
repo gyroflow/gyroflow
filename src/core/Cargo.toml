@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "697d57d" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "7a459b6" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { version = "0.7", features = ["field_access"] }
 
@@ -24,7 +24,7 @@ argmin = { version = "0.10.0", git = "https://github.com/argmin-rs/argmin.git", 
 argmin-math = { version = "0.4.0", git = "https://github.com/argmin-rs/argmin.git", default-features = false, features = ["nalgebra_v0_33"] }
 
 nalgebra = { version = "0.33", features = ["serde-serialize"] }
-rayon = "1.10"
+rayon = "1.11"
 biquad = "0.5.0"
 fastrand = "2.3.0"
 lazy_static = "1.5.0"

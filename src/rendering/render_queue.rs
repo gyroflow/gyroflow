@@ -100,7 +100,7 @@ impl RenderOptions {
         format!("{}x{} {:.3}fps | {}", self.output_width, self.output_height, fps, codec_info)
     }
 
-    pub fn get_encoder_options_dict(&self) -> ffmpeg_next::Dictionary {
+    pub fn get_encoder_options_dict(&self) -> ffmpeg_next::Dictionary<'_> {
         let re = Regex::new(r#"-([^\s"]+)\s+("[^"]+"|[^\s"]+)"#).unwrap();
 
         let mut options = ffmpeg_next::Dictionary::new();
@@ -115,7 +115,7 @@ impl RenderOptions {
         }
         options
     }
-    pub fn get_metadata_dict(&self) -> ffmpeg_next::Dictionary {
+    pub fn get_metadata_dict(&self) -> ffmpeg_next::Dictionary<'_> {
         let mut metadata = ffmpeg_next::Dictionary::new();
         metadata.set("comment", format!("Original filename: {}\n{}", self.input_filename, self.metadata.comment).trim());
         metadata

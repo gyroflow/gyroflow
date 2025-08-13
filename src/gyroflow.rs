@@ -74,7 +74,8 @@ fn entry() {
     ::log::debug!("Gyroflow {}", util::get_version());
 
     let mut open_file = String::new();
-    if cli::run(&mut open_file) {
+    let mut open_preset = String::new();
+    if cli::run(&mut open_file, &mut open_preset) {
         return;
     }
 
@@ -242,6 +243,7 @@ fn entry() {
     rendering::init_log();
 
     engine.set_property("openFileOnStart".into(), QUrl::from(QString::from(gyroflow_core::filesystem::path_to_url(&open_file))).into());
+    engine.set_property("loadPresetOnStart".into(), QString::from(open_preset).into());
 
     engine.set_property("defaultInitializedDevice".into(), QString::default().into());
     if let Some((name, list_name)) = core::gpu::initialize_contexts() {

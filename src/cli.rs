@@ -129,7 +129,7 @@ pub fn will_run_in_console() -> bool {
     false
 }
 
-pub fn run(open_file: &mut String) -> bool {
+pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
     if std::env::args().len() > 1 {
         let opts: Opts = argh::from_env();
 
@@ -151,6 +151,11 @@ pub fn run(open_file: &mut String) -> bool {
         if let Some(mut preset) = opts.preset {
             if !preset.is_empty() {
                 if preset.starts_with('{') { preset = preset.replace('\'', "\""); }
+                *open_preset = if preset.starts_with('{') {
+                    preset.clone()
+                } else {
+                    std::fs::read_to_string(std::fs::canonicalize(&preset).unwrap_or_else(|_| preset.clone().into()).to_string_lossy().to_string()).unwrap_or_default()
+                };
                 presets.push(preset);
             }
         }

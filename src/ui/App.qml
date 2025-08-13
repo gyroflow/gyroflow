@@ -110,6 +110,7 @@ Rectangle {
         onAccepted: videoArea.loadMultipleFiles(selectedFiles, false);
     }
 
+    property string pendingLoadPreset: loadPresetOnStart;
     property url pendingOpenFileOrg: openFileOnStart;
     property url pendingOpenFile: pendingOpenFileOrg;
     onPendingOpenFileOrgChanged: { pendingOpenFile = pendingOpenFileOrg; onItemLoaded(); }
