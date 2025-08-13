@@ -85,7 +85,7 @@ install-deps:
         # Compile squashfs-tools
         #if [[ ! -d "{{ExtDir}}/squashfs-tools-squashfs-tools-4.6.1/squashfs-tools" ]]; then
             sudo apt-get install -y unzip wget liblzma-dev zlib1g-dev
-            rm -rf "{{ExtDir}}/squashfs-tools-squashfs-tools-4.6.1/squashfs-tools"
+            rm -rf "{{ExtDir}}/squashfs-tools*"
             wget https://github.com/plougher/squashfs-tools/archive/refs/tags/squashfs-tools-4.6.1.zip
             unzip squashfs-tools-4.6.1.zip
             pushd squashfs-tools-squashfs-tools-4.6.1/squashfs-tools
