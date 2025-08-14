@@ -494,6 +494,13 @@ impl RenderQueue {
         }
         self.jobs.remove(&job_id);
         self.update_queue_indices();
+
+        if self.status.to_string() == "active" {
+            self.start_frame = 0;
+            self.start_timestamp = Self::current_timestamp();
+            self.start_frame = self.get_current_frame();
+            self.progress_changed();
+        }
     }
     pub fn clear(&mut self) {
         let mut to_delete = Vec::new();
@@ -546,6 +553,7 @@ impl RenderQueue {
                 let mut v = q[i].clone();
                 if v.start_timestamp > 0 && v.current_frame < v.total_frames {
                     v.start_timestamp += diff;
+                    v.frame_times.clear();
                     //q.data_changed(i);
                     q.change_line(i, v);
                 }
