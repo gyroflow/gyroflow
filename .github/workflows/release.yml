@@ -16,7 +16,7 @@ jobs:
           { os: macos-15,      type: macstore },
           { os: windows-2022,  type: windows },
           { os: windows-2022,  type: windows-arm },
-          { os: macos-15,      type: ios },
+          { os: macos-14,      type: ios },
           { os: windows-2022,  type: android }
         ]
     name: Gyroflow for ${{ matrix.targets.type }}
