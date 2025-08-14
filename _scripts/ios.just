@@ -136,6 +136,9 @@ build-and-package profile is_dist:
     fi
 
     if [ -f "{{ProjectDir}}/target/aarch64-apple-ios/{{profile}}/gyroflow" ]; then
+
+        xcodebuild -downloadPlatform iOS
+
         cp -f {{ProjectDir}}/target/aarch64-apple-ios/{{profile}}/gyroflow {{AppBundle}}/gyroflow
         cp -rf {{ProjectDir}}/target/aarch64-apple-ios/Frameworks {{AppBundle}}/Frameworks
         cp -rf {{ProjectDir}}/_deployment/ios/Info.plist {{AppBundle}}/Info.plist

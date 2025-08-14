@@ -527,9 +527,9 @@ impl<'a> VideoTranscoder<'a> {
         // (*dst).crop_right             = (*src).crop_right;
         (*dst).pts                    = (*src).pts;
         (*dst).repeat_pict            = (*src).repeat_pict;
-        (*dst).interlaced_frame       = (*src).interlaced_frame;
-        (*dst).top_field_first        = (*src).top_field_first;
-        (*dst).palette_has_changed    = (*src).palette_has_changed;
+        //(*dst).interlaced_frame       = (*src).interlaced_frame;
+        //(*dst).top_field_first        = (*src).top_field_first;
+        //(*dst).palette_has_changed    = (*src).palette_has_changed;
         (*dst).sample_rate            = (*src).sample_rate;
         (*dst).opaque                 = (*src).opaque;
         // (*dst).pkt_dts                = (*src).pkt_dts;

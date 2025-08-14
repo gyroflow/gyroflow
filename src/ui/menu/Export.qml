@@ -84,6 +84,8 @@ MenuItem {
         property alias preserveOtherTracks: preserveOtherTracks.checked;
         property alias padWithBlack: padWithBlack.checked;
         property alias exportTrimsSeparately: exportTrimsSeparately.checked;
+        property alias useVulkanEncoder: useVulkanEncoder.checked;
+        property alias useD3D12Encoder: useD3D12Encoder.checked;
         property alias metadataComment: metadataComment.text;
         property alias audioCodec: audioCodec.currentIndex;
         property alias interpolationMethod: interpolationMethod.currentIndex;
@@ -678,6 +680,24 @@ MenuItem {
                     if (outputFolder) settings.setValue("preservedOutputPath", outputFolder);
                 }
             }
+        }
+        CheckBox {
+            visible: Qt.platform.os == "linux" || Qt.platform.os == "windows";
+            id: useVulkanEncoder;
+            text: qsTr("Use experimental Vulkan encoder (HEVC only)");
+            checked: false;
+            width: parent.width;
+            Component.onCompleted: contentItem.wrapMode = Text.WordWrap;
+            onCheckedChanged: Qt.callLater(renderingDevice.updateController);
+        }
+        CheckBox {
+            visible: Qt.platform.os == "windows";
+            id: useD3D12Encoder;
+            text: qsTr("Use experimental D3D12 encoder (HEVC and AVC)");
+            checked: false;
+            width: parent.width;
+            Component.onCompleted: contentItem.wrapMode = Text.WordWrap;
+            onCheckedChanged: Qt.callLater(renderingDevice.updateController);
         }
     }
 }

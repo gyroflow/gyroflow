@@ -11,6 +11,7 @@ pub mod render_queue;
 pub mod mdk_processor;
 pub mod video_processor;
 pub mod zero_copy;
+use gyroflow_core::settings;
 use zero_copy::*;
 #[cfg(target_os = "android")]
 pub mod ffmpeg_android;
@@ -51,6 +52,8 @@ pub fn set_gpu_type_from_name(name: &str) {
     if gpu_type == GpuType::Nvidia {
         ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA);
     }
+    if settings::get_bool("useVulkanEncoder", false) { ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VULKAN); }
+    if settings::get_bool("useD3D12Encoder",  false) { ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_D3D12VA); }
     #[cfg(target_os = "windows")]
     if gpu_type == GpuType::Amd {
         ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA);
@@ -91,6 +94,8 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("h264_qsv",          true),
                 #[cfg(target_os = "windows")]
                 ("h264_mf",           true),
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
+                ("h264_vulkan",       true),
                 #[cfg(target_os = "linux")]
                 ("h264_v4l2m2m",      true),
                 #[cfg(target_os = "android")]
@@ -110,6 +115,10 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("hevc_qsv",          true),
                 #[cfg(target_os = "windows")]
                 ("hevc_mf",           true),
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
+                ("hevc_vulkan",       true),
+                #[cfg(target_os = "windows")]
+                ("hevc_d3d12va",      true),
                 #[cfg(target_os = "linux")]
                 ("hevc_v4l2m2m",      true),
                 #[cfg(target_os = "android")]
@@ -156,6 +165,10 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
     if gpu_type != GpuType::Nvidia {
         encoders.retain(|x| !x.0.contains("nvenc"));
     }
+
+    if !settings::get_bool("useVulkanEncoder", false) { encoders.retain(|x| !x.0.contains("_vulkan")); }
+    if !settings::get_bool("useD3D12Encoder",  false) { encoders.retain(|x| !x.0.contains("_d3d12")); }
+
     if gpu_type != GpuType::Amd {
         encoders.retain(|x| !x.0.contains("_amf"));
     }

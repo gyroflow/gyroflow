@@ -246,6 +246,7 @@ pub fn is_hardware_format(format: ffi::AVPixelFormat) -> bool {
     format == ffi::AVPixelFormat::AV_PIX_FMT_OPENCL ||
     format == ffi::AVPixelFormat::AV_PIX_FMT_QSV ||
     format == ffi::AVPixelFormat::AV_PIX_FMT_MMAL ||
+    format == ffi::AVPixelFormat::AV_PIX_FMT_VULKAN ||
     format == ffi::AVPixelFormat::AV_PIX_FMT_VAAPI
 }
 
