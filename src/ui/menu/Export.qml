@@ -389,6 +389,12 @@ MenuItem {
                         if (nw % 2 != 0) nw -= 1;
                         if (nh % 2 != 0) nh -= 1;
                         arr.push([qsTr("Proportional"), nw, nh]);
+
+                        let nwz = Math.round(nw * (100.0 / window.stab.maxValues.maxZoom));
+                        let nhz = Math.round(nh * (100.0 / window.stab.maxValues.maxZoom));
+                        if (nwz % 2 != 0) nwz -= 1;
+                        if (nhz % 2 != 0) nhz -= 1;
+                        arr.push([qsTr("Based on \"Max zoom\""), nwz, nhz]);
                     }
                     return {[k]: arr.concat(v)};
                 }));
