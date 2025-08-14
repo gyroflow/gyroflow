@@ -138,7 +138,7 @@ build-and-package profile is_dist:
     if [ -f "{{ProjectDir}}/target/aarch64-apple-ios/{{profile}}/gyroflow" ]; then
 
         xcodebuild -runFirstLaunch
-        xcodebuild -downloadPlatform iOS
+        xcodebuild -downloadPlatform iOS -buildVersion 18.5
 
         cp -f {{ProjectDir}}/target/aarch64-apple-ios/{{profile}}/gyroflow {{AppBundle}}/gyroflow
         cp -rf {{ProjectDir}}/target/aarch64-apple-ios/Frameworks {{AppBundle}}/Frameworks
