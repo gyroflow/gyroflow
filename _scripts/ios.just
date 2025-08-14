@@ -36,6 +36,9 @@ install-deps:
     brew list python &>/dev/null || brew install python
     rustup target add aarch64-apple-ios
     xcode-select --install || true
+    xcodebuild -runFirstLaunch
+    xcodebuild -downloadPlatform iOS || true
+
     export DYLD_FALLBACK_LIBRARY_PATH=""
     #export MACOSX_DEPLOYMENT_TARGET=""
 
@@ -136,10 +139,6 @@ build-and-package profile is_dist:
     fi
 
     if [ -f "{{ProjectDir}}/target/aarch64-apple-ios/{{profile}}/gyroflow" ]; then
-
-        xcodebuild -runFirstLaunch
-        xcodebuild -downloadPlatform iOS -buildVersion 18.5
-
         cp -f {{ProjectDir}}/target/aarch64-apple-ios/{{profile}}/gyroflow {{AppBundle}}/gyroflow
         cp -rf {{ProjectDir}}/target/aarch64-apple-ios/Frameworks {{AppBundle}}/Frameworks
         cp -rf {{ProjectDir}}/_deployment/ios/Info.plist {{AppBundle}}/Info.plist
