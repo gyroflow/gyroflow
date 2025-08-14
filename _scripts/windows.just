@@ -63,7 +63,11 @@ install-deps:
     if (-not (Test-Path -Path "vcpkg/installed/{{VcpkgArch}}/lib/opencv_core4.lib")) {
         echo "Downloading OpenCV"
         rm -Recurse -Force \vcpkg -ErrorAction SilentlyContinue
-        git clone --depth 1 https://github.com/Microsoft/vcpkg.git
+        if ("{{Arch}}" -eq "aarch64") {
+            git clone --depth 1 --branch 2025.03.19 https://github.com/Microsoft/vcpkg.git
+        } else {
+            git clone --depth 1 https://github.com/Microsoft/vcpkg.git
+        }
         .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
         #Add-Content .\vcpkg\triplets\arm64-windows.cmake -Value  "`nset(VCPKG_CMAKE_SYSTEM_VERSION 10.0.22621.0)"
         #Add-Content .\vcpkg\triplets\arm64-windows.cmake -Value  "`nset(CMAKE_SYSTEM_VERSION 10.0.22621.0)"
