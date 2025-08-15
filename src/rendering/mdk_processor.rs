@@ -104,6 +104,7 @@ impl MDKProcessor {
         pollster::block_on(rx.receive());
 
         std::thread::sleep(std::time::Duration::from_millis(100));
+        self.mdk.stopProcessing(0);
 
         Ok(())
     }

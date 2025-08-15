@@ -54,6 +54,7 @@ impl<'a> VideoProcessor<'a> {
             info.borrow_mut().rotation = mdk.mdk.getRotation();
 
             std::thread::sleep(std::time::Duration::from_millis(100));
+            mdk.mdk.stopProcessing(0);
 
             let info = info.borrow().clone();
             Ok(info)
