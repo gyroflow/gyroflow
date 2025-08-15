@@ -329,12 +329,12 @@ deploy *param:
     cp -f "$CARGO_TARGET/libmdk-r3d.so"                    "$TARGET/lib/"
     #cp -f "$CARGO_TARGET/libffmpeg.so.6"                  "$TARGET/"
 
-    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libavcodec.so.61"         "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libavfilter.so.10"        "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libavformat.so.61"        "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libavutil.so.59"          "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libswresample.so.5"       "$TARGET/lib/"
-    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libswscale.so.8"          "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libavcodec.so.62"         "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libavfilter.so.11"        "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libavformat.so.62"        "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libavutil.so.60"          "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libswresample.so.6"       "$TARGET/lib/"
+    cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libswscale.so.9"          "$TARGET/lib/"
 
     if [ "{{Arch}}" == "x86_64" ]; then
         curl -L https://api.gyroflow.xyz/sdk/libshaderc_shared.so -o "$TARGET/lib/libshaderc_shared.so"
