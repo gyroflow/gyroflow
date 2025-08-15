@@ -283,6 +283,10 @@ deploy:
         xcopy /Y "C:\Windows\System32\msvcp140_1.dll"       "$TargetDir\"
         xcopy /Y "C:\Windows\System32\msvcp140_2.dll"       "$TargetDir\"
     }
+    # Vulkan shaderc
+    if ("{{Arch}}" -eq "x86_64") {
+        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/shaderc_shared.dll" -OutFile "$TargetDir\shaderc_shared.dll"
+    }
 
     7z a $ProjectDir\_deployment\_binaries\Gyroflow-{{NameSuffix}}.zip $TargetDir\*
 

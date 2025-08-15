@@ -49,7 +49,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
 
     # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
-    $FFmpeg = "ffmpeg-7.1-android-gpl-lite"
+    $FFmpeg = "ffmpeg-master-android-gpl-lite"
     if (-not (Test-Path -Path "$FFmpeg")) {
         echo "Downloading $FFmpeg"
         wget "https://master.dl.sourceforge.net/project/avbuild/android/$FFmpeg.tar.xz?viasf=1" -outfile "ffmpeg.tar.xz"

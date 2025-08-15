@@ -336,6 +336,10 @@ deploy *param:
     cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libswresample.so.5"       "$TARGET/lib/"
     cp -f "$FFMPEG_DIR/lib/{{FFmpegLinuxArch}}/libswscale.so.8"          "$TARGET/lib/"
 
+    if [ "{{Arch}}" == "x86_64" ]; then
+        curl -L https://api.gyroflow.xyz/sdk/libshaderc_shared.so -o "$TARGET/lib/libshaderc_shared.so"
+    fi
+
     cp -f "$CARGO_TARGET/gyroflow"                         "$TARGET/"
     strip "$TARGET/gyroflow"
 
