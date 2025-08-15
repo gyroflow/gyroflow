@@ -24,7 +24,7 @@ pub fn compress_to_base91<T>(value: &T) -> Option<String>
 where T: serde::Serialize {
     use std::io::Write;
 
-    let data = bincode::serialize(value).ok()?;
+    let data = bincode::serde::encode_to_vec(value, bincode::config::legacy()).ok()?;
     let mut e = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::best());
     e.write_all(&data).ok()?;
     let compressed = e.finish().ok()?;

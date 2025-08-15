@@ -1419,7 +1419,7 @@ impl RenderQueue {
         let (has_sync_points, has_accurate_timestamps) = {
             let gyro = stab.gyro.read();
             let md = gyro.file_metadata.read();
-            (!gyro.get_offsets().is_empty(), md.has_accurate_timestamps)
+            (!gyro.get_offsets().is_empty(), md.has_accurate_timestamps && !url.to_ascii_lowercase().ends_with(".braw"))
         };
         let fps = stab.params.read().fps;
 

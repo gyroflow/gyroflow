@@ -1404,23 +1404,23 @@ impl StabilizationManager {
                     let mut gravity_vectors = None;
                     if is_compressed {
                         if let Some(bytes) = util::decompress_from_base91(obj.get("raw_imu").and_then(|x| x.as_str()).unwrap_or_default()) {
-                            if let Ok(data) = bincode::deserialize(&bytes) as bincode::Result<Vec<TimeIMU>> {
-                                raw_imu = data;
+                            if let Ok(data) = bincode::serde::decode_from_slice::<Vec<TimeIMU>, _>(&bytes, bincode::config::legacy()) {
+                                raw_imu = data.0;
                             }
                         }
                         if let Some(bytes) = util::decompress_from_base91(obj.get("quaternions").and_then(|x| x.as_str()).unwrap_or_default()) {
-                            if let Ok(data) = bincode::deserialize(&bytes) as bincode::Result<TimeQuat> {
-                                quaternions = data;
+                            if let Ok(data) = bincode::serde::decode_from_slice::<TimeQuat, _>(&bytes, bincode::config::legacy()) {
+                                quaternions = data.0;
                             }
                         }
                         if let Some(bytes) = util::decompress_from_base91(obj.get("image_orientations").and_then(|x| x.as_str()).unwrap_or_default()) {
-                            if let Ok(data) = bincode::deserialize(&bytes) as bincode::Result<TimeQuat> {
-                                image_orientations = Some(data);
+                            if let Ok(data) = bincode::serde::decode_from_slice::<TimeQuat, _>(&bytes, bincode::config::legacy()) {
+                                image_orientations = Some(data.0);
                             }
                         }
                         if let Some(bytes) = util::decompress_from_base91(obj.get("gravity_vectors").and_then(|x| x.as_str()).unwrap_or_default()) {
-                            if let Ok(data) = bincode::deserialize(&bytes) as bincode::Result<TimeVec> {
-                                gravity_vectors = Some(data);
+                            if let Ok(data) = bincode::serde::decode_from_slice::<TimeVec, _>(&bytes, bincode::config::legacy()) {
+                                gravity_vectors = Some(data.0);
                             }
                         }
                     } else {
@@ -1716,13 +1716,13 @@ impl StabilizationManager {
                 let is_compressed = obj.get("raw_imu").map(|x| x.is_string()).unwrap_or_default();
                 if is_compressed {
                     if let Some(bytes) = util::decompress_from_base91(obj.get("raw_imu").and_then(|x| x.as_str()).unwrap_or_default()) {
-                        if let Ok(data) = bincode::deserialize(&bytes) as bincode::Result<Vec<crate::gyro_source::TimeIMU>> {
-                            if !data.is_empty() { return true; }
+                        if let Ok(data) = bincode::serde::decode_from_slice::<Vec<crate::gyro_source::TimeIMU>, _>(&bytes, bincode::config::legacy()) {
+                            if !data.0.is_empty() { return true; }
                         }
                     }
                     if let Some(bytes) = util::decompress_from_base91(obj.get("quaternions").and_then(|x| x.as_str()).unwrap_or_default()) {
-                        if let Ok(data) = bincode::deserialize(&bytes) as bincode::Result<TimeQuat> {
-                            if !data.is_empty() { return true; }
+                        if let Ok(data) = bincode::serde::decode_from_slice::<TimeQuat, _>(&bytes, bincode::config::legacy()) {
+                            if !data.0.is_empty() { return true; }
                         }
                     }
                 } else {
