@@ -412,7 +412,7 @@ impl<'a> FfmpegProcessor<'a> {
             let mut pending_packets: Vec<(Stream, ffmpeg_next::Packet, usize, isize)> = Vec::new();
 
             let mut encoding_video = true;
-            let mut encoding_audio = true;
+            let mut encoding_audio = self.audio_codec != codec::Id::None;
 
             for (stream, mut packet) in self.input_context.packets() {
                 let ist_index = stream.index();
