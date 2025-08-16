@@ -107,7 +107,7 @@ deploy *param:
     $QT_LIBS = "$ProjectDir\ext\{{QtVersion}}\android_arm64_v8a\lib"
     $Env:Path = "$ProjectDir\ext\{{QtVersion}}\android_arm64_v8a\bin;$ProjectDir\ext\{{QtVersion}}\mingw_64\bin\;$Env:Path"
     $Env:QMAKE = "$ProjectDir\ext\{{QtVersion}}\android_arm64_v8a\bin\qmake.bat"
-    $Env:FFMPEG_DIR = "$ProjectDir\ext\ffmpeg-7.1-android-gpl-lite"
+    $Env:FFMPEG_DIR = "$ProjectDir\ext\ffmpeg-master-android-gpl-lite"
     $Env:OPENCV_LINK_LIBS = "opencv_stitching,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_core,tegra_hal,tbb,ittnotify,z,kleidicv,kleidicv_hal,kleidicv_thread"
     $Env:OPENCV_LINK_PATHS = "$ProjectDir\ext\OpenCV-android-sdk\sdk\native\staticlibs\arm64-v8a,$ProjectDir\ext\OpenCV-android-sdk\sdk\native\3rdparty\libs\arm64-v8a"
     $Env:OPENCV_INCLUDE_PATHS = "$ProjectDir\ext\OpenCV-android-sdk\sdk\native\jni\include"
