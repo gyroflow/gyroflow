@@ -41,12 +41,12 @@ time = { version = "0.3.41", features = ["local-offset"] }
 itertools = "0.14.0"
 num = "0.4.3"
 base91 = "0.1.0"
-bitflags = "2.9.1"
+bitflags = "2.9.2"
 enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.6.0"
 lru = "0.16"
-thiserror = "2.0.14"
+thiserror = "2.0.15"
 ciborium = "0.2.2"
 dyn-clone = "1.0"
 app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }
@@ -118,4 +118,4 @@ ndk-sys = { version = "0.6.0" }
 ndk-context = { version = "0.1.1" }
 
 [build-dependencies]
-ureq = "3.0"
+ureq = "3.1"

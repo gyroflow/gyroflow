@@ -38,6 +38,7 @@ lazy_static::lazy_static! {
     static ref GPU_TYPE: RwLock<GpuType> = RwLock::new(GpuType::Unknown);
 }
 pub fn set_gpu_type_from_name(name: &str) {
+    if name.is_empty() { return; }
     let name = name.to_ascii_lowercase();
          if name.contains("nvidia") || name.contains("quadro") || name.contains("grid") { *GPU_TYPE.write() = GpuType::Nvidia; }
     else if name.contains("amd") || name.contains("advanced micro devices") { *GPU_TYPE.write() = GpuType::Amd; }

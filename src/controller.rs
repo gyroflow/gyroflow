@@ -2074,10 +2074,20 @@ impl Controller {
     }
 
     fn check_external_sdk(&self, filename: QString) -> bool {
-        crate::external_sdk::requires_install(&filename.to_string())
+        let filename = filename.to_string();
+        if filename == "legacy_nvenc" {
+            std::thread::spawn(|| {
+                if crate::external_sdk::requires_install("legacy_nvenc") {
+                    crate::external_sdk::install("legacy_nvenc", |_| ());
+                }
+            });
+            return true;
+        }
+        crate::external_sdk::requires_install(&filename)
     }
     fn install_external_sdk(&self, url: QString) {
-        let filename = if url.to_string() == "ffmpeg_gpl" { url.to_string() } else { filesystem::get_filename(&url.to_string()) };
+        let url = url.to_string();
+        let filename = if url == "ffmpeg_gpl" { url.clone() } else { filesystem::get_filename(&url) };
         let progress = util::qt_queued_callback_mut(self, move |this, (percent, sdk_name, error_string): (f64, &'static str, String)| {
             this.external_sdk_progress(percent, QString::from(sdk_name), QString::from(error_string), QString::from(url.clone()));
         });

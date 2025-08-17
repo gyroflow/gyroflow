@@ -64,7 +64,7 @@ parking_lot = "0.12.3"
 simplelog = "0.12.2"
 log = "0.4"
 
-ureq = "3.0"
+ureq = "3.1"
 url = "2.5.4"
 whoami = "1.6.1"
 tar = "0.4.44"
@@ -92,6 +92,9 @@ oslog = "0.2"
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 metal = { version = "0.32.0" }
 core-foundation-sys = "0.8.7"
+
+[target.'cfg(any(target_os = "windows", target_os = "linux"))'.dependencies]
+nvml-wrapper = "0.11"
 
 [build-dependencies]
 cpp_build = "0.5.9"
