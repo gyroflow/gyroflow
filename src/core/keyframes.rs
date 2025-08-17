@@ -69,7 +69,7 @@ pub struct Keyframe {
     pub value: f64,
     pub easing: Easing
 }
-fn default_id() -> u32 { fastrand::u32(1..) }
+fn default_id() -> u32 { fastrand::u32(1..2147483640) }
 
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
 pub struct KeyframeManager {

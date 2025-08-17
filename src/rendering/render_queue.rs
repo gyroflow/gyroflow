@@ -365,7 +365,7 @@ impl RenderQueue {
         let job_id = if self.editing_job_id > 0 {
             self.editing_job_id
         } else {
-            fastrand::u32(1..)
+            fastrand::u32(1..2147483640)
         };
         if self.editing_job_id > 0 {
             self.editing_job_id = 0;
@@ -1117,7 +1117,7 @@ impl RenderQueue {
     }
 
     pub fn add_file(&mut self, url: String, gyro_url: String, additional_data: String) -> u32 {
-        let job_id = fastrand::u32(1..);
+        let job_id = fastrand::u32(1..2147483640);
 
         let is_gf_data = url.starts_with('{');
 
