@@ -113,21 +113,39 @@ pub unsafe fn pix_formats_to_vec(formats: *const ffi::AVPixelFormat) -> Vec<form
 }
 
 pub fn init_device_for_decoding(index: usize, codec: *const ffi::AVCodec, decoder_ctx: &mut codec::context::Context, device: Option<&str>) -> Result<(usize, ffi::AVHWDeviceType, String, Option<ffi::AVPixelFormat>), super::FFmpegError> {
-    let start_index = if index == 0 && cfg!(target_os = "windows") {
-        // Try to find CUDA first
-        (0..20).find(|i| {
-            unsafe {
-                let config = ffi::avcodec_get_hw_config(codec, (*i) as _);
-                !config.is_null() && (*config).device_type == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA
-            }
-        }).unwrap_or(index)
-    } else {
-        index
-    };
+    let mut decoders = Vec::<(usize, ffi::AVHWDeviceType)>::new();
 
-    for i in start_index..20 {
+    for i in 0..20 {
         unsafe {
             let config = ffi::avcodec_get_hw_config(codec, i as i32);
+            if !config.is_null() && (*config).device_type != ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_NONE {
+                decoders.push((i, (*config).device_type));
+            }
+        }
+    }
+    if let Some(cuda) = decoders.iter().find(|(_, type_)| *type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA).copied() {
+        // Move CUDA to first position
+        decoders.remove(cuda.0);
+        decoders.insert(0, cuda);
+    }
+    if gyroflow_core::settings::get_bool("useVulkanEncoder", false) {
+        if let Some(x) = decoders.iter().find(|(_, type_)| *type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VULKAN).copied() {
+            decoders.remove(x.0);
+            decoders.insert(0, x);
+        }
+    }
+    if gyroflow_core::settings::get_bool("useD3D12Encoder", false) {
+        if let Some(x) = decoders.iter().find(|(_, type_)| *type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_D3D12VA).copied() {
+            decoders.remove(x.0);
+            decoders.insert(0, x);
+        }
+    }
+
+    log::debug!("Available decoders: {decoders:?}");
+
+    for (i, _) in decoders.iter().skip(index) {
+        unsafe {
+            let config = ffi::avcodec_get_hw_config(codec, *i as i32);
             if config.is_null() {
                 ::log::debug!("config null for {}", i);
                 continue;
@@ -154,7 +172,7 @@ pub fn init_device_for_decoding(index: usize, codec: *const ffi::AVCodec, decode
             }
             if let Some(dev) = devices.get(&(type_ as u64 + device_hash)) {
                 (*decoder_ctx.as_mut_ptr()).hw_device_ctx = dev.add_ref();
-                return Ok((i, type_, dev.name(), Some((*config).pix_fmt)));
+                return Ok((*i, type_, dev.name(), Some((*config).pix_fmt)));
             }
         }
     }
