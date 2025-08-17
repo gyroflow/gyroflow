@@ -9,7 +9,7 @@ impl LegacyNvenc {
         if let Ok(nvml) = Nvml::init() {
             if let Ok(ver) = nvml.sys_driver_version() {
                 log::info!("NVIDIA driver version: {ver}");
-                if let Some((major, minor)) = ver.split_once('.') {
+                if let Some((major, _minor)) = ver.split_once('.') {
                     if let Ok(major) = major.parse::<u32>() {
                         // If driver is older than 522, we need legacy avcodec, because NVENC12 breaks ABI
                         if major < 522 {

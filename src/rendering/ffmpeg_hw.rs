@@ -113,7 +113,19 @@ pub unsafe fn pix_formats_to_vec(formats: *const ffi::AVPixelFormat) -> Vec<form
 }
 
 pub fn init_device_for_decoding(index: usize, codec: *const ffi::AVCodec, decoder_ctx: &mut codec::context::Context, device: Option<&str>) -> Result<(usize, ffi::AVHWDeviceType, String, Option<ffi::AVPixelFormat>), super::FFmpegError> {
-    for i in index..20 {
+    let start_index = if index == 0 && cfg!(target_os = "windows") {
+        // Try to find CUDA first
+        (0..20).find(|i| {
+            unsafe {
+                let config = ffi::avcodec_get_hw_config(codec, (*i) as _);
+                !config.is_null() && (*config).device_type == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA
+            }
+        }).unwrap_or(index)
+    } else {
+        index
+    };
+
+    for i in start_index..20 {
         unsafe {
             let config = ffi::avcodec_get_hw_config(codec, i as i32);
             if config.is_null() {
