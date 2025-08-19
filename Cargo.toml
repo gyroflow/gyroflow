@@ -57,7 +57,7 @@ qttypes     = { version = "0.2.12", default-features = false, features = ["requi
 qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "c08c607" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
-ffmpeg-next = { version = "8.0.0", git = "https://github.com/AdrianEddy/rust-ffmpeg.git", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
+ffmpeg-next = { version = "8.0.0", git = "https://github.com/AdrianEddy/rust-ffmpeg.git", rev = "ef9e8c0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.5.0"
 parking_lot = "0.12.3"
 
