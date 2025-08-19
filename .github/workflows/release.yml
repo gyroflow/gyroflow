@@ -116,6 +116,7 @@ jobs:
           FORCE_QT_VERSION: 6.7.3
           DONT_BUILD_DMG: true
         run: |
+          sudo xcode-select --switch /Applications/Xcode.app
           /usr/libexec/PlistBuddy -x -c "Set :LSMinimumSystemVersion \"11.0\"" ${{ github.workspace }}/_deployment/mac/Gyroflow.app/Contents/Info.plist
           sed -i -e 's/"10.14"/"11.0"/' ${{ github.workspace }}/_scripts/macos.just
           just install-deps
