@@ -13,7 +13,7 @@ jobs:
         targets: [
           { os: ubuntu-latest, type: linux },
           { os: macos-13,      type: macos },
-          { os: macos-15,      type: macstore },
+          { os: macos-14,      type: macstore },
           { os: windows-2022,  type: windows },
           { os: windows-2022,  type: windows-arm },
           { os: macos-14,      type: ios },
@@ -116,7 +116,7 @@ jobs:
           FORCE_QT_VERSION: 6.7.3
           DONT_BUILD_DMG: true
         run: |
-          sudo xcode-select --switch /Applications/Xcode.app
+          sudo xcode-select --switch /Applications/Xcode_16.2.app/Contents/Developer
           /usr/libexec/PlistBuddy -x -c "Set :LSMinimumSystemVersion \"11.0\"" ${{ github.workspace }}/_deployment/mac/Gyroflow.app/Contents/Info.plist
           sed -i -e 's/"10.14"/"11.0"/' ${{ github.workspace }}/_scripts/macos.just
           just install-deps
@@ -168,6 +168,7 @@ jobs:
           SIGN_KEY: 05AC9B1B232615B6DBE1FECD5A02AC21BBE967A9
           PROVISIONING_PROFILE: /Users/runner/Library/MobileDevice/Provisioning Profiles/${{ matrix.targets.type == 'ios' && fromJSON(steps.provisioning.outputs.profiles)[0].udid || '' }}.mobileprovision
         run: |
+          sudo xcode-select --switch /Applications/Xcode_16.2.app/Contents/Developer
           just ios install-deps
           just ios build-ipa
 
