@@ -20,10 +20,10 @@ export QMAKE := env_var_or_default("QMAKE", if path_exists(QtPath / "qmake.bat")
 # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
 
 # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
-FFmpeg := if os() == "windows"               { "ffmpeg-master-windows-desktop-clang-nvenc12abi-gpl-lite"
+FFmpeg := if os() == "windows"               { "ffmpeg-8.0-windows-desktop-clang-nvenc12abi-gpl-lite"
    } else if os() + Arch == "macosaarch64"   { "ffmpeg-arm64"
    } else if os() + Arch == "macosx86_64"    { "ffmpeg-x86_64"
-   } else                                    { "ffmpeg-master-linux-clang-nvenc12abi-gpl-lite" }
+   } else                                    { "ffmpeg-8.0-linux-clang-nvenc12abi-gpl-lite" }
 export FFMPEG_DIR := ProjectDir / "ext" / FFmpeg
 export FFMPEG_ARCH := if Arch == "aarch64" { "arm64" } else { if os() == "windows" { "x64" } else { "amd64" } }
 # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
