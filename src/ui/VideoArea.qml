@@ -105,7 +105,7 @@ Item {
     Connections {
         target: controller;
         function onGyroflow_file_loaded(obj: var): void {
-            if (obj && +obj.version > 0) {
+            if (obj) {
                 let duration_ms = videoArea.vid.duration;
                 const info = obj.video_info || { };
                 if (info && Object.keys(info).length > 0) {
@@ -271,7 +271,7 @@ Item {
                     controller.load_default_preset();
                 }
             }
-            if (window.pendingLoadPreset) {
+            if (is_main_video && window.pendingLoadPreset) {
                 Qt.callLater(loadGyroflowData, JSON.parse(window.pendingLoadPreset), 0);
                 window.pendingLoadPreset = "";
             }
