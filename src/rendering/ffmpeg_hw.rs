@@ -72,6 +72,9 @@ lazy_static::lazy_static! {
     static ref DEVICES: Mutex<HashMap<u64, HWDevice>> = Mutex::new(HashMap::new());
 }
 
+pub fn clear_devices() {
+    DEVICES.lock().clear();
+}
 pub fn initialize_ctx(type_: ffi::AVHWDeviceType) {
     let mut devices = DEVICES.lock();
     if let Entry::Vacant(e) = devices.entry(type_ as u64) {

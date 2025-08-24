@@ -39,6 +39,7 @@ lazy_static::lazy_static! {
 }
 pub fn set_gpu_type_from_name(name: &str) {
     if name.is_empty() { return; }
+    ffmpeg_hw::clear_devices();
     let name = name.to_ascii_lowercase();
          if name.contains("nvidia") || name.contains("quadro") || name.contains("grid") { *GPU_TYPE.write() = GpuType::Nvidia; }
     else if name.contains("amd") || name.contains("advanced micro devices") { *GPU_TYPE.write() = GpuType::Amd; }
@@ -347,7 +348,8 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         proc.video.encoder_params.options.set("realtime", "0");
 
         // Test if `constant_bit_rate` is supported
-        {
+        let vt_cbr = VT_SUPPORTS_CONSTANT_BIT_RATE.read().clone();
+        if vt_cbr.is_none() {
             let log = FFMPEG_LOG.read().clone();
             if let Some(enc) = ffmpeg_next::encoder::find_by_name("h264_videotoolbox") {
                 let ctx_ptr = unsafe { ffi::avcodec_alloc_context3(enc.as_ptr()) };
@@ -361,10 +363,15 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                 options.set("allow_sw", "1");
                 options.set("constant_bit_rate", "1");
                 if encoder.open_with(options).is_ok() {
-                    proc.video.encoder_params.options.set("constant_bit_rate", "1");
+                    VT_SUPPORTS_CONSTANT_BIT_RATE.write().replace(true);
+                } else {
+                    VT_SUPPORTS_CONSTANT_BIT_RATE.write().replace(false);
                 }
             }
             *FFMPEG_LOG.write() = log;
+        }
+        if VT_SUPPORTS_CONSTANT_BIT_RATE.read().is_some_and(|x| x) {
+            proc.video.encoder_params.options.set("constant_bit_rate", "1");
         }
     }
     if encoder.0.contains("nvenc") {
@@ -751,6 +758,7 @@ pub fn fps_to_rational(fps: f64) -> ffmpeg_next::Rational {
 lazy_static::lazy_static! {
     pub static ref FFMPEG_LOG: Arc<RwLock<String>> = Arc::new(RwLock::new(String::new()));
     pub static ref LAST_PREFIX: Arc<RwLock<i32>> = Arc::new(RwLock::new(1));
+    pub static ref VT_SUPPORTS_CONSTANT_BIT_RATE: RwLock<Option<bool>> = RwLock::new(None);
 }
 
 #[cfg(not(any(all(target_os = "linux", target_arch = "x86_64"), all(target_os = "macos", target_arch = "x86_64"))))]
