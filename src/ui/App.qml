@@ -545,6 +545,12 @@ Rectangle {
 
         if (identifier && +settings.value("dontShowAgain-" + identifier, 0)) {
             const clickedButton = +settings.value("dontShowAgain-" + identifier, 0) - 1;
+            if (identifier == "open-rdc-folder") {
+                Qt.callLater(function() {
+                    if (el)
+                        el.clicked(clickedButton, true);
+                });
+            }
             if (buttons.length == 1) {
                 showNotification(type, text, textFormat);
                 return null;
