@@ -706,6 +706,7 @@ Item {
                 }
             } else {
                 additional.output.output_folder = outFolder;
+                delete additional.output.output_filename;
                 if (isSandboxed) {
                     if (!foldersWithoutAccess.includes(outFolder) && !filesystem.can_create_file(outFolder, "check.tmp")) {
                         foldersWithoutAccess.push(outFolder);
