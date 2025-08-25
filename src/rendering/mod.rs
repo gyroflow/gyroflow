@@ -32,7 +32,7 @@ use gyroflow_core::gpu::Buffers;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 enum GpuType {
-    Nvidia, Amd, Intel, AppleSilicon, Android, Unknown
+    Nvidia, Amd, Intel, AppleSilicon, Android, WindowsArm, Unknown
 }
 lazy_static::lazy_static! {
     static ref GPU_TYPE: RwLock<GpuType> = RwLock::new(GpuType::Unknown);
@@ -45,7 +45,7 @@ pub fn set_gpu_type_from_name(name: &str) {
     else if name.contains("amd") || name.contains("advanced micro devices") { *GPU_TYPE.write() = GpuType::Amd; }
     else if name.contains("intel") && !name.contains("intel(r) core(tm)") { *GPU_TYPE.write() = GpuType::Intel; }
     else if name.contains("apple m") { *GPU_TYPE.write() = GpuType::AppleSilicon; }
-    else if name.contains("adreno") { *GPU_TYPE.write() = GpuType::Android; }
+    else if name.contains("adreno") { *GPU_TYPE.write() = if cfg!(target_os = "android") { GpuType::Android } else { GpuType::WindowsArm }; }
     else {
         log::warn!("Unknown GPU {}", name);
     }
@@ -54,6 +54,11 @@ pub fn set_gpu_type_from_name(name: &str) {
     if gpu_type == GpuType::Nvidia {
         ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA);
     }
+    if gpu_type == GpuType::WindowsArm {
+        // Enable the D3D12 encoder on Windows ARM by default
+        gyroflow_core::settings::set("useD3D12Encoder", true.into());
+    }
+
     if settings::get_bool("useVulkanEncoder", false) { ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VULKAN); }
     if settings::get_bool("useD3D12Encoder",  false) { ffmpeg_hw::initialize_ctx(ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_D3D12VA); }
     #[cfg(target_os = "windows")]
