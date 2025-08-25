@@ -73,6 +73,7 @@ pub struct RenderOptions {
     pub output_width: usize,
     pub output_height: usize,
     pub input_filename: String,
+    pub input_url: String,
     pub bitrate: f64,
     pub use_gpu: bool,
     pub audio: bool,
@@ -157,7 +158,24 @@ impl RenderOptions {
                 }
             }
             if let Some(v) = obj.get("output_folder").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
-                self.output_folder = v.to_string();
+                // If output_folder is a relative path, resolve it to an absolute path
+                if !v.starts_with('/') && !v.contains(":/") && !v.contains(":\\") {
+                    ::log::info!("Resolving relative url: {v}. Current url: {}", self.input_url);
+                    let current_folder = filesystem::get_folder(&self.input_url);
+                    let current_path = filesystem::url_to_path(&current_folder);
+                    let mut new_folder = current_path.clone();
+                    if !new_folder.ends_with('/') {
+                        new_folder.push('/');
+                    }
+                    new_folder.push_str(v);
+                    if !new_folder.ends_with('/') {
+                        new_folder.push('/');
+                    }
+                    self.output_folder = filesystem::path_to_url(&new_folder);
+                    ::log::info!("= {}", self.output_folder);
+                } else {
+                    self.output_folder = v.to_string();
+                }
             }
             if let Some(v) = obj.get("output_filename").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
                 self.output_filename = v.to_string();
@@ -449,6 +467,7 @@ impl RenderQueue {
 
         let project_data = Self::get_gyroflow_data_internal(&stab, &additional_data, &render_options);
 
+        render_options.input_url = stab.input_file.read().url.clone();
         render_options.input_filename = filesystem::get_filename(&stab.input_file.read().url);
 
         self.jobs.insert(job_id, Job {

@@ -212,6 +212,14 @@ MenuItem {
                 }
             }
             if (output.output_folder) {
+                if (!output.output_folder.startsWith("/") && !output.output_folder.includes(":/") && !output.output_folder.includes(":\\")) { // It's likely a relative url
+                    console.log("Resolving relative url: " + output.output_folder);
+                    const current_folder = filesystem.get_folder(window.videoArea.loadedFileUrl);
+                    const current_path = filesystem.url_to_path(current_folder);
+                    const new_folder = current_path + "/" + output.output_folder + "/";
+                    output.output_folder = filesystem.path_to_url(new_folder);
+                    console.log("= " + output.output_folder);
+                }
                 window.outputFile.setFolder(output.output_folder);
             }
             if (output.output_filename) {
