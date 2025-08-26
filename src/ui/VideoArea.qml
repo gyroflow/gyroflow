@@ -67,6 +67,10 @@ Item {
                 obj.gyro_source?.filepath || ""
             ];
         }
+        if ((!urls || !urls[0]) && !vidInfo.filename) {
+            messageBox(Modal.Error, qsTr("Preset can be applied only after loading a video."), [ { text: qsTr("Ok") } ]);
+            return;
+        }
 
         const isCorrectVideoLoaded = urls[0] && vidInfo.filename == filesystem.get_filename(urls[0]);
         const isCorrectGyroLoaded  = urls[1] && window.motionData.filename == filesystem.get_filename(urls[1]);
