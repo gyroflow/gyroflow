@@ -1626,7 +1626,11 @@ impl StabilizationManager {
                 let ranges = ranges.iter().filter_map(|x| {
                     let x = x.as_array()?;
                     if x.len() == 2 {
-                        Some((x[0].as_f64()? / duration_ms, x[1].as_f64()? / duration_ms))
+                        let mut end_range = x[1].as_f64()?;
+                        if end_range < 0.0 {
+                            end_range = duration_ms + end_range;
+                        }
+                        Some((x[0].as_f64()? / duration_ms, end_range / duration_ms))
                     } else {
                         None
                     }

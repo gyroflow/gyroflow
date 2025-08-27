@@ -131,7 +131,7 @@ Item {
                     timeline.setTrimRanges([[obj.trim_start, obj.trim_end]]);
                 }
                 if (obj.hasOwnProperty("trim_ranges_ms")) {
-                    timeline.setTrimRanges(obj.trim_ranges_ms.map(x => [x[0] / duration_ms, x[1] / duration_ms]));
+                    timeline.setTrimRanges(obj.trim_ranges_ms.map(x => [x[0] / duration_ms, (x[1] < 0? duration_ms + x[1] : x[1]) / duration_ms]));
                 } else if (obj.hasOwnProperty("trim_ranges")) {
                     timeline.setTrimRanges(obj.trim_ranges);
                 }
