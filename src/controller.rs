@@ -2075,14 +2075,6 @@ impl Controller {
 
     fn check_external_sdk(&self, filename: QString) -> bool {
         let filename = filename.to_string();
-        if filename == "legacy_nvenc" {
-            std::thread::spawn(|| {
-                if crate::external_sdk::requires_install("legacy_nvenc") {
-                    crate::external_sdk::install("legacy_nvenc", |_| ());
-                }
-            });
-            return true;
-        }
         crate::external_sdk::requires_install(&filename)
     }
     fn install_external_sdk(&self, url: QString) {

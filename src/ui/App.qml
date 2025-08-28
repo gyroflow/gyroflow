@@ -678,8 +678,6 @@ Rectangle {
         QT_TRANSLATE_NOOP("App", "Gyroflow will reboot the computer in 60 seconds because all tasks have been completed.");
 
         Qt.callLater(filesystem.restore_allowed_folders);
-
-        controller.check_external_sdk("legacy_nvenc");
     }
 
     function getReadableError(text: string): string {

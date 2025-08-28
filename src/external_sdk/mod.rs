@@ -5,9 +5,6 @@ mod braw;
 pub mod r3d;
 mod ffmpeg_gpl;
 
-#[cfg(any(target_os = "windows", target_os = "linux"))]
-mod legacy_nvenc;
-
 pub use ffmpeg_gpl::FfmpegGpl;
 
 use std::io::*;
@@ -49,9 +46,6 @@ pub fn requires_install(filename: &str) -> bool {
     if filename.to_lowercase().ends_with(".r3d") { return !r3d::REDSdk::is_installed(); }
     if filename == "ffmpeg_gpl" { return !FfmpegGpl::is_installed(); }
 
-    #[cfg(any(target_os = "windows", target_os = "linux"))]
-    if filename == "legacy_nvenc" { return !legacy_nvenc::LegacyNvenc::is_installed(); }
-
     false
 }
 
@@ -62,11 +56,6 @@ pub fn install<F: Fn((f64, &'static str, String)) + Send + Sync + Clone + 'stati
         (r3d::REDSdk::get_download_url(), "RED SDK")
     } else if filename == "ffmpeg_gpl" {
         (FfmpegGpl::get_download_url(), "FFmpeg GPL codecs (x264, x265)")
-    } else if filename == "legacy_nvenc" {
-        #[cfg(any(target_os = "windows", target_os = "linux"))]
-        { (legacy_nvenc::LegacyNvenc::get_download_url(), "Legacy NVENC SDK") }
-        #[cfg(not(any(target_os = "windows", target_os = "linux")))]
-        { (None, "") }
     } else {
         (None, "")
     };

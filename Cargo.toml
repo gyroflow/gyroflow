@@ -35,9 +35,9 @@ nalgebra = "0.33"
 semver = "1.0.26"
 fastrand = "2.1.0"
 itertools = "0.14.0"
-regex = "1.10.6"
+regex = "1.11"
 rayon = "1.10"
-mimalloc = { version = "0.1.47", default-features = false }
+mimalloc = { version = "0.1.48", default-features = false }
 
 pollster = "0.4.0"
 futures-intrusive = "0.5.0"
@@ -65,7 +65,7 @@ simplelog = "0.12.2"
 log = "0.4"
 
 ureq = "3.1"
-url = "2.5.4"
+url = "2.5.7"
 whoami = "1.6.1"
 tar = "0.4.44"
 lru = "0.16"
