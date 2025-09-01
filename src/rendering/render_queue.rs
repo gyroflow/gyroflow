@@ -1604,14 +1604,13 @@ impl RenderQueue {
         });
         ::log::debug!("new_output_options: {:?}", &new_output_options);
         let data = data.as_bytes();
+        let data_vec = data.to_vec();
         let mut q = self.queue.borrow_mut();
         for (job_id, job) in self.jobs.iter_mut() {
             if to_job_id > 0 && *job_id != to_job_id { continue; }
             if job.queue_index < q.row_count() as usize {
                 let mut itm = q[job.queue_index].clone();
                 if itm.status == JobStatus::Queued {
-                    let stab = job.stab.clone();
-                    let data_vec = data.to_vec();
                     let mut sync_options = serde_json::Value::default();
                     if let Ok(additional_data) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
                         if let Some(sync) = additional_data.get("synchronization") {
@@ -1642,11 +1641,11 @@ impl RenderQueue {
                     }
 
                     let mut is_preset = false;
-                    if let Err(e) = stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset, false) {
+                    if let Err(e) = job.stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset, false) {
                         ::log::error!("Failed to update queue stab data: {:?}", e);
                     }
 
-                    Self::update_sync_settings(&stab, &sync_options);
+                    Self::update_sync_settings(&job.stab, &sync_options);
                     job.project_data = Self::get_gyroflow_data_internal(&job.stab, &job.additional_data, &job.render_options);
                     processing_done(job_id);
 
