@@ -1633,7 +1633,6 @@ impl RenderQueue {
                         itm.output_filename = QString::from(job.render_options.output_filename.as_str());
                         itm.output_folder   = QString::from(job.render_options.output_folder.as_str());
                         itm.display_output_path = QString::from(filesystem::display_folder_filename(job.render_options.output_folder.as_str(), job.render_options.output_filename.as_str()));
-                        job.project_data = Self::get_gyroflow_data_internal(&job.stab, &job.additional_data, &job.render_options);
                         if filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
                             let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
                             itm.error_string = msg.clone();
@@ -1648,6 +1647,7 @@ impl RenderQueue {
                     }
 
                     Self::update_sync_settings(&stab, &sync_options);
+                    job.project_data = Self::get_gyroflow_data_internal(&job.stab, &job.additional_data, &job.render_options);
                     processing_done(job_id);
 
                     q.change_line(job.queue_index, itm);
