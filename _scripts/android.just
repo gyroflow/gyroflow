@@ -120,7 +120,9 @@ deploy *param:
     echo $Env:BINDGEN_EXTRA_CLANG_ARGS
 
     if ("$Env:GITHUB_RUN_NUMBER") {
-        (Get-Content $ProjectDir\_deployment\android\AndroidManifest.xml) -replace 'versionCode="[0-9]+"', "versionCode=`"$Env:GITHUB_RUN_NUMBER`"" | Out-File $ProjectDir\_deployment\android\AndroidManifest.xml -Encoding Utf8
+        $manifest = Join-Path $ProjectDir "_deployment\android\AndroidManifest.xml"
+        $runNumber = $Env:GITHUB_RUN_NUMBER
+        [System.IO.File]::WriteAllText($manifest, [regex]::Replace([System.IO.File]::ReadAllText($manifest), 'versionCode="\d+"', "versionCode=""$runNumber"""))
     }
 
     Copy-Item -Path "$QT_LIBS\libQt6Core_arm64-v8a.so"           -Destination "$QT_LIBS\libQt6Core.so"           -ErrorAction SilentlyContinue
