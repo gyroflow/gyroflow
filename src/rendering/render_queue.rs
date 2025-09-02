@@ -1182,11 +1182,7 @@ impl RenderQueue {
                 let override_ext = out.get("output_extension").and_then(|x| x.as_str()).map(|x| x.to_owned());
                 if let Ok(mut render_options) = serde_json::from_value(out.clone()) as serde_json::Result<RenderOptions> {
                     render_options.update_from_json(out);
-                    let (smoothing_name, smoothing_params) = {
-                        let smoothing_lock = stabilizer.smoothing.read();
-                        let smoothing = smoothing_lock.current();
-                        (smoothing.get_name(), smoothing.get_parameters_json())
-                    };
+                    let smoothing = stabilizer.smoothing.read().clone();
                     let params = stabilizer.params.read();
 
                     let stab = StabilizationManager {
@@ -1215,25 +1211,7 @@ impl RenderQueue {
                         ..Default::default()
                     };
 
-                    {
-                        let method_idx = stab.get_smoothing_algs()
-                            .iter().enumerate()
-                            .find(|(_, m)| smoothing_name == m.as_str())
-                            .map(|(idx, _)| idx)
-                            .unwrap_or_default();
-
-                        let mut smoothing = stab.smoothing.write();
-                        smoothing.set_current(method_idx);
-
-                        for param in smoothing_params.as_array().unwrap() {
-                            (|| -> Option<()> {
-                                let name = param.get("name").and_then(|x| x.as_str())?;
-                                let value = param.get("value").and_then(|x| x.as_f64())?;
-                                smoothing.current_mut().set_parameter(name, value);
-                                Some(())
-                            })();
-                        }
-                    }
+                    *stab.smoothing.write() = smoothing;
 
                     let stab = Arc::new(stab);
 
