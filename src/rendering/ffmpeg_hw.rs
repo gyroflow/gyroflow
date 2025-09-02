@@ -293,7 +293,7 @@ pub fn initialize_hwframes_context(encoder_ctx: *mut ffi::AVCodecContext, _frame
     }
     if let Some(dev) = devices.get_mut(&(type_ as u64 + device_hash)) {
         unsafe {
-            if (*encoder_ctx).hw_device_ctx.is_null() {
+            if (*encoder_ctx).hw_device_ctx.is_null() && type_ != ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_QSV {
                 (*encoder_ctx).hw_device_ctx = dev.add_ref();
                 log::debug!("Setting hw_device_ctx {:?}", (*encoder_ctx).hw_device_ctx);
             }
