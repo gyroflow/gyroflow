@@ -942,6 +942,7 @@ impl RenderQueue {
 
             core::run_threaded(move || {
                 Self::do_autosync(stab.clone(), processing, &input_file, err2, proc_height);
+                stab.recompute_blocking();
 
                 if let Some((opt, path, fields)) = export_metadata {
                     let result = || -> Result<(), core::GyroflowCoreError> {
