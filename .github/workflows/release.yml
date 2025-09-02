@@ -153,6 +153,7 @@ jobs:
           KEY_STORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_ALIAS }}
           KEY_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_PASS }}
           BUILD_PROFILE: deploy
+          FORCE_QT_VERSION: 6.9.2
         run: |
           $Env:JAVA_HOME = $Env:JAVA_HOME_21_X64
           Get-ChildItem Env:

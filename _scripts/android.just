@@ -4,9 +4,9 @@ KeyStore         := env_var_or_default("KEY_STORE_PATH",  "")
 KeyStoreAlias    := env_var_or_default("KEY_STORE_ALIAS", "")
 KeyStorePassword := env_var_or_default("KEY_STORE_PASS",  "")
 
-export ANDROID_NDK_HOME := env_var_or_default("ANDROID_NDK_HOME", "D:\\Programy\\Android\\sdk\\ndk\\android-ndk-r26b")
+export ANDROID_NDK_HOME := env_var_or_default("ANDROID_NDK_HOME", "D:\\Programy\\Android\\sdk\\ndk\\android-ndk-r27d")
 export ANDROID_SDK_ROOT := env_var_or_default("ANDROID_SDK_ROOT", "D:\\Programy\\Android\\sdk\\")
-export JAVA_HOME        := env_var_or_default("JAVA_HOME",        "D:\\Programy\\Java\\jdk-14.0.1")
+export JAVA_HOME        := env_var_or_default("JAVA_HOME",        "D:\\Programy\\Java\\jdk-20.0.2")
 export BUILD_PROFILE    := env_var_or_default("BUILD_PROFILE",    "release") # use "deploy" for final apk
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
