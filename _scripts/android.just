@@ -136,6 +136,10 @@ deploy *param:
     # Replace [[bin]] with [lib]
     [System.IO.File]::WriteAllText("$ProjectDir\Cargo.toml", [System.IO.File]::ReadAllText("$ProjectDir\Cargo.toml").Replace("[[bin]]", "[lib]`ncrate-type = [""cdylib""]"))
 
+    # Replace gradle version
+    [System.IO.File]::WriteAllText("$QT_LIBS\..\src\3rdparty\gradle\gradle\wrapper\gradle-wrapper.properties", [System.IO.File]::ReadAllText("$QT_LIBS\..\src\3rdparty\gradle\gradle\wrapper\gradle-wrapper.properties").Replace("gradle-8.3-bin", "gradle-8.6-bin"))
+    [System.IO.File]::WriteAllText("$QT_LIBS\..\src\android\templates\build.gradle", [System.IO.File]::ReadAllText("$QT_LIBS\..\src\android\templates\build.gradle").Replace("7.4.1", "8.4.2"))
+
     cargo apk build --profile $Env:BUILD_PROFILE
 
     # Restore [[bin]]
@@ -227,7 +231,7 @@ deploy *param:
         "qtPluginsDirectory": "plugins",
         "qtQmlDirectory": "qml",
         "sdk": "$SDK_REPLACED",
-        "sdkBuildToolsRevision": "30.0.3",
+        "sdkBuildToolsRevision": "35.0.0",
         "ndk": "$NDK_REPLACED",
         "toolchain-prefix": "llvm",
         "tool-prefix": "llvm",
