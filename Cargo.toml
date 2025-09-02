@@ -127,7 +127,7 @@ build_targets = [ "aarch64-linux-android" ]
 
 [package.metadata.android.sdk]
 min_sdk_version = 26
-target_sdk_version = 34
+target_sdk_version = 35
 
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "0.21"
