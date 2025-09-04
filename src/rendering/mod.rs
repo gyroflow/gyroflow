@@ -779,33 +779,33 @@ unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_cha
         let written = ffi::av_log_format_line2(avcl, level, fmt, vl, line.as_mut_ptr() as *mut i8, line.len() as i32, &mut prefix);
         if written > 0 {
             line.resize(written as usize, 0u8);
-        }
 
-        if let Ok(mut line) = String::from_utf8(line) {
-            if line.contains("Unknown profile bitstream") ||
-               line.contains("infe version < 2") ||
-               line.contains("Update your FFmpeg version to the newest one from Git.") ||
-               line.contains("Cannot find an index entry before timestamp") ||
-               line.contains("stream set to be discarded by default.") ||
-               line.contains("Missing key frame while searching for timestamp") {
-                return;
+            if let Ok(mut line) = String::from_utf8(line) {
+                if line.contains("Unknown profile bitstream") ||
+                   line.contains("infe version < 2") ||
+                   line.contains("Update your FFmpeg version to the newest one from Git.") ||
+                   line.contains("Cannot find an index entry before timestamp") ||
+                   line.contains("stream set to be discarded by default.") ||
+                   line.contains("Missing key frame while searching for timestamp") {
+                    return;
+                }
+                *LAST_PREFIX.write() = prefix;
+
+                // ffi::av_log_default_callback(avcl, level, fmt, vl);
+
+                match level {
+                    ffi::AV_LOG_PANIC | ffi::AV_LOG_FATAL | ffi::AV_LOG_ERROR => {
+                        ::log::error!("{}", line.trim());
+                        line = format!("<font color=\"#d82626\">{}</font>", line);
+                    },
+                    ffi::AV_LOG_WARNING => {
+                        ::log::warn!("{}", line.trim());
+                        line = format!("<font color=\"#f6a10c\">{}</font>", line);
+                    },
+                    _ => { ::log::debug!("{}", line.trim()); }
+                }
+                FFMPEG_LOG.write().push_str(&line);
             }
-            *LAST_PREFIX.write() = prefix;
-
-            // ffi::av_log_default_callback(avcl, level, fmt, vl);
-
-            match level {
-                ffi::AV_LOG_PANIC | ffi::AV_LOG_FATAL | ffi::AV_LOG_ERROR => {
-                    ::log::error!("{}", line.trim());
-                    line = format!("<font color=\"#d82626\">{}</font>", line);
-                },
-                ffi::AV_LOG_WARNING => {
-                    ::log::warn!("{}", line.trim());
-                    line = format!("<font color=\"#f6a10c\">{}</font>", line);
-                },
-                _ => { ::log::debug!("{}", line.trim()); }
-            }
-            FFMPEG_LOG.write().push_str(&line);
         }
     }
 }
