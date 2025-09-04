@@ -1,7 +1,7 @@
 set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 PathSep := if os() == "windows" { ";" } else { ":" }
 
-ProjectVersion := "1.6.2"
+ProjectVersion := "1.6.3"
 ProjectDir := if path_exists(justfile_directory() / "Cargo.toml") == "true" { justfile_directory()
        } else if path_exists(justfile_directory() / ".." / "Cargo.toml") == "true" { justfile_directory() / "../"
        } else { justfile_directory() }
