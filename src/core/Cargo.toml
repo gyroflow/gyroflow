@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "cbc61ab" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "f71d146" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { version = "0.7", features = ["field_access"] }
 
@@ -41,7 +41,7 @@ time = { version = "0.3.41", features = ["local-offset"] }
 itertools = "0.14.0"
 num = "0.4.3"
 base91 = "0.1.0"
-bitflags = "2.9.3"
+bitflags = "2.9.4"
 enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.6.0"
