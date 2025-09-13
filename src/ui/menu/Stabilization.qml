@@ -104,6 +104,8 @@ MenuItem {
             horizonCb.checked = (+stab.horizon_lock_amount || 0) > 0;
             horizonSlider.value = horizonCb.checked? +stab.horizon_lock_amount : 100;
             horizonRollSlider.value = horizonCb.checked? +stab.horizon_lock_roll : 0;
+            lockPitchCb.checked = !!stab.horizon_lock_pitch_enabled;
+            horizonPitchSlider.value = lockPitchCb.checked? +stab.horizon_lock_pitch : 0;
             Qt.callLater(updateHorizonLock);
 
             if (stab.hasOwnProperty("video_speed")) videoSpeed.value = +stab.video_speed;
@@ -146,7 +148,9 @@ MenuItem {
     function updateHorizonLock(): void {
         const lockAmount = horizonCb.checked? horizonSlider.value : 0.0;
         const roll = horizonCb.checked? horizonRollSlider.value : 0.0;
-        controller.set_horizon_lock(lockAmount, roll);
+        const pitch = horizonCb.checked && lockPitchCb.checked? horizonPitchSlider.value : 0.0;
+        const lockPitch = horizonCb.checked && lockPitchCb.checked;
+        controller.set_horizon_lock(lockAmount, roll, lockPitch, pitch);
         controller.set_use_gravity_vectors(useGravityVectors.checked);
         controller.set_horizon_lock_integration_method(integrationMethod.currentIndex);
     }
@@ -372,6 +376,32 @@ MenuItem {
                 unit: qsTr("°");
                 precision: 1;
                 keyframe: "LockHorizonRoll";
+                onValueChanged: Qt.callLater(updateHorizonLock);
+            }
+        }
+
+        CheckBox {
+            id: lockPitchCb;
+            text: qsTr("Lock pitch angle");
+            checked: false;
+            onCheckedChanged: Qt.callLater(updateHorizonLock);
+        }
+
+        Label {
+            width: parent.width;
+            spacing: 2 * dpiScale;
+            text: qsTr("Pitch angle correction");
+            visible: lockPitchCb.checked;
+            SliderWithField {
+                id: horizonPitchSlider;
+                width: parent.width;
+                from: -90;
+                to: 90;
+                value: 0;
+                defaultValue: 0;
+                unit: qsTr("°");
+                precision: 1;
+                keyframe: "LockHorizonPitch";
                 onValueChanged: Qt.callLater(updateHorizonLock);
             }
         }

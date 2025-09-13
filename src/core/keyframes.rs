@@ -40,6 +40,8 @@ define_keyframes! {
     BackgroundFeather,           "#9d93e1", "Background feather",               |v| format!("{:.0}%", v),
     LockHorizonAmount,           "#ed7789", "Horizon lock amount",              |v| format!("{:.0}%", v),
     LockHorizonRoll,             "#e86176", "Horizon lock roll correction",     |v| format!("{:.1}°", v),
+    LockHorizonPitchEnabled,     "#e86176", "Horizon lock pitch enabled",       |v| format!("{}", if v != 0.0 { "On" } else { "Off" }),
+    LockHorizonPitch,            "#e86176", "Horizon lock pitch correction",    |v| format!("{:.1}°", v),
     LensCorrectionStrength,      "#e8ae61", "Lens correction strength",         |v| format!("{:.0}%", v * 100.0),
     LightRefractionCoeff,        "#CD7F19", "Light refraction coefficient",     |v| format!("{:.3}",  v),
 
