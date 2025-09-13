@@ -5,7 +5,7 @@ use super::*;
 use nalgebra::*;
 use crate::keyframes::*;
 
-pub fn lock_horizon_angle(q: &UnitQuaternion<f64>, roll_correction: f64) -> UnitQuaternion<f64> {
+pub fn lock_horizon_angle(q: &UnitQuaternion<f64>, roll_correction: f64, lock_pitch: bool, pitch_correction: f64) -> UnitQuaternion<f64> {
     // z axis points in view direction, use as reference
 
     let x_axis = nalgebra::Vector3::<f64>::x_axis();
@@ -13,7 +13,7 @@ pub fn lock_horizon_angle(q: &UnitQuaternion<f64>, roll_correction: f64) -> Unit
     let z_axis = nalgebra::Vector3::<f64>::z_axis();
 
     let test_vec = q * nalgebra::Vector3::<f64>::z_axis();
-    let pitch    = (-test_vec.z).asin();
+    let pitch    = if lock_pitch { pitch_correction } else { (-test_vec.z).asin() };
     let yaw      = test_vec.y.simd_atan2(test_vec.x);
 
     let rot_yaw   = UnitQuaternion::from_axis_angle(&y_axis, yaw);
@@ -30,6 +30,8 @@ pub struct HorizonLock {
     pub lock_enabled: bool,
     pub horizonlockpercent: f64,
     pub horizonroll: f64,
+    pub lock_pitch: bool,
+    pub horizonpitch: f64,
 }
 
 impl Default for HorizonLock {
@@ -37,19 +39,26 @@ impl Default for HorizonLock {
         lock_enabled: false,
         horizonlockpercent: 100.0,
         horizonroll: 0.0,
+        lock_pitch: false,
+        horizonpitch: 0.0,
     } }
 }
 
 impl HorizonLock {
-    pub fn set_horizon(&mut self, lock_percent: f64, roll: f64) {
+    pub fn set_horizon(&mut self, lock_percent: f64, roll: f64, lock_pitch: bool, pitch: f64) {
         self.horizonroll = roll;
         self.horizonlockpercent = lock_percent;
         self.lock_enabled = self.horizonlockpercent > 1e-6;
+        self.horizonpitch = pitch;
+        self.lock_pitch = lock_pitch;
     }
+
     pub fn get_checksum(&self) -> u64 {
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
         hasher.write_u64(self.horizonlockpercent.to_bits());
         hasher.write_u64(self.horizonroll.to_bits());
+        hasher.write_u8(self.lock_pitch as u8);
+        hasher.write_u64(self.horizonpitch.to_bits());
         hasher.finish()
     }
 
@@ -88,9 +97,11 @@ impl HorizonLock {
                 let timestamp_ms = *ts as f64 / 1000.0;
                 let video_rotation = keyframes.value_at_gyro_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(compute_params.video_rotation);
                 let horizonroll = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonRoll, timestamp_ms).unwrap_or(self.horizonroll) + video_rotation;
+                let horizonpitch = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonPitch, timestamp_ms).unwrap_or(self.horizonpitch);
+                let lock_pitch = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonPitchEnabled, timestamp_ms).unwrap_or(if self.lock_pitch { 1.0 } else { 0.0 }) != 0.0;
                 let horizonlockpercent = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonAmount, timestamp_ms).unwrap_or(self.horizonlockpercent);
 
-                *smoothed_ori = lock_horizon_angle(smoothed_ori, horizonroll * std::f64::consts::PI / 180.0).slerp(&smoothed_ori, 1.0 - horizonlockpercent / 100.0);
+                *smoothed_ori = lock_horizon_angle(smoothed_ori, horizonroll * std::f64::consts::PI / 180.0, lock_pitch, horizonpitch * std::f64::consts::PI / 180.0).slerp(&smoothed_ori, 1.0 - horizonlockpercent / 100.0);
             }
         }
     }

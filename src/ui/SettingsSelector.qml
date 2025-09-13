@@ -47,7 +47,7 @@ Modal {
         "Stabilization|stabilization": {
             "FOV":                        ["fov"],
             "Smoothing params":           ["method", "smoothing_params"],
-            "Horizon lock":               ["horizon_lock_amount", "horizon_lock_roll", "use_gravity_vectors"],
+            "Horizon lock":               ["horizon_lock_amount", "horizon_lock_roll", "horizon_lock_pitch_enabled", "horizon_lock_pitch", "use_gravity_vectors"],
             "Rolling shutter correction": ["frame_readout_time", "frame_readout_direction"],
             "Zooming":                    ["adaptive_zoom_window", "adaptive_zoom_center_offset", "adaptive_zoom_method", "additional_rotation", "additional_translation", "max_zoom", "max_zoom_iterations"],
             "Lens correction strength":   ["lens_correction_amount"],

@@ -1023,8 +1023,8 @@ impl StabilizationManager {
         self.smoothing.write().current_mut().as_mut().set_parameter(name, val);
         self.invalidate_smoothing();
     }
-    pub fn set_horizon_lock(&self, lock_percent: f64, roll: f64) {
-        self.smoothing.write().horizon_lock.set_horizon(lock_percent, roll);
+    pub fn set_horizon_lock(&self, lock_percent: f64, roll: f64, lock_pitch: bool, pitch: f64) {
+        self.smoothing.write().horizon_lock.set_horizon(lock_percent, roll, lock_pitch, pitch);
         self.invalidate_smoothing();
     }
     pub fn set_use_gravity_vectors(&self, v: bool) {
@@ -1135,7 +1135,7 @@ impl StabilizationManager {
         let gyro = self.gyro.read();
         let params = self.params.read();
 
-        let (smoothing_name, smoothing_params, horizon_amount, horizon_roll) = {
+        let (smoothing_name, smoothing_params, horizon_amount, horizon_lock) = {
             let smoothing_lock = self.smoothing.read();
             let smoothing = smoothing_lock.current();
 
@@ -1155,7 +1155,7 @@ impl StabilizationManager {
                 horizon_amount = 0.0;
             }
 
-            (smoothing.get_name(), parameters, horizon_amount, smoothing_lock.horizon_lock.horizonroll)
+            (smoothing.get_name(), parameters, horizon_amount, smoothing_lock.horizon_lock)
         };
 
         let input_file = self.input_file.read().clone();
@@ -1203,7 +1203,9 @@ impl StabilizationManager {
                 "additional_translation": params.additional_translation,
                 "lens_correction_amount": params.lens_correction_amount,
                 "horizon_lock_amount":    horizon_amount,
-                "horizon_lock_roll":      horizon_roll,
+                "horizon_lock_roll":      horizon_lock.horizonroll,
+                "horizon_lock_pitch_enabled": horizon_lock.lock_pitch,
+                "horizon_lock_pitch":     horizon_lock.horizonpitch,
                 "use_gravity_vectors":    gyro.use_gravity_vectors,
                 "horizon_lock_integration_method": gyro.horizon_lock_integration_method,
                 "video_speed":                   params.video_speed,
@@ -1568,7 +1570,9 @@ impl StabilizationManager {
                 }
                 if let Some(horizon_amount) = obj.get("horizon_lock_amount").and_then(|x| x.as_f64()) {
                     if let Some(horizon_roll) = obj.get("horizon_lock_roll").and_then(|x| x.as_f64()) {
-                        smoothing.horizon_lock.set_horizon(horizon_amount, horizon_roll);
+                        let horizon_pitch_enabled = obj.get("horizon_lock_pitch_enabled").and_then(|x| x.as_bool()).unwrap_or(false);
+                        let horizon_pitch = obj.get("horizon_lock_pitch").and_then(|x| x.as_f64()).unwrap_or(0.0);
+                        smoothing.horizon_lock.set_horizon(horizon_amount, horizon_roll, horizon_pitch_enabled, horizon_pitch);
                     }
                 }
                 if let Some(v) = obj.get("use_gravity_vectors").and_then(|x| x.as_bool()) {
@@ -1863,6 +1867,8 @@ impl StabilizationManager {
 
             KeyframeType::LockHorizonAmount |
             KeyframeType::LockHorizonRoll |
+            KeyframeType::LockHorizonPitchEnabled |
+            KeyframeType::LockHorizonPitch |
             KeyframeType::AdditionalRotationX |
             KeyframeType::AdditionalRotationY |
             KeyframeType::AdditionalRotationZ |
