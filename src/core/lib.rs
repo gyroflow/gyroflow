@@ -1155,7 +1155,7 @@ impl StabilizationManager {
                 horizon_amount = 0.0;
             }
 
-            (smoothing.get_name(), parameters, horizon_amount, smoothing_lock.horizon_lock)
+            (smoothing.get_name(), parameters, horizon_amount, smoothing_lock.horizon_lock.clone())
         };
 
         let input_file = self.input_file.read().clone();
