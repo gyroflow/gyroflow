@@ -1135,7 +1135,7 @@ impl StabilizationManager {
         let gyro = self.gyro.read();
         let params = self.params.read();
 
-        let (smoothing_name, smoothing_params, horizon_amount, horizon_roll) = {
+        let (smoothing_name, smoothing_params, horizon_amount, horizon_lock) = {
             let smoothing_lock = self.smoothing.read();
             let smoothing = smoothing_lock.current();
 
@@ -1155,7 +1155,7 @@ impl StabilizationManager {
                 horizon_amount = 0.0;
             }
 
-            (smoothing.get_name(), parameters, horizon_amount, smoothing_lock.horizon_lock.horizonroll)
+            (smoothing.get_name(), parameters, horizon_amount, smoothing_lock.horizon_lock)
         };
 
         let input_file = self.input_file.read().clone();
@@ -1203,9 +1203,9 @@ impl StabilizationManager {
                 "additional_translation": params.additional_translation,
                 "lens_correction_amount": params.lens_correction_amount,
                 "horizon_lock_amount":    horizon_amount,
-                "horizon_lock_roll":      horizon_roll,
-                "horizon_lock_pitch_enabled": self.smoothing.read().horizon_lock.lock_pitch,
-                "horizon_lock_pitch":     self.smoothing.read().horizon_lock.horizonpitch,
+                "horizon_lock_roll":      horizon_lock.horizonroll,
+                "horizon_lock_pitch_enabled": horizon_lock.lock_pitch,
+                "horizon_lock_pitch":     horizon_lock.horizonpitch,
                 "use_gravity_vectors":    gyro.use_gravity_vectors,
                 "horizon_lock_integration_method": gyro.horizon_lock_integration_method,
                 "video_speed":                   params.video_speed,
