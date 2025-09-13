@@ -222,6 +222,16 @@ impl StabilizationManager {
                     let db = self.lens_profile_db.read();
                     l.resolve_interpolations(&db);
                 }
+                // Camera-specific lens profile fixes
+                if md.detected_source.as_ref().map(|s| s.starts_with("Insta360")).unwrap_or(false) {
+                    if let Some(camera_id) = &md.camera_identifier {
+                        if camera_id.model.to_lowercase().contains("x4") {
+                            // Insta360 X4: Fix camera matrix cx value (multiply by 2)
+                            l.fisheye_params.camera_matrix[0][2] *= 2.0;
+                            log::info!("Insta360 X4 camera matrix fix: cx doubled.");
+                        }
+                    }
+                }
             }
             if let Some(md_fps) = md.frame_rate {
                 let fps = self.params.read().fps;
@@ -245,6 +255,15 @@ impl StabilizationManager {
                     if rot == 180 {
                         self.params.write().frame_readout_direction = ReadoutDirection::BottomToTop;
                         md.imu_orientation = Some("YXz".into());
+                    }
+                }
+            }
+            // Special handling for Insta360 X4 with yzX IMU orientation (metadata sayz Xyz)
+            if md.detected_source.as_ref().map(|v| v.starts_with("Insta360 ")).unwrap_or_default() {
+                if let Some(camera_id) = &md.camera_identifier {
+                    if camera_id.model.to_lowercase().contains("x4") {
+                        log::info!("Detected Insta360 X4, setting IMU orientation to yzX");
+                        md.imu_orientation = Some("yzX".into());
                     }
                 }
             }
