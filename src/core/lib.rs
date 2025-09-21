@@ -741,6 +741,110 @@ impl StabilizationManager {
                     }
                 }
             }
+            // Spherical grid overlay (meridians/parallels every 15 degrees) with pole at center of original field of view
+            if p.show_spherical_grid {
+                let ts_ms = timestamp_us as f64 / 1000.0;
+                
+                // Use try_read to avoid blocking the UI thread during spherical grid rendering
+                let params = match self.params.try_read() {
+                    Some(_) => stabilization::ComputeParams::from_manager(self),
+                    None => {
+                        // Skip grid drawing if we can't get params lock immediately
+                        return;
+                    }
+                };
+                
+                let (camera_matrix, distortion_coeffs, _radial_limit, _sx, _sy, _fl) = stabilization::FrameTransform::get_lens_data_at_timestamp(&params, ts_ms, false);
+
+                // Draw function using existing undistortion/projection to ensure correctness
+                let mut draw_polyline = |pts: &[(f64, f64)]| {
+                    let mut prev: Option<(i32, i32)> = None;
+                    for &(u, v) in pts {
+                        let x = u.round() as i32;
+                        let y = v.round() as i32;
+                        if let Some((px, py)) = prev {
+                            // Limit line length to prevent extremely long Bresenham lines that could cause performance issues
+                            let dx = (x - px).abs();
+                            let dy = (y - py).abs();
+                            if dx < 2000 && dy < 2000 { // Reasonable limit for 4K+ displays
+                                let line = line_drawing::Bresenham::new((px as isize, py as isize), (x as isize, y as isize));
+                                for pnt in line { drawing.put_pixel(pnt.0 as i32, pnt.1 as i32, Color::Blue3, Alpha::Alpha50, Stage::OnInput, y_inverted, 1); }
+                            }
+                        }
+                        prev = Some((x, y));
+                    }
+                };
+
+                // Helper to project a 3D direction to pixel, through lens model
+                let project_dir = |dir: [f64; 3]| -> Option<(f64, f64)> {
+                    // Normalize and ensure forward z
+                    let mut d = nalgebra::Vector3::new(dir[0], dir[1], dir[2]);
+                    let n = d.norm();
+                    if n > 0.0 { d /= n; }
+                    if d.z <= 1e-6 { d.z = 1e-6; }
+
+                    let fx = camera_matrix[(0, 0)];
+                    let fy = camera_matrix[(1, 1)];
+                    let cx = camera_matrix[(0, 2)];
+                    let cy = camera_matrix[(1, 2)];
+
+                    // Convert to normalized camera coords, then distort
+                    let x = d.x / d.z;
+                    let y = d.y / d.z;
+
+                    // Build KernelParams minimally for distortion call
+                    let mut kp: stabilization::KernelParams = Default::default();
+                    kp.width = size.0 as i32;
+                    kp.height = size.1 as i32;
+                    kp.f = [fx as f32, fy as f32];
+                    kp.c = [cx as f32, cy as f32];
+                    kp.k = distortion_coeffs.iter().map(|v| *v as f32).collect::<Vec<_>>().try_into().unwrap();
+
+                    let dm = params.distortion_model.clone();
+                    let uv = dm.distort_point(x as f32, y as f32, 1.0, &kp);
+                    let u = (uv.0 as f64) * fx + cx;
+                    let v = (uv.1 as f64) * fy + cy;
+                    Some((u, v))
+                };
+
+                // Sampling resolution
+                let steps_lon = 360 / 3; // 3° steps for smoothness
+                let steps_lat = 180 / 3;
+
+                // Meridians (constant longitude), every 45° (8 meridians total)
+                // Rotated coordinate system: pole at center of original FOV
+                for lon_deg in (-180..=180).step_by(45) {
+                    // Skip 180 duplicate of -180 to avoid overdraw
+                    if lon_deg == 180 { continue; }
+                    let lon = (lon_deg as f64).to_radians();
+                    let mut poly: Vec<(f64, f64)> = Vec::new();
+                    for i in 0..=steps_lat {
+                        let lat = (-90.0 + i as f64 * (180.0 / steps_lat as f64)).to_radians();
+                        let clat = lat.cos();
+                        // Rotate coordinate system: X-right, Y-up, Z-forward -> X-right, Y-forward, Z-up
+                        // This places the north pole (Z=1) at the center of the original field of view
+                        let dir = [clat * lon.cos(), clat * lon.sin(), lat.sin()]; // X-right, Y-forward, Z-up
+                        if let Some(pt) = project_dir(dir) { poly.push(pt); }
+                    }
+                    if poly.len() > 1 { draw_polyline(&poly); }
+                }
+
+                // Parallels (constant latitude), every 15°
+                // Rotated coordinate system: pole at center of original FOV
+                for lat_deg in (-75..=75).step_by(15) { // avoid +/-90 singularities
+                    let lat = (lat_deg as f64).to_radians();
+                    let mut poly: Vec<(f64, f64)> = Vec::new();
+                    for i in 0..=steps_lon {
+                        let lon = (-180.0 + i as f64 * (360.0 / steps_lon as f64)).to_radians();
+                        let clat = lat.cos();
+                        // Rotate coordinate system: X-right, Y-up, Z-forward -> X-right, Y-forward, Z-up
+                        // This places the north pole (Z=1) at the center of the original field of view
+                        let dir = [clat * lon.cos(), clat * lon.sin(), lat.sin()];
+                        if let Some(pt) = project_dir(dir) { poly.push(pt); }
+                    }
+                    if poly.len() > 1 { draw_polyline(&poly); }
+                }
+            }
             #[cfg(feature = "opencv")]
             if p.is_calibrator {
                 let lock = self.lens_calibrator.read();
@@ -835,6 +939,7 @@ impl StabilizationManager {
     pub fn set_of_method(&self, v: u32) { self.params.write().of_method = v; self.pose_estimator.clear(); }
     pub fn set_show_detected_features(&self, v: bool) { self.params.write().show_detected_features = v; }
     pub fn set_show_optical_flow     (&self, v: bool) { self.params.write().show_optical_flow      = v; }
+    pub fn set_show_spherical_grid   (&self, v: bool) { self.params.write().show_spherical_grid    = v; }
     pub fn set_stab_enabled          (&self, v: bool) { self.params.write().stab_enabled           = v; }
     pub fn set_frame_readout_time    (&self, v: f64)  { self.params.write().frame_readout_time     = v; }
     pub fn set_frame_readout_direction(&self, v: impl Into<ReadoutDirection>) { self.params.write().frame_readout_direction = v.into(); }
