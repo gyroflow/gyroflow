@@ -174,7 +174,7 @@ Item {
         repeat: false;
         running: false;
         interval: 100;
-        property bool axes: false;
+        property bool axes: false;  // Set in triggerUpdateChart, called in setDisplayMode and updateDurations
         property bool zooming: false;
         onTriggered: {
             if (axes) {
@@ -188,7 +188,7 @@ Item {
         }
     }
 
-    function updateDurations(): void {
+    function updateDurations(): void {  // Called when IMU data is loaded or
         chart.setDurationMs(controller.get_scaled_duration_ms());
         keyframes.item.setDurationMs(controller.get_org_duration_ms());
         root.durationMs    = controller.get_scaled_duration_ms();
