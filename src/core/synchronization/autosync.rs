@@ -199,22 +199,24 @@ impl AutosyncProcess {
         self.estimator.cache_optical_flow(if offset_method == 1 { 2 } else { 1 });
         self.estimator.cleanup();
 
-        let mut scaled_ranges_us = Cow::Borrowed(&self.scaled_ranges_us);
-
-        if self.mode == "synchronize" && !self.compute_params.read().gyro.read().has_motion() {
-            // If no gyro data in file, set the computed optical flow as gyro data
+        // Update gyro_source with the computed estimated motion data
+        let duration_ms = {
             let compute_params = self.compute_params.write();
             let mut gyro = compute_params.gyro.write();
-
-            gyro.file_metadata.set_raw_imu(self.estimator.estimated_gyro.read().values().cloned().collect::<Vec<_>>());
-            gyro.apply_transforms();
-
+            gyro.set_estimated_gyro(self.estimator.estimated_gyro.read().clone());
+            // Note: integrate() is called in the recomputation pipeline to avoid deadlock
+            gyro.duration_ms
+        };
+        
+        let mut scaled_ranges_us = Cow::Borrowed(&self.scaled_ranges_us);
+        
+        if self.mode == "synchronize" && !self.compute_params.read().gyro.read().has_motion() {
+            // Dummy sync point at the middle of the video with duration 500ms
             let timestamps_fract = [0.5];
             let time_per_syncpoint = 500.0;
-
             scaled_ranges_us = Cow::Owned(timestamps_fract.into_iter().map(|x| (
-                (((x * gyro.duration_ms) - (time_per_syncpoint / 2.0)).max(0.0)              * 1000.0 / self.fps_scale.unwrap_or(1.0)).round() as i64,
-                (((x * gyro.duration_ms) + (time_per_syncpoint / 2.0)).min(gyro.duration_ms) * 1000.0 / self.fps_scale.unwrap_or(1.0)).round() as i64
+                (((x * duration_ms) - (time_per_syncpoint / 2.0)).max(0.0)              * 1000.0 / self.fps_scale.unwrap_or(1.0)).round() as i64,
+                (((x * duration_ms) + (time_per_syncpoint / 2.0)).min(duration_ms) * 1000.0 / self.fps_scale.unwrap_or(1.0)).round() as i64
             )).collect());
         }
 
