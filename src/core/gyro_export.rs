@@ -162,7 +162,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
         jsx.insert("orientations", Vec::<serde_json::Value>::new().into());
     }
 
-    let raw_imu = gyro.raw_imu(&file_metadata);
+    let raw_imu = gyro.get_motion_data();
 
     for (i, frame, ts, timestamp_ms) in timestamps {
         let raw_imu = raw_imu.get(i.unwrap_or(usize::MAX)).cloned().unwrap_or_default();

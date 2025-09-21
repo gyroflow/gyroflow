@@ -331,8 +331,7 @@ impl TimelineGyroChart {
             self.sync_points = gyro.get_offsets_plus_linear();
 
             {
-                let file_metadata = gyro.file_metadata.read();
-                let raw_imu = gyro.raw_imu(&file_metadata);
+                let raw_imu = gyro.get_motion_data();
                 let imu_len = raw_imu.len();
 
                 for x in raw_imu {

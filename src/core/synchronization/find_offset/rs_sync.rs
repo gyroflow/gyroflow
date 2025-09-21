@@ -20,8 +20,7 @@ pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64
 
     let raw_imu_len = {
         let gyro = params.gyro.read();
-        let md = gyro.file_metadata.read();
-        gyro.raw_imu(&md).len()
+        gyro.get_motion_data().len()
     };
     if sync_params.calc_initial_fast && !ranges.is_empty() && raw_imu_len > 0 {
         fn median(mut v: Vec<f64>) -> f64 {

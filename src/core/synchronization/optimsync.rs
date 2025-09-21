@@ -28,8 +28,7 @@ fn blackman(width: usize) -> Vec<f32> {
 
 impl OptimSync {
     pub fn new(gyro: &GyroSource) -> Option<OptimSync> {
-        let file_metadata = gyro.file_metadata.read();
-        let raw_imu = gyro.raw_imu(&file_metadata);
+        let raw_imu = gyro.get_motion_data();
 
         let duration_ms = raw_imu.last()?.timestamp_ms - raw_imu.first()?.timestamp_ms;
         let samples_total = raw_imu.iter().filter(|x| x.gyro.is_some()).count();

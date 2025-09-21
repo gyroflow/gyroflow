@@ -523,11 +523,17 @@ impl GyroSource {
     }
     pub fn integrate(&mut self) {
         let file_metadata = self.file_metadata.read();
+        let imu_data = self.get_motion_data();
+        let source_name = self.get_motion_data_source();
+        if !imu_data.is_empty() {
+            log::debug!("Integrating using {} with {} samples", source_name, imu_data.len());
+        }
+        
         match self.integration_method {
-            0 => {
+            0 => { // existing quaternions from metadata
                 self.quaternions = if file_metadata.detected_source.as_deref().unwrap_or("").starts_with("GoPro") && !file_metadata.quaternions.is_empty() && (file_metadata.gravity_vectors.is_none() || !self.use_gravity_vectors) {
                     log::info!("No gravity vectors - using accelerometer");
-                    QuaternionConverter::convert(self.horizon_lock_integration_method, &file_metadata.quaternions, file_metadata.image_orientations.as_ref().unwrap_or(&TimeQuat::default()), self.raw_imu(&file_metadata), self.duration_ms)
+                    QuaternionConverter::convert(self.horizon_lock_integration_method, &file_metadata.quaternions, file_metadata.image_orientations.as_ref().unwrap_or(&TimeQuat::default()), &imu_data, self.duration_ms)
                 } else {
                     file_metadata.quaternions.clone()
                 };
@@ -543,12 +549,12 @@ impl GyroSource {
                     }
                 }
             },
-            1 => self.quaternions = ComplementaryIntegrator  ::integrate(self.raw_imu(&file_metadata), self.duration_ms),
-            2 => self.quaternions = VQFIntegrator            ::integrate(self.raw_imu(&file_metadata), self.duration_ms),
-            3 => self.quaternions = SimpleGyroIntegrator     ::integrate(self.raw_imu(&file_metadata), self.duration_ms),
-            4 => self.quaternions = SimpleGyroAccelIntegrator::integrate(self.raw_imu(&file_metadata), self.duration_ms),
-            5 => self.quaternions = MahonyIntegrator         ::integrate(self.raw_imu(&file_metadata), self.duration_ms),
-            6 => self.quaternions = MadgwickIntegrator       ::integrate(self.raw_imu(&file_metadata), self.duration_ms),
+            1 => self.quaternions = ComplementaryIntegrator  ::integrate(&imu_data, self.duration_ms),
+            2 => self.quaternions = VQFIntegrator            ::integrate(&imu_data, self.duration_ms),
+            3 => self.quaternions = SimpleGyroIntegrator     ::integrate(&imu_data, self.duration_ms),
+            4 => self.quaternions = SimpleGyroAccelIntegrator::integrate(&imu_data, self.duration_ms),
+            5 => self.quaternions = MahonyIntegrator         ::integrate(&imu_data, self.duration_ms),
+            6 => self.quaternions = MadgwickIntegrator       ::integrate(&imu_data, self.duration_ms),
             _ => log::error!("Unknown integrator")
         }
     }
@@ -587,9 +593,40 @@ impl GyroSource {
         (smoothed_quaternions, max_angles)
     }
 
-    pub fn raw_imu<'a>(&'a self, file_metadata: &'a FileMetadata) -> &'a Vec<TimeIMU> {
-        if !self.raw_imu.is_empty() { return &self.raw_imu }
-        return &file_metadata.raw_imu;
+    /// Get the primary IMU data source for debugging/logging purposes
+    pub fn get_motion_data_source(&self) -> MotionDataSource {
+        if !self.transformed_imu.is_empty() {
+            MotionDataSource::TransformedRawImu
+        } else {
+            let file_metadata = self.file_metadata.read();
+            if !file_metadata.raw_imu.is_empty() {
+                MotionDataSource::FileMetadataRawImu
+            } else if !self.estimated_gyro.is_empty() {
+                MotionDataSource::EstimatedGyro
+            } else {
+                MotionDataSource::None
+            }
+        }
+    }
+
+    /// Returns IMU data in priority order:
+    /// 1. Processed/transformed IMU data (if available)
+    /// 2. Raw IMU data from file metadata (if available)  
+    /// 3. Estimated gyro data (if available)
+    /// 4. Empty vector (if no data available)
+    pub fn get_motion_data(&self) -> Vec<TimeIMU> {
+        if !self.transformed_imu.is_empty() {
+            return self.transformed_imu.clone();
+        }
+        let file_metadata = self.file_metadata.read();
+        if !file_metadata.raw_imu.is_empty() {
+            return file_metadata.raw_imu.clone();
+        }
+        // If no IMU data from file metadata, use estimated gyro data
+        if !self.estimated_gyro.is_empty() {
+            return self.estimated_gyro.values().cloned().collect();
+        }
+        Vec::new()
     }
 
     pub fn set_offset(&mut self, timestamp_us: i64, offset_ms: f64) {

@@ -610,8 +610,7 @@ impl Controller {
             let graph = unsafe { &mut *graph.as_ptr() }; // _self.borrow_mut();
 
             let gyro = &self.stabilizer.gyro.read();
-            let file_metadata = gyro.file_metadata.read();
-            let raw_imu = gyro.raw_imu(&file_metadata);
+            let raw_imu = gyro.get_motion_data();
 
             if !raw_imu.is_empty() {
                 let dt_ms = 1000.0 / sr;

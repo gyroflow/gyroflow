@@ -17,7 +17,7 @@ pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64
     let gyro = params.gyro.read();
     let ranges_len = ranges.len() as f64;
 
-    let raw_imu_len = gyro.raw_imu(&gyro.file_metadata.read()).len();
+    let raw_imu_len = gyro.get_motion_data().len();
 
     if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && raw_imu_len > 0 {
         for (i, (from_ts, to_ts)) in ranges.iter().enumerate() {
@@ -28,7 +28,7 @@ pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64
             let mut of_item: Vec<TimeIMU> = estimated_gyro.range(from_ts..to_ts).map(|v| v.1.clone()).collect();
             if !of_item.is_empty() {
                 let last_of_timestamp = of_item.last().map(|x| x.timestamp_ms).unwrap_or_default();
-                let mut gyro_item: Vec<TimeIMU> = gyro.raw_imu(&gyro.file_metadata.read()).iter().filter_map(|x| {
+                let mut gyro_item: Vec<TimeIMU> = gyro.get_motion_data().iter().filter_map(|x| {
                     let ts = x.timestamp_ms + sync_params.initial_offset;
                     if ts >= of_item[0].timestamp_ms - sync_params.search_size && ts <= last_of_timestamp + sync_params.search_size {
                         Some(x.clone())
