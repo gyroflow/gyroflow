@@ -23,6 +23,7 @@ MenuItem {
         property alias sync_lpf: lpf.value;
         property alias checkNegativeInitialOffset: checkNegativeInitialOffset.checked;
         property alias experimentalAutoSyncPoints: experimentalAutoSyncPoints.checked;
+        property alias forceWholeVideoAnalysis: forceWholeVideoAnalysis.checked;
         // property alias syncMethod: syncMethod.currentIndex;
         // property alias offsetMethod: offsetMethod.currentIndex;
         // property alias poseMethod: poseMethod.currentIndex;
@@ -56,6 +57,7 @@ MenuItem {
             if (o.hasOwnProperty("pose_method"))        poseMethod.currentIndex             = +o.pose_method;
             if (o.hasOwnProperty("custom_sync_pattern")) sync.customSyncTimestamps          = resolveSyncpointPattern(o.custom_sync_pattern);
             if (o.hasOwnProperty("auto_sync_points")) experimentalAutoSyncPoints.checked    = !!o.auto_sync_points;
+            if (o.hasOwnProperty("force_whole_video_analysis")) forceWholeVideoAnalysis.checked = !!o.force_whole_video_analysis;
             if (o.hasOwnProperty("do_autosync") && o.do_autosync) autosyncTimer.doRun = true;
         }
     }
@@ -83,6 +85,7 @@ MenuItem {
             "offset_method":      offsetMethod.currentIndex,
             "pose_method":        poseMethod.currentIndex,
             "auto_sync_points":   experimentalAutoSyncPoints.checked,
+            "force_whole_video_analysis": forceWholeVideoAnalysis.checked,
         };
     }
     function getSettingsJson(): string { return JSON.stringify(getSettings()); }
@@ -205,6 +208,11 @@ MenuItem {
             scale: 0.7;
             tooltip: qsTr("Experimental automatic sync point selection.");
         }
+    }
+
+    CheckBox {
+        id: forceWholeVideoAnalysis;
+        text: qsTr("Force whole-video analysis");
     }
 
     InfoMessageSmall {

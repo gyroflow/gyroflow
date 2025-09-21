@@ -43,7 +43,8 @@ pub struct SyncParams {
     pub offset_method: usize,
     pub pose_method: usize,
     pub custom_sync_pattern: serde_json::Value,
-    pub auto_sync_points: bool
+    pub auto_sync_points: bool,
+    pub force_whole_video_analysis: bool
 }
 
 #[derive(Clone)]

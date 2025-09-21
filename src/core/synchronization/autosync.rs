@@ -66,8 +66,9 @@ impl AutosyncProcess {
             ((range.0 * 1000.0).round() as i64, (range.1 * 1000.0).round() as i64)
         }).collect();
 
-        if mode == "synchronize" && !stab.gyro.read().has_motion() {
-            // If no gyro data in file, analyze the entire video
+        if mode == "synchronize" && (!stab.gyro.read().has_motion() || sync_params.force_whole_video_analysis) {
+            // If no gyro data in file OR force_whole_video_analysis is enabled, analyze the entire video
+            // set a single range covering the entire video (org_duration_ms is the duration of the video in milliseconds)
             ranges_us.clear();
             ranges_us.push((0, (org_duration_ms * 1000.0).round() as i64));
         }
