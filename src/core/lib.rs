@@ -554,6 +554,15 @@ impl StabilizationManager {
             if prevent_recompute.load(SeqCst) { return cb((compute_id, true)); } // we're still loading, don't recompute
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
+            // Always update quaternions with new estimated gyro data before smoothing
+            {
+                let mut lib_gyro = gyro.write();
+                if !lib_gyro.has_motion() {
+                    log::debug!("Integrating gyro data...");
+                    lib_gyro.integrate();
+                }
+            }
+            
             let mut smoothing_changed = false;
             if smoothing.read().get_state_checksum(gyro_checksum) != smoothing_checksum.load(SeqCst) {
                 let (mut smoothing, horizon_lock) = {
