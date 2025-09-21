@@ -548,15 +548,32 @@ MenuItem {
         Label {
             position: Label.LeftPosition;
             text: qsTr("FOV");
-            SliderWithField {
-                id: fov;
-                from: 0.1;
-                to: 3;
-                value: 1.0;
-                defaultValue: 1.0;
+            Column {
                 width: parent.width;
-                keyframe: "Fov";
-                onValueChanged: controller.fov = value;
+                spacing: 2 * dpiScale;
+                SliderWithField {
+                    id: fov;
+                    from: 0.1;
+                    to: 3;
+                    value: 1.0;
+                    defaultValue: 1.0;
+                    width: parent.width;
+                    keyframe: "Fov";
+                    onValueChanged: controller.fov = value;
+                }
+                // Display current horizontal/vertical FOV in degrees
+                BasicText {
+                    id: fovAnglesLabel;
+                    width: parent.width;
+                    text: {
+                        // Depend on fov.value to re-evaluate
+                        fov.value;
+                        const arr = controller.get_fov_angles_deg();
+                        const h = arr.length >= 1 ? arr[0] : 0.0;
+                        const v = arr.length >= 2 ? arr[1] : 0.0;
+                        return qsTr("HFOV: %1°, VFOV: %2°").arg(h.toFixed(1)).arg(v.toFixed(1));
+                    }
+                }
             }
         }
 

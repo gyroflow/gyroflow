@@ -23,6 +23,7 @@ MenuItem {
         property alias featherPixels: featherPixels.value;
         property alias defaultSuffix: defaultSuffix.text;
         property alias playSounds: playSounds.checked;
+        property alias sphericalGrid: sphericalGrid.checked;
         property alias r3dConvertFormat: r3dConvertFormat.currentIndex;
         property alias r3dColorMode: r3dColorMode.currentIndex;
         property alias r3dGammaCurve: r3dGammaCurve.currentIndex;
@@ -223,6 +224,13 @@ MenuItem {
             }
             onCurrentIndexChanged: Qt.callLater(setLang);
         }
+    }
+    CheckBox {
+        id: sphericalGrid;
+        text: qsTr("Spherical grid overlay (15° parallels)");
+        checked: false;
+        onCheckedChanged: controller.show_spherical_grid = checked;
+        Component.onCompleted: Qt.callLater(checkedChanged);
     }
     CheckBox {
         id: safeAreaGuide;

@@ -121,6 +121,7 @@ pub struct Controller {
     stab_enabled: qt_property!(bool; WRITE set_stab_enabled),
     show_detected_features: qt_property!(bool; WRITE set_show_detected_features),
     show_optical_flow: qt_property!(bool; WRITE set_show_optical_flow),
+    show_spherical_grid: qt_property!(bool; WRITE set_show_spherical_grid),
     fov: qt_property!(f64; WRITE set_fov),
     fov_overview: qt_property!(bool; WRITE set_fov_overview),
     show_safe_area: qt_property!(bool; WRITE set_show_safe_area),
@@ -200,6 +201,7 @@ pub struct Controller {
     mesh_at_frame: qt_method!(fn(&self, frame: usize) -> QVariantList),
     get_scaling_ratio: qt_method!(fn(&self) -> f64),
     get_min_fov: qt_method!(fn(&self) -> f64),
+    get_fov_angles_deg: qt_method!(fn(&self) -> QJsonArray),
 
     init_calibrator: qt_method!(fn(&mut self)),
 
@@ -1401,6 +1403,7 @@ impl Controller {
     wrap_simple_method!(set_stab_enabled,           v: bool);
     wrap_simple_method!(set_show_detected_features, v: bool);
     wrap_simple_method!(set_show_optical_flow,      v: bool);
+    wrap_simple_method!(set_show_spherical_grid,    v: bool);
     wrap_simple_method!(set_digital_lens_name,      v: String; recompute);
     wrap_simple_method!(set_digital_lens_param,     i: usize, v: f64; recompute);
     wrap_simple_method!(set_fov_overview,       v: bool; recompute);
@@ -1452,6 +1455,46 @@ impl Controller {
     fn get_scaling_ratio     (&self) -> f64 { self.stabilizer.get_scaling_ratio() }
     fn get_min_fov           (&self) -> f64 { self.stabilizer.get_min_fov() }
     fn set_video_created_at  (&self, timestamp: u64) { self.stabilizer.params.write().video_created_at = if timestamp > 0 { Some(timestamp) } else { None }; }
+
+    fn get_fov_angles_deg(&self) -> QJsonArray {
+        // Compute horizontal and vertical FOV angles (degrees) for current settings
+        let params = gyroflow_core::stabilization::ComputeParams::from_manager(&self.stabilizer);
+
+        // Use timestamp 0.0 for preview; this is sufficient for UI feedback
+        let ts_ms = 0.0f64;
+
+        let (camera_matrix, _distortion_coeffs, _radial_limit, _sx, _sy, _fl) =
+            gyroflow_core::stabilization::FrameTransform::get_lens_data_at_timestamp(&params, ts_ms, false);
+
+        // Effective FOV scalar similar to FrameTransform::get_fov (without keyframes)
+        let base_fov = params
+            .fovs
+            .get(0)
+            .copied()
+            .unwrap_or(1.0);
+        let out_w_nonzero = if params.output_width > 0 { params.output_width } else { 1 };
+        let fov = (base_fov * params.fov_scale).max(0.001)
+            * (params.width as f64 / out_w_nonzero as f64);
+
+        let horizontal_ratio = if params.lens.input_horizontal_stretch > 0.01 {
+            params.lens.input_horizontal_stretch
+        } else { 1.0 };
+        let img_dim_ratio = 1.0 / horizontal_ratio;
+
+        let fx0 = camera_matrix[(0, 0)];
+        let fy0 = camera_matrix[(1, 1)];
+        let fx = fx0 * img_dim_ratio / fov;
+        let fy = fy0 * img_dim_ratio / fov;
+
+        let out_w = if params.output_width > 0 { params.output_width as f64 } else { 1.0 };
+        let out_h = if params.output_height > 0 { params.output_height as f64 } else { 1.0 };
+
+        let to_deg = 180.0f64 / std::f64::consts::PI;
+        let h_fov = 2.0 * (out_w / (2.0 * fx)).atan() * to_deg;
+        let v_fov = 2.0 * (out_h / (2.0 * fy)).atan() * to_deg;
+
+        crate::util::serde_json_to_qt_array(&serde_json::json!([h_fov, v_fov]))
+    }
 
     fn set_trim_ranges(&self, ranges: QString) {
         let ranges = ranges.to_string()
