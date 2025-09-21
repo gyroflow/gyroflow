@@ -741,6 +741,55 @@ impl StabilizationManager {
                     }
                 }
             }
+            if p.show_motion_direction {
+                // Visualize motion direction as an arrow from image center
+                let window_us: i64 = 50000; // 50ms window for visualization
+                
+                let cx_i = size.0 as i32 / 2;
+                let cy_i = size.1 as i32 / 2;
+                
+                // Get motion direction data or use default
+                let (tdir_cam, qual, color) = if let Some((tdir_cam, qual)) = self.pose_estimator.get_translation_dir_cam_near(timestamp_us, window_us*1, false) {
+                    let color = if qual.inlier_ratio >= 0.5 { Color::Green } else if qual.inlier_ratio >= 0.2 { Color::Yellow } else { Color::Red };
+                    (tdir_cam, qual, color)
+                } else {
+                    // No motion data available, use default direction (forward)
+                    let default_dir = [0.0, 0.0, 1.0];
+                    let default_qual = crate::synchronization::PoseQuality::default();
+                    (default_dir, default_qual, Color::None)
+                };
+                
+                // Project direction to 2D using intrinsics at this timestamp
+                let ts_ms = timestamp_us as f64 / 1000.0;
+                let params = stabilization::ComputeParams::from_manager(self);
+                let (camera_matrix, _dist, _fx, _fy, _fov, _fl) = stabilization::FrameTransform::get_lens_data_at_timestamp(&params, ts_ms, false);
+                
+                // Use the new projection function
+                let depth = 1.0_f64;
+                let (u_raw, v_raw) = self.project_camera_direction_to_2d(tdir_cam, &camera_matrix, depth);
+                
+                // Clamp the projected coordinates to stay within view bounds
+                let margin = -50.0; // Keep some margin from edges
+                let u = u_raw.clamp(margin, size.0 as f64 - margin);
+                let v = v_raw.clamp(margin, size.1 as f64 - margin);
+                
+                // Print coordinate information for debugging
+                //println!("Drawing motion direction: center=({}, {}), target=({}, {}), clamped=({}, {}), size=({}, {})", 
+                //         cx_i, cy_i, u_raw, v_raw, u, v, size.0, size.1);
+
+                // Draw a line connecting the center to the projected point
+                let line = line_drawing::Bresenham::new((cx_i as isize, cy_i as isize), (u as isize, v as isize));
+                for point in line {
+                    drawing.put_pixel(point.0 as i32, point.1 as i32, color, Alpha::Alpha100, Stage::OnInput, y_inverted, 1);
+                }
+                
+                // Draw a circle around the point
+                let circle = line_drawing::BresenhamCircle::new(u as isize, v as isize, 15);
+                for point in circle {
+                    drawing.put_pixel(point.0 as i32, point.1 as i32, color, Alpha::Alpha100, Stage::OnInput, y_inverted, 2);
+                }
+            }
+
             // Spherical grid overlay (meridians/parallels every 15 degrees) with pole at center of original field of view
             if p.show_spherical_grid {
                 let ts_ms = timestamp_us as f64 / 1000.0;
@@ -937,8 +986,21 @@ impl StabilizationManager {
     }
 
     pub fn set_of_method(&self, v: u32) { self.params.write().of_method = v; self.pose_estimator.clear(); }
+    pub fn set_pose_method(&self, v: u32) {
+        let method_str = match v { 
+            0 => "EssentialLMEDS", 
+            1 => "EssentialRANSAC", 
+            2 => "Almeida", 
+            3 => "EightPoint", 
+            4 => "Homography", 
+            _ => "EssentialLMEDS" 
+        };
+        *self.pose_estimator.pose_config.write() = method_str.to_string();
+        self.pose_estimator.clear();
+    }
     pub fn set_show_detected_features(&self, v: bool) { self.params.write().show_detected_features = v; }
     pub fn set_show_optical_flow     (&self, v: bool) { self.params.write().show_optical_flow      = v; }
+    pub fn set_show_motion_direction (&self, v: bool) { self.params.write().show_motion_direction  = v; }
     pub fn set_show_spherical_grid   (&self, v: bool) { self.params.write().show_spherical_grid    = v; }
     pub fn set_stab_enabled          (&self, v: bool) { self.params.write().stab_enabled           = v; }
     pub fn set_frame_readout_time    (&self, v: f64)  { self.params.write().frame_readout_time     = v; }
@@ -963,6 +1025,26 @@ impl StabilizationManager {
     pub fn set_background_mode       (&self, v: i32)  { self.params.write().background_mode = stabilization_params::BackgroundMode::from(v); }
     pub fn set_background_margin     (&self, v: f64)  { self.params.write().background_margin = v; }
     pub fn set_background_margin_feather(&self, v: f64) { self.params.write().background_margin_feather = v; }
+
+    /// Project a camera direction vector to 2D pixel coordinates using camera intrinsics
+    pub fn project_camera_direction_to_2d(&self, direction: [f64; 3], camera_matrix: &nalgebra::Matrix3<f64>, depth: f64) -> (f64, f64) {
+        let fx = camera_matrix[(0, 0)];
+        let fy = camera_matrix[(1, 1)];
+        let cx = camera_matrix[(0, 2)];
+        let cy = camera_matrix[(1, 2)];
+
+        // Build a ray in camera frame and project
+        let x = direction[0] * depth;
+        let y = direction[1] * depth;
+        let z = direction[2] * depth;
+        let z_reg = if z.abs() < 1e-5 { z.signum() * 1e-5 } else { z };
+        
+        //println!("DEBUG project_camera_direction_to_2d: direction={:?}, z={}, z_reg={}", direction, z, z_reg);  // TODO: leave for debugging
+
+        let u = fx * (x / z_reg) + cx;
+        let v = fy * (y / z_reg) + cy;
+        (u, v)
+    }
     pub fn set_input_horizontal_stretch (&self, v: f64) { self.lens.write().input_horizontal_stretch = v; self.invalidate_zooming(); }
     pub fn set_input_vertical_stretch   (&self, v: f64) { self.lens.write().input_vertical_stretch   = v; self.invalidate_zooming(); }
     pub fn set_max_zoom(&self, v: f64, iters: usize)  {

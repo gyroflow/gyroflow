@@ -7,6 +7,7 @@ use crate::stabilization_params::ReadoutDirection;
 use crate::GyroSource;
 use crate::keyframes::KeyframeManager;
 use crate::lens_profile::LensProfile;
+use crate::synchronization;
 use std::sync::Arc;
 use parking_lot::RwLock;
 
@@ -59,7 +60,9 @@ pub struct ComputeParams {
 
     pub distortion_model: DistortionModel,
     pub digital_lens: Option<DistortionModel>,
-    pub digital_lens_params: Option<Vec<f64>>
+    pub digital_lens_params: Option<Vec<f64>>,
+    
+    pub pose_estimator: Arc<synchronization::PoseEstimator>
 }
 impl ComputeParams {
     pub fn from_manager(mgr: &StabilizationManager) -> Self {
@@ -122,7 +125,8 @@ impl ComputeParams {
 
             keyframes: mgr.keyframes.read().clone(),
 
-            zooming_debug_points: false
+            zooming_debug_points: false,
+            pose_estimator: mgr.pose_estimator.clone()
         }
     }
 

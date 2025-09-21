@@ -2,7 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use super::super::OpticalFlowPair;
-use super::EstimatePoseTrait;
+use super::{ EstimateRelativePoseTrait, RelativePose };
 
 use arrsac::Arrsac;
 use cv_core::{ FeatureMatch, Pose, sample_consensus::Consensus };
@@ -15,10 +15,9 @@ pub type Match = FeatureMatch;
 #[derive(Default, Clone)]
 pub struct PoseEightPoint;
 
-impl EstimatePoseTrait for PoseEightPoint {
+impl EstimateRelativePoseTrait for PoseEightPoint {
     fn init(&mut self, _: &ComputeParams) { }
-
-    fn estimate_pose(&self, pairs: &OpticalFlowPair, size: (u32, u32), params: &ComputeParams, timestamp_us: i64, next_timestamp_us: i64) -> Option<nalgebra::Rotation3<f64>> {
+    fn estimate_relative_pose(&self, pairs: &OpticalFlowPair, size: (u32, u32), params: &ComputeParams, timestamp_us: i64, next_timestamp_us: i64) -> Option<RelativePose> {
         use cv_core::nalgebra::{ UnitVector3, Point2 };
 
         let (pts1, pts2) = pairs.as_ref()?;
@@ -34,28 +33,25 @@ impl EstimatePoseTrait for PoseEightPoint {
             })
             .collect();
 
-        // Try different thresholds for best results
         let thresholds = [1e-10, 1e-8, 1e-6];
-
         let mut arrsac = Arrsac::new(1e-10, Xoshiro256PlusPlus::seed_from_u64(0));
-            //.initialization_hypotheses(2048)
-            //.max_candidate_hypotheses(512);
         for threshold in thresholds {
             arrsac = arrsac.inlier_threshold(threshold);
 
             let eight_point = eight_point::EightPoint::new();
             if let Some(out) = arrsac.model(&eight_point, matches.iter().copied()) {
-                let rot = out.isometry().rotation;
-                return Some(nalgebra::Rotation3::from_matrix_unchecked(nalgebra::Matrix3::from_column_slice(rot.matrix().as_slice())));
-                /*let rotations = cv_pinhole::EssentialMatrix::from(out).possible_rotations(1e-12, 1000).unwrap();
-                if rotations[0].angle() < rotations[1].angle() {
-                    Some(rotations[0])
-                } else {
-                    Some(rotations[1])
-                }*/
+                let iso = out.isometry();
+                let rot = iso.rotation;
+                let t = iso.translation.vector;
+                let tdir = if t.norm() > 0.0 { Some(nalgebra::Unit::new_normalize(nalgebra::Vector3::new(t.x, t.y, t.z))) } else { None };
+                return Some(RelativePose {
+                    rotation: nalgebra::Rotation3::from_matrix_unchecked(nalgebra::Matrix3::from_column_slice(rot.matrix().as_slice())),
+                    translation_dir_cam: tdir,
+                    inlier_ratio: None,
+                    median_epi_err: None,
+                });
             }
         }
-        ::log::warn!("couldn't find model");
         None
     }
 }

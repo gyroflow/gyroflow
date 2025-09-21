@@ -6,6 +6,8 @@ pub mod none;
 pub mod plain;
 pub mod fixed;
 pub mod default_algo;
+mod motion_direction;
+pub use motion_direction::MotionDirection;
 
 pub use nalgebra::*;
 use super::gyro_source::{ TimeQuat, Quat64 };
@@ -38,7 +40,8 @@ impl Default for Algs {
             Box::new(self::none::None::default()),
             Box::new(self::default_algo::DefaultAlgo::default()),
             Box::new(self::plain::Plain::default()),
-            Box::new(self::fixed::Fixed::default())
+            Box::new(self::fixed::Fixed::default()),
+            Box::new(self::motion_direction::MotionDirection::default()),
         ])
     }
 

@@ -111,6 +111,7 @@ pub struct StabilizationParams {
     pub stab_enabled: bool,
     pub show_detected_features: bool,
     pub show_optical_flow: bool,
+    pub show_motion_direction: bool,
     pub show_spherical_grid: bool,
 
     pub frame_offset: i32,
@@ -132,6 +133,7 @@ impl Default for StabilizationParams {
             stab_enabled: true,
             show_detected_features: true,
             show_optical_flow: true,
+            show_motion_direction: true,
             show_spherical_grid: false,
             frame_readout_time: 0.0,
             frame_readout_direction: ReadoutDirection::TopToBottom,
@@ -278,6 +280,7 @@ impl StabilizationParams {
             stab_enabled:              self.stab_enabled,
             show_detected_features:    self.show_detected_features,
             show_optical_flow:         self.show_optical_flow,
+            show_motion_direction:     self.show_motion_direction,
             show_spherical_grid:       self.show_spherical_grid,
             background:                self.background,
             adaptive_zoom_window:      self.adaptive_zoom_window,

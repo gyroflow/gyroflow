@@ -83,7 +83,7 @@ MenuItem {
             "time_per_syncpoint": timePerSyncpoint.value,
             "of_method":          syncMethod.currentIndex,
             "offset_method":      offsetMethod.currentIndex,
-            "pose_method":        poseMethod.currentIndex,
+            "pose_method":        ["EssentialLMEDS", "EssentialRANSAC", "Almeida", "EightPoint", "Homography"][poseMethod.currentIndex] || "EssentialLMEDS",
             "auto_sync_points":   experimentalAutoSyncPoints.checked,
             "force_whole_video_analysis": forceWholeVideoAnalysis.checked,
         };
@@ -361,11 +361,12 @@ MenuItem {
 
             ComboBox {
                 id: poseMethod;
-                model: ["findEssentialMat", "Almeida", "EightPoint", "findHomography"];
+                // Expose both Essential variants (LMEDS and RANSAC)
+                model: ["Essential (LMEDS)", "Essential (RANSAC)", "Almeida", "EightPoint", "findHomography"];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 0;
-                onCurrentIndexChanged: controller.set_of_method(syncMethod.currentIndex);
+                onCurrentIndexChanged: controller.set_pose_method(currentIndex);
             }
         }
         Label {
@@ -415,6 +416,12 @@ MenuItem {
             text: qsTr("Show optical flow");
             checked: true;
             onCheckedChanged: controller.show_optical_flow = checked;
+        }
+        CheckBox {
+            id: showMotionDirection;
+            text: qsTr("Show motion direction");
+            checked: true;
+            onCheckedChanged: controller.show_motion_direction = checked;
         }
     }
 }

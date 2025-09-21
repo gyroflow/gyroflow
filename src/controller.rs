@@ -121,6 +121,7 @@ pub struct Controller {
     stab_enabled: qt_property!(bool; WRITE set_stab_enabled),
     show_detected_features: qt_property!(bool; WRITE set_show_detected_features),
     show_optical_flow: qt_property!(bool; WRITE set_show_optical_flow),
+    show_motion_direction: qt_property!(bool; WRITE set_show_motion_direction),
     show_spherical_grid: qt_property!(bool; WRITE set_show_spherical_grid),
     fov: qt_property!(f64; WRITE set_fov),
     fov_overview: qt_property!(bool; WRITE set_fov_overview),
@@ -1402,6 +1403,7 @@ impl Controller {
     wrap_simple_method!(set_stab_enabled,           v: bool);
     wrap_simple_method!(set_show_detected_features, v: bool);
     wrap_simple_method!(set_show_optical_flow,      v: bool);
+    wrap_simple_method!(set_show_motion_direction,  v: bool);
     wrap_simple_method!(set_show_spherical_grid,    v: bool);
     wrap_simple_method!(set_digital_lens_name,      v: String; recompute);
     wrap_simple_method!(set_digital_lens_param,     i: usize, v: f64; recompute);

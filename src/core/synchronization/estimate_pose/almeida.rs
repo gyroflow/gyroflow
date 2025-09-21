@@ -2,7 +2,7 @@
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 use super::super::OpticalFlowPair;
-use super::EstimatePoseTrait;
+use super::{ EstimateRelativePoseTrait, RelativePose };
 
 use nalgebra as na;
 use crate::stabilization::*;
@@ -14,13 +14,12 @@ pub struct PoseAlmeida {
     cam: Camera
 }
 
-impl EstimatePoseTrait for PoseAlmeida {
+impl EstimateRelativePoseTrait for PoseAlmeida {
     fn init(&mut self, params: &ComputeParams) {
         self.cam = Camera { compute_params: params.clone() };
         self.cam.compute_params.lens_correction_amount = 0.0;
     }
-
-    fn estimate_pose(&self, pairs: &OpticalFlowPair, size: (u32, u32), _params: &ComputeParams, timestamp_us: i64, _next_timestamp_us: i64) -> Option<na::Rotation3<f64>> {
+    fn estimate_relative_pose(&self, pairs: &OpticalFlowPair, size: (u32, u32), params: &ComputeParams, timestamp_us: i64, next_timestamp_us: i64) -> Option<RelativePose> {
         let (pts1, pts2) = pairs.as_ref()?;
 
         let (w, h) = (size.0 as f32, size.1 as f32);
@@ -32,8 +31,8 @@ impl EstimatePoseTrait for PoseAlmeida {
         let timestamp_ms = timestamp_us as f64 / 1000.0;
 
         let rot = AlmeidaEstimator::default().estimate(&vectors, &self.cam, timestamp_ms);
-
-        Some(na::convert(na::Rotation3::from(rot.inverse())))
+        let rotation = na::convert(na::Rotation3::from(rot.inverse()));
+        Some(RelativePose { rotation, translation_dir_cam: None, inlier_ratio: None, median_epi_err: None })
     }
 }
 

@@ -82,7 +82,9 @@ impl AutosyncProcess {
 
         estimator.every_nth_frame.store(every_nth_frame.max(1) as u32, SeqCst);
         estimator.offset_method.store(sync_params.offset_method as u32, SeqCst);
-        estimator.pose_method.store(sync_params.pose_method as u32, SeqCst);
+        *estimator.pose_config.write() = sync_params.pose_method.clone();
+        // Clear previous pose results to ensure motion_samples reflect new settings
+        estimator.clear();
 
         let mut comp_params = ComputeParams::from_manager(stab);
         comp_params.keyframes.clear();
@@ -193,6 +195,7 @@ impl AutosyncProcess {
 
         self.estimator.process_detected_frames(self.org_fps, self.scaled_fps, &self.compute_params.read());
         self.estimator.recalculate_gyro_data(self.org_fps, true);
+        // Compute and cache optical flow after all frames are processed, before finishing
         self.estimator.cache_optical_flow(if offset_method == 1 { 2 } else { 1 });
         self.estimator.cleanup();
 

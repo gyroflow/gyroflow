@@ -19,6 +19,45 @@ mod find_offset { pub mod rs_sync; pub mod essential_matrix; pub mod visual_feat
 
 use super::gyro_source::TimeIMU;
 
+/// Represents the quality metrics for pose estimation
+#[derive(Clone, Debug, PartialEq)]
+pub struct PoseQuality {
+    /// Ratio of inlier points to total points (0.0 to 1.0)
+    pub inlier_ratio: f64,
+    /// Median epipolar error in pixels // TODO: choose the best unit in GUI
+    pub median_epi_err: f64,
+}
+
+impl PoseQuality {
+    /// Create a new PoseQuality with the given values
+    pub fn new(inlier_ratio: f64, median_epi_err: f64) -> Self {
+        Self {
+            inlier_ratio: inlier_ratio.max(0.0).min(1.0), // Clamp to [0, 1]
+            median_epi_err: median_epi_err.max(0.0), // Ensure non-negative
+        }
+    }
+
+    /// Create a default PoseQuality with zero values
+    pub fn default() -> Self {
+        Self {
+            inlier_ratio: 0.0,
+            median_epi_err: 0.0,
+        }
+    }
+
+    /// Check if the pose quality meets minimum thresholds
+    pub fn meets_thresholds(&self, min_inlier_ratio: f64, max_epi_err: f64) -> bool {
+        self.inlier_ratio >= min_inlier_ratio && 
+        (max_epi_err <= 0.0 || self.median_epi_err <= max_epi_err)
+    }
+}
+
+impl Default for PoseQuality {
+    fn default() -> Self {
+        Self::default()
+    }
+}
+
 pub mod optimsync;
 mod autosync;
 pub use autosync::AutosyncProcess;
@@ -41,11 +80,17 @@ pub struct SyncParams {
     pub time_per_syncpoint: f64,
     pub of_method: usize,
     pub offset_method: usize,
-    pub pose_method: usize,
+    pub pose_method: String,
     pub custom_sync_pattern: serde_json::Value,
     pub auto_sync_points: bool,
     pub force_whole_video_analysis: bool
 }
+/// High-level selection of the pose method from UI, without tunable parameters
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub enum PoseMethodKind { EssentialLMEDS, EssentialRANSAC, Almeida, EightPoint, Homography }
+impl Default for PoseMethodKind { fn default() -> Self { PoseMethodKind::EssentialLMEDS } }
+
 
 #[derive(Clone)]
 pub struct FrameResult {
@@ -57,6 +102,8 @@ pub struct FrameResult {
     pub rotation: Option<Rotation3<f64>>,
     pub quat: Option<Quat64>,
     pub euler: Option<(f64, f64, f64)>,
+    pub translation_dir_cam: Option<[f64; 3]>,
+    pub pose_quality: Option<PoseQuality>,
 
     optical_flow: RefCell<BTreeMap<usize, OpticalFlowPairWithTs>>
 }
@@ -70,7 +117,7 @@ pub struct PoseEstimator {
     pub estimated_quats: Arc<RwLock<TimeQuat>>,
     pub lpf: AtomicU32,
     pub every_nth_frame: AtomicU32,
-    pub pose_method: AtomicU32,
+    pub pose_config: RwLock<String>,
     pub offset_method: AtomicU32,
 }
 
@@ -94,6 +141,8 @@ impl PoseEstimator {
                 rotation: None,
                 quat: None,
                 euler: None,
+                translation_dir_cam: None,
+                pose_quality: None,
                 optical_flow: Default::default()
             };
             let mut l = self.sync_results.write();
@@ -123,7 +172,16 @@ impl PoseEstimator {
         }
 
         let results = self.sync_results.clone();
-        let mut pose = EstimatePoseMethod::from(self.pose_method.load(SeqCst));
+        let cfg_str = self.pose_config.read().clone();
+        let cfg = match cfg_str.as_str() {
+            "EssentialLMEDS" => PoseMethodKind::EssentialLMEDS,
+            "EssentialRANSAC" => PoseMethodKind::EssentialRANSAC,
+            "Almeida" => PoseMethodKind::Almeida,
+            "EightPoint" => PoseMethodKind::EightPoint,
+            "Homography" => PoseMethodKind::Homography,
+            _ => PoseMethodKind::EssentialLMEDS,
+        };
+        let mut pose = crate::synchronization::estimate_pose::RelativePoseMethod::from(&cfg);
         pose.init(params);
         frames_to_process.par_iter().for_each(move |(ts, next_ts)| {
             {
@@ -139,13 +197,21 @@ impl PoseEstimator {
                             // Unlock the mutex for estimate_pose
                             drop(l);
 
-                            if let Some(rot) = pose.estimate_pose(&curr_of.optical_flow_to(&next_of), curr_of.size(), params, *ts, *next_ts) {
+                            // Use only relative pose API (rotation + optional translation + quality)
+                            if let Some(rp) = pose.estimate_relative_pose(&curr_of.optical_flow_to(&next_of), curr_of.size(), params, *ts, *next_ts) {
                                 let mut l = results.write();
                                 if let Some(x) = l.get_mut(ts) {
-                                    x.rotation = Some(rot);
-                                    x.quat = Some(Quat64::from(rot));
-                                    let rotvec = rot.scaled_axis() * (scaled_fps / every_nth_frame);
+                                    x.rotation = Some(rp.rotation);
+                                    x.quat = Some(Quat64::from(rp.rotation));
+                                    let rotvec = rp.rotation.scaled_axis() * (scaled_fps / every_nth_frame);
                                     x.euler = Some((rotvec[0], rotvec[1], rotvec[2]));
+                                    if let Some(tdir) = rp.translation_dir_cam.as_ref() {
+                                        x.translation_dir_cam = Some([tdir.x, tdir.y, tdir.z]);
+                                    }
+                                    x.pose_quality = Some(PoseQuality::new(
+                                        rp.inlier_ratio.unwrap_or(0.0), 
+                                        rp.median_epi_err.unwrap_or(0.0)
+                                    ));
                                 } else {
                                     log::warn!("Failed to get ts {}", ts);
                                 }
@@ -194,6 +260,8 @@ impl PoseEstimator {
     }
 
     pub fn cache_optical_flow(&self, num_frames: usize) {
+        // Computes and caches the optical flow for the given number of frames 
+        // in self.sync_results[i].
         let l = self.sync_results.read();
         let keys: Vec<i64> = l.keys().copied().collect();
         for (i, k) in keys.iter().enumerate() {
@@ -359,6 +427,83 @@ impl PoseEstimator {
 
         *self.estimated_gyro.write() = gyro;
         *self.estimated_quats.write() = quats;
+    }
+
+    pub fn get_translation_dir_cam_near(&self, timestamp_us: i64, window_us: i64, use_average: bool) -> Option<([f64; 3], PoseQuality)> {
+        // Use try_read to avoid blocking the UI thread during motion direction stabilization
+        let l = match self.sync_results.try_read() {
+            Some(lock) => {
+                lock
+            },
+            None => {
+                // If we can't get the lock immediately, return None to avoid blocking
+                println!("get_translation_dir_cam_near() could not acquire sync_results read lock, skipping motion direction lookup");
+                return None;
+            }
+        };
+        
+        let start = timestamp_us.saturating_sub(window_us);
+        let end = timestamp_us.saturating_add(window_us);
+
+        if use_average {
+            // Collect all translation directions and pose qualities in the window
+            let mut translations = Vec::new();
+            let mut pose_qualities = Vec::new();
+            
+            for (ts, fr) in l.range(start..=end) {
+                if let Some(t) = fr.translation_dir_cam {
+                    translations.push(t);
+                    pose_qualities.push(fr.pose_quality.clone().unwrap_or_default());
+                }
+            }
+            
+            if translations.is_empty() {
+                return None;
+            }
+            
+            // Calculate average translation direction
+            let mut avg_translation = [0.0; 3];
+            for t in &translations {
+                avg_translation[0] += t[0];
+                avg_translation[1] += t[1];
+                avg_translation[2] += t[2];
+            }
+            let count = translations.len() as f64;
+            avg_translation[0] /= count;
+            avg_translation[1] /= count;
+            avg_translation[2] /= count;
+            
+            // Calculate average pose quality
+            let mut avg_inlier_ratio = 0.0;
+            let mut avg_median_epi_err = 0.0;
+            for pq in &pose_qualities {
+                avg_inlier_ratio += pq.inlier_ratio;
+                avg_median_epi_err += pq.median_epi_err;
+            }
+            avg_inlier_ratio /= count;
+            avg_median_epi_err /= count;
+            
+            let avg_pose_quality = PoseQuality::new(avg_inlier_ratio, avg_median_epi_err);
+            
+            Some((avg_translation, avg_pose_quality))
+        } else {
+            // Original behavior: find closest frame
+            let mut best: Option<(i64, [f64; 3], PoseQuality)> = None;
+            
+            for (ts, fr) in l.range(start..=end) {
+                if let Some(t) = fr.translation_dir_cam {
+                    let qual = fr.pose_quality.clone().unwrap_or_default();
+                    let dist = (timestamp_us - *ts).abs();
+                    match best {
+                        None => best = Some((dist, t, qual)),
+                        Some((b_dist, _, _)) if dist < b_dist => best = Some((dist, t, qual)),
+                        _ => {}
+                    }
+                }
+            }
+            
+            best.map(|(_, t, q)| (t, q))
+        }
     }
 
     pub fn get_ranges(&self) -> Vec<(i64, i64)> {
