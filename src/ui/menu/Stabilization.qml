@@ -564,14 +564,23 @@ MenuItem {
                 // Display current horizontal/vertical FOV in degrees
                 BasicText {
                     id: fovAnglesLabel;
+                    property int _rev: 0
                     width: parent.width;
                     text: {
                         // Depend on fov.value to re-evaluate
                         fov.value;
+                        // Re-evaluate when recompute finishes (params/fovs up to date)
+                        fovAnglesLabel._rev;
                         const arr = controller.get_fov_angles_deg();
                         const h = arr.length >= 1 ? arr[0] : 0.0;
                         const v = arr.length >= 2 ? arr[1] : 0.0;
                         return qsTr("HFOV: %1°, VFOV: %2°").arg(h.toFixed(1)).arg(v.toFixed(1));
+                    }
+                }
+                Connections {
+                    target: controller
+                    function onCompute_progress(id, progress) {
+                        if (progress >= 1.0) { fovAnglesLabel._rev++; }
                     }
                 }
             }

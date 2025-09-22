@@ -1458,41 +1458,32 @@ impl Controller {
     fn set_video_created_at  (&self, timestamp: u64) { self.stabilizer.params.write().video_created_at = if timestamp > 0 { Some(timestamp) } else { None }; }
 
     fn get_fov_angles_deg(&self) -> QJsonArray {
-        // Compute horizontal and vertical FOV angles (degrees) for current settings
         let params = gyroflow_core::stabilization::ComputeParams::from_manager(&self.stabilizer);
 
-        // Use timestamp 0.0 for preview; this is sufficient for UI feedback
-        let ts_ms = 0.0f64;
-
+        // Get camera intrinsic matrix and lens data for the timestamp 0.0  // TODO: check if this is correct
         let (camera_matrix, _distortion_coeffs, _radial_limit, _sx, _sy, _fl) =
-            gyroflow_core::stabilization::FrameTransform::get_lens_data_at_timestamp(&params, ts_ms, false);
+            gyroflow_core::stabilization::FrameTransform::get_lens_data_at_timestamp(&params, 0.0f64, false);
 
-        // Effective FOV scalar similar to FrameTransform::get_fov (without keyframes)
-        let base_fov = params
-            .fovs
-            .get(0)
-            .copied()
-            .unwrap_or(1.0);
-        let out_w_nonzero = if params.output_width > 0 { params.output_width } else { 1 };
-        let fov = (base_fov * params.fov_scale).max(0.001)
-            * (params.width as f64 / out_w_nonzero as f64);
-
+        // Calculate effective FOV scale (similar to FrameTransform::get_fov but without keyframes)
+        let base_fov = params.fovs.get(0).copied().unwrap_or(1.0);
+        let fov = (base_fov * params.fov_scale).max(0.001) * (params.width as f64 / params.output_width as f64);
+        
+        // Apply horizontal stretch correction for anamorphic lenses
         let horizontal_ratio = if params.lens.input_horizontal_stretch > 0.01 {
             params.lens.input_horizontal_stretch
         } else { 1.0 };
         let img_dim_ratio = 1.0 / horizontal_ratio;
 
+        // Extract focal lengths from camera matrix and apply corrections
         let fx0 = camera_matrix[(0, 0)];
         let fy0 = camera_matrix[(1, 1)];
         let fx = fx0 * img_dim_ratio / fov;
         let fy = fy0 * img_dim_ratio / fov;
 
-        let out_w = if params.output_width > 0 { params.output_width as f64 } else { 1.0 };
-        let out_h = if params.output_height > 0 { params.output_height as f64 } else { 1.0 };
-
+        // Convert to degrees and calculate FOV angles using standard formula
         let to_deg = 180.0f64 / std::f64::consts::PI;
-        let h_fov = 2.0 * (out_w / (2.0 * fx)).atan() * to_deg;
-        let v_fov = 2.0 * (out_h / (2.0 * fy)).atan() * to_deg;
+        let h_fov = 2.0 * (params.output_width as f64 / (2.0 * fx)).atan() * to_deg;
+        let v_fov = 2.0 * (params.output_height as f64 / (2.0 * fy)).atan() * to_deg;
 
         crate::util::serde_json_to_qt_array(&serde_json::json!([h_fov, v_fov]))
     }
