@@ -538,52 +538,52 @@ MenuItem {
         }
     }
 
+    Label {
+        position: Label.LeftPosition;
+        text: qsTr("FOV");
+        Column {
+            width: parent.width;
+            spacing: 2 * dpiScale;
+            SliderWithField {
+                id: fov;
+                from: 0.1;
+                to: 3;
+                value: 1.0;
+                defaultValue: 1.0;
+                width: parent.width;
+                keyframe: "Fov";
+                onValueChanged: controller.fov = value;
+            }
+            // Display current horizontal/vertical FOV in degrees
+            BasicText {
+                id: fovAnglesLabel;
+                property int _rev: 0
+                width: parent.width;
+                text: {
+                    // Depend on fov.value to re-evaluate
+                    fov.value;
+                    // Re-evaluate when recompute finishes (params/fovs up to date)
+                    fovAnglesLabel._rev;
+                    const arr = controller.get_fov_angles_deg();
+                    const h = arr.length >= 1 ? arr[0] : 0.0;
+                    const v = arr.length >= 2 ? arr[1] : 0.0;
+                    return qsTr("HFOV: %1°, VFOV: %2°").arg(h.toFixed(1)).arg(v.toFixed(1));
+                }
+            }
+            Connections {
+                target: controller
+                function onCompute_progress(id, progress) {
+                    if (progress >= 1.0) { fovAnglesLabel._rev++; }
+                }
+            }
+        }
+    }
+
     AdvancedSection {
         InfoMessageSmall {
             id: fovWarning;
             show: fov.value > 1.0 && croppingMode.currentIndex > 0;
             text: qsTr("FOV is greater than 1.0, you may see black borders");
-        }
-
-        Label {
-            position: Label.LeftPosition;
-            text: qsTr("FOV");
-            Column {
-                width: parent.width;
-                spacing: 2 * dpiScale;
-                SliderWithField {
-                    id: fov;
-                    from: 0.1;
-                    to: 3;
-                    value: 1.0;
-                    defaultValue: 1.0;
-                    width: parent.width;
-                    keyframe: "Fov";
-                    onValueChanged: controller.fov = value;
-                }
-                // Display current horizontal/vertical FOV in degrees
-                BasicText {
-                    id: fovAnglesLabel;
-                    property int _rev: 0
-                    width: parent.width;
-                    text: {
-                        // Depend on fov.value to re-evaluate
-                        fov.value;
-                        // Re-evaluate when recompute finishes (params/fovs up to date)
-                        fovAnglesLabel._rev;
-                        const arr = controller.get_fov_angles_deg();
-                        const h = arr.length >= 1 ? arr[0] : 0.0;
-                        const v = arr.length >= 2 ? arr[1] : 0.0;
-                        return qsTr("HFOV: %1°, VFOV: %2°").arg(h.toFixed(1)).arg(v.toFixed(1));
-                    }
-                }
-                Connections {
-                    target: controller
-                    function onCompute_progress(id, progress) {
-                        if (progress >= 1.0) { fovAnglesLabel._rev++; }
-                    }
-                }
-            }
         }
 
         CheckBoxWithContent {
