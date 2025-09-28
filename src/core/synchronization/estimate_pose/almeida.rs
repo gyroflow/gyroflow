@@ -126,7 +126,7 @@ fn solve_ypr_given(input: &[MotionEntry], camera: &Camera, timestamp_ms: f64) ->
 
     fn dot_map<T: Fn(&[na::Vector2<f32>]) -> f32>(
         motion: &[(na::Point2<f32>, [na::Vector2<f32>; 4])],
-    ) -> (impl Fn(T) -> f32 + '_) {
+    ) -> impl Fn(T) -> f32 + '_ {
         move |dot| motion.iter().map(|(_, v)| dot(v)).sum::<f32>()
     }
 
