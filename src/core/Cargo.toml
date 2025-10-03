@@ -21,7 +21,7 @@ stabilize_spirv = { path = "./gpu/stabilize_spirv" }
 rs-sync = { git = "https://github.com/gyroflow/rs-sync.git", rev = "fc5cf51" }
 
 argmin = { version = "0.11.0", default-features = false }
-argmin-math = { version = "0.5.0", default-features = false, features = ["nalgebra_v0_34"] }
+argmin-math = { version = "0.5.1", default-features = false, features = ["nalgebra_v0_34"] }
 
 nalgebra = { version = "0.34", features = ["serde-serialize"] }
 rayon = "1.11"
@@ -46,26 +46,26 @@ enum_delegate = "0.2.0"
 simple-easing = "1.0.1"
 half = "2.6.0"
 lru = "0.16"
-thiserror = "2.0.16"
+thiserror = "2.0.17"
 ciborium = "0.2.2"
 dyn-clone = "1.0"
 app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }
 whoami = "1.6.1"
 
-akaze = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee", features = ["rayon"] }
-eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee" }
-cv-pinhole = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee" }
-cv-core = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "82a25ee" }
+akaze = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "d271a9a", features = ["rayon"] }
+eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "d271a9a" }
+cv-pinhole = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "d271a9a" }
+cv-core = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "d271a9a" }
 sample-consensus = "1.0.2"
 arrsac = "0.10"
 rand_xoshiro = "0.6.0"
-image = { version = "0.24", default-features = false }
+image = { version = "0.25", default-features = false }
 space = { version = "0.17", features = ["alloc"] }
 bitarray = { version = "0.9", features = ["space"] }
 enterpolation = "0.3.0"
 libloading = "0.8"
 libc = "0.2"
-bytemuck = "1.23"
+bytemuck = "1.24"
 ash = "0.38.0"
 pollster = "0.4.0"
 futures-intrusive = "0.5.0"
@@ -81,7 +81,7 @@ exr = "1.73"
 opencv = { version = "0.96", features = ["clang-runtime"], optional = true }
 median = "0.3"
 
-wgpu = { version = "26", features = ["spirv", "naga-ir"] }
+wgpu = { version = "27", features = ["spirv", "naga-ir"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 metal = { version = "0.32.0" }

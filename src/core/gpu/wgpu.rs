@@ -61,7 +61,7 @@ impl Drop for WgpuWrapper {
         self.pipeline = PipelineType::None;
         self.bind_group = None;
 
-        let _ = self.device.poll(wgpu::PollType::Wait);
+        let _ = self.device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
     }
 }
 
@@ -197,7 +197,8 @@ impl WgpuWrapper {
                                 ..wgpu::Limits::default()
                             },
                             memory_hints: wgpu::MemoryHints::Performance,
-                            trace: wgpu::Trace::Off
+                            trace: wgpu::Trace::Off,
+                            experimental_features: wgpu::ExperimentalFeatures::disabled(),
                         }).map_err(|e| WgpuError::RequestDevice(e))?
                     }
                 },
@@ -219,7 +220,8 @@ impl WgpuWrapper {
                             required_features: wgpu::Features::empty(),
                             required_limits: limits.clone(),
                             memory_hints: wgpu::MemoryHints::Performance,
-                            trace: wgpu::Trace::Off
+                            trace: wgpu::Trace::Off,
+                            experimental_features: wgpu::ExperimentalFeatures::disabled(),
                         }));
                         if let Err(e) = &device {
                             let e_str = format!("{e:?}");
@@ -243,7 +245,7 @@ impl WgpuWrapper {
                 }
             };
 
-            device.on_uncaptured_error(Box::new(|e| {
+            device.on_uncaptured_error(std::sync::Arc::new(|e| {
                 log::error!("Uncaptured device error: {e:?}");
             }));
 
@@ -505,7 +507,7 @@ impl WgpuWrapper {
                 let (sender, receiver) = futures_intrusive::channel::shared::oneshot_channel();
                 buffer_slice.map_async(wgpu::MapMode::Read, move |v| sender.send(v).unwrap());
 
-                let _ = self.device.poll(wgpu::PollType::Wait);
+                let _ = self.device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
                 if let Some(Ok(())) = pollster::block_on(receiver.receive()) {
                     let data = buffer_slice.get_mapped_range();

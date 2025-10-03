@@ -448,7 +448,7 @@ pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription
     match &buf.data {
         #[cfg(target_os = "windows")]
         BufferSource::DirectX11 { texture, device_context, .. } => {
-            let _ = device.poll(wgpu::PollType::WaitForSubmissionIndex(sub_index));
+            let _ = device.poll(wgpu::PollType::Wait { submission_index: Some(sub_index), timeout: None });
 
             unsafe {
                 use windows::Win32::Graphics::Direct3D11::*;
@@ -459,7 +459,7 @@ pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription
         },
         #[cfg(any(target_os = "windows", target_os = "linux"))]
         BufferSource::CUDABuffer { buffer } => {
-            let _ = device.poll(wgpu::PollType::WaitForSubmissionIndex(sub_index));
+            let _ = device.poll(wgpu::PollType::Wait { submission_index: Some(sub_index), timeout: None });
             if let Some(NativeTexture::Cuda(cuda_mem)) = &out_texture.native_texture {
                 super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size, *buffer as CUdeviceptr, cuda_mem.device_ptr, 1, buf.size.2/*cuda_mem.vulkan_pitch_alignment*/);
             }
@@ -467,11 +467,11 @@ pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription
         },
         #[cfg(not(any(target_os = "macos", target_os = "ios")))]
         BufferSource::Vulkan { .. } => {
-            let _ = device.poll(wgpu::PollType::WaitForSubmissionIndex(sub_index));
+            let _ = device.poll(wgpu::PollType::Wait { submission_index: Some(sub_index), timeout: None });
         },
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         BufferSource::Metal { .. } | BufferSource::MetalBuffer { .. } => {
-            let _ = device.poll(wgpu::PollType::WaitForSubmissionIndex(sub_index));
+            let _ = device.poll(wgpu::PollType::Wait { submission_index: Some(sub_index), timeout: None });
         },
         _ => { }
     }

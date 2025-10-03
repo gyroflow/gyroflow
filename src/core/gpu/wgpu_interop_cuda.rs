@@ -98,7 +98,8 @@ pub fn get_current_device_id_by_uuid(adapters: &Vec<wgpu::Adapter>) -> usize {
                 required_features: wgpu::Features::empty(),
                 required_limits: wgpu::Limits::default(),
                 memory_hints: wgpu::MemoryHints::Performance,
-                trace: wgpu::Trace::Off
+                trace: wgpu::Trace::Off,
+                experimental_features: wgpu::ExperimentalFeatures::disabled(),
             }));
             if let Ok((device, _q)) = device {
                 unsafe {
