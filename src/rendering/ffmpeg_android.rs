@@ -9,7 +9,7 @@ use std::ffi::*;
 use ffmpeg_next::ffi;
 use std::sync::mpsc::{ Receiver, channel };
 
-extern "C" {
+unsafe extern "C" {
     fn av_mediacodec_release_buffer(buffer: *mut c_void, render: c_int) -> c_int;
     fn av_jni_get_java_vm(log_ctx: *mut c_void) -> *mut c_void;
 }

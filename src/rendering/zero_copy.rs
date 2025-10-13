@@ -133,7 +133,7 @@ pub mod mac_ffi {
     pub type SizeT = c_ulonglong;
 
     #[link(name = "CoreVideo", kind = "framework")]
-    extern "C" {
+    unsafe extern "C" {
         pub fn CVMetalTextureCacheCreate(
             allocator: CFAllocatorRef,
             cacheAttributes: CFDictionaryRef,
