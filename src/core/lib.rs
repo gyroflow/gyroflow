@@ -1239,7 +1239,7 @@ impl StabilizationManager {
         util::merge_json(&mut obj, &serde_json::from_str(additional_data).unwrap_or_default());
 
         #[cfg(any(target_os = "macos", target_os = "ios"))]
-        if let serde_json::Value::Object(obj) = obj {
+        if let serde_json::Value::Object(ref mut obj) = obj {
             obj.insert("videofile_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(&input_file.url, false, _project_url)));
             if let Some(serde_json::Value::Object(obj)) = obj.get_mut("gyro_source") {
                 obj.insert("filepath_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(&gyro.file_url, false, _project_url)));
