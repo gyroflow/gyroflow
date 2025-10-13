@@ -116,7 +116,7 @@ cpp! {{
 }}
 #[cfg(target_os = "android")]
 #[allow(non_snake_case)]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "system" fn Java_xyz_gyroflow_MainActivity_urlReceived(_vm: *mut c_void, _: *mut c_void, jstr: *mut c_void) {
     cpp!(unsafe [jstr as "void*"] {
         #ifdef Q_OS_ANDROID

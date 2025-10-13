@@ -257,7 +257,7 @@ fn entry() {
 }
 
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 #[cfg(target_os = "android")]
 pub extern fn main(_argc: i32, _argv: *mut *mut i8) -> i32 {
     entry();
