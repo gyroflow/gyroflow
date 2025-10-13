@@ -807,7 +807,7 @@ impl RenderQueue {
 
             let rendered_frames = Arc::new(AtomicUsize::new(0));
             let rendered_frames2 = rendered_frames.clone();
-            let progress = util::qt_queued_callback_mut(self, move |this, (progress, current_frame, total_frames, finished, is_conversion): (f64, usize, usize, bool, bool)| {
+            let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (progress, current_frame, total_frames, finished, is_conversion): (f64, usize, usize, bool, bool)| {
                 rendered_frames2.store(current_frame, SeqCst);
 
                 let mut start_time = 0;
@@ -851,13 +851,13 @@ impl RenderQueue {
                     }
                 }
             });
-            let processing = util::qt_queued_callback_mut(self, move |this, progress: f64| {
+            let processing = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, progress: f64| {
                 update_model!(this, job_id, itm {
                     itm.processing_progress = progress;
                 });
                 this.processing_progress(job_id, progress);
             });
-            let encoder_initialized = util::qt_queued_callback_mut(self, move |this, encoder_name: String| {
+            let encoder_initialized = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, encoder_name: String| {
                 if let Some(job) = this.jobs.get(&job_id) {
                     if job.render_options.use_gpu && (encoder_name == "libx264" || encoder_name == "libx265" || encoder_name == "prores_ks") {
                         update_model!(this, job_id, itm {
@@ -868,7 +868,7 @@ impl RenderQueue {
                 this.encoder_initialized(job_id, encoder_name);
             });
 
-            let err = util::qt_queued_callback_mut(self, move |this, (msg, mut arg): (String, String)| {
+            let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (msg, mut arg): (String, String)| {
                 arg.push_str("\n\n");
                 arg.push_str(&rendering::get_log());
 
@@ -890,7 +890,7 @@ impl RenderQueue {
                 this.update_status();
             });
 
-            let convert_format = util::qt_queued_callback_mut(self, move |this, (format, mut supported, candidate): (String, String, String)| {
+            let convert_format = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (format, mut supported, candidate): (String, String, String)| {
                 use itertools::Itertools;
                 supported = supported
                     .split(',')
@@ -1141,7 +1141,7 @@ impl RenderQueue {
 
         let is_gf_data = url.starts_with('{');
 
-        let err = util::qt_queued_callback_mut(self, move |this, (msg, arg): (String, String)| {
+        let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (msg, arg): (String, String)| {
             ::log::warn!("[add_file]: {}", arg);
             update_model!(this, job_id, itm {
                 itm.error_string = QString::from(arg.clone());
@@ -1150,7 +1150,7 @@ impl RenderQueue {
             this.error(job_id, QString::from(msg), QString::from(arg), QString::default());
         });
         let is_rendering = self.export_metadata.is_none() && self.export_stmap.is_none();
-        let processing_done = util::qt_queued_callback_mut(self, move |this, _: ()| {
+        let processing_done = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, _: ()| {
             if let Some(job) = this.jobs.get(&job_id) {
                 if is_rendering && filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
                     let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
@@ -1217,13 +1217,13 @@ impl RenderQueue {
                     let stab = Arc::new(stab);
 
                     let stab2 = stab.clone();
-                    let loaded = util::qt_queued_callback_mut(self, move |this, render_options: RenderOptions| {
+                    let loaded = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, render_options: RenderOptions| {
                         this.add_internal(job_id, stab2.clone(), render_options, additional_data2.clone(), QString::default());
                     });
-                    let thumb_fetched = util::qt_queued_callback_mut(self, move |this, thumb: QString| {
+                    let thumb_fetched = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, thumb: QString| {
                         update_model!(this, job_id, itm { itm.thumbnail_url = thumb; });
                     });
-                    let apply_preset = util::qt_queued_callback_mut(self, move |this, (preset, to_job_id): (String, u32)| {
+                    let apply_preset = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (preset, to_job_id): (String, u32)| {
                         this.apply_to_all(preset, additional_data3.clone(), to_job_id);
                         this.added(job_id);
                     });
@@ -1575,10 +1575,10 @@ impl RenderQueue {
                 new_output_options = Some(output.clone());
             }
         }
-        let processing_done = util::qt_queued_callback_mut(self, |this, job_id: u32| {
+        let processing_done = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, job_id: u32| {
             this.processing_done(job_id, true);
         });
-        let err = util::qt_queued_callback_mut(self, move |this, (job_id, msg): (u32, String)| {
+        let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (job_id, msg): (u32, String)| {
             this.error(job_id, QString::from(msg), QString::default(), QString::default());
         });
         ::log::debug!("new_output_options: {:?}", &new_output_options);

@@ -1142,7 +1142,7 @@ impl StabilizationManager {
             let mut parameters = smoothing.get_parameters_json();
             if let serde_json::Value::Array(ref mut arr) = parameters {
                 for v in arr.iter_mut() {
-                    if let serde_json::Value::Object(ref obj) = v {
+                    if let serde_json::Value::Object(obj) = v {
                         *v = serde_json::json!({
                             "name": obj["name"],
                             "value": obj["value"]
@@ -1239,19 +1239,19 @@ impl StabilizationManager {
         util::merge_json(&mut obj, &serde_json::from_str(additional_data).unwrap_or_default());
 
         #[cfg(any(target_os = "macos", target_os = "ios"))]
-        if let serde_json::Value::Object(ref mut obj) = obj {
+        if let serde_json::Value::Object(obj) = obj {
             obj.insert("videofile_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(&input_file.url, false, _project_url)));
-            if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
+            if let Some(serde_json::Value::Object(obj)) = obj.get_mut("gyro_source") {
                 obj.insert("filepath_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(&gyro.file_url, false, _project_url)));
             }
-            if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("output") {
+            if let Some(serde_json::Value::Object(obj)) = obj.get_mut("output") {
                 if let Some(output_folder) = obj.get("output_folder").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
                     obj.insert("output_folder_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(output_folder, true, _project_url)));
                 }
             }
         }
 
-        if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
+        if let Some(serde_json::Value::Object(obj)) = obj.get_mut("gyro_source") {
             let file_metadata = gyro.file_metadata.read();
             if typ == GyroflowProjectType::Simple {
                 if let Ok(val) = serde_json::to_value(file_metadata.thin()) {
@@ -1370,7 +1370,7 @@ impl StabilizationManager {
                 self.gyro.write().init_from_params(&params);
                 self.keyframes.write().timestamp_scale = params.fps_scale;
             }
-            if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("gyro_source") {
+            if let Some(serde_json::Value::Object(obj)) = obj.get_mut("gyro_source") {
                 let mut org_gyro_url = obj.get("filepath").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
                 if !org_gyro_url.is_empty() && !org_gyro_url.contains("://") {
                     org_gyro_url = filesystem::path_to_url(&org_gyro_url);
@@ -1504,7 +1504,7 @@ impl StabilizationManager {
                 let db = self.lens_profile_db.read();
                 l.resolve_interpolations(&db);
             }
-            if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("stabilization") {
+            if let Some(serde_json::Value::Object(obj)) = obj.get_mut("stabilization") {
                 let mut params = self.params.write();
                 if let Some(v) = obj.get("fov")                   .and_then(|x| x.as_f64()) { params.fov                     = v; }
                 if let Some(v) = obj.get("frame_readout_time")    .and_then(|x| x.as_f64()) { params.frame_readout_time      = v; if v < 0.0 { params.frame_readout_direction = ReadoutDirection::BottomToTop; } }
@@ -1584,7 +1584,7 @@ impl StabilizationManager {
 
                 obj.remove("adaptive_zoom_fovs");
             }
-            if let Some(serde_json::Value::Object(ref mut obj)) = obj.get_mut("output") {
+            if let Some(serde_json::Value::Object(obj)) = obj.get_mut("output") {
                 if let Some(w) =  obj.get("output_width").and_then(|x| x.as_u64()) {
                     if let Some(h) =  obj.get("output_height").and_then(|x| x.as_u64()) {
                         output_size = Some((w as usize, h as usize));
@@ -1713,8 +1713,8 @@ impl StabilizationManager {
     }
 
     pub fn project_has_motion_data(data: &[u8]) -> bool {
-        if let Ok(serde_json::Value::Object(ref obj)) = serde_json::from_slice(&data) {
-            if let Some(serde_json::Value::Object(ref obj)) = obj.get("gyro_source") {
+        if let Ok(serde_json::Value::Object(obj)) = serde_json::from_slice(&data) {
+            if let Some(serde_json::Value::Object(obj)) = obj.get("gyro_source") {
                 let built_in_gyro: std::io::Result<crate::gyro_source::FileMetadata> = util::decompress_from_base91_cbor(obj.get("file_metadata").and_then(|x| x.as_str()).unwrap_or_default());
                 if built_in_gyro.as_ref().map(|x| x.has_motion()).unwrap_or_default() {
                     return true;

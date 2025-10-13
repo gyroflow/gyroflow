@@ -76,7 +76,7 @@ impl Clone for Smoothing {
         let parameters = self.current().get_parameters_json();
         if let serde_json::Value::Array(ref arr) = parameters {
             for v in arr {
-                if let serde_json::Value::Object(ref obj) = v {
+                if let serde_json::Value::Object(obj) = v {
                     (|| -> Option<()> {
                         let name = obj.get("name").and_then(|x| x.as_str())?;
                         let value = obj.get("value").and_then(|x| x.as_f64())?;

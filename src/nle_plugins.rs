@@ -47,16 +47,18 @@ fn query_file_version(path: &str) -> Option<String> {
         };
 
         unsafe fn file_version_item(pblock: *const std::ffi::c_void, lang_id: i32, version_detail: &str) -> Option<String> {
-            let mut buffer = std::ptr::null_mut();
-            let mut len = 0;
-            let ok = VerQueryValueW(pblock, &HSTRING::from(format!("\\\\StringFileInfo\\\\{lang_id:08x}\\\\{version_detail}")), &mut buffer, &mut len);
-            if ok == false || len == 0 {
-                return None;
-            }
-            let raw = std::slice::from_raw_parts(buffer.cast(), len as usize);
-            match raw.iter().position(|&c| c == 0) {
-                Some(null_pos) => Some(String::from_utf16_lossy(&raw[..null_pos])),
-                None => Some(String::from_utf16_lossy(raw)),
+            unsafe {
+                let mut buffer = std::ptr::null_mut();
+                let mut len = 0;
+                let ok = VerQueryValueW(pblock, &HSTRING::from(format!("\\\\StringFileInfo\\\\{lang_id:08x}\\\\{version_detail}")), &mut buffer, &mut len);
+                if ok == false || len == 0 {
+                    return None;
+                }
+                let raw = std::slice::from_raw_parts(buffer.cast(), len as usize);
+                match raw.iter().position(|&c| c == 0) {
+                    Some(null_pos) => Some(String::from_utf16_lossy(&raw[..null_pos])),
+                    None => Some(String::from_utf16_lossy(raw)),
+                }
             }
         }
 

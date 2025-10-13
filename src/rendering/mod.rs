@@ -769,42 +769,44 @@ type VaList = *mut ffi::__va_list_tag;
 
 #[allow(improper_ctypes_definitions)]
 unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_char, vl: VaList) {
-    if level <= ffi::av_log_get_level() {
-        let mut line = vec![0u8; 2048];
-        let mut prefix: i32 = *LAST_PREFIX.read();
+    unsafe {
+        if level <= ffi::av_log_get_level() {
+            let mut line = vec![0u8; 2048];
+            let mut prefix: i32 = *LAST_PREFIX.read();
 
-        #[cfg(any(target_os = "android", all(target_os = "linux", target_arch = "aarch64")))]
-        let written = ffi::av_log_format_line2(avcl, level, fmt, vl, line.as_mut_ptr() as *mut u8, line.len() as i32, &mut prefix);
-        #[cfg(not(any(target_os = "android", all(target_os = "linux", target_arch = "aarch64"))))]
-        let written = ffi::av_log_format_line2(avcl, level, fmt, vl, line.as_mut_ptr() as *mut i8, line.len() as i32, &mut prefix);
-        if written > 0 {
-            line.resize(written as usize, 0u8);
+            #[cfg(any(target_os = "android", all(target_os = "linux", target_arch = "aarch64")))]
+            let written = ffi::av_log_format_line2(avcl, level, fmt, vl, line.as_mut_ptr() as *mut u8, line.len() as i32, &mut prefix);
+            #[cfg(not(any(target_os = "android", all(target_os = "linux", target_arch = "aarch64"))))]
+            let written = ffi::av_log_format_line2(avcl, level, fmt, vl, line.as_mut_ptr() as *mut i8, line.len() as i32, &mut prefix);
+            if written > 0 {
+                line.resize(written as usize, 0u8);
 
-            if let Ok(mut line) = String::from_utf8(line) {
-                if line.contains("Unknown profile bitstream") ||
-                   line.contains("infe version < 2") ||
-                   line.contains("Update your FFmpeg version to the newest one from Git.") ||
-                   line.contains("Cannot find an index entry before timestamp") ||
-                   line.contains("stream set to be discarded by default.") ||
-                   line.contains("Missing key frame while searching for timestamp") {
-                    return;
+                if let Ok(mut line) = String::from_utf8(line) {
+                    if line.contains("Unknown profile bitstream") ||
+                    line.contains("infe version < 2") ||
+                    line.contains("Update your FFmpeg version to the newest one from Git.") ||
+                    line.contains("Cannot find an index entry before timestamp") ||
+                    line.contains("stream set to be discarded by default.") ||
+                    line.contains("Missing key frame while searching for timestamp") {
+                        return;
+                    }
+                    *LAST_PREFIX.write() = prefix;
+
+                    // ffi::av_log_default_callback(avcl, level, fmt, vl);
+
+                    match level {
+                        ffi::AV_LOG_PANIC | ffi::AV_LOG_FATAL | ffi::AV_LOG_ERROR => {
+                            ::log::error!("{}", line.trim());
+                            line = format!("<font color=\"#d82626\">{}</font>", line);
+                        },
+                        ffi::AV_LOG_WARNING => {
+                            ::log::warn!("{}", line.trim());
+                            line = format!("<font color=\"#f6a10c\">{}</font>", line);
+                        },
+                        _ => { ::log::debug!("{}", line.trim()); }
+                    }
+                    FFMPEG_LOG.write().push_str(&line);
                 }
-                *LAST_PREFIX.write() = prefix;
-
-                // ffi::av_log_default_callback(avcl, level, fmt, vl);
-
-                match level {
-                    ffi::AV_LOG_PANIC | ffi::AV_LOG_FATAL | ffi::AV_LOG_ERROR => {
-                        ::log::error!("{}", line.trim());
-                        line = format!("<font color=\"#d82626\">{}</font>", line);
-                    },
-                    ffi::AV_LOG_WARNING => {
-                        ::log::warn!("{}", line.trim());
-                        line = format!("<font color=\"#f6a10c\">{}</font>", line);
-                    },
-                    _ => { ::log::debug!("{}", line.trim()); }
-                }
-                FFMPEG_LOG.write().push_str(&line);
             }
         }
     }
@@ -816,7 +818,7 @@ pub fn clear_log() { FFMPEG_LOG.write().clear() }
 
 unsafe fn to_str<'a>(ptr: *const c_char) -> std::borrow::Cow<'a, str> {
     if ptr.is_null() { return std::borrow::Cow::Borrowed(""); }
-    std::ffi::CStr::from_ptr(ptr).to_string_lossy()
+    unsafe { std::ffi::CStr::from_ptr(ptr) }.to_string_lossy()
 }
 unsafe fn codec_options(c: *const ffi::AVCodec) {
     if c.is_null() {
@@ -824,36 +826,40 @@ unsafe fn codec_options(c: *const ffi::AVCodec) {
         return;
     }
 
-    use std::fmt::Write;
-    let mut ret = String::new();
-    let _ = writeln!(ret, "{} <b>{}</b>:\n", ["Decoder", "Encoder"][ffi::av_codec_is_encoder(c) as usize], to_str((*c).name));
+    unsafe {
+        use std::fmt::Write;
+        let mut ret = String::new();
+        let _ = writeln!(ret, "{} <b>{}</b>:\n", ["Decoder", "Encoder"][ffi::av_codec_is_encoder(c) as usize], to_str((*c).name));
 
-    if !(*c).pix_fmts.is_null() {
-        ret.push_str("Supported pixel formats (-pix_fmt): ");
-        for i in 0..100 {
-            let fmt = (*c).pix_fmts.offset(i);
-            if fmt.is_null() { break; }
-            let p = *fmt;
-            if p == ffi::AVPixelFormat::AV_PIX_FMT_NONE {
-                break;
+        if !(*c).pix_fmts.is_null() {
+            ret.push_str("Supported pixel formats (-pix_fmt): ");
+            for i in 0..100 {
+                let fmt = (*c).pix_fmts.offset(i);
+                if fmt.is_null() { break; }
+                let p = *fmt;
+                if p == ffi::AVPixelFormat::AV_PIX_FMT_NONE {
+                    break;
+                }
+                if i > 0 { ret.push_str(", "); }
+                ret.push_str(&to_str(ffi::av_get_pix_fmt_name(p)));
             }
-            if i > 0 { ret.push_str(", "); }
-            ret.push_str(&to_str(ffi::av_get_pix_fmt_name(p)));
         }
-    }
 
-    if !(*c).priv_class.is_null() {
-        ret.push_str("<pre>");
-        FFMPEG_LOG.write().push_str(&ret);
-        show_help_children((*c).priv_class, ffi::AV_OPT_FLAG_ENCODING_PARAM | ffi::AV_OPT_FLAG_DECODING_PARAM);
-        FFMPEG_LOG.write().push_str("</pre>Additional supported flags:<pre>-hwaccel_device\n-qscale</pre>");
+        if !(*c).priv_class.is_null() {
+            ret.push_str("<pre>");
+            FFMPEG_LOG.write().push_str(&ret);
+            show_help_children((*c).priv_class, ffi::AV_OPT_FLAG_ENCODING_PARAM | ffi::AV_OPT_FLAG_DECODING_PARAM);
+            FFMPEG_LOG.write().push_str("</pre>Additional supported flags:<pre>-hwaccel_device\n-qscale</pre>");
+        }
     }
 }
 
 unsafe fn show_help_children(mut class: *const ffi::AVClass, flags: c_int) {
-    if !(*class).option.is_null() {
-        let ptr = std::ptr::null_mut();
-        ffi::av_opt_show2((&mut class) as *mut *const _ as *mut _, ptr, flags, 0);
+    unsafe {
+        if !(*class).option.is_null() {
+            let ptr = std::ptr::null_mut();
+            ffi::av_opt_show2((&mut class) as *mut *const _ as *mut _, ptr, flags, 0);
+        }
     }
     // let mut iter = std::ptr::null_mut();
     // loop {

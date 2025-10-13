@@ -124,14 +124,14 @@ pub fn get_current_device_id_by_uuid(adapters: &Vec<wgpu::Adapter>) -> usize {
 
 fn align(a: usize, b: usize) -> usize { ((a + b - 1) / b) * b }
 
-pub fn cuda_2d_copy_on_device(size: (usize, usize, usize), dst: CUdeviceptr, src: CUdeviceptr, dst_alignment: usize, src_alignment: usize) {
+pub fn cuda_2d_copy_on_device(_width: usize, height: usize, row_bytes: usize, dst: CUdeviceptr, dst_pitch: usize, src: CUdeviceptr, src_pitch: usize) {
     let desc = CUDA_MEMCPY2D_st {
-        Height: size.1,
-        WidthInBytes: size.2,
+        Height: height,
+        WidthInBytes: row_bytes,
 
-        dstPitch: align(size.2, dst_alignment),
+        dstPitch: dst_pitch,
         dstDevice: dst,
-        srcPitch: align(size.2, src_alignment),
+        srcPitch: src_pitch,
         srcDevice: src,
 
         dstArray: std::ptr::null_mut(),
@@ -152,6 +152,17 @@ pub fn cuda_2d_copy_on_device(size: (usize, usize, usize), dst: CUdeviceptr, src
         // log::debug!("cuMemcpy2D_v2 | 0x{src:08x} ({size} bytes) => 0x{dst:08x} ({size2} bytes) | Device {}", get_current_cuda_device());
         // cuda!(cuda.cuMemcpy(dst, src, size.2 * size.1));
         cuda!(cuda.cuMemcpy2D_v2(&desc as *const _));
+    }
+}
+
+pub fn bytes_per_pixel(format: wgpu::TextureFormat) -> usize {
+    use wgpu::TextureFormat::*;
+    match format {
+        Rgba8Unorm | Rgba8UnormSrgb | Rgba8Snorm | Rgba8Uint | Rgba8Sint => 4,
+        Bgra8Unorm | Bgra8UnormSrgb => 4,
+        Rgba16Uint | Rgba16Sint | Rgba16Unorm | Rgba16Snorm | Rgba16Float => 8,
+        Rgba32Uint | Rgba32Sint | Rgba32Float => 16,
+        _ => panic!("Unsupported format for CUDA interop: {:?}", format),
     }
 }
 
@@ -747,68 +758,70 @@ pub struct CudaFunctions {
 
 impl CudaFunctions {
     pub unsafe fn new() -> Result<Self, libloading::Error> {
-        let candidates = if cfg!(target_os = "windows") {
-            vec![
-                "cudart64_121.dll",
-                "cudart64_120.dll",
-                "cudart64_12.dll",
-                "cudart64_110.dll",
-                "cudart64_101.dll",
-                "cudart64_91.dll",
-                "cudart64_90.dll",
-                "cudart64_80.dll",
-                "cudart64_75.dll",
-                "cudart64_65.dll",
-            ]
-        } else {
-            vec![
-                "libcudart.so",
-                "/usr/local/cuda/lib64/libcudart.so",
-                // "/usr/local/cuda-10.0/targets/amd64-linux/lib/libcudart.so",
-            ]
-        };
-        let mut cudart = None;
-        for filename in candidates {
-            if let Ok(l) = dl::Library::new(filename) {
-                cudart = Some(l);
-                log::debug!("Loaded {}", &filename);
-                break;
+        unsafe {
+            let candidates = if cfg!(target_os = "windows") {
+                vec![
+                    "cudart64_121.dll",
+                    "cudart64_120.dll",
+                    "cudart64_12.dll",
+                    "cudart64_110.dll",
+                    "cudart64_101.dll",
+                    "cudart64_91.dll",
+                    "cudart64_90.dll",
+                    "cudart64_80.dll",
+                    "cudart64_75.dll",
+                    "cudart64_65.dll",
+                ]
+            } else {
+                vec![
+                    "libcudart.so",
+                    "/usr/local/cuda/lib64/libcudart.so",
+                    // "/usr/local/cuda-10.0/targets/amd64-linux/lib/libcudart.so",
+                ]
+            };
+            let mut cudart = None;
+            for filename in candidates {
+                if let Ok(l) = dl::Library::new(filename) {
+                    cudart = Some(l);
+                    log::debug!("Loaded {}", &filename);
+                    break;
+                }
             }
+            if cudart.is_none() { return Err(libloading::Error::DlOpenUnknown); }
+            let cudart = cudart.unwrap();
+
+            let nvcuda = dl::Library::new(if cfg!(target_os = "windows") { "nvcuda.dll" } else { "libcuda.so.1" })?;
+
+            Ok(Self {
+                cudaDeviceSynchronize:           cudart.get(b"cudaDeviceSynchronize")?,
+                cudaGetDevice:                   cudart.get(b"cudaGetDevice")?,
+                cudaFree:                        cudart.get(b"cudaFree")?,
+
+                cuMemExportToShareableHandle:    nvcuda.get(b"cuMemExportToShareableHandle")?,
+                cuMemGetAllocationGranularity:   nvcuda.get(b"cuMemGetAllocationGranularity")?,
+                cuMemCreate:                     nvcuda.get(b"cuMemCreate")?,
+                cuMemFree:                       nvcuda.get(b"cuMemFree")?,
+                cuMemAddressReserve:             nvcuda.get(b"cuMemAddressReserve")?,
+                cuMemMap:                        nvcuda.get(b"cuMemMap")?,
+                cuMemSetAccess:                  nvcuda.get(b"cuMemSetAccess")?,
+                cuMemUnmap:                      nvcuda.get(b"cuMemUnmap")?,
+                cuMemRelease:                    nvcuda.get(b"cuMemRelease")?,
+                cuMemcpy:                        nvcuda.get(b"cuMemcpy")?,
+                cuMemcpy2D_v2:                   nvcuda.get(b"cuMemcpy2D_v2")?,
+                cuMemAddressFree:                nvcuda.get(b"cuMemAddressFree")?,
+                cuCtxSynchronize:                nvcuda.get(b"cuCtxSynchronize")?,
+                cuMemGetAddressRange_v2:         nvcuda.get(b"cuMemGetAddressRange_v2")?,
+
+                cuDeviceGetUuid:                 nvcuda.get(b"cuDeviceGetUuid_v2").or_else(|_| nvcuda.get(b"cuDeviceGetUuid"))?,
+
+                cuImportExternalMemory:          nvcuda.get(b"cuImportExternalMemory")?,
+                cuExternalMemoryGetMappedBuffer: nvcuda.get(b"cuExternalMemoryGetMappedBuffer")?,
+                cuDestroyExternalMemory:         nvcuda.get(b"cuDestroyExternalMemory")?,
+
+                _cudart: cudart,
+                _nvcuda: nvcuda,
+            })
         }
-        if cudart.is_none() { return Err(libloading::Error::DlOpenUnknown); }
-        let cudart = cudart.unwrap();
-
-        let nvcuda = dl::Library::new(if cfg!(target_os = "windows") { "nvcuda.dll" } else { "libcuda.so.1" })?;
-
-        Ok(Self {
-            cudaDeviceSynchronize:           cudart.get(b"cudaDeviceSynchronize")?,
-            cudaGetDevice:                   cudart.get(b"cudaGetDevice")?,
-            cudaFree:                        cudart.get(b"cudaFree")?,
-
-            cuMemExportToShareableHandle:    nvcuda.get(b"cuMemExportToShareableHandle")?,
-            cuMemGetAllocationGranularity:   nvcuda.get(b"cuMemGetAllocationGranularity")?,
-            cuMemCreate:                     nvcuda.get(b"cuMemCreate")?,
-            cuMemFree:                       nvcuda.get(b"cuMemFree")?,
-            cuMemAddressReserve:             nvcuda.get(b"cuMemAddressReserve")?,
-            cuMemMap:                        nvcuda.get(b"cuMemMap")?,
-            cuMemSetAccess:                  nvcuda.get(b"cuMemSetAccess")?,
-            cuMemUnmap:                      nvcuda.get(b"cuMemUnmap")?,
-            cuMemRelease:                    nvcuda.get(b"cuMemRelease")?,
-            cuMemcpy:                        nvcuda.get(b"cuMemcpy")?,
-            cuMemcpy2D_v2:                   nvcuda.get(b"cuMemcpy2D_v2")?,
-            cuMemAddressFree:                nvcuda.get(b"cuMemAddressFree")?,
-            cuCtxSynchronize:                nvcuda.get(b"cuCtxSynchronize")?,
-            cuMemGetAddressRange_v2:         nvcuda.get(b"cuMemGetAddressRange_v2")?,
-
-            cuDeviceGetUuid:                 nvcuda.get(b"cuDeviceGetUuid_v2").or_else(|_| nvcuda.get(b"cuDeviceGetUuid"))?,
-
-            cuImportExternalMemory:          nvcuda.get(b"cuImportExternalMemory")?,
-            cuExternalMemoryGetMappedBuffer: nvcuda.get(b"cuExternalMemoryGetMappedBuffer")?,
-            cuDestroyExternalMemory:         nvcuda.get(b"cuDestroyExternalMemory")?,
-
-            _cudart: cudart,
-            _nvcuda: nvcuda,
-        })
     }
 }
 

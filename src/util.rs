@@ -44,8 +44,7 @@ pub fn is_opengl() -> bool {
     })
 }
 
-pub fn qt_queued_callback<T: QObject + 'static, T2: Send, F: FnMut(&T, T2) + 'static>(qobj: &T, mut cb: F) -> impl Fn(T2) + Send + Sync + Clone {
-    let qptr = QPointer::from(qobj);
+pub fn qt_queued_callback<T: QObject + 'static, T2: Send + 'static, F: FnMut(&T, T2) + 'static>(qptr: QPointer<T>, mut cb: F) -> impl Fn(T2) + Send + Sync + Clone + 'static {
     qmetaobject::queued_callback(move |arg| {
         if let Some(this) = qptr.as_pinned() {
             let this = this.borrow();
@@ -53,8 +52,7 @@ pub fn qt_queued_callback<T: QObject + 'static, T2: Send, F: FnMut(&T, T2) + 'st
         }
     })
 }
-pub fn qt_queued_callback_mut<T: QObject + 'static, T2: Send, F: FnMut(&mut T, T2) + 'static>(qobj: &T, mut cb: F) -> impl Fn(T2) + Send + Sync + Clone {
-    let qptr = QPointer::from(qobj);
+pub fn qt_queued_callback_mut<T: QObject + 'static, T2: Send + 'static, F: FnMut(&mut T, T2) + 'static>(qptr: QPointer<T>, mut cb: F) -> impl Fn(T2) + Send + Sync + Clone + 'static {
     qmetaobject::queued_callback(move |arg| {
         if let Some(this) = qptr.as_pinned() {
             let mut this = this.borrow_mut();

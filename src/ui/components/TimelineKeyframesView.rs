@@ -98,7 +98,7 @@ impl TimelineKeyframesView {
     pub fn update(&mut self) {
         self.calculate_lines();
         self.update_video_timestamp(false);
-        util::qt_queued_callback(self, |this, _| {
+        util::qt_queued_callback(QPointer::from(self as &Self), |this, _| {
             (this as &dyn QQuickItem).update();
         })(());
     }

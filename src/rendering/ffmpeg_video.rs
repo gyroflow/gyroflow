@@ -518,36 +518,38 @@ impl<'a> VideoTranscoder<'a> {
     }*/
 
     unsafe fn copy_frame_props(dst: *mut ffi::AVFrame, src: *const ffi::AVFrame) {
-        // (*dst).key_frame              = (*src).key_frame;
-        (*dst).pict_type              = (*src).pict_type;
-        (*dst).sample_aspect_ratio    = (*src).sample_aspect_ratio;
-        // (*dst).crop_top               = (*src).crop_top;
-        // (*dst).crop_bottom            = (*src).crop_bottom;
-        // (*dst).crop_left              = (*src).crop_left;
-        // (*dst).crop_right             = (*src).crop_right;
-        (*dst).pts                    = (*src).pts;
-        (*dst).repeat_pict            = (*src).repeat_pict;
-        //(*dst).interlaced_frame       = (*src).interlaced_frame;
-        //(*dst).top_field_first        = (*src).top_field_first;
-        //(*dst).palette_has_changed    = (*src).palette_has_changed;
-        (*dst).sample_rate            = (*src).sample_rate;
-        (*dst).opaque                 = (*src).opaque;
-        // (*dst).pkt_dts                = (*src).pkt_dts;
-        // (*dst).pkt_pos                = (*src).pkt_pos;
-        // (*dst).pkt_size               = (*src).pkt_size;
-        // (*dst).pkt_duration           = (*src).pkt_duration;
-        // (*dst).time_base              = (*src).time_base; // TODO
-        // (*dst).reordered_opaque       = (*src).reordered_opaque;
-        (*dst).quality                = (*src).quality;
-        // (*dst).best_effort_timestamp  = (*src).best_effort_timestamp;
-        // (*dst).coded_picture_number   = (*src).coded_picture_number;
-        // (*dst).display_picture_number = (*src).display_picture_number;
-        (*dst).flags                  = (*src).flags;
-        (*dst).decode_error_flags     = (*src).decode_error_flags;
-        (*dst).color_primaries        = (*src).color_primaries;
-        (*dst).color_trc              = (*src).color_trc;
-        (*dst).colorspace             = (*src).colorspace;
-        (*dst).color_range            = (*src).color_range;
-        (*dst).chroma_location        = (*src).chroma_location;
+        unsafe {
+            // (*dst).key_frame              = (*src).key_frame;
+            (*dst).pict_type              = (*src).pict_type;
+            (*dst).sample_aspect_ratio    = (*src).sample_aspect_ratio;
+            // (*dst).crop_top               = (*src).crop_top;
+            // (*dst).crop_bottom            = (*src).crop_bottom;
+            // (*dst).crop_left              = (*src).crop_left;
+            // (*dst).crop_right             = (*src).crop_right;
+            (*dst).pts                    = (*src).pts;
+            (*dst).repeat_pict            = (*src).repeat_pict;
+            //(*dst).interlaced_frame       = (*src).interlaced_frame;
+            //(*dst).top_field_first        = (*src).top_field_first;
+            //(*dst).palette_has_changed    = (*src).palette_has_changed;
+            (*dst).sample_rate            = (*src).sample_rate;
+            (*dst).opaque                 = (*src).opaque;
+            // (*dst).pkt_dts                = (*src).pkt_dts;
+            // (*dst).pkt_pos                = (*src).pkt_pos;
+            // (*dst).pkt_size               = (*src).pkt_size;
+            // (*dst).pkt_duration           = (*src).pkt_duration;
+            // (*dst).time_base              = (*src).time_base; // TODO
+            // (*dst).reordered_opaque       = (*src).reordered_opaque;
+            (*dst).quality                = (*src).quality;
+            // (*dst).best_effort_timestamp  = (*src).best_effort_timestamp;
+            // (*dst).coded_picture_number   = (*src).coded_picture_number;
+            // (*dst).display_picture_number = (*src).display_picture_number;
+            (*dst).flags                  = (*src).flags;
+            (*dst).decode_error_flags     = (*src).decode_error_flags;
+            (*dst).color_primaries        = (*src).color_primaries;
+            (*dst).color_trc              = (*src).color_trc;
+            (*dst).colorspace             = (*src).colorspace;
+            (*dst).color_range            = (*src).color_range;
+            (*dst).chroma_location        = (*src).chroma_location;
+        }
     }
 }

@@ -143,7 +143,7 @@ impl<'a> FfmpegProcessor<'a> {
         let hwaccel_device = decoder_options.as_ref().and_then(|x| x.get("hwaccel_device").map(|x| x.to_string()));
         if file.path.starts_with("fd:") {
             match &mut decoder_options {
-                Some(ref mut dict) => { dict.set("fd", &file.path[3..]); file.path = "fd:".into(); }
+                Some(dict) => { dict.set("fd", &file.path[3..]); file.path = "fd:".into(); }
                 None => { let mut dict = Dictionary::new(); dict.set("fd", &file.path[3..]); file.path = "fd:".into(); decoder_options = Some(dict); }
             }
         }

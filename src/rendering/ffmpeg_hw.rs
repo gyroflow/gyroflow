@@ -106,7 +106,7 @@ pub fn supported_gpu_backends() -> Vec<String> {
 pub unsafe fn pix_formats_to_vec(formats: *const ffi::AVPixelFormat) -> Vec<format::Pixel> {
     let mut ret = Vec::new();
     for i in 0..100 {
-        let p = *formats.offset(i);
+        let p = unsafe { *formats.offset(i) };
         if p == ffi::AVPixelFormat::AV_PIX_FMT_NONE {
             break;
         }
@@ -245,25 +245,29 @@ pub fn find_working_encoder(encoders: &[(&'static str, bool)], device: Option<&s
 }
 
 pub unsafe fn get_transfer_formats_from_gpu(frame: *mut ffi::AVFrame) -> Vec<format::Pixel> {
-    let mut formats = ptr::null_mut();
-    if !frame.is_null() && !(*frame).hw_frames_ctx.is_null() {
-        ffi::av_hwframe_transfer_get_formats((*frame).hw_frames_ctx, ffi::AVHWFrameTransferDirection::AV_HWFRAME_TRANSFER_DIRECTION_FROM, &mut formats, 0);
-    }
-    if formats.is_null() {
-        Vec::new()
-    } else {
-        pix_formats_to_vec(formats)
+    unsafe {
+        let mut formats = ptr::null_mut();
+        if !frame.is_null() && !(*frame).hw_frames_ctx.is_null() {
+            ffi::av_hwframe_transfer_get_formats((*frame).hw_frames_ctx, ffi::AVHWFrameTransferDirection::AV_HWFRAME_TRANSFER_DIRECTION_FROM, &mut formats, 0);
+        }
+        if formats.is_null() {
+            Vec::new()
+        } else {
+            pix_formats_to_vec(formats)
+        }
     }
 }
 pub unsafe fn get_transfer_formats_to_gpu(frame: *mut ffi::AVFrame) -> Vec<format::Pixel> {
-    let mut formats = ptr::null_mut();
-    if !frame.is_null() && !(*frame).hw_frames_ctx.is_null() {
-        ffi::av_hwframe_transfer_get_formats((*frame).hw_frames_ctx, ffi::AVHWFrameTransferDirection::AV_HWFRAME_TRANSFER_DIRECTION_TO, &mut formats, 0);
-    }
-    if formats.is_null() {
-        Vec::new()
-    } else {
-        pix_formats_to_vec(formats)
+    unsafe {
+        let mut formats = ptr::null_mut();
+        if !frame.is_null() && !(*frame).hw_frames_ctx.is_null() {
+            ffi::av_hwframe_transfer_get_formats((*frame).hw_frames_ctx, ffi::AVHWFrameTransferDirection::AV_HWFRAME_TRANSFER_DIRECTION_TO, &mut formats, 0);
+        }
+        if formats.is_null() {
+            Vec::new()
+        } else {
+            pix_formats_to_vec(formats)
+        }
     }
 }
 

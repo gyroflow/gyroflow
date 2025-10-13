@@ -310,7 +310,7 @@ impl PoseEstimator {
                     // So we can't use the detected motion to distort `this` frame, we need to set the timestamp in between the frames
                     // TODO: figure out if rolling shutter time can be used to make better calculation here
                     let mut ts = *k as f64 / 1000.0;
-                    if let Some(next_ts) = iter.peek().map(|(&k, _)| k as f64 / 1000.0) {
+                    if let Some(next_ts) = iter.peek().map(|&(k, _)| *k as f64 / 1000.0) {
                         ts += (next_ts - ts) / 2.0;
                     }
 

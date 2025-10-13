@@ -3,9 +3,9 @@
 
 use std::io::Result;
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub static NvOptimusEnablement: i32 = 1;
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub static AmdPowerXpressRequestHighPerformance: i32 = 1;
 
 pub fn get_video_metadata(url: &str) -> std::result::Result<telemetry_parser::util::VideoMetadata, crate::GyroflowCoreError> {
@@ -99,15 +99,15 @@ impl<V> MapClosest<V> for BTreeMap<i64, V> {
 pub fn merge_json(a: &mut serde_json::Value, b: &serde_json::Value) {
     use serde_json::Value;
     match (a, b) {
-        (Value::Object(ref mut a), &Value::Object(ref b)) => {
+        (Value::Object(a), &Value::Object(ref b)) => {
             for (k, v) in b {
                 merge_json(a.entry(k).or_insert(Value::Null), v);
             }
         }
-        (Value::Array(ref mut a), &Value::Array(ref b)) => {
+        (Value::Array(a), &Value::Array(ref b)) => {
             a.extend(b.clone());
         }
-        (Value::Array(ref mut a), &Value::Object(ref b)) => {
+        (Value::Array(a), &Value::Object(ref b)) => {
             a.extend([Value::Object(b.clone())]);
         }
         (a, b) => {

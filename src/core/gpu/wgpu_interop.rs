@@ -290,7 +290,11 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
         BufferSource::CUDABuffer { buffer } => {
             super::wgpu_interop_cuda::cuda_synchronize();
             if let Some(NativeTexture::Cuda(cuda_mem)) = &in_texture.native_texture {
-                super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size, cuda_mem.device_ptr, *buffer as CUdeviceptr, /*cuda_mem.vulkan_pitch_alignment*/buf.size.2, 1);
+                let bpp = super::wgpu_interop_cuda::bytes_per_pixel(format);
+                let row_bytes = buf.size.0 * bpp;
+                let dst_pitch = cuda_mem.vulkan_pitch_alignment; // actual vk::SubresourceLayout.row_pitch
+                let src_pitch = buf.size.2;                      // producer's stride
+                super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size.0, buf.size.1, row_bytes, cuda_mem.device_ptr, dst_pitch, *buffer as CUdeviceptr, src_pitch);
                 super::wgpu_interop_cuda::cuda_synchronize();
             }
             if let Some(in_buf) = &in_texture.wgpu_buffer {
@@ -444,11 +448,11 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
     temp_texture
 }
 
-pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription, out_texture: &TextureHolder, format: wgpu::TextureFormat, sub_index: wgpu::SubmissionIndex) {
+pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription, out_texture: &TextureHolder, format: wgpu::TextureFormat, _sub_index: wgpu::SubmissionIndex) {
     match &buf.data {
         #[cfg(target_os = "windows")]
         BufferSource::DirectX11 { texture, device_context, .. } => {
-            let _ = device.poll(wgpu::PollType::Wait { submission_index: Some(sub_index), timeout: None });
+            let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
             unsafe {
                 use windows::Win32::Graphics::Direct3D11::*;
@@ -459,19 +463,25 @@ pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription
         },
         #[cfg(any(target_os = "windows", target_os = "linux"))]
         BufferSource::CUDABuffer { buffer } => {
-            let _ = device.poll(wgpu::PollType::Wait { submission_index: Some(sub_index), timeout: None });
+            let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
             if let Some(NativeTexture::Cuda(cuda_mem)) = &out_texture.native_texture {
-                super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size, *buffer as CUdeviceptr, cuda_mem.device_ptr, 1, buf.size.2/*cuda_mem.vulkan_pitch_alignment*/);
+                // Copy from the Vulkan LINEAR image memory back to the consumer buffer
+                // src_pitch must be the image pitch; dst_pitch is consumer stride.
+                let bpp = super::wgpu_interop_cuda::bytes_per_pixel(format);
+                let row_bytes = buf.size.0 * bpp;
+                let src_pitch = cuda_mem.vulkan_pitch_alignment; // image row pitch
+                let dst_pitch = buf.size.2;                      // consumer's stride
+                super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size.0, buf.size.1, row_bytes, *buffer as CUdeviceptr, dst_pitch, cuda_mem.device_ptr, src_pitch);
             }
             super::wgpu_interop_cuda::cuda_synchronize();
         },
         #[cfg(not(any(target_os = "macos", target_os = "ios")))]
         BufferSource::Vulkan { .. } => {
-            let _ = device.poll(wgpu::PollType::Wait { submission_index: Some(sub_index), timeout: None });
+            let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
         },
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         BufferSource::Metal { .. } | BufferSource::MetalBuffer { .. } => {
-            let _ = device.poll(wgpu::PollType::Wait { submission_index: Some(sub_index), timeout: None });
+            let _ = device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
         },
         _ => { }
     }

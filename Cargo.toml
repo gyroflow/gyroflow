@@ -2,7 +2,7 @@
 name = "gyroflow"
 version = "1.6.3"
 authors = ["Adrian <adrian.eddy@gmail.com>", "Elvin Chen"]
-edition = "2021"
+edition = "2024"
 build = "build.rs"
 
 [features]
@@ -35,7 +35,7 @@ nalgebra = "0.34"
 semver = "1.0.27"
 fastrand = "2.1.0"
 itertools = "0.14.0"
-regex = "1.11"
+regex = "1.12"
 rayon = "1.10"
 mimalloc = { version = "0.1.48", default-features = false }
 
@@ -59,7 +59,7 @@ qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "
 
 ffmpeg-next = { version = "8.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.5.0"
-parking_lot = "0.12.3"
+parking_lot = "0.12.5"
 
 simplelog = "0.12.2"
 log = "0.4"

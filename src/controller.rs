@@ -405,13 +405,13 @@ impl Controller {
 
         let timestamps_fract: Vec<f64> = timestamps_fract.split(';').filter_map(|x| x.parse::<f64>().ok()).collect();
 
-        let progress = util::qt_queued_callback_mut(self, |this, (percent, ready, total): (f64, usize, usize)| {
+        let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (percent, ready, total): (f64, usize, usize)| {
             this.sync_in_progress = ready < total || percent < 1.0;
             this.sync_in_progress_changed();
             this.chart_data_changed();
             this.sync_progress(percent, ready, total);
         });
-        let set_offsets = util::qt_queued_callback_mut(self, move |this, offsets: Vec<(f64, f64, f64)>| {
+        let set_offsets = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, offsets: Vec<(f64, f64, f64)>| {
             if for_rs {
                 if let Some(offs) = offsets.first() {
                     this.rolling_shutter_estimated(offs.1);
@@ -443,11 +443,11 @@ impl Controller {
             this.update_offset_model();
             this.request_recompute();
         });
-        let set_orientation = util::qt_queued_callback_mut(self, move |this, orientation: String| {
+        let set_orientation = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, orientation: String| {
             ::log::info!("Setting orientation {}", &orientation);
             this.orientation_guessed(QString::from(orientation));
         });
-        let err = util::qt_queued_callback_mut(self, |this, (msg, mut arg): (String, String)| {
+        let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (msg, mut arg): (String, String)| {
             arg.push_str("\n\n");
             arg.push_str(&rendering::get_log());
 
@@ -673,7 +673,7 @@ impl Controller {
             linear_offset_ms: v.1
         }).collect());
 
-        util::qt_queued_callback(self, |this, _| {
+        util::qt_queued_callback(QPointer::from(self as &Self), |this, _| {
             this.offsets_updated();
             this.chart_data_changed();
         })(());
@@ -716,17 +716,17 @@ impl Controller {
                 self.set_preview_resolution(self.preview_resolution, player);
             }
 
-            let err = util::qt_queued_callback_mut(self, |this, (msg, arg): (String, String)| {
+            let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (msg, arg): (String, String)| {
                 this.error(QString::from(msg), QString::from(arg), QString::default());
             });
 
-            let progress = util::qt_queued_callback_mut(self, move |this, progress: f64| {
+            let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, progress: f64| {
                 this.loading_gyro_in_progress = progress < 1.0;
                 this.loading_gyro_progress(progress);
                 this.loading_gyro_in_progress_changed();
             });
             let stab2 = stab.clone();
-            let finished = util::qt_queued_callback_mut(self, move |this, params: (bool, QString, QString, bool, serde_json::Value)| {
+            let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, params: (bool, QString, QString, bool, serde_json::Value)| {
                 this.gyro_loaded = params.3; // Contains motion
                 this.gyro_changed();
 
@@ -743,10 +743,10 @@ impl Controller {
                 stab2.invalidate_smoothing();
                 this.request_recompute();
             });
-            let load_lens = util::qt_queued_callback_mut(self, move |this, path: String| {
+            let load_lens = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, path: String| {
                 this.load_lens_profile(path.into());
             });
-            let reload_lens = util::qt_queued_callback_mut(self, move |this, _| {
+            let reload_lens = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, _| {
                 let lens = this.stabilizer.lens.read();
                 if this.lens_loaded || !lens.path_to_file.is_empty() {
                     this.lens_loaded = true;
@@ -898,7 +898,7 @@ impl Controller {
     }
 
     fn set_integration_method(&mut self, index: usize) {
-        let finished = util::qt_queued_callback(self, |this, _| {
+        let finished = util::qt_queued_callback(QPointer::from(self as &Self), |this, _| {
             this.chart_data_changed();
             this.request_recompute();
         });
@@ -961,7 +961,7 @@ impl Controller {
                 stab.kernel_flags.set(KernelParamsFlags::DRAWING_ENABLED, true);
                 stab.cache_frame_transform = true;
             }
-            let request_recompute = util::qt_queued_callback_mut(self, move |this, _: ()| {
+            let request_recompute = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, _: ()| {
                 this.request_recompute();
             });
             let stab = self.stabilizer.clone();
@@ -982,7 +982,7 @@ impl Controller {
             let stab = self.stabilizer.clone();
             let preview_pipeline = self.preview_pipeline.clone();
             let out_pixels = RefCell::new(Vec::new());
-            let update_info = util::qt_queued_callback_mut(self, move |this, (fov, minimal_fov, focal_length, info): (f64, f64, Option<f64>, QString)| {
+            let update_info = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (fov, minimal_fov, focal_length, info): (f64, f64, Option<f64>, QString)| {
                 this.current_fov = fov;
                 this.current_minimal_fov = minimal_fov;
                 this.current_focal_length = focal_length.unwrap_or_default();
@@ -1202,7 +1202,7 @@ impl Controller {
 
     fn recompute_threaded(&mut self) {
         if self.stabilizer.params.read().duration_ms <= 0.0 { return; }
-        let id = self.stabilizer.recompute_threaded(util::qt_queued_callback_mut(self, |this, (id, _discarded): (u64, bool)| {
+        let id = self.stabilizer.recompute_threaded(util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (id, _discarded): (u64, bool)| {
             if !this.ongoing_computations.contains(&id) {
                 ::log::error!("Unknown compute_id: {}", id);
             }
@@ -1228,7 +1228,7 @@ impl Controller {
         {
             gyroflow_core::settings::set("lastProject", filesystem::url_to_path(&url).into());
         }
-        let finished = util::qt_queued_callback(self, move |this, (res, arg): (&str, String)| {
+        let finished = util::qt_queued_callback(QPointer::from(self as &Self), move |this, (res, arg): (&str, String)| {
             match res {
                 "ok" => this.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", filesystem::display_url(&arg))), QString::default(), QString::from("gyroflow-exported")),
                 "location" => this.request_location(QString::from(arg), typ_str.clone()),
@@ -1312,12 +1312,12 @@ impl Controller {
 
     fn import_gyroflow_file(&mut self, url: QUrl) {
         let url = util::qurl_to_encoded(url);
-        let progress = util::qt_queued_callback_mut(self, move |this, progress: f64| {
+        let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, progress: f64| {
             this.loading_gyro_in_progress = progress < 1.0;
             this.loading_gyro_progress(progress);
             this.loading_gyro_in_progress_changed();
         });
-        let finished = util::qt_queued_callback_mut(self, move |this, obj: Result<serde_json::Value, gyroflow_core::GyroflowCoreError>| {
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, obj: Result<serde_json::Value, gyroflow_core::GyroflowCoreError>| {
             this.loading_gyro_in_progress = false;
             this.loading_gyro_progress(1.0);
             this.loading_gyro_in_progress_changed();
@@ -1340,12 +1340,12 @@ impl Controller {
         });
     }
     fn import_gyroflow_data(&mut self, data: QString) {
-        let progress = util::qt_queued_callback_mut(self, move |this, progress: f64| {
+        let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, progress: f64| {
             this.loading_gyro_in_progress = progress < 1.0;
             this.loading_gyro_progress(progress);
             this.loading_gyro_in_progress_changed();
         });
-        let finished = util::qt_queued_callback_mut(self, move |this, obj: Result<serde_json::Value, gyroflow_core::GyroflowCoreError>| {
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, obj: Result<serde_json::Value, gyroflow_core::GyroflowCoreError>| {
             this.loading_gyro_in_progress = false;
             this.loading_gyro_progress(1.0);
             this.loading_gyro_in_progress_changed();
@@ -1488,7 +1488,7 @@ impl Controller {
     }
 
     fn check_updates(&self) {
-        let update = util::qt_queued_callback_mut(self, |this, (version, changelog): (String, String)| {
+        let update = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (version, changelog): (String, String)| {
             this.updates_available(QString::from(version), QString::from(changelog))
         });
         core::run_threaded(move || {
@@ -1574,7 +1574,7 @@ impl Controller {
                 cal.max_sharpness = max_sharpness;
             }
 
-            let progress = util::qt_queued_callback_mut(self, |this, (ready, total, good, rms, sharpness): (usize, usize, usize, f64, f64)| {
+            let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (ready, total, good, rms, sharpness): (usize, usize, usize, f64, f64)| {
                 this.calib_in_progress = ready < total;
                 this.calib_in_progress_changed();
                 this.calib_progress(ready as f64 / total as f64, rms, ready, total, good, sharpness);
@@ -1582,7 +1582,7 @@ impl Controller {
                     this.update_calib_model();
                 }
             });
-            let err = util::qt_queued_callback_mut(self, |this, (msg, mut arg): (String, String)| {
+            let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (msg, mut arg): (String, String)| {
                 arg.push_str("\n\n");
                 arg.push_str(&rendering::get_log());
 
@@ -1717,7 +1717,7 @@ impl Controller {
                 is_forced: v.is_forced
             }).collect());
 
-            util::qt_queued_callback(self, |this, _| {
+            util::qt_queued_callback(QPointer::from(self as &Self), |this, _| {
                 this.calib_model_updated();
             })(());
         }
@@ -1804,7 +1804,7 @@ impl Controller {
     }
 
     fn load_profiles(&self, reload_from_disk: bool) {
-        let loaded = util::qt_queued_callback_mut(self, |this, _: ()| {
+        let loaded = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, _: ()| {
             this.all_profiles_loaded();
         });
         let db = self.stabilizer.lens_profile_db.clone();
@@ -1826,7 +1826,7 @@ impl Controller {
     }
 
     fn search_lens_profile(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32) {
-        let finished = util::qt_queued_callback_mut(self, |this, profiles: QVariantList| {
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, profiles: QVariantList| {
             this.search_lens_profile_finished(profiles);
         });
         let db = self.stabilizer.lens_profile_db.clone();
@@ -1858,7 +1858,7 @@ impl Controller {
             return;
         }
 
-        let update = util::qt_queued_callback_mut(self, |this, _| {
+        let update = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, _| {
             this.lens_profiles_updated(true);
         });
 
@@ -1916,7 +1916,7 @@ impl Controller {
         });
     }
     fn request_profile_ratings(&self) {
-        let update = util::qt_queued_callback_mut(self, |this, _| {
+        let update = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, _| {
             this.lens_profiles_updated(false);
         });
         let db = self.stabilizer.lens_profile_db.clone();
@@ -1929,7 +1929,7 @@ impl Controller {
     }
 
     fn list_gpu_devices(&self) {
-        let finished = util::qt_queued_callback(self, |this, list: Vec<String>| {
+        let finished = util::qt_queued_callback(QPointer::from(self as &Self), |this, list: Vec<String>| {
             this.gpu_list_loaded(util::serde_json_to_qt_array(&serde_json::json!(list)))
         });
         self.stabilizer.list_gpu_devices(finished);
@@ -2080,7 +2080,7 @@ impl Controller {
     fn install_external_sdk(&self, url: QString) {
         let url = url.to_string();
         let filename = if url == "ffmpeg_gpl" { url.clone() } else { filesystem::get_filename(&url) };
-        let progress = util::qt_queued_callback_mut(self, move |this, (percent, sdk_name, error_string): (f64, &'static str, String)| {
+        let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (percent, sdk_name, error_string): (f64, &'static str, String)| {
             this.external_sdk_progress(percent, QString::from(sdk_name), QString::from(error_string), QString::from(url.clone()));
         });
         crate::external_sdk::install(&filename, progress);
@@ -2105,7 +2105,7 @@ impl Controller {
         }
         let first_url = file_list.first().unwrap().clone();
         let out = output_url.clone();
-        let progress = util::qt_queued_callback_mut(self, move |this, (percent, error_string): (f64, String)| {
+        let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (percent, error_string): (f64, String)| {
             this.mp4_merge_progress(percent, QString::from(error_string), QString::from(out.as_str()));
         });
         core::run_threaded(move || {
@@ -2299,10 +2299,10 @@ impl Controller {
         let folder_url = util::qurl_to_encoded(folder_url);
         let frame_count = self.stabilizer.params.read().frame_count;
 
-        let progress = util::qt_queued_callback_mut(self, |this, (ready, total): (usize, usize)| {
+        let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (ready, total): (usize, usize)| {
             this.stmap_progress(ready as f64 / total as f64, ready, total);
         });
-        let err = util::qt_queued_callback_mut(self, |this, msg: String| {
+        let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, msg: String| {
             this.error(QString::from("An error occured: %1"), QString::from(msg), QString::default());
         });
 
@@ -2353,7 +2353,7 @@ impl Controller {
             let result = match command.as_ref() {
                 "install" | "latest_version" => {
                     let command2 = QString::from(command.clone());
-                    let signal = util::qt_queued_callback_mut(self, move |this, r: String| {
+                    let signal = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, r: String| {
                         this.nle_plugins_result(command2.clone(), QString::from(r));
                     });
                     core::run_threaded(move || {
