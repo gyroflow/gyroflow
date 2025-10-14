@@ -1194,9 +1194,9 @@ dependencies = [
 
 [[package]]
 name = "half"
-version = "2.7.0"
+version = "2.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e54c115d4f30f52c67202f079c5f9d8b49db4691f460fdb0b4c2e838261b2ba5"
+checksum = "6ea2d84b969582b4b1864a92dc5d27cd2b77b622a8d79306834f1be5ba20d84b"
 dependencies = [
  "cfg-if",
  "crunchy",
@@ -2903,7 +2903,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.3.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=8e0d229#8e0d22929dd19d59841203d22cb7b1e42f24db32"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=691b260#691b2601aad38f044598314958c4c9d43bbf12f0"
 dependencies = [
  "argh",
  "byteorder",
