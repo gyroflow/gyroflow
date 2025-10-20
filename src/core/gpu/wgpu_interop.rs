@@ -294,7 +294,7 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
                 let row_bytes = buf.size.0 * bpp;
                 let dst_pitch = cuda_mem.vulkan_pitch_alignment; // actual vk::SubresourceLayout.row_pitch
                 let src_pitch = buf.size.2;                      // producer's stride
-                super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size.0, buf.size.1, row_bytes, cuda_mem.device_ptr, dst_pitch, *buffer as CUdeviceptr, src_pitch);
+                super::wgpu_interop_cuda::cuda_2d_copy_on_device(bpp, buf.size.0, buf.size.1, row_bytes, cuda_mem.device_ptr, dst_pitch, *buffer as CUdeviceptr, src_pitch);
                 super::wgpu_interop_cuda::cuda_synchronize();
             }
             if let Some(in_buf) = &in_texture.wgpu_buffer {
@@ -471,7 +471,7 @@ pub fn handle_output_texture_post(device: &wgpu::Device, buf: &BufferDescription
                 let row_bytes = buf.size.0 * bpp;
                 let src_pitch = cuda_mem.vulkan_pitch_alignment; // image row pitch
                 let dst_pitch = buf.size.2;                      // consumer's stride
-                super::wgpu_interop_cuda::cuda_2d_copy_on_device(buf.size.0, buf.size.1, row_bytes, *buffer as CUdeviceptr, dst_pitch, cuda_mem.device_ptr, src_pitch);
+                super::wgpu_interop_cuda::cuda_2d_copy_on_device(bpp, buf.size.0, buf.size.1, row_bytes, *buffer as CUdeviceptr, dst_pitch, cuda_mem.device_ptr, src_pitch);
             }
             super::wgpu_interop_cuda::cuda_synchronize();
         },

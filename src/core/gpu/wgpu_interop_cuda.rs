@@ -124,7 +124,12 @@ pub fn get_current_device_id_by_uuid(adapters: &Vec<wgpu::Adapter>) -> usize {
 
 fn align(a: usize, b: usize) -> usize { ((a + b - 1) / b) * b }
 
-pub fn cuda_2d_copy_on_device(_width: usize, height: usize, row_bytes: usize, dst: CUdeviceptr, dst_pitch: usize, src: CUdeviceptr, src_pitch: usize) {
+pub fn cuda_2d_copy_on_device(bpp: usize, _width: usize, height: usize, mut row_bytes: usize, dst: CUdeviceptr, dst_pitch: usize, src: CUdeviceptr, src_pitch: usize) {
+    if !(row_bytes <= dst_pitch && row_bytes <= src_pitch) {
+        log::error!("cuMemcpy2D_v2: row_bytes ({row_bytes}) exceeds pitch (dst: {dst_pitch}, src: {src_pitch})");
+        let min_pitch = dst_pitch.min(src_pitch);
+        row_bytes = (row_bytes.min(min_pitch) / bpp) * bpp;
+    }
     let desc = CUDA_MEMCPY2D_st {
         Height: height,
         WidthInBytes: row_bytes,
@@ -384,6 +389,8 @@ pub fn create_vk_image_backed_by_cuda_memory(device: &wgpu::Device, size: (usize
 pub fn create_vk_buffer_backed_by_cuda_memory(device: &wgpu::Device, size: (usize, usize, usize)) -> Result<(vk::Buffer, CudaSharedMemory), Box<dyn std::error::Error>> {
     let buffer_size = size.2 * size.1;
     let mut cuda_mem = allocate_shared_cuda_memory(buffer_size)?;
+
+    cuda_mem.vulkan_pitch_alignment = size.2;
 
     let handle_type = if cfg!(target_os = "windows") {
         vk::ExternalMemoryHandleTypeFlags::OPAQUE_WIN32
