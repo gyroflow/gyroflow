@@ -950,14 +950,46 @@ Item {
                     spacing: 5 * dpiScale;
                     enabled: vid.loaded;
                     Button { text: "["; font.bold: true; onClicked: timeline.setTrimStart(timeline.closestTrimRange(timeline.position, true), timeline.position); tooltip: qsTr("Trim start"); transparentOnMobile: true; }
-                    Button { iconName: "chevron-left"; tooltip: qsTr("Previous frame"); onClicked: vid.seekToFrameDelta(-1); transparentOnMobile: true; }
+                    Button {
+                        iconName: "chevron-left";
+                        tooltip: qsTr("Previous frame");
+                        transparentOnMobile: true;
+                        MouseArea {
+                            anchors.fill: parent;
+                            onClicked: mouse => {
+                                if (mouse.modifiers & Qt.ShiftModifier) {
+                                    timeline.jumpToPrevKeyframe("");
+                                } else if (mouse.modifiers & Qt.ControlModifier) {
+                                    vid.seekToFrameDelta(-10);
+                                } else {
+                                    vid.seekToFrameDelta(-1);
+                                }
+                            }
+                        }
+                    }
                     Button {
                         onClicked: { if (vid.playing) vid.pause(); else vid.play(); }
                         tooltip: vid.playing? qsTr("Pause") : qsTr("Play");
                         iconName: vid.playing? "pause" : "play";
                         transparentOnMobile: true;
                     }
-                    Button { iconName: "chevron-right"; tooltip: qsTr("Next frame"); onClicked: vid.seekToFrameDelta(1); transparentOnMobile: true; }
+                    Button {
+                        iconName: "chevron-right";
+                        tooltip: qsTr("Next frame");
+                        transparentOnMobile: true;
+                        MouseArea {
+                            anchors.fill: parent;
+                            onClicked: mouse => {
+                                if (mouse.modifiers & Qt.ShiftModifier) {
+                                    timeline.jumpToNextKeyframe("");
+                                } else if (mouse.modifiers & Qt.ControlModifier) {
+                                    vid.seekToFrameDelta(10);
+                                } else {
+                                    vid.seekToFrameDelta(1);
+                                }
+                            }
+                        }
+                    }
                     Button { text: "]"; font.bold: true; onClicked: timeline.setTrimEnd(timeline.closestTrimRange(timeline.position, false), timeline.position); tooltip: qsTr("Trim end"); transparentOnMobile: true; }
                     Button { visible: isMobile; iconName: "menu"; onClicked: timeline.toggleContextMenu(this); tooltip: qsTr("Show timeline menu"); transparentOnMobile: true; leftPadding: 10 * dpiScale; rightPadding: 10 * dpiScale; }
                 }
