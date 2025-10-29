@@ -1022,7 +1022,7 @@ Item {
 
     Item {
         width: parent.width;
-        anchors.bottom: parent.bottom;
+        anchors.bottom: parent.top;
         ToolTip {
             text: qsTr("%1 to zoom horizontally, %2 to zoom vertically, %3 to pan, double click to reset zoom")
                     .arg("<b>" + qsTr("Scroll") + "</b>")
