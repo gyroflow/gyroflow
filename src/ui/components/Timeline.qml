@@ -1030,6 +1030,7 @@ Item {
                     .arg("<b>" + (Qt.platform.os == "osx"? qsTr("Scroll") : qsTr("Ctrl+Scroll")) + "</b>");
             visible: !isMobile && ma.containsMouse;
             delay: 2000;
+            timeout: 5000;
         }
     }
 }
