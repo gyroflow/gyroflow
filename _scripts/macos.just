@@ -382,7 +382,7 @@ bundle *param:
     # Bundle BRAW and RED SDK
     FrameworksDir={{AppBundle}}/Contents/Frameworks
     if [ ! -f "$FrameworksDir/REDR3D.dylib" ]; then
-        curl -L https://api.gyroflow.xyz/sdk/RED_SDK_MacOS_8.5.1.tar.gz -o tmp.tar.gz
+        curl -L https://api.gyroflow.xyz/sdk/RED_SDK_MacOS_9.1.2.tar.gz -o tmp.tar.gz
         7z x -aoa tmp.tar.gz
         7z x -o"$FrameworksDir/" tmp.tar
         rm tmp.tar tmp.tar.gz

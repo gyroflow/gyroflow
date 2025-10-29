@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::ffi::{ CStr, CString };
 use std::ptr;
+use std::sync::LazyLock;
 use parking_lot::Mutex;
 
 type DeviceType = ffi::AVHWDeviceType;
@@ -68,9 +69,7 @@ impl Drop for HWDevice {
 unsafe impl Sync for HWDevice { }
 unsafe impl Send for HWDevice { }
 
-lazy_static::lazy_static! {
-    static ref DEVICES: Mutex<HashMap<u64, HWDevice>> = Mutex::new(HashMap::new());
-}
+static DEVICES: LazyLock<Mutex<HashMap<u64, HWDevice>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 
 pub fn clear_devices() {
     DEVICES.lock().clear();
@@ -104,6 +103,9 @@ pub fn supported_gpu_backends() -> Vec<String> {
 }
 
 pub unsafe fn pix_formats_to_vec(formats: *const ffi::AVPixelFormat) -> Vec<format::Pixel> {
+    if formats.is_null() {
+        return Vec::new();
+    }
     let mut ret = Vec::new();
     for i in 0..100 {
         let p = unsafe { *formats.offset(i) };
