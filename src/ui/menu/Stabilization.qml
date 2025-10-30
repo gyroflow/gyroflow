@@ -101,11 +101,22 @@ MenuItem {
                 integrationMethod.currentIndex = stab.horizon_lock_integration_method;
             }
 
+            const hasKeyframes = typeof obj.keyframes === "object" && obj.keyframes !== null;
+            const isLockHorizonAmountKeyframed = hasKeyframes && typeof obj.keyframes.LockHorizonAmount === "object";
+            const isLockHorizonRollKeyframed = hasKeyframes && typeof obj.keyframes.LockHorizonRoll === "object";
+            const isLockHorizonPitchKeyframed = hasKeyframes && typeof obj.keyframes.LockHorizonPitch === "object";
+
             horizonCb.checked = (+stab.horizon_lock_amount || 0) > 0;
-            horizonSlider.value = horizonCb.checked? +stab.horizon_lock_amount : 100;
-            horizonRollSlider.value = horizonCb.checked? +stab.horizon_lock_roll : 0;
             lockPitchCb.checked = !!stab.horizon_lock_pitch_enabled;
-            horizonPitchSlider.value = lockPitchCb.checked? +stab.horizon_lock_pitch : 0;
+            if (!isLockHorizonAmountKeyframed) {
+                horizonSlider.value = horizonCb.checked? +stab.horizon_lock_amount : 100;
+            }
+            if (!isLockHorizonRollKeyframed) {
+                horizonRollSlider.value = horizonCb.checked? +stab.horizon_lock_roll : 0;
+            }
+            if (!isLockHorizonPitchKeyframed) {
+                horizonPitchSlider.value = lockPitchCb.checked? +stab.horizon_lock_pitch : 0;
+            }
             Qt.callLater(updateHorizonLock);
 
             if (stab.hasOwnProperty("video_speed")) videoSpeed.value = +stab.video_speed;
