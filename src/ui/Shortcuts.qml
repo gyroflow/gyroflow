@@ -175,12 +175,12 @@ Item {
 
     // Next keyframe
     Shortcut {
-        sequence: "Shift+Right";
+        sequences: ["Shift+Right", "Shift+Page Down"];
         onActivated: videoArea.timeline.jumpToNextKeyframe("");
     }
     // Previous keyframe
     Shortcut {
-        sequence: "Shift+Left";
+        sequences: ["Shift+Left", "Shift+Page Up"];
         onActivated: videoArea.timeline.jumpToPrevKeyframe("");
     }
 
