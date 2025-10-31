@@ -43,7 +43,7 @@ fn get_sdk_path() -> Result<std::path::PathBuf> {
 
 pub fn requires_install(filename: &str) -> bool {
     if filename.to_lowercase().ends_with(".braw") { return !braw::BrawSdk::is_installed(); }
-    if filename.to_lowercase().ends_with(".r3d") { return !r3d::REDSdk::is_installed(); }
+    if filename.to_lowercase().ends_with(".r3d") || filename.to_lowercase().ends_with(".nev") { return !r3d::REDSdk::is_installed(); }
     if filename == "ffmpeg_gpl" { return !FfmpegGpl::is_installed(); }
 
     false
@@ -52,7 +52,7 @@ pub fn requires_install(filename: &str) -> bool {
 pub fn install<F: Fn((f64, &'static str, String)) + Send + Sync + Clone + 'static>(filename: &str, cb: F) {
     let (url, sdk_name) = if filename.to_lowercase().ends_with(".braw") {
         (braw::BrawSdk::get_download_url(), "Blackmagic RAW SDK")
-    } else if filename.to_lowercase().ends_with(".r3d") {
+    } else if filename.to_lowercase().ends_with(".r3d") || filename.to_lowercase().ends_with(".nev") {
         (r3d::REDSdk::get_download_url(), "RED SDK")
     } else if filename == "ffmpeg_gpl" {
         (FfmpegGpl::get_download_url(), "FFmpeg GPL codecs (x264, x265)")

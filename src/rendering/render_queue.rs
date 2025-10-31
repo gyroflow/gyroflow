@@ -1024,7 +1024,7 @@ impl RenderQueue {
                 }
 
                 // Assumes regular filesystem
-                if filename.to_ascii_lowercase().ends_with(".r3d") {
+                if filename.to_ascii_lowercase().ends_with(".r3d") || filename.to_ascii_lowercase().ends_with(".nev") {
                     let mov_url = filesystem::get_file_url(&filesystem::get_folder(&input_file.url), &filesystem::filename_with_extension(&filesystem::get_filename(&input_file.url), "mov"), false);
                     if filesystem::exists(&mov_url) {
                         input_file.url = mov_url.clone();

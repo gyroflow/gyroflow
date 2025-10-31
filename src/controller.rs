@@ -358,7 +358,7 @@ impl Controller {
             let gpu = if self.stabilizer.gpu_decoding.load(SeqCst) { "auto" } else { "no" }; // Disable GPU decoding for BRAW
             custom_decoder = format!("BRAW:gpu={}{}", gpu, options);
         }
-        if filename.to_ascii_lowercase().ends_with("r3d") {
+        if filename.to_ascii_lowercase().ends_with("r3d") || filename.to_ascii_lowercase().ends_with("nev") {
             custom_decoder = format!("R3D:gpu=auto{}", options);
         }
         if !custom_decoder.is_empty() {
@@ -2470,7 +2470,7 @@ impl Filesystem {
         let folder = filesystem::get_folder(&current_url);
         let filename = filesystem::get_filename(&current_url);
 
-        let extensions = [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "braw", "r3d" ];
+        let extensions = [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "braw", "r3d", "nev" ];
 
         let list: Vec<(String, String)> = filesystem::list_folder(&folder)
             .into_iter()

@@ -43,7 +43,7 @@ impl MDKProcessor {
             let gpu = if gpu_edcoding { "auto" } else { "no" }; // Disable GPU decoding for BRAW
             custom_decoder = format!("BRAW:gpu={}{}", gpu, options);
         }
-        if filename.to_ascii_lowercase().ends_with("r3d") {
+        if filename.to_ascii_lowercase().ends_with("r3d") || filename.to_ascii_lowercase().ends_with("nev") {
             format = ffmpeg_next::format::Pixel::BGRA;
             custom_decoder = format!("R3D:gpu=auto{}", options);
         }

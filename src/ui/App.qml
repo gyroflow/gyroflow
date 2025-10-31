@@ -101,7 +101,7 @@ Rectangle {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "jpg", "exr", "dng", "braw", "r3d" ];
+        property var extensions: [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "jpg", "exr", "dng", "braw", "r3d", "nev" ];
 
         title: qsTr("Choose a video file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Video files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
@@ -294,7 +294,7 @@ Rectangle {
 
                         function render(): void {
                             const fname = vidInfo.item.filename.toLowerCase();
-                            if (fname.endsWith('.braw') || (fname.endsWith('.r3d') && !controller.find_redline()) || fname.endsWith('.dng')) {
+                            if (fname.endsWith('.braw') || ((fname.endsWith('.r3d') || fname.endsWith('.nev')) && !controller.find_redline()) || fname.endsWith('.dng')) {
                                 messageBox(Modal.Info, qsTr("This format is not available for rendering.\nThe recommended workflow is to export project file and use one of [video editor plugins] (%1).").replace(/\[(.*?)\]/, '<a href="https://gyroflow.xyz/download#plugins"><font color="' + styleTextColor + '">$1</font></a>').arg("DaVinci Resolve, Adobe Premiere/Ae, Final Cut Pro"), [
                                     { text: qsTr("Ok"), accent: true }
                                 ]);

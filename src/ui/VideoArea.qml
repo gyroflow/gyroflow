@@ -334,7 +334,7 @@ Item {
             folder = filesystem.get_folder(url);
         }
 
-        if (isMobile || filename.toLowerCase().endsWith(".r3d") || filename.toLowerCase().endsWith(".braw")) {
+        if (isMobile || filename.toLowerCase().endsWith(".r3d") || filename.toLowerCase().endsWith(".nev") || filename.toLowerCase().endsWith(".braw")) {
             // Preview resolution to 1080p
             if (isCalibrator && calibrator_window.lensCalib) {
                 if (calibrator_window.lensCalib.previewResolution == 0) {
