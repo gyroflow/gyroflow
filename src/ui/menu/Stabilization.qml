@@ -549,6 +549,55 @@ MenuItem {
         }
     }
 
+    CheckBoxWithContent {
+        id: flEnable;
+        text: qsTr("Stabilize focal length");
+
+        cb.checked: controller.focal_length_smoothing_enabled;
+        cb.onCheckedChanged: controller.focal_length_smoothing_enabled = cb.checked;
+
+        Label {
+            text: qsTr("Focal length smoothing");
+            position: Label.LeftPosition;
+            SliderWithField {
+                id: flStrength;
+                from: 0;
+                to: 1;
+                precision: 2;
+                width: parent.width;
+                value: controller.focal_length_smoothing_strength;
+                defaultValue: 0.5;
+                onValueChanged: controller.focal_length_smoothing_strength = value;
+            }
+        }
+
+        Label {
+            text: qsTr("Focal length time window");
+            position: Label.LeftPosition;
+            SliderWithField {
+                id: flTimeWindow;
+                from: 0.1;
+                to: 5.0;
+                precision: 2;
+                width: parent.width;
+                value: controller.focal_length_time_window;
+                defaultValue: 1.0;
+                unit: qsTr("s");
+                onValueChanged: controller.focal_length_time_window = value;
+            }
+        }
+
+        CheckBox {
+            id: flShowPlot;
+            text: qsTr("Show focal length plot");
+            checked: false;
+            onCheckedChanged: {
+                window.videoArea.timeline.chart.setAxisVisible(10, checked);
+                window.videoArea.timeline.chart.setAxisVisible(11, checked);
+            }
+        }
+    }
+
     AdvancedSection {
         InfoMessageSmall {
             id: fovWarning;

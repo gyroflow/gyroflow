@@ -50,6 +50,8 @@ pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)
 
     let fov_estimator = fov_iterative::FovIterative::new(&compute_params, org_output_size);
     let mut fov_values = fov_estimator.compute(timestamps, &compute_params.trim_ranges);
+    let debug_points = fov_estimator.get_debug_points();
+    
     let (final_fovs, final_fovs_minimal) = if compute_params.adaptive_zoom_window < -0.9 {
         // Static zoom
         let fov_minimal = fov_values.clone();
@@ -64,7 +66,7 @@ pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)
         // Disabled zoom
         (vec![1.0; fov_values.len()], fov_values)
     };
-    (final_fovs, final_fovs_minimal, fov_estimator.get_debug_points())
+    (final_fovs, final_fovs_minimal, debug_points)
 }
 
 pub fn get_checksum(compute_params: &ComputeParams) -> u64 {
@@ -86,6 +88,24 @@ pub fn get_checksum(compute_params: &ComputeParams) -> u64 {
     }
     hasher.write_u64(compute_params.video_rotation.to_bits());
     hasher.write_u64(compute_params.adaptive_zoom_window.to_bits());
+    hasher.write_u8(if compute_params.focal_length_smoothing_enabled { 1 } else { 0 });
+    hasher.write_u64(compute_params.focal_length_smoothing_strength.to_bits());
+    hasher.write_u64(compute_params.focal_length_time_window.to_bits());
+    // Include focal length data arrays to ensure recalculation when they change
+    for fl in &compute_params.focal_lengths {
+        if let Some(val) = fl {
+            hasher.write_u64(val.to_bits());
+        } else {
+            hasher.write_u64(0);
+        }
+    }
+    for fl in &compute_params.smoothed_focal_lengths {
+        if let Some(val) = fl {
+            hasher.write_u64(val.to_bits());
+        } else {
+            hasher.write_u64(0);
+        }
+    }
 
     hasher.finish()
 }

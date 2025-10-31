@@ -866,6 +866,7 @@ Item {
                 }
             }
             function onCompute_progress(id: real, progress: real): void {
+                chartUpdateTimer.axes = true;
                 chartUpdateTimer.start();
             }
         }

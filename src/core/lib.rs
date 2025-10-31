@@ -411,6 +411,33 @@ impl StabilizationManager {
         false
     }
 
+    pub fn extract_focal_lengths(compute_params: &ComputeParams) -> Vec<Option<f64>> {
+        use crate::util::MapClosest;
+        
+        let gyro = compute_params.gyro.read();
+        let file_metadata = gyro.file_metadata.read();
+        
+        // If no lens params, return empty
+        if file_metadata.lens_params.is_empty() {
+            return vec![];
+        }
+        
+        let mut focal_lengths = Vec::with_capacity(compute_params.frame_count);
+        
+        for frame in 0..compute_params.frame_count {
+            let timestamp_ms = crate::timestamp_at_frame(frame as i32, compute_params.scaled_fps);
+            let timestamp_us = (timestamp_ms * 1000.0).round() as i64;
+            
+            // Try to get focal length from lens_params (within 100ms window)
+            let focal_length = file_metadata.lens_params.get_closest(&timestamp_us, 100000)
+                .and_then(|val| val.focal_length.map(|fl| fl as f64));
+            
+            focal_lengths.push(focal_length);
+        }
+        
+        focal_lengths
+    }
+
     pub fn recompute_adaptive_zoom_static(compute_params: &ComputeParams, params: &RwLock<StabilizationParams>) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>) {
         let (frames, fps, method) = {
             let params = params.read();
@@ -578,6 +605,26 @@ impl StabilizationManager {
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
             if smoothing_changed || zooming::get_checksum(&params) != zooming_checksum.load(SeqCst) {
+                // Extract and smooth focal lengths BEFORE FOV calculation
+                // so they can be used during the iterative FOV estimation
+                let focal_lengths = Self::extract_focal_lengths(&params);
+                if !focal_lengths.is_empty() {
+                    let (smoothing_enabled, smoothing_strength, time_window) = {
+                        let sp = stabilization_params.read();
+                        (sp.focal_length_smoothing_enabled, sp.focal_length_smoothing_strength, sp.focal_length_time_window)
+                    };
+                    
+                    let window_frames = (params.scaled_fps * time_window).round() as usize;
+                    let smoothed_focal_lengths = if smoothing_enabled {
+                        crate::smoothing::focal_length::smooth_focal_lengths_gaussian(&focal_lengths, smoothing_strength, window_frames)
+                    } else {
+                        focal_lengths.clone()
+                    };
+                    
+                    params.focal_lengths = focal_lengths.clone();
+                    params.smoothed_focal_lengths = smoothed_focal_lengths.clone();
+                }
+
                 let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
                 params.fovs = fovs;
                 params.minimal_fovs = minimal_fovs;
@@ -589,6 +636,13 @@ impl StabilizationManager {
                     stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                     stab_params.minimal_fovs = params.minimal_fovs.clone();
                     stab_params.zooming_debug_points = debug_points;
+                    
+                    // Store focal length data
+                    if !params.focal_lengths.is_empty() {
+                        stab_params.focal_lengths = params.focal_lengths.clone();
+                        stab_params.smoothed_focal_lengths = params.smoothed_focal_lengths.clone();
+                    }
+                    
                     zooming_checksum.store(zooming::get_checksum(&params), SeqCst);
                     (
                         stab_params.max_zoom.unwrap_or(0.0),
@@ -648,18 +702,44 @@ impl StabilizationManager {
                             lib_gyro.smoothing_status = smoothing.get_status_json();
                         }
 
+                        // Extract and smooth focal lengths BEFORE FOV calculation for max zoom iterations
+                        let focal_lengths = Self::extract_focal_lengths(&params);
+                        if !focal_lengths.is_empty() {
+                            let (smoothing_enabled, smoothing_strength, time_window) = {
+                                let sp = stabilization_params.read();
+                                (sp.focal_length_smoothing_enabled, sp.focal_length_smoothing_strength, sp.focal_length_time_window)
+                            };
+                            
+                            let window_frames = (params.scaled_fps * time_window).round() as usize;
+                            let smoothed_focal_lengths = if smoothing_enabled {
+                                crate::smoothing::focal_length::smooth_focal_lengths_gaussian(&focal_lengths, smoothing_strength, window_frames)
+                            } else {
+                                focal_lengths.clone()
+                            };
+                            
+                            params.focal_lengths = focal_lengths.clone();
+                            params.smoothed_focal_lengths = smoothed_focal_lengths.clone();
+                        }
+
                         // Zooming
                         let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
                         params.fovs = fovs;
                         params.minimal_fovs = minimal_fovs;
 
                         if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
-
+                        
                         {
                             let mut stab_params = stabilization_params.write();
                             stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                             stab_params.minimal_fovs = params.minimal_fovs.clone();
                             stab_params.zooming_debug_points = debug_points;
+                            
+                            // Store focal length data
+                            if !params.focal_lengths.is_empty() {
+                                stab_params.focal_lengths = params.focal_lengths.clone();
+                                stab_params.smoothed_focal_lengths = params.smoothed_focal_lengths.clone();
+                            }
+                            
                             zooming_checksum.store(zooming::get_checksum(&params), SeqCst);
                         }
                     }
