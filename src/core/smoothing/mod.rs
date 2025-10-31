@@ -6,6 +6,7 @@ pub mod none;
 pub mod plain;
 pub mod fixed;
 pub mod default_algo;
+pub mod focal_length;
 
 pub use nalgebra::*;
 use super::gyro_source::{ TimeQuat, Quat64 };

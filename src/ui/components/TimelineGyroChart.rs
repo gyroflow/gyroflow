@@ -52,7 +52,7 @@ pub struct TimelineGyroChart {
 
     viewMode: qt_property!(u32; WRITE setViewMode NOTIFY viewModeChanged),
 
-    series: [Series; 4+4+1+1],
+    series: [Series; 4+4+1+1+2], // +2 for raw FL and smoothed FL
 
     sync_points: BTreeMap<i64, (f64, f64)>, // timestamp, (offset, fitted offset)
 
@@ -67,6 +67,8 @@ pub struct TimelineGyroChart {
     org_sync_results: Vec<ChartData<3>>,
     sync_quats: Vec<ChartData<4>>,
     org_sync_quats: Vec<ChartData<4>>,
+    focal_lengths: Vec<ChartData<1>>,
+    smoothed_focal_lengths: Vec<ChartData<1>>,
 
     gyro_max: Option<f64>,
     duration_ms: f64,
@@ -424,6 +426,17 @@ impl TimelineGyroChart {
                     values: [min_fov / (fov * fov_scale)]
                 }
             }).collect();
+
+            // Populate focal length series
+            let ts = |i: usize| (gyroflow_core::timestamp_at_frame(i as i32, fps) * 1000.0).round() as i64;
+            self.focal_lengths = params.focal_lengths.iter().enumerate()
+                .filter_map(|(i, v)| v.map(|x| ChartData { timestamp_us: ts(i), values: [x] }))
+                .collect();
+            self.smoothed_focal_lengths = params.smoothed_focal_lengths.iter().enumerate()
+                .filter_map(|(i, v)| v.map(|x| ChartData { timestamp_us: ts(i), values: [x] }))
+                .collect();
+            Self::normalize_height(&mut self.focal_lengths, None);
+            Self::normalize_height(&mut self.smoothed_focal_lengths, None);
         }
 
         self.update_data(series);
@@ -489,6 +502,12 @@ impl TimelineGyroChart {
         self.series[8].data = Self::get_serie_vector(&self.fovs, 0);
         self.series[8].is_fovs = true;
 
+        // New focal length series
+        self.series[10].data = Self::get_serie_vector(&self.focal_lengths, 0);
+        self.series[10].is_optflow = false;  // Don't use optflow rendering
+        self.series[11].data = Self::get_serie_vector(&self.smoothed_focal_lengths, 0);
+        self.series[11].is_optflow = false;  // Don't use optflow rendering
+
         self.update();
     }
 
@@ -528,6 +547,10 @@ impl QQuickItem for TimelineGyroChart {
         self.series[6].visible = true;
 
         self.series[8].visible = true;
+
+        // New: start hidden
+        self.series[10].visible = false;
+        self.series[11].visible = false;
     }
 
     fn geometry_changed(&mut self, _new: QRectF, _old: QRectF) {
@@ -562,6 +585,10 @@ impl QQuickPaintedItem for TimelineGyroChart {
         if self.series[7].visible { self.drawAxis(p, 7, colors[7]); } // Sync Angle
 
         if self.series[8].visible { self.drawOverlay(p, 8, colors[8]); } // FOVs - zooming amount
+
+        // New draws for focal length
+        if self.series[10].visible { self.drawAxis(p, 10, "#ff6600"); } // Raw focal length (orange/darker)
+        if self.series[11].visible { self.drawAxis(p, 11, "#cccc66"); } // Smoothed focal length (yellow/brighter, on top)
 
         if self.series[9].visible { self.drawSyncPoints(p); } // Sync points and line fit
     }
