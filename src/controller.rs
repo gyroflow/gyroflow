@@ -2083,7 +2083,8 @@ impl Controller {
         let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (percent, sdk_name, error_string): (f64, &'static str, String)| {
             this.external_sdk_progress(percent, QString::from(sdk_name), QString::from(error_string), QString::from(url.clone()));
         });
-        crate::external_sdk::install(&filename, progress);
+        let sdkbase = gyroflow_core::settings::get_str("sdkBase", "");
+        crate::external_sdk::install(&filename, &sdkbase, progress);
     }
 
     fn mp4_merge(&self, file_list: QStringList, output_folder: QUrl, output_filename: QString) {
@@ -2357,8 +2358,9 @@ impl Controller {
                         this.nle_plugins_result(command2.clone(), QString::from(r));
                     });
                     core::run_threaded(move || {
+                        let plugins_base = gyroflow_core::settings::get_str("pluginsBase", "");
                         let result = match command.as_ref() {
-                            "install" => crate::nle_plugins::install(&typ),
+                            "install" => crate::nle_plugins::install(&typ, plugins_base),
                             "latest_version" => crate::nle_plugins::latest_version().ok_or(std::io::Error::new(std::io::ErrorKind::Other, "Failed to check version")),
                             _ => Err(std::io::Error::new(std::io::ErrorKind::Other, format!("Unknown command {command}")))
                         };
