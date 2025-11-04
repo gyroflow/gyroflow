@@ -731,6 +731,11 @@ Item {
             }
             additional = JSON.stringify(additional);
 
+            // Natural sort the URLs
+            const ne = str => str.toString().replace(/\d+/g, n => n.padStart(8, "0"));
+            const nc = (a,b) => ne(a).localeCompare(ne(b));
+            urls.sort(nc);
+
             for (const url of urls) {
                 const job_id = render_queue.add_file(url.toString(), "", additional);
                 loader.pendingJobs[job_id] = true;
