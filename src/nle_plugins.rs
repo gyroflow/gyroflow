@@ -147,8 +147,11 @@ fn copy_files(tempdir: &str, extract_path: &str, typ: &str) -> io::Result<()> {
     }
 }
 
-pub fn install(typ: &str) -> io::Result<String> {
-    let nightly_base = "https://nightly.link/gyroflow/gyroflow-plugins/workflows/release/main/";
+pub fn install(typ: &str, plugins_base: String) -> io::Result<String> {
+    let mut nightly_base = "https://nightly.link/gyroflow/gyroflow-plugins/workflows/release/main/";
+    if !plugins_base.is_empty() {
+        nightly_base = &plugins_base;
+    }
     let release_base = "https://github.com/gyroflow/gyroflow-plugins/releases/latest/download/";
     let (download_url, extract_path) = match typ {
         "openfx" => {

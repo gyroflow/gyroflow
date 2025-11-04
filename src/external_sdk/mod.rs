@@ -49,13 +49,13 @@ pub fn requires_install(filename: &str) -> bool {
     false
 }
 
-pub fn install<F: Fn((f64, &'static str, String)) + Send + Sync + Clone + 'static>(filename: &str, cb: F) {
+pub fn install<F: Fn((f64, &'static str, String)) + Send + Sync + Clone + 'static>(filename: &str,sdkbase: &str,cb: F) {
     let (url, sdk_name) = if filename.to_lowercase().ends_with(".braw") {
-        (braw::BrawSdk::get_download_url(), "Blackmagic RAW SDK")
+        (braw::BrawSdk::get_download_url(sdkbase), "Blackmagic RAW SDK")
     } else if filename.to_lowercase().ends_with(".r3d") || filename.to_lowercase().ends_with(".nev") {
-        (r3d::REDSdk::get_download_url(), "RED SDK")
+        (r3d::REDSdk::get_download_url(sdkbase), "RED SDK")
     } else if filename == "ffmpeg_gpl" {
-        (FfmpegGpl::get_download_url(), "FFmpeg GPL codecs (x264, x265)")
+        (FfmpegGpl::get_download_url(sdkbase), "FFmpeg GPL codecs (x264, x265)")
     } else {
         (None, "")
     };

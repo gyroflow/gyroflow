@@ -16,15 +16,21 @@ impl FfmpegGpl {
         true
     }
 
-    pub fn get_download_url() -> Option<&'static str> {
-        if cfg!(target_os = "windows") {
-            Some("https://api.gyroflow.xyz/sdk/ffmpeg_gpl_Windows.tar.gz")
+    pub fn get_download_url(sdk_base: &str) -> Option<String> {
+        let filename = if cfg!(target_os = "windows") {
+            "ffmpeg_gpl_Windows.tar.gz"
         } else if cfg!(target_os = "macos") {
-            Some("https://api.gyroflow.xyz/sdk/ffmpeg_gpl_MacOS.tar.gz")
+            "ffmpeg_gpl_MacOS.tar.gz"
         } else if cfg!(target_os = "linux") {
-            Some("https://api.gyroflow.xyz/sdk/ffmpeg_gpl_Linux.tar.gz")
+            "ffmpeg_gpl_Linux.tar.gz"
         } else {
-            None
+            return None;
+        };
+
+        if !sdk_base.is_empty() {
+            Some(format!("{}/{}", sdk_base.trim_end_matches('/'), filename))
+        } else {
+            Some(format!("https://api.gyroflow.xyz/sdk/{}", filename))
         }
     }
 }
