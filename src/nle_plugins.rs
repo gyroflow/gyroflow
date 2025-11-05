@@ -224,6 +224,7 @@ pub fn is_nle_installed(typ: &str) -> bool {
                 Path::new("C:/Program Files/VEGAS").exists()
             } else {
                 Path::new("/Applications/DaVinci Resolve/").exists() ||
+                Path::new("/Applications/DaVinci Resolve.app/").exists() ||
                 Path::new("/Library/OFX/Plugins").exists()
             }
         }
@@ -233,7 +234,9 @@ pub fn is_nle_installed(typ: &str) -> bool {
             } else {
                 (2019..(Utc::now().year()+1)).any(|y| {
                     Path::new(&format!("/Applications/Adobe Premiere Pro {y}/")).exists() ||
-                    Path::new(&format!("/Applications/Adobe After Effects {y}/")).exists()
+                    Path::new(&format!("/Applications/Adobe After Effects {y}/")).exists() ||
+                    Path::new(&format!("/Applications/Adobe Premiere Pro {y}.app/")).exists() ||
+                    Path::new(&format!("/Applications/Adobe After Effects {y}.app/")).exists()
                 })
             }
         }
