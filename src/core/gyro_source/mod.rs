@@ -4,6 +4,7 @@
 mod file_metadata;
 mod imu_transforms;
 mod sony;
+mod canon;
 pub mod splines;
 pub use file_metadata::*;
 pub use imu_transforms::*;
@@ -190,6 +191,21 @@ impl GyroSource {
                         if let Some(v) = im.get_t(TagId::CaptureAreaSize) as Option<&(f32, f32)> { lens_info.capture_area_size = Some(*v); }
                         if let Some(v) = im.get_t(TagId::CaptureAreaOrigin) as Option<&(f32, f32)> { lens_info.capture_area_origin = Some(*v); }
                         if let Some(v) = im.get_t(TagId::SensorSizePixels) as Option<&(u32, u32)> { lens_info.sensor_size_px = Some(*v); }
+                        if let Some(w) = im.get_t(TagId::PixelWidth) as Option<&u32> {
+                            if let Some(h) = im.get_t(TagId::PixelHeight) as Option<&u32> {
+                                lens_info.capture_area_origin = Some((0.0, 0.0));
+                                lens_info.sensor_size_px = Some((*w, *h));
+                                lens_info.capture_area_size = Some((*w as f32, *h as f32));
+
+                                if let Some(def) = tag_map.get(&GroupId::Default) {
+                                    if let Some(sw) = def.get_t(TagId::SensorWidth) as Option<&f32> {
+                                        if let Some(sh) = def.get_t(TagId::SensorHeight) as Option<&f32> {
+                                            lens_info.pixel_pitch = Some(((*sw * 1000000.0 / *w as f32).round() as u32, (*sh * 1000000.0 / *h as f32).round() as u32));
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     if let Some(map) = tag_map.get(&GroupId::Lens) {
                         if let Some(v) = map.get_t(TagId::Data) as Option<&serde_json::Value> {
@@ -204,6 +220,14 @@ impl GyroSource {
                         }
                         if let Some(v) = map.get_t(TagId::FocusDistance) as Option<&f32> {
                             lens_info.focus_distance = Some(*v);
+                        }
+                        if let Some(v) = map.get_t(TagId::PixelFocalLength) as Option<&f32> {
+                            lens_info.pixel_focal_length = Some(*v);
+                        }
+                        if let Some(v) = map.get_t(TagId::PixelFocalLength) as Option<&Vec<f32>> {
+                            if let Some(v) = v.first() {
+                                lens_info.pixel_focal_length = Some(*v);
+                            }
                         }
                     }
                     if lens_info.focal_length.is_none() {
@@ -351,6 +375,7 @@ impl GyroSource {
         }
 
         let fr = input.frame_readout_time().unwrap_or_default();
+        let frame_readout_time = if fr != 0.0 { Some(if fr.abs() > 10000.0 { fr.abs() - 10000.0 } else { fr.abs() }) } else { None };
 
         let mut md = FileMetadata {
             imu_orientation,
@@ -361,7 +386,7 @@ impl GyroSource {
             lens_positions,
             lens_params,
             raw_imu,
-            frame_readout_time: if fr != 0.0 { Some(if fr.abs() > 10000.0 { fr.abs() - 10000.0 } else { fr.abs() }) } else { None },
+            frame_readout_time,
             frame_readout_direction: if fr < 0.0 {
                 if fr.abs() > 10000.0 { ReadoutDirection::RightToLeft } else { ReadoutDirection::BottomToTop }
             } else {
@@ -407,6 +432,16 @@ impl GyroSource {
                     // --------------------------------- Sony ---------------------------------
 
                     // --------------------------------- Sony ---------------------------------
+
+                    // --------------------------------- Canon ---------------------------------
+                    if input.camera_type() == "Canon" {
+                        if let Some(offset) = canon::get_time_offset(&md, &input, tag_map, sample_rate, fps) {
+                            md.per_frame_time_offsets.push(offset);
+                        }
+                        canon::init_lens_profile(&mut md, &input, tag_map, size, info);
+                    }
+                    // --------------------------------- Canon ---------------------------------
+
                     // --------------------------------- Insta360 ---------------------------------
                     // Timing
                     if input.camera_type() == "Insta360" {
