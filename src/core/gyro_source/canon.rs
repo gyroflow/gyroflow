@@ -5,6 +5,31 @@ use telemetry_parser::tags_impl::{ GroupedTagMap, GetWithType, GroupId, TagId };
 use crate::gyro_source::FileMetadata;
 
 pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input, tag_map: &GroupedTagMap, size: (usize, usize), info: &telemetry_parser::util::SampleInfo) {
+
+    if let Some(lens) = tag_map.get(&GroupId::Lens) {
+        if let Some(corrections) = lens.get_t(TagId::Custom("EnabledCorrections".into())) as Option<&Vec<u8>> {
+            if corrections.len() == 4 && corrections[2] == 0 {
+                // No internal distortion correction - use OpenCV params
+                let timestamp_us = (info.timestamp_ms * 1000.0).round() as i64;
+                if let Some(distortion) = lens.get_t(TagId::Distortion) as Option<&Vec<f32>> {
+                    if let Some(lp) = md.lens_params.get_mut(&timestamp_us) {
+                        if distortion.len() == 8 {
+                            lp.distortion_coefficients.clear();
+                            lp.distortion_coefficients.push(distortion[0] as f64); // k1
+                            lp.distortion_coefficients.push(distortion[1] as f64); // k2
+                            lp.distortion_coefficients.push(distortion[6] as f64); // p1
+                            lp.distortion_coefficients.push(distortion[7] as f64); // p2
+                            lp.distortion_coefficients.push(distortion[2] as f64); // k3
+                            lp.distortion_coefficients.push(distortion[3] as f64); // k4
+                            lp.distortion_coefficients.push(distortion[4] as f64); // k5
+                            lp.distortion_coefficients.push(distortion[5] as f64); // k6
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     if md.lens_profile.is_none() {
         if let Some(im) = tag_map.get(&GroupId::Imager) {
             if let Some(_w) = im.get_t(TagId::PixelWidth) as Option<&u32> {

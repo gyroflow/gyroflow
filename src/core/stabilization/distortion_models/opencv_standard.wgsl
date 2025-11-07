@@ -9,7 +9,7 @@ fn undistort_point(pos_param: vec2<f32>) -> vec2<f32> {
     // compensate distortion iteratively
     for (var i: i32 = 0; i < 20; i = i + 1) {
         let r2 = pos.x * pos.x + pos.y * pos.y;
-        let icdist = (1.0 + ((params.k2.w * r2 + params.k2.z) * r2 + params.k2.y) * r2)/(1.0 + ((k2.x * r2 + params.k1.y) * r2 + params.k1.x) * r2);
+        let icdist = (1.0 + ((params.k2.w * r2 + params.k2.z) * r2 + params.k2.y) * r2)/(1.0 + ((params.k2.x * r2 + params.k1.y) * r2 + params.k1.x) * r2);
         if (icdist < 0.0) {
             return vec2<f32>(0.0, 0.0);
         }
