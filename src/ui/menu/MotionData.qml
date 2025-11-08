@@ -38,7 +38,7 @@ MenuItem {
             return;
         }
         lastSelectedFile = url;
-        controller.load_telemetry(url, root.allMetadata, window.videoArea.vid, currentLog.visible && currentLog.currentIndex > 0? currentLog.currentIndex - 1 : -1);
+        controller.load_telemetry(url, root.allMetadata, window.videoArea.vid, currentLog.visible && currentLog.currentIndex > 0? currentLog.currentIndex - 1 : -1, 0);
     }
 
     function loadGyroflow(obj: var): void {

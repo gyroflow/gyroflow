@@ -56,11 +56,14 @@ Item {
         }
 
         let urls = null;
+        let project_version = +obj.version;
 
         if (obj.toString() != '[object Object]') { // obj is url
             urls = controller.get_urls_from_gyroflow_file(obj);
+            project_version = controller.get_version_from_gyroflow_file(obj);
         } else if (obj.project_file) {
             urls = controller.get_urls_from_gyroflow_file(obj.project_file);
+            project_version = controller.get_version_from_gyroflow_file(obj.project_file);
         } else {
             urls = [
                 obj.videofile,
@@ -91,7 +94,7 @@ Item {
             root.pendingQueueJobId = +queueJobId;
             console.log("Loading gyro file", urls[1]);
             window.motionData.lastSelectedFile = urls[1];
-            controller.load_telemetry(urls[1], urls[0] == urls[1] || window.motionData.allMetadata, window.videoArea.vid, -1);
+            controller.load_telemetry(urls[1], urls[0] == urls[1] || window.motionData.allMetadata, window.videoArea.vid, -1, project_version);
             return;
         }
 
@@ -695,7 +698,7 @@ Item {
                         if (root.pendingGyroflowData) {
                             Qt.callLater(root.loadGyroflowData, root.pendingGyroflowData, root.pendingQueueJobId);
                         } else {
-                            controller.load_telemetry(root.loadedFileUrl, true, vid, -1);
+                            controller.load_telemetry(root.loadedFileUrl, true, vid, -1, 0);
                         }
                         vidInfo.loadFromVideoMetadata(md, vid.videoWidth, vid.videoHeight);
                         window.sync.customSyncTimestamps = [];

@@ -1164,7 +1164,7 @@ impl StabilizationManager {
 
         let mut obj = serde_json::json!({
             "title": "Gyroflow data file",
-            "version": 3,
+            "version": 4,
             "app_version": env!("CARGO_PKG_VERSION").to_string(),
             "videofile": input_file.url,
             "calibration_data": self.lens.read().get_json_value().unwrap_or_else(|_| serde_json::json!({})),
@@ -1324,8 +1324,10 @@ impl StabilizationManager {
     }
     pub fn import_gyroflow_data<F: Fn(f64)>(&self, data: &[u8], blocking: bool, url: Option<&str>, progress_cb: F, cancel_flag: Arc<AtomicBool>, is_preset: &mut bool, is_plugin: bool) -> std::result::Result<serde_json::Value, GyroflowCoreError> {
         let mut obj: serde_json::Value = serde_json::from_slice(&data)?;
+        let mut load_options = gyro_source::FileLoadOptions::default();
         if let serde_json::Value::Object(ref mut obj) = obj {
             let mut output_size = None;
+            load_options.project_version = obj.get("version").and_then(|x| x.as_u64()).unwrap_or(2);
             let mut org_video_url = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
             if !org_video_url.is_empty() && !org_video_url.contains("://") {
                 org_video_url = filesystem::path_to_url(&org_video_url);
@@ -1468,12 +1470,12 @@ impl StabilizationManager {
                         let mut gyro = self.gyro.write();
                         gyro.load_from_telemetry(md);
                     } else if filesystem::exists(&gyro_url) && blocking {
-                        if let Err(e) = self.load_gyro_data(&gyro_url, is_main_video, &Default::default(), progress_cb, cancel_flag) {
+                        if let Err(e) = self.load_gyro_data(&gyro_url, is_main_video, &load_options, progress_cb, cancel_flag) {
                             ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_url, e);
                         }
                     }
                 } else if filesystem::exists(&gyro_url) && blocking {
-                    if let Err(e) = self.load_gyro_data(&gyro_url, is_main_video, &Default::default(), progress_cb, cancel_flag) {
+                    if let Err(e) = self.load_gyro_data(&gyro_url, is_main_video, &load_options, progress_cb, cancel_flag) {
                         ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_url, e);
                     }
                 }

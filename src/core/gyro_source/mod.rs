@@ -36,7 +36,8 @@ pub type TimeVec = BTreeMap<i64, Vector3<f64>>; // key is timestamp_us
 
 #[derive(Default, Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct FileLoadOptions {
-    pub sample_index: Option<usize>
+    pub sample_index: Option<usize>,
+    pub project_version: u64,
 }
 
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
@@ -362,8 +363,18 @@ impl GyroSource {
             }
         }
 
-        let raw_imu = util::normalized_imu_interpolated(&input, Some("XYZ".into())).unwrap_or_default();
+        let mut raw_imu = util::normalized_imu_interpolated(&input, Some("XYZ".into())).unwrap_or_default();
 
+        if (input.camera_type() == "RED" || input.camera_type() == "RED RAW") && options.project_version > 0 && options.project_version < 4 { // Legacy gyro offset
+            let mut first_timestamp = None;
+            log::debug!("Legacy project, removing new RED gyro offset");
+            for x in raw_imu.iter_mut() {
+                if first_timestamp.is_none() {
+                    first_timestamp = Some(x.timestamp_ms);
+                }
+                x.timestamp_ms -= first_timestamp.unwrap();
+            }
+        }
         let mut has_accurate_timestamps = input.has_accurate_timestamps();
         if let serde_json::Value::Object(o) = &mut additional_data {
             match o.get("has_accurate_timestamps") {
@@ -432,6 +443,18 @@ impl GyroSource {
                     // --------------------------------- Sony ---------------------------------
 
                     // --------------------------------- Sony ---------------------------------
+
+                    // --------------------------------- RED ---------------------------------
+                    if input.camera_type() == "RED" || input.camera_type() == "RED RAW" {
+                        telemetry_parser::try_block!({
+                            let legacy_offset = options.project_version > 0 && options.project_version < 4;
+                            if !legacy_offset {
+                                let exposure_time = (tag_map.get(&GroupId::Default)?.get_t(TagId::ExposureTime) as Option<&f32>)?;
+                                md.per_frame_time_offsets.push(-(*exposure_time as f64 / 1000.0) / 2.0);
+                            }
+                        });
+                    }
+                    // --------------------------------- RED ---------------------------------
 
                     // --------------------------------- Canon ---------------------------------
                     if input.camera_type() == "Canon" {

@@ -52,7 +52,7 @@ pub struct Controller {
     reset_player: qt_method!(fn(&self, player: QJSValue)),
     load_video: qt_method!(fn(&self, url: QUrl, player: QJSValue)),
     video_file_loaded: qt_method!(fn(&self, player: QJSValue)),
-    load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, sample_index: i32)),
+    load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, sample_index: i32, project_version: u32)),
     load_lens_profile: qt_method!(fn(&mut self, url_or_id: QString)),
     get_preset_contents: qt_method!(fn(&mut self, url_or_id: QString) -> QString),
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool)),
@@ -204,6 +204,7 @@ pub struct Controller {
     init_calibrator: qt_method!(fn(&mut self)),
 
     get_urls_from_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> QStringList),
+    get_version_from_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> u32),
     import_gyroflow_file: qt_method!(fn(&mut self, url: QUrl)),
     import_gyroflow_data: qt_method!(fn(&mut self, data: QString)),
     gyroflow_file_loaded: qt_signal!(obj: QJsonObject),
@@ -698,10 +699,12 @@ impl Controller {
         }
     }
 
-    fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue, sample_index: i32) {
+    fn load_telemetry(&mut self, url: QUrl, is_main_video: bool, player: QJSValue, sample_index: i32, project_version: u32) {
         let url = util::qurl_to_encoded(url);
         let stab = self.stabilizer.clone();
         let filename = filesystem::get_filename(&url);
+        let mut load_options = gyroflow_core::gyro_source::FileLoadOptions::default();
+        load_options.project_version = project_version as _;
 
         if let Some(vid) = player.to_qobject::<MDKVideoItem>() {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
@@ -769,16 +772,15 @@ impl Controller {
                     let additional_obj = additional_data.as_object_mut().unwrap();
                     if is_main_video {
                         // Ignore the error here, video file may not contain the telemetry and it's ok
-                        let _ = stab.load_gyro_data(&url, is_main_video, &Default::default(), progress, cancel_flag);
+                        let _ = stab.load_gyro_data(&url, is_main_video, &load_options, progress, cancel_flag);
 
                         stab.recompute_undistortion();
                     } else {
-                        let mut options = gyroflow_core::gyro_source::FileLoadOptions::default();
                         if sample_index > -1 {
-                            options.sample_index = Some(sample_index as usize);
+                            load_options.sample_index = Some(sample_index as usize);
                         }
 
-                        if let Err(e) = stab.load_gyro_data(&url, is_main_video, &options, progress, cancel_flag) {
+                        if let Err(e) = stab.load_gyro_data(&url, is_main_video, &load_options, progress, cancel_flag) {
                             err(("An error occured: %1".to_string(), e.to_string()));
                         }
                     }
@@ -1261,6 +1263,20 @@ impl Controller {
         QString::from(self.stabilizer.export_gyroflow_data(typ, &additional_data.to_json().to_string(), None).unwrap_or_default())
     }
 
+    fn get_version_from_gyroflow_file(&mut self, url: QUrl) -> u32 {
+        let url = util::qurl_to_encoded(url);
+        let mut version = 0;
+        if let Ok(data) = filesystem::read(&url) {
+            if let Ok(serde_json::Value::Object(obj)) = serde_json::from_slice(&data) {
+                if let Some(v) = obj.get("version").and_then(|x| x.as_u64()) {
+                    version = v as u32;
+                }
+            } else {
+                ::log::error!("Failed to parse json: {}", unsafe { std::str::from_utf8_unchecked(&data) });
+            }
+        }
+        version
+    }
     fn get_urls_from_gyroflow_file(&mut self, url: QUrl) -> QStringList {
         let url = util::qurl_to_encoded(url);
         let mut ret = vec![QString::default(); 2];
