@@ -101,6 +101,16 @@ MenuItem {
                 integrationMethod.currentIndex = stab.horizon_lock_integration_method;
             }
 
+            if (stab.hasOwnProperty("focal_length_smoothing_enabled")) {
+                flEnable.cb.checked = !!stab.focal_length_smoothing_enabled;
+            }
+            if (stab.hasOwnProperty("focal_length_smoothing_strength")) {
+                flStrength.value = +stab.focal_length_smoothing_strength;
+            }
+            if (stab.hasOwnProperty("focal_length_time_window")) {
+                flTimeWindow.value = +stab.focal_length_time_window;
+            }
+
             const hasKeyframes = typeof obj.keyframes === "object" && obj.keyframes !== null;
             const isLockHorizonAmountKeyframed = hasKeyframes && typeof obj.keyframes.LockHorizonAmount === "object";
             const isLockHorizonRollKeyframed = hasKeyframes && typeof obj.keyframes.LockHorizonRoll === "object";
@@ -546,6 +556,46 @@ MenuItem {
             keyframe: "LensCorrectionStrength";
             scaler: 100.0;
             onValueChanged: Qt.callLater(() => { controller.lens_correction_amount = value; });
+        }
+    }
+
+    CheckBoxWithContent {
+        id: flEnable;
+        text: qsTr("Stabilize focal length");
+        visible: controller.has_per_frame_focal_length;
+
+        cb.checked: controller.focal_length_smoothing_enabled;
+        cb.onCheckedChanged: controller.focal_length_smoothing_enabled = cb.checked;
+
+        Label {
+            text: qsTr("Focal length smoothing");
+            position: Label.LeftPosition;
+            SliderWithField {
+                id: flStrength;
+                from: 0;
+                to: 1;
+                precision: 2;
+                width: parent.width;
+                value: controller.focal_length_smoothing_strength;
+                defaultValue: 0.5;
+                onValueChanged: controller.focal_length_smoothing_strength = value;
+            }
+        }
+
+        Label {
+            text: qsTr("Focal length time window");
+            position: Label.LeftPosition;
+            SliderWithField {
+                id: flTimeWindow;
+                from: 0.1;
+                to: 5.0;
+                precision: 2;
+                width: parent.width;
+                value: controller.focal_length_time_window;
+                defaultValue: 1.0;
+                unit: qsTr("s");
+                onValueChanged: controller.focal_length_time_window = value;
+            }
         }
     }
 
