@@ -165,6 +165,7 @@ pub struct Controller {
     gyro_changed: qt_signal!(),
 
     has_gravity_vectors: qt_property!(bool; READ has_gravity_vectors NOTIFY gyro_changed),
+    has_per_frame_focal_length: qt_property!(bool; NOTIFY gyro_changed),
 
     compute_progress: qt_signal!(id: u64, progress: f64),
     sync_progress: qt_signal!(progress: f64, ready: usize, total: usize),
@@ -1206,12 +1207,20 @@ impl Controller {
 
     fn recompute_threaded(&mut self) {
         if self.stabilizer.params.read().duration_ms <= 0.0 { return; }
-        let id = self.stabilizer.recompute_threaded(util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (id, _discarded): (u64, bool)| {
+        let stab = self.stabilizer.clone();
+        let id = self.stabilizer.recompute_threaded(util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (id, _discarded): (u64, bool)| {
             if !this.ongoing_computations.contains(&id) {
                 ::log::error!("Unknown compute_id: {}", id);
             }
             this.ongoing_computations.remove(&id);
             let finished = this.ongoing_computations.is_empty();
+            
+            // Lazy evaluation: Update focal length availability flag only after stabilization is complete
+            if finished {
+                this.has_per_frame_focal_length = !stab.gyro.read().file_metadata.read().lens_params.is_empty();
+                this.gyro_changed();
+            }
+            
             this.compute_progress(id, if finished { 1.0 } else { 0.0 });
         }));
         self.ongoing_computations.insert(id);

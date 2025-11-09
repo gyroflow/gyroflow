@@ -101,6 +101,16 @@ MenuItem {
                 integrationMethod.currentIndex = stab.horizon_lock_integration_method;
             }
 
+            if (stab.hasOwnProperty("focal_length_smoothing_enabled")) {
+                flEnable.cb.checked = !!stab.focal_length_smoothing_enabled;
+            }
+            if (stab.hasOwnProperty("focal_length_smoothing_strength")) {
+                flStrength.value = +stab.focal_length_smoothing_strength;
+            }
+            if (stab.hasOwnProperty("focal_length_time_window")) {
+                flTimeWindow.value = +stab.focal_length_time_window;
+            }
+
             const hasKeyframes = typeof obj.keyframes === "object" && obj.keyframes !== null;
             const isLockHorizonAmountKeyframed = hasKeyframes && typeof obj.keyframes.LockHorizonAmount === "object";
             const isLockHorizonRollKeyframed = hasKeyframes && typeof obj.keyframes.LockHorizonRoll === "object";
@@ -552,6 +562,7 @@ MenuItem {
     CheckBoxWithContent {
         id: flEnable;
         text: qsTr("Stabilize focal length");
+        visible: controller.has_per_frame_focal_length;
 
         cb.checked: controller.focal_length_smoothing_enabled;
         cb.onCheckedChanged: controller.focal_length_smoothing_enabled = cb.checked;
@@ -584,16 +595,6 @@ MenuItem {
                 defaultValue: 1.0;
                 unit: qsTr("s");
                 onValueChanged: controller.focal_length_time_window = value;
-            }
-        }
-
-        CheckBox {
-            id: flShowPlot;
-            text: qsTr("Show focal length plot");
-            checked: false;
-            onCheckedChanged: {
-                window.videoArea.timeline.chart.setAxisVisible(10, checked);
-                window.videoArea.timeline.chart.setAxisVisible(11, checked);
             }
         }
     }
