@@ -128,20 +128,20 @@ pub fn init_device_for_decoding(index: usize, codec: *const ffi::AVCodec, decode
             }
         }
     }
-    if let Some(cuda) = decoders.iter().find(|(_, type_)| *type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA).copied() {
+    if let Some(pos) = decoders.iter().position(|(_, type_)| *type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA) {
         // Move CUDA to first position
-        decoders.remove(cuda.0);
+        let cuda = decoders.remove(pos);
         decoders.insert(0, cuda);
     }
     if gyroflow_core::settings::get_bool("useVulkanEncoder", false) {
-        if let Some(x) = decoders.iter().find(|(_, type_)| *type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VULKAN).copied() {
-            decoders.remove(x.0);
+        if let Some(pos) = decoders.iter().position(|(_, type_)| *type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VULKAN) {
+            let x = decoders.remove(pos);
             decoders.insert(0, x);
         }
     }
     if gyroflow_core::settings::get_bool("useD3D12Encoder", false) {
-        if let Some(x) = decoders.iter().find(|(_, type_)| *type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_D3D12VA).copied() {
-            decoders.remove(x.0);
+        if let Some(pos) = decoders.iter().position(|(_, type_)| *type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_D3D12VA) {
+            let x = decoders.remove(pos);
             decoders.insert(0, x);
         }
     }
