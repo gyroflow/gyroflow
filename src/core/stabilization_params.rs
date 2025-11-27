@@ -117,7 +117,14 @@ pub struct StabilizationParams {
     pub of_method: u32,
     pub current_device: i32,
 
-    pub zooming_debug_points: std::collections::BTreeMap<i64, Vec<(f64, f64)>>
+    pub zooming_debug_points: std::collections::BTreeMap<i64, Vec<(f64, f64)>>,
+
+    // Focal length smoothing
+    pub focal_lengths: Vec<Option<f64>>,
+    pub smoothed_focal_lengths: Vec<Option<f64>>,
+    pub focal_length_smoothing_enabled: bool,
+    pub focal_length_smoothing_strength: f64,
+    pub focal_length_time_window: f64,
 }
 impl Default for StabilizationParams {
     fn default() -> Self {
@@ -179,6 +186,12 @@ impl Default for StabilizationParams {
             frame_count: 0,
             duration_ms: 0.0,
             video_created_at: None,
+
+            focal_lengths: vec![],
+            smoothed_focal_lengths: vec![],
+            focal_length_smoothing_enabled: false,
+            focal_length_smoothing_strength: 0.5,
+            focal_length_time_window: 1.0,
         }
     }
 }
@@ -295,6 +308,8 @@ impl StabilizationParams {
             show_safe_area:            self.show_safe_area,
             max_zoom:                  self.max_zoom,
             max_zoom_iterations:       self.max_zoom_iterations,
+            focal_length_smoothing_enabled: self.focal_length_smoothing_enabled,
+            focal_length_smoothing_strength: self.focal_length_smoothing_strength,
             ..Self::default()
         };
     }
