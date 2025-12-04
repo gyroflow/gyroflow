@@ -225,6 +225,8 @@ pub fn is_nle_installed(typ: &str) -> bool {
             } else {
                 Path::new("/Applications/DaVinci Resolve/").exists() ||
                 Path::new("/Applications/DaVinci Resolve.app/").exists() ||
+                Path::new("/Applications/DaVinci Resolve Studio/").exists() ||
+                Path::new("/Applications/DaVinci Resolve Studio.app/").exists() ||
                 Path::new("/Library/OFX/Plugins").exists()
             }
         }
