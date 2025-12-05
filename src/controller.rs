@@ -131,6 +131,10 @@ pub struct Controller {
     zooming_center_x: qt_property!(f64; WRITE set_zooming_center_x),
     zooming_center_y: qt_property!(f64; WRITE set_zooming_center_y),
     zooming_method: qt_property!(i32; WRITE set_zooming_method),
+    
+    focal_length_smoothing_enabled: qt_property!(bool; READ get_focal_length_smoothing_enabled WRITE set_focal_length_smoothing_enabled),
+    focal_length_smoothing_strength: qt_property!(f64; READ get_focal_length_smoothing_strength WRITE set_focal_length_smoothing_strength),
+    focal_length_time_window: qt_property!(f64; READ get_focal_length_time_window WRITE set_focal_length_time_window),
 
     additional_rotation_x: qt_property!(f64; WRITE set_additional_rotation_x),
     additional_rotation_y: qt_property!(f64; WRITE set_additional_rotation_y),
@@ -161,6 +165,7 @@ pub struct Controller {
     gyro_changed: qt_signal!(),
 
     has_gravity_vectors: qt_property!(bool; READ has_gravity_vectors NOTIFY gyro_changed),
+    has_per_frame_focal_length: qt_property!(bool; NOTIFY gyro_changed),
 
     compute_progress: qt_signal!(id: u64, progress: f64),
     sync_progress: qt_signal!(progress: f64, ready: usize, total: usize),
@@ -1204,12 +1209,20 @@ impl Controller {
 
     fn recompute_threaded(&mut self) {
         if self.stabilizer.params.read().duration_ms <= 0.0 { return; }
-        let id = self.stabilizer.recompute_threaded(util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (id, _discarded): (u64, bool)| {
+        let stab = self.stabilizer.clone();
+        let id = self.stabilizer.recompute_threaded(util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (id, _discarded): (u64, bool)| {
             if !this.ongoing_computations.contains(&id) {
                 ::log::error!("Unknown compute_id: {}", id);
             }
             this.ongoing_computations.remove(&id);
             let finished = this.ongoing_computations.is_empty();
+            
+            // Lazy evaluation: Update focal length availability flag only after stabilization is complete
+            if finished {
+                this.has_per_frame_focal_length = !stab.gyro.read().file_metadata.read().lens_params.is_empty();
+                this.gyro_changed();
+            }
+            
             this.compute_progress(id, if finished { 1.0 } else { 0.0 });
         }));
         self.ongoing_computations.insert(id);
@@ -2087,6 +2100,30 @@ impl Controller {
 
     fn has_gravity_vectors(&self) -> bool {
         self.stabilizer.gyro.read().file_metadata.read().gravity_vectors.as_ref().map(|v| !v.is_empty()).unwrap_or_default()
+    }
+
+    fn get_focal_length_smoothing_enabled(&self) -> bool {
+        self.stabilizer.params.read().focal_length_smoothing_enabled
+    }
+    fn set_focal_length_smoothing_enabled(&mut self, v: bool) {
+        self.stabilizer.params.write().focal_length_smoothing_enabled = v;
+        self.request_recompute();
+    }
+
+    fn get_focal_length_smoothing_strength(&self) -> f64 {
+        self.stabilizer.params.read().focal_length_smoothing_strength
+    }
+    fn set_focal_length_smoothing_strength(&mut self, v: f64) {
+        self.stabilizer.params.write().focal_length_smoothing_strength = v.clamp(0.0, 1.0);
+        self.request_recompute();
+    }
+
+    fn get_focal_length_time_window(&self) -> f64 {
+        self.stabilizer.params.read().focal_length_time_window
+    }
+    fn set_focal_length_time_window(&mut self, v: f64) {
+        self.stabilizer.params.write().focal_length_time_window = v.clamp(0.1, 5.0);
+        self.request_recompute();
     }
 
     fn check_external_sdk(&self, filename: QString) -> bool {
