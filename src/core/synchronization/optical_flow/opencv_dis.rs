@@ -120,13 +120,15 @@ impl OpticalFlowTrait for OFOpenCVDis {
                 Ok((points_a, points_b))
             }();
 
-            self.used.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-            next.used.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-
             match result {
                 Ok(res) => {
-                    self.matched_points.write().insert(next.timestamp_us, res.clone());
-                    return Some(res);
+                    // Only store and return if we have enough valid points (>15)
+                    if res.0.len() >= 10 && res.1.len() >= 10 {
+                        self.used.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                        next.used.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                        self.matched_points.write().insert(next.timestamp_us, res.clone());
+                        return Some(res);
+                    }
                 },
                 Err(e) => {
                     log::error!("OpenCV error: {:?}", e);
