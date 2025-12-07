@@ -547,8 +547,7 @@ Rectangle {
             const clickedButton = +settings.value("dontShowAgain-" + identifier, 0) - 1;
             if (identifier == "open-rdc-folder") {
                 Qt.callLater(function() {
-                    if (el)
-                        el.clicked(clickedButton, true);
+                    buttons[0].clicked();
                 });
             }
             if (buttons.length == 1) {
