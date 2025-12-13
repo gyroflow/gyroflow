@@ -14,7 +14,7 @@
     <key>CFBundleSupportedPlatforms</key>          <array><string>MacOSX</string></array>
     <key>CFBundleVersion</key>                     <string>1.6.3</string>
     <key>LSArchitecturePriority</key>              <array><string>arm64</string><string>x86_64</string></array>
-    <key>LSMinimumSystemVersion</key>              <string>10.14</string>
+    <key>LSMinimumSystemVersion</key>              <string>10.15</string>
     <key>LSRequiresNativeExecution</key>           <true/>
     <key>NSHighResolutionCapable</key>             <true/>
     <key>ITSAppUsesNonExemptEncryption</key>       <false/>

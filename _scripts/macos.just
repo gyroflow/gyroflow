@@ -150,7 +150,7 @@ deploy *param:
         #export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/usr/lib/"
         export DYLD_FALLBACK_LIBRARY_PATH="$(xcode-select --print-path)/Toolchains/XcodeDefault.xctoolchain/usr/lib/"
         #export LD_LIBRARY_PATH="$PROJECT_DIR/ext/{{QtVersion}}/macos/lib"
-        export MACOSX_DEPLOYMENT_TARGET="10.14"
+        export MACOSX_DEPLOYMENT_TARGET="10.15"
 
         export FFMPEG_DIR=$PROJECT_DIR/ext/ffmpeg-x86_64
         export OPENCV_LINK_PATHS=$OPENCV_DIR/x64-osx/lib
@@ -406,7 +406,7 @@ bundle *param:
     PlistBuddy -x -c "Add :com.apple.security.temporary-exception.files.home-relative-path.read-write array" {{AppBundle}}/../entitlements.xcent
     PlistBuddy -x -c "Add :com.apple.security.temporary-exception.files.home-relative-path.read-write:0 string /Library/Application Support/Gyroflow/" {{AppBundle}}/../entitlements.xcent
 
-    actool {{ProjectDir}}/_deployment/ios/Resources/Images.xcassets --compile {{AppBundle}}/Contents --platform macosx --minimum-deployment-target 10.14 --app-icon AppIcon --output-partial-info-plist {{AppBundle}}/../AppIcon.plist
+    actool {{ProjectDir}}/_deployment/ios/Resources/Images.xcassets --compile {{AppBundle}}/Contents --platform macosx --minimum-deployment-target 10.15 --app-icon AppIcon --output-partial-info-plist {{AppBundle}}/../AppIcon.plist
 
     dsymutil {{AppBundle}}/Contents/MacOS/gyroflow -o {{AppBundle}}/../Gyroflow.app.dSYM
     mkdir -p {{AppBundle}}/../Symbols

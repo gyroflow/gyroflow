@@ -118,7 +118,7 @@ jobs:
         run: |
           sudo xcode-select --switch /Applications/Xcode_16.2.app/Contents/Developer
           /usr/libexec/PlistBuddy -x -c "Set :LSMinimumSystemVersion \"11.0\"" ${{ github.workspace }}/_deployment/mac/Gyroflow.app/Contents/Info.plist
-          sed -i -e 's/"10.14"/"11.0"/' ${{ github.workspace }}/_scripts/macos.just
+          sed -i -e 's/"10.15"/"11.0"/' ${{ github.workspace }}/_scripts/macos.just
           just install-deps
           just deploy universal
           just bundle

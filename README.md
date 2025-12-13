@@ -145,7 +145,7 @@ Latest development version is always available here: https://gyroflow.xyz/devbui
 ## Minimum system requirements:
 - Windows 10 64-bit (1809 or later)
     - If you have Windows "N" install, go to `Settings` -> `Apps` -> `Optional features` -> `Add a feature` -> enable `Media Feature Pack`
-- macOS 10.14 or later (both Intel and Apple Silicon are supported natively)
+- macOS 10.15 or later (both Intel and Apple Silicon are supported natively)
 - Linux:
     - `.tar.gz` package (recommended): Debian 10+, Ubuntu 18.10+, CentOS 8.2+, openSUSE 15.3+. Other distros require glibc 2.28+ (`ldd --version` to check)
     - `.AppImage` should work everywhere

@@ -21,7 +21,7 @@ QtVersionIOS := "6.7.3"
 
 IPHONESDK := `xcode-select -p` + "/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 export BINDGEN_EXTRA_CLANG_ARGS_aarch64_apple_ios := "--target=arm64-apple-ios -arch arm64 -miphoneos-version-min=14 -isysroot " + IPHONESDK
-export CFLAGS_aarch64_apple_darwin := "-mmacosx-version-min=10.14"
+export CFLAGS_aarch64_apple_darwin := "-mmacosx-version-min=10.15"
 export IPHONEOS_DEPLOYMENT_TARGET := "14.0"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
