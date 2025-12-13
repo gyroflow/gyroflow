@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "2fe3a40" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "ae72a70" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { version = "0.8", features = ["field_access"] }
 
@@ -63,7 +63,7 @@ image = { version = "0.25", default-features = false }
 space = { version = "0.17", features = ["alloc"] }
 bitarray = { version = "0.9", features = ["space"] }
 enterpolation = "0.3.0"
-libloading = "0.8"
+libloading = "0.9"
 libc = "0.2"
 bytemuck = "1.24"
 ash = "0.38.0"
@@ -77,7 +77,7 @@ log = "0.4"
 ocl = { version = "0.19.7", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.4.1"
-exr = "1.73"
+exr = "1.74"
 opencv = { version = "0.97", features = ["clang-runtime"], optional = true }
 median = "0.3"
 

@@ -12,7 +12,7 @@ jobs:
       matrix:
         targets: [
           { os: ubuntu-latest, type: linux },
-          { os: macos-13,      type: macos },
+          { os: macos-14,      type: macos },
           { os: macos-14,      type: macstore },
           { os: windows-2022,  type: windows },
           { os: windows-2022,  type: windows-arm },

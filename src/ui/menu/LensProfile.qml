@@ -119,7 +119,9 @@ MenuItem {
                            (obj.calibrated_by == "Eddy" ||
                             obj.calibrated_by == "GoPro" ||
                             obj.calibrated_by == "DJI" ||
+                            obj.calibrated_by == "Xtra" ||
                             obj.calibrated_by == "Insta360" ||
+                            obj.calibrated_by == "Canon" ||
                             obj.calibrated_by == "Sony")) {
                         root.opened = false;
                         window.motionData.opened = false;
