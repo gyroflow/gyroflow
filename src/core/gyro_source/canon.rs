@@ -93,8 +93,8 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
 
 pub fn get_time_offset(md: &FileMetadata, _input: &telemetry_parser::Input, tag_map: &GroupedTagMap, sample_rate: f64, fps: f64) -> Option<f64> {
     let exposure = (tag_map.get(&GroupId::Imager)?.get_t(TagId::ExposureTime) as Option<&f64>)?;
-    // dbg!(&exposure);
     let frame_time = 1000.0 / md.frame_rate.unwrap_or(fps);
-    let frame_readout_time = md.frame_readout_time?;
-    Some(frame_time + frame_readout_time / 2.0 - (*exposure) / 2.0)
+    let frame_readout_time = md.frame_readout_time.unwrap_or(14.0); // better approx than nothing
+    let dt = 1000.0 / sample_rate.max(1.0);
+    Some(frame_time + frame_readout_time / 2.0 - (*exposure) / 2.0 - dt / 2.0)
 }
