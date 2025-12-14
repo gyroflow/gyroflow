@@ -26,8 +26,11 @@ pub fn create_metal_texture_from_buffer(buffer: *mut metal::MTLBuffer, width: u3
     texture_descriptor.set_depth(1);
     texture_descriptor.set_texture_type(metal::MTLTextureType::D2);
     texture_descriptor.set_pixel_format(format_wgpu_to_metal(format));
-    texture_descriptor.set_storage_mode(metal::MTLStorageMode::Private); // GPU only.
-    texture_descriptor.set_usage(usage);
+    // The storage mode for a linear texture backed by a buffer must match the buffer's storage mode.
+    // For some hosts (e.g. Adobe), the underlying MTLBuffer may not be `Private`.
+    texture_descriptor.set_storage_mode(buf.storage_mode());
+    // Be permissive with usage flags; missing usage bits can lead to undefined behavior depending on how the host uses the resource.
+    texture_descriptor.set_usage(usage | metal::MTLTextureUsage::ShaderRead | metal::MTLTextureUsage::ShaderWrite | metal::MTLTextureUsage::RenderTarget);
 
     buf.new_texture_with_descriptor(&texture_descriptor, 0, stride as u64)
 }
