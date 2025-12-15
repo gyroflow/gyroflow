@@ -78,7 +78,7 @@ ocl = { version = "0.19.7", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.4.1"
 exr = "1.74"
-opencv = { version = "0.97", features = ["clang-runtime"], optional = true }
+opencv = { version = "0.96", default-features = false, features = [ "calib3d", "features2d", "imgproc", "optflow", "clang-runtime" ], optional = true } #"imgcodecs","objdetect","sfm",
 median = "0.3"
 
 wgpu = { version = "27", features = ["spirv", "naga-ir"] }
