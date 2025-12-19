@@ -16,8 +16,8 @@ system_shutdown = { git = "https://github.com/risoflora/system_shutdown.git", re
 breakpad-sys = "0.2.0"
 trash = "5.2"
 # For nle_plugins
-zip = { version = "3", default-features = false, features = ["deflate-flate2"] }
-zip-extensions = { version = "0.8", default-features = false, features = ["deflate-flate2"] }
+zip = { version = "6", default-features = false, features = ["deflate-flate2"] }
+zip-extensions = { version = "0.13", default-features = false, features = ["deflate-flate2"] }
 runas = "1.2"
 tempfile = "3"
 fs_extra = "1.3"
@@ -80,7 +80,7 @@ qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = 
 qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "ff1e23d" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
-version = "0.58.0"
+version = "0.62"
 features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation", "Win32_System_LibraryLoader",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry",
@@ -90,7 +90,7 @@ features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemSer
 oslog = "0.2"
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
-metal = { version = "0.32.0" }
+metal = { version = "0.33.0" }
 core-foundation-sys = "0.8.7"
 
 [build-dependencies]

@@ -78,18 +78,18 @@ ocl = { version = "0.19.7", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.4.1"
 exr = "1.74"
-opencv = { version = "0.96", default-features = false, features = [ "calib3d", "features2d", "imgproc", "optflow", "clang-runtime" ], optional = true } #"imgcodecs","objdetect","sfm",
+opencv = { version = "0.98", default-features = false, features = [ "calib3d", "features2d", "imgproc", "optflow", "clang-runtime" ], optional = true } #"imgcodecs","objdetect","sfm",
 median = "0.3"
 
-wgpu = { version = "27", features = ["spirv", "naga-ir"] }
+wgpu = { version = "28", features = ["spirv", "naga-ir"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
-metal = { version = "0.32.0" }
+metal = { version = "0.33.0" }
 objc-foundation = "0.1.1"
 core-foundation-sys = "0.8.7"
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
-version = "0.58.0"
+version = "0.62"
 features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation", "Win32_System_LibraryLoader",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry",

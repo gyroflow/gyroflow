@@ -261,8 +261,8 @@ pub fn allocate_shared_cuda_memory(size: usize) -> Result<CudaSharedMemory, Box<
                         Length: std::mem::size_of::<OBJECT_ATTRIBUTES>() as u32,
                         RootDirectory: HANDLE::default(),
                         ObjectName: std::ptr::null_mut(),
-                        Attributes: 0,
-                        SecurityDescriptor: sec_desc.0,
+                        Attributes: OBJECT_ATTRIBUTE_FLAGS::default(),
+                        SecurityDescriptor: sec_desc.0 as *const _,
                         SecurityQualityOfService: std::ptr::null_mut(),
                     })
                 } else {

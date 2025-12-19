@@ -33,6 +33,7 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
                 memory_flags: wgpu::hal::MemoryFlags::empty(),
             },
             if drop { None } else { Some(drop_guard) },
+           wgpu::hal::vulkan::TextureMemory::External
         )
     };
 

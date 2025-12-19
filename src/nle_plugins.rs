@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2024 Adrian <adrian.eddy at gmail>
 
-use zip_extensions::*;
+use zip_extensions::zip_archive_extensions::ZipArchiveExtensions;
 use std::io::{ self, Cursor };
 use std::process::Command;
 use std::path::Path;
@@ -33,7 +33,7 @@ fn query_file_version(path: &str) -> Option<String> {
             return None;
         }
         let mut buffer: Vec<u16> = vec![0; size];
-        GetFileVersionInfoW(&hpath, 0, buffer.len() as u32, buffer.as_mut_ptr() as _).expect("get file version info failed.");
+        GetFileVersionInfoW(&hpath, None, buffer.len() as u32, buffer.as_mut_ptr() as _).expect("get file version info failed.");
         let pblock = buffer.as_ptr() as _;
         let lang_id = {
             let mut buffer = std::ptr::null_mut();

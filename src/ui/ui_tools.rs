@@ -179,7 +179,7 @@ impl UITools {
             if hwnd == 0 && self.main_window_handle.is_some() { hwnd = self.main_window_handle.unwrap(); }
             use windows::Win32::Foundation::*;
             use windows::Win32::Graphics::Dwm::*;
-            let is_dark = BOOL::from(self.is_dark);
+            let is_dark = self.is_dark;
             let _ = DwmSetWindowAttribute(HWND(hwnd as *mut _), DWMWA_USE_IMMERSIVE_DARK_MODE, &is_dark as *const _ as _, std::mem::size_of_val(&is_dark) as _);
         }
     }

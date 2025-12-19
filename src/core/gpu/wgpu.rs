@@ -77,7 +77,7 @@ impl WgpuWrapper {
     pub fn list_devices() -> Vec<String> {
         if ADAPTERS.read().is_empty() {
             let devices = std::panic::catch_unwind(|| -> Vec<Adapter> {
-                INSTANCE.lock().enumerate_adapters(wgpu::Backends::all()).into_iter().filter(|x| !EXCLUSIONS.iter().any(|e| x.get_info().name.contains(e))).collect()
+                pollster::block_on(INSTANCE.lock().enumerate_adapters(wgpu::Backends::all())).into_iter().filter(|x| !EXCLUSIONS.iter().any(|e| x.get_info().name.contains(e))).collect()
             });
             match devices {
                 Ok(devices) => { *ADAPTERS.write() = devices; },
@@ -331,7 +331,7 @@ impl WgpuWrapper {
             let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: None,
                 bind_group_layouts: &[&bind_group_layout],
-                push_constant_ranges: &[],
+                immediate_size: 0
             });
 
             let compilation_options = wgpu::PipelineCompilationOptions {
@@ -368,7 +368,7 @@ impl WgpuWrapper {
                         topology: wgpu::PrimitiveTopology::TriangleStrip,
                         ..wgpu::PrimitiveState::default()
                     },
-                    multiview: None,
+                    multiview_mask: None,
                     depth_stencil: None,
                     multisample: wgpu::MultisampleState::default(),
                     cache: Default::default()
@@ -489,6 +489,7 @@ impl WgpuWrapper {
                         },
                         depth_slice: None
                     })],
+                    multiview_mask: None,
                     depth_stencil_attachment: None,
                 });
                 rpass.set_pipeline(p);

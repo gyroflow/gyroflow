@@ -21,7 +21,7 @@ pub fn data_dir() -> PathBuf {
             use windows::Win32::UI::Shell::*;
             use std::os::windows::ffi::OsStringExt;
             let mut len = 0;
-            let _ = windows::Win32::Storage::Packaging::Appx::GetCurrentPackageFullName(&mut len, windows::core::PWSTR::null());
+            let _ = windows::Win32::Storage::Packaging::Appx::GetCurrentPackageFullName(&mut len, None);
             if len > 0 {
                 // It's a Microsoft Store package
                 if let Ok(raw_path) = SHGetKnownFolderPath(&FOLDERID_Profile, KNOWN_FOLDER_FLAG::default(), None) {

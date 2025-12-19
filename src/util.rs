@@ -507,7 +507,7 @@ pub fn is_store_package() -> bool {
     #[cfg(target_os = "windows")]
     unsafe {
         let mut len = 0;
-        let _ = windows::Win32::Storage::Packaging::Appx::GetCurrentPackageFullName(&mut len, windows::core::PWSTR::null());
+        let _ = windows::Win32::Storage::Packaging::Appx::GetCurrentPackageFullName(&mut len, None);
         if len > 0 {
             return true;
         }
