@@ -98,6 +98,7 @@ pub struct Controller {
     search_lens_profile_finished: qt_signal!(profiles: QVariantList),
     search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
     fetch_profiles_from_github: qt_method!(fn(&self)),
+    fetch_camera_database_from_github: qt_method!(fn(&self)),
     lens_profiles_updated: qt_signal!(reload_from_disk: bool),
 
     set_sync_lpf: qt_method!(fn(&self, lpf: f64)),
@@ -1868,11 +1869,15 @@ impl Controller {
     #[allow(unreachable_code)]
     fn fetch_profiles_from_github(&self) {
         use crate::core::lens_profile_database::LensProfileDatabase;
+        use crate::core::camera_database::CameraDatabase;
 
         if LensProfileDatabase::get_path().join("noupdate").exists() {
             ::log::info!("Skipping lens profile updates.");
             return;
         }
+
+        // Kick off camera database update alongside lens profiles.
+        self.fetch_camera_database_from_github();
 
         let update = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, _| {
             this.lens_profiles_updated(true);
@@ -1919,6 +1924,39 @@ impl Controller {
                 }
             });
         }
+    }
+
+    fn fetch_camera_database_from_github(&self) {
+        use crate::core::camera_database::CameraDatabase;
+        use std::io::Write;
+
+        let noupdate = gyroflow_core::settings::data_dir().join("camera_database.noupdate");
+        if noupdate.exists() {
+            ::log::info!("Skipping camera database updates.");
+            return;
+        }
+
+        let camera_db = self.stabilizer.camera_db.clone();
+        let target_paths = CameraDatabase::candidate_paths();
+        let url = "https://raw.githubusercontent.com/gyroflow/gyroflow/main/resources/camera_database.json";
+
+        core::run_threaded(move || {
+            if let Ok(Ok(body)) = ureq::get(url).call().map(|x| x.into_body().read_to_vec()) {
+                if let Ok(db) = CameraDatabase::from_slice(&body) {
+                    // Write to first writable candidate path.
+                    if let Some(path) = target_paths.into_iter().find(|p| p.parent().map(|pp| std::fs::create_dir_all(pp).is_ok()).unwrap_or(true)) {
+                        if std::fs::File::create(&path).and_then(|mut f| f.write_all(&body)).is_ok() {
+                            ::log::info!("Updated camera database from GitHub at {}", path.display());
+                            *camera_db.write() = db;
+                        } else {
+                            ::log::warn!("Failed to write camera database to {}", path.display());
+                        }
+                    }
+                } else {
+                    ::log::warn!("Downloaded camera database failed validation, ignoring.");
+                }
+            }
+        });
     }
 
     fn rate_profile(&self, name: QString, json: QString, checksum: QString, is_good: bool) {

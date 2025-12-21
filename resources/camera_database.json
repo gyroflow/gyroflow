@@ -1,0 +1,210 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2025-12-19",
+  "sources": [
+    "gyroflow/lens_profiles",
+    "lensfun"
+  ],
+  "mounts": [
+    "Fixed",
+    "Sony E",
+    "Sony A",
+    "Canon RF",
+    "Canon EF",
+    "Canon EF-S",
+    "Nikon Z",
+    "Nikon F",
+    "Micro Four Thirds",
+    "Leica L",
+    "Fujifilm X",
+    "Fujifilm G",
+    "Pentax K",
+    "PL",
+    "LPL"
+  ],
+  "brands": {
+    "GoPro": {
+      "cameras": [
+        { "model": "HERO3 Black", "mount": "Fixed", "aliases": ["hero3"] },
+        { "model": "HERO3+ Black", "mount": "Fixed", "aliases": ["hero3+"] },
+        { "model": "HERO4 Black", "mount": "Fixed", "aliases": ["hero4"] },
+        { "model": "HERO5 Black", "mount": "Fixed", "aliases": ["hero5"] },
+        { "model": "HERO6 Black", "mount": "Fixed", "aliases": ["hero6"] },
+        { "model": "HERO7 Black", "mount": "Fixed", "aliases": ["hero7"] },
+        { "model": "HERO8 Black", "mount": "Fixed", "aliases": ["hero8"] },
+        { "model": "HERO9 Black", "mount": "Fixed", "aliases": ["hero9"] },
+        { "model": "HERO10 Black", "mount": "Fixed", "aliases": ["hero10"] },
+        { "model": "HERO11 Black", "mount": "Fixed", "aliases": ["hero11"] },
+        { "model": "HERO12 Black", "mount": "Fixed", "aliases": ["hero12"] },
+        { "model": "HERO13 Black", "mount": "Fixed", "aliases": ["hero13"] },
+        { "model": "Max", "mount": "Fixed", "aliases": ["max"] },
+        { "model": "Session 5", "mount": "Fixed", "aliases": ["session5"] }
+      ],
+      "lens_models": ["Wide", "Linear", "Narrow", "SuperView", "Max Wide"]
+    },
+    "DJI": {
+      "cameras": [
+        { "model": "Osmo Action", "mount": "Fixed" },
+        { "model": "Osmo Action 3", "mount": "Fixed" },
+        { "model": "Osmo Action 4", "mount": "Fixed" },
+        { "model": "Osmo Pocket", "mount": "Fixed" },
+        { "model": "Osmo Pocket 2", "mount": "Fixed" },
+        { "model": "Osmo Pocket 3", "mount": "Fixed" },
+        { "model": "Mavic 3", "mount": "Fixed" },
+        { "model": "Mavic 3 Pro", "mount": "Fixed" },
+        { "model": "Air 3", "mount": "Fixed" },
+        { "model": "Mini 4 Pro", "mount": "Fixed" }
+      ],
+      "lens_models": ["Standard", "Wide", "D-Log", "HLG"]
+    },
+    "Insta360": {
+      "cameras": [
+        { "model": "ONE R", "mount": "Fixed" },
+        { "model": "ONE RS", "mount": "Fixed" },
+        { "model": "X3", "mount": "Fixed" },
+        { "model": "X4", "mount": "Fixed" },
+        { "model": "GO 3", "mount": "Fixed" },
+        { "model": "GO 3S", "mount": "Fixed" },
+        { "model": "Ace Pro", "mount": "Fixed" }
+      ],
+      "lens_models": ["4K Boost", "360", "1-Inch", "Wide"]
+    },
+    "Sony": {
+      "cameras": [
+        { "model": "FX3", "mount": "Sony E", "aliases": ["ilme-fx3"] },
+        { "model": "FX30", "mount": "Sony E" },
+        { "model": "FX6", "mount": "Sony E", "aliases": ["fx6v"] },
+        { "model": "FX9", "mount": "Sony E", "aliases": ["fx9v"] },
+        { "model": "A7 III", "mount": "Sony E", "aliases": ["a73"] },
+        { "model": "A7 IV", "mount": "Sony E", "aliases": ["a74"] },
+        { "model": "A7S III", "mount": "Sony E", "aliases": ["a7s3"] },
+        { "model": "A7R IV", "mount": "Sony E", "aliases": ["a7r4"] },
+        { "model": "A6700", "mount": "Sony E" },
+        { "model": "ZV-E10", "mount": "Sony E", "aliases": ["zve10"] },
+        { "model": "RX0 II", "mount": "Fixed" }
+      ],
+      "lens_models": [
+        "Sony FE 16-35mm F2.8 GM",
+        "Sony FE 24-70mm F2.8 GM II",
+        "Sony FE 70-200mm F2.8 GM II",
+        "Sony FE 20mm F1.8 G",
+        "Sony FE 35mm F1.4 GM",
+        "Sony FE 50mm F1.2 GM",
+        "Sony E PZ 16-50mm F3.5-5.6 OSS",
+        "Tamron 17-28mm F2.8 Di III RXD",
+        "Tamron 28-75mm F2.8 Di III VXD",
+        "Sigma 16mm F1.4 DC DN",
+        "Sigma 24-70mm F2.8 DG DN Art",
+        "Sigma 35mm F1.4 DG DN Art",
+        "Zeiss Loxia 35mm F2",
+        "Zeiss CP.3 15mm T2.9"
+      ]
+    },
+    "Canon": {
+      "cameras": [
+        { "model": "EOS R5", "mount": "Canon RF" },
+        { "model": "EOS R6 II", "mount": "Canon RF" },
+        { "model": "EOS R7", "mount": "Canon RF" },
+        { "model": "EOS R10", "mount": "Canon RF" },
+        { "model": "EOS C70", "mount": "Canon RF" },
+        { "model": "EOS C200", "mount": "Canon EF" }
+      ],
+      "lens_models": [
+        "Canon RF 15-35mm F2.8L IS",
+        "Canon RF 24-70mm F2.8L IS",
+        "Canon RF 70-200mm F2.8L IS",
+        "Canon EF 16-35mm F2.8L II",
+        "Canon EF 24-70mm F2.8L II",
+        "Canon EF 70-200mm F2.8L IS II"
+      ]
+    },
+    "Nikon": {
+      "cameras": [
+        { "model": "Z6 II", "mount": "Nikon Z" },
+        { "model": "Z8", "mount": "Nikon Z" },
+        { "model": "Z9", "mount": "Nikon Z" }
+      ],
+      "lens_models": [
+        "NIKKOR Z 24-70mm F2.8 S",
+        "NIKKOR Z 14-30mm F4 S",
+        "NIKKOR Z 70-200mm F2.8 S"
+      ]
+    },
+    "Panasonic": {
+      "cameras": [
+        { "model": "GH6", "mount": "Micro Four Thirds" },
+        { "model": "GH5 II", "mount": "Micro Four Thirds" },
+        { "model": "S1H", "mount": "Leica L" },
+        { "model": "S5 II", "mount": "Leica L" }
+      ],
+      "lens_models": [
+        "Panasonic 10-25mm F1.7",
+        "Panasonic 12-35mm F2.8",
+        "Panasonic 24-70mm F2.8 L",
+        "Sigma 18-35mm F1.8 DC HSM (MFT via adapter)"
+      ]
+    },
+    "Fujifilm": {
+      "cameras": [
+        { "model": "X-H2S", "mount": "Fujifilm X" },
+        { "model": "X-T5", "mount": "Fujifilm X" },
+        { "model": "X-S20", "mount": "Fujifilm X" },
+        { "model": "GFX100 II", "mount": "Fujifilm G" }
+      ],
+      "lens_models": [
+        "Fujinon XF 16-55mm F2.8 R LM WR",
+        "Fujinon XF 18-55mm F2.8-4 OIS",
+        "Fujinon XF 50-140mm F2.8 OIS",
+        "Fujinon GF 32-64mm F4"
+      ]
+    },
+    "Blackmagic": {
+      "cameras": [
+        { "model": "Pocket Cinema Camera 4K", "mount": "Micro Four Thirds", "aliases": ["bmpcc4k"] },
+        { "model": "Pocket Cinema Camera 6K", "mount": "Canon EF", "aliases": ["bmpcc6k"] },
+        { "model": "Pocket Cinema Camera 6K Pro", "mount": "Canon EF" },
+        { "model": "URSA Mini Pro 12K", "mount": "PL" }
+      ],
+      "lens_models": [
+        "Sigma 18-35mm F1.8 DC HSM",
+        "Canon EF 24-70mm F2.8L II",
+        "Tokina 11-16mm F2.8"
+      ]
+    },
+    "RED": {
+      "cameras": [
+        { "model": "V-RAPTOR", "mount": "Canon RF" },
+        { "model": "KOMODO", "mount": "Canon RF" },
+        { "model": "KOMODO-X", "mount": "Canon RF" }
+      ],
+      "lens_models": ["Canon RF 15-35mm F2.8L IS", "Canon RF 24-70mm F2.8L IS", "PL Primes"]
+    },
+    "ARRI": {
+      "cameras": [
+        { "model": "ALEXA Mini", "mount": "PL" },
+        { "model": "ALEXA Mini LF", "mount": "LPL" }
+      ],
+      "lens_models": ["ARRI Signature Prime 35mm", "Cooke S4/i 25mm", "Zeiss Ultra Prime 16mm"]
+    },
+    "Autel": {
+      "cameras": [
+        { "model": "Evo Lite+", "mount": "Fixed" },
+        { "model": "Evo II Pro", "mount": "Fixed" }
+      ],
+      "lens_models": ["Standard", "Wide"]
+    },
+    "Skydio": {
+      "cameras": [
+        { "model": "Skydio 2+", "mount": "Fixed" }
+      ],
+      "lens_models": ["Standard"]
+    },
+    "RunCam": {
+      "cameras": [
+        { "model": "RunCam 5", "mount": "Fixed" },
+        { "model": "RunCam Thumb", "mount": "Fixed" }
+      ],
+      "lens_models": ["Wide"]
+    }
+  }
+}
