@@ -5,6 +5,7 @@ pub mod gyro_source;
 pub mod imu_integration;
 pub mod lens_profile;
 pub mod lens_profile_database;
+pub mod camera_database;
 #[cfg(feature = "opencv")]
 pub mod calibration;
 pub mod synchronization;
@@ -107,6 +108,8 @@ pub struct StabilizationManager {
     pub params: Arc<RwLock<StabilizationParams>>,
 
     pub sync_data: Arc<RwLock<SyncData>>,
+
+    pub camera_db: Arc<RwLock<camera_database::CameraDatabase>>,
 }
 
 impl Default for StabilizationManager {
@@ -134,6 +137,7 @@ impl Default for StabilizationManager {
             pose_estimator: Arc::new(synchronization::PoseEstimator::default()),
 
             lens_profile_db: Arc::new(RwLock::new(LensProfileDatabase::default())),
+            camera_db: Arc::new(RwLock::new(camera_database::CameraDatabase::load())),
 
             input_file: Arc::new(RwLock::new(InputFile::default())),
 
@@ -150,6 +154,10 @@ impl Default for StabilizationManager {
 }
 
 impl StabilizationManager {
+    pub fn camera_database(&self) -> camera_database::CameraDatabase {
+        self.camera_db.read().clone()
+    }
+
     pub fn init_from_video_data(&self, duration_ms: f64, fps: f64, frame_count: usize, video_size: (usize, usize)) {
         {
             let mut params = self.params.write();
