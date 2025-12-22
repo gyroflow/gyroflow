@@ -59,7 +59,14 @@ pub struct ComputeParams {
 
     pub distortion_model: DistortionModel,
     pub digital_lens: Option<DistortionModel>,
-    pub digital_lens_params: Option<Vec<f64>>
+    pub digital_lens_params: Option<Vec<f64>>,
+
+    // Focal length smoothing
+    pub focal_lengths: Vec<Option<f64>>,
+    pub smoothed_focal_lengths: Vec<Option<f64>>,
+    pub focal_length_smoothing_enabled: bool,
+    pub focal_length_smoothing_strength: f64,
+    pub focal_length_time_window: f64,
 }
 impl ComputeParams {
     pub fn from_manager(mgr: &StabilizationManager) -> Self {
@@ -122,7 +129,13 @@ impl ComputeParams {
 
             keyframes: mgr.keyframes.read().clone(),
 
-            zooming_debug_points: false
+            zooming_debug_points: false,
+
+            focal_lengths: params.focal_lengths.clone(),
+            smoothed_focal_lengths: params.smoothed_focal_lengths.clone(),
+            focal_length_smoothing_enabled: params.focal_length_smoothing_enabled,
+            focal_length_smoothing_strength: params.focal_length_smoothing_strength,
+            focal_length_time_window: params.focal_length_time_window,
         }
     }
 
