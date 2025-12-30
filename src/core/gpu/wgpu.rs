@@ -187,7 +187,7 @@ impl WgpuWrapper {
                         let max_storage_buffer_bits = if cfg!(any(target_os = "android", target_os = "ios")) { 27 } else { 31 };
 
                         let adapter_limits = adapter.limits();
-                        let mut limits = wgpu::Limits::default().using_resolution(adapter_limits);
+                        let mut limits = wgpu::Limits::default().using_resolution(adapter_limits.clone());
 
                         limits.max_storage_buffers_per_shader_stage = 6.min(adapter_limits.max_storage_buffers_per_shader_stage);
                         limits.max_storage_textures_per_shader_stage = 4.min(adapter_limits.max_storage_textures_per_shader_stage);
@@ -212,7 +212,7 @@ impl WgpuWrapper {
                     let max_storage_buffer_bits = if cfg!(any(target_os = "android", target_os = "ios")) { 27 } else { 31 };
                     let adapter_limits = adapter.limits();
 
-                    let mut limits = wgpu::Limits::default().using_resolution(adapter_limits);
+                    let mut limits = wgpu::Limits::default().using_resolution(adapter_limits.clone());
 
                     limits.max_storage_buffers_per_shader_stage = 6.min(adapter_limits.max_storage_buffers_per_shader_stage);
                     limits.max_storage_textures_per_shader_stage = 4.min(adapter_limits.max_storage_textures_per_shader_stage);
