@@ -183,19 +183,24 @@ impl WgpuWrapper {
                         let mtl_cq = metal::CommandQueue::from_ptr(*command_queue);
                         let mtl_dev = mtl_cq.device();
 
+                        let max_buffer_bits = if cfg!(any(target_os = "android", target_os = "ios")) { 29 } else { 31 };
+                        let max_storage_buffer_bits = if cfg!(any(target_os = "android", target_os = "ios")) { 27 } else { 31 };
+
+                        let adapter_limits = adapter.limits();
+                        let mut limits = wgpu::Limits::default().using_resolution(adapter_limits);
+
+                        limits.max_storage_buffers_per_shader_stage = 6.min(adapter_limits.max_storage_buffers_per_shader_stage);
+                        limits.max_storage_textures_per_shader_stage = 4.min(adapter_limits.max_storage_textures_per_shader_stage);
+                        limits.max_buffer_size = ((1 << max_buffer_bits) - 1).min(adapter_limits.max_buffer_size);
+                        limits.max_storage_buffer_binding_size = ((1 << max_storage_buffer_bits) - 1+5).min(adapter_limits.max_storage_buffer_binding_size);
+
                         adapter.create_device_from_hal(wgpu::hal::OpenDevice::<Metal> {
                             device: <Metal as wgpu::hal::Api>::Device::device_from_raw(mtl_dev.to_owned(), wgpu::Features::empty()),
                             queue: <Metal as wgpu::hal::Api>::Queue::queue_from_raw(mtl_cq, 1.0)
                         }, &wgpu::DeviceDescriptor {
                             label: None,
                             required_features: wgpu::Features::empty(),
-                            required_limits: wgpu::Limits {
-                                max_storage_buffers_per_shader_stage: 6,
-                                max_storage_textures_per_shader_stage: 4,
-                                max_buffer_size: (1 << 31) - 1,
-                                max_storage_buffer_binding_size: (1 << 31) - 1,
-                                ..wgpu::Limits::default()
-                            },
+                            required_limits: limits,
                             memory_hints: wgpu::MemoryHints::Performance,
                             trace: wgpu::Trace::Off,
                             experimental_features: wgpu::ExperimentalFeatures::disabled(),
@@ -206,13 +211,14 @@ impl WgpuWrapper {
                     let max_buffer_bits = if cfg!(any(target_os = "android", target_os = "ios")) { 29 } else { 31 };
                     let max_storage_buffer_bits = if cfg!(any(target_os = "android", target_os = "ios")) { 27 } else { 31 };
                     let adapter_limits = adapter.limits();
-                    let mut limits = wgpu::Limits {
-                        max_storage_buffers_per_shader_stage: 6.min(adapter_limits.max_storage_buffers_per_shader_stage),
-                        max_storage_textures_per_shader_stage: 4.min(adapter_limits.max_storage_textures_per_shader_stage),
-                        max_buffer_size: ((1 << max_buffer_bits) - 1).min(adapter_limits.max_buffer_size),
-                        max_storage_buffer_binding_size: ((1 << max_storage_buffer_bits) - 1+5).min(adapter_limits.max_storage_buffer_binding_size),
-                        ..wgpu::Limits::default()
-                    };
+
+                    let mut limits = wgpu::Limits::default().using_resolution(adapter_limits);
+
+                    limits.max_storage_buffers_per_shader_stage = 6.min(adapter_limits.max_storage_buffers_per_shader_stage);
+                    limits.max_storage_textures_per_shader_stage = 4.min(adapter_limits.max_storage_textures_per_shader_stage);
+                    limits.max_buffer_size = ((1 << max_buffer_bits) - 1).min(adapter_limits.max_buffer_size);
+                    limits.max_storage_buffer_binding_size = ((1 << max_storage_buffer_bits) - 1+5).min(adapter_limits.max_storage_buffer_binding_size);
+
                     let mut result = Err(WgpuError::NoAvailableAdapter);
                     for _ in 0..4 {
                         let device = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
