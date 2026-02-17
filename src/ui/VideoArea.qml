@@ -698,7 +698,19 @@ Item {
                         if (root.pendingGyroflowData) {
                             Qt.callLater(root.loadGyroflowData, root.pendingGyroflowData, root.pendingQueueJobId);
                         } else {
-                            controller.load_telemetry(root.loadedFileUrl, true, vid, -1, 0);
+                            // Check for sidecar .gcsv file
+                            const sidecarGcsv = controller.detect_sidecar_gcsv(root.loadedFileUrl);
+                            console.log("Checking for sidecar GCSV for:", root.loadedFileUrl.toString());
+                            const sidecarGcsvUrl = sidecarGcsv.toString();
+                            console.log("Sidecar GCSV url:", sidecarGcsvUrl);
+                            if (sidecarGcsvUrl !== "") {
+                                console.log("Loading sidecar GCSV:", sidecarGcsv.toString());
+                                window.motionData.lastSelectedFile = sidecarGcsvUrl;
+                                controller.load_telemetry(sidecarGcsvUrl, false, vid, -1, 0);
+                            } else {
+                                console.log("No sidecar GCSV found, loading from video");
+                                controller.load_telemetry(root.loadedFileUrl, true, vid, -1, 0);
+                            }
                         }
                         vidInfo.loadFromVideoMetadata(md, vid.videoWidth, vid.videoHeight);
                         window.sync.customSyncTimestamps = [];

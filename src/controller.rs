@@ -205,6 +205,7 @@ pub struct Controller {
 
     get_urls_from_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> QStringList),
     get_version_from_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> u32),
+    detect_sidecar_gcsv: qt_method!(fn(&self, url: QUrl) -> QUrl),
     import_gyroflow_file: qt_method!(fn(&mut self, url: QUrl)),
     import_gyroflow_data: qt_method!(fn(&mut self, data: QString)),
     gyroflow_file_loaded: qt_signal!(obj: QJsonObject),
@@ -301,6 +302,59 @@ pub struct Controller {
     ongoing_computations: BTreeSet<u64>,
 
     pub stabilizer: Arc<StabilizationManager>,
+}
+
+/// Extract base name from a filename for sidecar GCSV detection.
+/// Handles:
+/// - video files: `video.mp4` -> `video`
+/// - image sequences: `clip_0001.dng` -> `clip`
+/// - ffmpeg image pattern: `clip_%05d.dng` -> `clip`
+fn extract_base_name(filename: &str) -> String {
+    if filename.is_empty() {
+        return String::new();
+    }
+
+    let Some(dot_pos) = filename.rfind('.') else {
+        return filename.to_string();
+    };
+    let stem = &filename[..dot_pos];
+    let ext = filename[dot_pos + 1..].to_ascii_lowercase();
+
+    let is_image_ext = matches!(ext.as_str(), "png" | "jpg" | "jpeg" | "exr" | "dng");
+    if !is_image_ext {
+        return stem.to_string();
+    }
+
+    // Match ffmpeg-style image sequences: clip_%05d.dng
+    if let Some(pct_pos) = stem.rfind('%') {
+        let suffix = &stem[pct_pos..];
+        if suffix.len() >= 4
+            && suffix.starts_with("%0")
+            && suffix.ends_with('d')
+            && suffix[2..suffix.len() - 1].chars().all(|c| c.is_ascii_digit())
+        {
+            let base = stem[..pct_pos].trim_end_matches(['_', '-', '.']);
+            if !base.is_empty() {
+                return base.to_string();
+            }
+        }
+    }
+
+    // Match numbered image sequences: clip_00001.dng
+    let digits_start = stem
+        .char_indices()
+        .rev()
+        .take_while(|(_, ch)| ch.is_ascii_digit())
+        .last()
+        .map(|(idx, _)| idx);
+    if let Some(digits_start) = digits_start {
+        let base = stem[..digits_start].trim_end_matches(['_', '-', '.']);
+        if !base.is_empty() {
+            return base.to_string();
+        }
+    }
+
+    stem.to_string()
 }
 
 impl Controller {
@@ -1284,6 +1338,26 @@ impl Controller {
             }
         }
         version
+    }
+    fn detect_sidecar_gcsv(&self, url: QUrl) -> QUrl {
+        let url = util::qurl_to_encoded(url);
+        if url.is_empty() { return QUrl::default(); }
+
+        let filename = filesystem::get_filename(&url);
+        let folder = filesystem::get_folder(&url);
+
+        // Extract base name for sidecar GCSV detection
+        let base_name = extract_base_name(&filename);
+        if base_name.is_empty() { return QUrl::default(); }
+
+        let gcsv_name = format!("{base_name}.gcsv");
+
+        if filesystem::exists_in_folder(&folder, &gcsv_name) {
+            let gcsv_url = filesystem::get_file_url(&folder, &gcsv_name, false);
+            return QUrl::from(QString::from(gcsv_url));
+        }
+
+        QUrl::default()
     }
     fn get_urls_from_gyroflow_file(&mut self, url: QUrl) -> QStringList {
         let url = util::qurl_to_encoded(url);
