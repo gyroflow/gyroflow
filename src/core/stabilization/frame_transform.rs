@@ -54,6 +54,22 @@ impl FrameTransform {
         fov_scale += if params.fov_overview && use_fovs && !for_ui { 1.0 } else { 0.0 };
         let mut fov = if use_fovs { params.fovs.get(frame).unwrap_or(if params.fovs.len() > 1 { params.fovs.last().unwrap() } else { &1.0 }) * fov_scale } else { 1.0 }.max(0.001);
         fov *= params.width as f64 / params.output_width.max(1) as f64;
+        
+        // Apply focal length compensation if enabled
+        if params.focal_length_smoothing_enabled && !for_ui {
+            if let (Some(&raw_fl), Some(&smoothed_fl)) = (
+                params.focal_lengths.get(frame).and_then(|x| x.as_ref()),
+                params.smoothed_focal_lengths.get(frame).and_then(|x| x.as_ref())
+            ) {
+                if raw_fl > 0.0 && smoothed_fl > 0.0 {
+                    // Compensation factor: raw / smoothed
+                    // When optical zoom increases (raw FL increases), we zoom out digitally (increase FOV)
+                    let compensation = raw_fl / smoothed_fl;
+                    fov *= compensation;
+                }
+            }
+        }
+        
         fov
     }
 
@@ -318,9 +334,24 @@ impl FrameTransform {
 
         let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, params.scaled_fps) as usize);
 
-        let (camera_matrix, distortion_coeffs, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, params.framebuffer_inverted);
+        let (mut camera_matrix, distortion_coeffs, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, params.framebuffer_inverted);
 
-        let fov = Self::get_fov(params, 0, use_fovs, timestamp_ms, false);
+        // Apply focal length smoothing to camera matrix for FOV calculation
+        // This ensures undistortion during FOV estimation uses the smoothed focal length
+        if params.focal_length_smoothing_enabled && use_fovs {
+            if let (Some(&raw_fl), Some(&smoothed_fl)) = (
+                params.focal_lengths.get(frame).and_then(|x| x.as_ref()),
+                params.smoothed_focal_lengths.get(frame).and_then(|x| x.as_ref())
+            ) {
+                if raw_fl > 0.0 && smoothed_fl > 0.0 {
+                    let ratio = smoothed_fl / raw_fl;
+                    camera_matrix[(0, 0)] *= ratio;
+                    camera_matrix[(1, 1)] *= ratio;
+                }
+            }
+        }
+
+        let fov = Self::get_fov(params, frame, use_fovs, timestamp_ms, false);
 
         let scaled_k = camera_matrix;
         let new_k = Self::get_new_k(params, &camera_matrix, fov);
