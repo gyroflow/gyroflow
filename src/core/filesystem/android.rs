@@ -21,7 +21,7 @@ macro_rules! check_exception {
 }
 
 pub fn get_jvm() -> jni::JavaVM {
-    unsafe { jni::JavaVM::from_raw(ndk_context::android_context().vm().cast()) }.unwrap()
+    unsafe { jni::JavaVM::from_raw(ndk_context::android_context().vm().cast()) }
 }
 
 impl<'a> super::FileWrapper<'a> {
