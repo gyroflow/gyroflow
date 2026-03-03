@@ -2093,7 +2093,7 @@ Click Ok and select the destination folder.</source>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="102"/>
       <source>Median filter</source>
-      <translation type="unfinished">Median filter</translation>
+      <translation>Медіана фільтр</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="104"/>
@@ -3643,8 +3643,8 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
       <location filename="../../src/ui/VideoArea.qml" line="242"/>
       <source>This video cannot be stabilized, because this lens doesn&apos;t support OSS metadata.
 Disable lens stabilization (Optical SteadyShot) in order to use Gyroflow.</source>
-      <translation type="unfinished">This video cannot be stabilized, because this lens doesn&apos;t support OSS metadata.
-Disable lens stabilization (Optical SteadyShot) in order to use Gyroflow.</translation>
+      <translation>Це відео не можна стабілізувати, тому що ця лінза підтримує&apos;OSS-метадату.
+Вимкнути стабілізацію лінзів (Optical SteadyShot) з метою використання Ґірофта.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="374"/>

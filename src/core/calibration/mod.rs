@@ -253,7 +253,7 @@ impl LensCalibrator {
             } else {
                 // Pick `max_images` random frames from the entire range
                 found_frames.iter().copied()
-                    .choose_multiple(&mut rand::rng(), max_images).into_iter()
+                    .sample(&mut rand::rng(), max_images).into_iter()
                     .collect()
             };
 

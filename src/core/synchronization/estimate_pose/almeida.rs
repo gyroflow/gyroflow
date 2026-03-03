@@ -199,12 +199,12 @@ fn solve_ypr_ransac(field: &[MotionEntry], camera: &Camera, timestamp_ms: f64, n
     let rng = &mut rand::rng();
 
     for _ in 0..num_iters {
-        let samples = field.choose_multiple(rng, 3).copied().collect::<Vec<_>>();
+        let samples = field.sample(rng, 3).copied().collect::<Vec<_>>();
 
         let fit = solve_ypr_given(&samples, camera, timestamp_ms);
 
         let motion = field
-            .choose_multiple(rng, num_samples)
+            .sample(rng, num_samples)
             .copied()
             .collect::<Vec<_>>();
 

@@ -133,7 +133,7 @@ Notez que ce n'est qu'un indicateur visuel, il n'affecte pas le rendu.</translat
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="427"/>
       <source>Open data folder</source>
-      <translation type="unfinished">Open data folder</translation>
+      <translation/>
     </message>
   </context>
   <context>
@@ -593,7 +593,7 @@ You can increase the sharpness limit in the Advanced section.</translation>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="401"/>
       <source>Proportional</source>
-      <translation type="unfinished">Proportional</translation>
+      <translation>Proportionnel</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="407"/>

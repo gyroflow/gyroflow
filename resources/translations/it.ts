@@ -108,7 +108,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="408"/>
       <source>Yes</source>
-      <translation>Si</translation>
+      <translation>Sì</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="416"/>
@@ -133,7 +133,7 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="427"/>
       <source>Open data folder</source>
-      <translation type="unfinished">Open data folder</translation>
+      <translation>Apri cartella dati</translation>
     </message>
   </context>
   <context>
@@ -272,7 +272,7 @@ Controlla il bitrate del file dopo il rendering e se riscontri questo bug, puoi:
       <location filename="../../src/ui/App.qml" line="448"/>
       <location filename="../../src/ui/App.qml" line="667"/>
       <source>Preset saved to %1</source>
-      <translation type="unfinished">Preset saved to %1</translation>
+      <translation>Preset salvato in %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="632"/>
@@ -311,17 +311,17 @@ Controlla il bitrate del file dopo il rendering e se riscontri questo bug, puoi:
       <location filename="../../src/ui/App.qml" line="331"/>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>Added to queue</source>
-      <translation type="unfinished">Added to queue</translation>
+      <translation>Aggiunto alla coda</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="331"/>
       <source>file %1 will be overwritten</source>
-      <translation type="unfinished">file %1 will be overwritten</translation>
+      <translation>Il file %1 verrà sovrascritto</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="334"/>
       <source>file will be rendered to %1</source>
-      <translation type="unfinished">file will be rendered to %1</translation>
+      <translation>Il file verrà renderizzato in %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="364"/>
@@ -334,18 +334,18 @@ Fare clic su Ok e selezionare la cartella di destinazione.</translation>
       <location filename="../../src/ui/App.qml" line="375"/>
       <source>Keep this app in the foreground and don&apos;t lock the screen.
 Due to limitations of the system video encoders, rendering in the background is not supported.</source>
-      <translation>Mantieni questa app in primo piano e non&apos; bloccare lo schermo.
+      <translation>Mantieni questa app in primo piano e non bloccare lo schermo.
 A causa delle limitazioni degli encoder video di sistema, il rendering in background non è supportato.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="439"/>
       <source>Enter the name for the preset: </source>
-      <translation type="unfinished">Enter the name for the preset: </translation>
+      <translation>Inserisci il nome del preset: </translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="443"/>
       <source>Name cannot be empty.</source>
-      <translation type="unfinished">Name cannot be empty.</translation>
+      <translation>Il nome non può essere vuoto.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="674"/>
@@ -418,17 +418,17 @@ Se disponi di un dispositivo moderno, degli ultimi driver GPU e pensi che questo
     <message>
       <location filename="../../src/ui/App.qml" line="724"/>
       <source>Your GPU doesn&apos;t support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.</source>
-      <translation>La tua GPU non supporta la codifica HEVC/x265; prova a usare x264 o disabilita la codifica GPU nelle impostazioni di Esportazione.</translation>
+      <translation>La tua GPU non supporta la codifica HEVC/x265; prova a usare x264/AVC o disabilita la codifica GPU nelle impostazioni di Esportazione.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="727"/>
       <source>GPU decoder failed to decode this file. Disable GPU decoding in &quot;Advanced&quot; and try again.</source>
-      <translation type="unfinished">GPU decoder failed to decode this file. Disable GPU decoding in &quot;Advanced&quot; and try again.</translation>
+      <translation>Il decoder GPU non è riuscito a decodificare questo file. Disabilita la decodifica GPU in &quot;Avanzate&quot; e riprova.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="730"/>
       <source>Make sure your output extension supports the selected codec. &quot;.mov&quot; should work in most cases.</source>
-      <translation>Assicurati che l'estensione di uscita supporti il codec selezionato. &quot;.mov&quot; dovrebbe funzionare nella maggior parte dei casi.</translation>
+      <translation>Assicurati che l&apos;estensione di uscita supporti il codec selezionato. &quot;.mov&quot; dovrebbe funzionare nella maggior parte dei casi.</translation>
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="733"/>
@@ -475,17 +475,17 @@ Se disponi di un dispositivo moderno, degli ultimi driver GPU e pensi che questo
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="80"/>
       <source>Pattern sharpness: %1</source>
-      <translation>Nitidezza modello: %1</translation>
+      <translation>Nitidezza schema: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="96"/>
       <source>Some patterns were detected, but their average sharpness was &lt;b&gt;%1 px&lt;/b&gt; and max limit is &lt;b&gt;%2 px&lt;/b&gt;.</source>
-      <translation>Sono stati rilevati alcuni modelli, ma la loro nitidezza media è stata &lt;b&gt;%1 px&lt;/b&gt; e il limite massimo è &lt;b&gt;%2 px&lt;/b&gt;.</translation>
+      <translation>Sono stati rilevati alcuni schemi, ma la loro nitidezza media è stata &lt;b&gt;%1 px&lt;/b&gt; e il limite massimo è &lt;b&gt;%2 px&lt;/b&gt;.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="97"/>
       <source>No calibration patterns were detected.</source>
-      <translation>Non sono stati rilevati modelli di calibrazione.</translation>
+      <translation>Non sono stati rilevati schemi di calibrazione.</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="98"/>
@@ -502,7 +502,7 @@ You can increase the sharpness limit in the Advanced section.</source>
 - Usa una buona illuminazione
 - Sposta la fotocamera lentamente
 - Evita il mosso
-- Assicurati che il modello rimanga a fuoco.
+- Assicurati che lo schema rimanga a fuoco.
 
 È possibile aumentare il limite di nitidezza nella sezione Avanzate.</translation>
     </message>
@@ -592,12 +592,12 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="401"/>
       <source>Proportional</source>
-      <translation type="unfinished">Proportional</translation>
+      <translation>Proporzionale</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="407"/>
       <source>Based on &quot;Max zoom&quot;</source>
-      <translation type="unfinished">Based on &quot;Max zoom&quot;</translation>
+      <translation>Basato su &quot;Max zoom&quot;</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="458"/>
@@ -672,12 +672,12 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="586"/>
       <source>Export trim ranges as separate videos</source>
-      <translation type="unfinished">Export trim ranges as separate videos</translation>
+      <translation>Esporta segmenti tagliati come video separati</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="605"/>
       <source>Interpolation method</source>
-      <translation type="unfinished">Interpolation method</translation>
+      <translation>Metodo di interpolazione</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="669"/>
@@ -702,12 +702,12 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="695"/>
       <source>Use experimental Vulkan encoder (HEVC only)</source>
-      <translation type="unfinished">Use experimental Vulkan encoder (HEVC only)</translation>
+      <translation>Usa encoder Vulkan sperimentale (solo HEVC)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="704"/>
       <source>Use experimental D3D12 encoder (HEVC and AVC)</source>
-      <translation type="unfinished">Use experimental D3D12 encoder (HEVC and AVC)</translation>
+      <translation>Usa encoder D3D12 sperimentale (HEVC e AVC)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="426"/>
@@ -768,12 +768,12 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="574"/>
       <source>This disables trim range and you need to use the .mov output file extension</source>
-      <translation>Questo disabilita l'intervallo di taglio ed è necessario utilizzare l'estensione del file di output .mov</translation>
+      <translation>Questo disabilita l'intervallo di trim è necessario utilizzare l'estensione file .mov</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="579"/>
       <source>Use black frames outside trim range and keep original file duration</source>
-      <translation>Usa fotogrammi neri al di fuori dell'intervallo di taglio e mantieni la durata del file originale</translation>
+      <translation>Usa fotogrammi neri al di fuori dell'intervallo di trim e mantieni la durata del file originale</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Export.qml" line="593"/>
@@ -804,12 +804,12 @@ You can increase the sharpness limit in the Advanced section.</source>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Disable</source>
-      <translation type="unfinished">Disable</translation>
+      <translation>Disabilita</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="51"/>
       <source>Enable</source>
-      <translation type="unfinished">Enable</translation>
+      <translation>Abilita</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/GridGuide.qml" line="54"/>
@@ -992,12 +992,12 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="599"/>
       <source>Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</source>
-      <translation>La calibrazione dell&apos;obiettivo dovrebbe essere eseguita alla risoluzione massima o almeno a 4k. Cambia questa impostazione solo se sai cosa stai facendo.</translation>
+      <translation>La calibrazione della lente dovrebbe essere eseguita alla risoluzione massima o almeno a 4k. Cambia questa impostazione solo se sai cosa stai facendo.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="602"/>
       <source>Lens is asymmetrical</source>
-      <translation>Le lenti sono asimmetriche</translation>
+      <translation>La lente è asimmetrica</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="609"/>
@@ -1045,7 +1045,7 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="110"/>
       <source>Yes</source>
-      <translation>Si</translation>
+      <translation>Sì</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="201"/>
@@ -1085,52 +1085,52 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="298"/>
       <source>Advanced</source>
-      <translation type="unfinished">Advanced</translation>
+      <translation>Avanzate</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="303"/>
       <source>Lens is under water</source>
-      <translation type="unfinished">Lens is under water</translation>
+      <translation>La lente è sott&apos;acqua</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="305"/>
       <source>Enable if you&apos;re filming under water. This will adjust the refraction coefficient.</source>
-      <translation type="unfinished">Enable if you&apos;re filming under water. This will adjust the refraction coefficient.</translation>
+      <translation>Abilitare se stai riprendendo sott&apos;acqua. Questo regolerà il coefficiente di rifrazione.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="326"/>
       <source>Enable keyframing</source>
-      <translation type="unfinished">Enable keyframing</translation>
+      <translation>Abilita keyframe</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="339"/>
       <source>Add keyframe</source>
-      <translation type="unfinished">Add keyframe</translation>
+      <translation>Aggiungi keyframe</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="409"/>
       <source>Export STMap</source>
-      <translation type="unfinished">Export STMap</translation>
+      <translation>Esporta STMap</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="415"/>
       <source>This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?</source>
-      <translation type="unfinished">This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?</translation>
+      <translation>Questo file contiene i metadati della lente per ogni frame. Vuoi esportare una sequenza STMap o un singolo frame?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="416"/>
       <source>Single frame</source>
-      <translation type="unfinished">Single frame</translation>
+      <translation>Frame singolo</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="417"/>
       <source>STMap sequence</source>
-      <translation type="unfinished">STMap sequence</translation>
+      <translation>Sequenza STMap</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="431"/>
       <source>Exporting %1...</source>
-      <translation type="unfinished">Exporting %1...</translation>
+      <translation>Esportazione %1...</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="368"/>
@@ -1242,7 +1242,7 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="166"/>
       <source>In order to detect multiple motion data files, click here and grant access to the directory with files.</source>
-      <translation type="unfinished">In order to detect multiple motion data files, click here and grant access to the directory with files.</translation>
+      <translation>Al fine di rilevare più file di dati di movimento, fare clic qui e consentire l'accesso alla cartella con i file.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="194"/>
@@ -1252,22 +1252,22 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="212"/>
       <source>Load all metadata</source>
-      <translation type="unfinished">Load all metadata</translation>
+      <translation>Carica tutti i metadati</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="226"/>
       <source>Frame offset</source>
-      <translation type="unfinished">Frame offset</translation>
+      <translation>Offset frame</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="233"/>
       <source>frames</source>
-      <translation type="unfinished">frames</translation>
+      <translation>frames</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="239"/>
       <source>Add or subtract frames from the video to align with motion data</source>
-      <translation type="unfinished">Add or subtract frames from the video to align with motion data</translation>
+      <translation>Aggiungi o sottrai frames dal video per allinearsi ai dati di movimento</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="247"/>
@@ -1287,12 +1287,12 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="269"/>
       <source>Median filter</source>
-      <translation type="unfinished">Median filter</translation>
+      <translation>Filtro mediano</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="277"/>
       <source>samples</source>
-      <translation type="unfinished">samples</translation>
+      <translation>campioni</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="293"/>
@@ -1390,42 +1390,42 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="686"/>
       <source>Export</source>
-      <translation type="unfinished">Export</translation>
+      <translation>Esporta</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="697"/>
       <source>Select file destination</source>
-      <translation type="unfinished">Select file destination</translation>
+      <translation>Seleziona destinazione file</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="711"/>
       <source>Export camera data (CSV/JSON/USD/AE)</source>
-      <translation type="unfinished">Export camera data (CSV/JSON/USD/AE)</translation>
+      <translation>Esporta dati telecamera (CSV/JSON/USD/AE)</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="760"/>
       <source>Which format do you want to use?</source>
-      <translation type="unfinished">Which format do you want to use?</translation>
+      <translation>Quale formato vuoi utilizzare?</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="765"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Annulla</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="777"/>
       <source>Export full metadata</source>
-      <translation type="unfinished">Export full metadata</translation>
+      <translation>Esporta metadati completi</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="796"/>
       <source>Export parsed metadata</source>
-      <translation type="unfinished">Export parsed metadata</translation>
+      <translation>Esporta metadati analizzati</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/MotionData.qml" line="814"/>
       <source>Export project file (including processed gyro data)</source>
-      <translation type="unfinished">Export project file (including processed gyro data)</translation>
+      <translation>Esporta file di progetto (inclusi dati giroscopici elaborati)</translation>
     </message>
   </context>
   <context>
@@ -1433,12 +1433,12 @@ Vuoi inviare il tuo profilo?</translation>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="9"/>
       <source>Video editor plugins</source>
-      <translation type="unfinished">Video editor plugins</translation>
+      <translation>Plugin editor video</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="25"/>
       <source>Select %1</source>
-      <translation type="unfinished">Select %1</translation>
+      <translation>Seleziona %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="31"/>
@@ -1448,58 +1448,58 @@ Vuoi inviare il tuo profilo?</translation>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="146"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="154"/>
       <source>Ok</source>
-      <translation type="unfinished">Ok</translation>
+      <translation>Ok</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="31"/>
       <source>You selected the wrong folder.
 Make sure to select %1.</source>
-      <translation type="unfinished">You selected the wrong folder.
-Make sure to select %1.</translation>
+      <translation>Hai selezionato la cartella sbagliata.
+Assicurati di selezionare %1.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="77"/>
       <source>Unable to copy the plugin due to sandbox limitations.
 Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</source>
-      <translation type="unfinished">Unable to copy the plugin due to sandbox limitations.
-Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
+      <translation>Impossibile copiare il plugin a causa delle limitazioni della sandbox.
+Apri &lt;b&gt;Terminale&lt;/b&gt; e inserisci il seguente comando:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="110"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="138"/>
       <source>Update</source>
-      <translation type="unfinished">Update</translation>
+      <translation>Aggiorna</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="110"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="138"/>
       <source>Install</source>
-      <translation type="unfinished">Install</translation>
+      <translation>Installa</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="117"/>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="154"/>
       <source>At the next prompt, click &lt;b&gt;&quot;Open&quot;&lt;/b&gt; to grant access to the %1 folder in order for Gyroflow to install the plugin.</source>
-      <translation type="unfinished">At the next prompt, click &lt;b&gt;&quot;Open&quot;&lt;/b&gt; to grant access to the %1 folder in order for Gyroflow to install the plugin.</translation>
+      <translation>Al prossimo prompt, fare clic su &lt;b&gt;&quot;Apri&quot;&lt;/b&gt; per consentire l'accesso alla cartella %1 per consentire a Gyroflow di installare il plugin.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="146"/>
       <source>%1 folder doesn&apos;t exist.
 Due to sandbox limitations, you have to create it yourself.
 Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</source>
-      <translation type="unfinished">%1 folder doesn&apos;t exist.
-Due to sandbox limitations, you have to create it yourself.
-Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
+      <translation>La cartella %1 non esiste.
+A causa delle limitazioni della sandbox, devi crearla manualmente.
+Apri &lt;b&gt;Terminale&lt;/b&gt; e inserisci il seguente comando:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="148"/>
       <source>Cancel</source>
-      <translation type="unfinished">Cancel</translation>
+      <translation>Annulla</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/NlePlugins.qml" line="167"/>
       <source>More information</source>
-      <translation type="unfinished">More information</translation>
+      <translation>Ulteriori informazioni</translation>
     </message>
   </context>
   <context>
@@ -1725,27 +1725,27 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Frame readout direction: %1</source>
-      <translation type="unfinished">Frame readout direction: %1</translation>
+      <translation>Direzione lettura frame: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Top to bottom</source>
-      <translation type="unfinished">Top to bottom</translation>
+      <translation>Dall'alto in basso</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Bottom to top</source>
-      <translation type="unfinished">Bottom to top</translation>
+      <translation>Dal basso in alto</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Left to right</source>
-      <translation type="unfinished">Left to right</translation>
+      <translation>Da sinistra a destra</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/ReadoutDirection.qml" line="57"/>
       <source>Right to left</source>
-      <translation type="unfinished">Right to left</translation>
+      <translation>Da destra a sinistra</translation>
     </message>
   </context>
   <context>
@@ -1758,7 +1758,7 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</translation>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="41"/>
       <source>Render queue</source>
-      <translation>Renderizza coda</translation>
+      <translation>Coda di rendering</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="766"/>
@@ -1866,12 +1866,12 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="394"/>
       <source>Move up</source>
-      <translation type="unfinished">Move up</translation>
+      <translation>Sposta in alto</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="399"/>
       <source>Move down</source>
-      <translation type="unfinished">Move down</translation>
+      <translation>Sposta in basso</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="404"/>
@@ -1908,7 +1908,7 @@ Do you want to convert to a different supported pixel format or keep the origina
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="581"/>
       <source>ETA %1</source>
-      <translation type="unfinished">ETA %1</translation>
+      <translation>Tempo stimato: %1</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="582"/>
@@ -1924,8 +1924,8 @@ Do you want to convert to a different supported pixel format or keep the origina
       <location filename="../../src/ui/RenderQueue.qml" line="721"/>
       <source>Due to file access restrictions, you need to select the destination folder manually.
 Click Ok and select the destination folder.</source>
-      <translation type="unfinished">Due to file access restrictions, you need to select the destination folder manually.
-Click Ok and select the destination folder.</translation>
+      <translation>A causa delle restrizioni di accesso ai file, è necessario selezionare manualmente la cartella di destinazione.
+Fare clic su Ok e selezionare la cartella di destinazione.</translation>
     </message>
     <message>
       <location filename="../../src/ui/RenderQueue.qml" line="787"/>
@@ -2054,7 +2054,7 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="74"/>
       <source>Select fields to include in the exported file</source>
-      <translation type="unfinished">Select fields to include in the exported file</translation>
+      <translation>Seleziona i campi da includere nel file esportato</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="96"/>
@@ -2090,12 +2090,12 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="102"/>
       <source>Median filter</source>
-      <translation type="unfinished">Median filter</translation>
+      <translation>Filtro mediano</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="104"/>
       <source>Gyro bias</source>
-      <translation>Influenza del giroscopio</translation>
+      <translation>Bias del giroscopio</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="105"/>
@@ -2120,7 +2120,7 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="109"/>
       <source>Keyframes</source>
-      <translation>Keyframes</translation>
+      <translation>Keyframe</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="110"/>
@@ -2216,62 +2216,62 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="135"/>
       <source>Original</source>
-      <translation type="unfinished">Original</translation>
+      <translation>Originale</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="136"/>
       <source>Stabilized</source>
-      <translation type="unfinished">Stabilized</translation>
+      <translation>Stabilizzato</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="138"/>
       <source>Gyroscope</source>
-      <translation type="unfinished">Gyroscope</translation>
+      <translation>Giroscopio</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="139"/>
       <source>Accelerometer</source>
-      <translation type="unfinished">Accelerometer</translation>
+      <translation>Accelerometro</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="140"/>
       <source>Quaternion</source>
-      <translation type="unfinished">Quaternion</translation>
+      <translation>Quaternione</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="141"/>
       <source>Euler angles</source>
-      <translation type="unfinished">Euler angles</translation>
+      <translation>Angoli di Eulero</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="142"/>
       <source>Minimal FOV scale</source>
-      <translation type="unfinished">Minimal FOV scale</translation>
+      <translation>Scala FOV minima</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="143"/>
       <source>Smoothed FOV scale</source>
-      <translation type="unfinished">Smoothed FOV scale</translation>
+      <translation>Scala FOV fluidificata</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="144"/>
       <source>Focal length (if available)</source>
-      <translation type="unfinished">Focal length (if available)</translation>
+      <translation>Lunghezza focale (se disponibile)</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="222"/>
       <source>Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the directory with lens profiles.</source>
-      <translation type="unfinished">Hint: You can have your presets in the lens profile search box, if you save your preset (`.gyroflow` file) in the directory with lens profiles.</translation>
+      <translation>Suggerimento: Puoi visualizzare i tuoi preset nella casella di ricerca del profilo lente se salvi il tuo preset (file `.gyroflow`) nella cartella dei profili.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="223"/>
       <source>You can also save your preset as `default.gyroflow` in the directory with lens profiles and it will be always applied to every loaded video file (also in plugins).</source>
-      <translation type="unfinished">You can also save your preset as `default.gyroflow` in the directory with lens profiles and it will be always applied to every loaded video file (also in plugins).</translation>
+      <translation>Puoi anche salvare il preset come `default.gyroflow` nella cartella dei profili lente e verrà applicato a tutti i video caricati (anche nei plugin).</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="237"/>
       <source>Save to lens profile directory</source>
-      <translation>Salva nella directory del profilo dell'obiettivo</translation>
+      <translation>Salva nella cartella dei profili lente</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="241"/>
@@ -2308,17 +2308,17 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="251"/>
       <source>Export all samples</source>
-      <translation type="unfinished">Export all samples</translation>
+      <translation>Esporta tutti i campioni</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="255"/>
       <source>Export one sample per frame</source>
-      <translation type="unfinished">Export one sample per frame</translation>
+      <translation>Esporta un campione per frame</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="268"/>
       <source>When exporting one sample per frame, it&apos;s the sample in the middle of the frame, and it ignores rolling shutter correction.</source>
-      <translation type="unfinished">When exporting one sample per frame, it&apos;s the sample in the middle of the frame, and it ignores rolling shutter correction.</translation>
+      <translation>Quando si esporta un campione per frame, viene usato quello al centro del frame e viene ignorata la correzione rolling shutter.</translation>
     </message>
     <message>
       <location filename="../../src/ui/SettingsSelector.qml" line="300"/>
@@ -2346,12 +2346,12 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="80"/>
       <source>Enable keyframing</source>
-      <translation>Abilita fotogrammi chiave</translation>
+      <translation>Abilita keyframe</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/SliderWithField.qml" line="93"/>
       <source>Add keyframe</source>
-      <translation>Aggiungi frame chiave</translation>
+      <translation>Aggiungi keyframe</translation>
     </message>
   </context>
   <context>
@@ -2404,7 +2404,7 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="227"/>
       <source>Only within trim range</source>
-      <translation>Solo entro l'intervallo di taglio</translation>
+      <translation>Solo entro l'intervallo di trim</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="228"/>
@@ -2450,37 +2450,37 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="636"/>
       <source>Link with zooming limit</source>
-      <translation type="unfinished">Link with zooming limit</translation>
+      <translation>Collega al limite zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="709"/>
       <source>Additional 3D rotation</source>
-      <translation type="unfinished">Additional 3D rotation</translation>
+      <translation>Rotazione 3D aggiuntiva</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="713"/>
       <source>Pitch</source>
-      <translation type="unfinished">Pitch</translation>
+      <translation>Pitch</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="718"/>
       <source>Yaw</source>
-      <translation type="unfinished">Yaw</translation>
+      <translation>Yaw</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="723"/>
       <source>Roll</source>
-      <translation type="unfinished">Roll</translation>
+      <translation>Roll</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="730"/>
       <source>Additional 3D translation</source>
-      <translation type="unfinished">Additional 3D translation</translation>
+      <translation>Traslazione 3D aggiuntiva</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="745"/>
       <source>Z</source>
-      <translation type="unfinished">Z</translation>
+      <translation>Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="340"/>
@@ -2538,14 +2538,14 @@ Click Ok and select the destination folder.</translation>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="456"/>
       <source>Zoom limit</source>
-      <translation type="unfinished">Zoom limit</translation>
+      <translation>Limite zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="459"/>
       <source>Zoom limit is calculated approximately.
 If you need more accuracy, increase the number of iterations in &quot;Advanced&quot; below.</source>
-      <translation type="unfinished">Zoom limit is calculated approximately.
-If you need more accuracy, increase the number of iterations in &quot;Advanced&quot; below.</translation>
+      <translation>Il limite di zoom è calcolato in modo approssimativo.
+Per una maggiore precisione, aumenta il numero di iterazioni in &quot;Avanzate&quot; qui sotto.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="475"/>
@@ -2560,7 +2560,7 @@ If you need more accuracy, increase the number of iterations in &quot;Advanced&q
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="493"/>
       <source>Lens correction</source>
-      <translation type="unfinished">Lens correction</translation>
+      <translation>Correzione lente</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="643"/>
@@ -2570,7 +2570,7 @@ If you need more accuracy, increase the number of iterations in &quot;Advanced&q
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="648"/>
       <source>Zooming method</source>
-      <translation>Metodo di ingrandimento</translation>
+      <translation>Metodo di zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="668"/>
@@ -2592,12 +2592,12 @@ If you need more accuracy, increase the number of iterations in &quot;Advanced&q
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="753"/>
       <source>Zoom limit iterations</source>
-      <translation type="unfinished">Zoom limit iterations</translation>
+      <translation>Iterazioni limite zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="754"/>
       <source>More iterations = more accurate limit, but also slower to calculate.</source>
-      <translation type="unfinished">More iterations = more accurate limit, but also slower to calculate.</translation>
+      <translation>Più iterazioni = limite più accurato, ma anche più lento da calcolare.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="535"/>
@@ -2896,7 +2896,7 @@ Assicurati di avere un corretto valore impostato per il rolling shutter prima de
     <message>
       <location filename="../../src/ui/menu/LensProfile.qml" line="68"/>
       <source>Digital lens</source>
-      <translation>Obiettivo digitale</translation>
+      <translation>Lente digitale</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/LensCalibrate.qml" line="63"/>
@@ -2988,52 +2988,52 @@ Assicurati di avere un corretto valore impostato per il rolling shutter prima de
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="47"/>
       <source>Shutter angle</source>
-      <translation type="unfinished">Shutter angle</translation>
+      <translation>Angolo otturatore</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="48"/>
       <source>Shutter speed</source>
-      <translation type="unfinished">Shutter speed</translation>
+      <translation>Velocità otturatore</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="49"/>
       <source>Exposure</source>
-      <translation type="unfinished">Exposure</translation>
+      <translation>Esposizione</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="50"/>
       <source>ISO</source>
-      <translation type="unfinished">ISO</translation>
+      <translation>ISO</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="51"/>
       <source>Color primaries</source>
-      <translation type="unfinished">Color primaries</translation>
+      <translation>Colori primari</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="52"/>
       <source>Gamma equation</source>
-      <translation type="unfinished">Gamma equation</translation>
+      <translation>Equazione gamma</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="53"/>
       <source>White balance mode</source>
-      <translation type="unfinished">White balance mode</translation>
+      <translation>Modalità bilanciamento del bianco</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="54"/>
       <source>White balance</source>
-      <translation type="unfinished">White balance</translation>
+      <translation>Bilanciamento del bianco</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="55"/>
       <source>Iris</source>
-      <translation type="unfinished">Iris</translation>
+      <translation>Diaframma</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="57"/>
       <source>Focus mode</source>
-      <translation type="unfinished">Focus mode</translation>
+      <translation>Modalità messa a fuoco</translation>
     </message>
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="89"/>
@@ -3048,7 +3048,7 @@ Assicurati di avere un corretto valore impostato per il rolling shutter prima de
     <message>
       <location filename="../../src/ui/Calibrator.qml" line="91"/>
       <source>Average pattern sharpness</source>
-      <translation>Nitidezza media del modello</translation>
+      <translation>Nitidezza media dello schema</translation>
     </message>
   </context>
   <context>
@@ -3156,7 +3156,7 @@ Sei sicuro di voler continuare?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="407"/>
       <source>Ease out</source>
-      <translation>Incrementare</translation>
+      <translation>Attenuazione graduale</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="425"/>
@@ -3171,7 +3171,7 @@ Sei sicuro di voler continuare?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="427"/>
       <source>Zooming speed</source>
-      <translation>Velocità di ingrandimento</translation>
+      <translation>Velocità di zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="428"/>
@@ -3186,37 +3186,37 @@ Sei sicuro di voler continuare?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="430"/>
       <source>Zoom limit</source>
-      <translation type="unfinished">Zoom limit</translation>
+      <translation>Limite zoom</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="431"/>
       <source>Additional 3D yaw</source>
-      <translation type="unfinished">Additional 3D yaw</translation>
+      <translation>Rotazione 3D aggiuntiva Yaw</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="432"/>
       <source>Additional 3D pitch</source>
-      <translation type="unfinished">Additional 3D pitch</translation>
+      <translation>Rotazione 3D aggiuntiva Pitch</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="433"/>
       <source>Additional 3D roll</source>
-      <translation type="unfinished">Additional 3D roll</translation>
+      <translation>Rotazione 3D aggiuntiva Roll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="434"/>
       <source>Additional 3D translation X</source>
-      <translation type="unfinished">Additional 3D translation X</translation>
+      <translation>Traslazione 3D aggiuntiva X</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="435"/>
       <source>Additional 3D translation Y</source>
-      <translation type="unfinished">Additional 3D translation Y</translation>
+      <translation>Traslazione 3D aggiuntiva Y</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="436"/>
       <source>Additional 3D translation Z</source>
-      <translation type="unfinished">Additional 3D translation Z</translation>
+      <translation>Traslazione 3D aggiuntiva Z</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="437"/>
@@ -3246,7 +3246,7 @@ Sei sicuro di voler continuare?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="442"/>
       <source>Light refraction coefficient</source>
-      <translation type="unfinished">Light refraction coefficient</translation>
+      <translation>Coefficiente di rifrazione della luce</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="443"/>
@@ -3266,7 +3266,7 @@ Sei sicuro di voler continuare?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="449"/>
       <source>Video speed</source>
-      <translation type="unfinished">Video speed</translation>
+      <translation>Velocità video</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="674"/>
@@ -3336,42 +3336,42 @@ Sei sicuro di voler continuare?</translation>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="446"/>
       <source>Pitch smoothness</source>
-      <translation>Fluidità sul pitch</translation>
+      <translation>Fluidità Pitch</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="447"/>
       <source>Roll smoothness</source>
-      <translation>Fluidità sul roll</translation>
+      <translation>Fluidità Roll</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="448"/>
       <source>Yaw smoothness</source>
-      <translation>Fluidità sullo yaw</translation>
+      <translation>Fluidità Yaw</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="714"/>
       <source>Trim range</source>
-      <translation type="unfinished">Trim range</translation>
+      <translation>Intervallo di trim</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="729"/>
       <source>Add new range</source>
-      <translation type="unfinished">Add new range</translation>
+      <translation>Aggiungi nuovo intervallo</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="738"/>
       <source>Delete this range</source>
-      <translation type="unfinished">Delete this range</translation>
+      <translation>Elimina questo intervallo</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="747"/>
       <source>Clear all</source>
-      <translation type="unfinished">Clear all</translation>
+      <translation>Cancella tutto</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="754"/>
       <source>Restrict playback to trim range</source>
-      <translation type="unfinished">Restrict playback to trim range</translation>
+      <translation>Limita la riproduzione all'intervallo di trim</translation>
     </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="1028"/>
@@ -3634,24 +3634,23 @@ Se hai Gyroflow in C:File programma, allora devi eseguire Gyroflow come amminist
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="71"/>
       <source>Preset can be applied only after loading a video.</source>
-      <translation type="unfinished">Preset can be applied only after loading a video.</translation>
+      <translation>Il preset può essere applicato solo dopo aver caricato un video.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="242"/>
       <source>This video cannot be stabilized, because this lens doesn&apos;t support OSS metadata.
 Disable lens stabilization (Optical SteadyShot) in order to use Gyroflow.</source>
-      <translation type="unfinished">This video cannot be stabilized, because this lens doesn&apos;t support OSS metadata.
-Disable lens stabilization (Optical SteadyShot) in order to use Gyroflow.</translation>
+      <translation>Questo video non può essere stabilizzato perché questa lente non supporta i metadati OSS. Disabilita la stabilizzazione della lente (Optical SteadyShot) per utilizzare Gyroflow.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="374"/>
       <source>In order to load all R3D parts, you need to select the entire .RDC folder.</source>
-      <translation type="unfinished">In order to load all R3D parts, you need to select the entire .RDC folder.</translation>
+      <translation>Per caricare tutte le parti R3D, è necessario selezionare l&apos;intera cartella .RDC.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="375"/>
       <source>OK</source>
-      <translation type="unfinished">OK</translation>
+      <translation>OK</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="676"/>
@@ -3666,7 +3665,7 @@ Disable lens stabilization (Optical SteadyShot) in order to use Gyroflow.</trans
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="712"/>
       <source>Files merged successfully, do you want to delete the original ones?</source>
-      <translation type="unfinished">Files merged successfully, do you want to delete the original ones?</translation>
+      <translation>File uniti con successo, vuoi eliminare quelli originali?</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="837"/>
@@ -3749,7 +3748,7 @@ Disable lens stabilization (Optical SteadyShot) in order to use Gyroflow.</trans
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="167"/>
       <source>In order to detect project files, video sequences or image sequences, click here and select the directory with input files.</source>
-      <translation>Per rilevare file di progetto, sequenze video o sequenze di immagini, fare clic qui e selezionare la directory con i file di input.</translation>
+      <translation>Per rilevare file di progetto, sequenze video o sequenze di immagini, fare clic qui e selezionare la cartella con i file di input.</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="158"/>

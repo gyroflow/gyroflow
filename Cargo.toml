@@ -49,7 +49,7 @@ argh = "0.1.14"
 indicatif = "0.18"
 rustfft = "6.4.1"
 crc32fast = "1.5.0"
-rodio = { default-features = false, features = ["vorbis", "playback"], version = "0.21" }
+rodio = { default-features = false, features = ["vorbis", "playback"], version = "0.22" }
 filetime_creation = "0.2"
 
 qmetaobject = { version = "0.2.10", default-features = false, features = ["log"] }
@@ -130,7 +130,7 @@ min_sdk_version = 26
 target_sdk_version = 35
 
 [target.'cfg(target_os = "android")'.dependencies]
-jni = "0.21"
+jni = "0.22"
 ndk = { version = "0.9", features = ["media", "api-level-26"] }
 ndk-sys = { version = "0.6.0" }
 ndk-context = "0.1.1"

@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "bced41c" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "b721fba" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { version = "0.8", features = ["field_access"] }
 
@@ -36,21 +36,21 @@ serde_json = "1.0"
 crc32fast = "1.5.0"
 byteorder = "1.5.0"
 line_drawing = "1.0.1"
-rand = "0.9.2"
-time = { version = "0.3.44", features = ["local-offset"] }
+rand = "0.10.0"
+time = { version = "0.3.47", features = ["local-offset"] }
 itertools = "0.14.0"
 num = "0.4.3"
 base91 = "0.1.0"
-bitflags = "2.10"
+bitflags = "2.11"
 enum_delegate = "0.2.0"
-simple-easing = "1.0.1"
+simple-easing = "1.0.2"
 half = "2.7"
 lru = "0.16"
-thiserror = "2.0.17"
+thiserror = "2.0.18"
 ciborium = "0.2.2"
 dyn-clone = "1.0"
 app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }
-whoami = "2.0"
+whoami = "2.1"
 
 akaze = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "d271a9a", features = ["rayon"] }
 eight-point = { version = "*", git = "https://github.com/rust-cv/cv.git", rev = "d271a9a" }
@@ -65,7 +65,7 @@ bitarray = { version = "0.9", features = ["space"] }
 enterpolation = "0.3.0"
 libloading = "0.9"
 libc = "0.2"
-bytemuck = "1.24"
+bytemuck = "1.25"
 ash = "0.38.0"
 pollster = "0.4.0"
 futures-intrusive = "0.5.0"
@@ -112,10 +112,10 @@ inherits = "release"
 debug = true
 
 [target.'cfg(target_os = "android")'.dependencies]
-jni = "0.21"
+jni = "0.22"
 ndk = { version = "0.9.0", features = ["media", "api-level-26"] }
 ndk-sys = { version = "0.6.0" }
 ndk-context = { version = "0.1.1" }
 
 [build-dependencies]
-ureq = "3.1"
+ureq = "3.2"

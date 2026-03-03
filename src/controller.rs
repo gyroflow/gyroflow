@@ -2305,8 +2305,8 @@ impl Controller {
                     _ => { return Err(Error::new(ErrorKind::Other, "").into()) }
                 };
                 {
-                    let stream_handle = rodio::OutputStreamBuilder::open_default_stream()?;
-                    let sink = rodio::Sink::connect_new(stream_handle.mixer());
+                    let stream_handle = rodio::DeviceSinkBuilder::open_default_sink()?;
+                    let sink = rodio::Player::connect_new(stream_handle.mixer());
                     sink.append(rodio::Decoder::new(Cursor::new(source))?);
                     sink.sleep_until_end();
                 }

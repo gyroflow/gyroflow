@@ -2458,7 +2458,7 @@ Click Ok and select the destination folder.</source>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="709"/>
       <source>Additional 3D rotation</source>
-      <translation type="unfinished">Additional 3D rotation</translation>
+      <translation>Additional 3D rotation</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Stabilization.qml" line="713"/>
