@@ -67,6 +67,8 @@ qrc!(pub rsrc,
         "resources/icons/svg/grid.svg",
         "resources/icons/svg/plugin.svg",
 
+        "resources/camera_database.json",
+
         "src/core/gpu/compiled/stabilize.frag.qsb",
         "src/qt_gpu/compiled/texture.vert.qsb",
         "src/qt_gpu/compiled/undistort_opencv_fisheye.frag.qsb",
