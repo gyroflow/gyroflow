@@ -115,8 +115,8 @@ pub fn merge_json(a: &mut serde_json::Value, b: &serde_json::Value) {
 
 pub fn init_telemetry_parser() {
     use telemetry_parser::filesystem as tp_fs;
-    fn telemetry_parser_open_file<'a>(base: &'a tp_fs::FilesystemBase, path: &str) -> std::io::Result<tp_fs::FileWrapper<'a>> {
-        match crate::filesystem::open_file(&base, path, false, false) {
+    fn telemetry_parser_open_file(path: &str) -> std::io::Result<tp_fs::FileWrapper> {
+        match crate::filesystem::open_file(path, false, false) {
             Ok(file) => {
                 let size = file.size;
                 return Ok(tp_fs::FileWrapper { file: Box::new(file), size });

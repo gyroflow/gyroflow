@@ -16,12 +16,12 @@ pub struct VideoProcessor<'a> {
 }
 
 impl<'a> VideoProcessor<'a> {
-    pub fn from_file(base: &'a gyroflow_core::filesystem::EngineBase, url: &str, gpu_decoding: bool, gpu_decoder_index: usize, decoder_options: Option<Dictionary>) -> Result<Self, FFmpegError> {
+    pub fn from_file( url: &str, gpu_decoding: bool, gpu_decoder_index: usize, decoder_options: Option<Dictionary>) -> Result<Self, FFmpegError> {
         let filename = gyroflow_core::filesystem::get_filename(url);
         if filename.to_lowercase().ends_with(".braw") || filename.to_lowercase().ends_with(".r3d") || filename.to_lowercase().ends_with(".nev") {
             Ok(Self { inner: Processor::Mdk(MDKProcessor::from_file(url, decoder_options, gpu_decoding)) })
         } else {
-            Ok(Self { inner: Processor::Ffmpeg(FfmpegProcessor::from_file(base, url, gpu_decoding, gpu_decoder_index, decoder_options)?) })
+            Ok(Self { inner: Processor::Ffmpeg(FfmpegProcessor::from_file(url, gpu_decoding, gpu_decoder_index, decoder_options)?) })
         }
     }
 

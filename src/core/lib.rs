@@ -1471,16 +1471,14 @@ impl StabilizationManager {
                         let mut gyro = self.gyro.write();
                         gyro.load_from_telemetry(md);
                     } else if filesystem::exists(&gyro_url) && blocking {
-                        let base = filesystem::get_engine_base();
-                        let mut file = filesystem::open_file(&base, &gyro_url, false, false)?;
+                        let mut file = filesystem::open_file(&gyro_url, false, false)?;
                         let filesize = file.size;
                         if let Err(e) = self.load_gyro_data(file.get_file(), filesize, &gyro_url, is_main_video, &load_options, progress_cb, cancel_flag) {
                             ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_url, e);
                         }
                     }
                 } else if filesystem::exists(&gyro_url) && blocking {
-                    let base = filesystem::get_engine_base();
-                    let mut file = filesystem::open_file(&base, &gyro_url, false, false)?;
+                    let mut file = filesystem::open_file(&gyro_url, false, false)?;
                     let filesize = file.size;
                     if let Err(e) = self.load_gyro_data(file.get_file(), filesize, &gyro_url, is_main_video, &load_options, progress_cb, cancel_flag) {
                         ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_url, e);

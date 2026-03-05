@@ -28,7 +28,7 @@ unsafe impl Send for AndroidHWBuffer {}
 pub struct AndroidHWHandles {
     image_reader: ImageReader,
     window: NativeWindow,
-    surface: GlobalRef,
+    surface: GlobalRef<JObject<'static>>,
     pub receiver: Option<Receiver<AndroidHWBuffer>>
 }
 
@@ -62,12 +62,17 @@ impl AndroidHWHandles {
             log::debug!("buffer removed");
         })).unwrap();
 
-        let window;
-        let surface;
-        unsafe {
-            let vm = JavaVM::from_raw(av_jni_get_java_vm(std::ptr::null_mut()) as *mut _).unwrap(); // TODO: unwrap
-            let env = vm.attach_current_thread().unwrap(); // TODO: unwrap
+        let vm = unsafe { JavaVM::from_raw(av_jni_get_java_vm(std::ptr::null_mut()) as *mut _) };
+        let (window, surface) = vm.attach_current_thread(|mut env| {
+            unsafe {
+                let window = image_reader.window().unwrap(); // TODO: unwrap
+                let surface = env.new_global_ref(JObject::from_raw(env, window.to_surface(env.get_raw() as _) as *mut _)).unwrap(); // TODO: unwrap
 
+                Ok::<_, jni::errors::Error>((window, surface))
+            }
+        }).unwrap(); // TODO: unwrap
+
+        unsafe {
             let hw_device_ctx = (*decoder_ctx.as_mut_ptr()).hw_device_ctx;
             {
                 if hw_device_ctx.is_null() { return Err("hw_device_ctx is null"); }
@@ -78,15 +83,10 @@ impl AndroidHWHandles {
                 if av_hw_device_ctx.is_null() { return Err("av_hw_device_ctx is null"); }
                 if (*av_hw_device_ctx).type_ != ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_MEDIACODEC { return Err("av_hw_device_ctx->type is not MediaCodec"); }
             }
-
             let media_codec_device_ctx = (*av_hw_device_ctx).hwctx as *mut AVMediaCodecDeviceContext;
             {
                 if media_codec_device_ctx.is_null() { return Err("media_codec_device_ctx is null"); }
             }
-
-            window = image_reader.window().unwrap(); // TODO: unwrap
-            surface = env.new_global_ref(JObject::from_raw(window.to_surface(env.get_raw()))).unwrap(); // TODO: unwrap
-
             (*media_codec_device_ctx).surface = surface.as_raw() as *mut _;
         }
 

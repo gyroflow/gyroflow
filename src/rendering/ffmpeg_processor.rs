@@ -8,7 +8,7 @@ use std::error;
 
 use ffmpeg_next::{ ffi, codec, encoder, format, frame, media, Dictionary, Rational, Stream, rescale, rescale::Rescale };
 
-use gyroflow_core::filesystem::{ self, EngineBase, FilesystemError, FfmpegPathWrapper };
+use gyroflow_core::filesystem::{ self, FilesystemError, FfmpegPathWrapper };
 use super::*;
 use super::ffmpeg_video::*;
 use super::ffmpeg_audio::*;
@@ -50,7 +50,7 @@ pub struct FfmpegProcessor<'a> {
 
     frame_ts: FrameTimestamps,
 
-    _file: FfmpegPathWrapper<'a>
+    _file: FfmpegPathWrapper
 }
 
 #[derive(PartialEq)]
@@ -134,8 +134,8 @@ pub struct VideoInfo {
 }
 
 impl<'a> FfmpegProcessor<'a> {
-    pub fn from_file(base: &'a EngineBase, url: &str, mut gpu_decoding: bool, gpu_decoder_index: usize, mut decoder_options: Option<Dictionary>) -> Result<Self, FFmpegError> {
-        let mut file = FfmpegPathWrapper::new(base, url, false).map_err(|e| FFmpegError::CannotOpenInputFile((url.to_string(), e)))?;
+    pub fn from_file(url: &str, mut gpu_decoding: bool, gpu_decoder_index: usize, mut decoder_options: Option<Dictionary>) -> Result<Self, FFmpegError> {
+        let mut file = FfmpegPathWrapper::new(url, false).map_err(|e| FFmpegError::CannotOpenInputFile((url.to_string(), e)))?;
 
         ffmpeg_next::init()?;
         crate::rendering::init_log();
@@ -241,9 +241,9 @@ impl<'a> FfmpegProcessor<'a> {
         })
     }
 
-    pub fn render(&mut self, base: &'a EngineBase, output_folder: &str, output_filename: &str, output_size: (u32, u32), bitrate: Option<f64>, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
+    pub fn render(&mut self, output_folder: &str, output_filename: &str, output_size: (u32, u32), bitrate: Option<f64>, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>) -> Result<(), FFmpegError> {
         let output_url = filesystem::get_file_url(output_folder, output_filename, true);
-        let mut file = FfmpegPathWrapper::new(base, &output_url, true).map_err(|e| FFmpegError::CannotOpenOutputFile((output_url.to_string(), e)))?;
+        let mut file = FfmpegPathWrapper::new(&output_url, true).map_err(|e| FFmpegError::CannotOpenOutputFile((output_url.to_string(), e)))?;
 
         let mut stream_mapping: Vec<isize> = vec![0; self.input_context.nb_streams() as _];
         let mut ist_time_bases = vec![Rational(0, 0); self.input_context.nb_streams() as _];
@@ -607,8 +607,7 @@ impl<'a> FfmpegProcessor<'a> {
     }
 
     pub fn get_video_info(url: &str) -> Result<VideoInfo, ffmpeg_next::Error> {
-        let base = filesystem::get_engine_base();
-        let mut file = FfmpegPathWrapper::new(&base, url, false).map_err(|_| ffmpeg_next::Error::ProtocolNotFound)?;
+        let mut file = FfmpegPathWrapper::new(url, false).map_err(|_| ffmpeg_next::Error::ProtocolNotFound)?;
         let mut dict = Dictionary::new();
         if file.path.starts_with("fd:") {
             dict.set("fd", &file.path[3..]);

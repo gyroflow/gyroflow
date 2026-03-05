@@ -500,8 +500,7 @@ impl Controller {
 
                 let sync = std::rc::Rc::new(sync);
 
-                let fs_base = gyroflow_core::filesystem::get_engine_base();
-                match VideoProcessor::from_file(&fs_base, &input_file.url, gpu_decoding, 0, Some(decoder_options)) {
+                match VideoProcessor::from_file(&input_file.url, gpu_decoding, 0, Some(decoder_options)) {
                     Ok(mut proc) => {
                         let err2 = err.clone();
                         let sync2 = sync.clone();
@@ -772,8 +771,7 @@ impl Controller {
                     let additional_obj = additional_data.as_object_mut().unwrap();
 
                     {
-                        let base = filesystem::get_engine_base();
-                        if let Ok(mut file) = filesystem::open_file(&base, &url, false, false) {
+                        if let Ok(mut file) = filesystem::open_file(&url, false, false) {
                             let filesize = file.size;
                             if is_main_video {
                                 // Ignore the error here, video file may not contain the telemetry and it's ok
@@ -1642,8 +1640,7 @@ impl Controller {
 
                 ::log::debug!("Decoder options: {:?}", decoder_options);
                 let gpu_decoding = stab.gpu_decoding.load(SeqCst);
-                let fs_base = gyroflow_core::filesystem::get_engine_base();
-                match VideoProcessor::from_file(&fs_base, &input_file.url, gpu_decoding, 0, Some(decoder_options)) {
+                match VideoProcessor::from_file(&input_file.url, gpu_decoding, 0, Some(decoder_options)) {
                     Ok(mut proc) => {
                         let progress = progress.clone();
                         let err2 = err.clone();
@@ -2153,16 +2150,15 @@ impl Controller {
                 }
             }
 
-            let base = filesystem::get_engine_base();
             let mut opened = Vec::with_capacity(file_list.len());
             for x in &file_list {
-                match filesystem::open_file(&base, &x, false, false) {
+                match filesystem::open_file(&x, false, false) {
                     Ok(x) => { opened.push(x); },
                     Err(e) => { progress((1.0, format!("Failed to open file: {x}: {e:?}"))); return; }
                 }
             }
             let mut file_references: Vec<(&mut std::fs::File, usize)> = opened.iter_mut().map(|x| { let s = x.size; (x.get_file(), s) }).collect();
-            let mut opened_output = match filesystem::open_file(&base, &output_url, true, true) {
+            let mut opened_output = match filesystem::open_file(&output_url, true, true) {
                 Ok(x) => { x },
                 Err(e) => { progress((1.0, format!("Failed to create file: {output_url}: {e:?}"))); return; }
             };
@@ -2182,8 +2178,6 @@ impl Controller {
         });
     }
     fn merge_gcsv(file_list: &[String], output_folder: &str, output_filename: &str) -> Result<(), gyroflow_core::GyroflowCoreError> {
-        let base = filesystem::get_engine_base();
-
         use std::io::{ BufRead, Write, Seek, SeekFrom };
         let mut last_diff = 0.0;
         let mut last_timestamp = 0.0;
@@ -2199,7 +2193,7 @@ impl Controller {
             for x in file_list {
                 let gcsv_name = filesystem::filename_with_extension(&filesystem::get_filename(x), "gcsv");
                 let gcsv_url = filesystem::get_file_url(&filesystem::get_folder(x), &gcsv_name, false);
-                let mut file = filesystem::open_file(&base, &gcsv_url, false, false).ok()?;
+                let mut file = filesystem::open_file(&gcsv_url, false, false).ok()?;
                 let mut is_data = false;
                 for line in std::io::BufReader::new(file.get_file()).lines() {
                     let line = line.ok()?;
@@ -2231,10 +2225,10 @@ impl Controller {
             let gcsv_url = filesystem::get_file_url(&folder, &gcsv_name, false);
             if filesystem::exists_in_folder(&folder, &gcsv_name) {
                 let mut is_data = false;
-                if let Ok(mut file) = filesystem::open_file(&base, &gcsv_url, false, false) {
+                if let Ok(mut file) = filesystem::open_file(&gcsv_url, false, false) {
                     if output_gcsv.is_none() {
                         let out_url = filesystem::get_file_url(&output_folder, &filesystem::filename_with_extension(output_filename, "gcsv"), true);
-                        output_gcsv = Some(filesystem::open_file(&base, &out_url, true, true)?);
+                        output_gcsv = Some(filesystem::open_file(&out_url, true, true)?);
                     }
                     for (i, line) in std::io::BufReader::new(file.get_file()).lines().enumerate() {
                         let mut line = line?;

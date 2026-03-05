@@ -15,16 +15,6 @@ use parking_lot::RwLock;
 
 pub type Result<T> = std::result::Result<T, FilesystemError>;
 
-#[cfg(target_os = "android")]
-pub type EngineBase = jni::JavaVM;
-#[cfg(not(target_os = "android"))]
-pub type EngineBase = ();
-
-#[cfg(target_os = "android")]
-pub fn get_engine_base() -> EngineBase { android::get_jvm() }
-#[cfg(not(target_os = "android"))]
-pub fn get_engine_base() -> EngineBase { () }
-
 // Filesystem assumptions:
 // 1. All file access should be based on URLs. On Desktop it will be file:///, but on mobile it can be arbitrary
 // 2. URL can be arbitrary and doesn't have to contain any names
@@ -118,33 +108,31 @@ pub fn stop_accessing_url(_url: &str, _is_folder: bool) {
     apple::stop_accessing_url(_url, _is_folder);
 }
 
-pub struct FileWrapper<'a> {
+pub struct FileWrapper {
     pub size: usize,
     pub url: String,
 
     file: Option<std::fs::File>,
 
     #[cfg(target_os = "android")]
-    pub android_handle: android::AndroidFileHandle<'a>,
-
-    _lifetime: std::marker::PhantomData<&'a ()>,
+    pub android_handle: android::AndroidFileHandle
 }
-impl<'a> FileWrapper<'a> {
+impl FileWrapper {
     pub fn get_file(&mut self) -> &mut File {
         self.file.as_mut().unwrap()
     }
 }
-impl<'a> Read for FileWrapper<'a> {
+impl Read for FileWrapper {
     fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
         self.file.as_mut().ok_or_else(|| std::io::Error::from(std::io::ErrorKind::Other))?.read(buf)
     }
 }
-impl<'a> std::io::Seek for FileWrapper<'a> {
+impl std::io::Seek for FileWrapper {
     fn seek(&mut self, pos: std::io::SeekFrom) -> std::io::Result<u64> {
         self.file.as_mut().ok_or_else(|| std::io::Error::from(std::io::ErrorKind::Other))?.seek(pos)
     }
 }
-impl<'a> Drop for FileWrapper<'a> {
+impl Drop for FileWrapper {
     fn drop(&mut self) {
         log::debug!("FileWrapper::drop {}", self.url);
         #[cfg(target_os = "android")]
@@ -156,25 +144,23 @@ impl<'a> Drop for FileWrapper<'a> {
         stop_accessing_url(&self.url, false);
     }
 }
-pub struct FfmpegPathWrapper<'a> {
+pub struct FfmpegPathWrapper {
     pub org_url: String,
     pub path: String,
     #[cfg(target_os = "android")]
-    _file: FileWrapper<'a>,
-    _lifetime: std::marker::PhantomData<&'a ()>,
+    _file: FileWrapper
 }
-impl<'a> FfmpegPathWrapper<'a> {
-    pub fn new(_base: &'a EngineBase, url: &str, _write: bool) -> Result<Self> {
+impl FfmpegPathWrapper {
+    pub fn new(url: &str, _write: bool) -> Result<Self> {
         log::debug!("FfmpegPathWrapper::new {url}, write: {_write}");
         #[cfg(target_os = "android")]
         {
             // On android we have to use raw file descriptor, because ffmpeg can't use the content:// urls
-            let file = FileWrapper::open_android(_base, &url, if _write { "wt" } else { "r" })?;
+            let file = FileWrapper::open_android(&url, if _write { "wt" } else { "r" })?;
             Ok(Self {
                 org_url: url.to_owned(),
                 path: format!("fd:{}", file.android_handle.fd),
                 _file: file,
-                _lifetime: Default::default()
             })
         }
         #[cfg(not(target_os = "android"))]
@@ -187,14 +173,13 @@ impl<'a> FfmpegPathWrapper<'a> {
             Ok(Self {
                 org_url: url.to_owned(),
                 path: path,
-                _lifetime: Default::default()
             })
         }
     }
 }
 
 #[cfg(not(target_os = "android"))]
-impl<'a> Drop for FfmpegPathWrapper<'a> {
+impl Drop for FfmpegPathWrapper {
     fn drop(&mut self) {
         log::debug!("FfmpegPathWrapper::drop {}", self.org_url);
         stop_accessing_url(&self.org_url, false);
@@ -414,8 +399,7 @@ pub fn read(url: &str) -> Result<Vec<u8>> {
     dbg_call!(url);
     start_accessing_url(url, false);
     let buf = {
-        let base = get_engine_base();
-        let mut f = open_file(&base, &url, false, false)?;
+        let mut f = open_file(&url, false, false)?;
         let mut buf = Vec::with_capacity(f.size);
         f.get_file().read_to_end(&mut buf)?;
         buf
@@ -427,8 +411,7 @@ pub fn write(url: &str, data: &[u8]) -> Result<()> {
     dbg_call!(url);
     start_accessing_url(url, false);
     {
-        let base = get_engine_base();
-        let mut f = open_file(&base, &url, true, true)?;
+        let mut f = open_file(&url, true, true)?;
         f.get_file().write(data)?;
     }
     stop_accessing_url(url, false);
@@ -474,8 +457,7 @@ pub fn remove_file(url: &str) -> Result<()> {
 pub fn can_open_file(url: &str) -> bool {
     dbg_call!(url);
     if !exists(url) { return false; }
-    let base = get_engine_base();
-    let x = open_file(&base, url, false, false).is_ok(); x
+    let x = open_file(url, false, false).is_ok(); x
 }
 pub fn can_create_file(folder: &str, filename: &str) -> bool {
     if folder.is_empty() || filename.is_empty() { return false; }
@@ -491,8 +473,7 @@ pub fn can_create_file(folder: &str, filename: &str) -> bool {
 
         let url = get_file_url(folder, filename, true);
         if !url.is_empty() {
-            let base = get_engine_base();
-            if open_file(&base, &url, true, false).is_ok() {
+            if open_file(&url, true, false).is_ok() {
                 if !already_exists {
                     let _ = remove_file(&url);
                 }
@@ -506,20 +487,20 @@ pub fn can_create_file(folder: &str, filename: &str) -> bool {
     ret
 }
 
-pub fn open_file<'a>(_base: &'a EngineBase, url: &str, writing: bool, truncate: bool) -> Result<FileWrapper<'a>> {
+pub fn open_file(url: &str, writing: bool, truncate: bool) -> Result<FileWrapper> {
     dbg_call!(url writing);
     start_accessing_url(url, false);
 
     #[cfg(target_os = "android")]
     {
-        return FileWrapper::open_android(_base, url, if writing && truncate { "wt" } else if writing { "w" } else { "r" });
+        return FileWrapper::open_android(url, if writing && truncate { "wt" } else if writing { "w" } else { "r" });
     }
     #[cfg(not(target_os = "android"))]
     {
         let path = url_to_path(url);
         let file = if (writing && truncate) || (writing && !exists(url)) { File::create(path)? } else if writing { OpenOptions::new().read(true).write(true).open(path)? } else { File::open(path)? };
         let size = file.metadata()?.len() as usize;
-        Ok(FileWrapper { file: Some(file), size, url: url.to_owned(), _lifetime: Default::default() })
+        Ok(FileWrapper { file: Some(file), size, url: url.to_owned() })
     }
 }
 

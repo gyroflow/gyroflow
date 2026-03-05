@@ -1232,8 +1232,7 @@ impl RenderQueue {
                         let fetch_thumb = |video_url: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
                             let mut fetched = false;
                             if !crate::cli::will_run_in_console() { // Don't fetch thumbs in the CLI
-                                let fs_base = filesystem::get_engine_base();
-                                let mut proc = rendering::VideoProcessor::from_file(&fs_base, video_url, false, 0, None)?;
+                                let mut proc = rendering::VideoProcessor::from_file(video_url, false, 0, None)?;
                                 proc.on_frame(move |_timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                                     let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
 
@@ -1333,8 +1332,7 @@ impl RenderQueue {
                                 let is_main_video = gyro_url.is_empty();
                                 let gyro_url = if !gyro_url.is_empty() { &gyro_url } else { &url };
                                 {
-                                    let base = filesystem::get_engine_base();
-                                    if let Ok(mut file) = filesystem::open_file(&base, &gyro_url, false, false) {
+                                    if let Ok(mut file) = filesystem::open_file(&gyro_url, false, false) {
                                         let filesize = file.size;
                                         let _ = stab.load_gyro_data(file.get_file(), filesize, &gyro_url, is_main_video, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
                                     }
@@ -1527,8 +1525,7 @@ impl RenderQueue {
                         }
                         ::log::debug!("Decoder options: {:?}", decoder_options);
 
-                        let fs_base = filesystem::get_engine_base();
-                        match VideoProcessor::from_file(&fs_base, &url, gpu_decoding, 0, Some(decoder_options)) {
+                        match VideoProcessor::from_file(&url, gpu_decoding, 0, Some(decoder_options)) {
                             Ok(mut proc) => {
                                 let err2 = err.clone();
                                 let sync2 = sync.clone();
