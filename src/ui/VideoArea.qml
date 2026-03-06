@@ -692,12 +692,6 @@ Item {
                         controller.update_keyframe_values(timestamp);
                         window.motionData.orientationIndicator.updateOrientation(timeline.position * timeline.durationMs * 1000);
                         updateTurnSpeed();
-                        if (!vid.playing) {
-                            Qt.callLater(function() {
-                                window.stab.updateHorizonLock();
-                                vid.seekToFrameDelta(0);
-                            });
-                        }
                     }
                     onMetadataLoaded: (md) => {
                         Qt.callLater(fileLoaded, md);
@@ -952,8 +946,9 @@ Item {
                     }
                 }
                 Row {
+                    visible: window.stab.automaticHorizonLock;
                     BasicText {
-                        text: qsTr("Turn Speed (ROLL):");
+                        text: qsTr("Turn Speed (Roll):");
                         leftPadding: 0;
                         font.pixelSize: 11 * dpiScale;
                         anchors.verticalCenter: parent.verticalCenter;

@@ -78,8 +78,7 @@ pub struct Controller {
     get_smoothing_max_angles: qt_method!(fn(&self) -> QJsonArray),
     get_smoothing_status: qt_method!(fn(&self) -> QJsonArray),
     set_smoothing_param: qt_method!(fn(&self, name: QString, val: f64)),
-    set_horizon_lock: qt_method!(fn(&self, lock_percent: f64, roll: f64, lock_pitch: bool, pitch: f64, automatic_lock: bool, turn_threshold: f64, turn_smoothing_ms: f64, turn_multiplier: f64, tilt_accel_limit: f64)),    
-    generate_automatic_lock_keyframes: qt_method!(fn(&self, threshold_deg_s: f64, interval_ms: f64)),
+    set_horizon_lock: qt_method!(fn(&self, lock_percent: f64, roll: f64, lock_pitch: bool, pitch: f64, automatic_lock: bool, turn_threshold: f64, turn_smoothing_ms: f64, turn_multiplier: f64, tilt_accel_limit: f64)),
     get_turn_speed: qt_method!(fn(&self, timestamp_ms: f64) -> f64),
     get_x_angle: qt_method!(fn(&self, timestamp_ms: f64) -> f64),
     set_use_gravity_vectors: qt_method!(fn(&self, v: bool)),
@@ -1546,33 +1545,6 @@ impl Controller {
         let euler = quat_stab.euler_angles();
         let roll = euler.2;
         roll.to_degrees()
-    }
-    pub fn generate_automatic_lock_keyframes(&self, threshold_deg_s: f64, interval_ms: f64) {
-        if threshold_deg_s <= 0.0 {
-            return;
-        }
-        let duration_ms = self.stabilizer.params.read().duration_ms;
-        if duration_ms <= 0.0 {
-            return;
-        }
-        self.stabilizer.keyframes.write().clear_type(&KeyframeType::LockHorizonAmount);
-        let mut current_ms = 0.0;
-        while current_ms <= duration_ms {
-            let turn_speed = self.get_turn_speed(current_ms);
-            if !turn_speed.is_nan() {
-                let current_speed = turn_speed.abs();
-                let lock_amount = if current_speed >= threshold_deg_s {
-                    0.0
-                } else if threshold_deg_s > 0.0 {
-                    (100.0 * (1.0 - current_speed / threshold_deg_s)).max(0.0).min(100.0)
-                } else {
-                    100.0
-                };
-                let timestamp_us = (current_ms * 1000.0) as i64;
-                self.stabilizer.keyframes.write().set(&KeyframeType::LockHorizonAmount, timestamp_us, lock_amount);
-            }
-            current_ms += interval_ms;
-        }
     }
     fn set_lens_param(&self, param: QString, value: f64) {
         self.stabilizer.set_lens_param(param.to_string().as_str(), value);

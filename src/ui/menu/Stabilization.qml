@@ -20,6 +20,7 @@ MenuItem {
     property alias zoomingCenterX: zoomingCenterX;
     property alias zoomingCenterY: zoomingCenterY;
     property alias croppingMode: croppingMode;
+    property alias automaticHorizonLock: autoLockCb.checked;
 
     Item {
         id: sett;
@@ -118,10 +119,19 @@ MenuItem {
                 horizonPitchSlider.value = lockPitchCb.checked? +stab.horizon_lock_pitch : 0;
             }
 
-            turnThreshold = stab.turn_threshold !== undefined ? +stab.turn_threshold : 5.0;
-            turnSmoothMs = stab.turn_smoothing_ms !== undefined ? +stab.turn_smoothing_ms : 500.0;
-            turnMultiplier = stab.turn_multiplier !== undefined ? +stab.turn_multiplier : 1.0;
-            
+            const turnThresholdValue  = stab.turn_threshold      !== undefined ? +stab.turn_threshold      : 5.0;
+            const turnSmoothMsValue   = stab.turn_smoothing_ms   !== undefined ? +stab.turn_smoothing_ms   : 500.0;
+            const turnMultiplierValue = stab.turn_multiplier     !== undefined ? +stab.turn_multiplier     : 1.0;
+
+            turnThreshold  = turnThresholdValue;
+            turnSmoothMs   = turnSmoothMsValue;
+            turnMultiplier = turnMultiplierValue;
+
+            // Keep corresponding sliders (if present) in sync with the loaded values
+            if (typeof turnThresholdSlider  !== "undefined" && turnThresholdSlider)  turnThresholdSlider.value  = turnThresholdValue;
+            if (typeof turnSmoothMsSlider   !== "undefined" && turnSmoothMsSlider)   turnSmoothMsSlider.value   = turnSmoothMsValue;
+            if (typeof turnMultiplierSlider !== "undefined" && turnMultiplierSlider) turnMultiplierSlider.value = turnMultiplierValue;
+
             if (stab.tilt_accel_limit !== undefined && +stab.tilt_accel_limit < Infinity) {
                 tiltAccelLimitCb.checked = true;
                 tiltAccelLimit = +stab.tilt_accel_limit;
@@ -177,7 +187,7 @@ MenuItem {
     property real turnMultiplier: 1.0 // Multiplier applied to dynamic tilt (1x default)
     property real tiltAccelLimit: Infinity // Tilt acceleration/deceleration limit (°/s²)
 
-    
+
     function updateHorizonLock(): void {
         const lockAmount = horizonCb.checked? (autoLockCb.checked ? 100.0 : horizonSlider.value) : 0.0;
         const roll = horizonCb.checked? horizonRollSlider.value : 0.0;
@@ -396,6 +406,74 @@ MenuItem {
             }
         }
 
+        Label {
+            width: parent.width;
+            spacing: 2 * dpiScale;
+            text: qsTr("Roll angle correction")
+            SliderWithField {
+                id: horizonRollSlider;
+                width: parent.width;
+                from: -180;
+                to: 180;
+                value: 0;
+                defaultValue: 0;
+                unit: qsTr("°");
+                precision: 1;
+                keyframe: "LockHorizonRoll";
+                onValueChanged: Qt.callLater(updateHorizonLock);
+            }
+        }
+
+        CheckBox {
+            id: lockPitchCb;
+            text: qsTr("Lock pitch angle");
+            checked: false;
+            onCheckedChanged: Qt.callLater(updateHorizonLock);
+        }
+
+        Label {
+            width: parent.width;
+            spacing: 2 * dpiScale;
+            text: qsTr("Pitch angle correction");
+            visible: lockPitchCb.checked;
+            SliderWithField {
+                id: horizonPitchSlider;
+                width: parent.width;
+                from: -90;
+                to: 90;
+                value: 0;
+                defaultValue: 0;
+                unit: qsTr("°");
+                precision: 1;
+                keyframe: "LockHorizonPitch";
+                onValueChanged: Qt.callLater(updateHorizonLock);
+            }
+        }
+        CheckBox {
+            id: useGravityVectors;
+            text: qsTr("Use gravity vectors");
+            checked: false;
+            visible: controller.has_gravity_vectors;
+            onCheckedChanged: Qt.callLater(updateHorizonLock);
+        }
+
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Integration method");
+            property bool usesQuats: window.motionData.hasQuaternions && window.motionData.hasRawGyro && window.motionData.integrationMethod === 0;
+            visible: usesQuats;
+
+            ComboBox {
+                id: integrationMethod;
+                model: ["Complementary", "VQF", "Simple gyro + accel", "Mahony", "Madgwick"];
+                currentIndex: 1;
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                tooltip: qsTr("IMU integration method for keeping track of the horizon and adjust built-in quaternions");
+                onCurrentIndexChanged: Qt.callLater(updateHorizonLock);
+            }
+        }
+
         CheckBoxWithContent {
             id: autoLockCb;
             text: qsTr("Automatic lock");
@@ -497,73 +575,6 @@ MenuItem {
             }
         }
 
-        Label {
-            width: parent.width;
-            spacing: 2 * dpiScale;
-            text: qsTr("Roll angle correction")
-            SliderWithField {
-                id: horizonRollSlider;
-                width: parent.width;
-                from: -180;
-                to: 180;
-                value: 0;
-                defaultValue: 0;
-                unit: qsTr("°");
-                precision: 1;
-                keyframe: "LockHorizonRoll";
-                onValueChanged: Qt.callLater(updateHorizonLock);
-            }
-        }
-
-        CheckBox {
-            id: lockPitchCb;
-            text: qsTr("Lock pitch angle");
-            checked: false;
-            onCheckedChanged: Qt.callLater(updateHorizonLock);
-        }
-
-        Label {
-            width: parent.width;
-            spacing: 2 * dpiScale;
-            text: qsTr("Pitch angle correction");
-            visible: lockPitchCb.checked;
-            SliderWithField {
-                id: horizonPitchSlider;
-                width: parent.width;
-                from: -90;
-                to: 90;
-                value: 0;
-                defaultValue: 0;
-                unit: qsTr("°");
-                precision: 1;
-                keyframe: "LockHorizonPitch";
-                onValueChanged: Qt.callLater(updateHorizonLock);
-            }
-        }
-        CheckBox {
-            id: useGravityVectors;
-            text: qsTr("Use gravity vectors");
-            checked: false;
-            visible: controller.has_gravity_vectors;
-            onCheckedChanged: Qt.callLater(updateHorizonLock);
-        }
-
-        Label {
-            position: Label.LeftPosition;
-            text: qsTr("Integration method");
-            property bool usesQuats: window.motionData.hasQuaternions && window.motionData.hasRawGyro && window.motionData.integrationMethod === 0;
-            visible: usesQuats;
-
-            ComboBox {
-                id: integrationMethod;
-                model: ["Complementary", "VQF", "Simple gyro + accel", "Mahony", "Madgwick"];
-                currentIndex: 1;
-                font.pixelSize: 12 * dpiScale;
-                width: parent.width;
-                tooltip: qsTr("IMU integration method for keeping track of the horizon and adjust built-in quaternions");
-                onCurrentIndexChanged: Qt.callLater(updateHorizonLock);
-            }
-        }
 
         BasicText {
             width: parent.width;

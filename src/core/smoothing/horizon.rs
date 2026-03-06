@@ -83,33 +83,35 @@ impl HorizonLock {
         let keyframes = &compute_params.keyframes;
         if self.lock_enabled || keyframes.is_keyframed(&KeyframeType::LockHorizonAmount) {
             let mut roll_rates: std::collections::BTreeMap<i64, f64> = std::collections::BTreeMap::new();
-            let mut prev_roll: Option<f64> = None;
-            let mut prev_ts: Option<i64> = None;
-            let mut prev_smoothed: Option<f64> = None;
             let tau_s: f64 = self.turn_smoothing_ms / 1000.0;
-            for (ts, org_quat) in org_quats.iter() {
-                let current_euler = org_quat.euler_angles();
-                let current_roll: f64 = current_euler.2;
-                if let (Some(pr), Some(pt)) = (prev_roll, prev_ts) {
-                    let dt = (*ts as f64 - pt as f64) / 1_000_000.0;
-                    if dt > 0.0 && dt < 1.0 {
-                        let mut diff_deg: f64 = (current_roll - pr).to_degrees();
-                        while diff_deg > 180.0 { diff_deg -= 360.0; }
-                        while diff_deg < -180.0 { diff_deg += 360.0; }
-                        let rate = diff_deg / dt;
+            if self.automatic_lock {
+                let mut prev_roll: Option<f64> = None;
+                let mut prev_ts: Option<i64> = None;
+                let mut prev_smoothed: Option<f64> = None;
+                for (ts, org_quat) in org_quats.iter() {
+                    let current_euler = org_quat.euler_angles();
+                    let current_roll: f64 = current_euler.2;
+                    if let (Some(pr), Some(pt)) = (prev_roll, prev_ts) {
+                        let dt = (*ts as f64 - pt as f64) / 1_000_000.0;
+                        if dt > 0.0 && dt < 1.0 {
+                            let mut diff_deg: f64 = (current_roll - pr).to_degrees();
+                            while diff_deg > 180.0 { diff_deg -= 360.0; }
+                            while diff_deg < -180.0 { diff_deg += 360.0; }
+                            let rate = diff_deg / dt;
 
-                        let alpha = if tau_s <= 0.0 { 1.0 } else { dt / (tau_s + dt) };
-                        let smoothed = if let Some(prev) = prev_smoothed {
-                            prev * (1.0 - alpha) + rate * alpha
-                        } else {
-                            rate
-                        };
-                        prev_smoothed = Some(smoothed);
-                        roll_rates.insert(*ts, smoothed);
+                            let alpha = if tau_s <= 0.0 { 1.0 } else { dt / (tau_s + dt) };
+                            let smoothed = if let Some(prev) = prev_smoothed {
+                                prev * (1.0 - alpha) + rate * alpha
+                            } else {
+                                rate
+                            };
+                            prev_smoothed = Some(smoothed);
+                            roll_rates.insert(*ts, smoothed);
+                        }
                     }
+                    prev_roll = Some(current_roll);
+                    prev_ts = Some(*ts);
                 }
-                prev_roll = Some(current_roll);
-                prev_ts = Some(*ts);
             }
 
             // Prepare tilt-smoothing state for gravity branch
