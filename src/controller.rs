@@ -78,7 +78,10 @@ pub struct Controller {
     get_smoothing_max_angles: qt_method!(fn(&self) -> QJsonArray),
     get_smoothing_status: qt_method!(fn(&self) -> QJsonArray),
     set_smoothing_param: qt_method!(fn(&self, name: QString, val: f64)),
-    set_horizon_lock: qt_method!(fn(&self, lock_percent: f64, roll: f64, lock_pitch: bool, pitch: f64)),
+    set_horizon_lock: qt_method!(fn(&self, lock_percent: f64, roll: f64, lock_pitch: bool, pitch: f64, automatic_lock: bool, turn_threshold: f64, turn_smoothing_ms: f64, turn_multiplier: f64, tilt_accel_limit: f64)),    
+    generate_automatic_lock_keyframes: qt_method!(fn(&self, threshold_deg_s: f64, interval_ms: f64)),
+    get_turn_speed: qt_method!(fn(&self, timestamp_ms: f64) -> f64),
+    get_x_angle: qt_method!(fn(&self, timestamp_ms: f64) -> f64),
     set_use_gravity_vectors: qt_method!(fn(&self, v: bool)),
     set_horizon_lock_integration_method: qt_method!(fn(&self, v: i32)),
     set_preview_resolution: qt_method!(fn(&mut self, target_height: i32, player: QJSValue)),
@@ -1194,7 +1197,7 @@ impl Controller {
         self.chart_data_changed();
         self.request_recompute();
     }
-    wrap_simple_method!(set_horizon_lock, lock_percent: f64, roll: f64, lock_pitch: bool, pitch: f64; recompute; chart_data_changed);
+    wrap_simple_method!(set_horizon_lock, lock_percent: f64, roll: f64, lock_pitch: bool, pitch: f64, automatic_lock: bool, turn_threshold: f64, turn_smoothing_ms: f64, turn_multiplier: f64, tilt_accel_limit: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_use_gravity_vectors, v: bool; recompute; chart_data_changed);
     wrap_simple_method!(set_horizon_lock_integration_method, v: i32; recompute; chart_data_changed);
     pub fn get_smoothing_algs(&self) -> QVariantList {
@@ -1502,6 +1505,73 @@ impl Controller {
             QVariantList::from_iter(mc.1.iter())
         } else {
             QVariantList::default()
+        }
+    }
+    fn get_turn_speed(&self, timestamp_ms: f64) -> f64 {
+        let params = self.stabilizer.params.read();
+        let fps = params.fps;
+        let frame_duration_ms = 1000.0 / fps;
+        let lookback_ms = 60.0 * frame_duration_ms;
+        if timestamp_ms < lookback_ms {
+            return f64::NAN;
+        }
+        let current_timestamp_ms = timestamp_ms;
+        let past_timestamp_ms = timestamp_ms - lookback_ms;
+        let gyro = self.stabilizer.gyro.read();
+        let quat_org_current = gyro.org_quat_at_timestamp(current_timestamp_ms);
+        let quat_smooth_current = gyro.smoothed_quat_at_timestamp(current_timestamp_ms);
+        let quat_org_past = gyro.org_quat_at_timestamp(past_timestamp_ms);
+        let quat_smooth_past = gyro.smoothed_quat_at_timestamp(past_timestamp_ms);
+        let quat_stab_current = (quat_smooth_current / quat_org_current).inverse();
+        let quat_stab_past = (quat_smooth_past / quat_org_past).inverse();
+        let euler_current = quat_stab_current.euler_angles();
+        let euler_past = quat_stab_past.euler_angles();
+        let roll_current = euler_current.2;
+        let roll_past = euler_past.2;
+        let mut angle_change_deg = (roll_current - roll_past).to_degrees();
+        while angle_change_deg > 180.0 {
+            angle_change_deg -= 360.0;
+        }
+        while angle_change_deg < -180.0 {
+            angle_change_deg += 360.0;
+        }
+        let time_diff_s = lookback_ms / 1000.0;
+        angle_change_deg / time_diff_s
+    }
+    fn get_x_angle(&self, timestamp_ms: f64) -> f64 {
+        let gyro = self.stabilizer.gyro.read();
+        let quat_org = gyro.org_quat_at_timestamp(timestamp_ms);
+        let quat_smooth = gyro.smoothed_quat_at_timestamp(timestamp_ms);
+        let quat_stab = (quat_smooth / quat_org).inverse();
+        let euler = quat_stab.euler_angles();
+        let roll = euler.2;
+        roll.to_degrees()
+    }
+    pub fn generate_automatic_lock_keyframes(&self, threshold_deg_s: f64, interval_ms: f64) {
+        if threshold_deg_s <= 0.0 {
+            return;
+        }
+        let duration_ms = self.stabilizer.params.read().duration_ms;
+        if duration_ms <= 0.0 {
+            return;
+        }
+        self.stabilizer.keyframes.write().clear_type(&KeyframeType::LockHorizonAmount);
+        let mut current_ms = 0.0;
+        while current_ms <= duration_ms {
+            let turn_speed = self.get_turn_speed(current_ms);
+            if !turn_speed.is_nan() {
+                let current_speed = turn_speed.abs();
+                let lock_amount = if current_speed >= threshold_deg_s {
+                    0.0
+                } else if threshold_deg_s > 0.0 {
+                    (100.0 * (1.0 - current_speed / threshold_deg_s)).max(0.0).min(100.0)
+                } else {
+                    100.0
+                };
+                let timestamp_us = (current_ms * 1000.0) as i64;
+                self.stabilizer.keyframes.write().set(&KeyframeType::LockHorizonAmount, timestamp_us, lock_amount);
+            }
+            current_ms += interval_ms;
         }
     }
     fn set_lens_param(&self, param: QString, value: f64) {

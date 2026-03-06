@@ -117,6 +117,22 @@ MenuItem {
             if (!isLockHorizonPitchKeyframed) {
                 horizonPitchSlider.value = lockPitchCb.checked? +stab.horizon_lock_pitch : 0;
             }
+
+            turnThreshold = stab.turn_threshold !== undefined ? +stab.turn_threshold : 5.0;
+            turnSmoothMs = stab.turn_smoothing_ms !== undefined ? +stab.turn_smoothing_ms : 500.0;
+            turnMultiplier = stab.turn_multiplier !== undefined ? +stab.turn_multiplier : 1.0;
+            
+            if (stab.tilt_accel_limit !== undefined && +stab.tilt_accel_limit < Infinity) {
+                tiltAccelLimitCb.checked = true;
+                tiltAccelLimit = +stab.tilt_accel_limit;
+            } else {
+                tiltAccelLimitCb.checked = false;
+                tiltAccelLimit = Infinity;
+            }
+
+            autoLockCb.checked = !!stab.automatic_lock;
+            horizonSlider.enabled = !autoLockCb.checked;
+
             Qt.callLater(updateHorizonLock);
 
             if (stab.hasOwnProperty("video_speed")) videoSpeed.value = +stab.video_speed;
@@ -156,12 +172,19 @@ MenuItem {
         return traverseChildren(smoothingOptions, "param-" + name);
     }
 
+    property real turnThreshold: 5.0  // Roll rate threshold (°/s) for horizon tilt
+    property real turnSmoothMs: 500.0 // EMA smoothing time constant in ms
+    property real turnMultiplier: 1.0 // Multiplier applied to dynamic tilt (1x default)
+    property real tiltAccelLimit: Infinity // Tilt acceleration/deceleration limit (°/s²)
+
+    
     function updateHorizonLock(): void {
-        const lockAmount = horizonCb.checked? horizonSlider.value : 0.0;
+        const lockAmount = horizonCb.checked? (autoLockCb.checked ? 100.0 : horizonSlider.value) : 0.0;
         const roll = horizonCb.checked? horizonRollSlider.value : 0.0;
         const pitch = horizonCb.checked && lockPitchCb.checked? horizonPitchSlider.value : 0.0;
         const lockPitch = horizonCb.checked && lockPitchCb.checked;
-        controller.set_horizon_lock(lockAmount, roll, lockPitch, pitch);
+        const accelLimit = tiltAccelLimitCb.checked ? tiltAccelLimit : Infinity;
+        controller.set_horizon_lock(lockAmount, roll, lockPitch, pitch, autoLockCb.checked, turnThreshold, turnSmoothMs, turnMultiplier, accelLimit);
         controller.set_use_gravity_vectors(useGravityVectors.checked);
         controller.set_horizon_lock_integration_method(integrationMethod.currentIndex);
     }
@@ -370,6 +393,107 @@ MenuItem {
                 value: 100;
                 keyframe: "LockHorizonAmount";
                 onValueChanged: Qt.callLater(updateHorizonLock);
+            }
+        }
+
+        CheckBoxWithContent {
+            id: autoLockCb;
+            text: qsTr("Automatic lock");
+            cb.onCheckedChanged: {
+                horizonSlider.enabled = !cb.checked;
+                if (cb.checked) horizonSlider.value = 100;
+                Qt.callLater(updateHorizonLock);
+            }
+
+            Label {
+                text: qsTr("Turn threshold");
+                tooltip: qsTr("When roll rate exceeds this threshold, horizon tilts proportionally to roll rate (°/s → °)");
+                width: parent.width;
+                spacing: 2 * dpiScale;
+                SliderWithField {
+                    id: turnThresholdSlider;
+                    defaultValue: 5.0;
+                    from: 0.0;
+                    to: 50.0;
+                    width: parent.width;
+                    unit: qsTr("°/s");
+                    precision: 1;
+                    value: 5.0;
+                    onValueChanged: {
+                        turnThreshold = value;
+                        Qt.callLater(updateHorizonLock);
+                    }
+                }
+            }
+
+            Label {
+                width: parent.width;
+                spacing: 2 * dpiScale;
+                text: qsTr("Turn smoothness");
+                tooltip: qsTr("Smoothing time constant for turn detection (ms)");
+                SliderWithField {
+                    id: turnSmoothnessSlider;
+                    defaultValue: 500.0;
+                    from: 0.0;
+                    to: 2000.0;
+                    width: parent.width;
+                    unit: qsTr("ms");
+                    precision: 0;
+                    value: 500.0;
+                    onValueChanged: {
+                        turnSmoothMs = value;
+                        Qt.callLater(updateHorizonLock);
+                    }
+                }
+            }
+
+            Label {
+                width: parent.width;
+                spacing: 2 * dpiScale;
+                text: qsTr("Turn multiplier");
+                tooltip: qsTr("Multiplier for dynamic tilt: tilt = multiplier * roll_rate (°/s → °)");
+                SliderWithField {
+                    id: turnMultiplierSlider;
+                    defaultValue: 1.0;
+                    from: 0.0;
+                    to: 2.0;
+                    width: parent.width;
+                    unit: "x";
+                    precision: 2;
+                    value: 1.0;
+                    onValueChanged: {
+                        turnMultiplier = value;
+                        Qt.callLater(updateHorizonLock);
+                    }
+                }
+            }
+
+            CheckBoxWithContent {
+                id: tiltAccelLimitCb;
+                text: qsTr("Limit tilt acceleration");
+                cb.onCheckedChanged: Qt.callLater(updateHorizonLock);
+
+                Label {
+                    width: parent.width;
+                    spacing: 2 * dpiScale;
+                    text: qsTr("Tilt acceleration limit");
+                    tooltip: qsTr("Limits how fast the tilt can accelerate or decelerate (°/s²). Prevents jerky horizon movements.");
+                    visible: tiltAccelLimitCb.checked;
+                    SliderWithField {
+                        id: tiltAccelLimitSlider;
+                        defaultValue: 3.0;
+                        from: 0.1;
+                        to: 30.0;
+                        width: parent.width;
+                        unit: qsTr("°/s²");
+                        precision: 1;
+                        value: 3.0;
+                        onValueChanged: {
+                            tiltAccelLimit = value;
+                            Qt.callLater(updateHorizonLock);
+                        }
+                    }
+                }
             }
         }
 

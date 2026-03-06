@@ -6,8 +6,6 @@ use nalgebra::*;
 use crate::keyframes::*;
 
 pub fn lock_horizon_angle(q: &UnitQuaternion<f64>, roll_correction: f64, lock_pitch: bool, pitch_correction: f64) -> UnitQuaternion<f64> {
-    // z axis points in view direction, use as reference
-
     let x_axis = nalgebra::Vector3::<f64>::x_axis();
     let y_axis = nalgebra::Vector3::<f64>::y_axis();
     let z_axis = nalgebra::Vector3::<f64>::z_axis();
@@ -32,6 +30,11 @@ pub struct HorizonLock {
     pub horizonroll: f64,
     pub lock_pitch: bool,
     pub horizonpitch: f64,
+    pub automatic_lock: bool,
+    pub turn_threshold: f64,
+    pub turn_smoothing_ms: f64,
+    pub turn_multiplier: f64,
+    pub tilt_accel_limit: f64,
 }
 
 impl Default for HorizonLock {
@@ -41,16 +44,26 @@ impl Default for HorizonLock {
         horizonroll: 0.0,
         lock_pitch: false,
         horizonpitch: 0.0,
+        automatic_lock: false,
+        turn_threshold: 5.0,
+        turn_smoothing_ms: 500.0,
+        turn_multiplier: 1.0,
+        tilt_accel_limit: f64::INFINITY,
     } }
 }
 
 impl HorizonLock {
-    pub fn set_horizon(&mut self, lock_percent: f64, roll: f64, lock_pitch: bool, pitch: f64) {
+    pub fn set_horizon(&mut self, lock_percent: f64, roll: f64, lock_pitch: bool, pitch: f64, automatic_lock: bool, turn_threshold: f64, turn_smoothing_ms: f64, turn_multiplier: f64, tilt_accel_limit: f64) {
         self.horizonroll = roll;
         self.horizonlockpercent = lock_percent;
         self.lock_enabled = self.horizonlockpercent > 1e-6;
         self.horizonpitch = pitch;
         self.lock_pitch = lock_pitch;
+        self.automatic_lock = automatic_lock;
+        self.turn_threshold = turn_threshold;
+        self.turn_smoothing_ms = turn_smoothing_ms;
+        self.turn_multiplier = turn_multiplier;
+        self.tilt_accel_limit = tilt_accel_limit;
     }
 
     pub fn get_checksum(&self) -> u64 {
@@ -59,23 +72,59 @@ impl HorizonLock {
         hasher.write_u64(self.horizonroll.to_bits());
         hasher.write_u8(self.lock_pitch as u8);
         hasher.write_u64(self.horizonpitch.to_bits());
+        hasher.write_u64(self.turn_threshold.to_bits());
+        hasher.write_u64(self.turn_smoothing_ms.to_bits());
+        hasher.write_u64(self.turn_multiplier.to_bits());
+        hasher.write_u64(self.tilt_accel_limit.to_bits());
         hasher.finish()
     }
 
     pub fn lock(&self, quats: &mut TimeQuat, org_quats: &TimeQuat, grav: &Option<crate::gyro_source::TimeVec>, use_grav: bool, _int_method: usize, compute_params: &ComputeParams) {
         let keyframes = &compute_params.keyframes;
         if self.lock_enabled || keyframes.is_keyframed(&KeyframeType::LockHorizonAmount) {
+            let mut roll_rates: std::collections::BTreeMap<i64, f64> = std::collections::BTreeMap::new();
+            let mut prev_roll: Option<f64> = None;
+            let mut prev_ts: Option<i64> = None;
+            let mut prev_smoothed: Option<f64> = None;
+            let tau_s: f64 = self.turn_smoothing_ms / 1000.0;
+            for (ts, org_quat) in org_quats.iter() {
+                let current_euler = org_quat.euler_angles();
+                let current_roll: f64 = current_euler.2;
+                if let (Some(pr), Some(pt)) = (prev_roll, prev_ts) {
+                    let dt = (*ts as f64 - pt as f64) / 1_000_000.0;
+                    if dt > 0.0 && dt < 1.0 {
+                        let mut diff_deg: f64 = (current_roll - pr).to_degrees();
+                        while diff_deg > 180.0 { diff_deg -= 360.0; }
+                        while diff_deg < -180.0 { diff_deg += 360.0; }
+                        let rate = diff_deg / dt;
+
+                        let alpha = if tau_s <= 0.0 { 1.0 } else { dt / (tau_s + dt) };
+                        let smoothed = if let Some(prev) = prev_smoothed {
+                            prev * (1.0 - alpha) + rate * alpha
+                        } else {
+                            rate
+                        };
+                        prev_smoothed = Some(smoothed);
+                        roll_rates.insert(*ts, smoothed);
+                    }
+                }
+                prev_roll = Some(current_roll);
+                prev_ts = Some(*ts);
+            }
+
+            // Prepare tilt-smoothing state for gravity branch
+            let mut prev_tilt_smoothed_grav: Option<f64> = None;
+            let mut prev_tilt_ts_grav: Option<i64> = None;
+
             if let Some(gvec) = grav {
                 if !gvec.is_empty() && use_grav {
                     let z_axis = nalgebra::Vector3::<f64>::z_axis();
                     let y_axis = nalgebra::Vector3::<f64>::y_axis();
-                    // let corr = Rotation3::from_axis_angle(&z_axis, std::f64::consts::PI);
 
                     for (ts, smoothed_ori) in quats.iter_mut() {
                         let gv = Self::interpolate_gravity_vector(&gvec, *ts).unwrap_or(*y_axis);
                         let ori = org_quats.get(ts).unwrap_or(&smoothed_ori).to_rotation_matrix();
 
-                        // Correct for angle difference between original and smoothed orientation
                         let correction = ori.inverse() * smoothed_ori.to_rotation_matrix();
                         let angle_corr = (-correction[(0, 1)]).simd_atan2(correction[(0, 0)]);
 
@@ -84,14 +133,58 @@ impl HorizonLock {
                         let horizonroll = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonRoll, timestamp_ms).unwrap_or(self.horizonroll) + video_rotation;
                         let horizonlockpercent = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonAmount, timestamp_ms).unwrap_or(self.horizonlockpercent);
 
-                        // let gv_corrected = corr.inverse() * correction * corr * gv; // Alternative matrix approach
-                        // let locked_ori = smoothed_ori.to_rotation_matrix() * Rotation3::from_axis_angle(&z_axis, gv_corrected[0].simd_atan2(gv_corrected[1]) + horizonroll * std::f64::consts::PI / 180.0);
-                        let locked_ori = smoothed_ori.to_rotation_matrix() * Rotation3::from_axis_angle(&z_axis, -angle_corr + gv[0].simd_atan2(gv[1]) + horizonroll * std::f64::consts::PI / 180.0);
+                        // Smooth ramping for dynamic tilt so threshold crossing isn't instantaneous
+                        let mut dynamic_tilt_deg: f64 = 0.0;
+                        if self.automatic_lock {
+                            // Target tilt (deg): proportional to roll rate if above threshold, otherwise 0
+                            let target = if let Some(&roll_rate) = roll_rates.get(ts) {
+                                if roll_rate.abs() > self.turn_threshold { roll_rate * self.turn_multiplier } else { 0.0 }
+                            } else { 0.0 };
+
+                            // Compute smoothing alpha based on time since previous tilt sample
+                            let alpha = if let Some(prev_ts_val) = prev_tilt_ts_grav {
+                                let dt = (*ts as f64 - prev_ts_val as f64) / 1_000_000.0;
+                                if tau_s <= 0.0 { 1.0 } else { (dt / (tau_s + dt)).max(0.0).min(1.0) }
+                            } else { 1.0 };
+
+                            let smoothed = if let Some(prev) = prev_tilt_smoothed_grav {
+                                prev * (1.0 - alpha) + target * alpha
+                            } else { target };
+
+                            // Apply acceleration/deceleration limit
+                            let mut accel_limited = smoothed;
+                            if self.tilt_accel_limit.is_finite() {
+                                if let Some(prev_tilt) = prev_tilt_smoothed_grav {
+                                    if let Some(prev_ts_val) = prev_tilt_ts_grav {
+                                        let dt = (*ts as f64 - prev_ts_val as f64) / 1_000_000.0;
+                                        if dt > 0.0 {
+                                            let max_change = self.tilt_accel_limit * dt;
+                                            let change = smoothed - prev_tilt;
+                                            if change.abs() > max_change {
+                                                accel_limited = prev_tilt + change.signum() * max_change;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            prev_tilt_smoothed_grav = Some(accel_limited);
+                            prev_tilt_ts_grav = Some(*ts);
+                            dynamic_tilt_deg = accel_limited;
+                        }
+
+                        let total_horizonroll_deg = horizonroll + dynamic_tilt_deg;
+
+                        let locked_ori = smoothed_ori.to_rotation_matrix() * Rotation3::from_axis_angle(&z_axis, -angle_corr + gv[0].simd_atan2(gv[1]) + total_horizonroll_deg * std::f64::consts::PI / 180.0);
                         *smoothed_ori = UnitQuaternion::from_rotation_matrix(&locked_ori).slerp(&smoothed_ori, 1.0 - horizonlockpercent / 100.0)
                     }
                     return;
                 }
             }
+
+            // Prepare tilt-smoothing state for non-gravity branch
+            let mut prev_tilt_smoothed: Option<f64> = None;
+            let mut prev_tilt_ts: Option<i64> = None;
 
             for (ts, smoothed_ori) in quats.iter_mut() {
                 let timestamp_ms = *ts as f64 / 1000.0;
@@ -101,7 +194,47 @@ impl HorizonLock {
                 let lock_pitch = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonPitchEnabled, timestamp_ms).unwrap_or(if self.lock_pitch { 1.0 } else { 0.0 }) != 0.0;
                 let horizonlockpercent = keyframes.value_at_gyro_timestamp(&KeyframeType::LockHorizonAmount, timestamp_ms).unwrap_or(self.horizonlockpercent);
 
-                *smoothed_ori = lock_horizon_angle(smoothed_ori, horizonroll * std::f64::consts::PI / 180.0, lock_pitch, horizonpitch * std::f64::consts::PI / 180.0).slerp(&smoothed_ori, 1.0 - horizonlockpercent / 100.0);
+                // Smooth ramping for dynamic tilt
+                let mut dynamic_tilt_deg: f64 = 0.0;
+                if self.automatic_lock {
+                    let target = if let Some(&roll_rate) = roll_rates.get(ts) {
+                        if roll_rate.abs() > self.turn_threshold { roll_rate * self.turn_multiplier } else { 0.0 }
+                    } else { 0.0 };
+
+                    let alpha = if let Some(prev_ts_val) = prev_tilt_ts {
+                        let dt = (*ts as f64 - prev_ts_val as f64) / 1_000_000.0;
+                        if tau_s <= 0.0 { 1.0 } else { (dt / (tau_s + dt)).max(0.0).min(1.0) }
+                    } else { 1.0 };
+
+                    let smoothed = if let Some(prev) = prev_tilt_smoothed {
+                        prev * (1.0 - alpha) + target * alpha
+                    } else { target };
+
+                    // Apply acceleration/deceleration limit
+                    let mut accel_limited = smoothed;
+                    if self.tilt_accel_limit.is_finite() {
+                        if let Some(prev_tilt) = prev_tilt_smoothed {
+                            if let Some(prev_ts_val) = prev_tilt_ts {
+                                let dt = (*ts as f64 - prev_ts_val as f64) / 1_000_000.0;
+                                if dt > 0.0 {
+                                    let max_change = self.tilt_accel_limit * dt;
+                                    let change = smoothed - prev_tilt;
+                                    if change.abs() > max_change {
+                                        accel_limited = prev_tilt + change.signum() * max_change;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    prev_tilt_smoothed = Some(accel_limited);
+                    prev_tilt_ts = Some(*ts);
+                    dynamic_tilt_deg = accel_limited;
+                }
+
+                let total_horizonroll_deg = horizonroll + dynamic_tilt_deg;
+
+                *smoothed_ori = lock_horizon_angle(smoothed_ori, total_horizonroll_deg * std::f64::consts::PI / 180.0, lock_pitch, horizonpitch * std::f64::consts::PI / 180.0).slerp(&smoothed_ori, 1.0 - horizonlockpercent / 100.0);
             }
         }
     }
@@ -131,5 +264,4 @@ impl HorizonLock {
             }
         }
     }
-
 }

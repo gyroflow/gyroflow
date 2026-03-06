@@ -88,7 +88,7 @@ pub const COEFFS: [f32; 64+128+256 + 9*4 + 4] = [
 // const ALPHAS: [f32; 4] = [ 1.0, 0.75, 0.50, 0.25 ];
 
 impl Stabilization {
-    pub fn undistort_image_cpu_spirv<T: PixelType>(buffers: &mut Buffers, params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, matrices: &[[f32; 14]], drawing: &[u8]) -> bool {
+    pub fn undistort_image_cpu_spirv<T: PixelType>(buffers: &mut Buffers, params: &KernelParams, _distortion_model: &DistortionModel, _digital_lens: Option<&DistortionModel>, matrices: &[[f32; 14]], drawing: &[u8]) -> bool {
         if let BufferSource::Cpu { buffer: input } = &mut buffers.input.data {
             if let BufferSource::Cpu { buffer: output } = &mut buffers.output.data {
                 if buffers.output.size.2 <= 0 {

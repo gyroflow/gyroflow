@@ -177,7 +177,7 @@ impl LensCalibrator {
 
                         for (_pos, mut pt) in corners.iter::<Point2f>()? {
                             if let Some(digital) = &digital_lens {
-                                if let Some(mut pt2) = digital.undistort_point((pt.x,  pt.y), &kernel_params) {
+                                if let Some(pt2) = digital.undistort_point((pt.x, pt.y), &kernel_params) {
                                     // TODO
                                     // Move from center to the left, because we trim the right part making it 4:3
                                     //pt2.0 -= 0.125; // (16-4) / (9-3) / 16
@@ -214,8 +214,8 @@ impl LensCalibrator {
         let find_min = |a: (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>), b: (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>)| -> (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>) { if a.0 < b.0 { a } else { b } };
 
         let image_points = self.image_points.read().clone();
-        let mut width = self.width as i32;
-        if let Some(digital) = self.digital_lens.as_ref().map(|x| DistortionModel::from_name(&x)) {
+        let width = self.width as i32;
+        if let Some(__digital) = self.digital_lens.as_ref().map(|x| DistortionModel::from_name(&x)) {
             // TODO
             //width = (width as f32 / 1.33333333).round() as i32;
         }

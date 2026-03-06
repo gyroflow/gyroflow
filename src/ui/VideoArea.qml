@@ -677,10 +677,27 @@ Item {
                         }
                     }
 
+                    function updateTurnSpeed(): void {
+                        const turnSpeed = controller.get_turn_speed(vid.timestamp);
+                        if (isNaN(turnSpeed)) {
+                            turnSpeedValue.text = "---";
+                        } else {
+                            const xAngle = controller.get_x_angle(vid.timestamp);
+                            turnSpeedValue.text = turnSpeed.toFixed(2) + "°/s (" + xAngle.toFixed(2) + "°)";
+                        }
+                    }
+
                     onCurrentFrameChanged: {
                         fovChanged();
                         controller.update_keyframe_values(timestamp);
                         window.motionData.orientationIndicator.updateOrientation(timeline.position * timeline.durationMs * 1000);
+                        updateTurnSpeed();
+                        if (!vid.playing) {
+                            Qt.callLater(function() {
+                                window.stab.updateHorizonLock();
+                                vid.seekToFrameDelta(0);
+                            });
+                        }
                     }
                     onMetadataLoaded: (md) => {
                         Qt.callLater(fileLoaded, md);
@@ -929,6 +946,21 @@ Item {
                     }
                     BasicText {
                         text: `(${vid.currentFrame+1}/${vid.frameCount})`;
+                        leftPadding: 5 * dpiScale;
+                        font.pixelSize: 11 * dpiScale;
+                        anchors.verticalCenter: parent.verticalCenter;
+                    }
+                }
+                Row {
+                    BasicText {
+                        text: qsTr("Turn Speed (ROLL):");
+                        leftPadding: 0;
+                        font.pixelSize: 11 * dpiScale;
+                        anchors.verticalCenter: parent.verticalCenter;
+                    }
+                    BasicText {
+                        id: turnSpeedValue;
+                        text: "---";
                         leftPadding: 5 * dpiScale;
                         font.pixelSize: 11 * dpiScale;
                         anchors.verticalCenter: parent.verticalCenter;

@@ -1024,8 +1024,8 @@ impl StabilizationManager {
         self.smoothing.write().current_mut().as_mut().set_parameter(name, val);
         self.invalidate_smoothing();
     }
-    pub fn set_horizon_lock(&self, lock_percent: f64, roll: f64, lock_pitch: bool, pitch: f64) {
-        self.smoothing.write().horizon_lock.set_horizon(lock_percent, roll, lock_pitch, pitch);
+    pub fn set_horizon_lock(&self, lock_percent: f64, roll: f64, lock_pitch: bool, pitch: f64, automatic_lock: bool, turn_threshold: f64, turn_smoothing_ms: f64, turn_multiplier: f64, tilt_accel_limit: f64) {
+        self.smoothing.write().horizon_lock.set_horizon(lock_percent, roll, lock_pitch, pitch, automatic_lock, turn_threshold, turn_smoothing_ms, turn_multiplier, tilt_accel_limit);
         self.invalidate_smoothing();
     }
     pub fn set_use_gravity_vectors(&self, v: bool) {
@@ -1579,7 +1579,12 @@ impl StabilizationManager {
                     if let Some(horizon_roll) = obj.get("horizon_lock_roll").and_then(|x| x.as_f64()) {
                         let horizon_pitch_enabled = obj.get("horizon_lock_pitch_enabled").and_then(|x| x.as_bool()).unwrap_or(false);
                         let horizon_pitch = obj.get("horizon_lock_pitch").and_then(|x| x.as_f64()).unwrap_or(0.0);
-                        smoothing.horizon_lock.set_horizon(horizon_amount, horizon_roll, horizon_pitch_enabled, horizon_pitch);
+                        let turn_threshold = obj.get("turn_threshold").and_then(|x| x.as_f64()).unwrap_or(5.0);
+                        let turn_smoothing_ms = obj.get("turn_smoothing_ms").and_then(|x| x.as_f64()).unwrap_or(500.0);
+                        let turn_multiplier = obj.get("turn_multiplier").and_then(|x| x.as_f64()).unwrap_or(1.0);
+                        let tilt_accel_limit = obj.get("tilt_accel_limit").and_then(|x| x.as_f64()).unwrap_or(f64::INFINITY);
+                        let automatic_lock = obj.get("automatic_lock").and_then(|x| x.as_bool()).unwrap_or(false);
+                        smoothing.horizon_lock.set_horizon(horizon_amount, horizon_roll, horizon_pitch_enabled, horizon_pitch, automatic_lock, turn_threshold, turn_smoothing_ms, turn_multiplier, tilt_accel_limit);
                     }
                 }
                 if let Some(v) = obj.get("use_gravity_vectors").and_then(|x| x.as_bool()) {

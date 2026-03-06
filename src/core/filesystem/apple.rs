@@ -205,18 +205,18 @@ pub fn resolve_bookmark(bookmark_data: &str, project_url: Option<&str>) -> (Stri
 }
 
 unsafe fn get_error(err: CFErrorRef) -> String {
-    let cf_str = CFErrorCopyDescription(err);
-    let c_string = CFStringGetCStringPtr(cf_str, kCFStringEncodingUTF8);
+    let cf_str = unsafe { CFErrorCopyDescription(err) };
+    let c_string = unsafe { CFStringGetCStringPtr(cf_str, kCFStringEncodingUTF8) };
     let ret = if !c_string.is_null() {
-        std::ffi::CStr::from_ptr(c_string).to_string_lossy().into()
+        unsafe { std::ffi::CStr::from_ptr(c_string).to_string_lossy().into() }
     } else {
-        let range = CFRange { location: 0, length: CFStringGetLength(cf_str) };
+        let range = CFRange { location: 0, length: unsafe { CFStringGetLength(cf_str) } };
         let mut len: CFIndex = 0;
-        CFStringGetBytes(cf_str, range, kCFStringEncodingUTF8, 0, false as Boolean, ptr::null_mut(), 0, &mut len);
+        unsafe { CFStringGetBytes(cf_str, range, kCFStringEncodingUTF8, 0, false as Boolean, ptr::null_mut(), 0, &mut len); }
         let mut buffer = vec![0u8; len as usize];
-        CFStringGetBytes(cf_str, range, kCFStringEncodingUTF8, 0, false as Boolean, buffer.as_mut_ptr(), buffer.len() as isize, ptr::null_mut());
-        String::from_utf8_unchecked(buffer)
+        unsafe { CFStringGetBytes(cf_str, range, kCFStringEncodingUTF8, 0, false as Boolean, buffer.as_mut_ptr(), buffer.len() as isize, ptr::null_mut()); }
+        unsafe { String::from_utf8_unchecked(buffer) }
     };
-    CFRelease(cf_str as CFTypeRef);
+    unsafe { CFRelease(cf_str as CFTypeRef); }
     ret
 }
