@@ -99,8 +99,19 @@ pub struct Controller {
     all_profiles_loaded: qt_signal!(),
     search_lens_profile_finished: qt_signal!(profiles: QVariantList),
     search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
+    search_lens_profile_filtered: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32, camera_brand: QString, camera_model: QString, lens_model: QString)),
     fetch_profiles_from_github: qt_method!(fn(&self)),
     lens_profiles_updated: qt_signal!(reload_from_disk: bool),
+    fetch_camera_databases: qt_method!(fn(&self)),
+    camera_databases_updated: qt_signal!(),
+
+    get_camera_brands: qt_method!(fn(&self) -> QVariantList),
+    get_camera_models: qt_method!(fn(&self, brand: QString) -> QVariantList),
+    get_lens_models: qt_method!(fn(&self, brand: QString) -> QVariantList),
+    get_compatible_cameras: qt_method!(fn(&self, brand: QString, model: QString) -> QVariantList),
+    get_profiles_for_review: qt_method!(fn(&self, brand: QString, model: QString, lens: QString)),
+    review_profiles_loaded: qt_signal!(profiles: QVariantList),
+    mark_profile_bad: qt_method!(fn(&self, checksum: QString, is_bad: bool)),
 
     set_sync_lpf: qt_method!(fn(&self, lpf: f64)),
     set_imu_lpf: qt_method!(fn(&self, lpf: f64)),
@@ -1889,14 +1900,24 @@ impl Controller {
     }
 
     fn search_lens_profile(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32) {
+        self.search_lens_profile_filtered(text, favorites, aspect_ratio, aspect_ratio_swapped, QString::default(), QString::default(), QString::default());
+    }
+
+    fn search_lens_profile_filtered(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32, camera_brand: QString, camera_model: QString, lens_model: QString) {
         let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, profiles: QVariantList| {
             this.search_lens_profile_finished(profiles);
         });
         let db = self.stabilizer.lens_profile_db.clone();
         let text = text.to_string();
         let favorites = HashSet::<String>::from_iter(favorites.into_iter().map(|x| x.to_qbytearray().to_string()));
+        let camera_brand_str = camera_brand.to_string();
+        let camera_model_str = camera_model.to_string();
+        let lens_model_str = lens_model.to_string();
         core::run_threaded(move || {
-            let profiles = db.read().search(&text, &favorites, aspect_ratio, aspect_ratio_swapped).into_iter().map(|(name, file, crc, official, rating, aspect_ratio, _author)| {
+            let brand = if camera_brand_str.is_empty() { None } else { Some(camera_brand_str.as_str()) };
+            let model = if camera_model_str.is_empty() { None } else { Some(camera_model_str.as_str()) };
+            let lens = if lens_model_str.is_empty() { None } else { Some(lens_model_str.as_str()) };
+            let profiles = db.read().search_with_filters(&text, &favorites, aspect_ratio, aspect_ratio_swapped, brand, model, lens).into_iter().map(|(name, file, crc, official, rating, aspect_ratio, _author)| {
                 let mut list = QVariantList::from_iter([
                     QString::from(name),
                     QString::from(file),
@@ -1909,6 +1930,106 @@ impl Controller {
             }).collect();
 
             finished(profiles);
+        });
+    }
+
+    fn get_camera_brands(&self) -> QVariantList {
+        let db = self.stabilizer.camera_db.read();
+        let brands = db.get_brands();
+        QVariantList::from_iter(brands.into_iter().map(|b| QString::from(b).into()))
+    }
+
+    fn get_camera_models(&self, brand: QString) -> QVariantList {
+        let db = self.stabilizer.camera_db.read();
+        let models = db.get_camera_models(&brand.to_string());
+        QVariantList::from_iter(models.into_iter().map(|m| QString::from(m).into()))
+    }
+
+    fn get_lens_models(&self, brand: QString) -> QVariantList {
+        let db = self.stabilizer.camera_db.read();
+        let lenses = db.get_lenses(&brand.to_string());
+        QVariantList::from_iter(lenses.into_iter().map(|l| {
+            let mut obj = QJsonObject::default();
+            obj.insert("model", QString::from(l.model).into());
+            obj.insert("brand", QString::from(l.brand).into());
+            if let Some(min_fl) = l.min_focal_length {
+                obj.insert("min_focal_length", min_fl.into());
+            }
+            if let Some(max_fl) = l.max_focal_length {
+                obj.insert("max_focal_length", max_fl.into());
+            }
+            obj.insert("is_zoom", l.is_zoom.into());
+            obj.into()
+        }))
+    }
+
+    fn get_compatible_cameras(&self, brand: QString, model: QString) -> QVariantList {
+        let db = self.stabilizer.camera_db.read();
+        let model_str = if model.is_empty() { None } else { Some(model.to_string().as_str()) };
+        let compatible = db.get_compatible_cameras(&brand.to_string(), model_str);
+        QVariantList::from_iter(compatible.into_iter().map(|c| QString::from(c).into()))
+    }
+
+    fn get_profiles_for_review(&self, brand: QString, model: QString, lens: QString) {
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, profiles: QVariantList| {
+            this.review_profiles_loaded(profiles);
+        });
+        let db = self.stabilizer.lens_profile_db.clone();
+        let brand_str = brand.to_string();
+        let model_str = model.to_string();
+        let lens_str = lens.to_string();
+        core::run_threaded(move || {
+            let profiles: Vec<_> = db.read().iter_profiles()
+                .filter(|p| {
+                    p.camera_brand.to_lowercase() == brand_str.to_lowercase() &&
+                    p.camera_model.to_lowercase() == model_str.to_lowercase() &&
+                    p.lens_model.to_lowercase() == lens_str.to_lowercase() &&
+                    !p.is_copy
+                })
+                .map(|p| {
+                    let mut obj = QJsonObject::default();
+                    obj.insert("name", QString::from(p.get_display_name()).into());
+                    obj.insert("checksum", QString::from(p.checksum.clone().unwrap_or_default()).into());
+                    obj.insert("calibrated_by", QString::from(p.calibrated_by.clone()).into());
+                    obj.insert("rating", p.rating.unwrap_or(0.0).into());
+                    obj.insert("rms", p.fisheye_params.RMS_error.into());
+                    obj.insert("official", p.official.into());
+                    obj.into()
+                })
+                .collect();
+            finished(QVariantList::from_iter(profiles.into_iter()));
+        });
+    }
+
+    fn mark_profile_bad(&self, checksum: QString, is_bad: bool) {
+        // Store bad profile status - could be extended to sync with server
+        let db = self.stabilizer.lens_profile_db.clone();
+        let checksum_str = checksum.to_string();
+        core::run_threaded(move || {
+            // Mark profile as bad using rating system (0.0 = bad)
+            if let Some(profile) = db.write().map.values_mut().find(|p| p.checksum.as_ref().map(|c| c == &checksum_str).unwrap_or(false)) {
+                if is_bad {
+                    profile.rating = Some(0.0);
+                } else {
+                    profile.rating = None; // Reset to unrated
+                }
+            }
+        });
+    }
+
+    fn mark_profile_bad(&self, checksum: QString, is_bad: bool) {
+        // Store bad profile status in settings or database
+        // This could be extended to sync with server
+        let db = self.stabilizer.lens_profile_db.clone();
+        let checksum_str = checksum.to_string();
+        core::run_threaded(move || {
+            // Mark profile as bad in the database
+            // For now, we'll use the existing rating system
+            if let Some(profile) = db.write().map.values_mut().find(|p| p.checksum.as_ref().map(|c| c == &checksum_str).unwrap_or(false)) {
+                if is_bad {
+                    profile.rating = Some(0.0); // Bad rating
+                }
+            }
         });
     }
 
@@ -1966,6 +2087,48 @@ impl Controller {
                 }
             });
         }
+        
+        // Also fetch camera databases
+        self.fetch_camera_databases();
+    }
+
+    fn fetch_camera_databases(&self) {
+        use crate::core::camera_database::CameraDatabase;
+
+        if CameraDatabase::get_path().join("noupdate").exists() {
+            ::log::info!("Skipping camera database updates.");
+            return;
+        }
+
+        let update = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, _| {
+            this.camera_databases_updated();
+            // Reload camera database
+            this.stabilizer.camera_db.write().load_all();
+        });
+
+        let db_path = CameraDatabase::get_path();
+        core::run_threaded(move || {
+            // Fetch camera_lens_list.json
+            if let Ok(Ok(body)) = ureq::get("https://raw.githubusercontent.com/gyroflow/lens_profiles/main/camera_lens_list.json").call().map(|x| x.into_body().read_to_string()) {
+                if let Ok(mut file) = std::fs::File::create(db_path.join("camera_lens_list.json")) {
+                    use std::io::Write;
+                    if file.write_all(body.as_bytes()).is_ok() {
+                        ::log::info!("Updated camera_lens_list.json");
+                    }
+                }
+            }
+
+            // Fetch camera_compatibility.json
+            if let Ok(Ok(body)) = ureq::get("https://raw.githubusercontent.com/gyroflow/lens_profiles/main/camera_compatibility.json").call().map(|x| x.into_body().read_to_string()) {
+                if let Ok(mut file) = std::fs::File::create(db_path.join("camera_compatibility.json")) {
+                    use std::io::Write;
+                    if file.write_all(body.as_bytes()).is_ok() {
+                        ::log::info!("Updated camera_compatibility.json");
+                        update(());
+                    }
+                }
+            }
+        });
     }
 
     fn rate_profile(&self, name: QString, json: QString, checksum: QString, is_good: bool) {

@@ -5,6 +5,8 @@ pub mod gyro_source;
 pub mod imu_integration;
 pub mod lens_profile;
 pub mod lens_profile_database;
+pub mod camera_database;
+pub mod lensfun_integration;
 #[cfg(feature = "opencv")]
 pub mod calibration;
 pub mod synchronization;
@@ -100,6 +102,7 @@ pub struct StabilizationManager {
 
     pub camera_id: Arc<RwLock<Option<CameraIdentifier>>>,
     pub lens_profile_db: Arc<RwLock<LensProfileDatabase>>,
+    pub camera_db: Arc<RwLock<camera_database::CameraDatabase>>,
 
     pub input_file: Arc<RwLock<InputFile>>,
 
@@ -144,6 +147,11 @@ impl Default for StabilizationManager {
             keyframes: Arc::new(RwLock::new(KeyframeManager::new())),
 
             camera_id: Arc::new(RwLock::new(None)),
+            camera_db: {
+                let mut db = camera_database::CameraDatabase::new();
+                db.load_all();
+                Arc::new(RwLock::new(db))
+            },
 
             sync_data: Arc::new(RwLock::new(SyncData::default())),
         }
