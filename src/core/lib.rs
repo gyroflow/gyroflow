@@ -10,6 +10,7 @@ pub mod calibration;
 pub mod synchronization;
 pub mod stabilization;
 pub mod camera_identifier;
+pub mod camera_database;
 pub mod keyframes;
 pub mod stmap;
 
