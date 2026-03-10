@@ -54,7 +54,7 @@ struct Job {
     additional_data: String,
     cancel_flag: Arc<AtomicBool>,
     project_data: Option<String>,
-    stab: Arc<StabilizationManager>
+    stab: Option<Arc<StabilizationManager>>
 }
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -309,7 +309,7 @@ impl RenderQueue {
         self.processing_resolution = target_height;
     }
     pub fn get_stab_for_job(&self, job_id: u32) -> Option<Arc<StabilizationManager>> {
-        Some(self.jobs.get(&job_id)?.stab.clone())
+        self.jobs.get(&job_id)?.stab.clone()
     }
 
     pub fn get_total_frames(&self) -> u64 {
@@ -339,7 +339,9 @@ impl RenderQueue {
     pub fn set_job_output_filename(&mut self, job_id: u32, new_filename: QString, start: bool) {
         if let Some(job) = self.jobs.get_mut(&job_id) {
             job.render_options.output_filename = new_filename.to_string();
-            job.project_data = Self::get_gyroflow_data_internal(&job.stab, &job.additional_data, &job.render_options);
+            if let Some(ref stab) = job.stab {
+                job.project_data = Self::get_gyroflow_data_internal(stab, &job.additional_data, &job.render_options);
+            }
         }
         update_model!(self, job_id, itm {
             itm.output_filename = new_filename;
@@ -476,7 +478,7 @@ impl RenderQueue {
             additional_data,
             cancel_flag: Default::default(),
             project_data,
-            stab: stab.clone()
+            stab: Some(stab.clone())
         });
         self.update_queue_indices();
 
@@ -801,7 +803,7 @@ impl RenderQueue {
             }
             job.cancel_flag.store(false, SeqCst);
 
-            let stab = job.stab.clone();
+            let stab = job.stab.clone().expect("stab must exist for rendering job");
 
             rendering::clear_log();
 
@@ -838,6 +840,10 @@ impl RenderQueue {
 
                 let is_queue_active = this.status == "active".into();
                 if finished {
+                    // Release StabilizationManager to reclaim GPU memory
+                    if let Some(job) = this.jobs.get_mut(&job_id) {
+                        job.stab = None;
+                    }
                     if this.get_pending_count() > 0 && is_queue_active {
                         // Start the next one
                         this.start();
@@ -1610,7 +1616,9 @@ impl RenderQueue {
                         job.render_options.update_from_json(new_output_options);
                         job.render_options.output_folder = Self::get_output_folder(&itm.input_file.to_string(), &job.render_options.output_folder);
                         job.render_options.output_filename = Self::get_output_filename(&itm.input_file.to_string(), &self.default_suffix.to_string(), &job.render_options, override_ext);
-                        itm.export_settings = QString::from(job.render_options.settings_string(job.stab.params.read().fps));
+                        if let Some(ref stab) = job.stab {
+                            itm.export_settings = QString::from(job.render_options.settings_string(stab.params.read().fps));
+                        }
                         itm.output_filename = QString::from(job.render_options.output_filename.as_str());
                         itm.output_folder   = QString::from(job.render_options.output_folder.as_str());
                         itm.display_output_path = QString::from(filesystem::display_folder_filename(job.render_options.output_folder.as_str(), job.render_options.output_filename.as_str()));
@@ -1622,13 +1630,15 @@ impl RenderQueue {
                         }
                     }
 
-                    let mut is_preset = false;
-                    if let Err(e) = job.stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset, false) {
-                        ::log::error!("Failed to update queue stab data: {:?}", e);
-                    }
+                    if let Some(ref stab) = job.stab {
+                        let mut is_preset = false;
+                        if let Err(e) = stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset, false) {
+                            ::log::error!("Failed to update queue stab data: {:?}", e);
+                        }
 
-                    Self::update_sync_settings(&job.stab, &sync_options);
-                    job.project_data = Self::get_gyroflow_data_internal(&job.stab, &job.additional_data, &job.render_options);
+                        Self::update_sync_settings(stab, &sync_options);
+                        job.project_data = Self::get_gyroflow_data_internal(stab, &job.additional_data, &job.render_options);
+                    }
                     processing_done(job_id);
 
                     q.change_line(job.queue_index, itm);
