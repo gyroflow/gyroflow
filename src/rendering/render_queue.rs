@@ -886,6 +886,11 @@ impl RenderQueue {
                 this.error(job_id, QString::from(msg), QString::from(arg), QString::default());
                 this.render_progress(job_id, 1.0, 0, 0, true, 0.0, false);
 
+                // Release StabilizationManager to reclaim GPU memory
+                if let Some(job) = this.jobs.get_mut(&job_id) {
+                    job.stab = None;
+                }
+
                 if this.get_pending_count() > 0 {
                     // Start the next one
                     this.start();
