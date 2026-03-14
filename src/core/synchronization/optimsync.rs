@@ -131,10 +131,20 @@ impl OptimSync {
         let mf = band_energy(&merged_ffts, 2.0, 30.0);
         let hf = band_energy(&merged_ffts, 30.0, 2000.0);
 
+        // For low-motion videos (MF max < 50.0), include LF in rank calculation
+        // since meaningful signal is concentrated below 2Hz
+        let mf_max = mf.iter().cloned().fold(0.0_f32, f32::max);
+        let low_motion = mf_max < 50.0;
+
         let mut rank: Vec<_> = izip!(&lf, &mf, &hf)
             .map(|(lf, mf, hf)| {
-                // we do not like low freqs and high freqs, but mid freqs are good
-                mf / (1.0 + nlfunc(*hf, 450.0) * 0.003) / (1.0 + nlfunc(*lf, 650.0) * 0.003)
+                if low_motion {
+                    // Low-motion video: combine LF+MF as signal source
+                    (lf + mf) / (1.0 + nlfunc(*hf, 450.0) * 0.003)
+                } else {
+                    // Normal video: prefer mid freqs, penalize low and high freqs
+                    mf / (1.0 + nlfunc(*hf, 450.0) * 0.003) / (1.0 + nlfunc(*lf, 650.0) * 0.003)
+                }
             })
             .collect();
 
