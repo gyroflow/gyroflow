@@ -201,7 +201,7 @@ pub struct RenderQueue {
 
     render_job: qt_method!(fn(&mut self, job_id: u32)),
     cancel_job: qt_method!(fn(&self, job_id: u32)),
-    reset_job: qt_method!(fn(&self, job_id: u32)),
+    reset_job: qt_method!(fn(&mut self, job_id: u32)),
     get_gyroflow_data: qt_method!(fn(&self, job_id: u32) -> QString),
 
     add_file: qt_method!(fn(&mut self, url: String, gyro_url: String, additional_data: String) -> u32),
@@ -689,13 +689,54 @@ impl RenderQueue {
             job.cancel_flag.store(true, SeqCst);
         }
     }
-    pub fn reset_job(&self, job_id: u32) {
+    pub fn reset_job(&mut self, job_id: u32) {
         if let Some(job) = self.jobs.get(&job_id) {
-            job.cancel_flag.store(true, SeqCst);
+            job.cancel_flag.store(false, SeqCst);
         }
+
+        // Recreate StabilizationManager from project_data if it was released after rendering
+        if self.jobs.get(&job_id).map_or(false, |j| j.stab.is_none()) {
+            let project_data = self.jobs.get(&job_id).and_then(|j| j.project_data.clone());
+            let render_options = self.jobs.get(&job_id).map(|j| j.render_options.clone());
+            let lens_profile_db = self.stabilizer.lens_profile_db.clone();
+
+            if let (Some(data), Some(opts)) = (project_data, render_options) {
+                let stab = Arc::new(StabilizationManager { lens_profile_db, ..Default::default() });
+                let mut is_preset = false;
+
+                let result = if let Ok(obj) = serde_json::from_str::<serde_json::Value>(&data) {
+                    if let Some(project_file) = obj.get("project_file").and_then(|v| v.as_str()) {
+                        stab.import_gyroflow_file(project_file, false, |_|(), Arc::new(AtomicBool::new(false)), false)
+                    } else {
+                        stab.import_gyroflow_data(data.as_bytes(), false, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset, false)
+                    }
+                } else {
+                    stab.import_gyroflow_data(data.as_bytes(), false, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset, false)
+                };
+
+                match result {
+                    Ok(_) => {
+                        stab.set_output_size(opts.output_width, opts.output_height);
+                        if let Some(job) = self.jobs.get_mut(&job_id) {
+                            job.stab = Some(stab);
+                        }
+                    }
+                    Err(e) => {
+                        ::log::error!("Failed to recreate StabilizationManager for job {}: {:?}", job_id, e);
+                        update_model!(self, job_id, itm {
+                            itm.error_string = QString::from(format!("Failed to restore job state: {:?}", e));
+                            itm.status = JobStatus::Error;
+                        });
+                        return;
+                    }
+                }
+            }
+        }
+
         update_model!(self, job_id, itm {
             itm.error_string = QString::default();
             itm.current_frame = 0;
+            itm.frame_times.clear();
             itm.status = JobStatus::Queued;
         });
     }
@@ -803,7 +844,13 @@ impl RenderQueue {
             }
             job.cancel_flag.store(false, SeqCst);
 
-            let stab = job.stab.clone().expect("stab must exist for rendering job");
+            let stab = match job.stab.clone() {
+                Some(s) => s,
+                None => {
+                    ::log::error!("StabilizationManager is None for job {}, cannot render", job_id);
+                    return;
+                }
+            };
 
             rendering::clear_log();
 
