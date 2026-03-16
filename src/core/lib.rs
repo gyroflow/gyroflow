@@ -837,6 +837,20 @@ impl StabilizationManager {
     pub fn set_show_detected_features(&self, v: bool) { self.params.write().show_detected_features = v; }
     pub fn set_show_optical_flow     (&self, v: bool) { self.params.write().show_optical_flow      = v; }
     pub fn set_stab_enabled          (&self, v: bool) { self.params.write().stab_enabled           = v; }
+    pub fn set_optical_flow_stabilization(&self, v: bool) { self.params.write().optical_flow_stabilization = v; }
+
+    /// Copy optical-flow-estimated gyro data from PoseEstimator into GyroSource as the primary motion data.
+    /// This enables stabilization purely from optical flow, without requiring external gyro/IMU data.
+    pub fn apply_optical_flow_as_gyro(&self) {
+        let estimated_gyro = self.pose_estimator.estimated_gyro.read();
+        if !estimated_gyro.is_empty() {
+            let imu_data: Vec<_> = estimated_gyro.values().cloned().collect();
+            drop(estimated_gyro);
+            let mut gyro = self.gyro.write();
+            gyro.file_metadata.set_raw_imu(imu_data);
+            gyro.apply_transforms();
+        }
+    }
     pub fn set_frame_readout_time    (&self, v: f64)  { self.params.write().frame_readout_time     = v; }
     pub fn set_frame_readout_direction(&self, v: impl Into<ReadoutDirection>) { self.params.write().frame_readout_direction = v.into(); }
     pub fn set_adaptive_zoom         (&self, v: f64)  { self.params.write().adaptive_zoom_window   = v; self.invalidate_zooming(); }

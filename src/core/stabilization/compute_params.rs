@@ -57,6 +57,8 @@ pub struct ComputeParams {
 
     pub zooming_debug_points: bool,
 
+    pub optical_flow_stabilization: bool,
+
     pub distortion_model: DistortionModel,
     pub digital_lens: Option<DistortionModel>,
     pub digital_lens_params: Option<Vec<f64>>
@@ -113,6 +115,8 @@ impl ComputeParams {
             video_speed_affects_smoothing: params.video_speed_affects_smoothing,
             video_speed_affects_zooming: params.video_speed_affects_zooming,
             video_speed_affects_zooming_limit: params.video_speed_affects_zooming_limit,
+
+            optical_flow_stabilization: params.optical_flow_stabilization,
 
             distortion_model,
             digital_lens,

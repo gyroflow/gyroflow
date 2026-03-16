@@ -72,6 +72,12 @@ impl AutosyncProcess {
             ranges_us.push((0, (org_duration_ms * 1000.0).round() as i64));
         }
 
+        if mode == "optical_flow_stabilization" {
+            // Analyze entire video for optical-flow-only stabilization
+            ranges_us.clear();
+            ranges_us.push((0, (org_duration_ms * 1000.0).round() as i64));
+        }
+
         let scaled_ranges_us = ranges_us.iter().map(|(f, t)| (
             (*f as f64 / fps_scale.unwrap_or(1.0)) as i64,
             (*t as f64 / fps_scale.unwrap_or(1.0)) as i64)
@@ -235,6 +241,25 @@ impl AutosyncProcess {
                 cb(0.6 + (progress * 0.4), d, t);
             }
         };
+
+        if self.mode == "optical_flow_stabilization" {
+            // For optical-flow-only stabilization, copy OF-derived gyro data into GyroSource
+            let compute_params = self.compute_params.write();
+            let mut gyro = compute_params.gyro.write();
+            gyro.file_metadata.set_raw_imu(self.estimator.estimated_gyro.read().values().cloned().collect::<Vec<_>>());
+            gyro.apply_transforms();
+            drop(gyro);
+            drop(compute_params);
+
+            if let Some(cb) = &self.finished_cb {
+                cb(Either::Left(Vec::new())); // Signal completion with empty offsets
+            }
+            if let Some(cb) = &self.progress_cb {
+                let len = self.total_detected_frames.load(SeqCst);
+                cb(1.0, len, len);
+            }
+            return;
+        }
 
         if let Some(cb) = &self.finished_cb {
             if self.mode == "estimate_rolling_shutter" {

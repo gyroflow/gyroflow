@@ -121,6 +121,8 @@ pub struct Controller {
     request_recompute: qt_signal!(),
 
     stab_enabled: qt_property!(bool; WRITE set_stab_enabled),
+    optical_flow_stabilization: qt_property!(bool; WRITE set_optical_flow_stabilization),
+    start_optical_flow_analysis: qt_method!(fn(&mut self)),
     show_detected_features: qt_property!(bool; WRITE set_show_detected_features),
     show_optical_flow: qt_property!(bool; WRITE set_show_optical_flow),
     fov: qt_property!(f64; WRITE set_fov),
@@ -527,6 +529,117 @@ impl Controller {
                                 frame_no += 1;
                             }
                             abs_frame_no += 1;
+                            Ok(())
+                        });
+                        if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
+                            err(("An error occured: %1".to_string(), e.to_string()));
+                        }
+                        sync.finished_feeding_frames();
+                    }
+                    Err(error) => {
+                        err(("An error occured: %1".to_string(), error.to_string()));
+                    }
+                };
+            });
+        } else {
+            err(("An error occured: %1".to_string(), "Invalid parameters".to_string()));
+        }
+    }
+
+    fn start_optical_flow_analysis(&mut self) {
+        rendering::clear_log();
+
+        self.sync_in_progress = true;
+        self.sync_in_progress_changed();
+
+        let sync_params = synchronization::SyncParams {
+            every_nth_frame: 1,
+            of_method: self.stabilizer.params.read().of_method as usize,
+            ..Default::default()
+        };
+
+        let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (percent, ready, total): (f64, usize, usize)| {
+            this.sync_in_progress = ready < total || percent < 1.0;
+            this.sync_in_progress_changed();
+            this.chart_data_changed();
+            this.sync_progress(percent, ready, total);
+        });
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, _offsets: Vec<(f64, f64, f64)>| {
+            this.sync_in_progress = false;
+            this.sync_in_progress_changed();
+            this.chart_data_changed();
+            this.request_recompute();
+        });
+        let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (msg, mut arg): (String, String)| {
+            arg.push_str("\n\n");
+            arg.push_str(&rendering::get_log());
+            this.error(QString::from(msg), QString::from(arg), QString::default());
+            this.sync_in_progress = false;
+            this.sync_in_progress_changed();
+            this.request_recompute();
+        });
+        self.sync_progress(0.0, 0, 0);
+
+        self.cancel_flag.store(false, SeqCst);
+
+        // Use 0.5 as a dummy timestamp fraction to cover the entire video (overridden in autosync for this mode)
+        let timestamps_fract = vec![0.5f64];
+
+        if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, &timestamps_fract, sync_params, "optical_flow_stabilization".into(), self.cancel_flag.clone()) {
+            sync.on_progress(move |percent, ready, total| {
+                progress((percent, ready, total));
+            });
+            sync.on_finished(move |arg| {
+                match arg {
+                    Either::Left(offsets) => finished(offsets),
+                    _ => ()
+                };
+            });
+
+            let ranges = sync.get_ranges();
+            let cancel_flag = self.cancel_flag.clone();
+
+            let input_file = self.stabilizer.input_file.read().clone();
+            let proc_height = self.processing_resolution;
+            let gpu_decoding = self.stabilizer.gpu_decoding.load(SeqCst);
+            core::run_threaded(move || {
+                let mut frame_no = 0;
+
+                let mut decoder_options = ffmpeg_next::Dictionary::new();
+                if input_file.image_sequence_fps > 0.0 {
+                    let fps = rendering::fps_to_rational(input_file.image_sequence_fps);
+                    decoder_options.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
+                }
+                if input_file.image_sequence_start > 0 {
+                    decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
+                }
+                if proc_height > 0 {
+                    decoder_options.set("scale", &format!("{}x{}", (proc_height * 16) / 9, proc_height));
+                }
+
+                let sync = std::rc::Rc::new(sync);
+
+                match VideoProcessor::from_file(&input_file.url, gpu_decoding, 0, Some(decoder_options)) {
+                    Ok(mut proc) => {
+                        let err2 = err.clone();
+                        let sync2 = sync.clone();
+                        proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
+                            assert!(_output_frame.is_none());
+
+                            let h = if proc_height > 0 { proc_height as u32 } else { input_frame.height() };
+                            let ratio = input_frame.height() as f64 / h as f64;
+                            let sw = (input_frame.width() as f64 / ratio).round() as u32;
+                            let sh = (input_frame.height() as f64 / (input_frame.width() as f64 / sw as f64)).round() as u32;
+                            match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
+                                Ok(small_frame) => {
+                                    let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
+                                    sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
+                                },
+                                Err(e) => {
+                                    err2(("An error occured: %1".to_string(), e.to_string()))
+                                }
+                            }
+                            frame_no += 1;
                             Ok(())
                         });
                         if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
@@ -1423,6 +1536,7 @@ impl Controller {
     wrap_simple_method!(override_video_fps,         v: f64, r: bool; recompute; update_offset_model);
     wrap_simple_method!(set_video_rotation,         v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_stab_enabled,           v: bool);
+    wrap_simple_method!(set_optical_flow_stabilization, v: bool; recompute);
     wrap_simple_method!(set_show_detected_features, v: bool);
     wrap_simple_method!(set_show_optical_flow,      v: bool);
     wrap_simple_method!(set_digital_lens_name,      v: String; recompute);

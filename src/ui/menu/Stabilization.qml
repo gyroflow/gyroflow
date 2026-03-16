@@ -281,6 +281,28 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Roll angle");
     }
 
+    CheckBoxWithContent {
+        id: opticalFlowCb;
+        text: qsTr("Optical flow stabilization (no gyro)");
+        cb.onCheckedChanged: {
+            controller.optical_flow_stabilization = cb.checked;
+        }
+
+        Button {
+            text: qsTr("Analyze optical flow");
+            iconName: "sync";
+            enabled: !controller.sync_in_progress;
+            onClicked: controller.start_optical_flow_analysis();
+        }
+
+        BasicText {
+            width: parent.width;
+            wrapMode: Text.WordWrap;
+            textFormat: Text.StyledText;
+            text: qsTr("Stabilize video using only optical flow analysis, without gyroscope data. Load a video and click Analyze to compute motion from pixel tracking.");
+        }
+    }
+
     ComboBox {
         id: smoothingMethod;
         model: smoothingAlgorithms;
