@@ -12,9 +12,18 @@ use crate::gpu::{ BufferDescription, BufferSource };
 #[cfg(target_os = "windows")]                            use { super::wgpu_interop_directx::*, windows::{ Win32::Graphics::Direct3D11::*, core::Interface } };
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
-use metal::foreign_types::ForeignTypeRef;
+use objc2::{ rc::Retained, runtime::ProtocolObject };
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+use objc2_metal::*;
 
 use wgpu::{ Origin3d, Extent3d, TextureAspect, TexelCopyTextureInfo, TexelCopyBufferInfo, TexelCopyBufferLayout };
+
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+pub struct SendableMetalTexture(pub Retained<ProtocolObject<dyn MTLTexture>>);
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+unsafe impl Send for SendableMetalTexture {}
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+unsafe impl Sync for SendableMetalTexture {}
 
 pub enum NativeTexture {
     #[cfg(any(target_os = "windows", target_os = "linux"))]
@@ -22,7 +31,7 @@ pub enum NativeTexture {
     #[cfg(target_os = "windows")]
     D3D11(DirectX11SharedTexture),
     #[cfg(any(target_os = "macos", target_os = "ios"))]
-    Metal(metal::Texture)
+    Metal(SendableMetalTexture)
 }
 
 #[derive(Default)]
@@ -88,15 +97,13 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
                     None
                 } else {
                     if check_metal_stride(device, format, buf.size.2) {
-                        let metal_usage = if is_in { metal::MTLTextureUsage::ShaderRead }
-                                          else     { metal::MTLTextureUsage::RenderTarget };
+                        let metal_usage = if is_in { MTLTextureUsage::ShaderRead }
+                                          else     { MTLTextureUsage::RenderTarget };
                         let texture = create_metal_texture_from_buffer(buffer, buf.size.0 as u32, buf.size.1 as u32, buf.size.2 as u32, format, metal_usage);
-                        if texture.as_ptr().is_null() {
+                        if texture.is_none() {
                             log::error!("Failed to create Metal texture from MTLBuffer!");
-                            None
-                        } else {
-                            Some(texture)
                         }
+                        texture
                     } else {
                         // TODO: handle this case
                         None
@@ -106,10 +113,10 @@ pub fn init_texture(device: &wgpu::Device, backend: wgpu::Backend, buf: &BufferD
                     wgpu_texture: Some(if buf.texture_copy || native_texture.is_none() {
                         device.create_texture(&desc)
                     } else {
-                        create_texture_from_metal(&device, native_texture.as_ref().unwrap().as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, usage)
+                        create_texture_from_metal(&device, Retained::as_ptr(native_texture.as_ref().unwrap()) as *mut std::ffi::c_void, buf.size.0 as u32, buf.size.1 as u32, format, usage)
                     }),
                     wgpu_buffer: None,
-                    native_texture: native_texture.map(NativeTexture::Metal)
+                    native_texture: native_texture.map(|t| NativeTexture::Metal(SendableMetalTexture(t)))
                 }
             }
         },
@@ -310,7 +317,7 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         BufferSource::Metal { texture, .. } => {
             if buf.texture_copy {
-                temp_texture = Some(create_texture_from_metal(device, *texture as *mut metal::MTLTexture, buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_SRC));
+                temp_texture = Some(create_texture_from_metal(device, *texture, buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_SRC));
 
                 encoder.copy_texture_to_texture(
                     TexelCopyTextureInfo { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
@@ -336,8 +343,17 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
         BufferSource::MetalBuffer { buffer, .. } => {
             if buf.texture_copy {
                 if let Some(NativeTexture::Metal(mtl_texture)) = &in_texture.native_texture {
-                    if !mtl_texture.as_ptr().is_null() {
-                        temp_texture = Some(create_texture_from_metal(device, mtl_texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_SRC));
+                    temp_texture = Some(create_texture_from_metal(device, Retained::as_ptr(&mtl_texture.0) as *mut std::ffi::c_void, buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_SRC));
+
+                    encoder.copy_texture_to_texture(
+                        TexelCopyTextureInfo { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        TexelCopyTextureInfo { texture: in_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        size
+                    );
+                } else {
+                    let metal_usage = MTLTextureUsage::ShaderRead;
+                    if let Some(texture) = create_metal_texture_from_buffer(*buffer, buf.size.0 as u32, buf.size.1 as u32, buf.size.2 as u32, format, metal_usage) {
+                        temp_texture = Some(create_texture_from_metal(device, Retained::as_ptr(&texture) as *mut std::ffi::c_void, buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_SRC));
 
                         encoder.copy_texture_to_texture(
                             TexelCopyTextureInfo { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
@@ -345,17 +361,6 @@ pub fn handle_input_texture(device: &wgpu::Device, buf: &BufferDescription, queu
                             size
                         );
                     }
-                } else {
-                    let metal_usage = metal::MTLTextureUsage::ShaderRead;
-                    let texture = create_metal_texture_from_buffer(*buffer, buf.size.0 as u32, buf.size.1 as u32, buf.size.2 as u32, format, metal_usage);
-
-                    temp_texture = Some(create_texture_from_metal(device, texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_SRC));
-
-                    encoder.copy_texture_to_texture(
-                        TexelCopyTextureInfo { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                        TexelCopyTextureInfo { texture: in_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                        size
-                    );
                 }
             }
         },
@@ -393,7 +398,7 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         BufferSource::Metal { texture, .. } => {
             if buf.texture_copy {
-                temp_texture = Some(create_texture_from_metal(&device, *texture as *mut metal::MTLTexture, buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
+                temp_texture = Some(create_texture_from_metal(&device, *texture, buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
 
                 encoder.copy_texture_to_texture(
                     TexelCopyTextureInfo { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
@@ -419,8 +424,17 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
         BufferSource::MetalBuffer { buffer, .. } => {
             if buf.texture_copy {
                 if let Some(NativeTexture::Metal(mtl_texture)) = &out_texture.native_texture {
-                    if !mtl_texture.as_ptr().is_null() {
-                        temp_texture = Some(create_texture_from_metal(device, mtl_texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
+                    temp_texture = Some(create_texture_from_metal(device, Retained::as_ptr(&mtl_texture.0) as *mut std::ffi::c_void, buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
+
+                    encoder.copy_texture_to_texture(
+                        TexelCopyTextureInfo { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        TexelCopyTextureInfo { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
+                        size
+                    );
+                } else {
+                    let metal_usage = MTLTextureUsage::RenderTarget;
+                    if let Some(texture) = create_metal_texture_from_buffer(*buffer, buf.size.0 as u32, buf.size.1 as u32, buf.size.2 as u32, format, metal_usage) {
+                        temp_texture = Some(create_texture_from_metal(device, Retained::as_ptr(&texture) as *mut std::ffi::c_void, buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
 
                         encoder.copy_texture_to_texture(
                             TexelCopyTextureInfo { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
@@ -428,17 +442,6 @@ pub fn handle_output_texture(device: &wgpu::Device, buf: &BufferDescription, _qu
                             size
                         );
                     }
-                } else {
-                    let metal_usage = metal::MTLTextureUsage::RenderTarget;
-                    let texture = create_metal_texture_from_buffer(*buffer, buf.size.0 as u32, buf.size.1 as u32, buf.size.2 as u32, format, metal_usage);
-
-                    temp_texture = Some(create_texture_from_metal(device, texture.as_ptr(), buf.size.0 as u32, buf.size.1 as u32, format, wgpu::TextureUsages::COPY_DST));
-
-                    encoder.copy_texture_to_texture(
-                        TexelCopyTextureInfo { texture: out_texture.wgpu_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                        TexelCopyTextureInfo { texture: temp_texture.as_ref().unwrap(), mip_level: 0, origin: Origin3d::ZERO, aspect: TextureAspect::All },
-                        size
-                    );
                 }
             }
         }

@@ -16,8 +16,8 @@ system_shutdown = "4.1"
 breakpad-sys = "0.2.0"
 trash = "5.2"
 # For nle_plugins
-zip = { version = "6", default-features = false, features = ["deflate-flate2"] }
-zip-extensions = { version = "0.13", default-features = false, features = ["deflate-flate2"] }
+zip = { version = "8.4", default-features = false, features = ["deflate-flate2"] }
+zip-extensions = { version = "0.14", default-features = false, features = ["deflate-flate2"] }
 runas = "1.2"
 tempfile = "3"
 fs_extra = "1.3"
@@ -45,7 +45,7 @@ flate2 = "1.1"
 walkdir = "2.5.0"
 mp4-merge = "0.1.10"
 human-sort = "0.2.2"
-argh = "0.1.15"
+argh = "0.1.19"
 indicatif = "0.18"
 rustfft = "6.4.1"
 crc32fast = "1.5.0"
@@ -54,10 +54,10 @@ filetime_creation = "0.2"
 
 qmetaobject = { version = "0.2.10", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.12", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "b1c18c3" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "7eb9292" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
-ffmpeg-next = { version = "8.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
+ffmpeg-next = { version = "8.1.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.5.0"
 parking_lot = "0.12.5"
 
@@ -67,7 +67,7 @@ log = "0.4"
 ureq = "3.2"
 url = "2.5.7"
 whoami = "2.1"
-tar = "0.4.44"
+tar = "0.4.45"
 lru = "0.16"
 chrono = "0.4"
 
@@ -90,8 +90,8 @@ features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemSer
 oslog = "0.2"
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
-metal = { version = "0.33.0" }
-core-foundation-sys = "0.8.7"
+objc2 = "0.6"
+objc2-metal = "0.3"
 
 [build-dependencies]
 cpp_build = "0.5.9"

@@ -119,7 +119,12 @@ pub mod mac_ffi {
     use std::ffi::c_ulonglong;
     use std::ffi::c_void;
     use ffmpeg_next::frame::Video;
-    use core_foundation_sys::{ base::{ CFAllocatorRef, CFTypeRef, Boolean }, dictionary::CFDictionaryRef };
+    use objc2_metal::MTLPixelFormat;
+
+    pub type CFAllocatorRef = *const c_void;
+    pub type CFTypeRef = *const c_void;
+    pub type CFDictionaryRef = *const c_void;
+    pub type Boolean = u8;
 
     #[derive(Debug, Copy, Clone)]
     pub enum __CVBuffer { }
@@ -137,7 +142,7 @@ pub mod mac_ffi {
         pub fn CVMetalTextureCacheCreate(
             allocator: CFAllocatorRef,
             cacheAttributes: CFDictionaryRef,
-            metalDevice: *mut metal::MTLDevice,
+            metalDevice: *mut c_void,
             textureAttributes: CFDictionaryRef,
             cacheOut: *mut CVMetalTextureCacheRef,
         ) -> CVReturn;
@@ -146,7 +151,7 @@ pub mod mac_ffi {
             textureCache: CVMetalTextureCacheRef,
             sourceImage: CVImageBufferRef,
             textureAttributes: CFDictionaryRef,
-            pixelFormat: metal::MTLPixelFormat,
+            pixelFormat: MTLPixelFormat,
             width: SizeT,
             height: SizeT,
             planeIndex: SizeT,
@@ -162,18 +167,23 @@ pub mod mac_ffi {
         pub fn CVPixelBufferGetPlaneCount(pixelBuffer: CVPixelBufferRef) -> SizeT;
         pub fn CVPixelBufferGetWidthOfPlane(pixelBuffer: CVPixelBufferRef, planeIndex: SizeT) -> SizeT;
         pub fn CVPixelBufferGetHeightOfPlane(pixelBuffer: CVPixelBufferRef, planeIndex: SizeT) -> SizeT;
-        pub fn CVMetalTextureGetTexture(image: CVMetalTextureRef) -> *mut metal::MTLTexture;
+        pub fn CVMetalTextureGetTexture(image: CVMetalTextureRef) -> *mut c_void;
         pub fn CVMetalTextureIsFlipped(image: CVMetalTextureRef) -> Boolean;
+    }
+
+    #[link(name = "CoreFoundation", kind = "framework")]
+    unsafe extern "C" {
+        fn CFRelease(cf: *const c_void);
     }
 
     struct TextureHandle {
         texture_ref: CVMetalTextureRef,
-        mtl_texture: *mut metal::MTLTexture
+        mtl_texture: *mut c_void
     }
     impl Drop for TextureHandle {
         fn drop(&mut self) {
             //log::debug!("dropping {:?}", self.texture_ref);
-            unsafe { core_foundation_sys::base::CFRelease(self.texture_ref as *mut _); }
+            unsafe { CFRelease(self.texture_ref as *const _); }
         }
     }
     pub struct MetalTextureCache {
@@ -183,15 +193,13 @@ pub mod mac_ffi {
 
     impl MetalTextureCache {
         pub fn new() -> Option<Self> {
-            Self::new_with_device(metal::Device::system_default()?)
-        }
-        pub fn new_with_device(mtl_device: metal::Device) -> Option<Self> {
-            use metal::foreign_types::ForeignType;
+            let mtl_device = objc2_metal::MTLCreateSystemDefaultDevice()?;
             let mut cache: CVMetalTextureCacheRef = std::ptr::null_mut();
+            let device_ptr = objc2::rc::Retained::as_ptr(&mtl_device) as *mut c_void;
             let ret = unsafe { CVMetalTextureCacheCreate(
                 std::ptr::null(),
                 std::ptr::null(),
-                mtl_device.as_ptr() as *mut metal::MTLDevice,
+                device_ptr,
                 std::ptr::null(),
                 (&mut cache) as *mut *const _ as *mut _
             ) };
@@ -206,7 +214,7 @@ pub mod mac_ffi {
             }
         }
 
-        pub fn get_texture_for_plane(&mut self, frame: &Video, size: (usize, usize), format: metal::MTLPixelFormat, plane: usize, cache: bool) -> *mut metal::MTLTexture {
+        pub fn get_texture_for_plane(&mut self, frame: &Video, size: (usize, usize), format: MTLPixelFormat, plane: usize, cache: bool) -> *mut c_void {
             let frame_ptr = unsafe { (*frame.as_ptr()).data[3] as CVPixelBufferRef };
             let key = ((frame_ptr as u64) << 8) | plane as u64;
             if !cache { self.frame_map.pop_entry(&key); }
@@ -239,7 +247,7 @@ pub mod mac_ffi {
     }
     impl Drop for MetalTextureCache {
         fn drop(&mut self) {
-            unsafe { core_foundation_sys::base::CFRelease(self.cv_cache as *mut _); }
+            unsafe { CFRelease(self.cv_cache as *const _); }
         }
     }
 }

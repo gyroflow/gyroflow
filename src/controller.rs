@@ -1060,12 +1060,12 @@ impl Controller {
                             Some((Buffers {
                                 input: BufferDescription {
                                     size,
-                                    data: BufferSource::Metal { texture: ptr1 as *mut metal::MTLTexture, command_queue: ptr3 as *mut metal::MTLCommandQueue }, ..Default::default()
+                                    data: BufferSource::Metal { texture: ptr1 as *mut std::ffi::c_void, command_queue: ptr3 as *mut std::ffi::c_void }, ..Default::default()
                                 },
                                 output: BufferDescription {
                                     size,
                                     texture_copy: true,
-                                    data: BufferSource::Metal { texture: ptr1 as *mut metal::MTLTexture, command_queue: ptr3 as *mut metal::MTLCommandQueue }, ..Default::default()
+                                    data: BufferSource::Metal { texture: ptr1 as *mut std::ffi::c_void, command_queue: ptr3 as *mut std::ffi::c_void }, ..Default::default()
                                 },
                             },
                             "Metal"))

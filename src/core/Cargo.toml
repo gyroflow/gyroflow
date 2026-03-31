@@ -25,7 +25,7 @@ argmin-math = { version = "0.5.1", default-features = false, features = ["nalgeb
 
 nalgebra = { version = "0.34", features = ["serde-serialize"] }
 rayon = "1.11"
-biquad = "0.5.0"
+biquad = "0.6.0"
 fastrand = "2.3.0"
 lazy_static = "1.5.0"
 parking_lot = "0.12.5"
@@ -81,12 +81,13 @@ exr = "1.74"
 opencv = { version = "0.98", default-features = false, features = [ "calib3d", "features2d", "imgproc", "optflow", "clang-runtime" ], optional = true } #"imgcodecs","objdetect","sfm",
 median = "0.3"
 
-wgpu = { version = "28", features = ["spirv", "naga-ir"] }
+wgpu = { version = "29", features = ["spirv", "naga-ir"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
-metal = { version = "0.33.0" }
-objc-foundation = "0.1.1"
-core-foundation-sys = "0.8.7"
+objc2 = "0.6"
+objc2-metal = "0.3"
+objc2-core-foundation = "0.3"
+objc2-foundation = "0.3"
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.62"
@@ -118,4 +119,4 @@ ndk-sys = { version = "0.6.0" }
 ndk-context = { version = "0.1.1" }
 
 [build-dependencies]
-ureq = "3.2"
+ureq = "3.3"

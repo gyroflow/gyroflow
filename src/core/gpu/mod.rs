@@ -56,13 +56,13 @@ pub enum BufferSource<'a> {
     },
     #[cfg(any(target_os = "macos", target_os = "ios"))]
     Metal {
-        texture: *mut metal::MTLTexture,
-        command_queue: *mut metal::MTLCommandQueue,
+        texture: *mut std::ffi::c_void,
+        command_queue: *mut std::ffi::c_void,
     },
     #[cfg(any(target_os = "macos", target_os = "ios"))]
     MetalBuffer {
-        buffer: *mut metal::MTLBuffer,
-        command_queue: *mut metal::MTLCommandQueue,
+        buffer: *mut std::ffi::c_void,
+        command_queue: *mut std::ffi::c_void,
     },
     #[cfg(any(target_os = "windows", target_os = "linux"))]
     CUDABuffer {

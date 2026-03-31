@@ -146,6 +146,8 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
             "ProRes" => vec![
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 ("prores_videotoolbox", true),
+                //#[cfg(any(target_os = "windows", target_os = "linux", target_os = "android"))]
+                //("prores_ks_vulkan", true),
                 ("prores_ks", false)
             ],
             "DNxHD"    => vec![("dnxhd", false)],

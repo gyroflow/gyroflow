@@ -49,7 +49,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
 
     # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
-    $FFmpeg = "ffmpeg-8.0-android-gpl-lite"
+    $FFmpeg = "ffmpeg-8.1-android-gpl-lite"
     if (-not (Test-Path -Path "$FFmpeg")) {
         echo "Downloading $FFmpeg"
         wget "https://master.dl.sourceforge.net/project/avbuild/android/$FFmpeg.tar.xz?viasf=1" -outfile "ffmpeg.tar.xz"
@@ -107,7 +107,7 @@ deploy *param:
     $QT_LIBS = "$ProjectDir\ext\{{QtVersion}}\android_arm64_v8a\lib"
     $Env:Path = "$ProjectDir\ext\{{QtVersion}}\android_arm64_v8a\bin;$ProjectDir\ext\{{QtVersion}}\mingw_64\bin\;$Env:Path"
     $Env:QMAKE = "$ProjectDir\ext\{{QtVersion}}\android_arm64_v8a\bin\qmake.bat"
-    $Env:FFMPEG_DIR = "$ProjectDir\ext\ffmpeg-8.0-android-gpl-lite"
+    $Env:FFMPEG_DIR = "$ProjectDir\ext\ffmpeg-8.1-android-gpl-lite"
     $Env:OPENCV_LINK_LIBS = "opencv_stitching,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_core,tegra_hal,tbb,ittnotify,z,kleidicv,kleidicv_hal,kleidicv_thread"
     $Env:OPENCV_LINK_PATHS = "$ProjectDir\ext\OpenCV-android-sdk\sdk\native\staticlibs\arm64-v8a,$ProjectDir\ext\OpenCV-android-sdk\sdk\native\3rdparty\libs\arm64-v8a"
     $Env:OPENCV_INCLUDE_PATHS = "$ProjectDir\ext\OpenCV-android-sdk\sdk\native\jni\include"
@@ -233,7 +233,7 @@ deploy *param:
         "qtPluginsDirectory": "plugins",
         "qtQmlDirectory": "qml",
         "sdk": "$SDK_REPLACED",
-        "sdkBuildToolsRevision": "35.0.0",
+        "sdkBuildToolsRevision": "36.0.0",
         "ndk": "$NDK_REPLACED",
         "toolchain-prefix": "llvm",
         "tool-prefix": "llvm",
@@ -241,7 +241,7 @@ deploy *param:
         "architectures": {"arm64-v8a":"aarch64-linux-android"},
         "android-min-sdk-version": "26",
         "android-package-source-directory": "$PROJECT_DIR_UNIX/_deployment/android",
-        "android-target-sdk-version": "35",
+        "android-target-sdk-version": "36",
         "qml-importscanner-binary": "$PROJECT_DIR_UNIX/ext/{{QtVersion}}/mingw_64/bin/qmlimportscanner.exe",
         "rcc-binary": "$PROJECT_DIR_UNIX/ext/{{QtVersion}}/mingw_64/bin/rcc.exe",
         "qml-root-path": "$PROJECT_DIR_UNIX/src",
@@ -279,7 +279,7 @@ deploy *param:
         $ApkName = "apk\release\android-build-release-signed.apk"
     }
 
-    $cmd = "androiddeployqt --input `"$ProjectDir\target\android-build\android-deploy.json`" --output `"$ProjectDir\target\android-build`" --deployment bundled $Sign --android-platform android-35 --jdk ${Env:JAVA_HOME} --gradle"
+    $cmd = "androiddeployqt --input `"$ProjectDir\target\android-build\android-deploy.json`" --output `"$ProjectDir\target\android-build`" --deployment bundled $Sign --android-platform android-36 --jdk ${Env:JAVA_HOME} --gradle"
 
     iex "$cmd"
     if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") {
