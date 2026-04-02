@@ -23,7 +23,10 @@ Modal {
             "Rotation":   ["rotation"],
             "Frame rate": ["fps_scale", "vfr_fps"],
         },
-        "Lens profile": ["calibration_data", "light_refraction_coefficient"],
+        "Lens profile": {
+            "Lens profile":                ["calibration_data", "light_refraction_coefficient"],
+            "Disable Gyroflow's stretch":  ["plugin_disable_stretch"],
+        },
         "Motion data|gyro_source": {
             "Low pass filter":    ["lpf"],
             "Median filter":      ["mf"],
@@ -67,7 +70,7 @@ Modal {
         }
     }];
 
-    property var defaultOff: ["trim_ranges_ms", "offsets", "video_infofps_scale", "video_inforotation", "synchronizationdo_autosync"];
+    property var defaultOff: ["trim_ranges_ms", "offsets", "video_infofps_scale", "video_inforotation", "synchronizationdo_autosync", "plugin_disable_stretch"];
 
     text: type == "preset"? qsTr("Select settings you want to include in the preset")
         : type == "apply"? qsTr("Select settings you want to apply to all items in the render queue")
@@ -97,6 +100,7 @@ Modal {
             QT_TR_NOOP("Rotation");
             QT_TR_NOOP("Frame rate");
         QT_TR_NOOP("Lens profile");
+            QT_TR_NOOP("Disable Gyroflow's stretch");
         QT_TR_NOOP("Motion data");
             QT_TR_NOOP("Low pass filter");
             QT_TR_NOOP("Median filter");
@@ -316,6 +320,10 @@ Modal {
     function getFilteredObject(source: var, desc: var): var {
         let finalData = { version: 2 };
         copyObj(source, desc, finalData);
+        // Handle plugin-specific flags not present in gyroflow data
+        if (desc["plugin_disable_stretch"]) {
+            finalData["plugin_disable_stretch"] = true;
+        }
         // Cleanup empty objects
         for (const key in finalData) {
             if (typeof finalData[key] === "object" && !Array.isArray(finalData[key]) && Object.keys(finalData[key]).length == 0) {
