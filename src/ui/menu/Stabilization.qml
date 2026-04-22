@@ -35,6 +35,8 @@ MenuItem {
         property alias zoomingMethod: zoomingMethod.currentIndex;
         property alias maxZoom: maxZoomSlider.value;
         property alias maxZoomIterations: maxZoomIterations.value;
+        property alias focalLengthSmoothingEnabled: flEnable.cb.checked;
+        property alias focalLengthSmoothingStrength: flStrength.value;
 
         Component.onCompleted: settings.init(sett);
         function propChanged() { settings.propChanged(sett); }
@@ -106,9 +108,6 @@ MenuItem {
             }
             if (stab.hasOwnProperty("focal_length_smoothing_strength")) {
                 flStrength.value = +stab.focal_length_smoothing_strength;
-            }
-            if (stab.hasOwnProperty("focal_length_time_window")) {
-                flTimeWindow.value = +stab.focal_length_time_window;
             }
 
             const hasKeyframes = typeof obj.keyframes === "object" && obj.keyframes !== null;
@@ -568,33 +567,19 @@ MenuItem {
         cb.onCheckedChanged: controller.focal_length_smoothing_enabled = cb.checked;
 
         Label {
-            text: qsTr("Focal length smoothing");
+            text: qsTr("Smoothness");
             position: Label.LeftPosition;
             SliderWithField {
                 id: flStrength;
                 from: 0;
-                to: 1;
-                precision: 2;
+                to: 100;
+                precision: 1;
+                scaler: 100.0;
+                unit: "%";
                 width: parent.width;
                 value: controller.focal_length_smoothing_strength;
-                defaultValue: 0.5;
+                defaultValue: 30.0;
                 onValueChanged: controller.focal_length_smoothing_strength = value;
-            }
-        }
-
-        Label {
-            text: qsTr("Focal length time window");
-            position: Label.LeftPosition;
-            SliderWithField {
-                id: flTimeWindow;
-                from: 0.1;
-                to: 5.0;
-                precision: 2;
-                width: parent.width;
-                value: controller.focal_length_time_window;
-                defaultValue: 1.0;
-                unit: qsTr("s");
-                onValueChanged: controller.focal_length_time_window = value;
             }
         }
     }

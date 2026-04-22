@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
-
 #![recursion_limit = "256"]
 
 pub mod gyro_source;
@@ -415,29 +414,101 @@ impl StabilizationManager {
 
     pub fn extract_focal_lengths(compute_params: &ComputeParams) -> Vec<Option<f64>> {
         use crate::util::MapClosest;
-        
+
         let gyro = compute_params.gyro.read();
         let file_metadata = gyro.file_metadata.read();
-        
-        // If no lens params, return empty
+
         if file_metadata.lens_params.is_empty() {
             return vec![];
         }
-        
+
         let mut focal_lengths = Vec::with_capacity(compute_params.frame_count);
-        
+
         for frame in 0..compute_params.frame_count {
             let timestamp_ms = crate::timestamp_at_frame(frame as i32, compute_params.scaled_fps);
             let timestamp_us = (timestamp_ms * 1000.0).round() as i64;
-            
+
             // Try to get focal length from lens_params (within 100ms window)
             let focal_length = file_metadata.lens_params.get_closest(&timestamp_us, 100000)
                 .and_then(|val| val.focal_length.map(|fl| fl as f64));
-            
+
             focal_lengths.push(focal_length);
         }
-        
+
         focal_lengths
+    }
+
+    fn apply_focal_length_smoothing(params: &mut ComputeParams, stabilization_params: &RwLock<StabilizationParams>) {
+        let (enabled, strength) = {
+            let sp = stabilization_params.read();
+            (sp.focal_length_smoothing_enabled, sp.focal_length_smoothing_strength)
+        };
+
+        let focal_lengths = if params.gyro.read().file_metadata.read().lens_params.is_empty() {
+            Vec::new()
+        } else {
+            Self::extract_focal_lengths(params)
+        };
+
+        let smoothing_active = enabled && !focal_lengths.is_empty();
+
+        let (dequantized_focal_lengths, smoothed_focal_lengths) = if smoothing_active {
+            // Dequantize the raw metadata with a short Gaussian. Camera-quantized focal length
+            // values produce visible stairs; the shader samples position depends on the raw
+            // side of the ratio (through scaled_k), so stairs in raw become stairs in output
+            // unless we feed the ratio a smooth estimate of the true optical state.
+            let dequantize_window = ((params.scaled_fps * 0.5).round() as usize).max(5);
+            let dequantized = crate::smoothing::focal_length::smooth_focal_lengths_gaussian(&focal_lengths, 1.0, dequantize_window);
+
+            // Single-knob mapping (`strength` ∈ [0, 1]). All three dials scale together so the
+            // slider feels monotonic: more smoothness = longer stationary time constant, higher
+            // velocity threshold, AND a longer "fast zoom" time constant so transitions round
+            // off instead of snapping to the raw shape.
+            //
+            //   * `max_smoothness_time` — stationary time constant. Exponential 0.1s → 30s so
+            //     the top of the slider gives genuinely extreme smoothness.
+            //   * `min_smoothness_time` — fast-zoom time constant. Scales from ~0.05s at
+            //     strength=0 (near pass-through) up to ~0.4s at strength=1. This is what keeps
+            //     deliberate zoom edges rounded rather than tracking the raw curve tightly.
+            //   * `velocity_threshold` — how fast a zoom has to be to open the filter. Scales
+            //     0.3 → 8.0 so low smoothness opens on any motion, high smoothness only yields
+            //     to very fast zooms.
+            let s = strength.clamp(0.0, 1.0);
+            let max_smoothness_time = 0.1_f64 * 300.0_f64.powf(s);           // 0.1 .. 30
+            let min_smoothness_time = 0.05_f64 + 0.35_f64 * s * s;           // 0.05 .. 0.40
+            let velocity_threshold  = 0.3_f64 + 7.7_f64 * s.powf(1.5);       // 0.3 .. 8.0
+
+            let smoothed = crate::smoothing::focal_length::smooth_focal_lengths_adaptive(
+                &dequantized,
+                params.scaled_fps,
+                max_smoothness_time,
+                min_smoothness_time,
+                velocity_threshold,
+            );
+            (dequantized, smoothed)
+        } else {
+            (Vec::new(), Vec::new())
+        };
+
+        // Rendering-side state: compute_params drives the shader compensation, so only populate
+        // when smoothing is actually active. `focal_lengths` here holds the DEQUANTIZED curve
+        // (used as the ratio denominator), not the raw metadata — see comment above.
+        if smoothing_active {
+            params.focal_lengths = dequantized_focal_lengths;
+            params.smoothed_focal_lengths = smoothed_focal_lengths.clone();
+            params.focal_length_smoothing_enabled = true;
+        } else {
+            params.focal_lengths.clear();
+            params.smoothed_focal_lengths.clear();
+            params.focal_length_smoothing_enabled = false;
+        }
+
+        // Chart-side state: always expose the RAW focal length curve when per-frame data exists,
+        // so the "FL" timeline toggle works regardless of whether smoothing is enabled. Smoothed
+        // curve is only populated when smoothing is active.
+        let mut sp = stabilization_params.write();
+        sp.focal_lengths = focal_lengths;
+        sp.smoothed_focal_lengths = smoothed_focal_lengths;
     }
 
     pub fn recompute_adaptive_zoom_static(compute_params: &ComputeParams, params: &RwLock<StabilizationParams>) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>) {
@@ -452,6 +523,8 @@ impl StabilizationManager {
     pub fn recompute_adaptive_zoom(&self) {
         let mut params = stabilization::ComputeParams::from_manager(self);
         params.calculate_camera_fovs();
+
+        Self::apply_focal_length_smoothing(&mut params, &self.params);
 
         let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
         let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &self.params);
@@ -513,6 +586,8 @@ impl StabilizationManager {
                     gyro.max_angles = max_angles;
                     gyro.smoothed_quaternions = quats;
                 }
+
+                Self::apply_focal_length_smoothing(&mut params, &self.params);
 
                 // Zooming
                 let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
@@ -606,31 +681,13 @@ impl StabilizationManager {
 
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
-            if smoothing_changed || zooming::get_checksum(&params) != zooming_checksum.load(SeqCst) {
-                // Extract and smooth focal lengths BEFORE FOV calculation (only if enabled and video has per-frame FL data)
-                let smoothing_enabled = stabilization_params.read().focal_length_smoothing_enabled;
-                if smoothing_enabled && !params.gyro.read().file_metadata.read().lens_params.is_empty() {
-                    let focal_lengths = Self::extract_focal_lengths(&params);
-                    if !focal_lengths.is_empty() {
-                        let (smoothing_strength, time_window) = {
-                            let sp = stabilization_params.read();
-                            (sp.focal_length_smoothing_strength, sp.focal_length_time_window)
-                        };
-                        
-                        let window_frames = (params.scaled_fps * time_window).round() as usize;
-                        let smoothed_focal_lengths = crate::smoothing::focal_length::smooth_focal_lengths_gaussian(&focal_lengths, smoothing_strength, window_frames);
-                        
-                        params.focal_lengths = focal_lengths;
-                        params.smoothed_focal_lengths = smoothed_focal_lengths;
-                        params.focal_length_smoothing_enabled = true;
-                    }
-                } else {
-                    // Clear focal length data when disabled
-                    params.focal_lengths.clear();
-                    params.smoothed_focal_lengths.clear();
-                    params.focal_length_smoothing_enabled = false;
-                }
+            // Run FL smoothing unconditionally so `params.focal_lengths` always carries the
+            // dequantized curve by the time `set_compute_params` stores it. The from_manager
+            // copy pulls raw-for-chart from StabilizationParams, so skipping this step would
+            // leave raw (stair-stepped) values in the rendering-side compute_params.
+            Self::apply_focal_length_smoothing(&mut params, &stabilization_params);
 
+            if smoothing_changed || zooming::get_checksum(&params) != zooming_checksum.load(SeqCst) {
                 let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
                 params.fovs = fovs;
                 params.minimal_fovs = minimal_fovs;
@@ -642,13 +699,7 @@ impl StabilizationManager {
                     stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                     stab_params.minimal_fovs = params.minimal_fovs.clone();
                     stab_params.zooming_debug_points = debug_points;
-                    
-                    // Store focal length data
-                    if !params.focal_lengths.is_empty() {
-                        stab_params.focal_lengths = params.focal_lengths.clone();
-                        stab_params.smoothed_focal_lengths = params.smoothed_focal_lengths.clone();
-                    }
-                    
+
                     zooming_checksum.store(zooming::get_checksum(&params), SeqCst);
                     (
                         stab_params.max_zoom.unwrap_or(0.0),
@@ -708,49 +759,21 @@ impl StabilizationManager {
                             lib_gyro.smoothing_status = smoothing.get_status_json();
                         }
 
-                        // Extract and smooth focal lengths BEFORE FOV calculation for max zoom iterations (only if enabled and video has per-frame FL data)
-                        let smoothing_enabled = stabilization_params.read().focal_length_smoothing_enabled;
-                        if smoothing_enabled && !params.gyro.read().file_metadata.read().lens_params.is_empty() {
-                            let focal_lengths = Self::extract_focal_lengths(&params);
-                            if !focal_lengths.is_empty() {
-                                let (smoothing_strength, time_window) = {
-                                    let sp = stabilization_params.read();
-                                    (sp.focal_length_smoothing_strength, sp.focal_length_time_window)
-                                };
-                                
-                                let window_frames = (params.scaled_fps * time_window).round() as usize;
-                                let smoothed_focal_lengths = crate::smoothing::focal_length::smooth_focal_lengths_gaussian(&focal_lengths, smoothing_strength, window_frames);
-                                
-                                params.focal_lengths = focal_lengths;
-                                params.smoothed_focal_lengths = smoothed_focal_lengths;
-                                params.focal_length_smoothing_enabled = true;
-                            }
-                        } else {
-                            // Clear focal length data when disabled
-                            params.focal_lengths.clear();
-                            params.smoothed_focal_lengths.clear();
-                            params.focal_length_smoothing_enabled = false;
-                        }
+                        // FL smoothing state from the outer apply is reused across iterations —
+                        // settings and raw metadata don't change within max-zoom iterations.
 
-                        // Zooming
                         let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
                         params.fovs = fovs;
                         params.minimal_fovs = minimal_fovs;
 
                         if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
-                        
+
                         {
                             let mut stab_params = stabilization_params.write();
                             stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                             stab_params.minimal_fovs = params.minimal_fovs.clone();
                             stab_params.zooming_debug_points = debug_points;
-                            
-                            // Store focal length data
-                            if !params.focal_lengths.is_empty() {
-                                stab_params.focal_lengths = params.focal_lengths.clone();
-                                stab_params.smoothed_focal_lengths = params.smoothed_focal_lengths.clone();
-                            }
-                            
+
                             zooming_checksum.store(zooming::get_checksum(&params), SeqCst);
                         }
                     }
@@ -1308,7 +1331,6 @@ impl StabilizationManager {
                 "frame_offset":           params.frame_offset,
                 "focal_length_smoothing_enabled":  params.focal_length_smoothing_enabled,
                 "focal_length_smoothing_strength": params.focal_length_smoothing_strength,
-                "focal_length_time_window":        params.focal_length_time_window,
             },
             "gyro_source": {
                 "filepath":           gyro.file_url,
@@ -1347,7 +1369,7 @@ impl StabilizationManager {
 
         if let Some(serde_json::Value::Object(obj)) = obj.get_mut("gyro_source") {
             let file_metadata = gyro.file_metadata.read();
-            
+
             if typ == GyroflowProjectType::Simple {
                 if let Ok(val) = serde_json::to_value(file_metadata.thin()) {
                     obj.insert("file_metadata".into(), val);
@@ -1366,7 +1388,7 @@ impl StabilizationManager {
                 if !params.smoothed_focal_lengths.is_empty() {
                     util::compress_to_base91_cbor(&params.smoothed_focal_lengths).and_then(|s| obj.insert("smoothed_focal_lengths".into(), serde_json::Value::String(s)));
                 }
-                
+
                 let mut imu_timestamps = Vec::with_capacity(gyro.quaternions.len());
                 let mut imu_timestamps_final = Vec::with_capacity(gyro.quaternions.len());
                 for (t, _) in &gyro.quaternions {
@@ -1594,16 +1616,11 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("acc_rotation") { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_acc_rotation(v[0], v[1], v[2]); }
                 if let Some(v) = obj.get("gyro_bias")    { gyro.imu_transforms.gyro_bias = serde_json::from_value(v.clone()).ok(); }
 
-                // Load focal length arrays if present (for processed data)
-                if let Some(bytes) = util::decompress_from_base91(obj.get("focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
-                    if let Ok(data) = bincode::serde::decode_from_slice::<Vec<Option<f64>>, _>(&bytes, bincode::config::legacy()) {
-                        self.params.write().focal_lengths = data.0;
-                    }
+                if let Ok(fls) = util::decompress_from_base91_cbor::<Vec<Option<f64>>>(obj.get("focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
+                    self.params.write().focal_lengths = fls;
                 }
-                if let Some(bytes) = util::decompress_from_base91(obj.get("smoothed_focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
-                    if let Ok(data) = bincode::serde::decode_from_slice::<Vec<Option<f64>>, _>(&bytes, bincode::config::legacy()) {
-                        self.params.write().smoothed_focal_lengths = data.0;
-                    }
+                if let Ok(fls) = util::decompress_from_base91_cbor::<Vec<Option<f64>>>(obj.get("smoothed_focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
+                    self.params.write().smoothed_focal_lengths = fls;
                 }
 
                 obj.remove("raw_imu");
@@ -1698,6 +1715,9 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("horizon_lock_integration_method").and_then(|x| x.as_i64()) {
                     self.gyro.write().set_horizon_lock_integration_method(v as i32);
                 }
+
+                if let Some(v) = obj.get("focal_length_smoothing_enabled") .and_then(|x| x.as_bool()) { params.focal_length_smoothing_enabled  = v; }
+                if let Some(v) = obj.get("focal_length_smoothing_strength").and_then(|x| x.as_f64())  { params.focal_length_smoothing_strength = v.clamp(0.0, 1.0); }
 
                 obj.remove("adaptive_zoom_fovs");
             }

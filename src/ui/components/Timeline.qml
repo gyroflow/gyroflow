@@ -257,9 +257,9 @@ Item {
         TimelineAxisButton { id: a2; text: "Z"; onCheckedChanged: chart.setAxisVisible(2, checked); checked: chart.getAxisVisible(2); }
         TimelineAxisButton { id: a3; text: "W"; onCheckedChanged: chart.setAxisVisible(3, checked); checked: chart.getAxisVisible(3); }
         TimelineAxisButton { id: a8; text: "Z"; onCheckedChanged: chart.setAxisVisible(8, checked); checked: chart.getAxisVisible(8); tooltip: qsTr("Zooming"); }
-        TimelineAxisButton { 
-            id: a10; 
-            text: "FL"; 
+        TimelineAxisButton {
+            id: a10;
+            text: "FL";
             onCheckedChanged: {
                 chart.setAxisVisible(10, checked);
                 chart.setAxisVisible(11, checked);

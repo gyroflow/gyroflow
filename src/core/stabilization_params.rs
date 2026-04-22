@@ -124,7 +124,6 @@ pub struct StabilizationParams {
     pub smoothed_focal_lengths: Vec<Option<f64>>,
     pub focal_length_smoothing_enabled: bool,
     pub focal_length_smoothing_strength: f64,
-    pub focal_length_time_window: f64,
 }
 impl Default for StabilizationParams {
     fn default() -> Self {
@@ -191,7 +190,6 @@ impl Default for StabilizationParams {
             smoothed_focal_lengths: vec![],
             focal_length_smoothing_enabled: false,
             focal_length_smoothing_strength: 0.5,
-            focal_length_time_window: 1.0,
         }
     }
 }

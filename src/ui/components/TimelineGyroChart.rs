@@ -34,6 +34,22 @@ struct Series {
 // viewMode 3: Quaternions
 // viewMode 3: Quaternions + smoothed quaternions
 
+// Series indices into `TimelineGyroChart::series`. Indices are sparse (9 is sync points,
+// which has no data in the series array — it's drawn from `sync_points` directly).
+const SERIES_X:               usize = 0;
+const SERIES_Y:               usize = 1;
+const SERIES_Z:               usize = 2;
+const SERIES_W:               usize = 3;
+const SERIES_SYNC_X:          usize = 4;
+const SERIES_SYNC_Y:          usize = 5;
+const SERIES_SYNC_Z:          usize = 6;
+const SERIES_SYNC_W:          usize = 7;
+const SERIES_FOV:             usize = 8;
+const SERIES_SYNC_POINTS:     usize = 9;
+const SERIES_FOCAL_LENGTH:    usize = 10;
+const SERIES_FOCAL_LENGTH_SM: usize = 11;
+const SERIES_COUNT:           usize = 12;
+
 #[derive(Default, QObject)]
 pub struct TimelineGyroChart {
     base: qt_base_class!(trait QQuickPaintedItem),
@@ -52,7 +68,7 @@ pub struct TimelineGyroChart {
 
     viewMode: qt_property!(u32; WRITE setViewMode NOTIFY viewModeChanged),
 
-    series: [Series; 4+4+1+1+2], // +2 for raw FL and smoothed FL
+    series: [Series; SERIES_COUNT],
 
     sync_points: BTreeMap<i64, (f64, f64)>, // timestamp, (offset, fitted offset)
 
@@ -435,8 +451,11 @@ impl TimelineGyroChart {
             self.smoothed_focal_lengths = params.smoothed_focal_lengths.iter().enumerate()
                 .filter_map(|(i, v)| v.map(|x| ChartData { timestamp_us: ts(i), values: [x] }))
                 .collect();
-            Self::normalize_height(&mut self.focal_lengths, None);
-            Self::normalize_height(&mut self.smoothed_focal_lengths, None);
+            // Normalize both series by the SAME max so they share a scale — otherwise raw's
+            // wider range gets compressed differently than smoothed's and it looks like the
+            // smoothed curve is biased toward the top.
+            let fl_max = Self::normalize_height(&mut self.focal_lengths, None);
+            Self::normalize_height(&mut self.smoothed_focal_lengths, fl_max);
         }
 
         self.update_data(series);
@@ -455,33 +474,33 @@ impl TimelineGyroChart {
             }
             match self.viewMode {
                 0 => {  // Gyroscope
-                    self.series[0].data = Self::get_serie_vector(&self.gyro, 0);
-                    self.series[1].data = Self::get_serie_vector(&self.gyro, 1);
-                    self.series[2].data = Self::get_serie_vector(&self.gyro, 2);
+                    self.series[SERIES_X].data = Self::get_serie_vector(&self.gyro, 0);
+                    self.series[SERIES_Y].data = Self::get_serie_vector(&self.gyro, 1);
+                    self.series[SERIES_Z].data = Self::get_serie_vector(&self.gyro, 2);
 
                     // + Sync results
-                    self.series[4].data = Self::get_serie_vector(&self.sync_results, 0);
-                    self.series[5].data = Self::get_serie_vector(&self.sync_results, 1);
-                    self.series[6].data = Self::get_serie_vector(&self.sync_results, 2);
-                    self.series[4].is_optflow = true;
-                    self.series[5].is_optflow = true;
-                    self.series[6].is_optflow = true;
+                    self.series[SERIES_SYNC_X].data = Self::get_serie_vector(&self.sync_results, 0);
+                    self.series[SERIES_SYNC_Y].data = Self::get_serie_vector(&self.sync_results, 1);
+                    self.series[SERIES_SYNC_Z].data = Self::get_serie_vector(&self.sync_results, 2);
+                    self.series[SERIES_SYNC_X].is_optflow = true;
+                    self.series[SERIES_SYNC_Y].is_optflow = true;
+                    self.series[SERIES_SYNC_Z].is_optflow = true;
                 }
                 1 => { // Accelerometer
-                    self.series[0].data = Self::get_serie_vector(&self.accl, 0);
-                    self.series[1].data = Self::get_serie_vector(&self.accl, 1);
-                    self.series[2].data = Self::get_serie_vector(&self.accl, 2);
+                    self.series[SERIES_X].data = Self::get_serie_vector(&self.accl, 0);
+                    self.series[SERIES_Y].data = Self::get_serie_vector(&self.accl, 1);
+                    self.series[SERIES_Z].data = Self::get_serie_vector(&self.accl, 2);
                 }
                 2 => { // Magnetometer
-                    self.series[0].data = Self::get_serie_vector(&self.magn, 0);
-                    self.series[1].data = Self::get_serie_vector(&self.magn, 1);
-                    self.series[2].data = Self::get_serie_vector(&self.magn, 2);
+                    self.series[SERIES_X].data = Self::get_serie_vector(&self.magn, 0);
+                    self.series[SERIES_Y].data = Self::get_serie_vector(&self.magn, 1);
+                    self.series[SERIES_Z].data = Self::get_serie_vector(&self.magn, 2);
                 }
                 3 => { // Quaternions
-                    self.series[0].data = Self::get_serie_vector(&self.quats, 0);
-                    self.series[1].data = Self::get_serie_vector(&self.quats, 1);
-                    self.series[2].data = Self::get_serie_vector(&self.quats, 2);
-                    self.series[3].data = Self::get_serie_vector(&self.quats, 3);
+                    self.series[SERIES_X].data = Self::get_serie_vector(&self.quats, 0);
+                    self.series[SERIES_Y].data = Self::get_serie_vector(&self.quats, 1);
+                    self.series[SERIES_Z].data = Self::get_serie_vector(&self.quats, 2);
+                    self.series[SERIES_W].data = Self::get_serie_vector(&self.quats, 3);
 
                     // + Sync quaternions
                     // self.series[4].data = Self::get_serie_vector(&self.sync_quats, 0);
@@ -490,23 +509,20 @@ impl TimelineGyroChart {
                     // self.series[7].data = Self::get_serie_vector(&self.sync_quats, 3);
 
                     // + Smoothed quaternions
-                    self.series[4].data = Self::get_serie_vector(&self.smoothed_quats, 0);
-                    self.series[5].data = Self::get_serie_vector(&self.smoothed_quats, 1);
-                    self.series[6].data = Self::get_serie_vector(&self.smoothed_quats, 2);
-                    self.series[7].data = Self::get_serie_vector(&self.smoothed_quats, 3);
+                    self.series[SERIES_SYNC_X].data = Self::get_serie_vector(&self.smoothed_quats, 0);
+                    self.series[SERIES_SYNC_Y].data = Self::get_serie_vector(&self.smoothed_quats, 1);
+                    self.series[SERIES_SYNC_Z].data = Self::get_serie_vector(&self.smoothed_quats, 2);
+                    self.series[SERIES_SYNC_W].data = Self::get_serie_vector(&self.smoothed_quats, 3);
                 }
                 _ => panic!("Invalid view mode")
             }
         }
 
-        self.series[8].data = Self::get_serie_vector(&self.fovs, 0);
-        self.series[8].is_fovs = true;
+        self.series[SERIES_FOV].data = Self::get_serie_vector(&self.fovs, 0);
+        self.series[SERIES_FOV].is_fovs = true;
 
-        // New focal length series
-        self.series[10].data = Self::get_serie_vector(&self.focal_lengths, 0);
-        self.series[10].is_optflow = false;  // Don't use optflow rendering
-        self.series[11].data = Self::get_serie_vector(&self.smoothed_focal_lengths, 0);
-        self.series[11].is_optflow = false;  // Don't use optflow rendering
+        self.series[SERIES_FOCAL_LENGTH].data = Self::get_serie_vector(&self.focal_lengths, 0);
+        self.series[SERIES_FOCAL_LENGTH_SM].data = Self::get_serie_vector(&self.smoothed_focal_lengths, 0);
 
         self.update();
     }
@@ -538,19 +554,18 @@ impl QQuickItem for TimelineGyroChart {
         self.visibleAreaLeft = 0.0;
         self.visibleAreaRight = 1.0;
         self.vscale = 1.0;
-        self.series[0].visible = true;
-        self.series[1].visible = true;
-        self.series[2].visible = true;
+        self.series[SERIES_X].visible = true;
+        self.series[SERIES_Y].visible = true;
+        self.series[SERIES_Z].visible = true;
 
-        self.series[4].visible = true;
-        self.series[5].visible = true;
-        self.series[6].visible = true;
+        self.series[SERIES_SYNC_X].visible = true;
+        self.series[SERIES_SYNC_Y].visible = true;
+        self.series[SERIES_SYNC_Z].visible = true;
 
-        self.series[8].visible = true;
+        self.series[SERIES_FOV].visible = true;
 
-        // New: start hidden
-        self.series[10].visible = false;
-        self.series[11].visible = false;
+        self.series[SERIES_FOCAL_LENGTH].visible = false;
+        self.series[SERIES_FOCAL_LENGTH_SM].visible = false;
     }
 
     fn geometry_changed(&mut self, _new: QRectF, _old: QRectF) {
@@ -574,22 +589,21 @@ impl QQuickPaintedItem for TimelineGyroChart {
             ]
         };
 
-        if self.series[0].visible { self.drawAxis(p, 0, colors[0]); } // X
-        if self.series[1].visible { self.drawAxis(p, 1, colors[1]); } // Y
-        if self.series[2].visible { self.drawAxis(p, 2, colors[2]); } // Z
-        if self.series[3].visible { self.drawAxis(p, 3, colors[3]); } // Angle
+        if self.series[SERIES_X].visible { self.drawAxis(p, SERIES_X, colors[0]); }
+        if self.series[SERIES_Y].visible { self.drawAxis(p, SERIES_Y, colors[1]); }
+        if self.series[SERIES_Z].visible { self.drawAxis(p, SERIES_Z, colors[2]); }
+        if self.series[SERIES_W].visible { self.drawAxis(p, SERIES_W, colors[3]); }
 
-        if self.series[4].visible { self.drawAxis(p, 4, colors[4]); } // Sync X
-        if self.series[5].visible { self.drawAxis(p, 5, colors[5]); } // Sync Y
-        if self.series[6].visible { self.drawAxis(p, 6, colors[6]); } // Sync Z
-        if self.series[7].visible { self.drawAxis(p, 7, colors[7]); } // Sync Angle
+        if self.series[SERIES_SYNC_X].visible { self.drawAxis(p, SERIES_SYNC_X, colors[4]); }
+        if self.series[SERIES_SYNC_Y].visible { self.drawAxis(p, SERIES_SYNC_Y, colors[5]); }
+        if self.series[SERIES_SYNC_Z].visible { self.drawAxis(p, SERIES_SYNC_Z, colors[6]); }
+        if self.series[SERIES_SYNC_W].visible { self.drawAxis(p, SERIES_SYNC_W, colors[7]); }
 
-        if self.series[8].visible { self.drawOverlay(p, 8, colors[8]); } // FOVs - zooming amount
+        if self.series[SERIES_FOV].visible { self.drawOverlay(p, SERIES_FOV, colors[8]); } // zooming amount
 
-        // New draws for focal length
-        if self.series[10].visible { self.drawAxis(p, 10, "#ff6600"); } // Raw focal length (orange/darker)
-        if self.series[11].visible { self.drawAxis(p, 11, "#cccc66"); } // Smoothed focal length (yellow/brighter, on top)
+        if self.series[SERIES_FOCAL_LENGTH].visible    { self.drawAxis(p, SERIES_FOCAL_LENGTH,    "#ff6600"); } // raw FL
+        if self.series[SERIES_FOCAL_LENGTH_SM].visible { self.drawAxis(p, SERIES_FOCAL_LENGTH_SM, "#cccc66"); } // smoothed FL (drawn on top)
 
-        if self.series[9].visible { self.drawSyncPoints(p); } // Sync points and line fit
+        if self.series[SERIES_SYNC_POINTS].visible { self.drawSyncPoints(p); }
     }
 }
