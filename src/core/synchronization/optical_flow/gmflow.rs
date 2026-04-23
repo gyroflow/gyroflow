@@ -6,6 +6,15 @@ use super::{ OpticalFlowTrait, OpticalFlowMethod };
 
 use std::sync::Arc;
 
+// AI-based optical flow backend built on gmflow (Unimatch).
+// The generated `model` module is produced by `burn-onnx` from a simplified
+// gmflow-scale2-regrefine6 ONNX at build time. See `build.rs`.
+#[cfg(feature = "use-burn")]
+#[allow(clippy::all, dead_code, unused_imports, unused_variables)]
+mod model {
+    include!(concat!(env!("OUT_DIR"), "/model/gmflow-scale2-regrefine6-320x576-opset16-sim.rs"));
+}
+
 #[derive(Clone)]
 pub struct OFGmflow {
     features: Vec<(f32, f32)>,
@@ -30,8 +39,7 @@ impl OpticalFlowTrait for OFGmflow {
     fn features(&self) -> &Vec<(f32, f32)> { &self.features }
 
     fn optical_flow_to(&self, _to: &OpticalFlowMethod) -> OpticalFlowPair {
-        // TODO: AI-based optical flow via burn::gmflow (task: #45)
-        // Requires feature = \"use-burn\" and pre-downloaded gmflow weights (.bpk)
+        // TODO(#45): preprocess frames, run `model::Model::forward`, sample to feature pairs.
         None
     }
 
