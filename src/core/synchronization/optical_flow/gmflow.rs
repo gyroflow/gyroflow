@@ -188,3 +188,42 @@ impl OpticalFlowTrait for OFGmflow {
     }
     fn cleanup(&mut self) { self.img = Arc::new(image::GrayImage::default()); }
 }
+
+#[cfg(all(test, feature = "use-burn"))]
+mod tests {
+    use super::*;
+
+    fn synthetic_pair(w: u32, h: u32, shift: u32) -> (Arc<image::GrayImage>, Arc<image::GrayImage>) {
+        let mut a = image::GrayImage::new(w, h);
+        let mut b = image::GrayImage::new(w, h);
+        for y in 0..h {
+            for x in 0..w {
+                // High-frequency texture pattern so the texture filter accepts the samples.
+                let v = (((x as i32 * 13 + y as i32 * 7) & 0xff) ^ ((x as i32 / 4) & 0xff)) as u8;
+                a.put_pixel(x, y, image::Luma([v]));
+                let sx = x.saturating_sub(shift);
+                let v2 = (((sx as i32 * 13 + y as i32 * 7) & 0xff) ^ ((sx as i32 / 4) & 0xff)) as u8;
+                b.put_pixel(x, y, image::Luma([v2]));
+            }
+        }
+        (Arc::new(a), Arc::new(b))
+    }
+
+    #[test]
+    #[ignore]
+    fn gmflow_detects_known_shift() {
+        let (w, h) = (576u32, 320u32);
+        let shift = 4u32;
+        let (img_a, img_b) = synthetic_pair(w, h, shift);
+        let of_a = OpticalFlowMethod::OFGmflow(OFGmflow::detect_features(0, img_a, w, h));
+        let of_b = OpticalFlowMethod::OFGmflow(OFGmflow::detect_features(1_000_000, img_b, w, h));
+        let pair = if let OpticalFlowMethod::OFGmflow(ref a) = of_a { a.optical_flow_to(&of_b) } else { None };
+        let (pts_a, pts_b) = pair.expect("gmflow returned no matches");
+        assert!(!pts_a.is_empty(), "no tracked points");
+        let mut dxs: Vec<f32> = pts_a.iter().zip(pts_b.iter()).map(|((ax,_),(bx,_))| bx - ax).collect();
+        dxs.sort_by(|a,b| a.partial_cmp(b).unwrap());
+        let median = dxs[dxs.len()/2];
+        println!("gmflow median dx = {median:.3} (expected ~{shift})");
+        assert!((median - shift as f32).abs() < 2.0, "median dx {median} not near expected {shift}");
+    }
+}
