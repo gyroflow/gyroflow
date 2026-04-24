@@ -24,6 +24,7 @@ mod inference {
     use std::io::Read;
     use std::path::PathBuf;
     use std::sync::{ Arc, OnceLock };
+    use std::time::Duration;
     use image::GrayImage;
     use burn::backend::NdArray;
     use burn::tensor::backend::Backend as BurnBackend;
@@ -78,7 +79,16 @@ mod inference {
             std::fs::create_dir_all(parent).map_err(|e| format!("create {:?}: {}", parent, e))?;
         }
         log::info!("gmflow: downloading model from {}", MODEL_URL);
-        let mut reader = ureq::get(MODEL_URL)
+        // 600 s global budget (covers the ~145 MB download on a >= 2.4 Mbps link)
+        // plus a 30 s connect timeout so a DNS / TLS stall cannot hang a rayon worker
+        // indefinitely. Without these, ureq falls back to unbounded waits.
+        let agent: ureq::Agent = ureq::Agent::config_builder()
+            .timeout_global(Some(Duration::from_secs(600)))
+            .timeout_connect(Some(Duration::from_secs(30)))
+            .build()
+            .into();
+        let mut reader = agent
+            .get(MODEL_URL)
             .call()
             .map_err(|e| format!("HTTP GET {}: {}", MODEL_URL, e))?
             .into_body()
@@ -88,7 +98,11 @@ mod inference {
         if !verify_sha256(&bytes, MODEL_SHA256) {
             return Err(format!("downloaded model SHA-256 mismatch (expected {})", MODEL_SHA256));
         }
-        let tmp = path.with_extension("bpk.tmp");
+        // Process-unique tmp name avoids two concurrent gyroflow instances
+        // truncating each other's partial file on a cold cache. Rename remains
+        // atomic per process, and a stale tmp from a crashed peer is orphaned
+        // rather than reused as a partial.
+        let tmp = path.with_extension(format!("bpk.tmp.{}", std::process::id()));
         std::fs::write(&tmp, &bytes).map_err(|e| format!("write {:?}: {}", tmp, e))?;
         std::fs::rename(&tmp, &path).map_err(|e| format!("rename cache: {}", e))?;
         log::info!("gmflow: cached model at {:?}", path);
