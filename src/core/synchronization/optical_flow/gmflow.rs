@@ -21,29 +21,93 @@ mod model {
 #[cfg(feature = "use-burn")]
 mod inference {
     use super::model::Model;
+    use std::io::Read;
+    use std::path::PathBuf;
     use std::sync::{ Arc, OnceLock };
     use image::GrayImage;
     use burn::backend::NdArray;
     use burn::tensor::backend::Backend as BurnBackend;
     use burn::tensor::{ Bytes, Tensor, TensorData };
+    use sha2::{ Digest, Sha256 };
 
     pub type Backend = NdArray<f32>;
     pub const MODEL_W: usize = 576;
     pub const MODEL_H: usize = 320;
 
-    static MODEL: OnceLock<Arc<Model<Backend>>> = OnceLock::new();
+    // Model weights are hosted separately rather than embedded to avoid a ~145 MB library bloat
+    // for users who do not enable the ai-optical-flow feature. The .bpk is a burn-store dump of
+    // the gmflow-scale2-regrefine6 weights (MIT, derived from autonomousvision/unimatch) converted
+    // via burn-onnx 0.21.0-pre.3. The SHA-256 pin defends against tampering on the download path.
+    const MODEL_URL: &str = "https://github.com/yasumorishima/gyroflow-models/releases/download/v1.0.0/gmflow-scale2-regrefine6-320x576-opset16-sim.bpk";
+    const MODEL_SHA256: &str = "31feee698842928715e9ba693b69a492d85ace31c646df6f3eabd53e240cd5e9";
+    const MODEL_FILENAME: &str = "gmflow-scale2-regrefine6-320x576-opset16-sim.bpk";
+
+    static MODEL: OnceLock<Option<Arc<Model<Backend>>>> = OnceLock::new();
 
     fn device() -> <Backend as BurnBackend>::Device { Default::default() }
 
-    pub fn model() -> Arc<Model<Backend>> {
-        MODEL.get_or_init(|| {
-            let raw: &'static [u8] = include_bytes!(concat!(
-                env!("OUT_DIR"),
-                "/model/gmflow-scale2-regrefine6-320x576-opset16-sim.bpk"
-            ));
-            let bytes = Bytes::from_bytes_vec(raw.to_vec());
-            Arc::new(Model::from_bytes(bytes, &device()))
-        }).clone()
+    fn cache_path() -> PathBuf {
+        crate::settings::data_dir().join("ai_models").join(MODEL_FILENAME)
+    }
+
+    fn verify_sha256(bytes: &[u8], expected_hex: &str) -> bool {
+        if expected_hex.len() != 64 { return false; }
+        let mut hasher = Sha256::new();
+        hasher.update(bytes);
+        let actual = hasher.finalize();
+        let mut expected = [0u8; 32];
+        for i in 0..32 {
+            match u8::from_str_radix(&expected_hex[i * 2..i * 2 + 2], 16) {
+                Ok(b) => expected[i] = b,
+                Err(_) => return false,
+            }
+        }
+        actual.as_slice() == expected
+    }
+
+    fn ensure_model_bytes() -> Result<Vec<u8>, String> {
+        let path = cache_path();
+        if let Ok(bytes) = std::fs::read(&path) {
+            if verify_sha256(&bytes, MODEL_SHA256) {
+                log::info!("gmflow: using cached model at {:?}", path);
+                return Ok(bytes);
+            }
+            log::warn!("gmflow: cached model failed SHA-256, re-downloading");
+        }
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent).map_err(|e| format!("create {:?}: {}", parent, e))?;
+        }
+        log::info!("gmflow: downloading model from {}", MODEL_URL);
+        let mut reader = ureq::get(MODEL_URL)
+            .call()
+            .map_err(|e| format!("HTTP GET {}: {}", MODEL_URL, e))?
+            .into_body()
+            .into_reader();
+        let mut bytes = Vec::new();
+        reader.read_to_end(&mut bytes).map_err(|e| format!("read body: {}", e))?;
+        if !verify_sha256(&bytes, MODEL_SHA256) {
+            return Err(format!("downloaded model SHA-256 mismatch (expected {})", MODEL_SHA256));
+        }
+        let tmp = path.with_extension("bpk.tmp");
+        std::fs::write(&tmp, &bytes).map_err(|e| format!("write {:?}: {}", tmp, e))?;
+        std::fs::rename(&tmp, &path).map_err(|e| format!("rename cache: {}", e))?;
+        log::info!("gmflow: cached model at {:?}", path);
+        Ok(bytes)
+    }
+
+    pub fn model() -> Option<Arc<Model<Backend>>> {
+        MODEL
+            .get_or_init(|| match ensure_model_bytes() {
+                Ok(raw) => {
+                    let bytes = Bytes::from_bytes_vec(raw);
+                    Some(Arc::new(Model::from_bytes(bytes, &device())))
+                }
+                Err(e) => {
+                    log::error!("gmflow: failed to load model: {}", e);
+                    None
+                }
+            })
+            .clone()
     }
 
     // Aspect-preserving letterbox mapping parameters. `scale` is model-pixels per
@@ -105,7 +169,7 @@ mod inference {
     pub fn compute_flow(img0: &GrayImage, img1: &GrayImage) -> Option<(Vec<f32>, LetterboxParams)> {
         let (t0, lb0) = preprocess(img0);
         let (t1, _) = preprocess(img1);
-        let m = model();
+        let m = model()?;
         let flow = m.forward(t0, t1);
         let data = flow.into_data().to_vec::<f32>().ok()?;
         Some((data, lb0))

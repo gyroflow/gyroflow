@@ -3033,6 +3033,7 @@ dependencies = [
  "sample-consensus",
  "serde",
  "serde_json",
+ "sha2",
  "simple-easing",
  "space",
  "stabilize_spirv",
