@@ -343,7 +343,7 @@ MenuItem {
 
             ComboBox {
                 id: syncMethod;
-                model: ["AKAZE", "OpenCV (PyrLK)", "OpenCV (DIS)", "Gmflow (AI)"];
+                model: controller.has_ai_optical_flow() ? ["AKAZE", "OpenCV (PyrLK)", "OpenCV (DIS)", "Gmflow (AI)"] : ["AKAZE", "OpenCV (PyrLK)", "OpenCV (DIS)"];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 2;
