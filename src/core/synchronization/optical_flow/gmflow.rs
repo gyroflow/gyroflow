@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2026 Adrian <adrian.eddy at gmail>
+// Copyright © 2026 yasumorishima <fwyasu11@gmail.com>
 
 #![allow(unused_variables, dead_code)]
 use super::super::OpticalFlowPair;
