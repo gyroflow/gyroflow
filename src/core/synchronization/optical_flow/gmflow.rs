@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2026 yasumorishima <fwyasu11@gmail.com>
 
-#![allow(unused_variables, dead_code)]
 use super::super::OpticalFlowPair;
 use super::{ OpticalFlowTrait, OpticalFlowMethod };
 
@@ -47,17 +46,17 @@ mod inference {
         }).clone()
     }
 
-    // Aspect-preserving letterbox result: tensor plus mapping parameters for
-    // inverse projection. `scale` is model-pixels per original-pixel; `pad_x` /
-    // `pad_y` are the left/top zero-padding offsets in model space.
-    pub struct Letterbox {
-        pub tensor: Tensor<Backend, 4>,
+    // Aspect-preserving letterbox mapping parameters. `scale` is model-pixels per
+    // original-pixel; `pad_x` / `pad_y` are the left/top zero-padding offsets in
+    // model space. Kept separate from the tensor so `compute_flow` can move the
+    // tensor into `forward` without cloning.
+    pub struct LetterboxParams {
         pub scale: f32,
         pub pad_x: usize,
         pub pad_y: usize,
     }
 
-    pub fn preprocess(img: &GrayImage) -> Letterbox {
+    pub fn preprocess(img: &GrayImage) -> (Tensor<Backend, 4>, LetterboxParams) {
         let (iw, ih) = (img.width() as f32, img.height() as f32);
         let scale = (MODEL_W as f32 / iw).min(MODEL_H as f32 / ih);
         let new_w = ((iw * scale).round() as usize).min(MODEL_W).max(1);
@@ -72,41 +71,49 @@ mod inference {
             image::imageops::FilterType::Triangle,
         );
 
-        // Zero-padded letterbox into [MODEL_H, MODEL_W]. gmflow expects raw 0-255
-        // f32 (normalises internally). Duplicate luminance into all 3 channels.
-        let mut chan = vec![0.0f32; MODEL_H * MODEL_W];
-        let src_pixels = resized.as_raw();
-        for y in 0..new_h {
-            let sr = y * new_w;
-            let dr = (y + pad_y) * MODEL_W + pad_x;
-            for x in 0..new_w {
-                chan[dr + x] = src_pixels[sr + x] as f32;
+        // Zero-padded letterbox into [1, 3, MODEL_H, MODEL_W]. gmflow expects raw
+        // 0-255 f32 (normalises internally). Write the resized luminance into the
+        // first channel slot in place, then memcpy it into channels 2 and 3 so we
+        // do not allocate an auxiliary per-channel buffer.
+        let mut data = vec![0.0f32; 3 * MODEL_H * MODEL_W];
+        {
+            let src_pixels = resized.as_raw();
+            let (first, rest) = data.split_at_mut(MODEL_H * MODEL_W);
+            for y in 0..new_h {
+                let sr = y * new_w;
+                let dr = (y + pad_y) * MODEL_W + pad_x;
+                for x in 0..new_w {
+                    first[dr + x] = src_pixels[sr + x] as f32;
+                }
             }
+            let (second, third) = rest.split_at_mut(MODEL_H * MODEL_W);
+            second.copy_from_slice(first);
+            third.copy_from_slice(first);
         }
-        let mut data = Vec::with_capacity(3 * MODEL_H * MODEL_W);
-        for _ in 0..3 { data.extend_from_slice(&chan); }
 
         let tensor = Tensor::<Backend, 4>::from_data(
             TensorData::new(data, [1usize, 3, MODEL_H, MODEL_W]),
             &device(),
         );
-        Letterbox { tensor, scale, pad_x, pad_y }
+        (tensor, LetterboxParams { scale, pad_x, pad_y })
     }
 
     // Returns `None` if the backend produces a non-f32 tensor instead of panicking.
     // Emits the first frame letterbox parameters so callers can invert the mapping
-    // back into original-frame coordinates.
-    pub fn compute_flow(img0: &GrayImage, img1: &GrayImage) -> Option<(Vec<f32>, Letterbox)> {
-        let lb0 = preprocess(img0);
-        let lb1 = preprocess(img1);
+    // back into original-frame coordinates. Tensors are moved (not cloned) into
+    // `forward` to avoid ~4.4 MB of redundant allocations per pair at 320x576.
+    pub fn compute_flow(img0: &GrayImage, img1: &GrayImage) -> Option<(Vec<f32>, LetterboxParams)> {
+        let (t0, lb0) = preprocess(img0);
+        let (t1, _) = preprocess(img1);
         let m = model();
-        let flow = m.forward(lb0.tensor.clone(), lb1.tensor.clone());
+        let flow = m.forward(t0, t1);
         let data = flow.into_data().to_vec::<f32>().ok()?;
         Some((data, lb0))
     }
 }
 
 #[derive(Clone)]
+#[cfg_attr(not(feature = "use-burn"), allow(dead_code))]
 pub struct OFGmflow {
     features: Vec<(f32, f32)>,
     img: Arc<image::GrayImage>,
@@ -210,50 +217,21 @@ impl OpticalFlowTrait for OFGmflow {
             let pad_x = lb.pad_x;
             let pad_y = lb.pad_y;
 
-            // 15-wide grid + local texture variance filter, mirroring OFOpenCVDis.
-            let step = (w as usize / 15).max(1);
-            let window_size = ((w as f32 * 0.02).round() as usize).max(10);
-            let half_win = window_size / 2;
-            let texture_threshold = 3.0_f32;
-
-            let img = &*self.img;
-            let iw = img.width() as isize;
-            let ih = img.height() as isize;
-            let calculate_texture = |x: usize, y: usize| -> f32 {
-                let (x_i, y_i) = (x as isize, y as isize);
-                let start_y = (y_i - half_win as isize).max(0);
-                let end_y = (y_i + half_win as isize).min(ih - 1);
-                let start_x = (x_i - half_win as isize).max(0);
-                let end_x = (x_i + half_win as isize).min(iw - 1);
-                let mut sum = 0.0f32;
-                let mut sum_sq = 0.0f32;
-                let mut count = 0.0f32;
-                for ny in start_y..=end_y {
-                    for nx in start_x..=end_x {
-                        let p = img.get_pixel(nx as u32, ny as u32).0[0] as f32;
-                        sum += p;
-                        sum_sq += p * p;
-                        count += 1.0;
-                    }
-                }
-                if count == 0.0 { return 0.0; }
-                let mean = sum / count;
-                (sum_sq / count) - (mean * mean)
-            };
-
-            let mut points_a = Vec::new();
-            let mut points_b = Vec::new();
-            for j in (0..h as usize).step_by(step) {
-                for i in (0..w as usize).step_by(step) {
-                    if calculate_texture(i, j) <= texture_threshold { continue; }
-                    let mi = (((i as f32) * scale).round() as usize + pad_x).min(mw - 1);
-                    let mj = (((j as f32) * scale).round() as usize + pad_y).min(mh - 1);
-                    let idx = mj * mw + mi;
-                    let dx = dx_plane[idx] / scale;
-                    let dy = dy_plane[idx] / scale;
-                    points_a.push((i as f32, j as f32));
-                    points_b.push((i as f32 + dx, j as f32 + dy));
-                }
+            // `self.features` was populated at detect-time with the same
+            // texture-filtered grid we want here; iterate it rather than repeating
+            // the O(grid * window^2) variance scan on every pair, which also keeps
+            // the "Show detected features" overlay exactly in sync with the points
+            // we actually sample.
+            let mut points_a = Vec::with_capacity(self.features.len());
+            let mut points_b = Vec::with_capacity(self.features.len());
+            for &(fi, fj) in &self.features {
+                let mi = ((fi * scale).round() as usize + pad_x).min(mw - 1);
+                let mj = ((fj * scale).round() as usize + pad_y).min(mh - 1);
+                let idx = mj * mw + mi;
+                let dx = dx_plane[idx] / scale;
+                let dy = dy_plane[idx] / scale;
+                points_a.push((fi, fj));
+                points_b.push((fi + dx, fj + dy));
             }
 
             if points_a.len() >= 10 {
