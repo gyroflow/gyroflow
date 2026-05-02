@@ -1163,6 +1163,7 @@ dependencies = [
  "itertools 0.14.0",
  "jni 0.22.4",
  "lazy_static",
+ "lensfun",
  "libc",
  "libloading 0.9.0",
  "line_drawing",
@@ -1623,6 +1624,18 @@ name = "lebe"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a79a3332a6609480d7d0c9eab957bca6b455b91bb84e66d19f5ff66294b85b8"
+
+[[package]]
+name = "lensfun"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe52f943cdba39214e90c8ff14c10cebc0f597dcbbbcdab15a68902fc8392bd8"
+dependencies = [
+ "flate2",
+ "regex",
+ "roxmltree",
+ "thiserror 2.0.18",
+]
 
 [[package]]
 name = "libc"
@@ -2691,6 +2704,12 @@ dependencies = [
  "untrusted",
  "windows-sys 0.52.0",
 ]
+
+[[package]]
+name = "roxmltree"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c20b6793b5c2fa6553b250154b78d6d0db37e72700ae35fad9387a46f487c97"
 
 [[package]]
 name = "rs-sync"

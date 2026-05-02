@@ -390,6 +390,35 @@ impl LensProfileDatabase {
         }
     }
 
+    /// Import a lens profile from the bundled Lensfun database into this database.
+    ///
+    /// The profile is looked up by `maker`, `lens_model`, and `focal_mm`.
+    /// The `width` and `height` determine the synthesised pinhole camera matrix.
+    /// On success, returns the key under which the profile was stored.
+    pub fn import_lensfun_profile(
+        &mut self,
+        maker: &str,
+        lens_model: &str,
+        focal_mm: f32,
+        width: usize,
+        height: usize,
+    ) -> Result<String, crate::GyroflowCoreError> {
+        let profile = crate::lensfun_import::import_from_lensfun(
+            maker,
+            lens_model,
+            focal_mm,
+            width,
+            height,
+        )?;
+        let key = if !profile.identifier.is_empty() {
+            profile.identifier.clone()
+        } else {
+            format!("lensfun://{}/{}/{}mm", maker, lens_model, focal_mm)
+        };
+        self.map.insert(key.clone(), profile);
+        Ok(key)
+    }
+
     // -------------------------------------------------------------------
     // ---------------------- Maintenance functions ----------------------
     // -------------------------------------------------------------------
