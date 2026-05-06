@@ -485,9 +485,11 @@ float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global c
     ///////////////////////////////////////////////////////////////////
     // Add lens distortion back
     if (params->lens_correction_amount < 1.0f) {
-        float2 factor = (float2)max(1.0f - params->lens_correction_amount, 0.001f); // FIXME: this is close but wrong
+        float out_stretch = params->input_horizontal_stretch > 0.01f ? params->input_horizontal_stretch : 1.0f;
+        float2 in_c = params->c;
+        float2 in_f = params->f;
         float2 out_c = (float2)(params->output_width / 2.0f, params->output_height / 2.0f);
-        float2 out_f = (params->f / params->fov) / factor;
+        float2 out_f = (params->f / params->fov) / out_stretch;
 
         float2 new_out_pos = out_pos;
 
@@ -504,7 +506,7 @@ float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global c
                 new_out_pos *= r_d / r;
             }
         }
-        new_out_pos = out_f * new_out_pos + out_c;
+        new_out_pos = in_f * new_out_pos + in_c;
 
         out_pos = new_out_pos * (1.0f - params->lens_correction_amount) + (out_pos * params->lens_correction_amount);
     }

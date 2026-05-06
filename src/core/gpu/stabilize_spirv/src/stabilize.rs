@@ -80,9 +80,11 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
     ///////////////////////////////////////////////////////////////////
     // Add lens distortion back
     if params.lens_correction_amount < 1.0 {
-        let factor = (1.0 - params.lens_correction_amount).max(0.001); // FIXME: this is close but wrong
+        let out_stretch = if params.input_horizontal_stretch > 0.01 { params.input_horizontal_stretch } else { 1.0 };
+        let in_c = params.c;
+        let in_f = params.f;
         let out_c = vec2(params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
-        let out_f = params.f / params.fov / factor;
+        let out_f = params.f / params.fov / out_stretch;
         let mut new_out_pos = out_pos;
 
         if (flags & 2) == 2 { // Has digial lens
@@ -102,7 +104,7 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
                 new_out_pos *= r_d / r;
             }
         }
-        new_out_pos = new_out_pos * out_f + out_c;
+        new_out_pos = new_out_pos * in_f + in_c;
 
         out_pos = new_out_pos * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);
     }
