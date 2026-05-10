@@ -252,7 +252,7 @@ deploy:
     xcopy /Y "$OpenCVDir\opencv_flan*.dll"       "$TargetDir\"
     xcopy /Y "$OpenCVDir\opencv_imgpro*.dll"     "$TargetDir\"
     xcopy /Y "$OpenCVDir\opencv_vide*.dll"       "$TargetDir\"
-    xcopy /Y "$OpenCVDir\zlib*.dll"              "$TargetDir\"
+    xcopy /Y "$OpenCVDir\z.dll"                  "$TargetDir\"
     del "$TargetDir\opencv_*videoio*"
 
     # Copy Gyroflow
