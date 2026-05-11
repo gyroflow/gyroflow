@@ -33,55 +33,6 @@ impl Clone for LensProfileDatabase {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn profile(brand: &str, model: &str, lens: &str, checksum: &str) -> LensProfile {
-        let mut profile = LensProfile::default();
-        profile.camera_brand = brand.to_owned();
-        profile.camera_model = model.to_owned();
-        profile.lens_model = lens.to_owned();
-        profile.checksum = Some(checksum.to_owned());
-        profile
-    }
-
-    fn item(name: &str, path: &str, checksum: &str) -> LensProfileUiItem {
-        (name.to_owned(), path.to_owned(), checksum.to_owned(), false, 0.0, 0, String::new())
-    }
-
-    #[test]
-    fn structured_search_includes_compatible_profiles_and_hides_rejected_ones() {
-        let mut db = LensProfileDatabase::default();
-        db.map.insert("selected.json".to_owned(), profile("Brand", "Primary", "Wide", "selected"));
-        db.map.insert("compatible.json".to_owned(), profile("Brand", "Compatible", "Wide", "compatible"));
-        db.map.insert("hidden.json".to_owned(), profile("Brand", "Compatible", "Wide", "hidden"));
-        db.map.insert("other.json".to_owned(), profile("Brand", "Other", "Wide", "other"));
-        db.list_for_ui = vec![
-            item("Brand Primary Wide", "selected.json", "selected"),
-            item("Brand Compatible Wide", "compatible.json", "compatible"),
-            item("Brand Compatible Hidden", "hidden.json", "hidden"),
-            item("Brand Other Wide", "other.json", "other"),
-        ];
-
-        let results = db.search_by_camera(
-            "Brand",
-            "Primary",
-            "",
-            "",
-            &HashSet::from([(String::from("brand"), String::from("primary"))]),
-            &HashSet::from([(String::from("brand"), String::from("compatible"))]),
-            &HashSet::from([String::from("hidden")]),
-            &HashSet::new(),
-            0,
-            0
-        );
-
-        let result_checksums = results.into_iter().map(|item| item.2).collect::<Vec<_>>();
-        assert_eq!(result_checksums, vec!["selected", "compatible"]);
-    }
-}
-
 impl LensProfileDatabase {
     pub fn get_path() -> PathBuf {
         // return std::fs::canonicalize("D:/lens_review/").unwrap_or_default();
@@ -672,5 +623,54 @@ impl LensProfileDatabase {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn profile(brand: &str, model: &str, lens: &str, checksum: &str) -> LensProfile {
+        let mut profile = LensProfile::default();
+        profile.camera_brand = brand.to_owned();
+        profile.camera_model = model.to_owned();
+        profile.lens_model = lens.to_owned();
+        profile.checksum = Some(checksum.to_owned());
+        profile
+    }
+
+    fn item(name: &str, path: &str, checksum: &str) -> LensProfileUiItem {
+        (name.to_owned(), path.to_owned(), checksum.to_owned(), false, 0.0, 0, String::new())
+    }
+
+    #[test]
+    fn structured_search_includes_compatible_profiles_and_hides_rejected_ones() {
+        let mut db = LensProfileDatabase::default();
+        db.map.insert("selected.json".to_owned(), profile("Brand", "Primary", "Wide", "selected"));
+        db.map.insert("compatible.json".to_owned(), profile("Brand", "Compatible", "Wide", "compatible"));
+        db.map.insert("hidden.json".to_owned(), profile("Brand", "Compatible", "Wide", "hidden"));
+        db.map.insert("other.json".to_owned(), profile("Brand", "Other", "Wide", "other"));
+        db.list_for_ui = vec![
+            item("Brand Primary Wide", "selected.json", "selected"),
+            item("Brand Compatible Wide", "compatible.json", "compatible"),
+            item("Brand Compatible Hidden", "hidden.json", "hidden"),
+            item("Brand Other Wide", "other.json", "other"),
+        ];
+
+        let results = db.search_by_camera(
+            "Brand",
+            "Primary",
+            "",
+            "",
+            &HashSet::from([(String::from("brand"), String::from("primary"))]),
+            &HashSet::from([(String::from("brand"), String::from("compatible"))]),
+            &HashSet::from([String::from("hidden")]),
+            &HashSet::new(),
+            0,
+            0
+        );
+
+        let result_checksums = results.into_iter().map(|item| item.2).collect::<Vec<_>>();
+        assert_eq!(result_checksums, vec!["selected", "compatible"]);
     }
 }

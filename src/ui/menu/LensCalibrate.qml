@@ -202,7 +202,7 @@ MenuItem {
             return true;
         }
 
-        const fixedLensBrands = ["GoPro", "DJI", "Insta360", "RunCam", "Caddx", "Foxeer", "Garmin", "SJCAM", "AEE"];
+        const fixedLensBrands = ["GoPro", "DJI", "Insta360", "RunCam", "Caddx", "Foxeer", "Garmin", "SJCam", "AEE"];
         return fixedLensBrands.indexOf(brand) === -1 && !calib.calibrationInfo.camera_setting;
     }
     function cameraIsKnown(brand: string, model: string): bool {
