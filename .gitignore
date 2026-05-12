@@ -11,6 +11,7 @@ gyroflow.log
 *.mobileprovision
 *.provisionprofile
 *.pfx
-resources/camera_presets
+resources/camera_presets/*
+!resources/camera_presets/canonical_lenses.json
 *.exe
 .qmlls.ini

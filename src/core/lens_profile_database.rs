@@ -74,6 +74,9 @@ impl LensProfileDatabase {
         let _time = std::time::Instant::now();
 
         let mut load = |data: DataSource, f_name: &str| {
+            if f_name.ends_with(crate::canonical_camera_database::CANONICAL_LENSES_FILENAME) {
+                return;
+            }
             if f_name.ends_with(".gyroflow") {
                 let mut profile = LensProfile::default();
                 profile.name = std::path::Path::new(f_name).file_stem().map(|x| x.to_string_lossy().to_string()).unwrap_or_default();
