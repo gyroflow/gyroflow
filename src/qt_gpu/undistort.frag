@@ -182,9 +182,10 @@ void main() {
     ///////////////////////////////////////////////////////////////////
     // Add lens distortion back
     if (params.lens_correction_amount < 1.0) {
-        float factor = max(1.0 - params.lens_correction_amount, 0.001); // FIXME: this is close but wrong
         vec2 out_c = vec2(params.output_width / 2.0, params.output_height / 2.0);
-        vec2 out_f = (params.f / params.fov) / factor;
+        // Use the same calibrated output intrinsics across all lens-correction strengths.
+        // The strength mix happens below on coordinates; scaling focal length here over-zooms mid strengths.
+        vec2 out_f = params.f / params.fov;
 
         vec2 new_out_pos = texPos;
 
