@@ -307,8 +307,14 @@ Rectangle {
                                 ]);
                                 return;
                             }
-                            const usesQuats = ((motionData.item.hasQuaternions && motionData.item.integrationMethod === 0) || motionData.item.hasAccurateTimestamps) && motionData.item.filename == vidInfo.item.filename;
-                            if (!usesQuats && controller.offsets_model.rowCount() == 0 && !allowSync) {
+                            const hasMotionDataForClip = motionData.item.filename == vidInfo.item.filename &&
+                                (motionData.item.hasRawGyro || motionData.item.hasQuaternions || motionData.item.hasAccurateTimestamps);
+                            const usesQuats = ((motionData.item.hasQuaternions && motionData.item.integrationMethod === 0) || motionData.item.hasAccurateTimestamps) &&
+                                motionData.item.filename == vidInfo.item.filename;
+
+                            // Optical-only workflows do not have sync points by definition.
+                            // Keep the warning only when motion data is actually loaded for this clip.
+                            if (hasMotionDataForClip && !usesQuats && controller.offsets_model.rowCount() == 0 && !allowSync) {
                                 messageBox(Modal.Warning, qsTr("There are no sync points present, your result will be incorrect. Are you sure you want to render this file?"), [
                                     { text: qsTr("Yes"), clicked: () => { allowSync = true; renderBtn.render(); }},
                                     { text: qsTr("No"), accent: true },
