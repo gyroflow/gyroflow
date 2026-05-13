@@ -485,9 +485,8 @@ float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global c
     ///////////////////////////////////////////////////////////////////
     // Add lens distortion back
     if (params->lens_correction_amount < 1.0f) {
-        float2 factor = (float2)max(1.0f - params->lens_correction_amount, 0.001f); // FIXME: this is close but wrong
         float2 out_c = (float2)(params->output_width / 2.0f, params->output_height / 2.0f);
-        float2 out_f = (params->f / params->fov) / factor;
+        float2 out_f = params->f / params->fov;
 
         float2 new_out_pos = out_pos;
 

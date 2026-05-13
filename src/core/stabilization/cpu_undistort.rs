@@ -521,9 +521,8 @@ impl Stabilization {
                 let bg = Vector4::<f32>::new(params.background[0], params.background[1], params.background[2], params.background[3]) * params.max_pixel_value;
                 let bg_t: T = PixelType::from_float(bg);
 
-                let factor = (1.0 - params.lens_correction_amount).max(0.001); // FIXME: this is close but wrong
                 let out_c = Vector2::new(params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
-                let out_f = Vector2::new(params.f[0] / params.fov / factor, params.f[1] / params.fov / factor);
+                let out_f = Vector2::new(params.f[0] / params.fov, params.f[1] / params.fov);
 
                 // let drawing_enabled = !drawing.is_empty() && (params.flags & 8) == 8;
                 let fill_bg = (params.flags & 4) == 4;
