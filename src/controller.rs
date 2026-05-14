@@ -104,6 +104,7 @@ pub struct Controller {
     camera_database_models: qt_method!(fn(&self, brand: QString) -> QStringList),
     camera_database_lenses: qt_method!(fn(&self, brand: QString, model: QString) -> QStringList),
     camera_database_compatible_models: qt_method!(fn(&self, brand: QString, model: QString) -> QStringList),
+    camera_database_resolve_camera: qt_method!(fn(&self, brand: QString, model: QString) -> QJsonObject),
     camera_database_resolve_model: qt_method!(fn(&self, brand: QString, model: QString) -> QString),
     camera_database_info: qt_method!(fn(&self, brand: QString, model: QString) -> QJsonObject),
     fetch_profiles_from_github: qt_method!(fn(&self)),
@@ -1921,6 +1922,16 @@ impl Controller {
 
     fn camera_database_compatible_models(&self, brand: QString, model: QString) -> QStringList {
         QStringList::from_iter(self.camera_database.read().compatible_camera_names(&brand.to_string(), &model.to_string()).into_iter())
+    }
+
+    fn camera_database_resolve_camera(&self, brand: QString, model: QString) -> QJsonObject {
+        let resolved = self.camera_database.read()
+            .resolve_camera(&brand.to_string(), &model.to_string())
+            .map(|(brand, model)| serde_json::json!({
+                "brand": brand,
+                "model": model,
+            }));
+        util::serde_json_to_qt_object(&resolved.unwrap_or_default())
     }
 
     fn camera_database_resolve_model(&self, brand: QString, model: QString) -> QString {

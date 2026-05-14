@@ -394,13 +394,16 @@ MenuItem {
         cameraLensModel = selectorModel(qsTr("Any lens"), []);
         cameraLens.currentIndex = 0;
         compatibleCameras = [];
-        if (setSelectorValue(cameraBrand, detectedCamera.brand)) {
-            cameraModelModel = selectorModel(qsTr("Any model"), controller.camera_database_models(detectedCamera.brand));
-            const model = controller.camera_database_resolve_model(detectedCamera.brand, detectedCamera.model) || detectedCamera.model;
+        const resolvedCamera = controller.camera_database_resolve_camera(detectedCamera.brand, detectedCamera.model);
+        const brand = resolvedCamera.brand || detectedCamera.brand;
+        const model = resolvedCamera.model || detectedCamera.model;
+
+        if (setSelectorValue(cameraBrand, brand)) {
+            cameraModelModel = selectorModel(qsTr("Any model"), controller.camera_database_models(brand));
             if (model) {
                 setSelectorValue(cameraModel, model);
-                cameraLensModel = selectorModel(qsTr("Any lens"), controller.camera_database_lenses(detectedCamera.brand, model));
-                compatibleCameras = controller.camera_database_compatible_models(detectedCamera.brand, model);
+                cameraLensModel = selectorModel(qsTr("Any lens"), controller.camera_database_lenses(brand, model));
+                compatibleCameras = controller.camera_database_compatible_models(brand, model);
                 if (detectedCamera.lens) {
                     setSelectorValue(cameraLens, detectedCamera.lens);
                 }

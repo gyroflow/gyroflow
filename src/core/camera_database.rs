@@ -198,6 +198,15 @@ impl CameraDatabase {
         self.find_camera(brand, model).map(|(_, camera)| camera.model.clone())
     }
 
+    pub fn resolve_camera(&self, brand: &str, model: &str) -> Option<(String, String)> {
+        if let Some((_, camera)) = self.find_camera(brand, model) {
+            return Some((camera.brand.clone(), camera.model.clone()));
+        }
+
+        let brand = self.resolve_brand(brand)?;
+        Some((brand.clone(), Self::model_name(&brand, model)))
+    }
+
     fn empty() -> Self {
         Self {
             cameras: BTreeMap::new(),
@@ -496,6 +505,28 @@ impl CameraDatabase {
         };
         Some(size)
     }
+
+    fn resolve_brand(&self, brand: &str) -> Option<String> {
+        let brand_key = Self::key(brand);
+        if brand_key.is_empty() {
+            return None;
+        }
+
+        if let Some(brand) = self.brands.iter().find(|brand| Self::key(brand) == brand_key) {
+            return Some(brand.clone());
+        }
+
+        let matches = self.cameras.values()
+            .filter(|camera| camera.brand_aliases.iter().any(|alias| Self::key(alias) == brand_key))
+            .map(|camera| camera.brand.clone())
+            .collect::<BTreeSet<_>>();
+
+        if matches.len() == 1 {
+            matches.into_iter().next()
+        } else {
+            None
+        }
+    }
 }
 
 #[cfg(test)]
@@ -560,12 +591,19 @@ mod tests {
             model: "Pocket CInema Camera 4k".to_owned(),
             ..Default::default()
         });
+        db.merge_camera(CameraEntry {
+            brand: "LGE".to_owned(),
+            model: "V40".to_owned(),
+            ..Default::default()
+        });
         db.rebuild_indexes();
 
         assert!(db.brands().contains(&"Olympus".to_owned()));
         assert!(!db.brands().contains(&"Olympus Imaging Corp.".to_owned()));
         assert!(db.models("Blackmagic").contains(&"Pocket Cinema Camera 4K".to_owned()));
         assert!(db.selected_camera_keys("Olympus", "E-M1").contains(&CameraDatabase::camera_key("Olympus Imaging Corp.", "E-M1")));
+        assert_eq!(db.resolve_camera("Olympus Imaging Corp.", "E-M1"), Some(("Olympus".to_owned(), "E-M1".to_owned())));
+        assert_eq!(db.resolve_camera("LGE", "Unknown"), Some(("LG".to_owned(), "Unknown".to_owned())));
     }
 
     #[test]

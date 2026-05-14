@@ -147,9 +147,19 @@ MenuItem {
             return;
         }
 
-        const brand = calib.calibrationInfo.camera_brand || "";
-        const model = calib.calibrationInfo.camera_model || "";
+        const originalBrand = calib.calibrationInfo.camera_brand || "";
+        const originalModel = calib.calibrationInfo.camera_model || "";
         const lens = calib.calibrationInfo.lens_model || "";
+        const resolvedCamera = controller.camera_database_resolve_camera(originalBrand, originalModel);
+        const brand = resolvedCamera.brand || originalBrand;
+        const model = resolvedCamera.model || originalModel;
+
+        if (brand && brand !== originalBrand) {
+            calib.setMetadataField("camera_brand", "Camera brand", brand);
+        }
+        if (model && model !== originalModel) {
+            calib.setMetadataField("camera_model", "Camera model", model);
+        }
 
         updatingCameraSelectors = true;
         cameraBrand.popup.maxItemWidth = 0;
