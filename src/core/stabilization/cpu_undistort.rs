@@ -88,7 +88,7 @@ pub const COEFFS: [f32; 64+128+256 + 9*4 + 4] = [
 // const ALPHAS: [f32; 4] = [ 1.0, 0.75, 0.50, 0.25 ];
 
 impl Stabilization {
-    pub fn undistort_image_cpu_spirv<T: PixelType>(buffers: &mut Buffers, params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, matrices: &[[f32; 14]], drawing: &[u8]) -> bool {
+    pub fn undistort_image_cpu_spirv<T: PixelType>(buffers: &mut Buffers, params: &KernelParams, _distortion_model: &DistortionModel, _digital_lens: Option<&DistortionModel>, matrices: &[[f32; 14]], drawing: &[u8]) -> bool {
         if let BufferSource::Cpu { buffer: input } = &mut buffers.input.data {
             if let BufferSource::Cpu { buffer: output } = &mut buffers.output.data {
                 if buffers.output.size.2 <= 0 {
@@ -418,7 +418,7 @@ impl Stabilization {
             )
         }
 
-        fn undistort_coord(mut out_pos: Vector2<f32>, params: &KernelParams, matrices: &[[f32; 14]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit_sq: f32, mesh_data: &[f64], out_c: &Vector2<f32>, out_f: &Vector2<f32>) -> Option<Vector2<f32>> {
+        fn undistort_coord(mut out_pos: Vector2<f32>, params: &KernelParams, matrices: &[[f32; 14]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit_sq: f32, mesh_data: &[f64], out_c: &Vector2<f32>, out_f: &Vector2<f32>, in_c: &Vector2<f32>, in_f: &Vector2<f32>) -> Option<Vector2<f32>> {
             out_pos.x = map_coord(out_pos.x, params.output_rect[0] as f32, (params.output_rect[0] + params.output_rect[2]) as f32, 0.0, params.output_width  as f32);
             out_pos.y = map_coord(out_pos.y, params.output_rect[1] as f32, (params.output_rect[1] + params.output_rect[3]) as f32, 0.0, params.output_height as f32);
             out_pos.x += params.translation2d[0];
@@ -452,7 +452,7 @@ impl Stabilization {
                         new_out_pos *= factor;
                     }
                 }
-                new_out_pos = (new_out_pos.component_mul(out_f)) + out_c;
+                new_out_pos = (new_out_pos.component_mul(in_f)) + in_c;
 
                 out_pos = new_out_pos * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);
             }
@@ -521,9 +521,11 @@ impl Stabilization {
                 let bg = Vector4::<f32>::new(params.background[0], params.background[1], params.background[2], params.background[3]) * params.max_pixel_value;
                 let bg_t: T = PixelType::from_float(bg);
 
-                let factor = (1.0 - params.lens_correction_amount).max(0.001); // FIXME: this is close but wrong
+                let out_stretch = if params.input_horizontal_stretch > 0.01 { params.input_horizontal_stretch } else { 1.0 };
+                let in_c = Vector2::new(params.c[0], params.c[1]);
+                let in_f = Vector2::new(params.f[0], params.f[1]);
                 let out_c = Vector2::new(params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
-                let out_f = Vector2::new(params.f[0] / params.fov / factor, params.f[1] / params.fov / factor);
+                let out_f = Vector2::new(params.f[0] / params.fov / out_stretch, params.f[1] / params.fov / out_stretch);
 
                 // let drawing_enabled = !drawing.is_empty() && (params.flags & 8) == 8;
                 let fill_bg = (params.flags & 4) == 4;
@@ -560,12 +562,12 @@ impl Stabilization {
 
                             let position = Vector2::new(x as f32, y as f32);
 
-                            if let Some(mut uv) = undistort_coord(position, params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f) {
+                            if let Some(mut uv) = undistort_coord(position, params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f, &in_c, &in_f) {
                                 let mut jac = Vector4::new(1.0, 0.0, 0.0, 1.0);
                                 if I > 8 {
                                     let eps = 0.01;
-                                    let xyx = undistort_coord(position + Vector2::new(eps, 0.0), params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f).unwrap_or_default() - uv;
-                                    let xyy = undistort_coord(position + Vector2::new(0.0, eps), params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f).unwrap_or_default() - uv;
+                                    let xyx = undistort_coord(position + Vector2::new(eps, 0.0), params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f, &in_c, &in_f).unwrap_or_default() - uv;
+                                    let xyy = undistort_coord(position + Vector2::new(0.0, eps), params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f, &in_c, &in_f).unwrap_or_default() - uv;
                                     jac = Vector4::new(xyx.x / eps, xyy.x / eps, xyx.y / eps, xyy.y / eps);
                                 }
 
@@ -633,9 +635,9 @@ impl Stabilization {
 
 pub fn undistort_points_with_rolling_shutter(distorted: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, params: &ComputeParams, lens_correction_amount: f64, use_fovs: bool) -> Vec<(f32, f32)> {
     if distorted.is_empty() { return Vec::new(); }
-    let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms, frame, use_fovs);
+    let (camera_matrix, distortion_coeffs, output_camera_matrix, rotations, is, mesh) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms, frame, use_fovs);
 
-    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), params, lens_correction_amount, timestamp_ms, is, mesh)
+    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(output_camera_matrix), Some(rotations), params, lens_correction_amount, timestamp_ms, is, mesh)
 }
 pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us: i64, params: &ComputeParams, points_dims: (u32, u32)) -> Vec<(f32, f32)> {
     let img_dim_ratio = points_dims.0 as f64 / params.width.max(1) as f64;//FrameTransform::get_ratio(params);
@@ -644,10 +646,10 @@ pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us:
 
     let scaled_k = camera_matrix * img_dim_ratio;
 
-    undistort_points(distorted, scaled_k, &distortion_coeffs, Matrix3::identity(), None, None, params, 1.0, timestamp_us as f64 / 1000.0, None, None)
+    undistort_points(distorted, scaled_k, &distortion_coeffs, Matrix3::identity(), None, None, None, params, 1.0, timestamp_us as f64 / 1000.0, None, None)
 }
 // Ported from OpenCV: https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L321
-pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64; 12], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams, lens_correction_amount: f64, timestamp_ms: f64, shift_per_point: Option<Vec<(f32, f32, f32, f32, f32)>>, mesh: Option<Vec<f64>>) -> Vec<(f32, f32)> {
+pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64; 12], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, output_camera_matrix: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams, lens_correction_amount: f64, timestamp_ms: f64, shift_per_point: Option<Vec<(f32, f32, f32, f32, f32)>>, mesh: Option<Vec<f64>>) -> Vec<(f32, f32)> {
     let f = (camera_matrix[(0, 0)] as f32, camera_matrix[(1, 1)] as f32);
     let c = (camera_matrix[(0, 2)] as f32, camera_matrix[(1, 2)] as f32);
 
@@ -757,12 +759,19 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
             pt = (pr[0] / pr[2], pr[1] / pr[2]);
 
             if lens_correction_amount < 1.0 {
-                let mut out_c = (params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
-                if params.lens.input_horizontal_stretch > 0.001 { out_c.0 /= params.lens.input_horizontal_stretch as f32; }
-                if params.lens.input_vertical_stretch   > 0.001 { out_c.1 /= params.lens.input_vertical_stretch as f32; }
+                let output_k = output_camera_matrix.unwrap_or_else(|| {
+                    let mut fallback = Matrix3::identity();
+                    fallback[(0, 0)] = f.0 as f64;
+                    fallback[(1, 1)] = f.1 as f64;
+                    fallback[(0, 2)] = params.output_width as f64 / 2.0;
+                    fallback[(1, 2)] = params.output_height as f64 / 2.0;
+                    fallback
+                });
+                let out_c = (output_k[(0, 2)] as f32, output_k[(1, 2)] as f32);
+                let out_f = (output_k[(0, 0)] as f32, output_k[(1, 1)] as f32);
 
                 let mut new_pt = pt;
-                new_pt = ((new_pt.0 - out_c.0) / f.0, (new_pt.1 - out_c.1) / f.1);
+                new_pt = ((new_pt.0 - out_c.0) / out_f.0, (new_pt.1 - out_c.1) / out_f.1);
                 let mut _w = 1.0;
                 if kernel_params.light_refraction_coefficient != 1.0 && kernel_params.light_refraction_coefficient > 0.0 {
                     let r = (new_pt.0.powi(2) + new_pt.1.powi(2)).sqrt() / _w;
@@ -773,7 +782,7 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
                     }
                 }
                 new_pt = params.distortion_model.distort_point(new_pt.0, new_pt.1, _w, &kernel_params); // TODO: z?
-                new_pt = ((new_pt.0 * f.0) + out_c.0, (new_pt.1 * f.1) + out_c.1);
+                new_pt = ((new_pt.0 * f.0) + c.0, (new_pt.1 * f.1) + c.1);
 
                 if let Some(digital) = &params.digital_lens {
                     new_pt = digital.distort_point(new_pt.0, new_pt.1, 1.0, &kernel_params);

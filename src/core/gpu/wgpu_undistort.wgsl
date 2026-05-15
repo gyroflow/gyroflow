@@ -471,9 +471,11 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
     ///////////////////////////////////////////////////////////////////
     // Add lens distortion back
     if (params.lens_correction_amount < 1.0) {
-        let factor = max(1.0 - params.lens_correction_amount, 0.001); // FIXME: this is close but wrong
+        let out_stretch = select(1.0, params.input_horizontal_stretch, params.input_horizontal_stretch > 0.01);
+        let in_c = params.c;
+        let in_f = params.f;
         let out_c = vec2<f32>(f32(params.output_width) / 2.0, f32(params.output_height) / 2.0);
-        let out_f = (params.f / params.fov) / factor;
+        let out_f = (params.f / params.fov) / out_stretch;
 
         var new_out_pos = out_pos;
 
@@ -491,7 +493,7 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
                 new_out_pos *= r_d / r;
             }
         }
-        new_out_pos = out_f * new_out_pos + out_c;
+        new_out_pos = in_f * new_out_pos + in_c;
 
         out_pos = new_out_pos * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);
     }
