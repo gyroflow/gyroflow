@@ -24,7 +24,7 @@ FFmpeg := if os() == "windows"               { "ffmpeg-8.1-windows-desktop-vs202
    } else if os() + Arch == "macosaarch64"   { "ffmpeg-arm64"
    } else if os() + Arch == "macosx86_64"    { "ffmpeg-x86_64"
    } else                                    { "ffmpeg-8.1-linux-clang-gpl-lite" }
-export FFMPEG_DIR := ProjectDir / "ext" / FFmpeg
+export FFMPEG_DIR := env_var_or_default("FFMPEG_DIR", ProjectDir / "ext" / FFmpeg)
 export FFMPEG_ARCH := if Arch == "aarch64" { "arm64" } else { if os() == "windows" { "x64" } else { "amd64" } }
 # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
 
