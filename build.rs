@@ -192,19 +192,25 @@ fn main() {
 
     match target_os.as_str() {
         "android" => {
-            println!("cargo:rustc-link-search={}/lib/arm64-v8a", std::env::var("FFMPEG_DIR").unwrap());
-            println!("cargo:rustc-link-search={}/lib", std::env::var("FFMPEG_DIR").unwrap());
-            config.include(format!("{}/include", std::env::var("FFMPEG_DIR").unwrap()));
+            if let Ok(ffmpeg_dir) = std::env::var("FFMPEG_DIR") && !ffmpeg_dir.is_empty() {
+                println!("cargo:rustc-link-search={ffmpeg_dir}/lib/arm64-v8a");
+                println!("cargo:rustc-link-search={ffmpeg_dir}/lib");
+                config.include(format!("{ffmpeg_dir}/include"));
+            }
         },
         "macos" | "ios" => {
-            println!("cargo:rustc-link-search={}/lib", std::env::var("FFMPEG_DIR").unwrap());
+            if let Ok(ffmpeg_dir) = std::env::var("FFMPEG_DIR") && !ffmpeg_dir.is_empty() {
+                println!("cargo:rustc-link-search={ffmpeg_dir}/lib");
+            }
             println!("cargo:rustc-link-lib=static:+whole-archive=x264");
             println!("cargo:rustc-link-lib=static=x265");
         },
         "linux" => {
             println!("cargo:rustc-link-search={}", std::env::var("OPENCV_LINK_PATHS").unwrap());
-            println!("cargo:rustc-link-search={}/lib/{}", std::env::var("FFMPEG_DIR").unwrap(), std::env::var("FFMPEG_ARCH").unwrap_or("amd64".into()));
-            println!("cargo:rustc-link-search={}/lib", std::env::var("FFMPEG_DIR").unwrap());
+            if let Ok(ffmpeg_dir) = std::env::var("FFMPEG_DIR") && !ffmpeg_dir.is_empty() {
+                println!("cargo:rustc-link-search={ffmpeg_dir}/lib/{}", std::env::var("FFMPEG_ARCH").unwrap_or("amd64".into()));
+                println!("cargo:rustc-link-search={ffmpeg_dir}/lib");
+            }
             println!("cargo:rustc-link-lib=static:+whole-archive=z");
             if std::env::var("OPENCV_LINK_PATHS").unwrap_or_default().contains("vcpkg") {
                 std::env::var("OPENCV_LINK_LIBS").unwrap().split(',').for_each(|lib| println!("cargo:rustc-link-lib=static:+whole-archive={}", lib.trim()));
@@ -216,8 +222,10 @@ fn main() {
             println!("cargo:rustc-link-arg=/EXPORT:NvOptimusEnablement");
             println!("cargo:rustc-link-arg=/EXPORT:AmdPowerXpressRequestHighPerformance");
             println!("cargo:rustc-link-search={}", std::env::var("OPENCV_LINK_PATHS").unwrap());
-            println!("cargo:rustc-link-search={}\\lib\\{}", std::env::var("FFMPEG_DIR").unwrap(), std::env::var("FFMPEG_ARCH").unwrap_or("x64".into()));
-            println!("cargo:rustc-link-search={}\\lib", std::env::var("FFMPEG_DIR").unwrap());
+            if let Ok(ffmpeg_dir) = std::env::var("FFMPEG_DIR") && !ffmpeg_dir.is_empty() {
+                println!("cargo:rustc-link-search={ffmpeg_dir}\\lib\\{}", std::env::var("FFMPEG_ARCH").unwrap_or("x64".into()));
+                println!("cargo:rustc-link-search={ffmpeg_dir}\\lib");
+            }
             let mut res = winres::WindowsResource::new();
             res.set_icon("resources/app_icon.ico");
             res.set("FileVersion", env!("CARGO_PKG_VERSION"));
@@ -227,6 +235,12 @@ fn main() {
             res.compile().unwrap();
         }
         tos => panic!("unknown target os {:?}!", tos)
+    }
+
+    if let Ok(link_paths) = std::env::var("EXTRA_LINK_PATHS") && !link_paths.is_empty() {
+        for dir in link_paths.split(';') {
+            println!("cargo:rustc-link-search={dir}");
+        }
     }
 
     if let Ok(time) = std::time::SystemTime::now().duration_since(std::time::SystemTime::UNIX_EPOCH) {
