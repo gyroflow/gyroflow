@@ -26,6 +26,7 @@ pub struct LensParams {
 }
 
 fn deserialize_pixel_focal_length<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Option<(f32, f32)>, D::Error> {
+    use serde::Deserialize;
     #[derive(serde::Deserialize)]
     #[serde(untagged)]
     enum Compat { Pair((f32, f32)), Single(f32) }
