@@ -8,10 +8,7 @@ float map_coord(float x, float in_min, float in_max, float out_min, float out_ma
 vec2 undistort_point(vec2 pos) {
     if (params.k1 == vec4(0.0, 0.0, 0.0, 0.0)) return pos;
 
-    vec2 post_scale = vec2(params.k2.z, params.k2.w);
-    pos /= post_scale;
-
-    // now pos is in meters from center of sensor
+    // pos is a dimensionless normalized image-plane radius
 
     float theta_d = length(pos);
 
@@ -77,9 +74,7 @@ vec2 distort_point(float x, float y, float z) {
 
     float scale = r == 0? 1.0 : theta_d / r;
 
-    vec2 post_scale = vec2(params.k2.z, params.k2.w);
-
-    return pos * scale * post_scale;
+    return pos * scale;
 }
 
 const int GRID_SIZE = 9;
