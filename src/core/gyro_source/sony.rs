@@ -60,7 +60,7 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                         let timestamp_us = (info.timestamp_ms * 1000.0).round() as i64;
                         if let Some(lp) = md.lens_params.get_mut(&timestamp_us) {
                             lp.focal_length = Some(focal_length_mm as f32);
-                            lp.pixel_focal_length = Some(fx as f32);
+                            lp.pixel_focal_length = Some((fx as f32, fy as f32));
                         }
                         if md.lens_profile.is_none() {
                             let mut lens_name = String::new();
@@ -156,7 +156,7 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                         let timestamp_us = (info.timestamp_ms * 1000.0).round() as i64;
                         if let Some(lp) = md.lens_params.get_mut(&timestamp_us) {
                             lp.focal_length = Some((focal_length * sensor_height / size.1 as f64 * 1000.0) as f32);
-                            lp.pixel_focal_length = Some(focal_length as f32);
+                            lp.pixel_focal_length = Some((focal_length as f32, focal_length as f32));
                             lp.distortion_coefficients = poly_coeffs.into_iter().cloned().chain(post_scale).collect();
                         }
 

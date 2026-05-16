@@ -102,15 +102,23 @@ impl FrameTransform {
 
         if !file_metadata.lens_params.is_empty() && lens.fisheye_params.distortion_coeffs.len() < 4 {
             if let Some(val) = file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
-                let pixel_focal_length = val.pixel_focal_length.map(|x| x as f64).or_else(|| {
-                    focal_length = Some(val.focal_length? as f64);
-                    Some((val.focal_length? as f64 / ((val.pixel_pitch?.1 as f64 / 1000000.0) * val.capture_area_size?.1 as f64)) * params.height as f64)
+                let pixel_focal_length = val.pixel_focal_length.map(|f| (f.0 as f64, f.1 as f64)).or_else(|| {
+                    let fl_mm = val.focal_length? as f64;
+                    focal_length = Some(fl_mm);
+                    let pp = val.pixel_pitch?;
+                    let crop = val.capture_area_size?;
+                    if pp.0 == 0 || pp.1 == 0 || crop.0 <= 0.0 || crop.1 <= 0.0 { return None; }
+                    let fx = (fl_mm / ((pp.0 as f64 / 1_000_000.0) * crop.0 as f64)) * params.width  as f64;
+                    let fy = (fl_mm / ((pp.1 as f64 / 1_000_000.0) * crop.1 as f64)) * params.height as f64;
+                    Some((fx, fy))
                 });
-                if let Some(pfl) = pixel_focal_length {
-                    camera_matrix[(0, 0)] = pfl;
-                    camera_matrix[(1, 1)] = pfl;
-                    camera_matrix[(0, 2)] = params.width as f64 / 2.0;
-                    camera_matrix[(1, 2)] = params.height as f64 / 2.0;
+                if let Some((fx, fy)) = pixel_focal_length {
+                    camera_matrix[(0, 0)] = fx;
+                    camera_matrix[(1, 1)] = fy;
+                    if let Some((cx, cy)) = val.principal_point {
+                        camera_matrix[(0, 2)] = cx as f64;
+                        camera_matrix[(1, 2)] = cy as f64;
+                    }
                     stretch_lens = false;
 
                     if let Some(fl) = val.focal_length {

@@ -219,12 +219,26 @@ impl GyroSource {
                         if let Some(v) = map.get_t(TagId::FocusDistance) as Option<&f32> {
                             lens_info.focus_distance = Some(*v);
                         }
-                        if let Some(v) = map.get_t(TagId::PixelFocalLength) as Option<&f32> {
+                        if let Some(v) = map.get_t(TagId::PixelFocalLength) as Option<&(f32, f32)> {
                             lens_info.pixel_focal_length = Some(*v);
                         }
+                        if let Some(v) = map.get_t(TagId::PixelFocalLength) as Option<&f32> {
+                            lens_info.pixel_focal_length = Some((*v, *v));
+                        }
                         if let Some(v) = map.get_t(TagId::PixelFocalLength) as Option<&Vec<f32>> {
-                            if let Some(v) = v.first() {
-                                lens_info.pixel_focal_length = Some(*v);
+                            match v.as_slice() {
+                                [fx]          => lens_info.pixel_focal_length = Some((*fx, *fx)),
+                                [fx, fy, ..]  => lens_info.pixel_focal_length = Some((*fx, *fy)),
+                                _ => {}
+                            }
+                        }
+                        if let Some(v) = map.get_t(TagId::PrincipalPoint) as Option<&(f32, f32)> {
+                            lens_info.principal_point = Some(*v);
+                        }
+                        // Per-frame distortion coefficients for gyroflow.proto GenericPolynomial
+                        if let Some(v) = map.get_t(TagId::DistortionCoefficients) as Option<&Vec<f64>> {
+                            if !v.is_empty() {
+                                lens_info.distortion_coefficients = v.clone();
                             }
                         }
                     }
@@ -235,7 +249,8 @@ impl GyroSource {
                                 let focal_length_nm = v.get("focal_length_nm").and_then(|x| x.as_f64()).unwrap_or_default();
                                 let effective_sensor_height_nm = v.get("effective_sensor_height_nm").and_then(|x| x.as_f64()).unwrap_or(1.0);
 
-                                lens_info.pixel_focal_length = Some(((focal_length_nm as f64 / effective_sensor_height_nm as f64) * size.1 as f64) as f32);
+                                let pfl = ((focal_length_nm as f64 / effective_sensor_height_nm as f64) * size.1 as f64) as f32;
+                                lens_info.pixel_focal_length = Some((pfl, pfl));
                             }
                         }
                     }
@@ -497,7 +512,7 @@ impl GyroSource {
                     // --------------------------------- Insta360 ---------------------------------
                 }
             }
-            if input.camera_type() == "Sony" {
+            if !is_temp.t.is_empty() {
                 md.camera_stab_data = sony::stab_calc_splines(&md, &is_temp, sample_rate, fps, size).unwrap_or_default();
                 if let Some(frt) = md.frame_readout_time {
                     md.frame_readout_time = Some(frt / original_sample_rate * sample_rate);

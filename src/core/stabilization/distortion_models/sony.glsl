@@ -111,6 +111,14 @@ void cubic_spline_coefficients(float mesh[GRID_SIZE], int step_, int offset, flo
     }
 }
 float cubic_spline_interpolate2(int n, float x, float size) {
+    if (x <= 0.0) {
+        return a[0] + b[0] * x;
+    }
+    if (x >= size) {
+        float h = size / float(n - 1);
+        float slope = b[n - 2] + 2.0 * c[n - 2] * h + 3.0 * d[n - 2] * h * h;
+        return a[n - 1] + slope * (x - size);
+    }
     int i = int(max(0.0, min(float(n - 2), (float(n - 1) * x / size))));
     float dx = x - size * float(i) / float(n - 1);
     return a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx;

@@ -8,6 +8,7 @@ mod poly5;
 mod ptlens;
 mod insta360;
 mod sony;
+mod generic_polynomial;
 
 mod gopro_superview;
 mod gopro6_superview;
@@ -93,8 +94,9 @@ impl_models! {
     Poly3          => poly3::Poly3,
     Poly5          => poly5::Poly5,
     PtLens         => ptlens::PtLens,
-    Insta360       => insta360::Insta360,
-    Sony           => sony::Sony,
+    Insta360          => insta360::Insta360,
+    Sony              => sony::Sony,
+    GenericPolynomial => generic_polynomial::GenericPolynomial,
 
     // Digital lenses (ie. post-processing)
     GoProSuperview => gopro_superview::GoProSuperview,

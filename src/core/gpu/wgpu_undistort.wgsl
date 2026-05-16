@@ -330,6 +330,15 @@ fn cubic_spline_coefficients(mesh: ptr<function, array<f32, GRID_SIZE>>, step: i
 }
 
 fn cubic_spline_interpolate2(n: i32, x: f32, size: f32) -> f32 {
+    if (x <= 0.0) {
+        return a[0] + b[0] * x;
+    }
+    if (x >= size) {
+        let h = size / f32(n - 1);
+        let slope = b[n - 2] + 2.0 * c[n - 2] * h + 3.0 * d[n - 2] * h * h;
+        return a[n - 1] + slope * (x - size);
+    }
+
     let i = u32(max(0.0, min(f32(n - 2), (f32(n - 1) * x / size))));
     let dx = x - size * f32(i) / f32(n - 1);
     return a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx;

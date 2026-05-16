@@ -86,6 +86,8 @@ qrc!(pub rsrc,
         "src/qt_gpu/compiled/undistort_insta360.frag.qsb",
         "src/qt_gpu/compiled/undistort_sony_digital_stretch.frag.qsb",
         "src/qt_gpu/compiled/undistort_sony.frag.qsb",
+        "src/qt_gpu/compiled/undistort_generic_polynomial_digital_stretch.frag.qsb",
+        "src/qt_gpu/compiled/undistort_generic_polynomial.frag.qsb",
 
         "resources/translations/cs.qm",
         "resources/translations/da.qm",

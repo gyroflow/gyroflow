@@ -198,6 +198,14 @@ void cubic_spline_coefficients(__private float *mesh, int step, int offset, floa
     #undef n
 }
 float cubic_spline_interpolate2(__private float *a, __private float *b, __private float *c, __private float *d, int n, float x, float size) {
+    if (x <= 0.0f) {
+        return a[0] + b[0] * x;
+    }
+    if (x >= size) {
+        float h = size / (n - 1.0f);
+        float slope = b[n - 2] + 2.0f * c[n - 2] * h + 3.0f * d[n - 2] * h * h;
+        return a[n - 1] + slope * (x - size);
+    }
     int i = max(0.0f, min(n - 2.0f, (n - 1.0f) * x / size));
     float dx = x - size * i / (n - 1.0f);
     return a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx;

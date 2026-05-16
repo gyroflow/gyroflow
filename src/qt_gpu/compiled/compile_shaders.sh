@@ -3,7 +3,7 @@ QSB='../../../ext/6.4.3/msvc2019_64/bin/qsb.exe --glsl "120,300 es,310 es,320 es
 
 NO_DIGITAL_LENS="vec2 digital_undistort_point(vec2 uv) { return uv; } vec2 digital_distort_point(vec2 uv) { return uv; }"
 
-DISTORTION_MODELS=( "opencv_fisheye" "opencv_standard" "poly3" "poly5" "ptlens" "insta360" "sony" )
+DISTORTION_MODELS=( "opencv_fisheye" "opencv_standard" "poly3" "poly5" "ptlens" "insta360" "sony" "generic_polynomial" )
 DIGITAL_LENSES=( "" "gopro_superview" "gopro6_superview" "gopro_hyperview" "digital_stretch" )
 
 for i in "${DISTORTION_MODELS[@]}"
@@ -22,7 +22,7 @@ do
             d=_$d
         fi
 
-        if [ "$i" != "sony" ]; then
+        if [ "$i" != "sony" ] && [ "$i" != "generic_polynomial" ]; then
             FUNCS="$FUNCS vec2 process_coord(vec2 uv, float idx) { return uv; } "
         fi
 
@@ -31,7 +31,7 @@ do
 
         echo "${SHADER/LENS_MODEL_FUNCTIONS;/"$FUNCS"}" > tmp.frag
 
-        if [ "$i" = "sony" ]; then
+        if [ "$i" = "sony" ] || [ "$i" = "generic_polynomial" ]; then
            echo " float get_mesh_data(int idx) { return texture(texMeshData, vec2(0, idx / 1023.0)).r; } " >> tmp.frag
         fi
 
