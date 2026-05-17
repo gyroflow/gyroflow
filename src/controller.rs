@@ -1876,6 +1876,7 @@ impl Controller {
             this.all_profiles_loaded();
         });
         let db = self.stabilizer.lens_profile_db.clone();
+        let canonical_db = self.stabilizer.canonical_camera_db.clone();
         core::run_threaded(move || {
             if reload_from_disk {
                 let mut new_db = core::lens_profile_database::LensProfileDatabase::default();
@@ -1885,6 +1886,10 @@ impl Controller {
                 // new_db.process_adjusted_metadata();
 
                 db.write().set_from_db(new_db);
+
+                let mut new_canonical_db = core::canonical_camera_database::CanonicalCameraDatabase::default();
+                new_canonical_db.load_all();
+                canonical_db.write().set_from_db(new_canonical_db);
             }
 
             db.write().prepare_list_for_ui();
@@ -1931,6 +1936,7 @@ impl Controller {
         });
 
         let current_version = self.stabilizer.lens_profile_db.read().version;
+        let current_canonical_version = self.stabilizer.canonical_camera_db.read().version;
 
         let db_path = LensProfileDatabase::get_path().join("profiles.cbor.gz");
         if db_path.exists() || gyroflow_core::settings::data_dir().join("lens_profiles").exists() {
@@ -1941,9 +1947,18 @@ impl Controller {
                         if let Some(obj) = v.first() {
                             let obj = obj.as_object()?;
                             if let Ok(tag) = obj.get("tag_name")?.as_str()?.trim_start_matches("v").parse::<u32>() {
+                                let asset_url = |name: &str| -> Option<String> {
+                                    obj.get("assets")?
+                                        .as_array()?
+                                        .iter()
+                                        .find(|asset| asset.get("name").and_then(|v| v.as_str()) == Some(name))
+                                        .and_then(|asset| asset.get("browser_download_url")?.as_str())
+                                        .map(str::to_owned)
+                                };
+
                                 if tag > current_version {
                                     ::log::info!("Updating lens profile database from v{current_version} to v{tag}.");
-                                    if let Some(download_url) = obj["assets"][0]["browser_download_url"].as_str() {
+                                    if let Some(download_url) = asset_url("profiles.cbor.gz") {
                                         if let Ok(mut content) = ureq::get(download_url).call().map(|x| x.into_body().into_reader()) {
                                             let mut updated = false;
                                             if db_path.exists() {
@@ -1956,6 +1971,35 @@ impl Controller {
                                             }
                                             if !updated {
                                                 if let Ok(mut file) = std::fs::File::create(gyroflow_core::settings::data_dir().join("lens_profiles").join("profiles.cbor.gz")) {
+                                                    if std::io::copy(&mut content, &mut file).is_ok() {
+                                                        update(());
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if tag > current_canonical_version {
+                                    ::log::info!("Updating canonical camera database from v{current_canonical_version} to v{tag}.");
+                                    if let Some(download_url) = asset_url(gyroflow_core::canonical_camera_database::CANONICAL_LENSES_FILENAME) {
+                                        let canonical_path = gyroflow_core::canonical_camera_database::CanonicalCameraDatabase::bundled_path();
+                                        let canonical_user_path = gyroflow_core::canonical_camera_database::CanonicalCameraDatabase::user_path();
+                                        if let Ok(mut content) = ureq::get(download_url).call().map(|x| x.into_body().into_reader()) {
+                                            let mut updated = false;
+                                            if canonical_path.exists() {
+                                                if let Ok(mut file) = std::fs::File::create(&canonical_path) {
+                                                    if std::io::copy(&mut content, &mut file).is_ok() {
+                                                        updated = true;
+                                                        update(());
+                                                    }
+                                                }
+                                            }
+                                            if !updated {
+                                                if let Some(parent) = canonical_user_path.parent() {
+                                                    let _ = std::fs::create_dir_all(parent);
+                                                }
+                                                if let Ok(mut file) = std::fs::File::create(canonical_user_path) {
                                                     if std::io::copy(&mut content, &mut file).is_ok() {
                                                         update(());
                                                     }
