@@ -480,9 +480,10 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
     ///////////////////////////////////////////////////////////////////
     // Add lens distortion back
     if (params.lens_correction_amount < 1.0) {
-        let factor = max(1.0 - params.lens_correction_amount, 0.001); // FIXME: this is close but wrong
         let out_c = vec2<f32>(f32(params.output_width) / 2.0, f32(params.output_height) / 2.0);
-        let out_f = (params.f / params.fov) / factor;
+        // Use the same calibrated output intrinsics across all lens-correction strengths.
+        // The strength mix happens below on coordinates; scaling focal length here over-zooms mid strengths.
+        let out_f = params.f / params.fov;
 
         var new_out_pos = out_pos;
 
