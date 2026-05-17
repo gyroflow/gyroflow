@@ -77,6 +77,26 @@ macro_rules! impl_models {
             pub fn opencl_functions(&self) -> &'static str { match &self.inner { $(DistortionModels::$name(x) => x.opencl_functions(),)* } }
             pub fn wgsl_functions(&self)   -> &'static str { match &self.inner { $(DistortionModels::$name(x) => x.wgsl_functions(),)* } }
 
+            pub fn rescale_coeffs(&self, k: &mut [f64], hugin_scaling: f64) {
+                match &self.inner {
+                    DistortionModels::Poly3(_)  => poly3::Poly3::rescale_coeffs(k, hugin_scaling),
+                    DistortionModels::Poly5(_)  => poly5::Poly5::rescale_coeffs(k, hugin_scaling),
+                    DistortionModels::PtLens(_) => ptlens::PtLens::rescale_coeffs(k, hugin_scaling),
+                    _ => {
+                        // Other variants do not use the Hugin half-diagonal
+                        // convention, so rescaling is a no-op — but the only
+                        // caller today is the Lensfun import path, which is
+                        // guaranteed to resolve to Poly3/Poly5/PtLens.
+                        // Reaching this arm means a new caller wired something
+                        // up wrongly; surface that instead of silently
+                        // producing unchanged coefficients.
+                        let id = self.id();
+                        log::warn!("DistortionModel::rescale_coeffs called on {id}, which has no Hugin-convention rescale; coefficients left unchanged");
+                        debug_assert!(false, "rescale_coeffs only supports poly3/poly5/ptlens; got {id}");
+                    }
+                }
+            }
+
             pub fn from_name(id: &str) -> Self {
                 $(
                     if <$class>::id() == id { return Self { inner: DistortionModels::$name(Default::default()) }; }
