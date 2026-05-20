@@ -542,12 +542,12 @@ MenuItem {
         Button {
             iconName: "close";
             text: "";
-            tooltip: qsTr("Hide bad profile");
+            tooltip: qsTr("Hide profile locally");
             width: 35 * dpiScale;
             leftPadding: 5 * dpiScale;
             rightPadding: 5 * dpiScale;
             enabled: !!(root.profileChecksum || root.profilePath);
-            onClicked: root.rejectCurrentProfile(true);
+            onClicked: root.rejectCurrentProfile(false);
         }
     }
     Row {
