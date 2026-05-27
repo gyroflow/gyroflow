@@ -7,13 +7,13 @@ use std::io::Read;
 use xml::attribute::OwnedAttribute;
 use xml::reader::{ EventReader, XmlEvent };
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, serde::Serialize)]
 pub struct LensfunDatabase {
     pub cameras: Vec<LensfunCamera>,
     pub lenses: Vec<LensfunLens>,
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, serde::Serialize)]
 pub struct LensfunCamera {
     pub maker: String,
     pub model: String,
@@ -21,7 +21,7 @@ pub struct LensfunCamera {
     pub cropfactor: Option<f64>,
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, serde::Serialize)]
 pub struct LensfunLens {
     pub maker: String,
     pub model: String,
@@ -30,7 +30,7 @@ pub struct LensfunLens {
     pub distortions: Vec<LensfunDistortion>,
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, serde::Serialize)]
 pub struct LensfunDistortion {
     pub focal: f64,
     pub model: String,
@@ -148,7 +148,7 @@ impl LensfunDatabase {
     }
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, serde::Serialize)]
 pub struct LensfunLensMetadata {
     pub maker: String,
     pub model: String,

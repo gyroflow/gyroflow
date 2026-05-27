@@ -80,6 +80,20 @@ mod tests {
         assert_eq!(target.lensfun_db().cameras[0].model, "ILCE-7SM3");
         assert_eq!(target.lensfun_db().lenses_for_mount("Sony E")[0].display_name(), "Sony FE 24mm F1.4 GM");
     }
+
+    #[test]
+    fn exports_lensfun_metadata_json_for_ui_selectors() {
+        let mut db = LensProfileDatabase::default();
+        db.lensfun_db.extend(lensfun_fixture());
+
+        let metadata: serde_json::Value = serde_json::from_str(&db.lensfun_metadata_json()).unwrap();
+
+        assert_eq!(metadata[0]["maker"], "Sony");
+        assert_eq!(metadata[0]["model"], "FE 24mm F1.4 GM");
+        assert_eq!(metadata[0]["mounts"][0], "Sony E");
+        assert_eq!(metadata[0]["focal_lengths"][0], 24.0);
+        assert_eq!(metadata[0]["distortion_models"][0], "poly3");
+    }
 }
 
 impl LensProfileDatabase {
@@ -337,6 +351,10 @@ impl LensProfileDatabase {
 
     pub fn lensfun_db(&self) -> &LensfunDatabase {
         &self.lensfun_db
+    }
+
+    pub fn lensfun_metadata_json(&self) -> String {
+        serde_json::to_string(&self.lensfun_db.lens_metadata()).unwrap_or_else(|_| "[]".to_string())
     }
 
     pub fn search(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<(String, String, String, bool, f64, i32, String)> {
