@@ -94,6 +94,23 @@ mod tests {
         assert_eq!(metadata[0]["focal_lengths"][0], 24.0);
         assert_eq!(metadata[0]["distortion_models"][0], "poly3");
     }
+
+    #[test]
+    fn loads_lensfun_profiles_into_searchable_database() {
+        let mut db = LensProfileDatabase::default();
+        db.lensfun_db.extend(lensfun_fixture());
+
+        db.load_lensfun_profiles();
+        db.prepare_list_for_ui();
+
+        let profiles = db.search("sony 24", &HashSet::new(), 0, 0);
+        assert_eq!(profiles.len(), 1);
+        assert!(profiles[0].1.starts_with("lensfun://sony/ilce-7sm3/sony-fe-24mm-f1-4-gm/24/poly3"));
+
+        let profile = db.get_by_id(&profiles[0].1).unwrap();
+        assert_eq!(profile.distortion_model.as_deref(), Some("poly3"));
+        assert_eq!(profile.focal_length, Some(24.0));
+    }
 }
 
 impl LensProfileDatabase {
@@ -269,6 +286,7 @@ impl LensProfileDatabase {
             load_from_dir(Self::get_path());
         }
 
+        self.load_lensfun_profiles();
         let copy = self.clone();
         for (_, v) in self.map.iter_mut() {
             v.resolve_interpolations(&copy);
@@ -355,6 +373,12 @@ impl LensProfileDatabase {
 
     pub fn lensfun_metadata_json(&self) -> String {
         serde_json::to_string(&self.lensfun_db.lens_metadata()).unwrap_or_else(|_| "[]".to_string())
+    }
+
+    fn load_lensfun_profiles(&mut self) {
+        for (id, profile) in self.lensfun_db.lens_profiles() {
+            self.map.entry(id).or_insert(profile);
+        }
     }
 
     pub fn search(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<(String, String, String, bool, f64, i32, String)> {

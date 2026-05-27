@@ -4,6 +4,7 @@
 use std::collections::HashMap;
 use std::io::Read;
 
+use crate::lens_profile::{ CameraParams, Dimensions, LensProfile };
 use xml::attribute::OwnedAttribute;
 use xml::reader::{ EventReader, XmlEvent };
 
@@ -146,6 +147,20 @@ impl LensfunDatabase {
     pub fn lenses_for_mount<'a>(&'a self, mount: &str) -> Vec<&'a LensfunLens> {
         self.lenses.iter().filter(|lens| lens.supports_mount(mount)).collect()
     }
+
+    pub fn lens_profiles(&self) -> Vec<(String, LensProfile)> {
+        let mut profiles = Vec::new();
+        for camera in &self.cameras {
+            for lens in self.lenses_for_mount(&camera.mount) {
+                for distortion in lens.distortions.iter().filter(|x| x.is_supported()) {
+                    if let Some(profile) = lens.to_profile(camera, distortion) {
+                        profiles.push((profile.identifier.clone(), profile));
+                    }
+                }
+            }
+        }
+        profiles
+    }
 }
 
 #[derive(Clone, Debug, Default, PartialEq, serde::Serialize)]
@@ -181,6 +196,37 @@ impl LensfunDistortion {
     pub fn is_supported(&self) -> bool {
         matches!(self.model.as_str(), "poly3" | "poly5" | "ptlens")
     }
+
+    fn scaled_coefficients(&self, cropfactor: f64) -> Vec<f64> {
+        let real_focal = match self.model.as_str() {
+            "ptlens" if self.coefficients.len() >= 3 => self.focal * (1.0 - self.coefficients[0] - self.coefficients[1] - self.coefficients[2]),
+            "poly3" if !self.coefficients.is_empty() => self.focal * (1.0 - self.coefficients[0]),
+            _ => self.focal,
+        };
+        let aspect_ratio = DEFAULT_WIDTH as f64 / DEFAULT_HEIGHT as f64;
+        let hugin_scale_in_millimeters = 36.0_f64.hypot(24.0) / cropfactor / aspect_ratio.hypot(1.0) / 2.0;
+        let hugin_scaling = real_focal / hugin_scale_in_millimeters;
+
+        let mut coefficients = self.coefficients.clone();
+        match self.model.as_str() {
+            "poly3" if !coefficients.is_empty() => {
+                let d = 1.0 - coefficients[0];
+                coefficients[0] *= hugin_scaling.powi(2) / d.powi(3);
+            },
+            "poly5" if coefficients.len() >= 2 => {
+                coefficients[0] *= hugin_scaling.powi(2);
+                coefficients[1] *= hugin_scaling.powi(4);
+            },
+            "ptlens" if coefficients.len() >= 3 => {
+                let d = 1.0 - coefficients[0] - coefficients[1] - coefficients[2];
+                coefficients[0] *= hugin_scaling.powi(3) / d.powi(4);
+                coefficients[1] *= hugin_scaling.powi(2) / d.powi(3);
+                coefficients[2] *= hugin_scaling / d.powi(2);
+            },
+            _ => { },
+        }
+        coefficients
+    }
 }
 
 impl LensfunLens {
@@ -203,10 +249,84 @@ impl LensfunLens {
             .map(|x| x.focal)
             .collect()
     }
+
+    fn to_profile(&self, camera: &LensfunCamera, distortion: &LensfunDistortion) -> Option<LensProfile> {
+        let cropfactor = camera.cropfactor.or(self.cropfactor).filter(|x| *x > 0.0).unwrap_or(1.0);
+        let mut profile = LensProfile::default();
+        let display_name = self.display_name();
+        let focal_text = focal_length_text(distortion.focal);
+        let identifier = format!(
+            "lensfun://{}/{}/{}/{}/{}",
+            id_component(&camera.maker),
+            id_component(&camera.model),
+            id_component(&display_name),
+            id_component(&focal_text),
+            distortion.model
+        );
+
+        profile.identifier = identifier.clone();
+        profile.path_to_file = identifier;
+        profile.camera_brand = camera.maker.clone();
+        profile.camera_model = camera.model.clone();
+        profile.lens_model = display_name;
+        profile.camera_setting = format!("{} {}mm", camera.mount, focal_text);
+        profile.calibrated_by = "Lensfun".to_string();
+        profile.calibrator_version = "lensfun".to_string();
+        profile.calib_dimension = Dimensions { w: DEFAULT_WIDTH, h: DEFAULT_HEIGHT };
+        profile.orig_dimension = Dimensions { w: DEFAULT_WIDTH, h: DEFAULT_HEIGHT };
+        profile.input_horizontal_stretch = 1.0;
+        profile.input_vertical_stretch = 1.0;
+        profile.focal_length = Some(distortion.focal);
+        profile.crop_factor = Some(cropfactor);
+        profile.distortion_model = Some(distortion.model.clone());
+        profile.fisheye_params = CameraParams {
+            RMS_error: 0.0,
+            camera_matrix: camera_matrix(distortion.focal, cropfactor),
+            distortion_coeffs: distortion.scaled_coefficients(cropfactor),
+            radial_distortion_limit: None,
+        };
+        profile.name = profile.get_name();
+        profile.checksum = Some(format!("{:08x}", crc32fast::hash(profile.identifier.as_bytes())));
+        profile.init();
+
+        Some(profile)
+    }
 }
+
+const DEFAULT_WIDTH: usize = 1920;
+const DEFAULT_HEIGHT: usize = 1080;
 
 fn in_lens_calibration(stack: &[String]) -> bool {
     stack.iter().any(|x| x == "lens") && stack.iter().any(|x| x == "calibration")
+}
+
+fn camera_matrix(focal: f64, cropfactor: f64) -> Vec<[f64; 3]> {
+    let sensor_width = 36.0 / cropfactor;
+    let focal_px = focal / sensor_width * DEFAULT_WIDTH as f64;
+    vec![
+        [focal_px, 0.0, DEFAULT_WIDTH as f64 / 2.0],
+        [0.0, focal_px, DEFAULT_HEIGHT as f64 / 2.0],
+        [0.0, 0.0, 1.0],
+    ]
+}
+
+fn focal_length_text(focal: f64) -> String {
+    if (focal.fract()).abs() < f64::EPSILON {
+        format!("{focal:.0}")
+    } else {
+        format!("{focal:.1}")
+    }
+}
+
+fn id_component(value: &str) -> String {
+    value
+        .chars()
+        .map(|c| if c.is_ascii_alphanumeric() { c.to_ascii_lowercase() } else { '-' })
+        .collect::<String>()
+        .split('-')
+        .filter(|x| !x.is_empty())
+        .collect::<Vec<_>>()
+        .join("-")
 }
 
 fn parse_attr(attrs: &HashMap<&str, &str>, key: &str) -> Option<f64> {
@@ -312,5 +432,41 @@ mod tests {
         assert_eq!(lenses.len(), 1);
         assert_eq!(lenses[0].display_name(), "Sony FE 24mm F1.4 GM");
         assert_eq!(lenses[0].supported_focal_lengths(), vec![24.0]);
+    }
+
+    #[test]
+    fn creates_gyroflow_profiles_for_matching_cameras_and_lenses() {
+        let xml = r#"
+            <lensdatabase>
+                <camera>
+                    <maker>Sony</maker>
+                    <model>ILCE-7SM3</model>
+                    <mount>Sony E</mount>
+                    <cropfactor>1.0</cropfactor>
+                </camera>
+                <lens>
+                    <maker>Sony</maker>
+                    <model>FE 24mm F1.4 GM</model>
+                    <mount>Sony E</mount>
+                    <calibration>
+                        <distortion model="poly3" focal="24" k1="-0.01" />
+                    </calibration>
+                </lens>
+            </lensdatabase>
+        "#;
+
+        let db = LensfunDatabase::from_xml_str(xml).unwrap();
+        let profiles = db.lens_profiles();
+
+        assert_eq!(profiles.len(), 1);
+        let (id, profile) = &profiles[0];
+        assert!(id.starts_with("lensfun://sony/ilce-7sm3/sony-fe-24mm-f1-4-gm/24/poly3"));
+        assert_eq!(profile.camera_brand, "Sony");
+        assert_eq!(profile.camera_model, "ILCE-7SM3");
+        assert_eq!(profile.lens_model, "Sony FE 24mm F1.4 GM");
+        assert_eq!(profile.distortion_model.as_deref(), Some("poly3"));
+        assert_eq!(profile.focal_length, Some(24.0));
+        assert_eq!(profile.fisheye_params.camera_matrix.len(), 3);
+        assert_eq!(profile.fisheye_params.distortion_coeffs.len(), 1);
     }
 }
