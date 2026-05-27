@@ -137,6 +137,15 @@ impl LensfunDatabase {
             })
             .collect()
     }
+
+    pub fn extend(&mut self, other: Self) {
+        self.cameras.extend(other.cameras);
+        self.lenses.extend(other.lenses);
+    }
+
+    pub fn lenses_for_mount<'a>(&'a self, mount: &str) -> Vec<&'a LensfunLens> {
+        self.lenses.iter().filter(|lens| lens.supports_mount(mount)).collect()
+    }
 }
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -171,6 +180,28 @@ impl LensfunDistortion {
 
     pub fn is_supported(&self) -> bool {
         matches!(self.model.as_str(), "poly3" | "poly5" | "ptlens")
+    }
+}
+
+impl LensfunLens {
+    pub fn supports_mount(&self, mount: &str) -> bool {
+        self.mounts.iter().any(|x| x.eq_ignore_ascii_case(mount))
+    }
+
+    pub fn display_name(&self) -> String {
+        [self.maker.trim(), self.model.trim()]
+            .into_iter()
+            .filter(|x| !x.is_empty())
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
+
+    pub fn supported_focal_lengths(&self) -> Vec<f64> {
+        self.distortions
+            .iter()
+            .filter(|x| x.is_supported())
+            .map(|x| x.focal)
+            .collect()
     }
 }
 
@@ -250,5 +281,36 @@ mod tests {
         assert_eq!(metadata[0].mounts, vec!["Canon RF"]);
         assert_eq!(metadata[0].focal_lengths, vec![15.0]);
         assert_eq!(metadata[0].distortion_models, vec!["poly5"]);
+    }
+
+    #[test]
+    fn finds_lenses_for_matching_mounts() {
+        let xml = r#"
+            <lensdatabase>
+                <lens>
+                    <maker>Sony</maker>
+                    <model>FE 24mm F1.4 GM</model>
+                    <mount>Sony E</mount>
+                    <calibration>
+                        <distortion model="poly3" focal="24" k1="-0.01" />
+                    </calibration>
+                </lens>
+                <lens>
+                    <maker>Canon</maker>
+                    <model>RF 24mm F1.8</model>
+                    <mount>Canon RF</mount>
+                    <calibration>
+                        <distortion model="poly3" focal="24" k1="-0.01" />
+                    </calibration>
+                </lens>
+            </lensdatabase>
+        "#;
+
+        let db = LensfunDatabase::from_xml_str(xml).unwrap();
+        let lenses = db.lenses_for_mount("sony e");
+
+        assert_eq!(lenses.len(), 1);
+        assert_eq!(lenses[0].display_name(), "Sony FE 24mm F1.4 GM");
+        assert_eq!(lenses[0].supported_focal_lengths(), vec![24.0]);
     }
 }

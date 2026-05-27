@@ -4,6 +4,7 @@
 use std::cmp::Ordering;
 use std::collections::{ HashSet, HashMap, BTreeMap };
 use crate::LensProfile;
+use crate::lensfun_database::LensfunDatabase;
 use std::path::PathBuf;
 use std::io::Read;
 
@@ -22,12 +23,62 @@ pub struct LensProfileDatabase {
     map: HashMap<String, LensProfile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
     list_for_ui: Vec<(String, String, String, bool, f64, i32, String)>,
+    lensfun_db: LensfunDatabase,
     pub loaded: bool,
     pub version: u32,
 }
 impl Clone for LensProfileDatabase {
     fn clone(&self) -> Self {
-        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), loaded: self.loaded, ..Default::default() }
+        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), lensfun_db: self.lensfun_db.clone(), loaded: self.loaded, ..Default::default() }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn lensfun_fixture() -> LensfunDatabase {
+        LensfunDatabase::from_xml_str(r#"
+            <lensdatabase>
+                <camera>
+                    <maker>Sony</maker>
+                    <model>ILCE-7SM3</model>
+                    <mount>Sony E</mount>
+                    <cropfactor>1.0</cropfactor>
+                </camera>
+                <lens>
+                    <maker>Sony</maker>
+                    <model>FE 24mm F1.4 GM</model>
+                    <mount>Sony E</mount>
+                    <calibration>
+                        <distortion model="poly3" focal="24" k1="-0.01" />
+                    </calibration>
+                </lens>
+            </lensdatabase>
+        "#).unwrap()
+    }
+
+    #[test]
+    fn clone_preserves_lensfun_database() {
+        let mut db = LensProfileDatabase::default();
+        db.lensfun_db.extend(lensfun_fixture());
+
+        let cloned = db.clone();
+
+        assert_eq!(cloned.lensfun_db().cameras.len(), 1);
+        assert_eq!(cloned.lensfun_db().lenses_for_mount("Sony E").len(), 1);
+    }
+
+    #[test]
+    fn set_from_db_preserves_lensfun_database() {
+        let mut source = LensProfileDatabase::default();
+        source.lensfun_db.extend(lensfun_fixture());
+
+        let mut target = LensProfileDatabase::default();
+        target.set_from_db(source);
+
+        assert_eq!(target.lensfun_db().cameras[0].model, "ILCE-7SM3");
+        assert_eq!(target.lensfun_db().lenses_for_mount("Sony E")[0].display_name(), "Sony FE 24mm F1.4 GM");
     }
 }
 
@@ -151,6 +202,13 @@ impl LensProfileDatabase {
                             load(DataSource::String(data), &f_name);
                         }
                     }
+                    if f_name.ends_with(".xml") {
+                        match std::fs::read_to_string(&f_name).map(|data| LensfunDatabase::from_xml_str(&data)) {
+                            Ok(Ok(db)) => self.lensfun_db.extend(db),
+                            Ok(Err(e)) => log::warn!("Error parsing Lensfun database: {}: {:?}", f_name, e),
+                            Err(e) => log::warn!("Error reading Lensfun database: {}: {:?}", f_name, e),
+                        }
+                    }
                     if !bundle_loaded && f_name.ends_with(".cbor.gz") {
                         if let Ok(data) = std::fs::read(&f_name) {
                             let mut e = flate2::read::GzDecoder::new(std::io::Cursor::new(data));
@@ -209,6 +267,7 @@ impl LensProfileDatabase {
     pub fn set_from_db(&mut self, b: Self) {
         self.map = b.map;
         self.preset_map = b.preset_map;
+        self.lensfun_db = b.lensfun_db;
         self.loaded = b.loaded;
         self.version = b.version;
         if self.loaded {
@@ -274,6 +333,10 @@ impl LensProfileDatabase {
             }
         }
         self.list_for_ui.sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
+    }
+
+    pub fn lensfun_db(&self) -> &LensfunDatabase {
+        &self.lensfun_db
     }
 
     pub fn search(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<(String, String, String, bool, f64, i32, String)> {
