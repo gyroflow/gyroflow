@@ -77,6 +77,15 @@ macro_rules! impl_models {
             pub fn opencl_functions(&self) -> &'static str { match &self.inner { $(DistortionModels::$name(x) => x.opencl_functions(),)* } }
             pub fn wgsl_functions(&self)   -> &'static str { match &self.inner { $(DistortionModels::$name(x) => x.wgsl_functions(),)* } }
 
+            pub fn rescale_coeffs(&self, k: &mut [f64], hugin_scaling: f64) -> bool {
+                match &self.inner {
+                    DistortionModels::Poly3(_)  => { poly3::Poly3::rescale_coeffs(k, hugin_scaling); true },
+                    DistortionModels::Poly5(_)  => { poly5::Poly5::rescale_coeffs(k, hugin_scaling); true },
+                    DistortionModels::PtLens(_) => { ptlens::PtLens::rescale_coeffs(k, hugin_scaling); true },
+                    _ => false
+                }
+            }
+
             pub fn from_name(id: &str) -> Self {
                 $(
                     if <$class>::id() == id { return Self { inner: DistortionModels::$name(Default::default()) }; }
