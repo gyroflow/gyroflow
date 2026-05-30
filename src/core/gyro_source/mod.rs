@@ -17,7 +17,7 @@ use std::collections::btree_map::Entry;
 use std::sync::{ Arc, atomic::AtomicBool };
 use parking_lot::RwLock;
 use telemetry_parser::{ Input, util, InputOptions, TagFilter };
-use telemetry_parser::tags_impl::{ GetWithType, GroupId, TagId, TimeQuaternion, TimeVector3 };
+use telemetry_parser::tags_impl::{ GetWithType, GroupId, GroupedTagMap, TagId, TimeQuaternion, TimeVector3 };
 use std::io::{ Read, Seek };
 
 use crate::camera_identifier::CameraIdentifier;
@@ -141,6 +141,7 @@ impl GyroSource {
         let mut digital_zoom = None;
         let mut lens_positions = BTreeMap::new();
         let mut lens_params = BTreeMap::new();
+        let mut frame_readout_direction_tag: Option<i32> = None;
         let mut additional_data = serde_json::Value::Object(serde_json::Map::new());
 
         if input.camera_type() == "BlackBox" {
@@ -185,6 +186,7 @@ impl GyroSource {
                         if input.camera_type() == "RED" {
                             lens_info.capture_area_size = Some((size.0 as f32, size.1 as f32));
                         }
+                        if let Some(v) = im.get_t(TagId::FrameReadoutDirection) as Option<&i32> { frame_readout_direction_tag = Some(*v); }
                         if let Some(v) = im.get_t(TagId::PixelPitch) as Option<&(u32, u32)> { lens_info.pixel_pitch = Some(*v); }
                         if let Some(v) = im.get_t(TagId::CaptureAreaSize) as Option<&(f32, f32)> { lens_info.capture_area_size = Some(*v); }
                         if let Some(v) = im.get_t(TagId::CaptureAreaOrigin) as Option<&(f32, f32)> { lens_info.capture_area_origin = Some(*v); }
@@ -399,6 +401,14 @@ impl GyroSource {
 
         let fr = input.frame_readout_time().unwrap_or_default();
         let frame_readout_time = if fr != 0.0 { Some(if fr.abs() > 10000.0 { fr.abs() - 10000.0 } else { fr.abs() }) } else { None };
+        let frame_readout_direction = match frame_readout_direction_tag {
+            Some(v) => ReadoutDirection::from(v),
+            None => if fr < 0.0 {
+                if fr.abs() > 10000.0 { ReadoutDirection::RightToLeft } else { ReadoutDirection::BottomToTop }
+            } else {
+                if fr.abs() > 10000.0 { ReadoutDirection::LeftToRight } else { ReadoutDirection::TopToBottom }
+            },
+        };
 
         let mut md = FileMetadata {
             imu_orientation,
@@ -410,11 +420,7 @@ impl GyroSource {
             lens_params,
             raw_imu,
             frame_readout_time,
-            frame_readout_direction: if fr < 0.0 {
-                if fr.abs() > 10000.0 { ReadoutDirection::RightToLeft } else { ReadoutDirection::BottomToTop }
-            } else {
-                if fr.abs() > 10000.0 { ReadoutDirection::LeftToRight } else { ReadoutDirection::TopToBottom }
-            },
+            frame_readout_direction,
             frame_rate,
             lens_profile,
             camera_identifier,
@@ -430,11 +436,25 @@ impl GyroSource {
         let mut original_sample_rate = sample_rate;
         let mut is_temp = sony::ISTemp::default();
         let mut mesh_cache = BTreeMap::new();
+        let is_gyroflow_proto = input.parser_name() == "GyroflowProtobuf";
         if let Some(ref samples) = input.samples {
             for info in samples {
                 if let Some(ref tag_map) = info.tag_map {
-                    // --------------------------------- Sony ---------------------------------
-                    if let Some((org_sample_rate, offset)) = sony::get_time_offset(&md, &input, tag_map, sample_rate) {
+                    // --------------------------------- Timing -------------------------------
+                    if is_gyroflow_proto {
+                        fn gyroflow_proto_time_offset(tag_map: &GroupedTagMap) -> Option<f64> {
+                            let imager = tag_map.get(&GroupId::Imager)?;
+                            let first_frame_ts = *(imager.get_t(TagId::FirstFrameTimestamp) as Option<&f64>)?;
+                            let exposure_time = *(imager.get_t(TagId::ExposureTime)     as Option<&f64>).unwrap_or(&0.0);
+                            let readout_time  = *(imager.get_t(TagId::FrameReadoutTime) as Option<&f64>).unwrap_or(&0.0);
+
+                            Some(first_frame_ts - exposure_time / 2.0 + readout_time / 2.0)
+                        }
+
+                        if let Some(offset) = gyroflow_proto_time_offset(tag_map) {
+                            md.per_frame_time_offsets.push(offset);
+                        }
+                    } else if let Some((org_sample_rate, offset)) = sony::get_time_offset(&md, &input, tag_map, sample_rate) {
                         original_sample_rate = org_sample_rate;
                         md.per_frame_time_offsets.push(offset);
                     }
