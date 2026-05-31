@@ -54,6 +54,14 @@ layout(std140, binding = 2) uniform KernelParams {
     float reserved2;                // 16
     vec4 ewa_coefs_p;               // 16
     vec4 ewa_coefs_q;               // 16
+    int cg_flags;                   // 4
+    int cg_pad0;                    // 8
+    int cg_pad1;                    // 12
+    int cg_pad2;                    // 16
+    vec4 cg_color0;                 // 16
+    vec4 cg_tone0;                  // 16
+    vec4 cg_tone1;                  // 16
+    vec4 cg_reserved;               // 16
 } params;
 
 LENS_MODEL_FUNCTIONS;
@@ -61,6 +69,46 @@ LENS_MODEL_FUNCTIONS;
 layout(binding = 3) uniform sampler2D texParams;
 layout(binding = 4) uniform sampler2D texCanvas;
 layout(binding = 5) uniform sampler2D texMeshData;
+layout(binding = 6) uniform sampler2D texLut;
+
+// Fixed LUT texture dimensions (see qrhi_undistort.cpp). The actual LUT of
+// size N occupies the top-left NxN*N (3D) or 1xN (1D) region.
+const float LUT_TEX_W = 65.0;
+const float LUT_TEX_H = 4225.0; // 65*65
+
+vec3 sample_lut3d_slice(float n, float rf, float gf, float bslice) {
+    // rf,gf in [0,1]; bslice integer slice index
+    float px = rf * (n - 1.0);
+    float py = bslice * n + gf * (n - 1.0);
+    float tx = (px + 0.5) / LUT_TEX_W;
+    float ty = (py + 0.5) / LUT_TEX_H;
+    return texture(texLut, vec2(tx, ty)).rgb;
+}
+vec3 apply_lut(vec3 c) {
+    float strength = params.cg_reserved.x;
+    float n        = params.cg_reserved.y;
+    float kind     = params.cg_reserved.z; // 1=3D, 0=1D
+    if (n < 2.0) return c;
+    vec3 x = clamp(c, 0.0, 1.0);
+    vec3 res;
+    if (kind > 0.5) {
+        // Trilinear: hardware bilinear in (r,g) within a slice, manual lerp in b
+        float bf = x.b * (n - 1.0);
+        float b0 = floor(bf);
+        float b1 = min(b0 + 1.0, n - 1.0);
+        float fb = bf - b0;
+        vec3 c0 = sample_lut3d_slice(n, x.r, x.g, b0);
+        vec3 c1 = sample_lut3d_slice(n, x.r, x.g, b1);
+        res = mix(c0, c1, fb);
+    } else {
+        // 1D LUT: per-channel curve (texture is 1 wide, N tall)
+        float r = texture(texLut, vec2(0.5 / LUT_TEX_W, (x.r * (n - 1.0) + 0.5) / LUT_TEX_H)).r;
+        float g = texture(texLut, vec2(0.5 / LUT_TEX_W, (x.g * (n - 1.0) + 0.5) / LUT_TEX_H)).g;
+        float b = texture(texLut, vec2(0.5 / LUT_TEX_W, (x.b * (n - 1.0) + 0.5) / LUT_TEX_H)).b;
+        res = vec3(r, g, b);
+    }
+    return mix(c, res, clamp(strength, 0.0, 1.0));
+}
 
 const vec4 colors[9] = vec4[9](
     vec4(0.0,   0.0,   0.0,     0.0), // None
@@ -170,6 +218,74 @@ vec2 rotate_point(vec2 pos, float angle, vec2 origin, vec2 origin2) {
      return vec2(cos(angle) * (pos.x - origin.x) - sin(angle) * (pos.y - origin.y) + origin2.x,
                  sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin2.y);
 }
+vec3 apply_color_grading(vec3 c) {
+    float mpv = max(params.max_pixel_value, 1.0);
+    vec3 x = clamp(c / mpv, 0.0, 1.0);
+    const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
+
+    // ---- Input LUT (applied first, like Premiere's 基本補正 LUT設定) ----
+    if ((params.cg_flags & 4) != 0) {
+        x = apply_lut(x);
+    }
+
+    // ---- Basic correction ----
+    if ((params.cg_flags & 1) != 0) {
+        float temperature = params.cg_color0.x; // -1..1
+        float tint        = params.cg_color0.y; // -1..1
+        float saturation  = params.cg_color0.z; // 0..2
+        float exposure    = params.cg_color0.w; // -1..1
+        float contrast    = params.cg_tone0.x;  // -1..1
+        float highlights  = params.cg_tone0.y;  // -1..1
+        float shadows     = params.cg_tone0.z;  // -1..1
+        float whites      = params.cg_tone0.w;  // -1..1
+        float blacks      = params.cg_tone1.x;  // -1..1
+
+        // White balance
+        x.r += temperature * 0.2;
+        x.b -= temperature * 0.2;
+        x.g += tint * 0.2;
+
+        // Exposure (in stops)
+        x *= pow(2.0, exposure * 2.0);
+
+        // Contrast around mid grey
+        x = (x - 0.5) * (1.0 + contrast) + 0.5;
+
+        // Tonal ranges
+        float luma = dot(clamp(x, 0.0, 1.0), LUMA);
+        x += highlights * 0.5 * smoothstep(0.5, 1.0, luma);
+        x += shadows    * 0.5 * (1.0 - smoothstep(0.0, 0.5, luma));
+        x += whites * 0.2 * luma;
+        x += blacks * 0.2 * (1.0 - luma);
+
+        // Saturation
+        float g = dot(x, LUMA);
+        x = mix(vec3(g), x, saturation);
+    }
+
+    // ---- Creative ----
+    if ((params.cg_flags & 2) != 0) {
+        float faded_film          = params.cg_tone1.y; // 0..1
+        float vibrance            = params.cg_tone1.z; // -1..1
+        float creative_saturation = params.cg_tone1.w; // 0..2
+
+        // Faded film: lift blacks
+        x = mix(x, x * 0.85 + 0.15, faded_film);
+
+        // Vibrance: boost low-saturation pixels more
+        float g2 = dot(x, LUMA);
+        float sat = length(x - vec3(g2));
+        float vib = vibrance * (1.0 - smoothstep(0.0, 0.6, sat));
+        x = mix(vec3(g2), x, 1.0 + vib);
+
+        // Creative saturation
+        float g3 = dot(x, LUMA);
+        x = mix(vec3(g3), x, creative_saturation);
+    }
+
+    return clamp(x, 0.0, 1.0) * mpv;
+}
+
 void main() {
     vec2 texPos = v_texcoord.xy * vec2(params.output_width, params.output_height) + params.translation2d;
     vec2 outPos = v_texcoord.xy * vec2(params.output_width, params.output_height);
@@ -279,6 +395,7 @@ void main() {
             draw_pixel(fragColor, uv.x, uv.y, true);
             draw_pixel(fragColor, outPos.x, outPos.y, false);
             draw_safe_area(fragColor, outPos.x, outPos.y);
+            fragColor.rgb = apply_color_grading(fragColor.rgb);
             return;
         }
 
@@ -287,6 +404,7 @@ void main() {
             draw_pixel(fragColor, uv.x, uv.y, true);
             draw_pixel(fragColor, outPos.x, outPos.y, false);
             draw_safe_area(fragColor, outPos.x, outPos.y);
+            fragColor.rgb = apply_color_grading(fragColor.rgb);
             return;
         }
     }

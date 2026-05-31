@@ -53,12 +53,19 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, frame: usize, width:
             let mesh_data_ptr = itm.mesh_data.as_ptr();
             let mesh_data_len = itm.mesh_data.len() as u32;
 
+            // LUT data (kept alive across the FFI call via lut_arc)
+            let lut_arc = stab.params.try_read().and_then(|p| p.color_grading.lut.clone());
+            let (lut_ptr, lut_w, lut_h) = match &lut_arc {
+                Some(l) => (l.rgba_f32().as_ptr(), l.tex_width() as u32, l.tex_height() as u32),
+                None => (std::ptr::null::<f32>(), 0u32, 0u32),
+            };
+
             let size_for_rs = if (itm.kernel_params.flags & 16) == 16 { itm.kernel_params.width } else { itm.kernel_params.height } as u32;
 
             let canvas_size = undist.drawing.get_size();
             let canvas_size = QSize { width: canvas_size.0 as u32, height: canvas_size.1 as u32 };
 
-            let ok = cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *", output_size as "QSize", shader_path as "QString", width as "uint32_t", height as "uint32_t", params_ptr as "uint8_t*", matrices_ptr as "uint8_t*", canvas_ptr as "uint8_t*", mesh_data_ptr as "float*", mesh_data_len as "uint32_t", matrices_len as "uint32_t", params_len as "uint32_t", canvas_len as "uint32_t", canvas_size as "QSize", size_for_rs as "uint32_t"] -> bool as "bool" {
+            let ok = cpp!(unsafe [mdkplayer as "MDKPlayerWrapper *", output_size as "QSize", shader_path as "QString", width as "uint32_t", height as "uint32_t", params_ptr as "uint8_t*", matrices_ptr as "uint8_t*", canvas_ptr as "uint8_t*", mesh_data_ptr as "float*", mesh_data_len as "uint32_t", matrices_len as "uint32_t", params_len as "uint32_t", canvas_len as "uint32_t", canvas_size as "QSize", size_for_rs as "uint32_t", lut_ptr as "float*", lut_w as "uint32_t", lut_h as "uint32_t"] -> bool as "bool" {
                 if (!mdkplayer || !mdkplayer->mdkplayer || shader_path.isEmpty() || output_size.isEmpty()) return false;
 
                 auto rhiUndistortion = static_cast<QtRHIUndistort *>(mdkplayer->mdkplayer->userData());
@@ -96,7 +103,7 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, frame: usize, width:
                     });
                 }
 
-                return rhiUndistortion->render(mdkplayer->mdkplayer, params_ptr, params_len, matrices_ptr, matrices_len, canvas_ptr, canvas_len, mesh_data_ptr, mesh_data_len);
+                return rhiUndistortion->render(mdkplayer->mdkplayer, params_ptr, params_len, matrices_ptr, matrices_len, canvas_ptr, canvas_len, mesh_data_ptr, mesh_data_len, lut_ptr, lut_w, lut_h);
             });
             if ok {
                 return Some(ProcessedInfo {
