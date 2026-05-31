@@ -76,6 +76,14 @@ pub struct KernelParams {
     pub reserved2:                f32, // 16
     pub ewa_coeffs_p:             Vec4, // 16
     pub ewa_coeffs_q:             Vec4, // 16
+    pub cg_flags:                 i32, // 4
+    pub cg_pad0:                  i32, // 8
+    pub cg_pad1:                  i32, // 12
+    pub cg_pad2:                  i32, // 16
+    pub cg_color0:                Vec4, // 16
+    pub cg_tone0:                 Vec4, // 16
+    pub cg_tone1:                 Vec4, // 16
+    pub cg_reserved:              Vec4, // 16
 }
 
 // #[inline] pub fn fast_floor(x: f32) -> i32 { x as i32 }

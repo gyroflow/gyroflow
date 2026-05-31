@@ -49,6 +49,14 @@ struct KernelParams {
     reserved2:                f32, // 16
     ewa_coeffs_p:             vec4<f32>, // 16
     ewa_coeffs_q:             vec4<f32>, // 16
+    cg_flags:                 i32, // 4
+    cg_pad0:                  i32, // 8
+    cg_pad1:                  i32, // 12
+    cg_pad2:                  i32, // 16
+    cg_color0:                vec4<f32>, // 16
+    cg_tone0:                 vec4<f32>, // 16
+    cg_tone1:                 vec4<f32>, // 16
+    cg_reserved:              vec4<f32>, // 16
 }
 
 @group(0) @binding(0) @fragment var<uniform> params: KernelParams;

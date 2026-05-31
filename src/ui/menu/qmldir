@@ -1,5 +1,6 @@
 module menu
 Advanced 1.0 Advanced.qml
+ColorGrading 1.0 ColorGrading.qml
 Export 1.0 Export.qml
 LensCalibrate 1.0 LensCalibrate.qml
 LensProfile 1.0 LensProfile.qml
