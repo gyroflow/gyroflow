@@ -37,7 +37,7 @@ struct KernelParams {
     translation3d:      vec4<f32>, // 16
     source_rect:        vec4<i32>, // 16 - x, y, w, h
     output_rect:        vec4<i32>, // 16 - x, y, w, h
-    digital_lens_params:vec4<f32>, // 16
+    digital_lens_params:array<vec4<f32>, 4>, // 16,16,16,16
     safe_area_rect:     vec4<f32>, // 16
     max_pixel_value:          f32, // 4
     distortion_model:         i32, // 8
@@ -487,7 +487,10 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
         var new_out_pos = out_pos;
 
         if (bool(flags & 2)) { // Has digital lens
+            // Apply the digital warp in the UN-zoomed (fov=1) frame so it's FOV-independent.
+            new_out_pos = (new_out_pos - out_c) * params.fov + out_c;
             new_out_pos = digital_undistort_point(new_out_pos);
+            new_out_pos = (new_out_pos - out_c) / params.fov + out_c;
         }
 
         new_out_pos = (new_out_pos - out_c) / out_f;

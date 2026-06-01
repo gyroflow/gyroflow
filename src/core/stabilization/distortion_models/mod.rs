@@ -9,10 +9,12 @@ mod ptlens;
 mod insta360;
 mod sony;
 mod generic_polynomial;
+mod gopro;
 
 mod gopro_superview;
 mod gopro6_superview;
 mod gopro_hyperview;
+mod gopro_warp;
 mod digital_stretch;
 
 use super::KernelParams;
@@ -97,10 +99,12 @@ impl_models! {
     Insta360          => insta360::Insta360,
     Sony              => sony::Sony,
     GenericPolynomial => generic_polynomial::GenericPolynomial,
+    GoPro             => gopro::GoPro,
 
     // Digital lenses (ie. post-processing)
-    GoProSuperview => gopro_superview::GoProSuperview,
+    GoProSuperview  => gopro_superview::GoProSuperview,
     GoPro6Superview => gopro6_superview::GoPro6Superview,
-    GoProHyperview => gopro_hyperview::GoProHyperview,
-    DigitalStretch => digital_stretch::DigitalStretch,
+    GoProHyperview  => gopro_hyperview::GoProHyperview,
+    GoProWarp       => gopro_warp::GoProWarp,
+    DigitalStretch  => digital_stretch::DigitalStretch,
 }

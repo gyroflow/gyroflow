@@ -1038,7 +1038,7 @@ impl StabilizationManager {
     pub fn set_digital_lens_param(&self, index: usize, value: f64) {
         let mut lens = self.lens.write();
         if lens.digital_lens_params.is_none() {
-            lens.digital_lens_params = Some(vec![0f64; 4]);
+            lens.digital_lens_params = Some(vec![0f64; 16]);
         }
         lens.digital_lens_params.as_mut().unwrap()[index] = value;
         #[cfg(feature = "opencv")]

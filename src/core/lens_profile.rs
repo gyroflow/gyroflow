@@ -84,7 +84,7 @@ pub struct LensProfile {
 
 impl LensProfile {
     pub fn init(&mut self) {
-        if !self.fisheye_params.distortion_coeffs.is_empty() {
+        if !self.fisheye_params.distortion_coeffs.is_empty() && !self.distortion_model.as_deref().is_some_and(|x| x == "gopro") {
             let distortion_model = DistortionModel::from_name(self.distortion_model.as_deref().unwrap_or("opencv_fisheye"));
             self.fisheye_params.radial_distortion_limit = distortion_model.radial_distortion_limit(&self.get_distortion_coeffs());
         }

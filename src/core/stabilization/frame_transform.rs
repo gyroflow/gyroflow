@@ -309,9 +309,9 @@ impl FrameTransform {
         drop(file_metadata);
         drop(gyro);
 
-        let mut digital_lens_params = [0f32; 4];
+        let mut digital_lens_params = [0f32; 16];
         if let Some(p) = &params.digital_lens_params {
-            for (i, v) in p.iter().enumerate() {
+            for (i, v) in p.iter().take(16).enumerate() {
                 digital_lens_params[i] = *v as f32;
             }
         }
@@ -349,7 +349,7 @@ impl FrameTransform {
         }
     }
 
-    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, use_fovs: bool) -> (Matrix3<f64>, [f64; 12], Matrix3<f64>, Vec<Matrix3<f64>>, Option<Vec<(f32, f32, f32, f32, f32)>>, Option<Vec<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
+    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, use_fovs: bool) -> (Matrix3<f64>, [f64; 12], Matrix3<f64>, Vec<Matrix3<f64>>, Option<Vec<(f32, f32, f32, f32, f32)>>, Option<Vec<f64>>, f64) { // camera_matrix, dist_coeffs, p, rotations_per_point, shifts, mesh, fov
         // ----------- Keyframes -----------
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
         // ----------- Keyframes -----------
@@ -434,6 +434,6 @@ impl FrameTransform {
             shifts = None;
         }
 
-        (scaled_k, distortion_coeffs, new_k, rotations, shifts, mesh_correction)
+        (scaled_k, distortion_coeffs, new_k, rotations, shifts, mesh_correction, fov)
     }
 }

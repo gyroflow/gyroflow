@@ -39,7 +39,7 @@ typedef struct {
     float4 translation3d;            // 16
     int4 source_rect;                // 16
     int4 output_rect;                // 16
-    float4 digital_lens_params;      // 16
+    float4 digital_lens_params[4];   // 16,16,16,16
     float4 safe_area_rect;           // 16
     float max_pixel_value;           // 4
     int distortion_model;            // 8
@@ -500,7 +500,10 @@ float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global c
         float2 new_out_pos = out_pos;
 
         if ((params->flags & 2)) { // Has digital lens
+            // Apply the digital warp in the UN-zoomed (fov=1) frame so it's FOV-independent
+            new_out_pos = (new_out_pos - out_c) * params->fov + out_c;
             new_out_pos = digital_undistort_point(new_out_pos, params);
+            new_out_pos = (new_out_pos - out_c) / params->fov + out_c;
         }
         new_out_pos = (new_out_pos - out_c) / out_f;
         new_out_pos = undistort_point(new_out_pos, params);
