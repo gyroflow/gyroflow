@@ -110,8 +110,8 @@ jobs:
         env:
           SIGNING_FINGERPRINT: ${{ secrets.MACOS_CERTIFICATE_FINGERPRINT }}
           # For Mac App Store
-          SIGN_KEY: 05AC9B1B232615B6DBE1FECD5A02AC21BBE967A9
-          PKG_SIGN_KEY: 67FDE536BC3BEBDB68E1224CF5DB17B8EB936F49
+          SIGN_KEY: 58FE9D9FF561BF9910031999A8211A23858D1920
+          PKG_SIGN_KEY: 1029ED283BDA1E21F7ADBC891E95BCBFB102B952
           PROVISIONING_PROFILE: /Users/runner/Library/MobileDevice/Provisioning Profiles/${{ matrix.targets.type == 'macstore' && fromJSON(steps.provisioning_mac.outputs.profiles)[0].udid || '' }}.mobileprovision
           FORCE_QT_VERSION: 6.7.3
           DONT_BUILD_DMG: true
@@ -162,7 +162,7 @@ jobs:
       - name: Build Gyroflow (iOS)
         if: ${{ matrix.targets.type == 'ios' }}
         env:
-          SIGN_KEY: 05AC9B1B232615B6DBE1FECD5A02AC21BBE967A9
+          SIGN_KEY: 58FE9D9FF561BF9910031999A8211A23858D1920
           PROVISIONING_PROFILE: /Users/runner/Library/MobileDevice/Provisioning Profiles/${{ matrix.targets.type == 'ios' && fromJSON(steps.provisioning.outputs.profiles)[0].udid || '' }}.mobileprovision
         run: |
           sudo xcode-select --switch /Applications/Xcode_16.2.app/Contents/Developer

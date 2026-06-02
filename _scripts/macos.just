@@ -2,8 +2,8 @@ import 'common.just'
 
 TeamID                        := "RR3ZC2L4DF"
 BundleIdentifier              := "xyz.gyroflow"
-DistributionCertificateSHA    := "05AC9B1B232615B6DBE1FECD5A02AC21BBE967A9"
-DistributionMacInstallerSHA   := "67FDE536BC3BEBDB68E1224CF5DB17B8EB936F49"
+DistributionCertificateSHA    := "58FE9D9FF561BF9910031999A8211A23858D1920"
+DistributionMacInstallerSHA   := "1029ED283BDA1E21F7ADBC891E95BCBFB102B952"
 DistributionProvisioning      := ProjectDir / "_deployment/mac/Gyroflow_mac_app_store.provisionprofile"
 
 # For local sandbox testing:
