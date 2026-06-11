@@ -198,8 +198,221 @@ MenuItem {
         settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
     }
 
+    property var cameraBrands: [];
+    property var cameraModels: [];
+    property var lensModels: [];
+    property string selectedCameraBrand: "";
+    property string selectedCameraModel: "";
+    property string selectedLensModel: "";
+    property bool useTextSearch: false;
+
+    function updateCameraModels() {
+        if (selectedCameraBrand) {
+            // Get regular models
+            const models = controller.get_camera_models(selectedCameraBrand) || [];
+            // Get compatible cameras
+            const compatible = controller.get_compatible_cameras(selectedCameraBrand, "") || [];
+            
+            // Combine and deduplicate
+            let allModels = models.concat(compatible);
+            let uniqueModels = [];
+            let seen = {};
+            for (const m of allModels) {
+                if (!seen[m]) {
+                    seen[m] = true;
+                    uniqueModels.push(m);
+                }
+            }
+            uniqueModels.sort();
+            
+            cameraModels = [""].concat(uniqueModels); // Empty string for "All models"
+            if (selectedCameraModel && !cameraModels.includes(selectedCameraModel)) {
+                selectedCameraModel = "";
+                cameraModelCombo.currentIndex = 0;
+            }
+            updateLensModels();
+            filterProfiles();
+        } else {
+            cameraModels = [];
+            lensModels = [];
+        }
+    }
+
+    function updateLensModels() {
+        if (selectedCameraBrand) {
+            const lenses = controller.get_lens_models(selectedCameraBrand) || [];
+            lensModels = [""].concat(lenses.map(l => {
+                if (typeof l === "string") return l;
+                return l.model || "";
+            }));
+            if (selectedLensModel && !lensModels.includes(selectedLensModel)) {
+                selectedLensModel = "";
+                lensModelCombo.currentIndex = 0;
+            }
+            filterProfiles();
+        } else {
+            lensModels = [];
+        }
+    }
+
+    function filterProfiles() {
+        const favorites = Object.keys(root.favorites);
+        const aspectRatio = root.currentVideoAspectRatio;
+        const aspectRatioSwapped = root.currentVideoAspectRatioSwapped;
+        const searchText = useTextSearch ? searchField.text : "";
+        
+        controller.search_lens_profile_filtered(
+            searchText,
+            favorites,
+            aspectRatio,
+            aspectRatioSwapped,
+            selectedCameraBrand || "",
+            selectedCameraModel || "",
+            selectedLensModel || ""
+        );
+    }
+
+    Component.onCompleted: {
+        cameraBrands = [""].concat(controller.get_camera_brands() || []); // Empty string for "All brands"
+    }
+
+    Connections {
+        target: controller;
+        function onLens_profile_loaded(json_str: string, filepath: string, checksum: string): void {
+            if (json_str) {
+                const obj = JSON.parse(json_str);
+                if (obj && obj.camera_brand) {
+                    // Pre-populate selectors from loaded profile
+                    const brandIdx = cameraBrands.indexOf(obj.camera_brand);
+                    if (brandIdx >= 0) {
+                        cameraBrandCombo.currentIndex = brandIdx;
+                        selectedCameraBrand = obj.camera_brand;
+                        updateCameraModels();
+                        
+                        if (obj.camera_model) {
+                            Qt.callLater(() => {
+                                const modelIdx = cameraModels.indexOf(obj.camera_model);
+                                if (modelIdx >= 0) {
+                                    cameraModelCombo.currentIndex = modelIdx;
+                                    selectedCameraModel = obj.camera_model;
+                                }
+                            });
+                        }
+                        
+                        if (obj.lens_model) {
+                            Qt.callLater(() => {
+                                const lensIdx = lensModels.indexOf(obj.lens_model);
+                                if (lensIdx >= 0) {
+                                    lensModelCombo.currentIndex = lensIdx;
+                                    selectedLensModel = obj.lens_model;
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Connections {
+        target: controller;
+        function onSearch_lens_profile_finished(profiles: var): void {
+            search.popup.lv.model = profiles;
+            search.popup.visible = profiles.length > 0;
+        }
+    }
+
+    Column {
+        spacing: 10 * dpiScale;
+        width: parent.width;
+
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Camera brand");
+            ComboBox {
+                id: cameraBrandCombo;
+                width: parent.width;
+                model: cameraBrands;
+                font.pixelSize: 12 * dpiScale;
+                onCurrentIndexChanged: {
+                    if (currentIndex >= 0) {
+                        const value = model[currentIndex];
+                        selectedCameraBrand = value || "";
+                        updateCameraModels();
+                    }
+                }
+            }
+        }
+
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Camera model");
+            ComboBox {
+                id: cameraModelCombo;
+                width: parent.width;
+                model: cameraModels;
+                enabled: selectedCameraBrand;
+                font.pixelSize: 12 * dpiScale;
+                onCurrentIndexChanged: {
+                    if (currentIndex >= 0 && enabled) {
+                        const value = model[currentIndex];
+                        selectedCameraModel = value || "";
+                        // Update compatible cameras when model changes
+                        if (selectedCameraModel && selectedCameraBrand) {
+                            const compatible = controller.get_compatible_cameras(selectedCameraBrand, selectedCameraModel) || [];
+                            if (compatible.length > 0) {
+                                // Could show a tooltip or info message about compatible cameras
+                            }
+                        }
+                        filterProfiles();
+                    }
+                }
+            }
+            InfoMessageSmall {
+                show: selectedCameraBrand && cameraModels.length > 1;
+                type: InfoMessage.Info;
+                text: qsTr("Showing compatible cameras for %1").arg(selectedCameraBrand);
+            }
+        }
+
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Lens model");
+            ComboBox {
+                id: lensModelCombo;
+                width: parent.width;
+                model: lensModels;
+                enabled: selectedCameraBrand;
+                font.pixelSize: 12 * dpiScale;
+                onCurrentIndexChanged: {
+                    if (currentIndex >= 0 && enabled) {
+                        const value = model[currentIndex];
+                        selectedLensModel = value || "";
+                        filterProfiles();
+                    }
+                }
+            }
+        }
+
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Text search (fallback)");
+            CheckBox {
+                id: useTextSearchCb;
+                text: qsTr("Enable text search");
+                onCheckedChanged: {
+                    useTextSearch = checked;
+                    if (checked) {
+                        filterProfiles();
+                    }
+                }
+            }
+        }
+    }
+
     SearchField {
         id: search;
+        visible: useTextSearch;
         placeholderText: qsTr("Search...");
         height: 25 * dpiScale;
         width: parent.width;
@@ -212,6 +425,11 @@ MenuItem {
             } else {
                 root.selected_manually = true;
                 controller.load_lens_profile(lensPathOrId);
+            }
+        }
+        onTextChanged: {
+            if (useTextSearch) {
+                filterProfiles();
             }
         }
         popup.lv.delegate: LensProfileSearchDelegate {

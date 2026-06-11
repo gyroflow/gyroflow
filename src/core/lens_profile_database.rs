@@ -277,6 +277,10 @@ impl LensProfileDatabase {
     }
 
     pub fn search(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<(String, String, String, bool, f64, i32, String)> {
+        self.search_with_filters(text, favorites, aspect_ratio, aspect_ratio_swapped, None, None, None)
+    }
+
+    pub fn search_with_filters(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32, camera_brand: Option<&str>, camera_model: Option<&str>, lens_model: Option<&str>) -> Vec<(String, String, String, bool, f64, i32, String)> {
         let text = text.to_ascii_lowercase()
             .replace("bmpcc4k",  "blackmagic pocket cinema camera 4k")
             .replace("bmpcc6k",  "blackmagic pocket cinema camera 6k")
@@ -303,16 +307,47 @@ impl LensProfileDatabase {
             .replace(";", " ");
 
         let words = text.split_ascii_whitespace().map(str::trim).filter(|x| !x.is_empty()).collect::<Vec<_>>();
-        if words.is_empty() {
+        
+        // If no text search and no filters, return empty
+        if words.is_empty() && camera_brand.is_none() && camera_model.is_none() && lens_model.is_none() {
             return Vec::new();
         }
 
-        let mut filtered = self.list_for_ui.iter().filter(|(name, _, _, _, _, _, author)| {
-            let name = name.to_ascii_lowercase();
-            let author = author.to_ascii_lowercase();
-            for word in &words {
-                if !name.contains(word) && !author.contains(word) {
-                    return false;
+        let mut filtered = self.list_for_ui.iter().filter(|(name, id, _, _, rating, _, author)| {
+            // Filter by camera brand/model/lens if provided
+            if let Some(profile) = self.map.get(*id) {
+                // Filter out bad profiles (rating of 0.0 or very low)
+                if let Some(r) = rating {
+                    if *r <= 0.1 && *r > 0.0 {
+                        return false; // Bad profile
+                    }
+                }
+
+                if let Some(brand) = camera_brand {
+                    if !brand.is_empty() && profile.camera_brand.to_ascii_lowercase() != brand.to_ascii_lowercase() {
+                        return false;
+                    }
+                }
+                if let Some(model) = camera_model {
+                    if !model.is_empty() && profile.camera_model.to_ascii_lowercase() != model.to_ascii_lowercase() {
+                        return false;
+                    }
+                }
+                if let Some(lens) = lens_model {
+                    if !lens.is_empty() && profile.lens_model.to_ascii_lowercase() != lens.to_ascii_lowercase() {
+                        return false;
+                    }
+                }
+            }
+
+            // Text search (only if words provided)
+            if !words.is_empty() {
+                let name = name.to_ascii_lowercase();
+                let author = author.to_ascii_lowercase();
+                for word in &words {
+                    if !name.contains(word) && !author.contains(word) {
+                        return false;
+                    }
                 }
             }
             return true;
@@ -388,6 +423,10 @@ impl LensProfileDatabase {
             let path_normalized = filename_or_id.replace('\\', "/");
             self.map.iter().find(|(_, v)| v.path_to_file.replace('\\', "/").contains(&path_normalized)).map(|(_, v)| v)
         }
+    }
+
+    pub fn iter_profiles(&self) -> impl Iterator<Item = &LensProfile> {
+        self.map.values()
     }
 
     // -------------------------------------------------------------------
