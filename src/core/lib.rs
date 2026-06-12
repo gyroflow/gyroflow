@@ -6,6 +6,7 @@ pub mod gyro_source;
 pub mod imu_integration;
 pub mod lens_profile;
 pub mod lens_profile_database;
+pub mod lensfun_import;
 #[cfg(feature = "opencv")]
 pub mod calibration;
 pub mod synchronization;
@@ -2126,6 +2127,18 @@ pub enum GyroflowCoreError {
 
     #[error("IO error {0:?}")]
     IOError(#[from] std::io::Error),
+
+    #[error("Failed to load bundled Lensfun database")]
+    LensfunDbLoadFailed,
+
+    #[error("Lens not found in Lensfun database: {0}")]
+    LensNotFound(String),
+
+    #[error("No distortion calibration for focal {0} mm")]
+    NoCalibrationForFocal(f32),
+
+    #[error("Lens has no distortion model")]
+    LensHasNoDistortion,
 
     #[error("Unknown error")]
     Unknown
