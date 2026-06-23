@@ -12,10 +12,7 @@ impl Sony {
 
         const EPS: f32 = 1e-6;
 
-        let post_scale = (params.k[6], params.k[7]);
-
-        let point = (point.0 / post_scale.0, point.1 / post_scale.1);
-        // now point is in meters from center of sensor
+        // point is a dimensionless normalized image-plane radius
 
         let theta_d = (point.0 * point.0 + point.1 * point.1).sqrt();
 
@@ -88,12 +85,7 @@ impl Sony {
 
         let scale = if r == 0.0 { 1.0 } else { theta_d / r };
 
-        let post_scale = (params.k[6], params.k[7]);
-
-        (
-            x * scale * post_scale.0,
-            y * scale * post_scale.1
-        )
+        (x * scale, y * scale)
     }
 
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }

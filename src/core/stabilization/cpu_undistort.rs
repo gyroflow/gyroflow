@@ -431,9 +431,11 @@ impl Stabilization {
 
                 if (params.flags & 2) == 2 { // Has digial lens
                     if let Some(digital) = digital_lens {
-                        if let Some(pt) = digital.undistort_point((new_out_pos.x, new_out_pos.y), params) {
-                            new_out_pos.x = pt.0;
-                            new_out_pos.y = pt.1;
+                        // Apply the digital warp in the UN-zoomed (fov=1) frame so it's FOV-independent,
+                        let uz = ((new_out_pos.x - out_c.x) * params.fov + out_c.x, (new_out_pos.y - out_c.y) * params.fov + out_c.y);
+                        if let Some(pt) = digital.undistort_point(uz, params) {
+                            new_out_pos.x = (pt.0 - out_c.x) / params.fov + out_c.x;
+                            new_out_pos.y = (pt.1 - out_c.y) / params.fov + out_c.y;
                         }
                     }
                 }
@@ -633,9 +635,9 @@ impl Stabilization {
 
 pub fn undistort_points_with_rolling_shutter(distorted: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, params: &ComputeParams, lens_correction_amount: f64, use_fovs: bool) -> Vec<(f32, f32)> {
     if distorted.is_empty() { return Vec::new(); }
-    let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms, frame, use_fovs);
+    let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh, fov) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms, frame, use_fovs);
 
-    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), params, lens_correction_amount, timestamp_ms, is, mesh)
+    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), params, lens_correction_amount, fov, timestamp_ms, is, mesh)
 }
 pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us: i64, params: &ComputeParams, points_dims: (u32, u32)) -> Vec<(f32, f32)> {
     let img_dim_ratio = points_dims.0 as f64 / params.width.max(1) as f64;//FrameTransform::get_ratio(params);
@@ -644,10 +646,10 @@ pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us:
 
     let scaled_k = camera_matrix * img_dim_ratio;
 
-    undistort_points(distorted, scaled_k, &distortion_coeffs, Matrix3::identity(), None, None, params, 1.0, timestamp_us as f64 / 1000.0, None, None)
+    undistort_points(distorted, scaled_k, &distortion_coeffs, Matrix3::identity(), None, None, params, 1.0, 1.0, timestamp_us as f64 / 1000.0, None, None)
 }
 // Ported from OpenCV: https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L321
-pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64; 12], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams, lens_correction_amount: f64, timestamp_ms: f64, shift_per_point: Option<Vec<(f32, f32, f32, f32, f32)>>, mesh: Option<Vec<f64>>) -> Vec<(f32, f32)> {
+pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64; 12], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams, lens_correction_amount: f64, fov: f64, timestamp_ms: f64, shift_per_point: Option<Vec<(f32, f32, f32, f32, f32)>>, mesh: Option<Vec<f64>>) -> Vec<(f32, f32)> {
     let f = (camera_matrix[(0, 0)] as f32, camera_matrix[(1, 1)] as f32);
     let c = (camera_matrix[(0, 2)] as f32, camera_matrix[(1, 2)] as f32);
 
@@ -658,6 +660,13 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
 
     let light_refraction_coefficient = params.keyframes.value_at_video_timestamp(&crate::KeyframeType::LightRefractionCoeff, timestamp_ms).unwrap_or(params.light_refraction_coefficient) as f32;
 
+    let mut digital_lens_params = [0f32; 16];
+    if let Some(p) = &params.digital_lens_params {
+        for (i, v) in p.iter().take(16).enumerate() {
+            digital_lens_params[i] = *v as f32;
+        }
+    }
+
     // TODO more params
     let kernel_params = KernelParams {
         width : params.width as i32,
@@ -667,12 +676,26 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
         f: [f.0, f.1],
         c: [c.0, c.1],
         k: distortion_coeffs.iter().map(|x| *x as f32).collect::<Vec<_>>().try_into().unwrap(),
+        digital_lens_params,
         light_refraction_coefficient,
 
         ..Default::default()
     };
 
-    // TODO: into_par_iter?
+    // Lens-correction blend constants — point-independent, so compute once instead of per point.
+    let lens_correction = if lens_correction_amount < 1.0 {
+        // Match the render's lens-correction EXACTLY: out_c = output/2 (no input-stretch division) and
+        // out_f = (f/fov)/factor — see undistort.frag and the undistort_coord render mirror above.
+        let out_c = (params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
+        let amount = lens_correction_amount as f32;
+        let factor = (1.0 - amount).max(0.001);
+        let out_f = (f.0 / fov as f32 / factor, f.1 / fov as f32 / factor);
+        Some((out_c, amount, factor, out_f))
+    } else { None };
+
+    // Not parallelized here: the only caller that reaches the lens-correction block below
+    // (zooming::fov_iterative) already runs this across frames via into_par_iter, and the
+    // stmap caller passes one point at a time — so a nested par_iter would only oversubscribe.
     distorted.iter().enumerate().map(|(index, pi)| {
         let mut x = pi.0;
         let mut y = pi.1;
@@ -756,44 +779,76 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
             let pr = rot * nalgebra::Vector3::new(pt.0, pt.1, 1.0); // rotated point optionally multiplied by new camera matrix
             pt = (pr[0] / pr[2], pr[1] / pr[2]);
 
-            if lens_correction_amount < 1.0 {
-                let mut out_c = (params.output_width as f32 / 2.0, params.output_height as f32 / 2.0);
-                if params.lens.input_horizontal_stretch > 0.001 { out_c.0 /= params.lens.input_horizontal_stretch as f32; }
-                if params.lens.input_vertical_stretch   > 0.001 { out_c.1 /= params.lens.input_vertical_stretch as f32; }
-
-                let mut new_pt = pt;
-                new_pt = ((new_pt.0 - out_c.0) / f.0, (new_pt.1 - out_c.1) / f.1);
-                let mut _w = 1.0;
-                if kernel_params.light_refraction_coefficient != 1.0 && kernel_params.light_refraction_coefficient > 0.0 {
-                    let r = (new_pt.0.powi(2) + new_pt.1.powi(2)).sqrt() / _w;
-                    let sin_theta_d = (r / (1.0 + r * r).sqrt()) * kernel_params.light_refraction_coefficient;
-                    let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
-                    if r_d != 0.0 {
-                        _w *= r / r_d;
-                    }
-                }
-                new_pt = params.distortion_model.distort_point(new_pt.0, new_pt.1, _w, &kernel_params); // TODO: z?
-                new_pt = ((new_pt.0 * f.0) + out_c.0, (new_pt.1 * f.1) + out_c.1);
-
-                if let Some(digital) = &params.digital_lens {
-                    new_pt = digital.distort_point(new_pt.0, new_pt.1, 1.0, &kernel_params);
-                    if digital.id() == "gopro_superview" || digital.id() == "gopro6_superview" || digital.id() == "gopro_hyperview" {
-                        // TODO: This calculation is wrong but it somewhat works
-                        let size = (params.width as f32, params.height as f32);
-                        new_pt = (new_pt.0 / size.0 - 0.5, new_pt.1 / size.1 - 0.5);
-                        if digital.id() == "gopro_superview" || digital.id() == "gopro6_superview" {
-                            new_pt.0 *= 0.91;
-                        } else if digital.id() == "gopro_hyperview"{
-                            new_pt.0 *= 0.81;
+            if let Some((out_c, amount, factor, out_f)) = lens_correction {
+                // The digital warp is applied FOV-independently (un-zoom -> warp -> re-zoom below), so the
+                // corrected frame shape is a pure uniform scale in fov — the zoom search and the cached debug
+                // overlay both use the use_fovs=false `fov`, and the live FOV is a uniform scale at draw time.
+                //
+                // The render samples at  texPos_used = lerp(R(o), o, amount), where R(o) is applied FORWARD to
+                // the in-frame output pixel o:  R = digital_undistort -> /out_f -> radial undistort -> *out_f
+                // (undistort.frag). `pt` is that texPos_used, so the output position o of this source point is the
+                // solution of  amount*o + (1-amount)*R(o) = pt. We solve it with Newton, evaluating R FORWARD —
+                // digital_undistort is a direct polynomial (finite even out-of-domain) and radial undistort is
+                // well-defined, so this never blows up. (The old closed-form inverse fed the rectilinear,
+                // far-out-of-frame `pt` into the digital *inverse*, which diverged to NaN for lc>0.)
+                let r_of = |o: (f32, f32)| -> (f32, f32) {
+                    let mut q = o;
+                    if let Some(digital) = &params.digital_lens {
+                        // FOV-independent digital warp: un-zoom -> warp -> re-zoom.
+                        let uz = ((q.0 - out_c.0) * fov as f32 + out_c.0, (q.1 - out_c.1) * fov as f32 + out_c.1);
+                        if let Some(d) = digital.undistort_point(uz, &kernel_params) {
+                            q = ((d.0 - out_c.0) / fov as f32 + out_c.0, (d.1 - out_c.1) / fov as f32 + out_c.1);
                         }
-                        new_pt = ((new_pt.0 + 0.5) * size.0, (new_pt.1 + 0.5) * size.1);
                     }
-                }
+                    let mut n = ((q.0 - out_c.0) / out_f.0, (q.1 - out_c.1) / out_f.1);
+                    if let Some(d) = params.distortion_model.undistort_point(n, &kernel_params) { n = d; }
+                    if kernel_params.light_refraction_coefficient != 1.0 && kernel_params.light_refraction_coefficient > 0.0 {
+                        let r = (n.0 * n.0 + n.1 * n.1).sqrt();
+                        if r != 0.0 {
+                            let sin_theta_d = (r / (1.0 + r * r).sqrt()) / kernel_params.light_refraction_coefficient;
+                            let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
+                            let s = r_d / r;
+                            n = (n.0 * s, n.1 * s);
+                        }
+                    }
+                    ((n.0 * out_f.0) + out_c.0, (n.1 * out_f.1) + out_c.1)
+                };
 
-                pt = (
-                    new_pt.0 * (1.0 - lens_correction_amount as f32) + (pt.0 * lens_correction_amount as f32),
-                    new_pt.1 * (1.0 - lens_correction_amount as f32) + (pt.1 * lens_correction_amount as f32),
-                );
+                // Initial guess: the old closed-form inverse blended toward pt (exact at amount=0 and amount→1),
+                // falling back to pt where the inverse digital warp is out-of-domain.
+                let inv = {
+                    let n = ((pt.0 - out_c.0) / out_f.0, (pt.1 - out_c.1) / out_f.1);
+                    let d = params.distortion_model.distort_point(n.0, n.1, 1.0, &kernel_params);
+                    let mut p2 = ((d.0 * out_f.0) + out_c.0, (d.1 * out_f.1) + out_c.1);
+                    if let Some(digital) = &params.digital_lens {
+                        let uz = ((p2.0 - out_c.0) * fov as f32 + out_c.0, (p2.1 - out_c.1) * fov as f32 + out_c.1);
+                        let dd = digital.distort_point(uz.0, uz.1, 1.0, &kernel_params);
+                        p2 = ((dd.0 - out_c.0) / fov as f32 + out_c.0, (dd.1 - out_c.1) / fov as f32 + out_c.1);
+                    }
+                    p2
+                };
+                let mut o = if inv.0.is_finite() && inv.1.is_finite() {
+                    (inv.0 * factor + pt.0 * amount, inv.1 * factor + pt.1 * amount)
+                } else { pt };
+
+                // Newton: g(o) = amount*o + (1-amount)*R(o) - pt = 0
+                for _ in 0..10 {
+                    let r = r_of(o);
+                    let g = (amount * o.0 + factor * r.0 - pt.0, amount * o.1 + factor * r.1 - pt.1);
+                    if g.0.abs() < 0.02 && g.1.abs() < 0.02 { break; }
+                    let eps = 1.0_f32;
+                    let rx = r_of((o.0 + eps, o.1));
+                    let ry = r_of((o.0, o.1 + eps));
+                    let j11 = amount + factor * (rx.0 - r.0) / eps; let j21 = factor * (rx.1 - r.1) / eps;
+                    let j12 = factor * (ry.0 - r.0) / eps;          let j22 = amount + factor * (ry.1 - r.1) / eps;
+                    let det = j11 * j22 - j12 * j21;
+                    if !det.is_finite() || det.abs() < 1e-9 { break; }
+                    let dx = ( j22 * g.0 - j12 * g.1) / det;
+                    let dy = (-j21 * g.0 + j11 * g.1) / det;
+                    if !dx.is_finite() || !dy.is_finite() { break; }
+                    o = (o.0 - dx, o.1 - dy);
+                }
+                pt = o;
             }
             pt
         } else {

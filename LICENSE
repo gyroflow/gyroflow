@@ -676,9 +676,20 @@ Public License instead of this License.  But first, please read
 ---
 
 **Additional terms:**
-As an additional permission under section 7, you are allowed to distribute
-Gyroflow and [`gyroflow_core`](https://github.com/gyroflow/gyroflow/tree/master/src/core)
-through an app store, even if that store has restrictive terms and conditions
-that are incompatible with the GPLv3 license, provided that
-the source is also available under the GPLv3 with or without this permission
-through a channel without those restrictive terms and conditions.
+- As an additional permission under section 7, you are allowed to distribute
+  Gyroflow and [`gyroflow_core`](https://github.com/gyroflow/gyroflow/tree/master/src/core)
+  through an app store, even if that store has restrictive terms and conditions
+  that are incompatible with the GPLv3 license, provided that
+  the source is also available under the GPLv3 with or without this permission
+  through a channel without those restrictive terms and conditions.
+
+- As an additional permission under section 7, you are allowed to link or combine
+  Gyroflow with mdk-sdk, and to distribute the resulting combined work, provided
+  that every other part of the combined work is distributed under terms compatible
+  with the GNU GPL version 3.
+
+  You are not required to provide the Corresponding Source for mdk-sdk under the
+  GNU GPL, provided that mdk-sdk is distributed under its own license terms.
+
+  This permission applies only to mdk-sdk and not to any other proprietary
+  library.

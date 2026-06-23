@@ -60,7 +60,7 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                         let timestamp_us = (info.timestamp_ms * 1000.0).round() as i64;
                         if let Some(lp) = md.lens_params.get_mut(&timestamp_us) {
                             lp.focal_length = Some(focal_length_mm as f32);
-                            lp.pixel_focal_length = Some(fx as f32);
+                            lp.pixel_focal_length = Some((fx as f32, fy as f32));
                         }
                         if md.lens_profile.is_none() {
                             let mut lens_name = String::new();
@@ -108,56 +108,32 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                 match nalgebra::SVD::new(matrix.clone(), true, true).solve(&lens_out_radius, 1e-18f64) {
                     Ok(poly_coeffs) => {
                         assert_eq!(poly_coeffs.len(), 6);
-                        //////////////////////////////////////////////////
-                        fn a2y(a: f64, params: &nalgebra::DVector<f64>) -> f64 {
-                            let mut sum = 0.0;
-                            for i in 0..6 {
-                                sum += a.powi(i + 1) * params[i as usize];
-                            }
-                            sum
-                        }
-                        fn a2y_diff(a: f64, params: &nalgebra::DVector<f64>) -> f64 {
-                            let mut sum = 0.0;
-                            for i in 0..6 {
-                                sum += (i as f64 + 1.0) * a.powi(i) * params[i as usize];
-                            }
-                            sum
-                        }
-                        fn y2a(y: f64, params: &nalgebra::DVector<f64>) -> f64 {
-                            let mut x = 0.01;
-                            for _ in 0..50 {
-                                x = x - (a2y(x, params) - y) / a2y_diff(x, params);
-                            }
-                            x
-                        }
 
-                        // Calculate max possible fov
+                        let pixel_pitch_m  = nalgebra::Vector2::new(pixel_pitch.0 as f64, pixel_pitch.1 as f64) / 1e9;
                         let sensor_crop_px = nalgebra::Vector2::new(crop_size.0 as f64, crop_size.1 as f64);
-                        let pixel_pitch = nalgebra::Vector2::new(pixel_pitch.0 as f64, pixel_pitch.1 as f64) / 1e9;
-                        let video_res_px = nalgebra::Vector2::new(size.0 as f64, size.1 as f64);
+                        let video_res_px   = nalgebra::Vector2::new(size.0 as f64, size.1 as f64);
 
-                        let sensor_crop = pixel_pitch.component_mul(&sensor_crop_px);
-                        let pixel_pitch_scaled = sensor_crop.component_div(&video_res_px);
+                        // Effective meters-per-output-pixel after the sensor → output resize.
+                        let pixel_pitch_scaled = pixel_pitch_m.component_mul(&sensor_crop_px).component_div(&video_res_px);
 
-                        let fov_hor = y2a(sensor_crop.x / 2.0, &poly_coeffs);
-                        let fov_vert = y2a(sensor_crop.y / 2.0, &poly_coeffs);
-                        let fov_diag = y2a(sensor_crop.norm() / 2.0, &poly_coeffs);
+                        // Single physical focal length (meters) used to normalize the polynomial.
+                        let f_meters = focal_length_mm / 1000.0;
 
-                        let focal_length = (video_res_px.x / fov_hor.tan())
-                            .max(video_res_px.y / fov_vert.tan())
-                            .max(video_res_px.norm() / fov_diag.tan())
-                            / 2.0;
-                        let post_scale = [
-                            1.0 / pixel_pitch_scaled.x / focal_length,
-                            1.0 / pixel_pitch_scaled.y / focal_length,
-                        ];
-                        let fx = focal_length;
+                        // Per-axis pixel focal length: f_meters / (meters per output pixel).
+                        let fx = f_meters / pixel_pitch_scaled.x;
+                        let fy = f_meters / pixel_pitch_scaled.y;
+
+                        // Dimensionless coefficients: c_i = k_i / f_meters. c_0 should be ≈ 1.0.
+                        let normalized: Vec<f64> = poly_coeffs.iter().map(|c| c / f_meters).collect();
+                        if (normalized[0] - 1.0).abs() > 0.05 {
+                            log::warn!("Sony polynomial fit: c_0 = {:.4} (expected ≈1.0)", normalized[0]);
+                        }
 
                         let timestamp_us = (info.timestamp_ms * 1000.0).round() as i64;
                         if let Some(lp) = md.lens_params.get_mut(&timestamp_us) {
-                            lp.focal_length = Some((focal_length * sensor_height / size.1 as f64 * 1000.0) as f32);
-                            lp.pixel_focal_length = Some(focal_length as f32);
-                            lp.distortion_coefficients = poly_coeffs.into_iter().cloned().chain(post_scale).collect();
+                            lp.focal_length = Some(focal_length_mm as f32);
+                            lp.pixel_focal_length = Some((fx as f32, fy as f32));
+                            lp.distortion_coefficients = normalized;
                         }
 
                         if md.lens_profile.is_none() {
@@ -179,8 +155,8 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
                                 "note": format!("Distortion comp.: {}", if lens_compensation_enabled { "On" } else { "Off" }),
                                 "fisheye_params": {
                                     "camera_matrix": [
-                                        [ fx, 0.0, size.0 / 2 ],
-                                        [ 0.0, fx, size.1 / 2 ],
+                                        [ fx,  0.0, size.0 / 2 ],
+                                        [ 0.0, fy,  size.1 / 2 ],
                                         [ 0.0, 0.0, 1.0 ]
                                     ],
                                     "distortion_coeffs": []
@@ -604,8 +580,8 @@ fn inverse_interpolate_mesh(x_prime: f64, y_prime: f64, size: (f64, f64), mesh: 
     let operator = Objective { x_prime, y_prime, size, mesh };
     let solver = NelderMead::new(vec![
             Vector2::new(x_prime, y_prime),
-            Vector2::new(x_prime + 0.0001, y_prime),
-            Vector2::new(x_prime, y_prime + 0.0001),
+            Vector2::new(x_prime + 0.0003, y_prime),
+            Vector2::new(x_prime, y_prime + 0.0003),
         ])
         .with_sd_tolerance(1e-10)?;
 

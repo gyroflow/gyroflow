@@ -114,7 +114,7 @@ install-deps:
         fi
     fi
 
-    if [ ! -d "{{FFmpeg}}" ]; then
+    if [ ! -d "$FFMPEG_DIR" ]; then
         echo "Downloading ffmpeg"
 
         # Download and extract ffmpeg

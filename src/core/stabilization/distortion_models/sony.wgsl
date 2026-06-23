@@ -4,10 +4,8 @@
 fn undistort_point(pos_param: vec2<f32>) -> vec2<f32> {
     if (params.k1.x == 0.0 && params.k1.y == 0.0 && params.k1.z == 0.0 && params.k1.w == 0.0) { return pos_param; }
 
-    let post_scale = vec2<f32>(params.k2.z, params.k2.w);
-    var pos = pos_param / post_scale;
-
-    // now pos is in meters from center of sensor
+    // pos is a dimensionless normalized image-plane radius
+    var pos = pos_param;
 
     let theta_d = length(pos);
 
@@ -77,7 +75,5 @@ fn distort_point(x: f32, y: f32, z: f32) -> vec2<f32> {
         scale = theta_d / r;
     }
 
-    let post_scale = vec2<f32>(params.k2.z, params.k2.w);
-
-    return pos * scale * post_scale;
+    return pos * scale;
 }

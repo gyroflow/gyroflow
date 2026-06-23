@@ -133,7 +133,7 @@ pub struct KernelParams {
     pub translation3d:            [f32; 4], // 16
     pub source_rect:              [i32; 4], // 16 - x, y, w, h
     pub output_rect:              [i32; 4], // 16 - x, y, w, h
-    pub digital_lens_params:      [f32; 4], // 16
+    pub digital_lens_params:      [f32; 16], // 16,16,16,16
     pub safe_area_rect:           [f32; 4], // 16
     pub max_pixel_value:          f32, // 4
     pub distortion_model:         stabilize_spirv::DistortionModel, // 8

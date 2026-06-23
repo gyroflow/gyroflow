@@ -39,7 +39,7 @@ typedef struct {
     float4 translation3d;            // 16
     int4 source_rect;                // 16
     int4 output_rect;                // 16
-    float4 digital_lens_params;      // 16
+    float4 digital_lens_params[4];   // 16,16,16,16
     float4 safe_area_rect;           // 16
     float max_pixel_value;           // 4
     int distortion_model;            // 8
@@ -198,6 +198,14 @@ void cubic_spline_coefficients(__private float *mesh, int step, int offset, floa
     #undef n
 }
 float cubic_spline_interpolate2(__private float *a, __private float *b, __private float *c, __private float *d, int n, float x, float size) {
+    if (x <= 0.0f) {
+        return a[0] + b[0] * x;
+    }
+    if (x >= size) {
+        float h = size / (n - 1.0f);
+        float slope = b[n - 2] + 2.0f * c[n - 2] * h + 3.0f * d[n - 2] * h * h;
+        return a[n - 1] + slope * (x - size);
+    }
     int i = max(0.0f, min(n - 2.0f, (n - 1.0f) * x / size));
     float dx = x - size * i / (n - 1.0f);
     return a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx;
@@ -492,7 +500,10 @@ float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global c
         float2 new_out_pos = out_pos;
 
         if ((params->flags & 2)) { // Has digital lens
+            // Apply the digital warp in the UN-zoomed (fov=1) frame so it's FOV-independent
+            new_out_pos = (new_out_pos - out_c) * params->fov + out_c;
             new_out_pos = digital_undistort_point(new_out_pos, params);
+            new_out_pos = (new_out_pos - out_c) / params->fov + out_c;
         }
         new_out_pos = (new_out_pos - out_c) / out_f;
         new_out_pos = undistort_point(new_out_pos, params);

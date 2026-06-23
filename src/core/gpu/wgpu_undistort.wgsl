@@ -37,7 +37,7 @@ struct KernelParams {
     translation3d:      vec4<f32>, // 16
     source_rect:        vec4<i32>, // 16 - x, y, w, h
     output_rect:        vec4<i32>, // 16 - x, y, w, h
-    digital_lens_params:vec4<f32>, // 16
+    digital_lens_params:array<vec4<f32>, 4>, // 16,16,16,16
     safe_area_rect:     vec4<f32>, // 16
     max_pixel_value:          f32, // 4
     distortion_model:         i32, // 8
@@ -330,6 +330,15 @@ fn cubic_spline_coefficients(mesh: ptr<function, array<f32, GRID_SIZE>>, step: i
 }
 
 fn cubic_spline_interpolate2(n: i32, x: f32, size: f32) -> f32 {
+    if (x <= 0.0) {
+        return a[0] + b[0] * x;
+    }
+    if (x >= size) {
+        let h = size / f32(n - 1);
+        let slope = b[n - 2] + 2.0 * c[n - 2] * h + 3.0 * d[n - 2] * h * h;
+        return a[n - 1] + slope * (x - size);
+    }
+
     let i = u32(max(0.0, min(f32(n - 2), (f32(n - 1) * x / size))));
     let dx = x - size * f32(i) / f32(n - 1);
     return a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx;
@@ -478,7 +487,10 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
         var new_out_pos = out_pos;
 
         if (bool(flags & 2)) { // Has digital lens
+            // Apply the digital warp in the UN-zoomed (fov=1) frame so it's FOV-independent.
+            new_out_pos = (new_out_pos - out_c) * params.fov + out_c;
             new_out_pos = digital_undistort_point(new_out_pos);
+            new_out_pos = (new_out_pos - out_c) / params.fov + out_c;
         }
 
         new_out_pos = (new_out_pos - out_c) / out_f;

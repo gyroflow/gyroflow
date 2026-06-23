@@ -8,9 +8,13 @@ pub mod poly5;
 pub mod ptlens;
 pub mod insta360;
 pub mod sony;
+pub mod generic_polynomial;
+
+pub mod gopro;
 
 pub mod gopro_superview;
 pub mod gopro_hyperview;
+pub mod gopro_warp;
 pub mod digital_stretch;
 
 use crate::KernelParams;
@@ -66,10 +70,13 @@ impl_models! {
     ptlens::PtLens,
     insta360::Insta360,
     sony::Sony,
+    generic_polynomial::GenericPolynomial,
+    gopro::GoPro,
 
     // Digital lenses (ie. post-processing)
     gopro_superview::GoProSuperview,
     gopro_hyperview::GoProHyperview,
+    gopro_warp::GoProWarp,
     digital_stretch::DigitalStretch,
 }
 

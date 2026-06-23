@@ -55,8 +55,8 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
         let mesh_data = transform.mesh_data.iter().map(|x| *x as f64).collect::<Vec<f64>>();
 
         let bbox = fov_iterative::FovIterative::new(&compute_params, org_output_size).points_around_rect(width as f32, height as f32, 31, 31);
-        let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh) = FrameTransform::at_timestamp_for_points(&compute_params, &bbox, timestamp, Some(frame), false);
-        let undistorted_bbox = undistort_points(&bbox, camera_matrix, &distortion_coeffs, rotations[0], None, Some(rotations), &compute_params, 1.0, timestamp, is, mesh);
+        let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh, fov) = FrameTransform::at_timestamp_for_points(&compute_params, &bbox, timestamp, Some(frame), false);
+        let undistorted_bbox = undistort_points(&bbox, camera_matrix, &distortion_coeffs, rotations[0], None, Some(rotations), &compute_params, 1.0, fov, timestamp, is, mesh);
 
         let mut min_x = 0.0;
         let mut min_y = 0.0;
@@ -113,8 +113,8 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
 
         let dist = parallel_exr(width, height, |x, y| {
             let distorted = [(x as f32, y as f32)];
-            let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh) = FrameTransform::at_timestamp_for_points(&compute_params, &distorted, timestamp, Some(frame), true);
-            undistort_points(&distorted, camera_matrix, &distortion_coeffs, rotations[0], None, Some(rotations), &compute_params, 1.0, timestamp, is, mesh).first().copied()
+            let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh, fov) = FrameTransform::at_timestamp_for_points(&compute_params, &distorted, timestamp, Some(frame), true);
+            undistort_points(&distorted, camera_matrix, &distortion_coeffs, rotations[0], None, Some(rotations), &compute_params, 1.0, fov, timestamp, is, mesh).first().copied()
         });
 
         (filename_base.clone(), frame, dist, undist)

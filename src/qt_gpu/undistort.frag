@@ -42,7 +42,7 @@ layout(std140, binding = 2) uniform KernelParams {
     vec4 translation3d;             // 16
     ivec4 source_rect;              // 16 - x, y, w, h - unused in this kernel
     ivec4 output_rect;              // 16 - x, y, w, h - unused in this kernel
-    vec4 digital_lens_params;       // 16
+    vec4 digital_lens_params[4];    // 16,16,16,16
     vec4 safe_area_rect;            // 16
     float max_pixel_value;          // 4
     int distortion_model;           // 8
@@ -189,7 +189,12 @@ void main() {
         vec2 new_out_pos = texPos;
 
         if (bool(params.flags & 2)) { // Has digital lens
+            // Apply the digital warp in the UN-zoomed (fov=1) frame so it's FOV-independent. The warp is a
+            // frame-relative pixel map; evaluating it on post-zoom pixels made the corrected shape (and the
+            // adaptive-zoom bounding box from it) depend on the zoom. Un-zoom -> warp -> re-zoom.
+            new_out_pos = (new_out_pos - out_c) * params.fov + out_c;
             new_out_pos = digital_undistort_point(new_out_pos);
+            new_out_pos = (new_out_pos - out_c) / params.fov + out_c;
         }
 
         new_out_pos = (new_out_pos - out_c) / out_f;

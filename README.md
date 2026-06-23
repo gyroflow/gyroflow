@@ -34,9 +34,6 @@
     <a href="https://github.com/gyroflow/gyroflow/blob/master/LICENSE">
       <img src="https://img.shields.io/github/license/gyroflow/gyroflow" alt="License">
     </a>
-    <a href="https://gurubase.io/g/gyroflow">
-      <img src="https://img.shields.io/badge/Gurubase-Ask%20Gyroflow%20Guru-006BFF" alt="Gurubase">
-    </a>
   </p>
 </p>
 
@@ -221,6 +218,9 @@ OpenCV usage is kept to a minimum, used only for lens calibration and optical fl
 GPU stuff supports *DirectX*, *OpenGL*, *Metal* and *Vulkan* thanks to *Qt RHI* and *wgpu*.
 For GPU processing we use *OpenCL* or *wgpu*, with highly parallelized CPU implementation as a fallback.
 
+The Gyroflow binary links against mdk-sdk, which is closed-source and not licensed under the GNU GPL.
+Gyroflow is licensed under GPLv3 with an additional permission allowing linking with mdk-sdk. mdk-sdk is distributed under its own license.
+
 ### Code structure
 1. Entire GUI is in the `src/ui` directory
 2. `src/controller.rs` is a bridge between UI and core, it takes all commands from QML and calls functions in core
@@ -267,7 +267,7 @@ The project also supports UI live reload, it's a super quick way of working with
     - Compile and run: `just run`
 
 ### Building for Android
-0. Prerequisites: `git`, `7z`, working `powershell`, Android SDK and NDK. Android is not well supported yet, but the app can be built and somewhat works. Building is supported only on Windows
+0. Prerequisites: `git`, `7z`, working `powershell`, Android SDK and NDK. Building is supported only on Windows
 1. Get latest stable Rust language from: https://rustup.rs/
 2. Install `Just` by running `cargo install --force just`
 3. Clone the repo: `git clone https://github.com/gyroflow/gyroflow.git`
@@ -303,6 +303,9 @@ The project also supports UI live reload, it's a super quick way of working with
 Distributed under the GPLv3 License with App Store Exception. See [LICENSE](https://github.com/gyroflow/gyroflow/blob/main/LICENSE) for more information.
 
 As additional permission under section 7, you are allowed to distribute [`gyroflow_core`](https://github.com/gyroflow/gyroflow/tree/master/src/core) through an app store, even if that store has restrictive terms and conditions that are incompatible with the GPL, provided that the source is also available under the GPL with or without this permission through a channel without those restrictive terms and conditions.
+
+The Gyroflow binary links against mdk-sdk, which is closed-source and not licensed under the GNU GPL.
+An additional permission is granted allowing linking with mdk-sdk. mdk-sdk is distributed under its own license.
 
 ## Authors
 

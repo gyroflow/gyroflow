@@ -17,9 +17,23 @@ pub struct LensParams {
     pub sensor_size_px: Option<(u32, u32)>, // pixels
     pub capture_area_origin: Option<(f32, f32)>, // pixels
     pub capture_area_size: Option<(f32, f32)>, // pixels
-    pub pixel_focal_length: Option<f32>, // pixels
+    // Old projects stored this as a single f32 instead of (fx, fy)
+    #[serde(deserialize_with = "deserialize_pixel_focal_length")]
+    pub pixel_focal_length: Option<(f32, f32)>, // (fx, fy) pixels
+    pub principal_point: Option<(f32, f32)>, // (cx, cy) pixels (output pixel units)
     pub distortion_coefficients: Vec<f64>,
     pub focus_distance: Option<f32>
+}
+
+fn deserialize_pixel_focal_length<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Option<(f32, f32)>, D::Error> {
+    use serde::Deserialize;
+    #[derive(serde::Deserialize)]
+    #[serde(untagged)]
+    enum Compat { Pair((f32, f32)), Single(f32) }
+    Ok(Option::<Compat>::deserialize(d)?.map(|v| match v {
+        Compat::Pair(p)   => p,
+        Compat::Single(f) => (f, f),
+    }))
 }
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]

@@ -4,10 +4,7 @@
 float2 undistort_point(float2 pos, __global KernelParams *params) {
     if (params->k[0] == 0.0 && params->k[1] == 0.0 && params->k[2] == 0.0 && params->k[3] == 0.0) return pos;
 
-    float2 post_scale = (float2)(params->k[6], params->k[7]);
-    pos /= post_scale;
-
-    // now pos is in meters from center of sensor
+    // pos is a dimensionless normalized image-plane radius
 
     float theta_d = length(pos);
 
@@ -73,7 +70,5 @@ float2 distort_point(float x, float y, float z, __global KernelParams *params) {
 
     float scale = r == 0.0f? 1.0f : theta_d / r;
 
-    float2 post_scale = (float2)(params->k[6], params->k[7]);
-
-    return pos * scale * post_scale;
+    return pos * scale;
 }

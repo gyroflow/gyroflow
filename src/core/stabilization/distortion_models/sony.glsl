@@ -8,10 +8,7 @@ float map_coord(float x, float in_min, float in_max, float out_min, float out_ma
 vec2 undistort_point(vec2 pos) {
     if (params.k1 == vec4(0.0, 0.0, 0.0, 0.0)) return pos;
 
-    vec2 post_scale = vec2(params.k2.z, params.k2.w);
-    pos /= post_scale;
-
-    // now pos is in meters from center of sensor
+    // pos is a dimensionless normalized image-plane radius
 
     float theta_d = length(pos);
 
@@ -77,9 +74,7 @@ vec2 distort_point(float x, float y, float z) {
 
     float scale = r == 0? 1.0 : theta_d / r;
 
-    vec2 post_scale = vec2(params.k2.z, params.k2.w);
-
-    return pos * scale * post_scale;
+    return pos * scale;
 }
 
 const int GRID_SIZE = 9;
@@ -111,6 +106,14 @@ void cubic_spline_coefficients(float mesh[GRID_SIZE], int step_, int offset, flo
     }
 }
 float cubic_spline_interpolate2(int n, float x, float size) {
+    if (x <= 0.0) {
+        return a[0] + b[0] * x;
+    }
+    if (x >= size) {
+        float h = size / float(n - 1);
+        float slope = b[n - 2] + 2.0 * c[n - 2] * h + 3.0 * d[n - 2] * h * h;
+        return a[n - 1] + slope * (x - size);
+    }
     int i = int(max(0.0, min(float(n - 2), (float(n - 1) * x / size))));
     float dx = x - size * float(i) / float(n - 1);
     return a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx;
