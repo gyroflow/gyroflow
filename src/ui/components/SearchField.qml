@@ -10,6 +10,7 @@ TextField {
     property var model: [];
     property alias popup: popup;
     property var profilesMenu: null;
+    property bool autoSearch: true;
 
     signal selected(var item);
 
@@ -57,7 +58,9 @@ TextField {
     }
 
     onTextChanged: {
-        controller.search_lens_profile(text, Object.keys(root.profilesMenu.favorites), profilesMenu.currentVideoAspectRatio, profilesMenu.currentVideoAspectRatioSwapped);
+        if (autoSearch) {
+            controller.search_lens_profile(text, Object.keys(root.profilesMenu.favorites), profilesMenu.currentVideoAspectRatio, profilesMenu.currentVideoAspectRatioSwapped);
+        }
     }
     Keys.onDownPressed: {
         if (!popup.opened) {
