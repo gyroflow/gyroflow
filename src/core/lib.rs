@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2026 dan0v <dev@dan0v.com>
 #![recursion_limit = "256"]
 
 pub mod gyro_source;
@@ -19,6 +20,7 @@ pub mod smoothing;
 pub mod filtering;
 pub mod filesystem;
 pub mod gyro_export;
+pub mod gyro_replace;
 pub mod settings;
 
 pub mod gpu;
@@ -87,6 +89,7 @@ pub struct StabilizationManager {
     pub stabilization: Arc<RwLock<Stabilization>>,
 
     pub pose_estimator: Arc<synchronization::PoseEstimator>,
+    pub repair_estimator: Arc<synchronization::PoseEstimator>,
     #[cfg(feature = "opencv")]
     pub lens_calibrator: Arc<RwLock<Option<LensCalibrator>>>,
 
@@ -134,6 +137,7 @@ impl Default for StabilizationManager {
             gpu_decoding: Arc::new(AtomicBool::new(settings::get_bool("gpudecode", true))),
 
             pose_estimator: Arc::new(synchronization::PoseEstimator::default()),
+            repair_estimator: Arc::new(synchronization::PoseEstimator::default()),
 
             lens_profile_db: Arc::new(RwLock::new(LensProfileDatabase::default())),
 
@@ -166,6 +170,7 @@ impl StabilizationManager {
         }
 
         self.pose_estimator.sync_results.write().clear();
+        self.repair_estimator.sync_results.write().clear();
         self.keyframes.write().clear();
     }
 
@@ -1204,6 +1209,7 @@ impl StabilizationManager {
         self.keyframes.write().clear();
 
         self.pose_estimator.clear();
+        self.repair_estimator.clear();
     }
 
     pub fn override_video_fps(&self, fps: f64, recompute: bool) {
@@ -1344,6 +1350,7 @@ impl StabilizationManager {
                 "integration_method": gyro.integration_method,
                 "sample_index":       gyro.file_load_options.sample_index,
                 "detected_source":    gyro.file_metadata.read().detected_source,
+                "replacement_regions": gyro.replacement_regions,
             },
 
             "offsets": gyro.get_offsets(), // timestamp, offset value
@@ -1622,6 +1629,12 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("rotation")     { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_imu_rotation(v[0], v[1], v[2]); }
                 if let Some(v) = obj.get("acc_rotation") { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_acc_rotation(v[0], v[1], v[2]); }
                 if let Some(v) = obj.get("gyro_bias")    { gyro.imu_transforms.gyro_bias = serde_json::from_value(v.clone()).ok(); }
+
+                if let Some(v) = obj.get("replacement_regions") {
+                    if let Ok(regions) = serde_json::from_value::<Vec<crate::gyro_source::GyroReplacementRegion>>(v.clone()) {
+                        gyro.replacement_regions = regions;
+                    }
+                }
 
                 if let Ok(fls) = util::decompress_from_base91_cbor::<Vec<Option<f64>>>(obj.get("focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
                     self.params.write().focal_lengths = fls;

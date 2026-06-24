@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2026 dan0v <dev@dan0v.com>
 
 import QtQuick
 import QtQuick.Dialogs
@@ -833,4 +834,272 @@ MenuItem {
         extensions: fileDialog.extensions;
         onLoadFile: (url) => root.loadFile(url)
     }
+
+    Column {
+        id: repairSection;
+        width: parent.width;
+        spacing: 5 * dpiScale;
+        visible: controller.gyro_loaded;
+        property real gyroRepairProgress: 0;
+        // Theme-aware repair-region palette (orange accent, dimmed when disabled).
+        readonly property color regionBorder:      style === "light" ? "#ff6600" : "#ff6600";
+        readonly property color regionBorderSelected: "#ffaa00";
+        readonly property color regionFillSelected: style === "light" ? "#60ff6600" : "#60ff6600";
+        readonly property color regionFillEnabled:  style === "light" ? "#30ff6600" : "#30ff6600";
+        readonly property color regionFillDisabled: style === "light" ? "#18000000" : "#18000000";
+        readonly property color rowBgSelected:     style === "light" ? "#20000000" : "#15ffffff";
+        readonly property color rowBgUnselected:   style === "light" ? "#08000000" : "#08ffffff";
+
+        BasicText {
+            text: qsTr("Gyro repair");
+            font.bold: true;
+            font.pixelSize: 13 * dpiScale;
+        }
+        BasicText {
+            text: qsTr("Select a time range with corrupted gyro data and replace it with optical flow analysis.");
+            width: parent.width;
+            font.pixelSize: 11 * dpiScale;
+            wrapMode: Text.WordWrap;
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Region start");
+            inner.width: 110 * dpiScale;
+            Row {
+                spacing: 5 * dpiScale;
+                NumberField {
+                    id: repairStart;
+                    unit: "ms";
+                    precision: 1;
+                    from: 0;
+                    to: 999999;
+                    width: 75 * dpiScale;
+                    value: 0;
+                }
+                Button {
+                    text: "[";
+                    font.bold: true;
+                    width: 30 * dpiScale;
+                    leftPadding: 3 * dpiScale;
+                    rightPadding: 3 * dpiScale;
+                    tooltip: qsTr("Set to current cursor position");
+                    onClicked: repairStart.value = Math.round(window.videoArea.vid.timestamp * 10) / 10;
+                }
+            }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Region end");
+            inner.width: 110 * dpiScale;
+            Row {
+                spacing: 5 * dpiScale;
+                NumberField {
+                    id: repairEnd;
+                    unit: "ms";
+                    precision: 1;
+                    from: 0;
+                    to: 999999;
+                    width: 75 * dpiScale;
+                    value: 0;
+                }
+                Button {
+                    text: "]";
+                    font.bold: true;
+                    width: 30 * dpiScale;
+                    leftPadding: 3 * dpiScale;
+                    rightPadding: 3 * dpiScale;
+                    tooltip: qsTr("Set to current cursor position");
+                    onClicked: repairEnd.value = Math.round(window.videoArea.vid.timestamp * 10) / 10;
+                }
+            }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Blend duration");
+            inner.width: 80 * dpiScale;
+            NumberField {
+                id: repairBlend;
+                unit: "ms";
+                precision: 0;
+                from: 0;
+                to: 1000;
+                width: 80 * dpiScale;
+                value: 300;
+                tooltip: qsTr("Transition duration at region boundaries for smooth blending");
+            }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Blend curve");
+            ComboBox {
+                id: repairBlendMethod;
+                model: ["Linear", "Smooth"];
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                currentIndex: 1;
+                tooltip: qsTr("Blend curve at region boundaries: Linear = constant speed, Smooth = cosine S-curve");
+            }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Blend bias");
+            inner.width: 120 * dpiScale;
+            NumberField {
+                id: repairBlendBias;
+                precision: 2;
+                from: 0.01; to: 0.99;
+                defaultValue: 0.5;
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                Component.onCompleted: value = 0.5;
+                tooltip: qsTr("Position of the blend midpoint: 0.5 = symmetric, <0.5 = ease into repair, >0.5 = ease out of repair");
+            }
+        }
+        Row {
+            width: parent.width;
+            spacing: 5 * dpiScale;
+            ComboBox {
+                id: repairOfMethod;
+                model: ["AKAZE", "OpenCV (PyrLK)", "OpenCV (DIS)"];
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width / 2 - 2.5 * dpiScale;
+                currentIndex: 2;
+                tooltip: qsTr("Optical flow method");
+            }
+            ComboBox {
+                id: repairPoseMethod;
+                model: ["findEssentialMat", "Almeida", "EightPoint", "findHomography"];
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width / 2 - 2.5 * dpiScale;
+                currentIndex: 0;
+                tooltip: qsTr("Pose method");
+            }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Resolution");
+            inner.width: 80 * dpiScale;
+            ComboBox {
+                id: repairResolution;
+                model: [QT_TRANSLATE_NOOP("Popup", "Full"), "4k", "1080p", "720p", "480p"];
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                currentIndex: 3;
+                tooltip: qsTr("Processing resolution for optical flow analysis");
+            }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Number of features");
+            inner.width: 80 * dpiScale;
+            NumberField {
+                id: repairMaxFeatures;
+                unit: "";
+                precision: 0;
+                from: 50;
+                to: 2000;
+                width: 80 * dpiScale;
+                value: 50;
+                tooltip: qsTr("Number of tracking points");
+            }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Feature threshold");
+            inner.width: 80 * dpiScale;
+            NumberField {
+                id: repairThreshold;
+                unit: "";
+                precision: 4;
+                from: 0;
+                to: 0.01;
+                width: 80 * dpiScale;
+                defaultValue: 0.0007;
+                tooltip: qsTr("Feature detection sensitivity");
+                Component.onCompleted: value = 0.0007;
+            }
+        }
+        Button {
+            text: controller.gyro_replace_in_progress ? qsTr("Analyzing... %1%").arg(Math.round(repairSection.gyroRepairProgress)) : qsTr("Analyze");
+            iconName: "chart";
+            width: parent.width;
+            enabled: !controller.gyro_replace_in_progress && repairEnd.value > repairStart.value;
+            property real gyroRepairProgress: 0;
+            onClicked: {
+                const start_us = Math.round(repairStart.value * 1000);
+                const end_us = Math.round(repairEnd.value * 1000);
+                const blend_us = Math.round(repairBlend.value * 1000);
+                const proc_height = [-1, 2160, 1080, 720, 480][repairResolution.currentIndex];
+                controller.start_gyro_replace(start_us, end_us, blend_us, repairBlendMethod.currentIndex, repairBlendBias.value, repairOfMethod.currentIndex, repairPoseMethod.currentIndex, repairMaxFeatures.value, repairThreshold.value, proc_height);
+            }
+        }
+        Connections {
+            target: controller;
+            function onGyro_replace_progress(progress: real, ready: int, total: int): void {
+                repairSection.gyroRepairProgress = progress * 100;
+            }
+            function onReplacement_regions_updated(): void {
+                repairRegionsRepeater.model = [];
+                repairRegionsRepeater.model = controller.replacement_regions_model;
+            }
+        }
+        Repeater {
+            id: repairRegionsRepeater;
+            model: controller.replacement_regions_model;
+            delegate: Rectangle {
+                width: repairSection.width;
+                height: 30 * dpiScale;
+                color: model.index === controller.selected_repair_region ? repairSection.rowBgSelected : repairSection.rowBgUnselected;
+                radius: 4 * dpiScale;
+                border.width: model.index === controller.selected_repair_region ? 1 : 0;
+                border.color: repairSection.regionBorder;
+                CheckBox {
+                    x: 4 * dpiScale;
+                    y: (parent.height - height) / 2;
+                    checked: model.enabled;
+                    onClicked: controller.toggle_gyro_replace(model.index, checked);
+                    tooltip: qsTr("Enable/disable repaired gyro data");
+                }
+                BasicText {
+                    x: 30 * dpiScale;
+                    y: (parent.height - height) / 2;
+                    text: "%1 - %2 ms".arg((model.start_us / 1000).toFixed(1)).arg((model.end_us / 1000).toFixed(1));
+                    font.pixelSize: 11 * dpiScale;
+                    verticalAlignment: Text.AlignVCenter;
+                    width: parent.width - 60 * dpiScale;
+                    elide: Text.ElideRight;
+                }
+                Button {
+                    text: "X";
+                    x: parent.width - 26 * dpiScale;
+                    y: (parent.height - height) / 2;
+                    width: 22 * dpiScale;
+                    height: 22 * dpiScale;
+                    font.pixelSize: 11 * dpiScale;
+                    leftPadding: 0;
+                    rightPadding: 0;
+                    tooltip: qsTr("Remove this repair");
+                    onClicked: controller.remove_gyro_replace(model.index);
+                }
+                MouseArea {
+                    anchors.fill: parent;
+                    acceptedButtons: Qt.LeftButton;
+                    propagateComposedEvents: true;
+                    onClicked: (mouse) => {
+                        controller.selected_repair_region = (controller.selected_repair_region === model.index) ? -1 : model.index;
+                        controller.selected_repair_region_changed();
+                        mouse.accepted = false;
+                    }
+                    onPressed: (mouse) => mouse.accepted = false;
+                }
+            }
+        }
+        Button {
+            text: qsTr("Clear all repairs");
+            iconName: "bin";
+            width: parent.width;
+            visible: controller.replacement_regions_model.rowCount() > 0;
+            onClicked: controller.clear_gyro_replace();
+        }
+     }
 }

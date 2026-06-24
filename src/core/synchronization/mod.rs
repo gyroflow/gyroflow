@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2026 dan0v <dev@dan0v.com>
 
 use nalgebra::Rotation3;
 use std::ops::Range;
 use std::sync::Arc;
-use std::sync::atomic::{ AtomicBool, AtomicU32, Ordering::SeqCst };
+use std::sync::atomic::{ AtomicBool, AtomicU32, AtomicUsize, Ordering::SeqCst };
 use parking_lot::RwLock;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
@@ -71,6 +72,8 @@ pub struct PoseEstimator {
     pub every_nth_frame: AtomicU32,
     pub pose_method: AtomicU32,
     pub offset_method: AtomicU32,
+    pub pose_progress: Arc<AtomicUsize>,
+    pub pose_total: Arc<AtomicUsize>,
 }
 
 impl PoseEstimator {
@@ -80,12 +83,12 @@ impl PoseEstimator {
         self.estimated_quats.write().clear();
     }
 
-    pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32, of_method: u32) {
+    pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32, of_method: u32, max_features: usize, of_threshold: f64) {
         let frame_size = (width, height);
         let contains = self.sync_results.read().contains_key(&timestamp_us);
         if !contains {
             let result = FrameResult {
-                of_method: OpticalFlowMethod::detect_features(of_method, timestamp_us, img, width, height),
+                of_method: OpticalFlowMethod::detect_features(of_method, timestamp_us, img, width, height, max_features, of_threshold),
                 frame_no,
                 frame_size,
                 timestamp_us,
@@ -121,7 +124,12 @@ impl PoseEstimator {
             }
         }
 
+        let total = frames_to_process.len();
+        self.pose_total.store(total, std::sync::atomic::Ordering::Relaxed);
+        self.pose_progress.store(0, std::sync::atomic::Ordering::Relaxed);
+
         let results = self.sync_results.clone();
+        let progress = self.pose_progress.clone();
         let mut pose = EstimatePoseMethod::from(self.pose_method.load(SeqCst));
         pose.init(params);
         frames_to_process.par_iter().for_each(move |(ts, next_ts)| {
@@ -129,13 +137,10 @@ impl PoseEstimator {
                 let l = results.read();
                 if let Some(curr) = l.get(ts) {
                     if curr.rotation.is_none() {
-                        //let curr = curr.item.clone();
                         if let Some(next) = l.get(next_ts) {
-                            // TODO estimate pose should be quick so test if instead of cloning it is faster just to keep the lock for longer
                             let curr_of = curr.of_method.clone();
                             let next_of = next.of_method.clone();
 
-                            // Unlock the mutex for estimate_pose
                             drop(l);
 
                             if let Some(rot) = pose.estimate_pose(&curr_of.optical_flow_to(&next_of), curr_of.size(), params, *ts, *next_ts) {
@@ -154,7 +159,8 @@ impl PoseEstimator {
                 }
             }
 
-            // Free unneeded img memory
+            progress.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+
             let mut l = results.write();
             if let Some(curr) = l.get_mut(ts) {
                 if curr.of_method.can_cleanup() { curr.of_method.cleanup(); }

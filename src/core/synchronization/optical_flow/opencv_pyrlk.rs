@@ -22,7 +22,7 @@ pub struct OFOpenCVPyrLK {
     used: Arc<AtomicU32>,
 }
 impl OFOpenCVPyrLK {
-    pub fn detect_features(timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32) -> Self {
+    pub fn detect_features(timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32, max_features: usize, _threshold: f64) -> Self {
         let (w, h) = (width as i32, height as i32);
 
         #[cfg(feature = "use-opencv")]
@@ -34,7 +34,7 @@ impl OFOpenCVPyrLK {
             let mut pts = Mat::default();
 
             if let Err(e) = inp.and_then(|inp| {
-                opencv::imgproc::good_features_to_track(&inp, &mut pts, 200, 0.01, 10.0, &Mat::default(), 3, false, 0.04)
+                opencv::imgproc::good_features_to_track(&inp, &mut pts, max_features as i32, 0.01, 10.0, &Mat::default(), 3, false, 0.04)
             }) {
                 log::error!("OpenCV error {:?}", e);
             }
@@ -100,7 +100,7 @@ impl OpticalFlowTrait for OFOpenCVPyrLK {
                 }
                 Ok((pts1, pts2))
             }();
-            
+
             match result {
                 Ok(res) => {
                     // Only store and return if we have enough valid points (>15)

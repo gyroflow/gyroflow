@@ -20,17 +20,19 @@ pub struct OFOpenCVDis {
     timestamp_us: i64,
     size: (i32, i32),
     used: Arc<AtomicU32>,
+    grid_points: usize,
 }
 
 impl OFOpenCVDis {
-    pub fn detect_features(timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32) -> Self {
+    pub fn detect_features(timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32, max_features: usize, _threshold: f64) -> Self {
         Self {
             features: Vec::new(),
             timestamp_us,
             size: (width as i32, height as i32),
             matched_points: Default::default(),
             img,
-            used: Default::default()
+            used: Default::default(),
+            grid_points: max_features,
         }
     }
 }
@@ -61,34 +63,36 @@ impl OpticalFlowTrait for OFOpenCVDis {
 
                 let mut points_a = Vec::new();
                 let mut points_b = Vec::new();
-                let step = w as usize / 15; // 15 points
-                
+                let target_points = self.grid_points.max(50);
+                let grid_side = (target_points as f64).sqrt() as usize;
+                let step = if grid_side > 0 { (w as usize / grid_side).max(2) } else { w as usize / 15 };
+
                 // Calculate window size as 2% of image width, minimum 10
                 let window_size = (w as f32 * 0.02).round() as usize;
                 let window_size = window_size.max(10);
                 let texture_threshold = 3.0; // Threshold for texture clarity
-                
+
                 // Pre-calculate half window size for efficiency
                 let half_win = window_size / 2;
-                
+
                 // Function to calculate variance of grayscale values in a window (more accurate than gradient)
                 let calculate_texture = |img: &image::GrayImage, x: usize, y: usize| -> f32 {
                     let mut sum = 0.0;
                     let mut sum_sq = 0.0;
                     let mut count = 0.0;
-                    
+
                     // Cache image dimensions as isize for faster comparisons
                     let img_width = img.width() as isize;
                     let img_height = img.height() as isize;
                     let x_isize = x as isize;
                     let y_isize = y as isize;
-                    
+
                     // Calculate valid pixel boundaries once
                     let start_y = (y_isize - half_win as isize).max(0);
                     let end_y = (y_isize + half_win as isize).min(img_height - 1);
                     let start_x = (x_isize - half_win as isize).max(0);
                     let end_x = (x_isize + half_win as isize).min(img_width - 1);
-                    
+
                     // Iterate only over valid pixels, avoiding repeated boundary checks
                     for ny in start_y..=end_y {
                         for nx in start_x..=end_x {
@@ -98,14 +102,14 @@ impl OpticalFlowTrait for OFOpenCVDis {
                             count += 1.0;
                         }
                     }
-                    
+
                     if count == 0.0 { return 0.0; }
-                    
+
                     let mean = sum / count;
                     let variance = (sum_sq / count) - (mean * mean);
                     variance
                 };
-                
+
                 for i in (0..a1_img.cols()).step_by(step) {
                     for j in (0..a1_img.rows()).step_by(step) {
                         // Check texture clarity using accurate variance method

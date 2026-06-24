@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2026 dan0v <dev@dan0v.com>
 
 use itertools::{Either, Itertools};
 use qmetaobject::*;
@@ -42,6 +43,21 @@ struct CalibrationItem {
     pub timestamp_us: i64,
     pub sharpness: f64,
     pub is_forced: bool,
+}
+
+/// Error prefix used by the gyro-repair worker so the message format stays
+/// consistent across all failure paths and the typo ("occured") is not repeated.
+const GYRO_REPLACE_ERROR: &str = "An error occurred: %1";
+
+#[derive(Default, SimpleListItem)]
+struct ReplacementRegionItem {
+    pub index: usize,
+    pub start_us: i64,
+    pub end_us: i64,
+    pub blend_us: i64,
+    pub blend_method: i32,
+    pub blend_bias: f64,
+    pub enabled: bool,
 }
 
 #[derive(Default, QObject)]
@@ -94,6 +110,19 @@ pub struct Controller {
     offset_at_video_timestamp: qt_method!(fn(&self, timestamp_us: i64) -> f64),
     offsets_model: qt_property!(RefCell<SimpleListModel<OffsetItem>>; NOTIFY offsets_updated),
     offsets_updated: qt_signal!(),
+
+    replacement_regions_model: qt_property!(RefCell<SimpleListModel<ReplacementRegionItem>>; NOTIFY replacement_regions_updated),
+    replacement_regions_updated: qt_signal!(),
+    gyro_replace_in_progress: qt_property!(bool; NOTIFY gyro_replace_in_progress_changed),
+    gyro_replace_in_progress_changed: qt_signal!(),
+    gyro_replace_progress: qt_signal!(progress: f64, ready: usize, total: usize),
+    start_gyro_replace: qt_method!(fn(&mut self, start_us: i64, end_us: i64, blend_us: i64, blend_method: i32, blend_bias: f64, of_method: u32, pose_method: u32, max_features: u32, of_threshold: f64, proc_height: i32)),
+    remove_gyro_replace: qt_method!(fn(&mut self, index: usize)),
+    toggle_gyro_replace: qt_method!(fn(&mut self, index: usize, enabled: bool)),
+    clear_gyro_replace: qt_method!(fn(&mut self)),
+    get_replacement_region_enabled: qt_method!(fn(&self, index: usize) -> bool),
+    selected_repair_region: qt_property!(i32; NOTIFY selected_repair_region_changed),
+    selected_repair_region_changed: qt_signal!(),
 
     load_profiles: qt_method!(fn(&self, reload_from_disk: bool)),
     all_profiles_loaded: qt_signal!(),
@@ -314,6 +343,7 @@ impl Controller {
         Self {
             preview_resolution: -1,
             processing_resolution: 720,
+            selected_repair_region: -1,
             ..Default::default()
         }
     }
@@ -743,6 +773,7 @@ impl Controller {
                 this.loading_gyro_in_progress_changed();
 
                 this.update_offset_model();
+                this.update_replacement_regions_model();
                 this.chart_data_changed();
 
                 this.telemetry_loaded(params.0, params.1, params.2, util::serde_json_to_qt_object(&params.4));
@@ -1406,6 +1437,7 @@ impl Controller {
                     self.lens_profile_loaded(QString::from(lens_json), QString::default(), QString::default());
                 }
                 self.update_offset_model();
+                self.update_replacement_regions_model();
                 self.request_recompute();
                 self.chart_data_changed();
                 self.keyframes_changed();
@@ -1464,6 +1496,284 @@ impl Controller {
     wrap_simple_method!(set_offset, timestamp_us: i64, offset_ms: f64; recompute; update_offset_model);
     wrap_simple_method!(clear_offsets,; recompute; update_offset_model);
     wrap_simple_method!(remove_offset, timestamp_us: i64; recompute; update_offset_model);
+
+    fn update_replacement_regions_model(&mut self) {
+        self.replacement_regions_model = RefCell::new(self.stabilizer.gyro.read().replacement_regions.iter().enumerate().map(|(i, r)| ReplacementRegionItem {
+            index: i,
+            start_us: r.start_us,
+            end_us: r.end_us,
+            blend_us: r.blend_us,
+            blend_method: r.blend_method,
+            blend_bias: r.blend_bias,
+            enabled: r.enabled,
+        }).collect());
+
+        util::qt_queued_callback(QPointer::from(self as &Self), |this, _| {
+            this.replacement_regions_updated();
+            this.chart_data_changed();
+        })(());
+    }
+
+    fn start_gyro_replace(&mut self, start_us: i64, end_us: i64, blend_us: i64, blend_method: i32, blend_bias: f64, of_method: u32, pose_method: u32, max_features: u32, of_threshold: f64, proc_height: i32) {
+        {
+            let mut gyro = self.stabilizer.gyro.write();
+            if let Some(idx) = gyro.replacement_regions.iter().position(|r| r.start_us == start_us && r.end_us == end_us) {
+                gyro.replacement_regions.remove(idx);
+                if self.selected_repair_region == idx as i32 {
+                    self.selected_repair_region = -1;
+                } else if self.selected_repair_region > idx as i32 {
+                    self.selected_repair_region -= 1;
+                }
+            }
+        }
+        self.selected_repair_region_changed();
+        self.stabilizer.invalidate_smoothing();
+        self.update_replacement_regions_model();
+        self.request_recompute();
+
+        self.gyro_replace_in_progress = true;
+        self.gyro_replace_in_progress_changed();
+
+        let stabilizer = self.stabilizer.clone();
+        let cancel_flag = self.cancel_flag.clone();
+        let input_file = self.stabilizer.input_file.read().clone();
+        let proc_height = if proc_height > 0 { proc_height } else { self.processing_resolution };
+        let gpu_decoding = self.stabilizer.gpu_decoding.load(SeqCst);
+
+        let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (pct, ready, total): (f64, usize, usize)| {
+            this.gyro_replace_progress(pct, ready, total);
+        });
+
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (cancelled, start_us, end_us, blend_us, blend_method, blend_bias, of_quats): (bool, i64, i64, i64, i32, f64, gyroflow_core::gyro_source::TimeQuat)| {
+            this.gyro_replace_in_progress = false;
+            this.gyro_replace_in_progress_changed();
+            if !cancelled && !of_quats.is_empty() {
+                let (start_quat, end_quat, fps) = {
+                    let gyro = this.stabilizer.gyro.read();
+                    let params = core::stabilization::ComputeParams::from_manager(&this.stabilizer);
+                    (gyro.org_quat_at_timestamp(start_us as f64 / 1000.0),
+                     gyro.org_quat_at_timestamp(end_us as f64 / 1000.0),
+                     params.lens.fps)
+                };
+                let region = gyroflow_core::gyro_replace::build_replacement_region(
+                    start_us, end_us, blend_us, blend_method, blend_bias, start_quat, end_quat, of_quats, fps,
+                );
+                {
+                    let mut gyro = this.stabilizer.gyro.write();
+                    gyro.add_replacement_region(region);
+                }
+                this.stabilizer.invalidate_smoothing();
+                this.update_replacement_regions_model();
+                this.request_recompute();
+            }
+        });
+        let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (msg, arg): (String, String)| {
+            this.gyro_replace_in_progress = false;
+            this.gyro_replace_in_progress_changed();
+            this.error(QString::from(msg), QString::from(arg), QString::default());
+        });
+
+        self.cancel_flag.store(false, SeqCst);
+
+        core::run_threaded(move || {
+            Self::run_gyro_replace_worker(
+                stabilizer, input_file, start_us, end_us, blend_us, blend_method, blend_bias,
+                of_method, pose_method, max_features, of_threshold, proc_height, gpu_decoding,
+                progress, finished, err, cancel_flag,
+            );
+        });
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn run_gyro_replace_worker(
+        stabilizer: Arc<gyroflow_core::StabilizationManager>,
+        input_file: gyroflow_core::InputFile,
+        start_us: i64, end_us: i64, blend_us: i64, blend_method: i32, blend_bias: f64,
+        of_method: u32, pose_method: u32, max_features: u32, of_threshold: f64,
+        proc_height: i32, gpu_decoding: bool,
+        progress: impl Fn((f64, usize, usize)) + Send + Sync + Clone + 'static,
+        finished: impl Fn((bool, i64, i64, i64, i32, f64, gyroflow_core::gyro_source::TimeQuat)) + Send + Sync + Clone + 'static,
+        err: impl Fn((String, String)) + Send + Sync + Clone + 'static,
+        cancel_flag: Arc<AtomicBool>,
+    ) {
+        let pose_estimator = stabilizer.repair_estimator.clone();
+        pose_estimator.clear();
+        let params = core::stabilization::ComputeParams::from_manager(&stabilizer);
+
+        pose_estimator.every_nth_frame.store(1, SeqCst);
+        pose_estimator.pose_method.store(pose_method, SeqCst);
+        pose_estimator.offset_method.store(0, SeqCst);
+
+        let fps = params.lens.fps;
+        let scaled_fps = params.scaled_fps;
+        let duration_us = end_us - start_us;
+        let estimated_total_frames = if fps > 0.0 { (duration_us as f64 / 1_000_000.0 * fps).round() as usize } else { 0 };
+        let ranges = vec![(start_us as f64 / 1000.0, end_us as f64 / 1000.0)];
+
+        let mut decoder_options = ffmpeg_next::Dictionary::new();
+        if input_file.image_sequence_fps > 0.0 {
+            let fps_r = rendering::fps_to_rational(input_file.image_sequence_fps);
+            decoder_options.set("framerate", &format!("{}/{}", fps_r.numerator(), fps_r.denominator()));
+        }
+        if input_file.image_sequence_start > 0 {
+            decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
+        }
+        if proc_height > 0 {
+            decoder_options.set("scale", &format!("{}x{}", (proc_height * 16) / 9, proc_height));
+        }
+
+        let mut frame_no: usize = 0;
+        match VideoProcessor::from_file(&input_file.url, gpu_decoding, 0, Some(decoder_options)) {
+            Ok(mut proc) => {
+                let pe = pose_estimator.clone();
+                let err2 = err.clone();
+                let progress2 = progress.clone();
+                let fail2 = finished.clone();
+                proc.on_frame(move |timestamp_us, input_frame, output_frame, converter, _rate_control| {
+                    if output_frame.is_some() {
+                        err2((GYRO_REPLACE_ERROR.to_string(), "Unexpected output frame in decoder".to_string()));
+                        return Err(rendering::FFmpegError::FrameEmpty);
+                    }
+                    let h = if proc_height > 0 { proc_height as u32 } else { input_frame.height() };
+                    let ratio = input_frame.height() as f64 / h as f64;
+                    let sw = (input_frame.width() as f64 / ratio).round() as u32;
+                    let sh = (input_frame.height() as f64 / (input_frame.width() as f64 / sw as f64)).round() as u32;
+                    match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
+                        Ok(small_frame) => {
+                            let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
+                            if let Some(img) = synchronization::PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels) {
+                                pe.detect_features(frame_no, timestamp_us, std::sync::Arc::new(img), width, height, of_method, max_features as usize, of_threshold);
+                            }
+                            frame_no += 1;
+                            if frame_no % 10 == 0 {
+                                let pct = if estimated_total_frames > 0 { (frame_no as f64 / estimated_total_frames as f64 * 0.5).min(0.5) } else { 0.0 };
+                                progress2((pct, frame_no, estimated_total_frames));
+                            }
+                        },
+                        Err(e) => {
+                            err2((GYRO_REPLACE_ERROR.to_string(), e.to_string()));
+                            fail2((true, start_us, end_us, blend_us, blend_method, blend_bias, gyroflow_core::gyro_source::TimeQuat::new()));
+                            return Err(rendering::FFmpegError::FrameEmpty);
+                        }
+                    }
+                    Ok(())
+                });
+                if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
+                    err((GYRO_REPLACE_ERROR.to_string(), e.to_string()));
+                    finished((true, start_us, end_us, blend_us, blend_method, blend_bias, gyroflow_core::gyro_source::TimeQuat::new()));
+                    return;
+                }
+            }
+            Err(error) => {
+                err((GYRO_REPLACE_ERROR.to_string(), error.to_string()));
+                finished((true, start_us, end_us, blend_us, blend_method, blend_bias, gyroflow_core::gyro_source::TimeQuat::new()));
+                return;
+            }
+        };
+
+        if cancel_flag.load(SeqCst) {
+            finished((true, start_us, end_us, blend_us, blend_method, blend_bias, gyroflow_core::gyro_source::TimeQuat::new()));
+            return;
+        }
+
+        progress((0.5, 0, 0));
+
+        let pose_estimator_clone = pose_estimator.clone();
+        let params_clone = params.clone();
+        let (tx_done, rx_done) = std::sync::mpsc::channel::<()>();
+        std::thread::spawn(move || {
+            pose_estimator_clone.process_detected_frames(fps, scaled_fps, &params_clone);
+            let _ = tx_done.send(());
+        });
+
+        loop {
+            if cancel_flag.load(SeqCst) { break; }
+            if rx_done.try_recv().is_ok() { break; }
+            let pose_total = pose_estimator.pose_total.load(std::sync::atomic::Ordering::Relaxed);
+            let pose_done = pose_estimator.pose_progress.load(std::sync::atomic::Ordering::Relaxed);
+            let pose_pct = if pose_total > 0 { pose_done as f64 / pose_total as f64 } else { 0.0 };
+            progress((0.5 + pose_pct * 0.4, pose_done, pose_total));
+            std::thread::sleep(std::time::Duration::from_millis(250));
+        }
+
+        if cancel_flag.load(SeqCst) {
+            finished((true, start_us, end_us, blend_us, blend_method, blend_bias, gyroflow_core::gyro_source::TimeQuat::new()));
+            return;
+        }
+
+        {
+            let pose_total = pose_estimator.pose_total.load(std::sync::atomic::Ordering::Relaxed);
+            let pose_done = pose_estimator.pose_progress.load(std::sync::atomic::Ordering::Relaxed);
+            let pose_pct = if pose_total > 0 { pose_done as f64 / pose_total as f64 } else { 1.0 };
+            progress((0.5 + pose_pct * 0.4, pose_done, pose_total));
+        }
+
+        let mut result_quats = gyroflow_core::gyro_source::TimeQuat::new();
+        {
+            let quats = pose_estimator.estimated_quats.read();
+            for (&ts, q) in quats.iter() {
+                if ts >= start_us && ts <= end_us {
+                    result_quats.insert(ts, *q);
+                }
+            }
+        }
+        ::log::info!("Gyro repair: extracted {} quaternions from {}-{}us", result_quats.len(), start_us, end_us);
+
+        if cancel_flag.load(SeqCst) {
+            finished((true, start_us, end_us, blend_us, blend_method, blend_bias, gyroflow_core::gyro_source::TimeQuat::new()));
+            return;
+        }
+
+        progress((1.0, result_quats.len(), result_quats.len()));
+        finished((false, start_us, end_us, blend_us, blend_method, blend_bias, result_quats));
+    }
+
+    fn remove_gyro_replace(&mut self, index: usize) {
+        if self.gyro_replace_in_progress { return; }
+        {
+            let mut gyro = self.stabilizer.gyro.write();
+            gyro.remove_replacement_region(index);
+        }
+        if self.selected_repair_region == index as i32 {
+            self.selected_repair_region = -1;
+            self.selected_repair_region_changed();
+        } else if self.selected_repair_region > index as i32 {
+            self.selected_repair_region -= 1;
+            self.selected_repair_region_changed();
+        }
+        self.stabilizer.invalidate_smoothing();
+        self.update_replacement_regions_model();
+        self.request_recompute();
+    }
+
+    fn toggle_gyro_replace(&mut self, index: usize, enabled: bool) {
+        if self.gyro_replace_in_progress { return; }
+        {
+            let mut gyro = self.stabilizer.gyro.write();
+            gyro.set_replacement_region_enabled(index, enabled);
+        }
+        self.stabilizer.invalidate_smoothing();
+        self.update_replacement_regions_model();
+        self.request_recompute();
+    }
+
+    fn clear_gyro_replace(&mut self) {
+        if self.gyro_replace_in_progress { return; }
+        {
+            let mut gyro = self.stabilizer.gyro.write();
+            gyro.clear_replacement_regions();
+        }
+        self.selected_repair_region = -1;
+        self.selected_repair_region_changed();
+        self.stabilizer.invalidate_smoothing();
+        self.update_replacement_regions_model();
+        self.request_recompute();
+    }
+
+    fn get_replacement_region_enabled(&self, index: usize) -> bool {
+        let gyro = self.stabilizer.gyro.read();
+        gyro.replacement_regions.get(index).map(|r| r.enabled).unwrap_or(false)
+    }
 
     wrap_simple_method!(set_imu_lpf, v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_imu_median_filter, size: i32; recompute; chart_data_changed);
