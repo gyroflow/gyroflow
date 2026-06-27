@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2026 dapeef <alistair.white.horne@gmail.com>
 
 import QtQuick
 
@@ -112,6 +113,10 @@ MenuItem {
 
         Qt.callLater(window.exportSettings.videoInfoLoaded, w, h, bitrate);
     }
+    function loadNextFile(index: int): void {
+        const url = filesystem.get_next_file_url(window.videoArea.loadedFileUrl, index);
+        if (url && url.toString()) window.videoArea.loadFile(url);
+    }
     function updateEntry(key: string, value: string): void {
         if (key == "File name") root.filename = value;
         list.updateEntry(key, value);
@@ -154,11 +159,29 @@ MenuItem {
         return format + (format? " " : "") + rate;
     }
 
-    Button {
-        text: qsTr("Open file");
-        iconName: "video"
+    Row {
         anchors.horizontalCenter: parent.horizontalCenter;
-        onClicked: root.selectFileRequest();
+        spacing: 6 * dpiScale;
+
+        Button {
+            text: "<";
+            tooltip: qsTr("Open the previous file in the directory.")
+            width: height;
+            onClicked: { loadNextFile(-1) }
+        }
+
+        Button {
+            text: qsTr("Open file");
+            iconName: "video";
+            onClicked: root.selectFileRequest();
+        }
+
+        Button {
+            text: ">";
+            tooltip: qsTr("Open the next file in the directory.")
+            width: height;
+            onClicked: { loadNextFile(1) }
+        }
     }
 
     InfoMessageSmall {
