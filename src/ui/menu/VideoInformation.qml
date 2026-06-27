@@ -22,6 +22,8 @@ MenuItem {
     property bool hasAccessToInputDirectory: true;
     property alias infoList: list;
     property var orgModel: [];
+    property bool hasPreviousFile: false;
+    property bool hasNextFile: false;
 
     Component.onCompleted: {
         QT_TRANSLATE_NOOP("TableList", "Created at");
@@ -118,11 +120,20 @@ MenuItem {
         if (url && url.toString()) window.videoArea.loadFile(url);
     }
     function updateEntry(key: string, value: string): void {
-        if (key == "File name") root.filename = value;
+        if (key == "File name") {
+            root.filename = value;
+            root.updateFileNavigation();
+        }
         list.updateEntry(key, value);
     }
     function updateEntryWithTrigger(key: string, value: string): void {
         list.updateEntryWithTrigger(key, value);
+    }
+    function updateFileNavigation() {
+        const prev = filesystem.get_next_file_url(window.videoArea.loadedFileUrl, -1);
+        const next = filesystem.get_next_file_url(window.videoArea.loadedFileUrl,  1);
+        hasPreviousFile = prev && prev.toString() !== "";
+        hasNextFile     = next && next.toString() !== "";
     }
 
     function getDuration(md): string {
@@ -167,6 +178,7 @@ MenuItem {
             text: "<";
             tooltip: qsTr("Open the previous file in the directory.")
             width: height;
+            enabled: root.hasPreviousFile;
             onClicked: { loadNextFile(-1) }
         }
 
@@ -180,6 +192,7 @@ MenuItem {
             text: ">";
             tooltip: qsTr("Open the next file in the directory.")
             width: height;
+            enabled: root.hasNextFile;
             onClicked: { loadNextFile(1) }
         }
     }
