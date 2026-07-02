@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2026 dapeef <alistair.white.horne at gmail>
 
 import QtQuick
 
@@ -775,16 +776,15 @@ MenuItem {
             text: qsTr("Video speed");
             SliderWithField {
                 id: videoSpeed;
-                from: 10;
-                to: 1000.0;
+                from: 0.1;
+                to: 10.0;
                 value: 1.0;
-                unit: "%";
-                defaultValue: 100.0;
-                precision: 0;
-                slider.stepSize: 1;
+                unit: "×";
+                defaultValue: 1.0;
+                precision: 2;
+                slider.stepSize: 0.01;
                 width: parent.width;
                 keyframe: "VideoSpeed";
-                scaler: 100.0;
                 property bool isKeyframed: false;
                 function updateVideoSpeed(): void {
                     window.videoArea.vid.playbackRate = videoSpeed.value;
