@@ -15,6 +15,7 @@ Item {
     anchors.horizontalCenter: parent.horizontalCenter;
 
     property alias vid: vid;
+    property alias playbackRateCb: playbackRateCb;
     property alias timeline: timeline;
     property alias durationMs: timeline.durationMs;
     property alias videoLoader: videoLoader;
@@ -1121,6 +1122,11 @@ Item {
                     itemHeight: 25 * dpiScale;
                     font.pixelSize: 11 * dpiScale;
                     anchors.verticalCenter: parent.verticalCenter;
+                    function setRate(rate: real): void {
+                        for (let i = 0; i < model.length; ++i) {
+                            if (+model[i].replace("×", "") === rate) { currentIndex = i; return; }
+                        }
+                    }
                     onCurrentTextChanged: {
                         const rate = +currentText.replace("×", ""); // hacky but simple and it works
                         vid.playbackRate = rate;
