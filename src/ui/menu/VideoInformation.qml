@@ -88,7 +88,7 @@ MenuItem {
 
         root.videoRotation = (360 - (md["stream.video[0].rotation"] || 0)) % 360; // Constrain to 0-360
 
-        list.model["Dimensions"]   = w && h? w + "x" + h : "---";
+        list.model["Dimensions"]   = w && h? w + "×" + h : "---";
         list.model["Duration"]     = getDuration(md) || "---";
         list.model["Frame rate"]   = framerate? framerate.toFixed(3) + " fps" : "---";
         list.model["Codec"]        = getCodec(md) || "---";

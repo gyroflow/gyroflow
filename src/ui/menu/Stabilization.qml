@@ -545,7 +545,7 @@ MenuItem {
                     from: 0.0;
                     to: 2.0;
                     width: parent.width;
-                    unit: "x";
+                    unit: "×";
                     precision: 2;
                     value: 1.0;
                     onValueChanged: {

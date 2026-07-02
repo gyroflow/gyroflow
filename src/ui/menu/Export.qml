@@ -456,7 +456,7 @@ MenuItem {
         property var maxSize: exportFormats[codec.currentIndex].max_size;
         show: maxSize && (outWidth > maxSize[0] || outHeight > maxSize[1]);
         text: qsTr("This resolution is not supported by the selected codec.") + "\n" +
-              qsTr("Maximum supported resolution is %1.").arg(maxSize? maxSize.join("x") : "");
+              qsTr("Maximum supported resolution is %1.").arg(maxSize? maxSize.join("×") : "");
     }
     InfoMessageSmall {
         id: resolutionWarning2;

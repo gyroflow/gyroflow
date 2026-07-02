@@ -101,12 +101,12 @@ MenuItem {
                         "Lens":            obj.lens_model,
                         "Setting":         obj.camera_setting,
                         "Additional info": obj.note,
-                        "Dimensions":      obj.calib_dimension.w + "x" + obj.calib_dimension.h,
+                        "Dimensions":      obj.calib_dimension.w + "×" + obj.calib_dimension.h,
                         "Calibrated by":   obj.calibrated_by
                     };
 
                     if (+obj.focal_length > 0) lensInfo["Focal length"] = obj.focal_length.toFixed(2) + " mm";
-                    if (+obj.crop_factor  > 0) lensInfo["Crop factor"]  = obj.crop_factor.toFixed(2) + "x";
+                    if (+obj.crop_factor  > 0) lensInfo["Crop factor"]  = obj.crop_factor.toFixed(2) + "×";
                     if (obj.asymmetrical) lensInfo["Asymmetrical"] = qsTr("Yes");
                     if (obj.distortion_model && obj.distortion_model != "opencv_fisheye") lensInfo["Distortion model"] = obj.distortion_model;
                     if (obj.digital_lens) lensInfo["Digital lens"] = obj.digital_lens;
