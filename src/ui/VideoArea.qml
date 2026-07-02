@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2026 dapeef <alistair.white.horne at gmail>
 
 import QtQuick
 import MDKVideo
@@ -156,7 +157,7 @@ Item {
                     let i = 0;
                     const speed = +obj.playback_speed;
                     for (const x of playbackRateCb.model) {
-                        const rate = +x.replace("x", "");
+                        const rate = +x.replace("×", "");
                         if (Math.abs(rate - speed) < 0.01) {
                             playbackRateCb.currentIndex = i;
                             break;
@@ -1114,7 +1115,7 @@ Item {
 
                 ComboBox {
                     id: playbackRateCb;
-                    model: ["0.13x", "0.25x", "0.5x", "1x", "2x", "4x", "5x", "8x", "10x", "20x", "50x"];
+                    model: ["0.13×", "0.25×", "0.5×", "1×", "2×", "4×", "5×", "8×", "10×", "20×", "50×"];
                     width: 60 * dpiScale;
                     currentIndex: 3;
                     height: 25 * dpiScale;
@@ -1122,7 +1123,7 @@ Item {
                     font.pixelSize: 11 * dpiScale;
                     anchors.verticalCenter: parent.verticalCenter;
                     onCurrentTextChanged: {
-                        const rate = +currentText.replace("x", ""); // hacky but simple and it works
+                        const rate = +currentText.replace("×", ""); // hacky but simple and it works
                         vid.playbackRate = rate;
                     }
                     tooltip: qsTr("Playback speed");

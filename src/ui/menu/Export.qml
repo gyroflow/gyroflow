@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2026 dapeef <alistair.white.horne at gmail>
 
 import QtQuick
 import QtQuick.Controls as QQC
@@ -456,7 +457,7 @@ MenuItem {
         property var maxSize: exportFormats[codec.currentIndex].max_size;
         show: maxSize && (outWidth > maxSize[0] || outHeight > maxSize[1]);
         text: qsTr("This resolution is not supported by the selected codec.") + "\n" +
-              qsTr("Maximum supported resolution is %1.").arg(maxSize? maxSize.join("x") : "");
+              qsTr("Maximum supported resolution is %1.").arg(maxSize? maxSize.join("×") : "");
     }
     InfoMessageSmall {
         id: resolutionWarning2;
