@@ -25,6 +25,7 @@ pub mod gpu;
 
 pub mod util;
 pub mod stabilization_params;
+pub mod optical_flow_stabilizer;
 
 use std::sync::{ Arc, atomic::{ AtomicU64, AtomicBool, Ordering::SeqCst } };
 use std::collections::BTreeMap;
