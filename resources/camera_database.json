@@ -1,0 +1,448 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2024-01-01",
+  "cameras": [
+    {
+      "brand": "Sony",
+      "models": [
+        {
+          "model": "A7 III",
+          "sensor_size": "full_frame",
+          "crop_factor": 1.0,
+          "lens_mounts": ["Sony E"]
+        },
+        {
+          "model": "A7R IV",
+          "sensor_size": "full_frame",
+          "crop_factor": 1.0,
+          "lens_mounts": ["Sony E"]
+        },
+        {
+          "model": "A7S III",
+          "sensor_size": "full_frame",
+          "crop_factor": 1.0,
+          "lens_mounts": ["Sony E"]
+        },
+        {
+          "model": "A6600",
+          "sensor_size": "aps_c",
+          "crop_factor": 1.5,
+          "lens_mounts": ["Sony E"]
+        },
+        {
+          "model": "A6500",
+          "sensor_size": "aps_c",
+          "crop_factor": 1.5,
+          "lens_mounts": ["Sony E"]
+        },
+        {
+          "model": "A6400",
+          "sensor_size": "aps_c",
+          "crop_factor": 1.5,
+          "lens_mounts": ["Sony E"]
+        },
+        {
+          "model": "RX100 VII",
+          "sensor_size": "one_inch",
+          "crop_factor": 2.7,
+          "lens_mounts": ["fixed"]
+        },
+        {
+          "model": "FX3",
+          "sensor_size": "full_frame",
+          "crop_factor": 1.0,
+          "lens_mounts": ["Sony E"]
+        },
+        {
+          "model": "FX6",
+          "sensor_size": "full_frame",
+          "crop_factor": 1.0,
+          "lens_mounts": ["Sony E"]
+        }
+      ]
+    },
+    {
+      "brand": "Canon",
+      "models": [
+        {
+          "model": "EOS R5",
+          "sensor_size": "full_frame",
+          "crop_factor": 1.0,
+          "lens_mounts": ["Canon RF", "Canon EF (adapter)"]
+        },
+        {
+          "model": "EOS R6",
+          "sensor_size": "full_frame",
+          "crop_factor": 1.0,
+          "lens_mounts": ["Canon RF", "Canon EF (adapter)"]
+        },
+        {
+          "model": "EOS R",
+          "sensor_size": "full_frame",
+          "crop_factor": 1.0,
+          "lens_mounts": ["Canon RF", "Canon EF (adapter)"]
+        },
+        {
+          "model": "EOS M50 Mark II",
+          "sensor_size": "aps_c",
+          "crop_factor": 1.6,
+          "lens_mounts": ["Canon EF-M"]
+        },
+        {
+          "model": "EOS 90D",
+          "sensor_size": "aps_c",
+          "crop_factor": 1.6,
+          "lens_mounts": ["Canon EF", "Canon EF-S"]
+        },
+        {
+          "model": "EOS 5D Mark IV",
+          "sensor_size": "full_frame",
+          "crop_factor": 1.0,
+          "lens_mounts": ["Canon EF"]
+        }
+      ]
+    },
+    {
+      "brand": "Nikon",
+      "models": [
+        {
+          "model": "Z6 II",
+          "sensor_size": "full_frame",
+          "crop_factor": 1.0,
+          "lens_mounts": ["Nikon Z", "Nikon F (adapter)"]
+        },
+        {
+          "model": "Z7 II",
+          "sensor_size": "full_frame",
+          "crop_factor": 1.0,
+          "lens_mounts": ["Nikon Z", "Nikon F (adapter)"]
+        },
+        {
+          "model": "Z50",
+          "sensor_size": "aps_c",
+          "crop_factor": 1.5,
+          "lens_mounts": ["Nikon Z"]
+        },
+        {
+          "model": "D850",
+          "sensor_size": "full_frame",
+          "crop_factor": 1.0,
+          "lens_mounts": ["Nikon F"]
+        },
+        {
+          "model": "D7500",
+          "sensor_size": "aps_c",
+          "crop_factor": 1.5,
+          "lens_mounts": ["Nikon F", "Nikon DX"]
+        }
+      ]
+    },
+    {
+      "brand": "Panasonic",
+      "models": [
+        {
+          "model": "Lumix S5",
+          "sensor_size": "full_frame",
+          "crop_factor": 1.0,
+          "lens_mounts": ["Leica L"]
+        },
+        {
+          "model": "Lumix S1",
+          "sensor_size": "full_frame",
+          "crop_factor": 1.0,
+          "lens_mounts": ["Leica L"]
+        },
+        {
+          "model": "Lumix GH6",
+          "sensor_size": "micro_four_thirds",
+          "crop_factor": 2.0,
+          "lens_mounts": ["Micro Four Thirds"]
+        },
+        {
+          "model": "Lumix GH5",
+          "sensor_size": "micro_four_thirds",
+          "crop_factor": 2.0,
+          "lens_mounts": ["Micro Four Thirds"]
+        },
+        {
+          "model": "Lumix GH5S",
+          "sensor_size": "micro_four_thirds",
+          "crop_factor": 2.0,
+          "lens_mounts": ["Micro Four Thirds"]
+        },
+        {
+          "model": "Lumix G9",
+          "sensor_size": "micro_four_thirds",
+          "crop_factor": 2.0,
+          "lens_mounts": ["Micro Four Thirds"]
+        }
+      ]
+    },
+    {
+      "brand": "Fujifilm",
+      "models": [
+        {
+          "model": "X-T4",
+          "sensor_size": "aps_c",
+          "crop_factor": 1.5,
+          "lens_mounts": ["Fujifilm X"]
+        },
+        {
+          "model": "X-T3",
+          "sensor_size": "aps_c",
+          "crop_factor": 1.5,
+          "lens_mounts": ["Fujifilm X"]
+        },
+        {
+          "model": "X-S10",
+          "sensor_size": "aps_c",
+          "crop_factor": 1.5,
+          "lens_mounts": ["Fujifilm X"]
+        },
+        {
+          "model": "GFX 100S",
+          "sensor_size": "medium_format",
+          "crop_factor": 0.79,
+          "lens_mounts": ["Fujifilm G"]
+        }
+      ]
+    },
+    {
+      "brand": "GoPro",
+      "models": [
+        {
+          "model": "HERO12 Black",
+          "sensor_size": "one_over_1_9_inch",
+          "crop_factor": 5.64,
+          "lens_mounts": ["fixed"]
+        },
+        {
+          "model": "HERO11 Black",
+          "sensor_size": "one_over_1_9_inch",
+          "crop_factor": 5.64,
+          "lens_mounts": ["fixed"]
+        },
+        {
+          "model": "HERO10 Black",
+          "sensor_size": "one_over_2_3_inch",
+          "crop_factor": 5.64,
+          "lens_mounts": ["fixed"]
+        },
+        {
+          "model": "HERO9 Black",
+          "sensor_size": "one_over_2_3_inch",
+          "crop_factor": 5.64,
+          "lens_mounts": ["fixed"]
+        },
+        {
+          "model": "HERO8 Black",
+          "sensor_size": "one_over_2_3_inch",
+          "crop_factor": 5.64,
+          "lens_mounts": ["fixed"]
+        }
+      ]
+    },
+    {
+      "brand": "DJI",
+      "models": [
+        {
+          "model": "Osmo Action 4",
+          "sensor_size": "one_over_1_3_inch",
+          "crop_factor": 3.93,
+          "lens_mounts": ["fixed"]
+        },
+        {
+          "model": "Osmo Action 3",
+          "sensor_size": "one_over_1_7_inch",
+          "crop_factor": 4.55,
+          "lens_mounts": ["fixed"]
+        },
+        {
+          "model": "Osmo Pocket 3",
+          "sensor_size": "one_inch",
+          "crop_factor": 2.7,
+          "lens_mounts": ["fixed"]
+        },
+        {
+          "model": "Mavic 3",
+          "sensor_size": "four_thirds",
+          "crop_factor": 1.88,
+          "lens_mounts": ["fixed"]
+        }
+      ]
+    },
+    {
+      "brand": "Insta360",
+      "models": [
+        {
+          "model": "ONE RS 1-Inch 360",
+          "sensor_size": "one_inch",
+          "crop_factor": 2.7,
+          "lens_mounts": ["fixed"]
+        },
+        {
+          "model": "ONE X2",
+          "sensor_size": "one_over_2_3_inch",
+          "crop_factor": 5.64,
+          "lens_mounts": ["fixed"]
+        },
+        {
+          "model": "GO 2",
+          "sensor_size": "one_over_2_3_inch",
+          "crop_factor": 5.64,
+          "lens_mounts": ["fixed"]
+        }
+      ]
+    },
+    {
+      "brand": "Blackmagic Design",
+      "models": [
+        {
+          "model": "Pocket Cinema Camera 6K",
+          "sensor_size": "super_35",
+          "crop_factor": 1.558,
+          "lens_mounts": ["Canon EF"]
+        },
+        {
+          "model": "Pocket Cinema Camera 4K",
+          "sensor_size": "micro_four_thirds",
+          "crop_factor": 1.9,
+          "lens_mounts": ["Micro Four Thirds"]
+        },
+        {
+          "model": "Pocket Cinema Camera 6K G2",
+          "sensor_size": "super_35",
+          "crop_factor": 1.558,
+          "lens_mounts": ["Canon EF"]
+        }
+      ]
+    },
+    {
+      "brand": "Other",
+      "models": [
+        {
+          "model": "Other",
+          "sensor_size": "unknown",
+          "crop_factor": null,
+          "lens_mounts": ["Other"]
+        }
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "brand": "Sony",
+      "mount": "Sony E",
+      "models": [
+        { "model": "FE 16-35mm f/2.8 GM", "type": "zoom", "focal_range": [16, 35] },
+        { "model": "FE 24-70mm f/2.8 GM", "type": "zoom", "focal_range": [24, 70] },
+        { "model": "FE 70-200mm f/2.8 GM OSS", "type": "zoom", "focal_range": [70, 200] },
+        { "model": "FE 24mm f/1.4 GM", "type": "prime", "focal_length": 24 },
+        { "model": "FE 35mm f/1.8", "type": "prime", "focal_length": 35 },
+        { "model": "FE 50mm f/1.2 GM", "type": "prime", "focal_length": 50 },
+        { "model": "FE 85mm f/1.4 GM", "type": "prime", "focal_length": 85 },
+        { "model": "FE 12-24mm f/2.8 GM", "type": "zoom", "focal_range": [12, 24] }
+      ]
+    },
+    {
+      "brand": "Canon",
+      "mount": "Canon RF",
+      "models": [
+        { "model": "RF 15-35mm f/2.8L IS USM", "type": "zoom", "focal_range": [15, 35] },
+        { "model": "RF 24-70mm f/2.8L IS USM", "type": "zoom", "focal_range": [24, 70] },
+        { "model": "RF 70-200mm f/2.8L IS USM", "type": "zoom", "focal_range": [70, 200] },
+        { "model": "RF 50mm f/1.2L USM", "type": "prime", "focal_length": 50 },
+        { "model": "RF 85mm f/1.2L USM", "type": "prime", "focal_length": 85 }
+      ]
+    },
+    {
+      "brand": "Canon",
+      "mount": "Canon EF",
+      "models": [
+        { "model": "EF 16-35mm f/2.8L III USM", "type": "zoom", "focal_range": [16, 35] },
+        { "model": "EF 24-70mm f/2.8L II USM", "type": "zoom", "focal_range": [24, 70] },
+        { "model": "EF 70-200mm f/2.8L IS III USM", "type": "zoom", "focal_range": [70, 200] },
+        { "model": "EF 50mm f/1.2L USM", "type": "prime", "focal_length": 50 },
+        { "model": "EF 85mm f/1.2L II USM", "type": "prime", "focal_length": 85 }
+      ]
+    },
+    {
+      "brand": "Nikon",
+      "mount": "Nikon Z",
+      "models": [
+        { "model": "NIKKOR Z 14-30mm f/4 S", "type": "zoom", "focal_range": [14, 30] },
+        { "model": "NIKKOR Z 24-70mm f/2.8 S", "type": "zoom", "focal_range": [24, 70] },
+        { "model": "NIKKOR Z 70-200mm f/2.8 VR S", "type": "zoom", "focal_range": [70, 200] },
+        { "model": "NIKKOR Z 50mm f/1.2 S", "type": "prime", "focal_length": 50 },
+        { "model": "NIKKOR Z 85mm f/1.8 S", "type": "prime", "focal_length": 85 }
+      ]
+    },
+    {
+      "brand": "Panasonic",
+      "mount": "Micro Four Thirds",
+      "models": [
+        { "model": "Lumix G 14mm f/2.5 II ASPH", "type": "prime", "focal_length": 14 },
+        { "model": "Lumix G Vario 12-35mm f/2.8 II ASPH OIS", "type": "zoom", "focal_range": [12, 35] },
+        { "model": "Lumix G X Vario 35-100mm f/2.8 II Power OIS", "type": "zoom", "focal_range": [35, 100] }
+      ]
+    },
+    {
+      "brand": "Sigma",
+      "mount": "various",
+      "models": [
+        { "model": "10-20mm f/3.5 EX DC HSM", "type": "zoom", "focal_range": [10, 20] },
+        { "model": "18-35mm f/1.8 DC HSM Art", "type": "zoom", "focal_range": [18, 35] },
+        { "model": "35mm f/1.4 DG HSM Art", "type": "prime", "focal_length": 35 },
+        { "model": "50mm f/1.4 DG HSM Art", "type": "prime", "focal_length": 50 },
+        { "model": "85mm f/1.4 DG HSM Art", "type": "prime", "focal_length": 85 }
+      ]
+    },
+    {
+      "brand": "Tamron",
+      "mount": "various",
+      "models": [
+        { "model": "17-28mm f/2.8 Di III RXD", "type": "zoom", "focal_range": [17, 28] },
+        { "model": "28-75mm f/2.8 Di III RXD", "type": "zoom", "focal_range": [28, 75] },
+        { "model": "70-180mm f/2.8 Di III VXD", "type": "zoom", "focal_range": [70, 180] }
+      ]
+    },
+    {
+      "brand": "Other",
+      "mount": "Other",
+      "models": [
+        { "model": "Other", "type": "unknown", "focal_length": null }
+      ]
+    }
+  ],
+  "sensor_sizes": {
+    "full_frame": { "width_mm": 36.0, "height_mm": 24.0, "crop_factor": 1.0, "display_name": "Full Frame (35mm)" },
+    "aps_c": { "width_mm": 23.5, "height_mm": 15.6, "crop_factor": 1.5, "display_name": "APS-C" },
+    "aps_c_canon": { "width_mm": 22.3, "height_mm": 14.9, "crop_factor": 1.6, "display_name": "APS-C (Canon)" },
+    "micro_four_thirds": { "width_mm": 17.3, "height_mm": 13.0, "crop_factor": 2.0, "display_name": "Micro Four Thirds" },
+    "four_thirds": { "width_mm": 17.3, "height_mm": 13.0, "crop_factor": 1.88, "display_name": "Four Thirds" },
+    "one_inch": { "width_mm": 13.2, "height_mm": 8.8, "crop_factor": 2.7, "display_name": "1 inch" },
+    "super_35": { "width_mm": 24.89, "height_mm": 14.0, "crop_factor": 1.5, "display_name": "Super 35" },
+    "medium_format": { "width_mm": 43.8, "height_mm": 32.9, "crop_factor": 0.79, "display_name": "Medium Format" },
+    "one_over_1_3_inch": { "width_mm": 9.6, "height_mm": 7.2, "crop_factor": 3.93, "display_name": "1/1.3 inch" },
+    "one_over_1_7_inch": { "width_mm": 7.6, "height_mm": 5.7, "crop_factor": 4.55, "display_name": "1/1.7 inch" },
+    "one_over_1_9_inch": { "width_mm": 6.4, "height_mm": 4.8, "crop_factor": 5.64, "display_name": "1/1.9 inch" },
+    "one_over_2_3_inch": { "width_mm": 6.17, "height_mm": 4.55, "crop_factor": 5.64, "display_name": "1/2.3 inch" },
+    "unknown": { "width_mm": null, "height_mm": null, "crop_factor": null, "display_name": "Unknown" }
+  },
+  "lens_mounts": [
+    "Sony E",
+    "Canon RF",
+    "Canon EF",
+    "Canon EF-S",
+    "Canon EF-M",
+    "Nikon Z",
+    "Nikon F",
+    "Nikon DX",
+    "Fujifilm X",
+    "Fujifilm G",
+    "Leica L",
+    "Micro Four Thirds",
+    "fixed",
+    "Other"
+  ]
+}
