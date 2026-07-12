@@ -24,6 +24,8 @@ export BINDGEN_EXTRA_CLANG_ARGS_aarch64_apple_ios := "--target=arm64-apple-ios -
 export CFLAGS_aarch64_apple_darwin := "-mmacosx-version-min=10.15"
 export IPHONEOS_DEPLOYMENT_TARGET := "14.0"
 
+export CXXFLAGS := env_var_or_default("CXXFLAGS", "") + " -Wno-error=implicit-function-declaration"
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
