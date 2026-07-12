@@ -199,7 +199,7 @@ impl WgpuWrapper {
                         limits.max_storage_buffer_binding_size = ((1 << max_storage_buffer_bits) - 1+5).min(adapter_limits.max_storage_buffer_binding_size);
 
                         adapter.create_device_from_hal(wgpu::hal::OpenDevice::<Metal> {
-                            device: <Metal as wgpu::hal::Api>::Device::device_from_raw(mtl_dev, wgpu::Features::empty()),
+                            device: <Metal as wgpu::hal::Api>::Device::device_from_raw(mtl_dev, wgpu::Features::empty(), &limits),
                             queue: <Metal as wgpu::hal::Api>::Queue::queue_from_raw(mtl_cq, 1.0)
                         }, &wgpu::DeviceDescriptor {
                             label: None,

@@ -13,10 +13,10 @@ jobs:
         targets: [
           { os: ubuntu-latest, type: linux },
           { os: macos-14,      type: macos },
-          { os: macos-14,      type: macstore },
+          { os: macos-15,      type: macstore },
           { os: windows-2022,  type: windows },
           { os: windows-2022,  type: windows-arm },
-          { os: macos-14,      type: ios },
+          { os: macos-15,      type: ios },
           { os: windows-2022,  type: android }
         ]
     name: Gyroflow for ${{ matrix.targets.type }}

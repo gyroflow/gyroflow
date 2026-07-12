@@ -66,7 +66,8 @@ pub fn create_texture_from_metal(device: &Device, image: *mut std::ffi::c_void, 
                 width,
                 height,
                 depth: 1,
-            }
+            },
+            None
         )
     };
 
@@ -83,6 +84,7 @@ pub fn create_texture_from_metal(device: &Device, image: *mut std::ffi::c_void, 
                 usage,
                 view_formats: &[],
             },
+            wgpu::TextureUses::UNINITIALIZED
         )
     }
 }
