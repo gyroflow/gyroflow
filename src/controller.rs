@@ -105,6 +105,7 @@ pub struct Controller {
     set_sync_lpf: qt_method!(fn(&self, lpf: f64)),
     set_imu_lpf: qt_method!(fn(&self, lpf: f64)),
     set_imu_median_filter: qt_method!(fn(&self, size: i32)),
+    set_glitch_filter: qt_method!(fn(&self, enabled: bool, strength: f64)),
     set_imu_rotation: qt_method!(fn(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64)),
     set_acc_rotation: qt_method!(fn(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64)),
     set_imu_orientation: qt_method!(fn(&self, orientation: String)),
@@ -1467,6 +1468,7 @@ impl Controller {
 
     wrap_simple_method!(set_imu_lpf, v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_imu_median_filter, size: i32; recompute; chart_data_changed);
+    wrap_simple_method!(set_glitch_filter, enabled: bool, strength: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_imu_rotation, pitch_deg: f64, roll_deg: f64, yaw_deg: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_acc_rotation, pitch_deg: f64, roll_deg: f64, yaw_deg: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_imu_orientation, v: String; recompute; chart_data_changed);

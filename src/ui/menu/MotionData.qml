@@ -66,6 +66,12 @@ MenuItem {
                 lpf.value = +gyro.lpf;
                 lpfcb.checked = lpf.value > 0;
             }
+            if (typeof gyro.glitch_strength === "number" && +gyro.glitch_strength > 0) {
+                glitchStrength.value = +gyro.glitch_strength;
+            }
+            if (gyro.hasOwnProperty("glitch_filter")) {
+                glitchcb.checked = !!gyro.glitch_filter;
+            }
             if (typeof gyro.sample_index === "number") {
                 currentLog.currentIndex = gyro.sample_index + 1;
             }
@@ -120,6 +126,7 @@ MenuItem {
 
             controller.set_imu_lpf(lpfcb.checked? lpf.value : 0);
             controller.set_imu_median_filter(mfcb.checked? mf.value : 0);
+            controller.set_glitch_filter(glitchcb.checked, glitchStrength.value);
             controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
             controller.set_acc_rotation(arot.checked? ap.value : 0, arot.checked? ar.value : 0, arot.checked? ay.value : 0);
             Qt.callLater(controller.recompute_gyro);
@@ -282,6 +289,33 @@ MenuItem {
             onValueChanged: {
                 controller.set_imu_median_filter(mfcb.checked? value : 0);
                 Qt.callLater(controller.recompute_gyro);
+            }
+        }
+    }
+    CheckBoxWithContent {
+        id: glitchcb;
+        text: qsTr("Glitch filtering");
+        tooltip: qsTr("Detect and repair short bursts of corrupt gyro data");
+        onCheckedChanged: {
+            controller.set_glitch_filter(checked, glitchStrength.value);
+            Qt.callLater(controller.recompute_gyro);
+        }
+        Label {
+            text: qsTr("Strength");
+            width: parent.width;
+            tooltip: qsTr("Higher values detect glitches more aggressively (catching weaker and longer bursts with more passes), but may affect real fast motion. Lower values only repair the obvious, large glitches. 50% is the default.");
+            SliderWithField {
+                id: glitchStrength;
+                defaultValue: 50;
+                to: 100;
+                value: 50;
+                unit: "%";
+                precision: 0;
+                width: parent.width;
+                onValueChanged: {
+                    controller.set_glitch_filter(glitchcb.checked, value);
+                    Qt.callLater(controller.recompute_gyro);
+                }
             }
         }
     }

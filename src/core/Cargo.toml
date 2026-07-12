@@ -29,16 +29,16 @@ biquad = "0.6.0"
 fastrand = "2.4"
 lazy_static = "1.5.0"
 parking_lot = "0.12.5"
-regex = "1.12"
+regex = "1.13"
 bincode = { version = "2.0", features = ["serde"] }
 serde = "1.0"
 serde_json = "1.0"
 crc32fast = "1.5.0"
 byteorder = "1.5.0"
 line_drawing = "1.0.1"
-rand = "0.10.1"
-time = { version = "0.3.47", features = ["local-offset"] }
-itertools = "0.14.0"
+rand = "0.10.2"
+time = { version = "0.3.53", features = ["local-offset"] }
+itertools = "0.15.0"
 num = "0.4.3"
 base91 = "0.1.0"
 bitflags = "2.13"
@@ -67,7 +67,7 @@ libloading = "0.9"
 libc = "0.2"
 bytemuck = "1.25"
 ash = "0.38.0"
-pollster = "0.4.0"
+pollster = "1.0.1"
 futures-intrusive = "0.5.0"
 flate2 = "1.1"
 walkdir = "2.5.0"
@@ -78,10 +78,10 @@ ocl = { version = "0.19.7", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.4.1"
 exr = "1.74"
-opencv = { version = "0.98", default-features = false, features = [ "calib3d", "features2d", "imgproc", "optflow", "clang-runtime" ], optional = true } #"imgcodecs","objdetect","sfm",
+opencv = { version = "0.99", default-features = false, features = [ "calib3d", "features2d", "imgproc", "optflow", "clang-runtime" ], optional = true } #"imgcodecs","objdetect","sfm",
 median = "0.3"
 
-wgpu = { version = "29", features = ["spirv", "naga-ir"] }
+wgpu = { version = "30", features = ["spirv", "naga-ir"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 objc2 = "0.6"

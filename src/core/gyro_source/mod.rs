@@ -557,6 +557,8 @@ impl GyroSource {
         self.imu_transforms.acc_rotation = None;
         self.imu_transforms.imu_lpf = 0.0;
         self.imu_transforms.imu_mf = 0;
+        self.imu_transforms.glitch_filter = false;
+        self.imu_transforms.glitch_strength = 0.0;
         self.file_metadata = Default::default();
         self.clear_offsets();
     }
@@ -621,6 +623,13 @@ impl GyroSource {
                 } else {
                     file_metadata.quaternions.clone()
                 };
+                if self.imu_transforms.glitch_filter && self.quaternions.len() >= 8 {
+                    let params = super::filtering::GlitchRepairParams::from_strength(self.imu_transforms.glitch_strength);
+                    let patched = super::filtering::GlitchRepair::repair_quats(&mut self.quaternions, &params);
+                    if patched > 0 {
+                        log::info!("Glitch filter: repaired {} sample(s)", patched);
+                    }
+                }
                 if self.imu_transforms.imu_lpf > 0.0 && !self.quaternions.is_empty() && self.duration_ms > 0.0 {
                     let sample_rate = self.quaternions.len() as f64 / (self.duration_ms / 1000.0);
                     if let Err(e) = super::filtering::Lowpass::filter_quats_forward_backward(self.imu_transforms.imu_lpf, sample_rate, &mut self.quaternions) {
@@ -914,6 +923,8 @@ impl GyroSource {
         hasher.write_u64(self.duration_ms.to_bits());
         hasher.write_u64(self.imu_transforms.imu_lpf.to_bits());
         hasher.write_i32(self.imu_transforms.imu_mf);
+        hasher.write_u8(if self.imu_transforms.glitch_filter { 1 } else { 0 });
+        hasher.write_u64(self.imu_transforms.glitch_strength.to_bits());
         hasher.write_usize(self.raw_imu.len());
         hasher.write_usize(file_metadata.raw_imu.len());
         hasher.write_usize(self.quaternions.len());

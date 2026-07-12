@@ -127,6 +127,7 @@ impl WgpuWrapper {
             power_preference: wgpu::PowerPreference::HighPerformance,
             force_fallback_adapter: false,
             compatible_surface: None,
+            apply_limit_buckets: false,
         })).ok()?;
         let info = adapter.get_info();
         log::debug!("WGPU adapter: {:?}", &info);
@@ -520,29 +521,30 @@ impl WgpuWrapper {
                 let _ = self.device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
 
                 if let Some(Ok(())) = pollster::block_on(receiver.receive()) {
-                    let data = buffer_slice.get_mapped_range();
-                    if self.padded_out_stride == buffers.output.size.2 as u32 {
-                        // Fast path
-                        (&mut buffer[..buffers.output.size.1 * buffers.output.size.2]).copy_from_slice(data.as_ref());
-                    } else {
-                        // data.as_ref()
-                        //     .chunks(self.padded_out_stride as usize)
-                        //     .zip(output.chunks_mut(buffers.output_size.2))
-                        //     .for_each(|(src, dest)| {
-                        //         dest.copy_from_slice(&src[0..buffers.output_size.2]);
-                        //     });
-                        use rayon::prelude::{ ParallelSliceMut, ParallelSlice };
-                        use rayon::iter::{ ParallelIterator, IndexedParallelIterator };
-                        data.as_ref()
-                            .par_chunks(self.padded_out_stride as usize)
-                            .zip(buffer.par_chunks_mut(buffers.output.size.2))
-                            .for_each(|(src, dest)| {
-                                dest.copy_from_slice(&src[0..buffers.output.size.2]);
-                            });
-                    }
+                    if let Ok(data) = buffer_slice.get_mapped_range() {
+                        if self.padded_out_stride == buffers.output.size.2 as u32 {
+                            // Fast path
+                            (&mut buffer[..buffers.output.size.1 * buffers.output.size.2]).copy_from_slice(data.as_ref());
+                        } else {
+                            // data.as_ref()
+                            //     .chunks(self.padded_out_stride as usize)
+                            //     .zip(output.chunks_mut(buffers.output_size.2))
+                            //     .for_each(|(src, dest)| {
+                            //         dest.copy_from_slice(&src[0..buffers.output_size.2]);
+                            //     });
+                            use rayon::prelude::{ ParallelSliceMut, ParallelSlice };
+                            use rayon::iter::{ ParallelIterator, IndexedParallelIterator };
+                            data.as_ref()
+                                .par_chunks(self.padded_out_stride as usize)
+                                .zip(buffer.par_chunks_mut(buffers.output.size.2))
+                                .for_each(|(src, dest)| {
+                                    dest.copy_from_slice(&src[0..buffers.output.size.2]);
+                                });
+                        }
 
-                    // We have to make sure all mapped views are dropped before we unmap the buffer.
-                    drop(data);
+                        // We have to make sure all mapped views are dropped before we unmap the buffer.
+                        drop(data);
+                    }
                     self.staging_buffer.as_ref().unwrap().unmap();
                 } else {
                     // TODO change to Result

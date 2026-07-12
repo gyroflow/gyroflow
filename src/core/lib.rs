@@ -1081,6 +1081,11 @@ impl StabilizationManager {
     pub fn set_imu_median_filter(&self, size: i32) {
         self.gyro.write().imu_transforms.imu_mf = size;
     }
+    pub fn set_glitch_filter(&self, enabled: bool, strength: f64) {
+        let mut gyro = self.gyro.write();
+        gyro.imu_transforms.glitch_filter = enabled;
+        gyro.imu_transforms.glitch_strength = strength;
+    }
     pub fn set_imu_rotation(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
         self.gyro.write().imu_transforms.set_imu_rotation(pitch_deg, roll_deg, yaw_deg);
     }
@@ -1337,6 +1342,8 @@ impl StabilizationManager {
                 "filepath":           gyro.file_url,
                 "lpf":                gyro.imu_transforms.imu_lpf,
                 "mf":                 gyro.imu_transforms.imu_mf,
+                "glitch_filter":      gyro.imu_transforms.glitch_filter,
+                "glitch_strength":    gyro.imu_transforms.glitch_strength,
                 "rotation":           gyro.imu_transforms.imu_rotation_angles,
                 "acc_rotation":       gyro.imu_transforms.acc_rotation_angles,
                 "imu_orientation":    gyro.imu_transforms.imu_orientation,
@@ -1617,6 +1624,8 @@ impl StabilizationManager {
 
                 if let Some(v) = obj.get("lpf").and_then(|x| x.as_f64()) { gyro.imu_transforms.imu_lpf = v; }
                 if let Some(v) = obj.get("mf").and_then(|x| x.as_i64()) { gyro.imu_transforms.imu_mf = v as _; }
+                if let Some(v) = obj.get("glitch_filter").and_then(|x| x.as_bool()) { gyro.imu_transforms.glitch_filter = v; }
+                if let Some(v) = obj.get("glitch_strength").and_then(|x| x.as_f64()) { gyro.imu_transforms.glitch_strength = v; }
                 if let Some(v) = obj.get("integration_method").and_then(|x| x.as_u64()) { gyro.integration_method = v as usize; }
                 if let Some(v) = obj.get("imu_orientation").and_then(|x| x.as_str()) { gyro.imu_transforms.imu_orientation = Some(v.to_string()); }
                 if let Some(v) = obj.get("rotation")     { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_imu_rotation(v[0], v[1], v[2]); }
