@@ -165,7 +165,6 @@ jobs:
           SIGN_KEY: 58FE9D9FF561BF9910031999A8211A23858D1920
           PROVISIONING_PROFILE: /Users/runner/Library/MobileDevice/Provisioning Profiles/${{ matrix.targets.type == 'ios' && fromJSON(steps.provisioning.outputs.profiles)[0].udid || '' }}.mobileprovision
         run: |
-          sudo xcode-select --switch /Applications/Xcode_16.2.app/Contents/Developer
           just ios install-deps
           just ios build-ipa
 
