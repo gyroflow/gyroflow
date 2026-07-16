@@ -130,16 +130,22 @@ pub fn parse_lenses(xml: &str) -> Vec<LensfunLens> {
 /// given at this scale must be rescaled by `rescale_coeffs` before use in gyroflow, whose
 /// distortion models operate on `x/z, y/z` normalized by gyroflow's own camera matrix.
 pub fn hugin_scaling(model: &str, k: &[f64], focal: f64, real_focal: Option<f64>, crop_factor: f64, aspect_ratio: f64) -> f64 {
-    let real_focal = real_focal.unwrap_or_else(|| match model {
-        "ptlens" if k.len() >= 3 => focal * (1.0 - k[0] - k[1] - k[2]),
-        "poly3"  if k.len() >= 1 => focal * (1.0 - k[0]),
-        _ => focal,
-    });
+    let real_focal = real_focal.unwrap_or_else(|| derive_real_focal(model, k, focal));
     let hugin_scale_in_millimeters = FULL_FRAME_DIAGONAL_MM / crop_factor / aspect_ratio.hypot(1.0) / 2.0;
     if hugin_scale_in_millimeters.abs() < f64::EPSILON {
         return 1.0;
     }
     real_focal / hugin_scale_in_millimeters
+}
+
+/// Derive a calibration point's real focal length from its polynomial coefficients, for the
+/// (common) case where Lensfun's `real-focal` attribute isn't present. Ported from `database.cpp`.
+fn derive_real_focal(model: &str, k: &[f64], focal: f64) -> f64 {
+    match model {
+        "ptlens" if k.len() >= 3 => focal * (1.0 - k[0] - k[1] - k[2]),
+        "poly3"  if k.len() >= 1 => focal * (1.0 - k[0]),
+        _ => focal,
+    }
 }
 
 /// Rescale coefficients (in place) from Lensfun's hugin-normalized scale into gyroflow's.
@@ -150,6 +156,81 @@ pub fn rescale_coeffs(model: &str, k: &mut [f64], hugin_scaling: f64) {
         "ptlens" => PtLens::rescale_coeffs(k, hugin_scaling),
         _ => {}
     }
+}
+
+/// Interpolate a lens' distortion coefficients at an arbitrary `focal` length, for a camera
+/// with the given crop factor. Lensfun only calibrates a handful of discrete focal lengths per
+/// zoom lens, so a video shot in between needs its coefficients derived rather than looked up.
+/// Direct port of `lfLens::InterpolateDistortion` in Lensfun's `lens.cpp`.
+///
+/// Note: `distortion_to_profile` still builds one profile per exactly-calibrated focal length,
+/// so this doesn't change what gets generated today — it's the piece a future "arbitrary focal"
+/// lookup (e.g. matching a video's actual focal length instead of the nearest calibrated one)
+/// would call into.
+pub fn interpolate_distortion(lens: &LensfunLens, camera_crop: f64, focal: f64) -> Option<LensfunDistortion> {
+    // A calibration from a smaller sensor than the target camera doesn't cover its whole
+    // frame and can't be reused — same `>= 0.96` tolerance Lensfun itself uses.
+    if lens.crop_factor <= 0.0 || camera_crop / lens.crop_factor < 0.96 {
+        return None;
+    }
+    let model = lens.distortions.first()?.model.clone();
+
+    // 2 nearest calibrated focals below and 2 above the requested one.
+    let mut spline: [Option<&LensfunDistortion>; 4] = [None; 4];
+    let mut spline_dist = [f64::MIN, f64::MIN, f64::MAX, f64::MAX];
+    for d in &lens.distortions {
+        if d.model != model { continue; }
+        let df = focal - d.focal;
+        if df == 0.0 {
+            return Some(d.clone());
+        }
+        if df < 0.0 {
+            if df > spline_dist[1] {
+                spline_dist[0] = spline_dist[1]; spline_dist[1] = df;
+                spline[0] = spline[1]; spline[1] = Some(d);
+            } else if df > spline_dist[0] {
+                spline_dist[0] = df; spline[0] = Some(d);
+            }
+        } else if df < spline_dist[2] {
+            spline_dist[3] = spline_dist[2]; spline_dist[2] = df;
+            spline[3] = spline[2]; spline[2] = Some(d);
+        } else if df < spline_dist[3] {
+            spline_dist[3] = df; spline[3] = Some(d);
+        }
+    }
+
+    let (s1, s2) = match (spline[1], spline[2]) {
+        (Some(s1), Some(s2)) => (s1, s2),
+        // Requested focal is outside the calibrated range, clamp to the nearest entry.
+        (Some(s), None) | (None, Some(s)) => return Some(s.clone()),
+        (None, None) => return None,
+    };
+
+    let t = (focal - s1.focal) / (s2.focal - s1.focal);
+    let real_focal = |d: &LensfunDistortion| d.real_focal.unwrap_or_else(|| derive_real_focal(&d.model, &d.k, d.focal));
+    let interpolated_real_focal = hermite_interpolate(spline[0].map(real_focal), real_focal(s1), real_focal(s2), spline[3].map(real_focal), t);
+
+    let n = s1.k.len().min(s2.k.len());
+    let mut k = vec![0.0; n];
+    for (i, ki) in k.iter_mut().enumerate() {
+        // Parameters are ~proportional to inverse focal length, so interpolate `term * focal`
+        // (see `__parameter_scales` in Lensfun's lens.cpp), not the raw term.
+        let scaled_edge = |d: Option<&LensfunDistortion>| d.and_then(|d| d.k.get(i).map(|v| v * d.focal));
+        *ki = hermite_interpolate(scaled_edge(spline[0]), s1.k[i] * s1.focal, s2.k[i] * s2.focal, scaled_edge(spline[3]), t) / focal;
+    }
+
+    Some(LensfunDistortion { model, focal, real_focal: Some(interpolated_real_focal), k })
+}
+
+/// Hermite spline interpolation, direct port of `_lf_interpolate` in Lensfun's `auxfun.cpp`.
+/// `y1`/`y4` are the values surrounding the interpolated segment `y2`..`y3` and may be missing
+/// (at the edge of the calibrated range), falling back to a linear tangent in that case.
+fn hermite_interpolate(y1: Option<f64>, y2: f64, y3: f64, y4: Option<f64>, t: f64) -> f64 {
+    let t2 = t * t;
+    let t3 = t2 * t;
+    let tg2 = y1.map_or(y3 - y2, |y1| (y3 - y1) * 0.5);
+    let tg3 = y4.map_or(y3 - y2, |y4| (y4 - y2) * 0.5);
+    (2.0 * t3 - 3.0 * t2 + 1.0) * y2 + (t3 - 2.0 * t2 + t) * tg2 + (-2.0 * t3 + 3.0 * t2) * y3 + (t3 - t2) * tg3
 }
 
 // ponytail: Lensfun calibrations are resolution-independent (only aspect ratio matters),
@@ -352,5 +433,54 @@ mod tests {
     fn distortion_to_profile_rejects_lens_with_zero_crop_factor() {
         let lens = LensfunLens { crop_factor: 0.0, aspect_ratio: 1.5, distortions: vec![LensfunDistortion { model: "poly3".into(), focal: 50.0, k: vec![0.1], ..Default::default() }], ..Default::default() };
         assert!(distortion_to_profile(&lens, &lens.distortions[0]).is_none());
+    }
+
+    // Reference values below were generated by running actual Lensfun (git master, e78e7be4+)
+    // through `lfLens::InterpolateDistortion` on an equivalent 4-focal ptlens zoom.
+    const ZOOM_XML: &str = r#"<lensdatabase version="2">
+        <lens>
+            <maker>TestMaker</maker>
+            <model>Test PTLens Zoom 18-55mm</model>
+            <mount>TestMount</mount>
+            <cropfactor>1.5</cropfactor>
+            <calibration>
+                <distortion model="ptlens" focal="18" a="0.012" b="-0.035" c="0.002" />
+                <distortion model="ptlens" focal="24" a="0.008" b="-0.021" c="0.001" />
+                <distortion model="ptlens" focal="35" a="0.004" b="-0.009" c="0.0005" />
+                <distortion model="ptlens" focal="55" a="0.001" b="-0.002" c="0.0" />
+            </calibration>
+        </lens>
+    </lensdatabase>"#;
+
+    #[test]
+    fn interpolate_distortion_returns_exact_match_without_interpolating() {
+        let lens = &parse_lenses(ZOOM_XML)[0];
+        let d = interpolate_distortion(lens, 1.5, 24.0).unwrap();
+        assert_eq!(d.k, vec![0.008, -0.021, 0.001]);
+    }
+
+    #[test]
+    fn interpolate_distortion_matches_lensfun_hermite_spline() {
+        let lens = &parse_lenses(ZOOM_XML)[0];
+        // 28mm falls between the 24mm and 35mm calibration points.
+        let d = interpolate_distortion(lens, 1.5, 28.0).unwrap();
+        assert!((d.k[0] -  0.00630503381).abs()  < 1e-7, "a = {}", d.k[0]);
+        assert!((d.k[1] - -0.0157351606).abs()   < 1e-7, "b = {}", d.k[1]);
+        assert!((d.k[2] -  0.000774793385).abs() < 1e-7, "c = {}", d.k[2]);
+        assert!((d.real_focal.unwrap() - 27.4955425).abs() < 1e-5, "real_focal = {}", d.real_focal.unwrap());
+    }
+
+    #[test]
+    fn interpolate_distortion_clamps_outside_calibrated_range() {
+        let lens = &parse_lenses(ZOOM_XML)[0];
+        let d = interpolate_distortion(lens, 1.5, 100.0).unwrap();
+        assert_eq!(d.k, vec![0.001, -0.002, 0.0]); // clamped to the 55mm entry
+    }
+
+    #[test]
+    fn interpolate_distortion_rejects_calibration_from_smaller_sensor() {
+        let lens = &parse_lenses(ZOOM_XML)[0]; // calibrated on a 1.5 crop sensor
+        assert!(interpolate_distortion(lens, 1.0, 24.0).is_none()); // full-frame target can't use it
+        assert!(interpolate_distortion(lens, 1.6, 24.0).is_some()); // smaller-sensor target can
     }
 }
