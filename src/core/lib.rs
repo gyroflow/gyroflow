@@ -6,6 +6,7 @@ pub mod gyro_source;
 pub mod imu_integration;
 pub mod lens_profile;
 pub mod lens_profile_database;
+pub mod lensfun_import;
 #[cfg(feature = "opencv")]
 pub mod calibration;
 pub mod synchronization;
@@ -274,18 +275,26 @@ impl StabilizationManager {
         } else {
             url.to_owned()
         };
+        let (width, height, aspect, id, fps) = {
+            let params = self.params.read();
+            (params.size.0, params.size.1, ((params.size.0 * 100) as f64 / params.size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.get_identifier_for_autoload()).unwrap_or_default(), (params.fps * 100.0).round() as i32)
+        };
         let db = self.lens_profile_db.read();
-        let (result, from_db) = if let Some(lens) = db.get_by_id(&url) {
+        let (result, from_db) = if crate::lensfun_import::is_lensfun_identifier(&url) {
+            match crate::lensfun_import::import_from_identifier(&url, width, height) {
+                Ok(lens) => {
+                    *self.lens.write() = lens;
+                    (Ok(()), true)
+                },
+                Err(err) => (Err(err), false)
+            }
+        } else if let Some(lens) = db.get_by_id(&url) {
             *self.lens.write() = lens.clone();
             (Ok(()), true)
         } else if url.starts_with('{') {
             (self.lens.write().load_from_data(&url), false)
         } else {
             (self.lens.write().load_from_file(&url), false)
-        };
-        let (width, height, aspect, id, fps) = {
-            let params = self.params.read();
-            (params.size.0, params.size.1, ((params.size.0 * 100) as f64 / params.size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.get_identifier_for_autoload()).unwrap_or_default(), (params.fps * 100.0).round() as i32)
         };
 
         let mut lens = self.lens.write();
@@ -2135,6 +2144,18 @@ pub enum GyroflowCoreError {
 
     #[error("IO error {0:?}")]
     IOError(#[from] std::io::Error),
+
+    #[error("Failed to load Lensfun database: {0}")]
+    LensfunDbLoadFailed(String),
+
+    #[error("Invalid Lensfun profile identifier: {0}")]
+    InvalidLensfunIdentifier(String),
+
+    #[error("Lensfun profile not found: {0}")]
+    LensfunProfileNotFound(String),
+
+    #[error("Lensfun profile has no supported distortion calibration: {0}")]
+    LensfunProfileUnsupported(String),
 
     #[error("Unknown error")]
     Unknown
