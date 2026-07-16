@@ -74,6 +74,18 @@ impl LensProfileDatabase {
         let _time = std::time::Instant::now();
 
         let mut load = |data: DataSource, f_name: &str| {
+            if f_name.ends_with(".xml") {
+                if let DataSource::String(xml) = &data {
+                    for lens in crate::lensfun_xml::parse_lenses(xml) {
+                        for d in &lens.distortions {
+                            if let Some(profile) = crate::lensfun_xml::distortion_to_profile(&lens, d) {
+                                self.map.entry(profile.identifier.clone()).or_insert(profile);
+                            }
+                        }
+                    }
+                }
+                return;
+            }
             if f_name.ends_with(".gyroflow") {
                 let mut profile = LensProfile::default();
                 profile.name = std::path::Path::new(f_name).file_stem().map(|x| x.to_string_lossy().to_string()).unwrap_or_default();
@@ -146,7 +158,7 @@ impl LensProfileDatabase {
             walkdir::WalkDir::new(dir).into_iter().for_each(|e| {
                 if let Ok(entry) = e {
                     let f_name = entry.path().to_string_lossy().replace('\\', "/");
-                    if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
+                    if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") || f_name.ends_with(".xml") {
                         if let Ok(data) = std::fs::read_to_string(&f_name) {
                             load(DataSource::String(data), &f_name);
                         }
