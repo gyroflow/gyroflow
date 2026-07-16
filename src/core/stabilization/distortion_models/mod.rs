@@ -89,6 +89,19 @@ macro_rules! impl_models {
     };
 }
 
+impl DistortionModel {
+    /// Rescale Hugin/Lensfun-normalized polynomial coefficients to focal-length-normalized space.
+    /// See `rescale_polynomial_coefficients` in Lensfun's mod-coord.cpp
+    pub fn rescale_coeffs(&self, k: &mut [f64], hugin_scaling: f64) {
+        match &self.inner {
+            DistortionModels::Poly3(_)  => poly3::Poly3::rescale_coeffs(k, hugin_scaling),
+            DistortionModels::Poly5(_)  => poly5::Poly5::rescale_coeffs(k, hugin_scaling),
+            DistortionModels::PtLens(_) => ptlens::PtLens::rescale_coeffs(k, hugin_scaling),
+            _ => { }
+        }
+    }
+}
+
 impl_models! {
     // Physical lenses
     OpenCVFisheye  => opencv_fisheye::OpenCVFisheye,
