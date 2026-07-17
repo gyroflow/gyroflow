@@ -6,6 +6,7 @@ pub mod gyro_source;
 pub mod imu_integration;
 pub mod lens_profile;
 pub mod lens_profile_database;
+pub mod canonical_camera_database;
 #[cfg(feature = "opencv")]
 pub mod calibration;
 pub mod synchronization;
@@ -35,6 +36,7 @@ use gyro_source::{ GyroSource, Quat64, TimeQuat, TimeVec };
 use stabilization_params::{ ReadoutDirection, StabilizationParams };
 use lens_profile::LensProfile;
 use lens_profile_database::LensProfileDatabase;
+use canonical_camera_database::CanonicalCameraDatabase;
 use smoothing::Smoothing;
 use stabilization::{ Stabilization, KernelParamsFlags, ComputeParams };
 use camera_identifier::CameraIdentifier;
@@ -101,6 +103,7 @@ pub struct StabilizationManager {
 
     pub camera_id: Arc<RwLock<Option<CameraIdentifier>>>,
     pub lens_profile_db: Arc<RwLock<LensProfileDatabase>>,
+    pub canonical_camera_db: Arc<RwLock<CanonicalCameraDatabase>>,
 
     pub input_file: Arc<RwLock<InputFile>>,
 
@@ -136,6 +139,7 @@ impl Default for StabilizationManager {
             pose_estimator: Arc::new(synchronization::PoseEstimator::default()),
 
             lens_profile_db: Arc::new(RwLock::new(LensProfileDatabase::default())),
+            canonical_camera_db: Arc::new(RwLock::new(CanonicalCameraDatabase::default())),
 
             input_file: Arc::new(RwLock::new(InputFile::default())),
 
@@ -1174,6 +1178,7 @@ impl StabilizationManager {
             smoothing:  Arc::new(RwLock::new(self.smoothing.read().clone())),
             input_file: Arc::new(RwLock::new(self.input_file.read().clone())),
             lens_profile_db: self.lens_profile_db.clone(),
+            canonical_camera_db: self.canonical_camera_db.clone(),
 
             // NOT cloned:
             // stabilization
