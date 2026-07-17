@@ -31,6 +31,7 @@ MenuItem {
 
     property bool fetched_from_github: false;
     property bool selected_manually: false;
+    property var metadataIndex: ({ "brands": [] });
 
     FileDialog {
         id: fileDialog;
@@ -81,6 +82,7 @@ MenuItem {
             }
 
             lensProfilesListPrepared = true;
+            root.refreshLensProfileMetadataIndex();
 
             root.loadFavorites();
             if (!root.fetched_from_github) {
@@ -198,6 +200,52 @@ MenuItem {
         settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
     }
 
+    function refreshLensProfileMetadataIndex(): void {
+        const parsed = JSON.parse(controller.lens_profile_metadata_index() || "{\"brands\":[]}");
+        metadataIndex = parsed && parsed.brands? parsed : ({ "brands": [] });
+        brandFilter.model = brandOptions();
+        modelFilter.model = modelOptions();
+        lensFilter.model = lensOptions();
+        settingFilter.model = settingOptions();
+    }
+    function selectedBrand(): var {
+        return brandFilter.currentIndex > 0? metadataIndex.brands[brandFilter.currentIndex - 1] : null;
+    }
+    function selectedModel(): var {
+        const brand = selectedBrand();
+        return brand && modelFilter.currentIndex > 0? brand.models[modelFilter.currentIndex - 1] : null;
+    }
+    function selectedLens(): var {
+        const model = selectedModel();
+        return model && lensFilter.currentIndex > 0? model.lenses[lensFilter.currentIndex - 1] : null;
+    }
+    function brandOptions(): var {
+        return [qsTr("All brands")].concat(metadataIndex.brands.map(v => v.name));
+    }
+    function modelOptions(): var {
+        const brand = selectedBrand();
+        return [qsTr("All models")].concat(brand? brand.models.map(v => v.name) : []);
+    }
+    function lensOptions(): var {
+        const model = selectedModel();
+        return [qsTr("All lenses")].concat(model? model.lenses.map(v => v.name) : []);
+    }
+    function settingOptions(): var {
+        const lens = selectedLens();
+        return [qsTr("All settings")].concat(lens? lens.settings : []);
+    }
+    function applyMetadataFilter(): void {
+        const parts = [];
+        const brand = selectedBrand();
+        const model = selectedModel();
+        const lens = selectedLens();
+        if (brand) parts.push(brand.name);
+        if (model) parts.push(model.name);
+        if (lens) parts.push(lens.name);
+        if (settingFilter.currentIndex > 0) parts.push(settingFilter.currentText);
+        search.text = parts.join(" ");
+    }
+
     SearchField {
         id: search;
         placeholderText: qsTr("Search...");
@@ -217,6 +265,73 @@ MenuItem {
         popup.lv.delegate: LensProfileSearchDelegate {
             popup: search.popup;
             profilesMenu: root;
+        }
+    }
+    Column {
+        width: parent.width;
+        spacing: 5 * dpiScale;
+        visible: metadataIndex.brands.length > 0;
+
+        Row {
+            width: parent.width;
+            spacing: 6 * dpiScale;
+            ComboBox {
+                id: brandFilter;
+                width: (parent.width - parent.spacing) / 2;
+                height: 28 * dpiScale;
+                itemHeight: 24 * dpiScale;
+                model: root.brandOptions();
+                onActivated: {
+                    modelFilter.currentIndex = 0;
+                    lensFilter.currentIndex = 0;
+                    settingFilter.currentIndex = 0;
+                    modelFilter.model = root.modelOptions();
+                    lensFilter.model = root.lensOptions();
+                    settingFilter.model = root.settingOptions();
+                    root.applyMetadataFilter();
+                }
+            }
+            ComboBox {
+                id: modelFilter;
+                width: (parent.width - parent.spacing) / 2;
+                height: 28 * dpiScale;
+                itemHeight: 24 * dpiScale;
+                model: root.modelOptions();
+                enabled: brandFilter.currentIndex > 0;
+                onActivated: {
+                    lensFilter.currentIndex = 0;
+                    settingFilter.currentIndex = 0;
+                    lensFilter.model = root.lensOptions();
+                    settingFilter.model = root.settingOptions();
+                    root.applyMetadataFilter();
+                }
+            }
+        }
+        Row {
+            width: parent.width;
+            spacing: 6 * dpiScale;
+            ComboBox {
+                id: lensFilter;
+                width: (parent.width - parent.spacing) / 2;
+                height: 28 * dpiScale;
+                itemHeight: 24 * dpiScale;
+                model: root.lensOptions();
+                enabled: modelFilter.currentIndex > 0;
+                onActivated: {
+                    settingFilter.currentIndex = 0;
+                    settingFilter.model = root.settingOptions();
+                    root.applyMetadataFilter();
+                }
+            }
+            ComboBox {
+                id: settingFilter;
+                width: (parent.width - parent.spacing) / 2;
+                height: 28 * dpiScale;
+                itemHeight: 24 * dpiScale;
+                model: root.settingOptions();
+                enabled: lensFilter.currentIndex > 0;
+                onActivated: root.applyMetadataFilter();
+            }
         }
     }
     Row {

@@ -99,6 +99,7 @@ pub struct Controller {
     all_profiles_loaded: qt_signal!(),
     search_lens_profile_finished: qt_signal!(profiles: QVariantList),
     search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
+    lens_profile_metadata_index: qt_method!(fn(&self) -> QString),
     fetch_profiles_from_github: qt_method!(fn(&self)),
     lens_profiles_updated: qt_signal!(reload_from_disk: bool),
 
@@ -1917,6 +1918,11 @@ impl Controller {
 
             finished(profiles);
         });
+    }
+
+    fn lens_profile_metadata_index(&self) -> QString {
+        let index = self.stabilizer.lens_profile_db.read().camera_metadata_index();
+        QString::from(serde_json::to_string(&index).unwrap_or_else(|_| "{\"brands\":[]}".into()))
     }
 
     #[allow(unreachable_code)]
