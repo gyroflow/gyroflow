@@ -73,7 +73,7 @@ MenuItem {
         for (const x in fields) {
             let v = calib.calibrationInfo[x];
             if (v && x == "output_dimension") {
-                v = v.w + "x" + v.h;
+                v = v.w + "×" + v.h;
             }
             model[fields[x]] = v || "---";
         }
@@ -242,7 +242,7 @@ MenuItem {
             "Default output size": {
                 "type": "text",
                 "width": 120,
-                "value": function() { return calib.calibrationInfo.output_dimension? (calib.calibrationInfo.output_dimension.w + "x" + calib.calibrationInfo.output_dimension.h) : ""; },
+                "value": function() { return calib.calibrationInfo.output_dimension? (calib.calibrationInfo.output_dimension.w + "×" + calib.calibrationInfo.output_dimension.h) : ""; },
                 "onChange": function(value) {
                     if (/^[0-9]{1,5}x[0-9]{1,5}$/.test(value)) {
                         list.updateEntry("Default output size", value);
@@ -469,9 +469,9 @@ MenuItem {
                 if ((yStretch.value || 1) != 1 && (h % 2) != 0) h--;
                 if (calib.calibrationInfo.output_dimension.w != w || calib.calibrationInfo.output_dimension.h != h) {
                     if (dialog) dialog.close();
-                    dialog = messageBox(Modal.Info, qsTr("Do you want to update the output resolution to %1?").arg("<b>" + w + "x" + h + "</b>"), [
+                    dialog = messageBox(Modal.Info, qsTr("Do you want to update the output resolution to %1?").arg("<b>" + w + "×" + h + "</b>"), [
                         { text: qsTr("Yes"), accent: true, clicked: () => {
-                            list.updateEntryWithTrigger("Default output size", w + "x" + h);
+                            list.updateEntryWithTrigger("Default output size", w + "×" + h);
                             updateResolutionTimer.dialog = null;
                         } },
                         { text: qsTr("No"), clicked: () => {
@@ -538,7 +538,7 @@ MenuItem {
                 position: Label.LeftPosition;
                 NumberField {
                     id: crop;
-                    unit: qsTr("x");
+                    unit: qsTr("×");
                     precision: 2;
                     value: 1;
                     from: 0;

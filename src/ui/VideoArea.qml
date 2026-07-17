@@ -15,6 +15,7 @@ Item {
     anchors.horizontalCenter: parent.horizontalCenter;
 
     property alias vid: vid;
+    property alias playbackRateCb: playbackRateCb;
     property alias timeline: timeline;
     property alias durationMs: timeline.durationMs;
     property alias videoLoader: videoLoader;
@@ -156,7 +157,7 @@ Item {
                     let i = 0;
                     const speed = +obj.playback_speed;
                     for (const x of playbackRateCb.model) {
-                        const rate = +x.replace("x", "");
+                        const rate = +x.replace("×", "");
                         if (Math.abs(rate - speed) < 0.01) {
                             playbackRateCb.currentIndex = i;
                             break;
@@ -1114,15 +1115,20 @@ Item {
 
                 ComboBox {
                     id: playbackRateCb;
-                    model: ["0.13x", "0.25x", "0.5x", "1x", "2x", "4x", "5x", "8x", "10x", "20x", "50x"];
+                    model: ["0.13×", "0.25×", "0.5×", "1×", "2×", "4×", "5×", "8×", "10×", "20×", "50×"];
                     width: 60 * dpiScale;
                     currentIndex: 3;
                     height: 25 * dpiScale;
                     itemHeight: 25 * dpiScale;
                     font.pixelSize: 11 * dpiScale;
                     anchors.verticalCenter: parent.verticalCenter;
+                    function setRate(rate: real): void {
+                        for (let i = 0; i < model.length; ++i) {
+                            if (+model[i].replace("×", "") === rate) { currentIndex = i; return; }
+                        }
+                    }
                     onCurrentTextChanged: {
-                        const rate = +currentText.replace("x", ""); // hacky but simple and it works
+                        const rate = +currentText.replace("×", ""); // hacky but simple and it works
                         vid.playbackRate = rate;
                     }
                     tooltip: qsTr("Playback speed");

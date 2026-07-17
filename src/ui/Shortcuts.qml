@@ -248,13 +248,11 @@ Item {
         onActivated: videoArea.gridGuide.isBlack = !videoArea.gridGuide.isBlack;
     }
 
-    // Play backwards
+    // Seek back 500 frames and then play
     Shortcut {
         id: j;
         sequence: "J";
-        property int currentX: 1;
         onActivated: {
-            //videoArea.vid.playbackRate = -1 * [1, 2, 4, 8, 16][currentX++ % 5];
             videoArea.vid.seekToFrameDelta(-500);
             videoArea.vid.play();
         }
@@ -263,18 +261,21 @@ Item {
     Shortcut {
         sequences: ["K"];
         onActivated: {
-            videoArea.vid.playbackRate = 1;
-            j.currentX = l.currentX = 0;
+            videoArea.playbackRateCb.setRate(1);
+            l.nextX = 0;
             if (videoArea.vid.playing) videoArea.vid.pause();
             else                       videoArea.vid.play();
         }
     }
-    // Play forward
+    // Play forward; cycles through a fixed subset of playback rates
     Shortcut {
         id: l;
         sequence: "L";
-        property int currentX: 1;
-        onActivated: { videoArea.vid.playbackRate = 1 * [1, 2, 4, 8, 16][currentX++ % 5]; videoArea.vid.play(); }
+        property int nextX: 0;
+        onActivated: {
+            videoArea.playbackRateCb.setRate([1, 2, 4, 8, 20][nextX++ % 5]);
+            videoArea.vid.play();
+        }
     }
 
     // Horizon lock roll adjustment shortcuts
