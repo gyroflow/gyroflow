@@ -12,6 +12,11 @@ use crate::stabilization::ComputeParams;
 use super::PoseEstimator;
 use super::SyncParams;
 
+/// Default max features for autosync's AKAZE detection.
+const AUTOSYNC_MAX_FEATURES: usize = 200;
+/// Default AKAZE detection threshold for autosync.
+const AUTOSYNC_THRESHOLD: f64 = 0.0007;
+
 pub struct AutosyncProcess {
     frame_count: usize,
     scaled_fps: f64,
@@ -161,7 +166,7 @@ impl AutosyncProcess {
                     return;
                 }
                 if let Some(img) = img {
-                    estimator.detect_features(frame_no, timestamp_us, img, width, height, method);
+                    estimator.detect_features(frame_no, timestamp_us, img, width, height, method, AUTOSYNC_MAX_FEATURES, AUTOSYNC_THRESHOLD);
                     total_detected_frames.fetch_add(1, SeqCst);
 
                     if frame_no % 7 == 0 {
