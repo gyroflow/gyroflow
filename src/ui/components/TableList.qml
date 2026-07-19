@@ -97,8 +97,9 @@ Row {
         Row {
             id: editableItm;
             spacing: 5 * dpiScale;
-            Item { width: 1; height: 1; visible: newValue.visible; }
+            Item { width: 1; height: 1; visible: newValue.visible || newComboValue.visible; }
             property var desc: tl.editableFields[name];
+            
             NumberField {
                 id: newValue;
                 visible: false;
@@ -120,26 +121,83 @@ Row {
                     function onCommitAll(): void { if (newValue.visible) newValue.accepted(); }
                 }
             }
+
+            ComboBox {
+                id: newComboValue;
+                visible: false;
+                x: 5 * dpiScale;
+                anchors.verticalCenter: parent.verticalCenter;
+                height: parent.height + 8 * dpiScale;
+                width: (desc.width || 120) * dpiScale;
+                editable: true;
+                model: desc.options ? desc.options() : [];
+                
+                onVisibleChanged: {
+                    if (visible) {
+                        let val = desc.value();
+                        let idx = find(val);
+                        if (idx !== -1) {
+                            currentIndex = idx;
+                        } else {
+                            editText = val;
+                        }
+                    }
+                }
+                
+                onAccepted: {
+                    visible = false;
+                    parent.parent.parent.children[0].visible = true;
+                    if (desc.onChange) {
+                        desc.onChange(editText.trim());
+                    }
+                }
+                
+                onActivated: {
+                    visible = false;
+                    parent.parent.parent.children[0].visible = true;
+                    if (desc.onChange) {
+                        desc.onChange(currentText.trim());
+                    }
+                }
+                
+                Connections {
+                    target: tl;
+                    function onCommitAll(): void { if (newComboValue.visible) newComboValue.accepted(); }
+                }
+            }
+
             LinkButton {
                 id: editLinkBtn;
                 anchors.verticalCenter: parent.verticalCenter;
-                iconName: newValue.visible? "checkmark" : "pencil";
+                iconName: (newValue.visible || newComboValue.visible) ? "checkmark" : "pencil";
                 icon.height: parent.height * 0.8;
                 icon.width: parent.height * 0.8;
                 opacity: editLinkBtn.activeFocus ? 0.8 : 1;
-                height: newValue.visible? newValue.height + 5 * dpiScale : undefined;
-                leftPadding: newValue.visible? 15 * dpiScale : 0; rightPadding: leftPadding;
+                height: (newValue.visible || newComboValue.visible) ? (newValue.visible ? newValue.height : newComboValue.height) + 5 * dpiScale : undefined;
+                leftPadding: (newValue.visible || newComboValue.visible) ? 15 * dpiScale : 0;
+                rightPadding: leftPadding;
 
                 function _onClicked(): void {
-                    if (newValue.visible) {
-                        newValue.accepted();
+                    if (desc["type"] === "combobox") {
+                        if (newComboValue.visible) {
+                            newComboValue.accepted();
+                        } else {
+                            newComboValue.visible = true;
+                            parent.parent.parent.children[0].visible = false;
+                            newComboValue.focus = true;
+                            newComboValue.popup.open();
+                        }
                     } else {
-                        const val = desc.value();
-                        if (typeof val === "string") newValue.text = val;
-                        else newValue.value = val;
-                        newValue.visible = true;
-                        parent.parent.parent.children[0].visible = false;
-                        newValue.focus = true;
+                        if (newValue.visible) {
+                            newValue.accepted();
+                        } else {
+                            const val = desc.value();
+                            if (typeof val === "string") newValue.text = val;
+                            else newValue.value = val;
+                            newValue.visible = true;
+                            parent.parent.parent.children[0].visible = false;
+                            newValue.focus = true;
+                        }
                     }
                 }
 
