@@ -145,6 +145,14 @@ pub struct KernelParams {
     pub reserved2:                f32, // 16
     pub ewa_coeffs_p:             [f32; 4], // 16
     pub ewa_coeffs_q:             [f32; 4], // 16
+    pub cg_flags:                 i32, // 4  - bit0=basic on, bit1=creative on
+    pub cg_pad0:                  i32, // 8
+    pub cg_pad1:                  i32, // 12
+    pub cg_pad2:                  i32, // 16
+    pub cg_color0:                [f32; 4], // 16 - (temperature, tint, basic_saturation, exposure)
+    pub cg_tone0:                 [f32; 4], // 16 - (contrast, highlights, shadows, whites)
+    pub cg_tone1:                 [f32; 4], // 16 - (blacks, faded_film, vibrance, creative_saturation)
+    pub cg_reserved:              [f32; 4], // 16 - reserved for LUT strengths (later plan)
 }
 unsafe impl bytemuck::Zeroable for KernelParams {}
 unsafe impl bytemuck::Pod for KernelParams {}

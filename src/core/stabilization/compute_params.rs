@@ -66,6 +66,8 @@ pub struct ComputeParams {
     pub smoothed_focal_lengths: Vec<Option<f64>>,
     pub focal_length_smoothing_enabled: bool,
     pub focal_length_smoothing_strength: f64,
+
+    pub color_grading: crate::color_grading::ColorGradingParams,
 }
 impl ComputeParams {
     pub fn from_manager(mgr: &StabilizationManager) -> Self {
@@ -134,6 +136,8 @@ impl ComputeParams {
             smoothed_focal_lengths: params.smoothed_focal_lengths.clone(),
             focal_length_smoothing_enabled: params.focal_length_smoothing_enabled,
             focal_length_smoothing_strength: params.focal_length_smoothing_strength,
+
+            color_grading: params.color_grading.clone(),
         }
     }
 

@@ -137,6 +137,105 @@ Note that this is only a visual indicator, it doesn&apos;t affect rendering.</so
     </message>
   </context>
   <context>
+    <name>ColorGrading</name>
+    <message>
+      <source>Color grading</source>
+      <translation>カラーグレーディング</translation>
+    </message>
+    <message>
+      <source>Enable basic correction</source>
+      <translation>基本補正を有効化</translation>
+    </message>
+    <message>
+      <source>LUT files</source>
+      <translation>LUTファイル</translation>
+    </message>
+    <message>
+      <source>LUT</source>
+      <translation>LUT</translation>
+    </message>
+    <message>
+      <source>Select LUT</source>
+      <translation>LUTを選択</translation>
+    </message>
+    <message>
+      <source>None</source>
+      <translation>なし</translation>
+    </message>
+    <message>
+      <source>Enable LUT</source>
+      <translation>LUTを有効化</translation>
+    </message>
+    <message>
+      <source>LUT strength</source>
+      <translation>LUT強度</translation>
+    </message>
+    <message>
+      <source>Color</source>
+      <translation>色</translation>
+    </message>
+    <message>
+      <source>Temperature</source>
+      <translation>色温度</translation>
+    </message>
+    <message>
+      <source>Tint</source>
+      <translation>色かぶり補正</translation>
+    </message>
+    <message>
+      <source>Saturation</source>
+      <translation>彩度</translation>
+    </message>
+    <message>
+      <source>Light</source>
+      <translation>ライト</translation>
+    </message>
+    <message>
+      <source>Exposure</source>
+      <translation>露光量</translation>
+    </message>
+    <message>
+      <source>Contrast</source>
+      <translation>コントラスト</translation>
+    </message>
+    <message>
+      <source>Highlights</source>
+      <translation>ハイライト</translation>
+    </message>
+    <message>
+      <source>Shadows</source>
+      <translation>シャドウ</translation>
+    </message>
+    <message>
+      <source>Whites</source>
+      <translation>白レベル</translation>
+    </message>
+    <message>
+      <source>Blacks</source>
+      <translation>黒レベル</translation>
+    </message>
+    <message>
+      <source>Reset</source>
+      <translation>リセット</translation>
+    </message>
+    <message>
+      <source>Enable creative</source>
+      <translation>クリエイティブを有効化</translation>
+    </message>
+    <message>
+      <source>Adjustments</source>
+      <translation>調整</translation>
+    </message>
+    <message>
+      <source>Faded film</source>
+      <translation>色あせたフィルム</translation>
+    </message>
+    <message>
+      <source>Vibrance</source>
+      <translation>自然な彩度</translation>
+    </message>
+  </context>
+  <context>
     <name>AdvancedSection</name>
     <message>
       <location filename="../../src/ui/components/AdvancedSection.qml" line="16"/>

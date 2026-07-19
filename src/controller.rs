@@ -86,6 +86,24 @@ pub struct Controller {
     set_preview_resolution: qt_method!(fn(&mut self, target_height: i32, player: QJSValue)),
     set_processing_resolution: qt_method!(fn(&mut self, target_height: i32)),
     set_background_color: qt_method!(fn(&self, color: QString, player: QJSValue)),
+    set_cg_basic_enabled:       qt_method!(fn(&self, v: bool)),
+    set_cg_creative_enabled:    qt_method!(fn(&self, v: bool)),
+    set_cg_temperature:         qt_method!(fn(&self, v: f64)),
+    set_cg_tint:                qt_method!(fn(&self, v: f64)),
+    set_cg_basic_saturation:    qt_method!(fn(&self, v: f64)),
+    set_cg_exposure:            qt_method!(fn(&self, v: f64)),
+    set_cg_contrast:            qt_method!(fn(&self, v: f64)),
+    set_cg_highlights:          qt_method!(fn(&self, v: f64)),
+    set_cg_shadows:             qt_method!(fn(&self, v: f64)),
+    set_cg_whites:              qt_method!(fn(&self, v: f64)),
+    set_cg_blacks:              qt_method!(fn(&self, v: f64)),
+    set_cg_faded_film:          qt_method!(fn(&self, v: f64)),
+    set_cg_vibrance:            qt_method!(fn(&self, v: f64)),
+    set_cg_creative_saturation: qt_method!(fn(&self, v: f64)),
+    reset_color_grading:        qt_method!(fn(&self)),
+    set_cg_lut_enabled:         qt_method!(fn(&self, v: bool)),
+    set_cg_lut_strength:        qt_method!(fn(&self, v: f64)),
+    set_cg_lut_path:            qt_method!(fn(&self, path: QString)),
     set_integration_method: qt_method!(fn(&self, index: usize)),
 
     set_offset: qt_method!(fn(&self, timestamp_us: i64, offset_ms: f64)),
@@ -1202,6 +1220,32 @@ impl Controller {
         self.request_recompute();
     }
     wrap_simple_method!(set_horizon_lock, lock_percent: f64, roll: f64, lock_pitch: bool, pitch: f64, automatic_lock: bool, turn_threshold: f64, turn_smoothing_ms: f64, turn_multiplier: f64, tilt_accel_limit: f64; recompute; chart_data_changed);
+    wrap_simple_method!(set_cg_basic_enabled,       v: bool; recompute);
+    wrap_simple_method!(set_cg_creative_enabled,    v: bool; recompute);
+    wrap_simple_method!(set_cg_temperature,         v: f64; recompute);
+    wrap_simple_method!(set_cg_tint,                v: f64; recompute);
+    wrap_simple_method!(set_cg_basic_saturation,    v: f64; recompute);
+    wrap_simple_method!(set_cg_exposure,            v: f64; recompute);
+    wrap_simple_method!(set_cg_contrast,            v: f64; recompute);
+    wrap_simple_method!(set_cg_highlights,          v: f64; recompute);
+    wrap_simple_method!(set_cg_shadows,             v: f64; recompute);
+    wrap_simple_method!(set_cg_whites,              v: f64; recompute);
+    wrap_simple_method!(set_cg_blacks,              v: f64; recompute);
+    wrap_simple_method!(set_cg_faded_film,          v: f64; recompute);
+    wrap_simple_method!(set_cg_vibrance,            v: f64; recompute);
+    wrap_simple_method!(set_cg_creative_saturation, v: f64; recompute);
+    fn reset_color_grading(&self) { self.stabilizer.reset_color_grading(); self.request_recompute(); }
+    wrap_simple_method!(set_cg_lut_enabled,  v: bool; recompute);
+    wrap_simple_method!(set_cg_lut_strength, v: f64; recompute);
+    fn set_cg_lut_path(&mut self, path: QString) {
+        let path = path.to_string();
+        // Strip file:// URL prefix if present
+        let path = path.strip_prefix("file://").unwrap_or(&path).to_string();
+        if let Err(e) = self.stabilizer.set_cg_lut_path(&path) {
+            self.error(QString::from("An error occured: %1"), QString::from(e), QString::default());
+        }
+        self.request_recompute();
+    }
     wrap_simple_method!(set_use_gravity_vectors, v: bool; recompute; chart_data_changed);
     wrap_simple_method!(set_horizon_lock_integration_method, v: i32; recompute; chart_data_changed);
     pub fn get_smoothing_algs(&self) -> QVariantList {
