@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2026 dapeef <alistair.white.horne@gmail.com>
 
 import QtQuick
 
@@ -21,6 +22,8 @@ MenuItem {
     property bool hasAccessToInputDirectory: true;
     property alias infoList: list;
     property var orgModel: [];
+    property bool hasPreviousFile: false;
+    property bool hasNextFile: false;
 
     Component.onCompleted: {
         QT_TRANSLATE_NOOP("TableList", "Created at");
@@ -112,12 +115,25 @@ MenuItem {
 
         Qt.callLater(window.exportSettings.videoInfoLoaded, w, h, bitrate);
     }
+    function loadNextFile(index: int): void {
+        const url = filesystem.get_next_file_url(window.videoArea.loadedFileUrl, index);
+        if (url && url.toString()) window.videoArea.loadFile(url);
+    }
     function updateEntry(key: string, value: string): void {
-        if (key == "File name") root.filename = value;
+        if (key == "File name") {
+            root.filename = value;
+            root.updateFileNavigation();
+        }
         list.updateEntry(key, value);
     }
     function updateEntryWithTrigger(key: string, value: string): void {
         list.updateEntryWithTrigger(key, value);
+    }
+    function updateFileNavigation() {
+        const prev = filesystem.get_next_file_url(window.videoArea.loadedFileUrl, -1);
+        const next = filesystem.get_next_file_url(window.videoArea.loadedFileUrl,  1);
+        hasPreviousFile = prev && prev.toString() !== "";
+        hasNextFile     = next && next.toString() !== "";
     }
 
     function getDuration(md): string {
@@ -154,11 +170,31 @@ MenuItem {
         return format + (format? " " : "") + rate;
     }
 
-    Button {
-        text: qsTr("Open file");
-        iconName: "video"
+    Row {
         anchors.horizontalCenter: parent.horizontalCenter;
-        onClicked: root.selectFileRequest();
+        spacing: 6 * dpiScale;
+
+        Button {
+            text: "<";
+            tooltip: qsTr("Open the previous file in the directory.")
+            width: height;
+            enabled: root.hasPreviousFile;
+            onClicked: { loadNextFile(-1) }
+        }
+
+        Button {
+            text: qsTr("Open file");
+            iconName: "video";
+            onClicked: root.selectFileRequest();
+        }
+
+        Button {
+            text: ">";
+            tooltip: qsTr("Open the next file in the directory.")
+            width: height;
+            enabled: root.hasNextFile;
+            onClicked: { loadNextFile(1) }
+        }
     }
 
     InfoMessageSmall {
