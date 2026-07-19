@@ -210,22 +210,44 @@ MenuItem {
         columnSpacing: 10 * dpiScale;
         editableFields: ({
             "Camera brand": {
-                "type": "text",
+                "type": "combobox",
                 "width": 120,
+                "options": function() { return controller.get_camera_brands(); },
                 "value": function() { return calib.calibrationInfo.camera_brand || ""; },
-                "onChange": function(value) { calib.calibrationInfo.camera_brand = value; list.updateEntry("Camera brand", value); }
+                "onChange": function(value) {
+                    if (calib.calibrationInfo.camera_brand !== value) {
+                        calib.calibrationInfo.camera_brand = value;
+                        list.updateEntry("Camera brand", value);
+                        calib.calibrationInfo.camera_model = "";
+                        list.updateEntry("Camera model", "");
+                        calib.calibrationInfo.lens_model = "";
+                        list.updateEntry("Lens model", "");
+                    }
+                }
             },
             "Camera model": {
-                "type": "text",
+                "type": "combobox",
                 "width": 120,
+                "options": function() { return controller.get_camera_models(calib.calibrationInfo.camera_brand || ""); },
                 "value": function() { return calib.calibrationInfo.camera_model || ""; },
-                "onChange": function(value) { calib.calibrationInfo.camera_model = value; list.updateEntry("Camera model", value);  }
+                "onChange": function(value) {
+                    if (calib.calibrationInfo.camera_model !== value) {
+                        calib.calibrationInfo.camera_model = value;
+                        list.updateEntry("Camera model", value);
+                        calib.calibrationInfo.lens_model = "";
+                        list.updateEntry("Lens model", "");
+                    }
+                }
             },
             "Lens model": {
-                "type": "text",
+                "type": "combobox",
                 "width": 120,
+                "options": function() { return controller.get_lens_models(calib.calibrationInfo.camera_brand || "", calib.calibrationInfo.camera_model || ""); },
                 "value": function() { return calib.calibrationInfo.lens_model || ""; },
-                "onChange": function(value) { calib.calibrationInfo.lens_model = value; list.updateEntry("Lens model", value); }
+                "onChange": function(value) {
+                    calib.calibrationInfo.lens_model = value;
+                    list.updateEntry("Lens model", value);
+                }
             },
             "Camera setting": {
                 "type": "text",

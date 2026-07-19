@@ -99,6 +99,9 @@ pub struct Controller {
     all_profiles_loaded: qt_signal!(),
     search_lens_profile_finished: qt_signal!(profiles: QVariantList),
     search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
+    get_camera_brands: qt_method!(fn(&self) -> QJsonArray),
+    get_camera_models: qt_method!(fn(&self, brand: QString) -> QJsonArray),
+    get_lens_models: qt_method!(fn(&self, brand: QString, model: QString) -> QJsonArray),
     fetch_profiles_from_github: qt_method!(fn(&self)),
     lens_profiles_updated: qt_signal!(reload_from_disk: bool),
 
@@ -1917,6 +1920,53 @@ impl Controller {
 
             finished(profiles);
         });
+    }
+
+    fn get_camera_brands(&self) -> QJsonArray {
+        let db = self.stabilizer.lens_profile_db.read();
+        let mut brands = BTreeSet::new();
+        for profile in db.map.values() {
+            let b = profile.camera_brand.trim();
+            if !b.is_empty() {
+                brands.insert(b.to_string());
+            }
+        }
+        let list: Vec<serde_json::Value> = brands.into_iter().map(serde_json::Value::String).collect();
+        util::serde_json_to_qt_array(&serde_json::Value::Array(list))
+    }
+
+    fn get_camera_models(&self, brand: QString) -> QJsonArray {
+        let brand_str = brand.to_string().to_lowercase();
+        let db = self.stabilizer.lens_profile_db.read();
+        let mut models = BTreeSet::new();
+        for profile in db.map.values() {
+            if profile.camera_brand.to_lowercase().trim() == brand_str {
+                let m = profile.camera_model.trim();
+                if !m.is_empty() {
+                    models.insert(m.to_string());
+                }
+            }
+        }
+        let list: Vec<serde_json::Value> = models.into_iter().map(serde_json::Value::String).collect();
+        util::serde_json_to_qt_array(&serde_json::Value::Array(list))
+    }
+
+    fn get_lens_models(&self, brand: QString, model: QString) -> QJsonArray {
+        let brand_str = brand.to_string().to_lowercase();
+        let model_str = model.to_string().to_lowercase();
+        let db = self.stabilizer.lens_profile_db.read();
+        let mut lenses = BTreeSet::new();
+        for profile in db.map.values() {
+            if profile.camera_brand.to_lowercase().trim() == brand_str 
+               && profile.camera_model.to_lowercase().trim() == model_str {
+                let l = profile.lens_model.trim();
+                if !l.is_empty() {
+                    lenses.insert(l.to_string());
+                }
+            }
+        }
+        let list: Vec<serde_json::Value> = lenses.into_iter().map(serde_json::Value::String).collect();
+        util::serde_json_to_qt_array(&serde_json::Value::Array(list))
     }
 
     #[allow(unreachable_code)]
