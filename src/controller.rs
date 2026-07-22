@@ -99,6 +99,10 @@ pub struct Controller {
     all_profiles_loaded: qt_signal!(),
     search_lens_profile_finished: qt_signal!(profiles: QVariantList),
     search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
+    is_valid_lens_profile: qt_method!(fn(&self, url_or_id: QString) -> bool),
+    get_camera_list: qt_method!(fn(&self) -> QStringList),
+    get_lens_list: qt_method!(fn(&self, camera: QString) -> QStringList),
+    select_camera: qt_method!(fn(&mut self, camera: QString)),
     fetch_profiles_from_github: qt_method!(fn(&self)),
     lens_profiles_updated: qt_signal!(reload_from_disk: bool),
 
@@ -866,6 +870,57 @@ impl Controller {
         self.lens_changed();
         self.lens_profile_loaded(QString::from(json), QString::from(filepath), QString::from(checksum));
         self.request_recompute();
+    }
+    fn is_valid_lens_profile(&self, url_or_id: QString) -> bool {
+        let url_or_id_str = url_or_id.to_string();
+        if url_or_id_str.is_empty() {
+            self.stabilizer.lens.read().is_valid()
+        } else {
+            let db = self.stabilizer.lens_profile_db.read();
+            if let Some(profile) = db.find(&url_or_id_str) {
+                profile.is_valid()
+            } else if url_or_id_str.starts_with('{') {
+                if let Ok(profile) = LensProfile::from_json(&url_or_id_str) {
+                    profile.is_valid()
+                } else {
+                    false
+                }
+            } else {
+                let mut profile = LensProfile::default();
+                if profile.load_from_file(&url_or_id_str).is_ok() {
+                    profile.is_valid()
+                } else {
+                    false
+                }
+            }
+        }
+    }
+    fn get_camera_list(&self) -> QStringList {
+        let db = self.stabilizer.lens_profile_db.read();
+        let cameras = db.get_camera_list();
+        QStringList::from_iter(cameras.into_iter().map(QString::from))
+    }
+    fn get_lens_list(&self, camera: QString) -> QStringList {
+        let db = self.stabilizer.lens_profile_db.read();
+        let lenses = db.get_lens_list(&camera.to_string());
+        QStringList::from_iter(lenses.into_iter().map(QString::from))
+    }
+    fn select_camera(&mut self, camera: QString) {
+        let camera_str = camera.to_string();
+        let db = self.stabilizer.lens_profile_db.read();
+        let camera_lc = camera_str.trim().to_lowercase();
+        let matching_key = db.map.iter().find_map(|(id, p)| {
+            let full_cam = format!("{} {}", p.camera_brand, p.camera_model).trim().to_lowercase();
+            if full_cam == camera_lc || p.camera_brand.to_lowercase() == camera_lc || p.camera_model.to_lowercase() == camera_lc {
+                Some(id.clone())
+            } else {
+                None
+            }
+        });
+        drop(db);
+        if let Some(id) = matching_key {
+            self.load_lens_profile(QString::from(id));
+        }
     }
     fn load_default_preset(&mut self) {
         // Assumes regular filesystem

@@ -32,6 +32,20 @@ impl Clone for LensProfileDatabase {
 }
 
 impl LensProfileDatabase {
+    pub fn cameras(&self) -> Vec<String> {
+        let mut cams: Vec<String> = self.map.values().map(|p| p.camera_model.clone()).collect();
+        cams.sort();
+        cams.dedup();
+        cams
+    }
+
+    pub fn lenses(&self) -> Vec<String> {
+        let mut lens_list: Vec<String> = self.map.values().map(|p| p.lens_model.clone()).collect();
+        lens_list.sort();
+        lens_list.dedup();
+        lens_list
+    }
+
     pub fn get_path() -> PathBuf {
         // return std::fs::canonicalize("D:/lens_review/").unwrap_or_default();
 
@@ -109,27 +123,9 @@ impl LensProfileDatabase {
                                 // std::fs::write(f_name, serde_json::to_string_pretty(&prof).unwrap()).unwrap();
                             }
                         } else {
-                            (|| -> Option<()> {
-                                let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
-                                    profile.identifier,
-
-                                    profile.calib_dimension.w,
-                                    profile.calib_dimension.h,
-
-                                    profile.fisheye_params.camera_matrix.get(0)?.get(0)?,
-                                    profile.fisheye_params.camera_matrix.get(1)?.get(1)?,
-                                    profile.fisheye_params.camera_matrix.get(0)?.get(2)?,
-                                    profile.fisheye_params.camera_matrix.get(1)?.get(2)?,
-
-                                    profile.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
-                                );
-
-                                profile.checksum = Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())));
-                                Some(())
-                            })();
+                            if profile.checksum.is_none() {
+                                profile.checksum = profile.compute_checksum();
+                            }
                             self.map.insert(key, profile);
                         }
                     }
@@ -390,6 +386,53 @@ impl LensProfileDatabase {
         }
     }
 
+    pub fn get_camera_list(&self) -> Vec<String> {
+        let mut cameras = HashSet::new();
+        for profile in self.map.values() {
+            let cam = if !profile.camera_brand.is_empty() && !profile.camera_model.is_empty() {
+                format!("{} {}", profile.camera_brand, profile.camera_model)
+            } else if !profile.camera_model.is_empty() {
+                profile.camera_model.clone()
+            } else if !profile.camera_brand.is_empty() {
+                profile.camera_brand.clone()
+            } else {
+                continue;
+            };
+            let cam = cam.trim().to_string();
+            if !cam.is_empty() {
+                cameras.insert(cam);
+            }
+        }
+        let mut list: Vec<String> = cameras.into_iter().collect();
+        list.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        list
+    }
+
+    pub fn get_lens_list(&self, camera: &str) -> Vec<String> {
+        let camera_lc = camera.trim().to_lowercase();
+        let mut lenses = HashSet::new();
+        for profile in self.map.values() {
+            let full_cam = format!("{} {}", profile.camera_brand, profile.camera_model).trim().to_lowercase();
+            let brand_lc = profile.camera_brand.trim().to_lowercase();
+            let model_lc = profile.camera_model.trim().to_lowercase();
+
+            if camera_lc.is_empty()
+                || full_cam == camera_lc
+                || brand_lc == camera_lc
+                || model_lc == camera_lc
+                || full_cam.contains(&camera_lc)
+                || camera_lc.contains(&full_cam)
+            {
+                if !profile.lens_model.is_empty() {
+                    lenses.insert(profile.lens_model.clone());
+                }
+            }
+        }
+        let mut list: Vec<String> = lenses.into_iter().collect();
+        list.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        list
+    }
+
     // -------------------------------------------------------------------
     // ---------------------- Maintenance functions ----------------------
     // -------------------------------------------------------------------
@@ -530,5 +573,58 @@ impl LensProfileDatabase {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_lens_profile_database_camera_and_lens_list() {
+        let mut db = LensProfileDatabase::default();
+        
+        let json1 = serde_json::json!({
+            "camera_brand": "Sony",
+            "camera_model": "A7IV",
+            "lens_model": "FE 24mm F1.4 GM",
+            "calibrator_version": "1.5.0",
+            "calib_dimension": { "w": 3840, "h": 2160 },
+            "fisheye_params": {
+                "RMS_error": 0.1,
+                "camera_matrix": [[1000.0, 0.0, 1920.0], [0.0, 1000.0, 1080.0], [0.0, 0.0, 1.0]],
+                "distortion_coeffs": [0.0, 0.0, 0.0, 0.0]
+            }
+        }).to_string();
+
+        let json2 = serde_json::json!({
+            "camera_brand": "GoPro",
+            "camera_model": "HERO11 Black",
+            "lens_model": "Wide",
+            "calibrator_version": "1.5.0",
+            "calib_dimension": { "w": 3840, "h": 2160 },
+            "fisheye_params": {
+                "RMS_error": 0.1,
+                "camera_matrix": [[1000.0, 0.0, 1920.0], [0.0, 1000.0, 1080.0], [0.0, 0.0, 1.0]],
+                "distortion_coeffs": [0.0, 0.0, 0.0, 0.0]
+            }
+        }).to_string();
+
+        let mut p1 = LensProfile::default();
+        p1.load_from_data(&json1).unwrap();
+        db.map.insert("sony-a7iv".into(), p1);
+
+        let mut p2 = LensProfile::default();
+        p2.load_from_data(&json2).unwrap();
+        db.map.insert("gopro-hero11".into(), p2);
+
+        let cameras = db.get_camera_list();
+        assert_eq!(cameras, vec!["GoPro HERO11 Black", "Sony A7IV"]);
+
+        let sony_lenses = db.get_lens_list("Sony A7IV");
+        assert_eq!(sony_lenses, vec!["FE 24mm F1.4 GM"]);
+
+        let gopro_lenses = db.get_lens_list("GoPro");
+        assert_eq!(gopro_lenses, vec!["Wide"]);
     }
 }
