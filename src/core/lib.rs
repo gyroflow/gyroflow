@@ -276,13 +276,31 @@ impl StabilizationManager {
         };
         let db = self.lens_profile_db.read();
         let (result, from_db) = if let Some(lens) = db.get_by_id(&url) {
-            *self.lens.write() = lens.clone();
-            (Ok(()), true)
+            if !lens.is_valid() {
+                (Err(crate::GyroflowCoreError::InvalidData), true)
+            } else {
+                *self.lens.write() = lens.clone();
+                (Ok(()), true)
+            }
         } else if url.starts_with('{') {
-            (self.lens.write().load_from_data(&url), false)
+            let res = self.lens.write().load_from_data(&url);
+            if res.is_ok() && !self.lens.read().is_valid() {
+                (Err(crate::GyroflowCoreError::InvalidData), false)
+            } else {
+                (res, false)
+            }
         } else {
-            (self.lens.write().load_from_file(&url), false)
+            let res = self.lens.write().load_from_file(&url);
+            if res.is_ok() && !self.lens.read().is_valid() {
+                (Err(crate::GyroflowCoreError::InvalidData), false)
+            } else {
+                (res, false)
+            }
         };
+
+        if result.is_err() {
+            return result;
+        }
         let (width, height, aspect, id, fps) = {
             let params = self.params.read();
             (params.size.0, params.size.1, ((params.size.0 * 100) as f64 / params.size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.get_identifier_for_autoload()).unwrap_or_default(), (params.fps * 100.0).round() as i32)
@@ -2138,4 +2156,59 @@ pub enum GyroflowCoreError {
 
     #[error("Unknown error")]
     Unknown
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn valid_profile_json(brand: &str, model: &str, identifier: &str, w: usize, h: usize, fps: f64) -> String {
+        serde_json::json!({
+            "name": format!("{} {}", brand, model),
+            "camera_brand": brand,
+            "camera_model": model,
+            "lens_model": "Standard",
+            "identifier": identifier,
+            "calibrator_version": "1.5.0",
+            "calib_dimension": { "w": w, "h": h },
+            "orig_dimension": { "w": w, "h": h },
+            "fps": fps,
+            "fisheye_params": {
+                "RMS_error": 0.1,
+                "camera_matrix": [[1000.0, 0.0, (w/2) as f64], [0.0, 1000.0, (h/2) as f64], [0.0, 0.0, 1.0]],
+                "distortion_coeffs": [0.0, 0.0, 0.0, 0.0]
+            }
+        }).to_string()
+    }
+
+    #[test]
+    fn test_load_lens_profile_valid_and_invalid() {
+        let manager = StabilizationManager::default();
+
+        let valid_json = valid_profile_json("Sony", "A7IV", "sony-a7iv-standard", 3840, 2160, 60.0);
+        assert!(manager.load_lens_profile(&valid_json).is_ok());
+        assert!(manager.lens.read().is_valid());
+
+        let invalid_json = serde_json::json!({
+            "name": "Invalid Profile",
+            "camera_brand": "Sony",
+            "calibrator_version": "",
+            "calib_dimension": { "w": 0, "h": 0 },
+            "fisheye_params": { "camera_matrix": [] }
+        }).to_string();
+
+        assert!(manager.load_lens_profile(&invalid_json).is_err());
+    }
+
+    #[test]
+    fn test_load_lens_profile_fallback_cascade() {
+        let manager = StabilizationManager::default();
+
+        let json = valid_profile_json("GoPro", "HERO11 Black", "gopro-hero11black-wide", 3840, 2160, 60.0);
+        let res = manager.load_lens_profile(&json);
+        assert!(res.is_ok());
+        let lens = manager.lens.read();
+        assert_eq!(lens.camera_brand, "GoPro");
+        assert_eq!(lens.camera_model, "HERO11 Black");
+    }
 }

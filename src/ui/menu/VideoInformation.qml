@@ -181,6 +181,49 @@ MenuItem {
         id: list;
         columnSpacing: 6 * dpiScale;
         editableFields: isCalibrator? ({}) : ({
+            "Detected camera": {
+                "type": "combobox",
+                "width": 140,
+                "value": function() {
+                    return list.model["Detected camera"] || "---";
+                },
+                "options": function() {
+                    let cams = (typeof controller !== "undefined" && controller.get_camera_list) ? controller.get_camera_list() : [];
+                    if (!cams || cams.length === 0) {
+                        return ["GoPro", "Sony", "Insta360", "DJI", "RunCam", "Caddx", "Blackmagic", "Canon", "Panasonic", "RED"];
+                    }
+                    return cams;
+                },
+                "onChange": function(value) {
+                    root.updateEntry("Detected camera", value);
+                    if (typeof controller !== "undefined" && controller.select_camera) {
+                        controller.select_camera(value);
+                    }
+                    list.cameraLensSelected(value, list.model["Detected lens"] || "");
+                }
+            },
+            "Detected lens": {
+                "type": "combobox",
+                "width": 160,
+                "value": function() {
+                    return list.model["Detected lens"] || "---";
+                },
+                "options": function() {
+                    let currentCam = list.model["Detected camera"] || "";
+                    let lenses = (typeof controller !== "undefined" && controller.get_lens_list) ? controller.get_lens_list(currentCam) : [];
+                    if (!lenses || lenses.length === 0) {
+                        return ["Standard", "Wide", "SuperView", "HyperView", "Linear", "Anamorphic"];
+                    }
+                    return lenses;
+                },
+                "onChange": function(value) {
+                    root.updateEntry("Detected lens", value);
+                    if (typeof controller !== "undefined" && controller.load_lens_profile) {
+                        controller.load_lens_profile(value);
+                    }
+                    list.cameraLensSelected(list.model["Detected camera"] || "", value);
+                }
+            },
             "Rotation": {
                 "unit": "°",
                 "from": -360,

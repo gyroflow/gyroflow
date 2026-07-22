@@ -101,14 +101,62 @@ impl LensProfile {
         lens
     }
 
+    pub fn compute_checksum(&self) -> Option<String> {
+        let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
+            self.identifier,
+
+            self.calib_dimension.w,
+            self.calib_dimension.h,
+
+            self.fisheye_params.camera_matrix.get(0)?.get(0)?,
+            self.fisheye_params.camera_matrix.get(1)?.get(1)?,
+            self.fisheye_params.camera_matrix.get(0)?.get(2)?,
+            self.fisheye_params.camera_matrix.get(1)?.get(2)?,
+
+            self.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
+            self.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
+            self.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
+            self.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
+        );
+
+        Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())))
+    }
+
+    pub fn is_valid(&self) -> bool {
+        if self.calibrator_version.is_empty()
+            || self.fisheye_params.camera_matrix.is_empty()
+            || self.fisheye_params.camera_matrix.len() < 2
+            || self.calib_dimension.w == 0
+            || self.calib_dimension.h == 0
+        {
+            return false;
+        }
+
+        if let Some(ref expected_checksum) = self.checksum {
+            if let Some(computed) = self.compute_checksum() {
+                if expected_checksum != &computed {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        true
+    }
+
     pub fn load_from_data(&mut self, data: &str) -> std::result::Result<(), crate::GyroflowCoreError> {
         *self = Self::from_json(&data)?;
 
         // Trust lens profiles loaded from file
         self.official = true;
 
-        if self.calibrator_version.is_empty() || self.fisheye_params.camera_matrix.is_empty() || self.calib_dimension.w <= 0 || self.calib_dimension.h <= 0 {
+        if !self.is_valid() {
             return Err(crate::GyroflowCoreError::InvalidData);
+        }
+
+        if self.checksum.is_none() {
+            self.checksum = self.compute_checksum();
         }
 
         Ok(())
@@ -598,5 +646,73 @@ impl LensProfile {
             }
             self.parsed_interpolations = interpolations;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sample_valid_json() -> String {
+        serde_json::json!({
+            "name": "Test Camera",
+            "camera_brand": "Sony",
+            "camera_model": "A7IV",
+            "lens_model": "24mm f1.4",
+            "calibrator_version": "1.5.0",
+            "calib_dimension": { "w": 3840, "h": 2160 },
+            "orig_dimension": { "w": 3840, "h": 2160 },
+            "fisheye_params": {
+                "RMS_error": 0.15,
+                "camera_matrix": [
+                    [1000.0, 0.0, 1920.0],
+                    [0.0, 1000.0, 1080.0],
+                    [0.0, 0.0, 1.0]
+                ],
+                "distortion_coeffs": [0.1, -0.05, 0.01, -0.001]
+            }
+        }).to_string()
+    }
+
+    #[test]
+    fn test_valid_lens_profile_loading() {
+        let json = sample_valid_json();
+        let mut profile = LensProfile::default();
+        assert!(profile.load_from_data(&json).is_ok());
+        assert!(profile.is_valid());
+        assert!(profile.checksum.is_some());
+    }
+
+    #[test]
+    fn test_invalid_empty_calibrator_version() {
+        let mut val: serde_json::Value = serde_json::from_str(&sample_valid_json()).unwrap();
+        val["calibrator_version"] = serde_json::Value::String("".into());
+        let mut profile = LensProfile::default();
+        assert!(profile.load_from_data(&val.to_string()).is_err());
+    }
+
+    #[test]
+    fn test_invalid_empty_camera_matrix() {
+        let mut val: serde_json::Value = serde_json::from_str(&sample_valid_json()).unwrap();
+        val["fisheye_params"]["camera_matrix"] = serde_json::Value::Array(vec![]);
+        let mut profile = LensProfile::default();
+        assert!(profile.load_from_data(&val.to_string()).is_err());
+    }
+
+    #[test]
+    fn test_invalid_calib_dimension() {
+        let mut val: serde_json::Value = serde_json::from_str(&sample_valid_json()).unwrap();
+        val["calib_dimension"]["w"] = serde_json::Value::Number(0.into());
+        let mut profile = LensProfile::default();
+        assert!(profile.load_from_data(&val.to_string()).is_err());
+    }
+
+    #[test]
+    fn test_invalid_checksum_rejection() {
+        let json = sample_valid_json();
+        let mut profile = LensProfile::default();
+        assert!(profile.load_from_data(&json).is_ok());
+        profile.checksum = Some("badchecksum123".into());
+        assert!(!profile.is_valid());
     }
 }
