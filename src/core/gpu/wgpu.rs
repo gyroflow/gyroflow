@@ -17,6 +17,7 @@ pub enum WgpuError {
     RequestDevice(wgpu::RequestDeviceError),
     ParamCheck,
     NoAvailableAdapter,
+    NullCommandQueue,
 }
 
 enum PipelineType {
@@ -184,7 +185,8 @@ impl WgpuWrapper {
                         use wgpu::hal::api::Metal;
 
                         let mtl_cq: Retained<ProtocolObject<dyn MTLCommandQueue>> =
-                            Retained::retain(*command_queue as *mut ProtocolObject<dyn MTLCommandQueue>).unwrap();
+                            Retained::retain(*command_queue as *mut ProtocolObject<dyn MTLCommandQueue>)
+                                .ok_or(WgpuError::NullCommandQueue)?;
                         let mtl_dev = mtl_cq.device();
 
                         let max_buffer_bits = if cfg!(any(target_os = "android", target_os = "ios")) { 29 } else { 31 };
