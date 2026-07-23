@@ -13,6 +13,58 @@ pub mod wgpu_interop;
 
 pub mod drawing;
 use std::hash::Hasher;
+use std::sync::atomic::{ AtomicBool, Ordering };
+use std::sync::OnceLock;
+
+/// GPU backends whose availability can be toggled at runtime.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Backend {
+    OpenCL,
+    Wgpu,
+    Metal,
+}
+
+// Runtime override flags. These are the race-free replacement for reading the
+// NO_OPENCL / NO_WGPU / NO_METAL environment variables on render threads: the host
+// can flip a backend off from any thread via `set_backend_disabled` and it is picked
+// up atomically, without the data race caused by std::env::set_var on other platforms.
+static DISABLE_OPENCL: AtomicBool = AtomicBool::new(false);
+static DISABLE_WGPU: AtomicBool = AtomicBool::new(false);
+static DISABLE_METAL: AtomicBool = AtomicBool::new(false);
+
+fn backend_flag(backend: Backend) -> &'static AtomicBool {
+    match backend {
+        Backend::OpenCL => &DISABLE_OPENCL,
+        Backend::Wgpu => &DISABLE_WGPU,
+        Backend::Metal => &DISABLE_METAL,
+    }
+}
+
+fn backend_env_disabled(backend: Backend) -> bool {
+    // Read the environment variable exactly once and cache it, so render threads
+    // never call getenv concurrently with a host set_var (which is UB on Unix).
+    static OPENCL: OnceLock<bool> = OnceLock::new();
+    static WGPU: OnceLock<bool> = OnceLock::new();
+    static METAL: OnceLock<bool> = OnceLock::new();
+    let (cell, var) = match backend {
+        Backend::OpenCL => (&OPENCL, "NO_OPENCL"),
+        Backend::Wgpu => (&WGPU, "NO_WGPU"),
+        Backend::Metal => (&METAL, "NO_METAL"),
+    };
+    *cell.get_or_init(|| !std::env::var(var).unwrap_or_default().is_empty())
+}
+
+/// Disable or re-enable a GPU backend at runtime. Thread-safe and race-free;
+/// subsequent calls to `is_backend_disabled` observe the new value.
+pub fn set_backend_disabled(backend: Backend, disabled: bool) {
+    backend_flag(backend).store(disabled, Ordering::SeqCst);
+}
+
+/// Whether a GPU backend is currently disabled, combining the runtime flag with the
+/// (once-read) NO_OPENCL / NO_WGPU / NO_METAL environment variable.
+pub fn is_backend_disabled(backend: Backend) -> bool {
+    backend_flag(backend).load(Ordering::SeqCst) || backend_env_disabled(backend)
+}
 
 #[derive(Debug, Default)]
 pub struct BufferDescription<'a> {
@@ -151,7 +203,7 @@ impl<'a> Buffers<'a> {
 
 pub fn initialize_contexts() -> Option<(String, String)> {
     #[cfg(feature = "use-opencl")]
-    if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() {
+    if !is_backend_disabled(Backend::OpenCL) {
         let cl = std::panic::catch_unwind(|| {
             opencl::OclWrapper::initialize_context(None)
         });
@@ -170,7 +222,7 @@ pub fn initialize_contexts() -> Option<(String, String)> {
         }
     }
 
-    if std::env::var("NO_WGPU").unwrap_or_default().is_empty() {
+    if !is_backend_disabled(Backend::Wgpu) {
         let wgpu = std::panic::catch_unwind(|| {
             wgpu::WgpuWrapper::initialize_context()
         });

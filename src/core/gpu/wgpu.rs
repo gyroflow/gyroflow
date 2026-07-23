@@ -17,6 +17,7 @@ pub enum WgpuError {
     RequestDevice(wgpu::RequestDeviceError),
     ParamCheck,
     NoAvailableAdapter,
+    NullCommandQueue,
 }
 
 enum PipelineType {
@@ -41,6 +42,14 @@ pub struct WgpuWrapper  {
     queue: wgpu::Queue,
     pub device: wgpu::Device,
 
+    // Set to the host command queue pointer when `device`/`queue` were built from a
+    // queue owned by the host application (via queue_from_raw), otherwise None. When set,
+    // we must never drive GPU work on that queue outside of an active host render call,
+    // otherwise committing on a queue the host has since torn down crashes (observed on
+    // Metal in DaVinci Resolve when switching pages). See the Drop impl below. The pointer
+    // is also used by the cache to evict wrappers bound to a stale host queue.
+    pub host_queue_ptr: Option<u64>,
+
     pixel_format: wgpu::TextureFormat,
     padded_out_stride: u32,
     in_size: u64,
@@ -61,7 +70,13 @@ impl Drop for WgpuWrapper {
         self.pipeline = PipelineType::None;
         self.bind_group = None;
 
-        let _ = self.device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        // Only poll when we own the queue. For host-provided queues (queue_from_raw),
+        // polling would commit/wait on a queue whose lifetime is controlled by the host
+        // and may already be torn down (e.g. after a Resolve page switch), which crashes
+        // inside the Metal driver. Just drop the wrapped device/queue handles instead.
+        if self.host_queue_ptr.is_none() {
+            let _ = self.device.poll(wgpu::PollType::Wait { submission_index: None, timeout: None });
+        }
     }
 }
 
@@ -173,7 +188,7 @@ impl WgpuWrapper {
 
         if let Some(adapter) = lock.get(adapter_id) {
             log::debug!("WGPU initializing adapter #{adapter_id}: {:?}", adapter.get_info());
-            let (device, queue) = match &buffers.input.data {
+            let (device, queue, host_queue_ptr) = match &buffers.input.data {
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 BufferSource::Metal { command_queue, .. } |
                 BufferSource::MetalBuffer { command_queue, .. } if !(*command_queue).is_null() => {
@@ -184,7 +199,8 @@ impl WgpuWrapper {
                         use wgpu::hal::api::Metal;
 
                         let mtl_cq: Retained<ProtocolObject<dyn MTLCommandQueue>> =
-                            Retained::retain(*command_queue as *mut ProtocolObject<dyn MTLCommandQueue>).unwrap();
+                            Retained::retain(*command_queue as *mut ProtocolObject<dyn MTLCommandQueue>)
+                                .ok_or(WgpuError::NullCommandQueue)?;
                         let mtl_dev = mtl_cq.device();
 
                         let max_buffer_bits = if cfg!(any(target_os = "android", target_os = "ios")) { 29 } else { 31 };
@@ -208,7 +224,7 @@ impl WgpuWrapper {
                             memory_hints: wgpu::MemoryHints::Performance,
                             trace: wgpu::Trace::Off,
                             experimental_features: wgpu::ExperimentalFeatures::disabled(),
-                        }).map_err(|e| WgpuError::RequestDevice(e))?
+                        }).map(|(device, queue)| (device, queue, Some(*command_queue as u64))).map_err(|e| WgpuError::RequestDevice(e))?
                     }
                 },
                 _ => {
@@ -251,7 +267,8 @@ impl WgpuWrapper {
                         result = device.map_err(|e| WgpuError::RequestDevice(e));
                         break;
                     }
-                    result?
+                    let (device, queue) = result?;
+                    (device, queue, None)
                 }
             };
 
@@ -430,6 +447,7 @@ impl WgpuWrapper {
             Ok(Self {
                 device,
                 queue,
+                host_queue_ptr,
                 staging_buffer: Some(staging_buffer),
                 out_texture,
                 in_texture,
