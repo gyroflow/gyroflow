@@ -534,7 +534,22 @@ impl Stabilization {
                     match wgpu {
                         Ok(Ok(wgpu)) => {
                             if self.share_wgpu_instances {
-                                CACHED_WGPU.with(|x| x.0.borrow_mut().put(hash, wgpu));
+                                let current_host_queue = wgpu.host_queue_ptr;
+                                CACHED_WGPU.with(|x| {
+                                    let mut cache = x.0.borrow_mut();
+                                    // Evict any previously cached wrapper bound to a different host
+                                    // command queue. When the host rebuilds its GPU pipeline (e.g. a
+                                    // Resolve page switch) it hands us a new queue; the old wrappers
+                                    // still retain the previous, now-stale queue and must be dropped.
+                                    if let Some(current) = current_host_queue {
+                                        let stale: Vec<u32> = cache.iter()
+                                            .filter(|(_, w)| w.host_queue_ptr.map_or(false, |p| p != current))
+                                            .map(|(k, _)| *k)
+                                            .collect();
+                                        for k in stale { cache.pop(&k); }
+                                    }
+                                    cache.put(hash, wgpu);
+                                });
                             } else {
                                 self.wgpu = Some(wgpu);
                             }
