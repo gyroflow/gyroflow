@@ -400,10 +400,10 @@ impl Stabilization {
         let mut ret = Vec::new();
 
         #[cfg(feature = "use-opencl")]
-        if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() {
+        if !is_backend_disabled(Backend::OpenCL) {
             ret.extend(opencl::OclWrapper::list_devices().into_iter().map(|x| format!("[OpenCL] {x}")));
         }
-        if std::env::var("NO_WGPU").unwrap_or_default().is_empty() {
+        if !is_backend_disabled(Backend::Wgpu) {
             ret.extend(wgpu::WgpuWrapper::list_devices().into_iter().map(|x| format!("[wgpu] {x}")));
         }
         ret
@@ -475,7 +475,7 @@ impl Stabilization {
             let mut next_backend = self.next_backend.take().unwrap_or_default();
 
             #[cfg(feature = "use-opencl")]
-            if std::env::var("NO_OPENCL").unwrap_or_default().is_empty() && next_backend != "wgpu" && opencl::is_buffer_supported(buffers) {
+            if !is_backend_disabled(Backend::OpenCL) && next_backend != "wgpu" && opencl::is_buffer_supported(buffers) {
                 if self.share_wgpu_instances && CACHED_OPENCL.with(|x| x.borrow().contains(&hash)) {
                     self.cl = None;
                     self.initialized_backend = BackendType::OpenCL(hash);
@@ -518,7 +518,7 @@ impl Stabilization {
                     }
                 }
             }
-            if self.initialized_backend.is_none() && T::wgpu_format().is_some() && next_backend != "opencl" && std::env::var("NO_WGPU").unwrap_or_default().is_empty() && wgpu::is_buffer_supported(buffers) {
+            if self.initialized_backend.is_none() && T::wgpu_format().is_some() && next_backend != "opencl" && !is_backend_disabled(Backend::Wgpu) && wgpu::is_buffer_supported(buffers) {
                 if self.share_wgpu_instances && CACHED_WGPU.with(|x| x.0.borrow().contains(&hash)) {
                     self.wgpu = None;
                     self.initialized_backend = BackendType::Wgpu(hash);
