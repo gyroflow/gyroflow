@@ -97,9 +97,10 @@ pub struct Controller {
 
     load_profiles: qt_method!(fn(&self, reload_from_disk: bool)),
     all_profiles_loaded: qt_signal!(),
-    search_lens_profile_finished: qt_signal!(profiles: QVariantList),
-    search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
-    search_lens_profile_for_camera: qt_method!(fn(&self, brand: QString, model: QString, lens: QString, text: QString, hidden_profiles: QVariantList, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
+    search_lens_profile_finished: qt_signal!(request_id: u32, profiles: QVariantList),
+    next_lens_profile_search_id: qt_method!(fn(&self) -> u32),
+    search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32, request_id: u32)),
+    search_lens_profile_for_camera: qt_method!(fn(&self, brand: QString, model: QString, lens: QString, text: QString, hidden_profiles: QVariantList, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32, request_id: u32)),
     camera_database_brands: qt_method!(fn(&self) -> QStringList),
     camera_database_models: qt_method!(fn(&self, brand: QString) -> QStringList),
     camera_database_lenses: qt_method!(fn(&self, brand: QString, model: QString) -> QStringList),
@@ -312,6 +313,7 @@ pub struct Controller {
 
     cancel_flag: Arc<AtomicBool>,
     preview_pipeline: Arc<AtomicUsize>,
+    lens_profile_search_id: Arc<AtomicUsize>,
 
     ongoing_computations: BTreeSet<u64>,
 
@@ -1959,9 +1961,13 @@ impl Controller {
         }).collect()
     }
 
-    fn search_lens_profile(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32) {
-        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, profiles: QVariantList| {
-            this.search_lens_profile_finished(profiles);
+    fn next_lens_profile_search_id(&self) -> u32 {
+        self.lens_profile_search_id.fetch_add(1, SeqCst).wrapping_add(1) as u32
+    }
+
+    fn search_lens_profile(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32, request_id: u32) {
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, profiles: QVariantList| {
+            this.search_lens_profile_finished(request_id, profiles);
         });
         let db = self.stabilizer.lens_profile_db.clone();
         let text = text.to_string();
@@ -1973,9 +1979,9 @@ impl Controller {
         });
     }
 
-    fn search_lens_profile_for_camera(&self, brand: QString, model: QString, lens: QString, text: QString, hidden_profiles: QVariantList, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32) {
-        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, profiles: QVariantList| {
-            this.search_lens_profile_finished(profiles);
+    fn search_lens_profile_for_camera(&self, brand: QString, model: QString, lens: QString, text: QString, hidden_profiles: QVariantList, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32, request_id: u32) {
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, profiles: QVariantList| {
+            this.search_lens_profile_finished(request_id, profiles);
         });
         let db = self.stabilizer.lens_profile_db.clone();
         let brand = brand.to_string();

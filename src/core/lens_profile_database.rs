@@ -326,11 +326,12 @@ impl LensProfileDatabase {
 
         let mut filtered = self.list_for_ui.iter().filter(|item| {
             let (name, path, checksum, _, _, _, author) = item;
-            if hidden_profiles.contains(checksum) || hidden_profiles.contains(path) {
+            let profile = self.map.get(path);
+            if hidden_profiles.contains(checksum) ||
+               hidden_profiles.contains(path) ||
+               profile.map(|profile| hidden_profiles.contains(&profile.path_to_file)).unwrap_or(false) {
                 return false;
             }
-
-            let profile = self.map.get(path);
 
             if !brand_key.is_empty() {
                 let Some(profile) = profile else {
@@ -352,7 +353,8 @@ impl LensProfileDatabase {
                     return false;
                 };
                 let profile_lens_key = Self::key(&profile.lens_model);
-                if profile_lens_key != lens_key && !profile_lens_key.contains(&lens_key) && !lens_key.contains(&profile_lens_key) {
+                if profile_lens_key.is_empty() ||
+                   (profile_lens_key != lens_key && !profile_lens_key.contains(&lens_key) && !lens_key.contains(&profile_lens_key)) {
                     return false;
                 }
             }
@@ -636,6 +638,7 @@ mod tests {
         profile.camera_model = model.to_owned();
         profile.lens_model = lens.to_owned();
         profile.checksum = Some(checksum.to_owned());
+        profile.path_to_file = format!("profiles/{checksum}.json");
         profile
     }
 
@@ -661,6 +664,41 @@ mod tests {
             "Brand",
             "Primary",
             "",
+            "",
+            &HashSet::from([(String::from("brand"), String::from("primary"))]),
+            &HashSet::from([(String::from("brand"), String::from("compatible"))]),
+            &HashSet::from([String::from("hidden")]),
+            &HashSet::new(),
+            0,
+            0
+        );
+
+        let result_checksums = results.into_iter().map(|item| item.2).collect::<Vec<_>>();
+        assert_eq!(result_checksums, vec!["selected", "compatible"]);
+
+        let results = db.search_by_camera(
+            "Brand",
+            "Primary",
+            "",
+            "",
+            &HashSet::from([(String::from("brand"), String::from("primary"))]),
+            &HashSet::from([(String::from("brand"), String::from("compatible"))]),
+            &HashSet::from([String::from("hidden"), String::from("profiles/compatible.json")]),
+            &HashSet::new(),
+            0,
+            0
+        );
+
+        let result_checksums = results.into_iter().map(|item| item.2).collect::<Vec<_>>();
+        assert_eq!(result_checksums, vec!["selected"]);
+
+        db.map.insert("missing-lens.json".to_owned(), profile("Brand", "Compatible", "", "missing-lens"));
+        db.list_for_ui.push(item("Brand Compatible", "missing-lens.json", "missing-lens"));
+
+        let results = db.search_by_camera(
+            "Brand",
+            "Primary",
+            "Wide",
             "",
             &HashSet::from([(String::from("brand"), String::from("primary"))]),
             &HashSet::from([(String::from("brand"), String::from("compatible"))]),

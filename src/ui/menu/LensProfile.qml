@@ -40,6 +40,9 @@ MenuItem {
     property var detectedCamera: ({});
     property var reviewProfiles: [];
     property int reviewIndex: -1;
+    property string pendingProfilePath: "";
+    property string pendingProfileChecksum: "";
+    property int activeCameraSearchRequestId: 0;
     property bool suppressSearchUpdate: false;
     property var rejectedProfiles: ({});
 
@@ -52,8 +55,19 @@ MenuItem {
         type: "lens";
         onAccepted: loadFile(fileDialog.selectedFile);
     }
+    Timer {
+        id: pendingProfileIdentityTimer;
+        interval: 10000;
+        onTriggered: {
+            root.pendingProfilePath = "";
+            root.pendingProfileChecksum = "";
+        }
+    }
     function loadFile(url: url): void {
         root.selected_manually = true;
+        pendingProfileIdentityTimer.stop();
+        root.pendingProfilePath = "";
+        root.pendingProfileChecksum = "";
         controller.load_lens_profile(url.toString());
     }
 
@@ -107,7 +121,16 @@ MenuItem {
             profilesUpdateTimer.start();
         }
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
-            if (!is_main_video || !additional_data.camera_identifier) {
+            if (!is_main_video) {
+                return;
+            }
+
+            if (!additional_data || !additional_data.camera_identifier || !additional_data.camera_identifier.brand) {
+                root.detectedCamera = {};
+                if (root.lensProfilesListPrepared) {
+                    root.refreshCameraBrands();
+                    root.updateCameraSearch();
+                }
                 return;
             }
 
@@ -119,7 +142,8 @@ MenuItem {
             };
             root.applyDetectedCamera();
         }
-        function onSearch_lens_profile_finished(profiles: list<var>): void {
+        function onSearch_lens_profile_finished(request_id: int, profiles: list<var>): void {
+            if (request_id !== root.activeCameraSearchRequestId) return;
             root.reviewProfiles = profiles;
             root.reviewIndex = -1;
         }
@@ -127,6 +151,11 @@ MenuItem {
             if (json_str) {
                 const obj = JSON.parse(json_str);
                 if (obj) {
+                    const loadedProfilePath = root.pendingProfilePath || filepath;
+                    const loadedProfileChecksum = root.pendingProfileChecksum || checksum;
+                    pendingProfileIdentityTimer.stop();
+                    root.pendingProfilePath = "";
+                    root.pendingProfileChecksum = "";
                     let lensInfo = {
                         "Camera":          obj.camera_brand + " " + obj.camera_model,
                         "Lens":            obj.lens_model,
@@ -158,13 +187,13 @@ MenuItem {
                         window.motionData.opened = false;
                     }
 
-                    officialInfo.show = !obj.official && !settings.value("rated-profile-" + checksum, false);
+                    officialInfo.show = !obj.official && !settings.value("rated-profile-" + loadedProfileChecksum, false);
                     officialInfo.canRate = true;
                     officialInfo.thankYou = false;
-                    root.profileName = (filepath || obj.name || "").replace(/^.*?[\/\\]([^\/\\]+?)$/, "$1");
+                    root.profileName = (loadedProfilePath || obj.name || "").replace(/^.*?[\/\\]([^\/\\]+?)$/, "$1");
                     root.profileOriginalJson = json_str;
-                    root.profileChecksum = checksum;
-                    root.profilePath = filepath;
+                    root.profileChecksum = loadedProfileChecksum;
+                    root.profilePath = loadedProfilePath;
 
                     if (obj.output_dimension && obj.output_dimension.w > 0 && (window.exportSettings.outWidth != obj.output_dimension.w || window.exportSettings.outHeight != obj.output_dimension.h)) {
                         Qt.callLater(window.exportSettings.lensProfileLoaded, obj.output_dimension.w, obj.output_dimension.h);
@@ -249,8 +278,7 @@ MenuItem {
         settings.setValue("hiddenLensProfiles", JSON.stringify(Object.keys(rejectedProfiles).filter(v => v)));
     }
     function rejectProfile(checksum: string, path: string): void {
-        const key = checksum || path;
-        if (!key) {
+        if (!checksum && !path) {
             return;
         }
 
@@ -258,7 +286,12 @@ MenuItem {
         for (const value of Object.keys(rejectedProfiles)) {
             rejected[value] = 1;
         }
-        rejected[key] = 1;
+        if (checksum) {
+            rejected[checksum] = 1;
+        }
+        if (path) {
+            rejected[path] = 1;
+        }
         rejectedProfiles = rejected;
         updateRejectedProfiles();
 
@@ -351,6 +384,7 @@ MenuItem {
     }
     function searchProfiles(): void {
         const text = search.text.trim();
+        root.activeCameraSearchRequestId = controller.next_lens_profile_search_id();
         controller.search_lens_profile_for_camera(
             selectorValue(cameraBrand),
             selectorValue(cameraModel),
@@ -359,7 +393,8 @@ MenuItem {
             Object.keys(root.rejectedProfiles),
             Object.keys(root.favorites),
             root.currentVideoAspectRatio,
-            root.currentVideoAspectRatioSwapped
+            root.currentVideoAspectRatioSwapped,
+            root.activeCameraSearchRequestId
         );
     }
     function compatibleCameraSummary(): string {
@@ -413,7 +448,15 @@ MenuItem {
         updateCameraSearch();
     }
     function loadProfileItem(item: var): void {
+        const index = root.reviewProfiles.findIndex(candidate => candidate[1] === item[1] && candidate[2] === item[2]);
+        if (index >= 0) {
+            root.reviewIndex = index;
+        }
+
         const lensPathOrId = item[1];
+        root.pendingProfilePath = lensPathOrId;
+        root.pendingProfileChecksum = item[2];
+        pendingProfileIdentityTimer.restart();
         if (lensPathOrId.endsWith(".gyroflow")) {
             window.videoArea.loadGyroflowData(JSON.parse(controller.get_preset_contents(lensPathOrId)), 0);
         } else {
@@ -449,6 +492,7 @@ MenuItem {
             popup.width: root.selectorPopupWidth(cameraBrand);
             popup.height: Math.min(popup.implicitHeight, 8 * itemHeight + 4 * dpiScale);
             onCurrentIndexChanged: {
+                if (root.updatingCameraSelectors) return;
                 root.refreshCameraModels();
                 root.updateCameraSearch();
             }
@@ -462,6 +506,7 @@ MenuItem {
             popup.width: root.selectorPopupWidth(cameraModel);
             popup.height: Math.min(popup.implicitHeight, 8 * itemHeight + 4 * dpiScale);
             onCurrentIndexChanged: {
+                if (root.updatingCameraSelectors) return;
                 root.refreshCameraLenses();
                 root.updateCameraSearch();
             }
@@ -474,7 +519,10 @@ MenuItem {
             popup.x: root.selectorPopupX(cameraLens);
             popup.width: root.selectorPopupWidth(cameraLens);
             popup.height: Math.min(popup.implicitHeight, 8 * itemHeight + 4 * dpiScale);
-            onCurrentIndexChanged: root.updateCameraSearch();
+            onCurrentIndexChanged: {
+                if (root.updatingCameraSelectors) return;
+                root.updateCameraSearch();
+            }
         }
     }
     BasicText {

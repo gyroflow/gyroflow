@@ -11,6 +11,7 @@ TextField {
     property alias popup: popup;
     property var profilesMenu: null;
     property bool autoSearch: true;
+    property int activeSearchRequestId: 0;
 
     signal selected(var item);
 
@@ -47,7 +48,8 @@ TextField {
 
     Connections {
         target: controller;
-        function onSearch_lens_profile_finished(profiles: list<var>): void {
+        function onSearch_lens_profile_finished(request_id: int, profiles: list<var>): void {
+            if (request_id !== root.activeSearchRequestId) return;
             if (!popup.opened && profiles.length > 0) popup.open();
             if (popup.opened && !profiles.length) popup.close();
             popup.maxItemWidth = 0;
@@ -59,7 +61,8 @@ TextField {
 
     onTextChanged: {
         if (autoSearch) {
-            controller.search_lens_profile(text, Object.keys(root.profilesMenu.favorites), profilesMenu.currentVideoAspectRatio, profilesMenu.currentVideoAspectRatioSwapped);
+            root.activeSearchRequestId = controller.next_lens_profile_search_id();
+            controller.search_lens_profile(text, Object.keys(root.profilesMenu.favorites), profilesMenu.currentVideoAspectRatio, profilesMenu.currentVideoAspectRatioSwapped, root.activeSearchRequestId);
         }
     }
     Keys.onDownPressed: {
