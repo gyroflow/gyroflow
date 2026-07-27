@@ -223,6 +223,8 @@ pub struct Controller {
     get_version_from_gyroflow_file: qt_method!(fn(&mut self, url: QUrl) -> u32),
     import_gyroflow_file: qt_method!(fn(&mut self, url: QUrl)),
     import_gyroflow_data: qt_method!(fn(&mut self, data: QString)),
+    load_lens_profile_preset: qt_method!(fn(&mut self, data: QString)),
+    lens_profile_preset_finished: qt_signal!(),
     gyroflow_file_loaded: qt_signal!(obj: QJsonObject),
     export_gyroflow_file: qt_method!(fn(&self, url: QUrl, typ: QString, additional_data: QJsonObject)),
     export_gyroflow_data: qt_method!(fn(&self, typ: QString, additional_data: QJsonObject) -> QString),
@@ -1393,6 +1395,35 @@ impl Controller {
 
             let obj = this.import_gyroflow_internal(obj);
             this.gyroflow_file_loaded(obj);
+        });
+
+        let stab = self.stabilizer.clone();
+        let cancel_flag = self.cancel_flag.clone();
+        cancel_flag.store(true, SeqCst);
+        core::run_threaded(move || {
+            if Arc::strong_count(&cancel_flag) > 2 {
+                // Wait for other tasks to finish
+                std::thread::sleep(std::time::Duration::from_millis(200));
+            }
+            cancel_flag.store(false, SeqCst);
+            let mut is_preset = false;
+            finished(stab.import_gyroflow_data(data.to_string().as_bytes(), false, None, progress, cancel_flag, &mut is_preset, false));
+        });
+    }
+    fn load_lens_profile_preset(&mut self, data: QString) {
+        let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, progress: f64| {
+            this.loading_gyro_in_progress = progress < 1.0;
+            this.loading_gyro_progress(progress);
+            this.loading_gyro_in_progress_changed();
+        });
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, obj: Result<serde_json::Value, gyroflow_core::GyroflowCoreError>| {
+            this.loading_gyro_in_progress = false;
+            this.loading_gyro_progress(1.0);
+            this.loading_gyro_in_progress_changed();
+
+            let obj = this.import_gyroflow_internal(obj);
+            this.gyroflow_file_loaded(obj);
+            this.lens_profile_preset_finished();
         });
 
         let stab = self.stabilizer.clone();

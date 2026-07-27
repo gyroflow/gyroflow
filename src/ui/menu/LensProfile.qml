@@ -42,6 +42,8 @@ MenuItem {
     property int reviewIndex: -1;
     property string pendingProfilePath: "";
     property string pendingProfileChecksum: "";
+    property bool presetProfileLoadInProgress: false;
+    property var queuedProfileItem: null;
     property int activeCameraSearchRequestId: 0;
     property bool suppressSearchUpdate: false;
     property var rejectedProfiles: ({});
@@ -59,6 +61,10 @@ MenuItem {
         id: pendingProfileIdentityTimer;
         interval: 10000;
         onTriggered: {
+            if (root.presetProfileLoadInProgress) {
+                restart();
+                return;
+            }
             root.pendingProfilePath = "";
             root.pendingProfileChecksum = "";
         }
@@ -238,6 +244,18 @@ MenuItem {
                     }
                 }
                 Qt.callLater(controller.recompute_threaded);
+            }
+        }
+        function onLens_profile_preset_finished(): void {
+            root.presetProfileLoadInProgress = false;
+            pendingProfileIdentityTimer.stop();
+            root.pendingProfilePath = "";
+            root.pendingProfileChecksum = "";
+
+            const item = root.queuedProfileItem;
+            root.queuedProfileItem = null;
+            if (item) {
+                Qt.callLater(root.loadProfileItem, item);
             }
         }
     }
@@ -453,12 +471,19 @@ MenuItem {
             root.reviewIndex = index;
         }
 
+        if (root.presetProfileLoadInProgress) {
+            root.queuedProfileItem = item;
+            controller.cancel_current_operation();
+            return;
+        }
+
         const lensPathOrId = item[1];
         root.pendingProfilePath = lensPathOrId;
         root.pendingProfileChecksum = item[2];
         pendingProfileIdentityTimer.restart();
         if (lensPathOrId.endsWith(".gyroflow")) {
-            window.videoArea.loadGyroflowData(JSON.parse(controller.get_preset_contents(lensPathOrId)), 0);
+            root.presetProfileLoadInProgress = true;
+            controller.load_lens_profile_preset(controller.get_preset_contents(lensPathOrId));
         } else {
             root.selected_manually = true;
             controller.load_lens_profile(lensPathOrId);
