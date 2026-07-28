@@ -777,6 +777,19 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
+      "model": "iPhone 17 Pro",
+      "mounts": [],
+      "sensor_size": null,
+      "source": [
+        "gyroflow"
+      ]
+    },
+    {
+      "aliases": [],
+      "brand": "Apple",
+      "brand_aliases": [],
+      "compatible_mounts": [],
+      "crop_factor": null,
       "model": "iPhone 26mm",
       "mounts": [],
       "sensor_size": null,
@@ -15036,6 +15049,19 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "HDZero_Nano",
+      "mounts": [],
+      "sensor_size": null,
+      "source": [
+        "gyroflow"
+      ]
+    },
+    {
+      "aliases": [],
+      "brand": "helmetcam2",
+      "brand_aliases": [],
+      "compatible_mounts": [],
+      "crop_factor": null,
+      "model": "shenshu icm42607",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -35067,7 +35093,8 @@
       ],
       "sensor_size": "Full frame",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
@@ -40772,6 +40799,19 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "\u5c0f\u8681\u76f8\u673a",
+      "mounts": [],
+      "sensor_size": null,
+      "source": [
+        "gyroflow"
+      ]
+    },
+    {
+      "aliases": [],
+      "brand": "XIAOMI (POCO)",
+      "brand_aliases": [],
+      "compatible_mounts": [],
+      "crop_factor": null,
+      "model": "X3 GT",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -56166,6 +56206,15 @@
       "brand": "",
       "crop_factor": null,
       "model": "DZOFILM 75mm T2.1",
+      "mounts": [],
+      "source": [
+        "gyroflow"
+      ]
+    },
+    {
+      "brand": "",
+      "crop_factor": null,
+      "model": "DZOFilm Arcana Anamorphic 32mm",
       "mounts": [],
       "source": [
         "gyroflow"
@@ -74372,6 +74421,15 @@
     {
       "brand": "",
       "crop_factor": null,
+      "model": "Sigma 28-105mm F2.8 DG DN Art",
+      "mounts": [],
+      "source": [
+        "gyroflow"
+      ]
+    },
+    {
+      "brand": "",
+      "crop_factor": null,
       "model": "Sigma 28-45mm F1.8 DG DN | Art 024 28mm",
       "mounts": [],
       "source": [
@@ -83633,6 +83691,15 @@
     {
       "brand": "",
       "crop_factor": null,
+      "model": "Viltrox 16mm F1.8 FE",
+      "mounts": [],
+      "source": [
+        "gyroflow"
+      ]
+    },
+    {
+      "brand": "",
+      "crop_factor": null,
       "model": "Viltrox 20 1.8",
       "mounts": [],
       "source": [
@@ -84930,6 +84997,15 @@
       "brand": "",
       "crop_factor": null,
       "model": "X3",
+      "mounts": [],
+      "source": [
+        "gyroflow"
+      ]
+    },
+    {
+      "brand": "",
+      "crop_factor": null,
+      "model": "X3 GT",
       "mounts": [],
       "source": [
         "gyroflow"
