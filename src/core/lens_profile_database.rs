@@ -298,6 +298,20 @@ impl LensProfileDatabase {
         filtered.into_iter().take(200).cloned().collect()
     }
 
+    fn profile_is_hidden(profile: Option<&LensProfile>, path: &str, checksum: &str, hidden: &HashSet<String>) -> bool {
+        [Some(path), Some(checksum), profile.map(|value| value.path_to_file.as_str())]
+            .into_iter()
+            .flatten()
+            .any(|value| !value.is_empty() && hidden.contains(value))
+    }
+
+    fn lens_matches(profile: Option<&LensProfile>, requested: &str) -> bool {
+        let Some(candidate) = profile.map(|value| Self::key(&value.lens_model)).filter(|value| !value.is_empty()) else {
+            return false;
+        };
+        candidate == requested || candidate.contains(requested) || requested.contains(&candidate)
+    }
+
     pub fn search_by_camera(
         &self,
         brand: &str,
@@ -326,11 +340,10 @@ impl LensProfileDatabase {
 
         let mut filtered = self.list_for_ui.iter().filter(|item| {
             let (name, path, checksum, _, _, _, author) = item;
-            if hidden_profiles.contains(checksum) || hidden_profiles.contains(path) {
+            let profile = self.map.get(path);
+            if Self::profile_is_hidden(profile, path, checksum, hidden_profiles) {
                 return false;
             }
-
-            let profile = self.map.get(path);
 
             if !brand_key.is_empty() {
                 let Some(profile) = profile else {
@@ -347,14 +360,8 @@ impl LensProfileDatabase {
                 }
             }
 
-            if !lens_key.is_empty() {
-                let Some(profile) = profile else {
-                    return false;
-                };
-                let profile_lens_key = Self::key(&profile.lens_model);
-                if profile_lens_key != lens_key && !profile_lens_key.contains(&lens_key) && !lens_key.contains(&profile_lens_key) {
-                    return false;
-                }
+            if !lens_key.is_empty() && !Self::lens_matches(profile, &lens_key) {
+                return false;
             }
 
             words.is_empty() || Self::matches_words(name, author, &words)
@@ -672,5 +679,40 @@ mod tests {
 
         let result_checksums = results.into_iter().map(|item| item.2).collect::<Vec<_>>();
         assert_eq!(result_checksums, vec!["selected", "compatible"]);
+    }
+
+    #[test]
+    fn structured_search_honors_the_profile_resolved_path() {
+        let mut db = LensProfileDatabase::default();
+        let mut candidate = profile("Maker", "Body", "Prime", "candidate");
+        candidate.path_to_file = "profiles/resolved.json".to_owned();
+        db.map.insert("catalog-key".to_owned(), candidate);
+        db.list_for_ui.push(item("Maker Body Prime", "catalog-key", "candidate"));
+
+        let hidden = HashSet::from(["profiles/resolved.json".to_owned()]);
+        let selected = HashSet::from([("maker".to_owned(), "body".to_owned())]);
+        let matches = db.search_by_camera(
+            "Maker", "Body", "Prime", "", &selected, &HashSet::new(), &hidden, &HashSet::new(), 0, 0
+        );
+
+        assert!(matches.is_empty());
+    }
+
+    #[test]
+    fn structured_search_requires_lens_metadata_for_a_lens_filter() {
+        let mut db = LensProfileDatabase::default();
+        db.map.insert("unnamed".to_owned(), profile("Maker", "Body", "", "unnamed"));
+        db.map.insert("prime".to_owned(), profile("Maker", "Body", "Prime 24mm", "prime"));
+        db.list_for_ui.extend([
+            item("Maker Body", "unnamed", "unnamed"),
+            item("Maker Body Prime", "prime", "prime"),
+        ]);
+
+        let selected = HashSet::from([("maker".to_owned(), "body".to_owned())]);
+        let checksums = db.search_by_camera(
+            "Maker", "Body", "Prime 24mm", "", &selected, &HashSet::new(), &HashSet::new(), &HashSet::new(), 0, 0
+        ).into_iter().map(|entry| entry.2).collect::<Vec<_>>();
+
+        assert_eq!(checksums, ["prime"]);
     }
 }

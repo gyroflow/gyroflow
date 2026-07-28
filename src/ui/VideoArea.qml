@@ -43,7 +43,7 @@ Item {
 
     property Menu.VideoInformation vidInfo: null;
 
-    function loadGyroflowData(obj: var, queueJobId: var): void {
+    function loadGyroflowData(obj: var, queueJobId: var): bool {
         root.pendingGyroflowData = null;
         root.pendingQueueJobId = 0;
 
@@ -52,7 +52,7 @@ Item {
             root.pendingQueueJobId = +queueJobId;
             controller.cancel_current_operation();
             // we'll get called again from telemetry_loaded
-            return;
+            return true;
         }
 
         let urls = null;
@@ -72,7 +72,7 @@ Item {
         }
         if ((!urls || !urls[0]) && !vidInfo.filename) {
             messageBox(Modal.Error, qsTr("Preset can be applied only after loading a video."), [ { text: qsTr("Ok") } ]);
-            return;
+            return false;
         }
 
         const isCorrectVideoLoaded = urls[0] && vidInfo.filename == filesystem.get_filename(urls[0]);
@@ -87,7 +87,7 @@ Item {
             if (controller.image_sequence_fps > 0) {
                 vid.setFrameRate(controller.image_sequence_fps);
             }
-            return;
+            return true;
         }
         if (urls[1] && !isCorrectGyroLoaded && filesystem.exists(urls[1])) {
             root.pendingGyroflowData = obj;
@@ -95,7 +95,7 @@ Item {
             console.log("Loading gyro file", urls[1]);
             window.motionData.lastSelectedFile = urls[1];
             controller.load_telemetry(urls[1], urls[0] == urls[1] || window.motionData.allMetadata, window.videoArea.vid, -1, project_version);
-            return;
+            return true;
         }
 
         controller.set_prevent_recompute(true);
@@ -108,6 +108,7 @@ Item {
             controller.import_gyroflow_data(JSON.stringify(obj));
         }
         render_queue.editing_job_id = +queueJobId;
+        return true;
     }
     Connections {
         target: controller;

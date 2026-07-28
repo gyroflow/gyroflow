@@ -311,6 +311,7 @@ pub struct Controller {
     processing_info_changed: qt_signal!(),
 
     cancel_flag: Arc<AtomicBool>,
+    profile_query_epoch: Arc<AtomicUsize>,
     preview_pipeline: Arc<AtomicUsize>,
 
     ongoing_computations: BTreeSet<u64>,
@@ -1959,9 +1960,18 @@ impl Controller {
         }).collect()
     }
 
+    fn begin_profile_query(&self) -> (usize, Arc<AtomicUsize>) {
+        let epoch = self.profile_query_epoch.clone();
+        let value = epoch.fetch_add(1, SeqCst).wrapping_add(1);
+        (value, epoch)
+    }
+
     fn search_lens_profile(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32) {
-        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, profiles: QVariantList| {
-            this.search_lens_profile_finished(profiles);
+        let (query, epoch) = self.begin_profile_query();
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, profiles: QVariantList| {
+            if epoch.load(SeqCst) == query {
+                this.search_lens_profile_finished(profiles);
+            }
         });
         let db = self.stabilizer.lens_profile_db.clone();
         let text = text.to_string();
@@ -1974,8 +1984,11 @@ impl Controller {
     }
 
     fn search_lens_profile_for_camera(&self, brand: QString, model: QString, lens: QString, text: QString, hidden_profiles: QVariantList, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32) {
-        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, profiles: QVariantList| {
-            this.search_lens_profile_finished(profiles);
+        let (query, epoch) = self.begin_profile_query();
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, profiles: QVariantList| {
+            if epoch.load(SeqCst) == query {
+                this.search_lens_profile_finished(profiles);
+            }
         });
         let db = self.stabilizer.lens_profile_db.clone();
         let brand = brand.to_string();
