@@ -5380,6 +5380,31 @@
       ]
     },
     {
+      "aliases": [
+        "Canon EOS R6 V"
+      ],
+      "brand": "Canon",
+      "brand_aliases": [],
+      "compatible_mounts": [
+        "Canon EF-S",
+        "Canon EF",
+        "M42",
+        "M39/1",
+        "DKL",
+        "T2",
+        "Generic"
+      ],
+      "crop_factor": 1.0,
+      "model": "EOS R6 V",
+      "mounts": [
+        "Canon RF"
+      ],
+      "sensor_size": "Full frame",
+      "source": [
+        "lensfun"
+      ]
+    },
+    {
       "aliases": [],
       "brand": "Canon",
       "brand_aliases": [],
@@ -33995,19 +34020,6 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
-      "model": "a7rIVa",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
       "model": "A99 II",
       "mounts": [],
       "sensor_size": null,
@@ -34711,6 +34723,30 @@
     },
     {
       "aliases": [
+        "ILCE-6100A",
+        "a6100A"
+      ],
+      "brand": "Sony",
+      "brand_aliases": [],
+      "compatible_mounts": [
+        "M42",
+        "M39/1",
+        "DKL",
+        "T2",
+        "Generic"
+      ],
+      "crop_factor": 1.534,
+      "model": "Alpha 6100A",
+      "mounts": [
+        "Sony E"
+      ],
+      "sensor_size": "APS-C",
+      "source": [
+        "lensfun"
+      ]
+    },
+    {
+      "aliases": [
         "ILCE-6300",
         "a6300"
       ],
@@ -34757,6 +34793,30 @@
       "source": [
         "lensfun",
         "gyroflow"
+      ]
+    },
+    {
+      "aliases": [
+        "ILCE-6400A",
+        "a6400A"
+      ],
+      "brand": "Sony",
+      "brand_aliases": [],
+      "compatible_mounts": [
+        "M42",
+        "M39/1",
+        "DKL",
+        "T2",
+        "Generic"
+      ],
+      "crop_factor": 1.534,
+      "model": "Alpha 6400A",
+      "mounts": [
+        "Sony E"
+      ],
+      "sensor_size": "APS-C",
+      "source": [
+        "lensfun"
       ]
     },
     {
@@ -35291,7 +35351,8 @@
     },
     {
       "aliases": [
-        "ILCE-7RM4A"
+        "ILCE-7RM4A",
+        "a7RIVA"
       ],
       "brand": "Sony",
       "brand_aliases": [],
@@ -35303,13 +35364,14 @@
         "Generic"
       ],
       "crop_factor": 1.0,
-      "model": "Alpha 7R IV A",
+      "model": "Alpha 7R IVA",
       "mounts": [
         "Sony E"
       ],
       "sensor_size": "Full frame",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
@@ -35335,6 +35397,30 @@
       "source": [
         "lensfun",
         "gyroflow"
+      ]
+    },
+    {
+      "aliases": [
+        "ILCE-7RM6",
+        "a7RVI"
+      ],
+      "brand": "Sony",
+      "brand_aliases": [],
+      "compatible_mounts": [
+        "M42",
+        "M39/1",
+        "DKL",
+        "T2",
+        "Generic"
+      ],
+      "crop_factor": 1.0,
+      "model": "Alpha 7R VI",
+      "mounts": [
+        "Sony E"
+      ],
+      "sensor_size": "Full frame",
+      "source": [
+        "lensfun"
       ]
     },
     {
@@ -93301,6 +93387,17 @@
       ]
     },
     {
+      "brand": "LZOS",
+      "crop_factor": 1.0,
+      "model": "Industar-61 L/Z MC 50mm f/2.8",
+      "mounts": [
+        "M42"
+      ],
+      "source": [
+        "lensfun"
+      ]
+    },
+    {
       "brand": "Mamiya",
       "crop_factor": 0.644,
       "model": "Mamiya 120mm f/32.0-4.0",
@@ -97153,6 +97250,17 @@
       "brand": "OM Digital Solutions",
       "crop_factor": 2.0,
       "model": "OM 12-100mm F4.0",
+      "mounts": [
+        "Micro 4/3 System"
+      ],
+      "source": [
+        "lensfun"
+      ]
+    },
+    {
+      "brand": "OM Digital Solutions",
+      "crop_factor": 2.0,
+      "model": "OM 12-45mm F4.0",
       "mounts": [
         "Micro 4/3 System"
       ],
@@ -101608,6 +101716,17 @@
     {
       "brand": "Sony",
       "crop_factor": 1.534,
+      "model": "E 15mm F1.4 G",
+      "mounts": [
+        "Sony E"
+      ],
+      "source": [
+        "lensfun"
+      ]
+    },
+    {
+      "brand": "Sony",
+      "crop_factor": 1.534,
       "model": "E 16-50mm f/3.5-5.6 OSS PZ",
       "mounts": [
         "Sony E"
@@ -102060,6 +102179,17 @@
       "brand": "Sony",
       "crop_factor": 1.0,
       "model": "FE 50mm f/1.2 GM",
+      "mounts": [
+        "Sony E"
+      ],
+      "source": [
+        "lensfun"
+      ]
+    },
+    {
+      "brand": "Sony",
+      "crop_factor": 1.0,
+      "model": "FE 50mm f/1.4 GM",
       "mounts": [
         "Sony E"
       ],
@@ -102887,7 +103017,8 @@
       "crop_factor": 1.0,
       "model": "Tamron 70-300mm F4.5-6.3 Di III RXD",
       "mounts": [
-        "Sony E"
+        "Sony E",
+        "Nikon Z"
       ],
       "source": [
         "lensfun"
@@ -105018,6 +105149,6 @@
       ]
     }
   ],
-  "updated_at": "2026-05-11",
+  "updated_at": "2026-07-28",
   "version": 1
 }
