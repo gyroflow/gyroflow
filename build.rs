@@ -20,6 +20,10 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
         config.flag(f);
     }
 
+    if env::var("CARGO_CFG_TARGET_ARCH").as_deref() == Ok("aarch64") && matches!(env::var("CARGO_CFG_TARGET_OS").as_deref(), Ok("ios") | Ok("macos")) {
+        config.flag("-include").flag("arm_acle.h");
+    }
+
     println!("cargo:rerun-if-changed={}", dir);
 
     let out_dir = env::var("OUT_DIR").unwrap();
@@ -90,6 +94,10 @@ fn main() {
 
     for f in env::var("DEP_QT_COMPILE_FLAGS").unwrap().split_terminator(';') {
         config.flag(f);
+    }
+
+    if env::var("CARGO_CFG_TARGET_ARCH").as_deref() == Ok("aarch64") && (target_os == "ios" || target_os == "macos") {
+        config.flag("-include").flag("arm_acle.h");
     }
     // config.define("QT_QML_DEBUG", None);
     println!("cargo:rerun-if-changed=src/qt_gpu/qrhi_undistort.cpp");

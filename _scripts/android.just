@@ -252,47 +252,69 @@ deploy *param:
     "@
     $androiddeploy | Out-File -encoding utf8 -FilePath "$ProjectDir\target\android-build\android-deploy.json"
 
-    $job = Start-Job -Name "Cleanup" -ArgumentList "$ProjectDir\target\android-build\libs\arm64-v8a" -ScriptBlock {
-        for ($num = 1; $num -le 800 ; $num++) {
-            try {
-                $c = [System.IO.File]::ReadAllText("${args}\..\..\res\values\libs.xml") -replace "<item.+?(Fusion|Imagine|Universal).+?item>", ""
-                [System.IO.File]::WriteAllText("${args}\..\..\res\values\libs.xml", $c)
-                Remove-Item "${args}\*Universal*"
-                Remove-Item "${args}\*Imagine*"
-                Remove-Item "${args}\*Fusion*"
-                Remove-Item "${args}\*Particles*"
-                Remove-Item "${args}\*tooling*"
-                Remove-Item "${args}\*qgif*"
-                Remove-Item "${args}\*qico*"
-            } catch {
-
-            }
-            Start-Sleep -Milliseconds 150;
-        }
-    }
-    Get-job | Receive-Job
-
-    $Sign = ""
+    $ReleaseFlag = ""
     $ApkName = "apk\debug\android-build-debug.apk"
+    $GradleApkTask = "assembleDebug"
+    $GradleSignArgs = @()
     if ("{{KeyStore}}" -and "{{KeyStoreAlias}}" -and "{{KeyStorePassword}}") {
-        $Sign = "--release --sign {{KeyStore}} {{KeyStoreAlias}} --storepass {{KeyStorePassword}}"
-        $ApkName = "apk\release\android-build-release-signed.apk"
+        $ReleaseFlag = "--release"
+        $ApkName = "apk\release\android-build-release.apk"
+        $GradleApkTask = "assembleRelease"
+        $GradleSignArgs = @(
+            "-Pandroid.injected.signing.store.file={{KeyStore}}",
+            "-Pandroid.injected.signing.store.password={{KeyStorePassword}}",
+            "-Pandroid.injected.signing.key.alias={{KeyStoreAlias}}",
+            "-Pandroid.injected.signing.key.password={{KeyStorePassword}}"
+        )
     }
 
-    $cmd = "androiddeployqt --input `"$ProjectDir\target\android-build\android-deploy.json`" --output `"$ProjectDir\target\android-build`" --deployment bundled $Sign --android-platform android-36 --jdk ${Env:JAVA_HOME} --gradle"
+    try {
+        $deployCmd = "androiddeployqt --input `"$ProjectDir\target\android-build\android-deploy.json`" --output `"$ProjectDir\target\android-build`" --deployment bundled $ReleaseFlag --android-platform android-36 --jdk ${Env:JAVA_HOME}"
+        iex "$deployCmd"
+        if ($LASTEXITCODE -ne 0) { throw "androiddeployqt (prepare) failed with exit code $LASTEXITCODE" }
 
-    iex "$cmd"
-    if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") {
-        iex "$cmd --aab"
+        # ~~~ Step 2: Strip unwanted Qt styles/plugins once (no background race) ~~~
+        $LibsDir = "$ProjectDir\target\android-build\libs\arm64-v8a"
+        $LibsXml = "$ProjectDir\target\android-build\res\values\libs.xml"
+        $c = [System.IO.File]::ReadAllText($LibsXml) -replace "<item.+?(Fusion|Imagine|Universal).+?item>", ""
+        if ($c.Trim().Length -eq 0) { throw "libs.xml became empty after filtering - aborting to avoid a corrupt build" }
+        [System.IO.File]::WriteAllText($LibsXml, $c)
+        Remove-Item "$LibsDir\*Universal*" -ErrorAction SilentlyContinue
+        Remove-Item "$LibsDir\*Imagine*"   -ErrorAction SilentlyContinue
+        Remove-Item "$LibsDir\*Fusion*"    -ErrorAction SilentlyContinue
+        Remove-Item "$LibsDir\*Particles*" -ErrorAction SilentlyContinue
+        Remove-Item "$LibsDir\*tooling*"   -ErrorAction SilentlyContinue
+        Remove-Item "$LibsDir\*qgif*"      -ErrorAction SilentlyContinue
+        Remove-Item "$LibsDir\*qico*"      -ErrorAction SilentlyContinue
+
+        $Gradlew = "$ProjectDir\target\android-build\gradlew.bat"
+        Push-Location "$ProjectDir\target\android-build"
+        try {
+            & $Gradlew $GradleApkTask @GradleSignArgs
+            if ($LASTEXITCODE -ne 0) { throw "gradle $GradleApkTask failed with exit code $LASTEXITCODE" }
+
+            if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") {
+                & $Gradlew bundleRelease @GradleSignArgs
+                if ($LASTEXITCODE -ne 0) { throw "gradle bundleRelease failed with exit code $LASTEXITCODE" }
+            }
+        } finally {
+            Pop-Location
+        }
+    } finally {
+        [System.IO.File]::WriteAllText("$ProjectDir\src\ui\components\Modal.qml", [System.IO.File]::ReadAllText("$ProjectDir\src\ui\components\Modal.qml").Replace("`nimport QtQuick.Effects", "`n// import QtQuick.Effects"))
     }
-
-    [System.IO.File]::WriteAllText("$ProjectDir\src\ui\components\Modal.qml", [System.IO.File]::ReadAllText("$ProjectDir\src\ui\components\Modal.qml").Replace("`nimport QtQuick.Effects", "`n// import QtQuick.Effects"))
-
-    Stop-Job $job
 
     New-Item -Type dir "$ProjectDir\_deployment\_binaries\" -ErrorAction SilentlyContinue
-    Copy-Item -Path "$ProjectDir\target\android-build\build\outputs\$ApkName" -Destination "$ProjectDir\_deployment\_binaries\Gyroflow.apk" -Force -ErrorAction SilentlyContinue
-    Copy-Item -Path "$ProjectDir\target\android-build\build\outputs\bundle\release\android-build-release.aab" -Destination "$ProjectDir\_deployment\_binaries\Gyroflow.aab" -Force -ErrorAction SilentlyContinue
+
+    $ApkPath = "$ProjectDir\target\android-build\build\outputs\$ApkName"
+    if (-not (Test-Path $ApkPath)) { throw "Expected APK not found at $ApkPath" }
+    Copy-Item -Path $ApkPath -Destination "$ProjectDir\_deployment\_binaries\Gyroflow.apk" -Force
+
+    if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") {
+        $AabPath = "$ProjectDir\target\android-build\build\outputs\bundle\release\android-build-release.aab"
+        if (-not (Test-Path $AabPath)) { throw "Expected AAB not found at $AabPath" }
+        Copy-Item -Path $AabPath -Destination "$ProjectDir\_deployment\_binaries\Gyroflow.aab" -Force
+    }
 
     if ("{{param}}" -eq "install") {
         adb install "$ProjectDir\_deployment\_binaries\Gyroflow.apk"

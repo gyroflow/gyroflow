@@ -165,6 +165,8 @@ impl std::fmt::Debug for ComputeParams {
          .field("gyro.duration_ms", &gyro.duration_ms)
          .field("gyro.imu_lpf", &gyro.imu_transforms.imu_lpf)
          .field("gyro.imu_mf", &gyro.imu_transforms.imu_mf)
+         .field("gyro.glitch_filter", &gyro.imu_transforms.glitch_filter)
+         .field("gyro.glitch_strength", &gyro.imu_transforms.glitch_strength)
          .field("gyro.gyro_bias", &gyro.imu_transforms.gyro_bias)
          .field("gyro.integration_method", &gyro.integration_method)
          .field("fovs.len", &self.fovs.len())

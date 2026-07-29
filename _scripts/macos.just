@@ -22,6 +22,12 @@ export CPATH := if os() == "macos" {
     env_var_or_default("CPATH", "")
 }
 
+export CXXFLAGS_aarch64_apple_darwin := "-Wno-error=implicit-function-declaration"
+export CFLAGS_aarch64_apple_darwin   := "-Wno-error=implicit-function-declaration"
+export CXXFLAGS_x86_64_apple_darwin := "-Wno-error=implicit-function-declaration"
+export CFLAGS_x86_64_apple_darwin   := "-Wno-error=implicit-function-declaration"
+export RUST_MIN_STACK := "33554432"
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

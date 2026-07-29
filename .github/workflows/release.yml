@@ -13,10 +13,10 @@ jobs:
         targets: [
           { os: ubuntu-latest, type: linux },
           { os: macos-14,      type: macos },
-          { os: macos-14,      type: macstore },
+          { os: macos-26,      type: macstore },
           { os: windows-2022,  type: windows },
           { os: windows-2022,  type: windows-arm },
-          { os: macos-14,      type: ios },
+          { os: macos-26,      type: ios },
           { os: windows-2022,  type: android }
         ]
     name: Gyroflow for ${{ matrix.targets.type }}
@@ -59,7 +59,7 @@ jobs:
           rm -r -force ${{ github.workspace }}/target/release/build/qml-video-rs* -ErrorAction SilentlyContinue
 
       - name: Install Mac certificates
-        if: ${{ matrix.targets.os == 'macos-13' || matrix.targets.os == 'macos-14' || matrix.targets.os == 'macos-15' }}
+        if: ${{ matrix.targets.os == 'macos-13' || matrix.targets.os == 'macos-14' || matrix.targets.os == 'macos-15' || matrix.targets.os == 'macos-26' }}
         uses: apple-actions/import-codesign-certs@v3
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATES }}
@@ -116,7 +116,6 @@ jobs:
           FORCE_QT_VERSION: 6.7.3
           DONT_BUILD_DMG: true
         run: |
-          sudo xcode-select --switch /Applications/Xcode_16.2.app/Contents/Developer
           /usr/libexec/PlistBuddy -x -c "Set :LSMinimumSystemVersion \"11.0\"" ${{ github.workspace }}/_deployment/mac/Gyroflow.app/Contents/Info.plist
           sed -i -e 's/"10.15"/"11.0"/' ${{ github.workspace }}/_scripts/macos.just
           just install-deps
@@ -165,7 +164,6 @@ jobs:
           SIGN_KEY: 58FE9D9FF561BF9910031999A8211A23858D1920
           PROVISIONING_PROFILE: /Users/runner/Library/MobileDevice/Provisioning Profiles/${{ matrix.targets.type == 'ios' && fromJSON(steps.provisioning.outputs.profiles)[0].udid || '' }}.mobileprovision
         run: |
-          sudo xcode-select --switch /Applications/Xcode_16.2.app/Contents/Developer
           just ios install-deps
           just ios build-ipa
 
