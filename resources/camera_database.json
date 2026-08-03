@@ -1,0 +1,173 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-08-03",
+  "brands": [
+    {
+      "name": "Sony",
+      "models": [
+        "A7IV",
+        "A7SIII",
+        "FX3",
+        "FX6",
+        "A7RIV",
+        "A7RV",
+        "A1",
+        "ZV-E1",
+        "ZV-E10",
+        "A6700"
+      ],
+      "lenses": [
+        "FE 24mm F1.4 GM",
+        "FE 20mm F1.8 G",
+        "FE 16-35mm F2.8 GM",
+        "FE 24-70mm F2.8 GM",
+        "E 11mm F1.8",
+        "E 15mm F1.4 G"
+      ]
+    },
+    {
+      "name": "GoPro",
+      "models": [
+        "HERO12 Black",
+        "HERO11 Black",
+        "HERO10 Black",
+        "HERO9 Black",
+        "HERO8 Black",
+        "MAX"
+      ],
+      "lenses": [
+        "Wide",
+        "SuperView",
+        "HyperView",
+        "Linear",
+        "Linear + Horizon Lock"
+      ]
+    },
+    {
+      "name": "DJI",
+      "models": [
+        "Osmo Action 4",
+        "Osmo Action 3",
+        "Action 2",
+        "Osmo Pocket 3",
+        "Avata",
+        "Avata 2",
+        "O3 Air Unit"
+      ],
+      "lenses": [
+        "Standard",
+        "Wide",
+        "Ultrawide"
+      ]
+    },
+    {
+      "name": "Insta360",
+      "models": [
+        "Ace Pro",
+        "GO 3",
+        "ONE RS",
+        "X3",
+        "X4"
+      ],
+      "lenses": [
+        "ActionView",
+        "Dewarp",
+        "Ultrawide",
+        "MegaView"
+      ]
+    },
+    {
+      "name": "RED",
+      "models": [
+        "Komodo 6K",
+        "V-Raptor 8K VV",
+        "Komodo-X"
+      ],
+      "lenses": [
+        "Canon RF Mount",
+        "ARRI PL Mount"
+      ]
+    },
+    {
+      "name": "Blackmagic",
+      "models": [
+        "Pocket Cinema Camera 4K",
+        "Pocket Cinema Camera 6K Pro",
+        "Cinema Camera 6K",
+        "Micro Studio Camera 4K G2"
+      ],
+      "lenses": [
+        "MFT Mount",
+        "EF Mount",
+        "L Mount"
+      ]
+    },
+    {
+      "name": "Canon",
+      "models": [
+        "EOS R5",
+        "EOS R6 Mark II",
+        "EOS R7",
+        "EOS R8",
+        "EOS R3",
+        "EOS C70"
+      ],
+      "lenses": [
+        "RF 15-35mm F2.8L",
+        "RF 24-70mm F2.8L",
+        "RF 16mm F2.8"
+      ]
+    },
+    {
+      "name": "Panasonic",
+      "models": [
+        "Lumix S5II",
+        "Lumix GH6",
+        "Lumix S1H",
+        "Lumix S5"
+      ],
+      "lenses": [
+        "Lumix S 18mm F1.8",
+        "Lumix G 12-35mm F2.8"
+      ]
+    },
+    {
+      "name": "Fujifilm",
+      "models": [
+        "X-T5",
+        "X-H2S",
+        "X-T4",
+        "X-S20"
+      ],
+      "lenses": [
+        "XF 16-55mm F2.8",
+        "XF 10-24mm F4",
+        "XF 8mm F3.5"
+      ]
+    },
+    {
+      "name": "RunCam",
+      "models": [
+        "Thumb Pro",
+        "Thumb",
+        "Wasp",
+        "Phoenix 2"
+      ],
+      "lenses": [
+        "Standard"
+      ]
+    },
+    {
+      "name": "Caddx",
+      "models": [
+        "Walnut",
+        "Peanut",
+        "Ant",
+        "Ratel 2"
+      ],
+      "lenses": [
+        "Standard"
+      ]
+    }
+  ]
+}
