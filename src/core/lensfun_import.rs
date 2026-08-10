@@ -138,6 +138,9 @@ fn build_profile(
     width: usize,
     height: usize,
 ) -> Option<LensProfile> {
+    if !(focal_mm > 0.0) {
+        return None;
+    }
     let (model_id, mut k): (&str, Vec<f64>) = match calib.model {
         LfDistortion::Poly3 { k1 } => ("poly3", vec![k1 as f64]),
         LfDistortion::Poly5 { k1, k2 } => ("poly5", vec![k1 as f64, k2 as f64]),
@@ -222,6 +225,11 @@ fn build_profile(
     profile.camera_brand = camera.map(|c| c.maker.clone()).unwrap_or_else(|| lens.maker.clone());
     profile.camera_model = camera.map(|c| c.model.clone()).unwrap_or_default();
     profile.lens_model = lens.model.clone();
+    // `LensProfile::get_display_name` composes the list entry from the lens
+    // model, `camera_setting` and `note` — it has no focal length of its own.
+    // A zoom carries one calibration per focal, so without this every one of
+    // them would render under the same name and could not be told apart.
+    profile.camera_setting = format!("{focal_mm}mm");
     profile.calibrated_by = "Lensfun".to_string();
     profile.calib_dimension = Dimensions { w: width, h: height };
     profile.orig_dimension = Dimensions { w: width, h: height };
@@ -253,10 +261,12 @@ fn synth_dimensions(camera: &Camera, lens: &Lens) -> (usize, usize) {
         .aspect_ratio
         .filter(|a| *a > 0.0)
         .unwrap_or(if lens.aspect_ratio > 0.0 { lens.aspect_ratio } else { DEFAULT_ASPECT_RATIO });
-    let height = ((SYNTH_WIDTH as f32 / aspect).round() as usize).max(1);
+    let height = (SYNTH_WIDTH as f32 / aspect).round() as usize;
     // Keep both sides even; odd frame sizes are unusual and complicate nothing
-    // here beyond making the centre land off-pixel.
-    (SYNTH_WIDTH, height - (height % 2))
+    // here beyond making the centre land off-pixel. The clamp comes after the
+    // rounding, because an absurd aspect ratio would otherwise round to 1 and
+    // then be evened down to a zero-height frame.
+    (SYNTH_WIDTH, (height - (height % 2)).max(2))
 }
 
 /// The bundled Lensfun database, decompressed once on first use.
@@ -564,5 +574,34 @@ mod tests {
             }
         }
         assert!(checked > 0, "the sample must contain at least one valid pairing");
+    }
+
+    /// A zoom carries one calibration per focal length, and the list entry is
+    /// composed by `LensProfile::get_display_name`, which has no focal of its
+    /// own. Unless the focal reaches `camera_setting`, every calibration of
+    /// the same lens on the same body renders identically and the user cannot
+    /// tell which one they are picking.
+    #[test]
+    fn calibrations_of_one_lens_are_distinguishable() {
+        use std::collections::HashMap;
+        let profiles = profiles_for_query("EOS 5D");
+        assert!(!profiles.is_empty());
+
+        let mut by_pairing: HashMap<(String, String), Vec<&LensProfile>> = HashMap::new();
+        for p in &profiles {
+            by_pairing.entry((p.camera_model.clone(), p.lens_model.clone())).or_default().push(p);
+        }
+        let mut zooms_seen = 0;
+        for ((camera, lens), group) in &by_pairing {
+            if group.len() < 2 { continue; }
+            zooms_seen += 1;
+            let names: std::collections::HashSet<String> = group.iter().map(|p| p.get_display_name()).collect();
+            assert_eq!(
+                names.len(), group.len(),
+                "{camera} + {lens}: {} calibrations collapse to {} display names",
+                group.len(), names.len()
+            );
+        }
+        assert!(zooms_seen > 0, "the query must include at least one lens with several calibrations");
     }
 }
