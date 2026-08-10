@@ -22,6 +22,8 @@ pub struct LensProfileDatabase {
     map: HashMap<String, LensProfile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
     list_for_ui: Vec<(String, String, String, bool, f64, i32, String)>,
+    #[cfg(feature = "lensfun-import")]
+    lensfun_queries: HashSet<String>,
     pub loaded: bool,
     pub version: u32,
 }
@@ -207,6 +209,12 @@ impl LensProfileDatabase {
     }
 
     pub fn set_from_db(&mut self, b: Self) {
+        // The map is replaced wholesale, so anything imported from Lensfun is
+        // gone with it. Forgetting that here would leave the query set
+        // claiming those profiles are still present, and they would never be
+        // imported again.
+        #[cfg(feature = "lensfun-import")]
+        { self.lensfun_queries.clear(); }
         self.map = b.map;
         self.preset_map = b.preset_map;
         self.loaded = b.loaded;
@@ -217,6 +225,39 @@ impl LensProfileDatabase {
                 cb(&self);
             }
         }
+    }
+
+    /// Whether `query` still needs to be looked up in the Lensfun database.
+    ///
+    /// Deliberately takes `&self`: the caller checks this under a read lock,
+    /// synthesises outside it, and only then takes a write lock, so a search
+    /// keystroke never blocks other readers for the length of an import.
+    #[cfg(feature = "lensfun-import")]
+    pub fn needs_lensfun_import(&self, query: &str) -> bool {
+        let key = query.trim().to_ascii_lowercase();
+        key.chars().count() >= 3 && !self.lensfun_queries.contains(&key)
+    }
+
+    /// Add profiles synthesised from the Lensfun database for `query`.
+    ///
+    /// Returns how many were actually new, so the caller can skip rebuilding
+    /// the UI list when nothing changed. Profiles are keyed by their
+    /// `lensfun://` identifier, which makes repeating a search idempotent.
+    #[cfg(feature = "lensfun-import")]
+    pub fn add_lensfun_profiles(&mut self, query: &str, profiles: Vec<LensProfile>) -> usize {
+        self.lensfun_queries.insert(query.trim().to_ascii_lowercase());
+        let mut added = 0;
+        for mut profile in profiles {
+            if profile.identifier.is_empty() || self.map.contains_key(&profile.identifier) { continue; }
+            profile.path_to_file = profile.identifier.clone();
+            profile.checksum = Some(format!("{:08x}", crc32fast::hash(profile.identifier.as_bytes())));
+            self.map.insert(profile.identifier.clone(), profile);
+            added += 1;
+        }
+        if added > 0 {
+            log::debug!("Imported {added} Lensfun profiles for query {query:?}");
+        }
+        added
     }
 
     pub fn get_all_filenames(&self) -> Vec<String> {
