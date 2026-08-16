@@ -368,7 +368,7 @@ impl FrameTransform {
         let file_metadata = gyro.file_metadata.read();
 
         let mut mesh_correction = None;
-        if let Some(mc) = file_metadata.mesh_correction.get(frame) {
+        if let Some(mc) = file_metadata.mesh_correction.get(frame).filter(|mc| crate::synchronization::residual_mesh::is_valid_forward_mesh(&mc.0)) {
             mesh_correction = Some(mc.0.clone()); // distorting mesh
         }
 

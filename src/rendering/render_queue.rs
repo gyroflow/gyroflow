@@ -403,8 +403,11 @@ impl RenderQueue {
                     }
                     let stab = self.stabilizer.get_cloned();
 
-                    // If it's added from main UI, never do the additional autosync
-                    if let Some(ref mut obj) = stab.lens.write().sync_settings { obj.as_object_mut().and_then(|x| x.remove("do_autosync")); }
+                    // Main UI renders are already analyzed for gyro-backed clips, but no-gyro
+                    // optical-only queue jobs still need autosync before rendering.
+                    if stab.gyro.read().has_motion() {
+                        if let Some(ref mut obj) = stab.lens.write().sync_settings { obj.as_object_mut().and_then(|x| x.remove("do_autosync")); }
+                    }
 
                     self.add_internal(job_id, Arc::new(stab), render_options, additional_data, thumbnail_url);
                 }
@@ -1427,15 +1430,15 @@ impl RenderQueue {
             (stab.input_file.read().url.clone(), stab.params.read().duration_ms)
         };
 
-        let (has_sync_points, has_accurate_timestamps) = {
+        let (has_sync_points, has_accurate_timestamps, has_motion_data) = {
             let gyro = stab.gyro.read();
             let md = gyro.file_metadata.read();
-            (!gyro.get_offsets().is_empty(), md.has_accurate_timestamps && !url.to_ascii_lowercase().ends_with(".braw"))
+            (!gyro.get_offsets().is_empty(), md.has_accurate_timestamps && !url.to_ascii_lowercase().ends_with(".braw"), gyro.has_motion())
         };
         let fps = stab.params.read().fps;
 
         let sync_settings = stab.lens.read().sync_settings.clone().unwrap_or_default();
-        if !has_sync_points && !has_accurate_timestamps && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
+        if !has_sync_points && (!has_accurate_timestamps || !has_motion_data) && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
             // ----------------------------------------------------------------------------
             // --------------------------------- Autosync ---------------------------------
             processing_cb(0.01);

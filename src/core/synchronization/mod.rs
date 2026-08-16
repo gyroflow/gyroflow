@@ -14,6 +14,7 @@ use crate::gyro_source::{ Quat64, TimeQuat };
 use crate::stabilization::ComputeParams;
 
 mod optical_flow; pub use optical_flow::*;
+pub(crate) mod residual_mesh;
 mod estimate_pose; pub use estimate_pose::*;
 mod find_offset { pub mod rs_sync; pub mod essential_matrix; pub mod visual_features; }
 
@@ -217,6 +218,27 @@ impl PoseEstimator {
                 }
             }
         }
+    }
+    pub fn build_residual_mesh_correction(&self, frame_count: usize, render_size: (u32, u32), scaled_fps: f64) -> Vec<Option<(Vec<f64>, Vec<f32>)>> {
+        let l = self.sync_results.read();
+        let pairs = l.values().filter_map(|frame| {
+            let of = frame.optical_flow.try_borrow().ok()?;
+            let pair = of.get(&1)?.as_ref()?;
+            let next_frame = crate::frame_at_timestamp(pair.1.0 as f64 / 1000.0, scaled_fps).max(0) as usize;
+            let scale = (
+                render_size.0 as f32 / frame.frame_size.0.max(1) as f32,
+                render_size.1 as f32 / frame.frame_size.1.max(1) as f32,
+            );
+            let correspondences = pair.0.1.iter().zip(&pair.1.1).map(|(start, end)| residual_mesh::Correspondence {
+                start: (start.0 * scale.0, start.1 * scale.1),
+                end: (end.0 * scale.0, end.1 * scale.1),
+                confidence: 1.0,
+            }).collect::<Vec<_>>();
+            Some((next_frame, correspondences))
+        })
+            .filter(|(_, correspondences)| !correspondences.is_empty())
+            .collect::<Vec<_>>();
+        residual_mesh::build_residual_meshes(frame_count, render_size, &pairs)
     }
     pub fn cleanup(&self) {
         let mut l = self.sync_results.write();

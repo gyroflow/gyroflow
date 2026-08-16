@@ -203,6 +203,13 @@ impl AutosyncProcess {
             let mut gyro = compute_params.gyro.write();
 
             gyro.file_metadata.set_raw_imu(self.estimator.estimated_gyro.read().values().cloned().collect::<Vec<_>>());
+            let render_size = (compute_params.width as u32, compute_params.height as u32);
+            let meshes = self.estimator.build_residual_mesh_correction(compute_params.frame_count, render_size, compute_params.scaled_fps);
+            if meshes.iter().any(|mesh| mesh.is_some()) {
+                let existing = gyro.file_metadata.read().mesh_correction.clone();
+                let meshes = super::residual_mesh::compose_mesh_corrections(&existing, meshes);
+                gyro.file_metadata.set_mesh_correction(meshes);
+            }
             gyro.apply_transforms();
 
             let timestamps_fract = [0.5];
