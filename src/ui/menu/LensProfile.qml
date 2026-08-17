@@ -403,6 +403,7 @@ MenuItem {
     function searchProfiles(): void {
         const text = search.text.trim();
         root.activeCameraSearchRequestId = controller.next_lens_profile_search_id();
+        search.activeSearchRequestId = root.activeCameraSearchRequestId;
         controller.search_lens_profile_for_camera(
             selectorValue(cameraBrand),
             selectorValue(cameraModel),
