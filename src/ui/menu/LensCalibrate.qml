@@ -412,7 +412,10 @@ MenuItem {
             popup.height: Math.min(popup.implicitHeight, 8 * itemHeight + 4 * dpiScale);
             onCurrentIndexChanged: {
                 if (calib.metadataControlsReady && !calib.updatingCameraSelectors) {
+                    list.commitAll();
                     calib.setMetadataField("camera_brand", "Camera brand", calib.selectorValue(cameraBrand));
+                    calib.setMetadataField("camera_model", "Camera model", "");
+                    calib.setMetadataField("lens_model", "Lens model", "");
                     calib.refreshCameraModels();
                 }
             }
@@ -427,7 +430,9 @@ MenuItem {
             popup.height: Math.min(popup.implicitHeight, 8 * itemHeight + 4 * dpiScale);
             onCurrentIndexChanged: {
                 if (calib.metadataControlsReady && !calib.updatingCameraSelectors) {
+                    list.commitAll();
                     calib.setMetadataField("camera_model", "Camera model", calib.selectorValue(cameraModel));
+                    calib.setMetadataField("lens_model", "Lens model", "");
                     calib.refreshCameraLenses();
                     calib.updateCropFromCamera();
                 }
@@ -443,6 +448,7 @@ MenuItem {
             popup.height: Math.min(popup.implicitHeight, 8 * itemHeight + 4 * dpiScale);
             onCurrentIndexChanged: {
                 if (calib.metadataControlsReady && !calib.updatingCameraSelectors) {
+                    list.commitAll();
                     calib.setMetadataField("lens_model", "Lens model", calib.selectorValue(cameraLens));
                 }
             }
