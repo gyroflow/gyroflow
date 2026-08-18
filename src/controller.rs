@@ -868,6 +868,7 @@ impl Controller {
         let (json, filepath, checksum) = {
             if let Err(e) = self.stabilizer.load_lens_profile(&url_or_id.to_string()) {
                 self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+                return;
             }
             let lens = self.stabilizer.lens.read();
             (lens.get_json().unwrap_or_default(), lens.path_to_file.clone(), lens.checksum.clone().unwrap_or_default())
