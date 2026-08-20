@@ -16,7 +16,7 @@ install-deps:
     }
 
     mkdir "{{ExtDir}}" -ErrorAction SilentlyContinue
-    cd {{ExtDir}}
+    cd "{{ExtDir}}"
 
     $Python = "python";
     if (Get-Command "python3.10.exe" -ErrorAction SilentlyContinue) {
