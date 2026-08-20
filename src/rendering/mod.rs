@@ -2,6 +2,9 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 mod ffmpeg_audio;
+pub mod audio_export;
+#[cfg(test)]
+mod audio_export_tests;
 mod ffmpeg_video;
 mod ffmpeg_video_converter;
 mod audio_resampler;
@@ -253,6 +256,9 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         "PCM (s16be)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S16BE,
         "PCM (s24le)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S24LE,
         "PCM (s24be)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S24BE,
+        // 32-bit float preserves float recorders (DJI Mic and similar) losslessly, but
+        // doesn't fit in MP4 - see the compatibility check in audio_export.rs.
+        "PCM (f32le)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_F32LE,
         _ => { }
     }
 
@@ -415,6 +421,78 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
 
     if !render_options.audio {
         proc.audio_codec = codec::Id::None;
+    }
+
+    // External audio. The `audio` flag above is the master switch; when it's on and an
+    // external track is set, that track replaces the clip's embedded audio.
+    if render_options.audio && !render_options.external_audio_url.is_empty() {
+        match gyroflow_core::audio::decode::decode_file(&render_options.external_audio_url) {
+            Ok(mut track) => {
+                track.offset_seconds = render_options.external_audio_offset;
+                track.preserve_original_format = render_options.external_audio_preserve_format;
+
+                // The codec comes from the SOURCE format, not from the UI selector, so that
+                // float stays float.
+                let extension = std::path::Path::new(&render_options.output_filename)
+                    .extension()
+                    .and_then(|e| e.to_str())
+                    .unwrap_or("");
+
+                let compat = gyroflow_core::audio::export::check_format_compatibility(
+                    track.source_format,
+                    extension,
+                    track.preserve_original_format,
+                );
+
+                use gyroflow_core::audio::export::FormatCompatibility;
+                let codec_name = match &compat {
+                    FormatCompatibility::Preserved { codec } => *codec,
+                    FormatCompatibility::DowngradeAccepted { codec } => *codec,
+                    // The UI already warns about this before the export; if it got here
+                    // anyway, fall back to AAC instead of aborting the whole render.
+                    FormatCompatibility::ContainerMismatch { wanted_codec, extension, suggested_extension } => {
+                        log::warn!(
+                            "External audio: {wanted_codec} does not fit in .{extension}. \
+                             Switch the output to .{suggested_extension} to preserve the format. \
+                             Exporting as AAC."
+                        );
+                        "AAC"
+                    }
+                };
+
+                let codec_id = match codec_name {
+                    "PCM (f32le)" => codec::Id::PCM_F32LE,
+                    "PCM (s24le)" => codec::Id::PCM_S24LE,
+                    "PCM (s16le)" => codec::Id::PCM_S16LE,
+                    _ => codec::Id::AAC,
+                };
+
+                // The core's trim_ranges are normalized from 0 to 1.
+                let (trim_ranges, video_duration_s) = {
+                    let params = stab.params.read();
+                    (params.trim_ranges.clone(), params.get_scaled_duration_ms() / 1000.0)
+                };
+
+                let samples = gyroflow_core::audio::export::build_from_trim_ranges(
+                    &track,
+                    &trim_ranges,
+                    video_duration_s,
+                );
+
+                log::info!(
+                    "External audio prepared: {} | offset {:.3}s | {} samples | codec {codec_name}",
+                    track.format_summary(),
+                    track.offset_seconds,
+                    samples.len()
+                );
+
+                proc.external_audio = Some((track, samples, codec_id));
+            }
+            Err(e) => {
+                // Don't abort the export: the user still gets the stabilized video.
+                log::error!("Could not load the external audio for the export: {e}");
+            }
+        }
     }
 
     log::debug!("start_us: {}, render_duration: {}, render_frame_count: {}", start_us, render_duration, render_frame_count);

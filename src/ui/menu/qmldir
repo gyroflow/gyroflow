@@ -1,6 +1,7 @@
 module menu
 Advanced 1.0 Advanced.qml
 Export 1.0 Export.qml
+ExternalAudio 1.0 ExternalAudio.qml
 LensCalibrate 1.0 LensCalibrate.qml
 LensProfile 1.0 LensProfile.qml
 MotionData 1.0 MotionData.qml

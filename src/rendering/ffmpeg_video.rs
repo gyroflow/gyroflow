@@ -392,6 +392,13 @@ impl<'a> VideoTranscoder<'a> {
                             octx.write_header()?;
                             // format::context::output::dump(&octx, 0, Some(&output_path));
 
+                            // The output can have MORE streams than the input, e.g.
+                            // when external audio is muxed into a clip that had none.
+                            // This vector is sized by the input streams, so it must
+                            // grow before being indexed.
+                            if ost_time_bases.len() < octx.nb_streams() as usize {
+                                ost_time_bases.resize(octx.nb_streams() as usize, Rational(0, 0));
+                            }
                             for (ost_index, _) in octx.streams().enumerate() {
                                 ost_time_bases[ost_index] = octx.stream(ost_index as _).ok_or(Error::StreamNotFound)?.time_base();
                             }

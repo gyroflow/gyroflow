@@ -139,7 +139,12 @@ MenuItem {
             pad_with_black:        padWithBlack.checked,
             export_trims_separately: exportTrimsSeparately.checked,
             audio_codec:           audioCodec.currentText,
-            interpolation:         interpolationMethod.currentText
+            interpolation:         interpolationMethod.currentText,
+
+            // External audio; the `audio` flag above is still the master gate.
+            external_audio_url:             controller.get_external_audio_url(),
+            external_audio_offset:          controller.get_external_audio_offset(),
+            external_audio_preserve_format: controller.get_external_audio_preserve_format()
         };
     }
 
@@ -243,7 +248,7 @@ MenuItem {
             if (output.hasOwnProperty("preserve_other_tracks")) preserveOtherTracks.checked = output.preserve_other_tracks;
             if (output.hasOwnProperty("pad_with_black"))        padWithBlack.checked        = output.pad_with_black;
             if (output.hasOwnProperty("export_trims_separately")) exportTrimsSeparately.checked = output.export_trims_separately;
-            if (output.hasOwnProperty("audio_codec"))           Util.setComboValue(audioCodec, output.audio_codec);
+            if (output.hasOwnProperty("audio_codec"))         { Util.setComboValue(audioCodec, output.audio_codec); audioCodec.userPicked = true; }
             if (output.hasOwnProperty("interpolation"))         Util.setComboValue(interpolationMethod, output.interpolation);
             if (output.hasOwnProperty("metadata")) {
                 metadataComment.text = output.metadata.comment || "";
@@ -594,10 +599,30 @@ MenuItem {
             enabled: audio.checked;
             ComboBox {
                 id: audioCodec;
-                model: ["AAC", "PCM (s16le)", "PCM (s16be)", "PCM (s24le)", "PCM (s24be)"];
+                // PCM (f32le) preserves 32-bit float audio (DJI Mic and similar) losslessly,
+                // but only fits in MOV/MKV.
+                model: ["AAC", "PCM (s16le)", "PCM (s16be)", "PCM (s24le)", "PCM (s24be)", "PCM (f32le)"];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 0;
+
+                // Once the user picks a codec, that choice wins: importing another
+                // track must not silently undo it.
+                property bool userPicked: false;
+                onActivated: userPicked = true;
+
+                Connections {
+                    target: controller;
+                    // Importing an external track suggests the codec that keeps it
+                    // intact - float stays float, and integer PCM keeps its depth.
+                    function onExternal_audio_changed(): void {
+                        if (audioCodec.userPicked) return;
+                        const recommended = controller.get_external_audio_recommended_codec();
+                        if (!recommended) return;
+                        const idx = audioCodec.model.indexOf(recommended);
+                        if (idx >= 0) audioCodec.currentIndex = idx;
+                    }
+                }
             }
         }
         Label {

@@ -2,6 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 #![recursion_limit = "256"]
 
+pub mod audio;
 pub mod gyro_source;
 pub mod imu_integration;
 pub mod lens_profile;

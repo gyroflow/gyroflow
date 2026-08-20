@@ -42,6 +42,7 @@ Item {
 
     function redrawChart(): void { chart.update(); keyframes.item.update(); }
     function getKeyframesView(): TimelineKeyframesView { return keyframes.item; }
+    function getAudioWaveform(): TimelineAudioWaveform { return audioWaveform; }
 
     function getTimestampUs(): real {
         return vid.timestamp * 1000;
@@ -241,6 +242,7 @@ Item {
         id: sett;
         property alias timelineChart: chart.viewMode;
         property alias restrictTrimRange: root.restrictTrim;
+        property alias audioWaveformVisible: audioLaneBtn.checked;
         Component.onCompleted: settings.init(sett);
         function propChanged() { settings.propChanged(sett); }
     }
@@ -257,6 +259,17 @@ Item {
         TimelineAxisButton { id: a2; text: "Z"; onCheckedChanged: chart.setAxisVisible(2, checked); checked: chart.getAxisVisible(2); }
         TimelineAxisButton { id: a3; text: "W"; onCheckedChanged: chart.setAxisVisible(3, checked); checked: chart.getAxisVisible(3); }
         TimelineAxisButton { id: a8; text: "Z"; onCheckedChanged: chart.setAxisVisible(8, checked); checked: chart.getAxisVisible(8); tooltip: qsTr("Zooming"); }
+        TimelineAxisButton {
+            id: audioLaneBtn;
+            // The neighbours here are text labels ("X", "FL"), not icons: the
+            // project icon font is SVG, not glyph based.
+            text: "♪";
+            // Initial value; the `sett` alias restores the previous session's
+            // choice and settings.init() takes care of storing the changes.
+            checked: true;
+            tooltip: qsTr("Audio waveform");
+            visible: audioWaveform.hasAudio;
+        }
         TimelineAxisButton {
             id: a10;
             text: "FL";
@@ -347,6 +360,26 @@ Item {
                     a7.checked = chart.getAxisVisible(7);
                     a8.checked = chart.getAxisVisible(8);
                 }
+            }
+
+            // External audio waveform lane. Only shown when a track is imported,
+            // so it doesn't steal height from the gyro chart in normal use.
+            TimelineAudioWaveform {
+                id: audioWaveform;
+                objectName: "timelineAudioWaveform";
+                visibleAreaLeft: root.visibleAreaLeft;
+                visibleAreaRight: root.visibleAreaRight;
+                anchors.left: parent.left;
+                anchors.right: parent.right;
+                anchors.bottom: parent.bottom;
+                anchors.bottomMargin: (root.fullScreen || window.isMobileLayout? 0 : 5) * dpiScale;
+                readonly property bool shown: hasAudio && audioLaneBtn.checked;
+                height: shown? Math.min(parent.height * 0.3, 60 * dpiScale) : 0;
+                visible: shown;
+                theme: style;
+                vscale: 1.0;
+                durationMs: root.durationMs;
+                opacity: root.trimActive? 0.9 : 1.0;
             }
 
             Loader {

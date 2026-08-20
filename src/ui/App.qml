@@ -88,6 +88,7 @@ Rectangle {
     property alias vidInfo: vidInfo.item;
     property alias videoArea: videoArea;
     property alias motionData: motionData.item;
+    property alias externalAudio: externalAudio.item;
     property alias lensProfile: lensProfile.item;
     property alias outputFile: outputFile;
     property alias sync: sync.item;
@@ -178,6 +179,10 @@ Rectangle {
             Hr { id: lensProfileHr; }
             ItemLoader { id: motionData; sourceComponent: Component {
                 Menu.MotionData { }
+            } }
+            Hr { id: motionDataHr; }
+            ItemLoader { id: externalAudio; sourceComponent: Component {
+                Menu.ExternalAudio { }
             } }
         }
 
@@ -759,6 +764,9 @@ Rectangle {
         return {
             "output": exportSettings.item.getExportOptions(),
             "synchronization": sync.item.getSettings(),
+            // Projects without this key still load fine. The ItemLoader is async, so
+            // the item can still be null at startup.
+            "audio_sync": externalAudio.item? externalAudio.item.getSettings() : ({ }),
 
             "muted": window.videoArea.vid.muted,
             "playback_speed": window.videoArea.vid.playbackRate

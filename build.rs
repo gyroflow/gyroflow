@@ -25,6 +25,9 @@ fn compile_qml(dir: &str, qt_include_path: &str, qt_library_path: &str) {
     }
 
     println!("cargo:rerun-if-changed={}", dir);
+    // The .qm files are embedded through resources.rs, so a rebuilt translation
+    // must invalidate the build as well.
+    println!("cargo:rerun-if-changed=resources/translations");
 
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir);

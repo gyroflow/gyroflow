@@ -88,6 +88,14 @@ pub struct RenderOptions {
     pub export_trims_separately: bool,
     pub audio_codec: String,
     pub interpolation: String,
+
+    /// External audio track URL, if any. The `audio` flag above is still the master
+    /// switch; when it's on and this is set, the external audio replaces the embedded one.
+    pub external_audio_url: String,
+    /// External audio offset, in seconds (`t_audio = t_video + offset`).
+    pub external_audio_offset: f64,
+    /// Whether the external audio's source format should be preserved losslessly.
+    pub external_audio_preserve_format: bool,
 }
 impl RenderOptions {
     pub fn settings_string(&self, fps: f64) -> String {

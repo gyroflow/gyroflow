@@ -33,6 +33,14 @@ pub struct FfmpegProcessor<'a> {
 
     pub audio_codec: codec::Id,
 
+    /// External audio track to mux into the output file, replacing the clip's embedded audio.
+    ///
+    /// The buffer is already offset-aligned and cut to the project's trim ranges by
+    /// `gyroflow_core::audio::export::build_from_trim_ranges`. The `codec::Id` comes along
+    /// because it is decided by the source format (to preserve it losslessly), not by the
+    /// UI codec selector.
+    pub external_audio: Option<(gyroflow_core::audio::AudioTrack, Vec<f32>, codec::Id)>,
+
     input_context: format::context::Input,
 
     pub video: VideoTranscoder<'a>,
@@ -212,6 +220,8 @@ impl<'a> FfmpegProcessor<'a> {
 
             audio_codec: codec::Id::AAC,
 
+            external_audio: None,
+
             ost_time_bases: Vec::new(),
 
             frame_ts: Default::default(),
@@ -331,6 +341,11 @@ impl<'a> FfmpegProcessor<'a> {
                 out_stream.set_avg_frame_rate(stream.avg_frame_rate());
 
                 output_index += 1;
+            } else if medium == media::Type::Audio && self.external_audio.is_some() {
+                // External audio replaces the embedded one: drop the input stream, the
+                // replacement is created after this loop.
+                stream_mapping[i] = -1;
+                continue;
             } else if medium == media::Type::Audio && self.audio_codec != codec::Id::None {
                 if self.preserve_other_tracks/*stream.codec().id() == self.audio_codec*/ {
                     // Direct stream copy
@@ -351,6 +366,26 @@ impl<'a> FfmpegProcessor<'a> {
                 output_index += 1;
             }
         }
+
+        // Outside the loop above because it maps to no input stream, so it is created even
+        // when the clip has no audio at all.
+        let mut external_audio_encoder = None;
+        if let Some((track, _, codec_id)) = &self.external_audio {
+            log::info!(
+                "External audio in export: {} ({} samples, codec {:?})",
+                track.format_summary(),
+                track.samples.len(),
+                codec_id
+            );
+            external_audio_encoder = Some(super::audio_export::ExternalAudioEncoder::new(
+                *codec_id,
+                track,
+                &mut octx,
+                output_index,
+            )?);
+            output_index += 1;
+        }
+
         let mut updated_creation_time = None;
         if let Some(start_ms) = start_ms {
             if start_ms > 0.0 {
@@ -511,6 +546,31 @@ impl<'a> FfmpegProcessor<'a> {
                 let ost_time_base = self.ost_time_bases[*ost_index];
                 transcoder.flush(&mut octx, ost_time_base, start_ms, end_ms, &mut self.frame_ts)?;
             }
+        }
+
+        // The external audio buffer is written in one go after the video: it is ready and
+        // aligned upfront, so it doesn't depend on decoding progress. ffmpeg's
+        // `write_interleaved` reorders packets by DTS, so the output stays properly
+        // interleaved despite this call order.
+        if let Some(encoder) = &mut external_audio_encoder {
+            // Time base must come from the output stream: `ost_time_bases` is sized by the
+            // INPUT streams and doesn't cover this index.
+            let ost_index = encoder.stream_index();
+            let ost_time_base = octx
+                .stream(ost_index)
+                .map(|s| s.time_base())
+                .unwrap_or(Rational(1, 90000));
+
+            let samples = self.external_audio.as_ref().map(|(_, s, _)| s.clone()).unwrap_or_default();
+            if let Err(e) = encoder.write_all(&samples, &mut octx, ost_time_base) {
+                log::error!("Failed to write external audio: {e:?}");
+                return Err(e.into());
+            }
+            if let Err(e) = encoder.finish(&mut octx, ost_time_base) {
+                log::error!("Failed to finalize external audio: {e:?}");
+                return Err(e.into());
+            }
+            log::info!("External audio written: {} samples", samples.len());
         }
 
         octx.write_trailer()?;

@@ -77,6 +77,10 @@ log = "0.4"
 ocl = { version = "0.19.7", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.4.1"
+# External audio decoding (`audio` module). Used instead of ffmpeg because
+# gyroflow-core does not depend on ffmpeg and should not start to. The features cover
+# WAV/PCM including IEEE 32-bit float (format tag 3), which is what the DJI Mic records.
+symphonia = { version = "0.5.5", default-features = false, features = ["wav", "pcm", "aac", "isomp4", "mp3", "flac"] }
 exr = "1.74"
 opencv = { version = "0.99", default-features = false, features = [ "calib3d", "features2d", "imgproc", "optflow", "clang-runtime" ], optional = true } #"imgcodecs","objdetect","sfm",
 median = "0.3"

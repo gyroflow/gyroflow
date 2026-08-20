@@ -26,6 +26,7 @@ use crate::util;
 use crate::wrap_simple_method;
 use crate::rendering::VideoProcessor;
 use crate::ui::components::TimelineGyroChart::TimelineGyroChart;
+use crate::ui::components::TimelineAudioWaveform::TimelineAudioWaveform;
 use crate::ui::components::TimelineKeyframesView::TimelineKeyframesView;
 use crate::ui::components::FrequencyGraph::FrequencyGraph;
 use crate::qt_gpu::qrhi_undistort;
@@ -61,6 +62,69 @@ pub struct Controller {
     set_of_method: qt_method!(fn(&self, v: u32)),
     start_autosync: qt_method!(fn(&mut self, timestamps_fract: String, sync_params: String, mode: String)),
     update_chart: qt_method!(fn(&self, chart: QJSValue, series: String) -> bool),
+
+    // ---- External audio ----
+    /// Imports an audio file and hands the decoded track to the waveform lane.
+    import_external_audio: qt_method!(fn(&mut self, url: QUrl)),
+    /// Imports from a URL already in text form - used when reopening a project.
+    /// Returns `true` if the track was loaded.
+    /// Imports from a URL string, as stored in the `.gyroflow` file.
+    ///
+    /// `pending_offset_ms` is applied once decoding finishes, so the project can
+    /// restore its offset without waiting for the file.
+    import_external_audio_url: qt_method!(fn(&mut self, url: QString, pending_offset_ms: f64)),
+    /// Emitted when an import finishes. `offset_ms` is the value the interface
+    /// should put on the slider; `ok` is false when the file could not be read.
+    external_audio_imported: qt_signal!(ok: bool, offset_ms: f64),
+    /// True while a track is being decoded.
+    external_audio_loading: qt_property!(bool; NOTIFY external_audio_loading_changed),
+    external_audio_loading_changed: qt_signal!(),
+    /// Fills the timeline lane with the loaded track. Called from QML after
+    /// `external_audio_imported`, so the item pointer is resolved on the UI thread.
+    refresh_audio_waveform: qt_method!(fn(&self, waveform: QJSValue)),
+    /// Removes the imported track.
+    clear_external_audio: qt_method!(fn(&mut self, waveform: QJSValue)),
+    /// URL of the loaded track, in the internal format (serializable in the project).
+    get_external_audio_url: qt_method!(fn(&self) -> QString),
+    /// Sample rate of the loaded track, or 0.
+    get_external_audio_sample_rate: qt_method!(fn(&self) -> u32),
+    /// Track offset in seconds, or 0.
+    get_external_audio_offset: qt_method!(fn(&self) -> f64),
+    /// Whether format preservation is on (default `true`).
+    get_external_audio_preserve_format: qt_method!(fn(&self) -> bool),
+    /// Sets the track offset, in seconds (`t_audio = t_video + offset`).
+    set_external_audio_offset: qt_method!(fn(&mut self, offset_seconds: f64)),
+    /// Enables/disables preserving the original audio format on export.
+    set_external_audio_preserve_format: qt_method!(fn(&mut self, preserve: bool)),
+    /// Computes the offset by correlating vibration in the audio and in the gyro.
+    ///
+    /// Returns JSON with `offset_seconds` and `confidence` (0..1), or an empty
+    /// string if there is not enough data.
+    /// Starts the auto-sync. The STFT over the whole track takes seconds, so it
+    /// runs off the UI thread; the result arrives in `external_audio_synced`.
+    auto_sync_external_audio: qt_method!(fn(&mut self, auto_band: bool, band_lo_hz: f64, band_hi_hz: f64, highpass_hz: f64)),
+    /// Auto-sync result as JSON, or an empty string when there was not enough data.
+    external_audio_synced: qt_signal!(result: QString),
+    /// True while the auto-sync is running, for the UI to show a spinner.
+    external_audio_syncing: qt_property!(bool; NOTIFY external_audio_syncing_changed),
+    external_audio_syncing_changed: qt_signal!(),
+    /// Format preservation status for an output extension.
+    ///
+    /// Returns JSON with `status` (`preserved` | `mismatch` | `downgrade`),
+    /// `codec`, and - on conflict - `suggested_extension`. The UI uses this to
+    /// warn *before* the export, never after.
+    get_external_audio_format_status: qt_method!(fn(&self, extension: QString) -> QString),
+    /// Audio codec that preserves the loaded track, as one of the labels of the
+    /// codec combo box. Empty when no track is loaded.
+    get_external_audio_recommended_codec: qt_method!(fn(&self) -> QString),
+    /// Detected format of the loaded track as JSON, for the interface to build a
+    /// translated summary: `{ sample_rate, channels, source_format }`. Empty when
+    /// no track is loaded.
+    get_external_audio_info: qt_method!(fn(&self) -> QString),
+    /// Path of the loaded track, or an empty string.
+    get_external_audio_path: qt_method!(fn(&self) -> QString),
+    /// Emitted when a track is loaded or removed.
+    external_audio_changed: qt_signal!(),
     update_frequency_graph: qt_method!(fn(&self, graph: QJSValue, idx: usize, ts: f64, sr: f64, fft_size: usize)),
     update_keyframes_view: qt_method!(fn(&self, kfview: QJSValue)),
     rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
@@ -306,6 +370,12 @@ pub struct Controller {
     preview_pipeline: Arc<AtomicUsize>,
 
     ongoing_computations: BTreeSet<u64>,
+
+    /// External audio track imported by the user.
+    ///
+    /// It lives in the controller and not in the `StabilizationManager` because
+    /// stabilization never needs it - only the waveform lane and the export do.
+    pub external_audio: Option<gyroflow_core::audio::AudioTrack>,
 
     pub stabilizer: Arc<StabilizationManager>,
 }
@@ -1476,6 +1546,375 @@ impl Controller {
     wrap_simple_method!(set_imu_bias, bx: f64, by: f64, bz: f64; recompute; chart_data_changed);
     wrap_simple_method!(recompute_gyro,; recompute; chart_data_changed);
     wrap_simple_method!(set_device, v: i32);
+
+    // ---------- External audio ----------
+
+    /// Decodes the chosen file and hands the track to the waveform lane.
+    ///
+    /// Decoding runs on the UI thread on purpose: even a several minute WAV takes
+    /// a fraction of a second, so the result (or the error) is already available
+    /// when the method returns, without the callback machinery that video loading
+    /// needs.
+    fn import_external_audio(&mut self, url: QUrl) {
+        let url = util::qurl_to_encoded(url);
+        self.load_external_audio(&url, true, 0.0);
+    }
+
+    fn import_external_audio_url(&mut self, url: QString, pending_offset_ms: f64) {
+        self.load_external_audio(&url.to_string(), false, pending_offset_ms);
+    }
+
+    /// Common import path.
+    ///
+    /// Decoding reads the whole file and builds the mono downmix, which takes
+    /// seconds on a long track - so it runs off the UI thread, like every other
+    /// long operation in the app.
+    ///
+    /// `report_errors` separates an explicit user action (which deserves a dialog)
+    /// from loading a project automatically (which only logs).
+    fn load_external_audio(&mut self, url: &str, report_errors: bool, pending_offset_ms: f64) {
+        if self.external_audio_loading { return; }
+
+        let url = url.to_string();
+        let url_for_log = url.clone();
+
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, res: Result<gyroflow_core::audio::AudioTrack, String>| {
+            this.external_audio_loading = false;
+            this.external_audio_loading_changed();
+
+            match res {
+                Ok(mut track) => {
+                    ::log::info!("External audio imported: {} ({})", url_for_log, track.format_summary());
+                    track.offset_seconds = pending_offset_ms / 1000.0;
+
+                    // The lane is filled from QML, on the signal: holding a raw
+                    // pointer to the item across a thread would dangle if the
+                    // panel went away mid-decode.
+                    this.external_audio = Some(track);
+                    this.external_audio_changed();
+                    this.external_audio_imported(true, pending_offset_ms);
+                }
+                Err(e) => {
+                    ::log::error!("Failed to import external audio {}: {}", url_for_log, e);
+                    if report_errors {
+                        this.error(QString::from("An error occured: %1"), QString::from(e), QString::default());
+                    }
+                    this.external_audio_imported(false, 0.0);
+                }
+            }
+        });
+
+        self.external_audio_loading = true;
+        self.external_audio_loading_changed();
+
+        std::thread::spawn(move || {
+            finished(gyroflow_core::audio::decode::decode_file(&url).map_err(|e| e.to_string()));
+        });
+    }
+
+    fn refresh_audio_waveform(&self, waveform: QJSValue) {
+        if let Some(item) = waveform.to_qobject::<TimelineAudioWaveform>() {
+            let item = unsafe { &mut *item.as_ptr() };
+            item.set_track(self.external_audio.clone());
+        }
+    }
+    /// Removes the imported track and clears the lane.
+    fn clear_external_audio(&mut self, waveform: QJSValue) {
+        if let Some(item) = waveform.to_qobject::<TimelineAudioWaveform>() {
+            let item = unsafe { &mut *item.as_ptr() };
+            item.set_track(None);
+        }
+        self.external_audio = None;
+        self.external_audio_changed();
+    }
+
+    /// Detected format of the track, as separate fields so the interface can
+    /// translate the units and the format label.
+    fn get_external_audio_info(&self) -> QString {
+        match &self.external_audio {
+            Some(track) => QString::from(serde_json::json!({
+                "sample_rate":   track.sample_rate,
+                "channels":      track.channels,
+                "source_format": track.source_format.key(),
+            }).to_string()),
+            None => QString::default(),
+        }
+    }
+
+    /// Path of the loaded track, in readable form.
+    fn get_external_audio_path(&self) -> QString {
+        match &self.external_audio {
+            Some(track) => QString::from(gyroflow_core::filesystem::display_url(&track.path)),
+            None => QString::default(),
+        }
+    }
+
+    /// Internal URL of the track, as it must be stored in the project.
+    fn get_external_audio_url(&self) -> QString {
+        match &self.external_audio {
+            Some(track) => QString::from(track.path.clone()),
+            None => QString::default(),
+        }
+    }
+
+    fn get_external_audio_sample_rate(&self) -> u32 {
+        self.external_audio.as_ref().map_or(0, |t| t.sample_rate)
+    }
+
+    fn get_external_audio_offset(&self) -> f64 {
+        self.external_audio.as_ref().map_or(0.0, |t| t.offset_seconds)
+    }
+
+    /// Whether format preservation is on.
+    ///
+    /// With no track loaded it returns `true`, the default - so the value never
+    /// reaches the render suggesting that the loss was accepted.
+    fn get_external_audio_preserve_format(&self) -> bool {
+        self.external_audio.as_ref().map_or(true, |t| t.preserve_original_format)
+    }
+
+    /// Aligns the audio to the video by correlating propeller vibration.
+    ///
+    /// Compares the energy envelope of the audio in the blade band with the
+    /// envelope of the vibration read by the gyroscope. See
+    /// `gyroflow_core::audio::features` for why the comparison is done between
+    /// energy envelopes and not between spectra.
+    fn auto_sync_external_audio(&mut self, auto_band: bool, band_lo_hz: f64, band_hi_hz: f64, highpass_hz: f64) {
+        use gyroflow_core::audio::features::FeatureParams;
+
+        if self.external_audio_syncing { return; }
+
+        let Some(track) = &self.external_audio else { return; };
+        if track.mono_analysis.is_empty() { return; }
+
+        // Everything the computation needs is copied here, on the UI thread, so
+        // the worker never touches the stabilizer or the track.
+        let mono = track.mono_analysis.clone();
+        let sample_rate = track.sample_rate;
+
+        let params = FeatureParams {
+            band_lo_hz: band_lo_hz as f32,
+            band_hi_hz: band_hi_hz as f32,
+            auto_band,
+            highpass_hz: highpass_hz as f32,
+        };
+
+        // Gyro side: the samples come from file_metadata, because the GyroSource
+        // `raw_imu` field is usually empty (see gyro_source/mod.rs:689).
+        let mut gyro_samples: Vec<(f64, [f64; 3])> = {
+            let gyro = self.stabilizer.gyro.read();
+            let md = gyro.file_metadata.read();
+            gyro.raw_imu(&md)
+                .iter()
+                .filter_map(|x| x.gyro.map(|g| (x.timestamp_ms, g)))
+                .collect()
+        };
+
+        // Not every camera provides raw gyroscope data. The DJI O4P, for example,
+        // reports `contains_raw_gyro: false` and only provides already integrated
+        // quaternions. In that case the angular velocity is derived from the
+        // difference between consecutive orientations - which is exactly what the
+        // gyro measures.
+        if gyro_samples.len() < 2 {
+            let gyro = self.stabilizer.gyro.read();
+            let quats = &gyro.quaternions;
+            if quats.len() >= 2 {
+                gyro_samples = quats
+                    .iter()
+                    .zip(quats.iter().skip(1))
+                    .filter_map(|((t0, q0), (t1, q1))| {
+                        let dt = (*t1 - *t0) as f64 / 1_000_000.0; // us -> s
+                        if dt <= 0.0 {
+                            return None;
+                        }
+                        // The relative rotation between the two orientations,
+                        // converted to an axis-angle vector and divided by time,
+                        // gives the angular velocity in rad/s.
+                        let delta = q0.inverse() * q1;
+                        let v = delta.scaled_axis() / dt;
+                        Some((*t1 as f64 / 1000.0, [v[0], v[1], v[2]]))
+                    })
+                    .collect();
+
+                ::log::info!(
+                    "Audio auto-sync: no raw gyroscope; angular velocity derived from {} quaternions",
+                    quats.len()
+                );
+            }
+        }
+
+        if gyro_samples.len() < 2 {
+            ::log::warn!("Audio auto-sync: no gyroscope data available (neither raw nor quaternions)");
+            self.external_audio_synced(QString::default());
+            return;
+        }
+
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, res: Option<(f64, f64, bool)>| {
+            this.external_audio_syncing = false;
+            this.external_audio_syncing_changed();
+
+            match res {
+                Some((offset_seconds, confidence, use_onset)) => {
+                    // The computed value is only the starting point: the user can
+                    // still adjust it on the slider.
+                    if let Some(track) = &mut this.external_audio {
+                        track.offset_seconds = offset_seconds;
+                    }
+                    this.external_audio_synced(QString::from(serde_json::json!({
+                        "offset_seconds": offset_seconds,
+                        "confidence": confidence,
+                        // The UI reports which method was used: with cameras that
+                        // only give quaternions the alignment is by start of
+                        // movement, which is less accurate than the blade band.
+                        "method": if use_onset { "onset" } else { "blade_band" },
+                    }).to_string()));
+                }
+                None => this.external_audio_synced(QString::default()),
+            }
+        });
+
+        self.external_audio_syncing = true;
+        self.external_audio_syncing_changed();
+
+        // The STFT runs over the whole track: seconds of work, which would freeze
+        // the window if done here.
+        std::thread::spawn(move || {
+            finished(Self::compute_audio_sync(&mono, sample_rate, &gyro_samples, &params));
+        });
+    }
+
+    /// Correlates the audio against the motion data. Pure computation, off the UI
+    /// thread; returns `(offset_seconds, confidence, used_onset_method)`.
+    fn compute_audio_sync(mono: &[f32], sample_rate: u32, gyro_samples: &[(f64, [f64; 3])], params: &gyroflow_core::audio::features::FeatureParams) -> Option<(f64, f64, bool)> {
+        use gyroflow_core::audio::features::{audio_envelope, gyro_envelope};
+        use gyroflow_core::audio::sync::cross_correlate;
+
+        let (audio_env, env_rate) = audio_envelope(mono, sample_rate, params);
+        if audio_env.is_empty() || env_rate <= 0.0 {
+            return None;
+        }
+
+        // Actual rate at which the camera provides the motion data.
+        let gyro_rate = {
+            let span_s = (gyro_samples[gyro_samples.len() - 1].0 - gyro_samples[0].0) / 1000.0;
+            if span_s > 0.0 { gyro_samples.len() as f64 / span_s } else { 0.0 }
+        };
+
+        // The blade band starts at ~150 Hz; by Nyquist, the gyro must sample above
+        // 300 Hz to see it. Below that - the case of cameras that only provide
+        // integrated quaternions, like the DJI O4P - the vibration is not present
+        // in the signal, and correlating it would be comparing noise. In those
+        // cases we align by START OF MOVEMENT: the takeoff appears as an energy
+        // jump in both the gyro and the audio.
+        const MIN_GYRO_RATE_FOR_BLADE_BAND: f64 = 300.0;
+        let use_onset = gyro_rate < MIN_GYRO_RATE_FOR_BLADE_BAND;
+
+        let (result, method) = if use_onset {
+            use gyroflow_core::audio::features::{audio_energy_envelope, gyro_motion_envelope, onset_strength};
+
+            // Low enough for the few motion points to fill the grid, and high
+            // enough to give useful precision.
+            let onset_rate = 20.0f32;
+
+            let (audio_energy, actual_rate) = audio_energy_envelope(mono, sample_rate, onset_rate);
+            let motion = gyro_motion_envelope(gyro_samples, actual_rate.max(1.0));
+
+            if audio_energy.is_empty() || motion.is_empty() {
+                ::log::warn!("Audio auto-sync: empty motion envelopes");
+                return None;
+            }
+
+            let audio_onset = onset_strength(&audio_energy);
+            let gyro_onset = onset_strength(&motion);
+
+            (cross_correlate(&audio_onset, &gyro_onset, actual_rate), "start of movement")
+        } else {
+            let gyro_env = gyro_envelope(gyro_samples, env_rate, params);
+            if gyro_env.is_empty() {
+                return None;
+            }
+            (cross_correlate(&audio_env, &gyro_env, env_rate), "blade band")
+        };
+
+        ::log::info!(
+            "Audio auto-sync [{}]: offset={:.3}s, confidence={:.3} (gyro at {:.1} Hz, {} samples)",
+            method, result.offset_seconds, result.confidence, gyro_rate, gyro_samples.len()
+        );
+
+        Some((result.offset_seconds, result.confidence as f64, use_onset))
+    }
+    /// Enables or disables format preservation.
+    ///
+    /// Turning it off is an explicit choice by the user, aware of the loss - it
+    /// must never happen automatically.
+    fn set_external_audio_preserve_format(&mut self, preserve: bool) {
+        if let Some(track) = &mut self.external_audio {
+            track.preserve_original_format = preserve;
+        }
+        self.external_audio_changed();
+    }
+
+    /// Audio codec that keeps the imported track intact, for the export panel to
+    /// select on import. Follows the preserve-original-format choice.
+    fn get_external_audio_recommended_codec(&self) -> QString {
+        match &self.external_audio {
+            // Turning preservation off means the user accepted the loss, so the
+            // recommendation becomes the compact codec instead of the one that
+            // would keep the source bit for bit.
+            Some(track) if !track.preserve_original_format => QString::from("AAC"),
+            Some(track) => QString::from(gyroflow_core::audio::export::recommended_codec(track.source_format)),
+            None => QString::default(),
+        }
+    }
+
+    fn get_external_audio_format_status(&self, extension: QString) -> QString {
+        use gyroflow_core::audio::export::{check_format_compatibility, FormatCompatibility};
+
+        let Some(track) = &self.external_audio else {
+            return QString::default();
+        };
+
+        let result = check_format_compatibility(
+            track.source_format,
+            &extension.to_string(),
+            track.preserve_original_format,
+        );
+
+        let json = match result {
+            FormatCompatibility::Preserved { codec } => serde_json::json!({
+                "status": "preserved",
+                "codec": codec,
+                "source_format": track.source_format.key(),
+            }),
+            FormatCompatibility::ContainerMismatch { wanted_codec, extension, suggested_extension } => {
+                serde_json::json!({
+                    "status": "mismatch",
+                    "codec": wanted_codec,
+                    "source_format": track.source_format.key(),
+                    "extension": extension,
+                    "suggested_extension": suggested_extension,
+                })
+            }
+            FormatCompatibility::DowngradeAccepted { codec } => serde_json::json!({
+                "status": "downgrade",
+                "codec": codec,
+                "source_format": track.source_format.key(),
+            }),
+        };
+
+        QString::from(json.to_string())
+    }
+
+    /// Stores the offset adjusted by the user.
+    ///
+    /// The waveform lane gets the same value directly from QML (to redraw without
+    /// intermediaries); the value is kept here because it is the controller's
+    /// `AudioTrack` that the export reads from.
+    fn set_external_audio_offset(&mut self, offset_seconds: f64) {
+        if let Some(track) = &mut self.external_audio {
+            track.offset_seconds = offset_seconds;
+        }
+    }
 
     fn get_org_duration_ms   (&self) -> f64 { self.stabilizer.params.read().duration_ms }
     fn get_scaled_duration_ms(&self) -> f64 { self.stabilizer.params.read().get_scaled_duration_ms() }

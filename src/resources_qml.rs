@@ -18,6 +18,7 @@ qrc!(pub rsrc_qml,
 
         "src/ui/menu/Advanced.qml",
         "src/ui/menu/Export.qml",
+        "src/ui/menu/ExternalAudio.qml",
         "src/ui/menu/LensProfile.qml",
         "src/ui/menu/LensCalibrate.qml",
         "src/ui/menu/MotionData.qml",

@@ -789,6 +789,164 @@ You can increase the sharpness limit in the Advanced section.</translation>
     </message>
   </context>
   <context>
+    <name>ExternalAudio</name>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="20"/>
+      <source>External audio</source>
+      <translation>Áudio externo</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="30"/>
+      <source>32-bit float</source>
+      <translation>32 bits float</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="40"/>
+      <source>32-bit int</source>
+      <translation>32 bits inteiro</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="50"/>
+      <source>24-bit int</source>
+      <translation>24 bits inteiro</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="60"/>
+      <source>16-bit int</source>
+      <translation>16 bits inteiro</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="70"/>
+      <source>8-bit</source>
+      <translation>8 bits</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="80"/>
+      <source>compressed</source>
+      <translation>comprimido</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="90"/>
+      <source>%1 Hz, %2 channels, %3</source>
+      <translation>%1 Hz, %2 canais, %3</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="100"/>
+      <source>Choose an audio file</source>
+      <translation>Escolha um arquivo de áudio</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="110"/>
+      <source>Audio files</source>
+      <translation>Arquivos de áudio</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="120"/>
+      <source>Replace audio file</source>
+      <translation>Substituir arquivo de áudio</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="130"/>
+      <source>Import external audio</source>
+      <translation>Importar áudio externo</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="140"/>
+      <source>Auto-sync audio</source>
+      <translation>Sincronizar áudio automaticamente</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="150"/>
+      <source>Aligns the audio by correlating propeller vibration picked up by the microphone with the vibration read by the gyroscope.</source>
+      <translation>Alinha o áudio correlacionando a vibração das hélices captada pelo microfone com a vibração lida pelo giroscópio.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="160"/>
+      <source>Not enough data to sync</source>
+      <translation>Dados insuficientes para sincronizar</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="170"/>
+      <source>aligned by start of movement</source>
+      <translation>alinhado pelo início do movimento</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="180"/>
+      <source>aligned by propeller vibration</source>
+      <translation>alinhado pela vibração das hélices</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="190"/>
+      <source>Confidence: %1% — %2 — weak match, check manually</source>
+      <translation>Confiança: %1% — %2 — correspondência fraca, verifique manualmente</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="200"/>
+      <source>Confidence: %1% — %2</source>
+      <translation>Confiança: %1% — %2</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="210"/>
+      <source>Offset</source>
+      <translation>Deslocamento</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="220"/>
+      <source>%1 frames @ %2 fps</source>
+      <translation>%1 quadros a %2 fps</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="230"/>
+      <source>Audio: %1 preserved (%2)</source>
+      <translation>Áudio: %1 preservado (%2)</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="240"/>
+      <source>Audio: %1 does not fit in .%2. Switch the output to .%3 or the audio will be converted.</source>
+      <translation>Áudio: %1 não cabe em .%2. Mude a saída para .%3 ou o áudio será convertido.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="250"/>
+      <source>Audio: will be converted to %1</source>
+      <translation>Áudio: será convertido para %1</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="260"/>
+      <source>Preserve original audio format</source>
+      <translation>Preservar formato original do áudio</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="270"/>
+      <source>Keeps the original bit depth and sample rate. 32-bit float stays 32-bit float, with no silent conversion.</source>
+      <translation>Mantém a profundidade de bits e a taxa de amostragem originais. 32 bits float continua 32 bits float, sem conversão silenciosa.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="280"/>
+      <source>Detect propeller band automatically</source>
+      <translation>Detectar banda das hélices automaticamente</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="290"/>
+      <source>Band</source>
+      <translation>Banda</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="300"/>
+      <source>Gyro high-pass</source>
+      <translation>Passa-alta do giro</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="310"/>
+      <source>Remove audio</source>
+      <translation>Remover áudio</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/ExternalAudio.qml" line="318"/>
+      <source>Audio: %1 does not fit in .%2. Pick ProRes, DNxHD or CineForm as the video codec to get a .mov, otherwise the audio will be converted.</source>
+      <translation>Áudio: %1 não cabe em .%2. Escolha ProRes, DNxHD ou CineForm como codec de vídeo para gerar um .mov, senão o áudio será convertido.</translation>
+    </message>
+  </context>
+  <context>
     <name>FrequencyChart</name>
     <message>
       <location filename="../../src/ui/components/FrequencyChart.qml" line="38"/>
@@ -3074,6 +3232,11 @@ Make sure you have proper rolling shutter value set before syncing.</translation
   </context>
   <context>
     <name>Timeline</name>
+    <message>
+      <location filename="../../src/ui/components/Timeline.qml" line="270"/>
+      <source>Audio waveform</source>
+      <translation>Forma de onda do áudio</translation>
+    </message>
     <message>
       <location filename="../../src/ui/components/Timeline.qml" line="664"/>
       <source>Auto sync here</source>
