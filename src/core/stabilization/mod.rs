@@ -271,8 +271,13 @@ impl Stabilization {
         {
             let gyro = self.compute_params.gyro.read();
             let file_metadata = gyro.file_metadata.read();
-            kernel_flags.set(KernelParamsFlags::HAS_MESH_DATA, file_metadata.mesh_correction.has_mesh(frame));
-            kernel_flags.set(KernelParamsFlags::HAS_FPD_DATA, file_metadata.mesh_correction.has_focal_plane(frame));
+            let has_embedded_mesh = file_metadata.mesh_correction.has_mesh(frame);
+            let has_embedded_fpd = file_metadata.mesh_correction.has_focal_plane(frame);
+            let has_optical_mesh = !has_embedded_mesh && !has_embedded_fpd
+                && file_metadata.optical_flow_correction.get(frame)
+                    .map_or(false, |v| v.1.first().copied().unwrap_or_default() > 10.0);
+            kernel_flags.set(KernelParamsFlags::HAS_MESH_DATA, has_embedded_mesh || has_optical_mesh);
+            kernel_flags.set(KernelParamsFlags::HAS_FPD_DATA, has_embedded_fpd);
             if file_metadata.camera_stab_data.len() > frame {
                 kernel_flags.set(KernelParamsFlags::HAS_IBIS_DATA, true);
             }

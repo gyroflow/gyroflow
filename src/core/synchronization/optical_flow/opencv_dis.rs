@@ -22,6 +22,15 @@ pub struct OFOpenCVDis {
     used: Arc<AtomicU32>,
 }
 
+fn forward_backward_consistent(forward: (f32, f32), backward: (f32, f32)) -> bool {
+    if ![forward.0, forward.1, backward.0, backward.1].iter().all(|v| v.is_finite()) {
+        return false;
+    }
+    let closure_error = (forward.0 + backward.0).hypot(forward.1 + backward.1);
+    let motion = forward.0.hypot(forward.1);
+    closure_error <= (1.5 + motion * 0.05).min(4.0)
+}
+
 impl OFOpenCVDis {
     pub fn detect_features(timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32) -> Self {
         Self {
@@ -56,8 +65,13 @@ impl OpticalFlowTrait for OFOpenCVDis {
                 let a2_img = unsafe { Mat::new_size_with_data_unsafe(Size::new(next.img.width() as i32, next.img.height() as i32), CV_8UC1, next.img.as_raw().as_ptr() as *mut std::ffi::c_void, 0) }?;
 
                 let mut of = Mat::default();
+                let mut reverse_of = Mat::default();
                 let mut optflow = opencv::video::DISOpticalFlow::create(opencv::video::DISOpticalFlow_PRESET_FAST)?;
                 optflow.calc(&a1_img, &a2_img, &mut of)?;
+                // A second, reverse pass lets us reject occlusions and unstable dense-flow
+                // estimates before they can influence either global pose or the local warp.
+                let mut reverse_optflow = opencv::video::DISOpticalFlow::create(opencv::video::DISOpticalFlow_PRESET_FAST)?;
+                reverse_optflow.calc(&a2_img, &a1_img, &mut reverse_of)?;
 
                 let mut points_a = Vec::new();
                 let mut points_b = Vec::new();
@@ -112,8 +126,17 @@ impl OpticalFlowTrait for OFOpenCVDis {
                         let texture = calculate_texture(&self.img, i as usize, j as usize);
                         if texture > texture_threshold {
                             let pt = of.at_2d::<Vec2f>(j, i)?;
+                            let forward = (pt[0] as f32, pt[1] as f32);
+                            if !forward.0.is_finite() || !forward.1.is_finite() { continue; }
+                            let dst = (i as f32 + forward.0, j as f32 + forward.1);
+                            if dst.0 < 0.0 || dst.1 < 0.0 || dst.0 >= w as f32 || dst.1 >= h as f32 { continue; }
+                            let rx = dst.0.round().clamp(0.0, (w - 1) as f32) as i32;
+                            let ry = dst.1.round().clamp(0.0, (h - 1) as f32) as i32;
+                            let rpt = reverse_of.at_2d::<Vec2f>(ry, rx)?;
+                            let backward = (rpt[0] as f32, rpt[1] as f32);
+                            if !forward_backward_consistent(forward, backward) { continue; }
                             points_a.push((i as f32, j as f32));
-                            points_b.push((i as f32 + pt[0] as f32, j as f32 + pt[1] as f32));
+                            points_b.push(dst);
                         }
                     }
                 }
@@ -142,5 +165,22 @@ impl OpticalFlowTrait for OFOpenCVDis {
     }
     fn cleanup(&mut self) {
         self.img = Arc::new(image::GrayImage::default());
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::forward_backward_consistent;
+
+    #[test]
+    fn accepts_closed_forward_backward_tracks() {
+        assert!(forward_backward_consistent((12.0, -4.0), (-12.4, 4.2)));
+        assert!(forward_backward_consistent((0.2, 0.1), (-0.3, -0.1)));
+    }
+
+    #[test]
+    fn rejects_occluded_or_invalid_tracks() {
+        assert!(!forward_backward_consistent((8.0, 0.0), (-2.0, 0.0)));
+        assert!(!forward_backward_consistent((f32::NAN, 0.0), (0.0, 0.0)));
     }
 }
