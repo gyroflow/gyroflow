@@ -430,6 +430,7 @@ impl GyroSource {
             digital_zoom,
             camera_stab_data: Vec::new(),
             mesh_correction:  Vec::new(),
+            optical_flow_correction: Vec::new(),
         };
 
         let sample_rate = Self::get_sample_rate(&md);

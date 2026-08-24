@@ -203,6 +203,21 @@ impl AutosyncProcess {
             let mut gyro = compute_params.gyro.write();
 
             gyro.file_metadata.set_raw_imu(self.estimator.estimated_gyro.read().values().cloned().collect::<Vec<_>>());
+            let has_embedded_mesh = !gyro.file_metadata.read().mesh_correction.is_empty();
+            if has_embedded_mesh {
+                // Keep camera-provided mesh / focal-plane corrections authoritative.
+                // The optical-only local warp uses the same renderer slot and must not
+                // silently replace calibrated camera metadata.
+                gyro.file_metadata.set_optical_flow_correction(Vec::new());
+                log::warn!("Skipping optical-flow local mesh because the clip contains embedded mesh correction metadata");
+            } else {
+                let local_warp = self.estimator.build_local_warp(
+                    compute_params.frame_count,
+                    (compute_params.width as u32, compute_params.height as u32),
+                    compute_params.scaled_fps,
+                );
+                gyro.file_metadata.set_optical_flow_correction(local_warp);
+            }
             gyro.apply_transforms();
 
             let timestamps_fract = [0.5];

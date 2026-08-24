@@ -69,6 +69,11 @@ pub struct FileMetadata {
     pub per_frame_time_offsets: Vec<f64>,
     pub camera_stab_data:    Vec<CameraStabData>,
     pub mesh_correction:     Vec<(Vec<f64>, Vec<f32>)>,
+    /// Runtime-generated local stabilization warp. Kept separate from camera
+    /// metadata meshes so optical-only analysis can be replaced or cleared
+    /// without destroying embedded lens/ sensor corrections.
+    #[serde(skip)]
+    pub optical_flow_correction: Vec<(Vec<f64>, Vec<f32>)>,
 }
 impl FileMetadata {
     pub fn thin(&self) -> Self {
@@ -92,6 +97,7 @@ impl FileMetadata {
             per_frame_time_offsets:  Default::default(),
             camera_stab_data:        Default::default(),
             mesh_correction:         Default::default(),
+            optical_flow_correction: Default::default(),
         }
     }
     pub fn has_motion(&self) -> bool {
@@ -119,6 +125,9 @@ impl ReadOnlyFileMetadata {
     }
     pub fn set_raw_imu(&mut self, v: Vec<TimeIMU>) {
         self.0.write().raw_imu = v;
+    }
+    pub fn set_optical_flow_correction(&mut self, v: Vec<(Vec<f64>, Vec<f32>)>) {
+        self.0.write().optical_flow_correction = v;
     }
 }
 impl serde::Serialize for ReadOnlyFileMetadata {

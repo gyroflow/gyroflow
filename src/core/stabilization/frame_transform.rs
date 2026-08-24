@@ -213,7 +213,7 @@ impl FrameTransform {
         let file_metadata = gyro.file_metadata.read();
 
         let mut mesh_data = Vec::new();
-        if let Some(mc) = file_metadata.mesh_correction.get(frame) {
+        if let Some(mc) = file_metadata.mesh_correction.get(frame).or_else(|| file_metadata.optical_flow_correction.get(frame)) {
             mesh_data = mc.1.clone(); // undistorting mesh
         }
 
@@ -368,7 +368,7 @@ impl FrameTransform {
         let file_metadata = gyro.file_metadata.read();
 
         let mut mesh_correction = None;
-        if let Some(mc) = file_metadata.mesh_correction.get(frame) {
+        if let Some(mc) = file_metadata.mesh_correction.get(frame).or_else(|| file_metadata.optical_flow_correction.get(frame)) {
             mesh_correction = Some(mc.0.clone()); // distorting mesh
         }
 

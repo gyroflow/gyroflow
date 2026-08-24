@@ -14,6 +14,7 @@ use crate::gyro_source::{ Quat64, TimeQuat };
 use crate::stabilization::ComputeParams;
 
 mod optical_flow; pub use optical_flow::*;
+mod local_warp;
 mod estimate_pose; pub use estimate_pose::*;
 mod find_offset { pub mod rs_sync; pub mod essential_matrix; pub mod visual_features; }
 
@@ -217,6 +218,25 @@ impl PoseEstimator {
                 }
             }
         }
+    }
+    pub fn build_local_warp(&self, frame_count: usize, render_size: (u32, u32), fps: f64) -> Vec<(Vec<f64>, Vec<f32>)> {
+        let frames = self.sync_results.read();
+        let transitions = frames.values().filter_map(|frame| {
+            let flow = frame.optical_flow.try_borrow().ok()?;
+            let pair = flow.get(&1)?.as_ref()?;
+            let source_frame = crate::frame_at_timestamp(pair.0.0 as f64 / 1000.0, fps).max(0) as usize;
+            let scale = (
+                render_size.0 as f32 / frame.frame_size.0.max(1) as f32,
+                render_size.1 as f32 / frame.frame_size.1.max(1) as f32,
+            );
+            let tracks = pair.0.1.iter().zip(&pair.1.1).map(|(from, to)| local_warp::Track {
+                from: (from.0 * scale.0, from.1 * scale.1),
+                to: (to.0 * scale.0, to.1 * scale.1),
+            }).collect();
+            Some((source_frame, tracks))
+        }).collect::<Vec<_>>();
+        local_warp::build_local_warps(frame_count, render_size, &transitions)
+            .into_iter().map(Option::unwrap_or_default).collect()
     }
     pub fn cleanup(&self) {
         let mut l = self.sync_results.write();
