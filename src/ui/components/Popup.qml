@@ -22,6 +22,7 @@ QQC.Popup {
 
     property var icons: [];
     property var colors: [];
+    property bool translateItems: true;
 
     signal clicked(int index);
 

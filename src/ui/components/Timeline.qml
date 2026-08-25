@@ -14,6 +14,8 @@ Item {
     property bool trimActive: trimRanges.length > 0;
     property bool restrictTrim: true;
 
+    readonly property bool hasQuaternionSelection: quaternionSelection.hasSelection;
+
     property real durationMs: 0;
     property real orgDurationMs: 0;
     property real scaledFps: 0;
@@ -39,6 +41,9 @@ Item {
 
     function mapToVisibleArea(pos: real): real { return (pos - visibleAreaLeft) / (visibleAreaRight - visibleAreaLeft); }
     function mapFromVisibleArea(pos: real): real { return pos * (visibleAreaRight - visibleAreaLeft) + visibleAreaLeft; }
+    function quaternionSelectionLeft(): real { return quaternionSelection.selectionLeft(); }
+    function quaternionSelectionRight(): real { return quaternionSelection.selectionRight(); }
+    function clearQuaternionSelection(): void { quaternionSelection.clear(); }
 
     function redrawChart(): void { chart.update(); keyframes.item.update(); }
     function getKeyframesView(): TimelineKeyframesView { return keyframes.item; }
@@ -349,6 +354,16 @@ Item {
                 }
             }
 
+            TimelineQuaternionSelection {
+                id: quaternionSelection;
+                viewMode: chart.viewMode;
+                visibleAreaLeft: root.visibleAreaLeft;
+                visibleAreaRight: root.visibleAreaRight;
+                durationMs: root.durationMs;
+                y: chart.y;
+                height: chart.height;
+            }
+
             Loader {
                 id: keyframes;
                 asynchronous: true;
@@ -529,6 +544,10 @@ Item {
 
             onMouseXChanged: {
                 if (pressed) {
+                    if (quaternionSelection.selecting) {
+                        quaternionSelection.extendTo(Math.max(0.0, Math.min(1.0, root.mapFromVisibleArea(mouseX / parent.width))));
+                        return;
+                    }
                     if (cursorShape == Qt.PointingHandCursor || movingKeyframe) {
                         if (holdingAlt && keyframes.item) {
                             const pt = ma.mapToItem(keyframes.item, mouseX, mouseY);
@@ -577,10 +596,15 @@ Item {
                 panInit.visibleAreaLeft  = root.visibleAreaLeft;
                 panInit.visibleAreaWidth = root.visibleAreaRight - root.visibleAreaLeft;
                 holdingAlt = (mouse.modifiers & Qt.AltModifier) || (mouse.modifiers & Qt.MetaModifier);
+                if (chart.viewMode === 3 && (mouse.modifiers & Qt.ShiftModifier)) {
+                    quaternionSelection.begin(Math.max(0.0, Math.min(1.0, root.mapFromVisibleArea(mouse.x / parent.width))));
+                    mouse.accepted = true;
+                }
             }
             onReleased: (mouse) => {
                 holdingAlt = false;
                 movingKeyframe = "";
+                quaternionSelection.finish();
             }
             onPressAndHold: (mouse) => {
                 if (Math.abs(panInit.x - mouse.x) > 15 * dpiScale) { mouse.accepted = false; return; }

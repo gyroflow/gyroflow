@@ -706,6 +706,17 @@ MenuItem {
         }
     }
 
+    Hr {
+        visible: quaternionRepair.visible;
+    }
+    DjiQuaternionRepair {
+        id: quaternionRepair;
+        width: parent.width;
+        hasQuaternions: root.hasQuaternions;
+        detectedFormat: root.detectedFormat;
+        integrationMethod: integrator.currentIndex;
+    }
+
     Row {
         anchors.horizontalCenter: parent.horizontalCenter;
         LinkButton {

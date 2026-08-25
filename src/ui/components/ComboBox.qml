@@ -9,6 +9,7 @@ QQC.ComboBox {
 
     //property alias icon: ti.icon;
     property alias itemHeight: pp.itemHeight;
+    property bool translateItems: true;
 
     implicitWidth: 150 * dpiScale;
     height: 35 * dpiScale;
@@ -42,7 +43,7 @@ QQC.ComboBox {
     Ease on scale {  }
 
     contentItem: Text {
-        text: qsTranslate("Popup", root.displayText);
+        text: root.translateItems ? qsTranslate("Popup", root.displayText) : root.displayText;
         color: styleTextColor;
         font: root.font;
         anchors.left: parent.left;
@@ -56,6 +57,7 @@ QQC.ComboBox {
 
     popup: Popup {
         id: pp;
+        translateItems: root.translateItems;
         font: root.font;
         model: root.delegateModel;
         currentIndex: root.currentIndex;

@@ -8,6 +8,7 @@ CheckBoxWithContent 1.0 CheckBoxWithContent.qml
 ComboBox 1.0 ComboBox.qml
 ContextMenuLoader 1.0 ContextMenuLoader.qml
 ContextMenuMouseArea 1.0 ContextMenuMouseArea.qml
+DjiQuaternionRepair 1.0 DjiQuaternionRepair.qml
 DropdownChevron 1.0 DropdownChevron.qml
 DropTarget 1.0 DropTarget.qml
 DropTargetRect 1.0 DropTargetRect.qml
@@ -46,6 +47,7 @@ TextArea 1.0 TextArea.qml
 TextField 1.0 TextField.qml
 Timeline 1.0 Timeline.qml
 TimelineAxisButton 1.0 TimelineAxisButton.qml
+TimelineQuaternionSelection 1.0 TimelineQuaternionSelection.qml
 TimelineRangeIndicator 1.0 TimelineRangeIndicator.qml
 TimelineSyncPoint 1.0 TimelineSyncPoint.qml
 ToolTip 1.0 ToolTip.qml

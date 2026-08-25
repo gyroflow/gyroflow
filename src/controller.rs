@@ -30,6 +30,8 @@ use crate::ui::components::TimelineKeyframesView::TimelineKeyframesView;
 use crate::ui::components::FrequencyGraph::FrequencyGraph;
 use crate::qt_gpu::qrhi_undistort;
 
+mod dji_quaternion_repair;
+
 #[derive(Default, SimpleListItem)]
 struct OffsetItem {
     pub timestamp_us: i64,
@@ -111,6 +113,11 @@ pub struct Controller {
     set_imu_orientation: qt_method!(fn(&self, orientation: String)),
     set_imu_bias: qt_method!(fn(&self, bx: f64, by: f64, bz: f64)),
     recompute_gyro: qt_method!(fn(&self)),
+    smooth_quaternion_range: qt_method!(fn(&self, start_ms: f64, end_ms: f64, strength: i32) -> i32),
+    undo_quaternion_edit: qt_method!(fn(&self) -> bool),
+    redo_quaternion_edit: qt_method!(fn(&self) -> bool),
+    clear_quaternion_edits: qt_method!(fn(&self) -> bool),
+    save_fixed_quaternion_video: qt_method!(fn(&self) -> QString),
 
     override_video_fps: qt_method!(fn(&self, fps: f64, recompute: bool)),
     get_org_duration_ms: qt_method!(fn(&self) -> f64),

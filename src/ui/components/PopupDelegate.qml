@@ -16,7 +16,7 @@ QQC.ItemDelegate {
 
     contentItem: QQCI.IconLabel {
         anchors.fill: parent;
-        text: qsTranslate("Popup", modelData);
+        text: parentPopup.translateItems ? qsTranslate("Popup", modelData) : modelData;
         icon.name: parentPopup.icons[index] || "";
         icon.source: parentPopup.icons[index] ? "qrc:/resources/icons/svg/" + parentPopup.icons[index] + ".svg" : "";
         icon.color: c;

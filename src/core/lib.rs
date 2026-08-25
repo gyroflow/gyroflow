@@ -17,6 +17,7 @@ pub mod stmap;
 pub mod zooming;
 pub mod smoothing;
 pub mod filtering;
+pub mod dji_quaternion;
 pub mod filesystem;
 pub mod gyro_export;
 pub mod settings;

@@ -385,7 +385,11 @@ impl TimelineGyroChart {
             }
 
             if self.viewMode == 3 {
-                self.quats = Vec::with_capacity(gyro.quaternions.len());
+                // The left-hand quaternion layer is the original camera metadata.
+                // `gyro.quaternions` is a working copy and may include filtering.
+                let file_metadata = gyro.file_metadata.read();
+                let raw_quats = gyro.edited_quaternions().unwrap_or(&file_metadata.quaternions);
+                self.quats = Vec::with_capacity(raw_quats.len());
                 self.smoothed_quats = Vec::with_capacity(gyro.smoothed_quaternions.len());
                 let add_quats = |quats: &TimeQuat, out_quats: &mut Vec<ChartData<4>>| {
                     for x in quats {
@@ -398,7 +402,7 @@ impl TimelineGyroChart {
                         });
                     }
                 };
-                add_quats(&gyro.quaternions, &mut self.quats);
+                add_quats(raw_quats, &mut self.quats);
 
                 // Reverse the smoothed rotation to get original smoothed quaternions.
                 // This is the inverse of gyro_source.rs:recompute_smoothness

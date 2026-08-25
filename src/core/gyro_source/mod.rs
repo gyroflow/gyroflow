@@ -55,6 +55,9 @@ pub struct GyroSource {
     pub quaternions: TimeQuat,
     pub smoothed_quaternions: TimeQuat,
 
+    #[serde(skip)]
+    pub(crate) quaternion_repair: crate::dji_quaternion::QuaternionEditState,
+
     pub use_gravity_vectors: bool,
     pub horizon_lock_integration_method: i32,
 
@@ -552,6 +555,7 @@ impl GyroSource {
     pub fn clear(&mut self) {
         self.quaternions.clear();
         self.smoothed_quaternions.clear();
+        self.clear_quaternion_edits();
         self.raw_imu.clear();
         self.imu_transforms.imu_rotation = None;
         self.imu_transforms.acc_rotation = None;
@@ -621,7 +625,7 @@ impl GyroSource {
                     log::info!("No gravity vectors - using accelerometer");
                     QuaternionConverter::convert(self.horizon_lock_integration_method, &file_metadata.quaternions, file_metadata.image_orientations.as_ref().unwrap_or(&TimeQuat::default()), self.raw_imu(&file_metadata), self.duration_ms)
                 } else {
-                    file_metadata.quaternions.clone()
+                    self.edited_quaternions().unwrap_or(&file_metadata.quaternions).clone()
                 };
                 if self.imu_transforms.glitch_filter && self.quaternions.len() >= 8 {
                     let params = super::filtering::GlitchRepairParams::from_strength(self.imu_transforms.glitch_strength);
@@ -934,6 +938,7 @@ impl GyroSource {
         hasher.write_usize(file_metadata.lens_params.len());
         hasher.write_u32(if self.use_gravity_vectors { 1 } else { 0 });
         hasher.write_usize(self.integration_method);
+        hasher.write_u64(self.quaternion_edit_revision());
         for (ts, v) in &self.offsets {
             hasher.write_i64(*ts);
             hasher.write_u64(v.to_bits());
