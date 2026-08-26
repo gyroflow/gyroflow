@@ -102,10 +102,25 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
     let file_metadata = gyro.file_metadata.read();
     let mut focal_length_value = stab.lens.read().focal_length;
 
+    let raw_imu = gyro.raw_imu(&file_metadata);
+
+    // Index of the raw IMU sample closest to `gyro_ts` (in gyro timestamps), or None if there's no sample within `max_diff_ms`
+    let closest_imu_index = |gyro_ts: f64, max_diff_ms: f64| -> Option<usize> {
+        let next = raw_imu.partition_point(|x| x.timestamp_ms < gyro_ts);
+        let index = match (next.checked_sub(1), raw_imu.get(next)) {
+            (Some(prev), Some(n)) => if (gyro_ts - raw_imu[prev].timestamp_ms).abs() <= (n.timestamp_ms - gyro_ts).abs() { prev } else { next },
+            (Some(prev), None)    => prev,
+            (None,       Some(_)) => next,
+            (None,       None)    => return None
+        };
+        if (raw_imu[index].timestamp_ms - gyro_ts).abs() <= max_diff_ms { Some(index) } else { None }
+    };
+
     let timestamps: Vec<(Option<usize>, usize, TimestampType, f64)> = if all_samples {
         let mut frame = 0;
-        gyro.quaternions.keys().enumerate().map(|(i, ts)| {
-            let mut timestamp_ms = *ts as f64 / 1000.0;
+        gyro.quaternions.keys().map(|ts| {
+            let gyro_timestamp_ms = *ts as f64 / 1000.0;
+            let mut timestamp_ms = gyro_timestamp_ms;
             timestamp_ms += gyro.offset_at_gyro_timestamp(timestamp_ms);
 
             let final_timestamp = timestamp_ms - file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
@@ -113,7 +128,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
                 frame += 1;
             }
 
-            (Some(i), frame, TimestampType::Microseconds(*ts), final_timestamp)
+            (closest_imu_index(gyro_timestamp_ms, frame_duration), frame, TimestampType::Microseconds(*ts), final_timestamp)
         }).collect()
     } else {
         (0..params.frame_count).map(|frame| {
@@ -121,7 +136,10 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
 
             let middle_timestamp = timestamp_ms + file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
 
-            (None, frame, TimestampType::Milliseconds(middle_timestamp), timestamp_ms)
+            // Raw IMU is only available at the actual sample times, so take the sample closest to the middle of the frame readout
+            let gyro_timestamp_ms = middle_timestamp - gyro.offset_at_video_timestamp(middle_timestamp);
+
+            (closest_imu_index(gyro_timestamp_ms, frame_duration), frame, TimestampType::Milliseconds(middle_timestamp), timestamp_ms)
         }).collect()
     };
     let num_frames = params.frame_count;
@@ -160,8 +178,6 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
         jsx.insert("frame_times", frame_times.into());
         jsx.insert("orientations", Vec::<serde_json::Value>::new().into());
     }
-
-    let raw_imu = gyro.raw_imu(&file_metadata);
 
     for (i, frame, ts, timestamp_ms) in timestamps {
         let raw_imu = raw_imu.get(i.unwrap_or(usize::MAX)).cloned().unwrap_or_default();
