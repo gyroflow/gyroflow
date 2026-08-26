@@ -51,7 +51,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "{{FFmpeg}}")) {
         echo "Downloading {{FFmpeg}}"
-        wget "https://master.dl.sourceforge.net/project/avbuild/windows-desktop/{{FFmpeg}}.7z?viasf=1" -O "{{FFmpeg}}.7z"
+        Invoke-WebRequest -Uri "https://downloads.sourceforge.net/project/avbuild/windows-desktop/{{FFmpeg}}.7z" -OutFile "{{FFmpeg}}.7z" -MaximumRedirection 5 -UserAgent "wget/1.21"
         7z x -y {{FFmpeg}}.7z
         del {{FFmpeg}}.7z
     }

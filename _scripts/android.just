@@ -52,7 +52,7 @@ install-deps:
     $FFmpeg = "ffmpeg-8.1-android-gpl-lite"
     if (-not (Test-Path -Path "$FFmpeg")) {
         echo "Downloading $FFmpeg"
-        wget "https://master.dl.sourceforge.net/project/avbuild/android/$FFmpeg.tar.xz?viasf=1" -O "ffmpeg.tar.xz"
+        Invoke-WebRequest -Uri "https://downloads.sourceforge.net/project/avbuild/android/$FFmpeg.tar.xz" -OutFile "ffmpeg.tar.xz" -MaximumRedirection 5 -UserAgent "wget/1.21"
         7z x -aoa ffmpeg.tar.xz
         del ffmpeg.tar.xz
         7z x -aoa ffmpeg.tar
