@@ -48,7 +48,7 @@ human-sort = "0.2.2"
 argh = "0.1.19"
 indicatif = "0.18"
 rustfft = "6.4.1"
-crc32fast = "1.5.0"
+crc32fast = "1.5.1"
 rodio = { default-features = false, features = ["vorbis", "playback"], version = "0.22" }
 filetime_creation = "0.2"
 
@@ -64,7 +64,7 @@ parking_lot = "0.12.5"
 simplelog = "0.12.2"
 log = "0.4"
 
-ureq = "3.2"
+ureq = "3.4"
 url = "2.5.7"
 whoami = "2.1"
 tar = "0.4.45"
@@ -97,7 +97,7 @@ objc2-metal = "0.3"
 cpp_build = "0.5.11"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.2"
+cc = "1.4"
 
 [[bin]]
 name = "gyroflow"
