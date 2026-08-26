@@ -106,20 +106,21 @@ impl<'a>  FovIterative<'a> {
 
         let initial = (1000000.0, 1000000.0 * self.output_inv_aspect);
         let mut nearest = (None, initial);
+        let mut current_rect = rect.to_vec();
 
         for _ in 1..5 {
             nearest = self.nearest_edge(&polygon, center, nearest.1);
             if let Some(idx) = nearest.0 {
-                let len = rect.len();
+                let len = current_rect.len();
                 if len == 0 { continue; }
                 let relevant = [
-                    rect[idx.overflowing_sub(1).0 % len],
-                    rect[idx],
-                    rect[idx.overflowing_add(1).0 % len]
+                    current_rect[if len == rect.len() { idx.overflowing_sub(1).0 % len } else { idx.saturating_sub(1) }],
+                    current_rect[idx],
+                    current_rect[if len == rect.len() { (idx + 1) % len } else { (idx + 1).min(len - 1) }]
                 ];
 
-                let distorted = interpolate_points(&relevant, 30);
-                polygon = undistort_points_with_rolling_shutter(&distorted, ts, Some(frame), &self.compute_params, lens_correction_amount, false);
+                current_rect = interpolate_points(&relevant, 30);
+                polygon = undistort_points_with_rolling_shutter(&current_rect, ts, Some(frame), &self.compute_params, lens_correction_amount, false);
                 for (x, y) in polygon.iter_mut() {
                     *x -= adaptive_zoom_center_x as f32 * self.input_dim.0;
                     *y -= adaptive_zoom_center_y as f32 * self.input_dim.1;
