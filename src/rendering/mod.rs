@@ -4,6 +4,7 @@
 mod ffmpeg_audio;
 mod ffmpeg_video;
 mod ffmpeg_video_converter;
+mod color_grading_baker;
 mod audio_resampler;
 pub mod ffmpeg_processor;
 pub mod ffmpeg_hw;
@@ -447,6 +448,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     }
 
     let render_globals = Rc::new(RefCell::new(zero_copy::RenderGlobals::default()));
+    let cg_baker = Rc::new(RefCell::new(color_grading_baker::ColorGradingBaker::default()));
 
     proc.on_frame(move |mut timestamp_us, input_frame, output_frame, converter, rate_control| {
         let fill_with_background = render_options.pad_with_black && !trim_ranges.is_empty() &&
@@ -677,6 +679,16 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                 converter.convert_pixel_format(input_frame, output_frame, Pixel::YUV444P16LE, ffmpeg_interpolation, |converted_frame, converted_output| {
                     undistort_frame(converted_frame, converted_output);
                 })?;
+            }
+        }
+
+        // Bake color grading + LUT into the exported frame (matches the preview math)
+        {
+            let cg = stab.params.read().color_grading.clone();
+            if !cg.is_identity() {
+                if let Err(e) = cg_baker.borrow_mut().apply(output_frame, &cg, ffmpeg_interpolation) {
+                    ::log::error!("Color grading bake failed: {e:?}");
+                }
             }
         }
 

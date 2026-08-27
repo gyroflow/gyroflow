@@ -25,6 +25,8 @@ pub mod gpu;
 
 pub mod util;
 pub mod stabilization_params;
+pub mod color_grading;
+pub mod lut;
 
 use std::sync::{ Arc, atomic::{ AtomicU64, AtomicBool, Ordering::SeqCst } };
 use std::collections::BTreeMap;
@@ -970,6 +972,40 @@ impl StabilizationManager {
     pub fn set_frame_offset          (&self, v: i32)  { self.params.write().frame_offset           = v; }
     pub fn set_light_refraction_coefficient(&self, v: f64) { self.params.write().light_refraction_coefficient = v; self.invalidate_zooming(); }
     pub fn set_background_color      (&self, bg: Vector4<f32>) { self.params.write().background = bg; }
+
+    pub fn set_cg_basic_enabled      (&self, v: bool) { self.params.write().color_grading.basic_enabled = v; }
+    pub fn set_cg_creative_enabled   (&self, v: bool) { self.params.write().color_grading.creative_enabled = v; }
+    pub fn set_cg_temperature        (&self, v: f64) { self.params.write().color_grading.temperature = v as f32; }
+    pub fn set_cg_tint               (&self, v: f64) { self.params.write().color_grading.tint = v as f32; }
+    pub fn set_cg_basic_saturation   (&self, v: f64) { self.params.write().color_grading.basic_saturation = v as f32; }
+    pub fn set_cg_exposure           (&self, v: f64) { self.params.write().color_grading.exposure = v as f32; }
+    pub fn set_cg_contrast           (&self, v: f64) { self.params.write().color_grading.contrast = v as f32; }
+    pub fn set_cg_highlights         (&self, v: f64) { self.params.write().color_grading.highlights = v as f32; }
+    pub fn set_cg_shadows            (&self, v: f64) { self.params.write().color_grading.shadows = v as f32; }
+    pub fn set_cg_whites             (&self, v: f64) { self.params.write().color_grading.whites = v as f32; }
+    pub fn set_cg_blacks             (&self, v: f64) { self.params.write().color_grading.blacks = v as f32; }
+    pub fn set_cg_faded_film         (&self, v: f64) { self.params.write().color_grading.faded_film = v as f32; }
+    pub fn set_cg_vibrance           (&self, v: f64) { self.params.write().color_grading.vibrance = v as f32; }
+    pub fn set_cg_creative_saturation(&self, v: f64) { self.params.write().color_grading.creative_saturation = v as f32; }
+    pub fn reset_color_grading       (&self) { self.params.write().color_grading = crate::color_grading::ColorGradingParams::default(); }
+
+    pub fn set_cg_lut_enabled (&self, v: bool) { self.params.write().color_grading.lut_enabled = v; }
+    pub fn set_cg_lut_strength(&self, v: f64)  { self.params.write().color_grading.lut_strength = v as f32; }
+    /// Load a `.cube` LUT from disk. Empty path clears the LUT. Returns Err with a message on parse failure.
+    pub fn set_cg_lut_path(&self, path: &str) -> Result<(), String> {
+        if path.is_empty() {
+            let mut p = self.params.write();
+            p.color_grading.lut_path = String::new();
+            p.color_grading.lut = None;
+            return Ok(());
+        }
+        let text = std::fs::read_to_string(path).map_err(|e| format!("Cannot read LUT: {e}"))?;
+        let lut = crate::lut::Lut::parse_cube(&text)?;
+        let mut p = self.params.write();
+        p.color_grading.lut_path = path.to_string();
+        p.color_grading.lut = Some(std::sync::Arc::new(lut));
+        Ok(())
+    }
     pub fn set_background_mode       (&self, v: i32)  { self.params.write().background_mode = stabilization_params::BackgroundMode::from(v); }
     pub fn set_background_margin     (&self, v: f64)  { self.params.write().background_margin = v; }
     pub fn set_background_margin_feather(&self, v: f64) { self.params.write().background_margin_feather = v; }
@@ -1322,6 +1358,7 @@ impl StabilizationManager {
                 "additional_rotation":    params.additional_rotation,
                 "additional_translation": params.additional_translation,
                 "lens_correction_amount": params.lens_correction_amount,
+        "color_grading": serde_json::to_value(&params.color_grading).unwrap_or(serde_json::Value::Null),
                 "horizon_lock_amount":    horizon_amount,
                 "horizon_lock_roll":      horizon_lock.horizonroll,
                 "horizon_lock_pitch_enabled": horizon_lock.lock_pitch,
@@ -1662,6 +1699,7 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("frame_readout_direction").and_then(|x| x.as_str()) { params.frame_readout_direction = v.into(); }
                 if let Some(v) = obj.get("adaptive_zoom_window")  .and_then(|x| x.as_f64()) { params.adaptive_zoom_window    = v; }
                 if let Some(v) = obj.get("lens_correction_amount").and_then(|x| x.as_f64()) { params.lens_correction_amount  = v; }
+                if let Some(v) = obj.get("color_grading") { params.color_grading = serde_json::from_value(v.clone()).unwrap_or_default(); }
                 if let Some(v) = obj.get("frame_offset")          .and_then(|x| x.as_i64()) { params.frame_offset            = v as i32; }
                 if let Some(v) = obj.get("horizontal_rs")         .and_then(|x| x.as_bool()) { if v { params.frame_readout_direction = if params.frame_readout_time < 0.0 { ReadoutDirection::RightToLeft } else { ReadoutDirection::LeftToRight }; } }
                 if let Some(v) = obj.get("max_zoom")              .and_then(|x| x.as_f64()) { params.max_zoom                = Some(v); }
@@ -2138,4 +2176,33 @@ pub enum GyroflowCoreError {
 
     #[error("Unknown error")]
     Unknown
+}
+
+
+#[cfg(test)]
+mod color_grading_setter_tests {
+    use crate::StabilizationManager;
+
+    #[test]
+    fn setters_write_through() {
+        let mgr = StabilizationManager::default();
+        mgr.set_cg_exposure(0.5);
+        mgr.set_cg_basic_enabled(true);
+        mgr.set_cg_basic_saturation(1.5);
+        let p = mgr.params.read();
+        assert_eq!(p.color_grading.exposure, 0.5);
+        assert_eq!(p.color_grading.basic_enabled, true);
+        assert_eq!(p.color_grading.basic_saturation, 1.5);
+    }
+
+    #[test]
+    fn reset_restores_defaults() {
+        let mgr = StabilizationManager::default();
+        mgr.set_cg_exposure(0.7);
+        mgr.set_cg_creative_enabled(true);
+        mgr.reset_color_grading();
+        let p = mgr.params.read();
+        assert_eq!(p.color_grading.exposure, 0.0);
+        assert_eq!(p.color_grading.creative_enabled, false);
+    }
 }

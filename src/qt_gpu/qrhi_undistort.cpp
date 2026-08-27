@@ -94,6 +94,11 @@ public:
         m_texCanvas.reset(rhi->newTexture(QRhiTexture::R8, canvasSize, 1, QRhiTexture::Flags()));
         if (!m_texCanvas->create()) { qDebug2("init") << "failed to create m_texCanvas"; return false; }
 
+        // LUT texture: fixed max size (supports .cube up to 65^3). Actual LUT
+        // occupies the top-left region; the shader normalizes by cg_reserved.y (N).
+        m_texLut.reset(rhi->newTexture(QRhiTexture::RGBA32F, QSize(65, 4225), 1, QRhiTexture::Flags()));
+        if (!m_texLut->create()) { qDebug2("init") << "failed to create m_texLut"; return false; }
+
         m_vertexBuffer.reset(rhi->newBuffer(QRhiBuffer::Immutable, QRhiBuffer::VertexBuffer, sizeof(quadVertexData)));
         if (!m_vertexBuffer->create()) { qDebug2("init") << "failed to create m_vertexBuffer"; return false; }
 
@@ -116,6 +121,9 @@ public:
         m_meshDataSampler.reset(rhi->newSampler(QRhiSampler::Nearest, QRhiSampler::Nearest, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge));
         if (!m_meshDataSampler->create()) { qDebug2("init") << "failed to create m_meshDataSampler"; return false; }
 
+        m_lutSampler.reset(rhi->newSampler(QRhiSampler::Linear, QRhiSampler::Linear, QRhiSampler::None, QRhiSampler::ClampToEdge, QRhiSampler::ClampToEdge));
+        if (!m_lutSampler->create()) { qDebug2("init") << "failed to create m_lutSampler"; return false; }
+
         m_srb.reset(rhi->newShaderResourceBindings());
         m_srb->setBindings({
             QRhiShaderResourceBinding::uniformBuffer (0, QRhiShaderResourceBinding::FragmentStage | QRhiShaderResourceBinding::VertexStage, m_drawingUniform.get()),
@@ -124,6 +132,7 @@ public:
             QRhiShaderResourceBinding::sampledTexture(3, QRhiShaderResourceBinding::FragmentStage, m_texMatrices.get(), m_matricesSampler.get()),
             QRhiShaderResourceBinding::sampledTexture(4, QRhiShaderResourceBinding::FragmentStage, m_texCanvas.get(), m_canvasSampler.get()),
             QRhiShaderResourceBinding::sampledTexture(5, QRhiShaderResourceBinding::FragmentStage, m_texMeshData.get(), m_meshDataSampler.get()),
+            QRhiShaderResourceBinding::sampledTexture(6, QRhiShaderResourceBinding::FragmentStage, m_texLut.get(), m_lutSampler.get()),
         });
         if (!m_srb->create()) { qDebug2("init") << "failed to create m_srb"; return false; }
 
@@ -151,7 +160,7 @@ public:
         return true;
     }
 
-    bool render(MDKPlayer *item, uint8_t *params, uint paramsLen, uint8_t *matrices, uint matricesLen, uint8_t *canvas, uint canvasLen, float *meshData, uint meshDataLen) {
+    bool render(MDKPlayer *item, uint8_t *params, uint paramsLen, uint8_t *matrices, uint matricesLen, uint8_t *canvas, uint canvasLen, float *meshData, uint meshDataLen, float *lut, uint lutW, uint lutH) {
         if (!item->qmlItem() || !item->rhiTexture() || !item->qmlWindow()) return false;
         auto context = item->rhiContext();
         auto rhi = context->rhi();
@@ -186,6 +195,12 @@ public:
         if (canvasLen > 0) {
             QRhiTextureSubresourceUploadDescription desc2(canvas, canvasLen);
             u->uploadTexture(m_texCanvas.get(), QRhiTextureUploadDescription({ QRhiTextureUploadEntry(0, 0, desc2) }));
+        }
+
+        if (lut && lutW > 0 && lutH > 0 && lutW <= 65 && lutH <= 4225) {
+            QRhiTextureSubresourceUploadDescription descLut(lut, lutW * lutH * 4 * sizeof(float));
+            descLut.setSourceSize(QSize(lutW, lutH));
+            u->uploadTexture(m_texLut.get(), QRhiTextureUploadDescription({ QRhiTextureUploadEntry(0, 0, descLut) }));
         }
 
         QMatrix4x4 mvp = item->textureMatrix();
@@ -233,6 +248,7 @@ public:
     QScopedPointer<QRhiTexture> m_texCanvas;
     QScopedPointer<QRhiBuffer> m_kernelParams;
     QScopedPointer<QRhiTexture> m_texMeshData;
+    QScopedPointer<QRhiTexture> m_texLut;
 
     QSize m_outputSize;
     QSize m_textureSize;
@@ -246,6 +262,7 @@ public:
     QScopedPointer<QRhiSampler> m_drawingSampler;
     QScopedPointer<QRhiSampler> m_matricesSampler;
     QScopedPointer<QRhiSampler> m_meshDataSampler;
+    QScopedPointer<QRhiSampler> m_lutSampler;
     QScopedPointer<QRhiShaderResourceBindings> m_srb;
     QScopedPointer<QRhiGraphicsPipeline> m_pipeline;
 

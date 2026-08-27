@@ -336,6 +336,11 @@ impl FrameTransform {
             translation3d: [0.0, 0.0, 0.0, 0.0], // currently unused
             digital_lens_params,
             light_refraction_coefficient: light_refraction_coefficient as f32,
+            cg_flags: { let cg = &params.color_grading; (if cg.basic_enabled { 1 } else { 0 }) | (if cg.creative_enabled { 2 } else { 0 }) | (if cg.lut_enabled && cg.lut.is_some() { 4 } else { 0 }) },
+            cg_color0: [params.color_grading.temperature, params.color_grading.tint, params.color_grading.basic_saturation, params.color_grading.exposure],
+            cg_tone0:  [params.color_grading.contrast, params.color_grading.highlights, params.color_grading.shadows, params.color_grading.whites],
+            cg_tone1:  [params.color_grading.blacks, params.color_grading.faded_film, params.color_grading.vibrance, params.color_grading.creative_saturation],
+            cg_reserved: { let cg = &params.color_grading; let (sz, kind) = cg.lut.as_ref().map(|l| (l.size as f32, if matches!(l.kind, crate::lut::LutKind::Dim3) { 1.0 } else { 0.0 })).unwrap_or((0.0, 0.0)); [cg.lut_strength, sz, kind, 0.0] },
             ..Default::default()
         };
 

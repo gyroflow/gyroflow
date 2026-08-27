@@ -51,6 +51,14 @@ typedef struct {
     float reserved2;                 // 16
     float4 ewa_coeffs_p;             // 16
     float4 ewa_coeffs_q;             // 16
+    int cg_flags;                    // 4
+    int cg_pad0;                     // 8
+    int cg_pad1;                     // 12
+    int cg_pad2;                     // 16
+    float4 cg_color0;                // 16
+    float4 cg_tone0;                 // 16
+    float4 cg_tone1;                 // 16
+    float4 cg_reserved;              // 16
 } KernelParams;
 
 #if INTERPOLATION == 2 // Bilinear

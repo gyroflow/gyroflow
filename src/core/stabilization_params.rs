@@ -124,6 +124,8 @@ pub struct StabilizationParams {
     pub smoothed_focal_lengths: Vec<Option<f64>>,
     pub focal_length_smoothing_enabled: bool,
     pub focal_length_smoothing_strength: f64,
+
+    pub color_grading: crate::color_grading::ColorGradingParams,
 }
 impl Default for StabilizationParams {
     fn default() -> Self {
@@ -190,6 +192,8 @@ impl Default for StabilizationParams {
             smoothed_focal_lengths: vec![],
             focal_length_smoothing_enabled: false,
             focal_length_smoothing_strength: 0.5,
+
+            color_grading: crate::color_grading::ColorGradingParams::default(),
         }
     }
 }

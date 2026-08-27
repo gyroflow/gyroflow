@@ -509,6 +509,8 @@ Rectangle {
             Hr { id: syncHr; }
             ItemLoader { id: stab; sourceComponent: Component { Menu.Stabilization { } } }
             Hr { id: stabHr; }
+            ItemLoader { id: colorGrading; sourceComponent: Component { Menu.ColorGrading { } } }
+            Hr { id: colorGradingHr; }
             ItemLoader { id: exportSettings; sourceComponent: Component { Menu.Export { showBtn: !window.isMobileLayout; } } }
             Hr { id: exportHr; visible: !isMobileLayout; }
             ItemLoader { id: advanced; sourceComponent: Component { Menu.Advanced { } } }
