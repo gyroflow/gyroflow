@@ -16,7 +16,7 @@ install-deps:
     }
 
     mkdir "{{ExtDir}}" -ErrorAction SilentlyContinue
-    cd {{ExtDir}}
+    cd "{{ExtDir}}"
 
     $Python = "python";
     if (Get-Command "python3.10.exe" -ErrorAction SilentlyContinue) {
@@ -28,7 +28,7 @@ install-deps:
     } else {
         if (-not (Test-Path -Path "{{ExtDir}}/WPy64-310100b3")) {
             echo "Downloading WinPython"
-            wget https://github.com/winpython/winpython/releases/download/6.1.20230227/Winpython64-3.10.10.0dotb3.exe -outfile "winpython.exe"
+            wget https://github.com/winpython/winpython/releases/download/6.1.20230227/Winpython64-3.10.10.0dotb3.exe -O "winpython.exe"
             7z x -y winpython.exe
             del winpython.exe
         }
@@ -51,7 +51,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "{{FFmpeg}}")) {
         echo "Downloading {{FFmpeg}}"
-        wget "https://master.dl.sourceforge.net/project/avbuild/windows-desktop/{{FFmpeg}}.7z?viasf=1" -outfile "{{FFmpeg}}.7z"
+        Invoke-WebRequest -Uri "https://downloads.sourceforge.net/project/avbuild/windows-desktop/{{FFmpeg}}.7z" -OutFile "{{FFmpeg}}.7z" -MaximumRedirection 5 -UserAgent "wget/1.21"
         7z x -y {{FFmpeg}}.7z
         del {{FFmpeg}}.7z
     }
@@ -61,11 +61,7 @@ install-deps:
     if (-not (Test-Path -Path "vcpkg/installed/{{VcpkgArch}}/lib/opencv_core4.lib")) {
         echo "Downloading OpenCV"
         rm -Recurse -Force \vcpkg -ErrorAction SilentlyContinue
-        if ("{{Arch}}" -eq "aarch64") {
-            git clone --depth 1 --branch 2025.03.19 https://github.com/Microsoft/vcpkg.git
-        } else {
-            git clone --depth 1 https://github.com/Microsoft/vcpkg.git
-        }
+        git clone --depth 1 https://github.com/Microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
         #Add-Content .\vcpkg\triplets\arm64-windows.cmake -Value  "`nset(VCPKG_CMAKE_SYSTEM_VERSION 10.0.22621.0)"
         #Add-Content .\vcpkg\triplets\arm64-windows.cmake -Value  "`nset(CMAKE_SYSTEM_VERSION 10.0.22621.0)"
@@ -87,7 +83,7 @@ install-deps:
             $Arch = "woa64";
         }
         echo "Downloading LLVM"
-        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-$Arch.exe" -outfile "llvm.exe"
+        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-$Arch.exe" -O "llvm.exe"
         7z x -y llvm.exe -ollvm
         del "llvm.exe"
     }

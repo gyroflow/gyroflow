@@ -29,7 +29,7 @@ install-deps:
     } else {
         if (-not (Test-Path -Path "{{ExtDir}}/WPy64-310100b3")) {
             echo "Downloading WinPython"
-            wget https://github.com/winpython/winpython/releases/download/6.1.20230227/Winpython64-3.10.10.0dotb3.exe -outfile "winpython.exe"
+            wget https://github.com/winpython/winpython/releases/download/6.1.20230227/Winpython64-3.10.10.0dotb3.exe -O "winpython.exe"
             7z x -y winpython.exe
             del winpython.exe
         }
@@ -52,7 +52,7 @@ install-deps:
     $FFmpeg = "ffmpeg-8.1-android-gpl-lite"
     if (-not (Test-Path -Path "$FFmpeg")) {
         echo "Downloading $FFmpeg"
-        wget "https://master.dl.sourceforge.net/project/avbuild/android/$FFmpeg.tar.xz?viasf=1" -outfile "ffmpeg.tar.xz"
+        Invoke-WebRequest -Uri "https://downloads.sourceforge.net/project/avbuild/android/$FFmpeg.tar.xz" -OutFile "ffmpeg.tar.xz" -MaximumRedirection 5 -UserAgent "wget/1.21"
         7z x -aoa ffmpeg.tar.xz
         del ffmpeg.tar.xz
         7z x -aoa ffmpeg.tar
@@ -63,7 +63,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "OpenCV-android-sdk/")) {
         echo "Downloading OpenCV for Android"
-        wget "https://github.com/opencv/opencv/releases/download/4.11.0/opencv-4.11.0-android-sdk.zip" -outfile "opencv.zip"
+        wget "https://github.com/opencv/opencv/releases/download/4.11.0/opencv-4.11.0-android-sdk.zip" -O "opencv.zip"
         7z x -aoa opencv.zip
         del opencv.zip
     }
@@ -72,7 +72,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――― LLVM ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "{{LLVMPath}}\libclang.dll")) {
         echo "Downloading LLVM"
-        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-win64.exe" -outfile "llvm-win64.exe"
+        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-win64.exe" -O "llvm-win64.exe"
         7z x -y llvm-win64.exe -ollvm
         del "llvm-win64.exe"
     }

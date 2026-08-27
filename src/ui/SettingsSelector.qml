@@ -258,19 +258,11 @@ Modal {
         RadioButton {
             id: exportPerFrame;
             text: qsTr("Export one sample per frame");
-            onCheckedChanged: {
-                sectionsArea.forAllCheckboxes(sectionsArea, function(cb) {
-                    if (cb.props[0] == "gyroscope" || cb.props[0] == "accelerometer") {
-                        cb.enabled = !checked;
-                        if (!cb.enabled && cb.checked) cb.checked = false;
-                    }
-                });
-            }
         }
     }
     BasicText {
         visible: root.type == "gyro_csv" && exportPerFrame.checked;
-        text: qsTr("When exporting one sample per frame, it's the sample in the middle of the frame, and it ignores rolling shutter correction.");
+        text: qsTr("When exporting one sample per frame, it's the sample in the middle of the frame, and it ignores rolling shutter correction. Gyroscope and accelerometer values are taken from the raw IMU sample closest to that time.");
         color: styleTextColor;
     }
 

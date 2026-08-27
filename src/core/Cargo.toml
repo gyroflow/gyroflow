@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "77a3b81" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "c0110c5" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { version = "0.8", features = ["field_access"] }
 
@@ -26,7 +26,7 @@ argmin-math = { version = "0.5.1", default-features = false, features = ["nalgeb
 nalgebra = { version = "0.34", features = ["serde-serialize"] }
 rayon = "1.12"
 biquad = "0.6.0"
-fastrand = "2.4"
+fastrand = "2.5"
 lazy_static = "1.5.0"
 parking_lot = "0.12.5"
 regex = "1.13"
@@ -46,7 +46,7 @@ enum_delegate = "0.2.0"
 simple-easing = "1.0.2"
 half = "2.7"
 lru = "0.18"
-thiserror = "2.0.18"
+thiserror = "2.0.20"
 ciborium = "0.2.2"
 dyn-clone = "1.0"
 app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }
