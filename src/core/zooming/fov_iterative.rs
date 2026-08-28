@@ -151,10 +151,12 @@ impl<'a>  FovIterative<'a> {
     }
 
     // Returns points placed around a rectangle in a continous order
-    pub fn points_around_rect(&self, mut w: f32, mut h: f32, w_div: usize, h_div: usize) -> Vec<(f32, f32)> {
-        w -= self.compute_params.fov_algorithm_margin * 2.0;
-        h -= self.compute_params.fov_algorithm_margin * 2.0;
-
+    // No safety inset here on purpose: this polygon is the *measurement* of where the frame actually
+    // ends, and `minimal_fovs` derived from it is what the FOV warning and the safe-area overlay
+    // compare against 1.0. Insetting biased that measurement (~2.5px of reported FOV for a 2px inset),
+    // which silently swallowed genuinely-uncovered frames. The safety pad is applied to the *applied*
+    // zoom instead - see `fov_algorithm_margin` in zooming::calculate_fovs.
+    pub fn points_around_rect(&self, w: f32, h: f32, w_div: usize, h_div: usize) -> Vec<(f32, f32)> {
         let (wcnt, hcnt) = (w_div.max(2) - 1, h_div.max(2) - 1);
         let (wstep, hstep) = (w / wcnt as f32, h / hcnt as f32);
 
@@ -164,12 +166,6 @@ impl<'a>  FovIterative<'a> {
         for i in 0..hcnt { distorted_points.push((w,                         i as f32 * hstep)); }
         for i in 0..wcnt { distorted_points.push(((wcnt - i) as f32 * wstep, h)); }
         for i in 0..hcnt { distorted_points.push((0.0,                       (hcnt - i) as f32 * hstep)); }
-
-        // Add margin
-        for (x, y) in distorted_points.iter_mut() {
-            *x += self.compute_params.fov_algorithm_margin;
-            *y += self.compute_params.fov_algorithm_margin;
-        }
 
         distorted_points
     }

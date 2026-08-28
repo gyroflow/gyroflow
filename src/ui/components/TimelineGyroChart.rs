@@ -86,6 +86,10 @@ pub struct TimelineGyroChart {
     focal_lengths: Vec<ChartData<1>>,
     smoothed_focal_lengths: Vec<ChartData<1>>,
 
+    // Below this fraction of a fully covered frame, `minimal_fovs` counts as a real crop.
+    // Set from the source width so the tolerance is half a source pixel, not a magic number.
+    uncovered_fov_threshold: f64,
+
     gyro_max: Option<f64>,
     duration_ms: f64,
 }
@@ -235,7 +239,7 @@ impl TimelineGyroChart {
 
             let mut region: Option<QRectF> = None;
             for x in &self.minimal_fovs {
-                if x.values[0] < 0.99 {
+                if x.values[0] < self.uncovered_fov_threshold {
                     let x_pos = map_to_visible_area(x.timestamp_us as f64 / duration_us) * rect.width;
                     if let Some(region) = &mut region {
                         region.width = x_pos - region.x;
@@ -431,6 +435,12 @@ impl TimelineGyroChart {
                 values: [max - *x]
             }).collect();
             Self::normalize_height(&mut self.fovs, None);
+
+            // `min_fov` is the covered width as a fraction of the source width, so one source pixel
+            // of crop is `1 / width`. With zooming off the applied fov is exactly 1.0 and the ratio
+            // below carries no safety pad, so the undistortion's float noise on a fully covered frame
+            // (e.g. 0.99999994) must not read as a crop - but anything from half a pixel up does.
+            self.uncovered_fov_threshold = 1.0 - 0.5 / params.size.0.max(1) as f64;
 
             self.minimal_fovs = params.minimal_fovs.iter().zip(params.fovs.iter()).enumerate().map(|(i, (min_fov, fov))| {
                 let timestamp_us = (gyroflow_core::timestamp_at_frame(i as i32, fps) * 1000.0).round() as i64;

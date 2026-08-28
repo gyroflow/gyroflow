@@ -124,7 +124,7 @@ impl ComputeParams {
             digital_lens,
             digital_lens_params,
             suppress_rotation: false,
-            fov_algorithm_margin: 2.0,
+            fov_algorithm_margin: 3.0,
 
             keyframes: mgr.keyframes.read().clone(),
 
