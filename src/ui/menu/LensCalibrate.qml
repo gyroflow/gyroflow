@@ -58,6 +58,25 @@ MenuItem {
             "output_dimension": { "w": 0, "h": 0 }
         };
     }
+    function getSubmissionValidationError(): string {
+        list.commitAll();
+        const info = calib.calibrationInfo || {};
+        const brand = (info.camera_brand || "").trim();
+        const model = (info.camera_model || "").trim();
+        const lens  = (info.lens_model   || "").trim();
+
+        if (!brand.length) return qsTr("Camera brand is required before submitting a lens profile.");
+        if (!model.length) return qsTr("Camera model is required before submitting a lens profile.");
+        if (!lens.length)  return qsTr("Lens model is required before submitting a lens profile.");
+
+        const focalLength = +info.focal_length || 0;
+        const looksZoomLens = /\b(zoom|mm[-–]mm|\d+\s*-\s*\d+\s*mm)\b/i.test(lens);
+        if (looksZoomLens && focalLength <= 0) {
+            return qsTr("Zoom lenses require Lens native focal length before submitting.");
+        }
+
+        return "";
+    }
     function updateTable(): void {
         const fields = {
             "camera_brand":     QT_TRANSLATE_NOOP("TableList", "Camera brand"),
@@ -310,7 +329,11 @@ MenuItem {
         enabled: infoList.rms > 0 && infoList.rms < 100 && calibrator_window.videoArea.vid.loaded;
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
-            list.commitAll();
+            const validationError = calib.getSubmissionValidationError();
+            if (validationError.length > 0) {
+                window.messageBox(Modal.Warning, validationError, [ { text: qsTr("Ok") } ], calibrator_window.contentItem);
+                return;
+            }
             fileDialog.selectedFile = controller.export_lens_profile_filename(calib.calibrationInfo);
             fileDialog.open2();
         }
