@@ -28,9 +28,20 @@ MenuItem {
     property string profileName;
     property string profileOriginalJson;
     property string profileChecksum;
+    property string profilePath;
 
     property bool fetched_from_github: false;
     property bool selected_manually: false;
+    property bool updatingCameraSelectors: false;
+    property bool suppressSearchUpdate: false;
+    property var cameraBrandModel: [qsTr("Any brand"), qsTr("Other")];
+    property var cameraModelModel: [qsTr("Any model"), qsTr("Other")];
+    property var cameraLensModel: [qsTr("Any lens"), qsTr("Other")];
+    property var compatibleCameras: [];
+    property var detectedCamera: ({});
+    property var hiddenProfiles: ({});
+    property var reviewProfiles: [];
+    property int reviewIndex: -1;
 
     FileDialog {
         id: fileDialog;
@@ -53,6 +64,7 @@ MenuItem {
     }
 
     Component.onCompleted: {
+        root.loadHiddenProfiles();
         controller.load_profiles(true);
 
         QT_TRANSLATE_NOOP("TableList", "Camera");
@@ -81,6 +93,8 @@ MenuItem {
             }
 
             lensProfilesListPrepared = true;
+            root.refreshCameraBrands();
+            root.applyDetectedCamera();
 
             root.loadFavorites();
             if (!root.fetched_from_github) {
@@ -91,6 +105,23 @@ MenuItem {
         function onLens_profiles_updated(fromDisk: bool): void {
             profilesUpdateTimer.fromDisk = fromDisk;
             profilesUpdateTimer.start();
+        }
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
+            if (!is_main_video || !additional_data.camera_identifier) {
+                return;
+            }
+
+            const camera_id = additional_data.camera_identifier;
+            root.detectedCamera = {
+                "brand": camera_id.brand || "",
+                "model": camera_id.model || "",
+                "lens": camera_id.lens_model || camera_id.lens_info || ""
+            };
+            root.applyDetectedCamera();
+        }
+        function onSearch_lens_profile_finished(profiles: list<var>): void {
+            root.reviewProfiles = profiles;
+            root.reviewIndex = -1;
         }
         function onLens_profile_loaded(json_str: string, filepath: string, checksum: string): void {
             if (json_str) {
@@ -133,6 +164,7 @@ MenuItem {
                     root.profileName = (filepath || obj.name || "").replace(/^.*?[\/\\]([^\/\\]+?)$/, "$1");
                     root.profileOriginalJson = json_str;
                     root.profileChecksum = checksum;
+                    root.profilePath = filepath;
 
                     if (obj.output_dimension && obj.output_dimension.w > 0 && (window.exportSettings.outWidth != obj.output_dimension.w || window.exportSettings.outHeight != obj.output_dimension.h)) {
                         Qt.callLater(window.exportSettings.lensProfileLoaded, obj.output_dimension.w, obj.output_dimension.h);
@@ -197,6 +229,246 @@ MenuItem {
     function updateFavorites(): void {
         settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
     }
+    function loadHiddenProfiles(): void {
+        const stored = settings.value("hiddenLensProfiles", "[]");
+        let values = [];
+        try {
+            values = JSON.parse(stored || "[]");
+        } catch (e) {
+            values = (stored || "").split(",");
+        }
+        let hidden = {};
+        for (const value of values) {
+            if (value) {
+                hidden[value] = 1;
+            }
+        }
+        hiddenProfiles = hidden;
+    }
+    function updateHiddenProfiles(): void {
+        settings.setValue("hiddenLensProfiles", JSON.stringify(Object.keys(hiddenProfiles).filter(v => v)));
+    }
+    function hideProfile(checksum: string, path: string): void {
+        const key = checksum || path;
+        if (!key) {
+            return;
+        }
+        let hidden = {};
+        for (const value of Object.keys(hiddenProfiles)) {
+            hidden[value] = 1;
+        }
+        hidden[key] = 1;
+        hiddenProfiles = hidden;
+        updateHiddenProfiles();
+        root.reviewProfiles = root.reviewProfiles.filter(item => item[2] !== checksum && item[1] !== path);
+        if (root.reviewIndex >= root.reviewProfiles.length) {
+            root.reviewIndex = root.reviewProfiles.length - 1;
+        }
+        root.searchProfiles();
+    }
+    function hideCurrentProfile(): void {
+        root.hideProfile(root.profileChecksum, root.profilePath);
+        officialInfo.thankYou = true;
+        officialInfo.canRate = false;
+        tyTimer.start();
+    }
+    function selectorModel(emptyText: string, values: var): var {
+        let model = [emptyText];
+        for (const value of values || []) {
+            if (value && model.indexOf(value) === -1) {
+                model.push(value);
+            }
+        }
+        model.push(qsTr("Other"));
+        return model;
+    }
+    function selectorValue(combo: var): string {
+        if (combo.currentIndex <= 0 || combo.currentIndex >= combo.model.length - 1) {
+            return "";
+        }
+        return combo.model[combo.currentIndex];
+    }
+    function setSelectorValue(combo: var, value: string): bool {
+        const index = combo.model.indexOf(value);
+        if (index > 0) {
+            combo.currentIndex = index;
+            return true;
+        }
+        return false;
+    }
+    function refreshCameraBrands(): void {
+        updatingCameraSelectors = true;
+        cameraBrand.popup.maxItemWidth = 0;
+        cameraModel.popup.maxItemWidth = 0;
+        cameraLens.popup.maxItemWidth = 0;
+        cameraBrandModel = selectorModel(qsTr("Any brand"), controller.camera_registry_brands());
+        cameraBrand.currentIndex = 0;
+        cameraModelModel = selectorModel(qsTr("Any model"), []);
+        cameraModel.currentIndex = 0;
+        cameraLensModel = selectorModel(qsTr("Any lens"), []);
+        cameraLens.currentIndex = 0;
+        compatibleCameras = [];
+        updatingCameraSelectors = false;
+    }
+    function refreshCameraModels(): void {
+        const brand = selectorValue(cameraBrand);
+        updatingCameraSelectors = true;
+        cameraModel.popup.maxItemWidth = 0;
+        cameraLens.popup.maxItemWidth = 0;
+        cameraModelModel = selectorModel(qsTr("Any model"), brand? controller.camera_registry_models(brand) : []);
+        cameraModel.currentIndex = 0;
+        cameraLensModel = selectorModel(qsTr("Any lens"), []);
+        cameraLens.currentIndex = 0;
+        compatibleCameras = [];
+        updatingCameraSelectors = false;
+    }
+    function refreshCameraLenses(): void {
+        const brand = selectorValue(cameraBrand);
+        const model = selectorValue(cameraModel);
+        updatingCameraSelectors = true;
+        cameraLens.popup.maxItemWidth = 0;
+        cameraLensModel = selectorModel(qsTr("Any lens"), brand && model? controller.camera_registry_lenses(brand, model) : []);
+        cameraLens.currentIndex = 0;
+        compatibleCameras = brand && model? controller.camera_registry_compatible_models(brand, model) : [];
+        updatingCameraSelectors = false;
+    }
+    function updateCameraSearch(): void {
+        if (!updatingCameraSelectors) {
+            searchProfiles();
+        }
+    }
+    function searchProfiles(): void {
+        controller.search_lens_profile_for_camera(
+            selectorValue(cameraBrand),
+            selectorValue(cameraModel),
+            selectorValue(cameraLens),
+            search.text.trim(),
+            Object.keys(root.hiddenProfiles),
+            Object.keys(root.favorites),
+            root.currentVideoAspectRatio,
+            root.currentVideoAspectRatioSwapped
+        );
+    }
+    function compatibleCameraSummary(): string {
+        const visible = root.compatibleCameras.slice(0, 4);
+        let summary = visible.join(", ");
+        if (root.compatibleCameras.length > visible.length) {
+            summary += qsTr(" +%1 more").arg(root.compatibleCameras.length - visible.length);
+        }
+        return qsTr("Compatible: %1").arg(summary);
+    }
+    function selectorPopupWidth(combo: var): real {
+        const parentWidth = combo.parent? combo.parent.width : combo.width;
+        const desiredWidth = Math.max(combo.width, combo.popup.maxItemWidth + 16 * dpiScale);
+        return Math.min(desiredWidth, parentWidth);
+    }
+    function selectorPopupX(combo: var): real {
+        const parentWidth = combo.parent? combo.parent.width : combo.width;
+        return Math.max(-combo.x, Math.min(0, parentWidth - combo.x - combo.popup.width));
+    }
+    function applyDetectedCamera(): void {
+        if (!detectedCamera.brand || !lensProfilesListPrepared) {
+            return;
+        }
+        updatingCameraSelectors = true;
+        cameraBrand.currentIndex = 0;
+        cameraModelModel = selectorModel(qsTr("Any model"), []);
+        cameraModel.currentIndex = 0;
+        cameraLensModel = selectorModel(qsTr("Any lens"), []);
+        cameraLens.currentIndex = 0;
+        compatibleCameras = [];
+        const resolvedCamera = controller.camera_registry_resolve_camera(detectedCamera.brand, detectedCamera.model);
+        const brand = resolvedCamera.brand || detectedCamera.brand;
+        const model = resolvedCamera.model || detectedCamera.model;
+        if (setSelectorValue(cameraBrand, brand)) {
+            cameraModelModel = selectorModel(qsTr("Any model"), controller.camera_registry_models(brand));
+            if (model && setSelectorValue(cameraModel, model)) {
+                cameraLensModel = selectorModel(qsTr("Any lens"), controller.camera_registry_lenses(brand, model));
+                compatibleCameras = controller.camera_registry_compatible_models(brand, model);
+                if (detectedCamera.lens) {
+                    setSelectorValue(cameraLens, detectedCamera.lens);
+                }
+            }
+        }
+        updatingCameraSelectors = false;
+        updateCameraSearch();
+    }
+    function loadProfileItem(item: var): void {
+        const lensPathOrId = item[1];
+        if (lensPathOrId.endsWith(".gyroflow")) {
+            window.videoArea.loadGyroflowData(JSON.parse(controller.get_preset_contents(lensPathOrId)), 0);
+        } else {
+            root.selected_manually = true;
+            controller.load_lens_profile(lensPathOrId);
+        }
+    }
+    function reviewRelative(step: int): void {
+        if (!reviewProfiles.length) {
+            return;
+        }
+        if (reviewIndex < 0) {
+            reviewIndex = step < 0? reviewProfiles.length - 1 : 0;
+        } else {
+            reviewIndex = (reviewIndex + step + reviewProfiles.length) % reviewProfiles.length;
+        }
+        loadProfileItem(reviewProfiles[reviewIndex]);
+    }
+
+    Grid {
+        width: parent.width;
+        columns: window.isMobileLayout? 1 : 3;
+        columnSpacing: 5 * dpiScale;
+        rowSpacing: 5 * dpiScale;
+
+        ComboBox {
+            id: cameraBrand;
+            model: root.cameraBrandModel;
+            width: window.isMobileLayout? parent.width : (parent.width - 10 * dpiScale) / 3;
+            font.pixelSize: 12 * dpiScale;
+            popup.x: root.selectorPopupX(cameraBrand);
+            popup.width: root.selectorPopupWidth(cameraBrand);
+            popup.height: Math.min(popup.implicitHeight, 8 * itemHeight + 4 * dpiScale);
+            onCurrentIndexChanged: {
+                if (!root.updatingCameraSelectors) {
+                    root.refreshCameraModels();
+                    root.updateCameraSearch();
+                }
+            }
+        }
+        ComboBox {
+            id: cameraModel;
+            model: root.cameraModelModel;
+            width: window.isMobileLayout? parent.width : (parent.width - 10 * dpiScale) / 3;
+            font.pixelSize: 12 * dpiScale;
+            popup.x: root.selectorPopupX(cameraModel);
+            popup.width: root.selectorPopupWidth(cameraModel);
+            popup.height: Math.min(popup.implicitHeight, 8 * itemHeight + 4 * dpiScale);
+            onCurrentIndexChanged: {
+                if (!root.updatingCameraSelectors) {
+                    root.refreshCameraLenses();
+                    root.updateCameraSearch();
+                }
+            }
+        }
+        ComboBox {
+            id: cameraLens;
+            model: root.cameraLensModel;
+            width: window.isMobileLayout? parent.width : (parent.width - 10 * dpiScale) / 3;
+            font.pixelSize: 12 * dpiScale;
+            popup.x: root.selectorPopupX(cameraLens);
+            popup.width: root.selectorPopupWidth(cameraLens);
+            popup.height: Math.min(popup.implicitHeight, 8 * itemHeight + 4 * dpiScale);
+            onCurrentIndexChanged: if (!root.updatingCameraSelectors) root.updateCameraSearch();
+        }
+    }
+    BasicText {
+        visible: root.compatibleCameras.length > 0;
+        width: parent.width;
+        text: root.compatibleCameraSummary();
+        color: Qt.darker(styleTextColor, 1.25);
+        font.pixelSize: 11 * dpiScale;
+        elide: Text.ElideRight;
+    }
 
     SearchField {
         id: search;
@@ -205,18 +477,57 @@ MenuItem {
         width: parent.width;
         topPadding: 5 * dpiScale;
         profilesMenu: root;
+        autoSearch: false;
+        onTextChanged: if (!root.suppressSearchUpdate) root.searchProfiles();
         onSelected: (item) => {
-            const lensPathOrId = item[1];
-            if (lensPathOrId.endsWith(".gyroflow")) {
-                window.videoArea.loadGyroflowData(JSON.parse(controller.get_preset_contents(lensPathOrId)), 0);
-            } else {
-                root.selected_manually = true;
-                controller.load_lens_profile(lensPathOrId);
-            }
+            root.suppressSearchUpdate = true;
+            root.loadProfileItem(item);
+            Qt.callLater(() => root.suppressSearchUpdate = false);
         }
         popup.lv.delegate: LensProfileSearchDelegate {
             popup: search.popup;
             profilesMenu: root;
+        }
+    }
+    Row {
+        visible: root.reviewProfiles.length > 1 || ((root.profileChecksum || root.profilePath) && root.reviewProfiles.length > 0);
+        anchors.horizontalCenter: parent.horizontalCenter;
+        spacing: 5 * dpiScale;
+
+        Button {
+            iconName: "chevron-left";
+            text: "";
+            tooltip: qsTr("Previous profile");
+            width: 35 * dpiScale;
+            leftPadding: 5 * dpiScale;
+            rightPadding: 5 * dpiScale;
+            enabled: root.reviewProfiles.length > 1;
+            onClicked: root.reviewRelative(-1);
+        }
+        BasicText {
+            text: (root.reviewIndex >= 0? (root.reviewIndex + 1) : 0) + "/" + root.reviewProfiles.length;
+            height: 35 * dpiScale;
+            verticalAlignment: Text.AlignVCenter;
+        }
+        Button {
+            iconName: "chevron-right";
+            text: "";
+            tooltip: qsTr("Next profile");
+            width: 35 * dpiScale;
+            leftPadding: 5 * dpiScale;
+            rightPadding: 5 * dpiScale;
+            enabled: root.reviewProfiles.length > 1;
+            onClicked: root.reviewRelative(1);
+        }
+        Button {
+            iconName: "close";
+            text: "";
+            tooltip: qsTr("Hide profile locally");
+            width: 35 * dpiScale;
+            leftPadding: 5 * dpiScale;
+            rightPadding: 5 * dpiScale;
+            enabled: !!(root.profileChecksum || root.profilePath);
+            onClicked: root.hideCurrentProfile();
         }
     }
     Row {
@@ -266,9 +577,13 @@ MenuItem {
         Connections {
             target: officialInfo.t;
             function onLinkActivated(link: url): void {
-                controller.rate_profile(root.profileName, root.profileOriginalJson, root.profileChecksum, link === "#good");
-                if (link === "#good")
+                const isGood = link === "#good";
+                controller.rate_profile(root.profileName, root.profileOriginalJson, root.profileChecksum, isGood);
+                if (isGood) {
                     settings.setValue("rated-profile-" + root.profileChecksum, true);
+                } else {
+                    root.hideCurrentProfile();
+                }
                 officialInfo.thankYou = true;
                 officialInfo.canRate = false;
                 tyTimer.start();
