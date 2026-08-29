@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2026 dan0v <dev@dan0v.com>
 
 import QtQuick
 import QtQuick.Controls as QQC
@@ -822,6 +823,69 @@ Item {
                     onReset: root.resetTrim();
                 }
             }
+            Repeater {
+                id: replacementRegionsRepeater;
+                model: controller.replacement_regions_model;
+                // Theme-aware repair-region palette (orange accent, dimmed when disabled).
+                readonly property color fillSelected:  "#60ff6600";
+                readonly property color fillEnabled:   "#30ff6600";
+                readonly property color fillDisabled:  "#18000000";
+                readonly property color fillCoreSel:   "#80ff6600";
+                readonly property color fillCoreEn:    "#50ff6600";
+                readonly property color fillCoreDis:   "#20000000";
+                readonly property color borderSel:     "#ffaa00";
+                readonly property color borderEn:     "#ff6600";
+                readonly property color borderDis:    "#40000000";
+                Rectangle {
+                    required property var model;
+                    property real regionStart: model.start_us / (root.durationMs * 1000);
+                    property real regionEnd: model.end_us / (root.durationMs * 1000);
+                    property real regionBlend: model.blend_us / (root.durationMs * 1000);
+                    property bool isSelected: model.index === controller.selected_repair_region;
+                    x: parent.width * root.mapToVisibleArea(Math.max(0.0, regionStart - regionBlend));
+                    width: Math.max(4, parent.width * (root.mapToVisibleArea(Math.min(1.0, regionEnd + regionBlend)) - root.mapToVisibleArea(Math.max(0.0, regionStart - regionBlend))));
+                    y: (root.fullScreen || window.isMobileLayout? 0 : 35) * dpiScale;
+                    height: parent.height - y;
+                    color: isSelected ? replacementRegionsRepeater.fillSelected : (model.enabled ? replacementRegionsRepeater.fillEnabled : replacementRegionsRepeater.fillDisabled);
+                    border.width: (isSelected ? 2 : 1) * dpiScale;
+                    border.color: isSelected ? replacementRegionsRepeater.borderSel : (model.enabled ? replacementRegionsRepeater.borderEn : replacementRegionsRepeater.borderDis);
+                    radius: 2 * dpiScale;
+                    visible: root.durationMs > 0 && !isNaN(regionStart) && !isNaN(regionEnd);
+                    Rectangle {
+                        x: parent.parent.width * root.mapToVisibleArea(regionStart) - parent.x;
+                        width: parent.parent.width * (root.mapToVisibleArea(regionEnd) - root.mapToVisibleArea(regionStart));
+                        height: parent.height;
+                        color: isSelected ? replacementRegionsRepeater.fillCoreSel : (model.enabled ? replacementRegionsRepeater.fillCoreEn : replacementRegionsRepeater.fillCoreDis);
+                    }
+                    MouseArea {
+                        anchors.fill: parent;
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton;
+                        onClicked: (mouse) => {
+                            if (mouse.button === Qt.RightButton) {
+                                regionMenu.index = model.index;
+                                regionMenu.regionEnabled = model.enabled;
+                                regionMenu.popup();
+                            } else {
+                                controller.selected_repair_region = (controller.selected_repair_region === model.index) ? -1 : model.index;
+                                controller.selected_repair_region_changed();
+                            }
+                        }
+                    }
+                    QQC.Menu {
+                        id: regionMenu;
+                        property int index;
+                        property bool regionEnabled;
+                        QQC.Action {
+                            text: regionMenu.regionEnabled ? qsTr("Disable") : qsTr("Enable");
+                            onTriggered: controller.toggle_gyro_replace(regionMenu.index, !regionMenu.regionEnabled);
+                        }
+                        QQC.Action {
+                            text: qsTr("Remove");
+                            onTriggered: controller.remove_gyro_replace(regionMenu.index);
+                        }
+                    }
+                }
+            }
         }
 
         // Handle
@@ -875,6 +939,10 @@ Item {
                 if (isCalibrator) {
                     calibRepeater.model = controller.calib_model;
                 }
+            }
+            function onReplacement_regions_updated(): void {
+                replacementRegionsRepeater.model = [];
+                replacementRegionsRepeater.model = controller.replacement_regions_model;
             }
             function onCompute_progress(id: real, progress: real): void {
                 chartUpdateTimer.axes = true;

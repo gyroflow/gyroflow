@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2026 dan0v <dev@dan0v.com>
 
 mod file_metadata;
 mod imu_transforms;
@@ -33,6 +34,23 @@ pub type Quat64 = UnitQuaternion<f64>;
 pub type TimeIMU = telemetry_parser::util::IMUData;
 pub type TimeQuat = BTreeMap<i64, Quat64>; // key is timestamp_us
 pub type TimeVec = BTreeMap<i64, Vector3<f64>>; // key is timestamp_us
+
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+pub struct GyroReplacementRegion {
+    pub start_us: i64,
+    pub end_us: i64,
+    pub blend_us: i64,
+    #[serde(default)]
+    pub blend_method: i32,
+    #[serde(default = "default_blend_bias")]
+    pub blend_bias: f64,
+    pub of_quats: TimeQuat,
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+}
+
+fn default_true() -> bool { true }
+fn default_blend_bias() -> f64 { 0.5 }
 
 #[derive(Default, Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct FileLoadOptions {
@@ -70,7 +88,9 @@ pub struct GyroSource {
     offsets_linear: BTreeMap<i64, f64>, // <microseconds timestamp, offset in milliseconds> - linear fit
     offsets_adjusted: BTreeMap<i64, f64>, // <timestamp + offset, offset>
 
-    pub file_url: String
+    pub file_url: String,
+
+    pub replacement_regions: Vec<GyroReplacementRegion>,
 }
 
 impl GyroSource {
@@ -560,6 +580,7 @@ impl GyroSource {
         self.imu_transforms.glitch_filter = false;
         self.imu_transforms.glitch_strength = 0.0;
         self.file_metadata = Default::default();
+        self.replacement_regions.clear();
         self.clear_offsets();
     }
 
@@ -667,19 +688,28 @@ impl GyroSource {
             *q *= additional_rotation;
         }
 
+        let org_quats: TimeQuat = if self.replacement_regions.iter().any(|r| r.enabled && !r.of_quats.is_empty()) {
+            self.quaternions.keys().map(|&ts| {
+                let ts_ms = ts as f64 / 1000.0;
+                (ts, self.org_quat_at_gyro_us(ts, ts, ts_ms))
+            }).collect()
+        } else {
+            self.quaternions.clone()
+        };
+
         if true {
             // Lock horizon, then smooth
-            horizon_lock.lock(&mut smoothed_quaternions, &self.quaternions, &file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, compute_params);
+            horizon_lock.lock(&mut smoothed_quaternions, &org_quats, &file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, compute_params);
             smoothed_quaternions = alg.smooth(&smoothed_quaternions, self.duration_ms, compute_params);
         } else {
             // Smooth, then lock horizon
             smoothed_quaternions = alg.smooth(&smoothed_quaternions, self.duration_ms, compute_params);
-            horizon_lock.lock(&mut smoothed_quaternions, &self.quaternions, &file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, compute_params);
+            horizon_lock.lock(&mut smoothed_quaternions, &org_quats, &file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, compute_params);
         }
 
-        let max_angles = crate::Smoothing::get_max_angles(&self.quaternions, &smoothed_quaternions, compute_params);
+        let max_angles = crate::Smoothing::get_max_angles(&org_quats, &smoothed_quaternions, compute_params);
 
-        for (sq, q) in smoothed_quaternions.iter_mut().zip(self.quaternions.iter()) {
+        for (sq, q) in smoothed_quaternions.iter_mut().zip(org_quats.iter()) {
             // rotation quaternion from smooth motion -> raw motion to counteract it
             *sq.1 = sq.1.inverse() * q.1;
         }
@@ -854,11 +884,16 @@ impl GyroSource {
         self.integrate();
     }
 
-    fn quat_at_timestamp(&self, quats: &TimeQuat, mut timestamp_ms: f64) -> Quat64 {
+    pub fn quat_at_timestamp(&self, quats: &TimeQuat, mut timestamp_ms: f64) -> Quat64 {
         if quats.len() < 2 || self.duration_ms <= 0.0 { return Quat64::identity(); }
 
         timestamp_ms -= self.offset_at_video_timestamp(timestamp_ms);
 
+        Self::interp_quat(quats, timestamp_ms)
+    }
+
+    fn interp_quat(quats: &TimeQuat, timestamp_ms: f64) -> Quat64 {
+        if quats.len() < 2 { return Quat64::identity(); }
         if let Some(&first_ts) = quats.keys().next() {
             if let Some(&last_ts) = quats.keys().next_back() {
                 let lookup_ts = ((timestamp_ms * 1000.0).round() as i64).min(last_ts).max(first_ts);
@@ -878,7 +913,87 @@ impl GyroSource {
         Quat64::identity()
     }
 
-    pub fn      org_quat_at_timestamp(&self, timestamp_ms: f64) -> Quat64 { self.quat_at_timestamp(&self.quaternions,          timestamp_ms) }
+    pub fn org_quat_at_timestamp(&self, timestamp_ms: f64) -> Quat64 {
+        let ts_us = (timestamp_ms * 1000.0).round() as i64;
+        let offset_ms = self.offset_at_video_timestamp(timestamp_ms);
+        let gyro_ts_ms = timestamp_ms - offset_ms;
+        let gyro_ts_us = (gyro_ts_ms * 1000.0).round() as i64;
+        self.org_quat_at_gyro_us(ts_us, gyro_ts_us, gyro_ts_ms)
+    }
+
+    fn org_quat_at_gyro_us(&self, ts_us: i64, gyro_ts_us: i64, gyro_ts_ms: f64) -> Quat64 {
+        self.org_quat_at_gyro_us_below(ts_us, gyro_ts_us, gyro_ts_ms, usize::MAX)
+    }
+
+    /// Resolve the orientation at `gyro_ts_us`, applying replacement regions.
+    /// Regions are scanned **back-to-front** so that later-added regions take
+    /// precedence over earlier ones. When a region's blend window is active, the
+    /// blend base is computed by evaluating only the *earlier* (lower-index)
+    /// regions, so that later repairs compose on top of the state established by
+    /// prior enabled repairs. `max_idx` bounds which regions are eligible: only
+    /// regions with index `< max_idx` are consulted, which prevents infinite
+    /// recursion when two regions' blend windows overlap.
+    fn org_quat_at_gyro_us_below(&self, ts_us: i64, gyro_ts_us: i64, gyro_ts_ms: f64, max_idx: usize) -> Quat64 {
+        // Iterate back-to-front: last-added region wins. Only consider regions
+        // below `max_idx` so the recursive blend-base call cannot re-enter the
+        // region currently being blended.
+        for (i, region) in self.replacement_regions.iter().enumerate().rev() {
+            if i >= max_idx { continue; }
+            if !region.enabled || region.of_quats.is_empty() { continue; }
+            if region.blend_us <= 0 {
+                if gyro_ts_us >= region.start_us && gyro_ts_us <= region.end_us {
+                    return Self::interp_quat(&region.of_quats, gyro_ts_ms);
+                }
+                continue;
+            }
+            let blend_start = region.start_us - region.blend_us;
+            let blend_end = region.end_us + region.blend_us;
+            if gyro_ts_us >= blend_start && gyro_ts_us <= blend_end {
+                // Base orientation: earlier enabled regions (or raw gyro) at this ts.
+                let base = self.org_quat_at_gyro_us_below(ts_us, gyro_ts_us, gyro_ts_ms, i);
+                if gyro_ts_us < region.start_us {
+                    let base_at_boundary = self.org_quat_at_gyro_us_below(ts_us, region.start_us, region.start_us as f64 / 1000.0, i);
+                    let of_at_boundary = Self::interp_quat(&region.of_quats, region.start_us as f64 / 1000.0);
+                    let correction = of_at_boundary * base_at_boundary.inverse();
+                    let t_raw = (gyro_ts_us - blend_start) as f64 / region.blend_us as f64;
+                    let t = Self::apply_blend_easing(t_raw, region.blend_method, region.blend_bias);
+                    return Quat64::identity().slerp(&correction, t) * base;
+                } else if gyro_ts_us > region.end_us {
+                    let base_at_boundary = self.org_quat_at_gyro_us_below(ts_us, region.end_us, region.end_us as f64 / 1000.0, i);
+                    let of_at_boundary = Self::interp_quat(&region.of_quats, region.end_us as f64 / 1000.0);
+                    let correction = of_at_boundary * base_at_boundary.inverse();
+                    let t_raw = (blend_end - gyro_ts_us) as f64 / region.blend_us as f64;
+                    let t = Self::apply_blend_easing(t_raw, region.blend_method, region.blend_bias);
+                    return Quat64::identity().slerp(&correction, t) * base;
+                } else {
+                    return Self::interp_quat(&region.of_quats, gyro_ts_ms);
+                }
+            }
+        }
+        Self::interp_quat(&self.quaternions, gyro_ts_ms)
+    }
+
+    /// Blend easing. `method == 0` is linear; otherwise a Schlick bias term
+    /// `t^(log(0.5)/log(bias))` (Schlick 1994) shapes the input, followed by a
+    /// cosine S-curve `(1 - cos(pi*t))/2` for smooth acceleration/deceleration.
+    /// `bias == 0.5` collapses the Schlick term to identity (symmetric ease).
+    fn apply_blend_easing(t: f64, method: i32, bias: f64) -> f64 {
+        let t = t.clamp(0.0, 1.0);
+        match method {
+            0 => t,
+            _ => {
+                let bias = bias.clamp(0.01, 0.99);
+                let k = if (bias - 0.5).abs() < 0.01 {
+                    1.0
+                } else {
+                    (0.5_f64).ln() / bias.ln()
+                };
+                let t_biased = t.powf(k);
+                (1.0 - (t_biased * std::f64::consts::PI).cos()) / 2.0
+            }
+        }
+    }
+
     pub fn smoothed_quat_at_timestamp(&self, timestamp_ms: f64) -> Quat64 { self.quat_at_timestamp(&self.smoothed_quaternions, timestamp_ms) }
 
     pub fn offset_at_timestamp(offsets: &BTreeMap<i64, f64>, timestamp_ms: f64) -> f64 {
@@ -999,5 +1114,31 @@ impl GyroSource {
         }
 
         (bias_vals[0], bias_vals[1], bias_vals[2])
+    }
+
+    pub fn add_replacement_region(&mut self, region: GyroReplacementRegion) -> usize {
+        if let Some(idx) = self.replacement_regions.iter().position(|r| r.start_us == region.start_us && r.end_us == region.end_us) {
+            self.replacement_regions[idx] = region;
+            idx
+        } else {
+            self.replacement_regions.push(region);
+            self.replacement_regions.len() - 1
+        }
+    }
+
+    pub fn remove_replacement_region(&mut self, index: usize) {
+        if index < self.replacement_regions.len() {
+            self.replacement_regions.remove(index);
+        }
+    }
+
+    pub fn set_replacement_region_enabled(&mut self, index: usize, enabled: bool) {
+        if let Some(r) = self.replacement_regions.get_mut(index) {
+            r.enabled = enabled;
+        }
+    }
+
+    pub fn clear_replacement_regions(&mut self) {
+        self.replacement_regions.clear();
     }
 }
