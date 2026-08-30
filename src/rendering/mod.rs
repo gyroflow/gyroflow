@@ -380,8 +380,9 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         proc.video.encoder_params.options.set("b_ref_mode", "disabled");
     }
 
-    if cfg!(target_os = "android") {
+    if encoder.0.contains("mediacodec") {
         proc.video.encoder_params.options.set("ndk_codec", "1");
+        proc.video.encoder_params.options.set("ndk_async", "1");
     }
 
     proc.video.encoder_params.keyframe_distance_s = render_options.keyframe_distance.max(0.0001);
