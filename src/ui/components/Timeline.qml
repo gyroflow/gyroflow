@@ -410,6 +410,7 @@ Item {
                                 iconName: "ease_in";
                                 text: qsTr("Ease in");
                                 checkable: true;
+                                enabled: !smoothKf.checked;
                                 onTriggered: keyframeContextMenu.updateEasing();
                             }
                             Action {
@@ -417,18 +418,31 @@ Item {
                                 iconName: "ease_out";
                                 text: qsTr("Ease out");
                                 checkable: true;
+                                enabled: !smoothKf.checked;
+                                onTriggered: keyframeContextMenu.updateEasing();
+                            }
+                            Action {
+                                id: smoothKf;
+                                iconName: "ease_smooth";
+                                text: qsTr("Smooth");
+                                checkable: true;
                                 onTriggered: keyframeContextMenu.updateEasing();
                             }
                             function updateEasingMenu(): void {
                                 let e = controller.keyframe_easing(pressedKeyframe, pressedKeyframeTs);
-                                easeIn.checked  = e == "EaseIn"  || e == "EaseInOut";
-                                easeOut.checked = e == "EaseOut" || e == "EaseInOut";
+                                easeIn.checked   = e == "EaseIn"  || e == "EaseInOut";
+                                easeOut.checked  = e == "EaseOut" || e == "EaseInOut";
+                                smoothKf.checked = e == "Smooth";
                             }
                             function updateEasing(): void {
                                 let e = "NoEasing";
-                                if (easeIn.checked) e = "EaseIn";
-                                if (easeOut.checked) e = "EaseOut";
-                                if (easeIn.checked && easeOut.checked) e = "EaseInOut";
+                                if (smoothKf.checked) {
+                                    e = "Smooth";
+                                } else {
+                                    if (easeIn.checked) e = "EaseIn";
+                                    if (easeOut.checked) e = "EaseOut";
+                                    if (easeIn.checked && easeOut.checked) e = "EaseInOut";
+                                }
                                 controller.set_keyframe_easing(pressedKeyframe, pressedKeyframeTs, e);
                             }
                         }
