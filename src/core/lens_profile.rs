@@ -144,6 +144,10 @@ impl LensProfile {
             radial_distortion_limit: None
         };
 
+        self.finalize();
+    }
+
+    pub fn finalize(&mut self) {
         self.calibrator_version = env!("CARGO_PKG_VERSION").to_string();
         self.date = time::OffsetDateTime::now_local().map(|v| v.date().to_string()).unwrap_or_default();
         self.name = self.get_name();

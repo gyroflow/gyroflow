@@ -208,7 +208,7 @@ Window {
                             }
 
                             calibrator_window.getSaveFileUrl(folder, output, function(url) {
-                                controller.export_lens_profile(url, lensCalib.calibrationInfo, lensCalib.uploadProfile.checked);
+                                controller.export_lens_profile(url, lensCalib.calibrationInfo, lensCalib.uploadProfile.checked && lensCalib.uploadProfile.enabled);
                             }, "Lens profile");
                         }
                         batch.runIn(1000, function() { batch.start(); });

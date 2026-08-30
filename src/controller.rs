@@ -54,6 +54,7 @@ pub struct Controller {
     video_file_loaded: qt_method!(fn(&self, player: QJSValue)),
     load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, sample_index: i32, project_version: u32)),
     load_lens_profile: qt_method!(fn(&mut self, url_or_id: QString)),
+    reset_lens_profile: qt_method!(fn(&mut self)),
     get_preset_contents: qt_method!(fn(&mut self, url_or_id: QString) -> QString),
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool) -> bool),
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
@@ -871,6 +872,27 @@ impl Controller {
         self.lens_loaded = true;
         self.lens_changed();
         self.lens_profile_loaded(QString::from(json), QString::from(filepath), QString::from(checksum));
+        self.request_recompute();
+    }
+    /// Drops the lens geometry, keeping the settings that don't come from the profile itself (stretch, digital lens)
+    fn reset_lens_profile(&mut self) {
+        {
+            let mut lens = self.stabilizer.lens.write();
+            lens.fisheye_params = Default::default();
+            lens.calib_dimension = Default::default();
+            lens.distortion_model = None;
+            lens.focal_length = None;
+            lens.crop_factor = None;
+            // If a chessboard calibration was already computed, go back to it
+            #[cfg(feature = "opencv")]
+            if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
+                if !cal.used_points.is_empty() {
+                    lens.set_from_calibrator(cal);
+                }
+            }
+        }
+        self.lens_loaded = false;
+        self.lens_changed();
         self.request_recompute();
     }
     fn load_default_preset(&mut self) {
@@ -1834,14 +1856,24 @@ impl Controller {
         }
     }
 
+    /// A profile generated directly (eg. from the focal length) already carries its camera matrix,
+    /// only the ones coming from the chessboard calibration need to be filled in.
+    fn fill_profile_from_calibrator(&self, profile: &mut core::lens_profile::LensProfile) {
+        if profile.fisheye_params.camera_matrix.len() == 3 && profile.calib_dimension.w > 0 && profile.calib_dimension.h > 0 {
+            profile.finalize();
+            return;
+        }
+        #[cfg(feature = "opencv")]
+        if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
+            profile.set_from_calibrator(cal);
+        }
+    }
+
     fn export_lens_profile_filename(&self, info: QJsonObject) -> QString {
         let info_json = info.to_json().to_string();
 
         if let Ok(mut profile) = core::lens_profile::LensProfile::from_json(&info_json) {
-            #[cfg(feature = "opencv")]
-            if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
-                profile.set_from_calibrator(cal);
-            }
+            self.fill_profile_from_calibrator(&mut profile);
             let name = profile.get_name()
                 .replace([':', '|', '*', ':'], "_")
                 .replace(['<', '"', '>', '/', '\\'], "");
@@ -1856,10 +1888,7 @@ impl Controller {
 
         match core::lens_profile::LensProfile::from_json(&info_json) {
             Ok(mut profile) => {
-                #[cfg(feature = "opencv")]
-                if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
-                    profile.set_from_calibrator(cal);
-                }
+                self.fill_profile_from_calibrator(&mut profile);
 
                 match profile.save_to_file(&url) {
                     Ok(json) => {
