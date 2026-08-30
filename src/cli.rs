@@ -301,7 +301,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
         let queue_ptr = unsafe { qmetaobject::QObjectPinned::new(&queue).get_or_create_cpp_object() };
 
         if let Some(watch) = opts.watch {
-            watching = watch_folder(watch, |path| {
+            if let Err(e) = watch_folder(watch, |path| {
                 if !path.contains(&suffix) {
                     log::info!("New file detected: {}", path);
                     let extensions = [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "exr", "dng", "braw" ];
@@ -314,7 +314,12 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                         });
                     }
                 }
-            });
+            }) {
+                // Nothing is being watched and nothing was queued, so the event loop would just hang forever
+                log::error!("{}", e);
+                return true;
+            }
+            watching = true;
         }
 
         unsafe {
@@ -633,16 +638,20 @@ fn setup_defaults(stab: &Arc<StabilizationManager>, queue: &mut RenderQueue) -> 
 }
 
 // TODO: replace with `notify` crate
-fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> bool {
-    if path.is_empty() { return false; }
-    if !std::path::Path::new(&path).exists() { log::info!("{} doesn't exist.", path); return false; }
+fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> Result<(), String> {
+    if path.is_empty() { return Err("The watch folder path is empty.".to_string()); }
+    match std::fs::metadata(&path) {
+        Err(e) => { return Err(format!("Unable to access the watch folder {}: {}", path, e)); },
+        Ok(md) if !md.is_dir() => { return Err(format!("The watch path is not a folder: {}", path)); },
+        Ok(_) => { }
+    }
 
-    let path = QString::from(path);
+    let path_q = QString::from(path.as_str());
     let func: Box<dyn FnMut(String)> = Box::new(cb);
     let cb_ptr = Box::into_raw(func);
-    cpp!(unsafe [path as "QString", cb_ptr as "TraitObject2"] -> bool as "bool" {
+    let watched_count = cpp!(unsafe [path_q as "QString", cb_ptr as "TraitObject2"] -> i32 as "int" {
         int argc = 0;
-        globalApp = new QCoreApplication(argc, nullptr);
+        if (!globalApp) globalApp = new QCoreApplication(argc, nullptr);
 
         auto w = new QFileSystemWatcher();
         auto existing = new QStringList();
@@ -678,25 +687,68 @@ fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> bool {
             }
         });
 
-        QDirIterator it(path, QDirIterator::Subdirectories);
+        int failedCount = 0;
+        // The root folder itself, QDirIterator only reports its contents
+        if (!w->addPath(QFileInfo(path_q).absoluteFilePath())) failedCount++;
+
+        QDirIterator it(path_q, QDirIterator::Subdirectories);
         while (it.hasNext()) {
             it.next();
             auto i = it.fileInfo();
-            if (i.fileName() == "..") continue;
-            if (i.isDir()) w->addPath(i.absoluteFilePath());
+            // "." would be the already added parent folder, and addPath fails on duplicates
+            if (i.fileName() == "." || i.fileName() == "..") continue;
+            if (i.isDir() && !w->addPath(i.absoluteFilePath())) failedCount++;
             if (i.isFile()) existing->append(i.absoluteFilePath());
         }
         QObject::connect(w, &QFileSystemWatcher::directoryChanged, [=](const QString &file) {
             auto &paths2 = (*paths)[file];
 
+            QStringList watchedDirs; // Filled lazily, only to tell "already watched" apart from an actual failure
             for (const auto &i : QDir(file).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Readable)) {
                 if (i.fileName() == "..") continue;
-                if (i.isDir()) w->addPath(i.absoluteFilePath());
+                if (i.isDir() && !w->addPath(i.absoluteFilePath())) {
+                    if (watchedDirs.isEmpty()) watchedDirs = w->directories();
+                    QString failedPath = i.absoluteFilePath();
+                    if (!watchedDirs.contains(failedPath)) {
+                        rust!(Rust_Gyroflow_cli_watch_subfolder_failed [failedPath: QString as "QString"] {
+                            log::warn!("Unable to watch the new subfolder {}, files added there will be ignored.", failedPath.to_string());
+                        });
+                    }
+                }
                 if (i.isFile() && !existing->contains(i.absoluteFilePath()))
                     paths2.insert(i.absoluteFilePath(), 0);
             }
+            if (w->directories().isEmpty()) {
+                rust!(Rust_Gyroflow_cli_watch_gone [path_q: QString as "QString"] {
+                    log::error!("{} is not being watched anymore (deleted or unmounted?), no new files will be processed.", path_q.to_string());
+                });
+            }
             t->start(1000);
         });
-        return !w->directories().isEmpty();
-    })
+
+        if (failedCount > 0) {
+            rust!(Rust_Gyroflow_cli_watch_partial [failedCount: i32 as "int"] {
+                log::warn!("{} subfolder(s) couldn't be watched, files added there will be ignored.{}", failedCount,
+                    if cfg!(target_os = "linux") { " You may need to increase `fs.inotify.max_user_watches`." } else { "" });
+            });
+        }
+
+        int count = (int)w->directories().size();
+        if (count == 0) {
+            // Nothing references the Rust callback anymore after this, so the caller can safely take it back
+            delete t;
+            delete w;
+            delete existing;
+            delete paths;
+        }
+        return count;
+    });
+
+    if watched_count <= 0 {
+        drop(unsafe { Box::from_raw(cb_ptr) }); // The C++ side was torn down, don't leak the callback
+        return Err(format!("Unable to watch the folder {}. It may be inaccessible, or the system limit of watched folders was reached.", path));
+    }
+
+    log::info!("Watching {} folder(s) in {}, waiting for new files...", watched_count, path);
+    Ok(())
 }
