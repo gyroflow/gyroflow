@@ -1211,9 +1211,17 @@ impl StabilizationManager {
         {
             let mut params = self.params.write();
             if (fps - params.fps).abs() > 0.001 {
-                params.fps_scale = Some(fps / params.fps);
+                if params.fps > 0.0 {
+                    let scale = fps / params.fps;
+                    params.set_fps_scale(Some(scale));
+                } else {
+                    // The video frame rate is not known, so there's nothing to scale against.
+                    // This can happen eg. when the file gets unloaded while its telemetry is still being parsed in the background.
+                    log::warn!("Unable to override video fps to {fps}, because the source fps is unknown");
+                    params.set_fps_scale(None);
+                }
             } else {
-                params.fps_scale = None;
+                params.set_fps_scale(None);
             }
             self.gyro.write().init_from_params(&params);
             self.keyframes.write().timestamp_scale = params.fps_scale;
@@ -1496,7 +1504,7 @@ impl StabilizationManager {
                 if let Some(v) = vid_info.get("num_frames") .and_then(|x| x.as_u64()) { params.frame_count    = v as usize; }
                 if let Some(v) = vid_info.get("fps")        .and_then(|x| x.as_f64()) { params.fps            = v; }
                 if let Some(v) = vid_info.get("duration_ms").and_then(|x| x.as_f64()) { params.duration_ms    = v; }
-                if let Some(v) = vid_info.get("fps_scale") { params.fps_scale = v.as_f64(); }
+                if let Some(v) = vid_info.get("fps_scale") { params.set_fps_scale(v.as_f64()); }
 
                 self.gyro.write().init_from_params(&params);
                 self.keyframes.write().timestamp_scale = params.fps_scale;
