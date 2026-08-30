@@ -47,7 +47,7 @@ export MACOSX_DEPLOYMENT_TARGET := "10.15"
 # ――――――――――――――――――――――――――――――――――――――― MacOS ―――――――――――――――――――――――――――――――――――――――――
 
 # ――――――――――――――――――――――――――――――――――――――― Clang ―――――――――――――――――――――――――――――――――――――――――
-LlvmLibDir := if os() == "linux" { `(llvm-config --libdir 2>/dev/null || ls -d /usr/lib/llvm-*/lib 2>/dev/null | sort -V | tail -n1) || true` } else { "" }
+LlvmLibDir := if os() == "linux" { `d=""; for x in $(ls -d /usr/lib/llvm-*/lib 2>/dev/null | sort -V); do v=${x#/usr/lib/llvm-}; v=${v%/lib}; [ "$v" -ge 13 ] 2>/dev/null && d=$x; done; if [ -z "$d" ]; then v=$(llvm-config --version 2>/dev/null | cut -d. -f1); [ "${v:-0}" -ge 13 ] 2>/dev/null && d=$(llvm-config --libdir 2>/dev/null); fi; echo "$d"` } else { "" }
 export LIBCLANG_PATH := if os() == "macos" {
    DYLD_FALLBACK_LIBRARY_PATH
 } else {

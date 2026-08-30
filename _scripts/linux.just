@@ -49,10 +49,8 @@ install-deps:
         rm -rf {{ExtDir}}/vcpkg/downloads
     fi
 
-    if [[ ! -d "${LIBCLANG_PATH}" ]]; then
-        if [ "{{AptGetExists}}" == "true" ]; then
-            sudo apt-get install -y libclang-dev
-        fi
+    if [ "{{AptGetExists}}" == "true" ]; then
+        sudo apt-get install -y libclang-13-dev || true
     fi
 
     pushd {{ExtDir}}
