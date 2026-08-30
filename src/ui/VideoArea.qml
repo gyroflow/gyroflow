@@ -737,6 +737,12 @@ Item {
                     property bool errorShown: false;
                     onMetadataChanged: {
                         if (vid.videoWidth > 0) {
+                            // The video size may arrive after the "size"/metadataLoaded event
+                            // (e.g. the first BRAW decode, while the GPU decoder is still
+                            // initializing), so correct the one-shot "loaded" latch here.
+                            if (!loaded) {
+                                loaded = true;
+                            }
                             // Trigger seek to buffer the video frames
                             if (vid.duration == 0) {
                                 vid.play();
