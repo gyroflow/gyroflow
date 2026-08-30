@@ -202,7 +202,7 @@ Modal {
                                     onClicked: (mouse) => {
                                         const invert = mouse.modifiers & Qt.ControlModifier;
                                         sectionsArea.forAllCheckboxes(sectionsArea, function(cb) {
-                                            if (!cb.enabled) return;
+                                            if (cb.unavailable) return;
                                             if (invert  && cb.parent == groupCb) return;
                                             if (!invert && cb.parent != groupCb) return;
                                             if (invert && root.defaultOff.includes(cb.group + cb.props[0])) return;
@@ -216,9 +216,9 @@ Modal {
                                 model: modelData[1];
                                 CheckBox {
                                     text: qsTr(modelData[0]);
-                                    enabled: !root.unavailable.includes(group + props[0]);
-                                    checked: enabled && !root.defaultOff.includes(group + props[0]);
-                                    tooltip: enabled? "" : qsTr("This data is not present in the loaded file.");
+                                    unavailable: root.unavailable.includes(group + props[0]);
+                                    checked: !unavailable && !root.defaultOff.includes(group + props[0]);
+                                    tooltip: unavailable? qsTr("This data is not present in the loaded file.") : "";
                                     property string group: modelData[1];
                                     property var props: modelData[2];
                                 }
@@ -290,9 +290,9 @@ Modal {
                 for (const x of cb.props) {
                     if (cb.group) {
                         if (!finalObj[cb.group]) finalObj[cb.group] = { };
-                        finalObj[cb.group][x] = cb.checked && cb.enabled;
+                        finalObj[cb.group][x] = cb.checked && !cb.unavailable;
                     } else {
-                        finalObj[x] = cb.checked;
+                        finalObj[x] = cb.checked && !cb.unavailable;
                     }
                 }
             });
@@ -349,7 +349,7 @@ Modal {
         }
 
         sectionsArea.forAllCheckboxes(sectionsArea, function(cb) {
-            if (!cb.enabled) return;
+            if (cb.unavailable) return;
             for (const x of cb.props) {
                 if (cb.group) {
                     cb.checked = obj[cb.group] && obj[cb.group][x];
