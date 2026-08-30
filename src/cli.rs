@@ -20,6 +20,8 @@ cpp! {{
     #include <QFileSystemWatcher>
     #include <QTimer>
     #include <QDirIterator>
+    #include <QFileInfo>
+    #include <QDateTime>
     #include <QMap>
 
     QCoreApplication *globalApp = nullptr;
@@ -450,18 +452,22 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             });
             connect!(queue_ptr, q, processing_done, |job_id: &u32, by_preset: &bool| {
                 let queue = &mut *queue.as_ptr();
-                log::info!("[{:08x}] Processing done", job_id);
 
-                if let Some(file) = lens_profiles.first() {
-                    // Apply lens profile
-                    log::info!("Loading lens profile {}", file);
-                    let stab = queue.get_stab_for_job(*job_id).unwrap();
-                    stab.load_lens_profile(file).expect("Loading lens profile");
-                    stab.recompute_blocking();
+                // A file that failed to load never made it into the queue, it only needs to be released below,
+                // otherwise a single unreadable file would stall the whole queue forever
+                if let Some(stab) = queue.get_stab_for_job(*job_id) {
+                    log::info!("[{:08x}] Processing done", job_id);
+
+                    if let Some(file) = lens_profiles.first() {
+                        // Apply lens profile
+                        log::info!("Loading lens profile {}", file);
+                        stab.load_lens_profile(file).expect("Loading lens profile");
+                        stab.recompute_blocking();
+                    }
+
+                    let fname = queue.get_job_output_filename(*job_id).to_string();
+                    if let Some(pb) = pbs.get(job_id) { pb.set_message(fname); }
                 }
-
-                let fname = queue.get_job_output_filename(*job_id).to_string();
-                pbs.get(job_id).unwrap().set_message(fname);
 
                 queue.jobs_added.remove(job_id);
 
@@ -509,6 +515,11 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             }).unwrap_or_default();
             for file in &videos {
                 queue.add_file(path_to_url(file), path_to_url(&gyro_file), additional_data.to_string());
+            }
+            if queue.jobs_added.is_empty() {
+                // Nothing was queued, so `processing_done` will never fire, the queue would never start and the event loop would hang forever
+                log::error!("None of the input files could be added to the render queue.");
+                return true;
             }
         }
 
@@ -655,9 +666,14 @@ fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> Result<(), String> {
 
         auto w = new QFileSystemWatcher();
         auto existing = new QStringList();
-        auto paths = new QMap<QString, QMap<QString, qint64> >();
+        // A file is only complete once its size stopped changing for a few consecutive checks and
+        // nothing wrote to it for a while - otherwise a file that is still being copied into the
+        // watched folder gets picked up half written
+        auto paths = new QMap<QString, QMap<QString, QPair<qint64, int> > >();
         auto t = new QTimer();
         QObject::connect(t, &QTimer::timeout, [=] {
+            const int stableChecks = 2; // consecutive checks (1s apart) with an unchanged size
+            const int minAgeSecs = 3;   // and nothing written to the file for at least this long
             bool anyWatching = false;
             for (const auto &file : paths->keys()) {
                 auto &paths2 = (*paths)[file];
@@ -667,7 +683,15 @@ fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> Result<(), String> {
                     if (f.open(QFile::ReadOnly)) {
                         auto size = f.size();
                         f.close();
-                        if (paths2[path] > 0 && paths2[path] == size) {
+                        // Negative if the timestamp is in the future, eg. clock skew on a network share
+                        auto age = QFileInfo(path).lastModified().secsTo(QDateTime::currentDateTime());
+                        auto entry = paths2.value(path);
+                        if (entry.first != size) {
+                            entry = QPair<qint64, int>(size, 0); // Still being written to
+                        } else if (size > 0 && (age >= minAgeSecs || age < 0)) {
+                            entry.second++;
+                        }
+                        if (entry.second >= stableChecks) {
                             rust!(Rust_Gyroflow_cli_watch [cb_ptr: *mut dyn FnMut(String) as "TraitObject2", path: QString as "QString"] {
                                 let mut cb = unsafe { Box::from_raw(cb_ptr) };
                                 cb(path.to_string());
@@ -677,7 +701,7 @@ fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> Result<(), String> {
                             existing->append(path);
                             paths2.remove(path);
                         } else {
-                            paths2[path] = size;
+                            paths2[path] = entry;
                         }
                     }
                 }
@@ -716,7 +740,7 @@ fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> Result<(), String> {
                     }
                 }
                 if (i.isFile() && !existing->contains(i.absoluteFilePath()))
-                    paths2.insert(i.absoluteFilePath(), 0);
+                    paths2.insert(i.absoluteFilePath(), QPair<qint64, int>(0, 0));
             }
             if (w->directories().isEmpty()) {
                 rust!(Rust_Gyroflow_cli_watch_gone [path_q: QString as "QString"] {

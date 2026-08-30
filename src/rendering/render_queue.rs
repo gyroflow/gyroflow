@@ -1173,6 +1173,11 @@ impl RenderQueue {
 
             this.processing_done(job_id, false);
         });
+        // Failures must report the end of the processing phase too, otherwise the job would stay in
+        // `jobs_added` forever and the CLI would never start the render queue (and never exit).
+        let processing_failed = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, _: ()| {
+            this.processing_done(job_id, false);
+        });
 
         let suffix = self.default_suffix.to_string();
 
@@ -1180,6 +1185,7 @@ impl RenderQueue {
 
         let additional_data2 = additional_data.clone();
         let additional_data3 = additional_data.clone();
+        let mut processing_started = false;
         if let Ok(additional_data) = serde_json::from_str(&additional_data) as serde_json::Result<serde_json::Value> {
             let mut sync_options = serde_json::Value::default();
             if let Some(sync) = additional_data.get("synchronization") {
@@ -1269,7 +1275,11 @@ impl RenderQueue {
                                     // It's a preset
                                     if let Ok(data) = filesystem::read_to_string(&url) {
                                         apply_preset((data, 0));
+                                    } else {
+                                        err(("An error occured: %1".to_string(), format!("Unable to read the preset file {}", url)));
                                     }
+                                    // The preset is applied to the already queued jobs, this job itself never enters the queue
+                                    processing_failed(());
                                     return;
                                 }
                             }
@@ -1311,6 +1321,7 @@ impl RenderQueue {
                                 },
                                 Err(e) => {
                                     err(("An error occured: %1".to_string(), format!("Error loading {}: {:?}", url, e)));
+                                    processing_failed(());
                                 }
                             }
                         } else if let Ok(info) = rendering::VideoProcessor::get_video_info(&url) {
@@ -1370,6 +1381,7 @@ impl RenderQueue {
                                             }
                                             Err(e) => {
                                                 err(("An error occured: %1".to_string(), e.to_string()));
+                                                processing_failed(());
                                                 return;
                                             }
                                         }
@@ -1409,15 +1421,24 @@ impl RenderQueue {
                                 }
 
                                 processing_done(());
+                            } else {
+                                err(("An error occured: %1".to_string(), format!("Unable to determine the video duration ({} ms) or frame rate ({} fps).", info.duration_ms, info.fps)));
+                                processing_failed(());
                             }
                         } else {
                             err(("An error occured: %1".to_string(), "Unable to read the video file.".to_string()));
+                            processing_failed(());
                         }
                     });
+                    processing_started = true;
                 }
             }
         }
-        self.jobs_added.insert(job_id);
+        if processing_started {
+            self.jobs_added.insert(job_id);
+        } else {
+            ::log::error!("[{:08x}] Invalid output parameters, the file was not added.", job_id);
+        }
 
         job_id
     }
