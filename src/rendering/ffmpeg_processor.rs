@@ -316,7 +316,7 @@ impl<'a> FfmpegProcessor<'a> {
                 let codec = encoder::find_by_name(self.video_codec.as_ref().ok_or(Error::EncoderNotFound)?).ok_or(Error::EncoderNotFound)?;
                 unsafe {
                     if !codec.as_ptr().is_null() {
-                        self.video.codec_supported_formats = super::ffmpeg_hw::pix_formats_to_vec((*codec.as_ptr()).pix_fmts);
+                        self.video.codec_supported_formats = super::ffmpeg_hw::codec_pix_formats(std::ptr::null(), codec.as_ptr());
                         log::debug!("Codec formats: {:?}", self.video.codec_supported_formats);
                     }
                 }
