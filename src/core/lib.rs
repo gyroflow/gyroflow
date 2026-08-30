@@ -410,12 +410,10 @@ impl StabilizationManager {
     }
 
     pub fn extract_focal_lengths(compute_params: &ComputeParams) -> Vec<Option<f64>> {
-        use crate::util::MapClosest;
-
         let gyro = compute_params.gyro.read();
         let file_metadata = gyro.file_metadata.read();
 
-        if file_metadata.lens_params.is_empty() {
+        if !file_metadata.has_per_frame_focal_length() {
             return vec![];
         }
 
@@ -426,7 +424,7 @@ impl StabilizationManager {
             let timestamp_us = (timestamp_ms * 1000.0).round() as i64;
 
             // Try to get focal length from lens_params (within 100ms window)
-            let focal_length = file_metadata.lens_params.get_closest(&timestamp_us, 100000)
+            let focal_length = file_metadata.lens_params_closest(timestamp_us, 100000, |v| v.focal_length.is_some())
                 .and_then(|val| val.focal_length.map(|fl| fl as f64));
 
             focal_lengths.push(focal_length);
@@ -441,10 +439,10 @@ impl StabilizationManager {
             (sp.focal_length_smoothing_enabled, sp.focal_length_smoothing_strength)
         };
 
-        let focal_lengths = if params.gyro.read().file_metadata.read().lens_params.is_empty() {
-            Vec::new()
-        } else {
+        let focal_lengths = if params.gyro.read().file_metadata.read().has_per_frame_focal_length() {
             Self::extract_focal_lengths(params)
+        } else {
+            Vec::new()
         };
 
         let smoothing_active = enabled && !focal_lengths.is_empty();

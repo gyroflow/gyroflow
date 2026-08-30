@@ -22,7 +22,26 @@ pub struct LensParams {
     pub pixel_focal_length: Option<(f32, f32)>, // (fx, fy) pixels
     pub principal_point: Option<(f32, f32)>, // (cx, cy) pixels (output pixel units)
     pub distortion_coefficients: Vec<f64>,
-    pub focus_distance: Option<f32>
+    pub focus_distance: Option<f32>, // meters
+    pub iris_fstop: Option<f32>, // f-number
+    pub iris_tstop: Option<f32>  // T-number
+}
+impl LensParams {
+    /// Whether the imager geometry is complete enough to be used for the stabilization
+    pub fn has_geometry(&self) -> bool {
+        self.pixel_pitch.is_some() && self.capture_area_size.is_some() && (self.pixel_focal_length.is_some() || self.focal_length.is_some())
+    }
+    pub fn has_descriptive_data(&self) -> bool {
+        self.focus_distance.is_some() || self.iris_fstop.is_some() || self.iris_tstop.is_some()
+    }
+    pub fn has_projection_data(&self) -> bool {
+        self.pixel_focal_length.is_some()
+            || (self.focal_length.is_some() && self.pixel_pitch.is_some() && self.capture_area_size.is_some())
+            || !self.distortion_coefficients.is_empty()
+    }
+    pub fn has_readout_scale(&self) -> bool {
+        self.capture_area_size.is_some() && self.sensor_size_px.is_some()
+    }
 }
 
 fn deserialize_pixel_focal_length<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Option<(f32, f32)>, D::Error> {
@@ -96,6 +115,38 @@ impl FileMetadata {
     }
     pub fn has_motion(&self) -> bool {
         !self.raw_imu.is_empty() || !self.quaternions.is_empty()
+    }
+    /// Number of `lens_params` samples that feed the projection. The map also holds entries with
+    /// nothing but the descriptive values, for cameras that report those but no geometry at all
+    pub fn lens_geometry_count(&self) -> usize {
+        self.lens_params.values().filter(|x| x.has_projection_data()).count()
+    }
+    pub fn has_per_frame_focal_length(&self) -> bool {
+        self.lens_params.values().any(|x| x.focal_length.is_some())
+    }
+    pub fn lens_params_closest(&self, timestamp_us: i64, max_diff: i64, pred: impl Fn(&LensParams) -> bool) -> Option<&LensParams> {
+        let max_diff = max_diff.max(0);
+        let min_ts = timestamp_us.saturating_sub(max_diff);
+        let max_ts = timestamp_us.saturating_add(max_diff);
+
+        // The two ranges overlap on an exact key hit; the tie-break below then picks that same entry
+        let before = self.lens_params.range(min_ts..=timestamp_us).rev().find(|(_, v)| pred(*v));
+        let after  = self.lens_params.range(timestamp_us..=max_ts) .find(|(_, v)| pred(*v));
+
+        // `abs_diff` returns an u64 and can't overflow, unlike `(key - other).abs()`
+        let closest = match (before, after) {
+            (Some(before), Some(after)) => if timestamp_us.abs_diff(*after.0) <= timestamp_us.abs_diff(*before.0) { after } else { before },
+            (Some(before), None)        => before,
+            (None,         Some(after)) => after,
+            (None,         None)        => return None
+        };
+        // The ranges above are inclusive on both ends, so an entry exactly `max_diff` away still needs rejecting.
+        // Anything farther than the closest matching entry is out of range as well, so one check is enough
+        if timestamp_us.abs_diff(*closest.0) < max_diff as u64 {
+            Some(closest.1)
+        } else {
+            None
+        }
     }
 }
 

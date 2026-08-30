@@ -15,6 +15,8 @@ MenuItem {
 
     property alias hasQuaternions: integrator.hasQuaternions;
     property bool hasAccurateTimestamps: false;
+    property bool hasFocusDistance: false;
+    property bool hasIris: false;
     property alias hasRawGyro: integrator.hasRawGyro;
     property alias integrationMethod: integrator.currentIndex;
     property alias orientationIndicator: orientationIndicator;
@@ -108,6 +110,8 @@ MenuItem {
             integrator.hasQuaternions = !additional_data.contains_quats;
             integrator.hasQuaternions = additional_data.contains_quats;
             root.hasAccurateTimestamps = additional_data.has_accurate_timestamps || false;
+            root.hasFocusDistance = additional_data.contains_focus_distance || false;
+            root.hasIris          = additional_data.contains_iris || false;
             if (additional_data.contains_quats && !is_main_video) {
                 if (integrator.hasRawGyro) {
                     integrator.currentIndex = 2;
@@ -749,6 +753,7 @@ MenuItem {
                                             "Quaternion":      ["quaternion"],
                                             "Euler angles":    ["euler_angles"],
                                             "Focus distances": ["focus_distances"],
+                                            "Iris (f/T-stop)": ["iris"],
                                         },
                                     },
                                     {
@@ -765,7 +770,11 @@ MenuItem {
                                         },
                                     }
                                 ],
-                                type: "gyro_csv"
+                                type: "gyro_csv",
+                                // Files with only built-in quaternions (eg. DJI) have no raw IMU data to export
+                                unavailable: (integrator.hasRawGyro?    [] : ["originalgyroscope", "originalaccelerometer"])
+                                     .concat(root.hasFocusDistance?     [] : ["originalfocus_distances"])
+                                     .concat(root.hasIris?              [] : ["originaliris"])
                             });
                             let savedState = settings.value("CSVExportSelection", "");
                             if (savedState) {

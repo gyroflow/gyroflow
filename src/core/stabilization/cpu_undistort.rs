@@ -8,6 +8,12 @@ use nalgebra::{ Vector2, Vector3, Vector4, Matrix3 };
 use rayon::{ prelude::ParallelSliceMut, iter::{ ParallelIterator, IndexedParallelIterator } };
 use crate::util::map_coord;
 
+pub const INVALID_POINT: (f32, f32) = (-1_000_000.0, -1_000_000.0);
+
+pub fn is_valid_point(p: (f32, f32)) -> bool {
+    p.0.is_finite() && p.1.is_finite() && p.0 > INVALID_POINT.0 / 2.0 && p.1 > INVALID_POINT.1 / 2.0
+}
+
 pub const COEFFS: [f32; 64+128+256 + 9*4 + 4] = [
     // Bilinear
     // offset 0
@@ -136,7 +142,7 @@ impl Stabilization {
         let _y = (pos.0 * matrices[3]) + (pos.1 * matrices[4]) + matrices[5] + params.translation3d[1];
         let mut _w = (pos.0 * matrices[6]) + (pos.1 * matrices[7]) + matrices[8] + params.translation3d[2];
         if _w > 0.0 {
-            if r_limit_sq > 0.0 && (_x.powi(2) + _y.powi(2)) > r_limit_sq * _w {
+            if params.r_limit > 0.0 && (_x.powi(2) + _y.powi(2)) > r_limit_sq * (_w * _w) {
                 return None;
             }
 
@@ -633,11 +639,11 @@ impl Stabilization {
     }
 }
 
-pub fn undistort_points_with_rolling_shutter(distorted: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, params: &ComputeParams, lens_correction_amount: f64, use_fovs: bool) -> Vec<(f32, f32)> {
+pub fn undistort_points_with_rolling_shutter(distorted: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, params: &ComputeParams, lens_correction_amount: f64, use_fovs: bool, clamp_to_image_circle: bool) -> Vec<(f32, f32)> {
     if distorted.is_empty() { return Vec::new(); }
-    let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh, fov) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms, frame, use_fovs);
+    let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh, fov, r_limit) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms, frame, use_fovs);
 
-    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), params, lens_correction_amount, fov, timestamp_ms, is, mesh)
+    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), params, lens_correction_amount, fov, timestamp_ms, is, mesh, if clamp_to_image_circle { r_limit } else { 0.0 })
 }
 pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us: i64, params: &ComputeParams, points_dims: (u32, u32)) -> Vec<(f32, f32)> {
     let img_dim_ratio = points_dims.0 as f64 / params.width.max(1) as f64;//FrameTransform::get_ratio(params);
@@ -646,12 +652,14 @@ pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us:
 
     let scaled_k = camera_matrix * img_dim_ratio;
 
-    undistort_points(distorted, scaled_k, &distortion_coeffs, Matrix3::identity(), None, None, params, 1.0, 1.0, timestamp_us as f64 / 1000.0, None, None)
+    // Optical flow matches real image features, so no image-circle clamping here - see `undistort_points`.
+    undistort_points(distorted, scaled_k, &distortion_coeffs, Matrix3::identity(), None, None, params, 1.0, 1.0, timestamp_us as f64 / 1000.0, None, None, 0.0)
 }
 // Ported from OpenCV: https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L321
-pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64; 12], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams, lens_correction_amount: f64, fov: f64, timestamp_ms: f64, shift_per_point: Option<Vec<(f32, f32, f32, f32, f32)>>, mesh: Option<Vec<f64>>) -> Vec<(f32, f32)> {
+pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64; 12], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams, lens_correction_amount: f64, fov: f64, timestamp_ms: f64, shift_per_point: Option<Vec<(f32, f32, f32, f32, f32)>>, mesh: Option<Vec<f64>>, r_limit: f64) -> Vec<(f32, f32)> {
     let f = (camera_matrix[(0, 0)] as f32, camera_matrix[(1, 1)] as f32);
     let c = (camera_matrix[(0, 2)] as f32, camera_matrix[(1, 2)] as f32);
+    let r_limit = r_limit as f32;
 
     let mut rr = rotation;
     if let Some(p) = p { // PP
@@ -763,21 +771,40 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
 
         let rot = nalgebra::convert::<nalgebra::Matrix3<f64>, nalgebra::Matrix3<f32>>(*rot_per_point.as_ref().and_then(|v| v.get(index)).unwrap_or(&rr));
 
-        if let Some(mut pt) = params.distortion_model.undistort_point(pw, &kernel_params) {
-            if kernel_params.light_refraction_coefficient != 1.0 && kernel_params.light_refraction_coefficient > 0.0 {
-                let r = (pt.0.powi(2) + pt.1.powi(2)).sqrt();
-                if r != 0.0 {
-                    let sin_theta_d = (r / (1.0 + r * r).sqrt()) / kernel_params.light_refraction_coefficient;
-                    let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
-                    let factor = r_d / r;
-                    pt.0 *= factor;
-                    pt.1 *= factor;
+        let ray = match params.distortion_model.undistort_point(pw, &kernel_params) {
+            Some(mut pt) => {
+                if kernel_params.light_refraction_coefficient != 1.0 && kernel_params.light_refraction_coefficient > 0.0 {
+                    let r = (pt.0.powi(2) + pt.1.powi(2)).sqrt();
+                    if r != 0.0 {
+                        let sin_theta_d = (r / (1.0 + r * r).sqrt()) / kernel_params.light_refraction_coefficient;
+                        let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
+                        let factor = r_d / r;
+                        pt.0 *= factor;
+                        pt.1 *= factor;
+                    }
                 }
-            }
+                if r_limit > 0.0 {
+                    let r = (pt.0.powi(2) + pt.1.powi(2)).sqrt();
+                    if r > r_limit {
+                        pt = (pt.0 * (r_limit / r), pt.1 * (r_limit / r));
+                    }
+                }
+                Some(pt)
+            },
+            None if r_limit > 0.0 => {
+                let r = (pw.0.powi(2) + pw.1.powi(2)).sqrt();
+                if r > 0.0 { Some((pw.0 * (r_limit / r), pw.1 * (r_limit / r))) } else { None }
+            },
+            None => None
+        };
 
+        if let Some(ray) = ray {
             // reproject
-            let pr = rot * nalgebra::Vector3::new(pt.0, pt.1, 1.0); // rotated point optionally multiplied by new camera matrix
-            pt = (pr[0] / pr[2], pr[1] / pr[2]);
+            let pr = rot * nalgebra::Vector3::new(ray.0, ray.1, 1.0); // rotated point optionally multiplied by new camera matrix
+            if !(pr[2] > 0.0) {
+                return INVALID_POINT;
+            }
+            let mut pt = (pr[0] / pr[2], pr[1] / pr[2]);
 
             if let Some((out_c, amount, factor, out_f)) = lens_correction {
                 // The digital warp is applied FOV-independently (un-zoom -> warp -> re-zoom below), so the
@@ -852,7 +879,7 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
             }
             pt
         } else {
-            (-1000000.0, -1000000.0)
+            INVALID_POINT
         }
     }).collect()
 }

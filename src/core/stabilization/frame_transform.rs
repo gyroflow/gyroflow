@@ -23,7 +23,7 @@ impl FrameTransform {
         let mut frame_readout_time = params.frame_readout_time.abs();
         let mut scale = 1.0;
         telemetry_parser::try_block!({
-            let val = file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000)?; // closest within 100ms
+            let val = file_metadata.lens_params_closest((timestamp_ms * 1000.0).round() as i64, 100000, |v| v.has_readout_scale())?; // closest within 100ms
             scale = val.capture_area_size?.1 as f64 / val.sensor_size_px?.1 as f64;
         });
         if can_invert && params.framebuffer_inverted && !params.frame_readout_direction.is_horizontal() {
@@ -100,8 +100,8 @@ impl FrameTransform {
         let mut stretch_lens = true;
         let digital_zoom = file_metadata.digital_zoom.unwrap_or_default();
 
-        if !file_metadata.lens_params.is_empty() && lens.fisheye_params.distortion_coeffs.len() < 4 {
-            if let Some(val) = file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
+        if lens.fisheye_params.distortion_coeffs.len() < 4 {
+            if let Some(val) = file_metadata.lens_params_closest((timestamp_ms * 1000.0).round() as i64, 100000, |v| v.has_projection_data()) { // closest within 100ms
                 let pixel_focal_length = val.pixel_focal_length.map(|f| (f.0 as f64, f.1 as f64)).or_else(|| {
                     let fl_mm = val.focal_length? as f64;
                     focal_length = Some(fl_mm);
@@ -349,14 +349,14 @@ impl FrameTransform {
         }
     }
 
-    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, use_fovs: bool) -> (Matrix3<f64>, [f64; 12], Matrix3<f64>, Vec<Matrix3<f64>>, Option<Vec<(f32, f32, f32, f32, f32)>>, Option<Vec<f64>>, f64) { // camera_matrix, dist_coeffs, p, rotations_per_point, shifts, mesh, fov
+    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, use_fovs: bool) -> (Matrix3<f64>, [f64; 12], Matrix3<f64>, Vec<Matrix3<f64>>, Option<Vec<(f32, f32, f32, f32, f32)>>, Option<Vec<f64>>, f64, f64) { // camera_matrix, dist_coeffs, p, rotations_per_point, shifts, mesh, fov, radial_distortion_limit
         // ----------- Keyframes -----------
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
         // ----------- Keyframes -----------
 
         let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, params.scaled_fps) as usize);
 
-        let (camera_matrix, distortion_coeffs, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, params.framebuffer_inverted);
+        let (camera_matrix, distortion_coeffs, radial_distortion_limit, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, params.framebuffer_inverted);
 
         let fl_compensation = Self::focal_length_fov_compensation(params, frame);
         let fov = Self::get_fov(params, frame, use_fovs, timestamp_ms, false) * fl_compensation;
@@ -434,6 +434,6 @@ impl FrameTransform {
             shifts = None;
         }
 
-        (scaled_k, distortion_coeffs, new_k, rotations, shifts, mesh_correction, fov)
+        (scaled_k, distortion_coeffs, new_k, rotations, shifts, mesh_correction, fov, radial_distortion_limit)
     }
 }

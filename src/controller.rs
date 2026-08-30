@@ -810,6 +810,12 @@ impl Controller {
                     additional_obj.insert("contains_quats".to_owned(),    serde_json::Value::Bool(has_quats));
                     additional_obj.insert("contains_motion".to_owned(),   serde_json::Value::Bool(has_motion));
                     additional_obj.insert("has_accurate_timestamps".to_owned(), serde_json::Value::Bool(file_metadata.has_accurate_timestamps));
+                    additional_obj.insert("contains_focus_distance".to_owned(), serde_json::Value::Bool(
+                        file_metadata.lens_params.values().any(|x| x.focus_distance.is_some())
+                    ));
+                    additional_obj.insert("contains_iris".to_owned(), serde_json::Value::Bool(
+                        file_metadata.lens_params.values().any(|x| x.iris_fstop.is_some() || x.iris_tstop.is_some())
+                    ));
                     additional_obj.insert("sample_rate".to_owned(),       serde_json::to_value(gyroflow_core::gyro_source::GyroSource::get_sample_rate(&*file_metadata)).unwrap());
                     let has_builtin_profile = file_metadata.lens_profile.as_ref().map(|y| y.is_object()).unwrap_or_default();
                     let md_data = file_metadata.additional_data.clone();
@@ -2144,7 +2150,7 @@ impl Controller {
         self.stabilizer.gyro.read().file_metadata.read().gravity_vectors.as_ref().map(|v| !v.is_empty()).unwrap_or_default()
     }
     fn has_per_frame_focal_length(&self) -> bool {
-        !self.stabilizer.gyro.read().file_metadata.read().lens_params.is_empty()
+        self.stabilizer.gyro.read().file_metadata.read().has_per_frame_focal_length()
     }
 
     fn get_focal_length_smoothing_enabled(&self) -> bool {
@@ -2381,7 +2387,7 @@ impl Controller {
     fn has_per_frame_lens_data(&self) -> bool {
         let gyro = self.stabilizer.gyro.read();
         let md = gyro.file_metadata.read();
-        md.camera_stab_data.len() > 1 || md.lens_params.len() > 1 || md.lens_positions.len() > 1 || md.mesh_correction.len() > 1
+        md.camera_stab_data.len() > 1 || md.lens_geometry_count() > 1 || md.lens_positions.len() > 1 || md.mesh_correction.len() > 1
     }
     fn export_stmap(&self, folder_url: QUrl, per_frame: bool) {
         let folder_url = util::qurl_to_encoded(folder_url);
