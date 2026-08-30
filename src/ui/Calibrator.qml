@@ -64,6 +64,13 @@ Window {
     function messageBox(type: int, text: string, buttons: list<var>, parent: QtObject, textFormat: int, identifier: string): Modal {
         return window.messageBox(type, text, buttons, parent || calibrator_window.contentItem, textFormat, identifier);
     }
+    function showNotification(type: int, text: string, textFormat: var): void {
+        window.showNotification(type, text, textFormat, videoArea.infoMessages);
+    }
+    // Same as `window.getSaveFileUrl`, but any dialog is presented on top of the calibrator window instead of the main one.
+    function getSaveFileUrl(folder: url, filename: string, cb, type: string): void {
+        window.getSaveFileUrl(folder, filename, cb, type, calibrator_window.contentItem);
+    }
 
     Connections {
         target: controller;
@@ -200,7 +207,7 @@ Window {
                                 if (i > 2000) break;
                             }
 
-                            window.getSaveFileUrl(folder, output, function(url) {
+                            calibrator_window.getSaveFileUrl(folder, output, function(url) {
                                 controller.export_lens_profile(url, lensCalib.calibrationInfo, lensCalib.uploadProfile.checked);
                             }, "Lens profile");
                         }

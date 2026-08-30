@@ -55,7 +55,7 @@ pub struct Controller {
     load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, sample_index: i32, project_version: u32)),
     load_lens_profile: qt_method!(fn(&mut self, url_or_id: QString)),
     get_preset_contents: qt_method!(fn(&mut self, url_or_id: QString) -> QString),
-    export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool)),
+    export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool) -> bool),
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
 
     set_of_method: qt_method!(fn(&self, v: u32)),
@@ -1844,7 +1844,7 @@ impl Controller {
         QString::default()
     }
 
-    fn export_lens_profile(&mut self, url: QUrl, info: QJsonObject, upload: bool) {
+    fn export_lens_profile(&mut self, url: QUrl, info: QJsonObject, upload: bool) -> bool {
         let url = util::qurl_to_encoded(url);
         let info_json = info.to_json().to_string();
 
@@ -1865,11 +1865,12 @@ impl Controller {
                                 }
                             });
                         }
+                        true
                     }
-                    Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); }
+                    Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
                 }
             },
-            Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); }
+            Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
         }
     }
 

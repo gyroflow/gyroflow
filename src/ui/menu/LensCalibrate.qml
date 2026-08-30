@@ -138,6 +138,22 @@ MenuItem {
         function propChanged() { settings.propChanged(sett); }
     }
 
+    function exportProfile(fileUrl: url, notify: bool): void {
+        const save = (upload) => {
+            // `export_lens_profile` reports failures itself, via `error()` -> a message box
+            if (controller.export_lens_profile(fileUrl, calib.calibrationInfo, upload) && notify)
+                calibrator_window.showNotification(Modal.Info, qsTr("Lens profile exported to %1.").arg("<b>" + filesystem.display_url(fileUrl) + "</b>"));
+        };
+        if (uploadProfile.checked) {
+            messageBox(Modal.Info, qsTr("By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.\nDo you want to submit your profile?"), [
+                { text: qsTr("Yes"), accent: true, clicked: () => save(true) },
+                { text: qsTr("No"),                clicked: () => save(false) }
+            ]);
+        } else {
+            save(false);
+        }
+    }
+
     FileDialog {
         id: fileDialog;
         fileMode: FileDialog.SaveFile;
@@ -146,16 +162,7 @@ MenuItem {
         title: qsTr("Export lens profile");
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Lens profiles") + " (*.json)"];
         type: "output-preset";
-        onAccepted: {
-            if (uploadProfile.checked) {
-                messageBox(Modal.Info, qsTr("By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.\nDo you want to submit your profile?"), [
-                    { text: qsTr("Yes"), accent: true, clicked: () => controller.export_lens_profile(selectedFile, calib.calibrationInfo, true) },
-                    { text: qsTr("No"),                clicked: () => controller.export_lens_profile(selectedFile, calib.calibrationInfo, false) }
-                ]);
-            } else {
-                controller.export_lens_profile(selectedFile, calib.calibrationInfo, uploadProfile.checked);
-            }
-        }
+        onAccepted: calib.exportProfile(selectedFile, false);
         Component.onCompleted: {
             if (Qt.platform.os != "android" && Qt.platform.os != "ios") {
                 currentFolder = filesystem.path_to_url(settings.dataDir("lens_profiles"));
@@ -311,7 +318,14 @@ MenuItem {
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
             list.commitAll();
-            fileDialog.selectedFile = controller.export_lens_profile_filename(calib.calibrationInfo);
+            const filename = controller.export_lens_profile_filename(calib.calibrationInfo);
+            if (Qt.platform.os == "ios") {
+                calibrator_window.getSaveFileUrl(filesystem.get_folder(calibrator_window.videoArea.loadedFileUrl), filename, function(url) {
+                    calib.exportProfile(url, true);
+                }, "Lens profile");
+                return;
+            }
+            fileDialog.selectedFile = filename;
             fileDialog.open2();
         }
     }
