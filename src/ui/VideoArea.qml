@@ -433,6 +433,9 @@ Item {
         vid.errorShown = false;
         render_queue.editing_job_id = 0;
         controller.load_video(url, vid);
+        // Arm the "first frame never arrived" retry for this load.
+        vid.loadRetryCount = 0;
+        loadRetryTimer.restart();
         if (!isCalibrator) {
             const suffix = window.advanced.defaultSuffix.text;
             window.outputFile.setFilename(filesystem.filename_with_suffix(filename, suffix).replace(/%0[0-9]+d/, ""));
@@ -644,6 +647,11 @@ Item {
                     Ease on opacity { }
                     anchors.fill: parent;
                     property bool loaded: false;
+                    // Number of automatic re-decode attempts made for the current file.
+                    // Some decoders (notably the BRAW GPU/OpenCL decoder) fail to produce
+                    // their first frame on the very first decode in a fresh process but work
+                    // fine on a retry, so we transparently re-issue the load a few times.
+                    property int loadRetryCount: 0;
 
                     property bool stabEnabled: stabEnabledBtn.checked;
                     transform: [
@@ -698,6 +706,7 @@ Item {
                     }
                     function fileLoaded(md: var): void {
                         loaded = vid.videoWidth > 0;
+                        if (loaded) loadRetryTimer.stop(); // loaded fine, cancel any pending retry
                         videoLoader.active = false;
                         vidInfo.loader = false;
                         timeline.resetTrim();
@@ -768,6 +777,33 @@ Item {
                                     vid.volume = volumeSlider.value / 100.0;
                                 }
                             });
+                        }
+                    }
+
+                    // If the video has not produced a frame within a few seconds of being
+                    // opened, re-issue the decode. This works around decoders (e.g. the
+                    // BRAW GPU/OpenCL decoder) that hang on their first decode in a fresh
+                    // process but succeed once re-issued. Normal files load well within the
+                    // window, so this is a no-op for them.
+                    Timer {
+                        id: loadRetryTimer;
+                        interval: 8000;
+                        repeats: false;
+                        onTriggered: {
+                            if (vid.videoWidth > 0) return; // loaded fine, nothing to do
+                            if (vid.loadRetryCount < 3) {
+                                vid.loadRetryCount++;
+                                console.log("gyroflow: video not loaded after", loadRetryTimer.interval / 1000,
+                                          "s, re-issuing decode (attempt", vid.loadRetryCount + ")");
+                                controller.load_video(root.loadedFileUrl, vid);
+                                loadRetryTimer.restart();
+                            } else if (!vid.errorShown) {
+                                vid.errorShown = true;
+                                messageBox(Modal.Error, qsTr("Failed to load the selected file, it may be unsupported or invalid."), [ { "text": qsTr("Ok") } ]);
+                                dropText.loadingFile = "";
+                                root.pendingGyroflowData = null;
+                                stabEnabledBtn.checked = true;
+                            }
                         }
                     }
 
