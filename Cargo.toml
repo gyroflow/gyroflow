@@ -71,8 +71,6 @@ tar = "0.4.45"
 lru = "0.18"
 chrono = "0.4"
 
-log-panics = { version = "2.1", features = ["with-backtrace"] }
-
 keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "4f2a93f" }
 
 [patch.crates-io]
