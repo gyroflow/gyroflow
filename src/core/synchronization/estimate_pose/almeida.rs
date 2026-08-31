@@ -64,6 +64,10 @@ impl Camera {
 
         let pt = undistort_points(&[(coords[0] * vw, coords[1] * vh)], camera_matrix, &distortion_coeffs, na::convert(rot), Some(camera_matrix), None, &self.compute_params, 1.0, 1.0, timestamp_ms, None, None, 0.0)[0];
 
+        if !is_valid_point(pt) {
+            return na::Vector2::zeros();
+        }
+
         na::Point2::new(pt.0 / vw, pt.1 / vh) - coords
     }
     fn roll(&self, coords: na::Point2<f32>, eps: f32, timestamp_ms: f64) -> na::Vector2<f32> {

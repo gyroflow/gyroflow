@@ -250,9 +250,10 @@ float2 interpolate_mesh(__global const float *mesh, int width, int height, float
 #if INTERPOLATION > 8
 // Gives a bounding box in the source image containing pixels that cover a circle of radius 2 completely in both the source and destination images
 float2 affine_bbox(float4 jac) {
+    const float MAX_SUPPORT = 64.0f;
     return (float2)(
-        2.0f * fmax(1.0f, fmax(fabs(jac.x + jac.y), fabs(jac.x - jac.y))),
-        2.0f * fmax(1.0f, fmax(fabs(jac.z + jac.w), fabs(jac.z - jac.w)))
+        fmin(MAX_SUPPORT, 2.0f * fmax(1.0f, fmax(fabs(jac.x + jac.y), fabs(jac.x - jac.y)))),
+        fmin(MAX_SUPPORT, 2.0f * fmax(1.0f, fmax(fabs(jac.z + jac.w), fabs(jac.z - jac.w))))
     );
 }
 // Computes minimum area ellipse which covers a unit circle in both the source and destination image
@@ -507,6 +508,7 @@ float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global c
         }
         new_out_pos = (new_out_pos - out_c) / out_f;
         new_out_pos = undistort_point(new_out_pos, params);
+        if (new_out_pos.x < -99998.0f) { return (float2)(-99999.0f, -99999.0f); }
         if ((params->flags & 2048) && params->light_refraction_coefficient != 1.0f && params->light_refraction_coefficient > 0.0f) {
             float r = length(new_out_pos);
             if (r != 0.0f) {
@@ -606,9 +608,13 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
 
 #       if INTERPOLATION > 8
             const float eps = 0.01f;
-            float2 xyx = undistort_coord(out_pos + (float2)(eps, 0.0f), params, matrices, mesh_data) - uv;
-            float2 xyy = undistort_coord(out_pos + (float2)(0.0f, eps), params, matrices, mesh_data) - uv;
-            jac = (float4)(xyx.x / eps, xyy.x / eps, xyx.y / eps, xyy.y / eps);
+            float2 nx = undistort_coord(out_pos + (float2)(eps, 0.0f), params, matrices, mesh_data);
+            float2 ny = undistort_coord(out_pos + (float2)(0.0f, eps), params, matrices, mesh_data);
+            if (uv.x > -99998.0f && nx.x > -99998.0f && ny.x > -99998.0f) {
+                float2 xyx = nx - uv;
+                float2 xyy = ny - uv;
+                jac = (float4)(xyx.x / eps, xyy.x / eps, xyx.y / eps, xyy.y / eps);
+            }
 #       endif
 
         DATA_TYPE final_pix;

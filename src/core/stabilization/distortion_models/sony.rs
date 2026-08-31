@@ -25,7 +25,7 @@ impl Sony {
             theta = 0.0;
 
             // compensate distortion iteratively
-            for _ in 0..10 {
+            for _ in 0..15 {
                 let theta2 = theta*theta;
                 let theta3 = theta2*theta;
                 let theta4 = theta2*theta2;
@@ -37,9 +37,11 @@ impl Sony {
                 let k4_theta4 = params.k[4] * theta4;
                 let k5_theta5 = params.k[5] * theta5;
                 // new_theta = theta - theta_fix, theta_fix = f0(theta) / f0'(theta)
-                let theta_fix = (theta * (k0 + k1_theta1 + k2_theta2 + k3_theta3 + k4_theta4 + k5_theta5) - theta_d)
+                let mut theta_fix = (theta * (k0 + k1_theta1 + k2_theta2 + k3_theta3 + k4_theta4 + k5_theta5) - theta_d)
                                 /
                                 (k0 + 2.0 * k1_theta1 + 3.0 * k2_theta2 + 4.0 * k3_theta3 + 5.0 * k4_theta4 + 6.0 * k5_theta5);
+
+                theta_fix = theta_fix.max(-0.9).min(0.9);
 
                 theta = theta - theta_fix;
                 if theta_fix.abs() < EPS {
@@ -55,7 +57,9 @@ impl Sony {
 
         let theta_flipped = (theta_d < 0.0 && theta > 0.0) || (theta_d > 0.0 && theta < 0.0);
 
-        if converged && !theta_flipped {
+        let out_of_range = theta.abs() >= std::f32::consts::FRAC_PI_2 || (params.r_limit > 0.0 && (scale * theta_d).abs() > params.r_limit);
+
+        if converged && !theta_flipped && !out_of_range {
             return Some((point.0 * scale, point.1 * scale));
         }
         None

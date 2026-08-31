@@ -23,7 +23,7 @@ impl GenericPolynomial {
         if theta_d.abs() > EPS {
             theta = 0.0;
 
-            let mut i = 0; while i < 10 {
+            let mut i = 0; while i < 15 {
                 let theta2  = theta*theta;
                 let theta3  = theta2*theta;
                 let theta4  = theta2*theta2;
@@ -46,9 +46,11 @@ impl GenericPolynomial {
                 let k9_theta9   = params.k3.y * theta9;
                 let k10_theta10 = params.k3.z * theta10;
                 let k11_theta11 = params.k3.w * theta11;
-                let theta_fix = (theta * (k0 + k1_theta1 + k2_theta2 + k3_theta3 + k4_theta4 + k5_theta5 + k6_theta6 + k7_theta7 + k8_theta8 + k9_theta9 + k10_theta10 + k11_theta11) - theta_d)
+                let mut theta_fix = (theta * (k0 + k1_theta1 + k2_theta2 + k3_theta3 + k4_theta4 + k5_theta5 + k6_theta6 + k7_theta7 + k8_theta8 + k9_theta9 + k10_theta10 + k11_theta11) - theta_d)
                                 /
                                 (k0 + 2.0 * k1_theta1 + 3.0 * k2_theta2 + 4.0 * k3_theta3 + 5.0 * k4_theta4 + 6.0 * k5_theta5 + 7.0 * k6_theta6 + 8.0 * k7_theta7 + 9.0 * k8_theta8 + 10.0 * k9_theta9 + 11.0 * k10_theta10 + 12.0 * k11_theta11);
+
+                theta_fix = theta_fix.max(-0.9).min(0.9);
 
                 theta = theta - theta_fix;
                 if theta_fix.abs() < EPS {
@@ -65,7 +67,9 @@ impl GenericPolynomial {
 
         let theta_flipped = (theta_d < 0.0 && theta > 0.0) || (theta_d > 0.0 && theta < 0.0);
 
-        if converged && !theta_flipped {
+        let out_of_range = theta.abs() >= core::f32::consts::FRAC_PI_2 || (params.r_limit > 0.0 && (scale * theta_d).abs() > params.r_limit);
+
+        if converged && !theta_flipped && !out_of_range {
             return point * scale;
         }
         vec2(-99999.0, -99999.0)

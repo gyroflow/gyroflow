@@ -30,7 +30,7 @@ impl OpenCVFisheye {
             theta = 0.0;
 
             // compensate distortion iteratively
-            for _ in 0..10 {
+            for _ in 0..15 {
                 let theta2 = theta*theta;
                 let theta4 = theta2*theta2;
                 let theta6 = theta4*theta2;
@@ -63,7 +63,9 @@ impl OpenCVFisheye {
         // so we can check whether theta has changed the sign during the optimization
         let theta_flipped = (theta_d < 0.0 && theta > 0.0) || (theta_d > 0.0 && theta < 0.0);
 
-        if converged && !theta_flipped {
+        let out_of_range = theta.abs() >= std::f32::consts::FRAC_PI_2 || (params.r_limit > 0.0 && (scale * theta_d).abs() > params.r_limit);
+
+        if converged && !theta_flipped && !out_of_range {
             return Some((point.0 * scale, point.1 * scale));
         }
         None

@@ -11,7 +11,7 @@ fn undistort_point(pos_param: vec2<f32>) -> vec2<f32> {
         let r2 = pos.x * pos.x + pos.y * pos.y;
         let icdist = (1.0 + ((params.k2.w * r2 + params.k2.z) * r2 + params.k2.y) * r2)/(1.0 + ((params.k2.x * r2 + params.k1.y) * r2 + params.k1.x) * r2);
         if (icdist < 0.0) {
-            return vec2<f32>(0.0, 0.0);
+            return vec2<f32>(-99999.0, -99999.0);
         }
         let delta_x = 2.0 * params.k1.z * pos.x * pos.y + params.k1.w * (r2 + 2.0 * pos.x * pos.x)+ params.k3.x * r2 + params.k3.y * r2 * r2;
         let delta_y = params.k1.z * (r2 + 2.0 * pos.y * pos.y) + 2.0 * params.k1.w * pos.x * pos.y+ params.k3.z * r2 + params.k3.w * r2 * r2;

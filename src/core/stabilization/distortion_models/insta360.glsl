@@ -29,13 +29,26 @@ vec2 distort_point(float x, float y, float z) {
 vec2 undistort_point(vec2 p) {
     vec2 P = p;
 
+    bool converged = false;
     for (int i = 0; i < 200; i++) {
         vec2 diff = distort_point(P.x, P.y, 1.0) - p;
         if (abs(diff.x) < 1e-6 && abs(diff.y) < 1e-6) {
+            converged = true;
             break;
         }
         P -= diff;
     }
 
-    return P;
+    if (!converged) {
+        vec2 diff = distort_point(P.x, P.y, 1.0) - p;
+        converged = abs(diff.x) < 1e-3 && abs(diff.y) < 1e-3;
+    }
+
+    bool out_of_range = params.r_limit > 0.0 && length(P) > params.r_limit;
+
+    if (converged && !out_of_range) {
+        return P;
+    }
+    return vec2(-99999.0, -99999.0);
 }
+

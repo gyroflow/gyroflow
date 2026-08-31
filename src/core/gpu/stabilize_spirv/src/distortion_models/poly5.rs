@@ -12,7 +12,7 @@ const NEWTON_EPS: f32 = 0.00001;
 impl Poly5 {
     pub fn undistort_point(point: Vec2, params: &KernelParams) -> Vec2 {
         let rd = point.length();
-        if rd == 0.0 { return vec2(-99999.0, -99999.0); }
+        if rd == 0.0 { return point; }
 
         let mut ru = rd;
         let mut i = 0; while i < 6 {

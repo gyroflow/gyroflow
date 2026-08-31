@@ -276,9 +276,10 @@ impl Stabilization {
 
         // Gives a bounding box in the source image containing pixels that cover a circle of radius 2 completely in both the source and destination images
         fn affine_bbox(jac: &Vector4<f32>) -> Vector2<f32> {
+            const MAX_SUPPORT: f32 = 64.0;
             return Vector2::new(
-                2.0 * ((jac.x + jac.y).abs().max((jac.x - jac.y).abs()).max(1.0)),
-                2.0 * ((jac.z + jac.w).abs().max((jac.z - jac.w).abs()).max(1.0))
+                (2.0 * ((jac.x + jac.y).abs().max((jac.x - jac.y).abs()).max(1.0))).min(MAX_SUPPORT),
+                (2.0 * ((jac.z + jac.w).abs().max((jac.z - jac.w).abs()).max(1.0))).min(MAX_SUPPORT)
             );
         }
         // Computes minimum area ellipse which covers a unit circle in both the source and destination image
@@ -447,10 +448,9 @@ impl Stabilization {
                 }
 
                 new_out_pos = (new_out_pos - out_c).component_div(out_f);
-                if let Some(pt) = distortion_model.undistort_point((new_out_pos.x, new_out_pos.y), params) {
-                    new_out_pos.x = pt.0;
-                    new_out_pos.y = pt.1;
-                }
+                let pt = distortion_model.undistort_point((new_out_pos.x, new_out_pos.y), params)?;
+                new_out_pos.x = pt.0;
+                new_out_pos.y = pt.1;
                 if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
                     let r = new_out_pos.norm();
                     if r != 0.0 {
@@ -572,9 +572,13 @@ impl Stabilization {
                                 let mut jac = Vector4::new(1.0, 0.0, 0.0, 1.0);
                                 if I > 8 {
                                     let eps = 0.01;
-                                    let xyx = undistort_coord(position + Vector2::new(eps, 0.0), params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f).unwrap_or_default() - uv;
-                                    let xyy = undistort_coord(position + Vector2::new(0.0, eps), params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f).unwrap_or_default() - uv;
-                                    jac = Vector4::new(xyx.x / eps, xyy.x / eps, xyx.y / eps, xyy.y / eps);
+                                    let nx = undistort_coord(position + Vector2::new(eps, 0.0), params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f);
+                                    let ny = undistort_coord(position + Vector2::new(0.0, eps), params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f);
+                                    if let (Some(nx), Some(ny)) = (nx, ny) {
+                                        let xyx = nx - uv;
+                                        let xyy = ny - uv;
+                                        jac = Vector4::new(xyx.x / eps, xyy.x / eps, xyx.y / eps, xyy.y / eps);
+                                    }
                                 }
 
                                 let width_f = params.width as f32;

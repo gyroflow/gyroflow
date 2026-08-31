@@ -14,7 +14,7 @@ const NEWTON_EPS: f32 = 0.00001;
 impl PtLens {
     pub fn undistort_point(&self, point: (f32, f32), params: &KernelParams) -> Option<(f32, f32)> {
         let rd = (point.0 * point.0 + point.1 * point.1).sqrt();
-        if rd == 0.0 { return None; }
+        if rd == 0.0 { return Some(point); }
 
         let mut ru = rd;
         for i in 0..10 {
