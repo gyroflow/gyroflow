@@ -18,7 +18,8 @@ vec2 undistort_point(vec2 pos) {
     float scale = 0.0;
 
     if (abs(theta_d) > 1e-6) {
-        for (int i = 0; i < 10; ++i) {
+        theta = 0.0;
+        for (int i = 0; i < 15; ++i) {
             float theta2 = theta*theta;
             float theta3 = theta2*theta;
             float theta4 = theta2*theta2;
@@ -29,9 +30,9 @@ vec2 undistort_point(vec2 pos) {
             float k3_theta3 = params.k1.w * theta3;
             float k4_theta4 = params.k2.x * theta4;
             float k5_theta5 = params.k2.y * theta5;
-            float theta_fix = (theta * (k0 + k1_theta1 + k2_theta2 + k3_theta3 + k4_theta4 + k5_theta5) - theta_d)
-                              /
-                              (k0 + 2.0 * k1_theta1 + 3.0 * k2_theta2 + 4.0 * k3_theta3 + 5.0 * k4_theta4 + 6.0 * k5_theta5);
+            float theta_fix = clamp((theta * (k0 + k1_theta1 + k2_theta2 + k3_theta3 + k4_theta4 + k5_theta5) - theta_d)
+                                    /
+                                    (k0 + 2.0 * k1_theta1 + 3.0 * k2_theta2 + 4.0 * k3_theta3 + 5.0 * k4_theta4 + 6.0 * k5_theta5), -0.9, 0.9);
 
             theta -= theta_fix;
             if (abs(theta_fix) < 1e-6) {
@@ -46,10 +47,12 @@ vec2 undistort_point(vec2 pos) {
     }
     bool theta_flipped = (theta_d < 0.0 && theta > 0.0) || (theta_d > 0.0 && theta < 0.0);
 
-    if (converged && !theta_flipped) {
+    bool out_of_range = abs(theta) >= 1.5707963267948966 || (params.r_limit > 0.0 && abs(scale * theta_d) > params.r_limit);
+
+    if (converged && !theta_flipped && !out_of_range) {
         return pos * scale;
     }
-    return vec2(0.0, 0.0);
+    return vec2(-99999.0, -99999.0);
 }
 
 vec2 distort_point(float x, float y, float z) {

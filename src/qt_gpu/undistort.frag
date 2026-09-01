@@ -181,6 +181,7 @@ void main() {
 
     ///////////////////////////////////////////////////////////////////
     // Add lens distortion back
+    bool lens_undistort_failed = false;
     if (params.lens_correction_amount < 1.0) {
         float factor = max(1.0 - params.lens_correction_amount, 0.001); // FIXME: this is close but wrong
         vec2 out_c = vec2(params.output_width / 2.0, params.output_height / 2.0);
@@ -199,17 +200,20 @@ void main() {
 
         new_out_pos = (new_out_pos - out_c) / out_f;
         new_out_pos = undistort_point(new_out_pos);
-        if (params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
-            float r = length(new_out_pos);
-            if (r != 0.0) {
-                float sin_theta_d = (r / sqrt(1.0 + r * r)) / params.light_refraction_coefficient;
-                float r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
-                new_out_pos *= r_d / r;
+        lens_undistort_failed = new_out_pos.x < -99998.0;
+        if (!lens_undistort_failed) {
+            if (params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
+                float r = length(new_out_pos);
+                if (r != 0.0) {
+                    float sin_theta_d = (r / sqrt(1.0 + r * r)) / params.light_refraction_coefficient;
+                    float r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
+                    new_out_pos *= r_d / r;
+                }
             }
-        }
-        new_out_pos = out_f * new_out_pos + out_c;
+            new_out_pos = out_f * new_out_pos + out_c;
 
-        texPos = new_out_pos * (1.0 - params.lens_correction_amount) + (texPos * params.lens_correction_amount);
+            texPos = new_out_pos * (1.0 - params.lens_correction_amount) + (texPos * params.lens_correction_amount);
+        }
     }
     ///////////////////////////////////////////////////////////////////
 
@@ -245,7 +249,7 @@ void main() {
         uv = rotate_point(uv, rotation, size / vec2(2.0), frame_size / vec2(2.0));
     }
 
-    if (uv.x > -99998.0) {
+    if (!lens_undistort_failed && uv.x > -99998.0) {
         if (params.background_mode == 1) { // edge repeat
             uv = max(vec2(0, 0), min(vec2(params.width - 1, params.height - 1), uv));
         } else if (params.background_mode == 2) { // edge mirror

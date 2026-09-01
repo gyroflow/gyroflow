@@ -221,6 +221,12 @@ impl GyroSource {
                         if let Some(v) = map.get_t(TagId::FocusDistance) as Option<&f32> {
                             lens_info.focus_distance = Some(*v);
                         }
+                        if let Some(v) = map.get_t(TagId::IrisFStop) as Option<&f32> {
+                            lens_info.iris_fstop = Some(*v);
+                        }
+                        if let Some(v) = map.get_t(TagId::IrisTStop) as Option<&f32> {
+                            lens_info.iris_tstop = Some(*v);
+                        }
                         if let Some(v) = map.get_t(TagId::PixelFocalLength) as Option<&(f32, f32)> {
                             lens_info.pixel_focal_length = Some(*v);
                         }
@@ -256,7 +262,7 @@ impl GyroSource {
                             }
                         }
                     }
-                    if lens_info.pixel_pitch.is_some() && lens_info.capture_area_size.is_some() && (lens_info.pixel_focal_length.is_some() || lens_info.focal_length.is_some()) {
+                    if lens_info.has_geometry() || lens_info.has_descriptive_data() {
                         lens_params.insert(timestamp_us, lens_info.clone());
                     }
 

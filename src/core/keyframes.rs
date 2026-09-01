@@ -61,7 +61,8 @@ pub enum Easing {
     NoEasing, // Linear
     EaseIn,
     EaseOut,
-    EaseInOut
+    EaseInOut,
+    Smooth // Monotone cubic spline through the neighbouring keyframes, see `interpolate_smooth`
 }
 
 #[derive(Debug, Copy, Clone, Default, ::serde::Serialize, ::serde::Deserialize)]
@@ -101,7 +102,7 @@ impl KeyframeManager {
         let kf = Keyframe {
             id: default_id(),
             value,
-            easing: Easing::EaseInOut
+            easing: Easing::Smooth
         };
         timestamp_us = self.get_closest_timestamp(typ, timestamp_us);
         if let Some(x) = self.keyframes.get_mut(typ) {
@@ -190,6 +191,11 @@ impl KeyframeManager {
                             if let Some(offs2) = keyframes.range(lookup_ts..).next() {
                                 let time_delta = (offs2.0 - offs1.0) as f64;
                                 let alpha = (timestamp_us - offs1.0) as f64 / time_delta;
+                                if offs1.1.easing == Easing::Smooth || offs2.1.easing == Easing::Smooth {
+                                    let prev = keyframes.range(..*offs1.0).next_back().map(|(ts, kf)| (*ts as f64, kf.value));
+                                    let next = keyframes.range(*offs2.0 + 1..).next().map(|(ts, kf)| (*ts as f64, kf.value));
+                                    return Some(interpolate_smooth(prev, (*offs1.0 as f64, offs1.1), (*offs2.0 as f64, offs2.1), next, alpha));
+                                }
                                 let e = Easing::get(&offs1.1.easing, &offs2.1.easing, alpha);
                                 return Some(e.interpolate(offs1.1.value, offs2.1.value, alpha));
                             }
@@ -231,7 +237,19 @@ impl KeyframeManager {
     }
     pub fn deserialize(&mut self, v: &serde_json::Value) {
         self.keyframes.clear();
-        if let Ok(kf) = serde_json::from_value(v.clone()) {
+        let mut v = v.clone();
+        if let Some(types) = v.as_object_mut() {
+            for kfs in types.values_mut() {
+                if let Some(kfs) = kfs.as_object_mut() {
+                    for kf in kfs.values_mut() {
+                        if kf.get("easing").is_some_and(|e| serde_json::from_value::<Easing>(e.clone()).is_err()) {
+                            kf["easing"] = serde_json::Value::String(Easing::default().to_string());
+                        }
+                    }
+                }
+            }
+        }
+        if let Ok(kf) = serde_json::from_value(v) {
             self.keyframes = kf;
         }
     }
@@ -298,4 +316,44 @@ impl Easing {
 
         a * (1.0 - x) + b * x
     }
+}
+
+/// Monotone cubic Hermite interpolation (Fritsch-Carlson / PCHIP) of the segment `p1`..`p2`.
+fn interpolate_smooth(prev: Option<(f64, f64)>, p1: (f64, &Keyframe), p2: (f64, &Keyframe), next: Option<(f64, f64)>, alpha: f64) -> f64 {
+    let h = p2.0 - p1.0;
+    if h <= 0.0 { return p1.1.value; }
+    let d = (p2.1.value - p1.1.value) / h;
+
+    let tangent = |h1: f64, d1: f64, h2: f64, d2: f64| -> f64 {
+        if d1 * d2 <= 0.0 { return 0.0; } // local extremum or a flat neighbour
+        let w1 = 2.0 * h2 + h1;
+        let w2 = h2 + 2.0 * h1;
+        (w1 + w2) / (w1 / d1 + w2 / d2)
+    };
+
+    let m1 = match p1.1.easing {
+        Easing::Smooth => match prev {
+            Some((ts, v)) if p1.0 > ts => tangent(p1.0 - ts, (p1.1.value - v) / (p1.0 - ts), h, d),
+            _ => d // no keyframe before this one, just follow the segment
+        },
+        Easing::EaseOut | Easing::EaseInOut => 0.0,
+        _ => d
+    };
+
+    let m2 = match p2.1.easing {
+        Easing::Smooth => match next {
+            Some((ts, v)) if ts > p2.0 => tangent(h, d, ts - p2.0, (v - p2.1.value) / (ts - p2.0)),
+            _ => d // no keyframe after this one, just follow the segment
+        },
+        Easing::EaseIn | Easing::EaseInOut => 0.0,
+        _ => d
+    };
+
+    let t = alpha.clamp(0.0, 1.0);
+    let (t2, t3) = (t * t, t * t * t);
+
+    ( 2.0 * t3 - 3.0 * t2 + 1.0) * p1.1.value +
+    (       t3 - 2.0 * t2 + t  ) * h * m1 +
+    (-2.0 * t3 + 3.0 * t2      ) * p2.1.value +
+    (       t3 -       t2      ) * h * m2
 }

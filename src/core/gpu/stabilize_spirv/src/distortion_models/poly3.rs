@@ -15,7 +15,7 @@ impl Poly3 {
         let inv_k1 = 1.0 / params.k1.x;
 
         let rd = point.length();
-        if rd == 0.0 { return vec2(-99999.0, -99999.0); }
+        if rd == 0.0 { return point; }
 
         let rd_div_k1 = rd * inv_k1;
 

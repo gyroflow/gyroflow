@@ -160,10 +160,6 @@ impl StabilizationManager {
             params.duration_ms = duration_ms;
             params.size = video_size;
         }
-        if duration_ms < 10000.0 { // If the video is shorter than 10s, use Complementary
-            let mut gyro_source = self.gyro.write();
-            gyro_source.integration_method = 1; // Complementary
-        }
 
         self.pose_estimator.sync_results.write().clear();
         self.keyframes.write().clear();
@@ -414,12 +410,10 @@ impl StabilizationManager {
     }
 
     pub fn extract_focal_lengths(compute_params: &ComputeParams) -> Vec<Option<f64>> {
-        use crate::util::MapClosest;
-
         let gyro = compute_params.gyro.read();
         let file_metadata = gyro.file_metadata.read();
 
-        if file_metadata.lens_params.is_empty() {
+        if !file_metadata.has_per_frame_focal_length() {
             return vec![];
         }
 
@@ -430,7 +424,7 @@ impl StabilizationManager {
             let timestamp_us = (timestamp_ms * 1000.0).round() as i64;
 
             // Try to get focal length from lens_params (within 100ms window)
-            let focal_length = file_metadata.lens_params.get_closest(&timestamp_us, 100000)
+            let focal_length = file_metadata.lens_params_closest(timestamp_us, 100000, |v| v.focal_length.is_some())
                 .and_then(|val| val.focal_length.map(|fl| fl as f64));
 
             focal_lengths.push(focal_length);
@@ -445,10 +439,10 @@ impl StabilizationManager {
             (sp.focal_length_smoothing_enabled, sp.focal_length_smoothing_strength)
         };
 
-        let focal_lengths = if params.gyro.read().file_metadata.read().lens_params.is_empty() {
-            Vec::new()
-        } else {
+        let focal_lengths = if params.gyro.read().file_metadata.read().has_per_frame_focal_length() {
             Self::extract_focal_lengths(params)
+        } else {
+            Vec::new()
         };
 
         let smoothing_active = enabled && !focal_lengths.is_empty();
@@ -1215,9 +1209,17 @@ impl StabilizationManager {
         {
             let mut params = self.params.write();
             if (fps - params.fps).abs() > 0.001 {
-                params.fps_scale = Some(fps / params.fps);
+                if params.fps > 0.0 {
+                    let scale = fps / params.fps;
+                    params.set_fps_scale(Some(scale));
+                } else {
+                    // The video frame rate is not known, so there's nothing to scale against.
+                    // This can happen eg. when the file gets unloaded while its telemetry is still being parsed in the background.
+                    log::warn!("Unable to override video fps to {fps}, because the source fps is unknown");
+                    params.set_fps_scale(None);
+                }
             } else {
-                params.fps_scale = None;
+                params.set_fps_scale(None);
             }
             self.gyro.write().init_from_params(&params);
             self.keyframes.write().timestamp_scale = params.fps_scale;
@@ -1500,7 +1502,7 @@ impl StabilizationManager {
                 if let Some(v) = vid_info.get("num_frames") .and_then(|x| x.as_u64()) { params.frame_count    = v as usize; }
                 if let Some(v) = vid_info.get("fps")        .and_then(|x| x.as_f64()) { params.fps            = v; }
                 if let Some(v) = vid_info.get("duration_ms").and_then(|x| x.as_f64()) { params.duration_ms    = v; }
-                if let Some(v) = vid_info.get("fps_scale") { params.fps_scale = v.as_f64(); }
+                if let Some(v) = vid_info.get("fps_scale") { params.set_fps_scale(v.as_f64()); }
 
                 self.gyro.write().init_from_params(&params);
                 self.keyframes.write().timestamp_scale = params.fps_scale;

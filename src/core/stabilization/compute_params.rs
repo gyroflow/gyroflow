@@ -124,7 +124,7 @@ impl ComputeParams {
             digital_lens,
             digital_lens_params,
             suppress_rotation: false,
-            fov_algorithm_margin: 2.0,
+            fov_algorithm_margin: 3.0,
 
             keyframes: mgr.keyframes.read().clone(),
 
@@ -138,7 +138,7 @@ impl ComputeParams {
     }
 
     pub fn calculate_camera_fovs(&mut self) {
-        let frame_count = if self.gyro.read().file_metadata.read().lens_params.len() > 1 {
+        let frame_count = if self.gyro.read().file_metadata.read().lens_geometry_count() > 1 {
             self.frame_count
         } else {
             1 // FOV is constant (ie. lens is fixed focal length)

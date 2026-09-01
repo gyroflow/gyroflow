@@ -73,6 +73,9 @@ Modal {
 
     property var defaultOff: ["trim_ranges_ms", "offsets", "video_infofps_scale", "video_inforotation", "synchronizationdo_autosync", "plugin_disable_stretch"];
 
+    // Fields (`group + first property name`) that are not available in the loaded file
+    property var unavailable: [];
+
     text: type == "preset"? qsTr("Select settings you want to include in the preset")
         : type == "apply"? qsTr("Select settings you want to apply to all items in the render queue")
         : qsTr("Select fields to include in the exported file");
@@ -144,6 +147,8 @@ Modal {
             QT_TR_NOOP("Accelerometer");
             QT_TR_NOOP("Quaternion");
             QT_TR_NOOP("Euler angles");
+            QT_TR_NOOP("Focus distances");
+            QT_TR_NOOP("Iris (f/T-stop)");
             QT_TR_NOOP("Minimal FOV scale");
             QT_TR_NOOP("Smoothed FOV scale");
             QT_TR_NOOP("Focal length (if available)");
@@ -197,6 +202,7 @@ Modal {
                                     onClicked: (mouse) => {
                                         const invert = mouse.modifiers & Qt.ControlModifier;
                                         sectionsArea.forAllCheckboxes(sectionsArea, function(cb) {
+                                            if (cb.unavailable) return;
                                             if (invert  && cb.parent == groupCb) return;
                                             if (!invert && cb.parent != groupCb) return;
                                             if (invert && root.defaultOff.includes(cb.group + cb.props[0])) return;
@@ -210,7 +216,9 @@ Modal {
                                 model: modelData[1];
                                 CheckBox {
                                     text: qsTr(modelData[0]);
-                                    checked: !root.defaultOff.includes(group + props[0]);
+                                    unavailable: root.unavailable.includes(group + props[0]);
+                                    checked: !unavailable && !root.defaultOff.includes(group + props[0]);
+                                    tooltip: unavailable? qsTr("This data is not present in the loaded file.") : "";
                                     property string group: modelData[1];
                                     property var props: modelData[2];
                                 }
@@ -282,9 +290,9 @@ Modal {
                 for (const x of cb.props) {
                     if (cb.group) {
                         if (!finalObj[cb.group]) finalObj[cb.group] = { };
-                        finalObj[cb.group][x] = cb.checked && cb.enabled;
+                        finalObj[cb.group][x] = cb.checked && !cb.unavailable;
                     } else {
-                        finalObj[x] = cb.checked;
+                        finalObj[x] = cb.checked && !cb.unavailable;
                     }
                 }
             });
@@ -341,6 +349,7 @@ Modal {
         }
 
         sectionsArea.forAllCheckboxes(sectionsArea, function(cb) {
+            if (cb.unavailable) return;
             for (const x of cb.props) {
                 if (cb.group) {
                     cb.checked = obj[cb.group] && obj[cb.group][x];
@@ -349,6 +358,5 @@ Modal {
                 }
             }
         });
-        exportPerFrame.checkedChanged();
     }
 }

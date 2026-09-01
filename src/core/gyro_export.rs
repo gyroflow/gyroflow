@@ -35,7 +35,6 @@ pub fn export_full_metadata(gyro_url: &str, _stab: &Arc<crate::StabilizationMana
 
 pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::StabilizationManager>) -> String {
     use std::fmt::Write;
-    use crate::util::MapClosest;
     const RAD2DEG: f64 = 180.0 / std::f64::consts::PI;
     enum TimestampType {
         Milliseconds(f64),
@@ -68,6 +67,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
     let ogyro = original.get("gyroscope")      .and_then(|x| x.as_bool()).unwrap_or_default();
     let oquat = original.get("quaternion")     .and_then(|x| x.as_bool()).unwrap_or_default();
     let ofd   = original.get("focus_distances").and_then(|x| x.as_bool()).unwrap_or_default();
+    let oiris = original.get("iris")           .and_then(|x| x.as_bool()).unwrap_or_default();
 
     let seulr = stabilized.get("euler_angles").and_then(|x| x.as_bool()).unwrap_or_default();
     let squat = stabilized.get("quaternion")  .and_then(|x| x.as_bool()).unwrap_or_default();
@@ -86,6 +86,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
         if ogyro { let _ = write!(output, ",org_gyro_x,org_gyro_y,org_gyro_z"); }
         if oquat { let _ = write!(output, ",org_quat_w,org_quat_x,org_quat_y,org_quat_z"); }
         if ofd   { let _ = write!(output, ",focus_distance"); }
+        if oiris { let _ = write!(output, ",iris_fstop,iris_tstop"); }
         if seulr { let _ = write!(output, ",stab_pitch,stab_yaw,stab_roll"); }
         if squat { let _ = write!(output, ",stab_quat_w,stab_quat_x,stab_quat_y,stab_quat_z"); }
         if focal_length { let _ = write!(output, ",focal_length"); }
@@ -189,6 +190,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
         let val_ogyro = [get(raw_imu.gyro, 0), get(raw_imu.gyro, 1), get(raw_imu.gyro, 2)];
         let val_oquat = [quatv[3], quatv[0], quatv[1], quatv[2]];
         let mut val_ofd = 0.0_f32;
+        let mut val_iris = (0.0_f32, 0.0_f32); // (f-stop, T-stop)
 
         if format == Format::Jsx && !(seulr && !oeulr) {
             jsx.get_mut("orientations").unwrap().as_array_mut().unwrap().push(serde_json::to_value([val_oeulr[0], -val_oeulr[2], val_oeulr[1]]).unwrap());
@@ -227,13 +229,16 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
             ));
         }
 
-        if let Some(val) = file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
+        let lens_ts_us = (timestamp_ms * 1000.0).round() as i64;
+        if let Some(val) = file_metadata.lens_params_closest(lens_ts_us, 100000, |v| v.focal_length.is_some()) { // closest within 100ms
             if let Some(fl) = val.focal_length {
                 focal_length_value = Some(fl as f64);
             }
-            if let Some(fd) = val.focus_distance {
-		        val_ofd = fd;
-            }
+        }
+        if let Some(val) = file_metadata.lens_params_closest(lens_ts_us, 100000, |v| v.has_descriptive_data()) { // closest within 100ms
+            if let Some(fd) = val.focus_distance { val_ofd = fd; }
+            if let Some(v)  = val.iris_fstop     { val_iris.0 = v; }
+            if let Some(v)  = val.iris_tstop     { val_iris.1 = v; }
         }
         let val_fl = focal_length_value.unwrap_or(0.0);
         let val_fov = *params.fovs.get(frame).unwrap_or(&0.0);
@@ -246,6 +251,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
             if ogyro { let _ = write!(output, ",{:.6},{:.6},{:.6}",       val_ogyro[0], val_ogyro[1], val_ogyro[2]); }
             if oquat { let _ = write!(output, ",{:.6},{:.6},{:.6},{:.6}", val_oquat[0], val_oquat[1], val_oquat[2], val_oquat[3]); }
             if ofd   { let _ = write!(output, ",{:.3}", val_ofd); }
+            if oiris { let _ = write!(output, ",{:.3},{:.3}", val_iris.0, val_iris.1); }
             if seulr { let _ = write!(output, ",{:.3},{:.3},{:.3}",       val_seulr[0], val_seulr[1], val_seulr[2]); }
             if squat { let _ = write!(output, ",{:.6},{:.6},{:.6},{:.6}", val_squat[0], val_squat[1], val_squat[2], val_squat[3]); }
             if focal_length { let _ = write!(output, ",{val_fl:.3}");  }
@@ -261,6 +267,10 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
             if ogyro { obj.insert("org_gyro",   serde_json::to_value(val_ogyro).unwrap()); }
             if oquat { obj.insert("org_quat",   serde_json::to_value(val_oquat).unwrap()); }
             if ofd   { obj.insert("focus_distance", serde_json::to_value(val_ofd).unwrap()); }
+            if oiris {
+                obj.insert("iris_fstop", serde_json::to_value(val_iris.0).unwrap());
+                obj.insert("iris_tstop", serde_json::to_value(val_iris.1).unwrap());
+            }
             if seulr { obj.insert("stab_euler", serde_json::to_value(val_seulr).unwrap()); }
             if squat { obj.insert("stab_quat",  serde_json::to_value(val_squat).unwrap()); }
             if focal_length { obj.insert("focal_length",      val_fl.into()); }
@@ -277,7 +287,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
 
         let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&comp_params, 0.0, false);
         jsx.insert("zoom", camera_matrix[(0, 0)].into());
-        if comp_params.gyro.read().file_metadata.read().lens_params.len() > 1 {
+        if comp_params.gyro.read().file_metadata.read().lens_geometry_count() > 1 {
             jsx.insert("zooms", Vec::<serde_json::Value>::new().into());
             for f in 0..num_frames as i32 {
                 let timestamp = crate::timestamp_at_frame(f, fps);

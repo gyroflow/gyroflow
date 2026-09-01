@@ -50,16 +50,30 @@ macro_rules! impl_models {
             }
             pub fn radial_distortion_limit(&self, k: &[f64]) -> Option<f64> {
                 let max_theta = std::f64::consts::FRAC_PI_2; // PI/2
+                let derivative = |theta: f64| -> Option<f64> {
+                    match &self.inner {
+                        $(DistortionModels::$name(x) => { x.distortion_derivative(theta, k) })*
+                    }
+                };
+
+                const STEPS: usize = 256;
                 let mut low = 0.0;
                 let mut high = max_theta;
-                let tolerance = 1e-4;
+                let mut found = false;
+                for i in 1..=STEPS {
+                    let theta = i as f64 / STEPS as f64 * max_theta;
+                    if derivative(theta)? <= 0.0 {
+                        high = theta;
+                        found = true;
+                        break;
+                    }
+                    low = theta;
+                }
+                if !found { return None; }
 
-                while high - low > tolerance {
+                while high - low > 1e-6 {
                     let mid = (low + high) / 2.0;
-                    let deriv = match &self.inner {
-                        $(DistortionModels::$name(x) => { x.distortion_derivative(mid, k)? })*
-                    };
-                    if deriv > 0.0 {
+                    if derivative(mid)? > 0.0 {
                         low = mid;
                     } else {
                         high = mid;

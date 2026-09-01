@@ -54,8 +54,9 @@ pub struct Controller {
     video_file_loaded: qt_method!(fn(&self, player: QJSValue)),
     load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, sample_index: i32, project_version: u32)),
     load_lens_profile: qt_method!(fn(&mut self, url_or_id: QString)),
+    reset_lens_profile: qt_method!(fn(&mut self)),
     get_preset_contents: qt_method!(fn(&mut self, url_or_id: QString) -> QString),
-    export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool)),
+    export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool) -> bool),
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
 
     set_of_method: qt_method!(fn(&self, v: u32)),
@@ -811,6 +812,12 @@ impl Controller {
                     additional_obj.insert("contains_quats".to_owned(),    serde_json::Value::Bool(has_quats));
                     additional_obj.insert("contains_motion".to_owned(),   serde_json::Value::Bool(has_motion));
                     additional_obj.insert("has_accurate_timestamps".to_owned(), serde_json::Value::Bool(file_metadata.has_accurate_timestamps));
+                    additional_obj.insert("contains_focus_distance".to_owned(), serde_json::Value::Bool(
+                        file_metadata.lens_params.values().any(|x| x.focus_distance.is_some())
+                    ));
+                    additional_obj.insert("contains_iris".to_owned(), serde_json::Value::Bool(
+                        file_metadata.lens_params.values().any(|x| x.iris_fstop.is_some() || x.iris_tstop.is_some())
+                    ));
                     additional_obj.insert("sample_rate".to_owned(),       serde_json::to_value(gyroflow_core::gyro_source::GyroSource::get_sample_rate(&*file_metadata)).unwrap());
                     let has_builtin_profile = file_metadata.lens_profile.as_ref().map(|y| y.is_object()).unwrap_or_default();
                     let md_data = file_metadata.additional_data.clone();
@@ -866,6 +873,27 @@ impl Controller {
         self.lens_loaded = true;
         self.lens_changed();
         self.lens_profile_loaded(QString::from(json), QString::from(filepath), QString::from(checksum));
+        self.request_recompute();
+    }
+    /// Drops the lens geometry, keeping the settings that don't come from the profile itself (stretch, digital lens)
+    fn reset_lens_profile(&mut self) {
+        {
+            let mut lens = self.stabilizer.lens.write();
+            lens.fisheye_params = Default::default();
+            lens.calib_dimension = Default::default();
+            lens.distortion_model = None;
+            lens.focal_length = None;
+            lens.crop_factor = None;
+            // If a chessboard calibration was already computed, go back to it
+            #[cfg(feature = "opencv")]
+            if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
+                if !cal.used_points.is_empty() {
+                    lens.set_from_calibrator(cal);
+                }
+            }
+        }
+        self.lens_loaded = false;
+        self.lens_changed();
         self.request_recompute();
     }
     fn load_default_preset(&mut self) {
@@ -1829,14 +1857,24 @@ impl Controller {
         }
     }
 
+    /// A profile generated directly (eg. from the focal length) already carries its camera matrix,
+    /// only the ones coming from the chessboard calibration need to be filled in.
+    fn fill_profile_from_calibrator(&self, profile: &mut core::lens_profile::LensProfile) {
+        if profile.fisheye_params.camera_matrix.len() == 3 && profile.calib_dimension.w > 0 && profile.calib_dimension.h > 0 {
+            profile.finalize();
+            return;
+        }
+        #[cfg(feature = "opencv")]
+        if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
+            profile.set_from_calibrator(cal);
+        }
+    }
+
     fn export_lens_profile_filename(&self, info: QJsonObject) -> QString {
         let info_json = info.to_json().to_string();
 
         if let Ok(mut profile) = core::lens_profile::LensProfile::from_json(&info_json) {
-            #[cfg(feature = "opencv")]
-            if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
-                profile.set_from_calibrator(cal);
-            }
+            self.fill_profile_from_calibrator(&mut profile);
             let name = profile.get_name()
                 .replace([':', '|', '*', ':'], "_")
                 .replace(['<', '"', '>', '/', '\\'], "");
@@ -1845,16 +1883,13 @@ impl Controller {
         QString::default()
     }
 
-    fn export_lens_profile(&mut self, url: QUrl, info: QJsonObject, upload: bool) {
+    fn export_lens_profile(&mut self, url: QUrl, info: QJsonObject, upload: bool) -> bool {
         let url = util::qurl_to_encoded(url);
         let info_json = info.to_json().to_string();
 
         match core::lens_profile::LensProfile::from_json(&info_json) {
             Ok(mut profile) => {
-                #[cfg(feature = "opencv")]
-                if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
-                    profile.set_from_calibrator(cal);
-                }
+                self.fill_profile_from_calibrator(&mut profile);
 
                 match profile.save_to_file(&url) {
                     Ok(json) => {
@@ -1866,11 +1901,12 @@ impl Controller {
                                 }
                             });
                         }
+                        true
                     }
-                    Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); }
+                    Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
                 }
             },
-            Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); }
+            Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
         }
     }
 
@@ -2144,7 +2180,7 @@ impl Controller {
         self.stabilizer.gyro.read().file_metadata.read().gravity_vectors.as_ref().map(|v| !v.is_empty()).unwrap_or_default()
     }
     fn has_per_frame_focal_length(&self) -> bool {
-        !self.stabilizer.gyro.read().file_metadata.read().lens_params.is_empty()
+        self.stabilizer.gyro.read().file_metadata.read().has_per_frame_focal_length()
     }
 
     fn get_focal_length_smoothing_enabled(&self) -> bool {
@@ -2381,7 +2417,7 @@ impl Controller {
     fn has_per_frame_lens_data(&self) -> bool {
         let gyro = self.stabilizer.gyro.read();
         let md = gyro.file_metadata.read();
-        md.camera_stab_data.len() > 1 || md.lens_params.len() > 1 || md.lens_positions.len() > 1 || md.mesh_correction.len() > 1
+        md.camera_stab_data.len() > 1 || md.lens_geometry_count() > 1 || md.lens_positions.len() > 1 || md.mesh_correction.len() > 1
     }
     fn has_ai_optical_flow(&self) -> bool { cfg!(feature = "ai-optical-flow") }
     fn export_stmap(&self, folder_url: QUrl, per_frame: bool) {

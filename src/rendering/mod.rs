@@ -355,7 +355,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
             let log = FFMPEG_LOG.read().clone();
             if let Some(enc) = ffmpeg_next::encoder::find_by_name("h264_videotoolbox") {
                 let ctx_ptr = unsafe { ffi::avcodec_alloc_context3(enc.as_ptr()) };
-                let context = unsafe { codec::context::Context::wrap(ctx_ptr, Some(Rc::new(0))) };
+                let context = unsafe { codec::context::Context::wrap(ctx_ptr, Some(std::sync::Arc::new(0))) };
                 let mut encoder = context.encoder().video()?;
                 encoder.set_width(1920);
                 encoder.set_height(1080);
@@ -380,8 +380,9 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         proc.video.encoder_params.options.set("b_ref_mode", "disabled");
     }
 
-    if cfg!(target_os = "android") {
+    if encoder.0.contains("mediacodec") {
         proc.video.encoder_params.options.set("ndk_codec", "1");
+        proc.video.encoder_params.options.set("ndk_async", "1");
     }
 
     proc.video.encoder_params.keyframe_distance_s = render_options.keyframe_distance.max(0.0001);
@@ -832,17 +833,12 @@ unsafe fn codec_options(c: *const ffi::AVCodec) {
         let mut ret = String::new();
         let _ = writeln!(ret, "{} <b>{}</b>:\n", ["Decoder", "Encoder"][ffi::av_codec_is_encoder(c) as usize], to_str((*c).name));
 
-        if !(*c).pix_fmts.is_null() {
+        let pix_fmts = ffmpeg_hw::codec_pix_formats(std::ptr::null(), c);
+        if !pix_fmts.is_empty() {
             ret.push_str("Supported pixel formats (-pix_fmt): ");
-            for i in 0..100 {
-                let fmt = (*c).pix_fmts.offset(i);
-                if fmt.is_null() { break; }
-                let p = *fmt;
-                if p == ffi::AVPixelFormat::AV_PIX_FMT_NONE {
-                    break;
-                }
+            for (i, p) in pix_fmts.iter().enumerate() {
                 if i > 0 { ret.push_str(", "); }
-                ret.push_str(&to_str(ffi::av_get_pix_fmt_name(p)));
+                ret.push_str(&to_str(ffi::av_get_pix_fmt_name((*p).into())));
             }
         }
 

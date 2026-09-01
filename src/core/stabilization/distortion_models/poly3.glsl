@@ -7,7 +7,7 @@ vec2 undistort_point(vec2 pos) {
     float inv_k1 = (1.0 / params.k1.x);
 
     float rd = length(pos);
-    if (rd == 0.0) { return vec2(0.0, 0.0); }
+    if (rd == 0.0) { return pos; }
 
     float rd_div_k1 = rd * inv_k1;
 
@@ -26,13 +26,13 @@ vec2 undistort_point(vec2 pos) {
         }
         if (i > 5) {
             // Does not converge, no real solution in this area?
-            return vec2(0.0, 0.0);
+            return vec2(-99999.0, -99999.0);
         }
 
         ru -= fru / (3.0 * ru * ru + inv_k1);
     }
     if (ru < 0.0) {
-        return vec2(0.0, 0.0);
+        return vec2(-99999.0, -99999.0);
     }
 
     ru /= rd;

@@ -20,10 +20,10 @@ export QMAKE := env_var_or_default("QMAKE", if path_exists(QtPath / "qmake.bat")
 # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
 
 # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
-FFmpeg := if os() == "windows"               { "ffmpeg-8.1-windows-desktop-vs2026-gpl-lite"
+FFmpeg := if os() == "windows"               { "ffmpeg-9.0-windows-desktop-vs2026-gpl-lite"
    } else if os() + Arch == "macosaarch64"   { "ffmpeg-arm64"
    } else if os() + Arch == "macosx86_64"    { "ffmpeg-x86_64"
-   } else                                    { "ffmpeg-8.1-linux-clang-gpl-lite" }
+   } else                                    { "ffmpeg-9.0-linux-clang-gpl-lite" }
 export FFMPEG_DIR := env_var_or_default("FFMPEG_DIR", ProjectDir / "ext" / FFmpeg)
 export FFMPEG_ARCH := if Arch == "aarch64" { "arm64" } else { if os() == "windows" { "x64" } else { "amd64" } }
 # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
@@ -47,18 +47,14 @@ export MACOSX_DEPLOYMENT_TARGET := "10.15"
 # ――――――――――――――――――――――――――――――――――――――― MacOS ―――――――――――――――――――――――――――――――――――――――――
 
 # ――――――――――――――――――――――――――――――――――――――― Clang ―――――――――――――――――――――――――――――――――――――――――
-LlvmConfigExists := if os() == "linux" { `which llvm-config > /dev/null && echo true || echo false` } else { "false" }
+LlvmLibDir := if os() == "linux" { `d=""; for x in $(ls -d /usr/lib/llvm-*/lib 2>/dev/null | sort -V); do v=${x#/usr/lib/llvm-}; v=${v%/lib}; [ "$v" -ge 13 ] 2>/dev/null && d=$x; done; if [ -z "$d" ]; then v=$(llvm-config --version 2>/dev/null | cut -d. -f1); [ "${v:-0}" -ge 13 ] 2>/dev/null && d=$(llvm-config --libdir 2>/dev/null); fi; echo "$d"` } else { "" }
 export LIBCLANG_PATH := if os() == "macos" {
    DYLD_FALLBACK_LIBRARY_PATH
 } else {
    if path_exists(ExtDir / "llvm/bin") == "true" {
       ExtDir / "llvm/bin"
    } else {
-      env_var_or_default("LIBCLANG_PATH", if "{{LlvmConfigExists}}" == "true" {
-         `llvm-config --libdir`
-      } else {
-         if path_exists("/usr/lib/llvm-13/lib/") == "true" { "/usr/lib/llvm-13/lib/" } else { "" }
-      })
+      env_var_or_default("LIBCLANG_PATH", LlvmLibDir)
    }
 }
 LLVMPath := LIBCLANG_PATH

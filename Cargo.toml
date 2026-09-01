@@ -55,10 +55,10 @@ filetime_creation = "0.2"
 
 qmetaobject = { version = "0.2.10", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.12", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "7eb9292" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "855130d" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
-ffmpeg-next = { version = "8.1.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
+ffmpeg-next = { version = "9.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.5.0"
 parking_lot = "0.12.5"
 
@@ -71,8 +71,6 @@ whoami = "2.1"
 tar = "0.4.45"
 lru = "0.18"
 chrono = "0.4"
-
-log-panics = { version = "2.1", features = ["with-backtrace"] }
 
 keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "4f2a93f" }
 

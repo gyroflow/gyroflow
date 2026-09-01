@@ -202,16 +202,28 @@ impl StabilizationParams {
             self.trim_ranges.iter().fold(0.0, |acc, &x| acc + (x.1 - x.0))
         }
     }
+    /// `fps_scale` is a multiplier for `fps`, so only a finite, positive value makes any sense.
+    pub fn is_valid_fps_scale(scale: f64) -> bool { scale.is_finite() && scale > 0.0 }
+    pub fn set_fps_scale(&mut self, scale: Option<f64>) {
+        self.fps_scale = match scale {
+            Some(v) if !Self::is_valid_fps_scale(v) => {
+                log::warn!("Ignoring invalid fps scale: {v}");
+                None
+            },
+            v => v
+        };
+    }
+
     pub fn get_scaled_duration_ms(&self) -> f64 {
         match self.fps_scale {
-            Some(scale) => self.duration_ms / scale,
-            None            => self.duration_ms
+            Some(scale) if Self::is_valid_fps_scale(scale) => self.duration_ms / scale,
+            _ => self.duration_ms
         }
     }
     pub fn get_scaled_fps(&self) -> f64 {
         match self.fps_scale {
-            Some(scale) => self.fps * scale,
-            None            => self.fps
+            Some(scale) if Self::is_valid_fps_scale(scale) => self.fps * scale,
+            _ => self.fps
         }
     }
 

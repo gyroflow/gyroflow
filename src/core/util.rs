@@ -73,21 +73,22 @@ pub trait MapClosest<V> {
 }
 impl<V> MapClosest<V> for BTreeMap<i64, V> {
     fn get_closest(&self, key: &i64, max_diff: i64) -> Option<&V> {
-        if self.is_empty() { return None; };
-        if self.contains_key(key) { return self.get(key); };
+        if let Some(exact) = self.get(key) { return Some(exact); }
 
-        let r1 = self.range(..key);
-        let mut r2 = self.range(key..);
+        let after  = self.range(key..).next();      // First entry after `key`
+        let before = self.range(..key).next_back(); // Last entry before `key`
 
-        let f = r1.last();
-        let b = r2.next();
-        let bd = (key - b.map(|v| *v.0).unwrap_or(-99999)).abs();
-        let fd = (key - f.map(|v| *v.0).unwrap_or(-99999)).abs();
+        // `abs_diff` returns an u64 and can't overflow, unlike `(key - other).abs()`
+        let closest = match (before, after) {
+            (Some(before), Some(after)) => if key.abs_diff(*after.0) <= key.abs_diff(*before.0) { after } else { before },
+            (Some(before), None)        => before,
+            (None,         Some(after)) => after,
+            (None,         None)        => return None
+        };
 
-        if b.is_some() && bd < max_diff && bd < fd {
-            Some(b.unwrap().1)
-        } else if f.is_some() && fd < max_diff && fd < bd {
-            Some(f.unwrap().1)
+        // Anything farther than the closest entry is out of range as well, so one check is enough
+        if key.abs_diff(*closest.0) < max_diff.max(0) as u64 {
+            Some(closest.1)
         } else {
             None
         }

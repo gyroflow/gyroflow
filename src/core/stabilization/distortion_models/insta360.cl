@@ -28,13 +28,25 @@ float2 distort_point(float x, float y, float z, __global KernelParams *params) {
 float2 undistort_point(float2 p, __global KernelParams *params) {
     float2 P = p;
 
+    bool converged = false;
     for (int i = 0; i < 200; ++i) {
         float2 diff = distort_point(P.x, P.y, 1.0, params) - p;
         if (fabs(diff.x) < 1e-6f && fabs(diff.y) < 1e-6f) {
+            converged = true;
             break;
         }
         P -= diff;
     }
 
-    return P;
+    if (!converged) {
+        float2 diff = distort_point(P.x, P.y, 1.0, params) - p;
+        converged = fabs(diff.x) < 1e-3f && fabs(diff.y) < 1e-3f;
+    }
+
+    bool out_of_range = params->r_limit > 0.0f && length(P) > params->r_limit;
+
+    if (converged && !out_of_range) {
+        return P;
+    }
+    return (float2)(-99999.0f, -99999.0f);
 }

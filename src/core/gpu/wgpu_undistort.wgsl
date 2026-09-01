@@ -150,9 +150,10 @@ fn rotate_point(pos: vec2<f32>, angle: f32, origin: vec2<f32>, origin2: vec2<f32
 
 // Gives a bounding box in the source image containing pixels that cover a circle of radius 2 completely in both the source and destination images
 fn affine_bbox(jac: vec4<f32>) -> vec2<f32> {
+    let MAX_SUPPORT = 64.0;
     return vec2<f32>(
-        2.0 * max(1.0, max(abs(jac.x + jac.y), abs(jac.x - jac.y))),
-        2.0 * max(1.0, max(abs(jac.z + jac.w), abs(jac.z - jac.w)))
+        min(MAX_SUPPORT, 2.0 * max(1.0, max(abs(jac.x + jac.y), abs(jac.x - jac.y)))),
+        min(MAX_SUPPORT, 2.0 * max(1.0, max(abs(jac.z + jac.w), abs(jac.z - jac.w))))
     );
 }
 // Computes minimum area ellipse which covers a unit circle in both the source and destination image
@@ -495,6 +496,7 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
 
         new_out_pos = (new_out_pos - out_c) / out_f;
         new_out_pos = undistort_point(new_out_pos);
+        if (new_out_pos.x < -99998.0) { return vec2<f32>(-99999.0, -99999.0); }
         if (bool(flags & 2048) && params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
             let r = length(new_out_pos);
             if (r != 0.0) {
@@ -593,9 +595,13 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
 
     if (interpolation > 8u) {
         let eps = 0.01;
-        let xyx = undistort_coord(position + vec2<f32>(eps, 0.0)) - uv;
-        let xyy = undistort_coord(position + vec2<f32>(0.0, eps)) - uv;
-        jac = vec4<f32>(xyx.x / eps, xyy.x / eps, xyx.y / eps, xyy.y / eps);
+        let nx = undistort_coord(position + vec2<f32>(eps, 0.0));
+        let ny = undistort_coord(position + vec2<f32>(0.0, eps));
+        if (uv.x > -99998.0 && nx.x > -99998.0 && ny.x > -99998.0) {
+            let xyx = nx - uv;
+            let xyy = ny - uv;
+            jac = vec4<f32>(xyx.x / eps, xyy.x / eps, xyx.y / eps, xyy.y / eps);
+        }
     }
 
     var pixel: vec4<f32> = bg;
