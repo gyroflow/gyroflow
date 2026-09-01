@@ -410,23 +410,21 @@ Item {
                                 iconName: "ease_in";
                                 text: qsTr("Ease in");
                                 checkable: true;
-                                enabled: !smoothKf.checked;
-                                onTriggered: keyframeContextMenu.updateEasing();
+                                onTriggered: { if (easeIn.checked || easeOut.checked) smoothKf.checked = false; keyframeContextMenu.updateEasing(); }
                             }
                             Action {
                                 id: easeOut;
                                 iconName: "ease_out";
                                 text: qsTr("Ease out");
                                 checkable: true;
-                                enabled: !smoothKf.checked;
-                                onTriggered: keyframeContextMenu.updateEasing();
+                                onTriggered: { if (easeIn.checked || easeOut.checked) smoothKf.checked = false; keyframeContextMenu.updateEasing(); }
                             }
                             Action {
                                 id: smoothKf;
                                 iconName: "ease_smooth";
                                 text: qsTr("Smooth");
                                 checkable: true;
-                                onTriggered: keyframeContextMenu.updateEasing();
+                                onTriggered: { if (smoothKf.checked) { easeIn.checked = false; easeOut.checked = false; } keyframeContextMenu.updateEasing(); }
                             }
                             function updateEasingMenu(): void {
                                 let e = controller.keyframe_easing(pressedKeyframe, pressedKeyframeTs);
