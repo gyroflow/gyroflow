@@ -472,7 +472,7 @@ impl WgpuWrapper {
             self.queue.write_buffer(self.buf_drawing.as_ref().unwrap(), 0, drawing_buffer);
         }
         if !itm.mesh_data.is_empty() {
-            if self.buf_mesh_data.is_none() || (self.buf_mesh_data.as_ref().unwrap().size() as usize * 4) < itm.mesh_data.len() { log::error!("Buffer size mismatch buf_mesh_data! {} vs {}", self.buf_mesh_data.as_ref().unwrap().size() * 4, itm.mesh_data.len()); return false; }
+            if self.buf_mesh_data.is_none() || self.buf_mesh_data.as_ref().unwrap().size() as usize / std::mem::size_of::<f32>() < itm.mesh_data.len() { log::error!("Buffer size mismatch buf_mesh_data! {} vs {}", self.buf_mesh_data.as_ref().unwrap().size() / std::mem::size_of::<f32>() as u64, itm.mesh_data.len()); return false; }
             self.queue.write_buffer(self.buf_mesh_data.as_ref().unwrap(), 0, bytemuck::cast_slice(&itm.mesh_data));
         }
 

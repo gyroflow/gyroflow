@@ -272,10 +272,11 @@ impl Stabilization {
             let gyro = self.compute_params.gyro.read();
             let file_metadata = gyro.file_metadata.read();
             if let Some(mc) = file_metadata.mesh_correction.get(frame) {
-                if mc.1[0] > 10.0 {
+                if crate::synchronization::residual_mesh::has_non_identity_mesh(&mc.1) {
                     kernel_flags.set(KernelParamsFlags::HAS_MESH_DATA, true);
                 }
-                if mc.1[0] > 0.0 && mc.1[mc.1[0] as usize] > 0.0 {
+                let mesh_offset = mc.1.first().copied().unwrap_or_default().max(0.0) as usize;
+                if mesh_offset > 0 && mc.1.len() > mesh_offset && mc.1[mesh_offset] > 0.0 {
                     kernel_flags.set(KernelParamsFlags::HAS_FPD_DATA, true);
                 }
             }
