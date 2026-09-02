@@ -271,11 +271,12 @@ impl Stabilization {
         {
             let gyro = self.compute_params.gyro.read();
             let file_metadata = gyro.file_metadata.read();
-            if let Some(mc) = file_metadata.mesh_correction.get(frame) {
-                if mc.1[0] > 10.0 {
+            if let Some(mc) = file_metadata.mesh_correction.get(frame).or_else(|| file_metadata.optical_flow_correction.get(frame)) {
+                if mc.1.first().copied().unwrap_or_default() > 10.0 {
                     kernel_flags.set(KernelParamsFlags::HAS_MESH_DATA, true);
                 }
-                if mc.1[0] > 0.0 && mc.1[mc.1[0] as usize] > 0.0 {
+                let offset = mc.1.first().copied().unwrap_or_default().max(0.0) as usize;
+                if offset > 0 && mc.1.get(offset).copied().unwrap_or_default() > 0.0 {
                     kernel_flags.set(KernelParamsFlags::HAS_FPD_DATA, true);
                 }
             }
