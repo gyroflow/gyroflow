@@ -40,7 +40,7 @@ do
         echo "${SHADER/LENS_MODEL_FUNCTIONS;/"$FUNCS"}" > tmp.frag
 
         if [ "$i" = "sony" ] || [ "$i" = "generic_polynomial" ]; then
-           echo " float get_mesh_data(int idx) { return texture(texMeshData, vec2(0, idx / 1023.0)).r; } " >> tmp.frag
+           echo " float get_mesh_data(int idx) { return texture(texMeshData, vec2(0, idx / 2047.0)).r; } " >> tmp.frag
         fi
 
         eval "$QSB -o undistort_$i$d.frag.qsb tmp.frag"

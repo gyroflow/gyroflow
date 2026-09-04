@@ -27,7 +27,7 @@ layout(std140, binding = 2) uniform KernelParams {
     vec4 background;    // 16
     vec2 f;             // 8  - focal length in pixels
     vec2 c;             // 16 - lens center
-    vec4 k1, k2, k3;    // 16, 16, 16 - distortion coefficients
+    vec4 k1, k2, k3, k4, k5, k6; // 16 x 6 - distortion coefficients
     float fov;          // 4
     float r_limit;      // 8
     float lens_correction_amount;   // 12
@@ -145,10 +145,12 @@ vec2 rotate_and_distort(vec2 pos, float idx) {
             float ang_rad = get_param(idx, 11);
             float cos_a = cos(-ang_rad);
             float sin_a = sin(-ang_rad);
+            // The camera applies the sensor roll before the sensor/lens shift, so undo the shift first and then the roll
             uv -= params.c;
+            uv = vec2(uv.x - get_param(idx, 9) + get_param(idx, 12), uv.y - get_param(idx, 10) + get_param(idx, 13));
             uv = vec2(
-                cos_a * uv.x - sin_a * uv.y - get_param(idx, 9)  + get_param(idx, 12),
-                sin_a * uv.x + cos_a * uv.y - get_param(idx, 10) + get_param(idx, 13)
+                cos_a * uv.x - sin_a * uv.y,
+                sin_a * uv.x + cos_a * uv.y
             );
             uv += params.c;
         }

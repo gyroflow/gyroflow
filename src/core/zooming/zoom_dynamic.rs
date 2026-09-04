@@ -79,7 +79,7 @@ pub fn compute(compute_params: &ComputeParams, mut fov_values: Vec<f64>, timesta
     (fov_values, fov_minimal)
 }
 
-fn get_frames_per_window(window: f64, fps: f64, max_frames: usize) -> usize {
+pub(crate) fn get_frames_per_window(window: f64, fps: f64, max_frames: usize) -> usize {
     let exact = window * fps;
     let mut frames = if exact.is_finite() && exact > 0.0 {
         (exact.floor() as usize).min(max_frames)
@@ -101,7 +101,7 @@ fn min_rolling(a: &[f64], window: usize) -> Vec<f64> {
     }).collect()
 }
 
-fn convolve(v: &[f64], filter: &[f64]) -> Vec<f64> {
+pub(crate) fn convolve(v: &[f64], filter: &[f64]) -> Vec<f64> {
     v.windows(filter.len()).map(|window| {
         window.iter().zip(filter).map(|(x, y)| x * y).sum()
     }).collect()
@@ -112,14 +112,14 @@ fn gaussian_window(width: isize, std: f64) -> Vec<f64> {
     (-width / 2..=width / 2).map(|x| (-(x.pow(2) as f64) / sig2).exp()).collect()
 }
 
-fn gaussian_window_normalized(m: usize, std: f64) -> Vec<f64> {
+pub(crate) fn gaussian_window_normalized(m: usize, std: f64) -> Vec<f64> {
     let mut w = gaussian_window(m as isize, std);
     let sum: f64 = w.iter().sum();
     w.iter_mut().for_each(|v| *v /= sum);
     w
 }
 
-fn pad_edge(arr: &[f64], pad_to: (usize, usize)) -> Vec<f64> {
+pub(crate) fn pad_edge(arr: &[f64], pad_to: (usize, usize)) -> Vec<f64> {
     let first = *arr.first().unwrap_or(&0.0);
     let last = *arr.last().unwrap_or(&0.0);
 

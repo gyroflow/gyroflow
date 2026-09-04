@@ -161,12 +161,14 @@ impl Stabilization {
             uv = (uv.0 * params.f[0], uv.1 * params.f[1]);
 
             if matrices[9] != 0.0 || matrices[10] != 0.0 || matrices[11] != 0.0 || matrices[12] != 0.0 || matrices[13] != 0.0 {
+                // The camera applies the sensor roll before the sensor/lens shift, so undo the shift first and then the roll
                 let ang_rad = matrices[11];
                 let cos_a = (-ang_rad).cos();
                 let sin_a = (-ang_rad).sin();
+                let shifted = (uv.0 - matrices[9] + matrices[12], uv.1 - matrices[10] + matrices[13]);
                 uv = (
-                    cos_a * uv.0 - sin_a * uv.1 - matrices[9]  + matrices[12],
-                    sin_a * uv.0 + cos_a * uv.1 - matrices[10] + matrices[13]
+                    cos_a * shifted.0 - sin_a * shifted.1,
+                    sin_a * shifted.0 + cos_a * shifted.1
                 );
             }
 
@@ -182,7 +184,23 @@ impl Stabilization {
                 uv.0 = map_coord(uv.0, 0.0, params.width  as f32, origin.0, origin.0 + crop_size.0);
                 uv.1 = map_coord(uv.1, 0.0, params.height as f32, origin.1, origin.1 + crop_size.1);
 
-                let new_pos = crate::gyro_source::interpolate_mesh(uv.0 as f64, uv.1 as f64, (mesh_size.0, mesh_size.1), mesh_data);
+                let q = (uv.0 as f64, uv.1 as f64);
+                let mut new_pos = crate::gyro_source::interpolate_mesh(q.0, q.1, (mesh_size.0, mesh_size.1), mesh_data);
+                // The 9x9 inverse mesh is only approximate for large warps, refine against the camera's forward mesh (fwd(p) = q).
+                // The block is only there when the mesh needs it (`sony::MESH_REFINE_THRESHOLD_PX`), and a first correction
+                // that is already tiny leaves nothing for a second one (`sony::MESH_REFINE_SKIP_PX`)
+                let o = mesh_data[0] as usize;
+                let fwd = o + 4 + 2 * (mesh_data[o].max(0.0) as usize);
+                if mesh_data.len() > fwd + 9 && mesh_data[fwd] > 10.0 {
+                    let skip_sq = crate::gyro_source::MESH_REFINE_SKIP_PX * crate::gyro_source::MESH_REFINE_SKIP_PX;
+                    for _ in 0..2 {
+                        let f = crate::gyro_source::interpolate_mesh(new_pos.x, new_pos.y, (mesh_size.0, mesh_size.1), &mesh_data[fwd..]);
+                        let (dx, dy) = (q.0 - f.x, q.1 - f.y);
+                        new_pos.x += dx;
+                        new_pos.y += dy;
+                        if dx * dx + dy * dy < skip_sq { break; }
+                    }
+                }
 
                 uv.0 = map_coord(new_pos.x as f32, origin.0, origin.0 + crop_size.0, 0.0, params.width  as f32);
                 uv.1 = map_coord(new_pos.y as f32, origin.1, origin.1 + crop_size.1, 0.0, params.height as f32);
@@ -197,7 +215,7 @@ impl Stabilization {
                 let mesh_size = (mesh_data[3], mesh_data[4]);
                 let origin    = (mesh_data[5] as f32, mesh_data[6] as f32);
                 let crop_size = (mesh_data[7] as f32, mesh_data[8] as f32);
-                let stblz_grid = mesh_size.1 / 8.0;
+                let stblz_grid = if mesh_data[o + 2] > 0.0 { mesh_data[o + 2] } else { mesh_size.1 / 8.0 }; // band height comes with the table
 
                 if (params.flags & 128) == 128 { uv.1 = params.height as f32 - uv.1; } // framebuffer inverted
 
@@ -652,7 +670,7 @@ pub fn undistort_points_with_rolling_shutter(distorted: &[(f32, f32)], timestamp
 pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us: i64, params: &ComputeParams, points_dims: (u32, u32)) -> Vec<(f32, f32)> {
     let img_dim_ratio = points_dims.0 as f64 / params.width.max(1) as f64;//FrameTransform::get_ratio(params);
 
-    let (camera_matrix, distortion_coeffs, _, _, _, _) = FrameTransform::get_lens_data_at_timestamp(params, timestamp_us as f64 / 1000.0, false);
+    let (camera_matrix, distortion_coeffs, _, _, _, _, _) = FrameTransform::get_lens_data_at_timestamp(params, timestamp_us as f64 / 1000.0, false);
 
     let scaled_k = camera_matrix * img_dim_ratio;
 
@@ -660,7 +678,7 @@ pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us:
     undistort_points(distorted, scaled_k, &distortion_coeffs, Matrix3::identity(), None, None, params, 1.0, 1.0, timestamp_us as f64 / 1000.0, None, None, 0.0)
 }
 // Ported from OpenCV: https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L321
-pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64; 12], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams, lens_correction_amount: f64, fov: f64, timestamp_ms: f64, shift_per_point: Option<Vec<(f32, f32, f32, f32, f32)>>, mesh: Option<Vec<f64>>, r_limit: f64) -> Vec<(f32, f32)> {
+pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64; 24], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams, lens_correction_amount: f64, fov: f64, timestamp_ms: f64, shift_per_point: Option<Vec<(f32, f32, f32, f32, f32)>>, mesh: Option<Vec<f64>>, r_limit: f64) -> Vec<(f32, f32)> {
     let f = (camera_matrix[(0, 0)] as f32, camera_matrix[(1, 1)] as f32);
     let c = (camera_matrix[(0, 2)] as f32, camera_matrix[(1, 2)] as f32);
     let r_limit = r_limit as f32;
@@ -690,6 +708,9 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
         k: distortion_coeffs.iter().map(|x| *x as f32).collect::<Vec<_>>().try_into().unwrap(),
         digital_lens_params,
         light_refraction_coefficient,
+        // The model has to reach exactly as far here as it does in the render, or the lens-correction
+        // solve below measures a field the picture doesn't have
+        r_limit,
 
         ..Default::default()
     };
@@ -702,7 +723,18 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
         let amount = lens_correction_amount as f32;
         let factor = (1.0 - amount).max(0.001);
         let out_f = (f.0 / fov as f32 / factor, f.1 / fov as f32 / factor);
-        Some((out_c, amount, factor, out_f))
+        // The largest image radius the model still corrects - its own field limit with `r_limit` on top.
+        // An output position past `n_max * out_f` has no picture at all (the render's `undistort_point`
+        // returns None there and the pixel becomes background), so the solve below must stay inside it.
+        let (mut lo, mut hi) = (0.0f32, 8.0f32);
+        for _ in 0..32 {
+            let mid = 0.5 * (lo + hi);
+            if params.distortion_model.undistort_point((mid, 0.0), &kernel_params).is_some() { lo = mid; } else { hi = mid; }
+        }
+        // R (`r_of` below) is radial about `out_c` only when nothing in it moves a point off its ray: a digital
+        // lens, or tangential and thin-prism terms of the optical model, need the two-dimensional solve
+        let radial = params.digital_lens.is_none() && params.distortion_model.is_radial(&kernel_params);
+        Some((out_c, amount, factor, out_f, lo, radial))
     } else { None };
 
     // Not parallelized here: the only caller that reaches the lens-correction block below
@@ -721,15 +753,15 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
             }
         }
 
-        if let Some(mesh_data) = &mesh {
+        if let Some(mesh_data) = mesh.as_ref().filter(|m| m.len() > 9) {
             // FocalPlaneDistortion
-            if mesh_data[0] > 0.0 && mesh_data[mesh_data[0] as usize] > 0.0 {
-                let o = mesh_data[0] as usize; // offset to focal plane distortion data
+            let o = mesh_data[0] as usize; // offset to focal plane distortion data
+            if o > 0 && mesh_data.get(o).map_or(false, |x| *x > 0.0) {
 
                 let mesh_size = (mesh_data[3], mesh_data[4]);
                 let origin    = (mesh_data[5] as f32, mesh_data[6] as f32);
                 let crop_size = (mesh_data[7] as f32, mesh_data[8] as f32);
-                let stblz_grid = mesh_size.1 / 8.0;
+                let stblz_grid = if mesh_data[o + 2] > 0.0 { mesh_data[o + 2] } else { mesh_size.1 / 8.0 }; // band height comes with the table
 
                 x = map_coord(x, 0.0, params.width  as f32, origin.0, origin.0 + crop_size.0);
                 y = map_coord(y, 0.0, params.height as f32, origin.1, origin.1 + crop_size.1);
@@ -762,13 +794,13 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
             }
         }
         if let Some(shift) = shift_per_point.as_ref().and_then(|v| v.get(index)) {
+            // Sensor roll around the principal point first, then the sensor/lens shift (the inverse of `rotate_and_distort`)
             let ang_rad = shift.2;
             let cos_a = ang_rad.cos();
             let sin_a = ang_rad.sin();
-            x = x - c.0 - shift.3 + shift.0;
-            y = y - c.1 - shift.4 + shift.1;
-            x = cos_a * x - sin_a * y + c.0;
-            y = sin_a * x + cos_a * y + c.1;
+            let (xr, yr) = (x - c.0, y - c.1);
+            x = cos_a * xr - sin_a * yr - shift.3 + shift.0 + c.0;
+            y = sin_a * xr + cos_a * yr - shift.4 + shift.1 + c.1;
         }
 
         let pw = ((x - c.0) / f.0, (y - c.1) / f.1); // world point
@@ -810,7 +842,7 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
             }
             let mut pt = (pr[0] / pr[2], pr[1] / pr[2]);
 
-            if let Some((out_c, amount, factor, out_f)) = lens_correction {
+            if let Some((out_c, amount, factor, out_f, n_max, radial)) = lens_correction {
                 // The digital warp is applied FOV-independently (un-zoom -> warp -> re-zoom below), so the
                 // corrected frame shape is a pure uniform scale in fov — the zoom search and the cached debug
                 // overlay both use the use_fovs=false `fov`, and the live FOV is a uniform scale at draw time.
@@ -818,9 +850,9 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
                 // The render samples at  texPos_used = lerp(R(o), o, amount), where R(o) is applied FORWARD to
                 // the in-frame output pixel o:  R = digital_undistort -> /out_f -> radial undistort -> *out_f
                 // (undistort.frag). `pt` is that texPos_used, so the output position o of this source point is the
-                // solution of  amount*o + (1-amount)*R(o) = pt. We solve it with Newton, evaluating R FORWARD —
-                // digital_undistort is a direct polynomial (finite even out-of-domain) and radial undistort is
-                // well-defined, so this never blows up. (The old closed-form inverse fed the rectilinear,
+                // solution of  amount*o + (1-amount)*R(o) = pt, see `invert_lens_correction_blend`. R is evaluated
+                // FORWARD — digital_undistort is a direct polynomial (finite even out-of-domain) and radial undistort
+                // is well-defined, so this never blows up. (The old closed-form inverse fed the rectilinear,
                 // far-out-of-frame `pt` into the digital *inverse*, which diverged to NaN for lc>0.)
                 let r_of = |o: (f32, f32)| -> (f32, f32) {
                     let mut q = o;
@@ -832,7 +864,20 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
                         }
                     }
                     let mut n = ((q.0 - out_c.0) / out_f.0, (q.1 - out_c.1) / out_f.1);
-                    if let Some(d) = params.distortion_model.undistort_point(n, &kernel_params) { n = d; }
+                    // Past the model's field, hold the correction at the edge. Falling back to the identity
+                    // out there (`R(o) = o`) collapses the blend to `o = pt`, ie. it hands the solve a
+                    // spurious root at the FULLY corrected position - which is why every strength between
+                    // 0 and 100% measured the 100% polygon and the zoom overlay disagreed with the picture.
+                    let nr = (n.0 * n.0 + n.1 * n.1).sqrt();
+                    if nr > n_max && nr > 0.0 {
+                        let s = n_max / nr;
+                        n = (n.0 * s, n.1 * s);
+                    }
+                    n = match params.distortion_model.undistort_point(n, &kernel_params) {
+                        Some(d) => d,
+                        None if r_limit > 0.0 && nr > 0.0 => (n.0 * (r_limit / nr), n.1 * (r_limit / nr)),
+                        None => n,
+                    };
                     if kernel_params.light_refraction_coefficient != 1.0 && kernel_params.light_refraction_coefficient > 0.0 {
                         let r = (n.0 * n.0 + n.1 * n.1).sqrt();
                         if r != 0.0 {
@@ -844,46 +889,181 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
                     }
                     ((n.0 * out_f.0) + out_c.0, (n.1 * out_f.1) + out_c.1)
                 };
-
-                // Initial guess: the old closed-form inverse blended toward pt (exact at amount=0 and amount→1),
-                // falling back to pt where the inverse digital warp is out-of-domain.
-                let inv = {
-                    let n = ((pt.0 - out_c.0) / out_f.0, (pt.1 - out_c.1) / out_f.1);
-                    let d = params.distortion_model.distort_point(n.0, n.1, 1.0, &kernel_params);
-                    let mut p2 = ((d.0 * out_f.0) + out_c.0, (d.1 * out_f.1) + out_c.1);
-                    if let Some(digital) = &params.digital_lens {
-                        let uz = ((p2.0 - out_c.0) * fov as f32 + out_c.0, (p2.1 - out_c.1) * fov as f32 + out_c.1);
-                        let dd = digital.distort_point(uz.0, uz.1, 1.0, &kernel_params);
-                        p2 = ((dd.0 - out_c.0) / fov as f32 + out_c.0, (dd.1 - out_c.1) / fov as f32 + out_c.1);
-                    }
-                    p2
-                };
-                let mut o = if inv.0.is_finite() && inv.1.is_finite() {
-                    (inv.0 * factor + pt.0 * amount, inv.1 * factor + pt.1 * amount)
-                } else { pt };
-
-                // Newton: g(o) = amount*o + (1-amount)*R(o) - pt = 0
-                for _ in 0..10 {
-                    let r = r_of(o);
-                    let g = (amount * o.0 + factor * r.0 - pt.0, amount * o.1 + factor * r.1 - pt.1);
-                    if g.0.abs() < 0.02 && g.1.abs() < 0.02 { break; }
-                    let eps = 1.0_f32;
-                    let rx = r_of((o.0 + eps, o.1));
-                    let ry = r_of((o.0, o.1 + eps));
-                    let j11 = amount + factor * (rx.0 - r.0) / eps; let j21 = factor * (rx.1 - r.1) / eps;
-                    let j12 = factor * (ry.0 - r.0) / eps;          let j22 = amount + factor * (ry.1 - r.1) / eps;
-                    let det = j11 * j22 - j12 * j21;
-                    if !det.is_finite() || det.abs() < 1e-9 { break; }
-                    let dx = ( j22 * g.0 - j12 * g.1) / det;
-                    let dy = (-j21 * g.0 + j11 * g.1) / det;
-                    if !dx.is_finite() || !dy.is_finite() { break; }
-                    o = (o.0 - dx, o.1 - dy);
-                }
-                pt = o;
+                pt = invert_lens_correction_blend(pt, out_c, out_f, n_max, amount, factor, radial, &r_of);
             }
             pt
         } else {
             INVALID_POINT
         }
     }).collect()
+}
+
+/// Inverts the render's lens-correction blend for one output-space point: the `o` with
+/// `amount * o + factor * R(o) = target`, where `R` is the forward lens-correction map of `undistort_points`
+/// (its `r_of`), `out_c` the centre R works about, `out_f` its focal length and `n_max` the largest normalized
+/// radius it still corrects (an `o` past `n_max * out_f` has no picture at all, so the answer stays inside it).
+///
+/// For a radial R the equation is scalar and monotone along the ray from `out_c` through `target`, and it is
+/// bisected there: the residual projected on the ray is `-|target - out_c|` at the centre and increasing, so the
+/// bracket holds from the start, and when it never reaches zero inside the field the picture of this source
+/// point ends at the field edge. Newton on the 2D map could not be trusted on its own: R rises almost vertically
+/// over a pixel at the field edge, and nothing stopped it from walking out of the domain and onto the spurious
+/// root the identity fallback used to offer there.
+///
+/// When R is not radial (a digital lens, tangential or thin-prism terms of the optical model), the ray answer is
+/// only the initial guess and a damped 2D Newton polishes it against the SAME `target`: a step is taken only
+/// when it reduces the residual (halved up to three times if it doesn't), so the polish can never hand back
+/// anything worse than the ray solve, and it stops on the first step that improves nothing. The Jacobian comes
+/// from one-pixel forward differences; R is smooth at that scale everywhere but the field edge, and there the
+/// damping holds.
+pub(crate) fn invert_lens_correction_blend(target: (f32, f32), out_c: (f32, f32), out_f: (f32, f32), n_max: f32, amount: f32, factor: f32, radial: bool, r_of: impl Fn((f32, f32)) -> (f32, f32)) -> (f32, f32) {
+    // ----- Along the ray -----
+    let dir = (target.0 - out_c.0, target.1 - out_c.1);
+    let dlen = (dir.0 * dir.0 + dir.1 * dir.1).sqrt();
+    let mut o = if dlen > 1e-6 {
+        let u = (dir.0 / dlen, dir.1 / dlen);
+        let (nx, ny) = (u.0 / out_f.0, u.1 / out_f.1);
+        let rho_max = n_max / (nx * nx + ny * ny).sqrt();
+        let resid = |rho: f32| -> f32 {
+            let o = (out_c.0 + u.0 * rho, out_c.1 + u.1 * rho);
+            let r = r_of(o);
+            (amount * o.0 + factor * r.0 - target.0) * u.0 + (amount * o.1 + factor * r.1 - target.1) * u.1
+        };
+        let (mut lo, mut hi) = (0.0f32, rho_max);
+        if resid(hi) < 0.0 {
+            lo = hi; // no solution inside the field: this source point's picture ends at its edge
+        } else {
+            for _ in 0..24 {
+                let mid = 0.5 * (lo + hi);
+                if resid(mid) < 0.0 { lo = mid; } else { hi = mid; }
+            }
+        }
+        let rho = 0.5 * (lo + hi);
+        (out_c.0 + u.0 * rho, out_c.1 + u.1 * rho)
+    } else {
+        out_c
+    };
+    if radial { return o; }
+
+    // ----- Two-dimensional polish -----
+    const TOLERANCE: f32 = 0.02; // pixels of residual
+    const EPS: f32 = 1.0;        // pixels, the finite-difference step
+    let clamp_o = |o: (f32, f32)| -> (f32, f32) {
+        let n = ((o.0 - out_c.0) / out_f.0, (o.1 - out_c.1) / out_f.1);
+        let r = (n.0 * n.0 + n.1 * n.1).sqrt();
+        if r > n_max && r > 0.0 {
+            let s = n_max / r;
+            (out_c.0 + n.0 * s * out_f.0, out_c.1 + n.1 * s * out_f.1)
+        } else { o }
+    };
+    // R(o), g(o) = amount*o + factor*R(o) - target, |g(o)|
+    let eval = |o: (f32, f32)| -> ((f32, f32), (f32, f32), f32) {
+        let r = r_of(o);
+        let g = (amount * o.0 + factor * r.0 - target.0, amount * o.1 + factor * r.1 - target.1);
+        (r, g, (g.0 * g.0 + g.1 * g.1).sqrt())
+    };
+    let (mut r, mut g, mut g_norm) = eval(o);
+    for _ in 0..10 {
+        if !(g_norm > TOLERANCE) { break; } // converged, or NaN
+        let rx = r_of((o.0 + EPS, o.1));
+        let ry = r_of((o.0, o.1 + EPS));
+        let j11 = amount + factor * (rx.0 - r.0) / EPS; let j12 = factor * (ry.0 - r.0) / EPS;
+        let j21 = factor * (rx.1 - r.1) / EPS;          let j22 = amount + factor * (ry.1 - r.1) / EPS;
+        let det = j11 * j22 - j12 * j21;
+        if !det.is_finite() || det.abs() < 1e-9 { break; }
+        let dx = ( j22 * g.0 - j12 * g.1) / det;
+        let dy = (-j21 * g.0 + j11 * g.1) / det;
+        if !dx.is_finite() || !dy.is_finite() { break; }
+        // Backtracking: the longest step that still reduces the residual
+        let mut improved = false;
+        for &t in &[1.0f32, 0.5, 0.25, 0.125] {
+            let candidate = clamp_o((o.0 - t * dx, o.1 - t * dy));
+            let (rc, gc, gc_norm) = eval(candidate);
+            if gc_norm < g_norm {
+                o = candidate; r = rc; g = gc; g_norm = gc_norm;
+                improved = true;
+                break;
+            }
+        }
+        if !improved { break; }
+    }
+    o
+}
+
+#[cfg(test)]
+mod tests {
+    use super::invert_lens_correction_blend;
+
+    const OUT_C: (f32, f32) = (960.0, 540.0);
+    const OUT_F: (f32, f32) = (1000.0, 1000.0);
+    const N_MAX: f32 = 4.0;
+
+    // R(o) = out_c + diag(s) (o - out_c): a uniform `s` is radial, an anisotropic one is a digital stretch
+    fn stretch(s: (f32, f32)) -> impl Fn((f32, f32)) -> (f32, f32) {
+        move |o| (OUT_C.0 + s.0 * (o.0 - OUT_C.0), OUT_C.1 + s.1 * (o.1 - OUT_C.1))
+    }
+    // amount*o + (1-amount)*R(o) = target then has the closed form o = out_c + (target - out_c) / (amount + (1-amount) s)
+    fn closed_form(target: (f32, f32), s: (f32, f32), amount: f32) -> (f32, f32) {
+        let factor = 1.0 - amount;
+        (OUT_C.0 + (target.0 - OUT_C.0) / (amount + factor * s.0), OUT_C.1 + (target.1 - OUT_C.1) / (amount + factor * s.1))
+    }
+    fn residual(o: (f32, f32), target: (f32, f32), amount: f32, r_of: &dyn Fn((f32, f32)) -> (f32, f32)) -> f32 {
+        let r = r_of(o);
+        let factor = 1.0 - amount;
+        ((amount * o.0 + factor * r.0 - target.0).powi(2) + (amount * o.1 + factor * r.1 - target.1).powi(2)).sqrt()
+    }
+    fn close(a: (f32, f32), b: (f32, f32)) -> bool { (a.0 - b.0).abs() < 0.05 && (a.1 - b.1).abs() < 0.05 }
+
+    #[test]
+    fn radial_map_is_solved_on_the_ray() {
+        let target = (OUT_C.0 + 800.0, OUT_C.1 - 300.0);
+        let r_of = stretch((1.4, 1.4));
+        let o = invert_lens_correction_blend(target, OUT_C, OUT_F, N_MAX, 0.5, 0.5, true, &r_of);
+        let e = closed_form(target, (1.4, 1.4), 0.5);
+        assert!(close(o, e), "{o:?} vs {e:?}");
+    }
+
+    #[test]
+    fn identity_map_returns_the_target() {
+        let target = (OUT_C.0 + 800.0, OUT_C.1 + 300.0);
+        let r_of = stretch((1.0, 1.0));
+        for radial in [true, false] {
+            let o = invert_lens_correction_blend(target, OUT_C, OUT_F, N_MAX, 0.5, 0.5, radial, &r_of);
+            assert!(close(o, target), "{o:?} vs {target:?}");
+        }
+    }
+
+    #[test]
+    fn nonradial_map_is_polished_against_the_original_target() {
+        // A digital stretch (x by 1.5, y by 0.8 about the centre) at 50% correction. The ray solve alone lands off
+        // the 2D solution, and a polish that solved against the ray answer instead of the target (what the code
+        // did before) returned a point satisfying neither equation
+        let target = (OUT_C.0 + 800.0, OUT_C.1 + 300.0);
+        let s = (1.5, 0.8);
+        let r_of = stretch(s);
+        let ray = invert_lens_correction_blend(target, OUT_C, OUT_F, N_MAX, 0.5, 0.5, true, &r_of);
+        assert!(residual(ray, target, 0.5, &r_of) > 1.0, "the ray answer already solves the 2D equation, the map isn't anisotropic enough to test anything");
+        let o = invert_lens_correction_blend(target, OUT_C, OUT_F, N_MAX, 0.5, 0.5, false, &r_of);
+        let e = closed_form(target, s, 0.5);
+        assert!(close(o, e), "{o:?} vs {e:?}");
+        assert!(residual(o, target, 0.5, &r_of) < 0.05);
+    }
+
+    #[test]
+    fn polish_never_worsens_the_ray_answer() {
+        // A map with a kink inside the field and a jump past it, plus a shear: Newton's local model is wrong
+        // across both, and the damping has to keep whatever the ray solve found
+        let r_of = |o: (f32, f32)| -> (f32, f32) {
+            let d = (o.0 - OUT_C.0, o.1 - OUT_C.1);
+            let r = (d.0 * d.0 + d.1 * d.1).sqrt();
+            let s = if r < 500.0 { 1.0 } else if r < 900.0 { 1.0 + (r - 500.0) / 200.0 } else { 6.0 };
+            (OUT_C.0 + s * d.0 + 0.3 * d.1, OUT_C.1 + s * d.1 - 0.2 * d.0)
+        };
+        for &(dx, dy) in &[(300.0f32, 100.0f32), (700.0, -400.0), (1500.0, 900.0), (3500.0, 0.0), (0.0, 0.0)] {
+            let target = (OUT_C.0 + dx, OUT_C.1 + dy);
+            let ray = invert_lens_correction_blend(target, OUT_C, OUT_F, N_MAX, 0.3, 0.7, true, &r_of);
+            let polished = invert_lens_correction_blend(target, OUT_C, OUT_F, N_MAX, 0.3, 0.7, false, &r_of);
+            assert!(residual(polished, target, 0.3, &r_of) <= residual(ray, target, 0.3, &r_of) + 1e-3, "{target:?}");
+        }
+    }
 }

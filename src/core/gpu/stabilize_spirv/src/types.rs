@@ -50,6 +50,9 @@ pub struct KernelParams {
     pub k1:                Vec4, // 16 - distortion coefficients
     pub k2:                Vec4, // 16 - distortion coefficients
     pub k3:                Vec4, // 16 - distortion coefficients
+    pub k4:                Vec4, // 16 - distortion coefficients
+    pub k5:                Vec4, // 16 - distortion coefficients
+    pub k6:                Vec4, // 16 - distortion coefficients
     pub fov:               f32, // 4
     pub r_limit:           f32, // 8
     pub lens_correction_amount:   f32, // 12

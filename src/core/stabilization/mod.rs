@@ -154,7 +154,7 @@ pub struct KernelParams {
     pub background:        [f32; 4], // 16
     pub f:                 [f32; 2], // 8  - focal length in pixels
     pub c:                 [f32; 2], // 16 - lens center
-    pub k:                 [f32; 12], // 16,16,16 - distortion coefficients
+    pub k:                 [f32; 24], // 16 x 6 - distortion coefficients
     pub fov:               f32, // 4
     pub r_limit:           f32, // 8
     pub lens_correction_amount:   f32, // 12
@@ -271,14 +271,8 @@ impl Stabilization {
         {
             let gyro = self.compute_params.gyro.read();
             let file_metadata = gyro.file_metadata.read();
-            if let Some(mc) = file_metadata.mesh_correction.get(frame) {
-                if mc.1[0] > 10.0 {
-                    kernel_flags.set(KernelParamsFlags::HAS_MESH_DATA, true);
-                }
-                if mc.1[0] > 0.0 && mc.1[mc.1[0] as usize] > 0.0 {
-                    kernel_flags.set(KernelParamsFlags::HAS_FPD_DATA, true);
-                }
-            }
+            kernel_flags.set(KernelParamsFlags::HAS_MESH_DATA, file_metadata.mesh_correction.has_mesh(frame));
+            kernel_flags.set(KernelParamsFlags::HAS_FPD_DATA, file_metadata.mesh_correction.has_focal_plane(frame));
             if file_metadata.camera_stab_data.len() > frame {
                 kernel_flags.set(KernelParamsFlags::HAS_IBIS_DATA, true);
             }
@@ -355,8 +349,32 @@ impl Stabilization {
             transform.kernel_params.output_rotation = r;
         }
 
+        /*static PREV: parking_lot::RwLock<Vec<f32>> = parking_lot::RwLock::new(Vec::new());
+        if let Ok(Ok(v)) = std::fs::read_to_string(std::env::current_exe().unwrap().with_file_name("params.json")).map(|x| serde_json::from_str(&x) as serde_json::Result<Vec<f32>>) {
+            if v.len() == 24 {
+                *PREV.write() = v.clone();
+            }
+        }
+        {
+            let v = PREV.read();
+            v.iter().enumerate().for_each(|(i, x)| transform.kernel_params.custom[i] = *x);
+        }*/
+
         transform.kernel_params.source_rect = Self::get_rect(&buffers.input);
         transform.kernel_params.output_rect = Self::get_rect(&buffers.output);
+
+        /*transform.kernel_params.distortion_model = match &self.compute_params.distortion_model.inner {
+            distortion_models::DistortionModels::OpenCVFisheye(_) => stabilize_spirv::DistortionModel::OpenCVFisheye,
+            distortion_models::DistortionModels::OpenCVStandard(_) => stabilize_spirv::DistortionModel::OpenCVStandard,
+            distortion_models::DistortionModels::Insta360(_) => stabilize_spirv::DistortionModel::Insta360,
+            _ => { stabilize_spirv::DistortionModel::None }
+        };
+        transform.kernel_params.digital_lens = match self.compute_params.digital_lens.as_ref().map(|x| &x.inner) {
+            Some(distortion_models::DistortionModels::GoProSuperview(_)) => stabilize_spirv::DistortionModel::GoProSuperview,
+            Some(distortion_models::DistortionModels::GoProHyperview(_)) => stabilize_spirv::DistortionModel::GoProHyperview,
+            Some(distortion_models::DistortionModels::DigitalStretch(_)) => stabilize_spirv::DistortionModel::DigitalStretch,
+            _ => { stabilize_spirv::DistortionModel::None }
+        };*/
 
         transform
     }

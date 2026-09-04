@@ -86,6 +86,25 @@ pub struct KeyframeManager {
 impl KeyframeManager {
     pub fn new() -> Self { Self::default() }
 
+    /// Hash of the keyframes of the given types (timestamps, values and easings), so a computation can tell
+    /// whether the keyframes it evaluates have changed
+    pub fn get_checksum_for(&self, types: &[KeyframeType]) -> u64 {
+        use std::hash::Hasher;
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        for typ in types {
+            if let Some(kfs) = self.keyframes.get(typ) {
+                hasher.write_usize(*typ as usize);
+                for (ts, kf) in kfs {
+                    hasher.write_i64(*ts);
+                    hasher.write_u64(kf.value.to_bits());
+                    hasher.write_u8(kf.easing as u8);
+                }
+            }
+        }
+        hasher.write_u64(self.timestamp_scale.unwrap_or_default().to_bits());
+        hasher.finish()
+    }
+
     fn get_closest_timestamp(&self, typ: &KeyframeType, timestamp_us: i64) -> i64 {
         if let Some(x) = self.keyframes.get(typ) {
             if let Some(existing) = x.range(timestamp_us-1000..=timestamp_us+1000).next() {

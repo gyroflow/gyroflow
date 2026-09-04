@@ -16,14 +16,14 @@ use crate::stabilization::KernelParams;
 pub struct GoPro;
 
 impl GoPro {
-    #[inline] fn poly_eval(p: f32, k: &[f32; 12]) -> f32 {
+    #[inline] fn poly_eval(p: f32, k: &[f32; 24]) -> f32 {
         k[0] + p * (k[1] + p * (k[2] + p * (k[3] + p * (k[4] + p * (k[5] + p * k[6])))))
     }
-    #[inline] fn poly_deriv(p: f32, k: &[f32; 12]) -> f32 {
+    #[inline] fn poly_deriv(p: f32, k: &[f32; 24]) -> f32 {
         k[1] + p * (2.0 * k[2] + p * (3.0 * k[3] + p * (4.0 * k[4] + p * (5.0 * k[5] + p * (6.0 * k[6])))))
     }
     // Solve POLY(p) = theta for p (angle -> normalized radius parameter).
-    #[inline] fn poly_invert(theta: f32, k: &[f32; 12]) -> f32 {
+    #[inline] fn poly_invert(theta: f32, k: &[f32; 24]) -> f32 {
         let mut p = (theta - k[0]) / k[1]; // paraxial guess (k0 ≈ 0)
         for _ in 0..10 {
             let d = Self::poly_deriv(p, k);

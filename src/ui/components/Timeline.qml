@@ -164,6 +164,11 @@ Item {
         chart.viewMode = i;
         triggerUpdateChart("");
     }
+    function setFocalLengthVisible(v: bool): void {
+        a10.checked = v;
+        chart.setAxisVisible(10, v);
+        chart.setAxisVisible(11, v);
+    }
     function triggerUpdateChart(series: string): void {
         if (series == "8") chartUpdateTimer.zooming = true;
         else chartUpdateTimer.axes = true;

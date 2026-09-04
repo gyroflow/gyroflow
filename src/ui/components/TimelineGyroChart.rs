@@ -454,18 +454,22 @@ impl TimelineGyroChart {
             }).collect();
 
             // Populate focal length series
-            let ts = |i: usize| (gyroflow_core::timestamp_at_frame(i as i32, fps) * 1000.0).round() as i64;
-            self.focal_lengths = params.focal_lengths.iter().enumerate()
-                .filter_map(|(i, v)| v.map(|x| ChartData { timestamp_us: ts(i), values: [x] }))
-                .collect();
-            self.smoothed_focal_lengths = params.smoothed_focal_lengths.iter().enumerate()
-                .filter_map(|(i, v)| v.map(|x| ChartData { timestamp_us: ts(i), values: [x] }))
-                .collect();
-            // Normalize both series by the SAME max so they share a scale — otherwise raw's
-            // wider range gets compressed differently than smoothed's and it looks like the
-            // smoothed curve is biased toward the top.
-            let fl_max = Self::normalize_height(&mut self.focal_lengths, None);
-            Self::normalize_height(&mut self.smoothed_focal_lengths, fl_max);
+            self.focal_lengths.clear();
+            self.smoothed_focal_lengths.clear();
+            if gyro.file_metadata.read().has_per_frame_focal_length() {
+                let ts = |i: usize| (gyroflow_core::timestamp_at_frame(i as i32, fps) * 1000.0).round() as i64;
+                self.focal_lengths = params.focal_lengths.iter().enumerate()
+                    .filter_map(|(i, v)| v.map(|x| ChartData { timestamp_us: ts(i), values: [x] }))
+                    .collect();
+                self.smoothed_focal_lengths = params.smoothed_focal_lengths.iter().enumerate()
+                    .filter_map(|(i, v)| v.map(|x| ChartData { timestamp_us: ts(i), values: [x] }))
+                    .collect();
+                // Normalize both series by the SAME max so they share a scale — otherwise raw's
+                // wider range gets compressed differently than smoothed's and it looks like the
+                // smoothed curve is biased toward the top.
+                let fl_max = Self::normalize_height(&mut self.focal_lengths, None);
+                Self::normalize_height(&mut self.smoothed_focal_lengths, fl_max);
+            }
         }
 
         self.update_data(series);

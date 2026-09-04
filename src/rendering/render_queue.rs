@@ -1460,10 +1460,9 @@ impl RenderQueue {
             // ----------------------------------------------------------------------------
             // --------------------------------- Autosync ---------------------------------
             processing_cb(0.01);
-            use gyroflow_core::synchronization::AutosyncProcess;
+            use gyroflow_core::synchronization::{ AutosyncProcess, AutosyncResult };
             use gyroflow_core::synchronization;
             use crate::rendering::VideoProcessor;
-            use itertools::Either;
 
             if let Ok(mut sync_params) = serde_json::from_value(sync_settings) as serde_json::Result<synchronization::SyncParams> {
                 if sync_params.max_sync_points > 0 {
@@ -1501,7 +1500,7 @@ impl RenderQueue {
                         });
                         let stab2 = stab.clone();
                         sync.on_finished(move |arg| {
-                            if let Either::Left(offsets) = arg {
+                            if let AutosyncResult::Offsets(offsets) = arg {
                                 let mut gyro = stab2.gyro.write();
                                 gyro.prevent_recompute = true;
                                 for x in offsets {

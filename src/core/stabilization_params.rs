@@ -122,8 +122,16 @@ pub struct StabilizationParams {
     // Focal length smoothing
     pub focal_lengths: Vec<Option<f64>>,
     pub smoothed_focal_lengths: Vec<Option<f64>>,
+    /// The delay-free dequantized curve the two above are derived from (`smoothing::focal_length::compute_base_curve`),
+    /// with a hash of everything it depends on: the file's lens metadata, the lens profile and the video geometry, no
+    /// setting. A recompute reuses it and only re-derives the curves, so a slider tick never repeats the per-frame sweep
+    pub focal_length_base: Vec<f64>,
+    pub focal_length_base_key: u64,
     pub focal_length_smoothing_enabled: bool,
-    pub focal_length_smoothing_strength: f64,
+    pub focal_length_max_zoom_rate: f64,
+    pub lens_metadata_delay_frames: i32, // how many frames the lens metadata lags the picture
+
+    pub lens_breathing_enabled: bool, // Sony lens breathing compensation, when the file carries the lens tables
 }
 impl Default for StabilizationParams {
     fn default() -> Self {
@@ -188,8 +196,13 @@ impl Default for StabilizationParams {
 
             focal_lengths: vec![],
             smoothed_focal_lengths: vec![],
+            focal_length_base: vec![],
+            focal_length_base_key: 0,
             focal_length_smoothing_enabled: false,
-            focal_length_smoothing_strength: 0.5,
+            focal_length_max_zoom_rate: 0.5,
+            lens_metadata_delay_frames: 0,
+
+            lens_breathing_enabled: true,
         }
     }
 }
@@ -319,7 +332,7 @@ impl StabilizationParams {
             max_zoom:                  self.max_zoom,
             max_zoom_iterations:       self.max_zoom_iterations,
             focal_length_smoothing_enabled: self.focal_length_smoothing_enabled,
-            focal_length_smoothing_strength: self.focal_length_smoothing_strength,
+            focal_length_max_zoom_rate: self.focal_length_max_zoom_rate,
             ..Self::default()
         };
     }

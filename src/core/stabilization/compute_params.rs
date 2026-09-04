@@ -61,13 +61,28 @@ pub struct ComputeParams {
     pub digital_lens: Option<DistortionModel>,
     pub digital_lens_params: Option<Vec<f64>>,
 
-    // Focal length smoothing
-    pub focal_lengths: Vec<Option<f64>>,
-    pub smoothed_focal_lengths: Vec<Option<f64>>,
+    // Focal length stabilization, see smoothing::focal_length. Per frame, in output pixels
+    pub focal_lengths: Vec<Option<f64>>,          // effective focal length the renderer projects with (dequantized)
+    pub smoothed_focal_lengths: Vec<Option<f64>>, // upper-envelope target, empty when disabled
     pub focal_length_smoothing_enabled: bool,
-    pub focal_length_smoothing_strength: f64,
+    pub focal_length_max_zoom_rate: f64,          // d ln(f) / dt in 1/s, 0.5 is roughly 50% of magnification per second
+    pub lens_metadata_delay_frames: i32,          // every per-frame lens lookup is shifted by this many frames, see synchronization::lens_delay
+
+    pub lens_breathing_enabled: bool,
 }
 impl ComputeParams {
+    /// Time (µs) the lens metadata of the picture at `timestamp_ms` is looked up at: the frame time shifted by
+    /// `lens_metadata_delay_frames`, the delay the lens reports its state with (see `synchronization::lens_delay`). The
+    /// one place the shift is spelled out; every per-frame lens lookup, the projection's and the focal length curves',
+    /// goes through it, so they can't disagree about which metadata entry a frame gets
+    pub fn lens_timestamp_us(&self, timestamp_ms: f64) -> i64 {
+        Self::lens_timestamp_us_with_delay(timestamp_ms, self.lens_metadata_delay_frames, self.scaled_fps)
+    }
+    /// `lens_timestamp_us` for a given delay
+    pub fn lens_timestamp_us_with_delay(timestamp_ms: f64, delay_frames: i32, fps: f64) -> i64 {
+        ((timestamp_ms + crate::timestamp_at_frame(delay_frames, fps.max(1e-9))) * 1000.0).round() as i64
+    }
+
     pub fn from_manager(mgr: &StabilizationManager) -> Self {
         let params = mgr.params.read();
 
@@ -133,12 +148,17 @@ impl ComputeParams {
             focal_lengths: params.focal_lengths.clone(),
             smoothed_focal_lengths: params.smoothed_focal_lengths.clone(),
             focal_length_smoothing_enabled: params.focal_length_smoothing_enabled,
-            focal_length_smoothing_strength: params.focal_length_smoothing_strength,
+            focal_length_max_zoom_rate: params.focal_length_max_zoom_rate,
+            lens_metadata_delay_frames: params.lens_metadata_delay_frames,
+
+            lens_breathing_enabled: params.lens_breathing_enabled,
         }
     }
 
     pub fn calculate_camera_fovs(&mut self) {
-        let frame_count = if self.gyro.read().file_metadata.read().lens_geometry_count() > 1 {
+        // Per frame only when the metadata's focal length changes over the clip, in whichever unit the camera reports
+        // it (see `FrameTransform::get_lens_data_at_timestamp`); a fixed lens has one FOV
+        let frame_count = if self.gyro.read().file_metadata.read().has_per_frame_focal_length() {
             self.frame_count
         } else {
             1 // FOV is constant (ie. lens is fixed focal length)
@@ -146,7 +166,7 @@ impl ComputeParams {
         self.camera_diagonal_fovs = Vec::with_capacity(frame_count);
         for f in 0..frame_count as i32 {
             let timestamp = crate::timestamp_at_frame(f, self.scaled_fps);
-            let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&self, timestamp, false);
+            let (camera_matrix, _, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&self, timestamp, false);
             let diag_length = ((self.width.pow(2) + self.height.pow(2)) as f64).sqrt();
             // let diag_pixel_focal_length = (camera_matrix[(0, 0)].powi(2) + camera_matrix[(1, 1)].powi(2)).sqrt();
             let d_fov = 2.0 * ((diag_length / (2.0 * camera_matrix[(1, 1)])).atan()) * 180.0 / std::f64::consts::PI;
@@ -198,6 +218,11 @@ impl std::fmt::Debug for ComputeParams {
          .field("zooming_debug_points",      &self.zooming_debug_points)
          .field("distortion_model",          &self.distortion_model.id())
          .field("digital_lens",              &self.digital_lens.as_ref().map(|x| x.id()).unwrap_or("None"))
+         .field("focal_length_smoothing_enabled", &self.focal_length_smoothing_enabled)
+         .field("focal_length_max_zoom_rate",     &self.focal_length_max_zoom_rate)
+         .field("lens_metadata_delay_frames",     &self.lens_metadata_delay_frames)
+         .field("focal_lengths.len",         &self.focal_lengths.len())
+         .field("lens_breathing_enabled",    &self.lens_breathing_enabled)
          .finish()
     }
 }

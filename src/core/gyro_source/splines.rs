@@ -16,6 +16,9 @@ impl<T> CatmullRom<T> {
     pub fn add_point(&mut self, position: f64, value: T) {
         self.points.push((position, value));
     }
+    pub fn points(&self) -> &[(f64, T)] {
+        &self.points
+    }
 }
 
 impl<T: Mul<f64, Output = T> + Sub<T, Output = T> + Add<T, Output = T> + Copy> CatmullRom<T> {
@@ -23,6 +26,10 @@ impl<T: Mul<f64, Output = T> + Sub<T, Output = T> + Add<T, Output = T> + Copy> C
         if self.points.len() < 2 {
             return None;
         }
+
+        // Outside of the sampled range hold the end values, like the reference implementation does
+        if t <= self.points[0].0 { return Some(self.points[0].1); }
+        if t >= self.points[self.points.len() - 1].0 { return Some(self.points[self.points.len() - 1].1); }
 
         let lower = self
             .search_lower_cp(t)
@@ -86,7 +93,9 @@ impl<T: Mul<f64, Output = T> + Sub<T, Output = T> + Add<T, Output = T> + Copy> C
 // ----------------------------------------------------------------
 
 pub const MAX_GRID_SIZE: usize = 9;
-pub const MAX_BUFFER_SIZE: usize = 9 + MAX_GRID_SIZE * MAX_GRID_SIZE * 2 + (MAX_GRID_SIZE*MAX_GRID_SIZE*4*2) + /*focal plane data*/20;
+pub const MESH_BLOCK_SIZE: usize = 9 + MAX_GRID_SIZE * MAX_GRID_SIZE * 2 + (MAX_GRID_SIZE*MAX_GRID_SIZE*4*2);
+/// Inverse mesh block + focal plane data + forward mesh block (used to refine the inverse lookup)
+pub const MAX_BUFFER_SIZE: usize = MESH_BLOCK_SIZE * 2 + /*focal plane data*/20;
 pub struct BivariateSpline {
     grid_size: (usize, usize)
 }
@@ -129,13 +138,12 @@ impl BivariateSpline {
         }
         if x >= size {
             let h = size / (n - 1) as f64;
-            let slope = b[n - 2] + 2.0 * c[n - 2] * h + 3.0 * d[n - 2] * h * h;
-            return a[n - 1] + slope * (x - size);
+            return a[n - 1] + cubic_slope(b[n - 2], c[n - 2], d[n - 2], h) * (x - size);
         }
 
         let i = (n - 2).min(((n as f64 - 1.0) * x / size) as usize).max(0);
         let dx = x - size * i as f64 / (n - 1) as f64;
-        a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx
+        cubic(a[i], b[i], c[i], d[i], dx)
     }
 
     pub fn interpolate(&self, size_x: f64, size_y: f64, mesh: &[f64], mesh_offset: usize, x: f64, y: f64) -> f64 {
@@ -173,5 +181,70 @@ impl BivariateSpline {
 
         Self::cubic_spline_coefficients(&intermediate_values, 1, 0, size_y, n_y, &mut a, &mut b, &mut c, &mut d, &mut alpha, &mut mu, &mut z);
         Self::cubic_spline_interpolate(&a, &b, &c, &d, n_y, y, size_y)
+    }
+}
+
+/// Value of the segment cubic `a + b·dx + c·dx² + d·dx³`, in the form the mesh kernels evaluate it
+#[inline]
+fn cubic(a: f64, b: f64, c: f64, d: f64, dx: f64) -> f64 {
+    a + b * dx + c * dx * dx + d * dx * dx * dx
+}
+/// Its slope `b + 2c·dx + 3d·dx²`
+#[inline]
+fn cubic_slope(b: f64, c: f64, d: f64, dx: f64) -> f64 {
+    b + 2.0 * c * dx + 3.0 * d * dx * dx
+}
+
+/// Natural cubic spline through the knots `xs` (strictly increasing, any spacing) with the values `ys`: zero second
+/// derivative at both ends, continued linearly with the end slopes outside the knots. These are the boundary
+/// conditions of `BivariateSpline::cubic_spline_coefficients`, the uniform-spacing special case the mesh kernels
+/// mirror, and on uniform knots the two agree to rounding (see the tests). Anything built from both, like the Sony
+/// lens curve and its inverse (`distortion_models::sony`), therefore meets without a kink
+#[derive(Debug, Clone)]
+pub struct NaturalSpline {
+    xs: Vec<f64>,
+    a: Vec<f64>,
+    b: Vec<f64>,
+    c: Vec<f64>,
+    d: Vec<f64>,
+}
+impl NaturalSpline {
+    /// `None` with fewer than two knots, mismatched lengths, or knots that are not strictly increasing
+    pub fn new(xs: &[f64], ys: &[f64]) -> Option<Self> {
+        let n = xs.len();
+        if n < 2 || ys.len() != n || xs.windows(2).any(|w| !(w[1] > w[0])) { return None; }
+        let h: Vec<f64> = xs.windows(2).map(|w| w[1] - w[0]).collect();
+        // Thomas algorithm on the tridiagonal system for c (half the second derivative at the knots), c_0 = c_{n-1} = 0
+        let (mut mu, mut z) = (vec![0.0; n], vec![0.0; n]);
+        for i in 1..n - 1 {
+            let alpha = 3.0 * ((ys[i + 1] - ys[i]) / h[i] - (ys[i] - ys[i - 1]) / h[i - 1]);
+            let l = 2.0 * (h[i - 1] + h[i]) - h[i - 1] * mu[i - 1];
+            mu[i] = h[i] / l;
+            z[i] = (alpha - h[i - 1] * z[i - 1]) / l;
+        }
+        let (mut b, mut c, mut d) = (vec![0.0; n], vec![0.0; n], vec![0.0; n]);
+        for j in (0..n - 1).rev() {
+            c[j] = z[j] - mu[j] * c[j + 1];
+            b[j] = (ys[j + 1] - ys[j]) / h[j] - h[j] * (c[j + 1] + 2.0 * c[j]) / 3.0;
+            d[j] = (c[j + 1] - c[j]) / (3.0 * h[j]);
+        }
+        Some(Self { xs: xs.to_vec(), a: ys.to_vec(), b, c, d })
+    }
+    /// Value at `t`
+    pub fn at(&self, t: f64) -> f64 {
+        let n = self.xs.len();
+        if t <= self.xs[0] {
+            return self.a[0] + self.b[0] * (t - self.xs[0]);
+        }
+        if t >= self.xs[n - 1] {
+            let h = self.xs[n - 1] - self.xs[n - 2];
+            return self.a[n - 1] + cubic_slope(self.b[n - 2], self.c[n - 2], self.d[n - 2], h) * (t - self.xs[n - 1]);
+        }
+        let i = self.xs.partition_point(|&k| k <= t).saturating_sub(1).min(n - 2);
+        cubic(self.a[i], self.b[i], self.c[i], self.d[i], t - self.xs[i])
+    }
+    /// Half the second derivative at every knot (`c_i`), zero at both ends
+    pub fn c(&self) -> &[f64] {
+        &self.c
     }
 }

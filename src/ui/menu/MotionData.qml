@@ -669,17 +669,19 @@ MenuItem {
                     ctx.lineWidth = 1 * dpiScale;
                     ctx.strokeStyle = maincolor;
                     const o = mesh[0];
-                    const stblz_grid = mesh_size[1] / 8;
+                    const stblz_grid = mesh[o + 2] > 0 ? mesh[o + 2] : mesh_size[1] / 8; // band height comes with the table, as in the kernels
 
                     let points = [];
                     for (let i = 0; i < 8; ++i) {
-                        // corners of the rectangle
-                        points.push([0, i * stblz_grid]);
-                        points.push([mesh_size[0], i * stblz_grid]);
-                        points.push([mesh_size[0], (i + 1) * stblz_grid]);
-                        points.push([0, (i + 1) * stblz_grid]);
+                        // corners of the rectangle; the last band carries on to the bottom of the sensor, as the kernels apply it
+                        const top = i * stblz_grid;
+                        const bottom = i == 7 ? Math.max((i + 1) * stblz_grid, mesh_size[1]) : (i + 1) * stblz_grid;
+                        points.push([0, top]);
+                        points.push([mesh_size[0], top]);
+                        points.push([mesh_size[0], bottom]);
+                        points.push([0, bottom]);
 
-                        points.push([0, i * stblz_grid]);
+                        points.push([0, top]);
                     }
 
                     for (let i = 0; i < points.length; ++i) {
