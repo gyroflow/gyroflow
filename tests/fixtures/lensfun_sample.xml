@@ -1,0 +1,33 @@
+<lensdatabase version="1">
+  <camera>
+    <maker>Sony</maker>
+    <model>A7S III</model>
+    <mount>Sony E</mount>
+    <cropfactor>1.0</cropfactor>
+  </camera>
+  <camera>
+    <maker>Panasonic</maker>
+    <model>GH5</model>
+    <mount>Micro 4/3 System</mount>
+    <cropfactor>2.0</cropfactor>
+  </camera>
+  <lens>
+    <maker>Tamron</maker>
+    <model>28-75mm f/2.8 Di III RXD</model>
+    <mount>Sony E</mount>
+    <cropfactor>1.0</cropfactor>
+    <focal>28-75</focal>
+    <calibration>
+      <distortion model="ptlens" focal="28" a="0.012" b="-0.034" c="0.005" />
+    </calibration>
+  </lens>
+  <lens>
+    <maker>Example</maker>
+    <model>Unsupported Model</model>
+    <cropfactor>1.0</cropfactor>
+    <focal>24</focal>
+    <calibration>
+      <distortion model="poly3" k1="0.1" />
+    </calibration>
+  </lens>
+</lensdatabase>
