@@ -86,12 +86,19 @@ impl LensProfileDatabase {
                 }
                 return;
             }
-            let parsed = match data {
-                DataSource::String(x)     => LensProfile::from_json(&x),
-                DataSource::SerdeValue(x) => LensProfile::from_value(x)
+            let parsed: Result<Vec<crate::LensProfile>, String> = match data {
+                DataSource::String(x) => {
+                    if f_name.ends_with(".xml") {
+                        crate::lensfun::LensfunDatabase::from_xml(&x).map(|db| db.to_lens_profiles()).map_err(|e| e.to_string())
+                    } else {
+                        LensProfile::from_json(&x).map(|v| vec![v]).map_err(|e| e.to_string())
+                    }
+                },
+                DataSource::SerdeValue(x) => LensProfile::from_value(x).map(|v| vec![v]).map_err(|e| e.to_string())
             };
             match parsed {
-                Ok(mut v) => {
+                Ok(profiles) => {
+                    for mut v in profiles {
                     v.path_to_file = f_name.to_string();
                     for mut profile in v.get_all_matching_profiles() {
                         let key = if !profile.identifier.is_empty() {
@@ -133,6 +140,7 @@ impl LensProfileDatabase {
                             self.map.insert(key, profile);
                         }
                     }
+                    }
                 },
                 Err(e) => {
                     log::error!("Error parsing lens profile: {}: {:?}", f_name, e);
@@ -147,6 +155,12 @@ impl LensProfileDatabase {
                 if let Ok(entry) = e {
                     let f_name = entry.path().to_string_lossy().replace('\\', "/");
                     if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
+                        if let Ok(data) = std::fs::read_to_string(&f_name) {
+                            load(DataSource::String(data), &f_name);
+                        }
+                    }
+                    // lensfun database XMLs (see lensfun::LENSFUN_DIR_NAME)
+                    if f_name.ends_with(".xml") && f_name.contains(&format!("/{}/", crate::lensfun::LENSFUN_DIR_NAME)) {
                         if let Ok(data) = std::fs::read_to_string(&f_name) {
                             load(DataSource::String(data), &f_name);
                         }
