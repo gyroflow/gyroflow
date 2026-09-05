@@ -32,6 +32,9 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
     compute_params.fov_algorithm_margin = 0.0;
     compute_params.fovs.clear();
     compute_params.minimal_fovs.clear();
+    // The maps describe the lens and the motion per frame; the focal length envelope is a zoom on top of
+    // that and would only shrink the bounding box computed below
+    compute_params.focal_length_smoothing_enabled = false;
 
     let mut kernel_flags = KernelParamsFlags::empty();
     kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, compute_params.digital_lens.is_some());

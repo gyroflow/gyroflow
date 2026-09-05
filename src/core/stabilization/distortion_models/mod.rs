@@ -7,7 +7,7 @@ mod poly3;
 mod poly5;
 mod ptlens;
 mod insta360;
-mod sony;
+pub mod sony;
 mod generic_polynomial;
 mod gopro;
 
@@ -48,43 +48,10 @@ macro_rules! impl_models {
                     $(DistortionModels::$name(m) => m.adjust_lens_profile(profile),)*
                 }
             }
-            pub fn radial_distortion_limit(&self, k: &[f64]) -> Option<f64> {
-                let max_theta = std::f64::consts::FRAC_PI_2; // PI/2
-                let derivative = |theta: f64| -> Option<f64> {
-                    match &self.inner {
-                        $(DistortionModels::$name(x) => { x.distortion_derivative(theta, k) })*
-                    }
-                };
-
-                const STEPS: usize = 256;
-                let mut low = 0.0;
-                let mut high = max_theta;
-                let mut found = false;
-                for i in 1..=STEPS {
-                    let theta = i as f64 / STEPS as f64 * max_theta;
-                    if derivative(theta)? <= 0.0 {
-                        high = theta;
-                        found = true;
-                        break;
-                    }
-                    low = theta;
-                }
-                if !found { return None; }
-
-                while high - low > 1e-6 {
-                    let mid = (low + high) / 2.0;
-                    if derivative(mid)? > 0.0 {
-                        low = mid;
-                    } else {
-                        high = mid;
-                    }
-                }
-
-                let theta_max = (low + high) / 2.0;
-                if (theta_max - max_theta).abs() > 0.001 {
-                    Some(theta_max.tan())
-                } else {
-                    None
+            /// `d(image radius)/dθ` at ray angle `theta`, ≤ 0 where the model's curve folds back
+            pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+                match &self.inner {
+                    $(DistortionModels::$name(x) => x.distortion_derivative(theta, k),)*
                 }
             }
 
@@ -121,4 +88,65 @@ impl_models! {
     GoProHyperview  => gopro_hyperview::GoProHyperview,
     GoProWarp       => gopro_warp::GoProWarp,
     DigitalStretch  => digital_stretch::DigitalStretch,
+}
+
+impl DistortionModel {
+    /// Largest usable ray radius `tan θ` before the curve folds back (its derivative stops being positive),
+    /// `None` when it rises all the way to 90° or the model has no derivative. The generic way samples the
+    /// derivative up to 90° and bisects the first non-positive step; the Sony spline solves its fold from the
+    /// coefficients, since each of its derivative samples would be a Newton solve and the renderer asks per frame
+    /// when the file records a lens curve per frame
+    pub fn radial_distortion_limit(&self, k: &[f64]) -> Option<f64> {
+        if let DistortionModels::Sony(m) = &self.inner {
+            return m.radial_distortion_limit(k);
+        }
+        let max_theta = std::f64::consts::FRAC_PI_2; // PI/2
+
+        const STEPS: usize = 256;
+        let mut low = 0.0;
+        let mut high = max_theta;
+        let mut found = false;
+        for i in 1..=STEPS {
+            let theta = i as f64 / STEPS as f64 * max_theta;
+            if self.distortion_derivative(theta, k)? <= 0.0 {
+                high = theta;
+                found = true;
+                break;
+            }
+            low = theta;
+        }
+        if !found { return None; }
+
+        while high - low > 1e-6 {
+            let mid = (low + high) / 2.0;
+            if self.distortion_derivative(mid, k)? > 0.0 {
+                low = mid;
+            } else {
+                high = mid;
+            }
+        }
+
+        let theta_max = (low + high) / 2.0;
+        if (theta_max - max_theta).abs() > 0.001 {
+            Some(theta_max.tan())
+        } else {
+            None
+        }
+    }
+
+    /// Whether `undistort_point` keeps every point on its ray from the principal point, ie. the map is a pure
+    /// function of the radius. The lens-correction solve in `cpu_undistort::invert_lens_correction_blend`
+    /// bisects along that ray when it is, and has to solve in two dimensions when it isn't: tangential and
+    /// thin-prism terms move a point off its ray, and the digital warps are not radial at all
+    pub fn is_radial(&self, params: &KernelParams) -> bool {
+        use DistortionModels as M;
+        match &self.inner {
+            M::OpenCVFisheye(_) | M::Poly3(_) | M::Poly5(_) | M::PtLens(_) | M::Sony(_) | M::GenericPolynomial(_) | M::GoPro(_) => true,
+            // k = [k1 k2 p1 p2 k3 k4 k5 k6 s1 s2 s3 s4 ...]: p1 p2 tangential, s1..s4 thin prism
+            M::OpenCVStandard(_) => params.k[2] == 0.0 && params.k[3] == 0.0 && params.k[8..12].iter().all(|k| *k == 0.0),
+            // k = [k1 k2 k3 p1 p2 xi]
+            M::Insta360(_) => params.k[3] == 0.0 && params.k[4] == 0.0,
+            M::GoProSuperview(_) | M::GoPro6Superview(_) | M::GoProHyperview(_) | M::GoProWarp(_) | M::DigitalStretch(_) => false,
+        }
+    }
 }

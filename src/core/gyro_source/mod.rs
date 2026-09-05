@@ -8,7 +8,7 @@ mod canon;
 pub mod splines;
 pub use file_metadata::*;
 pub use imu_transforms::*;
-pub use sony::interpolate_mesh;
+pub use sony::{ interpolate_mesh, MESH_REFINE_SKIP_PX, MESH_REFINE_THRESHOLD_PX };
 
 use nalgebra::*;
 use std::iter::zip;
@@ -227,16 +227,29 @@ impl GyroSource {
                         if let Some(v) = map.get_t(TagId::IrisTStop) as Option<&f32> {
                             lens_info.iris_tstop = Some(*v);
                         }
+                        if let Some(v) = map.get_t(TagId::ZoomRingPosition) as Option<&f32> {
+                            lens_info.zoom_ring_position = Some(*v);
+                        }
+                        let (pfl_scale, pfl_valid) = match tag_map.get(&GroupId::Imager).and_then(|im| im.get_t(TagId::Custom("ActiveAreaAspectRatio".into())) as Option<&(u32, u32)>) {
+                            Some(&(aw, ah)) if aw > 0 && ah > 0 && size.0 > 0 && size.1 > 0 => {
+                                let aspect_matches = ((aw as f64 / ah as f64) / (size.0 as f64 / size.1 as f64) - 1.0).abs() < 0.02;
+                                (size.0 as f32 / aw as f32, aspect_matches)
+                            }
+                            _ => (1.0, true)
+                        };
+                        if !pfl_valid {
+                            lens_info.pixel_focal_length = None;
+                        }
                         if let Some(v) = map.get_t(TagId::PixelFocalLength) as Option<&(f32, f32)> {
-                            lens_info.pixel_focal_length = Some(*v);
+                            if pfl_valid { lens_info.pixel_focal_length = Some((v.0 * pfl_scale, v.1 * pfl_scale)); }
                         }
                         if let Some(v) = map.get_t(TagId::PixelFocalLength) as Option<&f32> {
-                            lens_info.pixel_focal_length = Some((*v, *v));
+                            if pfl_valid { lens_info.pixel_focal_length = Some((*v * pfl_scale, *v * pfl_scale)); }
                         }
                         if let Some(v) = map.get_t(TagId::PixelFocalLength) as Option<&Vec<f32>> {
                             match v.as_slice() {
-                                [fx]          => lens_info.pixel_focal_length = Some((*fx, *fx)),
-                                [fx, fy, ..]  => lens_info.pixel_focal_length = Some((*fx, *fy)),
+                                [fx]         if pfl_valid => lens_info.pixel_focal_length = Some((*fx * pfl_scale, *fx * pfl_scale)),
+                                [fx, fy, ..] if pfl_valid => lens_info.pixel_focal_length = Some((*fx * pfl_scale, *fy * pfl_scale)),
                                 _ => {}
                             }
                         }
@@ -385,6 +398,10 @@ impl GyroSource {
 
         let mut raw_imu = util::normalized_imu_interpolated(&input, Some("XYZ".into())).unwrap_or_default();
 
+        // Sony: the metadata packets carry the gyro timing (offset and rate per frame), use it instead of a uniform spacing
+        let sony_packet_timed = input.camera_type() == "Sony" && input.samples.as_ref().map(|s| sony::retime_imu_from_packets(&mut raw_imu, s)).unwrap_or(false);
+        if sony_packet_timed { log::debug!("Sony gyro samples re-timed from the metadata packets"); }
+
         if (input.camera_type() == "RED" || input.camera_type() == "RED RAW") && options.project_version > 0 && options.project_version < 4 { // Legacy gyro offset
             let mut first_timestamp = None;
             log::debug!("Legacy project, removing new RED gyro offset");
@@ -435,13 +452,16 @@ impl GyroSource {
             per_frame_time_offsets: Vec::new(),
             digital_zoom,
             camera_stab_data: Vec::new(),
-            mesh_correction:  Vec::new(),
+            mesh_correction:  Default::default(),
+            legacy_mesh_correction: Vec::new(),
+            lens_breathing:   Vec::new(),
+            focal_length_varies_cache: Default::default(),
         };
 
         let sample_rate = Self::get_sample_rate(&md);
         let mut original_sample_rate = sample_rate;
         let mut is_temp = sony::ISTemp::default();
-        let mut mesh_cache = BTreeMap::new();
+        let mut mesh_cache = BTreeMap::new(); // mesh key -> table index, so the frames with the same mesh share one
         let is_gyroflow_proto = input.parser_name() == "GyroflowProtobuf";
         if let Some(ref samples) = input.samples {
             for info in samples {
@@ -460,15 +480,16 @@ impl GyroSource {
                         if let Some(offset) = gyroflow_proto_time_offset(tag_map) {
                             md.per_frame_time_offsets.push(offset);
                         }
-                    } else if let Some((org_sample_rate, offset)) = sony::get_time_offset(&md, &input, tag_map, sample_rate) {
+                    } else if let Some((org_sample_rate, offset)) = sony::get_time_offset(&md, &input, tag_map, sample_rate, sony_packet_timed) {
                         original_sample_rate = org_sample_rate;
                         md.per_frame_time_offsets.push(offset);
                     }
                     sony::init_lens_profile(&mut md, &input, tag_map, size, info);
                     sony::stab_collect(&mut is_temp, tag_map, info, fps);
-                    if let Some(mesh) = sony::get_mesh_correction(tag_map, &mut mesh_cache) {
-                        md.mesh_correction.push(mesh);
-                    }
+                    // One entry per sample, the correction is looked up by frame index: empty where the frame has none
+                    // (`MeshCorrections::frame`); the whole thing goes when no frame has one
+                    let mesh_frame = sony::get_mesh_correction(tag_map, size, &mut md.mesh_correction, &mut mesh_cache).unwrap_or_default();
+                    md.mesh_correction.frames.push(mesh_frame);
 
                     if let Some(ois) = tag_map.get(&GroupId::LensOSS).and_then(|x| x.get_t(TagId::Data) as Option<&Vec<TimeVector3<i32>>>) {
                         if ois.len() == 1 && *ois.first().unwrap() == (TimeVector3 { t: -1, x: -1, y: -1, z: -1 }) {
@@ -538,10 +559,22 @@ impl GyroSource {
                     // --------------------------------- Insta360 ---------------------------------
                 }
             }
-            if !is_temp.t.is_empty() {
+            if input.camera_type() == "Sony" {
+                md.lens_breathing = sony::breathing::compute(samples);
+            }
+            if md.mesh_correction.is_empty() {
+                md.mesh_correction.clear();
+            } else {
+                let tables = &md.mesh_correction.tables;
+                log::debug!("Mesh correction: {} tables over {} frames, {} refined against the camera's mesh", tables.len(), md.mesh_correction.frames.len(), tables.iter().filter(|t| !t.refinement.is_empty()).count());
+            }
+            if !is_temp.ibis.t.is_empty() || !is_temp.ois.t.is_empty() {
                 md.camera_stab_data = sony::stab_calc_splines(&md, &is_temp, sample_rate, fps, size).unwrap_or_default();
-                if let Some(frt) = md.frame_readout_time {
-                    md.frame_readout_time = Some(frt / original_sample_rate * sample_rate);
+                if !sony_packet_timed {
+                    // Uniform gyro timeline: rescale the metadata readout to the measured sample rate, like the per-frame offsets
+                    if let Some(frt) = md.frame_readout_time {
+                        md.frame_readout_time = Some(frt / original_sample_rate * sample_rate);
+                    }
                 }
             }
         }
@@ -569,13 +602,14 @@ impl GyroSource {
         self.clear_offsets();
     }
 
-    pub fn load_from_telemetry(&mut self, telemetry: FileMetadata) {
+    pub fn load_from_telemetry(&mut self, mut telemetry: FileMetadata) {
         if self.duration_ms <= 0.0 {
             ::log::error!("Invalid duration_ms {}", self.duration_ms);
             return;
         }
 
         self.clear();
+        sony::upgrade_legacy_metadata(&mut telemetry);
 
         self.imu_transforms.imu_orientation = telemetry.imu_orientation.clone();
 

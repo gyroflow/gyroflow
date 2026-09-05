@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use itertools::{Either, Itertools};
+use itertools::Itertools;
 use qmetaobject::*;
 use nalgebra::Vector4;
 use std::sync::Arc;
@@ -16,7 +16,7 @@ use crate::core;
 use crate::core::StabilizationManager;
 #[cfg(feature = "opencv")]
 use crate::core::calibration::LensCalibrator;
-use crate::core::synchronization::AutosyncProcess;
+use crate::core::synchronization::{ AutosyncError, AutosyncProcess, AutosyncResult };
 use crate::core::stabilization::KernelParamsFlags;
 use crate::core::synchronization;
 use crate::core::keyframes::*;
@@ -65,6 +65,7 @@ pub struct Controller {
     update_frequency_graph: qt_method!(fn(&self, graph: QJSValue, idx: usize, ts: f64, sr: f64, fft_size: usize)),
     update_keyframes_view: qt_method!(fn(&self, kfview: QJSValue)),
     rolling_shutter_estimated: qt_signal!(rolling_shutter: f64),
+    lens_delay_estimated: qt_signal!(delay_frames: i32, correlation: f64),
     estimate_bias: qt_method!(fn(&self, timestamp_fract: QString)),
     bias_estimated: qt_signal!(bx: f64, by: f64, bz: f64),
     orientation_guessed: qt_signal!(orientation: QString),
@@ -137,7 +138,11 @@ pub struct Controller {
     zooming_method: qt_property!(i32; WRITE set_zooming_method),
 
     focal_length_smoothing_enabled: qt_property!(bool; READ get_focal_length_smoothing_enabled WRITE set_focal_length_smoothing_enabled),
-    focal_length_smoothing_strength: qt_property!(f64; READ get_focal_length_smoothing_strength WRITE set_focal_length_smoothing_strength),
+    focal_length_max_zoom_rate: qt_property!(f64; READ get_focal_length_max_zoom_rate WRITE set_focal_length_max_zoom_rate),
+    lens_metadata_delay_frames: qt_property!(i32; READ get_lens_metadata_delay_frames WRITE set_lens_metadata_delay_frames NOTIFY lens_metadata_delay_changed),
+    lens_metadata_delay_changed: qt_signal!(),
+    has_lens_breathing: qt_property!(bool; READ has_lens_breathing NOTIFY gyro_changed),
+    lens_breathing_enabled: qt_property!(bool; READ get_lens_breathing_enabled WRITE set_lens_breathing_enabled),
 
     additional_rotation_x: qt_property!(f64; WRITE set_additional_rotation_x),
     additional_rotation_y: qt_property!(f64; WRITE set_additional_rotation_y),
@@ -407,6 +412,10 @@ impl Controller {
         sync_params.every_nth_frame     = sync_params.every_nth_frame.max(1);
 
         let for_rs = mode == "estimate_rolling_shutter";
+        let for_lens_delay = mode == "estimate_lens_delay";
+        if for_lens_delay {
+            sync_params.every_nth_frame = 1; // consecutive frames are what the estimate tracks
+        }
 
         let every_nth_frame = sync_params.every_nth_frame;
 
@@ -457,6 +466,20 @@ impl Controller {
             ::log::info!("Setting orientation {}", &orientation);
             this.orientation_guessed(QString::from(orientation));
         });
+        let set_lens_delay = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, estimate: Option<(i32, f64, f64)>| {
+            if let Some((delay_frames, exact, correlation)) = estimate {
+                ::log::info!("Lens metadata delay estimated at {delay_frames} frames ({exact:.2} exact, correlation {correlation:.2})");
+                this.stabilizer.params.write().lens_metadata_delay_frames = delay_frames;
+                this.lens_metadata_delay_changed();
+                this.lens_delay_estimated(delay_frames, correlation);
+            } else {
+                ::log::warn!("Lens metadata delay could not be estimated");
+                this.lens_delay_estimated(0, 0.0);
+            }
+            this.sync_in_progress = false;
+            this.sync_in_progress_changed();
+            this.request_recompute();
+        });
         let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (msg, mut arg): (String, String)| {
             arg.push_str("\n\n");
             arg.push_str(&rendering::get_log());
@@ -472,83 +495,88 @@ impl Controller {
 
         self.cancel_flag.store(false, SeqCst);
 
-        if let Ok(mut sync) = AutosyncProcess::from_manager(&self.stabilizer, &timestamps_fract, sync_params, mode, self.cancel_flag.clone()) {
+        let stabilizer = self.stabilizer.clone();
+        let cancel_flag = self.cancel_flag.clone();
+        let input_file = self.stabilizer.input_file.read().clone();
+        let proc_height = self.processing_resolution;
+        let gpu_decoding = self.stabilizer.gpu_decoding.load(SeqCst);
+        // The process is set up in the worker: picking the frames for the lens delay extracts the focal length
+        // curve of the whole clip
+        core::run_threaded(move || {
+            let mut sync = match AutosyncProcess::from_manager(&stabilizer, &timestamps_fract, sync_params, mode, cancel_flag.clone()) {
+                Ok(sync) => sync,
+                // No zoom to measure on: the same outcome as an analysis that found none, with its own message
+                Err(AutosyncError::NoZoomInMetadata) => return set_lens_delay(None),
+                Err(AutosyncError::InvalidParameters) => return err(("An error occured: %1".to_string(), "Invalid parameters".to_string())),
+            };
             sync.on_progress(move |percent, ready, total| {
                 progress((percent, ready, total));
             });
             sync.on_finished(move |arg| {
                 match arg {
-                    Either::Left(offsets) => set_offsets(offsets),
-                    Either::Right(Some(orientation)) => set_orientation(orientation.0),
-                    _=> ()
+                    AutosyncResult::Offsets(offsets) => set_offsets(offsets),
+                    AutosyncResult::Orientation(Some(orientation)) => set_orientation(orientation.0),
+                    AutosyncResult::LensDelay(estimate) => set_lens_delay(estimate.map(|e| (e.delay_frames, e.delay_frames_exact, e.correlation))),
+                    _ => ()
                 };
             });
 
             let ranges = sync.get_ranges();
-            let cancel_flag = self.cancel_flag.clone();
+            let mut frame_no = 0;
+            let mut abs_frame_no = 0;
 
-            let input_file = self.stabilizer.input_file.read().clone();
-            let proc_height = self.processing_resolution;
-            let gpu_decoding = self.stabilizer.gpu_decoding.load(SeqCst);
-            core::run_threaded(move || {
-                let mut frame_no = 0;
-                let mut abs_frame_no = 0;
+            let mut decoder_options = ffmpeg_next::Dictionary::new();
+            if input_file.image_sequence_fps > 0.0 {
+                let fps = rendering::fps_to_rational(input_file.image_sequence_fps);
+                decoder_options.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
+            }
+            if input_file.image_sequence_start > 0 {
+                decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
+            }
+            if proc_height > 0 {
+                decoder_options.set("scale", &format!("{}x{}", (proc_height * 16) / 9, proc_height));
+            }
+            ::log::debug!("Decoder options: {:?}", decoder_options);
 
-                let mut decoder_options = ffmpeg_next::Dictionary::new();
-                if input_file.image_sequence_fps > 0.0 {
-                    let fps = rendering::fps_to_rational(input_file.image_sequence_fps);
-                    decoder_options.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
-                }
-                if input_file.image_sequence_start > 0 {
-                    decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
-                }
-                if proc_height > 0 {
-                    decoder_options.set("scale", &format!("{}x{}", (proc_height * 16) / 9, proc_height));
-                }
-                ::log::debug!("Decoder options: {:?}", decoder_options);
+            let sync = std::rc::Rc::new(sync);
 
-                let sync = std::rc::Rc::new(sync);
+            match VideoProcessor::from_file(&input_file.url, gpu_decoding, 0, Some(decoder_options)) {
+                Ok(mut proc) => {
+                    let err2 = err.clone();
+                    let sync2 = sync.clone();
+                    proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
+                        assert!(_output_frame.is_none());
 
-                match VideoProcessor::from_file(&input_file.url, gpu_decoding, 0, Some(decoder_options)) {
-                    Ok(mut proc) => {
-                        let err2 = err.clone();
-                        let sync2 = sync.clone();
-                        proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
-                            assert!(_output_frame.is_none());
+                        if abs_frame_no % every_nth_frame == 0 {
+                            let h = if proc_height > 0 { proc_height as u32 } else { input_frame.height() };
+                            let ratio = input_frame.height() as f64 / h as f64;
+                            let sw = (input_frame.width() as f64 / ratio).round() as u32;
+                            let sh = (input_frame.height() as f64 / (input_frame.width() as f64 / sw as f64)).round() as u32;
+                            match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
+                                Ok(small_frame) => {
+                                    let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
 
-                            if abs_frame_no % every_nth_frame == 0 {
-                                let h = if proc_height > 0 { proc_height as u32 } else { input_frame.height() };
-                                let ratio = input_frame.height() as f64 / h as f64;
-                                let sw = (input_frame.width() as f64 / ratio).round() as u32;
-                                let sh = (input_frame.height() as f64 / (input_frame.width() as f64 / sw as f64)).round() as u32;
-                                match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
-                                    Ok(small_frame) => {
-                                        let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
-
-                                        sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
-                                    },
-                                    Err(e) => {
-                                        err2(("An error occured: %1".to_string(), e.to_string()))
-                                    }
+                                    sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
+                                },
+                                Err(e) => {
+                                    err2(("An error occured: %1".to_string(), e.to_string()))
                                 }
-                                frame_no += 1;
                             }
-                            abs_frame_no += 1;
-                            Ok(())
-                        });
-                        if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
-                            err(("An error occured: %1".to_string(), e.to_string()));
+                            frame_no += 1;
                         }
-                        sync.finished_feeding_frames();
+                        abs_frame_no += 1;
+                        Ok(())
+                    });
+                    if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
+                        err(("An error occured: %1".to_string(), e.to_string()));
                     }
-                    Err(error) => {
-                        err(("An error occured: %1".to_string(), error.to_string()));
-                    }
-                };
-            });
-        } else {
-            err(("An error occured: %1".to_string(), "Invalid parameters".to_string()));
-        }
+                    sync.finished_feeding_frames();
+                }
+                Err(error) => {
+                    err(("An error occured: %1".to_string(), error.to_string()));
+                }
+            };
+        });
     }
 
     fn estimate_bias(&mut self, timestamps_fract: QString) {
@@ -1536,11 +1564,7 @@ impl Controller {
     fn mesh_at_frame(&self, frame: usize) -> QVariantList {
         let gyro = self.stabilizer.gyro.read();
         let file_metadata = gyro.file_metadata.read();
-        if let Some(mc) = file_metadata.mesh_correction.get(frame) {
-            QVariantList::from_iter(mc.1.iter())
-        } else {
-            QVariantList::default()
-        }
+        QVariantList::from_iter(file_metadata.mesh_correction.kernel_buffer(frame).iter())
     }
     fn get_turn_speed(&self, timestamp_ms: f64) -> f64 {
         let params = self.stabilizer.params.read();
@@ -2182,6 +2206,16 @@ impl Controller {
     fn has_per_frame_focal_length(&self) -> bool {
         self.stabilizer.gyro.read().file_metadata.read().has_per_frame_focal_length()
     }
+    fn has_lens_breathing(&self) -> bool {
+        !self.stabilizer.gyro.read().file_metadata.read().lens_breathing.is_empty()
+    }
+    fn get_lens_breathing_enabled(&self) -> bool {
+        self.stabilizer.params.read().lens_breathing_enabled
+    }
+    fn set_lens_breathing_enabled(&mut self, v: bool) {
+        self.stabilizer.params.write().lens_breathing_enabled = v;
+        self.request_recompute();
+    }
 
     fn get_focal_length_smoothing_enabled(&self) -> bool {
         self.stabilizer.params.read().focal_length_smoothing_enabled
@@ -2191,11 +2225,22 @@ impl Controller {
         self.request_recompute();
     }
 
-    fn get_focal_length_smoothing_strength(&self) -> f64 {
-        self.stabilizer.params.read().focal_length_smoothing_strength
+    fn get_focal_length_max_zoom_rate(&self) -> f64 {
+        self.stabilizer.params.read().focal_length_max_zoom_rate
     }
-    fn set_focal_length_smoothing_strength(&mut self, v: f64) {
-        self.stabilizer.params.write().focal_length_smoothing_strength = v.clamp(0.0, 1.0);
+    fn set_focal_length_max_zoom_rate(&mut self, v: f64) {
+        self.stabilizer.params.write().focal_length_max_zoom_rate = v.clamp(0.01, 10.0);
+        self.request_recompute();
+    }
+
+    fn get_lens_metadata_delay_frames(&self) -> i32 {
+        self.stabilizer.params.read().lens_metadata_delay_frames
+    }
+    fn set_lens_metadata_delay_frames(&mut self, v: i32) {
+        let v = v.clamp(-30, 30);
+        if self.stabilizer.params.read().lens_metadata_delay_frames == v { return; }
+        self.stabilizer.params.write().lens_metadata_delay_frames = v;
+        self.lens_metadata_delay_changed();
         self.request_recompute();
     }
 
@@ -2417,7 +2462,7 @@ impl Controller {
     fn has_per_frame_lens_data(&self) -> bool {
         let gyro = self.stabilizer.gyro.read();
         let md = gyro.file_metadata.read();
-        md.camera_stab_data.len() > 1 || md.lens_geometry_count() > 1 || md.lens_positions.len() > 1 || md.mesh_correction.len() > 1
+        md.camera_stab_data.len() > 1 || md.lens_geometry_count() > 1 || md.lens_positions.len() > 1 || md.has_mesh_correction()
     }
     fn has_ai_optical_flow(&self) -> bool { cfg!(feature = "ai-optical-flow") }
     fn export_stmap(&self, folder_url: QUrl, per_frame: bool) {

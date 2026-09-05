@@ -22,7 +22,7 @@ struct KernelParams {
     background:    vec4<f32>, // 16
     f:             vec2<f32>, // 8 - focal length in pixels
     c:             vec2<f32>, // 16 - lens center
-    k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>, // 16,16,16 - distortion coefficients
+    k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>, k4: vec4<f32>, k5: vec4<f32>, k6: vec4<f32>, // 16 x 6 - distortion coefficients
     fov:           f32, // 4
     r_limit:       f32, // 8
     lens_correction_amount:   f32, // 12
@@ -345,14 +345,14 @@ fn cubic_spline_interpolate2(n: i32, x: f32, size: f32) -> f32 {
     return a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx;
 }
 
-fn bivariate_spline_interpolate(size_x: f32, size_y: f32, mesh_offset: i32, n: i32, x: f32, y: f32) -> f32 {
+fn bivariate_spline_interpolate(base: i32, size_x: f32, size_y: f32, mesh_offset: i32, n: i32, x: f32, y: f32) -> f32 {
     var intermediate_values: array<f32, GRID_SIZE>;
 
     let i = i32(max(0.0, min(f32(GRID_SIZE - 2), (f32(GRID_SIZE - 1) * x / size_x))));
     let dx = x - size_x * f32(i) / f32(GRID_SIZE - 1);
     let dx2 = dx * dx;
     let block_ = GRID_SIZE * 4;
-    let offs = 9 + GRID_SIZE * GRID_SIZE * 2 + (block_ * GRID_SIZE * mesh_offset) + i;
+    let offs = base + 9 + GRID_SIZE * GRID_SIZE * 2 + (block_ * GRID_SIZE * mesh_offset) + i;
 
     for (var j = 0; j < GRID_SIZE; j++) {
         intermediate_values[j] = mesh_data[offs + (GRID_SIZE * 0) + (j * block_)]
@@ -367,13 +367,10 @@ fn bivariate_spline_interpolate(size_x: f32, size_y: f32, mesh_offset: i32, n: i
     return cubic_spline_interpolate2(GRID_SIZE, y, size_y);
 }
 
-fn interpolate_mesh(width: f32, height: f32, pos: vec2<f32>) -> vec2<f32> {
-    if (pos.x < 0.0 || pos.x > width || pos.y < 0.0 || pos.y > height) {
-        return pos;
-    }
+fn interpolate_mesh(base: i32, width: f32, height: f32, pos: vec2<f32>) -> vec2<f32> {
     return vec2<f32>(
-        bivariate_spline_interpolate(width, height, 0, GRID_SIZE, pos.x, pos.y),
-        bivariate_spline_interpolate(width, height, 1, GRID_SIZE, pos.x, pos.y)
+        bivariate_spline_interpolate(base, width, height, 0, GRID_SIZE, pos.x, pos.y),
+        bivariate_spline_interpolate(base, width, height, 1, GRID_SIZE, pos.x, pos.y)
     );
 }
 
@@ -399,12 +396,14 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
         var uv = f * distort_point(_x, _y, _w);
 
         if (bool(flags & 256) && (matrices[idx + 9] != 0.0 || matrices[idx + 10] != 0.0 || matrices[idx + 11] != 0.0 || matrices[idx + 12] != 0.0 || matrices[idx + 13] != 0.0)) {
+            // The camera applies the sensor roll before the sensor/lens shift, so undo the shift first and then the roll
             let ang_rad = matrices[idx + 11];
             let cos_a = cos(-ang_rad);
             let sin_a = sin(-ang_rad);
+            let shifted = vec2<f32>(uv.x - matrices[idx + 9] + matrices[idx + 12], uv.y - matrices[idx + 10] + matrices[idx + 13]);
             uv = vec2<f32>(
-                cos_a * uv.x - sin_a * uv.y - matrices[idx + 9]  + matrices[idx + 12],
-                sin_a * uv.x + cos_a * uv.y - matrices[idx + 10] + matrices[idx + 13]
+                cos_a * shifted.x - sin_a * shifted.y,
+                sin_a * shifted.x + cos_a * shifted.y
             );
         }
 
@@ -420,7 +419,20 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
             uv.x = map_coord(uv.x, 0.0, f32(params.width),  origin.x, origin.x + crop_size.x);
             uv.y = map_coord(uv.y, 0.0, f32(params.height), origin.y, origin.y + crop_size.y);
 
-            uv = interpolate_mesh(mesh_size.x, mesh_size.y, uv);
+            let q = uv;
+            uv = interpolate_mesh(0, mesh_size.x, mesh_size.y, q);
+            // The 9x9 inverse mesh is only approximate for large warps, refine against the camera's forward mesh (fwd(p) = q).
+            // The block is only there when the mesh needs it (sony::MESH_REFINE_THRESHOLD_PX), and a first correction that
+            // is already tiny leaves nothing for a second one (sony::MESH_REFINE_SKIP_PX, squared here)
+            let o = i32(mesh_data[0]);
+            let fwd = o + 4 + 2 * i32(max(mesh_data[o], 0.0));
+            if (i32(arrayLength(&mesh_data)) > fwd + 9 && mesh_data[fwd] > 10.0) {
+                for (var it = 0; it < 2; it++) {
+                    let delta = q - interpolate_mesh(fwd, mesh_size.x, mesh_size.y, uv);
+                    uv += delta;
+                    if (dot(delta, delta) < 0.0625) { break; }
+                }
+            }
 
             uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0, f32(params.width));
             uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0, f32(params.height));
@@ -435,7 +447,7 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
             let mesh_size = vec2<f32>(mesh_data[3], mesh_data[4]);
             let origin    = vec2<f32>(mesh_data[5], mesh_data[6]);
             let crop_size = vec2<f32>(mesh_data[7], mesh_data[8]);
-            let stblz_grid = mesh_size.y / 8.0;
+            let stblz_grid = select(mesh_size.y / 8.0, mesh_data[o + 2], mesh_data[o + 2] > 0.0); // band height comes with the table
 
             if (bool(flags & 128)) { uv.y = f32(params.height) - uv.y; } // framebuffer inverted
 

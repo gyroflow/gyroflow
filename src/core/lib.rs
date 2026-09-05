@@ -409,101 +409,59 @@ impl StabilizationManager {
         false
     }
 
-    pub fn extract_focal_lengths(compute_params: &ComputeParams) -> Vec<Option<f64>> {
-        let gyro = compute_params.gyro.read();
-        let file_metadata = gyro.file_metadata.read();
-
-        if !file_metadata.has_per_frame_focal_length() {
-            return vec![];
-        }
-
-        let mut focal_lengths = Vec::with_capacity(compute_params.frame_count);
-
-        for frame in 0..compute_params.frame_count {
-            let timestamp_ms = crate::timestamp_at_frame(frame as i32, compute_params.scaled_fps);
-            let timestamp_us = (timestamp_ms * 1000.0).round() as i64;
-
-            // Try to get focal length from lens_params (within 100ms window)
-            let focal_length = file_metadata.lens_params_closest(timestamp_us, 100000, |v| v.focal_length.is_some())
-                .and_then(|val| val.focal_length.map(|fl| fl as f64));
-
-            focal_lengths.push(focal_length);
-        }
-
-        focal_lengths
-    }
-
     fn apply_focal_length_smoothing(params: &mut ComputeParams, stabilization_params: &RwLock<StabilizationParams>) {
-        let (enabled, strength) = {
+        let (enabled, max_zoom_rate) = {
             let sp = stabilization_params.read();
-            (sp.focal_length_smoothing_enabled, sp.focal_length_smoothing_strength)
+            (sp.focal_length_smoothing_enabled, sp.focal_length_max_zoom_rate)
+        };
+        // The base curve evaluates the projection for every frame (a third of a second per minute of 60 fps footage),
+        // and a recompute is requested on every slider change, so it's reused while nothing it depends on changed:
+        // the file and its lens metadata, the lens profile and the video geometry. The settings (the delay, the rate
+        // limit, whether smoothing is on) and the trim only act on the curves derived from it, in O(frames), so
+        // none of them is part of the key and a change of theirs never repeats the sweep
+        use crate::smoothing::focal_length::{ compute_base_curve, derive_curves };
+        let base_key = {
+            use std::hash::Hasher;
+            let mut h = std::collections::hash_map::DefaultHasher::new();
+            let gyro = params.gyro.read();
+            let md = gyro.file_metadata.read();
+            h.write(gyro.file_url.as_bytes());
+            h.write_usize(md.lens_params.len());
+            h.write_usize(md.lens_positions.len());
+            h.write_u64(md.digital_zoom.unwrap_or_default().to_bits());
+            h.write_u64(params.lens.get_checksum());
+            h.write_usize(params.width);
+            h.write_usize(params.height);
+            h.write_u64(params.scaled_fps.to_bits());
+            h.write_usize(params.frame_count);
+            h.finish()
+        };
+        let derive = |base: &[f64]| derive_curves(base, params.lens_metadata_delay_frames, enabled, max_zoom_rate, params.scaled_fps, &params.trim_ranges);
+        let cached = {
+            let sp = stabilization_params.read();
+            (sp.focal_length_base_key == base_key).then(|| derive(&sp.focal_length_base))
+        };
+        let (base, (focal_lengths, smoothed)) = match cached {
+            Some(curves) => (None, curves),
+            None => {
+                let base = compute_base_curve(params);
+                let curves = derive(&base);
+                (Some(base), curves)
+            }
         };
 
-        let focal_lengths = if params.gyro.read().file_metadata.read().has_per_frame_focal_length() {
-            Self::extract_focal_lengths(params)
-        } else {
-            Vec::new()
-        };
+        params.focal_length_smoothing_enabled = enabled && !smoothed.is_empty();
+        params.focal_length_max_zoom_rate = max_zoom_rate;
+        params.focal_lengths = focal_lengths.clone();
+        params.smoothed_focal_lengths = smoothed.clone();
 
-        let smoothing_active = enabled && !focal_lengths.is_empty();
-
-        let (dequantized_focal_lengths, smoothed_focal_lengths) = if smoothing_active {
-            // Dequantize the raw metadata with a short Gaussian. Camera-quantized focal length
-            // values produce visible stairs; the shader samples position depends on the raw
-            // side of the ratio (through scaled_k), so stairs in raw become stairs in output
-            // unless we feed the ratio a smooth estimate of the true optical state.
-            let dequantize_window = ((params.scaled_fps * 0.5).round() as usize).max(5);
-            let dequantized = crate::smoothing::focal_length::smooth_focal_lengths_gaussian(&focal_lengths, 1.0, dequantize_window);
-
-            // Single-knob mapping (`strength` ∈ [0, 1]). All three dials scale together so the
-            // slider feels monotonic: more smoothness = longer stationary time constant, higher
-            // velocity threshold, AND a longer "fast zoom" time constant so transitions round
-            // off instead of snapping to the raw shape.
-            //
-            //   * `max_smoothness_time` — stationary time constant. Exponential 0.1s → 30s so
-            //     the top of the slider gives genuinely extreme smoothness.
-            //   * `min_smoothness_time` — fast-zoom time constant. Scales from ~0.05s at
-            //     strength=0 (near pass-through) up to ~0.4s at strength=1. This is what keeps
-            //     deliberate zoom edges rounded rather than tracking the raw curve tightly.
-            //   * `velocity_threshold` — how fast a zoom has to be to open the filter. Scales
-            //     0.3 → 8.0 so low smoothness opens on any motion, high smoothness only yields
-            //     to very fast zooms.
-            let s = strength.clamp(0.0, 1.0);
-            let max_smoothness_time = 0.1_f64 * 300.0_f64.powf(s);           // 0.1 .. 30
-            let min_smoothness_time = 0.05_f64 + 0.35_f64 * s * s;           // 0.05 .. 0.40
-            let velocity_threshold  = 0.3_f64 + 7.7_f64 * s.powf(1.5);       // 0.3 .. 8.0
-
-            let smoothed = crate::smoothing::focal_length::smooth_focal_lengths_adaptive(
-                &dequantized,
-                params.scaled_fps,
-                max_smoothness_time,
-                min_smoothness_time,
-                velocity_threshold,
-            );
-            (dequantized, smoothed)
-        } else {
-            (Vec::new(), Vec::new())
-        };
-
-        // Rendering-side state: compute_params drives the shader compensation, so only populate
-        // when smoothing is actually active. `focal_lengths` here holds the DEQUANTIZED curve
-        // (used as the ratio denominator), not the raw metadata — see comment above.
-        if smoothing_active {
-            params.focal_lengths = dequantized_focal_lengths;
-            params.smoothed_focal_lengths = smoothed_focal_lengths.clone();
-            params.focal_length_smoothing_enabled = true;
-        } else {
-            params.focal_lengths.clear();
-            params.smoothed_focal_lengths.clear();
-            params.focal_length_smoothing_enabled = false;
-        }
-
-        // Chart-side state: always expose the RAW focal length curve when per-frame data exists,
-        // so the "FL" timeline toggle works regardless of whether smoothing is enabled. Smoothed
-        // curve is only populated when smoothing is active.
         let mut sp = stabilization_params.write();
         sp.focal_lengths = focal_lengths;
-        sp.smoothed_focal_lengths = smoothed_focal_lengths;
+        sp.smoothed_focal_lengths = smoothed;
+        if let Some(base) = base {
+            sp.focal_length_base = base;
+            sp.focal_length_base_key = base_key;
+        }
     }
 
     pub fn recompute_adaptive_zoom_static(compute_params: &ComputeParams, params: &RwLock<StabilizationParams>) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>) {
@@ -582,7 +540,6 @@ impl StabilizationManager {
                     gyro.smoothed_quaternions = quats;
                 }
 
-                Self::apply_focal_length_smoothing(&mut params, &self.params);
 
                 // Zooming
                 let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
@@ -653,8 +610,14 @@ impl StabilizationManager {
             if prevent_recompute.load(SeqCst) { return cb((compute_id, true)); } // we're still loading, don't recompute
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
-            let mut smoothing_changed = false;
-            if smoothing.read().get_state_checksum(gyro_checksum) != smoothing_checksum.load(SeqCst) {
+            let commit = |checksum: &AtomicU64, value: u64| -> bool {
+                checksum.store(value, SeqCst);
+                if current_compute_id.load(SeqCst) != compute_id { checksum.store(0, SeqCst); return false; }
+                true
+            };
+
+            let mut smoothing_recomputed = false;
+            if smoothing.read().get_state_checksum(gyro_checksum, &params) != smoothing_checksum.load(SeqCst) {
                 let (mut smoothing, horizon_lock) = {
                     let lock = smoothing.read();
                     (lock.current().clone(), lock.horizon_lock.clone())
@@ -665,24 +628,29 @@ impl StabilizationManager {
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
                 if gyro_checksum != gyro.read().get_checksum() { return cb((compute_id, true)); }
 
-                let mut lib_gyro = gyro.write();
-                lib_gyro.max_angles = max_angles;
-                lib_gyro.smoothed_quaternions = quats;
-                lib_gyro.smoothing_status = smoothing.get_status_json();
-                gyro_checksum = lib_gyro.get_checksum();
-                smoothing_changed = true;
+                {
+                    let mut lib_gyro = gyro.write();
+                    lib_gyro.max_angles = max_angles;
+                    lib_gyro.smoothed_quaternions = quats;
+                    lib_gyro.smoothing_status = smoothing.get_status_json();
+                    gyro_checksum = lib_gyro.get_checksum();
+                }
+                smoothing_recomputed = true;
             }
-            smoothing_checksum.store(smoothing.read().get_state_checksum(gyro_checksum), SeqCst);
+            let smoothing_state = smoothing.read().get_state_checksum(gyro_checksum, &params);
+            if smoothing_recomputed && !commit(&*smoothing_checksum, smoothing_state) { return cb((compute_id, true)); }
+
+            // Before the zoom: it accounts for the focal length compensation
+            Self::apply_focal_length_smoothing(&mut params, &stabilization_params);
 
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
-            // Run FL smoothing unconditionally so `params.focal_lengths` always carries the
-            // dequantized curve by the time `set_compute_params` stores it. The from_manager
-            // copy pulls raw-for-chart from StabilizationParams, so skipping this step would
-            // leave raw (stair-stepped) values in the rendering-side compute_params.
-            Self::apply_focal_length_smoothing(&mut params, &stabilization_params);
-
-            if smoothing_changed || zooming::get_checksum(&params) != zooming_checksum.load(SeqCst) {
+            let zoom_key = zooming::get_checksum(&params, smoothing_state);
+            // Freshly recomputed quaternions are the plain smoothing output, and the max zoom folds its limit back into
+            // them inside the zoom pass, so a smoothing recompute needs the zoom pass again even when the zoom key still
+            // matches the last commit: a run killed inside the max-zoom iterations leaves that key committed next to
+            // quaternions that no longer carry the limit
+            if smoothing_recomputed || zoom_key != zooming_checksum.load(SeqCst) {
                 let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
                 params.fovs = fovs;
                 params.minimal_fovs = minimal_fovs;
@@ -694,8 +662,6 @@ impl StabilizationManager {
                     stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                     stab_params.minimal_fovs = params.minimal_fovs.clone();
                     stab_params.zooming_debug_points = debug_points;
-
-                    zooming_checksum.store(zooming::get_checksum(&params), SeqCst);
                     (
                         stab_params.max_zoom.unwrap_or(0.0),
                         params.keyframes.get_keyframes(&KeyframeType::MaxZoom).map(|x| x.iter().map(|x| x.1.value).max_by(|a, b| a.total_cmp(b)).unwrap_or(stab_params.max_zoom.unwrap_or(0.0))).unwrap_or(stab_params.max_zoom.unwrap_or(0.0)),
@@ -706,6 +672,11 @@ impl StabilizationManager {
 
                 // Max zoom
                 if max_zoom_max > 50.0 && max_zoom_iters > 0 {
+                    // The iterations rewrite the quaternions with the zoom limit folded in, and the fovs along with them.
+                    // Until they finish, neither is the state its key describes, so a run killed in here has to redo both
+                    smoothing_checksum.store(0, SeqCst);
+                    zooming_checksum.store(0, SeqCst);
+
                     params.smoothing_fov_limit_per_frame.clear();
                     for _ in params.fovs.iter() {
                         params.smoothing_fov_limit_per_frame.push(1.0);
@@ -754,8 +725,8 @@ impl StabilizationManager {
                             lib_gyro.smoothing_status = smoothing.get_status_json();
                         }
 
-                        // FL smoothing state from the outer apply is reused across iterations —
-                        // settings and raw metadata don't change within max-zoom iterations.
+                        // The focal length curves don't change within max-zoom iterations:
+                        // settings and raw metadata are the same, so the outer apply is reused
 
                         let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
                         params.fovs = fovs;
@@ -768,11 +739,14 @@ impl StabilizationManager {
                             stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                             stab_params.minimal_fovs = params.minimal_fovs.clone();
                             stab_params.zooming_debug_points = debug_points;
-
-                            zooming_checksum.store(zooming::get_checksum(&params), SeqCst);
                         }
                     }
+
+                    // The quaternions are final again (zoom limit folded in), which is what the smoothing key describes
+                    if !commit(&*smoothing_checksum, smoothing_state) { return cb((compute_id, true)); }
                 }
+
+                if !commit(&*zooming_checksum, zoom_key) { return cb((compute_id, true)); }
             }
 
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
@@ -863,8 +837,10 @@ impl StabilizationManager {
             if !p.zooming_debug_points.is_empty() {
                 if let Some((_, points)) = p.zooming_debug_points.range(timestamp_us - 1000..).next() {
                     for i in 0..points.len() {
+                        // Same total zoom as FrameTransform::at_timestamp: the polygon is measured at fov = 1
                         let mut fov = ((p.fov + if p.fov_overview { 1.0 } else { 0.0 }) * p.fovs.get(frame).unwrap_or(&1.0)).max(0.0001);
                         fov *= p.size.0 as f64 / p.output_size.0.max(1) as f64;
+                        fov *= smoothing::focal_length::compensation(&p.focal_lengths, &p.smoothed_focal_lengths, p.focal_length_smoothing_enabled, frame);
                         let mut pt = points[i];
                         let width_ratio = p.size.0 as f64 / p.output_size.0 as f64;
                         let height_ratio = p.size.1 as f64 / p.output_size.1 as f64;
@@ -1338,7 +1314,9 @@ impl StabilizationManager {
                 "max_zoom_iterations":    params.max_zoom_iterations,
                 "frame_offset":           params.frame_offset,
                 "focal_length_smoothing_enabled":  params.focal_length_smoothing_enabled,
-                "focal_length_smoothing_strength": params.focal_length_smoothing_strength,
+                "focal_length_max_zoom_rate":      params.focal_length_max_zoom_rate,
+                "lens_metadata_delay_frames":      params.lens_metadata_delay_frames,
+                "lens_breathing_enabled":          params.lens_breathing_enabled,
             },
             "gyro_source": {
                 "filepath":           gyro.file_url,
@@ -1634,11 +1612,20 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("acc_rotation") { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_acc_rotation(v[0], v[1], v[2]); }
                 if let Some(v) = obj.get("gyro_bias")    { gyro.imu_transforms.gyro_bias = serde_json::from_value(v.clone()).ok(); }
 
-                if let Ok(fls) = util::decompress_from_base91_cbor::<Vec<Option<f64>>>(obj.get("focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
-                    self.params.write().focal_lengths = fls;
-                }
-                if let Ok(fls) = util::decompress_from_base91_cbor::<Vec<Option<f64>>>(obj.get("smoothed_focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
-                    self.params.write().smoothed_focal_lengths = fls;
+                {
+                    // The curves of a project file only stand in until the next recompute: they may come from another build
+                    // (older ones stored millimetres, the renderer projects with output pixels) or from other lens metadata
+                    // or settings than the ones loaded now. The base curve they'd be derived from is not stored, so the
+                    // next recompute extracts it (and derives the curves it computed itself) from the loaded data
+                    let mut params = self.params.write();
+                    if let Ok(fls) = util::decompress_from_base91_cbor::<Vec<Option<f64>>>(obj.get("focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
+                        params.focal_lengths = fls;
+                    }
+                    if let Ok(fls) = util::decompress_from_base91_cbor::<Vec<Option<f64>>>(obj.get("smoothed_focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
+                        params.smoothed_focal_lengths = fls;
+                    }
+                    params.focal_length_base.clear();
+                    params.focal_length_base_key = 0;
                 }
 
                 obj.remove("raw_imu");
@@ -1740,7 +1727,9 @@ impl StabilizationManager {
                 }
 
                 if let Some(v) = obj.get("focal_length_smoothing_enabled") .and_then(|x| x.as_bool()) { params.focal_length_smoothing_enabled  = v; }
-                if let Some(v) = obj.get("focal_length_smoothing_strength").and_then(|x| x.as_f64())  { params.focal_length_smoothing_strength = v.clamp(0.0, 1.0); }
+                if let Some(v) = obj.get("focal_length_max_zoom_rate").and_then(|x| x.as_f64()) { params.focal_length_max_zoom_rate = v.clamp(0.01, 10.0); }
+                if let Some(v) = obj.get("lens_metadata_delay_frames").and_then(|x| x.as_i64()) { params.lens_metadata_delay_frames = v.clamp(-30, 30) as i32; }
+                if let Some(v) = obj.get("lens_breathing_enabled").and_then(|x| x.as_bool()) { params.lens_breathing_enabled = v; }
 
                 obj.remove("adaptive_zoom_fovs");
             }
