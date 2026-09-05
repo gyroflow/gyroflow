@@ -1963,6 +1963,17 @@ impl Controller {
         let text = text.to_string();
         let favorites = HashSet::<String>::from_iter(favorites.into_iter().map(|x| x.to_qbytearray().to_string()));
         core::run_threaded(move || {
+            // Lensfun holds calibrations for far more bodies and lenses than
+            // gyroflow ships profiles for, so a query that finds nothing here
+            // may still be answerable. The synthesis runs outside the lock
+            // and the write is only taken when it produced something new.
+            #[cfg(feature = "lensfun-import")]
+            if db.read().needs_lensfun_import(&text) {
+                let imported = core::lensfun_import::profiles_for_query(&text);
+                if db.write().add_lensfun_profiles(&text, imported) > 0 {
+                    db.write().prepare_list_for_ui();
+                }
+            }
             let profiles = db.read().search(&text, &favorites, aspect_ratio, aspect_ratio_swapped).into_iter().map(|(name, file, crc, official, rating, aspect_ratio, _author)| {
                 let mut list = QVariantList::from_iter([
                     QString::from(name),

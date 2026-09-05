@@ -71,6 +71,7 @@ pollster = "1.0.1"
 futures-intrusive = "0.5.0"
 flate2 = "1.1"
 walkdir = "2.5.0"
+lensfun = { version = "0.7", optional = true }
 url = "2.5.8"
 urlencoding = "2.1.3"
 log = "0.4"
@@ -101,6 +102,9 @@ default = []
 use-opencl = ["ocl", "ocl-interop"]
 use-opencv = ["opencv"]
 bundle-lens-profiles = []
+# Bundles the Lensfun database (~5 MB of XML, compressed) and enables
+# synthesising lens profiles from it. Off by default because of that size.
+lensfun-import = ["dep:lensfun"]
 cache-gyro-metadata = []
 
 [profile.deploy]
