@@ -99,6 +99,9 @@ pub struct Controller {
 
     load_profiles: qt_method!(fn(&self, reload_from_disk: bool)),
     all_profiles_loaded: qt_signal!(),
+    camera_selector_options: qt_method!(fn(&self, selection: QString) -> QString),
+    browse_lens_profiles: qt_method!(fn(&self, selection: QString, compatible: bool) -> QString),
+    lens_profile_submission_errors: qt_method!(fn(&self, info: QJsonObject) -> QString),
     search_lens_profile_finished: qt_signal!(profiles: QVariantList),
     search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
     fetch_profiles_from_github: qt_method!(fn(&self)),
@@ -1913,6 +1916,13 @@ impl Controller {
         match core::lens_profile::LensProfile::from_json(&info_json) {
             Ok(mut profile) => {
                 self.fill_profile_from_calibrator(&mut profile);
+                if upload {
+                    let errors = self.stabilizer.lens_profile_db.read().camera_database.submission_errors(&profile);
+                    if !errors.is_empty() {
+                        self.error(QString::from("Complete the lens profile before submitting: %1"), QString::from(errors.join("\n")), QString::default());
+                        return false;
+                    }
+                }
 
                 match profile.save_to_file(&url) {
                     Ok(json) => {
@@ -1930,6 +1940,26 @@ impl Controller {
                 }
             },
             Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
+        }
+    }
+
+    fn camera_selector_options(&self, selection: QString) -> QString {
+        let selection = serde_json::from_str(&selection.to_string()).unwrap_or_default();
+        self.stabilizer.lens_profile_db.read().camera_database.options(&selection).to_string().into()
+    }
+
+    fn browse_lens_profiles(&self, selection: QString, compatible: bool) -> QString {
+        let selection = serde_json::from_str(&selection.to_string()).unwrap_or_default();
+        self.stabilizer.lens_profile_db.read().browse(&selection, compatible).to_string().into()
+    }
+
+    fn lens_profile_submission_errors(&self, info: QJsonObject) -> QString {
+        match core::lens_profile::LensProfile::from_json(&info.to_json().to_string()) {
+            Ok(mut profile) => {
+                self.fill_profile_from_calibrator(&mut profile);
+                serde_json::to_string(&self.stabilizer.lens_profile_db.read().camera_database.submission_errors(&profile)).unwrap_or_default().into()
+            }
+            Err(e) => serde_json::json!([e.to_string()]).to_string().into()
         }
     }
 
