@@ -65,7 +65,7 @@
   "synchronization": {
     "do_autosync": true,
     "of_method": 2,
-    "pose_method": 3,
+    "pose_method": 0,
     "offset_method": 0,
     "every_nth_frame": 1,
     "processing_resolution": 360,

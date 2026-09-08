@@ -18,6 +18,7 @@ parser.add_argument("--ffmpeg", type=Path, required=True)
 parser.add_argument("--output-dir", type=Path, required=True)
 parser.add_argument("--davis-dir", type=Path)
 parser.add_argument("--base-preset", type=Path, required=True)
+parser.add_argument("--pose-method", type=int, choices=range(4), default=0)
 args = parser.parse_args()
 out = args.output_dir.resolve()
 out.mkdir(parents=True, exist_ok=True)
@@ -75,9 +76,11 @@ def presets(case, w, h, focal, note):
             [0, 0, 1],
         ]
         preset["stabilization"]["optical_stabilization_strength"] = strength
-        preset["synchronization"].update(of_method=method, processing_resolution=h)
+        preset["synchronization"].update(
+            of_method=method, pose_method=args.pose_method, processing_resolution=h
+        )
         preset["output"].update(
-            output_folder=str(out), output_filename=f"{case}-{name}.mp4"
+            output_folder=out.as_uri(), output_filename=f"{case}-{name}.mp4"
         )
         (out / f"{case}-{name}-preset.gyroflow").write_text(
             json.dumps(preset, indent=2), encoding="utf-8"

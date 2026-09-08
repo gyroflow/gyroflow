@@ -84,6 +84,12 @@ variant; the evaluator reports scale as well as registration coverage. To test
 GMFlow, use `--variants gmflow-local gmflow-camera-only` and pass those variants
 to the evaluator. Footage paths are local to the chosen data directory.
 
+The generator uses the application's default `findEssentialMat` pose method (0).
+Pass `--pose-method 3` to reproduce the separate homography comparison, or 1 for
+Almeida. Keep results from different pose methods separate: camera estimation can
+change the outcome substantially. Output folders use file URLs so generated
+projects can also be opened in the GUI on Windows.
+
 The independent evaluator uses SIFT correspondences and local affine background
 patches. Acceleration and spatial residual metrics are proxies, not a perceptual
 score. Cuts are evaluated as separate shots. Review the videos, crop and failed
