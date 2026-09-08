@@ -54,10 +54,8 @@ impl FrameTransform {
         fov_scale += if params.fov_overview && use_fovs && !for_ui { 1.0 } else { 0.0 };
         let mut fov = if use_fovs { params.fovs.get(frame).unwrap_or(if params.fovs.len() > 1 { params.fovs.last().unwrap() } else { &1.0 }) * fov_scale } else { 1.0 }.max(0.001);
         fov *= params.width as f64 / params.output_width.max(1) as f64;
-        if use_fovs && params.optical_stabilization && params.optical_motion.as_ref().is_some_and(|d| d.complete && d.version == 1 && !d.pairs.is_empty()) {
-            // Reserve a fixed border for the bounded residual displacement. Its
-            // size is independent of per-frame support, avoiding crop pumping.
-            fov /= 1.0 + 2.0 * crate::synchronization::residual_motion::MAX_DISPLACEMENT as f64;
+        if use_fovs {
+            fov /= 1.0 + 2.0 * params.optical_crop_margins.get(frame).copied().unwrap_or(0.0) as f64;
         }
         fov
     }
@@ -563,6 +561,38 @@ mod tests {
     use crate::gyro_source::{ BreathingFrame, FileMetadata, LensParams };
     use crate::lens_profile::{ Dimensions, LensProfile };
     use crate::stabilization::{ Stabilization, undistort_points };
+
+    fn optical_crop_params() -> ComputeParams {
+        use crate::synchronization::residual_motion::{ OpticalMotionData, OpticalMotionPair };
+        let mut p = ComputeParams::default();
+        p.width = 1920; p.height = 1080; p.output_width = 1920; p.output_height = 1080;
+        p.scaled_fps = 30.0; p.frame_count = 2; p.fov_scale = 1.0;
+        p.adaptive_zoom_window = 4.0; p.max_zoom = Some(130.0);
+        p.optical_stabilization = true;
+        p.optical_motion = Some(std::sync::Arc::new(OpticalMotionData {
+            version: 1, complete: true, pairs: vec![OpticalMotionPair { from_us: 0, to_us: 33_333,
+                size: (320, 240), from: vec![(10.0, 10.0)], to: vec![(11.0, 10.0)] }],
+        }));
+        p
+    }
+
+    #[test]
+    fn optical_reserve_does_not_cross_an_exhausted_zoom_limit() {
+        let mut p = optical_crop_params();
+        p.fovs = vec![1.0 / 1.3; 2];
+        p.optical_crop_margins = std::sync::Arc::new(crate::synchronization::residual_motion::crop_margins(&p));
+        let applied = FrameTransform::get_fov(&p, 0, true, 0.0, false);
+        assert!(applied >= 1.0 / 1.3 - 1e-8, "The residual reserve increased zoom from 130% to {}%", 100.0 / applied);
+    }
+
+    #[test]
+    fn optical_reserve_respects_no_zooming_mode() {
+        let mut p = optical_crop_params();
+        p.adaptive_zoom_window = 0.0;
+        p.fovs = vec![1.0; 2];
+        p.optical_crop_margins = std::sync::Arc::new(crate::synchronization::residual_motion::crop_margins(&p));
+        assert_eq!(FrameTransform::get_fov(&p, 0, true, 0.0, false), 1.0);
+    }
 
     const W: usize = 1920;
     const H: usize = 1080;

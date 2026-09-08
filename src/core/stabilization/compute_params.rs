@@ -72,6 +72,7 @@ pub struct ComputeParams {
     pub optical_stabilization: bool,
     pub optical_motion: Option<Arc<crate::synchronization::residual_motion::OpticalMotionData>>,
     pub optical_grids: Arc<Vec<crate::synchronization::residual_motion::MotionGrid>>,
+    pub optical_crop_margins: Arc<Vec<f32>>,
     pub optical_time_scale: f64,
 }
 impl ComputeParams {
@@ -159,6 +160,7 @@ impl ComputeParams {
             optical_stabilization: params.optical_stabilization,
             optical_motion: mgr.gyro.read().file_metadata.read().optical_motion.clone().map(Arc::new),
             optical_grids: Default::default(),
+            optical_crop_margins: Default::default(),
             optical_time_scale: params.fps_scale.unwrap_or(1.0),
         }
     }

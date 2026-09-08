@@ -241,6 +241,9 @@ impl Stabilization {
     pub fn optical_grids(&self) -> std::sync::Arc<Vec<crate::synchronization::residual_motion::MotionGrid>> {
         self.compute_params.optical_grids.clone()
     }
+    pub fn optical_crop_margins(&self) -> std::sync::Arc<Vec<f32>> {
+        self.compute_params.optical_crop_margins.clone()
+    }
     pub fn set_compute_params(&mut self, params: ComputeParams) {
         self.stab_data.clear();
         self.compute_params = params;

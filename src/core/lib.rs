@@ -515,7 +515,7 @@ impl StabilizationManager {
                         zoom_limit *= (1.0 + ((vid_speed - 1.0) / 4.0)).min(1.8);
                     }
 
-                    let fov_limit = 1.0 / (zoom_limit * scaling_factor);
+                    let fov_limit = synchronization::residual_motion::zoom_reserve_factor(&params) / (zoom_limit * scaling_factor);
                     if *fov < fov_limit {
                         any_above_limit = true;
                         params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(*thresholds.get(iter).unwrap_or(thresholds.last().unwrap()));
@@ -571,7 +571,7 @@ impl StabilizationManager {
 
     pub fn recompute_undistortion(&self) {
         let mut params = stabilization::ComputeParams::from_manager(self);
-        params.optical_grids = Arc::new(synchronization::residual_motion::derive(&params));
+        synchronization::residual_motion::prepare(&mut params);
         self.stabilization.write().set_compute_params(params);
     }
 
@@ -694,7 +694,7 @@ impl StabilizationManager {
                                 zoom_limit *= (1.0 + ((vid_speed - 1.0) / 4.0)).min(1.8);
                             }
 
-                            let fov_limit = 1.0 / (zoom_limit * scaling_factor);
+                            let fov_limit = synchronization::residual_motion::zoom_reserve_factor(&params) / (zoom_limit * scaling_factor);
                             if *fov < fov_limit {
                                 any_above_limit = true;
                                 params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(*thresholds.get(iter).unwrap_or(thresholds.last().unwrap()));
@@ -752,7 +752,7 @@ impl StabilizationManager {
 
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
-            params.optical_grids = Arc::new(synchronization::residual_motion::derive(&params));
+            synchronization::residual_motion::prepare(&mut params);
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
             stabilization.write().set_compute_params(params);
 
@@ -1519,8 +1519,11 @@ impl StabilizationManager {
 
                 let built_in_gyro: std::io::Result<crate::gyro_source::FileMetadata> = util::decompress_from_base91_cbor(obj.get("file_metadata").and_then(|x| x.as_str()).unwrap_or_default());
 
-                // Load IMU data only if it's from another file or we are sure that built_in_gyro contains motion data
-                if (!org_gyro_url.is_empty() && org_gyro_url != org_video_url) || built_in_gyro.as_ref().map(|x| x.has_motion()).unwrap_or_default() {
+                // Full embedded metadata can carry the calibration required for
+                // optical analysis even when the source has no inertial samples.
+                let embedded_analysis = built_in_gyro.as_ref().is_ok_and(|md| md.has_motion() || md.optical_motion.is_some() ||
+                    md.lens_geometry_count() > 0 || md.has_mesh_correction() || !md.camera_stab_data.is_empty());
+                if (!org_gyro_url.is_empty() && org_gyro_url != org_video_url) || embedded_analysis {
                     let mut raw_imu = Vec::new();
                     let mut quaternions = TimeQuat::default();
                     let mut image_orientations = None;

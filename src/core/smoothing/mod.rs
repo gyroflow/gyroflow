@@ -110,6 +110,9 @@ impl Smoothing {
         hasher.write_usize(self.current_id);
         hasher.write_u64(self.algs.0[self.current_id].get_checksum());
         hasher.write_u64(self.horizon_lock.get_checksum());
+        // Zoom limiting changes the stored quaternions. Changing the optical
+        // reserve must restart from the unbounded camera smoothing result.
+        hasher.write_u64(crate::synchronization::residual_motion::zoom_reserve_factor(compute_params).to_bits());
         hasher.write_usize(compute_params.camera_diagonal_fovs.len());
         for fov in &compute_params.camera_diagonal_fovs { hasher.write_u64(fov.to_bits()); }
         hasher.finish()

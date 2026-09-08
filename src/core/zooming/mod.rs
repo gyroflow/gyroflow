@@ -150,6 +150,7 @@ pub fn get_checksum(compute_params: &ComputeParams, smoothing_checksum: u64) -> 
     hasher.write_u64(compute_params.additional_translation.2.to_bits());
     hasher.write_u64(compute_params.max_zoom.unwrap_or_default().to_bits());
     hasher.write_usize(compute_params.max_zoom_iterations);
+    hasher.write_u64(crate::synchronization::residual_motion::zoom_reserve_factor(compute_params).to_bits());
     hasher.write_u32(compute_params.fov_algorithm_margin.to_bits());
 
     // Focal length stabilization: the zoom accounts for the compensation, so it has to follow the curves themselves

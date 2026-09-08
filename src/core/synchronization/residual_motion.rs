@@ -13,6 +13,67 @@ pub const MAX_DISPLACEMENT: f32 = 0.04;
 pub const MAX_KERNEL_BUFFER: usize = crate::gyro_source::splines::MAX_BUFFER_SIZE + 10 + BUFFER_FLOATS;
 type Point = [f32; 2];
 
+fn zooming_enabled(params: &ComputeParams) -> bool {
+    params.adaptive_zoom_window < -0.9 || params.adaptive_zoom_window > 0.0001
+}
+
+pub fn zoom_reserve_factor(params: &ComputeParams) -> f64 {
+    if zooming_enabled(params) && params.optical_stabilization &&
+        params.optical_motion.as_ref().is_some_and(|d| d.complete && d.version == 1 && !d.pairs.is_empty()) {
+        1.0 + 2.0 * MAX_DISPLACEMENT as f64
+    } else { 1.0 }
+}
+
+/// Reserve only the magnification left after the camera projection, explicit
+/// FOV and focal-length compensation. This does not override a user crop or an
+/// already-over-limit result from the existing approximate camera smoother.
+pub fn crop_margins(params: &ComputeParams) -> Vec<f32> {
+    if params.frame_count == 0 || params.width == 0 || params.output_width == 0 ||
+        !params.scaled_fps.is_finite() || params.scaled_fps <= 0.0 { return Vec::new(); }
+    if !zooming_enabled(params) || !params.optical_stabilization ||
+        !params.optical_motion.as_ref().is_some_and(|d| d.complete && d.version == 1 && !d.pairs.is_empty()) {
+        return Vec::new();
+    }
+    let ratio = params.width as f64 / params.output_width.max(1) as f64;
+    let mut margins: Vec<f32> = (0..params.frame_count).map(|frame| {
+        let timestamp = crate::timestamp_at_frame(frame as i32, params.scaled_fps);
+        let fov_scale = params.keyframes.value_at_video_timestamp(&crate::KeyframeType::Fov, timestamp).unwrap_or(params.fov_scale);
+        let adaptive = params.fovs.get(frame).or_else(|| if params.fovs.len() > 1 { params.fovs.last() } else { None }).copied().unwrap_or(1.0);
+        let base_fov = (adaptive * fov_scale).max(0.001) * ratio * crate::smoothing::focal_length::compensation_at(params, frame);
+        let limit = params.keyframes.value_at_video_timestamp(&crate::KeyframeType::MaxZoom, timestamp).or(params.max_zoom);
+        if let Some(limit) = limit.filter(|v| v.is_finite() && *v > 50.0) {
+            let mut limit = limit / 100.0;
+            if params.video_speed_affects_zooming_limit && (params.video_speed != 1.0 || params.keyframes.is_keyframed(&crate::KeyframeType::VideoSpeed)) {
+                let speed = params.keyframes.value_at_video_timestamp(&crate::KeyframeType::VideoSpeed, timestamp).unwrap_or(params.video_speed).abs();
+                limit *= (1.0 + ((speed - 1.0) / 4.0)).min(1.8);
+            }
+            if !base_fov.is_finite() || !limit.is_finite() { return 0.0; }
+            // Adding displacement m requires a 1 + 2m magnification reserve.
+            ((base_fov * limit - 1.0) * 0.5).clamp(0.0, MAX_DISPLACEMENT as f64) as f32
+        } else { MAX_DISPLACEMENT }
+    }).collect();
+    if margins.is_empty() { return margins; }
+    if params.adaptive_zoom_window < -0.9 {
+        // A static crop must not breathe as the per-frame budget changes.
+        let minimum = margins.iter().copied().fold(MAX_DISPLACEMENT, f32::min);
+        margins.fill(minimum);
+        return margins;
+    }
+    // Erode then average within the same radius. Every averaged minimum contains
+    // this frame, so smoothing cannot spend more than its original headroom.
+    let radius = (params.scaled_fps * 0.2).ceil().clamp(1.0, 120.0) as usize;
+    let lower: Vec<f32> = (0..margins.len()).map(|i| margins[i.saturating_sub(radius)..(i + radius + 1).min(margins.len())].iter().copied().fold(MAX_DISPLACEMENT, f32::min)).collect();
+    (0..margins.len()).map(|i| {
+        let samples = &lower[i.saturating_sub(radius)..(i + radius + 1).min(lower.len())];
+        (samples.iter().map(|v| *v as f64).sum::<f64>() / samples.len() as f64) as f32
+    }).collect()
+}
+
+pub fn prepare(params: &mut ComputeParams) {
+    params.optical_crop_margins = std::sync::Arc::new(crop_margins(params));
+    params.optical_grids = std::sync::Arc::new(derive(params));
+}
+
 #[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
 pub struct OpticalMotionData {
@@ -216,7 +277,12 @@ pub fn derive(params: &ComputeParams) -> Vec<MotionGrid> {
         flows[from_frame] = estimate_field(&project(&pair.from, from_ms, from_frame), &project(&pair.to, to_ms, to_frame));
     }
     let supported = flows.iter().filter(|v| v.is_some()).count();
-    let grids = smooth_fields(&flows, params.scaled_fps, 0.2);
+    let mut grids = smooth_fields(&flows, params.scaled_fps, 0.2);
+    if zooming_enabled(params) {
+        for (frame, grid) in grids.iter_mut().enumerate() {
+            grid.limit(params.optical_crop_margins.get(frame).copied().unwrap_or(0.0), 0.25);
+        }
+    }
     let maximum = grids.iter().flat_map(|g| g.0.iter().flatten()).fold(0.0f32, |a, b| a.max(b.abs()));
     log::info!("Residual optical correction: {supported}/{} frame pairs, {} frames, maximum normalized displacement {maximum:.5}", flows.len(), grids.len());
     grids
@@ -245,6 +311,122 @@ mod tests {
     fn constant(d: Point) -> MotionGrid { MotionGrid([d; NODES]) }
     fn lattice() -> Vec<Point> {
         (0..12).flat_map(|y| (0..16).map(move |x| [(x as f32 + 0.5) / 16.0, (y as f32 + 0.5) / 12.0])).collect()
+    }
+
+    fn crop_params() -> ComputeParams {
+        let mut p = ComputeParams::default();
+        p.width = 1920; p.height = 1080; p.output_width = 1920; p.output_height = 1080;
+        p.scaled_fps = 30.0; p.frame_count = 60; p.fov_scale = 1.0;
+        p.adaptive_zoom_window = 4.0; p.max_zoom = Some(130.0);
+        p.optical_stabilization = true;
+        p.optical_motion = Some(std::sync::Arc::new(OpticalMotionData { version: 1, complete: true,
+            pairs: vec![OpticalMotionPair { from_us: 0, to_us: 33_333, size: (320, 240), from: vec![(10.0, 10.0)], to: vec![(11.0, 10.0)] }] }));
+        p
+    }
+
+    #[test]
+    fn crop_reserve_uses_available_budget_and_smooths_below_its_ceiling() {
+        let mut p = crop_params();
+        p.fovs = (0..60).map(|i| if (25..30).contains(&i) { 1.04 / 1.3 } else { 1.0 }).collect();
+        let margins = crop_margins(&p);
+        assert_eq!(margins[0], MAX_DISPLACEMENT);
+        assert!(margins[24] < MAX_DISPLACEMENT, "Budget reduction should start before the tight section");
+        assert!(margins[31] < MAX_DISPLACEMENT, "Recovery should also be gradual");
+        for (fov, margin) in p.fovs.iter().zip(&margins) {
+            assert!(margin >= &0.0 && margin <= &MAX_DISPLACEMENT);
+            assert!((1.0 + 2.0 * *margin as f64) / fov <= 1.3 + 1e-8);
+        }
+        p.adaptive_zoom_window = -1.0;
+        let margins = crop_margins(&p);
+        assert!(margins.iter().all(|m| (*m - 0.02).abs() < 1e-6), "Static reserve must not pump");
+    }
+
+    #[test]
+    fn crop_reserve_accounts_for_manual_fov_output_size_and_focal_compensation() {
+        let mut p = crop_params();
+        p.fovs = vec![1.0; 60];
+        p.fov_scale = 0.8;
+        assert!(crop_margins(&p).iter().all(|m| (*m - 0.02).abs() < 1e-6));
+        p.output_width = 3840;
+        assert!(crop_margins(&p).iter().all(|m| *m == 0.0));
+        p.output_width = 1920; p.fov_scale = 1.0;
+        p.focal_length_smoothing_enabled = true;
+        p.focal_lengths = vec![Some(800.0); 60];
+        p.smoothed_focal_lengths = vec![Some(1000.0); 60];
+        assert!(crop_margins(&p).iter().all(|m| (*m - 0.02).abs() < 1e-6));
+    }
+
+    #[test]
+    fn crop_reserve_does_not_add_zoom_to_an_existing_over_limit_view() {
+        let mut p = crop_params();
+        p.fovs = vec![0.7; 60];
+        assert!(crop_margins(&p).iter().all(|m| *m == 0.0));
+        p.max_zoom = None;
+        assert!(crop_margins(&p).iter().all(|m| *m == MAX_DISPLACEMENT));
+        p.adaptive_zoom_window = 0.0;
+        assert!(crop_margins(&p).is_empty());
+        p.adaptive_zoom_window = 4.0; p.optical_stabilization = false;
+        assert!(crop_margins(&p).is_empty());
+    }
+
+    #[test]
+    fn optical_reserve_requests_room_before_the_camera_zoom_limit() {
+        let mut p = crop_params();
+        assert!((zoom_reserve_factor(&p) - 1.08).abs() < 1e-6);
+        p.optical_stabilization = false;
+        assert_eq!(zoom_reserve_factor(&p), 1.0);
+        p.optical_stabilization = true; p.adaptive_zoom_window = 0.0;
+        assert_eq!(zoom_reserve_factor(&p), 1.0);
+        p.adaptive_zoom_window = 4.0; p.optical_motion = None;
+        assert_eq!(zoom_reserve_factor(&p), 1.0);
+    }
+
+    #[test]
+    fn optical_reserve_invalidates_camera_and_zoom_state_when_toggled() {
+        let mut p = crop_params();
+        let smoothing = crate::smoothing::Smoothing::default();
+        let on = (smoothing.get_state_checksum(123, &p), crate::zooming::get_checksum(&p, 123));
+        p.optical_stabilization = false;
+        let off = (smoothing.get_state_checksum(123, &p), crate::zooming::get_checksum(&p, 123));
+        assert_ne!(on.0, off.0);
+        assert_ne!(on.1, off.1);
+    }
+
+    #[test]
+    fn optical_crop_tracks_keyframed_fov_and_zoom_limits() {
+        let mut p = crop_params();
+        p.fovs = vec![0.85; p.frame_count];
+        p.keyframes.set(&crate::KeyframeType::MaxZoom, 0, 130.0);
+        p.keyframes.set(&crate::KeyframeType::MaxZoom, 1_000_000, 120.0);
+        p.keyframes.set(&crate::KeyframeType::MaxZoom, 2_000_000, 140.0);
+        p.keyframes.set(&crate::KeyframeType::Fov, 0, 1.0);
+        p.keyframes.set(&crate::KeyframeType::Fov, 2_000_000, 0.95);
+        for (i, margin) in crop_margins(&p).iter().enumerate() {
+            let ts = crate::timestamp_at_frame(i as i32, p.scaled_fps);
+            let manual = p.keyframes.value_at_video_timestamp(&crate::KeyframeType::Fov, ts).unwrap();
+            let limit = p.keyframes.value_at_video_timestamp(&crate::KeyframeType::MaxZoom, ts).unwrap() / 100.0;
+            let base_zoom = 1.0 / (0.85 * manual);
+            let total_zoom = (1.0 + 2.0 * *margin as f64) * base_zoom;
+            assert!(total_zoom <= base_zoom.max(limit) + 1e-8, "Frame {i} overspent its keyframed limit");
+        }
+    }
+
+    #[test]
+    fn project_keeps_calibration_metadata_without_gyro_samples() {
+        let manager = crate::StabilizationManager::default();
+        let mut md = crate::gyro_source::FileMetadata::default();
+        md.lens_params.insert(0, crate::gyro_source::LensParams { pixel_focal_length: Some((100.0, 110.0)), ..Default::default() });
+        let project = serde_json::json!({
+            "version": 4, "videofile": "file:///optical-fixture-missing.mp4",
+            "video_info": { "width": 32, "height": 32, "num_frames": 2, "fps": 30.0, "duration_ms": 66.667 },
+            "gyro_source": { "filepath": "file:///optical-fixture-missing.mp4", "file_metadata": crate::util::compress_to_base91_cbor(&md).unwrap() }
+        });
+        manager.import_gyroflow_data(&serde_json::to_vec(&project).unwrap(), false, None, |_| {},
+            std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)), &mut false, false).unwrap();
+        let gyro = manager.gyro.read();
+        let metadata = gyro.file_metadata.read();
+        assert!(!metadata.has_motion());
+        assert_eq!(metadata.lens_params[&0].pixel_focal_length, Some((100.0, 110.0)));
     }
 
     #[test]

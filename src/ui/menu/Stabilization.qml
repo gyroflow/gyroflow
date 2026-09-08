@@ -699,7 +699,7 @@ MenuItem {
     CheckBoxWithContent {
         id: opticalEnable;
         text: qsTr("Residual optical stabilization (experimental)");
-        tooltip: qsTr("Run Autosync after enabling to analyze local motion throughout the video. Uses an additional 8% zoom to make room for the correction.");
+        tooltip: qsTr("Run Autosync after enabling to analyze local motion throughout the video. Uses up to 8% additional zoom within the remaining zoom allowance, reducing correction when little room remains. No zooming mode adds no crop and may show moving borders.");
         cb.checked: controller.optical_stabilization;
         cb.onCheckedChanged: controller.optical_stabilization = cb.checked;
     }
