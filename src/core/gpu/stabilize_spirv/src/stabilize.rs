@@ -55,7 +55,12 @@ pub fn rotate_and_distort(pos: Vec2, idx: i32, params: &KernelParams, matrices: 
     vec2(-99999.0, -99999.0)
 }
 
-pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeffs: &[f32], _mesh_data: &[f32], drawing: &DrawingType, input: &ImageType, sampler: SamplerType, interpolation: u32, distortion_model: u32, digital_distortion_model: u32, flags: u32) -> Vec4 {
+fn optical_grid_at(data: &[f32], offset: usize, x: usize, y: usize) -> Vec2 {
+    let i = offset + (y * 9 + x) * 2;
+    vec2(data[i], data[i + 1])
+}
+
+pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeffs: &[f32], mesh_data: &[f32], drawing: &DrawingType, input: &ImageType, sampler: SamplerType, interpolation: u32, distortion_model: u32, digital_distortion_model: u32, flags: u32) -> Vec4 {
     let bg = params.background * params.max_pixel_value;
 
     if (params.flags & 4) == 4 { // Fill with background
@@ -76,6 +81,15 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
 
     let org_out_pos = out_pos;
     out_pos = out_pos + params.translation2d;
+    if flags & 4096 != 0 && params.optical_mesh_offset > 0 {
+        let size = vec2(params.output_width as f32, params.output_height as f32);
+        let p = (out_pos / size).clamp(Vec2::ZERO, Vec2::ONE) * vec2(8.0, 6.0);
+        let (x, y) = ((p.x as usize).min(7), (p.y as usize).min(5));
+        let (dx, dy, o) = (p.x - x as f32, p.y - y as f32, params.optical_mesh_offset as usize);
+        let a = optical_grid_at(mesh_data, o, x, y) * (1.0 - dx) + optical_grid_at(mesh_data, o, x + 1, y) * dx;
+        let b = optical_grid_at(mesh_data, o, x, y + 1) * (1.0 - dx) + optical_grid_at(mesh_data, o, x + 1, y + 1) * dx;
+        out_pos += (a * (1.0 - dy) + b * dy) * size;
+    }
 
     let mut lens_undistort_failed = false;
 

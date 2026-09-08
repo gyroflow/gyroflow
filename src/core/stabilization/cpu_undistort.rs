@@ -449,6 +449,13 @@ impl Stabilization {
             out_pos.x += params.translation2d[0];
             out_pos.y += params.translation2d[1];
 
+            if params.flags & 4096 != 0 {
+                let d = crate::synchronization::residual_motion::sample_buffer(mesh_data, params.optical_mesh_offset,
+                    [out_pos.x / params.output_width as f32, out_pos.y / params.output_height as f32]);
+                out_pos.x += d[0] * params.output_width as f32;
+                out_pos.y += d[1] * params.output_height as f32;
+            }
+
             ///////////////////////////////////////////////////////////////////
             // Add lens distortion back
             if params.lens_correction_amount < 1.0 {
@@ -665,7 +672,19 @@ pub fn undistort_points_with_rolling_shutter(distorted: &[(f32, f32)], timestamp
     if distorted.is_empty() { return Vec::new(); }
     let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh, fov, r_limit) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms, frame, use_fovs);
 
-    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), params, lens_correction_amount, fov, timestamp_ms, is, mesh, if clamp_to_image_circle { r_limit } else { 0.0 })
+    let mut points = undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), params, lens_correction_amount, fov, timestamp_ms, is, mesh, if clamp_to_image_circle { r_limit } else { 0.0 });
+    if use_fovs {
+        let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, params.scaled_fps) as usize);
+        if let Some(grid) = params.optical_grids.get(frame) {
+            for p in &mut points {
+                if p.0 > -99998.0 && p.1 > -99998.0 && p.0.is_finite() && p.1.is_finite() {
+                    let q = grid.inverse([p.0 / params.output_width as f32, p.1 / params.output_height as f32]);
+                    *p = (q[0] * params.output_width as f32, q[1] * params.output_height as f32);
+                }
+            }
+        }
+    }
+    points
 }
 pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us: i64, params: &ComputeParams, points_dims: (u32, u32)) -> Vec<(f32, f32)> {
     let img_dim_ratio = points_dims.0 as f64 / params.width.max(1) as f64;//FrameTransform::get_ratio(params);

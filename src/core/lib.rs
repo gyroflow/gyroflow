@@ -515,7 +515,7 @@ impl StabilizationManager {
                         zoom_limit *= (1.0 + ((vid_speed - 1.0) / 4.0)).min(1.8);
                     }
 
-                    let fov_limit = 1.0 / (zoom_limit * scaling_factor);
+                    let fov_limit = synchronization::residual_motion::zoom_reserve_factor(&params) / (zoom_limit * scaling_factor);
                     if *fov < fov_limit {
                         any_above_limit = true;
                         params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(*thresholds.get(iter).unwrap_or(thresholds.last().unwrap()));
@@ -570,7 +570,8 @@ impl StabilizationManager {
     }
 
     pub fn recompute_undistortion(&self) {
-        let params = stabilization::ComputeParams::from_manager(self);
+        let mut params = stabilization::ComputeParams::from_manager(self);
+        synchronization::residual_motion::prepare(&mut params);
         self.stabilization.write().set_compute_params(params);
     }
 
@@ -693,7 +694,7 @@ impl StabilizationManager {
                                 zoom_limit *= (1.0 + ((vid_speed - 1.0) / 4.0)).min(1.8);
                             }
 
-                            let fov_limit = 1.0 / (zoom_limit * scaling_factor);
+                            let fov_limit = synchronization::residual_motion::zoom_reserve_factor(&params) / (zoom_limit * scaling_factor);
                             if *fov < fov_limit {
                                 any_above_limit = true;
                                 params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(*thresholds.get(iter).unwrap_or(thresholds.last().unwrap()));
@@ -751,6 +752,8 @@ impl StabilizationManager {
 
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
+            synchronization::residual_motion::prepare(&mut params);
+            if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
             stabilization.write().set_compute_params(params);
 
             cb((compute_id, false));
@@ -1317,6 +1320,7 @@ impl StabilizationManager {
                 "focal_length_max_zoom_rate":      params.focal_length_max_zoom_rate,
                 "lens_metadata_delay_frames":      params.lens_metadata_delay_frames,
                 "lens_breathing_enabled":          params.lens_breathing_enabled,
+                "optical_stabilization":            params.optical_stabilization,
             },
             "gyro_source": {
                 "filepath":           gyro.file_url,
@@ -1358,7 +1362,9 @@ impl StabilizationManager {
         if let Some(serde_json::Value::Object(obj)) = obj.get_mut("gyro_source") {
             let file_metadata = gyro.file_metadata.read();
 
-            if typ == GyroflowProjectType::Simple {
+            // Optical analysis is not recoverable by rereading the video metadata.
+            // Keep it (and estimated motion) even in the default project format.
+            if typ == GyroflowProjectType::Simple && file_metadata.optical_motion.is_none() {
                 if let Ok(val) = serde_json::to_value(file_metadata.thin()) {
                     obj.insert("file_metadata".into(), val);
                 }
@@ -1513,8 +1519,11 @@ impl StabilizationManager {
 
                 let built_in_gyro: std::io::Result<crate::gyro_source::FileMetadata> = util::decompress_from_base91_cbor(obj.get("file_metadata").and_then(|x| x.as_str()).unwrap_or_default());
 
-                // Load IMU data only if it's from another file or we are sure that built_in_gyro contains motion data
-                if (!org_gyro_url.is_empty() && org_gyro_url != org_video_url) || built_in_gyro.as_ref().map(|x| x.has_motion()).unwrap_or_default() {
+                // Full embedded metadata can carry the calibration required for
+                // optical analysis even when the source has no inertial samples.
+                let embedded_analysis = built_in_gyro.as_ref().is_ok_and(|md| md.has_motion() || md.optical_motion.is_some() ||
+                    md.lens_geometry_count() > 0 || md.has_mesh_correction() || !md.camera_stab_data.is_empty());
+                if (!org_gyro_url.is_empty() && org_gyro_url != org_video_url) || embedded_analysis {
                     let mut raw_imu = Vec::new();
                     let mut quaternions = TimeQuat::default();
                     let mut image_orientations = None;
@@ -1730,6 +1739,7 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("focal_length_max_zoom_rate").and_then(|x| x.as_f64()) { params.focal_length_max_zoom_rate = v.clamp(0.01, 10.0); }
                 if let Some(v) = obj.get("lens_metadata_delay_frames").and_then(|x| x.as_i64()) { params.lens_metadata_delay_frames = v.clamp(-30, 30) as i32; }
                 if let Some(v) = obj.get("lens_breathing_enabled").and_then(|x| x.as_bool()) { params.lens_breathing_enabled = v; }
+                if let Some(v) = obj.get("optical_stabilization").and_then(|x| x.as_bool()) { params.optical_stabilization = v; }
 
                 obj.remove("adaptive_zoom_fovs");
             }

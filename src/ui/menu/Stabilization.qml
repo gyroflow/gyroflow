@@ -107,6 +107,9 @@ MenuItem {
             if (stab.hasOwnProperty("focal_length_smoothing_enabled")) {
                 flEnable.cb.checked = !!stab.focal_length_smoothing_enabled;
             }
+            if (stab.hasOwnProperty("optical_stabilization")) {
+                opticalEnable.cb.checked = !!stab.optical_stabilization;
+            }
             if (stab.hasOwnProperty("focal_length_max_zoom_rate")) {
                 flMaxZoomRate.value = +stab.focal_length_max_zoom_rate;
             }
@@ -691,6 +694,14 @@ MenuItem {
             scaler: 100.0;
             onValueChanged: Qt.callLater(() => { controller.lens_correction_amount = value; });
         }
+    }
+
+    CheckBoxWithContent {
+        id: opticalEnable;
+        text: qsTr("Residual optical stabilization (experimental)");
+        tooltip: qsTr("Run Autosync after enabling to analyze local motion throughout the video. Uses up to 8% additional zoom within the remaining zoom allowance, reducing correction when little room remains. No zooming mode adds no crop and may show moving borders.");
+        cb.checked: controller.optical_stabilization;
+        cb.onCheckedChanged: controller.optical_stabilization = cb.checked;
     }
 
     CheckBoxWithContent {

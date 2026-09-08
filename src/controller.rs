@@ -143,6 +143,7 @@ pub struct Controller {
     lens_metadata_delay_changed: qt_signal!(),
     has_lens_breathing: qt_property!(bool; READ has_lens_breathing NOTIFY gyro_changed),
     lens_breathing_enabled: qt_property!(bool; READ get_lens_breathing_enabled WRITE set_lens_breathing_enabled),
+    optical_stabilization: qt_property!(bool; READ get_optical_stabilization WRITE set_optical_stabilization),
 
     additional_rotation_x: qt_property!(f64; WRITE set_additional_rotation_x),
     additional_rotation_y: qt_property!(f64; WRITE set_additional_rotation_y),
@@ -412,7 +413,7 @@ impl Controller {
 
         let for_rs = mode == "estimate_rolling_shutter";
         let for_lens_delay = mode == "estimate_lens_delay";
-        if for_lens_delay {
+        if for_lens_delay || (mode == "synchronize" && self.stabilizer.params.read().optical_stabilization) {
             sync_params.every_nth_frame = 1; // consecutive frames are what the estimate tracks
         }
 
@@ -541,7 +542,6 @@ impl Controller {
 
             match VideoProcessor::from_file(&input_file.url, gpu_decoding, 0, Some(decoder_options)) {
                 Ok(mut proc) => {
-                    let err2 = err.clone();
                     let sync2 = sync.clone();
                     proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                         assert!(_output_frame.is_none());
@@ -558,7 +558,8 @@ impl Controller {
                                     sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
                                 },
                                 Err(e) => {
-                                    err2(("An error occured: %1".to_string(), e.to_string()))
+                                    sync2.mark_decode_failed();
+                                    return Err(e.into());
                                 }
                             }
                             frame_no += 1;
@@ -566,10 +567,14 @@ impl Controller {
                         abs_frame_no += 1;
                         Ok(())
                     });
-                    if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
+                    let decoded = proc.start_decoder_only(ranges, cancel_flag.clone());
+                    if decoded.is_err() { sync.mark_decode_failed(); }
+                    let complete = sync.finished_feeding_frames();
+                    if let Err(e) = decoded {
                         err(("An error occured: %1".to_string(), e.to_string()));
+                    } else if !complete && !cancel_flag.load(SeqCst) {
+                        err(("An error occured: %1".to_string(), "The complete video could not be analyzed. Previous analysis was preserved.".to_string()));
                     }
-                    sync.finished_feeding_frames();
                 }
                 Err(error) => {
                     err(("An error occured: %1".to_string(), error.to_string()));
@@ -2210,6 +2215,11 @@ impl Controller {
     }
     fn get_lens_breathing_enabled(&self) -> bool {
         self.stabilizer.params.read().lens_breathing_enabled
+    }
+    fn get_optical_stabilization(&self) -> bool { self.stabilizer.params.read().optical_stabilization }
+    fn set_optical_stabilization(&mut self, value: bool) {
+        self.stabilizer.params.write().optical_stabilization = value;
+        self.request_recompute();
     }
     fn set_lens_breathing_enabled(&mut self, v: bool) {
         self.stabilizer.params.write().lens_breathing_enabled = v;

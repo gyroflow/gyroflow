@@ -45,7 +45,7 @@ struct KernelParams {
     pixel_value_limit:        f32, // 16
     light_refraction_coefficient: f32, // 4
     plane_index:              i32, // 8
-    reserved1:                f32, // 12
+    optical_mesh_offset:      i32, // 12
     reserved2:                f32, // 16
     ewa_coeffs_p:             vec4<f32>, // 16
     ewa_coeffs_q:             vec4<f32>, // 16
@@ -480,6 +480,19 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
     return vec2<f32>(-99999.0, -99999.0);
 }
 
+fn optical_grid_at(cell: vec2<i32>) -> vec2<f32> {
+    let i = params.optical_mesh_offset + (cell.y * 9 + cell.x) * 2;
+    return vec2<f32>(mesh_data[i], mesh_data[i + 1]);
+}
+fn optical_correction(pos: vec2<f32>) -> vec2<f32> {
+    let size = vec2<f32>(f32(params.output_width), f32(params.output_height));
+    let p = clamp(pos / size, vec2<f32>(0.0), vec2<f32>(1.0)) * vec2<f32>(8.0, 6.0);
+    let cell = min(vec2<i32>(p), vec2<i32>(7, 5));
+    let f = p - vec2<f32>(cell);
+    return mix(mix(optical_grid_at(cell), optical_grid_at(cell + vec2<i32>(1, 0)), f.x),
+               mix(optical_grid_at(cell + vec2<i32>(0, 1)), optical_grid_at(cell + vec2<i32>(1, 1)), f.x), f.y) * size;
+}
+
 fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
     var out_pos = position;
     if (bool(flags & 64)) { // Uses output rect
@@ -489,6 +502,7 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
         );
     }
     out_pos += params.translation2d;
+    if (bool(flags & 4096) && params.optical_mesh_offset > 0) { out_pos += optical_correction(out_pos); }
 
     ///////////////////////////////////////////////////////////////////
     // Add lens distortion back
@@ -674,7 +688,9 @@ fn undistort_vertex(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(pos
 }
 @fragment
 fn undistort_fragment(@builtin(position) position: vec4<f32>) -> @location(0) vec4<SCALAR> {
-    return undistort(position.xy);
+    // Raster positions are pixel centers (0.5, 0.5); the remap and textureLoad
+    // use integer pixel indices, like the CPU/OpenCL/compute entry points.
+    return undistort(position.xy - vec2<f32>(0.5));
 }
 // {/texture_input}
 

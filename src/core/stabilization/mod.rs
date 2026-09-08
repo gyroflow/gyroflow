@@ -131,6 +131,7 @@ bitflags::bitflags! {
         const HAS_MESH_DATA        = 1 << 9; // 512
         const HAS_FPD_DATA         = 1 << 10; // 1024
         const ANY_UNDERWATER       = 1 << 11; // 2048
+        const HAS_OPTICAL_MOTION   = 1 << 12; // 4096
     }
 }
 
@@ -177,7 +178,7 @@ pub struct KernelParams {
     pub pixel_value_limit:        f32, // 16
     pub light_refraction_coefficient: f32, // 4
     pub plane_index:              i32, // 8
-    pub reserved1:                f32, // 12
+    pub optical_mesh_offset:      i32, // 12, separate section in mesh_data
     pub reserved2:                f32, // 16
     pub ewa_coeffs_p:             [f32; 4], // 16
     pub ewa_coeffs_q:             [f32; 4], // 16
@@ -237,6 +238,12 @@ pub struct ProcessedInfo {
 }
 
 impl Stabilization {
+    pub fn optical_grids(&self) -> std::sync::Arc<Vec<crate::synchronization::residual_motion::MotionGrid>> {
+        self.compute_params.optical_grids.clone()
+    }
+    pub fn optical_crop_margins(&self) -> std::sync::Arc<Vec<f32>> {
+        self.compute_params.optical_crop_margins.clone()
+    }
     pub fn set_compute_params(&mut self, params: ComputeParams) {
         self.stab_data.clear();
         self.compute_params = params;
@@ -266,6 +273,7 @@ impl Stabilization {
         kernel_flags.set(KernelParamsFlags::HAS_SOURCE_RECT, buffers.input.rect.is_some() || self.size.0 != buffers.input.size.0 || self.size.1 != buffers.input.size.1);
         kernel_flags.set(KernelParamsFlags::HAS_OUTPUT_RECT, buffers.output.rect.is_some() || self.output_size.0 != buffers.output.size.0 || self.output_size.1 != buffers.output.size.1);
         kernel_flags.set(KernelParamsFlags::FRAMEBUFFER_INVERTED, self.compute_params.framebuffer_inverted);
+        kernel_flags.set(KernelParamsFlags::HAS_OPTICAL_MOTION, self.compute_params.optical_grids.get(frame).is_some());
         kernel_flags.set(KernelParamsFlags::ANY_UNDERWATER, (self.compute_params.light_refraction_coefficient != 1.0 && self.compute_params.light_refraction_coefficient > 0.0) || self.compute_params.keyframes.is_keyframed(&crate::KeyframeType::LightRefractionCoeff));
 
         {

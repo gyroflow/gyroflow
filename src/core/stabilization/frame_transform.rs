@@ -54,6 +54,9 @@ impl FrameTransform {
         fov_scale += if params.fov_overview && use_fovs && !for_ui { 1.0 } else { 0.0 };
         let mut fov = if use_fovs { params.fovs.get(frame).unwrap_or(if params.fovs.len() > 1 { params.fovs.last().unwrap() } else { &1.0 }) * fov_scale } else { 1.0 }.max(0.001);
         fov *= params.width as f64 / params.output_width.max(1) as f64;
+        if use_fovs {
+            fov /= 1.0 + 2.0 * params.optical_crop_margins.get(frame).copied().unwrap_or(0.0) as f64;
+        }
         fov
     }
 
@@ -292,7 +295,8 @@ impl FrameTransform {
         let file_metadata = gyro.file_metadata.read();
 
         // Undistorting mesh of the frame, empty when it has none (the kernel flags say so, the buffer is then not uploaded)
-        let mesh_data = file_metadata.mesh_correction.kernel_buffer(frame);
+        let mut mesh_data = file_metadata.mesh_correction.kernel_buffer(frame);
+        let optical_mesh_offset = params.optical_grids.get(frame).map_or(0, |grid| grid.append_buffer(&mut mesh_data, params.framebuffer_inverted));
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(&params, true, timestamp_ms, &file_metadata);
@@ -318,7 +322,7 @@ impl FrameTransform {
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
         let quat1 = gyro.org_quat_at_timestamp(timestamp_ms).inverse();
-        let smoothed_quat1 = gyro.smoothed_quat_at_timestamp(timestamp_ms);
+        let smoothed_quat1 = gyro.smoothed_quat_with_discontinuities(timestamp_ms, &params.optical_cut_times);
 
         // Only compute 1 matrix if not using rolling shutter correction
         let rows = if frame_readout_time.abs() > 0.0 { if params.frame_readout_direction.is_horizontal() { params.width } else { params.height } } else { 1 };
@@ -427,6 +431,7 @@ impl FrameTransform {
             translation3d: [0.0, 0.0, 0.0, 0.0], // currently unused
             digital_lens_params,
             light_refraction_coefficient: light_refraction_coefficient as f32,
+            optical_mesh_offset,
             ..Default::default()
         };
 
@@ -475,7 +480,7 @@ impl FrameTransform {
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
         let quat1 = gyro.org_quat_at_timestamp(timestamp_ms).inverse();
-        let smoothed_quat1 = gyro.smoothed_quat_at_timestamp(timestamp_ms);
+        let smoothed_quat1 = gyro.smoothed_quat_with_discontinuities(timestamp_ms, &params.optical_cut_times);
 
         // Only compute 1 matrix if not using rolling shutter correction; it stands for the whole frame, so the
         // per-row data (sensor and lens shift, lens breathing) is looked up at the centre row, like `at_timestamp` does
@@ -556,6 +561,39 @@ mod tests {
     use crate::gyro_source::{ BreathingFrame, FileMetadata, LensParams };
     use crate::lens_profile::{ Dimensions, LensProfile };
     use crate::stabilization::{ Stabilization, undistort_points };
+
+    fn optical_crop_params() -> ComputeParams {
+        use crate::synchronization::residual_motion::{ OpticalMotionData, OpticalMotionPair };
+        let mut p = ComputeParams::default();
+        p.width = 1920; p.height = 1080; p.output_width = 1920; p.output_height = 1080;
+        p.scaled_fps = 30.0; p.frame_count = 2; p.fov_scale = 1.0;
+        p.adaptive_zoom_window = 4.0; p.max_zoom = Some(130.0);
+        p.optical_stabilization = true;
+        p.optical_motion = Some(std::sync::Arc::new(OpticalMotionData {
+            version: 1, complete: true, pairs: vec![OpticalMotionPair { from_us: 0, to_us: 33_333,
+                size: (320, 240), from: vec![(10.0, 10.0)], to: vec![(11.0, 10.0)] }],
+            ..Default::default()
+        }));
+        p
+    }
+
+    #[test]
+    fn optical_reserve_does_not_cross_an_exhausted_zoom_limit() {
+        let mut p = optical_crop_params();
+        p.fovs = vec![1.0 / 1.3; 2];
+        p.optical_crop_margins = std::sync::Arc::new(crate::synchronization::residual_motion::crop_margins(&p));
+        let applied = FrameTransform::get_fov(&p, 0, true, 0.0, false);
+        assert!(applied >= 1.0 / 1.3 - 1e-8, "The residual reserve increased zoom from 130% to {}%", 100.0 / applied);
+    }
+
+    #[test]
+    fn optical_reserve_respects_no_zooming_mode() {
+        let mut p = optical_crop_params();
+        p.adaptive_zoom_window = 0.0;
+        p.fovs = vec![1.0; 2];
+        p.optical_crop_margins = std::sync::Arc::new(crate::synchronization::residual_motion::crop_margins(&p));
+        assert_eq!(FrameTransform::get_fov(&p, 0, true, 0.0, false), 1.0);
+    }
 
     const W: usize = 1920;
     const H: usize = 1080;
