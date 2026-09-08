@@ -54,6 +54,11 @@ impl FrameTransform {
         fov_scale += if params.fov_overview && use_fovs && !for_ui { 1.0 } else { 0.0 };
         let mut fov = if use_fovs { params.fovs.get(frame).unwrap_or(if params.fovs.len() > 1 { params.fovs.last().unwrap() } else { &1.0 }) * fov_scale } else { 1.0 }.max(0.001);
         fov *= params.width as f64 / params.output_width.max(1) as f64;
+        if use_fovs && params.optical_stabilization && params.optical_motion.as_ref().is_some_and(|d| d.complete && d.version == 1 && !d.pairs.is_empty()) {
+            // Reserve a fixed border for the bounded residual displacement. Its
+            // size is independent of per-frame support, avoiding crop pumping.
+            fov /= 1.0 + 2.0 * crate::synchronization::residual_motion::MAX_DISPLACEMENT as f64;
+        }
         fov
     }
 
@@ -292,7 +297,8 @@ impl FrameTransform {
         let file_metadata = gyro.file_metadata.read();
 
         // Undistorting mesh of the frame, empty when it has none (the kernel flags say so, the buffer is then not uploaded)
-        let mesh_data = file_metadata.mesh_correction.kernel_buffer(frame);
+        let mut mesh_data = file_metadata.mesh_correction.kernel_buffer(frame);
+        let optical_mesh_offset = params.optical_grids.get(frame).map_or(0, |grid| grid.append_buffer(&mut mesh_data, params.framebuffer_inverted));
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(&params, true, timestamp_ms, &file_metadata);
@@ -427,6 +433,7 @@ impl FrameTransform {
             translation3d: [0.0, 0.0, 0.0, 0.0], // currently unused
             digital_lens_params,
             light_refraction_coefficient: light_refraction_coefficient as f32,
+            optical_mesh_offset,
             ..Default::default()
         };
 

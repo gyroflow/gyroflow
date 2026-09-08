@@ -503,6 +503,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
                     }
 
                     let mut compute_params = ComputeParams::from_manager(&stab);
+                    compute_params.optical_grids = stab.stabilization.read().optical_grids();
 
                     let is_limited_range = $out_frame.color_range() == ffmpeg_next::util::color::Range::MPEG;
                     compute_params.background = <$t as PixelType>::from_rgb_color(compute_params.background, &$yuvi, is_limited_range);

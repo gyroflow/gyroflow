@@ -89,10 +89,11 @@ impl AutosyncProcess {
             ((range.0 * 1000.0).round() as i64, (range.1 * 1000.0).round() as i64)
         }).collect();
 
-        if mode == "synchronize" && !stab.gyro.read().has_motion() {
+        if mode == "synchronize" && (!stab.gyro.read().has_motion() || stab.params.read().optical_stabilization) {
             // If no gyro data in file, analyze the entire video
             ranges_us.clear();
             ranges_us.push((0, (org_duration_ms * 1000.0).round() as i64));
+            frame_count = stab.params.read().frame_count / every_nth_frame.max(1);
         }
 
         let mut comp_params = ComputeParams::from_manager(stab);
@@ -127,6 +128,10 @@ impl AutosyncProcess {
         ).collect();
 
         let estimator = stab.pose_estimator.clone();
+        if mode == "synchronize" && stab.params.read().optical_stabilization {
+            // A new full analysis cannot reuse matches from another sampling mode.
+            estimator.clear();
+        }
 
         estimator.every_nth_frame.store(every_nth_frame.max(1) as u32, SeqCst);
         estimator.offset_method.store(sync_params.offset_method as u32, SeqCst);
@@ -202,13 +207,16 @@ impl AutosyncProcess {
             self.total_read_frames.fetch_add(1, SeqCst);
 
             self.thread_pool.spawn(move || {
-                if cancel_flag.load(Relaxed) {
-                    total_detected_frames.fetch_add(1, SeqCst);
-                    return;
+                struct Completed(Arc<AtomicUsize>);
+                impl Drop for Completed {
+                    fn drop(&mut self) { self.0.fetch_add(1, SeqCst); }
                 }
+                // Count completion after all pose work and callbacks, including
+                // rejected frames and unwinding. Finalization must not race them.
+                let _completed = Completed(total_detected_frames.clone());
+                if cancel_flag.load(Relaxed) { return; }
                 if let Some(img) = img {
                     estimator.detect_features(frame_no, timestamp_us, img, width, height, method);
-                    total_detected_frames.fetch_add(1, SeqCst);
 
                     if needs_poses && frame_no % 7 == 0 {
                         estimator.process_detected_frames(org_fps, scaled_fps, &compute_params.read());
@@ -216,7 +224,7 @@ impl AutosyncProcess {
                     }
 
                     if let Some(cb) = &progress_cb {
-                        let d = total_detected_frames.load(SeqCst);
+                        let d = total_detected_frames.load(SeqCst) + 1;
                         let t = total_read_frames.load(SeqCst).max(frame_count);
                         cb((d as f64 / t.max(1) as f64) * 0.58, d, t);
                     }
@@ -230,6 +238,11 @@ impl AutosyncProcess {
     pub fn finished_feeding_frames(&self) {
         while self.total_detected_frames.load(SeqCst) < self.total_read_frames.load(SeqCst) - 1 {
             std::thread::sleep(std::time::Duration::from_millis(100));
+        }
+        if self.cancel_flag.load(SeqCst) {
+            self.estimator.cleanup();
+            if let Some(cb) = &self.progress_cb { let n = self.total_detected_frames.load(SeqCst); cb(1.0, n, n); }
+            return;
         }
 
         let offset_method = self.sync_params.offset_method;
@@ -264,6 +277,28 @@ impl AutosyncProcess {
         self.estimator.cleanup();
 
         let mut scaled_ranges_us = Cow::Borrowed(&self.scaled_ranges_us);
+
+        if self.mode == "synchronize" && self.compute_params.read().optical_stabilization {
+            use super::residual_motion::{ OpticalMotionData, OpticalMotionPair };
+            let mut data = OpticalMotionData { version: 1,
+                complete: self.sync_params.every_nth_frame == 1 && self.total_read_frames.load(SeqCst) - 1 >= self.frame_count,
+                pairs: Vec::new() };
+            let results = self.estimator.sync_results.read();
+            let params = self.compute_params.read();
+            let metadata = params.gyro.read().file_metadata.clone();
+            let metadata = metadata.read();
+            for current in results.values() {
+                if let Some(Some(((from_us, from), (to_us, to)))) = current.optical_flow.borrow().get(&1) {
+                    let file_time = |ts: i64| {
+                        let frame = crate::frame_at_timestamp(ts as f64 / 1000.0, self.scaled_fps) as usize;
+                        ((ts as f64 - metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0) * 1000.0) * self.fps_scale.unwrap_or(1.0)).round() as i64
+                    };
+                    data.pairs.push(OpticalMotionPair { from_us: file_time(*from_us), to_us: file_time(*to_us), size: current.frame_size, from: from.clone(), to: to.clone() });
+                }
+            }
+            drop(metadata);
+            params.gyro.write().file_metadata.set_optical_motion(data);
+        }
 
         if self.mode == "synchronize" && !self.compute_params.read().gyro.read().has_motion() {
             // If no gyro data in file, set the computed optical flow as gyro data
@@ -349,5 +384,50 @@ impl AutosyncProcess {
     }
     pub fn on_finished<F>(&mut self, cb: F) where F:  Fn(AutosyncResult) + Send + Sync + 'static {
         self.finished_cb = Some(Arc::new(Box::new(cb)));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::synchronization::residual_motion::OpticalMotionData;
+
+    fn manager() -> StabilizationManager {
+        let manager = StabilizationManager::default();
+        {
+            let mut p = manager.params.write();
+            p.fps = 30.0; p.duration_ms = 66.667; p.frame_count = 2;
+            p.size = (32, 32); p.output_size = (32, 32); p.optical_stabilization = true;
+        }
+        manager
+    }
+    fn sync(manager: &StabilizationManager, cancelled: Arc<AtomicBool>) -> AutosyncProcess {
+        AutosyncProcess::from_manager(manager, &[0.5], SyncParams {
+            search_size: 5000.0, time_per_syncpoint: 1000.0, every_nth_frame: 1, max_sync_points: 1, of_method: 2,
+            ..Default::default()
+        }, "synchronize".into(), cancelled).unwrap()
+    }
+
+    #[test]
+    fn rejected_frames_complete_without_hanging_finalization() {
+        let manager = manager();
+        let process = sync(&manager, Arc::new(AtomicBool::new(false)));
+        process.feed_frame(0, 0, 32, 32, 32, &[]);
+        process.feed_frame(33_333, 1, 32, 32, 32, &[]);
+        process.finished_feeding_frames();
+        assert_eq!(process.total_detected_frames.load(SeqCst), 2);
+        assert!(manager.gyro.read().file_metadata.read().optical_motion.as_ref().unwrap().pairs.is_empty());
+    }
+
+    #[test]
+    fn cancelled_analysis_preserves_previous_project_motion() {
+        let manager = manager();
+        manager.gyro.write().file_metadata.set_optical_motion(OpticalMotionData { version: 42, complete: true, pairs: vec![] });
+        let cancelled = Arc::new(AtomicBool::new(false));
+        let process = sync(&manager, cancelled.clone());
+        process.feed_frame(0, 0, 32, 32, 32, &[]);
+        cancelled.store(true, SeqCst);
+        process.finished_feeding_frames();
+        assert_eq!(manager.gyro.read().file_metadata.read().optical_motion.as_ref().unwrap().version, 42);
     }
 }

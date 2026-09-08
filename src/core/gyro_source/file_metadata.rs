@@ -117,6 +117,7 @@ pub struct FileMetadata {
     #[serde(rename = "mesh_correction", skip_serializing)]
     pub legacy_mesh_correction: Vec<(Vec<f64>, Vec<f32>)>,
     pub lens_breathing:      Vec<BreathingFrame>,
+    pub optical_motion:     Option<crate::synchronization::residual_motion::OpticalMotionData>,
     /// Cache of `lens_focal_length_varies`, the renderer asks per frame
     #[serde(skip)]
     pub focal_length_varies_cache: std::sync::OnceLock<bool>,
@@ -145,6 +146,7 @@ impl FileMetadata {
             mesh_correction:         Default::default(),
             legacy_mesh_correction:  Default::default(),
             lens_breathing:          Default::default(),
+            optical_motion:         None,
             focal_length_varies_cache: Default::default(),
         }
     }
@@ -434,6 +436,9 @@ impl ReadOnlyFileMetadata {
     }
     pub fn set_raw_imu(&mut self, v: Vec<TimeIMU>) {
         self.0.write().raw_imu = v;
+    }
+    pub fn set_optical_motion(&mut self, data: crate::synchronization::residual_motion::OpticalMotionData) {
+        self.0.write().optical_motion = Some(data);
     }
 }
 impl serde::Serialize for ReadOnlyFileMetadata {

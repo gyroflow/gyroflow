@@ -455,6 +455,7 @@ impl GyroSource {
             mesh_correction:  Default::default(),
             legacy_mesh_correction: Vec::new(),
             lens_breathing:   Vec::new(),
+            optical_motion:  None,
             focal_length_varies_cache: Default::default(),
         };
 

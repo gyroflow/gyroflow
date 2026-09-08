@@ -570,7 +570,8 @@ impl StabilizationManager {
     }
 
     pub fn recompute_undistortion(&self) {
-        let params = stabilization::ComputeParams::from_manager(self);
+        let mut params = stabilization::ComputeParams::from_manager(self);
+        params.optical_grids = Arc::new(synchronization::residual_motion::derive(&params));
         self.stabilization.write().set_compute_params(params);
     }
 
@@ -751,6 +752,8 @@ impl StabilizationManager {
 
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
+            params.optical_grids = Arc::new(synchronization::residual_motion::derive(&params));
+            if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
             stabilization.write().set_compute_params(params);
 
             cb((compute_id, false));
@@ -1317,6 +1320,7 @@ impl StabilizationManager {
                 "focal_length_max_zoom_rate":      params.focal_length_max_zoom_rate,
                 "lens_metadata_delay_frames":      params.lens_metadata_delay_frames,
                 "lens_breathing_enabled":          params.lens_breathing_enabled,
+                "optical_stabilization":            params.optical_stabilization,
             },
             "gyro_source": {
                 "filepath":           gyro.file_url,
@@ -1358,7 +1362,9 @@ impl StabilizationManager {
         if let Some(serde_json::Value::Object(obj)) = obj.get_mut("gyro_source") {
             let file_metadata = gyro.file_metadata.read();
 
-            if typ == GyroflowProjectType::Simple {
+            // Optical analysis is not recoverable by rereading the video metadata.
+            // Keep it (and estimated motion) even in the default project format.
+            if typ == GyroflowProjectType::Simple && file_metadata.optical_motion.is_none() {
                 if let Ok(val) = serde_json::to_value(file_metadata.thin()) {
                     obj.insert("file_metadata".into(), val);
                 }
@@ -1730,6 +1736,7 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("focal_length_max_zoom_rate").and_then(|x| x.as_f64()) { params.focal_length_max_zoom_rate = v.clamp(0.01, 10.0); }
                 if let Some(v) = obj.get("lens_metadata_delay_frames").and_then(|x| x.as_i64()) { params.lens_metadata_delay_frames = v.clamp(-30, 30) as i32; }
                 if let Some(v) = obj.get("lens_breathing_enabled").and_then(|x| x.as_bool()) { params.lens_breathing_enabled = v; }
+                if let Some(v) = obj.get("optical_stabilization").and_then(|x| x.as_bool()) { params.optical_stabilization = v; }
 
                 obj.remove("adaptive_zoom_fovs");
             }

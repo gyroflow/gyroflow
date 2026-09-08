@@ -69,6 +69,10 @@ pub struct ComputeParams {
     pub lens_metadata_delay_frames: i32,          // every per-frame lens lookup is shifted by this many frames, see synchronization::lens_delay
 
     pub lens_breathing_enabled: bool,
+    pub optical_stabilization: bool,
+    pub optical_motion: Option<Arc<crate::synchronization::residual_motion::OpticalMotionData>>,
+    pub optical_grids: Arc<Vec<crate::synchronization::residual_motion::MotionGrid>>,
+    pub optical_time_scale: f64,
 }
 impl ComputeParams {
     /// Time (µs) the lens metadata of the picture at `timestamp_ms` is looked up at: the frame time shifted by
@@ -152,6 +156,10 @@ impl ComputeParams {
             lens_metadata_delay_frames: params.lens_metadata_delay_frames,
 
             lens_breathing_enabled: params.lens_breathing_enabled,
+            optical_stabilization: params.optical_stabilization,
+            optical_motion: mgr.gyro.read().file_metadata.read().optical_motion.clone().map(Arc::new),
+            optical_grids: Default::default(),
+            optical_time_scale: params.fps_scale.unwrap_or(1.0),
         }
     }
 

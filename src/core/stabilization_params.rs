@@ -132,6 +132,8 @@ pub struct StabilizationParams {
     pub lens_metadata_delay_frames: i32, // how many frames the lens metadata lags the picture
 
     pub lens_breathing_enabled: bool, // Sony lens breathing compensation, when the file carries the lens tables
+    #[serde(default)]
+    pub optical_stabilization: bool,
 }
 impl Default for StabilizationParams {
     fn default() -> Self {
@@ -203,6 +205,7 @@ impl Default for StabilizationParams {
             lens_metadata_delay_frames: 0,
 
             lens_breathing_enabled: true,
+            optical_stabilization: false,
         }
     }
 }
@@ -333,6 +336,7 @@ impl StabilizationParams {
             max_zoom_iterations:       self.max_zoom_iterations,
             focal_length_smoothing_enabled: self.focal_length_smoothing_enabled,
             focal_length_max_zoom_rate: self.focal_length_max_zoom_rate,
+            optical_stabilization: self.optical_stabilization,
             ..Self::default()
         };
     }

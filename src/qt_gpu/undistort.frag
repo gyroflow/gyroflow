@@ -50,7 +50,7 @@ layout(std140, binding = 2) uniform KernelParams {
     float pixel_value_limit;        // 16
     float light_refraction_coefficient; // 4
     int plane_index;                // 8
-    float reserved1;                // 12
+    int optical_mesh_offset;        // 12
     float reserved2;                // 16
     vec4 ewa_coefs_p;               // 16
     vec4 ewa_coefs_q;               // 16
@@ -61,6 +61,20 @@ LENS_MODEL_FUNCTIONS;
 layout(binding = 3) uniform sampler2D texParams;
 layout(binding = 4) uniform sampler2D texCanvas;
 layout(binding = 5) uniform sampler2D texMeshData;
+
+vec2 optical_grid_at(ivec2 cell) {
+    int i = params.optical_mesh_offset + (cell.y * 9 + cell.x) * 2;
+    return vec2(texture(texMeshData, vec2(0.5, (float(i) + 0.5) / 2048.0)).r,
+                texture(texMeshData, vec2(0.5, (float(i) + 1.5) / 2048.0)).r);
+}
+vec2 optical_correction(vec2 pos) {
+    vec2 size = vec2(params.output_width, params.output_height);
+    vec2 p = clamp(pos / size, vec2(0.0), vec2(1.0)) * vec2(8.0, 6.0);
+    ivec2 cell = min(ivec2(p), ivec2(7, 5));
+    vec2 f = p - vec2(cell);
+    return mix(mix(optical_grid_at(cell), optical_grid_at(cell + ivec2(1, 0)), f.x),
+               mix(optical_grid_at(cell + ivec2(0, 1)), optical_grid_at(cell + ivec2(1, 1)), f.x), f.y) * size;
+}
 
 const vec4 colors[9] = vec4[9](
     vec4(0.0,   0.0,   0.0,     0.0), // None
@@ -174,6 +188,7 @@ vec2 rotate_point(vec2 pos, float angle, vec2 origin, vec2 origin2) {
 }
 void main() {
     vec2 texPos = v_texcoord.xy * vec2(params.output_width, params.output_height) + params.translation2d;
+    if ((params.flags & 4096) != 0 && params.optical_mesh_offset > 0) { texPos += optical_correction(texPos); }
     vec2 outPos = v_texcoord.xy * vec2(params.output_width, params.output_height);
 
     if (bool(params.flags & 4)) { // Fill with background

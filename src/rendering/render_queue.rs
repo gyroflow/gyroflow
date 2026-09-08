@@ -1455,8 +1455,20 @@ impl RenderQueue {
         };
         let fps = stab.params.read().fps;
 
-        let sync_settings = stab.lens.read().sync_settings.clone().unwrap_or_default();
-        if !has_sync_points && !has_accurate_timestamps && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
+        let needs_optical = stab.params.read().optical_stabilization &&
+            !stab.gyro.read().file_metadata.read().optical_motion.as_ref().is_some_and(|d| d.version == 1 && d.complete);
+        let mut sync_settings = stab.lens.read().sync_settings.clone().unwrap_or_default();
+        if needs_optical {
+            if !sync_settings.is_object() { sync_settings = serde_json::json!({}); }
+            let settings = sync_settings.as_object_mut().unwrap();
+            for (key, value) in [("search_size", 5), ("time_per_syncpoint", 1), ("max_sync_points", 1), ("of_method", stab.params.read().of_method as i32), ("pose_method", 3)] {
+                settings.entry(key).or_insert_with(|| serde_json::json!(value));
+            }
+            // A full-frame analysis does not depend on existing gyro sync points.
+            settings.insert("every_nth_frame".into(), serde_json::json!(1));
+            if settings.get("max_sync_points").and_then(|v| v.as_u64()).unwrap_or(0) == 0 { settings.insert("max_sync_points".into(), serde_json::json!(1)); }
+        }
+        if needs_optical || (!has_sync_points && !has_accurate_timestamps && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default()) {
             // ----------------------------------------------------------------------------
             // --------------------------------- Autosync ---------------------------------
             processing_cb(0.01);
@@ -1489,6 +1501,7 @@ impl RenderQueue {
                     sync_params.time_per_syncpoint *= 1000.0; // s to ms
                     sync_params.search_size        *= 1000.0; // s to ms
 
+                    if stab.params.read().optical_stabilization { sync_params.every_nth_frame = 1; }
                     let every_nth_frame = sync_params.every_nth_frame.max(1);
 
                     let size = stab.params.read().size;
@@ -1525,7 +1538,9 @@ impl RenderQueue {
                             }
                         });
 
-                        let (sw, sh) = ((proc_height as f64 * (size.0 as f64 / size.1 as f64)).round() as u32, proc_height as u32);
+                        let (sw, sh) = if proc_height > 0 {
+                            ((proc_height as f64 * (size.0 as f64 / size.1 as f64)).round() as u32, proc_height as u32)
+                        } else { (size.0 as u32, size.1 as u32) };
 
                         let gpu_decoding = stab.gpu_decoding.load(SeqCst);
 

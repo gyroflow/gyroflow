@@ -47,7 +47,7 @@ typedef struct {
     float pixel_value_limit;         // 16
     float light_refraction_coefficient; // 4
     int plane_index;                 // 8
-    float reserved1;                 // 12
+    int optical_mesh_offset;         // 12
     float reserved2;                 // 16
     float4 ewa_coeffs_p;             // 16
     float4 ewa_coeffs_q;             // 16
@@ -499,9 +499,24 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
     return (float2)(-99999.0f, -99999.0f);
 }
 
+float2 optical_grid_at(int x, int y, int offset, __global const float *data) {
+    int i = offset + (y * 9 + x) * 2;
+    return (float2)(data[i], data[i + 1]);
+}
+float2 optical_correction(float2 pos, __global KernelParams *params, __global const float *data) {
+    float2 size = (float2)(params->output_width, params->output_height);
+    float2 p = clamp(pos / size, (float2)(0.0f), (float2)(1.0f)) * (float2)(8.0f, 6.0f);
+    int2 cell = min(convert_int2(p), (int2)(7, 5));
+    float2 f = p - convert_float2(cell);
+    int o = params->optical_mesh_offset;
+    return mix(mix(optical_grid_at(cell.x, cell.y, o, data), optical_grid_at(cell.x + 1, cell.y, o, data), f.x),
+               mix(optical_grid_at(cell.x, cell.y + 1, o, data), optical_grid_at(cell.x + 1, cell.y + 1, o, data), f.x), f.y) * size;
+}
+
 float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global const float *matrices, __global const float *mesh_data) {
     out_pos.x = map_coord(out_pos.x, (float)params->output_rect.x, (float)(params->output_rect.x + params->output_rect.z), 0.0f, (float)params->output_width ) + params->translation2d.x;
     out_pos.y = map_coord(out_pos.y, (float)params->output_rect.y, (float)(params->output_rect.y + params->output_rect.w), 0.0f, (float)params->output_height) + params->translation2d.y;
+    if ((params->flags & 4096) && params->optical_mesh_offset > 0) { out_pos += optical_correction(out_pos, params, mesh_data); }
 
     ///////////////////////////////////////////////////////////////////
     // Add lens distortion back
