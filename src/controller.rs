@@ -104,6 +104,23 @@ pub struct Controller {
     fetch_profiles_from_github: qt_method!(fn(&self)),
     lens_profiles_updated: qt_signal!(reload_from_disk: bool),
 
+    get_camera_brands: qt_method!(fn(&self) -> QVariantList),
+    get_camera_models: qt_method!(fn(&self, brand: QString) -> QVariantList),
+    get_lens_models: qt_method!(fn(&self, brand: QString) -> QVariantList),
+    get_compatible_lenses: qt_method!(fn(&self, brand: QString, model: QString) -> QVariantList),
+    get_compatible_cameras: qt_method!(fn(&self, brand: QString, model: QString) -> QVariantList),
+    is_zoom_lens: qt_method!(fn(&self, brand: QString, lens: QString) -> bool),
+    is_fixed_lens_camera: qt_method!(fn(&self, brand: QString, model: QString) -> bool),
+    search_by_camera: qt_method!(fn(&self, brand: QString, model: QString, lens: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
+
+    get_review_group: qt_method!(fn(&self, profile_key: QString) -> QVariantList),
+    hide_profile: qt_method!(fn(&mut self, checksum: QString)),
+    unhide_profile: qt_method!(fn(&mut self, checksum: QString)),
+    is_profile_hidden: qt_method!(fn(&self, checksum: QString) -> bool),
+    get_hidden_profiles: qt_method!(fn(&self) -> QVariantList),
+
+    validate_profile_for_upload: qt_method!(fn(&self, info: QJsonObject) -> QVariantList),
+
     set_sync_lpf: qt_method!(fn(&self, lpf: f64)),
     set_imu_lpf: qt_method!(fn(&self, lpf: f64)),
     set_imu_median_filter: qt_method!(fn(&self, size: i32)),
@@ -2056,6 +2073,156 @@ impl Controller {
                 update(());
             }
         });
+    }
+
+    // -------------------------------------------------------------------
+    // ---------------------- Camera selector APIs -----------------------
+    // -------------------------------------------------------------------
+
+    fn get_camera_brands(&self) -> QVariantList {
+        let db = self.stabilizer.lens_profile_db.read();
+        db.get_camera_brands()
+            .into_iter()
+            .map(|s| QString::from(s).into())
+            .collect()
+    }
+
+    fn get_camera_models(&self, brand: QString) -> QVariantList {
+        let db = self.stabilizer.lens_profile_db.read();
+        db.get_camera_models(&brand.to_string())
+            .into_iter()
+            .map(|s| QString::from(s).into())
+            .collect()
+    }
+
+    fn get_lens_models(&self, brand: QString) -> QVariantList {
+        let db = self.stabilizer.lens_profile_db.read();
+        db.get_lens_models(&brand.to_string())
+            .into_iter()
+            .map(|s| QString::from(s).into())
+            .collect()
+    }
+
+    fn get_compatible_lenses(&self, brand: QString, model: QString) -> QVariantList {
+        let db = self.stabilizer.lens_profile_db.read();
+        db.get_compatible_lenses(&brand.to_string(), &model.to_string())
+            .into_iter()
+            .map(|(b, l)| {
+                let mut list = QVariantList::new();
+                list.push(QString::from(b).into());
+                list.push(QString::from(l).into());
+                list.into()
+            })
+            .collect()
+    }
+
+    fn get_compatible_cameras(&self, brand: QString, model: QString) -> QVariantList {
+        let db = self.stabilizer.lens_profile_db.read();
+        db.get_compatible_cameras(&brand.to_string(), &model.to_string())
+            .into_iter()
+            .map(|(b, m, crop)| {
+                let mut list = QVariantList::new();
+                list.push(QString::from(b).into());
+                list.push(QString::from(m).into());
+                list.push(crop.into());
+                list.into()
+            })
+            .collect()
+    }
+
+    fn is_zoom_lens(&self, brand: QString, lens: QString) -> bool {
+        let db = self.stabilizer.lens_profile_db.read();
+        db.is_zoom_lens(&brand.to_string(), &lens.to_string())
+    }
+
+    fn is_fixed_lens_camera(&self, brand: QString, model: QString) -> bool {
+        let db = self.stabilizer.lens_profile_db.read();
+        db.is_fixed_lens_camera(&brand.to_string(), &model.to_string())
+    }
+
+    fn search_by_camera(&self, brand: QString, model: QString, lens: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32) {
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, profiles: QVariantList| {
+            this.search_lens_profile_finished(profiles);
+        });
+        let db = self.stabilizer.lens_profile_db.clone();
+        let brand = brand.to_string();
+        let model = model.to_string();
+        let lens = lens.to_string();
+        let favorites = HashSet::<String>::from_iter(favorites.into_iter().map(|x| x.to_qbytearray().to_string()));
+        core::run_threaded(move || {
+            let profiles = db.read().search_by_camera(&brand, &model, &lens, &favorites, aspect_ratio, aspect_ratio_swapped)
+                .into_iter()
+                .map(|(name, file, crc, official, rating, aspect_ratio, _author)| {
+                    let mut list = QVariantList::from_iter([
+                        QString::from(name),
+                        QString::from(file),
+                        QString::from(crc)
+                    ].into_iter());
+                    list.push(official.into());
+                    list.push(rating.into());
+                    list.push(aspect_ratio.into());
+                    list
+                })
+                .collect();
+            finished(profiles);
+        });
+    }
+
+    // -------------------------------------------------------------------
+    // ---------------------- Profile review APIs ------------------------
+    // -------------------------------------------------------------------
+
+    fn get_review_group(&self, profile_key: QString) -> QVariantList {
+        let db = self.stabilizer.lens_profile_db.read();
+        db.get_review_group(&profile_key.to_string())
+            .into_iter()
+            .map(|s| QString::from(s).into())
+            .collect()
+    }
+
+    fn hide_profile(&mut self, checksum: QString) {
+        self.stabilizer.lens_profile_db.write().hide_profile(&checksum.to_string());
+    }
+
+    fn unhide_profile(&mut self, checksum: QString) {
+        self.stabilizer.lens_profile_db.write().unhide_profile(&checksum.to_string());
+    }
+
+    fn is_profile_hidden(&self, checksum: QString) -> bool {
+        self.stabilizer.lens_profile_db.read().is_profile_hidden(&checksum.to_string())
+    }
+
+    fn get_hidden_profiles(&self) -> QVariantList {
+        self.stabilizer.lens_profile_db.read().get_hidden_profiles()
+            .into_iter()
+            .map(|s| QString::from(s).into())
+            .collect()
+    }
+
+    // -------------------------------------------------------------------
+    // ---------------------- Calibrator validation ----------------------
+    // -------------------------------------------------------------------
+
+    fn validate_profile_for_upload(&self, info: QJsonObject) -> QVariantList {
+        let mut profile = core::lens_profile::LensProfile::default();
+        
+        if let Some(v) = info.value("camera_brand").as_str() { profile.camera_brand = v.to_string(); }
+        if let Some(v) = info.value("camera_model").as_str() { profile.camera_model = v.to_string(); }
+        if let Some(v) = info.value("lens_model").as_str() { profile.lens_model = v.to_string(); }
+        if let Some(v) = info.value("focal_length").as_f64() { profile.focal_length = Some(v); }
+        if let Some(v) = info.value("fps").as_f64() { profile.fps = v; }
+        if let Some(dim) = info.value("calib_dimension").as_object() {
+            if let (Some(w), Some(h)) = (dim.value("w").as_u64(), dim.value("h").as_u64()) {
+                profile.calib_dimension.w = w as usize;
+                profile.calib_dimension.h = h as usize;
+            }
+        }
+
+        let db = self.stabilizer.lens_profile_db.read();
+        match db.validate_profile_for_upload(&profile) {
+            Ok(_) => QVariantList::new(),
+            Err(errors) => errors.into_iter().map(|e| QString::from(e).into()).collect()
+        }
     }
 
     fn list_gpu_devices(&self) {
