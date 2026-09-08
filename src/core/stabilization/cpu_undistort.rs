@@ -443,11 +443,19 @@ impl Stabilization {
             )
         }
 
-        fn undistort_coord(mut out_pos: Vector2<f32>, params: &KernelParams, matrices: &[[f32; 14]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit_sq: f32, mesh_data: &[f64], out_c: &Vector2<f32>, out_f: &Vector2<f32>) -> Option<Vector2<f32>> {
+        fn undistort_coord(mut out_pos: Vector2<f32>, params: &KernelParams, matrices: &[[f32; 14]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, r_limit_sq: f32, mesh_data: &[f64], optical: Option<&super::optical::Grid>, out_c: &Vector2<f32>, out_f: &Vector2<f32>) -> Option<Vector2<f32>> {
             out_pos.x = map_coord(out_pos.x, params.output_rect[0] as f32, (params.output_rect[0] + params.output_rect[2]) as f32, 0.0, params.output_width  as f32);
             out_pos.y = map_coord(out_pos.y, params.output_rect[1] as f32, (params.output_rect[1] + params.output_rect[3]) as f32, 0.0, params.output_height as f32);
             out_pos.x += params.translation2d[0];
             out_pos.y += params.translation2d[1];
+            if let Some(grid) = optical {
+                let scale = Vector2::new(params.width as f32, params.height as f32) / params.fov;
+                let mut p = [(out_pos.x - out_c.x) / scale.x + 0.5, (out_pos.y - out_c.y) / scale.y + 0.5];
+                if params.flags & 128 != 0 { p[1] = 1.0 - p[1]; }
+                let mut q = grid.inverse(p);
+                if params.flags & 128 != 0 { q[1] = 1.0 - q[1]; }
+                out_pos = Vector2::new((q[0] - 0.5) * scale.x + out_c.x, (q[1] - 0.5) * scale.y + out_c.y);
+            }
 
             ///////////////////////////////////////////////////////////////////
             // Add lens distortion back
@@ -560,7 +568,14 @@ impl Stabilization {
                     return false;
                 }
 
-                let mesh_data = mesh_data.iter().map(|x| *x as f64).collect::<Vec<f64>>();
+                let optical = params.optical_buffer_offset.checked_sub(1).filter(|&o| o >= 0)
+                    .and_then(|o| mesh_data.get(o as usize..o as usize + super::optical::BUFFER_LEN))
+                    .map(|data| super::optical::Grid(std::array::from_fn(|i| [data[2 * i], data[2 * i + 1]])));
+                // The legacy CPU lens kernels identify their tables by header
+                // contents. Never let them interpret residual displacement as
+                // a lens or focal-plane correction table.
+                let lens_end = if params.optical_buffer_offset > 0 { (params.optical_buffer_offset - 1) as usize } else { mesh_data.len() };
+                let mesh_data = mesh_data[..lens_end.min(mesh_data.len())].iter().map(|x| *x as f64).collect::<Vec<f64>>();
 
                 assert_eq!(params.bytes_per_pixel as usize, std::mem::size_of::<T>());
 
@@ -586,12 +601,12 @@ impl Stabilization {
 
                             let position = Vector2::new(x as f32, y as f32);
 
-                            if let Some(mut uv) = undistort_coord(position, params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f) {
+                            if let Some(mut uv) = undistort_coord(position, params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, optical.as_ref(), &out_c, &out_f) {
                                 let mut jac = Vector4::new(1.0, 0.0, 0.0, 1.0);
                                 if I > 8 {
                                     let eps = 0.01;
-                                    let nx = undistort_coord(position + Vector2::new(eps, 0.0), params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f);
-                                    let ny = undistort_coord(position + Vector2::new(0.0, eps), params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, &out_c, &out_f);
+                                    let nx = undistort_coord(position + Vector2::new(eps, 0.0), params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, optical.as_ref(), &out_c, &out_f);
+                                    let ny = undistort_coord(position + Vector2::new(0.0, eps), params, matrices, distortion_model, digital_lens, r_limit_sq, &mesh_data, optical.as_ref(), &out_c, &out_f);
                                     if let (Some(nx), Some(ny)) = (nx, ny) {
                                         let xyx = nx - uv;
                                         let xyy = ny - uv;
@@ -665,7 +680,18 @@ pub fn undistort_points_with_rolling_shutter(distorted: &[(f32, f32)], timestamp
     if distorted.is_empty() { return Vec::new(); }
     let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh, fov, r_limit) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms, frame, use_fovs);
 
-    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), params, lens_correction_amount, fov, timestamp_ms, is, mesh, if clamp_to_image_circle { r_limit } else { 0.0 })
+    let mut points = undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(Matrix3::identity()), Some(rotations), params, lens_correction_amount, fov, timestamp_ms, is, mesh, if clamp_to_image_circle { r_limit } else { 0.0 });
+    if let Some(grid) = super::optical::grid_at(params, timestamp_ms) {
+        for point in &mut points {
+            if !is_valid_point(*point) { continue; }
+            let p = [(point.0 - params.output_width as f32 / 2.0) * fov as f32 / params.width as f32 + 0.5,
+                     (point.1 - params.output_height as f32 / 2.0) * fov as f32 / params.height as f32 + 0.5];
+            let d = grid.sample(p);
+            point.0 += d[0] * params.width as f32 / fov as f32;
+            point.1 += d[1] * params.height as f32 / fov as f32;
+        }
+    }
+    points
 }
 pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us: i64, params: &ComputeParams, points_dims: (u32, u32)) -> Vec<(f32, f32)> {
     let img_dim_ratio = points_dims.0 as f64 / params.width.max(1) as f64;//FrameTransform::get_ratio(params);

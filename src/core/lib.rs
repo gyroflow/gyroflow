@@ -1316,6 +1316,7 @@ impl StabilizationManager {
                 "focal_length_smoothing_enabled":  params.focal_length_smoothing_enabled,
                 "focal_length_max_zoom_rate":      params.focal_length_max_zoom_rate,
                 "lens_metadata_delay_frames":      params.lens_metadata_delay_frames,
+                "optical_stabilization_strength": params.optical_stabilization_strength,
                 "lens_breathing_enabled":          params.lens_breathing_enabled,
             },
             "gyro_source": {
@@ -1340,6 +1341,11 @@ impl StabilizationManager {
             "trim_ranges_ms": trim_ranges_ms,
         });
 
+        if !params.optical_motion.frames.is_empty() {
+            if let Some(data) = util::compress_to_base91_cbor(&*params.optical_motion) {
+                obj["optical_motion"] = serde_json::Value::String(data);
+            }
+        }
         util::merge_json(&mut obj, &serde_json::from_str(additional_data).unwrap_or_default());
 
         #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -1467,6 +1473,14 @@ impl StabilizationManager {
                 *videofile = serde_json::Value::String(video_url.clone());
             }
             *is_preset = org_video_url.is_empty();
+            if !*is_preset {
+                let motion = obj.get("optical_motion").and_then(|v| v.as_str())
+                    .and_then(|v| util::decompress_from_base91_cbor::<stabilization::optical::MotionData>(v).ok())
+                    .filter(|v| v.is_valid()).unwrap_or_default();
+                let mut params = self.params.write();
+                params.optical_motion = Arc::new(motion);
+                params.optical_stabilization_strength = 0.0;
+            }
 
             if let Some(vid_info) = obj.get("video_info") {
                 let mut params = self.params.write();
@@ -1729,6 +1743,7 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("focal_length_smoothing_enabled") .and_then(|x| x.as_bool()) { params.focal_length_smoothing_enabled  = v; }
                 if let Some(v) = obj.get("focal_length_max_zoom_rate").and_then(|x| x.as_f64()) { params.focal_length_max_zoom_rate = v.clamp(0.01, 10.0); }
                 if let Some(v) = obj.get("lens_metadata_delay_frames").and_then(|x| x.as_i64()) { params.lens_metadata_delay_frames = v.clamp(-30, 30) as i32; }
+                if let Some(v) = obj.get("optical_stabilization_strength").and_then(|x| x.as_f64()).filter(|v| v.is_finite()) { params.optical_stabilization_strength = v.clamp(0.0, 1.0); }
                 if let Some(v) = obj.get("lens_breathing_enabled").and_then(|x| x.as_bool()) { params.lens_breathing_enabled = v; }
 
                 obj.remove("adaptive_zoom_fovs");

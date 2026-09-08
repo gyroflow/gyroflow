@@ -1,146 +1,227 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright Â© 2021-2022 Adrian <adrian.eddy at gmail>
 
-#![allow(unused_variables, dead_code)]
-use super::super::OpticalFlowPair;
-use super::{ OpticalFlowTrait, OpticalFlowMethod };
-
-use std::collections::BTreeMap;
-use std::sync::atomic::AtomicU32;
-use std::sync::Arc;
-use parking_lot::RwLock;
+#![cfg_attr(not(feature = "use-opencv"), allow(dead_code, unused_imports))]
+use super::{OpticalFlowContext, OpticalFlowMethod, OpticalFlowPair, OpticalFlowTrait};
 #[cfg(feature = "use-opencv")]
-use opencv::{ core::{ Mat, Size, CV_8UC1, Vec2f }, prelude::{ MatTraitConst, DenseOpticalFlowTrait } };
+use opencv::{
+    core::{CV_8UC1, Mat, Size, Vec2f},
+    prelude::{DenseOpticalFlowTrait, MatTraitConst},
+};
+use parking_lot::Mutex;
+use std::{
+    collections::BTreeMap,
+    sync::{
+        Arc,
+        atomic::{AtomicU32, Ordering},
+    },
+};
 
 #[derive(Clone)]
 pub struct OFOpenCVDis {
     features: Vec<(f32, f32)>,
     img: Arc<image::GrayImage>,
-    matched_points: Arc<RwLock<BTreeMap<i64, (Vec<(f32, f32)>, Vec<(f32, f32)>)>>>,
+    matches: Arc<Mutex<BTreeMap<i64, OpticalFlowPair>>>,
     timestamp_us: i64,
-    size: (i32, i32),
+    size: (u32, u32),
     used: Arc<AtomicU32>,
+    context: Arc<OpticalFlowContext>,
 }
 
 impl OFOpenCVDis {
-    pub fn detect_features(timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32) -> Self {
+    pub fn detect_features(
+        timestamp_us: i64,
+        img: Arc<image::GrayImage>,
+        width: u32,
+        height: u32,
+    ) -> Self {
+        Self::with_context(timestamp_us, img, width, height, Arc::default())
+    }
+
+    pub fn with_context(
+        timestamp_us: i64,
+        img: Arc<image::GrayImage>,
+        width: u32,
+        height: u32,
+        context: Arc<OpticalFlowContext>,
+    ) -> Self {
         Self {
             features: Vec::new(),
             timestamp_us,
-            size: (width as i32, height as i32),
-            matched_points: Default::default(),
+            size: (width, height),
+            matches: Default::default(),
             img,
-            used: Default::default()
+            used: Default::default(),
+            context,
         }
+    }
+
+    #[cfg(feature = "use-opencv")]
+    fn track(&self, next: &Self) -> opencv::Result<OpticalFlowPair> {
+        let (w, h) = (self.size.0 as i32, self.size.1 as i32);
+        // The Mat borrows immutable image storage for calc's read-only inputs.
+        // Its row step includes padding, while its dimensions exclude padding.
+        let view = |image: &image::GrayImage| unsafe {
+            Mat::new_size_with_data_unsafe(
+                Size::new(w, h),
+                CV_8UC1,
+                image.as_raw().as_ptr() as *mut std::ffi::c_void,
+                image.width() as usize,
+            )
+        };
+        let a = view(&self.img)?;
+        let b = view(&next.img)?;
+        // DIS requires contiguous input. Copy only when decoder row padding
+        // makes the active image view non-contiguous.
+        let a = if a.is_continuous() { a } else { a.try_clone()? };
+        let b = if b.is_continuous() { b } else { b.try_clone()? };
+        let mut algorithm =
+            opencv::video::DISOpticalFlow::create(opencv::video::DISOpticalFlow_PRESET_FAST)?;
+        let mut forward = Mat::default();
+        let mut reverse = Mat::default();
+        algorithm.calc(&a, &b, &mut forward)?;
+        if self.context.is_cancelled() {
+            return Ok(None);
+        }
+        algorithm.calc(&b, &a, &mut reverse)?;
+        let mut source = Vec::new();
+        let mut target = Vec::new();
+        let step = (w as usize / 24).max(1);
+        for y in (0..h).step_by(step) {
+            for x in (0..w).step_by(step) {
+                let flow = forward.at_2d::<Vec2f>(y, x)?;
+                source.push((x as f32, y as f32));
+                target.push((x as f32 + flow[0], y as f32 + flow[1]));
+            }
+        }
+        let backward = |p: (f32, f32)| -> Option<(f32, f32)> {
+            if !p.0.is_finite()
+                || !p.1.is_finite()
+                || p.0 < 0.0
+                || p.1 < 0.0
+                || p.0 + 1.0 >= w as f32
+                || p.1 + 1.0 >= h as f32
+            {
+                return None;
+            }
+            let (x, y) = (p.0 as i32, p.1 as i32);
+            let (ax, ay) = (p.0 - x as f32, p.1 - y as f32);
+            let a = reverse.at_2d::<Vec2f>(y, x).ok()?;
+            let b = reverse.at_2d::<Vec2f>(y, x + 1).ok()?;
+            let c = reverse.at_2d::<Vec2f>(y + 1, x).ok()?;
+            let d = reverse.at_2d::<Vec2f>(y + 1, x + 1).ok()?;
+            let sample = |i: usize| {
+                (a[i] * (1.0 - ax) + b[i] * ax) * (1.0 - ay) + (c[i] * (1.0 - ax) + d[i] * ax) * ay
+            };
+            Some((p.0 + sample(0), p.1 + sample(1)))
+        };
+        Ok(super::quality::filter_matches(
+            &self.img,
+            &next.img,
+            self.size,
+            Some((source, target)),
+            backward,
+        ))
     }
 }
 
 impl OpticalFlowTrait for OFOpenCVDis {
     fn size(&self) -> (u32, u32) {
-        (self.size.0 as u32, self.size.1 as u32)
+        self.size
     }
-    fn features(&self) -> &Vec<(f32, f32)> { &self.features }
+    fn features(&self) -> &Vec<(f32, f32)> {
+        &self.features
+    }
 
-    fn optical_flow_to(&self, _to: &OpticalFlowMethod) -> OpticalFlowPair {
-        #[cfg(feature = "use-opencv")]
-        if let OpticalFlowMethod::OFOpenCVDis(next) = _to {
-            let (w, h) = self.size;
-            if let Some(matched) = self.matched_points.read().get(&next.timestamp_us) {
-                return Some(matched.clone());
-            }
-            if self.img.is_empty() || next.img.is_empty() || w <= 0 || h <= 0 { return None; }
-
-
-            let result = || -> Result<(Vec<(f32, f32)>, Vec<(f32, f32)>), opencv::Error> {
-                let a1_img = unsafe { Mat::new_size_with_data_unsafe(Size::new(self.img.width() as i32, self.img.height() as i32), CV_8UC1, self.img.as_raw().as_ptr() as *mut std::ffi::c_void, 0) }?;
-                let a2_img = unsafe { Mat::new_size_with_data_unsafe(Size::new(next.img.width() as i32, next.img.height() as i32), CV_8UC1, next.img.as_raw().as_ptr() as *mut std::ffi::c_void, 0) }?;
-
-                let mut of = Mat::default();
-                let mut optflow = opencv::video::DISOpticalFlow::create(opencv::video::DISOpticalFlow_PRESET_FAST)?;
-                optflow.calc(&a1_img, &a2_img, &mut of)?;
-
-                let mut points_a = Vec::new();
-                let mut points_b = Vec::new();
-                let step = w as usize / 15; // 15 points
-                
-                // Calculate window size as 2% of image width, minimum 10
-                let window_size = (w as f32 * 0.02).round() as usize;
-                let window_size = window_size.max(10);
-                let texture_threshold = 3.0; // Threshold for texture clarity
-                
-                // Pre-calculate half window size for efficiency
-                let half_win = window_size / 2;
-                
-                // Function to calculate variance of grayscale values in a window (more accurate than gradient)
-                let calculate_texture = |img: &image::GrayImage, x: usize, y: usize| -> f32 {
-                    let mut sum = 0.0;
-                    let mut sum_sq = 0.0;
-                    let mut count = 0.0;
-                    
-                    // Cache image dimensions as isize for faster comparisons
-                    let img_width = img.width() as isize;
-                    let img_height = img.height() as isize;
-                    let x_isize = x as isize;
-                    let y_isize = y as isize;
-                    
-                    // Calculate valid pixel boundaries once
-                    let start_y = (y_isize - half_win as isize).max(0);
-                    let end_y = (y_isize + half_win as isize).min(img_height - 1);
-                    let start_x = (x_isize - half_win as isize).max(0);
-                    let end_x = (x_isize + half_win as isize).min(img_width - 1);
-                    
-                    // Iterate only over valid pixels, avoiding repeated boundary checks
-                    for ny in start_y..=end_y {
-                        for nx in start_x..=end_x {
-                            let pixel = img.get_pixel(nx as u32, ny as u32).0[0] as f32;
-                            sum += pixel;
-                            sum_sq += pixel * pixel;
-                            count += 1.0;
-                        }
-                    }
-                    
-                    if count == 0.0 { return 0.0; }
-                    
-                    let mean = sum / count;
-                    let variance = (sum_sq / count) - (mean * mean);
-                    variance
-                };
-                
-                for i in (0..a1_img.cols()).step_by(step) {
-                    for j in (0..a1_img.rows()).step_by(step) {
-                        // Check texture clarity using accurate variance method
-                        let texture = calculate_texture(&self.img, i as usize, j as usize);
-                        if texture > texture_threshold {
-                            let pt = of.at_2d::<Vec2f>(j, i)?;
-                            points_a.push((i as f32, j as f32));
-                            points_b.push((i as f32 + pt[0] as f32, j as f32 + pt[1] as f32));
-                        }
-                    }
-                }
-                Ok((points_a, points_b))
-            }();
-
-            match result {
-                Ok(res) => {
-                    // Only store and return if we have enough valid points (>15)
-                    if res.0.len() >= 10 && res.1.len() >= 10 {
-                        self.used.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                        next.used.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                        self.matched_points.write().insert(next.timestamp_us, res.clone());
-                        return Some(res);
-                    }
-                },
-                Err(e) => {
-                    log::error!("OpenCV error: {:?}", e);
-                }
-            }
+    fn optical_flow_to(&self, to: &OpticalFlowMethod) -> OpticalFlowPair {
+        if self.context.is_cancelled() {
+            return None;
         }
-        None
+        let OpticalFlowMethod::OFOpenCVDis(next) = to else {
+            return None;
+        };
+        // Pose estimation and the chart may request the same pair concurrently.
+        let mut cache = self.matches.lock();
+        if let Some(matched) = cache.get(&next.timestamp_us) {
+            return matched.clone();
+        }
+        let valid = |image: &image::GrayImage| {
+            self.size.0 >= 12
+                && self.size.1 >= 12
+                && self.size.0 <= image.width()
+                && self.size.1 <= image.height()
+        };
+        if self.size != next.size || !valid(&self.img) || !valid(&next.img) {
+            return None;
+        }
+        #[cfg(feature = "use-opencv")]
+        let result = match self.track(next) {
+            Ok(result) => result,
+            Err(error) => {
+                self.context.fail(format!("OpenCV DIS: {error}"));
+                None
+            }
+        };
+        #[cfg(not(feature = "use-opencv"))]
+        let result = None;
+        cache.insert(next.timestamp_us, result.clone());
+        self.used.fetch_add(1, Ordering::Relaxed);
+        next.used.fetch_add(1, Ordering::Relaxed);
+        result
     }
+
     fn can_cleanup(&self) -> bool {
-        self.used.load(std::sync::atomic::Ordering::SeqCst) == 2
+        self.context.may_release_images() && self.used.load(Ordering::Relaxed) >= 2
     }
     fn cleanup(&mut self) {
         self.img = Arc::new(image::GrayImage::default());
+    }
+}
+
+#[cfg(all(test, feature = "use-opencv"))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn padded_decoder_rows_do_not_enter_dis_or_photometric_checks() {
+        let active = (130, 74);
+        let a = image::GrayImage::from_fn(144, active.1, |x, y| {
+            image::Luma([if x < active.0 {
+                ((x * 17 + y * 11 + x * y) % 160 + 40) as u8
+            } else {
+                0
+            }])
+        });
+        let b = image::GrayImage::from_fn(144, active.1, |x, y| {
+            image::Luma([if (4..active.0).contains(&x) {
+                a.get_pixel(x - 4, y).0[0]
+            } else {
+                255
+            }])
+        });
+        let first = OFOpenCVDis::detect_features(0, Arc::new(a), active.0, active.1);
+        let next = OpticalFlowMethod::OFOpenCVDis(OFOpenCVDis::detect_features(
+            33_333,
+            Arc::new(b),
+            active.0,
+            active.1,
+        ));
+        let (a, b) = first
+            .optical_flow_to(&next)
+            .expect("Padded frames should be trackable");
+        assert!(a.len() >= 30);
+        let mut errors: Vec<_> = a
+            .iter()
+            .zip(&b)
+            .map(|(a, b)| ((b.0 - a.0) - 4.0).hypot(b.1 - a.1))
+            .collect();
+        errors.sort_by(f32::total_cmp);
+        assert!(errors[errors.len() / 2] < 0.5);
+        assert!(
+            a.iter()
+                .chain(&b)
+                .all(|&(x, y)| x < active.0 as f32 && y < active.1 as f32)
+        );
+        assert_eq!(first.optical_flow_to(&next).unwrap().0, a);
     }
 }

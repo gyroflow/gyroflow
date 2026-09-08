@@ -42,6 +42,7 @@ pub struct ComputeParams {
     pub frame_readout_direction: ReadoutDirection,
     pub trim_ranges: Vec<(f64, f64)>,
     pub scaled_fps: f64,
+    pub fps_scale: f64,
     pub scaled_duration_ms: f64,
     pub adaptive_zoom_window: f64,
     pub adaptive_zoom_center_offset: (f64, f64),
@@ -67,6 +68,10 @@ pub struct ComputeParams {
     pub focal_length_smoothing_enabled: bool,
     pub focal_length_max_zoom_rate: f64,          // d ln(f) / dt in 1/s, 0.5 is roughly 50% of magnification per second
     pub lens_metadata_delay_frames: i32,          // every per-frame lens lookup is shifted by this many frames, see synchronization::lens_delay
+
+    pub optical_motion: Arc<super::optical::MotionData>,
+    pub optical_corrections: Arc<std::collections::BTreeMap<i64, super::optical::Grid>>,
+    pub optical_stabilization_strength: f64,
 
     pub lens_breathing_enabled: bool,
 }
@@ -124,6 +129,7 @@ impl ComputeParams {
             frame_readout_direction: params.frame_readout_direction,
             trim_ranges: params.trim_ranges.clone(),
             scaled_fps: params.get_scaled_fps(),
+            fps_scale: params.fps_scale.unwrap_or(1.0),
             scaled_duration_ms: params.get_scaled_duration_ms(),
             adaptive_zoom_window: params.adaptive_zoom_window,
             adaptive_zoom_center_offset: params.adaptive_zoom_center_offset,
@@ -151,6 +157,9 @@ impl ComputeParams {
             focal_length_max_zoom_rate: params.focal_length_max_zoom_rate,
             lens_metadata_delay_frames: params.lens_metadata_delay_frames,
 
+            optical_motion: params.optical_motion.clone(),
+            optical_corrections: Arc::default(),
+            optical_stabilization_strength: params.optical_stabilization_strength,
             lens_breathing_enabled: params.lens_breathing_enabled,
         }
     }

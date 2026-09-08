@@ -50,7 +50,7 @@ layout(std140, binding = 2) uniform KernelParams {
     float pixel_value_limit;        // 16
     float light_refraction_coefficient; // 4
     int plane_index;                // 8
-    float reserved1;                // 12
+    int optical_buffer_offset;                // 12
     float reserved2;                // 16
     vec4 ewa_coefs_p;               // 16
     vec4 ewa_coefs_q;               // 16
@@ -61,6 +61,8 @@ LENS_MODEL_FUNCTIONS;
 layout(binding = 3) uniform sampler2D texParams;
 layout(binding = 4) uniform sampler2D texCanvas;
 layout(binding = 5) uniform sampler2D texMeshData;
+
+float get_mesh_data(int idx) { return texture(texMeshData, vec2(0, idx / 2047.0)).r; }
 
 const vec4 colors[9] = vec4[9](
     vec4(0.0,   0.0,   0.0,     0.0), // None
@@ -172,8 +174,30 @@ vec2 rotate_point(vec2 pos, float angle, vec2 origin, vec2 origin2) {
      return vec2(cos(angle) * (pos.x - origin.x) - sin(angle) * (pos.y - origin.y) + origin2.x,
                  sin(angle) * (pos.x - origin.x) + cos(angle) * (pos.y - origin.y) + origin2.y);
 }
+// Inverse of the bounded forward residual map used by the crop estimator.
+vec2 optical_displacement(vec2 p, int offset) {
+    vec2 xy = clamp(p, vec2(0.0), vec2(1.0)) * vec2(8.0, 6.0);
+    ivec2 cell = min(ivec2(xy), ivec2(7, 5));
+    vec2 a = xy - vec2(cell);
+    int i = offset + (cell.y * 9 + cell.x) * 2;
+    vec2 top = mix(vec2(get_mesh_data(i), get_mesh_data(i+1)), vec2(get_mesh_data(i+2), get_mesh_data(i+3)), a.x);
+    vec2 bottom = mix(vec2(get_mesh_data(i+18), get_mesh_data(i+19)), vec2(get_mesh_data(i+20), get_mesh_data(i+21)), a.x);
+    return mix(top, bottom, a.y);
+}
+vec2 optical_inverse(vec2 position) {
+    if (params.optical_buffer_offset <= 0) { return position; }
+    vec2 center = vec2(params.output_width, params.output_height) * 0.5;
+    vec2 scale = vec2(params.width, params.height) / params.fov;
+    vec2 p = (position - center) / scale + 0.5;
+    if (bool(params.flags & 128)) { p.y = 1.0 - p.y; }
+    vec2 q = p;
+    for (int n = 0; n < 8; n++) { q = p - optical_displacement(q, params.optical_buffer_offset - 1); }
+    if (bool(params.flags & 128)) { q.y = 1.0 - q.y; }
+    return (q - 0.5) * scale + center;
+}
+
 void main() {
-    vec2 texPos = v_texcoord.xy * vec2(params.output_width, params.output_height) + params.translation2d;
+    vec2 texPos = optical_inverse(v_texcoord.xy * vec2(params.output_width, params.output_height) + params.translation2d);
     vec2 outPos = v_texcoord.xy * vec2(params.output_width, params.output_height);
 
     if (bool(params.flags & 4)) { // Fill with background

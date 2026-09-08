@@ -131,6 +131,11 @@ pub struct StabilizationParams {
     pub focal_length_max_zoom_rate: f64,
     pub lens_metadata_delay_frames: i32, // how many frames the lens metadata lags the picture
 
+    #[serde(skip)] // Stored once in the project's compressed optical_motion field.
+    pub optical_motion: std::sync::Arc<crate::stabilization::optical::MotionData>,
+    #[serde(default)]
+    pub optical_stabilization_strength: f64,
+
     pub lens_breathing_enabled: bool, // Sony lens breathing compensation, when the file carries the lens tables
 }
 impl Default for StabilizationParams {
@@ -202,6 +207,8 @@ impl Default for StabilizationParams {
             focal_length_max_zoom_rate: 0.5,
             lens_metadata_delay_frames: 0,
 
+            optical_motion: Default::default(),
+            optical_stabilization_strength: 0.0,
             lens_breathing_enabled: true,
         }
     }
@@ -324,6 +331,7 @@ impl StabilizationParams {
             background_mode:           self.background_mode,
             background_margin:         self.background_margin,
             background_margin_feather: self.background_margin_feather,
+            optical_stabilization_strength: self.optical_stabilization_strength,
             of_method:                 self.of_method,
             current_device:            self.current_device,
             adaptive_zoom_method:      self.adaptive_zoom_method,

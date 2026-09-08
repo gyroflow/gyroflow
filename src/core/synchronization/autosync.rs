@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright Â© 2021-2022 Adrian <adrian.eddy at gmail>
 
 use std::sync::atomic::{ AtomicBool, AtomicUsize, Ordering::Relaxed, Ordering::SeqCst };
 use std::sync::Arc;
@@ -48,6 +48,10 @@ pub struct AutosyncProcess {
     finished_cb: Option<Arc<Box<dyn Fn(AutosyncResult) + Send + Sync + 'static>>>,
 
     sync_params: SyncParams,
+    stabilization_params: Arc<RwLock<crate::StabilizationParams>>,
+    gyro_target: Arc<RwLock<crate::GyroSource>>,
+    capture_optical: bool,
+    video_timestamps: RwLock<std::collections::BTreeMap<i64, i64>>,
     /// `estimate_lens_delay`: log focal length per frame of the metadata without any delay applied (`NaN` where
     /// unknown), the curve the analyzed windows were picked on and the estimate is aligned against
     lens_delay_meta_ln: Vec<f64>,
@@ -58,7 +62,15 @@ pub struct AutosyncProcess {
 impl AutosyncProcess {
     /// Sets the process up. For `estimate_lens_delay` this extracts the focal length curve of the whole clip to pick
     /// the frames to analyze, so call it off the UI thread
-    pub fn from_manager(stab: &StabilizationManager, timestamps_fract: &[f64], sync_params: SyncParams, mode: String, cancel_flag: Arc<AtomicBool>) -> Result<Self, AutosyncError> {
+    pub fn from_manager(stab: &StabilizationManager, timestamps_fract: &[f64], sync_params: SyncParams, mut mode: String, cancel_flag: Arc<AtomicBool>) -> Result<Self, AutosyncError> {
+        if mode == "optical_stabilization" {
+            let gyro = stab.gyro.read();
+            let accurate = gyro.file_metadata.read().has_accurate_timestamps
+                && !stab.input_file.read().url.to_ascii_lowercase().ends_with(".braw");
+            if !gyro.has_motion() || (!accurate && gyro.get_offsets().is_empty()) {
+                mode = "synchronize".into();
+            }
+        }
         let params = stab.params.read();
         let org_fps = params.fps;
         let scaled_fps = params.get_scaled_fps();
@@ -76,11 +88,16 @@ impl AutosyncProcess {
         if let Some(scale) = &fps_scale {
             time_per_syncpoint *= scale;
         }
+        every_nth_frame = every_nth_frame.max(1);
         let mut frame_count = ((timestamps_fract.len() as f64 * (time_per_syncpoint / 1000.0) * org_fps).ceil() as usize).min(params.frame_count) / every_nth_frame as usize;
 
+        let full_video = mode == "optical_stabilization" || (mode == "synchronize"
+            && (!stab.gyro.read().has_motion() || params.optical_stabilization_strength > 0.0));
+        if full_video { frame_count = params.frame_count / every_nth_frame; }
+        let capture_optical = full_video && every_nth_frame == 1;
         drop(params);
 
-        if duration_ms < 10.0 || frame_count < 2 || time_per_syncpoint < 10.0 || search_size < 10.0 { return Err(AutosyncError::InvalidParameters); }
+        if duration_ms < 10.0 || frame_count < 2 || (mode != "optical_stabilization" && (time_per_syncpoint < 10.0 || search_size < 10.0)) { return Err(AutosyncError::InvalidParameters); }
 
         let mut ranges_us: Vec<(i64, i64)> = timestamps_fract.iter().map(|x| {
             let range = (
@@ -90,13 +107,16 @@ impl AutosyncProcess {
             ((range.0 * 1000.0).round() as i64, (range.1 * 1000.0).round() as i64)
         }).collect();
 
-        if mode == "synchronize" && !stab.gyro.read().has_motion() {
-            // If no gyro data in file, analyze the entire video
+        if full_video {
+            // Optical stabilization needs a continuous path over the whole clip.
             ranges_us.clear();
             ranges_us.push((0, (org_duration_ms * 1000.0).round() as i64));
         }
 
         let mut comp_params = ComputeParams::from_manager(stab);
+        // Work on a snapshot. Cancellation or a failed decoder must not replace
+        // the project's existing camera motion with a partial estimate.
+        comp_params.gyro = Arc::new(RwLock::new(stab.gyro.read().clone()));
         comp_params.keyframes.clear();
         // Make sure we apply full correction for autosync
         comp_params.lens_correction_amount = 1.0;
@@ -128,6 +148,7 @@ impl AutosyncProcess {
         ).collect();
 
         let estimator = stab.pose_estimator.clone();
+        if full_video { estimator.clear(); }
 
         estimator.every_nth_frame.store(every_nth_frame.max(1) as u32, SeqCst);
         estimator.offset_method.store(sync_params.offset_method as u32, SeqCst);
@@ -157,6 +178,10 @@ impl AutosyncProcess {
             org_fps,
             scaled_fps,
             sync_params,
+            stabilization_params: stab.params.clone(),
+            gyro_target: stab.gyro.clone(),
+            capture_optical,
+            video_timestamps: Default::default(),
             lens_delay_meta_ln,
             mode,
             ranges_us,
@@ -179,6 +204,12 @@ impl AutosyncProcess {
     }
 
     pub fn feed_frame(&self, mut timestamp_us: i64, frame_no: usize, mut width: u32, height: u32, stride: usize, pixels: &[u8]) {
+        // Bound the decoder's lead over expensive flow jobs on long videos.
+        while self.total_read_frames.load(SeqCst).saturating_sub(self.total_detected_frames.load(SeqCst)) > 4 {
+            if self.of_context.is_cancelled() { return; }
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        }
+        if self.of_context.is_cancelled() { return; }
         let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels).map(Arc::new);
         if width > stride as u32 {
             width = stride as u32;
@@ -196,17 +227,20 @@ impl AutosyncProcess {
         let cancel_flag = self.cancel_flag.clone();
         let of_context = self.of_context.clone();
         let needs_poses = self.mode != "estimate_lens_delay";
+        let source_timestamp_us = timestamp_us;
         if let Some(scale) = self.fps_scale {
             timestamp_us = (timestamp_us as f64 / scale) as i64;
         }
 
+        let video_timestamp_us = timestamp_us;
         {
             let compute_params = compute_params.read();
             let frame = crate::frame_at_timestamp(timestamp_us as f64 / 1000.0, compute_params.scaled_fps) as usize;
             timestamp_us += (compute_params.gyro.read().file_metadata.read().per_frame_time_offsets.get(frame).unwrap_or(&0.0) * 1000.0).round() as i64;
         }
 
-        if let Some(_current_range) = self.scaled_ranges_us.iter().find(|(from, to)| (*from..=*to).contains(&timestamp_us)) {
+        if self.scaled_ranges_us.iter().any(|(from, to)| (*from..=*to).contains(&video_timestamp_us)) {
+            self.video_timestamps.write().insert(timestamp_us, source_timestamp_us);
             self.total_read_frames.fetch_add(1, SeqCst);
 
             self.thread_pool.spawn(move || {
@@ -270,16 +304,44 @@ impl AutosyncProcess {
             return Ok(());
         }
 
-        self.estimator.process_detected_frames(self.org_fps, self.scaled_fps, &self.compute_params.read());
-        if let Some(result) = self.finish_if_cancelled() { return result; }
-        self.estimator.recalculate_gyro_data(self.org_fps, true);
+        if self.mode != "optical_stabilization" {
+            self.estimator.process_detected_frames(self.org_fps, self.scaled_fps, &self.compute_params.read());
+            if let Some(result) = self.finish_if_cancelled() { return result; }
+            self.estimator.recalculate_gyro_data(self.org_fps, true);
+        }
         self.estimator.cache_optical_flow(if offset_method == 1 { 2 } else { 1 });
         self.estimator.cleanup();
         if let Some(result) = self.finish_if_cancelled() { return result; }
+        let optical_motion = if self.capture_optical {
+            let mut frames = {
+                let timestamps = self.video_timestamps.read();
+                let results = self.estimator.sync_results.read();
+                let keys: Vec<_> = results.keys().copied().collect();
+                let mut frames = Vec::new();
+                for pair in keys.windows(2) {
+                    let from = &results[&pair[0]];
+                    let to = &results[&pair[1]];
+                    let cached = from.optical_flow.borrow();
+                    let points = cached.get(&1).and_then(|p| p.as_ref()).map(|((_, a), (_, b))| (a.clone(), b.clone()));
+                    if let (Some(&start), Some(&end)) = (timestamps.get(&from.timestamp_us), timestamps.get(&to.timestamp_us)) {
+                        frames.push(crate::stabilization::optical::MotionFrame::new(start, end, from.frame_size, &points));
+                    }
+                }
+                frames
+            };
+            frames.sort_by_key(|f| f.timestamp_us);
+            if frames.is_empty() {
+                let error = "No consecutive video frames were decoded for optical stabilization.".to_string();
+                self.of_context.fail(error.clone());
+                return self.finish_if_cancelled().unwrap_or(Err(error));
+            }
+            Some(Arc::new(crate::stabilization::optical::MotionData { frames }))
+        } else { None };
 
         let mut scaled_ranges_us = Cow::Borrowed(&self.scaled_ranges_us);
 
-        if self.mode == "synchronize" && !self.compute_params.read().gyro.read().has_motion() {
+        let generated_camera_motion = self.mode == "synchronize" && !self.compute_params.read().gyro.read().has_motion();
+        if generated_camera_motion {
             // If no gyro data in file, set the computed optical flow as gyro data
             let samples: Vec<_> = self.estimator.estimated_gyro.read().values().cloned().collect();
             if samples.len() < 2 {
@@ -290,7 +352,9 @@ impl AutosyncProcess {
             let compute_params = self.compute_params.write();
             let mut gyro = compute_params.gyro.write();
 
-            gyro.file_metadata.set_raw_imu(samples);
+            let mut metadata = gyro.file_metadata.read().clone();
+            metadata.raw_imu = samples;
+            gyro.file_metadata = metadata.into();
             gyro.apply_transforms();
 
             let timestamps_fract = [0.5];
@@ -324,40 +388,42 @@ impl AutosyncProcess {
             }
         };
 
-        if let Some(cb) = &self.finished_cb {
-            if self.mode == "estimate_rolling_shutter" {
-                use super::find_offset::visual_features::find_offsets;
-                cb(AutosyncResult::Offsets(find_offsets(&self.estimator, &scaled_ranges_us, &self.sync_params, &self.compute_params.read(), true, progress_cb2, self.cancel_flag.clone())));
-            } else if self.mode == "guess_imu_orientation" {
-                use super::find_offset::rs_sync::FindOffsetsRssync;
-                let guessed = FindOffsetsRssync::new(&scaled_ranges_us, self.estimator.sync_results.clone(), &self.sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone()).guess_orient();
-                if !self.cancel_flag.load(SeqCst) {
-                    cb(AutosyncResult::Orientation(guessed));
-                }
-            } else {
-                let offsets = self.estimator.find_offsets(&scaled_ranges_us, &self.sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone());
-                if check_negative {
-                    for_negative.store(true, SeqCst);
-                    // Try also negative rough offset
-                    let mut sync_params = self.sync_params.clone();
-                    sync_params.initial_offset = -sync_params.initial_offset;
-                    let offsets2 = self.estimator.find_offsets(&scaled_ranges_us, &sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone());
-                    if offsets2.len() > offsets.len() {
-                        cb(AutosyncResult::Offsets(offsets2));
-                    } else if offsets2.len() == offsets.len() {
-                        let sum1: f64 = offsets.iter().map(|(_, _, cost)| *cost).sum();
-                        let sum2: f64 = offsets2.iter().map(|(_, _, cost)| *cost).sum();
-                        if sum1 < sum2 {
-                            cb(AutosyncResult::Offsets(offsets));
-                        } else {
-                            cb(AutosyncResult::Offsets(offsets2));
-                        }
-                    }
-                } else {
-                    cb(AutosyncResult::Offsets(offsets));
+        let result = if self.mode == "estimate_rolling_shutter" {
+            use super::find_offset::visual_features::find_offsets;
+            AutosyncResult::Offsets(find_offsets(&self.estimator, &scaled_ranges_us, &self.sync_params, &self.compute_params.read(), true, progress_cb2, self.cancel_flag.clone()))
+        } else if self.mode == "guess_imu_orientation" {
+            use super::find_offset::rs_sync::FindOffsetsRssync;
+            AutosyncResult::Orientation(FindOffsetsRssync::new(&scaled_ranges_us, self.estimator.sync_results.clone(), &self.sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone()).guess_orient())
+        } else if self.mode == "optical_stabilization" {
+            // Preserve the already synchronized gyro path; only publish tracks.
+            AutosyncResult::Offsets(Vec::new())
+        } else {
+            let mut offsets = self.estimator.find_offsets(&scaled_ranges_us, &self.sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone());
+            if check_negative {
+                for_negative.store(true, SeqCst);
+                let mut sync_params = self.sync_params.clone();
+                sync_params.initial_offset = -sync_params.initial_offset;
+                let other = self.estimator.find_offsets(&scaled_ranges_us, &sync_params, &self.compute_params.read(), progress_cb2, self.cancel_flag.clone());
+                let cost = |v: &Vec<(f64, f64, f64)>| v.iter().map(|(_, _, c)| c).sum::<f64>();
+                if other.len() > offsets.len() || (other.len() == offsets.len() && cost(&other) < cost(&offsets)) {
+                    offsets = other;
                 }
             }
+            AutosyncResult::Offsets(offsets)
+        };
+        if let Some(result) = self.finish_if_cancelled() { return result; }
+        if generated_camera_motion {
+            let metadata = self.compute_params.read().gyro.read().file_metadata.clone();
+            let mut gyro = self.gyro_target.write();
+            gyro.file_metadata = metadata;
+            gyro.apply_transforms();
         }
+        if let Some(motion) = optical_motion.filter(|m| m.is_valid()) {
+            let tracked = motion.frames.iter().filter(|f| f.points.len() >= 12).count();
+            log::info!("Optical motion: {tracked}/{} frame pairs have at least 12 tracks", motion.frames.len());
+            self.stabilization_params.write().optical_motion = motion;
+        }
+        if let Some(cb) = &self.finished_cb { cb(result); }
         if let Some(cb) = &self.progress_cb {
             let len = self.total_detected_frames.load(SeqCst);
             cb(1.0, len, len);
@@ -382,3 +448,7 @@ impl AutosyncProcess {
         self.finished_cb = Some(Arc::new(Box::new(cb)));
     }
 }
+
+#[cfg(test)]
+#[path = "autosync_tests.rs"]
+mod tests;

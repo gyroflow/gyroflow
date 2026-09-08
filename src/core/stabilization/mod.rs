@@ -116,6 +116,8 @@ pub fn clear_gpu_cache_current_thread() {
     });
 }
 
+pub mod optical;
+
 bitflags::bitflags! {
     #[derive(Default, Clone)]
     pub struct KernelParamsFlags: i32 {
@@ -177,7 +179,7 @@ pub struct KernelParams {
     pub pixel_value_limit:        f32, // 16
     pub light_refraction_coefficient: f32, // 4
     pub plane_index:              i32, // 8
-    pub reserved1:                f32, // 12
+    pub optical_buffer_offset:    i32, // 12 - offset plus one in mesh_data; zero disables the residual warp
     pub reserved2:                f32, // 16
     pub ewa_coeffs_p:             [f32; 4], // 16
     pub ewa_coeffs_q:             [f32; 4], // 16
@@ -237,7 +239,8 @@ pub struct ProcessedInfo {
 }
 
 impl Stabilization {
-    pub fn set_compute_params(&mut self, params: ComputeParams) {
+    pub fn set_compute_params(&mut self, mut params: ComputeParams) {
+        optical::prepare(&mut params);
         self.stab_data.clear();
         self.compute_params = params;
     }

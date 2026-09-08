@@ -47,7 +47,7 @@ typedef struct {
     float pixel_value_limit;         // 16
     float light_refraction_coefficient; // 4
     int plane_index;                 // 8
-    float reserved1;                 // 12
+    int optical_buffer_offset;                 // 12
     float reserved2;                 // 16
     float4 ewa_coeffs_p;             // 16
     float4 ewa_coeffs_q;             // 16
@@ -499,9 +499,32 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
     return (float2)(-99999.0f, -99999.0f);
 }
 
+// Inverse of the bounded forward residual map used by the crop estimator.
+float2 optical_displacement(float2 p, int offset, __global const float *mesh_data) {
+    float2 xy = clamp(p, (float2)(0.0), (float2)(1.0)) * (float2)(8.0, 6.0);
+    int2 cell = min(convert_int2(xy), (int2)(7, 5));
+    float2 a = xy - convert_float2(cell);
+    int i = offset + (cell.y * 9 + cell.x) * 2;
+    float2 top = mix((float2)(mesh_data[i], mesh_data[i+1]), (float2)(mesh_data[i+2], mesh_data[i+3]), a.x);
+    float2 bottom = mix((float2)(mesh_data[i+18], mesh_data[i+19]), (float2)(mesh_data[i+20], mesh_data[i+21]), a.x);
+    return mix(top, bottom, a.y);
+}
+float2 optical_inverse(float2 position, __global KernelParams *params, __global const float *mesh_data) {
+    if (params->optical_buffer_offset <= 0) { return position; }
+    float2 center = (float2)(params->output_width, params->output_height) * 0.5f;
+    float2 scale = (float2)(params->width, params->height) / params->fov;
+    float2 p = (position - center) / scale + 0.5f;
+    if ((params->flags & 128)) { p.y = 1.0f - p.y; }
+    float2 q = p;
+    for (int n = 0; n < 8; n++) { q = p - optical_displacement(q, params->optical_buffer_offset - 1, mesh_data); }
+    if ((params->flags & 128)) { q.y = 1.0f - q.y; }
+    return (q - 0.5f) * scale + center;
+}
+
 float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global const float *matrices, __global const float *mesh_data) {
     out_pos.x = map_coord(out_pos.x, (float)params->output_rect.x, (float)(params->output_rect.x + params->output_rect.z), 0.0f, (float)params->output_width ) + params->translation2d.x;
     out_pos.y = map_coord(out_pos.y, (float)params->output_rect.y, (float)(params->output_rect.y + params->output_rect.w), 0.0f, (float)params->output_height) + params->translation2d.y;
+    out_pos = optical_inverse(out_pos, params, mesh_data);
 
     ///////////////////////////////////////////////////////////////////
     // Add lens distortion back

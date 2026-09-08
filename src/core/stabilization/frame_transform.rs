@@ -292,7 +292,13 @@ impl FrameTransform {
         let file_metadata = gyro.file_metadata.read();
 
         // Undistorting mesh of the frame, empty when it has none (the kernel flags say so, the buffer is then not uploaded)
-        let mesh_data = file_metadata.mesh_correction.kernel_buffer(frame);
+        let mut mesh_data = file_metadata.mesh_correction.kernel_buffer(frame);
+        // Keep lens/EIS tables intact and append the independent residual field.
+        let optical_buffer_offset = if let Some(grid) = super::optical::grid_at(params, timestamp_ms) {
+            let offset = mesh_data.len() as i32 + 1;
+            mesh_data.extend(grid.0.iter().flatten().copied());
+            offset
+        } else { 0 };
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(&params, true, timestamp_ms, &file_metadata);
@@ -411,6 +417,7 @@ impl FrameTransform {
         }
 
         let kernel_params = KernelParams {
+            optical_buffer_offset,
             matrix_count:  matrices.len() as i32,
             f:             [scaled_k[(0, 0)] as f32, scaled_k[(1, 1)] as f32],
             c:             [scaled_k[(0, 2)] as f32, scaled_k[(1, 2)] as f32],

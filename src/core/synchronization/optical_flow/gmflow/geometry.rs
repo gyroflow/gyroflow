@@ -104,38 +104,42 @@ impl Layout {
         points
     }
 
-    pub fn correspondences(&self, flow: &[f32], features: &[(f32, f32)]) -> OpticalFlowPair {
+    pub fn destination(&self, flow: &[f32], p: (f32, f32)) -> Option<(f32, f32)> {
         if flow.len() != 2 * WIDTH * HEIGHT {
             return None;
         }
+        let (x, y) = self.model_point(p);
+        if x < 0.0 || y < 0.0 || x > (WIDTH - 1) as f32 || y > (HEIGHT - 1) as f32 {
+            return None;
+        }
+        let (ix, iy) = (x.floor() as usize, y.floor() as usize);
+        let (nx, ny) = ((ix + 1).min(WIDTH - 1), (iy + 1).min(HEIGHT - 1));
+        let (ax, ay) = (x - ix as f32, y - iy as f32);
+        let sample = |c| {
+            let at = |x, y| flow[c * WIDTH * HEIGHT + y * WIDTH + x];
+            let upper = at(ix, iy) * (1.0 - ax) + at(nx, iy) * ax;
+            let lower = at(ix, ny) * (1.0 - ax) + at(nx, ny) * ax;
+            upper * (1.0 - ay) + lower * ay
+        };
+        // Rounded resize dimensions need independent x/y scales. Padding
+        // cancels from displacement, but remains in the sampling location.
+        let q = (
+            p.0 + sample(0) / self.scale.0,
+            p.1 + sample(1) / self.scale.1,
+        );
+        (q.0.is_finite()
+            && q.1.is_finite()
+            && q.0 >= 0.0
+            && q.1 >= 0.0
+            && q.0 < self.size.0 as f32
+            && q.1 < self.size.1 as f32)
+            .then_some(q)
+    }
+
+    pub fn correspondences(&self, flow: &[f32], features: &[(f32, f32)]) -> OpticalFlowPair {
         let (mut a, mut b) = (Vec::new(), Vec::new());
         for &p in features {
-            let (x, y) = self.model_point(p);
-            if x < 0.0 || y < 0.0 || x > (WIDTH - 1) as f32 || y > (HEIGHT - 1) as f32 {
-                continue;
-            }
-            let (ix, iy) = (x.floor() as usize, y.floor() as usize);
-            let (nx, ny) = ((ix + 1).min(WIDTH - 1), (iy + 1).min(HEIGHT - 1));
-            let (ax, ay) = (x - ix as f32, y - iy as f32);
-            let sample = |c| {
-                let at = |x, y| flow[c * WIDTH * HEIGHT + y * WIDTH + x];
-                let upper = at(ix, iy) * (1.0 - ax) + at(nx, iy) * ax;
-                let lower = at(ix, ny) * (1.0 - ax) + at(nx, ny) * ax;
-                upper * (1.0 - ay) + lower * ay
-            };
-            // Rounded resize dimensions need independent x/y scales. Padding
-            // cancels from displacement, but remains in the sampling location.
-            let q = (
-                p.0 + sample(0) / self.scale.0,
-                p.1 + sample(1) / self.scale.1,
-            );
-            if q.0.is_finite()
-                && q.1.is_finite()
-                && q.0 >= 0.0
-                && q.1 >= 0.0
-                && q.0 <= (self.size.0 - 1) as f32
-                && q.1 <= (self.size.1 - 1) as f32
-            {
+            if let Some(q) = self.destination(flow, p) {
                 a.push(p);
                 b.push(q);
             }

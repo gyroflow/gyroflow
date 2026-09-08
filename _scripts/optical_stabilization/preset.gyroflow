@@ -1,0 +1,89 @@
+{
+  "version": 4,
+  "calibration_data": {
+    "name": "Known synthetic pinhole, spatial jitter fixture",
+    "camera_brand": "Evaluation",
+    "camera_model": "Known synthetic pinhole, spatial jitter fixture",
+    "calibrator_version": "1.6.3",
+    "calib_dimension": {
+      "w": 640,
+      "h": 360
+    },
+    "orig_dimension": {
+      "w": 640,
+      "h": 360
+    },
+    "input_horizontal_stretch": 1,
+    "input_vertical_stretch": 1,
+    "distortion_model": "opencv_standard",
+    "global_shutter": true,
+    "fisheye_params": {
+      "camera_matrix": [
+        [
+          480,
+          0,
+          320.0
+        ],
+        [
+          0,
+          480,
+          180.0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "distortion_coeffs": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "gyro_source": {
+    "integration_method": 3
+  },
+  "stabilization": {
+    "method": "Default",
+    "smoothing_params": [
+      {
+        "name": "smoothness",
+        "value": 0.5
+      }
+    ],
+    "fov": 1.0,
+    "adaptive_zoom_window": 2.0,
+    "max_zoom": 150,
+    "frame_readout_time": 0,
+    "lens_correction_amount": 1.0,
+    "optical_stabilization_strength": 1.0
+  },
+  "synchronization": {
+    "do_autosync": true,
+    "of_method": 2,
+    "pose_method": 3,
+    "offset_method": 0,
+    "every_nth_frame": 1,
+    "processing_resolution": 360,
+    "max_sync_points": 1,
+    "time_per_syncpoint": 1,
+    "search_size": 0.1,
+    "auto_sync_points": false,
+    "initial_offset": 0,
+    "initial_offset_inv": false,
+    "calc_initial_fast": false
+  },
+  "output": {
+    "codec": "H.264/AVC",
+    "use_gpu": false,
+    "audio": false,
+    "bitrate": 12,
+    "output_folder": ".",
+    "output_filename": "optical-result.mp4",
+    "interpolation": "Bicubic"
+  }
+}

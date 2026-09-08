@@ -1469,7 +1469,11 @@ impl RenderQueue {
         };
         let sync_settings = stab.lens.read().sync_settings.clone().unwrap_or_default();
         let requested = sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default();
-        if has_sync_points || has_accurate_timestamps || !requested {
+        let needs_optical_analysis = {
+            let params = stab.params.read();
+            params.optical_stabilization_strength > 0.0 && params.optical_motion.frames.is_empty()
+        };
+        if !requested || (!needs_optical_analysis && (has_sync_points || has_accurate_timestamps)) {
             return Ok(());
         }
         let mut sync_params: SyncParams = serde_json::from_value(sync_settings).map_err(|e| e.to_string())?;
@@ -1495,8 +1499,10 @@ impl RenderQueue {
         sync_params.initial_offset *= 1000.0; // Seconds to milliseconds.
         sync_params.time_per_syncpoint *= 1000.0;
         sync_params.search_size *= 1000.0;
+        if needs_optical_analysis { sync_params.every_nth_frame = 1; }
         let every_nth_frame = sync_params.every_nth_frame.max(1);
-        let mut sync = AutosyncProcess::from_manager(&stab, &timestamps_fract, sync_params, "synchronize".into(), cancel_flag.clone())
+        let mode = if needs_optical_analysis { "optical_stabilization" } else { "synchronize" };
+        let mut sync = AutosyncProcess::from_manager(&stab, &timestamps_fract, sync_params, mode.into(), cancel_flag.clone())
             .map_err(|_| "Video or synchronization settings leave too few frames to analyze".to_string())?;
         let processing_cb2 = processing_cb.clone();
         sync.on_progress(move |percent, _ready, _total| processing_cb2(percent));

@@ -304,7 +304,7 @@ impl WgpuWrapper {
             let buf_params = device.create_buffer(&wgpu::BufferDescriptor { size: std::mem::size_of::<KernelParams>() as u64, usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_drawing = device.create_buffer(&wgpu::BufferDescriptor { size: drawing_len as u64, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
             let buf_coeffs  = device.create_buffer_init(&wgpu::util::BufferInitDescriptor { label: None, contents: bytemuck::cast_slice(&crate::stabilization::COEFFS), usage: wgpu::BufferUsages::STORAGE });
-            let buf_mesh_data = device.create_buffer(&wgpu::BufferDescriptor { size: (crate::gyro_source::splines::MAX_BUFFER_SIZE * std::mem::size_of::<f32>()).max(4096) as _, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
+            let buf_mesh_data = device.create_buffer(&wgpu::BufferDescriptor { size: ((crate::gyro_source::splines::MAX_BUFFER_SIZE + crate::stabilization::optical::BUFFER_LEN) * std::mem::size_of::<f32>()).max(4096) as _, usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, label: None, mapped_at_creation: false });
 
             let bind_group_layout = if uses_textures {
                 let sample_type = match wgpu_format.1 {
@@ -472,8 +472,13 @@ impl WgpuWrapper {
             self.queue.write_buffer(self.buf_drawing.as_ref().unwrap(), 0, drawing_buffer);
         }
         if !itm.mesh_data.is_empty() {
-            if self.buf_mesh_data.is_none() || (self.buf_mesh_data.as_ref().unwrap().size() as usize * 4) < itm.mesh_data.len() { log::error!("Buffer size mismatch buf_mesh_data! {} vs {}", self.buf_mesh_data.as_ref().unwrap().size() * 4, itm.mesh_data.len()); return false; }
-            self.queue.write_buffer(self.buf_mesh_data.as_ref().unwrap(), 0, bytemuck::cast_slice(&itm.mesh_data));
+            let Some(buffer) = &self.buf_mesh_data else { return false; };
+            let capacity = buffer.size() as usize / std::mem::size_of::<f32>();
+            if itm.mesh_data.len() > capacity {
+                log::error!("Mesh buffer capacity {capacity} is smaller than {} floats", itm.mesh_data.len());
+                return false;
+            }
+            self.queue.write_buffer(buffer, 0, bytemuck::cast_slice(&itm.mesh_data));
         }
 
         match &self.pipeline {

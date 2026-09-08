@@ -143,6 +143,7 @@ pub struct Controller {
     lens_metadata_delay_frames: qt_property!(i32; READ get_lens_metadata_delay_frames WRITE set_lens_metadata_delay_frames NOTIFY lens_metadata_delay_changed),
     lens_metadata_delay_changed: qt_signal!(),
     has_lens_breathing: qt_property!(bool; READ has_lens_breathing NOTIFY gyro_changed),
+    optical_stabilization_strength: qt_property!(f64; READ get_optical_stabilization_strength WRITE set_optical_stabilization_strength),
     lens_breathing_enabled: qt_property!(bool; READ get_lens_breathing_enabled WRITE set_lens_breathing_enabled),
 
     additional_rotation_x: qt_property!(f64; WRITE set_additional_rotation_x),
@@ -417,7 +418,7 @@ impl Controller {
 
         let for_rs = mode == "estimate_rolling_shutter";
         let for_lens_delay = mode == "estimate_lens_delay";
-        if for_lens_delay {
+        if for_lens_delay || mode == "optical_stabilization" || self.stabilizer.params.read().optical_stabilization_strength > 0.0 {
             sync_params.every_nth_frame = 1; // consecutive frames are what the estimate tracks
         }
 
@@ -2206,6 +2207,16 @@ impl Controller {
     fn has_lens_breathing(&self) -> bool {
         !self.stabilizer.gyro.read().file_metadata.read().lens_breathing.is_empty()
     }
+    fn get_optical_stabilization_strength(&self) -> f64 {
+        self.stabilizer.params.read().optical_stabilization_strength
+    }
+    fn set_optical_stabilization_strength(&mut self, v: f64) {
+        if !v.is_finite() { return; }
+        self.stabilizer.params.write().optical_stabilization_strength = v.clamp(0.0, 1.0);
+        self.stabilizer.invalidate_zooming();
+        self.request_recompute();
+    }
+
     fn get_lens_breathing_enabled(&self) -> bool {
         self.stabilizer.params.read().lens_breathing_enabled
     }

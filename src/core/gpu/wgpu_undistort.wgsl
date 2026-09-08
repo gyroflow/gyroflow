@@ -45,7 +45,7 @@ struct KernelParams {
     pixel_value_limit:        f32, // 16
     light_refraction_coefficient: f32, // 4
     plane_index:              i32, // 8
-    reserved1:                f32, // 12
+    optical_buffer_offset:    i32, // 12
     reserved2:                f32, // 16
     ewa_coeffs_p:             vec4<f32>, // 16
     ewa_coeffs_q:             vec4<f32>, // 16
@@ -480,6 +480,28 @@ fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
     return vec2<f32>(-99999.0, -99999.0);
 }
 
+// Inverse of the bounded forward residual map used by the crop estimator.
+fn optical_displacement(p: vec2<f32>, offset: i32) -> vec2<f32> {
+    let xy = clamp(p, vec2<f32>(0.0), vec2<f32>(1.0)) * vec2<f32>(8.0, 6.0);
+    let cell = min(vec2<i32>(xy), vec2<i32>(7, 5));
+    let a = xy - vec2<f32>(cell);
+    let i = offset + (cell.y * 9 + cell.x) * 2;
+    let top = mix(vec2<f32>(mesh_data[i], mesh_data[i+1]), vec2<f32>(mesh_data[i+2], mesh_data[i+3]), a.x);
+    let bottom = mix(vec2<f32>(mesh_data[i+18], mesh_data[i+19]), vec2<f32>(mesh_data[i+20], mesh_data[i+21]), a.x);
+    return mix(top, bottom, a.y);
+}
+fn optical_inverse(position: vec2<f32>) -> vec2<f32> {
+    if (params.optical_buffer_offset <= 0) { return position; }
+    let center = vec2<f32>(f32(params.output_width), f32(params.output_height)) * 0.5;
+    let scale = vec2<f32>(f32(params.width), f32(params.height)) / params.fov;
+    var p = (position - center) / scale + 0.5;
+    if (bool(flags & 128)) { p.y = 1.0 - p.y; }
+    var q = p;
+    for (var n = 0; n < 8; n++) { q = p - optical_displacement(q, params.optical_buffer_offset - 1); }
+    if (bool(flags & 128)) { q.y = 1.0 - q.y; }
+    return (q - 0.5) * scale + center;
+}
+
 fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
     var out_pos = position;
     if (bool(flags & 64)) { // Uses output rect
@@ -488,7 +510,7 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
             map_coord(position.y, f32(params.output_rect.y), f32(params.output_rect.y + params.output_rect.w), 0.0, f32(params.output_height))
         );
     }
-    out_pos += params.translation2d;
+    out_pos = optical_inverse(out_pos + params.translation2d);
 
     ///////////////////////////////////////////////////////////////////
     // Add lens distortion back

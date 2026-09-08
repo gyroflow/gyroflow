@@ -109,8 +109,29 @@ impl OpticalFlowTrait for OFGmflow {
             self.size,
             self.context.clone(),
         ) {
-            Ok(Some(flow)) => geometry::Layout::new(self.size)
-                .and_then(|layout| layout.correspondences(&flow, &self.features)),
+            Ok(Some(flow)) => {
+                match inference::flow(
+                    next.img.clone(),
+                    self.img.clone(),
+                    self.size,
+                    self.context.clone(),
+                ) {
+                    Ok(Some(reverse)) => geometry::Layout::new(self.size).and_then(|layout| {
+                        super::quality::filter_matches(
+                            &self.img,
+                            &next.img,
+                            self.size,
+                            layout.correspondences(&flow, &self.features),
+                            |p| layout.destination(&reverse, p),
+                        )
+                    }),
+                    Ok(None) => None,
+                    Err(error) => {
+                        self.context.fail(error);
+                        None
+                    }
+                }
+            }
             Ok(None) => None,
             Err(error) => {
                 self.context.fail(error);

@@ -49,6 +49,7 @@ pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)
     compute_params.output_width = compute_params.width;
     compute_params.output_height = compute_params.height;
 
+    crate::stabilization::optical::prepare(&mut compute_params);
     let fov_estimator = fov_iterative::FovIterative::new(&compute_params, org_output_size);
     let measured = fov_estimator.compute(timestamps, &compute_params.trim_ranges);
     let debug_points = fov_estimator.get_debug_points();
@@ -116,6 +117,12 @@ pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)
 pub fn get_checksum(compute_params: &ComputeParams, smoothing_checksum: u64) -> u64 {
     let mut hasher = DefaultHasher::new();
     hasher.write_u64(smoothing_checksum);
+    hasher.write_u64(compute_params.optical_stabilization_strength.to_bits());
+    for frame in &compute_params.optical_motion.frames {
+        hasher.write_i64(frame.timestamp_us);
+        hasher.write_i64(frame.next_timestamp_us);
+        for value in frame.points.iter().flatten() { hasher.write_u32(value.to_bits()); }
+    }
 
     // Lens: the profile's projection, which also covers `distortion_model`, `digital_lens` and `digital_lens_params`
     // (`ComputeParams::from_manager` derives them from the profile and nothing else writes them)
@@ -129,6 +136,7 @@ pub fn get_checksum(compute_params: &ComputeParams, smoothing_checksum: u64) -> 
     hasher.write_usize(compute_params.output_width);
     hasher.write_usize(compute_params.output_height);
     hasher.write_u64(compute_params.scaled_fps.to_bits());
+    hasher.write_u64(compute_params.fps_scale.to_bits());
     hasher.write_u64(compute_params.frame_readout_time.to_bits());
     hasher.write_i32(compute_params.frame_readout_direction as i32);
     for x in compute_params.trim_ranges.iter() {

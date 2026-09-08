@@ -104,6 +104,7 @@ MenuItem {
                 integrationMethod.currentIndex = stab.horizon_lock_integration_method;
             }
 
+            if (stab.hasOwnProperty("optical_stabilization_strength")) { opticalStrength.value = stab.optical_stabilization_strength * 100; }
             if (stab.hasOwnProperty("focal_length_smoothing_enabled")) {
                 flEnable.cb.checked = !!stab.focal_length_smoothing_enabled;
             }
@@ -691,6 +692,28 @@ MenuItem {
             scaler: 100.0;
             onValueChanged: Qt.callLater(() => { controller.lens_correction_amount = value; });
         }
+    }
+
+    Label {
+        text: qsTr("Optical stabilization");
+        position: Label.LeftPosition;
+        tooltip: qsTr("Reduces local shake after camera stabilization. Analyze optical motion to process the whole video. Moving subjects and weak tracking may limit the correction.");
+        SliderWithField {
+            id: opticalStrength;
+            from: 0; to: 100; unit: "%"; precision: 0; defaultValue: 0;
+            width: parent.width;
+            value: controller.optical_stabilization_strength * 100;
+            onValueChanged: Qt.callLater(() => { controller.optical_stabilization_strength = value / 100; });
+        }
+    }
+
+    Button {
+        text: qsTr("Analyze optical motion");
+        visible: opticalStrength.value > 0;
+        enabled: !controller.sync_in_progress && controller.lens_loaded;
+        anchors.horizontalCenter: parent.horizontalCenter;
+        tooltip: qsTr("Tracks the whole video and preserves existing synchronization. Load a lens profile first.");
+        onClicked: controller.start_autosync("0.5", window.sync.getSettingsJson(), "optical_stabilization");
     }
 
     CheckBoxWithContent {

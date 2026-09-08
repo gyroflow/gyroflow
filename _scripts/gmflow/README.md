@@ -1,8 +1,9 @@
 # Experimental GMFlow GPU backend
 
 This opt-in backend implements neural optical-flow matching for #831,
-related to optical-only stabilization #45. It does not implement a residual warp,
-rolling-shutter-aware neural motion model, or a complete optical-only workflow.
+related to optical-only stabilization #45. The branch now integrates a separate
+[residual optical pass](../optical_stabilization/README.md). The network estimates
+image correspondences; it is not a rolling-shutter-aware neural motion model.
 Default builds keep their existing optical-flow choices and do not import Burn.
 
 ## Reproducible model preparation
@@ -112,7 +113,9 @@ Preprocessing crops decoder stride padding before aspect-preserving resizing and
 edge padding. Flow is sampled bilinearly at pixel-center coordinates and mapped
 back using separate, rounded x/y resize scales. Non-finite and out-of-image
 endpoints are discarded, and flat patches do not become motion correspondences.
-This does not add an occlusion-confidence or forward/backward consistency filter.
+Forward/backward inference and a shared photometric consistency filter now reject
+unreliable matches. This doubles network calls per uncached pair relative to the
+earlier measurements below; it is not a learned occlusion-confidence model.
 
 The shared pose pipeline also rejects non-finite rotations and angular velocity.
 Degenerate homographies can otherwise introduce NaN samples into the synthesized
@@ -150,7 +153,9 @@ A full-app synthetic pinhole test improved measured image jitter with GMFlow,
 and both DIS and GMFlow stopped producing black output after the shared finite-
 pose guard. An exploratory run on `resources/comparison1.mp4` was rejected as
 quality evidence: the source contains a wipe between two versions of the image,
-not raw camera footage. A proper real-video quality evaluation remains outstanding.
+not raw camera footage. That early result is excluded. Current second-pass
+comparisons and raw-video diagnostics are documented with the residual optical
+pass and must be assessed separately from these earlier backend measurements.
 
 Model distribution and supported GPUs still need maintainer agreement. This
 backend alone does not implement the local residual warp requested in #45 or

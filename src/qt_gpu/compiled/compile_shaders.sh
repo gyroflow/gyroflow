@@ -1,5 +1,6 @@
 #!/bin/bash
-QSB='../../../ext/6.4.3/msvc2019_64/bin/qsb.exe --glsl "120,300 es,310 es,320 es,310,320,330,400,410,420" --hlsl 50 --msl 12'
+set -e
+QSB=${QSB:-'qsb --glsl "120,300 es,310 es,320 es,310,320,330,400,410,420" --hlsl 50 --msl 12'}
 
 NO_DIGITAL_LENS="vec2 digital_undistort_point(vec2 uv) { return uv; } vec2 digital_distort_point(vec2 uv) { return uv; }"
 
@@ -38,10 +39,6 @@ do
         SHADER=`cat ../undistort.frag`
 
         echo "${SHADER/LENS_MODEL_FUNCTIONS;/"$FUNCS"}" > tmp.frag
-
-        if [ "$i" = "sony" ] || [ "$i" = "generic_polynomial" ]; then
-           echo " float get_mesh_data(int idx) { return texture(texMeshData, vec2(0, idx / 2047.0)).r; } " >> tmp.frag
-        fi
 
         eval "$QSB -o undistort_$i$d.frag.qsb tmp.frag"
         rm tmp.frag

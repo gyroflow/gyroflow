@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2022 Adrian <adrian.eddy at gmail>
+// Copyright Â© 2022 Adrian <adrian.eddy at gmail>
 
 use super::OpticalFlowPair;
 use std::sync::Arc;
+
+#[cfg_attr(not(any(feature = "use-opencv", feature = "use-gmflow")), allow(dead_code))]
+mod quality;
 
 mod akaze;        pub use self::akaze::*;
 mod opencv_dis;   pub use opencv_dis::*;
@@ -36,7 +39,7 @@ impl OpticalFlowMethod {
         match method {
             0 => Self::OFAkaze(OFAkaze::detect_features(timestamp_us, img, width, height)),
             1 => Self::OFOpenCVPyrLK(OFOpenCVPyrLK::detect_features(timestamp_us, img, width, height)),
-            2 => Self::OFOpenCVDis(OFOpenCVDis::detect_features(timestamp_us, img, width, height)),
+            2 => Self::OFOpenCVDis(OFOpenCVDis::with_context(timestamp_us, img, width, height, context)),
             3 => Self::OFGmflow(OFGmflow::detect_features(timestamp_us, img, width, height, context)),
             _ => { log::error!("Unknown OF method {method}", ); Self::OFAkaze(OFAkaze::detect_features(timestamp_us, img, width, height)) }
         }
