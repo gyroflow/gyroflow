@@ -1,0 +1,143 @@
+[
+  {
+    "file": "known-camera.mp4",
+    "frames": 90,
+    "black_frames": 0,
+    "registration_failed_frames": [],
+    "jitter_rms_px": 5.267790794372559,
+    "median_registration_inliers": 537.5,
+    "median_scale": 0.9991872528191541,
+    "reference_points": [
+      [
+        288.0,
+        162.0
+      ],
+      [
+        480.0,
+        162.0
+      ],
+      [
+        672.0,
+        162.0
+      ],
+      [
+        288.0,
+        270.0
+      ],
+      [
+        480.0,
+        270.0
+      ],
+      [
+        672.0,
+        270.0
+      ],
+      [
+        288.0,
+        378.0
+      ],
+      [
+        480.0,
+        378.0
+      ],
+      [
+        672.0,
+        378.0
+      ]
+    ]
+  },
+  {
+    "file": "known-camera-dis.mp4",
+    "frames": 90,
+    "black_frames": 0,
+    "registration_failed_frames": [],
+    "jitter_rms_px": 3.79347825050354,
+    "median_registration_inliers": 479.0,
+    "median_scale": 1.144290732185489,
+    "reference_points": [
+      [
+        288.0,
+        162.0
+      ],
+      [
+        480.0,
+        162.0
+      ],
+      [
+        672.0,
+        162.0
+      ],
+      [
+        288.0,
+        270.0
+      ],
+      [
+        480.0,
+        270.0
+      ],
+      [
+        672.0,
+        270.0
+      ],
+      [
+        288.0,
+        378.0
+      ],
+      [
+        480.0,
+        378.0
+      ],
+      [
+        672.0,
+        378.0
+      ]
+    ]
+  },
+  {
+    "file": "known-camera-gmflow.mp4",
+    "frames": 90,
+    "black_frames": 0,
+    "registration_failed_frames": [],
+    "jitter_rms_px": 2.429145336151123,
+    "median_registration_inliers": 483.0,
+    "median_scale": 1.1134318086990158,
+    "reference_points": [
+      [
+        288.0,
+        162.0
+      ],
+      [
+        480.0,
+        162.0
+      ],
+      [
+        672.0,
+        162.0
+      ],
+      [
+        288.0,
+        270.0
+      ],
+      [
+        480.0,
+        270.0
+      ],
+      [
+        672.0,
+        270.0
+      ],
+      [
+        288.0,
+        378.0
+      ],
+      [
+        480.0,
+        378.0
+      ],
+      [
+        672.0,
+        378.0
+      ]
+    ]
+  }
+]

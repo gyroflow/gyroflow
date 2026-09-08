@@ -40,9 +40,11 @@ MenuItem {
     property alias poseMethod: poseMethod;
     property var customSyncTimestamps: [];
     property var additionalSyncTimestamps: [];
+    property bool gmflowRequested: false;
 
     function loadGyroflow(obj: var): void {
         const o = obj.synchronization || { };
+        gmflowRequested = +o.of_method === 3;
         if (o && Object.keys(o).length > 0) {
             if (o.hasOwnProperty("initial_offset"))     initialOffset.value                 = +o.initial_offset;
             if (o.hasOwnProperty("initial_offset_inv")) checkNegativeInitialOffset.checked  = !!o.initial_offset_inv;
@@ -146,8 +148,9 @@ MenuItem {
         text: qsTr("Auto sync");
         iconName: "spinner"
         anchors.horizontalCenter: parent.horizontalCenter;
+        enabled: syncMethod.currentIndex !== 3 || controller.gmflow_available();
         // enabled: controller.gyro_loaded;
-        tooltip: !enabled? qsTr("No motion data loaded, cannot sync.") : "";
+        tooltip: !enabled ? qsTr("Select an optical flow method supported by this build.") : "";
         function doSync(): void {
             let maxPoints = maxSyncPoints.value;
             let sync_points = controller.get_optimal_sync_points(maxPoints, initialOffset.value);
@@ -333,17 +336,25 @@ MenuItem {
             show: syncMethod.currentValue == "AKAZE";
             text: qsTr("The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn't produce good results");
         }
+        InfoMessageSmall {
+            show: syncMethod.currentIndex === 3;
+            text: controller.gmflow_available()
+                ? qsTr("GMFlow analyzes frames on the GPU. The first analysis may take longer while the model loads.")
+                : qsTr("This project uses GMFlow, which is not included in this build. Select another optical flow method to analyze the video.");
+        }
         Label {
             position: Label.LeftPosition;
             text: qsTr("Optical flow method");
 
             ComboBox {
                 id: syncMethod;
-                model: ["AKAZE", "OpenCV (PyrLK)", "OpenCV (DIS)"];
+                model: controller.gmflow_available() || sync.gmflowRequested
+                    ? ["AKAZE", "OpenCV (PyrLK)", "OpenCV (DIS)", "GMFlow (GPU)"]
+                    : ["AKAZE", "OpenCV (PyrLK)", "OpenCV (DIS)"];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 2;
-                onCurrentIndexChanged: controller.set_of_method(currentIndex);
+                onCurrentIndexChanged: if (currentIndex >= 0) controller.set_of_method(currentIndex);
                 Component.onCompleted: currentIndexChanged();
             }
         }

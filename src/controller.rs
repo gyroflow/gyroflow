@@ -60,6 +60,7 @@ pub struct Controller {
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
 
     set_of_method: qt_method!(fn(&self, v: u32)),
+    gmflow_available: qt_method!(fn(&self) -> bool),
     start_autosync: qt_method!(fn(&mut self, timestamps_fract: String, sync_params: String, mode: String)),
     update_chart: qt_method!(fn(&self, chart: QJSValue, series: String) -> bool),
     update_frequency_graph: qt_method!(fn(&self, graph: QJSValue, idx: usize, ts: f64, sr: f64, fft_size: usize)),
@@ -317,6 +318,10 @@ pub struct Controller {
 }
 
 impl Controller {
+    fn gmflow_available(&self) -> bool {
+        cfg!(feature = "gmflow")
+    }
+
     pub fn new() -> Self {
         Self {
             preview_resolution: -1,
@@ -541,7 +546,6 @@ impl Controller {
 
             match VideoProcessor::from_file(&input_file.url, gpu_decoding, 0, Some(decoder_options)) {
                 Ok(mut proc) => {
-                    let err2 = err.clone();
                     let sync2 = sync.clone();
                     proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                         assert!(_output_frame.is_none());
@@ -551,25 +555,19 @@ impl Controller {
                             let ratio = input_frame.height() as f64 / h as f64;
                             let sw = (input_frame.width() as f64 / ratio).round() as u32;
                             let sh = (input_frame.height() as f64 / (input_frame.width() as f64 / sw as f64)).round() as u32;
-                            match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
-                                Ok(small_frame) => {
-                                    let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
-
-                                    sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
-                                },
-                                Err(e) => {
-                                    err2(("An error occured: %1".to_string(), e.to_string()))
-                                }
-                            }
+                            let frame = converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh)?;
+                            sync2.feed_frame(timestamp_us, frame_no, frame.plane_width(0), frame.plane_height(0), frame.stride(0), frame.data(0));
                             frame_no += 1;
                         }
                         abs_frame_no += 1;
                         Ok(())
                     });
-                    if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
-                        err(("An error occured: %1".to_string(), e.to_string()));
+                    let decoded = proc.start_decoder_only(ranges, cancel_flag.clone()).map_err(|e| e.to_string());
+                    if decoded.is_err() { cancel_flag.store(true, SeqCst); }
+                    let analyzed = sync.finished_feeding_frames();
+                    if let Err(error) = analyzed.and(decoded) {
+                        err(("An error occured: %1".to_string(), error));
                     }
-                    sync.finished_feeding_frames();
                 }
                 Err(error) => {
                     err(("An error occured: %1".to_string(), error.to_string()));

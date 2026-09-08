@@ -1,0 +1,55 @@
+[
+  {
+    "case": "identity",
+    "matches": 1222,
+    "median_epe_pixels": 0.005830673592863109,
+    "p95_epe_pixels": 0.0117146632681358,
+    "seconds_including_first_load": 1.4575839
+  },
+  {
+    "case": "right4",
+    "matches": 1222,
+    "median_epe_pixels": 0.01134036035356774,
+    "p95_epe_pixels": 0.022049312233320757,
+    "seconds_including_first_load": 1.3025582
+  },
+  {
+    "case": "left7-down3",
+    "matches": 1196,
+    "median_epe_pixels": 0.04310293666383852,
+    "p95_epe_pixels": 0.06199283180470288,
+    "seconds_including_first_load": 1.3388149
+  },
+  {
+    "case": "right12-up5",
+    "matches": 1222,
+    "median_epe_pixels": 0.03951568658192813,
+    "p95_epe_pixels": 0.07333584851143311,
+    "seconds_including_first_load": 1.3530081
+  },
+  {
+    "case": "rotate2",
+    "matches": 1214,
+    "median_epe_pixels": 0.022064151247432058,
+    "p95_epe_pixels": 0.04448240972418354,
+    "seconds_including_first_load": 1.3112468
+  },
+  {
+    "case": "upstream_davis_demo",
+    "source": "AdrianEddy/unimatch demo/flow-davis at da140fac",
+    "size": [
+      854,
+      480
+    ],
+    "pairs": 2,
+    "matches": [
+      1184,
+      1179
+    ],
+    "seconds": [
+      1.3606795,
+      0.6650872
+    ],
+    "accuracy_ground_truth": "unavailable; ingestion and finite/in-bounds correspondences only"
+  }
+]

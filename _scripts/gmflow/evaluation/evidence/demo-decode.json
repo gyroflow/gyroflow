@@ -1,0 +1,26 @@
+[
+  {
+    "file": "nonfinite-pose-fix.mp4",
+    "decoded_frames": 90,
+    "height_width": [
+      378,
+      1536
+    ]
+  },
+  {
+    "file": "excluded-composite-comparison.mp4",
+    "decoded_frames": 133,
+    "height_width": [
+      378,
+      1536
+    ]
+  },
+  {
+    "file": "synthetic-comparison.mp4",
+    "decoded_frames": 90,
+    "height_width": [
+      378,
+      1536
+    ]
+  }
+]

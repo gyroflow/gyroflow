@@ -43,6 +43,7 @@ pub struct AutosyncProcess {
     total_detected_frames: Arc<AtomicUsize>,
     compute_params: Arc<RwLock<ComputeParams>>,
     cancel_flag: Arc<AtomicBool>,
+    of_context: Arc<super::OpticalFlowContext>,
     progress_cb: Option<Arc<Box<dyn Fn(f64, usize, usize) + Send + Sync + 'static>>>,
     finished_cb: Option<Arc<Box<dyn Fn(AutosyncResult) + Send + Sync + 'static>>>,
 
@@ -146,6 +147,11 @@ impl AutosyncProcess {
             })
             .build().unwrap();
 
+        // Visual-feature offsets request two-frame matches after pose estimation.
+        // Their images must remain available until that cache is complete.
+        let of_context = super::OpticalFlowContext::new(cancel_flag.clone());
+        let of_context = if sync_params.offset_method == 1 { of_context.retaining_images() } else { of_context };
+
         Ok(Self {
             frame_count,
             org_fps,
@@ -162,6 +168,7 @@ impl AutosyncProcess {
             compute_params: Arc::new(RwLock::new(comp_params)),
             finished_cb: None,
             progress_cb: None,
+            of_context: Arc::new(of_context),
             cancel_flag,
             thread_pool
         })
@@ -187,6 +194,7 @@ impl AutosyncProcess {
         let org_fps = self.org_fps;
         let compute_params = self.compute_params.clone();
         let cancel_flag = self.cancel_flag.clone();
+        let of_context = self.of_context.clone();
         let needs_poses = self.mode != "estimate_lens_delay";
         if let Some(scale) = self.fps_scale {
             timestamp_us = (timestamp_us as f64 / scale) as i64;
@@ -206,31 +214,34 @@ impl AutosyncProcess {
                     total_detected_frames.fetch_add(1, SeqCst);
                     return;
                 }
-                if let Some(img) = img {
-                    estimator.detect_features(frame_no, timestamp_us, img, width, height, method);
-                    total_detected_frames.fetch_add(1, SeqCst);
-
-                    if needs_poses && frame_no % 7 == 0 {
-                        estimator.process_detected_frames(org_fps, scaled_fps, &compute_params.read());
-                        estimator.recalculate_gyro_data(org_fps, false);
+                let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    if let Some(img) = img {
+                        estimator.detect_features_with_context(frame_no, timestamp_us, img, (width, height), method, of_context.clone());
+                        if needs_poses && frame_no % 7 == 0 {
+                            estimator.process_detected_frames(org_fps, scaled_fps, &compute_params.read());
+                            estimator.recalculate_gyro_data(org_fps, false);
+                        }
+                    } else {
+                        of_context.fail("Could not decode an optical-flow frame".into());
                     }
-
-                    if let Some(cb) = &progress_cb {
-                        let d = total_detected_frames.load(SeqCst);
-                        let t = total_read_frames.load(SeqCst).max(frame_count);
-                        cb((d as f64 / t.max(1) as f64) * 0.58, d, t);
-                    }
-                } else {
-                    log::warn!("Failed to get image {:?}", img);
+                }));
+                if result.is_err() { of_context.fail("Optical-flow analysis stopped unexpectedly. See the log for details.".into()); }
+                // Count completion after pose estimation, including failure. The
+                // finishing thread must not publish results while jobs still run.
+                let d = total_detected_frames.fetch_add(1, SeqCst) + 1;
+                if let Some(cb) = &progress_cb {
+                    let t = total_read_frames.load(SeqCst).max(frame_count);
+                    cb((d as f64 / t.max(1) as f64) * 0.58, d, t);
                 }
             });
         }
     }
 
-    pub fn finished_feeding_frames(&self) {
+    pub fn finished_feeding_frames(&self) -> Result<(), String> {
         while self.total_detected_frames.load(SeqCst) < self.total_read_frames.load(SeqCst) - 1 {
             std::thread::sleep(std::time::Duration::from_millis(100));
         }
+        if let Some(result) = self.finish_if_cancelled() { return result; }
 
         let offset_method = self.sync_params.offset_method;
 
@@ -246,6 +257,7 @@ impl AutosyncProcess {
             self.estimator.cache_optical_flow(1);
             }
             self.estimator.cleanup();
+            if let Some(result) = self.finish_if_cancelled() { return result; }
             if !cancelled {
             if let Some(cb) = &self.finished_cb {
                     cb(AutosyncResult::LensDelay(super::lens_delay::estimate(&self.estimator, &self.compute_params.read(), &self.lens_delay_meta_ln)));
@@ -255,22 +267,30 @@ impl AutosyncProcess {
                 let len = self.total_detected_frames.load(SeqCst);
                 cb(1.0, len, len);
             }
-            return;
+            return Ok(());
         }
 
         self.estimator.process_detected_frames(self.org_fps, self.scaled_fps, &self.compute_params.read());
+        if let Some(result) = self.finish_if_cancelled() { return result; }
         self.estimator.recalculate_gyro_data(self.org_fps, true);
         self.estimator.cache_optical_flow(if offset_method == 1 { 2 } else { 1 });
         self.estimator.cleanup();
+        if let Some(result) = self.finish_if_cancelled() { return result; }
 
         let mut scaled_ranges_us = Cow::Borrowed(&self.scaled_ranges_us);
 
         if self.mode == "synchronize" && !self.compute_params.read().gyro.read().has_motion() {
             // If no gyro data in file, set the computed optical flow as gyro data
+            let samples: Vec<_> = self.estimator.estimated_gyro.read().values().cloned().collect();
+            if samples.len() < 2 {
+                let error = "Could not estimate enough camera motion from this video. Try another optical flow or pose method.".to_string();
+                self.of_context.fail(error.clone());
+                return self.finish_if_cancelled().unwrap_or(Err(error));
+            }
             let compute_params = self.compute_params.write();
             let mut gyro = compute_params.gyro.write();
 
-            gyro.file_metadata.set_raw_imu(self.estimator.estimated_gyro.read().values().cloned().collect::<Vec<_>>());
+            gyro.file_metadata.set_raw_imu(samples);
             gyro.apply_transforms();
 
             let timestamps_fract = [0.5];
@@ -342,6 +362,17 @@ impl AutosyncProcess {
             let len = self.total_detected_frames.load(SeqCst);
             cb(1.0, len, len);
         }
+        Ok(())
+    }
+
+    fn finish_if_cancelled(&self) -> Option<Result<(), String>> {
+        if !self.of_context.is_cancelled() { return None; }
+        self.estimator.cleanup();
+        if let Some(cb) = &self.progress_cb {
+            let len = self.total_detected_frames.load(SeqCst);
+            cb(1.0, len, len);
+        }
+        Some(self.of_context.error().map_or(Ok(()), Err))
     }
 
     pub fn on_progress<F>(&mut self, cb: F) where F: Fn(f64, usize, usize) + Send + Sync + 'static {

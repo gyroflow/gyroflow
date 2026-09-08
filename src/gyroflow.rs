@@ -47,7 +47,7 @@ cpp! {{
     #endif
 }}
 
-fn entry() {
+fn entry() -> u8 {
     let ui_live_reload = false;
 
     #[cfg(target_os = "windows")]
@@ -78,8 +78,8 @@ fn entry() {
 
     let mut open_file = String::new();
     let mut open_preset = String::new();
-    if cli::run(&mut open_file, &mut open_preset) {
-        return;
+    if let Some(exit_status) = cli::run(&mut open_file, &mut open_preset) {
+        return exit_status;
     }
 
     if cfg!(compiled_qml) {
@@ -257,17 +257,17 @@ fn entry() {
     engine.exec();
 
     util::unregister_url_handlers();
+    0
 }
 
 
 #[unsafe(no_mangle)]
 #[cfg(target_os = "android")]
 pub extern fn main(_argc: i32, _argv: *mut *mut i8) -> i32 {
-    entry();
-    0
+    i32::from(entry())
 }
 
 #[cfg(not(target_os = "android"))]
-fn main() {
-    entry();
+fn main() -> std::process::ExitCode {
+    std::process::ExitCode::from(entry())
 }

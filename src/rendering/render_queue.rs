@@ -942,7 +942,6 @@ impl RenderQueue {
             let default_suffix = self.default_suffix.to_string();
             let mut additional_data = job.additional_data.clone();
             let mut proc_height = self.processing_resolution;
-            let err2 = err.clone();
             if let Some(ref ss) = stab.lens.read().sync_settings {
                 if let Some(pr) = ss.get("processing_resolution").and_then(|x| x.as_u64()) {
                     proc_height = pr as i32;
@@ -950,7 +949,12 @@ impl RenderQueue {
             }
 
             core::run_threaded(move || {
-                Self::do_autosync(stab.clone(), processing, &input_file, err2, proc_height);
+                if let Err(error) = Self::do_autosync(stab.clone(), processing, &input_file, cancel_flag.clone(), proc_height) {
+                    return err(("An error occured: %1".to_string(), error));
+                }
+                if cancel_flag.load(SeqCst) {
+                    return err(("Synchronization cancelled%1".to_string(), String::new()));
+                }
                 stab.recompute_blocking();
 
                 if let Some((opt, path, fields)) = export_metadata {
@@ -1443,159 +1447,130 @@ impl RenderQueue {
         job_id
     }
 
-    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(stab: Arc<StabilizationManager>, processing_cb: F, input_file: &gyroflow_core::InputFile, err: F2, proc_height: i32) {
-        let (url, duration_ms) = {
-            (stab.input_file.read().url.clone(), stab.params.read().duration_ms)
-        };
+    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static>(
+        stab: Arc<StabilizationManager>,
+        processing_cb: F,
+        input_file: &gyroflow_core::InputFile,
+        cancel_flag: Arc<AtomicBool>,
+        proc_height: i32,
+    ) -> Result<(), String> {
+        use gyroflow_core::synchronization::{AutosyncProcess, AutosyncResult, SyncParams};
+        use crate::rendering::VideoProcessor;
 
+        let url = stab.input_file.read().url.clone();
+        let (duration_ms, fps) = {
+            let params = stab.params.read();
+            (params.duration_ms, params.fps)
+        };
         let (has_sync_points, has_accurate_timestamps) = {
             let gyro = stab.gyro.read();
-            let md = gyro.file_metadata.read();
-            (!gyro.get_offsets().is_empty(), md.has_accurate_timestamps && !url.to_ascii_lowercase().ends_with(".braw"))
+            let metadata = gyro.file_metadata.read();
+            (!gyro.get_offsets().is_empty(), metadata.has_accurate_timestamps && !url.to_ascii_lowercase().ends_with(".braw"))
         };
-        let fps = stab.params.read().fps;
-
         let sync_settings = stab.lens.read().sync_settings.clone().unwrap_or_default();
-        if !has_sync_points && !has_accurate_timestamps && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
-            // ----------------------------------------------------------------------------
-            // --------------------------------- Autosync ---------------------------------
-            processing_cb(0.01);
-            use gyroflow_core::synchronization::{ AutosyncProcess, AutosyncResult };
-            use gyroflow_core::synchronization;
-            use crate::rendering::VideoProcessor;
-
-            if let Ok(mut sync_params) = serde_json::from_value(sync_settings) as serde_json::Result<synchronization::SyncParams> {
-                if sync_params.max_sync_points > 0 {
-                    let mut timestamps_fract = stab.get_optimal_sync_points(sync_params.max_sync_points, sync_params.initial_offset * 1000.0);
-
-                    if timestamps_fract.is_empty() || !sync_params.auto_sync_points {
-                        let chunks = 1.0 / sync_params.max_sync_points as f64;
-                        let start = chunks / 2.0;
-                        timestamps_fract = (0..sync_params.max_sync_points).map(|i| start + (i as f64 * chunks)).collect();
-
-                        if !sync_params.custom_sync_pattern.is_null() {
-                            let v = Self::resolve_syncpoint_pattern(&sync_params.custom_sync_pattern, duration_ms, fps);
-                            timestamps_fract = v.into_iter().filter(|v| *v <= duration_ms).map(|v| v / duration_ms).collect();
-                        }
-                    }
-
-                    #[cfg(not(any(target_os = "ios", target_os = "android")))]
-                    let _prevent_system_sleep = keep_awake::inhibit_system("Gyroflow", "Autosyncing");
-                    #[cfg(any(target_os = "ios", target_os = "android"))]
-                    let _prevent_system_sleep = keep_awake::inhibit_display("Gyroflow", "Autosyncing");
-
-                    let cancel_flag = Arc::new(AtomicBool::new(false));
-                    sync_params.initial_offset     *= 1000.0; // s to ms
-                    sync_params.time_per_syncpoint *= 1000.0; // s to ms
-                    sync_params.search_size        *= 1000.0; // s to ms
-
-                    let every_nth_frame = sync_params.every_nth_frame.max(1);
-
-                    let size = stab.params.read().size;
-
-                    if let Ok(mut sync) = AutosyncProcess::from_manager(&stab, &timestamps_fract, sync_params, "synchronize".into(), cancel_flag.clone()) {
-                        let processing_cb2 = processing_cb.clone();
-                        sync.on_progress(move |percent, _ready, _total| {
-                            processing_cb2(percent);
-                        });
-                        let stab2 = stab.clone();
-                        sync.on_finished(move |arg| {
-                            if let AutosyncResult::Offsets(offsets) = arg {
-                                let mut gyro = stab2.gyro.write();
-                                gyro.prevent_recompute = true;
-                                for x in offsets {
-                                    ::log::info!("Setting offset at {:.4}: {:.4} (cost {:.4})", x.0, x.1, x.2);
-                                    let new_ts = ((x.0 - x.1) * 1000.0) as i64;
-                                    { // Check the offset
-                                        let sync_data = stab2.sync_data.read();
-                                        if !sync_data.rank.is_empty() {
-                                            let index = ((x.0 - x.1) as f64 / (sync_data.ratio * 1000.0)).round() as usize;
-                                            if index < sync_data.rank.len() && sync_data.rank[index] < 13.0 {
-                                                continue;
-                                            }
-                                        }
-                                    }
-                                    // Remove existing offsets within 100ms range
-                                    gyro.remove_offsets_near(new_ts, 100.0);
-                                    gyro.set_offset(new_ts, x.1);
-                                }
-                                gyro.prevent_recompute = false;
-                                gyro.adjust_offsets();
-                                stab2.keyframes.write().update_gyro(&gyro);
-                            }
-                        });
-
-                        let (sw, sh) = ((proc_height as f64 * (size.0 as f64 / size.1 as f64)).round() as u32, proc_height as u32);
-
-                        let gpu_decoding = stab.gpu_decoding.load(SeqCst);
-
-                        let mut frame_no = 0;
-                        let mut abs_frame_no = 0;
-                        let sync = Arc::new(sync);
-
-                        let mut decoder_options = ffmpeg_next::Dictionary::new();
-                        if proc_height > 0 {
-                            decoder_options.set("scale", &format!("{}x{}", (proc_height * 16) / 9, proc_height));
-                        }
-
-                        if input_file.image_sequence_fps > 0.0 {
-                            let fps = if input_file.image_sequence_fps.fract() > 0.1 {
-                                ffmpeg_next::Rational::new((fps * 1001.0).round() as i32, 1001)
-                            } else {
-                                ffmpeg_next::Rational::new(fps.round() as i32, 1)
-                            };
-                            decoder_options.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
-                        }
-                        if input_file.image_sequence_start > 0 {
-                            decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
-                        }
-                        if cfg!(target_os = "android") {
-                            decoder_options.set("ndk_codec", "1");
-                        }
-                        ::log::debug!("Decoder options: {:?}", decoder_options);
-
-                        match VideoProcessor::from_file(&url, gpu_decoding, 0, Some(decoder_options)) {
-                            Ok(mut proc) => {
-                                let err2 = err.clone();
-                                let sync2 = sync.clone();
-                                proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
-                                    if abs_frame_no % every_nth_frame == 0 {
-                                        match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
-                                            Ok(small_frame) => {
-                                                let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
-
-                                                sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
-                                            },
-                                            Err(e) => {
-                                                err2(("An error occured: %1".to_string(), e.to_string()))
-                                            }
-                                        }
-                                        frame_no += 1;
-                                    }
-                                    abs_frame_no += 1;
-                                    Ok(())
-                                });
-                                if let Err(e) = proc.start_decoder_only(sync.get_ranges(), cancel_flag) {
-                                    err(("An error occured: %1".to_string(), e.to_string()));
-                                }
-
-                                sync.finished_feeding_frames();
-                            }
-                            Err(error) => {
-                                err(("An error occured: %1".to_string(), error.to_string()));
-                            }
-                        };
-                    } else {
-                        err(("An error occured: %1".to_string(), "Invalid parameters".to_string()));
-                    }
-
-                    stab.recompute_blocking();
-                }
-            }
-            processing_cb(1.0);
-            // --------------------------------- Autosync ---------------------------------
-            // ----------------------------------------------------------------------------
+        let requested = sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default();
+        if has_sync_points || has_accurate_timestamps || !requested {
+            return Ok(());
         }
+        let mut sync_params: SyncParams = serde_json::from_value(sync_settings).map_err(|e| e.to_string())?;
+        if sync_params.max_sync_points == 0 { return Ok(()); }
+        processing_cb(0.01);
+
+        let mut timestamps_fract = stab.get_optimal_sync_points(sync_params.max_sync_points, sync_params.initial_offset * 1000.0);
+        if timestamps_fract.is_empty() || !sync_params.auto_sync_points {
+            let chunks = 1.0 / sync_params.max_sync_points as f64;
+            let start = chunks / 2.0;
+            timestamps_fract = (0..sync_params.max_sync_points).map(|i| start + (i as f64 * chunks)).collect();
+            if !sync_params.custom_sync_pattern.is_null() {
+                let points = Self::resolve_syncpoint_pattern(&sync_params.custom_sync_pattern, duration_ms, fps);
+                timestamps_fract = points.into_iter().filter(|v| *v <= duration_ms).map(|v| v / duration_ms).collect();
+            }
+        }
+
+        #[cfg(not(any(target_os = "ios", target_os = "android")))]
+        let _prevent_system_sleep = keep_awake::inhibit_system("Gyroflow", "Autosyncing");
+        #[cfg(any(target_os = "ios", target_os = "android"))]
+        let _prevent_system_sleep = keep_awake::inhibit_display("Gyroflow", "Autosyncing");
+
+        sync_params.initial_offset *= 1000.0; // Seconds to milliseconds.
+        sync_params.time_per_syncpoint *= 1000.0;
+        sync_params.search_size *= 1000.0;
+        let every_nth_frame = sync_params.every_nth_frame.max(1);
+        let mut sync = AutosyncProcess::from_manager(&stab, &timestamps_fract, sync_params, "synchronize".into(), cancel_flag.clone())
+            .map_err(|_| "Video or synchronization settings leave too few frames to analyze".to_string())?;
+        let processing_cb2 = processing_cb.clone();
+        sync.on_progress(move |percent, _ready, _total| processing_cb2(percent));
+        let stab2 = stab.clone();
+        sync.on_finished(move |result| {
+            if let AutosyncResult::Offsets(offsets) = result {
+                let mut gyro = stab2.gyro.write();
+                gyro.prevent_recompute = true;
+                for (timestamp, offset, cost) in offsets {
+                    ::log::info!("Setting offset at {timestamp:.4}: {offset:.4} (cost {cost:.4})");
+                    let new_ts = ((timestamp - offset) * 1000.0) as i64;
+                    {
+                        let sync_data = stab2.sync_data.read();
+                        if !sync_data.rank.is_empty() {
+                            let index = ((timestamp - offset) / (sync_data.ratio * 1000.0)).round() as usize;
+                            if index < sync_data.rank.len() && sync_data.rank[index] < 13.0 {
+                                continue;
+                            }
+                        }
+                    }
+                    gyro.remove_offsets_near(new_ts, 100.0);
+                    gyro.set_offset(new_ts, offset);
+                }
+                gyro.prevent_recompute = false;
+                gyro.adjust_offsets();
+                stab2.keyframes.write().update_gyro(&gyro);
+            }
+        });
+
+        let mut decoder_options = ffmpeg_next::Dictionary::new();
+        if proc_height > 0 {
+            decoder_options.set("scale", &format!("{}x{}", (proc_height as i64 * 16) / 9, proc_height));
+        }
+        if input_file.image_sequence_fps > 0.0 {
+            let rate = if input_file.image_sequence_fps.fract() > 0.1 {
+                ffmpeg_next::Rational::new((fps * 1001.0).round() as i32, 1001)
+            } else {
+                ffmpeg_next::Rational::new(fps.round() as i32, 1)
+            };
+            decoder_options.set("framerate", &format!("{}/{}", rate.numerator(), rate.denominator()));
+        }
+        if input_file.image_sequence_start > 0 {
+            decoder_options.set("start_number", &input_file.image_sequence_start.to_string());
+        }
+        if cfg!(target_os = "android") { decoder_options.set("ndk_codec", "1"); }
+        ::log::debug!("Decoder options: {decoder_options:?}");
+
+        let sync = Arc::new(sync);
+        let sync2 = sync.clone();
+        let mut frame_no = 0;
+        let mut abs_frame_no: usize = 0;
+        let mut processor = VideoProcessor::from_file(&url, stab.gpu_decoding.load(SeqCst), 0, Some(decoder_options)).map_err(|e| e.to_string())?;
+        processor.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
+            if abs_frame_no.is_multiple_of(every_nth_frame) {
+                // Non-positive heights mean full resolution. Derive the aspect
+                // ratio from decoded frames, which may already be downscaled.
+                let sh = if proc_height > 0 { proc_height as u32 } else { input_frame.height() };
+                let sw = (input_frame.width() as f64 * sh as f64 / input_frame.height().max(1) as f64).round() as u32;
+                let frame = converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh)?;
+                sync2.feed_frame(timestamp_us, frame_no, frame.plane_width(0), frame.plane_height(0), frame.stride(0), frame.data(0));
+                frame_no += 1;
+            }
+            abs_frame_no += 1;
+            Ok(())
+        });
+        let decoded = processor.start_decoder_only(sync.get_ranges(), cancel_flag.clone()).map_err(|e| e.to_string());
+        if decoded.is_err() { cancel_flag.store(true, SeqCst); }
+        // Join submitted analysis jobs even if decoding failed. They must not
+        // publish a partial motion stream or outlive the failed render job.
+        let analyzed = sync.finished_feeding_frames();
+        analyzed?;
+        decoded?;
+        processing_cb(1.0);
+        Ok(())
     }
 
     pub fn apply_to_all(&mut self, data: String, additional_data: String, to_job_id: u32) {

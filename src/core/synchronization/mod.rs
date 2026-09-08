@@ -82,11 +82,14 @@ impl PoseEstimator {
     }
 
     pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32, of_method: u32) {
-        let frame_size = (width, height);
+        self.detect_features_with_context(frame_no, timestamp_us, img, (width, height), of_method, Arc::default());
+    }
+
+    pub fn detect_features_with_context(&self, frame_no: usize, timestamp_us: i64, img: Arc<image::GrayImage>, frame_size: (u32, u32), of_method: u32, context: Arc<OpticalFlowContext>) {
         let contains = self.sync_results.read().contains_key(&timestamp_us);
         if !contains {
             let result = FrameResult {
-                of_method: OpticalFlowMethod::detect_features(of_method, timestamp_us, img, width, height),
+                of_method: OpticalFlowMethod::detect_features_with_context(of_method, timestamp_us, img, frame_size.0, frame_size.1, context),
                 frame_no,
                 frame_size,
                 timestamp_us,
@@ -259,9 +262,11 @@ impl PoseEstimator {
         }
         img
     }
-    pub fn yuv_to_gray(_width: u32, height: u32, stride: u32, slice: &[u8]) -> Option<GrayImage> {
+    pub fn yuv_to_gray(width: u32, height: u32, stride: u32, slice: &[u8]) -> Option<GrayImage> {
         // TODO: maybe a better way than using stride as width?
-        image::GrayImage::from_raw(stride as u32, height, slice[0..(stride*height) as usize].to_vec())
+        if width == 0 || height == 0 || width > stride { return None; }
+        let len = (stride as usize).checked_mul(height as usize)?;
+        image::GrayImage::from_raw(stride, height, slice.get(..len)?.to_vec())
     }
     pub fn lowpass_filter(&self, freq: f64, fps: f64) {
         self.lpf.store((freq * 100.0) as u32, SeqCst);
@@ -404,6 +409,20 @@ fn finite_angular_velocity(rotation: &Rotation3<f64>, rate: f64) -> Option<nalge
 #[cfg(test)]
 mod motion_tests {
     use super::*;
+
+    #[test]
+    fn gray_decoder_rejects_truncated_planes_and_accepts_stride_padding() {
+        assert!(PoseEstimator::yuv_to_gray(4, 2, 8, &[0; 15]).is_none());
+        assert!(PoseEstimator::yuv_to_gray(9, 2, 8, &[0; 16]).is_none());
+        assert!(PoseEstimator::yuv_to_gray(0, 2, 8, &[0; 16]).is_none());
+        assert!(PoseEstimator::yuv_to_gray(4, 2, 0, &[]).is_none());
+        assert!(PoseEstimator::yuv_to_gray(4, 0, 8, &[]).is_none());
+        assert!(PoseEstimator::yuv_to_gray(4, u32::MAX, u32::MAX, &[]).is_none());
+        let bytes: Vec<_> = (0..16).collect();
+        let image = PoseEstimator::yuv_to_gray(4, 2, 8, &bytes).unwrap();
+        assert_eq!(image.dimensions(), (8, 2));
+        assert_eq!(image.get_pixel(0, 1).0[0], 8);
+    }
 
     #[test]
     fn invalid_pose_cannot_become_an_imu_sample() {

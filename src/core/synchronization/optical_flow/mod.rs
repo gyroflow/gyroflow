@@ -7,6 +7,8 @@ use std::sync::Arc;
 mod akaze;        pub use self::akaze::*;
 mod opencv_dis;   pub use opencv_dis::*;
 mod opencv_pyrlk; pub use opencv_pyrlk::*;
+mod gmflow;       pub use gmflow::OFGmflow;
+mod context;      pub use context::OpticalFlowContext;
 
 #[enum_delegate::register]
 pub trait OpticalFlowTrait {
@@ -23,13 +25,19 @@ pub enum OpticalFlowMethod {
     OFAkaze(OFAkaze),
     OFOpenCVPyrLK(OFOpenCVPyrLK),
     OFOpenCVDis(OFOpenCVDis),
+    OFGmflow(OFGmflow),
 }
 impl OpticalFlowMethod {
     pub fn detect_features(method: u32, timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32) -> Self {
+        Self::detect_features_with_context(method, timestamp_us, img, width, height, Arc::default())
+    }
+
+    pub fn detect_features_with_context(method: u32, timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32, context: Arc<OpticalFlowContext>) -> Self {
         match method {
             0 => Self::OFAkaze(OFAkaze::detect_features(timestamp_us, img, width, height)),
             1 => Self::OFOpenCVPyrLK(OFOpenCVPyrLK::detect_features(timestamp_us, img, width, height)),
             2 => Self::OFOpenCVDis(OFOpenCVDis::detect_features(timestamp_us, img, width, height)),
+            3 => Self::OFGmflow(OFGmflow::detect_features(timestamp_us, img, width, height, context)),
             _ => { log::error!("Unknown OF method {method}", ); Self::OFAkaze(OFAkaze::detect_features(timestamp_us, img, width, height)) }
         }
     }

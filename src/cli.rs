@@ -7,7 +7,7 @@ use gyroflow_core::*;
 use std::sync::Arc;
 use std::time::Instant;
 use qmetaobject::QString;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use crate::rendering;
 use crate::rendering::render_queue::*;
@@ -131,13 +131,14 @@ pub fn will_run_in_console() -> bool {
     false
 }
 
-pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
+/// None continues into the GUI; Some contains the command-line exit status.
+pub fn run(open_file: &mut String, open_preset: &mut String) -> Option<u8> {
     if std::env::args().len() > 1 {
         let opts: Opts = argh::from_env();
 
         if opts.version {
             println!("Gyroflow v{}", crate::util::get_version());
-            return true;
+            return Some(0);
         }
 
         let absolute_paths: Vec<String> = opts.input.iter().map(|file| {
@@ -170,14 +171,14 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                 } else {
                     open
                 };
-                return false;
+                return None;
             }
         }
 
         for file in videos.iter().chain(lens_profiles.iter()) {
             if !std::path::Path::new(&file).exists() {
                 log::error!("File {} doesn't exist.", file);
-                return true;
+                return Some(1);
             }
         }
         let mut watching = opts.watch.as_ref().map(|x| !x.is_empty()).unwrap_or_default();
@@ -185,11 +186,11 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
         if !watching {
             if lens_profiles.len() > 1 {
                 log::error!("More than one lens profile!");
-                return true;
+                return Some(1);
             }
             if videos.is_empty() {
                 log::error!("No videos provided!");
-                return true;
+                return Some(1);
             }
 
             log::info!("Videos: {:?}", videos);
@@ -299,6 +300,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
 
         let mut pbs = HashMap::<u32, ProgressBar>::new();
 
+        let had_errors = Cell::new(false);
         let queue = RefCell::new(queue);
         let queue_ptr = unsafe { qmetaobject::QObjectPinned::new(&queue).get_or_create_cpp_object() };
 
@@ -319,7 +321,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             }) {
                 // Nothing is being watched and nothing was queued, so the event loop would just hang forever
                 log::error!("{}", e);
-                return true;
+                return Some(1);
             }
             watching = true;
         }
@@ -421,6 +423,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                 }
             });
             connect!(queue_ptr, q, convert_format, |job_id: &u32, format: &QString, supported: &QString, _candidate: &QString| {
+                had_errors.set(true);
                 log::error!("[{:08x}] Pixel format {} is not supported. Supported are: {}", job_id, format.to_string(), supported.to_string());
             });
             connect!(queue_ptr, q, error, |job_id: &u32, text: &QString, arg: &QString, _callback: &QString| {
@@ -430,6 +433,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                     log::warn!("[{:08x}] File exists, overwriting: {}", job_id, text.to_string().strip_prefix("file_exists:").unwrap());
                     return;
                 }
+                had_errors.set(true);
                 log::error!("[{:08x}] Error: {}", job_id, text.to_string().replace("%1", &arg.to_string()));
             });
             connect!(queue_ptr, q, added, |job_id: &u32| {
@@ -519,7 +523,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             if queue.jobs_added.is_empty() {
                 // Nothing was queued, so `processing_done` will never fire, the queue would never start and the event loop would hang forever
                 log::error!("None of the input files could be added to the render queue.");
-                return true;
+                return Some(1);
             }
         }
 
@@ -533,10 +537,10 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
 
         log::info!("Done in {:.3}s", time.elapsed().as_millis() as f64 / 1000.0);
 
-        return true;
+        return Some(u8::from(had_errors.get()));
     }
 
-    false
+    None
 }
 
 fn detect_types(all_files: &[String]) -> (Vec<String>, Vec<String>, Vec<String>) { // -> Videos/projects, lens profiles, presets

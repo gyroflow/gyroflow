@@ -1,0 +1,16 @@
+[package]
+name = "gyroflow-gmflow"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-or-later"
+publish = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+burn = { version = "=0.21.0", default-features = false, features = ["std", "wgpu"] }
+burn-store = { version = "=0.21.0", default-features = false, features = ["std", "burnpack"] }
+
+[build-dependencies]
+burn-onnx = "=0.21.0"
