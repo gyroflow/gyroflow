@@ -120,7 +120,11 @@ def encode(path, frames, size):
             raise RuntimeError(f"Encoding failed: {path}")
 
 
-manifest = {"fps_assumption": fps, "texture_seeds": {"background": 45, "alternate": 811}, "cases": {}}
+manifest = {
+    "fps_assumption": fps,
+    "texture_seeds": {"background": 45, "alternate": 811},
+    "cases": {},
+}
 for case in [
     "local-jitter",
     "moving-subject",
