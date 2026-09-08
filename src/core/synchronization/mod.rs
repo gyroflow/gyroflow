@@ -258,9 +258,24 @@ impl PoseEstimator {
         }
         img
     }
-    pub fn yuv_to_gray(_width: u32, height: u32, stride: u32, slice: &[u8]) -> Option<GrayImage> {
-        // TODO: maybe a better way than using stride as width?
-        image::GrayImage::from_raw(stride as u32, height, slice[0..(stride*height) as usize].to_vec())
+    pub fn yuv_to_gray(width: u32, height: u32, stride: u32, slice: &[u8]) -> Option<GrayImage> {
+        if width == 0 || height == 0 || stride < width { return None; }
+        let row_bytes = width as usize;
+        let rows = height as usize;
+        let pitch = stride as usize;
+        // Only visible pixels are required in the last row. Padding is not image
+        // content and must not become features or change the tracker's geometry.
+        let required = (rows - 1).checked_mul(pitch)?.checked_add(row_bytes)?;
+        let source = slice.get(..required)?;
+        let mut pixels = Vec::with_capacity(row_bytes.checked_mul(rows)?);
+        if row_bytes == pitch {
+            pixels.extend_from_slice(source);
+        } else {
+            for row in source.chunks(pitch) {
+                pixels.extend_from_slice(&row[..row_bytes]);
+            }
+        }
+        image::GrayImage::from_raw(width, height, pixels)
     }
     pub fn lowpass_filter(&self, freq: f64, fps: f64) {
         self.lpf.store((freq * 100.0) as u32, SeqCst);
@@ -387,5 +402,50 @@ impl PoseEstimator {
             2 => find_offset::rs_sync::find_offsets(&self, ranges, sync_params, params, progress_cb, cancel_flag),
             v => { log::error!("Unknown offset method: {v}"); Vec::new() }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::PoseEstimator;
+
+    #[test]
+    fn grayscale_discards_row_padding_before_tracking() {
+        let frame = [1, 2, 3, 250, 251, 4, 5, 6, 252, 253];
+        let gray = PoseEstimator::yuv_to_gray(3, 2, 5, &frame).unwrap();
+        assert_eq!(gray.dimensions(), (3, 2));
+        assert_eq!(gray.into_raw(), [1, 2, 3, 4, 5, 6]);
+    }
+
+    #[test]
+    fn grayscale_tight_rows_ignore_following_plane_bytes() {
+        let frame = [1, 2, 3, 4, 5, 6, 250, 251];
+        let gray = PoseEstimator::yuv_to_gray(3, 2, 3, &frame).unwrap();
+        assert_eq!(gray.dimensions(), (3, 2));
+        assert_eq!(gray.into_raw(), [1, 2, 3, 4, 5, 6]);
+    }
+
+    #[test]
+    fn grayscale_does_not_require_padding_after_the_last_row() {
+        let frame = [1, 2, 3, 250, 251, 4, 5, 6];
+        let gray = PoseEstimator::yuv_to_gray(3, 2, 5, &frame).unwrap();
+        assert_eq!(gray.into_raw(), [1, 2, 3, 4, 5, 6]);
+    }
+
+    #[test]
+    fn grayscale_rejects_a_truncated_visible_row_without_panicking() {
+        assert!(PoseEstimator::yuv_to_gray(3, 2, 5, &[1, 2, 3, 0, 0, 4, 5]).is_none());
+    }
+
+    #[test]
+    fn grayscale_rejects_empty_or_overlapping_rows() {
+        for (width, height, stride) in [(0, 2, 5), (3, 0, 5), (3, 2, 2), (3, 2, 0)] {
+            assert!(PoseEstimator::yuv_to_gray(width, height, stride, &[0; 10]).is_none());
+        }
+    }
+
+    #[test]
+    fn grayscale_rejects_unrepresentable_or_unbacked_extents() {
+        assert!(PoseEstimator::yuv_to_gray(u32::MAX, u32::MAX, u32::MAX, &[]).is_none());
     }
 }
