@@ -141,7 +141,8 @@ impl OpticalFlowTrait for OFOpenCVDis {
                             let (x, y) = (i as f32 + pt[0], j as f32 + pt[1]);
                             if let Some(back) = reverse_at(x, y)? {
                                 if (pt[0] + back.0).hypot(pt[1] + back.1) <= 1.5 &&
-                                    calculate_texture(&next.img, x.round() as usize, y.round() as usize) > texture_threshold {
+                                    calculate_texture(&next.img, x.round() as usize, y.round() as usize) > texture_threshold &&
+                                    super::photometric_match(&self.img, &next.img, self.size, (i as f32, j as f32), (x, y)) {
                                     points_a.push((i as f32, j as f32));
                                     points_b.push((x, y));
                                 }

@@ -322,7 +322,7 @@ impl FrameTransform {
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
         let quat1 = gyro.org_quat_at_timestamp(timestamp_ms).inverse();
-        let smoothed_quat1 = gyro.smoothed_quat_at_timestamp(timestamp_ms);
+        let smoothed_quat1 = gyro.smoothed_quat_with_discontinuities(timestamp_ms, &params.optical_cut_times);
 
         // Only compute 1 matrix if not using rolling shutter correction
         let rows = if frame_readout_time.abs() > 0.0 { if params.frame_readout_direction.is_horizontal() { params.width } else { params.height } } else { 1 };
@@ -480,7 +480,7 @@ impl FrameTransform {
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
         let quat1 = gyro.org_quat_at_timestamp(timestamp_ms).inverse();
-        let smoothed_quat1 = gyro.smoothed_quat_at_timestamp(timestamp_ms);
+        let smoothed_quat1 = gyro.smoothed_quat_with_discontinuities(timestamp_ms, &params.optical_cut_times);
 
         // Only compute 1 matrix if not using rolling shutter correction; it stands for the whole frame, so the
         // per-row data (sensor and lens shift, lens breathing) is looked up at the centre row, like `at_timestamp` does
@@ -572,6 +572,7 @@ mod tests {
         p.optical_motion = Some(std::sync::Arc::new(OpticalMotionData {
             version: 1, complete: true, pairs: vec![OpticalMotionPair { from_us: 0, to_us: 33_333,
                 size: (320, 240), from: vec![(10.0, 10.0)], to: vec![(11.0, 10.0)] }],
+            ..Default::default()
         }));
         p
     }

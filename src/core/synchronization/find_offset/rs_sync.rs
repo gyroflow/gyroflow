@@ -229,7 +229,7 @@ impl FindOffsetsRssync<'_> {
             if to_ts > from_ts {
                 let l = sync_results.read();
                 for (_ts, x) in l.range(from_ts..to_ts) {
-                    if let Ok(of) = x.optical_flow.try_borrow() {
+                    if let Some(of) = x.optical_flow.try_read() {
                         if let Some(Some(opt_pts)) = of.get(&1) {
                             points_per_range.push((opt_pts.clone(), x.frame_size));
                         }

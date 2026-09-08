@@ -950,7 +950,7 @@ impl RenderQueue {
             }
 
             core::run_threaded(move || {
-                Self::do_autosync(stab.clone(), processing, &input_file, err2, proc_height);
+                if !Self::do_autosync(stab.clone(), processing, &input_file, err2, proc_height, cancel_flag.clone()) { return; }
                 stab.recompute_blocking();
 
                 if let Some((opt, path, fields)) = export_metadata {
@@ -1443,7 +1443,7 @@ impl RenderQueue {
         job_id
     }
 
-    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(stab: Arc<StabilizationManager>, processing_cb: F, input_file: &gyroflow_core::InputFile, err: F2, proc_height: i32) {
+    fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(stab: Arc<StabilizationManager>, processing_cb: F, input_file: &gyroflow_core::InputFile, err: F2, proc_height: i32, cancel_flag: Arc<AtomicBool>) -> bool {
         let (url, duration_ms) = {
             (stab.input_file.read().url.clone(), stab.params.read().duration_ms)
         };
@@ -1496,7 +1496,6 @@ impl RenderQueue {
                     #[cfg(any(target_os = "ios", target_os = "android"))]
                     let _prevent_system_sleep = keep_awake::inhibit_display("Gyroflow", "Autosyncing");
 
-                    let cancel_flag = Arc::new(AtomicBool::new(false));
                     sync_params.initial_offset     *= 1000.0; // s to ms
                     sync_params.time_per_syncpoint *= 1000.0; // s to ms
                     sync_params.search_size        *= 1000.0; // s to ms
@@ -1571,7 +1570,6 @@ impl RenderQueue {
 
                         match VideoProcessor::from_file(&url, gpu_decoding, 0, Some(decoder_options)) {
                             Ok(mut proc) => {
-                                let err2 = err.clone();
                                 let sync2 = sync.clone();
                                 proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                                     if abs_frame_no % every_nth_frame == 0 {
@@ -1582,7 +1580,8 @@ impl RenderQueue {
                                                 sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
                                             },
                                             Err(e) => {
-                                                err2(("An error occured: %1".to_string(), e.to_string()))
+                                                sync2.mark_decode_failed();
+                                                return Err(e.into());
                                             }
                                         }
                                         frame_no += 1;
@@ -1590,27 +1589,40 @@ impl RenderQueue {
                                     abs_frame_no += 1;
                                     Ok(())
                                 });
-                                if let Err(e) = proc.start_decoder_only(sync.get_ranges(), cancel_flag) {
+                                let decoded = proc.start_decoder_only(sync.get_ranges(), cancel_flag.clone());
+                                if decoded.is_err() { sync.mark_decode_failed(); }
+                                let complete = sync.finished_feeding_frames();
+                                if let Err(e) = decoded {
                                     err(("An error occured: %1".to_string(), e.to_string()));
+                                    return false;
                                 }
-
-                                sync.finished_feeding_frames();
+                                if !complete {
+                                    let reason = if cancel_flag.load(SeqCst) { "Optical analysis cancelled." } else { "The complete video could not be analyzed. Previous analysis was preserved." };
+                                    err(("An error occured: %1".to_string(), reason.to_string()));
+                                    return false;
+                                }
                             }
                             Err(error) => {
                                 err(("An error occured: %1".to_string(), error.to_string()));
+                                return false;
                             }
                         };
                     } else {
                         err(("An error occured: %1".to_string(), "Invalid parameters".to_string()));
+                        return false;
                     }
 
                     stab.recompute_blocking();
                 }
+            } else {
+                err(("An error occured: %1".to_string(), "Invalid synchronization settings".to_string()));
+                return false;
             }
             processing_cb(1.0);
             // --------------------------------- Autosync ---------------------------------
             // ----------------------------------------------------------------------------
         }
+        true
     }
 
     pub fn apply_to_all(&mut self, data: String, additional_data: String, to_job_id: u32) {

@@ -696,6 +696,10 @@ impl GyroSource {
     pub fn recompute_smoothness(&self, alg: &dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, compute_params: &crate::ComputeParams) -> (TimeQuat, (f64, f64, f64)) {
         let file_metadata = self.file_metadata.read();
         let mut smoothed_quaternions = self.quaternions.clone();
+        let boundaries: Vec<i64> = compute_params.optical_cut_times.iter().map(|t| {
+            let ms = *t as f64 / 1000.0;
+            ((ms - self.offset_at_video_timestamp(ms)) * 1000.0).round() as i64
+        }).collect();
 
         for (ts, q) in smoothed_quaternions.iter_mut() {
             use crate::KeyframeType;
@@ -711,10 +715,10 @@ impl GyroSource {
         if true {
             // Lock horizon, then smooth
             horizon_lock.lock(&mut smoothed_quaternions, &self.quaternions, &file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, compute_params);
-            smoothed_quaternions = alg.smooth(&smoothed_quaternions, self.duration_ms, compute_params);
+            smoothed_quaternions = super::smoothing::smooth_with_boundaries(alg, &smoothed_quaternions, self.duration_ms, compute_params, &boundaries);
         } else {
             // Smooth, then lock horizon
-            smoothed_quaternions = alg.smooth(&smoothed_quaternions, self.duration_ms, compute_params);
+            smoothed_quaternions = super::smoothing::smooth_with_boundaries(alg, &smoothed_quaternions, self.duration_ms, compute_params, &boundaries);
             horizon_lock.lock(&mut smoothed_quaternions, &self.quaternions, &file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, compute_params);
         }
 
@@ -921,6 +925,27 @@ impl GyroSource {
 
     pub fn      org_quat_at_timestamp(&self, timestamp_ms: f64) -> Quat64 { self.quat_at_timestamp(&self.quaternions,          timestamp_ms) }
     pub fn smoothed_quat_at_timestamp(&self, timestamp_ms: f64) -> Quat64 { self.quat_at_timestamp(&self.smoothed_quaternions, timestamp_ms) }
+
+    pub fn smoothed_quat_with_discontinuities(&self, timestamp_ms: f64, boundaries_us: &[i64]) -> Quat64 {
+        if boundaries_us.is_empty() { return self.smoothed_quat_at_timestamp(timestamp_ms); }
+        let to_gyro = |video_us: i64| {
+            let ms = video_us as f64 / 1000.0;
+            ((ms - self.offset_at_video_timestamp(ms)) * 1000.0).round() as i64
+        };
+        let video_us = (timestamp_ms * 1000.0).round() as i64;
+        let index = boundaries_us.partition_point(|t| *t <= video_us);
+        let start = if index > 0 { to_gyro(boundaries_us[index - 1]) } else { i64::MIN };
+        let end = boundaries_us.get(index).map(|t| to_gyro(*t)).unwrap_or(i64::MAX);
+        if start >= end { return Quat64::identity(); }
+        let lookup = to_gyro(video_us).clamp(start, end - 1);
+        let before = self.smoothed_quaternions.range(start..=lookup).next_back();
+        let after = self.smoothed_quaternions.range(lookup..end).next();
+        match (before, after) {
+            (Some((ta, a)), Some((tb, b))) if ta != tb => a.slerp(b, (lookup - ta) as f64 / (tb - ta) as f64),
+            (Some((_, q)), _) | (_, Some((_, q))) => *q,
+            _ => Quat64::identity(),
+        }
+    }
 
     pub fn offset_at_timestamp(offsets: &BTreeMap<i64, f64>, timestamp_ms: f64) -> f64 {
         match offsets.len() {

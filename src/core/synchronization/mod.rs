@@ -6,7 +6,6 @@ use std::ops::Range;
 use std::sync::Arc;
 use std::sync::atomic::{ AtomicBool, AtomicU32, Ordering::SeqCst };
 use parking_lot::RwLock;
-use std::cell::RefCell;
 use std::collections::BTreeMap;
 use rayon::iter::{ ParallelIterator, IntoParallelRefIterator };
 
@@ -59,10 +58,8 @@ pub struct FrameResult {
     pub quat: Option<Quat64>,
     pub euler: Option<(f64, f64, f64)>,
 
-    optical_flow: RefCell<BTreeMap<usize, OpticalFlowPairWithTs>>
+    optical_flow: Arc<RwLock<BTreeMap<usize, OpticalFlowPairWithTs>>>
 }
-unsafe impl Send for FrameResult {}
-unsafe impl Sync for FrameResult {}
 
 #[derive(Default)]
 pub struct PoseEstimator {
@@ -73,6 +70,7 @@ pub struct PoseEstimator {
     pub every_nth_frame: AtomicU32,
     pub pose_method: AtomicU32,
     pub offset_method: AtomicU32,
+    pub optical_only: AtomicBool,
 }
 
 impl PoseEstimator {
@@ -199,7 +197,7 @@ impl PoseEstimator {
         let keys: Vec<i64> = l.keys().copied().collect();
         for (i, k) in keys.iter().enumerate() {
             if let Some(from_fr) = l.get(k) {
-                if from_fr.optical_flow.try_borrow().map(|of| !of.is_empty()).unwrap_or_default() {
+                if !from_fr.optical_flow.read().is_empty() {
                     // We already have OF for this frame
                     continue;
                 }
@@ -208,7 +206,8 @@ impl PoseEstimator {
                         if let Some(to_item) = l.get(to_key) {
                             if from_fr.frame_no + d == to_item.frame_no {
                                 let of = from_fr.of_method.optical_flow_to(&to_item.of_method);
-                                if let Ok(mut from_of) = from_fr.optical_flow.try_borrow_mut() {
+                                {
+                                    let mut from_of = from_fr.optical_flow.write();
                                     from_of.insert(d,
                                         of.map(|of| ((from_fr.timestamp_us, of.0), (to_item.timestamp_us, of.1)))
                                     );
@@ -233,7 +232,7 @@ impl PoseEstimator {
                 let mut iter = l.range(first_ts..);
                 for _ in 0..next_no { iter.next(); }
                 if let Some((_, curr)) = iter.next() {
-                    if let Ok(of) = curr.optical_flow.try_borrow() {
+                    if let Some(of) = curr.optical_flow.try_read() {
                         if let Some(opt_pts) = of.get(&num_frames) {
                             return (if filter {
                                 Self::filter_of_lines(opt_pts, scale)
@@ -298,7 +297,11 @@ impl PoseEstimator {
                 let mut eul = v.euler;
 
                 // ----------- Interpolation -----------
-                if final_pass && eul.is_none() {
+                if final_pass && eul.is_none() && self.optical_only.load(SeqCst) {
+                    // No observation across a cut/gap is not angular motion.
+                    // Keep a zero sample rather than interpolate unrelated scenes.
+                    if iter.peek().is_some() { eul = Some((0.0, 0.0, 0.0)); }
+                } else if final_pass && eul.is_none() {
                     if let Some(prev_existing) = sync_results.range(..*k).rev().find(|x| x.1.euler.is_some()) {
                         if let Some(next_existing) = sync_results.range(*k..).find(|x| x.1.euler.is_some()) {
                             let ratio = (*k - prev_existing.0) as f64 / (next_existing.0 - prev_existing.0) as f64;
@@ -409,6 +412,26 @@ impl PoseEstimator {
 #[cfg(test)]
 mod tests {
     use super::PoseEstimator;
+
+    #[test]
+    fn missing_optical_motion_is_not_interpolated_between_unrelated_scenes() {
+        use std::sync::{Arc, atomic::Ordering::SeqCst};
+        let estimator = PoseEstimator::default();
+        estimator.optical_only.store(true, SeqCst);
+        for i in 0..4 {
+            estimator.detect_features(i, i as i64 * 33_333, Arc::new(image::GrayImage::new(32, 32)), 32, 32, 2);
+        }
+        {
+            let mut results = estimator.sync_results.write();
+            results.get_mut(&0).unwrap().euler = Some((1.0, 2.0, 3.0));
+            results.get_mut(&66_666).unwrap().euler = Some((4.0, 5.0, 6.0));
+        }
+        estimator.recalculate_gyro_data(30.0, true);
+        assert_eq!(estimator.estimated_gyro.read()[&50_000].gyro, Some([0.0; 3]));
+        estimator.optical_only.store(false, SeqCst);
+        estimator.recalculate_gyro_data(30.0, true);
+        assert_ne!(estimator.estimated_gyro.read()[&50_000].gyro, Some([0.0; 3]));
+    }
 
     #[test]
     fn grayscale_discards_row_padding_before_tracking() {

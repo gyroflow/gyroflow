@@ -73,6 +73,7 @@ pub struct ComputeParams {
     pub optical_motion: Option<Arc<crate::synchronization::residual_motion::OpticalMotionData>>,
     pub optical_grids: Arc<Vec<crate::synchronization::residual_motion::MotionGrid>>,
     pub optical_crop_margins: Arc<Vec<f32>>,
+    pub optical_cut_times: Arc<Vec<i64>>,
     pub optical_time_scale: f64,
 }
 impl ComputeParams {
@@ -97,6 +98,12 @@ impl ComputeParams {
         let digital_lens = lens.digital_lens.as_ref().map(|x| DistortionModel::from_name(&x));
 
         let digital_lens_params = lens.digital_lens_params.clone();
+        let optical_motion = mgr.gyro.read().file_metadata.read().optical_motion.clone().map(Arc::new);
+        let mut optical_cut_times: Vec<i64> = optical_motion.as_ref().filter(|d| d.version == 1 && d.complete && d.estimated_gyro).map(|d|
+            d.discontinuities_us.iter().map(|t| (*t as f64 / params.fps_scale.unwrap_or(1.0)).round() as i64).collect()
+        ).unwrap_or_default();
+        optical_cut_times.sort_unstable();
+        optical_cut_times.dedup();
 
         Self {
             gyro: mgr.gyro.clone(),
@@ -158,9 +165,10 @@ impl ComputeParams {
 
             lens_breathing_enabled: params.lens_breathing_enabled,
             optical_stabilization: params.optical_stabilization,
-            optical_motion: mgr.gyro.read().file_metadata.read().optical_motion.clone().map(Arc::new),
+            optical_motion,
             optical_grids: Default::default(),
             optical_crop_margins: Default::default(),
+            optical_cut_times: Arc::new(optical_cut_times),
             optical_time_scale: params.fps_scale.unwrap_or(1.0),
         }
     }

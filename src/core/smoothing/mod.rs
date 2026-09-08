@@ -32,6 +32,32 @@ pub trait SmoothingAlgorithm: DynClone {
 }
 clone_trait_object!(SmoothingAlgorithm);
 
+/// Smooth independent observed segments without carrying velocity across edits
+/// or tracking gaps. Timestamps/keyframes stay in the original gyro timebase.
+pub fn smooth_with_boundaries(alg: &dyn SmoothingAlgorithm, quats: &TimeQuat, duration_ms: f64, params: &ComputeParams, boundaries: &[i64]) -> TimeQuat {
+    if boundaries.is_empty() || quats.len() < 2 { return alg.smooth(quats, duration_ms, params); }
+    let mut result = TimeQuat::new();
+    let mut segment = TimeQuat::new();
+    let mut index = 0;
+    let flush = |segment: &mut TimeQuat, result: &mut TimeQuat| {
+        if !segment.is_empty() {
+            // Preserve the original average sample rate used by these algorithms.
+            let duration = duration_ms * segment.len() as f64 / quats.len() as f64;
+            result.extend(alg.smooth(segment, duration, params));
+            segment.clear();
+        }
+    };
+    for (ts, q) in quats {
+        if boundaries.get(index).is_some_and(|b| ts >= b) {
+            flush(&mut segment, &mut result);
+            while boundaries.get(index).is_some_and(|b| ts >= b) { index += 1; }
+        }
+        segment.insert(*ts, *q);
+    }
+    flush(&mut segment, &mut result);
+    result
+}
+
 struct Algs(Vec<Box<dyn SmoothingAlgorithm>>);
 impl Default for Algs {
     fn default() -> Self {
@@ -113,6 +139,7 @@ impl Smoothing {
         // Zoom limiting changes the stored quaternions. Changing the optical
         // reserve must restart from the unbounded camera smoothing result.
         hasher.write_u64(crate::synchronization::residual_motion::zoom_reserve_factor(compute_params).to_bits());
+        for cut in compute_params.optical_cut_times.iter() { hasher.write_i64(*cut); }
         hasher.write_usize(compute_params.camera_diagonal_fovs.len());
         for fov in &compute_params.camera_diagonal_fovs { hasher.write_u64(fov.to_bits()); }
         hasher.finish()

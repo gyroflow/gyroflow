@@ -1,0 +1,62 @@
+{
+  "tests": {
+    "opencv": 65,
+    "without_opencv": 51
+  },
+  "platform": "Windows x64; release build; Qt 6.7.3; OpenCV 4.12.0; FFmpeg 9; LLVM 23.1.0; Rust 1.98.0",
+  "cases": {
+    "original_parallax_scene": {
+      "frames": 180,
+      "analysis_size": [
+        640,
+        360
+      ],
+      "control_rms_px": 4.07518964795105,
+      "residual_rms_px": 0.7499625051416313,
+      "proxy_reduction_percent": 81.59686861398703,
+      "control_low_confidence_fraction": 0.0,
+      "residual_low_confidence_fraction": 0.0
+    },
+    "sony_handheld_optical_only": {
+      "frames": 870,
+      "analysis_size": [
+        640,
+        360
+      ],
+      "control_rms_px": 4.371072353240949,
+      "residual_rms_px": 3.6944343330368126,
+      "proxy_reduction_percent": 15.479908945054198,
+      "control_low_confidence_fraction": 0.13118527042577677,
+      "residual_low_confidence_fraction": 0.11737629459148446
+    }
+  },
+  "metric_note": "Central phase-correlation translation-acceleration RMS, every adjacent frame pair retained; a limited motion proxy, not a general perceptual quality score.",
+  "cut_and_failure": {
+    "hard_cut": {
+      "frames": 120,
+      "pairs": 118,
+      "discontinuities_us": [
+        2000000
+      ],
+      "estimated_gyro": true,
+      "complete": true,
+      "cut_gyro_sample": {
+        "timestamp_ms": 1983.3335,
+        "gyro": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "accl": null,
+        "magn": null
+      }
+    },
+    "truncated": {
+      "output_exists": false,
+      "project_exists": false,
+      "error_reported": true,
+      "cli_exit": 0
+    }
+  },
+  "real_source": "Gyroflow official test-data folder: Sony a7sIII 1080p 28mm.MP4; remuxed without gyro/IBIS, retaining lens calibration in the project. Third-party video is not included."
+}

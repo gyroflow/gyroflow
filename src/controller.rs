@@ -542,7 +542,6 @@ impl Controller {
 
             match VideoProcessor::from_file(&input_file.url, gpu_decoding, 0, Some(decoder_options)) {
                 Ok(mut proc) => {
-                    let err2 = err.clone();
                     let sync2 = sync.clone();
                     proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                         assert!(_output_frame.is_none());
@@ -559,7 +558,8 @@ impl Controller {
                                     sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
                                 },
                                 Err(e) => {
-                                    err2(("An error occured: %1".to_string(), e.to_string()))
+                                    sync2.mark_decode_failed();
+                                    return Err(e.into());
                                 }
                             }
                             frame_no += 1;
@@ -567,10 +567,14 @@ impl Controller {
                         abs_frame_no += 1;
                         Ok(())
                     });
-                    if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
+                    let decoded = proc.start_decoder_only(ranges, cancel_flag.clone());
+                    if decoded.is_err() { sync.mark_decode_failed(); }
+                    let complete = sync.finished_feeding_frames();
+                    if let Err(e) = decoded {
                         err(("An error occured: %1".to_string(), e.to_string()));
+                    } else if !complete && !cancel_flag.load(SeqCst) {
+                        err(("An error occured: %1".to_string(), "The complete video could not be analyzed. Previous analysis was preserved.".to_string()));
                     }
-                    sync.finished_feeding_frames();
                 }
                 Err(error) => {
                     err(("An error occured: %1".to_string(), error.to_string()));

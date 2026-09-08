@@ -119,7 +119,8 @@ impl OpticalFlowTrait for OFOpenCVPyrLK {
                 for (i, (from, to)) in forward_from.iter().zip(&forward_to).enumerate() {
                     if *reverse_status.at::<u8>(i as i32)? != 1 { continue; }
                     let back = returned.at::<Point2f>(i as i32)?;
-                    if in_frame(back) && (back.x - from.x).hypot(back.y - from.y) <= 1.5 {
+                    if in_frame(back) && (back.x - from.x).hypot(back.y - from.y) <= 1.5 &&
+                        super::photometric_match(&self.img, &next.img, self.size, (from.x, from.y), (to.x, to.y)) {
                         pts1.push((from.x, from.y));
                         pts2.push((to.x, to.y));
                     }

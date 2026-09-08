@@ -10,6 +10,7 @@ pub const ROWS: usize = 7;
 pub const NODES: usize = COLS * ROWS;
 pub const BUFFER_FLOATS: usize = NODES * 2;
 pub const MAX_DISPLACEMENT: f32 = 0.04;
+pub const MAX_LOCAL_DEFORMATION: f32 = 0.005;
 pub const MAX_KERNEL_BUFFER: usize = crate::gyro_source::splines::MAX_BUFFER_SIZE + 10 + BUFFER_FLOATS;
 type Point = [f32; 2];
 
@@ -79,6 +80,9 @@ pub fn prepare(params: &mut ComputeParams) {
 pub struct OpticalMotionData {
     pub version: u32,
     pub complete: bool,
+    pub estimated_gyro: bool,
+    /// First frame after an unsupported transition, in the original video timebase.
+    pub discontinuities_us: Vec<i64>,
     /// Frame times are in the file's original timebase, before an FPS override.
     pub pairs: Vec<OpticalMotionPair>,
 }
@@ -98,6 +102,35 @@ impl Default for MotionGrid {
     fn default() -> Self { Self([[0.0; 2]; NODES]) }
 }
 impl MotionGrid {
+    fn affine_component(&self) -> Self {
+        let mean: Point = std::array::from_fn(|k| self.0.iter().map(|p| p[k]).sum::<f32>() / NODES as f32);
+        let (mut sx, mut sy) = (0.0, 0.0);
+        let (mut dx, mut dy) = ([0.0; 2], [0.0; 2]);
+        for y in 0..ROWS { for x in 0..COLS {
+            let px = x as f32 / (COLS - 1) as f32 - 0.5;
+            let py = y as f32 / (ROWS - 1) as f32 - 0.5;
+            sx += px * px; sy += py * py;
+            for k in 0..2 { dx[k] += px * self.0[y * COLS + x][k]; dy[k] += py * self.0[y * COLS + x][k]; }
+        }}
+        Self(std::array::from_fn(|i| {
+            let px = (i % COLS) as f32 / (COLS - 1) as f32 - 0.5;
+            let py = (i / COLS) as f32 / (ROWS - 1) as f32 - 0.5;
+            std::array::from_fn(|k| mean[k] + px * dx[k] / sx + py * dy[k] / sy)
+        }))
+    }
+
+    /// Preserve the fitted affine motion, which maps straight lines to straight
+    /// lines, while bounding the spatially varying remainder. This limits rubbery
+    /// deformation without spending the global translation/rotation correction.
+    pub fn regularize_deformation(&mut self) {
+        let affine = self.affine_component();
+        let max_delta = self.0.iter().zip(&affine.0).flat_map(|(a, b)| [(a[0] - b[0]).abs(), (a[1] - b[1]).abs()]).fold(0.0f32, f32::max);
+        let scale = (MAX_LOCAL_DEFORMATION / max_delta.max(1e-9)).min(1.0);
+        for (p, a) in self.0.iter_mut().zip(&affine.0) {
+            for k in 0..2 { p[k] = a[k] + (p[k] - a[k]) * scale; }
+        }
+    }
+
     pub fn sample(&self, point: Point) -> Point {
         let x = point[0].clamp(0.0, 1.0) * (COLS - 1) as f32;
         let y = point[1].clamp(0.0, 1.0) * (ROWS - 1) as f32;
@@ -249,6 +282,7 @@ pub fn smooth_fields(flows: &[Option<MotionGrid>], fps: f64, sigma_seconds: f64)
                 }
             }
         }
+        grid.regularize_deformation();
         grid.limit(MAX_DISPLACEMENT, 0.25);
         grid
     }).collect()
@@ -308,6 +342,55 @@ pub fn sample_buffer(buffer: &[f64], offset: i32, point: Point) -> Point {
 mod tests {
     use super::*;
 
+    #[test]
+    fn spatial_regularization_preserves_affine_camera_motion() {
+        let mut grid = MotionGrid(std::array::from_fn(|i| {
+            let (x, y) = ((i % COLS) as f32 / (COLS - 1) as f32, (i / COLS) as f32 / (ROWS - 1) as f32);
+            [0.01 + 0.006 * y, -0.008 + 0.004 * x]
+        }));
+        let original = grid.clone();
+        grid.regularize_deformation();
+        for (a, b) in grid.0.iter().zip(&original.0) { for k in 0..2 { assert!((a[k] - b[k]).abs() < 1e-6); } }
+    }
+
+    #[test]
+    fn spatial_regularization_caps_curvature_without_erasing_local_motion() {
+        let mut grid = MotionGrid(std::array::from_fn(|i| [0.02 + (i as f32 * 0.7).sin() * 0.025, (i as f32 * 0.5).cos() * 0.02]));
+        let affine = grid.affine_component();
+        grid.regularize_deformation();
+        let deviation = grid.0.iter().zip(&affine.0).flat_map(|(a, b)| [(a[0] - b[0]).abs(), (a[1] - b[1]).abs()]).fold(0.0f32, f32::max);
+        assert!(deviation > 0.004 && deviation <= MAX_LOCAL_DEFORMATION + 1e-6);
+        assert!((grid.affine_component().0[0][0] - affine.0[0][0]).abs() < 1e-6);
+    }
+
+    #[test]
+    fn camera_smoothing_is_independent_on_each_side_of_a_cut() {
+        use crate::gyro_source::{Quat64, TimeQuat};
+        let a = Quat64::identity();
+        let b = Quat64::from_euler_angles(0.0, 0.0, 1.0);
+        let quats: TimeQuat = (0..12).map(|i| (i * 10_000, if i < 6 { a } else { b })).collect();
+        let params = ComputeParams::default();
+        let alg = crate::smoothing::plain::Plain::default();
+        let result = crate::smoothing::smooth_with_boundaries(&alg, &quats, 120.0, &params, &[60_000]);
+        assert_eq!(result.len(), quats.len());
+        for (ts, q) in &result {
+            assert!((q.inverse() * quats[ts]).angle() < 1e-9, "Smoothing crossed the cut at {ts}");
+        }
+    }
+
+    #[test]
+    fn camera_lookup_does_not_interpolate_across_a_cut() {
+        use crate::gyro_source::{GyroSource, Quat64};
+        let mut gyro = GyroSource::new();
+        gyro.duration_ms = 200.0;
+        let a = Quat64::identity();
+        let b = Quat64::from_euler_angles(0.0, 0.0, 1.0);
+        gyro.smoothed_quaternions.insert(90_000, a);
+        gyro.smoothed_quaternions.insert(110_000, b);
+        assert!((gyro.smoothed_quat_with_discontinuities(99.0, &[100_000]).inverse() * a).angle() < 1e-9);
+        assert!((gyro.smoothed_quat_with_discontinuities(100.0, &[100_000]).inverse() * b).angle() < 1e-9);
+    }
+
     fn constant(d: Point) -> MotionGrid { MotionGrid([d; NODES]) }
     fn lattice() -> Vec<Point> {
         (0..12).flat_map(|y| (0..16).map(move |x| [(x as f32 + 0.5) / 16.0, (y as f32 + 0.5) / 12.0])).collect()
@@ -320,7 +403,7 @@ mod tests {
         p.adaptive_zoom_window = 4.0; p.max_zoom = Some(130.0);
         p.optical_stabilization = true;
         p.optical_motion = Some(std::sync::Arc::new(OpticalMotionData { version: 1, complete: true,
-            pairs: vec![OpticalMotionPair { from_us: 0, to_us: 33_333, size: (320, 240), from: vec![(10.0, 10.0)], to: vec![(11.0, 10.0)] }] }));
+            pairs: vec![OpticalMotionPair { from_us: 0, to_us: 33_333, size: (320, 240), from: vec![(10.0, 10.0)], to: vec![(11.0, 10.0)] }], ..Default::default() }));
         p
     }
 
@@ -509,7 +592,7 @@ mod tests {
     #[test]
     fn residual_metadata_round_trip_and_incomplete_data_are_safe() {
         let data = OpticalMotionData { version: 1, complete: true, pairs: vec![OpticalMotionPair {
-            from_us: 0, to_us: 33_333, size: (320, 240), from: vec![(1.0, 2.0)], to: vec![(3.0, 4.0)] }] };
+            from_us: 0, to_us: 33_333, size: (320, 240), from: vec![(1.0, 2.0)], to: vec![(3.0, 4.0)] }], ..Default::default() };
         let mut metadata = crate::gyro_source::FileMetadata::default();
         metadata.optical_motion = Some(data);
         let restored: crate::gyro_source::FileMetadata = serde_json::from_str(&serde_json::to_string(&metadata).unwrap()).unwrap();
@@ -517,7 +600,7 @@ mod tests {
         assert!(metadata.thin().optical_motion.is_none());
         let mut params = ComputeParams::default();
         params.optical_stabilization = true;
-        params.optical_motion = Some(std::sync::Arc::new(OpticalMotionData { version: 1, complete: false, pairs: vec![] }));
+        params.optical_motion = Some(std::sync::Arc::new(OpticalMotionData { version: 1, complete: false, pairs: vec![], ..Default::default() }));
         assert!(derive(&params).is_empty());
     }
 
