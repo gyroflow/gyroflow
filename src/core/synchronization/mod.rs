@@ -139,12 +139,13 @@ impl PoseEstimator {
                             // Unlock the mutex for estimate_pose
                             drop(l);
 
-                            if let Some(rot) = pose.estimate_pose(&curr_of.optical_flow_to(&next_of), curr_of.size(), params, *ts, *next_ts) {
+                            let motion = pose.estimate_pose(&curr_of.optical_flow_to(&next_of), curr_of.size(), params, *ts, *next_ts)
+                                .and_then(|rot| finite_angular_velocity(&rot, scaled_fps / every_nth_frame).map(|velocity| (rot, velocity)));
+                            if let Some((rot, rotvec)) = motion {
                                 let mut l = results.write();
                                 if let Some(x) = l.get_mut(ts) {
                                     x.rotation = Some(rot);
                                     x.quat = Some(Quat64::from(rot));
-                                    let rotvec = rot.scaled_axis() * (scaled_fps / every_nth_frame);
                                     x.euler = Some((rotvec[0], rotvec[1], rotvec[2]));
                                 } else {
                                     log::warn!("Failed to get ts {}", ts);
@@ -387,5 +388,40 @@ impl PoseEstimator {
             2 => find_offset::rs_sync::find_offsets(&self, ranges, sync_params, params, progress_cb, cancel_flag),
             v => { log::error!("Unknown offset method: {v}"); Vec::new() }
         }
+    }
+}
+
+// A degenerate pose can contain NaNs even when OpenCV reports success. One
+// invalid sample poisons quaternion integration and can turn every frame black.
+fn finite_angular_velocity(rotation: &Rotation3<f64>, rate: f64) -> Option<nalgebra::Vector3<f64>> {
+    if !rate.is_finite() || rate <= 0.0 || !rotation.matrix().iter().all(|v| v.is_finite()) {
+        return None;
+    }
+    let velocity = rotation.scaled_axis() * rate;
+    velocity.iter().all(|v| v.is_finite()).then_some(velocity)
+}
+
+#[cfg(test)]
+mod motion_tests {
+    use super::*;
+
+    #[test]
+    fn invalid_pose_cannot_become_an_imu_sample() {
+        for invalid in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
+            let mut matrix = nalgebra::Matrix3::identity();
+            matrix[(0, 0)] = invalid;
+            assert!(finite_angular_velocity(&Rotation3::from_matrix_unchecked(matrix), 30.0).is_none());
+        }
+        for rate in [0.0, -1.0, f64::NAN, f64::INFINITY] {
+            assert!(finite_angular_velocity(&Rotation3::identity(), rate).is_none());
+        }
+    }
+
+    #[test]
+    fn valid_pose_preserves_angular_velocity() {
+        let axis = nalgebra::Vector3::new(0.01, -0.02, 0.03);
+        let velocity = finite_angular_velocity(&Rotation3::new(axis), 30.0).unwrap();
+        assert!((velocity - axis * 30.0).norm() < 1e-12);
+        assert_eq!(finite_angular_velocity(&Rotation3::identity(), 30.0).unwrap(), nalgebra::Vector3::zeros());
     }
 }
