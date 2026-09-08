@@ -266,13 +266,16 @@ impl StabilizationManager {
     }
 
     pub fn load_lens_profile(&self, url: &str) -> Result<(), crate::GyroflowCoreError> {
-        let url = if (url.starts_with('/') || url.starts_with('\\') || (url.len() > 3 && &url[1..2] == ":")) && !url.contains("://") && !url.starts_with('{') {
+        // Profile IDs may contain absolute paths and a duplicate-profile suffix.
+        // Look up the original key before interpreting it as a filesystem path.
+        let db = self.lens_profile_db.read();
+        let lens_by_id = db.get_by_id(url);
+        let url = if lens_by_id.is_none() && (url.starts_with('/') || url.starts_with('\\') || (url.len() > 3 && url.as_bytes().get(1) == Some(&b':'))) && !url.contains("://") && !url.starts_with('{') {
             crate::filesystem::path_to_url(url)
         } else {
             url.to_owned()
         };
-        let db = self.lens_profile_db.read();
-        let (result, from_db) = if let Some(lens) = db.get_by_id(&url) {
+        let (result, from_db) = if let Some(lens) = lens_by_id.or_else(|| db.get_by_id(&url)) {
             *self.lens.write() = lens.clone();
             (Ok(()), true)
         } else if url.starts_with('{') {
