@@ -11,15 +11,31 @@ impl Insta360 {
         let mut px = point.x;
         let mut py = point.y;
 
+        let mut converged = false;
         let mut i = 0; while i < 200 {
-        // for _ in 0..200 {
             let dp = Self::distort_point(vec3(px, py, 1.0), params);
-            px -= dp.x - point.x;
-            py -= dp.y - point.y;
+            let dx = dp.x - point.x;
+            let dy = dp.y - point.y;
+            if dx.abs() < 1e-6 && dy.abs() < 1e-6 {
+                converged = true;
+                break;
+            }
+            px -= dx;
+            py -= dy;
             i += 1;
         }
 
-        vec2(px, py)
+        if !converged {
+            let dp = Self::distort_point(vec3(px, py, 1.0), params);
+            converged = (dp.x - point.x).abs() < 1e-3 && (dp.y - point.y).abs() < 1e-3;
+        }
+
+        let out_of_range = params.r_limit > 0.0 && (px * px + py * py).sqrt() > params.r_limit;
+
+        if converged && !out_of_range {
+            return vec2(px, py);
+        }
+        vec2(-99999.0, -99999.0)
     }
 
     pub fn distort_point(point: Vec3, params: &KernelParams) -> Vec2 {

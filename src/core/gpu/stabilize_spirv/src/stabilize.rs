@@ -77,6 +77,8 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
     let org_out_pos = out_pos;
     out_pos = out_pos + params.translation2d;
 
+    let mut lens_undistort_failed = false;
+
     ///////////////////////////////////////////////////////////////////
     // Add lens distortion back
     if params.lens_correction_amount < 1.0 {
@@ -93,18 +95,23 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
         }
 
         new_out_pos = (new_out_pos - out_c) / out_f;
-        new_out_pos = lens_undistort(new_out_pos, params, distortion_model);
-        if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
-            let r = new_out_pos.length();
-            if r != 0.0 {
-                let sin_theta_d = (r / (1.0 + r * r).sqrt()) / params.light_refraction_coefficient;
-                let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
-                new_out_pos *= r_d / r;
+        let undistorted = lens_undistort(new_out_pos, params, distortion_model);
+        // No solution means this direction isn't representable by the lens model, so the pixel is background.
+        lens_undistort_failed = undistorted.x < -99998.0;
+        if !lens_undistort_failed {
+            new_out_pos = undistorted;
+            if params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 {
+                let r = new_out_pos.length();
+                if r != 0.0 {
+                    let sin_theta_d = (r / (1.0 + r * r).sqrt()) / params.light_refraction_coefficient;
+                    let r_d = sin_theta_d / (1.0 - sin_theta_d * sin_theta_d).sqrt();
+                    new_out_pos *= r_d / r;
+                }
             }
-        }
-        new_out_pos = new_out_pos * out_f + out_c;
+            new_out_pos = new_out_pos * out_f + out_c;
 
-        out_pos = new_out_pos * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);
+            out_pos = new_out_pos * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);
+        }
     }
     ///////////////////////////////////////////////////////////////////
 
@@ -131,7 +138,11 @@ pub fn undistort(uv: Vec2, params: &KernelParams, matrices: &MatricesType, coeff
     let mut pixel = bg;
 
     let idx = sy.min(params.matrix_count as f32 - 1.0) as i32;
-    let uv = rotate_and_distort(out_pos, idx, params, matrices, sampler, distortion_model, digital_distortion_model, flags);
+    let uv = if lens_undistort_failed {
+        vec2(-99999.0, -99999.0)
+    } else {
+        rotate_and_distort(out_pos, idx, params, matrices, sampler, distortion_model, digital_distortion_model, flags)
+    };
     if uv.x > -99998.0 {
         pixel = sample_with_background_at(uv, coeffs, input, params, sampler, interpolation, flags);
     }

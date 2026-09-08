@@ -15,6 +15,8 @@ MenuItem {
 
     property alias hasQuaternions: integrator.hasQuaternions;
     property bool hasAccurateTimestamps: false;
+    property bool hasFocusDistance: false;
+    property bool hasIris: false;
     property alias hasRawGyro: integrator.hasRawGyro;
     property alias integrationMethod: integrator.currentIndex;
     property alias orientationIndicator: orientationIndicator;
@@ -25,7 +27,7 @@ MenuItem {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: [ "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "gcsv", "360", "log", "bin", "braw", "r3d", "nev", "gpmf", "crm" ];
+        property var extensions: [ "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "gcsv", "360", "log", "bin", "braw", "r3d", "nev", "gpmf", "crm", "zraw", "jsonl" ];
 
         title: qsTr("Choose a motion data file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Motion data files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
@@ -66,6 +68,12 @@ MenuItem {
                 lpf.value = +gyro.lpf;
                 lpfcb.checked = lpf.value > 0;
             }
+            if (typeof gyro.glitch_strength === "number" && +gyro.glitch_strength > 0) {
+                glitchStrength.value = +gyro.glitch_strength;
+            }
+            if (gyro.hasOwnProperty("glitch_filter")) {
+                glitchcb.checked = !!gyro.glitch_filter;
+            }
             if (typeof gyro.sample_index === "number") {
                 currentLog.currentIndex = gyro.sample_index + 1;
             }
@@ -102,6 +110,8 @@ MenuItem {
             integrator.hasQuaternions = !additional_data.contains_quats;
             integrator.hasQuaternions = additional_data.contains_quats;
             root.hasAccurateTimestamps = additional_data.has_accurate_timestamps || false;
+            root.hasFocusDistance = additional_data.contains_focus_distance || false;
+            root.hasIris          = additional_data.contains_iris || false;
             if (additional_data.contains_quats && !is_main_video) {
                 if (integrator.hasRawGyro) {
                     integrator.currentIndex = 2;
@@ -112,14 +122,11 @@ MenuItem {
             }
             if (!additional_data.contains_quats) {
                 integrator.currentIndex = 1; // Default to VQF
-                // Default to Complementary if video is shorter than 10s
-                if (controller.get_scaled_duration_ms() < 10000) {
-                    integrator.currentIndex = 0;
-                }
             }
 
             controller.set_imu_lpf(lpfcb.checked? lpf.value : 0);
             controller.set_imu_median_filter(mfcb.checked? mf.value : 0);
+            controller.set_glitch_filter(glitchcb.checked, glitchStrength.value);
             controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
             controller.set_acc_rotation(arot.checked? ap.value : 0, arot.checked? ar.value : 0, arot.checked? ay.value : 0);
             Qt.callLater(controller.recompute_gyro);
@@ -282,6 +289,33 @@ MenuItem {
             onValueChanged: {
                 controller.set_imu_median_filter(mfcb.checked? value : 0);
                 Qt.callLater(controller.recompute_gyro);
+            }
+        }
+    }
+    CheckBoxWithContent {
+        id: glitchcb;
+        text: qsTr("Glitch filtering");
+        tooltip: qsTr("Detect and repair short bursts of corrupt gyro data");
+        onCheckedChanged: {
+            controller.set_glitch_filter(checked, glitchStrength.value);
+            Qt.callLater(controller.recompute_gyro);
+        }
+        Label {
+            text: qsTr("Strength");
+            width: parent.width;
+            tooltip: qsTr("Higher values detect glitches more aggressively (catching weaker and longer bursts with more passes), but may affect real fast motion. Lower values only repair the obvious, large glitches. 50% is the default.");
+            SliderWithField {
+                id: glitchStrength;
+                defaultValue: 50;
+                to: 100;
+                value: 50;
+                unit: "%";
+                precision: 0;
+                width: parent.width;
+                onValueChanged: {
+                    controller.set_glitch_filter(glitchcb.checked, value);
+                    Qt.callLater(controller.recompute_gyro);
+                }
             }
         }
     }
@@ -635,17 +669,19 @@ MenuItem {
                     ctx.lineWidth = 1 * dpiScale;
                     ctx.strokeStyle = maincolor;
                     const o = mesh[0];
-                    const stblz_grid = mesh_size[1] / 8;
+                    const stblz_grid = mesh[o + 2] > 0 ? mesh[o + 2] : mesh_size[1] / 8; // band height comes with the table, as in the kernels
 
                     let points = [];
                     for (let i = 0; i < 8; ++i) {
-                        // corners of the rectangle
-                        points.push([0, i * stblz_grid]);
-                        points.push([mesh_size[0], i * stblz_grid]);
-                        points.push([mesh_size[0], (i + 1) * stblz_grid]);
-                        points.push([0, (i + 1) * stblz_grid]);
+                        // corners of the rectangle; the last band carries on to the bottom of the sensor, as the kernels apply it
+                        const top = i * stblz_grid;
+                        const bottom = i == 7 ? Math.max((i + 1) * stblz_grid, mesh_size[1]) : (i + 1) * stblz_grid;
+                        points.push([0, top]);
+                        points.push([mesh_size[0], top]);
+                        points.push([mesh_size[0], bottom]);
+                        points.push([0, bottom]);
 
-                        points.push([0, i * stblz_grid]);
+                        points.push([0, top]);
                     }
 
                     for (let i = 0; i < points.length; ++i) {
@@ -719,6 +755,7 @@ MenuItem {
                                             "Quaternion":      ["quaternion"],
                                             "Euler angles":    ["euler_angles"],
                                             "Focus distances": ["focus_distances"],
+                                            "Iris (f/T-stop)": ["iris"],
                                         },
                                     },
                                     {
@@ -735,7 +772,11 @@ MenuItem {
                                         },
                                     }
                                 ],
-                                type: "gyro_csv"
+                                type: "gyro_csv",
+                                // Files with only built-in quaternions (eg. DJI) have no raw IMU data to export
+                                unavailable: (integrator.hasRawGyro?    [] : ["originalgyroscope", "originalaccelerometer"])
+                                     .concat(root.hasFocusDistance?     [] : ["originalfocus_distances"])
+                                     .concat(root.hasIris?              [] : ["originaliris"])
                             });
                             let savedState = settings.value("CSVExportSelection", "");
                             if (savedState) {

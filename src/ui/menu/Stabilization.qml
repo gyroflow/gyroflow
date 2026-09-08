@@ -37,7 +37,7 @@ MenuItem {
         property alias maxZoom: maxZoomSlider.value;
         property alias maxZoomIterations: maxZoomIterations.value;
         property alias focalLengthSmoothingEnabled: flEnable.cb.checked;
-        property alias focalLengthSmoothingStrength: flStrength.value;
+        property alias focalLengthMaxZoomRate: flMaxZoomRate.value;
 
         Component.onCompleted: settings.init(sett);
         function propChanged() { settings.propChanged(sett); }
@@ -107,8 +107,8 @@ MenuItem {
             if (stab.hasOwnProperty("focal_length_smoothing_enabled")) {
                 flEnable.cb.checked = !!stab.focal_length_smoothing_enabled;
             }
-            if (stab.hasOwnProperty("focal_length_smoothing_strength")) {
-                flStrength.value = +stab.focal_length_smoothing_strength;
+            if (stab.hasOwnProperty("focal_length_max_zoom_rate")) {
+                flMaxZoomRate.value = +stab.focal_length_max_zoom_rate;
             }
 
             const hasKeyframes = typeof obj.keyframes === "object" && obj.keyframes !== null;
@@ -697,24 +697,29 @@ MenuItem {
         id: flEnable;
         text: qsTr("Stabilize focal length");
         visible: controller.has_per_frame_focal_length;
-
+        tooltip: qsTr("Limits how fast the picture may zoom when the lens metadata records a changing focal length.") + "\n" +
+                 qsTr("Zooms slower than the limit pass through untouched. Faster zooms are spread out by cropping ahead of a zoom-in and after a zoom-out. Lower values give a smoother zoom and more crop.");
         cb.checked: controller.focal_length_smoothing_enabled;
-        cb.onCheckedChanged: controller.focal_length_smoothing_enabled = cb.checked;
+        cb.onCheckedChanged: {
+            controller.focal_length_smoothing_enabled = cb.checked;
+            // Show the focal length curves on the chart, so the effect of this setting can be seen
+            if (cb.checked) window.videoArea?.timeline?.setFocalLengthVisible(true);
+        }
 
         Label {
-            text: qsTr("Smoothness");
+            text: qsTr("Max zoom speed");
             position: Label.LeftPosition;
             SliderWithField {
-                id: flStrength;
-                from: 0;
-                to: 100;
-                precision: 1;
+                id: flMaxZoomRate;
+                from: 5;
+                to: 200;
+                unit: "%/s";
+                precision: 0;
                 scaler: 100.0;
-                unit: "%";
                 width: parent.width;
-                value: controller.focal_length_smoothing_strength;
-                defaultValue: 30.0;
-                onValueChanged: controller.focal_length_smoothing_strength = value;
+                value: controller.focal_length_max_zoom_rate;
+                defaultValue: 50;
+                onValueChanged: controller.focal_length_max_zoom_rate = value;
             }
         }
     }

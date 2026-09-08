@@ -29,7 +29,7 @@ install-deps:
     } else {
         if (-not (Test-Path -Path "{{ExtDir}}/WPy64-310100b3")) {
             echo "Downloading WinPython"
-            wget https://github.com/winpython/winpython/releases/download/6.1.20230227/Winpython64-3.10.10.0dotb3.exe -outfile "winpython.exe"
+            wget https://github.com/winpython/winpython/releases/download/6.1.20230227/Winpython64-3.10.10.0dotb3.exe -O "winpython.exe"
             7z x -y winpython.exe
             del winpython.exe
         }
@@ -49,10 +49,10 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――――― Qt ――――――――――――――――――――――――――――――――――――――――――
 
     # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
-    $FFmpeg = "ffmpeg-8.1-android-gpl-lite"
+    $FFmpeg = "ffmpeg-9.0-android-gpl-lite"
     if (-not (Test-Path -Path "$FFmpeg")) {
         echo "Downloading $FFmpeg"
-        wget "https://master.dl.sourceforge.net/project/avbuild/android/$FFmpeg.tar.xz?viasf=1" -outfile "ffmpeg.tar.xz"
+        Invoke-WebRequest -Uri "https://downloads.sourceforge.net/project/avbuild/android/$FFmpeg.tar.xz" -OutFile "ffmpeg.tar.xz" -MaximumRedirection 5 -UserAgent "wget/1.21"
         7z x -aoa ffmpeg.tar.xz
         del ffmpeg.tar.xz
         7z x -aoa ffmpeg.tar
@@ -63,7 +63,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "OpenCV-android-sdk/")) {
         echo "Downloading OpenCV for Android"
-        wget "https://github.com/opencv/opencv/releases/download/4.11.0/opencv-4.11.0-android-sdk.zip" -outfile "opencv.zip"
+        wget "https://github.com/opencv/opencv/releases/download/4.11.0/opencv-4.11.0-android-sdk.zip" -O "opencv.zip"
         7z x -aoa opencv.zip
         del opencv.zip
     }
@@ -72,7 +72,7 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――― LLVM ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "{{LLVMPath}}\libclang.dll")) {
         echo "Downloading LLVM"
-        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-win64.exe" -outfile "llvm-win64.exe"
+        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-win64.exe" -O "llvm-win64.exe"
         7z x -y llvm-win64.exe -ollvm
         del "llvm-win64.exe"
     }
@@ -107,7 +107,7 @@ deploy *param:
     $QT_LIBS = "$ProjectDir\ext\{{QtVersion}}\android_arm64_v8a\lib"
     $Env:Path = "$ProjectDir\ext\{{QtVersion}}\android_arm64_v8a\bin;$ProjectDir\ext\{{QtVersion}}\mingw_64\bin\;$Env:Path"
     $Env:QMAKE = "$ProjectDir\ext\{{QtVersion}}\android_arm64_v8a\bin\qmake.bat"
-    $Env:FFMPEG_DIR = "$ProjectDir\ext\ffmpeg-8.1-android-gpl-lite"
+    $Env:FFMPEG_DIR = "$ProjectDir\ext\ffmpeg-9.0-android-gpl-lite"
     $Env:OPENCV_LINK_LIBS = "opencv_stitching,opencv_calib3d,opencv_features2d,opencv_imgproc,opencv_video,opencv_flann,opencv_core,tegra_hal,tbb,ittnotify,z,kleidicv,kleidicv_hal,kleidicv_thread"
     $Env:OPENCV_LINK_PATHS = "$ProjectDir\ext\OpenCV-android-sdk\sdk\native\staticlibs\arm64-v8a,$ProjectDir\ext\OpenCV-android-sdk\sdk\native\3rdparty\libs\arm64-v8a"
     $Env:OPENCV_INCLUDE_PATHS = "$ProjectDir\ext\OpenCV-android-sdk\sdk\native\jni\include"
@@ -252,47 +252,69 @@ deploy *param:
     "@
     $androiddeploy | Out-File -encoding utf8 -FilePath "$ProjectDir\target\android-build\android-deploy.json"
 
-    $job = Start-Job -Name "Cleanup" -ArgumentList "$ProjectDir\target\android-build\libs\arm64-v8a" -ScriptBlock {
-        for ($num = 1; $num -le 800 ; $num++) {
-            try {
-                $c = [System.IO.File]::ReadAllText("${args}\..\..\res\values\libs.xml") -replace "<item.+?(Fusion|Imagine|Universal).+?item>", ""
-                [System.IO.File]::WriteAllText("${args}\..\..\res\values\libs.xml", $c)
-                Remove-Item "${args}\*Universal*"
-                Remove-Item "${args}\*Imagine*"
-                Remove-Item "${args}\*Fusion*"
-                Remove-Item "${args}\*Particles*"
-                Remove-Item "${args}\*tooling*"
-                Remove-Item "${args}\*qgif*"
-                Remove-Item "${args}\*qico*"
-            } catch {
-
-            }
-            Start-Sleep -Milliseconds 150;
-        }
-    }
-    Get-job | Receive-Job
-
-    $Sign = ""
+    $ReleaseFlag = ""
     $ApkName = "apk\debug\android-build-debug.apk"
+    $GradleApkTask = "assembleDebug"
+    $GradleSignArgs = @()
     if ("{{KeyStore}}" -and "{{KeyStoreAlias}}" -and "{{KeyStorePassword}}") {
-        $Sign = "--release --sign {{KeyStore}} {{KeyStoreAlias}} --storepass {{KeyStorePassword}}"
-        $ApkName = "apk\release\android-build-release-signed.apk"
+        $ReleaseFlag = "--release"
+        $ApkName = "apk\release\android-build-release.apk"
+        $GradleApkTask = "assembleRelease"
+        $GradleSignArgs = @(
+            "-Pandroid.injected.signing.store.file={{KeyStore}}",
+            "-Pandroid.injected.signing.store.password={{KeyStorePassword}}",
+            "-Pandroid.injected.signing.key.alias={{KeyStoreAlias}}",
+            "-Pandroid.injected.signing.key.password={{KeyStorePassword}}"
+        )
     }
 
-    $cmd = "androiddeployqt --input `"$ProjectDir\target\android-build\android-deploy.json`" --output `"$ProjectDir\target\android-build`" --deployment bundled $Sign --android-platform android-36 --jdk ${Env:JAVA_HOME} --gradle"
+    try {
+        $deployCmd = "androiddeployqt --input `"$ProjectDir\target\android-build\android-deploy.json`" --output `"$ProjectDir\target\android-build`" --deployment bundled $ReleaseFlag --android-platform android-36 --jdk ${Env:JAVA_HOME}"
+        iex "$deployCmd"
+        if ($LASTEXITCODE -ne 0) { throw "androiddeployqt (prepare) failed with exit code $LASTEXITCODE" }
 
-    iex "$cmd"
-    if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") {
-        iex "$cmd --aab"
+        # ~~~ Step 2: Strip unwanted Qt styles/plugins once (no background race) ~~~
+        $LibsDir = "$ProjectDir\target\android-build\libs\arm64-v8a"
+        $LibsXml = "$ProjectDir\target\android-build\res\values\libs.xml"
+        $c = [System.IO.File]::ReadAllText($LibsXml) -replace "<item.+?(Fusion|Imagine|Universal).+?item>", ""
+        if ($c.Trim().Length -eq 0) { throw "libs.xml became empty after filtering - aborting to avoid a corrupt build" }
+        [System.IO.File]::WriteAllText($LibsXml, $c)
+        Remove-Item "$LibsDir\*Universal*" -ErrorAction SilentlyContinue
+        Remove-Item "$LibsDir\*Imagine*"   -ErrorAction SilentlyContinue
+        Remove-Item "$LibsDir\*Fusion*"    -ErrorAction SilentlyContinue
+        Remove-Item "$LibsDir\*Particles*" -ErrorAction SilentlyContinue
+        Remove-Item "$LibsDir\*tooling*"   -ErrorAction SilentlyContinue
+        Remove-Item "$LibsDir\*qgif*"      -ErrorAction SilentlyContinue
+        Remove-Item "$LibsDir\*qico*"      -ErrorAction SilentlyContinue
+
+        $Gradlew = "$ProjectDir\target\android-build\gradlew.bat"
+        Push-Location "$ProjectDir\target\android-build"
+        try {
+            & $Gradlew $GradleApkTask @GradleSignArgs
+            if ($LASTEXITCODE -ne 0) { throw "gradle $GradleApkTask failed with exit code $LASTEXITCODE" }
+
+            if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") {
+                & $Gradlew bundleRelease @GradleSignArgs
+                if ($LASTEXITCODE -ne 0) { throw "gradle bundleRelease failed with exit code $LASTEXITCODE" }
+            }
+        } finally {
+            Pop-Location
+        }
+    } finally {
+        [System.IO.File]::WriteAllText("$ProjectDir\src\ui\components\Modal.qml", [System.IO.File]::ReadAllText("$ProjectDir\src\ui\components\Modal.qml").Replace("`nimport QtQuick.Effects", "`n// import QtQuick.Effects"))
     }
-
-    [System.IO.File]::WriteAllText("$ProjectDir\src\ui\components\Modal.qml", [System.IO.File]::ReadAllText("$ProjectDir\src\ui\components\Modal.qml").Replace("`nimport QtQuick.Effects", "`n// import QtQuick.Effects"))
-
-    Stop-Job $job
 
     New-Item -Type dir "$ProjectDir\_deployment\_binaries\" -ErrorAction SilentlyContinue
-    Copy-Item -Path "$ProjectDir\target\android-build\build\outputs\$ApkName" -Destination "$ProjectDir\_deployment\_binaries\Gyroflow.apk" -Force -ErrorAction SilentlyContinue
-    Copy-Item -Path "$ProjectDir\target\android-build\build\outputs\bundle\release\android-build-release.aab" -Destination "$ProjectDir\_deployment\_binaries\Gyroflow.aab" -Force -ErrorAction SilentlyContinue
+
+    $ApkPath = "$ProjectDir\target\android-build\build\outputs\$ApkName"
+    if (-not (Test-Path $ApkPath)) { throw "Expected APK not found at $ApkPath" }
+    Copy-Item -Path $ApkPath -Destination "$ProjectDir\_deployment\_binaries\Gyroflow.apk" -Force
+
+    if ("$Env:BUILD_APP_STORE_BUNDLE" -eq "true") {
+        $AabPath = "$ProjectDir\target\android-build\build\outputs\bundle\release\android-build-release.aab"
+        if (-not (Test-Path $AabPath)) { throw "Expected AAB not found at $AabPath" }
+        Copy-Item -Path $AabPath -Destination "$ProjectDir\_deployment\_binaries\Gyroflow.aab" -Force
+    }
 
     if ("{{param}}" -eq "install") {
         adb install "$ProjectDir\_deployment\_binaries\Gyroflow.apk"

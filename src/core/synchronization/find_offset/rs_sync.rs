@@ -3,7 +3,7 @@
 
 use super::super::{ PoseEstimator, OpticalFlowPoints, FrameResult, SyncParams };
 use crate::gyro_source::{ Quat64, TimeQuat, GyroSource };
-use crate::stabilization::{ undistort_points_for_optical_flow, ComputeParams };
+use crate::stabilization::{ undistort_points_for_optical_flow, is_valid_point, ComputeParams };
 use nalgebra::Vector3;
 use rs_sync::SyncProblem;
 use std::f64::consts::PI;
@@ -129,6 +129,7 @@ impl FindOffsetsRssync<'_> {
 
                 let height = frame_size.1 as f64;
                 for (i, (ap, bp)) in a.iter().zip(b.iter()).enumerate() {
+                    if !is_valid_point(*ap) || !is_valid_point(*bp) { continue; }
                     let ts_a = a_t as f64 / 1000_000.0 + frame_readout_time * (a_p[i].1 as f64 / height);
                     let ts_b = b_t as f64 / 1000_000.0 + frame_readout_time * (b_p[i].1 as f64 / height);
 

@@ -36,4 +36,7 @@ Column {
             spacing: 5 * dpiScale;
         }
     }
+
+    property alias tooltip: tt.text;
+    ToolTip { id: tt; visible: !isMobile && text.length > 0 && cb.hovered; }
 }

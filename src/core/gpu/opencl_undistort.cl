@@ -24,7 +24,7 @@ typedef struct {
     float4 background; // 16
     float2 f;          // 8  - focal length in pixels
     float2 c;          // 16 - lens center
-    float k[12];       // 16, 16, 16 - distortion coefficients
+    float k[24];       // 16 x 6 - distortion coefficients
     float fov;         // 4
     float r_limit;     // 8
     float lens_correction_amount;    // 12
@@ -39,7 +39,7 @@ typedef struct {
     float4 translation3d;            // 16
     int4 source_rect;                // 16
     int4 output_rect;                // 16
-    float4 digital_lens_params;      // 16
+    float4 digital_lens_params[4];   // 16,16,16,16
     float4 safe_area_rect;           // 16
     float max_pixel_value;           // 4
     int distortion_model;            // 8
@@ -210,7 +210,7 @@ float cubic_spline_interpolate2(__private float *a, __private float *b, __privat
     float dx = x - size * i / (n - 1.0f);
     return a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx;
 }
-float bivariate_spline_interpolate(float size_x, float size_y, __global const float *mesh, int mesh_offset, int n, float x, float y) {
+float bivariate_spline_interpolate(int base, float size_x, float size_y, __global const float *mesh, int mesh_offset, int n, float x, float y) {
     __private float intermediate_values[GRID_SIZE];
     __private float a[GRID_SIZE], b[GRID_SIZE], c[GRID_SIZE], d[GRID_SIZE];
     __private float alpha[GRID_SIZE - 1], mu[GRID_SIZE], z[GRID_SIZE];
@@ -219,7 +219,7 @@ float bivariate_spline_interpolate(float size_x, float size_y, __global const fl
     const float dx = x - size_x * i / (float)(GRID_SIZE - 1);
     const float dx2 = dx * dx;
     const int block = GRID_SIZE * 4;
-    const int offs = 9 + GRID_SIZE*GRID_SIZE*2 + (block * GRID_SIZE * mesh_offset) + i;
+    const int offs = base + 9 + GRID_SIZE*GRID_SIZE*2 + (block * GRID_SIZE * mesh_offset) + i;
 
     #pragma unroll
     for (int j = 0; j < GRID_SIZE; j++) {
@@ -234,13 +234,10 @@ float bivariate_spline_interpolate(float size_x, float size_y, __global const fl
     cubic_spline_coefficients(intermediate_values, 1, 0, size_y, a, b, c, d, alpha, mu, z);
     return cubic_spline_interpolate2(a, b, c, d, GRID_SIZE, y, size_y);
 }
-float2 interpolate_mesh(__global const float *mesh, int width, int height, float2 pos) {
-    if (pos.x < 0 || pos.x > width || pos.y < 0 || pos.y > height) {
-        return pos;
-    }
+float2 interpolate_mesh(int base, __global const float *mesh, int width, int height, float2 pos) {
     return (float2)(
-        bivariate_spline_interpolate(width, height, mesh, 0, GRID_SIZE, pos.x, pos.y),
-        bivariate_spline_interpolate(width, height, mesh, 1, GRID_SIZE, pos.x, pos.y)
+        bivariate_spline_interpolate(base, width, height, mesh, 0, GRID_SIZE, pos.x, pos.y),
+        bivariate_spline_interpolate(base, width, height, mesh, 1, GRID_SIZE, pos.x, pos.y)
     );
 }
 
@@ -250,9 +247,10 @@ float2 interpolate_mesh(__global const float *mesh, int width, int height, float
 #if INTERPOLATION > 8
 // Gives a bounding box in the source image containing pixels that cover a circle of radius 2 completely in both the source and destination images
 float2 affine_bbox(float4 jac) {
+    const float MAX_SUPPORT = 64.0f;
     return (float2)(
-        2.0f * fmax(1.0f, fmax(fabs(jac.x + jac.y), fabs(jac.x - jac.y))),
-        2.0f * fmax(1.0f, fmax(fabs(jac.z + jac.w), fabs(jac.z - jac.w)))
+        fmin(MAX_SUPPORT, 2.0f * fmax(1.0f, fmax(fabs(jac.x + jac.y), fabs(jac.x - jac.y)))),
+        fmin(MAX_SUPPORT, 2.0f * fmax(1.0f, fmax(fabs(jac.z + jac.w), fabs(jac.z - jac.w))))
     );
 }
 // Computes minimum area ellipse which covers a unit circle in both the source and destination image
@@ -415,12 +413,14 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
         float2 uv = params->f * distort_point(_x, _y, _w, params);
 
         if ((params->flags & 256) && (matrix[9] != 0.0f || matrix[10] != 0.0f || matrix[11] != 0.0f || matrix[12] != 0.0f || matrix[13] != 0.0f)) {
+            // The camera applies the sensor roll before the sensor/lens shift, so undo the shift first and then the roll
             float ang_rad = matrix[11];
             float cos_a = cos(-ang_rad);
             float sin_a = sin(-ang_rad);
+            float2 shifted = (float2)(uv.x - matrix[9] + matrix[12], uv.y - matrix[10] + matrix[13]);
             uv = (float2)(
-                cos_a * uv.x - sin_a * uv.y - matrix[9]  + matrix[12],
-                sin_a * uv.x + cos_a * uv.y - matrix[10] + matrix[13]
+                cos_a * shifted.x - sin_a * shifted.y,
+                sin_a * shifted.x + cos_a * shifted.y
             );
         }
 
@@ -437,7 +437,20 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
             uv.x = map_coord(uv.x, 0.0f, (float)params->width,  origin.x, origin.x + crop_size.x);
             uv.y = map_coord(uv.y, 0.0f, (float)params->height, origin.y, origin.y + crop_size.y);
 
-            uv = interpolate_mesh(mesh_data, mesh_size.x, mesh_size.y, uv);
+            float2 q = uv;
+            uv = interpolate_mesh(0, mesh_data, mesh_size.x, mesh_size.y, q);
+            // The 9x9 inverse mesh is only approximate for large warps, refine against the camera's forward mesh (fwd(p) = q).
+            // The block is only there when the mesh needs it (sony::MESH_REFINE_THRESHOLD_PX), and a first correction that
+            // is already tiny leaves nothing for a second one (sony::MESH_REFINE_SKIP_PX, squared here)
+            int o = (int)mesh_data[0];
+            int fwd = o + 4 + 2 * (int)max(mesh_data[o], 0.0f);
+            if (mesh_data[fwd] > 10.0f) {
+                for (int it = 0; it < 2; it++) {
+                    float2 delta = q - interpolate_mesh(fwd, mesh_data, mesh_size.x, mesh_size.y, uv);
+                    uv += delta;
+                    if (dot(delta, delta) < 0.0625f) break;
+                }
+            }
 
             uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0f, (float)params->width);
             uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0f, (float)params->height);
@@ -452,7 +465,7 @@ float2 rotate_and_distort(float2 pos, uint idx, __global KernelParams *params, _
             float2 mesh_size = (float2)(mesh_data[3], mesh_data[4]);
             float2 origin    = (float2)(mesh_data[5], mesh_data[6]);
             float2 crop_size = (float2)(mesh_data[7], mesh_data[8]);
-            float stblz_grid = mesh_size.y / 8.0f;
+            float stblz_grid = mesh_data[o + 2] > 0.0f ? mesh_data[o + 2] : mesh_size.y / 8.0f; // band height comes with the table
 
             if ((params->flags & 128)) uv.y = (float)params->height - uv.y; // framebuffer inverted
 
@@ -500,10 +513,14 @@ float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global c
         float2 new_out_pos = out_pos;
 
         if ((params->flags & 2)) { // Has digital lens
+            // Apply the digital warp in the UN-zoomed (fov=1) frame so it's FOV-independent
+            new_out_pos = (new_out_pos - out_c) * params->fov + out_c;
             new_out_pos = digital_undistort_point(new_out_pos, params);
+            new_out_pos = (new_out_pos - out_c) / params->fov + out_c;
         }
         new_out_pos = (new_out_pos - out_c) / out_f;
         new_out_pos = undistort_point(new_out_pos, params);
+        if (new_out_pos.x < -99998.0f) { return (float2)(-99999.0f, -99999.0f); }
         if ((params->flags & 2048) && params->light_refraction_coefficient != 1.0f && params->light_refraction_coefficient > 0.0f) {
             float r = length(new_out_pos);
             if (r != 0.0f) {
@@ -603,9 +620,13 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
 
 #       if INTERPOLATION > 8
             const float eps = 0.01f;
-            float2 xyx = undistort_coord(out_pos + (float2)(eps, 0.0f), params, matrices, mesh_data) - uv;
-            float2 xyy = undistort_coord(out_pos + (float2)(0.0f, eps), params, matrices, mesh_data) - uv;
-            jac = (float4)(xyx.x / eps, xyy.x / eps, xyx.y / eps, xyy.y / eps);
+            float2 nx = undistort_coord(out_pos + (float2)(eps, 0.0f), params, matrices, mesh_data);
+            float2 ny = undistort_coord(out_pos + (float2)(0.0f, eps), params, matrices, mesh_data);
+            if (uv.x > -99998.0f && nx.x > -99998.0f && ny.x > -99998.0f) {
+                float2 xyx = nx - uv;
+                float2 xyy = ny - uv;
+                jac = (float4)(xyx.x / eps, xyy.x / eps, xyx.y / eps, xyy.y / eps);
+            }
 #       endif
 
         DATA_TYPE final_pix;

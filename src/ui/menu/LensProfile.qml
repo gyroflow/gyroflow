@@ -43,6 +43,8 @@ MenuItem {
     property var reviewProfiles: [];
     property int reviewIndex: -1;
 
+    property bool isSony: false;
+
     FileDialog {
         id: fileDialog;
         property var extensions: ["json"];
@@ -60,6 +62,13 @@ MenuItem {
     function loadGyroflow(obj: var): void {
         if (typeof obj.light_refraction_coefficient !== "undefined") {
             isUnderwater.checked = Math.round(+obj.light_refraction_coefficient * 1000) == 1330;
+        }
+        const stab = obj.stabilization || { };
+        if (stab.hasOwnProperty("lens_metadata_delay_frames")) {
+            lensDelay.value = +stab.lens_metadata_delay_frames;
+        }
+        if (stab.hasOwnProperty("lens_breathing_enabled")) {
+            lensBreathing.checked = !!stab.lens_breathing_enabled;
         }
     }
 
@@ -87,6 +96,34 @@ MenuItem {
     }
     Connections {
         target: controller;
+        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
+            root.isSony = (camera || "").startsWith("Sony");
+            if (is_main_video) {
+                // Every file starts from the defaults (see `StabilizationParams::clear`): breathing compensation on,
+                // no lens metadata delay. A project file loaded afterwards overrides them through loadGyroflow.
+                lensBreathing.checked = controller.lens_breathing_enabled;
+                lensDelay.value = controller.lens_metadata_delay_frames;
+            }
+            if (is_main_video && additional_data.camera_identifier) {
+                const camera_id = additional_data.camera_identifier;
+                root.detectedCamera = {
+                    "brand": camera_id.brand || "",
+                    "model": camera_id.model || "",
+                    "lens": camera_id.lens_model || camera_id.lens_info || ""
+                };
+                root.applyDetectedCamera();
+            }
+        }
+        function onLens_metadata_delay_changed(): void {
+            lensDelay.value = controller.lens_metadata_delay_frames;
+        }
+        function onLens_delay_estimated(delay_frames: int, correlation: real): void {
+            if (correlation > 0) {
+                lensDelay.value = delay_frames;
+            } else {
+                messageBox(Modal.Warning, qsTr("The lens metadata delay could not be estimated. The clip needs a zoom recorded in the lens metadata, and the picture has to follow it clearly."), [ { text: qsTr("Ok"), accent: true } ]);
+            }
+        }
         function onAll_profiles_loaded(): void {
             if (!lensProfilesListPrepared) { // If it's the first load
                 controller.request_profile_ratings();
@@ -105,19 +142,6 @@ MenuItem {
         function onLens_profiles_updated(fromDisk: bool): void {
             profilesUpdateTimer.fromDisk = fromDisk;
             profilesUpdateTimer.start();
-        }
-        function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
-            if (!is_main_video || !additional_data.camera_identifier) {
-                return;
-            }
-
-            const camera_id = additional_data.camera_identifier;
-            root.detectedCamera = {
-                "brand": camera_id.brand || "",
-                "model": camera_id.model || "",
-                "lens": camera_id.lens_model || camera_id.lens_info || ""
-            };
-            root.applyDetectedCamera();
         }
         function onSearch_lens_profile_finished(profiles: list<var>): void {
             root.reviewProfiles = profiles;
@@ -611,6 +635,15 @@ MenuItem {
         model: ({ })
     }
 
+    CheckBox {
+        id: lensBreathing;
+        text: qsTr("Lens breathing compensation");
+        visible: controller.has_lens_breathing;
+        tooltip: qsTr("Keeps the field of view constant while focusing, using the lens breathing data recorded by the camera.");
+        checked: controller.lens_breathing_enabled;
+        onCheckedChanged: controller.lens_breathing_enabled = checked;
+    }
+
     AdvancedSection {
         btn.text: qsTr("Advanced");
         visible: Object.keys(info.model).length > 0
@@ -661,6 +694,40 @@ MenuItem {
             ContextMenuLoader {
                 id: menuLoader;
                 sourceComponent: isUnderwaterMenu
+            }
+        }
+
+        Label {
+            text: qsTr("Lens metadata delay");
+            position: Label.LeftPosition;
+            visible: root.isSony;
+            tooltip: qsTr("How many frames later than the picture the lens reports its focal length. It depends on the lens, not on the frame rate: some report two frames late.") + "\n" +
+                     qsTr("\"Analyze\" measures it on the zooms recorded in this clip. Positive values read the lens metadata later.");
+            Row {
+                width: parent.width;
+                spacing: 5 * dpiScale;
+                NumberField {
+                    id: lensDelay;
+                    from: -30;
+                    to: 30;
+                    unit: qsTr("frames");
+                    precision: 0;
+                    font.pixelSize: 11 * dpiScale;
+                    width: parent.width - analyzeLensDelay.width - parent.spacing;
+                    anchors.verticalCenter: parent.verticalCenter;
+                    value: controller.lens_metadata_delay_frames;
+                    defaultValue: 0;
+                    onValueChanged: controller.lens_metadata_delay_frames = Math.round(value);
+                }
+                LinkButton {
+                    id: analyzeLensDelay;
+                    text: qsTr("Analyze");
+                    leftPadding: 6 * dpiScale;
+                    rightPadding: 6 * dpiScale;
+                    enabled: !controller.sync_in_progress && window.videoArea.vid.loaded;
+                    anchors.verticalCenter: parent.verticalCenter;
+                    onClicked: controller.start_autosync("0", window.sync.getSettingsJson(), "estimate_lens_delay");
+                }
             }
         }
 

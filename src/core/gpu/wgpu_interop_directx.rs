@@ -190,7 +190,7 @@ pub fn create_texture_from_dx12_resource(device: &wgpu::Device, resource: Direct
     unsafe {
         let texture = <Dx12 as wgpu::hal::Api>::Device::texture_from_raw(resource, desc.format, desc.dimension, desc.size, 1, 1);
 
-        device.create_texture_from_hal::<Dx12>(texture, &desc)
+        device.create_texture_from_hal::<Dx12>(texture, &desc, wgpu::TextureUses::UNINITIALIZED)
     }
 }
 

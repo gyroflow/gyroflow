@@ -54,6 +54,7 @@ pub fn create_texture_from_vk_image(device: &Device, image: vk::Image, width: u3
                     wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_DST
                 },
             },
+            wgpu::TextureUses::UNINITIALIZED
         )
     }
 }

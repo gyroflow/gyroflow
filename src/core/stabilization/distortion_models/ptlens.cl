@@ -5,7 +5,7 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
     float NEWTON_EPS = 0.00001;
 
     float rd = length(pos);
-    if (rd == 0.0) { return (float2)(0.0f, 0.0f); }
+    if (rd == 0.0) { return pos; }
 
     float ru = rd;
     for (int i = 0; i < 10; ++i) {
@@ -15,13 +15,13 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
         }
         if (i > 5) {
             // Does not converge, no real solution in this area?
-            return (float2)(0.0f, 0.0f);
+            return (float2)(-99999.0f, -99999.0f);
         }
 
         ru -= fru / (4.0 * params->k[0] * ru * ru * ru + 3.0 * params->k[1] * ru * ru + 2.0 * params->k[2] * ru + 1.0);
     }
     if (ru < 0.0) {
-        return (float2)(0.0f, 0.0f);
+        return (float2)(-99999.0f, -99999.0f);
     }
 
     ru /= rd;

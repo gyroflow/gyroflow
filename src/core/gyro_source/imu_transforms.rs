@@ -13,6 +13,8 @@ pub struct IMUTransforms {
     pub acc_rotation: Option<Rotation3<f64>>,
     pub imu_lpf: f64,
     pub imu_mf: i32,
+    pub glitch_filter: bool,
+    pub glitch_strength: f64,
     pub gyro_bias: Option<[f64; 3]>,
 }
 impl IMUTransforms {
@@ -41,6 +43,7 @@ impl IMUTransforms {
             || self.gyro_bias.is_some_and(|x| x[0].abs() > 0.0 || x[1].abs() > 0.0 || x[2].abs() > 0.0)
             || self.imu_lpf > 0.0
             || self.imu_mf > 0
+            || self.glitch_filter
     }
 
     pub fn set_imu_rotation(&mut self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {

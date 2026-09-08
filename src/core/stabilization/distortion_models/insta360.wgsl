@@ -29,13 +29,25 @@ fn distort_point(px: f32, py: f32, pz: f32) -> vec2<f32> {
 fn undistort_point(p: vec2<f32>) -> vec2<f32> {
     var pp = p;
 
+    var converged = false;
     for (var i: i32 = 0; i < 200; i = i + 1) {
         let diff = distort_point(pp.x, pp.y, 1.0) - p;
         if (abs(diff.x) < 1e-6 && abs(diff.y) < 1e-6) {
+            converged = true;
             break;
         }
         pp -= diff;
     }
 
-    return pp;
+    if (!converged) {
+        let diff = distort_point(pp.x, pp.y, 1.0) - p;
+        converged = abs(diff.x) < 1e-3 && abs(diff.y) < 1e-3;
+    }
+
+    let out_of_range = params.r_limit > 0.0 && length(pp) > params.r_limit;
+
+    if (converged && !out_of_range) {
+        return pp;
+    }
+    return vec2<f32>(-99999.0, -99999.0);
 }

@@ -5,7 +5,7 @@ fn undistort_point(pos: vec2<f32>) -> vec2<f32> {
     let NEWTON_EPS = 0.00001;
 
     let rd = length(pos);
-    if (rd == 0.0) { return vec2<f32>(0.0, 0.0); }
+    if (rd == 0.0) { return pos; }
 
     var ru = rd;
     for (var i: i32 = 0; i < 10; i = i + 1) {
@@ -16,13 +16,13 @@ fn undistort_point(pos: vec2<f32>) -> vec2<f32> {
         }
         if (i > 5) {
             // Does not converge, no real solution in this area?
-            return vec2<f32>(0.0, 0.0);
+            return vec2<f32>(-99999.0, -99999.0);
         }
 
         ru = ru - (fru / (1.0 + 3.0 * params.k1.x * ru2 + 5.0 * params.k1.y * ru2 * ru2));
     }
     if (ru < 0.0) {
-        return vec2<f32>(0.0, 0.0);
+        return vec2<f32>(-99999.0, -99999.0);
     }
 
     ru = ru / rd;

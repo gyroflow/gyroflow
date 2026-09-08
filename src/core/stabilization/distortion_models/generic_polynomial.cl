@@ -19,7 +19,8 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
     float scale = 0.0f;
 
     if (fabs(theta_d) > 1e-6f) {
-        for (int i = 0; i < 10; ++i) {
+        theta = 0.0f;
+        for (int i = 0; i < 15; ++i) {
             float theta2  = theta*theta;
             float theta3  = theta2*theta;
             float theta4  = theta2*theta2;
@@ -42,9 +43,9 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
             float k9_theta9   = params->k[9]  * theta9;
             float k10_theta10 = params->k[10] * theta10;
             float k11_theta11 = params->k[11] * theta11;
-            float theta_fix = (theta * (k0 + k1_theta1 + k2_theta2 + k3_theta3 + k4_theta4 + k5_theta5 + k6_theta6 + k7_theta7 + k8_theta8 + k9_theta9 + k10_theta10 + k11_theta11) - theta_d)
-                              /
-                              (k0 + 2.0f * k1_theta1 + 3.0f * k2_theta2 + 4.0f * k3_theta3 + 5.0f * k4_theta4 + 6.0f * k5_theta5 + 7.0f * k6_theta6 + 8.0f * k7_theta7 + 9.0f * k8_theta8 + 10.0f * k9_theta9 + 11.0f * k10_theta10 + 12.0f * k11_theta11);
+            float theta_fix = clamp((theta * (k0 + k1_theta1 + k2_theta2 + k3_theta3 + k4_theta4 + k5_theta5 + k6_theta6 + k7_theta7 + k8_theta8 + k9_theta9 + k10_theta10 + k11_theta11) - theta_d)
+                                    /
+                                    (k0 + 2.0f * k1_theta1 + 3.0f * k2_theta2 + 4.0f * k3_theta3 + 5.0f * k4_theta4 + 6.0f * k5_theta5 + 7.0f * k6_theta6 + 8.0f * k7_theta7 + 9.0f * k8_theta8 + 10.0f * k9_theta9 + 11.0f * k10_theta10 + 12.0f * k11_theta11), -0.9f, 0.9f);
 
             theta -= theta_fix;
             if (fabs(theta_fix) < 1e-6f) {
@@ -59,10 +60,12 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
     }
     bool theta_flipped = (theta_d < 0.0f && theta > 0.0f) || (theta_d > 0.0f && theta < 0.0f);
 
-    if (converged && !theta_flipped) {
+    bool out_of_range = fabs(theta) >= 1.5707963267948966f || (params->r_limit > 0.0f && fabs(scale * theta_d) > params->r_limit);
+
+    if (converged && !theta_flipped && !out_of_range) {
         return pos * scale;
     }
-    return (float2)(0.0f, 0.0f);
+    return (float2)(-99999.0f, -99999.0f);
 }
 
 float2 distort_point(float x, float y, float z, __global KernelParams *params) {

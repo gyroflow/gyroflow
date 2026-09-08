@@ -11,17 +11,30 @@ impl Insta360 {
         let mut px = point.0;
         let mut py = point.1;
 
+        let mut converged = false;
         for _ in 0..200 {
             let dp = self.distort_point(px, py, 1.0, params);
             let diff = (dp.0 - point.0, dp.1 - point.1);
             if diff.0.abs() < 1e-6 && diff.1.abs() < 1e-6 {
+                converged = true;
                 break;
             }
             px -= diff.0;
             py -= diff.1;
         }
 
-        Some((px, py))
+        if !converged {
+            let dp = self.distort_point(px, py, 1.0, params);
+            let diff = (dp.0 - point.0, dp.1 - point.1);
+            converged = diff.0.abs() < 1e-3 && diff.1.abs() < 1e-3;
+        }
+
+        let out_of_range = params.r_limit > 0.0 && (px * px + py * py).sqrt() > params.r_limit;
+
+        if converged && !out_of_range {
+            return Some((px, py));
+        }
+        None
     }
 
     pub fn distort_point(&self, mut x: f32, mut y: f32, z: f32, params: &KernelParams) -> (f32, f32) {

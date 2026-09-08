@@ -25,8 +25,10 @@ impl EstimatePoseTrait for PoseFindHomography {
             let pts11 = undistort_points_for_optical_flow(&pts1, timestamp_us, params, size);
             let pts22 = undistort_points_for_optical_flow(&pts2, next_timestamp_us, params, size);
 
-            let pts1 = pts11.into_iter().map(|(x, y)| Point2f::new(x, y)).collect::<Vec<Point2f>>();
-            let pts2 = pts22.into_iter().map(|(x, y)| Point2f::new(x, y)).collect::<Vec<Point2f>>();
+            let (pts1, pts2): (Vec<Point2f>, Vec<Point2f>) = pts11.into_iter().zip(pts22)
+                .filter(|(a, b)| is_valid_point(*a) && is_valid_point(*b))
+                .map(|(a, b)| (Point2f::new(a.0, a.1), Point2f::new(b.0, b.1)))
+                .unzip();
 
             let a1_pts = Mat::from_slice(&pts1)?;
             let a2_pts = Mat::from_slice(&pts2)?;

@@ -7,7 +7,7 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
     float inv_k1 = (1.0 / params->k[0]);
 
     float rd = length(pos);
-    if (rd == 0.0) { return (float2)(0.0f, 0.0f); }
+    if (rd == 0.0) { return pos; }
 
     float rd_div_k1 = rd * inv_k1;
 
@@ -26,13 +26,13 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
         }
         if (i > 5) {
             // Does not converge, no real solution in this area?
-            return (float2)(0.0f, 0.0f);
+            return (float2)(-99999.0f, -99999.0f);
         }
 
         ru -= fru / (3.0 * ru * ru + inv_k1);
     }
     if (ru < 0.0) {
-        return (float2)(0.0f, 0.0f);
+        return (float2)(-99999.0f, -99999.0f);
     }
 
     ru /= rd;

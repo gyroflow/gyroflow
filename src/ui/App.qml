@@ -521,9 +521,9 @@ Rectangle {
         videoArea: videoArea;
     }
 
-    function showNotification(type: int, text: string, textFormat: var): void {
+    function showNotification(type: int, text: string, textFormat: var, container: var): void {
         if (typeof textFormat === "undefined" || !textFormat) textFormat = text.includes("<b>")? Text.StyledText : Text.AutoText; // default
-        const im = Qt.createComponent("components/InfoMessage.qml").createObject(window.videoArea.infoMessages, {
+        const im = Qt.createComponent("components/InfoMessage.qml").createObject(container || window.videoArea.infoMessages, {
             text: text,
             type: type - 1,
             opacity: 0
@@ -535,6 +535,13 @@ Rectangle {
             im.height = -5 * dpiScale;
             im.destroy(700);
         });
+    }
+
+    // Notification container of the window that owns `parentItem`, falling back to the main window
+    function notificationContainer(parentItem: var): var {
+        const win = parentItem && parentItem.Window? parentItem.Window.window : null;
+        if (win && win.videoArea && win.videoArea.infoMessages) return win.videoArea.infoMessages;
+        return window.videoArea.infoMessages;
     }
 
     function messageBox(type: int, text: string, buttons: list<var>, parent: QtObject, textFormat: var, identifier: var): Modal {
@@ -551,7 +558,7 @@ Rectangle {
                 });
             }
             if (buttons.length == 1) {
-                showNotification(type, text, textFormat);
+                showNotification(type, text, textFormat, notificationContainer(parent));
                 return null;
             } else {
                 console.log("previously clicked", clickedButton);
@@ -643,6 +650,9 @@ Rectangle {
         title: qsTr("Select file destination");
         nameFilters: ["*.json"];
         type: "output-profile";
+        property var cb: null;
+        onAccepted: { const f = cb; cb = null; if (f) f(selectedFile); }
+        onRejected: cb = null;
     }
     FileDialog {
         id: gfFileDialog;
@@ -810,9 +820,11 @@ Rectangle {
             ], undefined, Text.MarkdownText);
         }
     }
-    function getSaveFileUrl(folder: url, filename: string, cb, type: string): void {
+    function getSaveFileUrl(folder: url, filename: string, cb, type: string, parentItem: var): void {
+        const parentItm = parentItem || window;
         if (isSandboxed) {
-            const opf = Qt.createComponent("components/OutputPathField.qml").createObject(window, { visible: false });
+            const opf = Qt.createComponent("components/OutputPathField.qml").createObject(parentItm, { visible: false });
+            opf.folderSelectionCanceled.connect(function() { opf.destroy(); });
             opf.selectFolder(folder, function(folder_url) {
                 cb(filesystem.get_file_url(folder_url, filename, true));
                 opf.destroy();
@@ -822,18 +834,14 @@ Rectangle {
         if (filesystem.can_create_file(folder, filename)) {
             cb(filesystem.get_file_url(folder, filename, true));
         } else {
-            if (type == "Lens profile") {
-                profileFileDialog.currentFolder = folder;
-                profileFileDialog.selectedFile = filesystem.get_file_url(folder, filename, true);
-                profileFileDialog.accepted.disconnect();
-                profileFileDialog.accepted.connect(function() { cb(profileFileDialog.selectedFile); });
-                profileFileDialog.open();
-            } else {
-                gfFileDialog.projectType = type;
-                gfFileDialog.currentFolder = folder;
-                gfFileDialog.selectedFile = filesystem.get_file_url(folder, filename, true);
-                gfFileDialog.open();
-            }
+            const dialog = type == "Lens profile"? profileFileDialog : gfFileDialog;
+            if (type == "Lens profile") { profileFileDialog.cb = cb; }
+            else                        { gfFileDialog.projectType = type; }
+            // Present the dialog on top of the window that asked for it, not always the main one
+            dialog.parentWindow = (parentItm.Window && parentItm.Window.window) || window.Window.window;
+            dialog.currentFolder = folder;
+            dialog.selectedFile = filesystem.get_file_url(folder, filename, true);
+            dialog.open();
         }
     }
 

@@ -11,7 +11,7 @@ BundleIdentifier              := "xyz.gyroflow"
 DevelopmentCertificateSHA     := "612D010FA5522A25CE1F1D5A38B84DCD2798704B"
 DevelopmentProvisioning       := ProjectDir / "_deployment/ios/Gyroflow_dev.mobileprovision"
 DevelopmentProvisioningName   := "Gyroflow dev"
-DistributionCertificateSHA    := "05AC9B1B232615B6DBE1FECD5A02AC21BBE967A9"
+DistributionCertificateSHA    := "58FE9D9FF561BF9910031999A8211A23858D1920"
 DistributionProvisioning      := ProjectDir / "_deployment/ios/Gyroflow_dist.mobileprovision"
 DistributionProvisioningName  := "Gyroflow dist"
 
@@ -23,6 +23,9 @@ IPHONESDK := `xcode-select -p` + "/Platforms/iPhoneOS.platform/Developer/SDKs/iP
 export BINDGEN_EXTRA_CLANG_ARGS_aarch64_apple_ios := "--target=arm64-apple-ios -arch arm64 -miphoneos-version-min=14 -isysroot " + IPHONESDK
 export CFLAGS_aarch64_apple_darwin := "-mmacosx-version-min=10.15"
 export IPHONEOS_DEPLOYMENT_TARGET := "14.0"
+
+export CXXFLAGS_aarch64_apple_ios := "-Wno-error=implicit-function-declaration"
+export CFLAGS_aarch64_apple_ios   := "-Wno-error=implicit-function-declaration"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,11 +75,11 @@ install-deps:
         rm -rf ./vcpkg/downloads
     fi
 
-    if [ ! -d "ffmpeg-8.1-iOS-gpl-lite" ]; then
+    if [ ! -d "ffmpeg-9.0-iOS-gpl-lite" ]; then
         echo "Downloading ffmpeg for iOS"
 
         # Download and extract ffmpeg
-        curl -L https://sourceforge.net/projects/avbuild/files/iOS/ffmpeg-8.1-iOS-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
+        curl -L https://sourceforge.net/projects/avbuild/files/iOS/ffmpeg-9.0-iOS-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
         7z x -aoa ffmpeg.tar.xz
         tar -xf ffmpeg.tar
         rm ffmpeg.tar ffmpeg.tar.xz
@@ -114,7 +117,7 @@ build-and-package profile is_dist:
 
     mkdir -p {{AppBundle}}
 
-    export FFMPEG_DIR="{{ProjectDir}}/ext/ffmpeg-8.1-iOS-gpl-lite"
+    export FFMPEG_DIR="{{ProjectDir}}/ext/ffmpeg-9.0-iOS-gpl-lite"
     export PATH="{{ProjectDir}}/ext/{{QtVersionIOS}}/ios/bin:/usr/libexec/:$PATH"
     export QMAKE="{{ProjectDir}}/ext/{{QtVersionIOS}}/ios/bin/qmake"
 

@@ -2,8 +2,8 @@ import 'common.just'
 
 TeamID                        := "RR3ZC2L4DF"
 BundleIdentifier              := "xyz.gyroflow"
-DistributionCertificateSHA    := "05AC9B1B232615B6DBE1FECD5A02AC21BBE967A9"
-DistributionMacInstallerSHA   := "67FDE536BC3BEBDB68E1224CF5DB17B8EB936F49"
+DistributionCertificateSHA    := "58FE9D9FF561BF9910031999A8211A23858D1920"
+DistributionMacInstallerSHA   := "1029ED283BDA1E21F7ADBC891E95BCBFB102B952"
 DistributionProvisioning      := ProjectDir / "_deployment/mac/Gyroflow_mac_app_store.provisionprofile"
 
 # For local sandbox testing:
@@ -21,6 +21,12 @@ export CPATH := if os() == "macos" {
 } else {
     env_var_or_default("CPATH", "")
 }
+
+export CXXFLAGS_aarch64_apple_darwin := "-Wno-error=implicit-function-declaration"
+export CFLAGS_aarch64_apple_darwin   := "-Wno-error=implicit-function-declaration"
+export CXXFLAGS_x86_64_apple_darwin := "-Wno-error=implicit-function-declaration"
+export CFLAGS_x86_64_apple_darwin   := "-Wno-error=implicit-function-declaration"
+export RUST_MIN_STACK := "33554432"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Dependencies ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -65,13 +71,13 @@ install-deps:
         echo "Downloading ffmpeg"
 
         # Download and extract ffmpeg
-        curl -L https://sourceforge.net/projects/avbuild/files/macOS/ffmpeg-8.1-macOS-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
+        curl -L https://sourceforge.net/projects/avbuild/files/macOS/ffmpeg-9.0-macOS-gpl-lite.tar.xz/download -o ffmpeg.tar.xz
         7z x -aoa ffmpeg.tar.xz
         tar -xf ffmpeg.tar
         rm ffmpeg.tar ffmpeg.tar.xz
         mkdir -p ffmpeg-x86_64/lib
         mkdir -p ffmpeg-arm64/lib
-        cd ffmpeg-8.1-macOS-gpl-lite
+        cd ffmpeg-9.0-macOS-gpl-lite
         lipo lib/libavcodec.a    -thin x86_64 -output ../ffmpeg-x86_64/lib/libavcodec.a
         lipo lib/libavformat.a   -thin x86_64 -output ../ffmpeg-x86_64/lib/libavformat.a
         lipo lib/libavdevice.a   -thin x86_64 -output ../ffmpeg-x86_64/lib/libavdevice.a

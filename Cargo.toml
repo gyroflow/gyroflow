@@ -34,12 +34,12 @@ bytemuck = "1.25"
 nalgebra = "0.34"
 semver = "1.0.28"
 fastrand = "2.1.0"
-itertools = "0.14.0"
-regex = "1.12"
+itertools = "0.15.0"
+regex = "1.13"
 rayon = "1.10"
 mimalloc = { version = "0.1.50", default-features = false }
 
-pollster = "0.4.0"
+pollster = "1.0"
 futures-intrusive = "0.5.0"
 flate2 = "1.1"
 walkdir = "2.5.0"
@@ -48,30 +48,28 @@ human-sort = "0.2.2"
 argh = "0.1.19"
 indicatif = "0.18"
 rustfft = "6.4.1"
-crc32fast = "1.5.0"
+crc32fast = "1.5.1"
 rodio = { default-features = false, features = ["vorbis", "playback"], version = "0.22" }
 filetime_creation = "0.2"
 
 qmetaobject = { version = "0.2.10", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.12", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "7eb9292" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "855130d" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
-ffmpeg-next = { version = "8.1.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
+ffmpeg-next = { version = "9.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.5.0"
 parking_lot = "0.12.5"
 
 simplelog = "0.12.2"
 log = "0.4"
 
-ureq = "3.2"
+ureq = "3.4"
 url = "2.5.7"
 whoami = "2.1"
 tar = "0.4.45"
 lru = "0.18"
 chrono = "0.4"
-
-log-panics = { version = "2.1", features = ["with-backtrace"] }
 
 keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "4f2a93f" }
 
@@ -97,7 +95,7 @@ objc2-metal = "0.3"
 cpp_build = "0.5.11"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.2"
+cc = "1.4"
 
 [[bin]]
 name = "gyroflow"

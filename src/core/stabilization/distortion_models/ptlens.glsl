@@ -5,7 +5,7 @@ vec2 undistort_point(vec2 pos) {
     float NEWTON_EPS = 0.00001;
 
     float rd = length(pos);
-    if (rd == 0.0) { return vec2(0.0, 0.0); }
+    if (rd == 0.0) { return pos; }
 
     float ru = rd;
     for (int i = 0; i < 10; ++i) {
@@ -15,13 +15,13 @@ vec2 undistort_point(vec2 pos) {
         }
         if (i > 5) {
             // Does not converge, no real solution in this area?
-            return vec2(0.0, 0.0);
+            return vec2(-99999.0, -99999.0);
         }
 
         ru -= fru / (4.0 * params.k1.x * ru * ru * ru + 3.0 * params.k1.y * ru * ru + 2.0 * params.k1.z * ru + 1.0);
     }
     if (ru < 0.0) {
-        return vec2(0.0, 0.0);
+        return vec2(-99999.0, -99999.0);
     }
 
     ru /= rd;

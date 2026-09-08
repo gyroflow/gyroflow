@@ -10,7 +10,11 @@ import "../Util.js" as Util;
 FileDialog {
     id: root;
     property string type: "";
-    onAccepted: settings.setValue("folder-" + type, filesystem.get_folder(selectedFile).toString());
+    // In a `Connections` and not in an `onAccepted` handler, because a handler declared where the dialog is used would override one declared here
+    Connections {
+        target: root;
+        function onAccepted(): void { settings.setValue("folder-" + root.type, filesystem.get_folder(root.selectedFile).toString()); }
+    }
 
     function open2(): void {
         const savedFolder = settings.value("folder-" + type, "");

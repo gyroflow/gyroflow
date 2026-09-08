@@ -15,7 +15,7 @@ impl Poly3 {
         let inv_k1 = 1.0 / params.k[0];
 
         let rd = (point.0 * point.0 + point.1 * point.1).sqrt();
-        if rd == 0.0 { return None; }
+        if rd == 0.0 { return Some(point); }
 
         let rd_div_k1 = rd * inv_k1;
 

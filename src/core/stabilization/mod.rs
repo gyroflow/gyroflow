@@ -3,6 +3,7 @@
 
 use std::collections::BTreeMap;
 use std::cell::RefCell;
+use std::sync::mpsc;
 
 use crate::GyroflowCoreError;
 
@@ -47,12 +48,47 @@ impl From<&str> for Interpolation {
     }
 }
 
-struct ThreadLocalWgpuCache(RefCell<lru::LruCache<u32, wgpu::WgpuWrapper>>);
+type WgpuCache = lru::LruCache<u32, wgpu::WgpuWrapper>;
+
+lazy_static::lazy_static! {
+    // Keep GPU destruction off Qt-owned render threads without creating a
+    // Rust thread from a TLS destructor. `std::thread::spawn` is not valid
+    // after Rust's own thread-local `Thread` has already been destroyed.
+    static ref WGPU_DROP_QUEUE: mpsc::Sender<WgpuCache> = {
+        let (tx, rx) = mpsc::channel::<WgpuCache>();
+        std::thread::Builder::new()
+            .name("gyroflow-wgpu-drop".into())
+            .spawn(move || {
+                while let Ok(cache) = rx.recv() {
+                    drop(cache);
+                }
+            })
+            .expect("failed to start wgpu drop worker");
+        tx
+    };
+}
+
+fn queue_wgpu_drop(cache: WgpuCache) {
+    if let Err(err) = WGPU_DROP_QUEUE.send(cache) {
+        // Never fall back to destroying Vulkan objects on the calling thread.
+        std::mem::forget(err.0);
+    }
+}
+
+struct ThreadLocalWgpuCache(RefCell<WgpuCache>);
+impl ThreadLocalWgpuCache {
+    fn new() -> Self {
+        // Ensure the worker is created while Rust's thread metadata is valid,
+        // rather than on first access from this type's TLS destructor.
+        lazy_static::initialize(&WGPU_DROP_QUEUE);
+        Self(RefCell::new(WgpuCache::new(std::num::NonZeroUsize::new(15).unwrap())))
+    }
+}
 impl Drop for ThreadLocalWgpuCache {
     fn drop(&mut self) {
         // Workaround for a Vulkan hang on device destroy (https://github.com/gfx-rs/wgpu/issues/4973)
-        let inner = self.0.replace(lru::LruCache::new(std::num::NonZeroUsize::new(1).unwrap()));
-        std::thread::spawn(move || drop(inner));
+        let inner = self.0.replace(WgpuCache::new(std::num::NonZeroUsize::new(1).unwrap()));
+        queue_wgpu_drop(inner);
     }
 }
 
@@ -60,7 +96,7 @@ lazy_static::lazy_static! {
     pub static ref GPU_LIST: parking_lot::RwLock<Vec<String>> = parking_lot::RwLock::new(Vec::new());
 }
 thread_local! {
-    static CACHED_WGPU: ThreadLocalWgpuCache = ThreadLocalWgpuCache(RefCell::new(lru::LruCache::new(std::num::NonZeroUsize::new(15).unwrap())));
+    static CACHED_WGPU: ThreadLocalWgpuCache = ThreadLocalWgpuCache::new();
     #[cfg(feature = "use-opencl")]
     static CACHED_OPENCL: RefCell<lru::LruCache<u32, opencl::OclWrapper>> = RefCell::new(lru::LruCache::new(std::num::NonZeroUsize::new(15).unwrap()));
 }
@@ -71,8 +107,8 @@ thread_local! {
 /// avoid the Vulkan-on-destroy hang (gfx-rs/wgpu#4973).
 pub fn clear_gpu_cache_current_thread() {
     CACHED_WGPU.with(|x| {
-        let inner = x.0.replace(lru::LruCache::new(std::num::NonZeroUsize::new(15).unwrap()));
-        std::thread::spawn(move || drop(inner));
+        let inner = x.0.replace(WgpuCache::new(std::num::NonZeroUsize::new(15).unwrap()));
+        queue_wgpu_drop(inner);
     });
     #[cfg(feature = "use-opencl")]
     CACHED_OPENCL.with(|x| {
@@ -118,7 +154,7 @@ pub struct KernelParams {
     pub background:        [f32; 4], // 16
     pub f:                 [f32; 2], // 8  - focal length in pixels
     pub c:                 [f32; 2], // 16 - lens center
-    pub k:                 [f32; 12], // 16,16,16 - distortion coefficients
+    pub k:                 [f32; 24], // 16 x 6 - distortion coefficients
     pub fov:               f32, // 4
     pub r_limit:           f32, // 8
     pub lens_correction_amount:   f32, // 12
@@ -133,7 +169,7 @@ pub struct KernelParams {
     pub translation3d:            [f32; 4], // 16
     pub source_rect:              [i32; 4], // 16 - x, y, w, h
     pub output_rect:              [i32; 4], // 16 - x, y, w, h
-    pub digital_lens_params:      [f32; 4], // 16
+    pub digital_lens_params:      [f32; 16], // 16,16,16,16
     pub safe_area_rect:           [f32; 4], // 16
     pub max_pixel_value:          f32, // 4
     pub distortion_model:         stabilize_spirv::DistortionModel, // 8
@@ -235,14 +271,8 @@ impl Stabilization {
         {
             let gyro = self.compute_params.gyro.read();
             let file_metadata = gyro.file_metadata.read();
-            if let Some(mc) = file_metadata.mesh_correction.get(frame) {
-                if mc.1[0] > 10.0 {
-                    kernel_flags.set(KernelParamsFlags::HAS_MESH_DATA, true);
-                }
-                if mc.1[0] > 0.0 && mc.1[mc.1[0] as usize] > 0.0 {
-                    kernel_flags.set(KernelParamsFlags::HAS_FPD_DATA, true);
-                }
-            }
+            kernel_flags.set(KernelParamsFlags::HAS_MESH_DATA, file_metadata.mesh_correction.has_mesh(frame));
+            kernel_flags.set(KernelParamsFlags::HAS_FPD_DATA, file_metadata.mesh_correction.has_focal_plane(frame));
             if file_metadata.camera_stab_data.len() > frame {
                 kernel_flags.set(KernelParamsFlags::HAS_IBIS_DATA, true);
             }
@@ -319,8 +349,32 @@ impl Stabilization {
             transform.kernel_params.output_rotation = r;
         }
 
+        /*static PREV: parking_lot::RwLock<Vec<f32>> = parking_lot::RwLock::new(Vec::new());
+        if let Ok(Ok(v)) = std::fs::read_to_string(std::env::current_exe().unwrap().with_file_name("params.json")).map(|x| serde_json::from_str(&x) as serde_json::Result<Vec<f32>>) {
+            if v.len() == 24 {
+                *PREV.write() = v.clone();
+            }
+        }
+        {
+            let v = PREV.read();
+            v.iter().enumerate().for_each(|(i, x)| transform.kernel_params.custom[i] = *x);
+        }*/
+
         transform.kernel_params.source_rect = Self::get_rect(&buffers.input);
         transform.kernel_params.output_rect = Self::get_rect(&buffers.output);
+
+        /*transform.kernel_params.distortion_model = match &self.compute_params.distortion_model.inner {
+            distortion_models::DistortionModels::OpenCVFisheye(_) => stabilize_spirv::DistortionModel::OpenCVFisheye,
+            distortion_models::DistortionModels::OpenCVStandard(_) => stabilize_spirv::DistortionModel::OpenCVStandard,
+            distortion_models::DistortionModels::Insta360(_) => stabilize_spirv::DistortionModel::Insta360,
+            _ => { stabilize_spirv::DistortionModel::None }
+        };
+        transform.kernel_params.digital_lens = match self.compute_params.digital_lens.as_ref().map(|x| &x.inner) {
+            Some(distortion_models::DistortionModels::GoProSuperview(_)) => stabilize_spirv::DistortionModel::GoProSuperview,
+            Some(distortion_models::DistortionModels::GoProHyperview(_)) => stabilize_spirv::DistortionModel::GoProHyperview,
+            Some(distortion_models::DistortionModels::DigitalStretch(_)) => stabilize_spirv::DistortionModel::DigitalStretch,
+            _ => { stabilize_spirv::DistortionModel::None }
+        };*/
 
         transform
     }

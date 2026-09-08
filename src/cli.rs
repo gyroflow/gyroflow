@@ -20,6 +20,8 @@ cpp! {{
     #include <QFileSystemWatcher>
     #include <QTimer>
     #include <QDirIterator>
+    #include <QFileInfo>
+    #include <QDateTime>
     #include <QMap>
 
     QCoreApplication *globalApp = nullptr;
@@ -301,7 +303,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
         let queue_ptr = unsafe { qmetaobject::QObjectPinned::new(&queue).get_or_create_cpp_object() };
 
         if let Some(watch) = opts.watch {
-            watching = watch_folder(watch, |path| {
+            if let Err(e) = watch_folder(watch, |path| {
                 if !path.contains(&suffix) {
                     log::info!("New file detected: {}", path);
                     let extensions = [ "mp4", "mov", "mxf", "mkv", "webm", "insv", "gyroflow", "png", "exr", "dng", "braw" ];
@@ -314,7 +316,12 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                         });
                     }
                 }
-            });
+            }) {
+                // Nothing is being watched and nothing was queued, so the event loop would just hang forever
+                log::error!("{}", e);
+                return true;
+            }
+            watching = true;
         }
 
         unsafe {
@@ -445,18 +452,22 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             });
             connect!(queue_ptr, q, processing_done, |job_id: &u32, by_preset: &bool| {
                 let queue = &mut *queue.as_ptr();
-                log::info!("[{:08x}] Processing done", job_id);
 
-                if let Some(file) = lens_profiles.first() {
-                    // Apply lens profile
-                    log::info!("Loading lens profile {}", file);
-                    let stab = queue.get_stab_for_job(*job_id).unwrap();
-                    stab.load_lens_profile(file).expect("Loading lens profile");
-                    stab.recompute_blocking();
+                // A file that failed to load never made it into the queue, it only needs to be released below,
+                // otherwise a single unreadable file would stall the whole queue forever
+                if let Some(stab) = queue.get_stab_for_job(*job_id) {
+                    log::info!("[{:08x}] Processing done", job_id);
+
+                    if let Some(file) = lens_profiles.first() {
+                        // Apply lens profile
+                        log::info!("Loading lens profile {}", file);
+                        stab.load_lens_profile(file).expect("Loading lens profile");
+                        stab.recompute_blocking();
+                    }
+
+                    let fname = queue.get_job_output_filename(*job_id).to_string();
+                    if let Some(pb) = pbs.get(job_id) { pb.set_message(fname); }
                 }
-
-                let fname = queue.get_job_output_filename(*job_id).to_string();
-                pbs.get(job_id).unwrap().set_message(fname);
 
                 queue.jobs_added.remove(job_id);
 
@@ -504,6 +515,11 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             }).unwrap_or_default();
             for file in &videos {
                 queue.add_file(path_to_url(file), path_to_url(&gyro_file), additional_data.to_string());
+            }
+            if queue.jobs_added.is_empty() {
+                // Nothing was queued, so `processing_done` will never fire, the queue would never start and the event loop would hang forever
+                log::error!("None of the input files could be added to the render queue.");
+                return true;
             }
         }
 
@@ -633,22 +649,31 @@ fn setup_defaults(stab: &Arc<StabilizationManager>, queue: &mut RenderQueue) -> 
 }
 
 // TODO: replace with `notify` crate
-fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> bool {
-    if path.is_empty() { return false; }
-    if !std::path::Path::new(&path).exists() { log::info!("{} doesn't exist.", path); return false; }
+fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> Result<(), String> {
+    if path.is_empty() { return Err("The watch folder path is empty.".to_string()); }
+    match std::fs::metadata(&path) {
+        Err(e) => { return Err(format!("Unable to access the watch folder {}: {}", path, e)); },
+        Ok(md) if !md.is_dir() => { return Err(format!("The watch path is not a folder: {}", path)); },
+        Ok(_) => { }
+    }
 
-    let path = QString::from(path);
+    let path_q = QString::from(path.as_str());
     let func: Box<dyn FnMut(String)> = Box::new(cb);
     let cb_ptr = Box::into_raw(func);
-    cpp!(unsafe [path as "QString", cb_ptr as "TraitObject2"] -> bool as "bool" {
+    let watched_count = cpp!(unsafe [path_q as "QString", cb_ptr as "TraitObject2"] -> i32 as "int" {
         int argc = 0;
-        globalApp = new QCoreApplication(argc, nullptr);
+        if (!globalApp) globalApp = new QCoreApplication(argc, nullptr);
 
         auto w = new QFileSystemWatcher();
         auto existing = new QStringList();
-        auto paths = new QMap<QString, QMap<QString, qint64> >();
+        // A file is only complete once its size stopped changing for a few consecutive checks and
+        // nothing wrote to it for a while - otherwise a file that is still being copied into the
+        // watched folder gets picked up half written
+        auto paths = new QMap<QString, QMap<QString, QPair<qint64, int> > >();
         auto t = new QTimer();
         QObject::connect(t, &QTimer::timeout, [=] {
+            const int stableChecks = 2; // consecutive checks (1s apart) with an unchanged size
+            const int minAgeSecs = 3;   // and nothing written to the file for at least this long
             bool anyWatching = false;
             for (const auto &file : paths->keys()) {
                 auto &paths2 = (*paths)[file];
@@ -658,7 +683,15 @@ fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> bool {
                     if (f.open(QFile::ReadOnly)) {
                         auto size = f.size();
                         f.close();
-                        if (paths2[path] > 0 && paths2[path] == size) {
+                        // Negative if the timestamp is in the future, eg. clock skew on a network share
+                        auto age = QFileInfo(path).lastModified().secsTo(QDateTime::currentDateTime());
+                        auto entry = paths2.value(path);
+                        if (entry.first != size) {
+                            entry = QPair<qint64, int>(size, 0); // Still being written to
+                        } else if (size > 0 && (age >= minAgeSecs || age < 0)) {
+                            entry.second++;
+                        }
+                        if (entry.second >= stableChecks) {
                             rust!(Rust_Gyroflow_cli_watch [cb_ptr: *mut dyn FnMut(String) as "TraitObject2", path: QString as "QString"] {
                                 let mut cb = unsafe { Box::from_raw(cb_ptr) };
                                 cb(path.to_string());
@@ -668,7 +701,7 @@ fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> bool {
                             existing->append(path);
                             paths2.remove(path);
                         } else {
-                            paths2[path] = size;
+                            paths2[path] = entry;
                         }
                     }
                 }
@@ -678,25 +711,68 @@ fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> bool {
             }
         });
 
-        QDirIterator it(path, QDirIterator::Subdirectories);
+        int failedCount = 0;
+        // The root folder itself, QDirIterator only reports its contents
+        if (!w->addPath(QFileInfo(path_q).absoluteFilePath())) failedCount++;
+
+        QDirIterator it(path_q, QDirIterator::Subdirectories);
         while (it.hasNext()) {
             it.next();
             auto i = it.fileInfo();
-            if (i.fileName() == "..") continue;
-            if (i.isDir()) w->addPath(i.absoluteFilePath());
+            // "." would be the already added parent folder, and addPath fails on duplicates
+            if (i.fileName() == "." || i.fileName() == "..") continue;
+            if (i.isDir() && !w->addPath(i.absoluteFilePath())) failedCount++;
             if (i.isFile()) existing->append(i.absoluteFilePath());
         }
         QObject::connect(w, &QFileSystemWatcher::directoryChanged, [=](const QString &file) {
             auto &paths2 = (*paths)[file];
 
+            QStringList watchedDirs; // Filled lazily, only to tell "already watched" apart from an actual failure
             for (const auto &i : QDir(file).entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Readable)) {
                 if (i.fileName() == "..") continue;
-                if (i.isDir()) w->addPath(i.absoluteFilePath());
+                if (i.isDir() && !w->addPath(i.absoluteFilePath())) {
+                    if (watchedDirs.isEmpty()) watchedDirs = w->directories();
+                    QString failedPath = i.absoluteFilePath();
+                    if (!watchedDirs.contains(failedPath)) {
+                        rust!(Rust_Gyroflow_cli_watch_subfolder_failed [failedPath: QString as "QString"] {
+                            log::warn!("Unable to watch the new subfolder {}, files added there will be ignored.", failedPath.to_string());
+                        });
+                    }
+                }
                 if (i.isFile() && !existing->contains(i.absoluteFilePath()))
-                    paths2.insert(i.absoluteFilePath(), 0);
+                    paths2.insert(i.absoluteFilePath(), QPair<qint64, int>(0, 0));
+            }
+            if (w->directories().isEmpty()) {
+                rust!(Rust_Gyroflow_cli_watch_gone [path_q: QString as "QString"] {
+                    log::error!("{} is not being watched anymore (deleted or unmounted?), no new files will be processed.", path_q.to_string());
+                });
             }
             t->start(1000);
         });
-        return !w->directories().isEmpty();
-    })
+
+        if (failedCount > 0) {
+            rust!(Rust_Gyroflow_cli_watch_partial [failedCount: i32 as "int"] {
+                log::warn!("{} subfolder(s) couldn't be watched, files added there will be ignored.{}", failedCount,
+                    if cfg!(target_os = "linux") { " You may need to increase `fs.inotify.max_user_watches`." } else { "" });
+            });
+        }
+
+        int count = (int)w->directories().size();
+        if (count == 0) {
+            // Nothing references the Rust callback anymore after this, so the caller can safely take it back
+            delete t;
+            delete w;
+            delete existing;
+            delete paths;
+        }
+        return count;
+    });
+
+    if watched_count <= 0 {
+        drop(unsafe { Box::from_raw(cb_ptr) }); // The C++ side was torn down, don't leak the callback
+        return Err(format!("Unable to watch the folder {}. It may be inaccessible, or the system limit of watched folders was reached.", path));
+    }
+
+    log::info!("Watching {} folder(s) in {}, waiting for new files...", watched_count, path);
+    Ok(())
 }

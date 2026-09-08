@@ -15,7 +15,7 @@ vec2 undistort_point(vec2 pos) {
         float cdist = 1.0 + params.k1.x * r2 + params.k1.y * r4 + params.k2.x * r6;
         float icdist = (1.0 + params.k2.y * r2 + params.k2.z * r4 + params.k2.w * r6) / cdist;
         if (icdist < 0.0) {
-            return vec2(0.0, 0.0);
+            return vec2(-99999.0, -99999.0);
         }
         float delta_x = params.k1.z * a1 + params.k1.w * a2 + params.k3.x * r2 + params.k3.y * r4;
         float delta_y = params.k1.z * a3 + params.k1.w * a1 + params.k3.z * r2 + params.k3.w * r4;

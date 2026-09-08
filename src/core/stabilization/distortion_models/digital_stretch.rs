@@ -33,26 +33,26 @@ impl DigitalStretch {
     pub fn opencl_functions(&self) -> &'static str {
         r#"
         float2 digital_undistort_point(float2 uv, __global KernelParams *params) {
-            uv.x /= params->digital_lens_params.x;
-            uv.y /= params->digital_lens_params.y;
+            uv.x /= params->digital_lens_params[0].x;
+            uv.y /= params->digital_lens_params[0].y;
             return uv;
         }
         float2 digital_distort_point(float2 uv, __global KernelParams *params) {
-            uv.x *= params->digital_lens_params.x;
-            uv.y *= params->digital_lens_params.y;
+            uv.x *= params->digital_lens_params[0].x;
+            uv.y *= params->digital_lens_params[0].y;
             return uv;
         }"#
     }
     pub fn wgsl_functions(&self) -> &'static str {
         r#"
         fn digital_undistort_point(uv: vec2<f32>) -> vec2<f32> {
-            uv.x = uv.x / params.digital_lens_params.x;
-            uv.y = uv.y / params.digital_lens_params.y;
+            uv.x = uv.x / params.digital_lens_params[0].x;
+            uv.y = uv.y / params.digital_lens_params[0].y;
             return uv;
         }
         fn digital_distort_point(uv: vec2<f32>) -> vec2<f32> {
-            uv.x = uv.x * params.digital_lens_params.x;
-            uv.y = uv.y * params.digital_lens_params.y;
+            uv.x = uv.x * params.digital_lens_params[0].x;
+            uv.y = uv.y * params.digital_lens_params[0].y;
             return uv;
         }"#
     }

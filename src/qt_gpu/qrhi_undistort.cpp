@@ -85,11 +85,11 @@ public:
         m_texMatrices.reset(rhi->newTexture(QRhiTexture::R32F, QSize(14, sizeForRS), 1, QRhiTexture::Flags()));
         if (!m_texMatrices->create()) { qDebug2("init") << "failed to create m_texMatrices"; return false; }
 
-        m_texMeshData.reset(rhi->newTexture(QRhiTexture::R32F, QSize(1, 1024), 1, QRhiTexture::Flags()));
+        m_texMeshData.reset(rhi->newTexture(QRhiTexture::R32F, QSize(1, 2048), 1, QRhiTexture::Flags()));
         if (!m_texMeshData->create()) { qDebug2("init") << "failed to create m_texMeshData"; return false; }
 
         matricesBuffer.resize(sizeForRS * 14 * sizeof(float));
-        meshDataBuffer.resize(1024 * sizeof(float));
+        meshDataBuffer.resize(2048 * sizeof(float));
 
         m_texCanvas.reset(rhi->newTexture(QRhiTexture::R8, canvasSize, 1, QRhiTexture::Flags()));
         if (!m_texCanvas->create()) { qDebug2("init") << "failed to create m_texCanvas"; return false; }
