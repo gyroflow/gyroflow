@@ -68,12 +68,12 @@ impl OpticalFlowTrait for OFOpenCVPyrLK {
         #[cfg(feature = "use-opencv")]
         if let OpticalFlowMethod::OFOpenCVPyrLK(next) = _to {
             let (w, h) = self.size;
-            if self.features.is_empty() || self.size != next.size ||
-                !Self::valid_layout(&self.img, self.size) || !Self::valid_layout(&next.img, next.size) { return None; }
-
+            if self.size != next.size { return None; }
             if let Some(matched) = self.matched_points.read().get(&next.timestamp_us) {
                 return Some(matched.clone());
             }
+            if self.features.is_empty() || !Self::valid_layout(&self.img, self.size) ||
+                !Self::valid_layout(&next.img, next.size) { return None; }
 
             let result = || -> Result<(Vec<(f32, f32)>, Vec<(f32, f32)>), opencv::Error> {
                 let a1_img = unsafe { Mat::new_size_with_data_unsafe(Size::new(w, h), CV_8UC1, self.img.as_raw().as_ptr() as *mut std::ffi::c_void, self.img.width() as usize) }?;
