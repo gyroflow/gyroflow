@@ -87,10 +87,19 @@ MenuItem {
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
             root.isSony = (camera || "").startsWith("Sony");
             if (is_main_video) {
-                // Every file starts from the defaults (see `StabilizationParams::clear`): breathing compensation on,
-                // no lens metadata delay. A project file loaded afterwards overrides them through loadGyroflow.
                 lensBreathing.checked = controller.lens_breathing_enabled;
                 lensDelay.value = controller.lens_metadata_delay_frames;
+
+                if (additional_data && additional_data.camera_identifier) {
+                    const cam_id = additional_data.camera_identifier;
+                    const brand = cam_id.brand || "";
+                    const model = cam_id.model || "";
+                    const lens = cam_id.lens_model || "";
+                    
+                    if (brand) {
+                        Qt.callLater(() => root.setFromMetadata(brand, model, lens));
+                    }
+                }
             }
         }
         function onLens_metadata_delay_changed(): void {
@@ -226,6 +235,135 @@ MenuItem {
         settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
     }
 
+    property string selectedBrand: ""
+    property string selectedModel: ""
+    property string selectedLens: ""
+    property var compatibleCameras: []
+    property var reviewGroup: []
+    property int reviewIndex: 0
+    property bool suppressSelectorUpdate: false
+
+    function updateSelectors(): void {
+        if (suppressSelectorUpdate) return;
+        
+        const brands = controller.get_camera_brands();
+        brandSelector.model = ["", ...brands];
+        
+        if (selectedBrand) {
+            const models = controller.get_camera_models(selectedBrand);
+            modelSelector.model = ["", ...models];
+            
+            const lenses = controller.get_lens_models(selectedBrand);
+            lensSelector.model = ["", ...lenses];
+            
+            compatibleCameras = controller.get_compatible_cameras(selectedBrand, selectedModel);
+        } else {
+            modelSelector.model = [""];
+            lensSelector.model = [""];
+            compatibleCameras = [];
+        }
+    }
+
+    function searchWithSelectors(): void {
+        if (selectedBrand || selectedModel || selectedLens) {
+            controller.search_by_camera(selectedBrand, selectedModel, selectedLens, 
+                Object.keys(root.favorites), currentVideoAspectRatio, currentVideoAspectRatioSwapped);
+        }
+    }
+
+    function setFromMetadata(brand: string, model: string, lens: string): void {
+        suppressSelectorUpdate = true;
+        selectedBrand = brand || "";
+        selectedModel = model || "";
+        selectedLens = lens || "";
+        
+        brandSelector.currentIndex = Math.max(0, brandSelector.model.indexOf(selectedBrand));
+        if (selectedBrand) {
+            const models = controller.get_camera_models(selectedBrand);
+            modelSelector.model = ["", ...models];
+            modelSelector.currentIndex = Math.max(0, modelSelector.model.indexOf(selectedModel));
+            
+            const lenses = controller.get_lens_models(selectedBrand);
+            lensSelector.model = ["", ...lenses];
+            lensSelector.currentIndex = Math.max(0, lensSelector.model.indexOf(selectedLens));
+        }
+        suppressSelectorUpdate = false;
+        searchWithSelectors();
+    }
+
+    Label {
+        text: qsTr("Camera brand");
+        position: Label.LeftPosition;
+        ComboBox {
+            id: brandSelector;
+            width: parent.width;
+            model: [""];
+            font.pixelSize: 12 * dpiScale;
+            currentIndex: 0;
+            Component.onCompleted: root.updateSelectors();
+            onCurrentIndexChanged: {
+                if (suppressSelectorUpdate) return;
+                selectedBrand = currentIndex > 0 ? model[currentIndex] : "";
+                selectedModel = "";
+                selectedLens = "";
+                modelSelector.currentIndex = 0;
+                lensSelector.currentIndex = 0;
+                root.updateSelectors();
+                searchWithSelectors();
+            }
+        }
+    }
+
+    Label {
+        text: qsTr("Camera model");
+        position: Label.LeftPosition;
+        visible: selectedBrand !== "";
+        ComboBox {
+            id: modelSelector;
+            width: parent.width;
+            model: [""];
+            font.pixelSize: 12 * dpiScale;
+            currentIndex: 0;
+            onCurrentIndexChanged: {
+                if (suppressSelectorUpdate) return;
+                selectedModel = currentIndex > 0 ? model[currentIndex] : "";
+                selectedLens = "";
+                lensSelector.currentIndex = 0;
+                root.updateSelectors();
+                searchWithSelectors();
+            }
+        }
+    }
+
+    Label {
+        text: qsTr("Lens model");
+        position: Label.LeftPosition;
+        visible: selectedBrand !== "" && !controller.is_fixed_lens_camera(selectedBrand, selectedModel);
+        ComboBox {
+            id: lensSelector;
+            width: parent.width;
+            model: [""];
+            font.pixelSize: 12 * dpiScale;
+            currentIndex: 0;
+            onCurrentIndexChanged: {
+                if (suppressSelectorUpdate) return;
+                selectedLens = currentIndex > 0 ? model[currentIndex] : "";
+                searchWithSelectors();
+            }
+        }
+    }
+
+    InfoMessageSmall {
+        type: InfoMessage.Info;
+        show: compatibleCameras.length > 0;
+        text: {
+            if (compatibleCameras.length === 0) return "";
+            const cameras = compatibleCameras.slice(0, 3).map(c => c[0] + " " + c[1]).join(", ");
+            const more = compatibleCameras.length > 3 ? qsTr(" and %1 more").arg(compatibleCameras.length - 3) : "";
+            return qsTr("Compatible cameras: %1%2").arg(cameras).arg(more);
+        }
+    }
+
     SearchField {
         id: search;
         placeholderText: qsTr("Search...");
@@ -240,11 +378,59 @@ MenuItem {
             } else {
                 root.selected_manually = true;
                 controller.load_lens_profile(lensPathOrId);
+                
+                reviewGroup = controller.get_review_group(lensPathOrId);
+                reviewIndex = Math.max(0, reviewGroup.indexOf(lensPathOrId));
             }
         }
         popup.lv.delegate: LensProfileSearchDelegate {
             popup: search.popup;
             profilesMenu: root;
+        }
+    }
+
+    Row {
+        visible: reviewGroup.length > 1;
+        anchors.horizontalCenter: parent.horizontalCenter;
+        spacing: 10 * dpiScale;
+        
+        Button {
+            text: qsTr("Previous");
+            iconName: "chevron-left";
+            enabled: reviewIndex > 0;
+            onClicked: {
+                if (reviewIndex > 0) {
+                    reviewIndex--;
+                    controller.load_lens_profile(reviewGroup[reviewIndex]);
+                }
+            }
+        }
+        BasicText {
+            anchors.verticalCenter: parent.verticalCenter;
+            text: qsTr("%1 of %2").arg(reviewIndex + 1).arg(reviewGroup.length);
+        }
+        Button {
+            text: qsTr("Next");
+            iconName: "chevron-right";
+            enabled: reviewIndex < reviewGroup.length - 1;
+            onClicked: {
+                if (reviewIndex < reviewGroup.length - 1) {
+                    reviewIndex++;
+                    controller.load_lens_profile(reviewGroup[reviewIndex]);
+                }
+            }
+        }
+        Button {
+            text: controller.is_profile_hidden(root.profileChecksum) ? qsTr("Unhide") : qsTr("Hide");
+            iconName: controller.is_profile_hidden(root.profileChecksum) ? "eye" : "eye-off";
+            visible: reviewGroup.length > 1;
+            onClicked: {
+                if (controller.is_profile_hidden(root.profileChecksum)) {
+                    controller.unhide_profile(root.profileChecksum);
+                } else {
+                    controller.hide_profile(root.profileChecksum);
+                }
+            }
         }
     }
     Row {
