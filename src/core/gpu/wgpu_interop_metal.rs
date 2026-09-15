@@ -8,9 +8,13 @@ use objc2::runtime::ProtocolObject;
 use objc2_metal::*;
 
 pub fn check_metal_stride(device: &Device, format: wgpu::TextureFormat, stride: usize) -> bool {
+    let metal_format = match format_wgpu_to_metal(format) {
+        Some(f) => f,
+        None => { log::error!("Unsupported pixel format for Metal stride check: {format:?}"); return false; }
+    };
     let alignment = unsafe { device.as_hal::<Metal>().and_then(|device| {
         let raw_device = device.raw_device();
-        Some(raw_device.minimumLinearTextureAlignmentForPixelFormat(format_wgpu_to_metal(format)) as usize)
+        Some(raw_device.minimumLinearTextureAlignmentForPixelFormat(metal_format) as usize)
     }).unwrap_or(16) };
 
     if stride % alignment != 0 {
@@ -21,33 +25,49 @@ pub fn check_metal_stride(device: &Device, format: wgpu::TextureFormat, stride: 
 }
 
 pub fn create_metal_texture_from_buffer(buffer: *mut std::ffi::c_void, width: u32, height: u32, stride: u32, format: wgpu::TextureFormat, usage: MTLTextureUsage) -> Option<Retained<ProtocolObject<dyn MTLTexture>>> {
+    if buffer.is_null() {
+        log::error!("create_metal_texture_from_buffer received a null MTLBuffer pointer");
+        return None;
+    }
+    let metal_format = match format_wgpu_to_metal(format) {
+        Some(f) => f,
+        None => { log::error!("Unsupported pixel format for Metal texture: {format:?}"); return None; }
+    };
     let buf: &ProtocolObject<dyn MTLBuffer> = unsafe { &*(buffer as *const ProtocolObject<dyn MTLBuffer>) };
     let texture_descriptor = MTLTextureDescriptor::new();
     unsafe { texture_descriptor.setWidth(width as usize) };
     unsafe { texture_descriptor.setHeight(height as usize) };
     unsafe { texture_descriptor.setDepth(1) };
     texture_descriptor.setTextureType(MTLTextureType::Type2D);
-    texture_descriptor.setPixelFormat(format_wgpu_to_metal(format));
+    texture_descriptor.setPixelFormat(metal_format);
     texture_descriptor.setStorageMode(buf.storageMode());
     texture_descriptor.setUsage(usage | MTLTextureUsage::ShaderRead | MTLTextureUsage::ShaderWrite | MTLTextureUsage::RenderTarget);
 
     buf.newTextureWithDescriptor_offset_bytesPerRow(&texture_descriptor, 0, stride as usize)
 }
 
-fn retain_texture(ptr: *mut std::ffi::c_void) -> Retained<ProtocolObject<dyn MTLTexture>> {
+fn retain_texture(ptr: *mut std::ffi::c_void) -> Option<Retained<ProtocolObject<dyn MTLTexture>>> {
+    if ptr.is_null() {
+        log::error!("retain_texture received a null MTLTexture pointer");
+        return None;
+    }
     unsafe {
         Retained::retain(ptr as *mut ProtocolObject<dyn MTLTexture>)
-    }.unwrap()
+    }
 }
 
-fn retain_buffer(ptr: *mut std::ffi::c_void) -> Retained<ProtocolObject<dyn MTLBuffer>> {
+fn retain_buffer(ptr: *mut std::ffi::c_void) -> Option<Retained<ProtocolObject<dyn MTLBuffer>>> {
+    if ptr.is_null() {
+        log::error!("retain_buffer received a null MTLBuffer pointer");
+        return None;
+    }
     unsafe {
         Retained::retain(ptr as *mut ProtocolObject<dyn MTLBuffer>)
-    }.unwrap()
+    }
 }
 
-pub fn create_texture_from_metal(device: &Device, image: *mut std::ffi::c_void, width: u32, height: u32, format: wgpu::TextureFormat, usage: wgpu::TextureUsages) -> wgpu::Texture {
-    let image = retain_texture(image);
+pub fn create_texture_from_metal(device: &Device, image: *mut std::ffi::c_void, width: u32, height: u32, format: wgpu::TextureFormat, usage: wgpu::TextureUsages) -> Option<wgpu::Texture> {
+    let image = retain_texture(image)?;
 
     let size = wgpu::Extent3d {
         width,
@@ -71,7 +91,7 @@ pub fn create_texture_from_metal(device: &Device, image: *mut std::ffi::c_void, 
         )
     };
 
-    unsafe {
+    Some(unsafe {
         device.create_texture_from_hal::<Metal>(
             texture,
             &wgpu::TextureDescriptor {
@@ -86,13 +106,13 @@ pub fn create_texture_from_metal(device: &Device, image: *mut std::ffi::c_void, 
             },
             wgpu::TextureUses::UNINITIALIZED
         )
-    }
+    })
 }
 
-pub fn create_buffer_from_metal(device: &Device, buffer: *mut std::ffi::c_void, size: u64, usage: wgpu::BufferUsages) -> wgpu::Buffer {
-    let buffer = retain_buffer(buffer);
+pub fn create_buffer_from_metal(device: &Device, buffer: *mut std::ffi::c_void, size: u64, usage: wgpu::BufferUsages) -> Option<wgpu::Buffer> {
+    let buffer = retain_buffer(buffer)?;
     let buffer = unsafe { <Metal as wgpu::hal::Api>::Device::buffer_from_raw(buffer, size) };
-    unsafe {
+    Some(unsafe {
         device.create_buffer_from_hal::<Metal>(
             buffer,
             &wgpu::BufferDescriptor {
@@ -102,13 +122,13 @@ pub fn create_buffer_from_metal(device: &Device, buffer: *mut std::ffi::c_void, 
                 usage,
             },
         )
-    }
+    })
 }
 
-pub fn format_wgpu_to_metal(format: wgpu::TextureFormat) -> MTLPixelFormat {
+pub fn format_wgpu_to_metal(format: wgpu::TextureFormat) -> Option<MTLPixelFormat> {
     use wgpu::TextureFormat as Tf;
     use wgpu::{AstcBlock, AstcChannel};
-    match format {
+    Some(match format {
         Tf::R8Unorm => MTLPixelFormat::R8Unorm,
         Tf::R8Snorm => MTLPixelFormat::R8Snorm,
         Tf::R8Uint => MTLPixelFormat::R8Uint,
@@ -230,6 +250,6 @@ pub fn format_wgpu_to_metal(format: wgpu::TextureFormat) -> MTLPixelFormat {
                 AstcBlock::B12x12 => MTLPixelFormat::ASTC_12x12_HDR,
             },
         },
-        _ => { panic!("Unsupported pixel format {:?}", format); }
-    }
+        _ => { log::error!("Unsupported pixel format {:?}", format); return None; }
+    })
 }
