@@ -381,6 +381,14 @@ impl LensProfileDatabase {
     pub fn get_by_id(&self, id: &str) -> Option<&LensProfile> {
         self.map.get(id)
     }
+    pub fn profile_map(&self) -> &HashMap<String, LensProfile> {
+        &self.map
+    }
+
+    pub fn list_for_ui_ref(&self) -> &[(String, String, String, bool, f64, i32, String)] {
+        &self.list_for_ui
+    }
+
     pub fn find(&self, filename_or_id: &str) -> Option<&LensProfile> {
         if let Some(l) = self.map.get(filename_or_id) {
             Some(l)

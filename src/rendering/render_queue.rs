@@ -1224,6 +1224,7 @@ impl RenderQueue {
                         })),
                         input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { url: if is_gf_data { String::new() } else { url.clone() }, project_file_url: None, image_sequence_start: 0, image_sequence_fps: 0.0, preset_name: None, preset_output_size: None })),
                         lens_profile_db: stabilizer.lens_profile_db.clone(),
+                        camera_database: stabilizer.camera_database.clone(),
                         ..Default::default()
                     };
 

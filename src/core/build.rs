@@ -14,4 +14,15 @@ fn main() {
             }
         }
     }
+
+    // Same auto-update path as lens profiles. The asset is optional until
+    // gyroflow/lens_profiles starts publishing camera_database.json.
+    let cam_db_path = format!("{project_dir}/../../resources/camera_presets/camera_database.json");
+    if !std::path::Path::new(&cam_db_path).exists() {
+        if let Ok(mut body) = ureq::get("https://github.com/gyroflow/lens_profiles/releases/latest/download/camera_database.json").call().map(|x| x.into_body().into_reader()) {
+            if let Ok(mut file) = std::fs::File::create(&cam_db_path) {
+                let _ = std::io::copy(&mut body, &mut file);
+            }
+        }
+    }
 }

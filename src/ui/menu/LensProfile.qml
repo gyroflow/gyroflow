@@ -86,6 +86,11 @@ MenuItem {
         target: controller;
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
             root.isSony = (camera || "").startsWith("Sony");
+            if (is_main_video && additional_data && additional_data.camera_identifier) {
+                const id = additional_data.camera_identifier;
+                const lens = [id.lens_model, id.lens_info].filter(v => v).join(" ");
+                cameraSelector.prefill(id.brand || "", id.model || "", lens);
+            }
             if (is_main_video) {
                 // Every file starts from the defaults (see `StabilizationParams::clear`): breathing compensation on,
                 // no lens metadata delay. A project file loaded afterwards overrides them through loadGyroflow.
@@ -132,6 +137,8 @@ MenuItem {
                         "Dimensions":      obj.calib_dimension.w + "x" + obj.calib_dimension.h,
                         "Calibrated by":   obj.calibrated_by
                     };
+
+                    cameraSelector.prefill(obj.camera_brand || "", obj.camera_model || "", obj.lens_model || "");
 
                     if (+obj.focal_length > 0) lensInfo["Focal length"] = obj.focal_length.toFixed(2) + " mm";
                     if (+obj.crop_factor  > 0) lensInfo["Crop factor"]  = obj.crop_factor.toFixed(2) + "x";
@@ -224,6 +231,25 @@ MenuItem {
     }
     function updateFavorites(): void {
         settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
+    }
+
+    CameraLensSelector {
+        id: cameraSelector;
+        onUserSelectionChanged: {
+            if (root.brandForSearch()) {
+                controller.search_lens_profile_by_setup(
+                    cameraSelector.brand,
+                    cameraSelector.model,
+                    cameraSelector.lens,
+                    Object.keys(root.favorites),
+                    root.currentVideoAspectRatio,
+                    root.currentVideoAspectRatioSwapped
+                );
+            }
+        }
+    }
+    function brandForSearch(): string {
+        return cameraSelector.brand && cameraSelector.brand !== cameraSelector.otherLabel? cameraSelector.brand : "";
     }
 
     SearchField {

@@ -162,6 +162,12 @@ MenuItem {
                     if (camera_id.fps)        { calib.calibrationInfo.fps          = camera_id.fps / 1000.0; }
                     if (+camera_id.focal_length > 0) { flcb.checked = true; fl.value = +camera_id.focal_length; }
 
+                    cameraSelector.prefill(
+                        calib.calibrationInfo.camera_brand || "",
+                        calib.calibrationInfo.camera_model || "",
+                        calib.calibrationInfo.lens_model || ""
+                    );
+
                     if (camera_id.brand === "GoPro" && camera_id.lens_info === "Super") digitalLens.currentIndex = 1;
                     if (camera_id.brand === "GoPro" && camera_id.lens_info === "Hyper") digitalLens.currentIndex = 2;
 
@@ -310,6 +316,22 @@ MenuItem {
         }
     }
 
+    InfoMessageSmall {
+        show: !focalLengthOnly.checked && !(calib.calibrationInfo.camera_brand && calib.calibrationInfo.camera_model);
+        text: qsTr("Pick a camera brand and model from the list (or Other) so the exported profile can be identified.");
+    }
+
+    CameraLensSelector {
+        id: cameraSelector;
+        onSelectionChanged: {
+            if (cameraSelector.brand) calib.calibrationInfo.camera_brand = cameraSelector.brand;
+            if (cameraSelector.model) calib.calibrationInfo.camera_model = cameraSelector.model;
+            if (cameraSelector.lens)  calib.calibrationInfo.lens_model   = cameraSelector.lens;
+            if (cameraSelector.cropFactor > 0) calib.calibrationInfo.crop_factor = cameraSelector.cropFactor;
+            calib.updateTable();
+        }
+    }
+
     TableList {
         id: list;
         columnSpacing: 10 * dpiScale;
@@ -431,8 +453,8 @@ MenuItem {
         id: uploadProfile;
         text: qsTr("Upload lens profile to the database");
         checked: true;
-        enabled: !focalLengthOnly.checked;
-        tooltip: enabled? "" : qsTr("Only calibrated profiles can be uploaded to the database.");
+        enabled: !focalLengthOnly.checked && !!(calib.calibrationInfo.camera_brand && calib.calibrationInfo.camera_model);
+        tooltip: enabled? "" : (focalLengthOnly.checked? qsTr("Only calibrated profiles can be uploaded to the database.") : qsTr("Select a camera brand and model (or Other with a typed name) before uploading."));
     }
     AdvancedSection {
         Label {

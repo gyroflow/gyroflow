@@ -101,6 +101,13 @@ pub struct Controller {
     all_profiles_loaded: qt_signal!(),
     search_lens_profile_finished: qt_signal!(profiles: QVariantList),
     search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
+    search_lens_profile_by_setup: qt_method!(fn(&self, brand: QString, model: QString, lens: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
+    get_camera_brands: qt_method!(fn(&self) -> QStringList),
+    get_camera_models: qt_method!(fn(&self, brand: QString) -> QStringList),
+    get_camera_lenses: qt_method!(fn(&self, brand: QString, model: QString) -> QStringList),
+    resolve_camera_selection: qt_method!(fn(&self, brand: QString, model: QString, lens: QString) -> QJsonObject),
+    get_compatible_cameras: qt_method!(fn(&self, brand: QString, model: QString) -> QJsonArray),
+    camera_database_loaded: qt_signal!(),
     fetch_profiles_from_github: qt_method!(fn(&self)),
     lens_profiles_updated: qt_signal!(reload_from_disk: bool),
 
@@ -1937,7 +1944,11 @@ impl Controller {
         let loaded = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, _: ()| {
             this.all_profiles_loaded();
         });
+        let cam_ready = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, _: ()| {
+            this.camera_database_loaded();
+        });
         let db = self.stabilizer.lens_profile_db.clone();
+        let cam_db = self.stabilizer.camera_database.clone();
         core::run_threaded(move || {
             if reload_from_disk {
                 let mut new_db = core::lens_profile_database::LensProfileDatabase::default();
@@ -1950,6 +1961,12 @@ impl Controller {
             }
 
             db.write().prepare_list_for_ui();
+
+            {
+                let mut catalog = cam_db.write();
+                catalog.merge_from_profiles(&db.read());
+            }
+            cam_ready(());
 
             loaded(());
         });
@@ -1979,7 +1996,54 @@ impl Controller {
         });
     }
 
-    #[allow(unreachable_code)]
+    fn search_lens_profile_by_setup(&self, brand: QString, model: QString, lens: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32) {
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, profiles: QVariantList| {
+            this.search_lens_profile_finished(profiles);
+        });
+        let db = self.stabilizer.lens_profile_db.clone();
+        let cam_db = self.stabilizer.camera_database.clone();
+        let brand = brand.to_string();
+        let model = model.to_string();
+        let lens = lens.to_string();
+        let favorites = HashSet::<String>::from_iter(favorites.into_iter().map(|x| x.to_qbytearray().to_string()));
+        core::run_threaded(move || {
+            let catalog = cam_db.read();
+            let resolved = catalog.resolve(&brand, &model, &lens);
+            let profiles = db.read().search_by_setup(|p| {
+                catalog.profile_matches_setup(p, &resolved.brand, &resolved.model, &resolved.lens)
+            }, &favorites, aspect_ratio, aspect_ratio_swapped).into_iter().map(|(name, file, crc, official, rating, aspect_ratio, _author)| {
+                let mut list = QVariantList::from_iter([
+                    QString::from(name),
+                    QString::from(file),
+                    QString::from(crc)
+                ].into_iter());
+                list.push(official.into());
+                list.push(rating.into());
+                list.push(aspect_ratio.into());
+                list
+            }).collect();
+            finished(profiles);
+        });
+    }
+
+    fn get_camera_brands(&self) -> QStringList {
+        QStringList::from_iter(self.stabilizer.camera_database.read().brand_names().into_iter().map(QString::from))
+    }
+    fn get_camera_models(&self, brand: QString) -> QStringList {
+        QStringList::from_iter(self.stabilizer.camera_database.read().model_names(&brand.to_string()).into_iter().map(QString::from))
+    }
+    fn get_camera_lenses(&self, brand: QString, model: QString) -> QStringList {
+        QStringList::from_iter(self.stabilizer.camera_database.read().lens_names(&brand.to_string(), &model.to_string()).into_iter().map(QString::from))
+    }
+    fn resolve_camera_selection(&self, brand: QString, model: QString, lens: QString) -> QJsonObject {
+        let resolved = self.stabilizer.camera_database.read().resolve(&brand.to_string(), &model.to_string(), &lens.to_string());
+        util::serde_json_to_qt_object(&serde_json::to_value(resolved).unwrap_or_default())
+    }
+    fn get_compatible_cameras(&self, brand: QString, model: QString) -> QJsonArray {
+        let list = self.stabilizer.camera_database.read().compatible_cameras(&brand.to_string(), &model.to_string(), 40);
+        util::serde_json_to_qt_array(&serde_json::to_value(list).unwrap_or_default())
+    }
+
     fn fetch_profiles_from_github(&self) {
         use crate::core::lens_profile_database::LensProfileDatabase;
 
@@ -1991,6 +2055,15 @@ impl Controller {
         let update = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, _| {
             this.lens_profiles_updated(true);
         });
+        let catalog_updated = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, path: String| {
+            if let Ok(json) = std::fs::read_to_string(&path) {
+                if let Ok(mut db) = gyroflow_core::camera_database::CameraDatabase::from_json(&json) {
+                    db.merge_from_profiles(&this.stabilizer.lens_profile_db.read());
+                    *this.stabilizer.camera_database.write() = db;
+                    this.camera_database_loaded();
+                }
+            }
+        });
 
         let current_version = self.stabilizer.lens_profile_db.read().version;
 
@@ -2000,30 +2073,53 @@ impl Controller {
                 if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/lens_profiles/releases").call().map(|x| x.into_body().read_to_string()) {
                     (|| -> Option<()> {
                         let v: Vec<serde_json::Value> = serde_json::from_str(&body).ok()?;
-                        if let Some(obj) = v.first() {
-                            let obj = obj.as_object()?;
-                            if let Ok(tag) = obj.get("tag_name")?.as_str()?.trim_start_matches("v").parse::<u32>() {
-                                if tag > current_version {
-                                    ::log::info!("Updating lens profile database from v{current_version} to v{tag}.");
-                                    if let Some(download_url) = obj["assets"][0]["browser_download_url"].as_str() {
-                                        if let Ok(mut content) = ureq::get(download_url).call().map(|x| x.into_body().into_reader()) {
-                                            let mut updated = false;
-                                            if db_path.exists() {
-                                                if let Ok(mut file) = std::fs::File::create(&db_path) {
-                                                    if std::io::copy(&mut content, &mut file).is_ok() {
-                                                        updated = true;
-                                                        update(());
-                                                    }
-                                                }
-                                            }
-                                            if !updated {
-                                                if let Ok(mut file) = std::fs::File::create(gyroflow_core::settings::data_dir().join("lens_profiles").join("profiles.cbor.gz")) {
-                                                    if std::io::copy(&mut content, &mut file).is_ok() {
-                                                        update(());
-                                                    }
+                        let obj = v.first()?.as_object()?;
+                        let assets = obj.get("assets")?.as_array()?;
+                        let asset_url = |name: &str| -> Option<String> {
+                            assets.iter().find_map(|a| {
+                                if a.get("name")?.as_str()? == name {
+                                    a.get("browser_download_url")?.as_str().map(|s| s.to_string())
+                                } else {
+                                    None
+                                }
+                            })
+                        };
+                        if let Ok(tag) = obj.get("tag_name")?.as_str()?.trim_start_matches('v').parse::<u32>() {
+                            if tag > current_version {
+                                ::log::info!("Updating lens profile database from v{current_version} to v{tag}.");
+                                if let Some(download_url) = asset_url("profiles.cbor.gz") {
+                                    if let Ok(mut content) = ureq::get(&download_url).call().map(|x| x.into_body().into_reader()) {
+                                        let mut updated = false;
+                                        if db_path.exists() {
+                                            if let Ok(mut file) = std::fs::File::create(&db_path) {
+                                                if std::io::copy(&mut content, &mut file).is_ok() {
+                                                    updated = true;
+                                                    update(());
                                                 }
                                             }
                                         }
+                                        if !updated {
+                                            if let Ok(mut file) = std::fs::File::create(gyroflow_core::settings::data_dir().join("lens_profiles").join("profiles.cbor.gz")) {
+                                                if std::io::copy(&mut content, &mut file).is_ok() {
+                                                    update(());
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        // Optional catalog asset — published from gyroflow/lens_profiles once the generator lives there.
+                        if let Some(download_url) = asset_url(gyroflow_core::camera_database::CameraDatabase::filename()) {
+                            let dest = if db_path.parent().map(|p| p.join("camera_database.json").exists()).unwrap_or(false) || db_path.exists() {
+                                db_path.parent().unwrap().join("camera_database.json")
+                            } else {
+                                gyroflow_core::settings::data_dir().join("lens_profiles").join("camera_database.json")
+                            };
+                            if let Ok(mut content) = ureq::get(&download_url).call().map(|x| x.into_body().into_reader()) {
+                                if let Ok(mut file) = std::fs::File::create(&dest) {
+                                    if std::io::copy(&mut content, &mut file).is_ok() {
+                                        catalog_updated(dest.to_string_lossy().to_string());
                                     }
                                 }
                             }

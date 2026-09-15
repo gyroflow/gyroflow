@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gyroflow.xyz/schemas/camera_database.schema.json",
+  "title": "Gyroflow camera and lens catalog",
+  "description": "Normalized inventory of camera brands, bodies, lenses, mounts and sensor sizes. Independent of individual lens-profile JSON files; those strings should eventually match these canonical names. Built from the Gyroflow lens profile database and LensFun metadata (names, mounts, crop factors — not distortion coefficients).",
+  "type": "object",
+  "required": ["version", "generated_at", "brands", "mounts", "sensor_sizes", "cameras", "lenses"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Catalog format version. Bump when the schema changes."
+    },
+    "generated_at": {
+      "type": "string",
+      "description": "UTC timestamp when this file was generated (YYYY-MM-DDTHH:MM:SSZ)."
+    },
+    "sources": {
+      "type": "object",
+      "description": "Provenance for the aggregated records.",
+      "additionalProperties": true
+    },
+    "brands": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/brand" }
+    },
+    "mounts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/mount" }
+    },
+    "sensor_sizes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/sensorSize" }
+    },
+    "cameras": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/camera" }
+    },
+    "lenses": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/lens" }
+    }
+  },
+  "$defs": {
+    "brand": {
+      "type": "object",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "description": "Stable slug, e.g. sony" },
+        "name": { "type": "string", "description": "Canonical display name, e.g. Sony" },
+        "aliases": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Other spellings seen in profiles, telemetry or LensFun."
+        }
+      }
+    },
+    "mount": {
+      "type": "object",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "aliases": { "type": "array", "items": { "type": "string" } },
+        "compat": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Other mount ids this mount can adapt to, from LensFun <compat>."
+        },
+        "flange_focal_distance_mm": { "type": ["number", "null"] }
+      }
+    },
+    "sensorSize": {
+      "type": "object",
+      "required": ["id", "name", "crop_factor"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "width_mm": { "type": ["number", "null"] },
+        "height_mm": { "type": ["number", "null"] },
+        "crop_factor": { "type": "number", "exclusiveMinimum": 0 },
+        "aliases": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "camera": {
+      "type": "object",
+      "required": ["id", "brand_id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "brand_id": { "type": "string" },
+        "name": { "type": "string" },
+        "aliases": { "type": "array", "items": { "type": "string" } },
+        "mount_id": { "type": ["string", "null"] },
+        "sensor_size_id": { "type": ["string", "null"] },
+        "crop_factor": { "type": ["number", "null"] },
+        "fixed_lens": { "type": "boolean" },
+        "sources": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["gyroflow", "lensfun"] }
+        }
+      }
+    },
+    "lens": {
+      "type": "object",
+      "required": ["id", "brand_id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "brand_id": { "type": "string" },
+        "name": { "type": "string" },
+        "aliases": { "type": "array", "items": { "type": "string" } },
+        "mount_id": { "type": ["string", "null"] },
+        "camera_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Bodies this lens is known to be used on (especially fixed-lens cameras)."
+        },
+        "focal_min_mm": { "type": ["number", "null"] },
+        "focal_max_mm": { "type": ["number", "null"] },
+        "aperture_min": { "type": ["number", "null"] },
+        "kind": {
+          "type": "string",
+          "enum": ["prime", "zoom", "unknown"]
+        },
+        "sources": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["gyroflow", "lensfun"] }
+        }
+      }
+    }
+  }
+}
