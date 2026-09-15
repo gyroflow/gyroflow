@@ -3,10 +3,11 @@
 
 use super::StabilizationManager;
 use super::distortion_models::DistortionModel;
-use crate::stabilization_params::ReadoutDirection;
+use crate::stabilization_params::{ OpticalMotionMode, ReadoutDirection, Similarity2D };
 use crate::GyroSource;
 use crate::keyframes::KeyframeManager;
 use crate::lens_profile::LensProfile;
+use std::collections::BTreeMap;
 use std::sync::Arc;
 use parking_lot::RwLock;
 
@@ -69,6 +70,12 @@ pub struct ComputeParams {
     pub lens_metadata_delay_frames: i32,          // every per-frame lens lookup is shifted by this many frames, see synchronization::lens_delay
 
     pub lens_breathing_enabled: bool,
+
+    pub optical_motion_mode: OpticalMotionMode,
+    pub optical_residual_enabled: bool,
+    pub optical_residual_strength: f64,
+    pub optical_residual_smooth_window: f64,
+    pub optical_residual: BTreeMap<i64, Similarity2D>,
 }
 impl ComputeParams {
     /// Time (µs) the lens metadata of the picture at `timestamp_ms` is looked up at: the frame time shifted by
@@ -152,6 +159,16 @@ impl ComputeParams {
             lens_metadata_delay_frames: params.lens_metadata_delay_frames,
 
             lens_breathing_enabled: params.lens_breathing_enabled,
+
+            optical_motion_mode: params.optical_motion_mode,
+            optical_residual_enabled: params.optical_residual_enabled,
+            optical_residual_strength: params.optical_residual_strength,
+            optical_residual_smooth_window: params.optical_residual_smooth_window,
+            optical_residual: if params.optical_residual_enabled {
+                mgr.pose_estimator.residual_path.read().clone()
+            } else {
+                BTreeMap::new()
+            },
         }
     }
 
@@ -223,6 +240,10 @@ impl std::fmt::Debug for ComputeParams {
          .field("lens_metadata_delay_frames",     &self.lens_metadata_delay_frames)
          .field("focal_lengths.len",         &self.focal_lengths.len())
          .field("lens_breathing_enabled",    &self.lens_breathing_enabled)
+         .field("optical_motion_mode",       &self.optical_motion_mode)
+         .field("optical_residual_enabled",  &self.optical_residual_enabled)
+         .field("optical_residual_strength", &self.optical_residual_strength)
+         .field("optical_residual.len",      &self.optical_residual.len())
          .finish()
     }
 }

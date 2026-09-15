@@ -21,8 +21,10 @@ use super::gyro_source::TimeIMU;
 
 pub mod optimsync;
 pub mod lens_delay;
+pub mod optical_stab;
 mod autosync;
 pub use autosync::{ AutosyncError, AutosyncProcess, AutosyncResult };
+pub use crate::stabilization_params::{ OpticalMotionMode, Similarity2D };
 use crate::util::MapClosest;
 
 pub type GrayImage = image::GrayImage;
@@ -68,6 +70,10 @@ pub struct PoseEstimator {
     pub sync_results: Arc<RwLock<BTreeMap<i64, FrameResult>>>,
     pub estimated_gyro: Arc<RwLock<BTreeMap<i64, TimeIMU>>>,
     pub estimated_quats: Arc<RwLock<TimeQuat>>,
+    /// Incremental leftover similarities after removing camera rotation, used to rebuild the residual path
+    pub residual_increments: Arc<RwLock<BTreeMap<i64, optical_stab::Similarity2D>>>,
+    /// High-pass residual correction applied in `FrameTransform` (identity when empty)
+    pub residual_path: Arc<RwLock<BTreeMap<i64, optical_stab::Similarity2D>>>,
     pub lpf: AtomicU32,
     pub every_nth_frame: AtomicU32,
     pub pose_method: AtomicU32,
@@ -79,6 +85,8 @@ impl PoseEstimator {
         self.sync_results.write().clear();
         self.estimated_gyro.write().clear();
         self.estimated_quats.write().clear();
+        self.residual_increments.write().clear();
+        self.residual_path.write().clear();
     }
 
     pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32, of_method: u32) {
@@ -224,6 +232,68 @@ impl PoseEstimator {
         for (_, i) in l.iter_mut(){
             i.of_method.cleanup();
         }
+    }
+
+    /// Consecutive-frame optical-flow pairs left after `cache_optical_flow`, with the pose rotation already estimated for that frame
+    pub fn optical_track_pairs(&self, fx: f64, fy: f64, cx: f64, cy: f64) -> Vec<optical_stab::TrackedPair> {
+        let l = self.sync_results.read();
+        let mut out = Vec::new();
+        for (_k, fr) in l.iter() {
+            let Ok(of) = fr.optical_flow.try_borrow() else { continue; };
+            let Some(Some(((t1, p1), (t2, p2)))) = of.get(&1).cloned() else { continue; };
+            if p1.len() < 8 || p1.len() != p2.len() { continue; }
+            out.push(optical_stab::TrackedPair {
+                timestamp_us: t1,
+                next_timestamp_us: t2,
+                from: p1,
+                to: p2,
+                remove_rotation: fr.rotation,
+                fx, fy, cx, cy,
+                width: fr.frame_size.0,
+                height: fr.frame_size.1,
+            });
+        }
+        out
+    }
+
+    /// Fit leftover similarities and rebuild the high-pass residual path. `use_gyro_rotation` replaces the OF pose with the gyro delta so the residual is truly a second pass after gyro.
+    pub fn rebuild_optical_residual(&self, params: &ComputeParams) {
+        if !params.optical_residual_enabled {
+            self.residual_increments.write().clear();
+            self.residual_path.write().clear();
+            return;
+        }
+        let (fx, fy, cx, cy) = {
+            let (k, _, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(params, 0.0, false);
+            let fx = k[(0, 0)];
+            let fy = k[(1, 1)];
+            let (cx, cy) = (k[(0, 2)], k[(1, 2)]);
+            if fx.is_finite() && fx > 0.0 { (fx, fy, cx, cy) } else {
+                let w = params.width.max(1) as f64;
+                let h = params.height.max(1) as f64;
+                (0.8 * w, 0.8 * w, w / 2.0, h / 2.0)
+            }
+        };
+        let mut pairs = self.optical_track_pairs(fx, fy, cx, cy);
+        let file_has_motion = params.gyro.read().has_motion();
+        if file_has_motion && !params.optical_motion_mode.uses_optical_as_motion(file_has_motion) {
+            let gyro = params.gyro.read();
+            for p in pairs.iter_mut() {
+                let q1 = gyro.org_quat_at_timestamp(p.timestamp_us as f64 / 1000.0);
+                let q2 = gyro.org_quat_at_timestamp(p.next_timestamp_us as f64 / 1000.0);
+                p.remove_rotation = Some(Rotation3::from(q1.inverse() * q2));
+            }
+        }
+        let increments = optical_stab::residual_increments(&pairs);
+        let path = optical_stab::residual_corrections(&increments, params.optical_residual_smooth_window.max(0.05));
+        *self.residual_increments.write() = increments;
+        *self.residual_path.write() = path;
+    }
+
+    pub fn resmooth_optical_residual(&self, window_s: f64) {
+        let increments = self.residual_increments.read().clone();
+        if increments.is_empty() { return; }
+        *self.residual_path.write() = optical_stab::residual_corrections(&increments, window_s.max(0.05));
     }
 
     pub fn get_of_lines_for_timestamp(&self, timestamp_us: &i64, next_no: usize, scale: f64, num_frames: usize, filter: bool) -> (OpticalFlowPairWithTs, Option<(u32, u32)>) {

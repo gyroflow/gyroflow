@@ -43,6 +43,106 @@ impl From<i32> for ReadoutDirection {
         }
     }
 }
+/// How Auto sync uses optical-flow camera motion relative to gyro/IMU data
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum OpticalMotionMode {
+    /// Existing behavior: optical flow becomes camera motion only when the file has no gyro/IMU
+    #[default]
+    Auto = 0,
+    /// Auto sync always writes the optical-flow estimate as camera motion, even if gyro exists
+    OpticalOnly = 1,
+    /// Never replace gyro/IMU with optical flow
+    GyroOnly = 2,
+}
+impl From<i32> for OpticalMotionMode {
+    fn from(v: i32) -> Self {
+        match v {
+            1 => Self::OpticalOnly,
+            2 => Self::GyroOnly,
+            _ => Self::Auto,
+        }
+    }
+}
+impl OpticalMotionMode {
+    /// Whether a finished Auto sync should copy estimated optical-flow rates into the gyro source
+    pub fn uses_optical_as_motion(self, file_has_motion: bool) -> bool {
+        match self {
+            Self::Auto => !file_has_motion,
+            Self::OpticalOnly => true,
+            Self::GyroOnly => false,
+        }
+    }
+}
+
+/// 2D similarity `p' = scale * R(rot) * p + (tx, ty)` in pixels / radians
+#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct Similarity2D {
+    pub tx: f64,
+    pub ty: f64,
+    pub rot: f64,
+    pub scale: f64,
+}
+impl Default for Similarity2D {
+    fn default() -> Self { Self::identity() }
+}
+impl Similarity2D {
+    pub fn identity() -> Self {
+        Self { tx: 0.0, ty: 0.0, rot: 0.0, scale: 1.0 }
+    }
+    pub fn is_finite(&self) -> bool {
+        self.tx.is_finite() && self.ty.is_finite() && self.rot.is_finite() && self.scale.is_finite() && self.scale > 0.0
+    }
+    pub fn is_near_identity(&self) -> bool {
+        self.tx.abs() < 1e-9 && self.ty.abs() < 1e-9 && self.rot.abs() < 1e-9 && (self.scale - 1.0).abs() < 1e-9
+    }
+    /// `self` then `other` (other is applied after self)
+    pub fn compose(self, other: Self) -> Self {
+        let (c, s) = (other.rot.cos(), other.rot.sin());
+        let sc = other.scale;
+        Self {
+            tx: sc * (c * self.tx - s * self.ty) + other.tx,
+            ty: sc * (s * self.tx + c * self.ty) + other.ty,
+            rot: self.rot + other.rot,
+            scale: self.scale * other.scale,
+        }
+    }
+    pub fn inverse(self) -> Self {
+        let (c, s) = (self.rot.cos(), self.rot.sin());
+        let inv_s = if self.scale.abs() > 1e-12 { 1.0 / self.scale } else { 1.0 };
+        Self {
+            tx: -inv_s * ( c * self.tx + s * self.ty),
+            ty: -inv_s * (-s * self.tx + c * self.ty),
+            rot: -self.rot,
+            scale: inv_s,
+        }
+    }
+    pub fn scale_strength(self, strength: f64) -> Self {
+        let t = strength.clamp(0.0, 1.0);
+        Self {
+            tx: self.tx * t,
+            ty: self.ty * t,
+            rot: self.rot * t,
+            scale: 1.0 + (self.scale - 1.0) * t,
+        }
+    }
+    pub fn apply(self, p: (f64, f64)) -> (f64, f64) {
+        let (c, s) = (self.rot.cos(), self.rot.sin());
+        let x = self.scale * (c * p.0 - s * p.1) + self.tx;
+        let y = self.scale * (s * p.0 + c * p.1) + self.ty;
+        (x, y)
+    }
+    /// Homography about `(cx, cy)`: rotate/scale around the centre, then translate
+    pub fn as_matrix_about(self, cx: f64, cy: f64) -> nalgebra::Matrix3<f64> {
+        let (c, s) = ((self.scale * self.rot.cos()), (self.scale * self.rot.sin()));
+        nalgebra::Matrix3::new(
+            c, -s, self.tx + cx - c * cx + s * cy,
+            s,  c, self.ty + cy - s * cx - c * cy,
+            0.0, 0.0, 1.0,
+        )
+    }
+}
+
 impl From<&str> for ReadoutDirection {
     fn from(v: &str) -> Self {
         match v {
@@ -117,6 +217,15 @@ pub struct StabilizationParams {
     pub of_method: u32,
     pub current_device: i32,
 
+    /// Auto / optical-only / gyro-only: whether Auto sync writes optical-flow rates as camera motion
+    pub optical_motion_mode: OpticalMotionMode,
+    /// Second-pass global 2D residual after camera-motion stabilization
+    pub optical_residual_enabled: bool,
+    /// 0–1 blend of the residual correction
+    pub optical_residual_strength: f64,
+    /// Box-filter window (seconds) used to separate intentional motion from leftover jitter
+    pub optical_residual_smooth_window: f64,
+
     pub zooming_debug_points: std::collections::BTreeMap<i64, Vec<(f64, f64)>>,
 
     // Focal length smoothing
@@ -180,6 +289,10 @@ impl Default for StabilizationParams {
             background: Vector4::new(0.0, 0.0, 0.0, 0.0),
 
             of_method: 2,
+            optical_motion_mode: OpticalMotionMode::Auto,
+            optical_residual_enabled: false,
+            optical_residual_strength: 1.0,
+            optical_residual_smooth_window: 0.5,
 
             current_device: 0,
 
@@ -325,6 +438,10 @@ impl StabilizationParams {
             background_margin:         self.background_margin,
             background_margin_feather: self.background_margin_feather,
             of_method:                 self.of_method,
+            optical_motion_mode:       self.optical_motion_mode,
+            optical_residual_enabled:  self.optical_residual_enabled,
+            optical_residual_strength: self.optical_residual_strength,
+            optical_residual_smooth_window: self.optical_residual_smooth_window,
             current_device:            self.current_device,
             adaptive_zoom_method:      self.adaptive_zoom_method,
             fov_overview:              self.fov_overview,

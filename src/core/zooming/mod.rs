@@ -161,6 +161,21 @@ pub fn get_checksum(compute_params: &ComputeParams, smoothing_checksum: u64) -> 
         hasher.write_u64(x.unwrap_or_default().to_bits());
     }
 
+    hasher.write_u8(compute_params.optical_residual_enabled as u8);
+    hasher.write_u64(compute_params.optical_residual_strength.to_bits());
+    hasher.write_u64(compute_params.optical_residual_smooth_window.to_bits());
+    hasher.write_usize(compute_params.optical_residual.len());
+    if let Some((t, s)) = compute_params.optical_residual.iter().next() {
+        hasher.write_i64(*t);
+        hasher.write_u64(s.tx.to_bits());
+        hasher.write_u64(s.ty.to_bits());
+        hasher.write_u64(s.rot.to_bits());
+    }
+    if let Some((t, s)) = compute_params.optical_residual.iter().next_back() {
+        hasher.write_i64(*t);
+        hasher.write_u64(s.tx.to_bits());
+    }
+
     // Keyframes the zoom evaluates per frame (the additional rotation ones act through the smoothing)
     use crate::keyframes::KeyframeType::*;
     hasher.write_u64(compute_params.keyframes.get_checksum_for(&[

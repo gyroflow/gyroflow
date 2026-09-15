@@ -918,6 +918,30 @@ impl StabilizationManager {
     }
 
     pub fn set_of_method(&self, v: u32) { self.params.write().of_method = v; self.pose_estimator.clear(); }
+    pub fn set_optical_motion_mode(&self, v: i32) {
+        self.params.write().optical_motion_mode = stabilization_params::OpticalMotionMode::from(v);
+    }
+    pub fn set_optical_residual_enabled(&self, v: bool) {
+        self.params.write().optical_residual_enabled = v;
+        if v {
+            let params = stabilization::ComputeParams::from_manager(self);
+            self.pose_estimator.rebuild_optical_residual(&params);
+        }
+        self.invalidate_zooming();
+    }
+    pub fn set_optical_residual_strength(&self, v: f64) {
+        self.params.write().optical_residual_strength = v.clamp(0.0, 1.0);
+        self.invalidate_zooming();
+    }
+    pub fn set_optical_residual_smooth_window(&self, v: f64) {
+        let v = v.clamp(0.05, 8.0);
+        self.params.write().optical_residual_smooth_window = v;
+        self.pose_estimator.resmooth_optical_residual(v);
+        self.invalidate_zooming();
+    }
+    pub fn optical_residual_sample_count(&self) -> usize {
+        self.pose_estimator.residual_path.read().len()
+    }
     pub fn set_show_detected_features(&self, v: bool) { self.params.write().show_detected_features = v; }
     pub fn set_show_optical_flow     (&self, v: bool) { self.params.write().show_optical_flow      = v; }
     pub fn set_stab_enabled          (&self, v: bool) { self.params.write().stab_enabled           = v; }
@@ -1317,6 +1341,10 @@ impl StabilizationManager {
                 "focal_length_max_zoom_rate":      params.focal_length_max_zoom_rate,
                 "lens_metadata_delay_frames":      params.lens_metadata_delay_frames,
                 "lens_breathing_enabled":          params.lens_breathing_enabled,
+                "optical_motion_mode":             params.optical_motion_mode as i32,
+                "optical_residual_enabled":        params.optical_residual_enabled,
+                "optical_residual_strength":       params.optical_residual_strength,
+                "optical_residual_smooth_window":  params.optical_residual_smooth_window,
             },
             "gyro_source": {
                 "filepath":           gyro.file_url,
@@ -1375,6 +1403,14 @@ impl StabilizationManager {
                 }
                 if !params.smoothed_focal_lengths.is_empty() {
                     util::compress_to_base91_cbor(&params.smoothed_focal_lengths).and_then(|s| obj.insert("smoothed_focal_lengths".into(), serde_json::Value::String(s)));
+                }
+                let residual = self.pose_estimator.residual_path.read().clone();
+                if !residual.is_empty() {
+                    util::compress_to_base91_cbor(&residual).and_then(|s| obj.insert("optical_residual_path".into(), serde_json::Value::String(s)));
+                }
+                let increments = self.pose_estimator.residual_increments.read().clone();
+                if !increments.is_empty() {
+                    util::compress_to_base91_cbor(&increments).and_then(|s| obj.insert("optical_residual_increments".into(), serde_json::Value::String(s)));
                 }
 
                 let mut imu_timestamps = Vec::with_capacity(gyro.quaternions.len());
@@ -1624,6 +1660,12 @@ impl StabilizationManager {
                     if let Ok(fls) = util::decompress_from_base91_cbor::<Vec<Option<f64>>>(obj.get("smoothed_focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
                         params.smoothed_focal_lengths = fls;
                     }
+                    if let Ok(path) = util::decompress_from_base91_cbor::<std::collections::BTreeMap<i64, stabilization_params::Similarity2D>>(obj.get("optical_residual_path").and_then(|x| x.as_str()).unwrap_or_default()) {
+                        *self.pose_estimator.residual_path.write() = path;
+                    }
+                    if let Ok(inc) = util::decompress_from_base91_cbor::<std::collections::BTreeMap<i64, stabilization_params::Similarity2D>>(obj.get("optical_residual_increments").and_then(|x| x.as_str()).unwrap_or_default()) {
+                        *self.pose_estimator.residual_increments.write() = inc;
+                    }
                     params.focal_length_base.clear();
                     params.focal_length_base_key = 0;
                 }
@@ -1730,6 +1772,10 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("focal_length_max_zoom_rate").and_then(|x| x.as_f64()) { params.focal_length_max_zoom_rate = v.clamp(0.01, 10.0); }
                 if let Some(v) = obj.get("lens_metadata_delay_frames").and_then(|x| x.as_i64()) { params.lens_metadata_delay_frames = v.clamp(-30, 30) as i32; }
                 if let Some(v) = obj.get("lens_breathing_enabled").and_then(|x| x.as_bool()) { params.lens_breathing_enabled = v; }
+                if let Some(v) = obj.get("optical_motion_mode").and_then(|x| x.as_i64()) { params.optical_motion_mode = stabilization_params::OpticalMotionMode::from(v as i32); }
+                if let Some(v) = obj.get("optical_residual_enabled").and_then(|x| x.as_bool()) { params.optical_residual_enabled = v; }
+                if let Some(v) = obj.get("optical_residual_strength").and_then(|x| x.as_f64()) { params.optical_residual_strength = v.clamp(0.0, 1.0); }
+                if let Some(v) = obj.get("optical_residual_smooth_window").and_then(|x| x.as_f64()) { params.optical_residual_smooth_window = v.clamp(0.05, 8.0); }
 
                 obj.remove("adaptive_zoom_fovs");
             }

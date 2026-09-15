@@ -147,6 +147,13 @@ pub struct Controller {
     additional_rotation_x: qt_property!(f64; WRITE set_additional_rotation_x),
     additional_rotation_y: qt_property!(f64; WRITE set_additional_rotation_y),
     additional_rotation_z: qt_property!(f64; WRITE set_additional_rotation_z),
+
+    optical_motion_mode: qt_property!(i32; READ get_optical_motion_mode WRITE set_optical_motion_mode),
+    optical_residual_enabled: qt_property!(bool; READ get_optical_residual_enabled WRITE set_optical_residual_enabled NOTIFY optical_residual_changed),
+    optical_residual_strength: qt_property!(f64; READ get_optical_residual_strength WRITE set_optical_residual_strength),
+    optical_residual_smooth_window: qt_property!(f64; READ get_optical_residual_smooth_window WRITE set_optical_residual_smooth_window),
+    optical_residual_sample_count: qt_property!(u64; READ get_optical_residual_sample_count NOTIFY optical_residual_changed),
+    optical_residual_changed: qt_signal!(),
     additional_translation_x: qt_property!(f64; WRITE set_additional_translation_x),
     additional_translation_y: qt_property!(f64; WRITE set_additional_translation_y),
     additional_translation_z: qt_property!(f64; WRITE set_additional_translation_z),
@@ -428,6 +435,9 @@ impl Controller {
             this.sync_in_progress_changed();
             this.chart_data_changed();
             this.sync_progress(percent, ready, total);
+            if percent >= 1.0 {
+                this.optical_residual_changed();
+            }
         });
         let set_offsets = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, offsets: Vec<(f64, f64, f64)>| {
             if for_rs {
@@ -1506,6 +1516,10 @@ impl Controller {
     wrap_simple_method!(set_additional_translation_z,v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_method,     v: i32; recompute; zooming_data_changed);
     wrap_simple_method!(set_of_method,          v: u32; recompute; chart_data_changed);
+    wrap_simple_method!(set_optical_motion_mode, v: i32);
+    wrap_simple_method!(set_optical_residual_enabled, v: bool; recompute; optical_residual_changed);
+    wrap_simple_method!(set_optical_residual_strength, v: f64; recompute; zooming_data_changed);
+    wrap_simple_method!(set_optical_residual_smooth_window, v: f64; recompute; zooming_data_changed);
 
     wrap_simple_method!(set_lens_correction_amount,    v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_frame_offset,              v: i32; recompute);
@@ -2214,6 +2228,22 @@ impl Controller {
     fn set_lens_breathing_enabled(&mut self, v: bool) {
         self.stabilizer.params.write().lens_breathing_enabled = v;
         self.request_recompute();
+    }
+
+    fn get_optical_motion_mode(&self) -> i32 {
+        self.stabilizer.params.read().optical_motion_mode as i32
+    }
+    fn get_optical_residual_enabled(&self) -> bool {
+        self.stabilizer.params.read().optical_residual_enabled
+    }
+    fn get_optical_residual_strength(&self) -> f64 {
+        self.stabilizer.params.read().optical_residual_strength
+    }
+    fn get_optical_residual_smooth_window(&self) -> f64 {
+        self.stabilizer.params.read().optical_residual_smooth_window
+    }
+    fn get_optical_residual_sample_count(&self) -> u64 {
+        self.stabilizer.optical_residual_sample_count() as u64
     }
 
     fn get_focal_length_smoothing_enabled(&self) -> bool {

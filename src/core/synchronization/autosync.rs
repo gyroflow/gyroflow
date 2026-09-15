@@ -38,6 +38,8 @@ pub struct AutosyncProcess {
     mode: String, // synchronize, guess_imu_orientation, estimate_rolling_shutter, estimate_lens_delay
     ranges_us: Vec<(i64, i64)>,
     scaled_ranges_us: Vec<(i64, i64)>,
+    /// Sync-point windows used by `find_offsets`. May be shorter than `scaled_ranges_us` when the residual pass decoded the whole clip.
+    offset_ranges_us: Vec<(i64, i64)>,
     estimator: Arc<PoseEstimator>,
     total_read_frames: Arc<AtomicUsize>,
     total_detected_frames: Arc<AtomicUsize>,
@@ -76,6 +78,7 @@ impl AutosyncProcess {
             time_per_syncpoint *= scale;
         }
         let mut frame_count = ((timestamps_fract.len() as f64 * (time_per_syncpoint / 1000.0) * org_fps).ceil() as usize).min(params.frame_count) / every_nth_frame as usize;
+        let trim_ranges = params.trim_ranges.clone();
 
         drop(params);
 
@@ -88,11 +91,26 @@ impl AutosyncProcess {
             );
             ((range.0 * 1000.0).round() as i64, (range.1 * 1000.0).round() as i64)
         }).collect();
+        let offset_ranges_us = ranges_us.clone();
 
-        if mode == "synchronize" && !stab.gyro.read().has_motion() {
-            // If no gyro data in file, analyze the entire video
-            ranges_us.clear();
-            ranges_us.push((0, (org_duration_ms * 1000.0).round() as i64));
+        if mode == "synchronize" {
+            let file_has_motion = stab.gyro.read().has_motion();
+            let optical_as_motion = stab.params.read().optical_motion_mode.uses_optical_as_motion(file_has_motion);
+            let residual = stab.params.read().optical_residual_enabled;
+            if optical_as_motion || residual {
+                // Optical-as-gyro and the residual pass need consecutive-frame tracks, not just sync windows
+                ranges_us.clear();
+                if !trim_ranges.is_empty() && residual && !optical_as_motion {
+                    ranges_us = trim_ranges.iter().map(|(a, b)| {
+                        ((a * org_duration_ms * 1000.0).round() as i64, (b * org_duration_ms * 1000.0).round() as i64)
+                    }).collect();
+                    let covered: f64 = trim_ranges.iter().map(|(a, b)| b - a).sum();
+                    frame_count = ((covered * org_duration_ms / 1000.0 * org_fps).ceil() as usize).max(2) / every_nth_frame.max(1);
+                } else {
+                    ranges_us.push((0, (org_duration_ms * 1000.0).round() as i64));
+                    frame_count = ((org_duration_ms / 1000.0 * org_fps).ceil() as usize).max(2) / every_nth_frame.max(1);
+                }
+            }
         }
 
         let mut comp_params = ComputeParams::from_manager(stab);
@@ -155,6 +173,7 @@ impl AutosyncProcess {
             mode,
             ranges_us,
             scaled_ranges_us,
+            offset_ranges_us,
             estimator,
             fps_scale,
             total_read_frames: Arc::new(AtomicUsize::new(1)), // Start with 1 to keep the loader active until `finished_feeding_frames` overrides it with final value
@@ -263,14 +282,24 @@ impl AutosyncProcess {
         self.estimator.cache_optical_flow(if offset_method == 1 { 2 } else { 1 });
         self.estimator.cleanup();
 
-        let mut scaled_ranges_us = Cow::Borrowed(&self.scaled_ranges_us);
+        let offset_scaled: Vec<(i64, i64)> = self.offset_ranges_us.iter().map(|(f, t)| (
+            (*f as f64 / self.fps_scale.unwrap_or(1.0)) as i64,
+            (*t as f64 / self.fps_scale.unwrap_or(1.0)) as i64)
+        ).collect();
+        let mut scaled_ranges_us = Cow::Borrowed(&offset_scaled);
 
-        if self.mode == "synchronize" && !self.compute_params.read().gyro.read().has_motion() {
-            // If no gyro data in file, set the computed optical flow as gyro data
+        let file_has_motion = self.compute_params.read().gyro.read().has_motion();
+        let optical_as_motion = self.compute_params.read().optical_motion_mode.uses_optical_as_motion(file_has_motion);
+        if self.mode == "synchronize" && optical_as_motion {
+            // Existing no-gyro path, plus explicit Optical-only: use the estimated rates as camera motion
             let compute_params = self.compute_params.write();
             let mut gyro = compute_params.gyro.write();
 
             gyro.file_metadata.set_raw_imu(self.estimator.estimated_gyro.read().values().cloned().collect::<Vec<_>>());
+            if gyro.integration_method == 0 {
+                // Baked camera quaternions would ignore the new rates
+                gyro.integration_method = 2;
+            }
             gyro.apply_transforms();
 
             let timestamps_fract = [0.5];
@@ -280,6 +309,10 @@ impl AutosyncProcess {
                 (((x * gyro.duration_ms) - (time_per_syncpoint / 2.0)).max(0.0)              * 1000.0 / self.fps_scale.unwrap_or(1.0)).round() as i64,
                 (((x * gyro.duration_ms) + (time_per_syncpoint / 2.0)).min(gyro.duration_ms) * 1000.0 / self.fps_scale.unwrap_or(1.0)).round() as i64
             )).collect());
+        }
+
+        if self.mode == "synchronize" && self.compute_params.read().optical_residual_enabled {
+            self.estimator.rebuild_optical_residual(&self.compute_params.read());
         }
 
         if let Some(cb) = &progress_cb {

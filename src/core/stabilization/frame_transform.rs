@@ -6,6 +6,7 @@ use super::{ ComputeParams, KernelParams };
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use crate::gyro_source::FileMetadata;
 use crate::keyframes::KeyframeType;
+use crate::synchronization::optical_stab;
 use crate::util::{ MapClosest, map_coord };
 
 #[derive(Default, Clone)]
@@ -382,6 +383,16 @@ impl FrameTransform {
                 log::error!("Failed to multiply matrices: {:?} * {:?}: {}", new_k, r, err);
             }
             let mut i_r = i_r.unwrap_or_default();
+            if let Some(s) = optical_stab::residual_matrix(
+                params.optical_residual_enabled,
+                params.optical_residual_strength,
+                &params.optical_residual,
+                quat_time,
+                params.output_width,
+                params.output_height,
+            ) {
+                i_r *= s;
+            }
             if let Some(b) = breathing {
                 // Lens breathing: a zoom of the output around its centre, by the row's magnification
                 if let Some(m) = Self::breathing_matrix(params, b.scale_at_row(sensor_row(y, b.crop_y as f64, b.crop_h as f64)), false) {
@@ -508,6 +519,18 @@ impl FrameTransform {
             }
 
             let mut p = new_k * r;
+            if let Some(s) = optical_stab::residual_matrix(
+                params.optical_residual_enabled,
+                params.optical_residual_strength,
+                &params.optical_residual,
+                quat_time,
+                params.output_width,
+                params.output_height,
+            ) {
+                if let Some(inv) = s.try_inverse() {
+                    p = inv * p;
+                }
+            }
             if let Some(b) = breathing {
                 // Looked up by the same index `at_timestamp` looks its matrices up by: the point's readout position
                 let readout_pos = if frame_readout_time.abs() > 0.0 {
@@ -656,6 +679,15 @@ mod tests {
         for (ts, expected) in [(0, 1000.0), (33333, 1500.0), (66666, 2000.0)] {
             assert!((fx(ts) - expected).abs() < 1e-6, "at {ts}: {} instead of {expected}", fx(ts));
         }
+    }
+
+    #[test]
+    fn residual_similarity_inverts_itself() {
+        let mut p = params(vec![1.0], 0.0);
+        p.optical_residual_enabled = true;
+        p.optical_residual_strength = 1.0;
+        p.optical_residual.insert(0, crate::synchronization::Similarity2D { tx: 8.0, ty: -3.0, rot: 0.02, scale: 1.0 });
+        assert_round_trip(&p);
     }
 
     #[test]

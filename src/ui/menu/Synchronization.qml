@@ -28,6 +28,10 @@ MenuItem {
         // property alias poseMethod: poseMethod.currentIndex;
         property alias showFeatures: showFeatures.checked;
         property alias showOF: showOF.checked;
+        property alias opticalMotionMode: motionSource.currentIndex;
+        property alias opticalResidualEnabled: residualCb.cb.checked;
+        property alias opticalResidualStrength: residualStrength.value;
+        property alias opticalResidualWindow: residualWindow.value;
         // This is a specific use case and I don't think we should remember that setting, especially that it's hidden under "Advanced"
         //property alias everyNthFrame: everyNthFrame.value;
 
@@ -58,6 +62,11 @@ MenuItem {
             if (o.hasOwnProperty("auto_sync_points")) experimentalAutoSyncPoints.checked    = !!o.auto_sync_points;
             if (o.hasOwnProperty("do_autosync") && o.do_autosync) autosyncTimer.doRun = true;
         }
+        const stab = obj.stabilization || { };
+        if (stab.hasOwnProperty("optical_motion_mode")) motionSource.currentIndex = +stab.optical_motion_mode;
+        if (stab.hasOwnProperty("optical_residual_enabled")) residualCb.cb.checked = !!stab.optical_residual_enabled;
+        if (stab.hasOwnProperty("optical_residual_strength")) residualStrength.value = +stab.optical_residual_strength;
+        if (stab.hasOwnProperty("optical_residual_smooth_window")) residualWindow.value = +stab.optical_residual_smooth_window;
     }
     Timer {
         id: autosyncTimer;
@@ -212,6 +221,70 @@ MenuItem {
         show: usesQuats && controller.offsets_model.rowCount() > 0;
         text: qsTr("This file uses synced motion data, additional sync points are not needed and can make the output look worse.");
         onUsesQuatsChanged: sync.opened = !usesQuats;
+    }
+
+    Label {
+        position: Label.LeftPosition;
+        text: qsTr("Motion source");
+        ComboBox {
+            id: motionSource;
+            model: [QT_TRANSLATE_NOOP("Popup", "Auto"), QT_TRANSLATE_NOOP("Popup", "Optical flow"), QT_TRANSLATE_NOOP("Popup", "Gyroscope")];
+            font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+            currentIndex: 0;
+            tooltip: qsTr("Auto uses optical flow as camera motion only when the file has no gyro/IMU (existing Auto sync behavior).\nOptical flow always analyzes the clip and uses it as motion, even if gyro exists (bad gyro, historical footage).\nGyroscope never replaces motion data with optical flow.");
+            onCurrentIndexChanged: controller.optical_motion_mode = currentIndex;
+        }
+    }
+
+    CheckBoxWithContent {
+        id: residualCb;
+        text: qsTr("Optical residual pass");
+        tooltip: qsTr("After camera-motion stabilization (gyro or optical-as-gyro), remove leftover 2D jitter from optical-flow tracks.\nThis is a global translate/rotate/scale per frame, not a local mesh and not an AI optical-flow model.\nRun Auto sync first so tracks exist. Strength 0 disables the warp.");
+        cb.onCheckedChanged: controller.optical_residual_enabled = cb.checked;
+
+        Label {
+            text: qsTr("Strength");
+            width: parent.width;
+            spacing: 2 * dpiScale;
+            SliderWithField {
+                id: residualStrength;
+                from: 0;
+                to: 100;
+                value: 1.0;
+                defaultValue: 100;
+                unit: qsTr("%");
+                precision: 0;
+                scaler: 100.0;
+                slider.stepSize: 1;
+                width: parent.width;
+                onValueChanged: controller.optical_residual_strength = value;
+            }
+        }
+        Label {
+            text: qsTr("Smooth window");
+            width: parent.width;
+            spacing: 2 * dpiScale;
+            SliderWithField {
+                id: residualWindow;
+                from: 0.05;
+                to: 4.0;
+                value: 0.5;
+                defaultValue: 0.5;
+                unit: qsTr("s");
+                precision: 2;
+                width: parent.width;
+                onValueChanged: controller.optical_residual_smooth_window = value;
+            }
+        }
+        InfoMessageSmall {
+            show: residualCb.cb.checked && controller.optical_residual_sample_count === 0 && !controller.sync_in_progress;
+            text: qsTr("No residual path yet. Run Auto sync to analyze optical-flow tracks. With this enabled, Auto sync reads the whole clip (or the trim range) instead of only sync windows.");
+        }
+        InfoMessageSmall {
+            show: residualCb.cb.checked && controller.optical_residual_sample_count > 0;
+            text: qsTr("Residual correction ready for %1 frames. This pass is global 2D only; local mesh / AI optical flow are out of scope here.").arg(controller.optical_residual_sample_count);
+        }
     }
 
     Label {
