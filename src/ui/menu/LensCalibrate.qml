@@ -23,6 +23,9 @@ MenuItem {
     property alias focalLengthOnly: focalLengthOnly;
     property var calibrationInfo: ({});
     property string focalLengthFovText: "";
+    property int identityRev: 0;
+    property string identityError: "";
+    readonly property bool hasExportIdentity: identityError.length === 0;
 
     property int videoWidth: 0;
     property int videoHeight: 0;
@@ -69,6 +72,7 @@ MenuItem {
                 delete calib.calibrationInfo[x];
             }
             controller.reset_lens_profile();
+            calib.refreshIdentity();
             return;
         }
         const sx = xStretch.value || 1, sy = yStretch.value || 1;
@@ -111,6 +115,18 @@ MenuItem {
             "input_vertical_stretch":   sy,
             "calibrator_version":       "---"
         }));
+        calib.refreshIdentity();
+    }
+    function identityErrorText(code: string): string {
+        if (code === "brand") return qsTr("Select a camera brand from the list, or choose Other and type the brand.");
+        if (code === "model") return qsTr("Select a camera model from the list, or choose Other and type the model.");
+        if (code === "lens")  return qsTr("This camera has an interchangeable lens. Select or type the lens before exporting.");
+        if (code === "focal") return qsTr("This setup needs the native focal length used for this calibration.");
+        return code || "";
+    }
+    function refreshIdentity(): void {
+        calib.identityError = calib.identityErrorText(controller.validate_lens_profile_identity(calib.calibrationInfo));
+        calib.identityRev++;
     }
     function updateTable(): void {
         const fields = {
@@ -136,6 +152,7 @@ MenuItem {
     Component.onCompleted: {
         calib.resetMetadata();
         calib.updateTable();
+        calib.refreshIdentity();
     }
     Connections {
         target: controller;
@@ -178,6 +195,7 @@ MenuItem {
             if (+additional_data.horizontal_stretch > 0.01) xStretch.value = +additional_data.horizontal_stretch;
             if (+additional_data.vertical_stretch   > 0.01) yStretch.value = +additional_data.vertical_stretch;
             calib.updateTable();
+            calib.refreshIdentity();
             sizeTimer.start();
         }
         function onRolling_shutter_estimated(rolling_shutter: real): void {
@@ -199,6 +217,12 @@ MenuItem {
     }
 
     function exportProfile(fileUrl: url, notify: bool): void {
+        list.commitAll();
+        calib.refreshIdentity();
+        if (!calib.hasExportIdentity) {
+            messageBox(Modal.Warning, calib.identityError, [ { text: qsTr("Ok"), accent: true } ]);
+            return;
+        }
         const save = (upload) => {
             // `export_lens_profile` reports failures itself, via `error()` -> a message box
             if (controller.export_lens_profile(fileUrl, calib.calibrationInfo, upload) && notify)
@@ -317,18 +341,19 @@ MenuItem {
     }
 
     InfoMessageSmall {
-        show: !focalLengthOnly.checked && !(calib.calibrationInfo.camera_brand && calib.calibrationInfo.camera_model);
-        text: qsTr("Pick a camera brand and model from the list (or Other) so the exported profile can be identified.");
+        show: !calib.hasExportIdentity;
+        text: calib.identityError || qsTr("Pick a camera brand and model from the list (or Other) so the exported profile can be identified.");
     }
 
     CameraLensSelector {
         id: cameraSelector;
         onSelectionChanged: {
-            if (cameraSelector.brand) calib.calibrationInfo.camera_brand = cameraSelector.brand;
-            if (cameraSelector.model) calib.calibrationInfo.camera_model = cameraSelector.model;
-            if (cameraSelector.lens)  calib.calibrationInfo.lens_model   = cameraSelector.lens;
+            calib.calibrationInfo.camera_brand = cameraSelector.brand;
+            calib.calibrationInfo.camera_model = cameraSelector.model;
+            calib.calibrationInfo.lens_model   = cameraSelector.lens;
             if (cameraSelector.cropFactor > 0) calib.calibrationInfo.crop_factor = cameraSelector.cropFactor;
             calib.updateTable();
+            calib.refreshIdentity();
         }
     }
 
@@ -340,19 +365,19 @@ MenuItem {
                 "type": "text",
                 "width": 120,
                 "value": function() { return calib.calibrationInfo.camera_brand || ""; },
-                "onChange": function(value) { calib.calibrationInfo.camera_brand = value; list.updateEntry("Camera brand", value); }
+                "onChange": function(value) { calib.calibrationInfo.camera_brand = value; list.updateEntry("Camera brand", value); calib.refreshIdentity(); }
             },
             "Camera model": {
                 "type": "text",
                 "width": 120,
                 "value": function() { return calib.calibrationInfo.camera_model || ""; },
-                "onChange": function(value) { calib.calibrationInfo.camera_model = value; list.updateEntry("Camera model", value);  }
+                "onChange": function(value) { calib.calibrationInfo.camera_model = value; list.updateEntry("Camera model", value); calib.refreshIdentity(); }
             },
             "Lens model": {
                 "type": "text",
                 "width": 120,
                 "value": function() { return calib.calibrationInfo.lens_model || ""; },
-                "onChange": function(value) { calib.calibrationInfo.lens_model = value; list.updateEntry("Lens model", value); }
+                "onChange": function(value) { calib.calibrationInfo.lens_model = value; list.updateEntry("Lens model", value); calib.refreshIdentity(); }
             },
             "Camera setting": {
                 "type": "text",
@@ -434,10 +459,16 @@ MenuItem {
         text: qsTr("Export lens profile");
         accent: true;
         iconName: "save"
-        enabled: (focalLengthOnly.checked || (infoList.rms > 0 && infoList.rms < 100)) && calibrator_window.videoArea.vid.loaded;
+        enabled: (focalLengthOnly.checked || (infoList.rms > 0 && infoList.rms < 100)) && calibrator_window.videoArea.vid.loaded && calib.hasExportIdentity;
+        tooltip: !calib.hasExportIdentity? calib.identityError : "";
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
             list.commitAll();
+            calib.refreshIdentity();
+            if (!calib.hasExportIdentity) {
+                messageBox(Modal.Warning, calib.identityError, [ { text: qsTr("Ok"), accent: true } ]);
+                return;
+            }
             const filename = controller.export_lens_profile_filename(calib.calibrationInfo);
             if (Qt.platform.os == "ios") {
                 calibrator_window.getSaveFileUrl(filesystem.get_folder(calibrator_window.videoArea.loadedFileUrl), filename, function(url) {
@@ -453,8 +484,8 @@ MenuItem {
         id: uploadProfile;
         text: qsTr("Upload lens profile to the database");
         checked: true;
-        enabled: !focalLengthOnly.checked && !!(calib.calibrationInfo.camera_brand && calib.calibrationInfo.camera_model);
-        tooltip: enabled? "" : (focalLengthOnly.checked? qsTr("Only calibrated profiles can be uploaded to the database.") : qsTr("Select a camera brand and model (or Other with a typed name) before uploading."));
+        enabled: !focalLengthOnly.checked && calib.hasExportIdentity;
+        tooltip: enabled? "" : (focalLengthOnly.checked? qsTr("Only calibrated profiles can be uploaded to the database.") : (calib.identityError || qsTr("Select a camera brand and model (or Other with a typed name) before uploading.")));
     }
     AdvancedSection {
         Label {
@@ -656,6 +687,10 @@ MenuItem {
         CheckBoxWithContent {
             id: flcb;
             text: qsTr("Focal length");
+            onCheckedChanged: {
+                calib.calibrationInfo.focal_length = checked? fl.value : null;
+                calib.refreshIdentity();
+            }
             Label {
                 text: qsTr("Lens native focal length");
                 position: Label.LeftPosition;
@@ -666,7 +701,7 @@ MenuItem {
                     value: 0;
                     from: 0;
                     width: parent.width;
-                    onValueChanged: calib.calibrationInfo.focal_length = flcb.checked? value : null;
+                    onValueChanged: { calib.calibrationInfo.focal_length = flcb.checked? value : null; calib.refreshIdentity(); }
                 }
             }
             Label {

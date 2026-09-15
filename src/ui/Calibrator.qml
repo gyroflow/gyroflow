@@ -121,6 +121,7 @@ Window {
         messageBox(Modal.NoIcon, qsTr("You selected multiple files. Do you want to process them automatically and export lens profiles?"), [
             { text: qsTr("Yes"), accent: true, clicked: () => {
                 batch.queue = files2;
+                batch.identityWarned = false;
                 batch.start();
              } },
             { text: qsTr("No") }
@@ -161,6 +162,7 @@ Window {
         property var queue: [];
         property bool active: false;
         property url currentFile;
+        property bool identityWarned: false;
         function runIn(ms: int, cb: var): void {
             batchTimer.cb = cb;
             batchTimer.interval = ms;
@@ -193,6 +195,15 @@ Window {
                     batch.runIn(2000, function() {
                         console.log('rms', rms);
                         if (rms < 5) {
+                            lensCalib.refreshIdentity();
+                            if (!lensCalib.hasExportIdentity) {
+                                if (!batch.identityWarned) {
+                                    batch.identityWarned = true;
+                                    messageBox(Modal.Warning, lensCalib.identityError, [ { text: qsTr("Ok"), accent: true } ]);
+                                }
+                                batch.runIn(1000, function() { batch.start(); });
+                                return;
+                            }
                             const folder = filesystem.get_folder(batch.currentFile);
                             let filename = filesystem.filename_with_extension(filesystem.get_filename(batch.currentFile), "json");
 

@@ -19,6 +19,8 @@ Column {
     property var compatible: [];
 
     readonly property string otherLabel: qsTr("Other");
+    readonly property bool usingOther: brandBox.currentText === root.otherLabel || modelBox.currentText === root.otherLabel || lensBox.currentText === root.otherLabel;
+    readonly property bool identityComplete: root.isFilledName(root.brand) && root.isFilledName(root.model);
 
     signal selectionChanged();
     signal userSelectionChanged();
@@ -57,6 +59,16 @@ Column {
     }
     function currentLens(): string {
         return lensBox.currentText === root.otherLabel? otherLens.text : (lensBox.currentText || "");
+    }
+    function isFilledName(value: string): bool {
+        const t = (value || "").trim();
+        return t.length > 0 && t !== root.otherLabel && t !== "---" && t !== "-" && t.toLowerCase() !== "unknown" && t.toLowerCase() !== "n/a";
+    }
+    function emitTyped(): void {
+        if (root.suppress) return;
+        const obj = controller.resolve_camera_selection(root.currentBrand(), root.currentModel(), root.currentLens());
+        root.applyResolved(obj);
+        root.selectionChanged();
     }
     function applyResolved(obj: var): void {
         root.brand = obj.brand || "";
@@ -134,7 +146,8 @@ Column {
         id: otherBrand;
         visible: brandBox.currentText === root.otherLabel;
         width: parent.width;
-        placeholderText: qsTr("Camera brand");
+        placeholderText: qsTr("Type the camera brand");
+        onTextChanged: root.emitTyped();
         onEditingFinished: root.emitSelection();
     }
 
@@ -160,7 +173,8 @@ Column {
         id: otherModel;
         visible: modelBox.currentText === root.otherLabel;
         width: parent.width;
-        placeholderText: qsTr("Camera model");
+        placeholderText: qsTr("Type the camera model");
+        onTextChanged: root.emitTyped();
         onEditingFinished: root.emitSelection();
     }
 
@@ -182,8 +196,17 @@ Column {
         id: otherLens;
         visible: lensBox.currentText === root.otherLabel;
         width: parent.width;
-        placeholderText: qsTr("Lens model");
+        placeholderText: qsTr("Type the lens model");
+        onTextChanged: root.emitTyped();
         onEditingFinished: root.emitSelection();
+    }
+
+    BasicText {
+        visible: root.usingOther;
+        width: parent.width;
+        wrapMode: Text.WordWrap;
+        font.pixelSize: 11 * dpiScale;
+        text: qsTr("Other lets you type a name that is not in the catalog. Export still needs a real brand and model, not \"Other\".");
     }
 
     BasicText {

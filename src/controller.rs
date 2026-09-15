@@ -107,6 +107,9 @@ pub struct Controller {
     get_camera_lenses: qt_method!(fn(&self, brand: QString, model: QString) -> QStringList),
     resolve_camera_selection: qt_method!(fn(&self, brand: QString, model: QString, lens: QString) -> QJsonObject),
     get_compatible_cameras: qt_method!(fn(&self, brand: QString, model: QString) -> QJsonArray),
+    validate_lens_profile_identity: qt_method!(fn(&self, info: QJsonObject) -> QString),
+    get_profiles_for_setup: qt_method!(fn(&self, brand: QString, model: QString, lens: QString) -> QJsonArray),
+    toggle_hidden_submitted_profile: qt_method!(fn(&self, checksum: QString, hide: bool)),
     camera_database_loaded: qt_signal!(),
     fetch_profiles_from_github: qt_method!(fn(&self)),
     lens_profiles_updated: qt_signal!(reload_from_disk: bool),
@@ -1914,8 +1917,17 @@ impl Controller {
     }
 
     fn export_lens_profile(&mut self, url: QUrl, info: QJsonObject, upload: bool) -> bool {
-        let url = util::qurl_to_encoded(url);
         let info_json = info.to_json().to_string();
+        if lens_profile_identity_error(&self.stabilizer.camera_database.read(), &info_json).is_some() {
+            self.error(
+                QString::from("Cannot export this lens profile until the camera setup is complete."),
+                QString::default(),
+                QString::default(),
+            );
+            return false;
+        }
+
+        let url = util::qurl_to_encoded(url);
 
         match core::lens_profile::LensProfile::from_json(&info_json) {
             Ok(mut profile) => {
@@ -1980,7 +1992,10 @@ impl Controller {
         let text = text.to_string();
         let favorites = HashSet::<String>::from_iter(favorites.into_iter().map(|x| x.to_qbytearray().to_string()));
         core::run_threaded(move || {
-            let profiles = db.read().search(&text, &favorites, aspect_ratio, aspect_ratio_swapped).into_iter().map(|(name, file, crc, official, rating, aspect_ratio, _author)| {
+            let hidden = hidden_submitted_checksums();
+            let profiles = db.read().search(&text, &favorites, aspect_ratio, aspect_ratio_swapped).into_iter()
+                .filter(|(_, _, crc, _, _, _, _)| !hidden.contains(crc))
+                .map(|(name, file, crc, official, rating, aspect_ratio, _author)| {
                 let mut list = QVariantList::from_iter([
                     QString::from(name),
                     QString::from(file),
@@ -2008,10 +2023,13 @@ impl Controller {
         let favorites = HashSet::<String>::from_iter(favorites.into_iter().map(|x| x.to_qbytearray().to_string()));
         core::run_threaded(move || {
             let catalog = cam_db.read();
+            let hidden = hidden_submitted_checksums();
             let resolved = catalog.resolve(&brand, &model, &lens);
             let profiles = db.read().search_by_setup(|p| {
                 catalog.profile_matches_setup(p, &resolved.brand, &resolved.model, &resolved.lens)
-            }, &favorites, aspect_ratio, aspect_ratio_swapped).into_iter().map(|(name, file, crc, official, rating, aspect_ratio, _author)| {
+            }, &favorites, aspect_ratio, aspect_ratio_swapped).into_iter()
+                .filter(|(_, _, crc, _, _, _, _)| !hidden.contains(crc))
+                .map(|(name, file, crc, official, rating, aspect_ratio, _author)| {
                 let mut list = QVariantList::from_iter([
                     QString::from(name),
                     QString::from(file),
@@ -2042,6 +2060,57 @@ impl Controller {
     fn get_compatible_cameras(&self, brand: QString, model: QString) -> QJsonArray {
         let list = self.stabilizer.camera_database.read().compatible_cameras(&brand.to_string(), &model.to_string(), 40);
         util::serde_json_to_qt_array(&serde_json::to_value(list).unwrap_or_default())
+    }
+
+    fn validate_lens_profile_identity(&self, info: QJsonObject) -> QString {
+        match lens_profile_identity_error(&self.stabilizer.camera_database.read(), &info.to_json().to_string()) {
+            Some(code) => QString::from(code),
+            None => QString::default(),
+        }
+    }
+
+    fn get_profiles_for_setup(&self, brand: QString, model: QString, lens: QString) -> QJsonArray {
+        let brand = brand.to_string();
+        let model = model.to_string();
+        let lens = lens.to_string();
+        if brand.trim().is_empty() || brand.eq_ignore_ascii_case(core::camera_database::OTHER) {
+            return util::serde_json_to_qt_array(&serde_json::json!([]));
+        }
+        let catalog = self.stabilizer.camera_database.read();
+        let db = self.stabilizer.lens_profile_db.read();
+        let hidden = hidden_submitted_checksums();
+        let resolved = catalog.resolve(&brand, &model, &lens);
+        let favorites = HashSet::new();
+        let rows = db.search_by_setup(|p| {
+            catalog.profile_matches_setup(p, &resolved.brand, &resolved.model, &resolved.lens)
+        }, &favorites, 0, 0);
+        let list: Vec<serde_json::Value> = rows.into_iter().take(50).map(|(name, file, crc, official, rating, aspect_ratio, author)| {
+            serde_json::json!({
+                "name": name,
+                "filename": file,
+                "checksum": crc,
+                "official": official,
+                "rating": rating,
+                "aspect_ratio": aspect_ratio,
+                "author": author,
+                "hidden": hidden.contains(&crc),
+            })
+        }).collect();
+        util::serde_json_to_qt_array(&serde_json::Value::Array(list))
+    }
+
+    fn toggle_hidden_submitted_profile(&self, checksum: QString, hide: bool) {
+        let checksum = checksum.to_string();
+        if checksum.is_empty() { return; }
+        let mut set = hidden_submitted_checksums();
+        if hide {
+            set.insert(checksum);
+        } else {
+            set.remove(&checksum);
+        }
+        let mut list: Vec<String> = set.into_iter().collect();
+        list.sort();
+        core::settings::set("hiddenSubmittedProfiles", serde_json::Value::String(list.join(",")));
     }
 
     fn fetch_profiles_from_github(&self) {
@@ -2651,6 +2720,41 @@ impl Controller {
     fn image_to_b64(&self, img: QImage) -> QString { util::image_to_b64(img) }
     fn copy_to_clipboard(&self, text: QString) { util::copy_to_clipboard(text) }
     fn data_folder(&self) -> QUrl { QUrl::from(QString::from(gyroflow_core::filesystem::path_to_url(gyroflow_core::settings::data_dir().to_str().unwrap_or_default()))) }
+}
+
+fn hidden_submitted_checksums() -> HashSet<String> {
+    core::settings::get_str("hiddenSubmittedProfiles", "")
+        .split(',')
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .collect()
+}
+
+fn json_string_field(value: &serde_json::Value, key: &str) -> String {
+    match value.get(key) {
+        Some(serde_json::Value::String(s)) => s.clone(),
+        Some(serde_json::Value::Number(n)) => n.to_string(),
+        _ => String::new(),
+    }
+}
+
+fn json_focal_length(value: &serde_json::Value) -> Option<f64> {
+    match value.get("focal_length") {
+        Some(serde_json::Value::Null) | None => None,
+        Some(serde_json::Value::Number(n)) => n.as_f64(),
+        Some(serde_json::Value::String(s)) => s.parse().ok(),
+        _ => None,
+    }
+}
+
+fn lens_profile_identity_error(db: &core::camera_database::CameraDatabase, info_json: &str) -> Option<&'static str> {
+    let value: serde_json::Value = serde_json::from_str(info_json).unwrap_or_default();
+    db.validate_export_identity(
+        &json_string_field(&value, "camera_brand"),
+        &json_string_field(&value, "camera_model"),
+        &json_string_field(&value, "lens_model"),
+        json_focal_length(&value),
+    ).err()
 }
 
 #[derive(Default, QObject)]

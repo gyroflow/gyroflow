@@ -33,6 +33,8 @@ MenuItem {
     property bool selected_manually: false;
 
     property bool isSony: false;
+    property var reviewMatches: [];
+    property int reviewIndex: -1;
 
     FileDialog {
         id: fileDialog;
@@ -116,6 +118,7 @@ MenuItem {
             lensProfilesListPrepared = true;
 
             root.loadFavorites();
+            root.refreshReviewMatches();
             if (!root.fetched_from_github) {
                 root.fetched_from_github = true;
                 controller.fetch_profiles_from_github();
@@ -168,6 +171,7 @@ MenuItem {
                     root.profileName = (filepath || obj.name || "").replace(/^.*?[\/\\]([^\/\\]+?)$/, "$1");
                     root.profileOriginalJson = json_str;
                     root.profileChecksum = checksum;
+                    root.refreshReviewMatches();
 
                     if (obj.output_dimension && obj.output_dimension.w > 0 && (window.exportSettings.outWidth != obj.output_dimension.w || window.exportSettings.outHeight != obj.output_dimension.h)) {
                         Qt.callLater(window.exportSettings.lensProfileLoaded, obj.output_dimension.w, obj.output_dimension.h);
@@ -235,21 +239,118 @@ MenuItem {
 
     CameraLensSelector {
         id: cameraSelector;
-        onUserSelectionChanged: {
-            if (root.brandForSearch()) {
-                controller.search_lens_profile_by_setup(
-                    cameraSelector.brand,
-                    cameraSelector.model,
-                    cameraSelector.lens,
-                    Object.keys(root.favorites),
-                    root.currentVideoAspectRatio,
-                    root.currentVideoAspectRatioSwapped
-                );
-            }
-        }
+        onSelectionChanged: root.refreshReviewMatches();
+        onUserSelectionChanged: root.searchBySetup();
     }
     function brandForSearch(): string {
-        return cameraSelector.brand && cameraSelector.brand !== cameraSelector.otherLabel? cameraSelector.brand : "";
+        return cameraSelector.isFilledName(cameraSelector.brand)? cameraSelector.brand : "";
+    }
+    function searchBySetup(): void {
+        if (root.brandForSearch()) {
+            controller.search_lens_profile_by_setup(
+                cameraSelector.brand,
+                cameraSelector.model,
+                cameraSelector.lens,
+                Object.keys(root.favorites),
+                root.currentVideoAspectRatio,
+                root.currentVideoAspectRatioSwapped
+            );
+        }
+    }
+    function refreshReviewMatches(): void {
+        if (!root.brandForSearch() || !cameraSelector.isFilledName(cameraSelector.model)) {
+            root.reviewMatches = [];
+            root.reviewIndex = -1;
+            return;
+        }
+        const matches = cameraSelector.listToArray(controller.get_profiles_for_setup(
+            cameraSelector.brand,
+            cameraSelector.model,
+            cameraSelector.lens
+        ));
+        root.reviewMatches = matches;
+        let idx = -1;
+        if (root.profileChecksum) {
+            for (let i = 0; i < matches.length; i++) {
+                if (matches[i].checksum === root.profileChecksum) { idx = i; break; }
+            }
+        }
+        root.reviewIndex = idx >= 0? idx : (matches.length? 0 : -1);
+        Qt.callLater(function() { if (hideSubmitted) hideSubmitted.syncFromReview(); });
+    }
+    function reviewStep(delta: int): void {
+        if (!root.reviewMatches.length) return;
+        const n = root.reviewMatches.length;
+        root.reviewIndex = (root.reviewIndex + delta + n) % n;
+        const item = root.reviewMatches[root.reviewIndex];
+        hideSubmitted.syncFromReview();
+        if (item && item.filename) {
+            root.selected_manually = true;
+            controller.load_lens_profile(item.filename);
+        }
+    }
+
+    Column {
+        width: parent.width;
+        spacing: 4 * dpiScale;
+        visible: root.reviewMatches.length > 0;
+
+        Row {
+            width: parent.width;
+            spacing: 8 * dpiScale;
+            BasicText {
+                width: parent.width - prevSetup.width - nextSetup.width - parent.spacing * 2;
+                wrapMode: Text.WordWrap;
+                font.pixelSize: 11 * dpiScale;
+                anchors.verticalCenter: parent.verticalCenter;
+                text: root.reviewMatches.length === 1
+                    ? qsTr("1 profile for this setup")
+                    : qsTr("%1 profiles for this setup · %2 / %3")
+                        .arg(root.reviewMatches.length)
+                        .arg(Math.max(1, root.reviewIndex + 1))
+                        .arg(root.reviewMatches.length);
+            }
+            LinkButton {
+                id: prevSetup;
+                text: qsTr("Prev");
+                enabled: root.reviewMatches.length > 1;
+                leftPadding: 6 * dpiScale;
+                rightPadding: 6 * dpiScale;
+                anchors.verticalCenter: parent.verticalCenter;
+                onClicked: root.reviewStep(-1);
+            }
+            LinkButton {
+                id: nextSetup;
+                text: qsTr("Next");
+                enabled: root.reviewMatches.length > 1;
+                leftPadding: 6 * dpiScale;
+                rightPadding: 6 * dpiScale;
+                anchors.verticalCenter: parent.verticalCenter;
+                onClicked: root.reviewStep(1);
+            }
+        }
+        CheckBox {
+            id: hideSubmitted;
+            width: parent.width;
+            property bool suppress: false;
+            text: qsTr("Hide this submitted profile");
+            tooltip: qsTr("Hides this profile from search on this computer. It is not deleted from the database.");
+            visible: root.reviewIndex >= 0 && root.reviewMatches[root.reviewIndex] && !root.reviewMatches[root.reviewIndex].official;
+            function syncFromReview(): void {
+                const item = root.reviewIndex >= 0? root.reviewMatches[root.reviewIndex] : null;
+                hideSubmitted.suppress = true;
+                hideSubmitted.checked = !!(item && item.hidden);
+                hideSubmitted.suppress = false;
+            }
+            onCheckedChanged: {
+                if (hideSubmitted.suppress) return;
+                const item = root.reviewIndex >= 0? root.reviewMatches[root.reviewIndex] : null;
+                if (!item || !item.checksum) return;
+                controller.toggle_hidden_submitted_profile(item.checksum, checked);
+                root.refreshReviewMatches();
+                root.searchBySetup();
+            }
+        }
     }
 
     SearchField {

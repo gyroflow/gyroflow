@@ -478,6 +478,43 @@ impl CameraDatabase {
         }
         true
     }
+
+    /// Validate that a calibrator export has a clear camera setup (issue #742).
+    ///
+    /// Returns a stable error code (`brand`, `model`, `lens`, `focal`) or `Ok`.
+    /// `Other` / empty / placeholder names are never accepted as identity.
+    /// Typed Other values are accepted as long as they are real names.
+    pub fn validate_export_identity(&self, brand: &str, model: &str, lens: &str, focal_length: Option<f64>) -> Result<(), &'static str> {
+        let brand = brand.trim();
+        let model = model.trim();
+        let lens = lens.trim();
+
+        if is_placeholder_name(brand) {
+            return Err("brand");
+        }
+        if is_placeholder_name(model) {
+            return Err("model");
+        }
+
+        if let Some(cam) = self.resolve_camera(brand, model) {
+            if !cam.fixed_lens {
+                if is_placeholder_name(lens) {
+                    return Err("lens");
+                }
+                match self.resolve_lens(brand, model, lens) {
+                    Some(l) if l.kind.eq_ignore_ascii_case("zoom") && !focal_is_set(focal_length) => {
+                        return Err("focal");
+                    }
+                    None if !focal_is_set(focal_length) => {
+                        // Manual / unknown glass on an interchangeable body: require a focal length.
+                        return Err("focal");
+                    }
+                    _ => {}
+                }
+            }
+        }
+        Ok(())
+    }
 }
 
 impl LensProfileDatabase {
@@ -488,6 +525,20 @@ impl LensProfileDatabase {
 
 fn is_other(s: &str) -> bool {
     s.eq_ignore_ascii_case(OTHER)
+}
+
+fn is_placeholder_name(s: &str) -> bool {
+    let t = s.trim();
+    t.is_empty()
+        || is_other(t)
+        || t == "---"
+        || t == "-"
+        || t.eq_ignore_ascii_case("unknown")
+        || t.eq_ignore_ascii_case("n/a")
+}
+
+fn focal_is_set(focal_length: Option<f64>) -> bool {
+    focal_length.map(|v| v.is_finite() && v > 0.0).unwrap_or(false)
 }
 
 fn collapse_ws(s: &str) -> String {
@@ -668,6 +719,7 @@ mod tests {
             ],
             "lenses": [
                 {"id": "sony_fe_24_70", "brand_id": "sony", "name": "FE 24-70mm F2.8 GM", "aliases": [], "mount_id": "sony_e", "camera_ids": [], "focal_min_mm": 24.0, "focal_max_mm": 70.0, "aperture_min": 2.8, "kind": "zoom", "sources": ["lensfun"]},
+                {"id": "sony_fe_24", "brand_id": "sony", "name": "FE 24mm F1.4 GM", "aliases": [], "mount_id": "sony_e", "camera_ids": [], "focal_min_mm": 24.0, "focal_max_mm": 24.0, "aperture_min": 1.4, "kind": "prime", "sources": ["lensfun"]},
                 {"id": "gopro_wide", "brand_id": "gopro", "name": "Wide", "aliases": [], "mount_id": "fixed", "camera_ids": ["gopro_hero11"], "focal_min_mm": null, "focal_max_mm": null, "aperture_min": null, "kind": "unknown", "sources": ["gyroflow"]}
             ]
         }"#).unwrap()
@@ -742,5 +794,37 @@ mod tests {
         assert_eq!(model_slug("A7S III"), model_slug("a7s3"));
         assert_eq!(camera_match_slug("sony", "ILCE-7SM3"), camera_match_slug("sony", "A7S III"));
         assert_eq!(camera_match_slug("sony", "ILME-FX3"), camera_match_slug("sony", "FX3"));
+    }
+
+    #[test]
+    fn export_identity_requires_brand_and_model() {
+        let db = fixture();
+        assert_eq!(db.validate_export_identity("", "", "", None), Err("brand"));
+        assert_eq!(db.validate_export_identity("Other", "Alpha 7S III", "", None), Err("brand"));
+        assert_eq!(db.validate_export_identity("Sony", "Other", "", None), Err("model"));
+        assert_eq!(db.validate_export_identity("Sony", "---", "", None), Err("model"));
+        assert_eq!(db.validate_export_identity("  ", "FX3", "", None), Err("brand"));
+    }
+
+    #[test]
+    fn export_identity_interchangeable_needs_lens_and_zoom_focal() {
+        let db = fixture();
+        assert_eq!(db.validate_export_identity("Sony", "ILCE-7SM3", "", None), Err("lens"));
+        assert_eq!(db.validate_export_identity("Sony", "Alpha 7S III", "Other", None), Err("lens"));
+        assert_eq!(db.validate_export_identity("Sony", "FX3", "FE 24-70mm F2.8 GM", None), Err("focal"));
+        assert_eq!(db.validate_export_identity("Sony", "FX3", "FE 24-70mm F2.8 GM", Some(35.0)), Ok(()));
+        assert_eq!(db.validate_export_identity("Sony", "FX3", "FE 24mm F1.4 GM", None), Ok(()));
+        assert_eq!(db.validate_export_identity("Sony", "FX3", "Vintage 50mm", None), Err("focal"));
+        assert_eq!(db.validate_export_identity("Sony", "FX3", "Vintage 50mm", Some(50.0)), Ok(()));
+    }
+
+    #[test]
+    fn export_identity_fixed_lens_and_manual_other_path() {
+        let db = fixture();
+        assert_eq!(db.validate_export_identity("GoPro", "HERO11 Black", "", None), Ok(()));
+        assert_eq!(db.validate_export_identity("GoPro", "HERO11 Black", "Wide", None), Ok(()));
+        // Typed Other names that are not in the catalog: brand + model is enough.
+        assert_eq!(db.validate_export_identity("MyBrand", "MyCam", "", None), Ok(()));
+        assert_eq!(db.validate_export_identity("MyBrand", "MyCam", "MyLens", None), Ok(()));
     }
 }
