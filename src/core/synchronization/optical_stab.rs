@@ -420,14 +420,29 @@ pub fn meshes_from_corrections(
     }
     let mut meshes = MeshCorrections::default();
     let mut last: Option<&Vec<(f64, f64)>> = None;
+    let mut last_idx: Option<u32> = None;
     for i in 0..frame_count {
-        if let Some(g) = by_frame.get(&i) {
+        let incoming = by_frame.get(&i);
+        if incoming.is_some() {
+            last_idx = None; // new grid: do not reuse the previous table
+        }
+        if let Some(g) = incoming {
             last = Some(g);
         }
         let Some(g) = last else {
             meshes.frames.push(MeshFrame::default());
             continue;
         };
+        if let Some(idx) = last_idx {
+            meshes.frames.push(MeshFrame {
+                table: Some(idx),
+                mesh_size: size,
+                crop_origin: (0.0, 0.0),
+                crop_size: size,
+                focal_plane: Vec::new(),
+            });
+            continue;
+        }
         let nodes = nodes_from_correction(g, size);
         let Some(table) = mesh_table_from_nodes(&nodes, size) else {
             meshes.frames.push(MeshFrame::default());
@@ -435,6 +450,7 @@ pub fn meshes_from_corrections(
         };
         let idx = meshes.tables.len() as u32;
         meshes.tables.push(table);
+        last_idx = Some(idx);
         meshes.frames.push(MeshFrame {
             table: Some(idx),
             mesh_size: size,
@@ -645,6 +661,24 @@ mod tests {
         assert_eq!(meshes.frames.len(), 5);
         assert!(meshes.frames.iter().any(|f| f.table.is_some()));
         assert!(!meshes.kernel_buffer(0).is_empty());
+        // Held frames reuse the table instead of inverting a new mesh per video frame
+        assert!(meshes.tables.len() <= 2, "interned tables, got {}", meshes.tables.len());
+    }
+
+    #[test]
+    fn mesh_tables_are_reused_between_of_samples() {
+        let size = grid_size();
+        let g0 = vec![(1.0, 0.0); GRID * GRID];
+        let g1 = vec![(0.0, 2.0); GRID * GRID];
+        // 30 fps: 0us -> frame 0, 100_000us -> frame 3
+        let meshes = meshes_from_corrections(&[g0, g1], &[0, 100_000], 30.0, 6, size);
+        assert_eq!(meshes.frames.len(), 6);
+        assert_eq!(meshes.tables.len(), 2);
+        let idx = |f: usize| meshes.frames[f].table;
+        assert_eq!(idx(0), idx(1));
+        assert_eq!(idx(1), idx(2));
+        assert_ne!(idx(0), idx(3));
+        assert_eq!(idx(3), idx(5));
     }
 
     #[test]
@@ -720,7 +754,7 @@ mod tests {
     }
 
     #[test]
-    fn residual_pass_reduces_local_jitter_and_writes_demo() {
+    fn residual_pass_reduces_local_jitter() {
         let (w, h) = (320usize, 180usize);
         let size = (w as f64, h as f64);
         let n = 16usize;
@@ -740,26 +774,22 @@ mod tests {
             let (from, to) = filter_tracks(&from, &to, (w as u32, h as u32), GRID);
             let sim = robust_similarity(&from, &to).expect("sim");
             let res = residual_vectors(&from, &to, sim);
-            let before = res.iter().map(|(_, d)| (d.0 * d.0 + d.1 * d.1).sqrt()).sum::<f64>() / res.len() as f64;
             let grid = grid_from_residuals(&res, size).expect("grid");
             increments.push(grid);
             timestamps.push((t as i64) * 33_333);
-            let _ = before;
         }
         let corrections = stabilize_grids(
             &increments,
             size,
             ResidualParams { strength: 1.0, smooth_frames: 7 },
         );
-        let peak = corrections.iter().map(|g| median_mag(g)).fold(0.0, f64::max);
         let peak_node = corrections.iter().map(|g| g.iter().map(|(x, y)| (x * x + y * y).sqrt()).fold(0.0, f64::max)).fold(0.0, f64::max);
-        eprintln!("residual median peak {peak:.3}px, max node {peak_node:.3}px");
         assert!(peak_node > 1.0, "local bump should produce a residual correction, max node {peak_node}");
 
         let meshes = meshes_from_corrections(&corrections, &timestamps, 30.0, n, size);
         assert!(!meshes.is_empty());
+        assert!(meshes.tables.len() < n, "tables interned across held frames");
 
-        // One peak-ripple frame: source | leftover after global camera motion | residual mesh
         let fi = n / 2;
         let t = fi as f64;
         let mut source = vec![0u8; w * h];
@@ -780,20 +810,20 @@ mod tests {
                 }
             }
         }
-        let mut sheet = vec![0u8; (w * 3) * h];
-        for y in 0..h {
-            for x in 0..w {
-                sheet[y * (w * 3) + x] = source[y * w + x];
-                sheet[y * (w * 3) + w + x] = leftover[y * w + x];
-                sheet[y * (w * 3) + 2 * w + x] = stab[y * w + x];
+        let region_err = |img: &[u8]| -> f64 {
+            let (x0, x1, y0, y1) = (190usize, 270usize, 40usize, 110usize);
+            let mut s = 0.0;
+            let mut n = 0.0;
+            for y in y0..y1 {
+                for x in x0..x1 {
+                    s += (img[y * w + x] as f64 - source[y * w + x] as f64).abs();
+                    n += 1.0;
+                }
             }
-        }
-        let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../demo");
-        std::fs::create_dir_all(&dir).unwrap();
-        let ppm = dir.join("optical_residual_demo.ppm");
-        let mut out = format!("P5\n{} {}\n255\n", w * 3, h).into_bytes();
-        out.extend_from_slice(&sheet);
-        std::fs::write(&ppm, out).unwrap();
-        assert!(ppm.exists());
+            s / n
+        };
+        let before = region_err(&leftover);
+        let after = region_err(&stab);
+        assert!(after < before * 0.85, "bump-region error {before:.1} -> {after:.1}");
     }
 }

@@ -118,7 +118,7 @@ pub struct FileMetadata {
     pub legacy_mesh_correction: Vec<(Vec<f64>, Vec<f32>)>,
     /// Runtime residual optical-flow mesh (Warp Stabilizer-style). Never written by camera metadata.
     /// Applied only when `mesh_correction` is empty so Sony IBIS mesh keeps priority.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "MeshCorrections::is_empty")]
     pub optical_residual:    MeshCorrections,
     pub lens_breathing:      Vec<BreathingFrame>,
     /// Cache of `lens_focal_length_varies`, the renderer asks per frame
