@@ -1563,7 +1563,7 @@ impl Controller {
     fn mesh_at_frame(&self, frame: usize) -> QVariantList {
         let gyro = self.stabilizer.gyro.read();
         let file_metadata = gyro.file_metadata.read();
-        QVariantList::from_iter(file_metadata.mesh_correction.kernel_buffer(frame).iter())
+        QVariantList::from_iter(file_metadata.mesh_for_render().kernel_buffer(frame).iter())
     }
     fn get_turn_speed(&self, timestamp_ms: f64) -> f64 {
         let params = self.stabilizer.params.read();

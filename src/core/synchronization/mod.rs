@@ -21,6 +21,7 @@ use super::gyro_source::TimeIMU;
 
 pub mod optimsync;
 pub mod lens_delay;
+pub mod optical_stab;
 mod autosync;
 pub use autosync::{ AutosyncError, AutosyncProcess, AutosyncResult };
 use crate::util::MapClosest;
@@ -44,7 +45,14 @@ pub struct SyncParams {
     pub offset_method: usize,
     pub pose_method: usize,
     pub custom_sync_pattern: serde_json::Value,
-    pub auto_sync_points: bool
+    pub auto_sync_points: bool,
+    /// Second optical-flow pass after camera motion: leftover local tracks are smoothed on a grid
+    /// and applied as Gyroflow mesh (Warp Stabilizer-style). Off by default.
+    pub optical_residual: bool,
+    /// 0–1. `0` with the pass enabled is treated as `1`.
+    pub optical_residual_strength: f64,
+    /// Temporal box-filter half-window in frames. `0` is treated as 15.
+    pub optical_residual_smooth_frames: usize,
 }
 
 #[derive(Clone)]
@@ -258,9 +266,8 @@ impl PoseEstimator {
         }
         img
     }
-    pub fn yuv_to_gray(_width: u32, height: u32, stride: u32, slice: &[u8]) -> Option<GrayImage> {
-        // TODO: maybe a better way than using stride as width?
-        image::GrayImage::from_raw(stride as u32, height, slice[0..(stride*height) as usize].to_vec())
+    pub fn yuv_to_gray(width: u32, height: u32, stride: u32, slice: &[u8]) -> Option<GrayImage> {
+        optical_stab::gray_from_luma(width, height, stride, slice)
     }
     pub fn lowpass_filter(&self, freq: f64, fps: f64) {
         self.lpf.store((freq * 100.0) as u32, SeqCst);
@@ -307,6 +314,9 @@ impl PoseEstimator {
                 // ----------- Interpolation -----------
 
                 if let Some(e) = eul {
+                    if !e.0.is_finite() || !e.1.is_finite() || !e.2.is_finite() {
+                        continue;
+                    }
                     // Analyzed motion in reality happened during the transition from this frame to the next frame
                     // So we can't use the detected motion to distort `this` frame, we need to set the timestamp in between the frames
                     // TODO: figure out if rolling shutter time can be used to make better calculation here

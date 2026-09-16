@@ -116,6 +116,10 @@ pub struct FileMetadata {
     /// into `mesh_correction` on load (`sony::upgrade_legacy_mesh_buffers`)
     #[serde(rename = "mesh_correction", skip_serializing)]
     pub legacy_mesh_correction: Vec<(Vec<f64>, Vec<f32>)>,
+    /// Runtime residual optical-flow mesh (Warp Stabilizer-style). Never written by camera metadata.
+    /// Applied only when `mesh_correction` is empty so Sony IBIS mesh keeps priority.
+    #[serde(default)]
+    pub optical_residual:    MeshCorrections,
     pub lens_breathing:      Vec<BreathingFrame>,
     /// Cache of `lens_focal_length_varies`, the renderer asks per frame
     #[serde(skip)]
@@ -144,6 +148,7 @@ impl FileMetadata {
             camera_stab_data:        Default::default(),
             mesh_correction:         Default::default(),
             legacy_mesh_correction:  Default::default(),
+            optical_residual:        Default::default(),
             lens_breathing:          Default::default(),
             focal_length_varies_cache: Default::default(),
         }
@@ -159,6 +164,10 @@ impl FileMetadata {
     /// Whether any frame has a mesh or focal plane correction
     pub fn has_mesh_correction(&self) -> bool {
         !self.mesh_correction.is_empty()
+    }
+    /// Mesh the renderer should upload: camera/IBIS mesh when present, otherwise the optical residual.
+    pub fn mesh_for_render(&self) -> &MeshCorrections {
+        if self.has_mesh_correction() { &self.mesh_correction } else { &self.optical_residual }
     }
     /// More than 0.2% between the smallest and the largest value
     fn varies(it: &mut dyn Iterator<Item = f64>) -> bool {
@@ -434,6 +443,9 @@ impl ReadOnlyFileMetadata {
     }
     pub fn set_raw_imu(&mut self, v: Vec<TimeIMU>) {
         self.0.write().raw_imu = v;
+    }
+    pub fn set_optical_residual(&mut self, v: MeshCorrections) {
+        self.0.write().optical_residual = v;
     }
 }
 impl serde::Serialize for ReadOnlyFileMetadata {

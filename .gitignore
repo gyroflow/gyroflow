@@ -14,3 +14,4 @@ gyroflow.log
 resources/camera_presets
 *.exe
 .qmlls.ini
+demo/

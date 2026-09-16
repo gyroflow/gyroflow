@@ -49,19 +49,26 @@ impl OpticalFlowTrait for OFOpenCVDis {
                 return Some(matched.clone());
             }
             if self.img.is_empty() || next.img.is_empty() || w <= 0 || h <= 0 { return None; }
+            if self.img.width() != w as u32 || self.img.height() != h as u32
+                || next.img.width() != next.size.0 as u32 || next.img.height() != next.size.1 as u32 {
+                return None;
+            }
 
 
             let result = || -> Result<(Vec<(f32, f32)>, Vec<(f32, f32)>), opencv::Error> {
-                let a1_img = unsafe { Mat::new_size_with_data_unsafe(Size::new(self.img.width() as i32, self.img.height() as i32), CV_8UC1, self.img.as_raw().as_ptr() as *mut std::ffi::c_void, 0) }?;
-                let a2_img = unsafe { Mat::new_size_with_data_unsafe(Size::new(next.img.width() as i32, next.img.height() as i32), CV_8UC1, next.img.as_raw().as_ptr() as *mut std::ffi::c_void, 0) }?;
+                // Logical size is `self.size`; the GrayImage is packed to that width (decoder padding stripped).
+                let a1_img = unsafe { Mat::new_size_with_data_unsafe(Size::new(w, h), CV_8UC1, self.img.as_raw().as_ptr() as *mut std::ffi::c_void, w as usize) }?;
+                let a2_img = unsafe { Mat::new_size_with_data_unsafe(Size::new(next.size.0, next.size.1), CV_8UC1, next.img.as_raw().as_ptr() as *mut std::ffi::c_void, next.size.0 as usize) }?;
 
                 let mut of = Mat::default();
+                let mut of_rev = Mat::default();
                 let mut optflow = opencv::video::DISOpticalFlow::create(opencv::video::DISOpticalFlow_PRESET_FAST)?;
                 optflow.calc(&a1_img, &a2_img, &mut of)?;
+                optflow.calc(&a2_img, &a1_img, &mut of_rev)?;
 
                 let mut points_a = Vec::new();
                 let mut points_b = Vec::new();
-                let step = w as usize / 15; // 15 points
+                let step = (w as usize / 15).max(1); // ~15 points per axis
                 
                 // Calculate window size as 2% of image width, minimum 10
                 let window_size = (w as f32 * 0.02).round() as usize;
@@ -105,16 +112,43 @@ impl OpticalFlowTrait for OFOpenCVDis {
                     let variance = (sum_sq / count) - (mean * mean);
                     variance
                 };
+
+                let wf = w as f32;
+                let hf = h as f32;
+                let fb_thresh = 1.0f32;
                 
-                for i in (0..a1_img.cols()).step_by(step) {
-                    for j in (0..a1_img.rows()).step_by(step) {
-                        // Check texture clarity using accurate variance method
-                        let texture = calculate_texture(&self.img, i as usize, j as usize);
-                        if texture > texture_threshold {
-                            let pt = of.at_2d::<Vec2f>(j, i)?;
-                            points_a.push((i as f32, j as f32));
-                            points_b.push((i as f32 + pt[0] as f32, j as f32 + pt[1] as f32));
+                for i in (0..w).step_by(step) {
+                    for j in (0..h).step_by(step) {
+                        if calculate_texture(&self.img, i as usize, j as usize) <= texture_threshold {
+                            continue;
                         }
+                        let pt = of.at_2d::<Vec2f>(j, i)?;
+                        let dx = pt[0];
+                        let dy = pt[1];
+                        if !dx.is_finite() || !dy.is_finite() {
+                            continue;
+                        }
+                        let x2 = i as f32 + dx;
+                        let y2 = j as f32 + dy;
+                        if x2 < 0.0 || y2 < 0.0 || x2 >= wf || y2 >= hf {
+                            continue;
+                        }
+                        let ix = x2.round() as i32;
+                        let iy = y2.round() as i32;
+                        if ix < 0 || iy < 0 || ix >= w || iy >= h {
+                            continue;
+                        }
+                        let back = of_rev.at_2d::<Vec2f>(iy, ix)?;
+                        let bx = back[0];
+                        let by = back[1];
+                        if !bx.is_finite() || !by.is_finite() {
+                            continue;
+                        }
+                        if (dx + bx).abs() > fb_thresh || (dy + by).abs() > fb_thresh {
+                            continue;
+                        }
+                        points_a.push((i as f32, j as f32));
+                        points_b.push((x2, y2));
                     }
                 }
                 Ok((points_a, points_b))
