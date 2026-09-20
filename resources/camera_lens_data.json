@@ -1,0 +1,58 @@
+{
+  "brands": [
+    {
+      "name": "Sony",
+      "models": [
+        {
+          "name": "Alpha a7 III",
+          "sensorSize": "Full Frame",
+          "cropFactor": 1.0,
+          "mount": "E-mount"
+        },
+        {
+          "name": "Alpha a6400",
+          "sensorSize": "APS-C",
+          "cropFactor": 1.5,
+          "mount": "E-mount"
+        }
+      ]
+    },
+    {
+      "name": "Canon",
+      "models": [
+        {
+          "name": "EOS R5",
+          "sensorSize": "Full Frame",
+          "cropFactor": 1.0,
+          "mount": "RF"
+        },
+        {
+          "name": "EOS M50",
+          "sensorSize": "APS-C",
+          "cropFactor": 1.6,
+          "mount": "EF-M"
+        }
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "brand": "Sony",
+      "model": "FE 24-70mm f/2.8 GM",
+      "mount": "E-mount",
+      "compatibleSensors": ["Full Frame", "APS-C"]
+    },
+    {
+      "brand": "Canon",
+      "model": "RF 24-105mm f/4L IS USM",
+      "mount": "RF",
+      "compatibleSensors": ["Full Frame"]
+    },
+    {
+      "brand": "Sigma",
+      "model": "24-70mm f/2.8 DG DN Art",
+      "mount": "E-mount",
+      "compatibleSensors": ["Full Frame", "APS-C"]
+    }
+  ]
+}
