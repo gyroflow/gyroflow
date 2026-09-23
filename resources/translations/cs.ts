@@ -349,7 +349,7 @@ Z důvodu omezení systémových kodérů není vykreslování na pozadí podpor
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="683"/>
-      <source>An error occured: %1</source>
+      <source>An error occurred: %1</source>
       <translation>Došlo k chybě: %1</translation>
     </message>
     <message>

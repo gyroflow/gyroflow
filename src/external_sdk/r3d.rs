@@ -166,7 +166,7 @@ impl REDSdk {
                 Ok(())
             })();
             if let Err(e) = result {
-                progress((1.0, format!("An error occured: {:?}", e.to_string()), String::new()))
+                progress((1.0, format!("An error occurred: {:?}", e.to_string()), String::new()))
             }
         }
     }

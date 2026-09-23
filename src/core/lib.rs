@@ -1939,7 +1939,7 @@ impl StabilizationManager {
                             }
                         }
                         Err(e) => {
-                            log::error!("An error occured: {e:?}");
+                            log::error!("An error occurred: {e:?}");
                             return Err(e);
                         }
                     }

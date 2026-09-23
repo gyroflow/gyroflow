@@ -68,7 +68,7 @@ MenuItem {
                 adobe_latest  = adobe_version && compare_ver(latest_version, adobe_version);
             }
             if (command == "install") {
-                if (result.startsWith("An error occured")) {
+                if (result.startsWith("An error occurred")) {
                     if (result.includes("Failed to copy files from ") && result.includes("PermissionDenied")) {
                         const parts = result.split("Failed to copy files from \\\"").pop().split("\\\" to \\\"");
                         const from = parts[0];

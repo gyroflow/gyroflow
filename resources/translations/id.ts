@@ -350,7 +350,7 @@ Rendering di latar belakang tidak didukung, karena keterbatasan sistem encoder v
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="683"/>
-      <source>An error occured: %1</source>
+      <source>An error occurred: %1</source>
       <translation>Telah terjadi kesalahan: %1</translation>
     </message>
     <message>

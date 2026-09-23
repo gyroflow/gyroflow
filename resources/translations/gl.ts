@@ -348,7 +348,7 @@ Debido ás limitacións dos codificadores de vídeo do sistema, non se admite a 
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="683"/>
-      <source>An error occured: %1</source>
+      <source>An error occurred: %1</source>
       <translation>Produciuse un erro: %1</translation>
     </message>
     <message>

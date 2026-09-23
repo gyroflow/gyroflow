@@ -349,7 +349,7 @@ Zbog ograničenja sistemskih video enkodera, renderovanje u pozadini nije podrž
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="683"/>
-      <source>An error occured: %1</source>
+      <source>An error occurred: %1</source>
       <translation>Došlo je do greške: %1</translation>
     </message>
     <message>
