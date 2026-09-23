@@ -349,7 +349,7 @@ A causa delle limitazioni degli encoder video di sistema, il rendering in backgr
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="683"/>
-      <source>An error occured: %1</source>
+      <source>An error occurred: %1</source>
       <translation>Si è verificato un errore: %1.</translation>
     </message>
     <message>

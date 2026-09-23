@@ -349,7 +349,7 @@ Ze względu na ograniczenia systemowych enkoderów wideo, renderowanie w tle nie
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="683"/>
-      <source>An error occured: %1</source>
+      <source>An error occurred: %1</source>
       <translation>Wystąpił błąd: %1</translation>
     </message>
     <message>

@@ -414,7 +414,7 @@ impl Controller {
         if let Err(e) = sync_params {
             self.sync_in_progress = false;
             self.sync_in_progress_changed();
-            return self.error(QString::from("An error occured: %1"), QString::from(format!("JSON parse error: {}", e)), QString::default());
+            return self.error(QString::from("An error occurred: %1"), QString::from(format!("JSON parse error: {}", e)), QString::default());
         }
         let mut sync_params = sync_params.unwrap();
 
@@ -519,7 +519,7 @@ impl Controller {
                 Ok(sync) => sync,
                 // No zoom to measure on: the same outcome as an analysis that found none, with its own message
                 Err(AutosyncError::NoZoomInMetadata) => return set_lens_delay(None),
-                Err(AutosyncError::InvalidParameters) => return err(("An error occured: %1".to_string(), "Invalid parameters".to_string())),
+                Err(AutosyncError::InvalidParameters) => return err(("An error occurred: %1".to_string(), "Invalid parameters".to_string())),
             };
             sync.on_progress(move |percent, ready, total| {
                 progress((percent, ready, total));
@@ -571,7 +571,7 @@ impl Controller {
                                     sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
                                 },
                                 Err(e) => {
-                                    err2(("An error occured: %1".to_string(), e.to_string()))
+                                    err2(("An error occurred: %1".to_string(), e.to_string()))
                                 }
                             }
                             frame_no += 1;
@@ -580,12 +580,12 @@ impl Controller {
                         Ok(())
                     });
                     if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
-                        err(("An error occured: %1".to_string(), e.to_string()));
+                        err(("An error occurred: %1".to_string(), e.to_string()));
                     }
                     sync.finished_feeding_frames();
                 }
                 Err(error) => {
-                    err(("An error occured: %1".to_string(), error.to_string()));
+                    err(("An error occurred: %1".to_string(), error.to_string()));
                 }
             };
         });
@@ -880,7 +880,7 @@ impl Controller {
                                 }
 
                                 if let Err(e) = stab.load_gyro_data(file.get_file(), filesize, &url, is_main_video, &load_options, progress, cancel_flag) {
-                                    err(("An error occured: %1".to_string(), e.to_string()));
+                                    err(("An error occurred: %1".to_string(), e.to_string()));
                                 }
                             }
                         }
@@ -952,7 +952,7 @@ impl Controller {
     fn load_lens_profile(&mut self, url_or_id: QString) {
         let (json, filepath, checksum) = {
             if let Err(e) = self.stabilizer.load_lens_profile(&url_or_id.to_string()) {
-                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+                self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
             }
             let lens = self.stabilizer.lens.read();
             (lens.get_json().unwrap_or_default(), lens.path_to_file.clone(), lens.checksum.clone().unwrap_or_default())
@@ -1372,7 +1372,7 @@ impl Controller {
             match res {
                 "ok" => this.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", filesystem::display_url(&arg))), QString::default(), QString::from("gyroflow-exported")),
                 "location" => this.request_location(QString::from(arg), typ_str.clone()),
-                "err" => this.error(QString::from("An error occured: %1"), QString::from(arg), QString::default()),
+                "err" => this.error(QString::from("An error occurred: %1"), QString::from(arg), QString::default()),
                 _ => { }
             }
             this.request_recompute();
@@ -1537,7 +1537,7 @@ impl Controller {
                 util::serde_json_to_qt_object(&thin_obj)
             },
             Err(e) => {
-                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+                self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
                 QJsonObject::default()
             }
         }
@@ -1894,18 +1894,18 @@ impl Controller {
                                         cal.feed_frame(timestamp_us, frame, (width, height), org_size, stride, pt_scale, pixels, cancel_flag2.clone(), total, processed.clone(), progress.clone());
                                     },
                                     Err(e) => {
-                                        err2(("An error occured: %1".to_string(), e.to_string()))
+                                        err2(("An error occurred: %1".to_string(), e.to_string()))
                                     }
                                 }
                             }
                             Ok(())
                         });
                         if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
-                            err(("An error occured: %1".to_string(), e.to_string()));
+                            err(("An error occurred: %1".to_string(), e.to_string()));
                         }
                     }
                     Err(error) => {
-                        err(("An error occured: %1".to_string(), error.to_string()));
+                        err(("An error occurred: %1".to_string(), error.to_string()));
                     }
                 }
                 // Don't lock the UI trying to draw chessboards while we calibrate
@@ -1918,7 +1918,7 @@ impl Controller {
                 let mut lock = cal.write();
                 let cal = lock.as_mut().unwrap();
                 if let Err(e) = cal.calibrate(is_forced) {
-                    err(("An error occured: %1".to_string(), format!("{:?}", e)));
+                    err(("An error occurred: %1".to_string(), format!("{:?}", e)));
                 } else {
                     if cal.rms < 100.0 {
                         stab.lens.write().set_from_calibrator(cal);
@@ -2034,10 +2034,10 @@ impl Controller {
                         }
                         true
                     }
-                    Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
+                    Err(e) => { self.error(QString::from("An error occurred: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
                 }
             },
-            Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
+            Err(e) => { self.error(QString::from("An error occurred: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
         }
     }
 
@@ -2193,7 +2193,7 @@ impl Controller {
         }
         let contents = content.to_json_pretty();
         if let Err(e) = filesystem::write(&url, contents.to_slice()) {
-            self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+            self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
         }
         QString::from(filesystem::display_url(&url))
     }
@@ -2204,13 +2204,13 @@ impl Controller {
             Ok(filesystem::write(&util::qurl_to_encoded(url), contents.as_bytes())?)
         };
         if let Err(e) = result() {
-            self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+            self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
         }
     }
     fn export_parsed_metadata(&self, url: QUrl) {
         if let Ok(contents) = serde_json::to_string_pretty(&self.stabilizer.gyro.read().file_metadata) {
             if let Err(e) = filesystem::write(&util::qurl_to_encoded(url), contents.as_bytes()) {
-                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+                self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
             }
         }
     }
@@ -2220,7 +2220,7 @@ impl Controller {
 
         let contents = gyroflow_core::gyro_export::export_gyro_data(&filename, fields.to_json().to_str().unwrap(), &self.stabilizer);
         if let Err(e) = filesystem::write(&url, contents.as_bytes()) {
-            self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+            self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
         }
     }
 
@@ -2579,7 +2579,7 @@ impl Controller {
             this.stmap_progress(ready as f64 / total as f64, ready, total);
         });
         let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, msg: String| {
-            this.error(QString::from("An error occured: %1"), QString::from(msg), QString::default());
+            this.error(QString::from("An error occurred: %1"), QString::from(msg), QString::default());
         });
 
         self.cancel_flag.store(false, SeqCst);
@@ -2592,7 +2592,7 @@ impl Controller {
         {
             let params = stab.params.read();
             if params.size.0 <= 0 || params.size.1 <= 0 {
-                self.error(QString::from("An error occured: %1"), QString::from("Video is not loaded"), QString::default());
+                self.error(QString::from("An error occurred: %1"), QString::from("Video is not loaded"), QString::default());
                 return;
             }
         }
@@ -2641,7 +2641,7 @@ impl Controller {
                         };
                         match result {
                             Ok(r) => signal(r),
-                            Err(e) => signal(format!("An error occured: {e:?}"))
+                            Err(e) => signal(format!("An error occurred: {e:?}"))
                         }
                     });
                     Ok(String::new())
@@ -2652,7 +2652,7 @@ impl Controller {
             };
             match result {
                 Ok(r) => QString::from(r),
-                Err(e) => QString::from(format!("An error occured: {e:?}"))
+                Err(e) => QString::from(format!("An error occurred: {e:?}"))
             }
         }
         #[cfg(not(any(target_os = "windows", target_os = "macos")))] { QString::default() }

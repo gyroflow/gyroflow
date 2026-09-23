@@ -991,7 +991,7 @@ impl RenderQueue {
                         Ok(())
                     };
                     if let Err(e) = result() {
-                        err(("An error occured: %1".to_string(), e.to_string()));
+                        err(("An error occurred: %1".to_string(), e.to_string()));
                     } else {
                         progress((1.0, 1, 1, true, false));
                     }
@@ -1057,7 +1057,7 @@ impl RenderQueue {
                         let mut frame = 0;
                         let r3d_progress = |(percent, error_str, out_url): (f64, String, String)| {
                             if !error_str.is_empty() {
-                                err(("An error occured: %1".to_string(), error_str));
+                                err(("An error occurred: %1".to_string(), error_str));
                             } else {
                                 progress((percent * 0.98, frame, total_frame_count + 1, false, true));
                                 input_file.url = out_url;
@@ -1116,7 +1116,7 @@ impl RenderQueue {
                                     continue;
                                 }
                             }
-                            err(("An error occured: %1".to_string(), e.to_string()));
+                            err(("An error occurred: %1".to_string(), e.to_string()));
                             break 'ranges;
                         } else {
                             // Render ok
@@ -1290,7 +1290,7 @@ impl RenderQueue {
                                     if let Ok(data) = filesystem::read_to_string(&url) {
                                         apply_preset((data, 0));
                                     } else {
-                                        err(("An error occured: %1".to_string(), format!("Unable to read the preset file {}", url)));
+                                        err(("An error occurred: %1".to_string(), format!("Unable to read the preset file {}", url)));
                                     }
                                     // The preset is applied to the already queued jobs, this job itself never enters the queue
                                     processing_failed(());
@@ -1320,7 +1320,7 @@ impl RenderQueue {
                                         };
 
                                         if let Err(e) = fetch_thumb(out, ratio) {
-                                            err(("An error occured: %1".to_string(), e.to_string()));
+                                            err(("An error occurred: %1".to_string(), e.to_string()));
                                         }
                                     }
 
@@ -1334,7 +1334,7 @@ impl RenderQueue {
                                     processing_done(());
                                 },
                                 Err(e) => {
-                                    err(("An error occured: %1".to_string(), format!("Error loading {}: {:?}", url, e)));
+                                    err(("An error occurred: %1".to_string(), format!("Error loading {}: {:?}", url, e)));
                                     processing_failed(());
                                 }
                             }
@@ -1394,7 +1394,7 @@ impl RenderQueue {
                                                 }
                                             }
                                             Err(e) => {
-                                                err(("An error occured: %1".to_string(), e.to_string()));
+                                                err(("An error occurred: %1".to_string(), e.to_string()));
                                                 processing_failed(());
                                                 return;
                                             }
@@ -1431,16 +1431,16 @@ impl RenderQueue {
                                 }
 
                                 if let Err(e) = fetch_thumb(&url, ratio) {
-                                    err(("An error occured: %1".to_string(), e.to_string()));
+                                    err(("An error occurred: %1".to_string(), e.to_string()));
                                 }
 
                                 processing_done(());
                             } else {
-                                err(("An error occured: %1".to_string(), format!("Unable to determine the video duration ({} ms) or frame rate ({} fps).", info.duration_ms, info.fps)));
+                                err(("An error occurred: %1".to_string(), format!("Unable to determine the video duration ({} ms) or frame rate ({} fps).", info.duration_ms, info.fps)));
                                 processing_failed(());
                             }
                         } else {
-                            err(("An error occured: %1".to_string(), "Unable to read the video file.".to_string()));
+                            err(("An error occurred: %1".to_string(), "Unable to read the video file.".to_string()));
                             processing_failed(());
                         }
                     });
@@ -1584,7 +1584,7 @@ impl RenderQueue {
                                                 sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
                                             },
                                             Err(e) => {
-                                                err2(("An error occured: %1".to_string(), e.to_string()))
+                                                err2(("An error occurred: %1".to_string(), e.to_string()))
                                             }
                                         }
                                         frame_no += 1;
@@ -1593,17 +1593,17 @@ impl RenderQueue {
                                     Ok(())
                                 });
                                 if let Err(e) = proc.start_decoder_only(sync.get_ranges(), cancel_flag) {
-                                    err(("An error occured: %1".to_string(), e.to_string()));
+                                    err(("An error occurred: %1".to_string(), e.to_string()));
                                 }
 
                                 sync.finished_feeding_frames();
                             }
                             Err(error) => {
-                                err(("An error occured: %1".to_string(), error.to_string()));
+                                err(("An error occurred: %1".to_string(), error.to_string()));
                             }
                         };
                     } else {
-                        err(("An error occured: %1".to_string(), "Invalid parameters".to_string()));
+                        err(("An error occurred: %1".to_string(), "Invalid parameters".to_string()));
                     }
 
                     stab.recompute_blocking();
