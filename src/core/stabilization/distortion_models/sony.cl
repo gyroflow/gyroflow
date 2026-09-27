@@ -57,27 +57,22 @@ float sony_radius_at(int n, float theta, __global KernelParams *params) {
 
 float2 undistort_point(float2 pos, __global KernelParams *params) {
     int n = sony_segments(params);
-    if (n == 0) return pos;
     float r = length(pos);
+    // No lens curve: a pinhole, so the image radius is `tan θ`
+    if (n == 0) return r < 1e-12f? pos : pos * (atan(r) / r);
     if (r < 1e-9f) return pos;
     float theta = sony_angle_at(n, r, params);
     if (theta <= 0.0f) return (float2)(-99999.0f, -99999.0f);
-    // Clamp the angle just under tan()'s 90° asymptote and continue the radius linearly past it, so over-FOV rays
-    // stay large and monotonic (no fold back into the frame) and r_limit clips them. See sony.rs / gopro.rs.
-    const float TMAX = 1.5533f, tt = 57.14902f; // TMAX ≈ 89°, tt = tan(TMAX)
-    float rr = theta < TMAX ? tan(theta) : tt + (theta - TMAX) * (1.0f + tt * tt);
-    if (params->r_limit > 0.0f && rr > params->r_limit) return (float2)(-99999.0f, -99999.0f);
-    return pos * (rr / r);
+    return pos * (theta / r);
 }
 
 float2 distort_point(float x, float y, float z, __global KernelParams *params) {
-    float2 pos = (float2)(x, y) / z;
     int n = sony_segments(params);
-    if (n == 0) return pos;
+    // No lens curve: a pinhole, which has no image of a ray at or past 90°
+    if (n == 0) return z > 1e-9f? (float2)(x, y) / z : (float2)(x, y) * 1e9f;
+    float2 pos = (float2)(x, y);
     float r = length(pos);
-    if (r < 1e-9f) return pos;
-    // Inverse of undistort_point's angle clamp
-    const float TMAX = 1.5533f, tt = 57.14902f;
-    float theta = r < tt ? atan(r) : TMAX + (r - tt) / (1.0f + tt * tt);
+    if (r < 1e-12f) return (float2)(0.0f, 0.0f);
+    float theta = atan2(r, z);
     return pos * (sony_radius_at(n, theta, params) / r);
 }

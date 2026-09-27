@@ -179,14 +179,14 @@ impl GoProWarp {
             var factor = params.digital_lens_params[3].z; if (factor == 0.0) { factor = 1.0; }
             let size = vec2<f32>(f32(params.width), f32(params.height));
             let n = (_uv / size) - 0.5;
-            let target = vec2<f32>(n.x * factor, n.y);
+            let want = vec2<f32>(n.x * factor, n.y); // not `target`: a WGSL reserved keyword
             var P = n; // seed inside the recorded domain [-0.5,0.5]
             for (var i: i32 = 0; i < 12; i = i + 1) {
-                let diff = gopro_map(P) - target;
+                let diff = gopro_map(P) - want;
                 if (abs(diff.x) < 1e-6 && abs(diff.y) < 1e-6) { break; }
                 P -= diff;
             }
-            let res = gopro_map(P) - target; // reject out-of-domain (beyond recorded frame) -> background
+            let res = gopro_map(P) - want; // reject out-of-domain (beyond recorded frame) -> background
             if (abs(res.x) > 0.02 || abs(res.y) > 0.02) { return vec2<f32>(-99999.0, -99999.0); }
             return (P + 0.5) * size;
         }"#

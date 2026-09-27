@@ -24,7 +24,7 @@ struct KernelParams {
     c:             vec2<f32>, // 16 - lens center
     k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>, k4: vec4<f32>, k5: vec4<f32>, k6: vec4<f32>, // 16 x 6 - distortion coefficients
     fov:           f32, // 4
-    r_limit:       f32, // 8
+    field_limit:   f32, // 8 - the largest ray angle the lens model can be asked for, in radians
     lens_correction_amount:   f32, // 12
     input_vertical_stretch:   f32, // 16
     input_horizontal_stretch: f32, // 4
@@ -45,7 +45,7 @@ struct KernelParams {
     pixel_value_limit:        f32, // 16
     light_refraction_coefficient: f32, // 4
     plane_index:              i32, // 8
-    reserved1:                f32, // 12
+    output_projection:        i32, // 12
     reserved2:                f32, // 16
     ewa_coeffs_p:             vec4<f32>, // 16
     ewa_coeffs_q:             vec4<f32>, // 16
@@ -374,26 +374,80 @@ fn interpolate_mesh(base: i32, width: f32, height: f32, pos: vec2<f32>) -> vec2<
     );
 }
 
-fn rotate_and_distort(pos: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>) -> vec2<f32> {
-    let _x = (pos.x * matrices[idx + 0u]) + (pos.y * matrices[idx + 1u]) + matrices[idx + 2u] + params.translation3d.x;
-    let _y = (pos.x * matrices[idx + 3u]) + (pos.y * matrices[idx + 4u]) + matrices[idx + 5u] + params.translation3d.y;
-    var _w = (pos.x * matrices[idx + 6u]) + (pos.y * matrices[idx + 7u]) + matrices[idx + 8u] + params.translation3d.z;
+// The pipeline carries a ray as an angle vector: |.| is the angle from the axis in radians, the direction
+// is the azimuth. See stabilization/projection.rs - nothing diverges at 90° the way a z=1 plane point does
+fn ray_unproject(n: vec2<f32>, proj: i32) -> vec2<f32> {
+    let r = length(n);
+    if (r < 1e-12) { return vec2<f32>(0.0, 0.0); }
+    var theta = atan(r);                                                    // rectilinear
+    if      (proj == 1) { theta = 2.0 * atan(r * 0.5); }                    // stereographic
+    else if (proj == 2) { theta = r; }                                      // equidistant
+    else if (proj == 3) { theta = 2.0 * asin(min(r * 0.5, 1.0)); }          // equisolid angle
+    else if (proj == 4) { theta = asin(min(r, 1.0)); }                      // orthographic
+    return n * (theta / r);
+}
+// Where a ray of angle `theta` lands on the output plane, under the output projection
+fn ray_radius(theta: f32, proj: i32) -> f32 {
+    if (proj == 1) { return 2.0 * tan(theta * 0.5); }
+    if (proj == 2) { return theta; }
+    if (proj == 3) { return 2.0 * sin(theta * 0.5); }
+    if (proj == 4) { return sin(theta); }
+    if (theta < 1.5707) { return tan(theta); }
+    return 1e9;
+}
+// `(1-a)*R(theta) + a*P(theta) - t`: the lens-correction blend (see stabilization/projection.rs), minus
+// where this pixel is. `R` carries the refraction, because the render applies it on this side too
+fn blend_residual(theta: f32, u: vec2<f32>, t: f32, a: f32, flags: i32) -> f32 {
+    var th = theta;
+    if (bool(flags & 2048) && params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
+        th = asin(clamp(sin(th) * params.light_refraction_coefficient, -1.0, 1.0));
+    }
+    let s = sin(th); let c = cos(th);
+    let p = distort_point(u.x * s, u.y * s, c);
+    return (1.0 - a) * length(p) + a * ray_radius(theta, params.output_projection) - t;
+}
+// The ray angle that lands at a given output radius, inverse of `ray_radius`
+fn ray_theta(r: f32, proj: i32) -> f32 {
+    if (proj == 1) { return 2.0 * atan(r * 0.5); }
+    if (proj == 2) { return r; }
+    if (proj == 3) { return 2.0 * asin(min(r * 0.5, 1.0)); }
+    if (proj == 4) { return asin(min(r, 1.0)); }
+    return atan(r);
+}
+fn ray_to_dir(ray: vec2<f32>) -> vec3<f32> {
+    let theta = length(ray);
+    if (theta < 1e-12) { return vec3<f32>(ray.x, ray.y, 1.0); }
+    return vec3<f32>(ray * (sin(theta) / theta), cos(theta));
+}
 
-    if (_w > 0.0) {
-        if (params.r_limit > 0.0 && length(vec2<f32>(_x, _y) / _w) > params.r_limit) {
+fn rotate_and_distort(ray: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: vec4<f32>, k2: vec4<f32>, k3: vec4<f32>) -> vec2<f32> {
+    let d = ray_to_dir(ray);
+    var _x = (d.x * matrices[idx + 0u]) + (d.y * matrices[idx + 1u]) + (d.z * matrices[idx + 2u]) + params.translation3d.x;
+    var _y = (d.x * matrices[idx + 3u]) + (d.y * matrices[idx + 4u]) + (d.z * matrices[idx + 5u]) + params.translation3d.y;
+    var _w = (d.x * matrices[idx + 6u]) + (d.y * matrices[idx + 7u]) + (d.z * matrices[idx + 8u]) + params.translation3d.z;
+
+    {
+        let rxy = length(vec2<f32>(_x, _y));
+        // The ray's angle in the source camera: past the lens's own field, or past a fold of its
+        // calibration, it has no image at all
+        let theta = atan2(rxy, _w);
+        if (params.field_limit > 0.0 && theta > params.field_limit) {
             return vec2<f32>(-99999.0, -99999.0);
         }
 
-        if (bool(flags & 2048) && params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
-            let r = length(vec2<f32>(_x, _y)) / _w;
-            let sin_theta_d = (r / sqrt(1.0 + r * r)) * params.light_refraction_coefficient;
-            let r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
-            if (r_d != 0.0) {
-                _w *= r / r_d;
-            }
+        // Refraction (underwater): Snell's law on the angle itself, exact for any field. Past the critical angle - or behind the flat port - no ray enters the housing at all: Snell's window ends there
+        if (bool(flags & 2048) && params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0 && rxy > 1e-12) {
+            let sin_d = sin(theta) * params.light_refraction_coefficient;
+            if (sin_d >= 1.0 || _w <= 0.0) { return vec2<f32>(-99999.0, -99999.0); }
+            let theta_d = asin(sin_d);
+            let s = sin(theta_d) / rxy;
+            _x *= s; _y *= s; _w = cos(theta_d);
         }
 
-        var uv = f * distort_point(_x, _y, _w);
+        var uv = distort_point(_x, _y, _w);
+        // Focus breathing: this row's magnification of the source image
+        if (matrices[idx + 14u] > 0.0) { uv *= matrices[idx + 14u]; }
+        uv *= f;
 
         if (bool(flags & 256) && (matrices[idx + 9] != 0.0 || matrices[idx + 10] != 0.0 || matrices[idx + 11] != 0.0 || matrices[idx + 12] != 0.0 || matrices[idx + 13] != 0.0)) {
             // The camera applies the sensor roll before the sensor/lens shift, so undo the shift first and then the roll
@@ -491,35 +545,112 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
     out_pos += params.translation2d;
 
     ///////////////////////////////////////////////////////////////////
-    // Add lens distortion back
-    if (params.lens_correction_amount < 1.0) {
-        let factor = max(1.0 - params.lens_correction_amount, 0.001); // FIXME: this is close but wrong
-        let out_c = vec2<f32>(f32(params.output_width) / 2.0, f32(params.output_height) / 2.0);
-        let out_f = (params.f / params.fov) / factor;
-
-        var new_out_pos = out_pos;
-
-        if (bool(flags & 2)) { // Has digital lens
-            // Apply the digital warp in the UN-zoomed (fov=1) frame so it's FOV-independent.
-            new_out_pos = (new_out_pos - out_c) * params.fov + out_c;
-            new_out_pos = digital_undistort_point(new_out_pos);
-            new_out_pos = (new_out_pos - out_c) / params.fov + out_c;
-        }
-
-        new_out_pos = (new_out_pos - out_c) / out_f;
-        new_out_pos = undistort_point(new_out_pos);
-        if (new_out_pos.x < -99998.0) { return vec2<f32>(-99999.0, -99999.0); }
-        if (bool(flags & 2048) && params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0) {
-            let r = length(new_out_pos);
-            if (r != 0.0) {
-                let sin_theta_d = (r / sqrt(1.0 + r * r)) / params.light_refraction_coefficient;
-                let r_d = sin_theta_d / sqrt(1.0 - sin_theta_d * sin_theta_d);
-                new_out_pos *= r_d / r;
+    // Output pixel -> ray. A ray of angle theta lands at `(1-a)*R(theta) + a*P(theta)` of the output plane
+    // - where the source lens images it, mixed with where the output projection wants it (see
+    // stabilization/projection.rs). This is that inverted: both maps rise with theta, so the mix does too,
+    // and the root is bracketed by the angles the two projections would each have given on their own
+    var stretch = 1.0;
+    if (params.input_horizontal_stretch > 0.01) { stretch = 1.0 / params.input_horizontal_stretch; }
+    let out_c = vec2<f32>(f32(params.output_width) / 2.0, f32(params.output_height) / 2.0);
+    let out_f = params.f * stretch / params.fov;
+    let a = params.lens_correction_amount;
+    let n_raw = (out_pos - out_c) / out_f;
+    var n = n_raw;
+    if (bool(flags & 2) && a < 1.0) { // Has digital lens
+        // Apply the digital warp in the UN-zoomed (fov=1) frame so it's FOV-independent.
+        let uz = (out_pos - out_c) * params.fov + out_c;
+        let dp = digital_undistort_point(uz);
+        n = ((dp - out_c) / params.fov) / out_f;
+    }
+    var ray = ray_unproject(n_raw, params.output_projection);
+    if (a < 1.0) {
+        // With a digital warp the two legs read different planes, so the target is mixed the same way they
+        // are; without one `n` is `n_raw` and this is just the pixel itself
+        let nb = n * (1.0 - a) + n_raw * a;
+        let t = length(nb);
+        if (t > 1e-9) {
+            let u = nb / t;
+            let lo = length(ray);
+            let src = undistort_point(n);
+            let has_src = src.x > -99998.0;
+            if (!has_src && !(params.field_limit > 0.0)) { return vec2<f32>(-99999.0, -99999.0); }
+            // Past the edge of its own image the model has no inverse, but the lens still reaches to its
+            // field limit and the blend may well land inside `t` before then
+            // Under water the lens's angles are the housing's; the bracket is in the water's, the inverse of
+            // Snell's law away - and no ray past the flat port's 90 degrees ever enters the housing
+            let refr = bool(flags & 2048) && params.light_refraction_coefficient != 1.0 && params.light_refraction_coefficient > 0.0;
+            var hi = params.field_limit;
+            if (has_src) { hi = length(src); }
+            if (refr) { hi = asin(clamp(sin(min(hi, 1.5707963)) / params.light_refraction_coefficient, -1.0, 1.0)); }
+            var edge = !has_src;
+            // ... and the root cannot be past the angle at which the output projection alone would already have
+                // used up `t` (`a·P(θ) <= t` at the root), and pinning the bracket there keeps both residuals
+                // of the order of `t`. Without it a lens that sees past 90 degrees hands `P`'s "no image" sentinel to
+                // the solve, and a secant cannot move against 1e9: the blend then silently stalled at the
+                // fully corrected angle outside a circle at `R(90 degrees)`
+            if (a > 0.0) { hi = min(hi, ray_theta(t / a, params.output_projection)); }
+            if (a <= 0.0) {
+                if (!has_src) { return vec2<f32>(-99999.0, -99999.0); }
+                // Exactly the source lens's own ray, tangential terms and all - with the refraction
+                // rotate_and_distort applies on the way out undone here, or the round trip isn't one
+                ray = src;
+                if (refr) {
+                    let th = length(src);
+                    if (th > 1e-12) { ray = src * (asin(clamp(sin(min(th, 1.5707963)) / params.light_refraction_coefficient, -1.0, 1.0)) / th); }
+                }
+            } else {
+                var l = min(lo, hi); var h = max(lo, hi);
+                // The lens ends at its field limit - under water, at Snell's window - and the projection's own
+                // angle may well lie past it; the bracket ends there too, and past it is background
+                var cap = 3.1415927;
+                if (params.field_limit > 0.0) { cap = params.field_limit; }
+                if (refr) { cap = asin(clamp(sin(min(cap, 1.5707963)) / params.light_refraction_coefficient, -1.0, 1.0)); }
+                if (h > cap) { h = cap; l = min(l, cap); edge = true; }
+                var gl = blend_residual(l, u, t, a, flags);
+                var gh = blend_residual(h, u, t, a, flags);
+                var theta = h;
+                // Near the axis every projection agrees, so both ends of the bracket are a difference of
+                // near-equal numbers and the sign of `g` there is float noise. An end that IS the source
+                // lens's own answer always has a root beside it, so the end itself is the answer; only when
+                // the end is the field limit - or Snell's window - has the lens really run out, and the pixel is background
+                if (gh < 0.0) {
+                    if (edge) { return vec2<f32>(-99999.0, -99999.0); }
+                } else {
+                    // The projection's own angle overshoots - refraction magnifies the source leg - so bracket from the axis, where the residual is -t
+                    if (gl >= 0.0) { l = 0.0; gl = -t; }
+                    // Regula falsi, Illinois variant: the bracket is tight (the two projections' own
+                    // answers), and halving the stale end keeps it from crawling in from one side
+                    var side: i32 = 0;
+                    for (var i: i32 = 0; i < 6; i = i + 1) {
+                        let d = gh - gl;
+                        if (abs(d) > 1e-12) { theta = clamp(l - gl * (h - l) / d, l, h); } else { theta = 0.5 * (l + h); }
+                        let gt = blend_residual(theta, u, t, a, flags);
+                        if (gt < 0.0) {
+                            l = theta; gl = gt;
+                            if (side == -1) { gh *= 0.5; }
+                            side = -1;
+                        } else {
+                            h = theta; gh = gt;
+                            if (side == 1) { gl *= 0.5; }
+                            side = 1;
+                        }
+                    }
+                }
+                // The source lens's own ray is off its radius by the tangential terms; that offset belongs to the
+                // source leg, so it fades out with it. It is measured against `n`, the point that leg reads: a
+                // digital warp moves `n` off `u`, and that is no offset of the lens's
+                var dir = u;
+                if (has_src) {
+                    let sl = length(src); let nl = length(n);
+                    if (sl > 1e-12 && nl > 1e-12) {
+                        let dd = u + (1.0 - a) * (src / sl - n / nl);
+                        let dl = length(dd);
+                        if (dl > 1e-12) { dir = dd / dl; }
+                    }
+                }
+                ray = dir * theta;
             }
         }
-        new_out_pos = out_f * new_out_pos + out_c;
-
-        out_pos = new_out_pos * (1.0 - params.lens_correction_amount) + (out_pos * params.lens_correction_amount);
     }
     ///////////////////////////////////////////////////////////////////
 
@@ -532,8 +663,8 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
         sy = u32(min(params.height, max(0, i32(floor(0.5 + out_pos.y)))));
     }
     if (params.matrix_count > 1) {
-        let idx: u32 = u32((params.matrix_count / 2) * 14); // Use middle matrix
-        let uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k1, params.k2, params.k3);
+        let idx: u32 = u32((params.matrix_count / 2) * 16); // Use middle matrix
+        let uv = rotate_and_distort(ray, idx, params.f, params.c, params.k1, params.k2, params.k3);
         if (uv.x > -99998.0) {
             if (bool(flags & 16)) { // Horizontal RS
                 sy = u32(min(params.width, max(0, i32(floor(0.5 + uv.x)))));
@@ -544,8 +675,8 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
     }
     ///////////////////////////////////////////////////////////////////
 
-    let idx: u32 = min(sy, u32(params.matrix_count - 1)) * 14u;
-    var uv = rotate_and_distort(out_pos, idx, params.f, params.c, params.k1, params.k2, params.k3);
+    let idx: u32 = min(sy, u32(params.matrix_count - 1)) * 16u;
+    var uv = rotate_and_distort(ray, idx, params.f, params.c, params.k1, params.k2, params.k3);
 
     var frame_size = vec2<f32>(f32(params.width), f32(params.height));
     if (params.input_rotation != 0.0) {

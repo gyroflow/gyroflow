@@ -242,12 +242,12 @@ impl AutosyncProcess {
             // is what ends the "in progress" state, so it's made either way
             let cancelled = self.cancel_flag.load(SeqCst);
             if !cancelled {
-            // Only the feature tracks between consecutive frames are needed
-            self.estimator.cache_optical_flow(1);
+                // Only the feature tracks between consecutive frames are needed
+                self.estimator.cache_optical_flow(1);
             }
             self.estimator.cleanup();
             if !cancelled {
-            if let Some(cb) = &self.finished_cb {
+                if let Some(cb) = &self.finished_cb {
                     cb(AutosyncResult::LensDelay(super::lens_delay::estimate(&self.estimator, &self.compute_params.read(), &self.lens_delay_meta_ln)));
                 }
             }
@@ -272,6 +272,9 @@ impl AutosyncProcess {
 
             gyro.file_metadata.set_raw_imu(self.estimator.estimated_gyro.read().values().cloned().collect::<Vec<_>>());
             gyro.apply_transforms();
+            /*gyro.file_metadata.quaternions = self.estimator.estimated_quats.read().clone();
+            gyro.integration_method = 0;
+            gyro.integrate();*/
 
             let timestamps_fract = [0.5];
             let time_per_syncpoint = 500.0;

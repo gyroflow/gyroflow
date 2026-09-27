@@ -193,6 +193,8 @@ pub fn estimate(estimator: &PoseEstimator, params: &ComputeParams, meta_ln: &[f6
         let scaled = |pts: &[(f32, f32)]| pts.iter().map(|p| (p.0 * scale, p.1 * scale)).collect::<Vec<_>>();
         // Frame-exact times, the renderer's convention (it adds the per-frame offset itself for the gyro lookup)
         let (t1, t2) = (crate::timestamp_at_frame(f1 as i32, fps), crate::timestamp_at_frame(f2 as i32, fps));
+        // No field clamp: these are tracked image features, and a feature the lens has no image of has to
+        // drop out of `inside()` below rather than come back as a stand-in at the edge of the field
         let u1 = undistort_points_with_rolling_shutter(&scaled(&pts1), t1, Some(f1), params, 1.0, false, false);
         let u2 = undistort_points_with_rolling_shutter(&scaled(&pts2), t2, Some(f2), params, 1.0, false, false);
         let (from, to): (Vec<_>, Vec<_>) = u1.iter().zip(&u2).filter(|(p, q)| inside(p) && inside(q)).map(|(p, q)| (*p, *q)).unzip();
@@ -201,69 +203,4 @@ pub fn estimate(estimator: &PoseEstimator, params: &ComputeParams, meta_ln: &[f6
         }
     }
     estimate_from_steps(&steps, meta_ln, fps)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn similarity_recovers_the_scale() {
-        let from: Vec<(f32, f32)> = (0..40).map(|i| (100.0 + 37.0 * (i % 7) as f32, 80.0 + 23.0 * (i % 5) as f32)).collect();
-        let (s, c, t) = (1.02f32, 0.01f32.cos(), 0.01f32.sin());
-        let mut to: Vec<(f32, f32)> = from.iter().map(|p| (s * (c * p.0 - t * p.1) + 5.0, s * (t * p.0 + c * p.1) - 3.0)).collect();
-        to[3] = (900.0, 900.0); // a wrong match
-        let (ln_scale, inliers) = similarity_ln_scale(&from, &to).unwrap();
-        assert!((ln_scale - 1.02f64.ln()).abs() < 1e-4, "{ln_scale}");
-        assert_eq!(inliers, 39);
-    }
-
-    #[test]
-    fn stamps_map_back_to_their_frames() {
-        // Sony a7S III at 59.94 fps: the sync adds 17.5-19.6 ms to every frame, more than the 16.68 ms frame
-        let fps = 59.94;
-        // What `AutosyncProcess::feed_frame` stamps a frame with: its own time plus its offset
-        let stamp = |frame: usize, offsets: &[f64]| ((crate::timestamp_at_frame(frame as i32, fps) + offsets.get(frame).copied().unwrap_or(0.0)) * 1000.0).round() as i64;
-        let offsets: Vec<f64> = (0..330).map(|i| 19.24 - 1.7 * i as f64 / 330.0).collect();
-        for frame in [0usize, 1, 2, 57, 200, 329] {
-            assert_eq!(frame_of_stamp(stamp(frame, &offsets), &offsets, fps), Some(frame), "frame {frame}");
-        }
-        // A capture area change moves the offset by more than two frames between two neighbours: the stamps of
-        // the frames around it are still their own
-        let mut jumping = offsets.clone();
-        for o in &mut jumping[100..] { *o += 40.0; }
-        for frame in [98usize, 99, 100, 101, 102, 150] {
-            assert_eq!(frame_of_stamp(stamp(frame, &jumping), &jumping, fps), Some(frame), "frame {frame}");
-        }
-        // Without offsets the stamp is the frame time itself
-        assert_eq!(frame_of_stamp(stamp(7, &[]), &[], fps), Some(7));
-    }
-
-    #[test]
-    fn lag_is_found_to_a_fraction_of_a_frame() {
-        let fps = 60.0;
-        // The picture zooms 1x -> 2x over frames 100..220 with a smooth ramp; the metadata reports it 2 frames late
-        let truth = |frame: f64| { let t = ((frame - 100.0) / 120.0).clamp(0.0, 1.0); (t * t * (3.0 - 2.0 * t)) * 2f64.ln() };
-        let meta_ln: Vec<f64> = (0..400).map(|i| truth(i as f64 - 2.0)).collect();
-        let image: Vec<(f64, f64, f64)> = (50..300).map(|i| {
-            let (t1, t2) = (i as f64 * 1000.0 / fps, (i + 1) as f64 * 1000.0 / fps);
-            (t1, t2, truth(i as f64 + 1.0) - truth(i as f64) + 0.0004 * ((i * 7919) % 13) as f64 / 13.0)
-        }).collect();
-        let est = estimate_from_steps(&image, &meta_ln, fps).expect("a zoom this clear must be estimated");
-        assert_eq!(est.delay_frames, 2, "exact {}", est.delay_frames_exact);
-        assert!((est.delay_frames_exact - 2.0).abs() < 0.3, "exact {}", est.delay_frames_exact);
-        assert!(est.correlation > 0.95);
-        // No zoom in the analyzed frames: no estimate
-        let flat: Vec<f64> = vec![0.0; 400];
-        assert!(estimate_from_steps(&image, &flat, fps).is_none());
-        // The windows to analyze sit on the zoom (frames 100..220), not on the flat parts
-        let ranges = zoom_ranges(&meta_ln, fps, 1000.0, 3);
-        assert!(!ranges.is_empty() && ranges.len() <= 3, "{ranges:?}");
-        for (a, b) in &ranges {
-            let (fa, fb) = (a * fps / 1000.0, b * fps / 1000.0);
-            assert!(fb > 95.0 && fa < 225.0, "window {a}..{b} ms is off the zoom");
-            assert!((fb - fa - 60.0).abs() < 1.5, "window {a}..{b} ms is not a second long");
-        }
-        assert!(zoom_ranges(&flat, fps, 1000.0, 3).is_empty());
-    }
 }

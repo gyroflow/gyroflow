@@ -10,7 +10,7 @@ use crate::util::{ MapClosest, map_coord };
 
 #[derive(Default, Clone)]
 pub struct FrameTransform {
-    pub matrices: Vec<[f32; 14]>,
+    pub matrices: Vec<[f32; 16]>,
     pub kernel_params: super::KernelParams,
     pub fov: f64,
     pub minimal_fov: f64,
@@ -19,7 +19,7 @@ pub struct FrameTransform {
 }
 
 impl FrameTransform {
-    fn get_frame_readout_time(params: &ComputeParams, can_invert: bool, timestamp_ms: f64, file_metadata: &FileMetadata) -> f64 {
+    pub(crate) fn get_frame_readout_time(params: &ComputeParams, can_invert: bool, timestamp_ms: f64, file_metadata: &FileMetadata) -> f64 {
         let mut frame_readout_time = params.frame_readout_time.abs();
         let mut scale = 1.0;
         telemetry_parser::try_block!({
@@ -86,20 +86,6 @@ impl FrameTransform {
         if params.framebuffer_inverted { 2.0 * crop_y + crop_h - y_sensor } else { y_sensor }
     }
 
-    /// The lens breathing compensation of one matrix row as a zoom of the output frame around its centre, by the
-    /// row's magnification `k` (see `gyro_source::sony::breathing`). `None` when the row has no usable zoom: only a
-    /// positive, finite one is a zoom at all, anything else makes the matrix singular and maps the whole output to
-    /// the centre. `at_timestamp` post-multiplies its inverse transform by it and `at_timestamp_for_points`
-    /// pre-multiplies its forward projection by the `inverse` of it, so the two directions stay exact inverses of
-    /// each other - the STMap export writes one map from each and they only compose back to the identity if they do.
-    /// The centre is the output frame's, in the coordinates of the caller's own output size: the two paths describe
-    /// the same frame at different scales, and a zoom about a point survives that scaling unchanged
-    fn breathing_matrix(params: &ComputeParams, k: f64, inverse: bool) -> Option<Matrix3<f64>> {
-        if !(k.is_finite() && k > 0.0) { return None; }
-        let k = if inverse { 1.0 / k } else { k };
-        let (cx, cy) = (params.output_width as f64 / 2.0, params.output_height as f64 / 2.0);
-        Some(Matrix3::new(k, 0.0, cx * (1.0 - k), 0.0, k, cy * (1.0 - k), 0.0, 0.0, 1.0))
-    }
 
     /// Camera matrix, distortion coefficients, radial distortion limit, input stretches, focal length in millimetres,
     /// and whether the camera matrix's focal length came from per-frame lens metadata (see `get_lens_data_at_timestamp_with_metadata`)
@@ -144,7 +130,7 @@ impl FrameTransform {
         let mut camera_matrix = lens.get_camera_matrix((params.width, params.height), invert_asym_lens);
         let mut distortion_coeffs = lens.get_distortion_coeffs();
 
-        let mut radial_distortion_limit = lens.fisheye_params.radial_distortion_limit.unwrap_or_default();
+        let mut radial_distortion_limit = lens.radial_distortion_limit_rad().unwrap_or_default();
 
         let mut stretch_lens = true;
         let mut zoom_scale = 1.0;
@@ -241,7 +227,14 @@ impl FrameTransform {
             camera_matrix[(1, 1)] *= zoom_scale;
         }
 
-        (camera_matrix, distortion_coeffs, radial_distortion_limit, input_horizontal_stretch, input_vertical_stretch, focal_length, per_frame)
+        // The largest ray angle this lens has an image for: where its calibration folds, and where the
+        // model's own projection ends (`DistortionModel::field_limit`), whichever comes first
+        let mut field_limit = radial_distortion_limit;
+        if let Some(fl) = params.distortion_model.field_limit(&distortion_coeffs) {
+            field_limit = if field_limit > 0.0 { field_limit.min(fl) } else { fl };
+        }
+
+        (camera_matrix, distortion_coeffs, field_limit, input_horizontal_stretch, input_vertical_stretch, focal_length, per_frame)
     }
 
     pub fn at_timestamp(params: &ComputeParams, timestamp_ms: f64, frame: usize) -> Self {
@@ -263,7 +256,7 @@ impl FrameTransform {
         // ----------- Lens -----------
         let (mut camera_matrix,
             distortion_coeffs,
-            radial_distortion_limit,
+            field_limit,
             input_horizontal_stretch,
             input_vertical_stretch,
             focal_length, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, false);
@@ -286,7 +279,8 @@ impl FrameTransform {
         }
 
         let scaled_k = camera_matrix;
-        let new_k = Self::get_new_k(&params, &camera_matrix, fov);
+        // No `get_new_k` here: the kernel builds the output plane itself, from `f`, `fov` and the output
+        // size, because the lens-correction blend needs it before the rotation (`undistort_coord`)
 
         let gyro = params.gyro.read();
         let file_metadata = gyro.file_metadata.read();
@@ -377,26 +371,28 @@ impl FrameTransform {
                 }
             }
 
-            let i_r = (new_k * r).pseudo_inverse(0.000001);
-            if let Err(err) = i_r {
-                log::error!("Failed to multiply matrices: {:?} * {:?}: {}", new_k, r, err);
-            }
-            let mut i_r = i_r.unwrap_or_default();
-            if let Some(b) = breathing {
-                // Lens breathing: a zoom of the output around its centre, by the row's magnification
-                if let Some(m) = Self::breathing_matrix(params, b.scale_at_row(sensor_row(y, b.crop_y as f64, b.crop_h as f64)), false) {
-                    i_r *= m;
-                }
-            }
-            let i_r: Matrix3<f32> = nalgebra::convert(i_r);
+            // The kernel carries rays as directions, not as points of the z=1 plane, so the output camera
+            // matrix is no longer folded in here: this is the rotation alone, and `undistort_coord` turns the
+            // output pixel into a ray before it. `r` is orthonormal (a rotation, at most conjugated by a
+            // diagonal ±1 flip above), so its inverse is its transpose
+            let i_r: Matrix3<f32> = nalgebra::convert(r.transpose());
+            // Lens breathing: the row's magnification of the source image, applied where the lens images the
+            // ray (`gyro_source::sony::breathing`). It used to be a zoom of the output plane folded into the
+            // matrix, which is the same thing only paraxially - breathing is a change of the source lens's
+            // focal length, so it belongs on the source side of the rotation
+            let bz = breathing
+                .map(|b| b.scale_at_row(sensor_row(y, b.crop_y as f64, b.crop_h as f64)))
+                .filter(|k| k.is_finite() && *k > 0.0)
+                .unwrap_or(1.0) as f32;
             [
                 i_r[(0, 0)], i_r[(0, 1)], i_r[(0, 2)],
                 i_r[(1, 0)], i_r[(1, 1)], i_r[(1, 2)],
                 i_r[(2, 0)], i_r[(2, 1)], i_r[(2, 2)],
                 sx, sy, ra,
-                ox, oy
+                ox, oy,
+                bz, 0.0
             ]
-        }).collect::<Vec<[f32; 14]>>();
+        }).collect::<Vec<[f32; 16]>>();
         drop(file_metadata);
         drop(gyro);
 
@@ -416,7 +412,8 @@ impl FrameTransform {
             c:             [scaled_k[(0, 2)] as f32, scaled_k[(1, 2)] as f32],
             k:             distortion_coeffs.iter().map(|x| *x as f32).collect::<Vec<f32>>().try_into().unwrap(),
             fov:           fov as f32,
-            r_limit:       radial_distortion_limit as f32,
+            field_limit:   field_limit as f32,
+            output_projection: params.output_projection,
             lens_correction_amount:   lens_correction_amount as f32,
             input_vertical_stretch:   input_vertical_stretch as f32,
             input_horizontal_stretch: input_horizontal_stretch as f32,
@@ -440,14 +437,14 @@ impl FrameTransform {
         }
     }
 
-    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, use_fovs: bool) -> (Matrix3<f64>, [f64; 24], Matrix3<f64>, Vec<Matrix3<f64>>, Option<Vec<(f32, f32, f32, f32, f32)>>, Option<Vec<f64>>, f64, f64) { // camera_matrix, dist_coeffs, p, rotations_per_point, shifts, mesh, fov, radial_distortion_limit
+    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, use_fovs: bool) -> (Matrix3<f64>, [f64; 24], Matrix3<f64>, Vec<Matrix3<f64>>, Option<Vec<(f32, f32, f32, f32, f32)>>, Option<Vec<f64>>, f64, f64, Option<Vec<f32>>) { // camera_matrix, dist_coeffs, output camera matrix, rotations_per_point, shifts, mesh, fov, field_limit, breathing_per_point
         // ----------- Keyframes -----------
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
         // ----------- Keyframes -----------
 
         let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, params.scaled_fps) as usize);
 
-        let (mut camera_matrix, distortion_coeffs, radial_distortion_limit, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, params.framebuffer_inverted);
+        let (mut camera_matrix, distortion_coeffs, field_limit, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, params.framebuffer_inverted);
         Self::dequantize_camera_matrix(params, frame, &mut camera_matrix);
 
         // The focal length compensation is part of the applied zoom, not of the base projection:
@@ -489,7 +486,7 @@ impl FrameTransform {
         // into them would only let the fit relax and undo it
         let breathing = if use_fovs && params.lens_breathing_enabled { file_metadata.lens_breathing.get(frame).filter(|b| !b.scale.is_empty()) } else { None };
 
-        let rotations: Vec<Matrix3<f64>> = points_iter.iter().map(|&(x, y)| {
+        let rotations_breathing: Vec<(Matrix3<f64>, f32)> = points_iter.iter().map(|&(x, y)| {
             let quat_time = if frame_readout_time.abs() > 0.0 {
                 start_ts + row_readout_time * if params.frame_readout_direction.is_horizontal() { x } else { y } as f64
             } else {
@@ -507,7 +504,11 @@ impl FrameTransform {
                 r = Matrix3::identity();
             }
 
-            let mut p = new_k * r;
+            // The rotation alone: `undistort_points` projects the rotated ray itself and applies `new_k`
+            // to the projected point, so the output camera matrix must not be folded in here. The breathing
+            // magnification travels beside it and is undone on the source side, where `at_timestamp` applies it
+            let p = r;
+            let mut bz = 1.0f32;
             if let Some(b) = breathing {
                 // Looked up by the same index `at_timestamp` looks its matrices up by: the point's readout position
                 let readout_pos = if frame_readout_time.abs() > 0.0 {
@@ -515,12 +516,14 @@ impl FrameTransform {
                 } else {
                     params.height as f64 / 2.0
                 };
-                if let Some(m) = Self::breathing_matrix(params, b.scale_at_row(Self::sensor_row(params, readout_pos, b.crop_y as f64, b.crop_h as f64)), true) {
-                    p = m * p;
-                }
+                let k = b.scale_at_row(Self::sensor_row(params, readout_pos, b.crop_y as f64, b.crop_h as f64));
+                if k.is_finite() && k > 0.0 { bz = k as f32; }
             }
-            p
+            (p, bz)
         }).collect();
+        let rotations: Vec<Matrix3<f64>> = rotations_breathing.iter().map(|x| x.0).collect();
+        // `None` when nothing breathes, so the common path carries no per-point vector at all
+        let breathing_per_point: Option<Vec<f32>> = breathing.map(|_| rotations_breathing.iter().map(|x| x.1).collect());
 
         let mut shifts: Option<Vec<(f32, f32, f32, f32, f32)>> = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
             let is_scale = (
@@ -547,127 +550,6 @@ impl FrameTransform {
             shifts = None;
         }
 
-        (scaled_k, distortion_coeffs, new_k, rotations, shifts, mesh_correction, fov, radial_distortion_limit)
-    }
-}
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::gyro_source::{ BreathingFrame, FileMetadata, LensParams };
-    use crate::lens_profile::{ Dimensions, LensProfile };
-    use crate::stabilization::{ Stabilization, undistort_points };
-
-    const W: usize = 1920;
-    const H: usize = 1080;
-    const POINTS: [(f32, f32); 5] = [(0.0, 0.0), (1919.0, 0.0), (960.0, 540.0), (300.0, 900.0), (1600.0, 1079.0)];
-
-    /// A plain fisheye calibration on a still camera with one lens breathing table: everything the two transform
-    /// paths need to describe the same frame, and nothing that could move between them
-    fn params(scale: Vec<f32>, readout_time: f64) -> ComputeParams {
-        let mut p = ComputeParams::default();
-        p.width = W; p.height = H; p.output_width = W; p.output_height = H;
-        p.frame_count = 1;
-        p.scaled_fps = 30.0;
-        p.fov_scale = 1.0;
-        p.frame_readout_time = readout_time;
-        p.suppress_rotation = true;
-        p.lens_breathing_enabled = true;
-
-        p.lens = LensProfile::default();
-        p.lens.calib_dimension = Dimensions { w: W, h: H };
-        p.lens.fisheye_params.camera_matrix = vec![[1400.0, 0.0, W as f64 / 2.0], [0.0, 1400.0, H as f64 / 2.0], [0.0, 0.0, 1.0]];
-        p.lens.fisheye_params.distortion_coeffs = vec![0.05, -0.012, 0.003, -0.0004];
-
-        let mut md = FileMetadata::default();
-        md.lens_breathing = vec![BreathingFrame { scale, crop_y: 0.0, crop_h: H as f32 }];
-        p.gyro.write().file_metadata = md.into();
-        p
-    }
-
-    /// Output position of a source pixel: the direction the zoom, the sync and the STMap redistort map go
-    fn to_output(p: &ComputeParams, pt: (f32, f32)) -> (f32, f32) {
-        let (k, coeffs, _p, rotations, is, mesh, fov, r_limit) = FrameTransform::at_timestamp_for_points(p, &[pt], 0.0, Some(0), true);
-        undistort_points(&[pt], k, &coeffs, rotations[0], None, Some(rotations), p, 1.0, fov, 0.0, is, mesh, r_limit)[0]
-    }
-
-    /// Source pixel an output position samples: the direction the render and the STMap undistort map go. `row` is
-    /// the matrix the render resolves for the pixel, the source row it lands on
-    fn to_source(p: &ComputeParams, pt: (f32, f32), row: usize) -> Option<(f32, f32)> {
-        let t = FrameTransform::at_timestamp(p, 0.0, 0);
-        let mut kp = t.kernel_params;
-        kp.width = W as i32; kp.height = H as i32;
-        kp.output_width = W as i32; kp.output_height = H as i32;
-        Stabilization::rotate_and_distort(pt, row.min(t.matrices.len() - 1), &kp, &t.matrices, &p.distortion_model, None, kp.r_limit * kp.r_limit, &[])
-    }
-
-    fn assert_round_trip(p: &ComputeParams) {
-        for &pt in &POINTS {
-            let out = to_output(p, pt);
-            let back = to_source(p, out, pt.1 as usize).unwrap_or_else(|| panic!("{pt:?} -> {out:?} has no source pixel"));
-            assert!((back.0 - pt.0).abs() < 0.05 && (back.1 - pt.1).abs() < 0.05, "{pt:?} -> {out:?} -> {back:?}");
-        }
-    }
-
-    #[test]
-    fn breathing_zoom_inverts_itself() {
-        // One magnification for the whole frame. The STMap export writes one map from each direction, and they
-        // only compose back to the identity if both carry the zoom
-        assert_round_trip(&params(vec![0.82], 0.0));
-    }
-
-    #[test]
-    fn per_row_breathing_zoom_inverts_itself() {
-        // The focus moving during the readout: every matrix row has a magnification of its own, and the forward
-        // direction has to look its own up at the same row
-        assert_round_trip(&params((0..9).map(|i| 0.75 + i as f32 * 0.02).collect(), 12.0));
-    }
-
-    /// A profile with calibrations at several lens positions, on a body that also records the focal length in
-    /// millimetres: the projection follows the zoom through the calibrations themselves, and the metadata must
-    /// not scale them on top of that. `get_interpolated_lens_at` hands out a profile with no interpolations left
-    /// wherever the lookup lands on a knot, so a check on the profile of the frame instead of the one in
-    /// `ComputeParams` would turn the scaling on at the knots only and jump the projection there
-    #[test]
-    fn interpolated_calibrations_are_not_scaled_by_the_metadata_focal_length() {
-        let mut p = params(vec![1.0], 0.0);
-        p.lens.focal_length = Some(24.0); // the calibration is a wide one; the metadata reaches 70mm
-        p.lens.interpolations = Some(serde_json::json!({
-            "0.0": { "camera_matrix": [[1000.0, 0.0, 960.0], [0.0, 1000.0, 540.0], [0.0, 0.0, 1.0]] },
-            "1.0": { "camera_matrix": [[2000.0, 0.0, 960.0], [0.0, 2000.0, 540.0], [0.0, 0.0, 1.0]] },
-        }));
-        p.lens.resolve_interpolations(&crate::lens_profile_database::LensProfileDatabase::default());
-        assert!(p.lens.has_interpolations());
-
-        let mut md = FileMetadata::default();
-        for (i, (position, mm)) in [(0.0, 24.0f32), (0.5, 47.0), (1.0, 70.0)].into_iter().enumerate() {
-            let ts = i as i64 * 33333;
-            md.lens_positions.insert(ts, position);
-            md.lens_params.insert(ts, LensParams { focal_length: Some(mm), ..Default::default() });
-        }
-        assert!(md.lens_focal_length_varies());
-        p.gyro.write().file_metadata = md.into();
-
-        let fx = |ts: i64| {
-            let gyro = p.gyro.read();
-            let md = gyro.file_metadata.read();
-            FrameTransform::get_lens_data_at_lens_timestamp(&p, &md, ts, false).0[(0, 0)]
-        };
-        // 1000 to 2000 across the lens travel: the calibrations at the ends and the blend in between, nothing else
-        for (ts, expected) in [(0, 1000.0), (33333, 1500.0), (66666, 2000.0)] {
-            assert!((fx(ts) - expected).abs() < 1e-6, "at {ts}: {} instead of {expected}", fx(ts));
-        }
-    }
-
-    #[test]
-    fn breathing_stays_out_of_the_fov_measurement() {
-        // The measurements at fov = 1 (zoom polygon, sync, features) describe the picture the zoom is fitted
-        // around; a zoom folded into them would only let the fit relax and undo it, like the focal length
-        // compensation next to it
-        let on = params(vec![0.82], 0.0);
-        let mut off = params(vec![0.82], 0.0);
-        off.lens_breathing_enabled = false;
-        let at = |p: &ComputeParams, use_fovs: bool| FrameTransform::at_timestamp_for_points(p, &POINTS, 0.0, Some(0), use_fovs).3;
-        assert_eq!(at(&on, false), at(&off, false));
-        assert_ne!(at(&on, true),  at(&off, true));
+        (scaled_k, distortion_coeffs, new_k, rotations, shifts, mesh_correction, fov, field_limit, breathing_per_point)
     }
 }

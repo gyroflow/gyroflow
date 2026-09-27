@@ -312,6 +312,19 @@ impl LensProfile {
             mat
         }
     }
+    /// The largest ray angle this calibration is good for, in radians - the fold `init` solved from the
+    /// coefficients, or whatever the profile itself declared.
+    ///
+    /// The one profile that stores something else is GoPro's: `init` leaves its `radial_distortion_limit`
+    /// alone (the POLY radial map has no fold to solve for), and telemetry-parser writes the recorded
+    /// frame's corner angle there as `tan(ZFOV/2)` - the units `r_limit` had before the pipeline started
+    /// carrying rays as angles. Read through here rather than off the field, or a 150° body comes out as a
+    /// 3.73 radian field limit, which is past 180° and so clips nothing at all.
+    pub fn radial_distortion_limit_rad(&self) -> Option<f64> {
+        let limit = self.fisheye_params.radial_distortion_limit.filter(|l| *l > 0.0)?;
+        Some(if self.distortion_model.as_deref() == Some("gopro") { limit.atan() } else { limit })
+    }
+
     pub fn get_distortion_coeffs(&self) -> [f64; 24] {
         let mut ret = [0.0; 24];
         for (i, x) in self.fisheye_params.distortion_coeffs.iter().enumerate() {

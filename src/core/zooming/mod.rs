@@ -33,6 +33,146 @@ pub trait FieldOfViewAlgorithm {
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>>;
 }
 
+/// Output pixels one source pixel may be smeared over at the edge of the frame before the zoom stops
+/// opening up. 1.0 is the untouched frame; a normal lens at fov 1 sits right around there and never reaches
+/// this, so this only ever bites a lens whose corrected image runs away faster than its pixels do.
+const MAX_EDGE_STRETCH: f64 = 4.0;
+
+/// The largest zoom-out the fov search may return (`0`: no limit), in its own units - the fitted rectangle's
+/// width as a fraction of the source width.
+///
+/// A rectilinear image of a fisheye has no edge: `tan θ` simply runs away, so the polygon the zoom fits the
+/// frame into can reach as far as the lens's field allows and the zoom follows it, turning the periphery
+/// into smear (an X5 at 100% correction opened to ±89.5° and 199 output pixels per source pixel before this
+/// existed). The zoom therefore needs a statement about picture, not about geometry.
+///
+/// It is where the picture stops being picture: with the frame fitted so its edge sits at the ray of angle
+/// `θ`, one source pixel there is worth `(W/2)·(dρ/dθ) / (ρ·f·dR/dθ)` output pixels, and the largest `θ`
+/// still under [`MAX_EDGE_STRETCH`] wins (if the lens never gets under it at all - a very wide one at full
+/// correction - the least bad angle does). The sweep runs in ray angles rather than output radii because
+/// that is the side the blend is a closed form on, and the side that stays finite: on an X4/X5 every border
+/// point of the frame is past 90°, has no rectilinear position at all, and lands on `P`'s infinity - so the
+/// polygon the zoom fits has no edge to find and this bound is the only thing that answers. It is bounded by
+/// where the source runs out anyway - the frame's own corner and the lens's field - so on an ordinary lens
+/// it lands on the frame corner and never fires.
+///
+/// It bounds the *fov*, not the polygon: the polygon is the picture's own outline, and clamping that would
+/// make the zoom overlay - and the STMap, and the sync - disagree with what the render actually draws.
+pub fn max_zoom_out_fov(params: &ComputeParams, amount: f64, output_width: usize, timestamp_ms: f64) -> f64 {
+    let lens = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(params, timestamp_ms, params.framebuffer_inverted);
+    max_zoom_out_fov_for_lens(params, amount, output_width, &lens)
+}
+
+/// The lens data [`max_zoom_out_fov`] reads, exactly as `FrameTransform::get_lens_data_at_timestamp` hands
+/// it out: camera matrix, coefficients, field limit, the two anamorphic stretches, and the focal length
+/// bookkeeping this doesn't use
+pub type LensData = (nalgebra::Matrix3<f64>, [f64; 24], f64, f64, f64, Option<f64>, bool);
+
+/// [`max_zoom_out_fov`] on lens data the caller already holds. The answer depends on the timestamp only
+/// through this, so the per-frame zoom sweep keys a cache on it (`FovIterative::max_fov_at`) rather than
+/// running the ~1200 lens evaluations below for every frame of a clip whose lens never moves.
+pub fn max_zoom_out_fov_for_lens(params: &ComputeParams, amount: f64, output_width: usize, lens: &LensData) -> f64 {
+    use crate::stabilization::{ KernelParams, projection::OutputProjection };
+    if output_width == 0 { return 0.0; }
+    let (camera_matrix, coeffs, field_limit) = (&lens.0, &lens.1, lens.2);
+    // The camera matrix lives in the plane the calibration was made in, where a stored pixel of an anamorphic
+    // source is `sh` (`sv`) wide - the render puts the squeeze back on at the very end, and
+    // `FrameTransform::get_new_k` builds the output plane with `f/sh`. So the frame's own corner is measured
+    // with the stretch on, and the pixel counts and the fov below are in the plane the zoom polygon lives in,
+    // with it off; read with the raw `fx` they were out by the stretch factor (33% on a 1.33x anamorphic)
+    let sh = if lens.3 > 0.01 { lens.3 } else { 1.0 };
+    let sv = if lens.4 > 0.01 { lens.4 } else { 1.0 };
+    let (fx, fy) = (camera_matrix[(0, 0)], camera_matrix[(1, 1)]);
+    if !(fx > 0.0) || !(fy > 0.0) { return 0.0; }
+
+    let mut kp = KernelParams::default();
+    for (i, v) in coeffs.iter().enumerate().take(24) { kp.k[i] = *v as f32; }
+    kp.field_limit = field_limit as f32;
+    kp.output_projection = params.output_projection;
+    let model = &params.distortion_model;
+    let proj = OutputProjection::from_i32(params.output_projection);
+    let a = amount.clamp(0.0, 1.0);
+
+    // The lens, forward: the normalized image radius it images a ray angle at. The whole sweep below is in
+    // ray angles, because that is the side the blend is a closed form on - and the side that stays finite:
+    // a ray past 90° has no rectilinear position at all, so an X4/X5's every frame border point lands on
+    // `P`'s infinity and the polygon the zoom fits has no edge to find
+    let radius_at = |t: f64| -> f64 { let p = model.distort_point(t.sin() as f32, 0.0, t.cos() as f32, &kp); (p.0 as f64).hypot(p.1 as f64) };
+    // Where a ray of that angle lands on the output plane, and how fast each of the two moves
+    let rho_at = |t: f64| -> f64 { (1.0 - a) * radius_at(t) + a * proj.radius_of_theta(t) };
+
+    // How far the sweep may go: the lens's own field, and the frame's own corner - there is no picture past
+    // either, whatever the projection would still show. The corner furthest from the principal point, the
+    // way `OutputProjection::for_lens` measures it: the point is the largest ray the frame really holds, and
+    // a body that records a principal point of its own per frame (Sony) does not put it in the middle
+    let (cx, cy) = (camera_matrix[(0, 2)], camera_matrix[(1, 2)]);
+    let (frame_w, frame_h) = (params.width as f64, params.height as f64);
+    let r_corner = [(0.0, 0.0), (frame_w, 0.0), (0.0, frame_h), (frame_w, frame_h)].iter()
+        .map(|&(x, y)| ((x * sh - cx) / fx).hypot((y * sv - cy) / fy))
+        .fold(0.0f64, f64::max);
+    let mut max_theta = if field_limit > 0.0 { field_limit } else { std::f64::consts::PI };
+    // Any correction at all puts the output projection in the answer, and it has an end of its own
+    if a > 0.0 { max_theta = max_theta.min(proj.max_theta()); }
+    {
+        let (mut lo, mut hi) = (0.0f64, max_theta);
+        for _ in 0..40 {
+            let mid = 0.5 * (lo + hi);
+            if radius_at(mid) < r_corner { lo = mid; } else { hi = mid; }
+        }
+        max_theta = max_theta.min(0.5 * (lo + hi));
+    }
+
+    let half_w = output_width as f64 / 2.0;
+    // Source pixels per unit of normalized radius, counted in the pixels the file actually stores
+    let f = (fx / sh + fy / sv) / 2.0;
+    // Output pixels per source pixel at the frame's edge, with the frame fitted so its edge sits at this
+    // ray: `(W/2)/rho` output pixels per unit of output radius, against `f·dR/dθ` source pixels per radian
+    let stretch = |t: f64| -> Option<f64> {
+        let h = (t * 1e-3).max(1e-7);
+        let (rl, rh) = (rho_at((t - h).max(0.0)), rho_at(t + h));
+        let (s_lo, s_hi) = (radius_at((t - h).max(0.0)), radius_at(t + h));
+        let rho = rho_at(t);
+        let (drho, ds) = ((rh - rl) / (2.0 * h), (s_hi - s_lo) / (2.0 * h) * f);
+        if !(ds > 0.0) || !(drho > 0.0) || !(rho > 0.0) || !rho.is_finite() { return None; }
+        Some(half_w * drho / (rho * ds))
+    };
+
+    // Sweep the angle out to where the picture stops, and bisect the crossing. `least_bad` is the angle that
+    // stretches least of all, for the case where nothing gets under the cap - it has to be tracked next to
+    // `best` rather than folded into it, or the first sample wins the fallback and every better one after it
+    // is ignored, which collapses the zoom to a two-hundredth of the field
+    let (mut best, mut best_stretch, mut least_bad, mut last_ok) = (0.0, f64::MAX, 0.0, 0.0);
+    let steps = 200;
+    for i in 1..=steps {
+        let t = i as f64 / steps as f64 * max_theta;
+        let Some(s) = stretch(t) else { break };
+        last_ok = t;
+        if s <= MAX_EDGE_STRETCH { best = t; }
+        if s < best_stretch { best_stretch = s; least_bad = t; }
+    }
+    if best > 0.0 {
+        if best < last_ok {
+            // Between the last angle under the cap and the first one over it
+            let (mut lo, mut hi) = (best, last_ok);
+            for _ in 0..24 {
+                let mid = 0.5 * (lo + hi);
+                match stretch(mid) { Some(s) if s <= MAX_EDGE_STRETCH => lo = mid, _ => hi = mid }
+            }
+            best = lo;
+        }
+    } else {
+        // Nothing got under the cap: a very wide lens at full correction, or an output so much larger than
+        // the source that every fit magnifies. There is no crossing to bisect, so the least bad angle stands
+        // - which on an ordinary lens is the frame's own corner, ie. no bound at all
+        best = least_bad;
+    }
+    let best = rho_at(best);
+    if !best.is_finite() || best <= 0.0 { return 0.0; }
+    // -> the fov the search speaks in: the fitted rectangle's half-width is `best · fx/sh` in the plane the
+    // polygon is measured in (`FrameTransform::get_new_k` at fov 1), and `find_fov` divides by the source width
+    2.0 * best * (fx / sh) / params.width.max(1) as f64
+}
+
 pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)], method: ZoomMethod) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>)  {
     if timestamps.is_empty() {
         return Default::default();

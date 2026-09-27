@@ -17,6 +17,7 @@ mod cpu_undistort;
 mod pixel_formats;
 // mod interpolation;
 pub mod distortion_models;
+pub mod projection;
 pub use pixel_formats::*;
 pub use compute_params::ComputeParams;
 pub use frame_transform::FrameTransform;
@@ -156,7 +157,10 @@ pub struct KernelParams {
     pub c:                 [f32; 2], // 16 - lens center
     pub k:                 [f32; 24], // 16 x 6 - distortion coefficients
     pub fov:               f32, // 4
-    pub r_limit:           f32, // 8
+    /// The largest ray angle the source lens model can be asked for, in radians (`<= 0`: no limit).
+    /// Where the radial curve folds, or where the lens's own field ends - see
+    /// `DistortionModel::field_limit`
+    pub field_limit:       f32, // 8
     pub lens_correction_amount:   f32, // 12
     pub input_vertical_stretch:   f32, // 16
     pub input_horizontal_stretch: f32, // 4
@@ -177,7 +181,8 @@ pub struct KernelParams {
     pub pixel_value_limit:        f32, // 16
     pub light_refraction_coefficient: f32, // 4
     pub plane_index:              i32, // 8
-    pub reserved1:                f32, // 12
+    /// [`crate::stabilization::projection::OutputProjection`] as `i32`
+    pub output_projection:        i32, // 12
     pub reserved2:                f32, // 16
     pub ewa_coeffs_p:             [f32; 4], // 16
     pub ewa_coeffs_q:             [f32; 4], // 16
@@ -349,32 +354,8 @@ impl Stabilization {
             transform.kernel_params.output_rotation = r;
         }
 
-        /*static PREV: parking_lot::RwLock<Vec<f32>> = parking_lot::RwLock::new(Vec::new());
-        if let Ok(Ok(v)) = std::fs::read_to_string(std::env::current_exe().unwrap().with_file_name("params.json")).map(|x| serde_json::from_str(&x) as serde_json::Result<Vec<f32>>) {
-            if v.len() == 24 {
-                *PREV.write() = v.clone();
-            }
-        }
-        {
-            let v = PREV.read();
-            v.iter().enumerate().for_each(|(i, x)| transform.kernel_params.custom[i] = *x);
-        }*/
-
         transform.kernel_params.source_rect = Self::get_rect(&buffers.input);
         transform.kernel_params.output_rect = Self::get_rect(&buffers.output);
-
-        /*transform.kernel_params.distortion_model = match &self.compute_params.distortion_model.inner {
-            distortion_models::DistortionModels::OpenCVFisheye(_) => stabilize_spirv::DistortionModel::OpenCVFisheye,
-            distortion_models::DistortionModels::OpenCVStandard(_) => stabilize_spirv::DistortionModel::OpenCVStandard,
-            distortion_models::DistortionModels::Insta360(_) => stabilize_spirv::DistortionModel::Insta360,
-            _ => { stabilize_spirv::DistortionModel::None }
-        };
-        transform.kernel_params.digital_lens = match self.compute_params.digital_lens.as_ref().map(|x| &x.inner) {
-            Some(distortion_models::DistortionModels::GoProSuperview(_)) => stabilize_spirv::DistortionModel::GoProSuperview,
-            Some(distortion_models::DistortionModels::GoProHyperview(_)) => stabilize_spirv::DistortionModel::GoProHyperview,
-            Some(distortion_models::DistortionModels::DigitalStretch(_)) => stabilize_spirv::DistortionModel::DigitalStretch,
-            _ => { stabilize_spirv::DistortionModel::None }
-        };*/
 
         transform
     }
