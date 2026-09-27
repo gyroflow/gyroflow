@@ -33,8 +33,8 @@ QQC.ComboBox {
     }
     Keys.onPressed: (e) => {
         if (e.key == Qt.Key_Enter || e.key == Qt.Key_Return) {
-            pp.open();
-            pp.focus = true;
+            root.popup.open();
+            root.popup.focus = true;
         }
     }
 

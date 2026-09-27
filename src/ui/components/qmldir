@@ -6,6 +6,7 @@ Button 1.0 Button.qml
 CheckBox 1.0 CheckBox.qml
 CheckBoxWithContent 1.0 CheckBoxWithContent.qml
 ComboBox 1.0 ComboBox.qml
+CameraSelector 1.0 CameraSelector.qml
 ContextMenuLoader 1.0 ContextMenuLoader.qml
 ContextMenuMouseArea 1.0 ContextMenuMouseArea.qml
 DropdownChevron 1.0 DropdownChevron.qml
