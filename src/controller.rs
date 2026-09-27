@@ -99,6 +99,8 @@ pub struct Controller {
 
     load_profiles: qt_method!(fn(&self, reload_from_disk: bool)),
     all_profiles_loaded: qt_signal!(),
+    camera_catalogue_json: qt_method!(fn(&self) -> QString),
+    review_profiles_json: qt_method!(fn(&self, brand: QString, model: QString, lens: QString) -> QString),
     search_lens_profile_finished: qt_signal!(profiles: QVariantList),
     search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
     fetch_profiles_from_github: qt_method!(fn(&self)),
@@ -1913,6 +1915,17 @@ impl Controller {
         match core::lens_profile::LensProfile::from_json(&info_json) {
             Ok(mut profile) => {
                 self.fill_profile_from_calibrator(&mut profile);
+                if upload {
+                    let errors = self.stabilizer.lens_profile_db.read().camera_catalogue().submission_errors(&profile);
+                    if !errors.is_empty() {
+                        self.error(
+                            QString::from("Complete the lens profile before submitting: %1"),
+                            QString::from(errors.join("\n")),
+                            QString::default(),
+                        );
+                        return false;
+                    }
+                }
 
                 match profile.save_to_file(&url) {
                     Ok(json) => {
@@ -1931,6 +1944,18 @@ impl Controller {
             },
             Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
         }
+    }
+
+    fn camera_catalogue_json(&self) -> QString {
+        serde_json::to_string(&self.stabilizer.lens_profile_db.read().camera_catalogue())
+            .unwrap_or_else(|_| "{\"cameras\":[]}".to_owned())
+            .into()
+    }
+
+    fn review_profiles_json(&self, brand: QString, model: QString, lens: QString) -> QString {
+        serde_json::to_string(&self.stabilizer.lens_profile_db.read().review_profiles(&brand.to_string(), &model.to_string(), &lens.to_string()))
+            .unwrap_or_else(|_| "[]".to_owned())
+            .into()
     }
 
     fn load_profiles(&self, reload_from_disk: bool) {

@@ -33,6 +33,30 @@ MenuItem {
     property bool selected_manually: false;
 
     property bool isSony: false;
+    property var reviewProfiles: [];
+    property int reviewIndex: -1;
+
+    function refreshReviewProfiles(brand, model, lens) {
+        root.reviewIndex = -1;
+        if (!brand || !model || !lens) {
+            root.reviewProfiles = [];
+            return;
+        }
+        try {
+            root.reviewProfiles = JSON.parse(controller.review_profiles_json(brand, model, lens));
+        } catch (e) {
+            console.warn("Unable to load review profiles", e);
+            root.reviewProfiles = [];
+        }
+    }
+
+    function loadReviewProfile(index) {
+        if (root.reviewProfiles.length < 1) return;
+        const count = root.reviewProfiles.length;
+        root.reviewIndex = ((index % count) + count) % count;
+        root.selected_manually = true;
+        controller.load_lens_profile(root.reviewProfiles[root.reviewIndex].id);
+    }
 
     FileDialog {
         id: fileDialog;
@@ -224,6 +248,30 @@ MenuItem {
     }
     function updateFavorites(): void {
         settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
+    }
+
+    CameraLensSelector {
+        id: cameraSelector;
+        width: parent.width;
+        onSelectionChanged: (brand, model, lens) => {
+            const terms = [brand, model, lens].filter(value => value && value.length > 0);
+            search.text = terms.join(" " ).trim();
+            root.refreshReviewProfiles(brand, model, lens);
+        }
+    }
+
+    Row {
+        anchors.horizontalCenter: parent.horizontalCenter;
+        spacing: 10 * dpiScale;
+        visible: root.reviewProfiles.length > 1;
+        Button {
+            text: qsTr("Previous profile");
+            onClicked: root.loadReviewProfile(root.reviewIndex < 0? root.reviewProfiles.length - 1 : root.reviewIndex - 1);
+        }
+        Button {
+            text: qsTr("Next profile");
+            onClicked: root.loadReviewProfile(root.reviewIndex + 1);
+        }
     }
 
     SearchField {

@@ -1,19 +1,35 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use std::cmp::Ordering;
-use std::collections::{ HashSet, HashMap, BTreeMap };
 use crate::LensProfile;
-use std::path::PathBuf;
+use std::cmp::Ordering;
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::Read;
+use std::path::PathBuf;
 
-#[cfg(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles"))]
-static LENS_PROFILES_STATIC: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../resources/camera_presets/profiles.cbor.gz"));
+#[cfg(any(
+    target_os = "android",
+    target_os = "ios",
+    feature = "bundle-lens-profiles"
+))]
+static LENS_PROFILES_STATIC: &[u8] = include_bytes!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../resources/camera_presets/profiles.cbor.gz"
+));
 
 #[allow(dead_code)]
 enum DataSource {
     String(String),
-    SerdeValue(serde_json::Value)
+    SerdeValue(serde_json::Value),
+}
+
+#[derive(Clone, Debug, serde::Serialize)]
+pub struct LensProfileReviewEntry {
+    pub id: String,
+    pub name: String,
+    pub calibrated_by: String,
+    pub official: bool,
+    pub rating: f64,
 }
 
 #[derive(Default)]
@@ -27,7 +43,12 @@ pub struct LensProfileDatabase {
 }
 impl Clone for LensProfileDatabase {
     fn clone(&self) -> Self {
-        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), loaded: self.loaded, ..Default::default() }
+        Self {
+            map: self.map.clone(),
+            preset_map: self.preset_map.clone(),
+            loaded: self.loaded,
+            ..Default::default()
+        }
     }
 }
 
@@ -40,7 +61,7 @@ impl LensProfileDatabase {
             PathBuf::from("../Resources/camera_presets/"),
             PathBuf::from("./resources/camera_presets/"),
             PathBuf::from("./camera_presets/"),
-            PathBuf::from("./lens_profiles/")
+            PathBuf::from("./lens_profiles/"),
         ];
         let exe = std::env::current_exe().unwrap_or_default();
         let exe_parent = exe.parent();
@@ -50,20 +71,30 @@ impl LensProfileDatabase {
                     return path;
                 }
             }
-            if let Ok(path) = std::fs::canonicalize(exe_parent.map(|x| x.join(&path)).unwrap_or_default()) {
+            if let Ok(path) =
+                std::fs::canonicalize(exe_parent.map(|x| x.join(&path)).unwrap_or_default())
+            {
                 if path.exists() {
                     return path;
                 }
             }
         }
-        if let Ok(path) = std::fs::canonicalize(exe_parent.map(|x| x.join("./camera_presets/")).unwrap_or_default()) {
+        if let Ok(path) = std::fs::canonicalize(
+            exe_parent
+                .map(|x| x.join("./camera_presets/"))
+                .unwrap_or_default(),
+        ) {
             if !path.exists() {
                 let _ = std::fs::create_dir_all(&path);
             }
             return path;
         }
 
-        log::warn!("Unknown lens directory: {:?}, exe: {:?}", candidates[0], exe_parent);
+        log::warn!(
+            "Unknown lens directory: {:?}, exe: {:?}",
+            candidates[0],
+            exe_parent
+        );
 
         std::fs::canonicalize(&candidates[0]).unwrap_or_default()
     }
@@ -76,19 +107,30 @@ impl LensProfileDatabase {
         let mut load = |data: DataSource, f_name: &str| {
             if f_name.ends_with(".gyroflow") {
                 let mut profile = LensProfile::default();
-                profile.name = std::path::Path::new(f_name).file_stem().map(|x| x.to_string_lossy().to_string()).unwrap_or_default();
+                profile.name = std::path::Path::new(f_name)
+                    .file_stem()
+                    .map(|x| x.to_string_lossy().to_string())
+                    .unwrap_or_default();
                 profile.path_to_file = f_name.to_string();
-                profile.checksum = Some(format!("{:08x}", crc32fast::hash(profile.path_to_file.as_bytes())));
+                profile.checksum = Some(format!(
+                    "{:08x}",
+                    crc32fast::hash(profile.path_to_file.as_bytes())
+                ));
                 self.map.insert(f_name.to_string(), profile);
                 match data {
-                    DataSource::String(v)     => { self.preset_map.insert(f_name.to_string(), v); }
-                    DataSource::SerdeValue(v) => { self.preset_map.insert(f_name.to_string(), serde_json::to_string(&v).unwrap()); }
+                    DataSource::String(v) => {
+                        self.preset_map.insert(f_name.to_string(), v);
+                    }
+                    DataSource::SerdeValue(v) => {
+                        self.preset_map
+                            .insert(f_name.to_string(), serde_json::to_string(&v).unwrap());
+                    }
                 }
                 return;
             }
             let parsed = match data {
-                DataSource::String(x)     => LensProfile::from_json(&x),
-                DataSource::SerdeValue(x) => LensProfile::from_value(x)
+                DataSource::String(x) => LensProfile::from_json(&x),
+                DataSource::SerdeValue(x) => LensProfile::from_value(x),
             };
             match parsed {
                 Ok(mut v) => {
@@ -101,7 +143,12 @@ impl LensProfileDatabase {
                         };
                         if self.map.contains_key(&key) {
                             if !self.loaded {
-                                log::warn!("Lens profile already present: {}, path_to_file: {} from {}", key, f_name, self.map.get(&key).unwrap().path_to_file);
+                                log::warn!(
+                                    "Lens profile already present: {}, path_to_file: {} from {}",
+                                    key,
+                                    f_name,
+                                    self.map.get(&key).unwrap().path_to_file
+                                );
 
                                 // let prof = std::fs::read(&f_name).unwrap();
                                 // let mut prof: serde_json::Value = serde_json::from_slice(&prof).unwrap();
@@ -110,30 +157,47 @@ impl LensProfileDatabase {
                             }
                         } else {
                             (|| -> Option<()> {
-                                let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
+                                let to_checksum = format!(
+                                    "{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
                                     profile.identifier,
-
                                     profile.calib_dimension.w,
                                     profile.calib_dimension.h,
-
                                     profile.fisheye_params.camera_matrix.get(0)?.get(0)?,
                                     profile.fisheye_params.camera_matrix.get(1)?.get(1)?,
                                     profile.fisheye_params.camera_matrix.get(0)?.get(2)?,
                                     profile.fisheye_params.camera_matrix.get(1)?.get(2)?,
-
-                                    profile.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
+                                    profile
+                                        .fisheye_params
+                                        .distortion_coeffs
+                                        .get(0)
+                                        .unwrap_or(&0.0),
+                                    profile
+                                        .fisheye_params
+                                        .distortion_coeffs
+                                        .get(1)
+                                        .unwrap_or(&0.0),
+                                    profile
+                                        .fisheye_params
+                                        .distortion_coeffs
+                                        .get(2)
+                                        .unwrap_or(&0.0),
+                                    profile
+                                        .fisheye_params
+                                        .distortion_coeffs
+                                        .get(3)
+                                        .unwrap_or(&0.0)
                                 );
 
-                                profile.checksum = Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())));
+                                profile.checksum = Some(format!(
+                                    "{:08x}",
+                                    crc32fast::hash(to_checksum.as_bytes())
+                                ));
                                 Some(())
                             })();
                             self.map.insert(key, profile);
                         }
                     }
-                },
+                }
                 Err(e) => {
                     log::error!("Error parsing lens profile: {}: {:?}", f_name, e);
                 }
@@ -156,11 +220,20 @@ impl LensProfileDatabase {
                             let mut e = flate2::read::GzDecoder::new(std::io::Cursor::new(data));
                             let mut decompressed = Vec::new();
                             if let Ok(_) = e.read_to_end(&mut decompressed) {
-                                if let Ok(array) = ciborium::from_reader::<Vec<(String, serde_json::Value)>, _>(std::io::Cursor::new(decompressed)) {
+                                if let Ok(array) =
+                                    ciborium::from_reader::<Vec<(String, serde_json::Value)>, _>(
+                                        std::io::Cursor::new(decompressed),
+                                    )
+                                {
                                     bundle_loaded = true;
                                     for (f_name, profile) in array {
-                                        if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
-                                        if f_name.starts_with("__") { continue; }
+                                        if f_name == "__version" {
+                                            self.version = profile.as_u64().unwrap_or(0) as u32;
+                                            continue;
+                                        }
+                                        if f_name.starts_with("__") {
+                                            continue;
+                                        }
                                         load(DataSource::SerdeValue(profile), &f_name);
                                     }
                                 }
@@ -172,27 +245,47 @@ impl LensProfileDatabase {
         };
 
         let preferred_path = crate::settings::data_dir().join("lens_profiles");
-        if preferred_path.exists() && std::fs::read_dir(&preferred_path).map(|x| x.count()).unwrap_or(0) > 0 {
+        if preferred_path.exists()
+            && std::fs::read_dir(&preferred_path)
+                .map(|x| x.count())
+                .unwrap_or(0)
+                > 0
+        {
             ::log::info!("Loading lens profiles from {}", preferred_path.display());
             load_from_dir(preferred_path);
         }
 
-        #[cfg(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles"))]
+        #[cfg(any(
+            target_os = "android",
+            target_os = "ios",
+            feature = "bundle-lens-profiles"
+        ))]
         if !bundle_loaded {
             let mut e = flate2::read::GzDecoder::new(LENS_PROFILES_STATIC);
             let mut decompressed = Vec::new();
             if let Ok(_) = e.read_to_end(&mut decompressed) {
-                if let Ok(array) = ciborium::from_reader::<Vec<(String, serde_json::Value)>, _>(std::io::Cursor::new(decompressed)) {
+                if let Ok(array) = ciborium::from_reader::<Vec<(String, serde_json::Value)>, _>(
+                    std::io::Cursor::new(decompressed),
+                ) {
                     for (f_name, profile) in array {
-                        if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
-                        if f_name.starts_with("__") { continue; }
+                        if f_name == "__version" {
+                            self.version = profile.as_u64().unwrap_or(0) as u32;
+                            continue;
+                        }
+                        if f_name.starts_with("__") {
+                            continue;
+                        }
                         load(DataSource::SerdeValue(profile), &f_name);
                     }
                 }
             }
         }
 
-        #[cfg(not(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles")))]
+        #[cfg(not(any(
+            target_os = "android",
+            target_os = "ios",
+            feature = "bundle-lens-profiles"
+        )))]
         {
             load_from_dir(Self::get_path());
         }
@@ -202,7 +295,11 @@ impl LensProfileDatabase {
             v.resolve_interpolations(&copy);
         }
 
-        ::log::info!("Loaded {} lens profiles in {:.3}ms", self.map.len(), _time.elapsed().as_micros() as f64 / 1000.0);
+        ::log::info!(
+            "Loaded {} lens profiles in {:.3}ms",
+            self.map.len(),
+            _time.elapsed().as_micros() as f64 / 1000.0
+        );
         self.loaded = true;
     }
 
@@ -220,14 +317,17 @@ impl LensProfileDatabase {
     }
 
     pub fn get_all_filenames(&self) -> Vec<String> {
-        self.map.values().map(|x| {
-            let mut path = x.path_to_file.clone();
-            path = path.replace('\\', "/");
-            if let Some(pos) = path.find("camera_presets/") {
-                path = path[pos + 15..].to_string();
-            }
-            path
-        }).collect()
+        self.map
+            .values()
+            .map(|x| {
+                let mut path = x.path_to_file.clone();
+                path = path.replace('\\', "/");
+                if let Some(pos) = path.find("camera_presets/") {
+                    path = path[pos + 15..].to_string();
+                }
+                path
+            })
+            .collect()
     }
 
     pub fn prepare_list_for_ui(&mut self) {
@@ -237,13 +337,25 @@ impl LensProfileDatabase {
         self.list_for_ui = Vec::with_capacity(self.map.len());
         for (k, v) in &self.map {
             if v.path_to_file.ends_with(".gyroflow") {
-                self.list_for_ui.push((v.name.clone(), k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), 0, v.calibrated_by.clone()));
+                self.list_for_ui.push((
+                    v.name.clone(),
+                    k.clone(),
+                    v.checksum.clone().unwrap_or_default(),
+                    v.official,
+                    v.rating.clone().unwrap_or_default(),
+                    0,
+                    v.calibrated_by.clone(),
+                ));
             } else if !v.camera_brand.is_empty() && !v.camera_model.is_empty() {
                 if !v.is_copy {
                     let mut name = v.get_display_name();
                     let mut new_name = name.clone();
                     if set.contains(&new_name) {
-                        if let Some((kk, vv, _, _, _, _, _)) = self.list_for_ui.iter_mut().find(|(k, _, _, _, _, _, _)| *k == new_name) {
+                        if let Some((kk, vv, _, _, _, _, _)) = self
+                            .list_for_ui
+                            .iter_mut()
+                            .find(|(k, _, _, _, _, _, _)| *k == new_name)
+                        {
                             set.remove(kk);
                             *kk = format!("{} by {}", *kk, self.map[vv].calibrated_by);
                             set.insert(kk.clone());
@@ -258,11 +370,30 @@ impl LensProfileDatabase {
                     }
                     set.insert(new_name.clone());
 
-                    let hstretch = if v.input_horizontal_stretch > 0.01 { v.input_horizontal_stretch } else { 1.0 };
-                    let vstretch = if v.input_vertical_stretch   > 0.01 { v.input_vertical_stretch   } else { 1.0 };
+                    let hstretch = if v.input_horizontal_stretch > 0.01 {
+                        v.input_horizontal_stretch
+                    } else {
+                        1.0
+                    };
+                    let vstretch = if v.input_vertical_stretch > 0.01 {
+                        v.input_vertical_stretch
+                    } else {
+                        1.0
+                    };
 
-                    let aspect_ratio = (((v.calib_dimension.w as f64 / hstretch) / (v.calib_dimension.h.max(1) as f64 / vstretch)) * 1000.0).round() as i32;
-                    self.list_for_ui.push((new_name, k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), aspect_ratio, v.calibrated_by.clone()));
+                    let aspect_ratio = (((v.calib_dimension.w as f64 / hstretch)
+                        / (v.calib_dimension.h.max(1) as f64 / vstretch))
+                        * 1000.0)
+                        .round() as i32;
+                    self.list_for_ui.push((
+                        new_name,
+                        k.clone(),
+                        v.checksum.clone().unwrap_or_default(),
+                        v.official,
+                        v.rating.clone().unwrap_or_default(),
+                        aspect_ratio,
+                        v.calibrated_by.clone(),
+                    ));
                 }
             } else {
                 log::debug!("Unknown camera model: {:?}", v);
@@ -273,69 +404,107 @@ impl LensProfileDatabase {
                 checksum_map.insert(v.checksum.clone(), v.path_to_file.clone());
             }
         }
-        self.list_for_ui.sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
+        self.list_for_ui
+            .sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
     }
 
-    pub fn search(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<(String, String, String, bool, f64, i32, String)> {
-        let text = text.to_ascii_lowercase()
-            .replace("bmpcc4k",  "blackmagic pocket cinema camera 4k")
-            .replace("bmpcc6k",  "blackmagic pocket cinema camera 6k")
-            .replace("bmpcc",    "blackmagic pocket cinema camera")
-            .replace("gopro5",   "hero5 black") .replace("gopro 5",  "hero5 black")
-            .replace("gopro6",   "hero6 black") .replace("gopro 6",  "hero6 black")
-            .replace("gopro7",   "hero7 black") .replace("gopro 7",  "hero7 black")
-            .replace("gopro8",   "hero8 black") .replace("gopro 8",  "hero8 black")
-            .replace("gopro9",   "hero9 black") .replace("gopro 9",  "hero9 black")
-            .replace("gopro10",  "hero10 black").replace("gopro 10", "hero10 black")
-            .replace("gopro11",  "hero11 black").replace("gopro 11", "hero11 black")
-            .replace("gopro12",  "hero11 black").replace("gopro 12", "hero11 black")
-            .replace("gopro13",  "hero11 black").replace("gopro 13", "hero11 black")
-            .replace("session5", "hero5 session") .replace("session 5", "hero5 session")
-            .replace("a73",      "a7iii")
-            .replace("a74",      "a7iv")
-            .replace("a75",      "a7v")
-            .replace("a7r3",     "a7riii")
-            .replace("a7r4",     "a7riv")
-            .replace("a7r5",     "a7rv")
-            .replace("a7s2",     "a7sii")
-            .replace("a7s3",     "a7siii")
+    pub fn search(
+        &self,
+        text: &str,
+        favorites: &HashSet<String>,
+        aspect_ratio: i32,
+        aspect_ratio_swapped: i32,
+    ) -> Vec<(String, String, String, bool, f64, i32, String)> {
+        let text = text
+            .to_ascii_lowercase()
+            .replace("bmpcc4k", "blackmagic pocket cinema camera 4k")
+            .replace("bmpcc6k", "blackmagic pocket cinema camera 6k")
+            .replace("bmpcc", "blackmagic pocket cinema camera")
+            .replace("gopro5", "hero5 black")
+            .replace("gopro 5", "hero5 black")
+            .replace("gopro6", "hero6 black")
+            .replace("gopro 6", "hero6 black")
+            .replace("gopro7", "hero7 black")
+            .replace("gopro 7", "hero7 black")
+            .replace("gopro8", "hero8 black")
+            .replace("gopro 8", "hero8 black")
+            .replace("gopro9", "hero9 black")
+            .replace("gopro 9", "hero9 black")
+            .replace("gopro10", "hero10 black")
+            .replace("gopro 10", "hero10 black")
+            .replace("gopro11", "hero11 black")
+            .replace("gopro 11", "hero11 black")
+            .replace("gopro12", "hero11 black")
+            .replace("gopro 12", "hero11 black")
+            .replace("gopro13", "hero11 black")
+            .replace("gopro 13", "hero11 black")
+            .replace("session5", "hero5 session")
+            .replace("session 5", "hero5 session")
+            .replace("a73", "a7iii")
+            .replace("a74", "a7iv")
+            .replace("a75", "a7v")
+            .replace("a7r3", "a7riii")
+            .replace("a7r4", "a7riv")
+            .replace("a7r5", "a7rv")
+            .replace("a7s2", "a7sii")
+            .replace("a7s3", "a7siii")
             .replace(",", " ")
             .replace(";", " ");
 
-        let words = text.split_ascii_whitespace().map(str::trim).filter(|x| !x.is_empty()).collect::<Vec<_>>();
+        let words = text
+            .split_ascii_whitespace()
+            .map(str::trim)
+            .filter(|x| !x.is_empty())
+            .collect::<Vec<_>>();
         if words.is_empty() {
             return Vec::new();
         }
 
-        let mut filtered = self.list_for_ui.iter().filter(|(name, _, _, _, _, _, author)| {
-            let name = name.to_ascii_lowercase();
-            let author = author.to_ascii_lowercase();
-            for word in &words {
-                if !name.contains(word) && !author.contains(word) {
-                    return false;
+        let mut filtered = self
+            .list_for_ui
+            .iter()
+            .filter(|(name, _, _, _, _, _, author)| {
+                let name = name.to_ascii_lowercase();
+                let author = author.to_ascii_lowercase();
+                for word in &words {
+                    if !name.contains(word) && !author.contains(word) {
+                        return false;
+                    }
                 }
-            }
-            return true;
-        }).collect::<Vec<_>>();
+                return true;
+            })
+            .collect::<Vec<_>>();
 
         filtered.sort_by(|a, b| {
             // Is preset or favorited
             let a_priority = a.1.ends_with(".gyroflow") || favorites.contains(&a.2);
             let b_priority = b.1.ends_with(".gyroflow") || favorites.contains(&b.2);
-            if a_priority && !b_priority { return Ordering::Less; }
-            if b_priority && !a_priority { return Ordering::Greater; }
+            if a_priority && !b_priority {
+                return Ordering::Less;
+            }
+            if b_priority && !a_priority {
+                return Ordering::Greater;
+            }
 
             // Check aspect match
             let a_priority2 = a.5 != 0 && aspect_ratio == a.5;
             let b_priority2 = b.5 != 0 && aspect_ratio == b.5;
-            if a_priority2 && !b_priority2 { return Ordering::Less; }
-            if b_priority2 && !a_priority2 { return Ordering::Greater; }
+            if a_priority2 && !b_priority2 {
+                return Ordering::Less;
+            }
+            if b_priority2 && !a_priority2 {
+                return Ordering::Greater;
+            }
 
             // Check swapped aspect match
             let a_priority3 = a.5 != 0 && aspect_ratio_swapped == a.5;
             let b_priority3 = b.5 != 0 && aspect_ratio_swapped == b.5;
-            if a_priority3 && !b_priority3 { return Ordering::Less; }
-            if b_priority3 && !a_priority3 { return Ordering::Greater; }
+            if a_priority3 && !b_priority3 {
+                return Ordering::Less;
+            }
+            if b_priority3 && !a_priority3 {
+                return Ordering::Greater;
+            }
 
             a.0.cmp(&b.0)
         });
@@ -344,18 +513,23 @@ impl LensProfileDatabase {
     }
 
     pub fn set_profile_ratings(&mut self, json: &str) {
-        if let Ok(serde_json::Value::Object(v)) = serde_json::from_str(json) as serde_json::Result<serde_json::Value> {
-            let final_ratings: HashMap<String, f64> = v.into_iter().filter_map(|(k, arr)| {
-                if let serde_json::Value::Array(arr) = arr {
-                    if arr.len() == 3 {
-                        let _good = arr[0].as_i64().unwrap_or_default();
-                        let _bad = arr[1].as_i64().unwrap_or_default();
-                        let final_rating = arr[2].as_f64().unwrap_or_default();
-                        return Some((k, final_rating));
+        if let Ok(serde_json::Value::Object(v)) =
+            serde_json::from_str(json) as serde_json::Result<serde_json::Value>
+        {
+            let final_ratings: HashMap<String, f64> = v
+                .into_iter()
+                .filter_map(|(k, arr)| {
+                    if let serde_json::Value::Array(arr) = arr {
+                        if arr.len() == 3 {
+                            let _good = arr[0].as_i64().unwrap_or_default();
+                            let _bad = arr[1].as_i64().unwrap_or_default();
+                            let final_rating = arr[2].as_f64().unwrap_or_default();
+                            return Some((k, final_rating));
+                        }
                     }
-                }
-                None
-            }).collect();
+                    None
+                })
+                .collect();
 
             for (_, v) in self.map.iter_mut() {
                 if let Some(crc) = &v.checksum {
@@ -386,8 +560,80 @@ impl LensProfileDatabase {
             Some(l)
         } else {
             let path_normalized = filename_or_id.replace('\\', "/");
-            self.map.iter().find(|(_, v)| v.path_to_file.replace('\\', "/").contains(&path_normalized)).map(|(_, v)| v)
+            self.map
+                .iter()
+                .find(|(_, v)| v.path_to_file.replace('\\', "/").contains(&path_normalized))
+                .map(|(_, v)| v)
         }
+    }
+
+    /// Build the normalized camera/lens catalogue used by selector-backed UI.
+    pub fn camera_catalogue(&self) -> crate::camera_database::CameraCatalogue {
+        let mut catalogue =
+            crate::camera_database::CameraCatalogue::from_profiles(self.map.values());
+        let lensfun = include_str!("../../resources/lensfun_camera_database.json");
+        if let Err(error) = catalogue.enrich_from_lensfun_json(lensfun) {
+            log::warn!("Unable to load bundled Lensfun metadata: {error}");
+        }
+        catalogue
+    }
+
+    /// Return every submitted profile for one exact camera/lens setup.
+    ///
+    /// Keeping this query in the database layer means review navigation uses the
+    /// same identifiers as normal profile loading and never fabricates duplicate
+    /// state in QML.
+    pub fn review_profiles(
+        &self,
+        brand: &str,
+        model: &str,
+        lens: &str,
+    ) -> Vec<LensProfileReviewEntry> {
+        let brand = brand.trim();
+        let model = model.trim();
+        let lens = lens.trim();
+        if brand.is_empty() || model.is_empty() || lens.is_empty() {
+            return Vec::new();
+        }
+
+        let mut entries = self
+            .map
+            .iter()
+            .filter_map(|(id, profile)| {
+                if profile.is_copy
+                    || profile.path_to_file.ends_with(".gyroflow")
+                    || !profile.camera_brand.trim().eq_ignore_ascii_case(brand)
+                    || !profile.camera_model.trim().eq_ignore_ascii_case(model)
+                    || !profile.lens_model.trim().eq_ignore_ascii_case(lens)
+                {
+                    return None;
+                }
+                Some(LensProfileReviewEntry {
+                    id: id.clone(),
+                    name: profile.get_display_name(),
+                    calibrated_by: profile.calibrated_by.clone(),
+                    official: profile.official,
+                    rating: profile.rating.unwrap_or_default(),
+                })
+            })
+            .collect::<Vec<_>>();
+
+        entries.sort_by(|a, b| {
+            b.official
+                .cmp(&a.official)
+                .then_with(|| b.rating.partial_cmp(&a.rating).unwrap_or(Ordering::Equal))
+                .then_with(|| {
+                    a.calibrated_by
+                        .to_ascii_lowercase()
+                        .cmp(&b.calibrated_by.to_ascii_lowercase())
+                })
+                .then_with(|| {
+                    a.name
+                        .to_ascii_lowercase()
+                        .cmp(&b.name.to_ascii_lowercase())
+                })
+        });
+        entries
     }
 
     // -------------------------------------------------------------------
@@ -395,7 +641,9 @@ impl LensProfileDatabase {
     // -------------------------------------------------------------------
 
     pub fn list_all_metadata(&self) {
-        fn q(s: &String) -> String { serde_json::to_string(&serde_json::Value::String(s.clone())).unwrap() }
+        fn q(s: &String) -> String {
+            serde_json::to_string(&serde_json::Value::String(s.clone())).unwrap()
+        }
         // fn qf(s: &Option<f64>) -> String { serde_json::to_string::<Option<f64>>(&s.clone().into()).unwrap() }
         // fn qb(s: bool) -> String { serde_json::to_string(&serde_json::Value::Bool(s)).unwrap() }
 
@@ -406,10 +654,21 @@ impl LensProfileDatabase {
             if !v.is_copy {
                 let coeffs = format!("{:?}", v.fisheye_params.distortion_coeffs);
                 if coeffs_map.contains_key(&coeffs) {
-                    println!("Duplicate profile:\n{}\n{}\n", coeffs_map[&coeffs], v.path_to_file.replace(&path, ""))
+                    println!(
+                        "Duplicate profile:\n{}\n{}\n",
+                        coeffs_map[&coeffs],
+                        v.path_to_file.replace(&path, "")
+                    )
                 }
                 coeffs_map.insert(coeffs, v.path_to_file.replace(&path, ""));
-                lines.push(format!("[{:<50}, {:<50}, {:<50}, {:<80}, {}],", q(&v.camera_brand), q(&v.camera_model), q(&v.lens_model), q(&v.camera_setting), q(&v.path_to_file.replace(&path, ""))));
+                lines.push(format!(
+                    "[{:<50}, {:<50}, {:<50}, {:<80}, {}],",
+                    q(&v.camera_brand),
+                    q(&v.camera_model),
+                    q(&v.lens_model),
+                    q(&v.camera_setting),
+                    q(&v.path_to_file.replace(&path, ""))
+                ));
             }
         }
         lines.sort_by(|a, b| a.to_lowercase().trim().cmp(&b.to_lowercase().trim()));
@@ -429,14 +688,24 @@ impl LensProfileDatabase {
         let content: serde_json::Value = serde_json::from_slice(&content).unwrap();
 
         for x in content.as_array().unwrap() {
-            let x: Vec<String> = x.as_array().unwrap().into_iter().map(|v| v.as_str().unwrap().to_string()).collect();
-            let (brand, model, lens_model, camera_setting, fname) = (&x[0], &x[1], &x[2], &x[3], &x[4]);
+            let x: Vec<String> = x
+                .as_array()
+                .unwrap()
+                .into_iter()
+                .map(|v| v.as_str().unwrap().to_string())
+                .collect();
+            let (brand, model, lens_model, camera_setting, fname) =
+                (&x[0], &x[1], &x[2], &x[3], &x[4]);
 
             let mut old_path = Self::get_path();
-            if fname.is_empty() { continue; }
+            if fname.is_empty() {
+                continue;
+            }
             old_path.push(&fname[1..]);
 
-            let mut cam_setting = LensProfile::cleanup_name(camera_setting.clone()).trim().to_string();
+            let mut cam_setting = LensProfile::cleanup_name(camera_setting.clone())
+                .trim()
+                .to_string();
 
             if let Ok(prof) = std::fs::read(&old_path) {
                 let parsed = LensProfile::from_json(&String::from_utf8_lossy(&prof)).unwrap();
@@ -446,7 +715,10 @@ impl LensProfileDatabase {
                 }
 
                 cam_setting = cam_setting
-                    .replace(&format!("{}x{}", parsed.calib_dimension.w, parsed.calib_dimension.h), "")
+                    .replace(
+                        &format!("{}x{}", parsed.calib_dimension.w, parsed.calib_dimension.h),
+                        "",
+                    )
                     .replace(&format!("{}p", parsed.calib_dimension.h), "")
                     .replace(&parsed.get_aspect_ratio(), "")
                     .replace(parsed.get_size_str(), "")
@@ -478,14 +750,19 @@ impl LensProfileDatabase {
                 cam_setting = cam_setting.trim().to_string();
 
                 let mut prof: serde_json::Value = serde_json::from_slice(&prof).unwrap();
-                *prof.get_mut("camera_brand")  .unwrap() = serde_json::Value::String(brand.clone());
-                *prof.get_mut("camera_model")  .unwrap() = serde_json::Value::String(model.clone());
-                *prof.get_mut("lens_model")    .unwrap() = serde_json::Value::String(lens_model.clone());
+                *prof.get_mut("camera_brand").unwrap() = serde_json::Value::String(brand.clone());
+                *prof.get_mut("camera_model").unwrap() = serde_json::Value::String(model.clone());
+                *prof.get_mut("lens_model").unwrap() =
+                    serde_json::Value::String(lens_model.clone());
                 *prof.get_mut("camera_setting").unwrap() = serde_json::Value::String(cam_setting);
 
-                let parsed = LensProfile::from_json(&serde_json::to_string_pretty(&prof).unwrap()).unwrap();
+                let parsed =
+                    LensProfile::from_json(&serde_json::to_string_pretty(&prof).unwrap()).unwrap();
                 *prof.get_mut("name").unwrap() = serde_json::Value::String(parsed.get_name());
-                let mut calibrated_by = prof.get("calibrated_by").and_then(|x| x.as_str().map(|x| x.to_string())).unwrap_or_default();
+                let mut calibrated_by = prof
+                    .get("calibrated_by")
+                    .and_then(|x| x.as_str().map(|x| x.to_string()))
+                    .unwrap_or_default();
                 if !calibrated_by.chars().all(|c| c.is_ascii()) {
                     // println!("Non-ascii author: {}", calibrated_by);
                     calibrated_by.clear();
@@ -493,7 +770,11 @@ impl LensProfileDatabase {
 
                 let new_prof = serde_json::to_string_pretty(&prof).unwrap();
                 //dbg!(new_prof);
-                let mut new_filename = parsed.get_name().chars().filter(|c| c.is_ascii()).collect::<String>()
+                let mut new_filename = parsed
+                    .get_name()
+                    .chars()
+                    .filter(|c| c.is_ascii())
+                    .collect::<String>()
                     .replace("\n", "")
                     .replace("|", "_")
                     .replace("*", "_")
@@ -503,7 +784,8 @@ impl LensProfileDatabase {
                     .replace(">", "")
                     .replace("/", "")
                     .replace("\\", "")
-                    .trim().to_string();
+                    .trim()
+                    .to_string();
 
                 let mut new_path = old_path.with_file_name(format!("{}.json", new_filename));
                 let mut i = 2;
@@ -514,7 +796,8 @@ impl LensProfileDatabase {
                         new_path = old_path.with_file_name(format!("{}.json", new_filename));
                     }
                     while new_path.exists() {
-                        new_path = old_path.with_file_name(format!("{} - {}.json", new_filename, i));
+                        new_path =
+                            old_path.with_file_name(format!("{} - {}.json", new_filename, i));
                         i += 1;
                     }
                 }
@@ -530,5 +813,56 @@ impl LensProfileDatabase {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod review_tests {
+    use super::*;
+
+    fn profile(
+        brand: &str,
+        model: &str,
+        lens: &str,
+        author: &str,
+        official: bool,
+        rating: f64,
+    ) -> LensProfile {
+        let mut profile = LensProfile::default();
+        profile.camera_brand = brand.into();
+        profile.camera_model = model.into();
+        profile.lens_model = lens.into();
+        profile.calibrated_by = author.into();
+        profile.official = official;
+        profile.rating = Some(rating);
+        profile
+    }
+
+    #[test]
+    fn review_profiles_are_exact_case_insensitive_and_keep_submissions_separate() {
+        let mut db = LensProfileDatabase::default();
+        db.map.insert(
+            "community-low".into(),
+            profile("Sony", "A7 IV", "FE 35mm F1.8", "Zed", false, 0.2),
+        );
+        db.map.insert(
+            "official".into(),
+            profile("Sony", "A7 IV", "FE 35mm F1.8", "Sony", true, 0.0),
+        );
+        db.map.insert(
+            "community-high".into(),
+            profile("sony", "a7 iv", "fe 35MM f1.8", "Amy", false, 0.9),
+        );
+        db.map.insert(
+            "other-lens".into(),
+            profile("Sony", "A7 IV", "FE 50mm F1.8", "Other", true, 1.0),
+        );
+
+        let entries = db.review_profiles("SONY", "A7 IV", "FE 35mm F1.8");
+        assert_eq!(entries.len(), 3);
+        assert_eq!(entries[0].id, "official");
+        assert_eq!(entries[1].id, "community-high");
+        assert_eq!(entries[2].id, "community-low");
+        assert!(db.review_profiles("Sony", "A7 IV", "").is_empty());
     }
 }

@@ -23,6 +23,7 @@ MenuItem {
     property alias focalLengthOnly: focalLengthOnly;
     property var calibrationInfo: ({});
     property string focalLengthFovText: "";
+    property bool manualCameraEntry: false;
 
     property int videoWidth: 0;
     property int videoHeight: 0;
@@ -172,6 +173,11 @@ MenuItem {
             if (+additional_data.horizontal_stretch > 0.01) xStretch.value = +additional_data.horizontal_stretch;
             if (+additional_data.vertical_stretch   > 0.01) yStretch.value = +additional_data.vertical_stretch;
             calib.updateTable();
+            Qt.callLater(() => calibrationCameraSelector.setSelection(
+                calib.calibrationInfo.camera_brand || "",
+                calib.calibrationInfo.camera_model || "",
+                calib.calibrationInfo.lens_model || ""
+            ));
             sizeTimer.start();
         }
         function onRolling_shutter_estimated(rolling_shutter: real): void {
@@ -308,6 +314,33 @@ MenuItem {
             value: 15;
             from: 1;
         }
+    }
+
+    CameraLensSelector {
+        id: calibrationCameraSelector;
+        width: parent.width;
+        allowManualEntry: true;
+        onSelectionChanged: (brand, model, lens) => {
+            calib.manualCameraEntry = false;
+            if (brand) calib.calibrationInfo.camera_brand = brand;
+            if (model) calib.calibrationInfo.camera_model = model;
+            if (lens) calib.calibrationInfo.lens_model = lens;
+            calib.updateTable();
+        }
+        onManualEntryRequested: {
+            calib.manualCameraEntry = true;
+            calibrationCameraSelector.setSelection("", "", "");
+            calib.updateTable();
+        }
+    }
+
+    BasicText {
+        width: parent.width;
+        wrapMode: Text.WordWrap;
+        font.pixelSize: 10 * dpiScale;
+        text: calib.manualCameraEntry
+            ? qsTr("Other/manual setup selected. Enter the camera and lens metadata in the editable fields below.")
+            : qsTr("Choose known camera/lens metadata above, or select Other/manual setup.");
     }
 
     TableList {
