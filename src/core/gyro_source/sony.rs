@@ -656,7 +656,7 @@ fn mesh_key(mesh_data: &serde_json::Value, size: (f64, f64), divisions: (usize, 
 
 /// The row spline coefficients of a mesh block whose header and grid are in place (see `MESH_HEADER`): a, b, c, d per
 /// row, `MAX_GRID_SIZE` values each, for the x coordinates and then for the y coordinates
-fn append_row_coefficients(mesh: &mut Vec<f64>, divisions: (usize, usize), size_x: f64) {
+pub(crate) fn append_row_coefficients(mesh: &mut Vec<f64>, divisions: (usize, usize), size_x: f64) {
     let mut a = [0.0; splines::MAX_GRID_SIZE];
     let mut b = [0.0; splines::MAX_GRID_SIZE];
     let mut c = [0.0; splines::MAX_GRID_SIZE];
@@ -770,7 +770,7 @@ impl CostFunction for Objective<'_> {
         Ok((interp_pos[0] - self.x_prime).powi(2) + (interp_pos[1] - self.y_prime).powi(2))
     }
 }
-fn inverse_interpolate_mesh(x_prime: f64, y_prime: f64, size: (f64, f64), mesh: &[f64]) -> Result<(f64, f64), argmin::core::Error> {
+pub(crate) fn inverse_interpolate_mesh(x_prime: f64, y_prime: f64, size: (f64, f64), mesh: &[f64]) -> Result<(f64, f64), argmin::core::Error> {
     let operator = Objective { x_prime, y_prime, size, mesh };
     let solver = NelderMead::new(vec![
             Vector2::new(x_prime, y_prime),

@@ -1448,15 +1448,17 @@ impl RenderQueue {
             (stab.input_file.read().url.clone(), stab.params.read().duration_ms)
         };
 
-        let (has_sync_points, has_accurate_timestamps) = {
+        let (has_sync_points, has_accurate_timestamps, has_motion) = {
             let gyro = stab.gyro.read();
             let md = gyro.file_metadata.read();
-            (!gyro.get_offsets().is_empty(), md.has_accurate_timestamps && !url.to_ascii_lowercase().ends_with(".braw"))
+            (!gyro.get_offsets().is_empty(), md.has_accurate_timestamps && !url.to_ascii_lowercase().ends_with(".braw"), gyro.has_motion())
         };
         let fps = stab.params.read().fps;
 
         let sync_settings = stab.lens.read().sync_settings.clone().unwrap_or_default();
-        if !has_sync_points && !has_accurate_timestamps && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
+        // Accurate timestamps skip autosync for gyro clips. Clips with no motion data still need it:
+        // Autosync is how optical-only (and the residual pass) analyze the picture.
+        if !has_sync_points && (!has_accurate_timestamps || !has_motion) && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
             // ----------------------------------------------------------------------------
             // --------------------------------- Autosync ---------------------------------
             processing_cb(0.01);

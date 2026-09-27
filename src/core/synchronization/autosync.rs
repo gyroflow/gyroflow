@@ -38,6 +38,7 @@ pub struct AutosyncProcess {
     mode: String, // synchronize, guess_imu_orientation, estimate_rolling_shutter, estimate_lens_delay
     ranges_us: Vec<(i64, i64)>,
     scaled_ranges_us: Vec<(i64, i64)>,
+    offset_ranges_us: Vec<(i64, i64)>,
     estimator: Arc<PoseEstimator>,
     total_read_frames: Arc<AtomicUsize>,
     total_detected_frames: Arc<AtomicUsize>,
@@ -89,8 +90,10 @@ impl AutosyncProcess {
             ((range.0 * 1000.0).round() as i64, (range.1 * 1000.0).round() as i64)
         }).collect();
 
-        if mode == "synchronize" && !stab.gyro.read().has_motion() {
-            // If no gyro data in file, analyze the entire video
+        let offset_ranges_us = ranges_us.clone();
+        if mode == "synchronize" && (!stab.gyro.read().has_motion() || sync_params.optical_residual) {
+            // No gyro: optical flow is the motion source, so the whole clip has to be analyzed.
+            // Residual pass: leftover tracks are needed outside the sync windows too.
             ranges_us.clear();
             ranges_us.push((0, (org_duration_ms * 1000.0).round() as i64));
         }
@@ -125,6 +128,10 @@ impl AutosyncProcess {
             (*f as f64 / fps_scale.unwrap_or(1.0)) as i64,
             (*t as f64 / fps_scale.unwrap_or(1.0)) as i64)
         ).collect();
+        let offset_ranges_us = offset_ranges_us.iter().map(|(f, t)| (
+            (*f as f64 / fps_scale.unwrap_or(1.0)) as i64,
+            (*t as f64 / fps_scale.unwrap_or(1.0)) as i64)
+        ).collect();
 
         let estimator = stab.pose_estimator.clone();
 
@@ -155,6 +162,7 @@ impl AutosyncProcess {
             mode,
             ranges_us,
             scaled_ranges_us,
+            offset_ranges_us,
             estimator,
             fps_scale,
             total_read_frames: Arc::new(AtomicUsize::new(1)), // Start with 1 to keep the loader active until `finished_feeding_frames` overrides it with final value
@@ -173,7 +181,9 @@ impl AutosyncProcess {
 
     pub fn feed_frame(&self, mut timestamp_us: i64, frame_no: usize, mut width: u32, height: u32, stride: usize, pixels: &[u8]) {
         let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels).map(Arc::new);
-        if width > stride as u32 {
+        if let Some(ref im) = img {
+            width = im.width();
+        } else if width > stride as u32 {
             width = stride as u32;
         }
 
@@ -261,9 +271,29 @@ impl AutosyncProcess {
         self.estimator.process_detected_frames(self.org_fps, self.scaled_fps, &self.compute_params.read());
         self.estimator.recalculate_gyro_data(self.org_fps, true);
         self.estimator.cache_optical_flow(if offset_method == 1 { 2 } else { 1 });
-        self.estimator.cleanup();
 
         let mut scaled_ranges_us = Cow::Borrowed(&self.scaled_ranges_us);
+
+        if self.mode == "synchronize" {
+            let compute_params = self.compute_params.read();
+            let has_camera_mesh = compute_params.gyro.read().file_metadata.read().has_mesh_correction();
+            let residual = if self.sync_params.optical_residual && !has_camera_mesh {
+                super::optical_stab::build_from_estimator(
+                    &self.estimator,
+                    self.org_fps,
+                    compute_params.frame_count,
+                    (compute_params.width, compute_params.height),
+                    super::optical_stab::ResidualParams::from_sync(
+                        self.sync_params.optical_residual_strength,
+                        self.sync_params.optical_residual_smooth_frames,
+                    ),
+                )
+            } else {
+                Default::default()
+            };
+            drop(compute_params);
+            self.compute_params.write().gyro.write().file_metadata.set_optical_residual(residual);
+        }
 
         if self.mode == "synchronize" && !self.compute_params.read().gyro.read().has_motion() {
             // If no gyro data in file, set the computed optical flow as gyro data
@@ -283,7 +313,12 @@ impl AutosyncProcess {
                 (((x * gyro.duration_ms) - (time_per_syncpoint / 2.0)).max(0.0)              * 1000.0 / self.fps_scale.unwrap_or(1.0)).round() as i64,
                 (((x * gyro.duration_ms) + (time_per_syncpoint / 2.0)).min(gyro.duration_ms) * 1000.0 / self.fps_scale.unwrap_or(1.0)).round() as i64
             )).collect());
+        } else if self.mode == "synchronize" && self.sync_params.optical_residual {
+            // Feed range was the whole clip; offset search stays on the original sync windows.
+            scaled_ranges_us = Cow::Owned(self.offset_ranges_us.clone());
         }
+
+        self.estimator.cleanup();
 
         if let Some(cb) = &progress_cb {
             let d = self.total_detected_frames.load(SeqCst);

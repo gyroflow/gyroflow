@@ -28,6 +28,8 @@ MenuItem {
         // property alias poseMethod: poseMethod.currentIndex;
         property alias showFeatures: showFeatures.checked;
         property alias showOF: showOF.checked;
+        property alias opticalResidual: opticalResidual.checked;
+        property alias opticalResidualStrength: opticalResidualStrength.value;
         // This is a specific use case and I don't think we should remember that setting, especially that it's hidden under "Advanced"
         //property alias everyNthFrame: everyNthFrame.value;
 
@@ -56,6 +58,8 @@ MenuItem {
             if (o.hasOwnProperty("pose_method"))        poseMethod.currentIndex             = +o.pose_method;
             if (o.hasOwnProperty("custom_sync_pattern")) sync.customSyncTimestamps          = resolveSyncpointPattern(o.custom_sync_pattern);
             if (o.hasOwnProperty("auto_sync_points")) experimentalAutoSyncPoints.checked    = !!o.auto_sync_points;
+            if (o.hasOwnProperty("optical_residual")) opticalResidual.checked               = !!o.optical_residual;
+            if (o.hasOwnProperty("optical_residual_strength")) opticalResidualStrength.value = Math.round((+o.optical_residual_strength) * 100);
             if (o.hasOwnProperty("do_autosync") && o.do_autosync) autosyncTimer.doRun = true;
         }
     }
@@ -66,7 +70,8 @@ MenuItem {
         running: controller.lens_loaded && controller.gyro_loaded && !window.isDialogOpened && doRun && render_queue.editing_job_id == 0;
         onTriggered: {
             doRun = false;
-            if (controller.offsets_model.rowCount() == 0 && !window.motionData.hasAccurateTimestamps)
+            const noMotion = !window.motionData.hasRawGyro && !window.motionData.hasQuaternions;
+            if (controller.offsets_model.rowCount() == 0 && (!window.motionData.hasAccurateTimestamps || noMotion))
                 autosync.doSync();
         }
     }
@@ -83,6 +88,8 @@ MenuItem {
             "offset_method":      offsetMethod.currentIndex,
             "pose_method":        poseMethod.currentIndex,
             "auto_sync_points":   experimentalAutoSyncPoints.checked,
+            "optical_residual":   opticalResidual.checked,
+            "optical_residual_strength": opticalResidualStrength.value / 100.0,
         };
     }
     function getSettingsJson(): string { return JSON.stringify(getSettings()); }
@@ -407,6 +414,23 @@ MenuItem {
             text: qsTr("Show optical flow");
             checked: true;
             onCheckedChanged: controller.show_optical_flow = checked;
+        }
+        CheckBoxWithContent {
+            id: opticalResidual;
+            text: qsTr("Optical residual pass");
+            tooltip: qsTr("After camera motion (gyro or optical flow used as gyro), smooth leftover local motion on a grid, like Warp Stabilizer.\nRun Auto sync to analyze the clip. Not applied when the file already has a camera mesh (Sony IBIS).");
+
+            NumberField {
+                id: opticalResidualStrength;
+                width: parent.width;
+                height: 25 * dpiScale;
+                precision: 0;
+                value: 100;
+                defaultValue: 100;
+                from: 0;
+                to: 100;
+                unit: "%";
+            }
         }
     }
 }

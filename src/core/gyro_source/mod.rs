@@ -3,7 +3,7 @@
 
 mod file_metadata;
 mod imu_transforms;
-mod sony;
+pub(crate) mod sony;
 mod canon;
 pub mod splines;
 pub use file_metadata::*;
@@ -454,6 +454,7 @@ impl GyroSource {
             camera_stab_data: Vec::new(),
             mesh_correction:  Default::default(),
             legacy_mesh_correction: Vec::new(),
+            optical_residual: Default::default(),
             lens_breathing:   Vec::new(),
             focal_length_varies_cache: Default::default(),
         };
