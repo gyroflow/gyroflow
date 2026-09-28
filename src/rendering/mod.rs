@@ -745,9 +745,12 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
 
 /// "Analyze image optically" (Motion data -> Optical correction): decodes the trim ranges (the whole clip without any)
 /// at about 1000 px wide, tracks them and fits the correction to what they measured, see
-/// `synchronization::optical_motion`. Blocking. `progress` gets the fraction done, and the frames done and in all
-pub fn analyze_optically(stab: &StabilizationManager, cancel_flag: Arc<AtomicBool>, progress: impl Fn(f64, usize, usize) + 'static) -> Result<(), String> {
+/// `synchronization::optical_motion`. Blocking. `progress` gets the fraction done, and the frames done and in all.
+/// Waits while `pause_flag` is up. Cancelled - by `cancel_flag`, or by another file, a project or Clear replacing what
+/// it measures - it stops decoding and returns "Cancelled"; the first error stops it too
+pub fn analyze_optically(stab: &StabilizationManager, cancel_flag: Arc<AtomicBool>, pause_flag: Option<Arc<AtomicBool>>, progress: impl Fn(f64, usize, usize) + 'static) -> Result<(), String> {
     use gyroflow_core::synchronization::optical_motion::OpticalMotionAnalysis;
+    use std::sync::atomic::Ordering::Relaxed;
     let analysis = OpticalMotionAnalysis::from_manager(stab, cancel_flag.clone())?;
     let size = stab.params.read().size;
     if size.0 == 0 || size.1 == 0 { return Err("Video is not loaded".into()); }
@@ -771,34 +774,46 @@ pub fn analyze_optically(stab: &StabilizationManager, cancel_flag: Arc<AtomicBoo
 
     let analysis = Rc::new(RefCell::new(analysis));
     let error = Rc::new(RefCell::new(None::<String>));
+    // What the decoder stops on: the analysis cancelled (it knows of more than `cancel_flag`), or the first error.
+    // Every frame after that would be decoded for nothing
+    let stop = Arc::new(AtomicBool::new(false));
     match VideoProcessor::from_file(&input_file.url, gpu_decoding, 0, Some(decoder_options)) {
         Ok(mut proc) => {
-            let (analysis2, error2) = (analysis.clone(), error.clone());
+            let (analysis2, error2, stop2) = (analysis.clone(), error.clone(), stop.clone());
             let mut last_progress = std::time::Instant::now();
             proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
-                match converter.scale(input_frame, Pixel::GRAY8, tw, th) {
-                    Ok(small_frame) => {
-                        let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
+                if let Some(pause_flag) = &pause_flag {
+                    while pause_flag.load(Relaxed) && !cancel_flag.load(Relaxed) {
+                        std::thread::sleep(std::time::Duration::from_millis(100));
+                    }
+                }
                         let mut a = analysis2.borrow_mut();
-                        if let Err(e) = a.feed_frame(timestamp_us, width, height, stride, pixels) {
+                if stop2.load(Relaxed) || a.is_cancelled() {
+                    stop2.store(true, Relaxed);
+                    return Ok(());
+                }
+                let result = converter.scale(input_frame, Pixel::GRAY8, tw, th).map_err(|e| e.to_string()).and_then(|small_frame| {
+                    let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
+                    a.feed_frame(timestamp_us, width, height, stride, pixels)
+                });
+                if let Err(e) = result {
                             error2.borrow_mut().get_or_insert(e);
+                    stop2.store(true, Relaxed);
                         }
                         if last_progress.elapsed().as_millis() > 100 {
                             last_progress = std::time::Instant::now();
                             let (ready, total) = a.progress();
                             progress(ready as f64 / total.max(1) as f64 * 0.99, ready, total);
-                        }
-                    },
-                    Err(e) => { error2.borrow_mut().get_or_insert(e.to_string()); }
                 }
                 Ok(())
             });
-            if let Err(e) = proc.start_decoder_only(ranges, cancel_flag) {
+            if let Err(e) = proc.start_decoder_only(ranges, stop) {
                 error.borrow_mut().get_or_insert(e.to_string());
             }
         },
         Err(e) => { error.borrow_mut().get_or_insert(e.to_string()); }
     }
+    if analysis.borrow().is_cancelled() { return Err("Cancelled".into()); }
     if let Some(e) = error.borrow_mut().take() { return Err(e); }
     let analysis = Rc::try_unwrap(analysis).map_err(|_| "The decoder is still holding the analysis".to_string())?.into_inner();
     // Kept, and fitted with the strength set
