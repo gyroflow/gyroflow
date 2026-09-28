@@ -809,6 +809,29 @@ pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us:
         .map(|ray| ray.map(projection::ray_to_dir).filter(|d| d.0.is_finite() && d.1.is_finite() && d.2.is_finite()))
         .collect()
 }
+/// [`undistort_points_for_optical_flow`] with everything else the render undoes on the source side of `frame`: its
+/// mesh correction, the sensor and lens shifts of in-body and optical stabilization, and lens breathing (when it's
+/// on). What the picture moved by beyond these is the camera's own rotation, which is what `optical_motion`
+/// measures - a sensor shift taken for one would be corrected twice, once as the shift and once as the rotation.
+///
+/// The per-frame data is in pixels of the frame itself, so the features are taken there first.
+pub fn undistort_points_for_optical_motion(distorted: &[(f32, f32)], timestamp_ms: f64, frame: usize, params: &ComputeParams, points_dims: (u32, u32)) -> Vec<Option<(f32, f32, f32)>> {
+    if distorted.is_empty() { return Vec::new(); }
+    let scale = (params.width as f32 / points_dims.0.max(1) as f32, params.height as f32 / points_dims.1.max(1) as f32);
+    let full: Vec<(f32, f32)> = distorted.iter().map(|p| (p.0 * scale.0, p.1 * scale.1)).collect();
+
+    // `use_fovs` is what brings lens breathing in, the magnification `at_timestamp` applies on the source side; the
+    // zoom it's otherwise about isn't read here
+    let (camera_matrix, distortion_coeffs, _, _, shifts, mesh, _, _, breathing) = FrameTransform::at_timestamp_for_points(params, &full, timestamp_ms, Some(frame), true);
+    // Without rolling shutter correction the shift is looked up once, for the whole frame
+    let shifts = shifts.map(|s| if s.len() == 1 { vec![s[0]; full.len()] } else { s });
+
+    let kernel_params = point_kernel_params(params, camera_matrix, distortion_coeffs, 0.0, timestamp_ms);
+    undistort_points_to_rays(&full, &kernel_params, Matrix3::identity(), None, params, shifts.as_deref(), mesh.as_deref(), breathing.as_deref(), false)
+        .into_iter()
+        .map(|ray| ray.map(projection::ray_to_dir).filter(|d| d.0.is_finite() && d.1.is_finite() && d.2.is_finite()))
+        .collect()
+}
 
 /// The block the point path evaluates the lens with: the same one the render fills per frame, minus
 /// everything that is about pixels rather than about the lens

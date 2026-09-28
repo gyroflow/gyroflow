@@ -63,6 +63,8 @@ pub struct LensProfile {
 
     pub sync_settings: Option<serde_json::Value>,
 
+    pub rig: Option<serde_json::Value>,
+
     pub distortion_model: Option<String>,
     pub digital_lens: Option<String>,
     pub digital_lens_params: Option<Vec<f64>>,

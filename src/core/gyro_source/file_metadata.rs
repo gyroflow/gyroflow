@@ -415,6 +415,23 @@ impl MeshCorrections {
 }
 
 // ------------- ReadOnlyFileMetadata -------------
+/// The motion data of a file, taken out of its metadata while it's ignored, see `GyroSource::set_ignore_file_motion`
+#[derive(Default, Clone, Debug)]
+pub struct FileMotion {
+    pub raw_imu:            Vec<TimeIMU>,
+    pub quaternions:        TimeQuat,
+    pub gravity_vectors:    Option<TimeVec>,
+    pub image_orientations: Option<TimeQuat>,
+}
+impl FileMotion {
+    fn put_into(self, md: &mut FileMetadata) {
+        md.raw_imu = self.raw_imu;
+        md.quaternions = self.quaternions;
+        md.gravity_vectors = self.gravity_vectors;
+        md.image_orientations = self.image_orientations;
+    }
+}
+
 // Make a thread-safe read-only wrapper for FileMetadata, because once it's read, it's never changed
 #[derive(Clone)]
 pub struct ReadOnlyFileMetadata(pub Arc<RwLock<FileMetadata>>);
@@ -432,8 +449,36 @@ impl ReadOnlyFileMetadata {
     pub fn read(&self) -> parking_lot::RwLockReadGuard<'_, FileMetadata> {
         self.0.read()
     }
+    /// Changes the metadata into a copy of its own, never in place: every clone of a `GyroSource` shares the one it
+    /// was cloned with (a render queue job's, a running analysis's), and a change is only ever meant for this one
+    fn modify(&mut self, f: impl FnOnce(&mut FileMetadata)) {
+        let mut md = self.0.read().clone();
+        f(&mut md);
+        self.0 = Arc::new(RwLock::new(md));
+    }
     pub fn set_raw_imu(&mut self, v: Vec<TimeIMU>) {
-        self.0.write().raw_imu = v;
+        self.modify(|md| md.raw_imu = v);
+    }
+    /// Takes the motion data out: from then on it's metadata of a file without any
+    pub fn take_motion(&mut self) -> FileMotion {
+        let mut motion = FileMotion::default();
+        self.modify(|md| motion = FileMotion {
+            raw_imu:            std::mem::take(&mut md.raw_imu),
+            quaternions:        std::mem::take(&mut md.quaternions),
+            gravity_vectors:    md.gravity_vectors.take(),
+            image_orientations: md.image_orientations.take(),
+        });
+        motion
+    }
+    /// Puts back what `take_motion` took out
+    pub fn restore_motion(&mut self, motion: FileMotion) {
+        self.modify(|md| motion.put_into(md));
+    }
+    /// A copy of the metadata with `motion` back in
+    pub fn with_motion(&self, motion: &FileMotion) -> FileMetadata {
+        let mut md = self.0.read().clone();
+        motion.clone().put_into(&mut md);
+        md
     }
 }
 impl serde::Serialize for ReadOnlyFileMetadata {

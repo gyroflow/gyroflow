@@ -743,6 +743,68 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     Ok(())
 }
 
+/// "Analyze image optically" (Motion data -> Optical correction): decodes the trim ranges (the whole clip without any)
+/// at about 1000 px wide, tracks them and fits the correction to what they measured, see
+/// `synchronization::optical_motion`. Blocking. `progress` gets the fraction done, and the frames done and in all
+pub fn analyze_optically(stab: &StabilizationManager, cancel_flag: Arc<AtomicBool>, progress: impl Fn(f64, usize, usize) + 'static) -> Result<(), String> {
+    use gyroflow_core::synchronization::optical_motion::OpticalMotionAnalysis;
+    let analysis = OpticalMotionAnalysis::from_manager(stab, cancel_flag.clone())?;
+    let size = stab.params.read().size;
+    if size.0 == 0 || size.1 == 0 { return Err("Video is not loaded".into()); }
+    let input_file = stab.input_file.read().clone();
+    let gpu_decoding = stab.gpu_decoding.load(std::sync::atomic::Ordering::SeqCst);
+    // Only the trim ranges
+    let ranges = analysis.ranges_ms();
+    // About 1000 px wide is enough: the tracks are averaged over thousands of points per frame
+    let tw = size.0.min(960) as u32;
+    let th = (((size.1 as f64 * tw as f64 / size.0 as f64) / 2.0).round() * 2.0) as u32;
+
+    let mut decoder_options = ffmpeg_next::Dictionary::new();
+    if input_file.image_sequence_fps > 0.0 {
+        let fps = fps_to_rational(input_file.image_sequence_fps);
+        decoder_options.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
+    }
+    if input_file.image_sequence_start > 0 {
+        decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
+    }
+    decoder_options.set("scale", &format!("{tw}x{th}"));
+
+    let analysis = Rc::new(RefCell::new(analysis));
+    let error = Rc::new(RefCell::new(None::<String>));
+    match VideoProcessor::from_file(&input_file.url, gpu_decoding, 0, Some(decoder_options)) {
+        Ok(mut proc) => {
+            let (analysis2, error2) = (analysis.clone(), error.clone());
+            let mut last_progress = std::time::Instant::now();
+            proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
+                match converter.scale(input_frame, Pixel::GRAY8, tw, th) {
+                    Ok(small_frame) => {
+                        let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
+                        let mut a = analysis2.borrow_mut();
+                        if let Err(e) = a.feed_frame(timestamp_us, width, height, stride, pixels) {
+                            error2.borrow_mut().get_or_insert(e);
+                        }
+                        if last_progress.elapsed().as_millis() > 100 {
+                            last_progress = std::time::Instant::now();
+                            let (ready, total) = a.progress();
+                            progress(ready as f64 / total.max(1) as f64 * 0.99, ready, total);
+                        }
+                    },
+                    Err(e) => { error2.borrow_mut().get_or_insert(e.to_string()); }
+                }
+                Ok(())
+            });
+            if let Err(e) = proc.start_decoder_only(ranges, cancel_flag) {
+                error.borrow_mut().get_or_insert(e.to_string());
+            }
+        },
+        Err(e) => { error.borrow_mut().get_or_insert(e.to_string()); }
+    }
+    if let Some(e) = error.borrow_mut().take() { return Err(e); }
+    let analysis = Rc::try_unwrap(analysis).map_err(|_| "The decoder is still holding the analysis".to_string())?.into_inner();
+    // Kept, and fitted with the strength set
+    stab.set_optical_measurements(analysis.finish()?)
+}
+
 pub fn init_log() {
 	unsafe {
         ffi::av_log_set_level(ffi::AV_LOG_INFO);

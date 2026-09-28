@@ -109,6 +109,15 @@ pub struct StabilizationManager {
     pub params: Arc<RwLock<StabilizationParams>>,
 
     pub sync_data: Arc<RwLock<SyncData>>,
+
+    /// What the last "Analyze image optically" measured, kept so a change of the strength refits the correction without
+    /// another pass over the video. In memory only: a project keeps just the fitted correction. Its lock also orders
+    /// what may replace the correction: a finished analysis or refit, and `invalidate_optical_measurements`
+    pub optical_measurements: Arc<RwLock<Option<Arc<synchronization::optical_motion::OpticalMeasurements>>>>,
+    pub optical_settings: Arc<RwLock<gyro_source::OpticalCorrectionSettings>>,
+    /// Moved on by everything that makes an analysis still running measure the wrong thing (another file, a project,
+    /// Clear): it stops, and what it measured is dropped, see `set_optical_measurements`
+    pub optical_generation: Arc<AtomicU64>,
 }
 
 impl Default for StabilizationManager {
@@ -147,6 +156,10 @@ impl Default for StabilizationManager {
             camera_id: Arc::new(RwLock::new(None)),
 
             sync_data: Arc::new(RwLock::new(SyncData::default())),
+
+            optical_measurements: Arc::new(RwLock::new(None)),
+            optical_settings: Arc::new(RwLock::new(Default::default())),
+            optical_generation: Arc::new(AtomicU64::new(0)),
         }
     }
 }
@@ -174,6 +187,7 @@ impl StabilizationManager {
             gyro.file_url = url.to_string();
             gyro.file_metadata = Default::default();
         }
+        self.invalidate_optical_measurements();
         self.invalidate_smoothing();
         self.invalidate_zooming();
 
@@ -575,6 +589,7 @@ impl StabilizationManager {
     }
 
     pub fn recompute_blocking(&self) {
+        self.refresh_optical_correction();
         self.recompute_smoothness();
         self.recompute_adaptive_zoom();
         self.recompute_undistortion();
@@ -587,6 +602,8 @@ impl StabilizationManager {
     pub fn recompute_threaded<F: Fn((u64, bool)) + Send + Sync + Clone + 'static>(&self, cb: F) -> u64 {
         //self.recompute_smoothness();
         //self.recompute_adaptive_zoom();
+        // Before the gyro checksum below, which says whether the correction is applied
+        self.refresh_optical_correction();
         let mut params = stabilization::ComputeParams::from_manager(self);
         params.calculate_camera_fovs();
 
@@ -1051,11 +1068,6 @@ impl StabilizationManager {
     pub fn set_imu_median_filter(&self, size: i32) {
         self.gyro.write().imu_transforms.imu_mf = size;
     }
-    pub fn set_glitch_filter(&self, enabled: bool, strength: f64) {
-        let mut gyro = self.gyro.write();
-        gyro.imu_transforms.glitch_filter = enabled;
-        gyro.imu_transforms.glitch_strength = strength;
-    }
     pub fn set_imu_rotation(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64) {
         self.gyro.write().imu_transforms.set_imu_rotation(pitch_deg, roll_deg, yaw_deg);
     }
@@ -1071,6 +1083,148 @@ impl StabilizationManager {
     pub fn recompute_gyro(&self) {
         self.gyro.write().apply_transforms();
         self.invalidate_smoothing();
+    }
+
+    /// Installs a correction (or none) in the context as it is now, so it applies right away when it was measured in it
+    pub fn set_optical_correction(&self, correction: Option<gyro_source::OpticalCorrection>) {
+        let context = correction.is_some().then(|| self.optical_context());
+        {
+            let mut gyro = self.gyro.write();
+            if let Some(context) = context { gyro.optical_context = context; }
+            gyro.optical_correction = correction;
+        }
+        self.recompute_gyro();
+    }
+    pub fn set_optical_correction_enabled(&self, enabled: bool) {
+        let changed = self.gyro.write().optical_correction.as_mut().map(|c| std::mem::replace(&mut c.enabled, enabled) != enabled).unwrap_or_default();
+        if changed { self.recompute_gyro(); }
+    }
+    pub fn clear_optical_correction(&self) {
+        self.invalidate_optical_measurements();
+        self.set_optical_correction(None);
+    }
+    /// Drops the kept measurements and moves `optical_generation` on: an analysis still running stops, and a refit
+    /// still running finds nothing to replace. For everything after which what they measure is for something else
+    fn invalidate_optical_measurements(&self) {
+        let mut kept = self.optical_measurements.write();
+        self.optical_generation.fetch_add(1, SeqCst);
+        *kept = None;
+    }
+    /// The context a correction applies in, as things are now, see `optical_motion::context_checksum`
+    fn optical_context(&self) -> u64 {
+        use synchronization::optical_motion::{ context_checksum, measurement_params };
+        context_checksum(&measurement_params(self))
+    }
+    /// Brings the correction up to date with its context: a sync, a lens profile or a frame timing other than the ones
+    /// it was measured with switches it off (and back on, when they come back), without `integrate` hearing of it. The
+    /// recomputes call this; true when it switched
+    pub fn refresh_optical_correction(&self) -> bool {
+        if self.gyro.read().optical_correction.is_none() { return false; }
+        let context = self.optical_context();
+        let mut gyro = self.gyro.write();
+        gyro.optical_context = context;
+        if gyro.optical_correction_applies() == gyro.optical_correction_applied { return false; }
+        gyro.integrate();
+        drop(gyro);
+        self.invalidate_smoothing();
+        true
+    }
+    /// See `GyroSource::set_ignore_file_motion`. True when anything changed
+    pub fn set_ignore_file_motion(&self, ignore: bool) -> bool {
+        let mut gyro = self.gyro.write();
+        if !gyro.set_ignore_file_motion(ignore) { return false; }
+        self.keyframes.write().update_gyro(&gyro);
+        drop(gyro);
+        self.invalidate_smoothing();
+        true
+    }
+    /// Keeps what an analysis measured and fits the correction to it with the current settings. When what's loaded
+    /// changed since the analysis started (another file, a project, Clear: `optical_generation`), they're dropped
+    /// instead, as "Cancelled"
+    pub fn set_optical_measurements(&self, m: synchronization::optical_motion::OpticalMeasurements) -> Result<(), String> {
+        let m = Arc::new(m);
+        let context = self.optical_context();
+        loop {
+            // A copy: the strength slider would wait for the fit on the settings lock
+            let settings = *self.optical_settings.read();
+            let correction = synchronization::optical_motion::solve(&m, &settings)?;
+            let mut kept = self.optical_measurements.write();
+            if self.optical_generation.load(SeqCst) != m.generation { return Err("Cancelled".into()); }
+            // Moved during the fit: the refit that asked for found no measurements to refit yet, so it's up to this one
+            if *self.optical_settings.read() != settings { continue; }
+            *kept = Some(m);
+            let mut gyro = self.gyro.write();
+            gyro.optical_context = context;
+            gyro.optical_correction = Some(correction);
+            break;
+        }
+        self.recompute_gyro();
+        Ok(())
+    }
+    /// The kept measurements, as long as the correction they gave still sits on what they were measured on: the same
+    /// quaternions (uncorrected), in the same context
+    fn valid_optical_measurements(&self) -> Option<Arc<synchronization::optical_motion::OpticalMeasurements>> {
+        let m = self.optical_measurements.read().clone()?;
+        let gyro = self.gyro.read();
+        (gyro.optical_correction.is_some() && m.quats_checksum == gyro.optical_uncorrected_checksum && m.context_checksum == gyro.optical_context).then_some(m)
+    }
+    /// Sets the strength; true when the correction should be refitted to it, see `refit_optical_correction`
+    pub fn set_optical_correction_strength(&self, strength: f64) -> bool {
+        let settings = { let mut s = self.optical_settings.write(); s.strength = strength.clamp(0.0, 1.0); *s };
+        let differs = self.gyro.read().optical_correction.as_ref().map(|c| c.settings != settings).unwrap_or_default();
+        differs && self.valid_optical_measurements().is_some()
+    }
+    /// Refits the correction to the kept measurements with the current settings (a fraction of a second for a long
+    /// clip, so not on the UI thread). False when there's nothing to refit, or the settings moved on meanwhile. Only
+    /// ever replaces the correction these very measurements gave: never one that Clear, another file or another
+    /// analysis put there while it was fitting
+    pub fn refit_optical_correction(&self) -> Result<bool, String> {
+        let Some(m) = self.valid_optical_measurements() else { return Ok(false) };
+        let settings = *self.optical_settings.read();
+        let mut c = synchronization::optical_motion::solve(&m, &settings)?;
+        {
+            let kept = self.optical_measurements.read();
+            if !kept.as_ref().is_some_and(|k| Arc::ptr_eq(k, &m)) || *self.optical_settings.read() != settings { return Ok(false); }
+            let mut gyro = self.gyro.write();
+            let Some(fitted) = &gyro.optical_correction else { return Ok(false) };
+            c.enabled = fitted.enabled;
+            gyro.optical_correction = Some(c);
+        }
+        self.recompute_gyro();
+        Ok(true)
+    }
+    /// State of the correction measured from the video, for the UI
+    pub fn optical_correction_info(&self) -> serde_json::Value {
+        // Read out under the lock, which is let go of before `valid_optical_measurements` takes it again: a second read
+        // of a parking_lot lock this thread holds deadlocks as soon as a writer queues up in between
+        let (mut info, fitted_with) = {
+            let gyro = self.gyro.read();
+            let (ignore_file_motion, has_motion) = (gyro.ignores_file_motion(), gyro.has_motion());
+            match &gyro.optical_correction {
+                Some(c) => (serde_json::json!({
+                    "available": true,
+                    "enabled": c.enabled,
+                    // Enabled but not applied: measured on other quaternions (another integration method or filter) or
+                    // in another context (sync, lens, frame timing) than the ones there now
+                    "stale": c.enabled && !gyro.optical_correction_applied,
+                    "frames": c.frames,
+                    "measured_frames": c.measured_frames,
+                    "rms_deg": c.rms_deg,
+                    "strength": c.settings.strength,
+                    // The file had no motion data: the analysis measured all of it
+                    "from_video": !c.video_base.is_empty(),
+                    "ignore_file_motion": ignore_file_motion,
+                    "has_motion": has_motion,
+                }), Some(c.settings)),
+                None => (serde_json::json!({ "available": false, "ignore_file_motion": ignore_file_motion, "has_motion": has_motion }), None),
+            }
+        };
+        if let Some(settings) = fitted_with {
+            // Fitted with another strength than the one set, and the measurements to refit aren't here any more (a
+            // project loaded from disk keeps only the correction): only another analysis applies the new one
+            info["outdated"] = (settings != *self.optical_settings.read() && self.valid_optical_measurements().is_none()).into();
+        }
+        info
     }
     pub fn set_sync_lpf(&self, lpf: f64) {
         let params = self.params.read();
@@ -1144,6 +1298,9 @@ impl StabilizationManager {
             smoothing:  Arc::new(RwLock::new(self.smoothing.read().clone())),
             input_file: Arc::new(RwLock::new(self.input_file.read().clone())),
             lens_profile_db: self.lens_profile_db.clone(),
+            // The strength the correction was fitted with: a project written from the clone (a render queue job's, which
+            // "Edit" loads back) says it, and one that says another would refit the correction there
+            optical_settings: Arc::new(RwLock::new(*self.optical_settings.read())),
 
             // NOT cloned:
             // stabilization
@@ -1154,6 +1311,7 @@ impl StabilizationManager {
             // zooming_checksum
             // prevent_recompute
             // camera_id
+            // optical_measurements: they take a lot of memory, and a clone has nothing to refit
             ..Default::default()
         }
     }
@@ -1169,6 +1327,7 @@ impl StabilizationManager {
     }
 
     pub fn clear(&self) {
+        self.invalidate_optical_measurements();
         self.params.write().clear();
         self.invalidate_ongoing_computations();
         self.invalidate_smoothing();
@@ -1322,8 +1481,6 @@ impl StabilizationManager {
                 "filepath":           gyro.file_url,
                 "lpf":                gyro.imu_transforms.imu_lpf,
                 "mf":                 gyro.imu_transforms.imu_mf,
-                "glitch_filter":      gyro.imu_transforms.glitch_filter,
-                "glitch_strength":    gyro.imu_transforms.glitch_strength,
                 "rotation":           gyro.imu_transforms.imu_rotation_angles,
                 "acc_rotation":       gyro.imu_transforms.acc_rotation_angles,
                 "imu_orientation":    gyro.imu_transforms.imu_orientation,
@@ -1331,9 +1488,12 @@ impl StabilizationManager {
                 "integration_method": gyro.integration_method,
                 "sample_index":       gyro.file_load_options.sample_index,
                 "detected_source":    gyro.file_metadata.read().detected_source,
+                "optical_correction_enabled": gyro.optical_correction.as_ref().map(|c| c.enabled),
+                "optical_correction_strength": self.optical_settings.read().strength,
+                "ignore_file_motion": gyro.ignores_file_motion(),
             },
 
-            "offsets": gyro.get_offsets(), // timestamp, offset value
+            "offsets": gyro.file_offsets(), // timestamp, offset value
             "keyframes": self.keyframes.read().serialize(),
 
             // "trim_ranges": params.trim_ranges,
@@ -1356,14 +1516,23 @@ impl StabilizationManager {
         }
 
         if let Some(serde_json::Value::Object(obj)) = obj.get_mut("gyro_source") {
+            // Before the guard below: it reads the same lock, and a second read of a parking_lot lock this thread holds
+            // deadlocks as soon as a writer queues up in between
+            let with_motion = if typ == GyroflowProjectType::Simple { None } else { gyro.file_metadata_with_ignored_motion() };
             let file_metadata = gyro.file_metadata.read();
+
+            // The analysis took a pass over every frame, so it's kept with the project whatever its type
+            if let Some(c) = gyro.optical_correction.as_ref().and_then(util::compress_to_base91_cbor) {
+                obj.insert("optical_correction".into(), serde_json::Value::String(c));
+            }
 
             if typ == GyroflowProjectType::Simple {
                 if let Ok(val) = serde_json::to_value(file_metadata.thin()) {
                     obj.insert("file_metadata".into(), val);
                 }
             } else {
-                if let Some(q) = util::compress_to_base91_cbor(&*file_metadata) {
+                // With the file's motion data also while it's set aside, for when it's used again
+                if let Some(q) = util::compress_to_base91_cbor(with_motion.as_ref().unwrap_or(&*file_metadata)) {
                     obj.insert("file_metadata".into(), serde_json::Value::String(q));
                 }
             }
@@ -1467,6 +1636,10 @@ impl StabilizationManager {
                 *videofile = serde_json::Value::String(video_url.clone());
             }
             *is_preset = org_video_url.is_empty();
+            if !*is_preset {
+                // A project replaces what an analysis still running measures, and what the last one measured
+                self.invalidate_optical_measurements();
+            }
 
             if let Some(vid_info) = obj.get("video_info") {
                 let mut params = self.params.write();
@@ -1485,6 +1658,7 @@ impl StabilizationManager {
                 self.gyro.write().init_from_params(&params);
                 self.keyframes.write().timestamp_scale = params.fps_scale;
             }
+            let mut ignore_file_motion = None;
             if let Some(serde_json::Value::Object(obj)) = obj.get_mut("gyro_source") {
                 let mut org_gyro_url = obj.get("filepath").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
                 if !org_gyro_url.is_empty() && !org_gyro_url.contains("://") {
@@ -1604,13 +1778,21 @@ impl StabilizationManager {
 
                 if let Some(v) = obj.get("lpf").and_then(|x| x.as_f64()) { gyro.imu_transforms.imu_lpf = v; }
                 if let Some(v) = obj.get("mf").and_then(|x| x.as_i64()) { gyro.imu_transforms.imu_mf = v as _; }
-                if let Some(v) = obj.get("glitch_filter").and_then(|x| x.as_bool()) { gyro.imu_transforms.glitch_filter = v; }
-                if let Some(v) = obj.get("glitch_strength").and_then(|x| x.as_f64()) { gyro.imu_transforms.glitch_strength = v; }
                 if let Some(v) = obj.get("integration_method").and_then(|x| x.as_u64()) { gyro.integration_method = v as usize; }
                 if let Some(v) = obj.get("imu_orientation").and_then(|x| x.as_str()) { gyro.imu_transforms.imu_orientation = Some(v.to_string()); }
                 if let Some(v) = obj.get("rotation")     { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_imu_rotation(v[0], v[1], v[2]); }
                 if let Some(v) = obj.get("acc_rotation") { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_acc_rotation(v[0], v[1], v[2]); }
                 if let Some(v) = obj.get("gyro_bias")    { gyro.imu_transforms.gyro_bias = serde_json::from_value(v.clone()).ok(); }
+                if let Some(v) = obj.get("optical_correction_strength").and_then(|x| x.as_f64()) { self.optical_settings.write().strength = v; }
+                ignore_file_motion = obj.get("ignore_file_motion").and_then(|x| x.as_bool());
+                if let Ok(mut c) = util::decompress_from_base91_cbor::<crate::gyro_source::OpticalCorrection>(obj.get("optical_correction").and_then(|x| x.as_str()).unwrap_or_default()) {
+                    if let Some(v) = obj.get("optical_correction_enabled").and_then(|x| x.as_bool()) { c.enabled = v; }
+                    gyro.optical_correction = Some(c);
+                    // Integrated with the settings just read, for the checksum it's matched against. Whether it applies
+                    // also depends on what the rest of the project sets (the sync, the lens, the frame timing): the next
+                    // recompute brings that up to date, see `refresh_optical_correction`
+                    gyro.apply_transforms();
+                }
 
                 {
                     // The curves of a project file only stand in until the next recompute: they may come from another build
@@ -1636,6 +1818,7 @@ impl StabilizationManager {
                 obj.remove("file_metadata");
                 obj.remove("focal_lengths");
                 obj.remove("smoothed_focal_lengths");
+                obj.remove("optical_correction");
             }
             if let Some(lens) = obj.get("calibration_data") {
                 let mut l = self.lens.write();
@@ -1763,6 +1946,10 @@ impl StabilizationManager {
                 self.keyframes.write().update_gyro(&gyro);
             }
             obj.remove("offsets");
+            // After the sync points, which it sets aside with the motion data
+            if let Some(v) = ignore_file_motion {
+                self.set_ignore_file_motion(v);
+            }
 
             if let Some(keyframes) = obj.get("keyframes") {
                 self.keyframes.write().deserialize(keyframes);

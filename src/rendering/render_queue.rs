@@ -403,8 +403,10 @@ impl RenderQueue {
                     }
                     let stab = self.stabilizer.get_cloned();
 
-                    // If it's added from main UI, never do the additional autosync
-                    if let Some(ref mut obj) = stab.lens.write().sync_settings { obj.as_object_mut().and_then(|x| x.remove("do_autosync")); }
+                    // If it's added from main UI, never do the additional autosync, nor the optical analysis (it's done there)
+                    if let Some(ref mut obj) = stab.lens.write().sync_settings {
+                        if let Some(x) = obj.as_object_mut() { x.remove("do_autosync"); x.remove("do_optical_correction"); }
+                    }
 
                     self.add_internal(job_id, Arc::new(stab), render_options, additional_data, thumbnail_url);
                 }
@@ -949,8 +951,20 @@ impl RenderQueue {
                 }
             }
 
+            let processing2 = processing.clone();
             core::run_threaded(move || {
+                // Before the sync: motion data set aside has nothing to sync
+                let optical = Self::optical_correction_requested(&stab);
                 Self::do_autosync(stab.clone(), processing, &input_file, err2, proc_height);
+                if optical {
+                    if let Err(e) = Self::do_optical_correction(&stab, processing2, cancel_flag.clone(), pause_flag.clone()) {
+                        return if cancel_flag.load(SeqCst) {
+                            err(("Optical analysis cancelled%1".to_string(), String::new()))
+                        } else {
+                            err(("An error occured: %1".to_string(), e))
+                        };
+                    }
+                }
                 stab.recompute_blocking();
 
                 if let Some((opt, path, fields)) = export_metadata {
@@ -1456,7 +1470,10 @@ impl RenderQueue {
         let fps = stab.params.read().fps;
 
         let sync_settings = stab.lens.read().sync_settings.clone().unwrap_or_default();
-        if !has_sync_points && !has_accurate_timestamps && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
+        // Without motion data there's nothing to sync: the optical analysis measures it instead, as Auto sync does in the
+        // app, see `optical_correction_requested`
+        let has_motion = stab.gyro.read().has_motion();
+        if has_motion && !has_sync_points && !has_accurate_timestamps && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
             // ----------------------------------------------------------------------------
             // --------------------------------- Autosync ---------------------------------
             processing_cb(0.01);
@@ -1595,6 +1612,49 @@ impl RenderQueue {
             processing_cb(1.0);
             // --------------------------------- Autosync ---------------------------------
             // ----------------------------------------------------------------------------
+        }
+    }
+
+    /// Whether the job's synchronization settings ask for "Analyze image optically" (`do_optical_correction`, from the
+    /// CLI's --optical-correction or a preset), with a file without motion data asking for it with autosync too. Applies
+    /// `ignore_file_motion` and `optical_correction_strength` along with it
+    fn optical_correction_requested(stab: &StabilizationManager) -> bool {
+        let sync_settings = stab.lens.read().sync_settings.clone().unwrap_or_default();
+        let flag = |key: &str| sync_settings.get(key).and_then(|v| v.as_bool()).unwrap_or_default();
+        let requested = flag("do_optical_correction") || flag("ignore_file_motion");
+        if !requested && !(flag("do_autosync") && !stab.gyro.read().has_motion()) { return false; }
+        if let Some(strength) = sync_settings.get("optical_correction_strength").and_then(|v| v.as_f64()) {
+            stab.set_optical_correction_strength(strength);
+        }
+        if flag("ignore_file_motion") {
+            stab.set_ignore_file_motion(true);
+        }
+        true
+    }
+
+    /// "Analyze image optically" before the render, see `optical_correction_requested`, with the job's cancel and pause.
+    /// Where it only corrects the file's motion data, a render without it is still one with that data as it is, so a
+    /// failed analysis only goes to the log. Where it's all the motion there is (a file without any, or with its own
+    /// ignored) the render would come out unstabilized: that fails the job instead
+    fn do_optical_correction<F: Fn(f64) + Send + Sync + Clone + 'static>(stab: &StabilizationManager, processing_cb: F, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>) -> Result<(), String> {
+        #[cfg(not(any(target_os = "ios", target_os = "android")))]
+        let _prevent_system_sleep = keep_awake::inhibit_system("Gyroflow", "Analyzing the video");
+        processing_cb(0.01);
+        let cb = processing_cb.clone();
+        let result = rendering::analyze_optically(stab, cancel_flag.clone(), Some(pause_flag), move |percent, _, _| cb(percent));
+        // Done either way: the queue only starts jobs whose processing isn't halfway
+        processing_cb(1.0);
+        match result {
+            Ok(()) => {
+                let info = stab.optical_correction_info();
+                ::log::info!("Optical correction: measured in {} of {} frames, correction {:.3} deg", info["measured_frames"], info["frames"], info["rms_deg"].as_f64().unwrap_or_default());
+                Ok(())
+            },
+            Err(e) if cancel_flag.load(SeqCst) || !stab.gyro.read().has_motion() => Err(format!("Optical analysis failed: {e}")),
+            Err(e) => {
+                ::log::error!("Optical analysis failed, rendering with the motion data as it is: {e}");
+                Ok(())
+            },
         }
     }
 

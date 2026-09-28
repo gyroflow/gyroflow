@@ -6,7 +6,9 @@ mod imu_transforms;
 mod sony;
 mod canon;
 pub mod splines;
+pub mod optical_correction;
 pub use file_metadata::*;
+pub use optical_correction::{ OpticalCorrection, OpticalCorrectionSettings };
 pub use imu_transforms::*;
 pub use sony::{ interpolate_mesh, MESH_REFINE_SKIP_PX, MESH_REFINE_THRESHOLD_PX };
 
@@ -70,7 +72,25 @@ pub struct GyroSource {
     offsets_linear: BTreeMap<i64, f64>, // <microseconds timestamp, offset in milliseconds> - linear fit
     offsets_adjusted: BTreeMap<i64, f64>, // <timestamp + offset, offset>
 
-    pub file_url: String
+    pub file_url: String,
+
+    /// Correction measured from the video, composed onto `quaternions` at the end of `integrate`
+    #[serde(default)]
+    pub optical_correction: Option<OpticalCorrection>,
+    /// Whether the last `integrate` applied it: an enabled one that doesn't match the quaternions is stale
+    #[serde(skip)]
+    pub optical_correction_applied: bool,
+    /// `optical_correction::checksum` of the quaternions the last `integrate` composed it onto, or would have
+    #[serde(skip)]
+    pub optical_uncorrected_checksum: u64,
+    /// The context the correction applies in: what `optical_motion::context_checksum` makes of the current sync, lens
+    /// and frame timing. Kept up to date by `StabilizationManager::refresh_optical_correction`
+    #[serde(skip)]
+    pub optical_context: u64,
+    /// The file's own motion data and sync points, set aside while the motion comes from the video instead, see
+    /// `set_ignore_file_motion`
+    #[serde(skip)]
+    ignored_motion: Option<Arc<(FileMotion, BTreeMap<i64, f64>)>>,
 }
 
 impl GyroSource {
@@ -85,6 +105,37 @@ impl GyroSource {
 
     pub fn has_motion(&self) -> bool {
         self.file_metadata.read().has_motion()
+    }
+
+    /// Sets the file's own motion data aside, and its sync points with it, so the motion comes from the video instead:
+    /// "Analyze image optically" then measures all of it, as for a file without any. For motion data too broken to
+    /// correct. Meanwhile everything reading motion data sees a file without any; the lens, the frame timing and the
+    /// rest of the metadata stay. False brings them back. Returns whether anything changed
+    pub fn set_ignore_file_motion(&mut self, ignore: bool) -> bool {
+        if ignore == self.ignored_motion.is_some() { return false; }
+        if ignore {
+            let motion = self.file_metadata.take_motion();
+            let offsets = std::mem::take(&mut self.offsets);
+            self.clear_offsets();
+            self.ignored_motion = Some(Arc::new((motion, offsets)));
+        } else if let Some(ignored) = self.ignored_motion.take() {
+            let (motion, offsets) = Arc::unwrap_or_clone(ignored);
+            self.file_metadata.restore_motion(motion);
+            self.set_offsets(offsets);
+        }
+        self.apply_transforms();
+        true
+    }
+    pub fn ignores_file_motion(&self) -> bool {
+        self.ignored_motion.is_some()
+    }
+    /// The sync points that belong to the file's motion data, also while it's set aside
+    pub fn file_offsets(&self) -> &BTreeMap<i64, f64> {
+        self.ignored_motion.as_ref().map(|x| &x.1).unwrap_or(&self.offsets)
+    }
+    /// The file's metadata with its motion data, when that's set aside (None otherwise: `file_metadata` has it)
+    pub fn file_metadata_with_ignored_motion(&self) -> Option<FileMetadata> {
+        self.ignored_motion.as_ref().map(|x| self.file_metadata.with_motion(&x.0))
     }
 
     pub fn set_use_gravity_vectors(&mut self, v: bool) {
@@ -596,9 +647,9 @@ impl GyroSource {
         self.imu_transforms.acc_rotation = None;
         self.imu_transforms.imu_lpf = 0.0;
         self.imu_transforms.imu_mf = 0;
-        self.imu_transforms.glitch_filter = false;
-        self.imu_transforms.glitch_strength = 0.0;
         self.file_metadata = Default::default();
+        self.optical_correction = None;
+        self.ignored_motion = None;
         self.clear_offsets();
     }
 
@@ -663,13 +714,6 @@ impl GyroSource {
                 } else {
                     file_metadata.quaternions.clone()
                 };
-                if self.imu_transforms.glitch_filter && self.quaternions.len() >= 8 {
-                    let params = super::filtering::GlitchRepairParams::from_strength(self.imu_transforms.glitch_strength);
-                    let patched = super::filtering::GlitchRepair::repair_quats(&mut self.quaternions, &params);
-                    if patched > 0 {
-                        log::info!("Glitch filter: repaired {} sample(s)", patched);
-                    }
-                }
                 if self.imu_transforms.imu_lpf > 0.0 && !self.quaternions.is_empty() && self.duration_ms > 0.0 {
                     let sample_rate = self.quaternions.len() as f64 / (self.duration_ms / 1000.0);
                     if let Err(e) = super::filtering::Lowpass::filter_quats_forward_backward(self.imu_transforms.imu_lpf, sample_rate, &mut self.quaternions) {
@@ -690,6 +734,35 @@ impl GyroSource {
             6 => self.quaternions = MadgwickIntegrator       ::integrate(self.raw_imu(&file_metadata), self.duration_ms),
             _ => log::error!("Unknown integrator")
         }
+        drop(file_metadata);
+        self.apply_optical_correction();
+    }
+
+    /// Composes the correction measured from the video onto freshly integrated quaternions - when it was measured
+    /// against these very ones, in this context, see `OpticalCorrection`
+    fn apply_optical_correction(&mut self) {
+        self.optical_correction_applied = false;
+        if let Some(c) = &self.optical_correction {
+            let from_video = self.quaternions.len() < 2 && !c.video_base.is_empty();
+            if from_video {
+                // A file without motion data: what the analysis measured between the frames is all there is
+                self.quaternions = c.base_quats();
+            }
+            self.optical_uncorrected_checksum = optical_correction::checksum(&self.quaternions);
+            if self.optical_correction_applies() {
+                c.apply(&mut self.quaternions);
+                self.optical_correction_applied = true;
+            } else if c.enabled {
+                log::warn!("The optical correction was measured on other motion data (another integration method or filter), sync, lens or frame timing, not applying it");
+            }
+            if from_video {
+                optical_correction::hold_over_clip(&mut self.quaternions, self.duration_ms);
+            }
+        }
+    }
+    /// Whether `integrate` composes the correction onto the quaternions, as things stand
+    pub fn optical_correction_applies(&self) -> bool {
+        self.optical_correction.as_ref().is_some_and(|c| c.enabled && c.measured_on(self.optical_uncorrected_checksum, self.optical_context))
     }
 
     pub fn recompute_smoothness(&self, alg: &dyn SmoothingAlgorithm, horizon_lock: super::smoothing::horizon::HorizonLock, compute_params: &crate::ComputeParams) -> (TimeQuat, (f64, f64, f64)) {
@@ -963,8 +1036,6 @@ impl GyroSource {
         hasher.write_u64(self.duration_ms.to_bits());
         hasher.write_u64(self.imu_transforms.imu_lpf.to_bits());
         hasher.write_i32(self.imu_transforms.imu_mf);
-        hasher.write_u8(if self.imu_transforms.glitch_filter { 1 } else { 0 });
-        hasher.write_u64(self.imu_transforms.glitch_strength.to_bits());
         hasher.write_usize(self.raw_imu.len());
         hasher.write_usize(file_metadata.raw_imu.len());
         hasher.write_usize(self.quaternions.len());
@@ -974,6 +1045,10 @@ impl GyroSource {
         hasher.write_usize(file_metadata.lens_params.len());
         hasher.write_u32(if self.use_gravity_vectors { 1 } else { 0 });
         hasher.write_usize(self.integration_method);
+        if let Some(c) = &self.optical_correction { c.hash_into(&mut hasher); }
+        // Switched on or off by the context alone (`refresh_optical_correction`), the correction is the same one, and
+        // where it isn't measured (the ends of the clip, which the rest of this looks at) the quaternions are too
+        hasher.write_u8(self.optical_correction_applied as u8);
         for (ts, v) in &self.offsets {
             hasher.write_i64(*ts);
             hasher.write_u64(v.to_bits());
