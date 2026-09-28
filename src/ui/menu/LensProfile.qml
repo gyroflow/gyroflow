@@ -87,6 +87,8 @@ MenuItem {
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
             root.isSony = (camera || "").startsWith("Sony");
             if (is_main_video) {
+                const metadata = additional_data.camera_identifier || {};
+                profileBrowser.selector.setSelection(metadata.brand || "", metadata.model || "", metadata.lens_model || metadata.lens_info || "");
                 // Every file starts from the defaults (see `StabilizationParams::clear`): breathing compensation on,
                 // no lens metadata delay. A project file loaded afterwards overrides them through loadGyroflow.
                 lensBreathing.checked = controller.lens_breathing_enabled;
@@ -124,6 +126,9 @@ MenuItem {
             if (json_str) {
                 const obj = JSON.parse(json_str);
                 if (obj) {
+                    if (!profileBrowser.reviewing) {
+                        profileBrowser.selector.setSelection(obj.camera_brand || "", obj.camera_model || "", obj.lens_model || "");
+                    }
                     let lensInfo = {
                         "Camera":          obj.camera_brand + " " + obj.camera_model,
                         "Lens":            obj.lens_model,
@@ -161,6 +166,7 @@ MenuItem {
                     root.profileName = (filepath || obj.name || "").replace(/^.*?[\/\\]([^\/\\]+?)$/, "$1");
                     root.profileOriginalJson = json_str;
                     root.profileChecksum = checksum;
+                    profileBrowser.syncLoadedProfile(checksum);
 
                     if (obj.output_dimension && obj.output_dimension.w > 0 && (window.exportSettings.outWidth != obj.output_dimension.w || window.exportSettings.outHeight != obj.output_dimension.h)) {
                         Qt.callLater(window.exportSettings.lensProfileLoaded, obj.output_dimension.w, obj.output_dimension.h);
@@ -226,9 +232,13 @@ MenuItem {
         settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
     }
 
+    ProfileBrowser {
+        id: profileBrowser;
+        profilesMenu: root;
+    }
     SearchField {
         id: search;
-        placeholderText: qsTr("Search...");
+        placeholderText: qsTr("Search all profiles and presets…");
         height: 25 * dpiScale;
         width: parent.width;
         topPadding: 5 * dpiScale;
