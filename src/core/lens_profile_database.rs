@@ -230,6 +230,15 @@ impl LensProfileDatabase {
         }).collect()
     }
 
+    /// Iterate over every loaded [`LensProfile`].
+    ///
+    /// Used by [`crate::camera_registry::build_camera_registry_from_database`]
+    /// (and any future read-only aggregator) so callers don't have to bounce
+    /// through `get_all_filenames` + `find` to walk the profile set.
+    pub fn iter_profiles(&self) -> impl Iterator<Item = &LensProfile> + '_ {
+        self.map.values()
+    }
+
     pub fn prepare_list_for_ui(&mut self) {
         // (name, path_to_file, crc32, official, rating, aspect_ratio*1000, author)
         let mut set = HashSet::with_capacity(self.map.len());
