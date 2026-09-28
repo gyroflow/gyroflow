@@ -197,6 +197,10 @@ impl LensProfileDatabase {
             load_from_dir(Self::get_path());
         }
 
+        if let Err(err) = self.load_lensfun_bundled_profiles() {
+            log::warn!("Failed to load Lensfun database profiles: {err:?}");
+        }
+
         let copy = self.clone();
         for (_, v) in self.map.iter_mut() {
             v.resolve_interpolations(&copy);
@@ -236,7 +240,7 @@ impl LensProfileDatabase {
         let mut checksum_map = HashMap::with_capacity(self.map.len());
         self.list_for_ui = Vec::with_capacity(self.map.len());
         for (k, v) in &self.map {
-            if v.path_to_file.ends_with(".gyroflow") {
+            if v.path_to_file.ends_with(".gyroflow") || crate::lensfun_import::is_lensfun_identifier(&v.path_to_file) {
                 self.list_for_ui.push((v.name.clone(), k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), 0, v.calibrated_by.clone()));
             } else if !v.camera_brand.is_empty() && !v.camera_model.is_empty() {
                 if !v.is_copy {
@@ -388,6 +392,26 @@ impl LensProfileDatabase {
             let path_normalized = filename_or_id.replace('\\', "/");
             self.map.iter().find(|(_, v)| v.path_to_file.replace('\\', "/").contains(&path_normalized)).map(|(_, v)| v)
         }
+    }
+
+    fn load_lensfun_bundled_profiles(&mut self) -> Result<(), crate::GyroflowCoreError> {
+        let profiles = crate::lensfun_import::bundled_profiles_for_ui(0, 0)?;
+        let mut inserted = 0usize;
+
+        for profile in profiles {
+            let key = profile.identifier.clone();
+            if key.is_empty() || self.map.contains_key(&key) {
+                continue;
+            }
+            if let Ok(json) = profile.get_json() {
+                self.preset_map.insert(key.clone(), json);
+            }
+            self.map.insert(key, profile);
+            inserted += 1;
+        }
+
+        log::info!("Loaded {inserted} Lensfun database profile entries");
+        Ok(())
     }
 
     // -------------------------------------------------------------------
