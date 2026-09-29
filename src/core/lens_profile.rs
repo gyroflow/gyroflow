@@ -63,6 +63,8 @@ pub struct LensProfile {
 
     pub sync_settings: Option<serde_json::Value>,
 
+    pub rig: Option<serde_json::Value>,
+
     pub distortion_model: Option<String>,
     pub digital_lens: Option<String>,
     pub digital_lens_params: Option<Vec<f64>>,
@@ -84,7 +86,7 @@ pub struct LensProfile {
 
 impl LensProfile {
     pub fn init(&mut self) {
-        if !self.fisheye_params.distortion_coeffs.is_empty() {
+        if !self.fisheye_params.distortion_coeffs.is_empty() && !self.distortion_model.as_deref().is_some_and(|x| x == "gopro") {
             let distortion_model = DistortionModel::from_name(self.distortion_model.as_deref().unwrap_or("opencv_fisheye"));
             self.fisheye_params.radial_distortion_limit = distortion_model.radial_distortion_limit(&self.get_distortion_coeffs());
         }
@@ -144,6 +146,10 @@ impl LensProfile {
             radial_distortion_limit: None
         };
 
+        self.finalize();
+    }
+
+    pub fn finalize(&mut self) {
         self.calibrator_version = env!("CARGO_PKG_VERSION").to_string();
         self.date = time::OffsetDateTime::now_local().map(|v| v.date().to_string()).unwrap_or_default();
         self.name = self.get_name();
@@ -308,10 +314,23 @@ impl LensProfile {
             mat
         }
     }
-    pub fn get_distortion_coeffs(&self) -> [f64; 12] {
-        let mut ret = [0.0; 12];
+    /// The largest ray angle this calibration is good for, in radians - the fold `init` solved from the
+    /// coefficients, or whatever the profile itself declared.
+    ///
+    /// The one profile that stores something else is GoPro's: `init` leaves its `radial_distortion_limit`
+    /// alone (the POLY radial map has no fold to solve for), and telemetry-parser writes the recorded
+    /// frame's corner angle there as `tan(ZFOV/2)` - the units `r_limit` had before the pipeline started
+    /// carrying rays as angles. Read through here rather than off the field, or a 150° body comes out as a
+    /// 3.73 radian field limit, which is past 180° and so clips nothing at all.
+    pub fn radial_distortion_limit_rad(&self) -> Option<f64> {
+        let limit = self.fisheye_params.radial_distortion_limit.filter(|l| *l > 0.0)?;
+        Some(if self.distortion_model.as_deref() == Some("gopro") { limit.atan() } else { limit })
+    }
+
+    pub fn get_distortion_coeffs(&self) -> [f64; 24] {
+        let mut ret = [0.0; 24];
         for (i, x) in self.fisheye_params.distortion_coeffs.iter().enumerate() {
-            if i < 12 {
+            if i < 24 {
                 ret[i] = *x;
             }
         }
@@ -490,6 +509,53 @@ impl LensProfile {
         let zoom = super::zooming::from_compute_params(params);
         zoom.compute(&[0.0], &crate::keyframes::KeyframeManager::new()).first().map(|x| x.0).unwrap_or(1.0)*/
         1.0
+    }
+
+    /// Whether the profile carries calibrations at several lens positions (`resolve_interpolations` must have run)
+    pub fn has_interpolations(&self) -> bool {
+        !self.parsed_interpolations.is_empty()
+    }
+
+    /// Hash of everything the per-frame projection reads from the profile (`FrameTransform::get_lens_data_at_timestamp`
+    /// and `ComputeParams::from_manager`): the calibration with its dimensions and stretches, the models, and the
+    /// calibrations at the other lens positions. The cached per-frame results (the focal length curves, the adaptive
+    /// zoom) key on it, so a new field that changes the projection is added here and nowhere else. The descriptive
+    /// fields are left out on purpose: two profiles with the same geometry project the same
+    pub fn get_checksum(&self) -> u64 {
+        use std::hash::{ Hash, Hasher };
+        // `None` and `Some(0.0)` are different settings (no crop vs. a zero crop), so the presence is hashed as well
+        fn opt_f64(h: &mut impl Hasher, v: Option<f64>) {
+            h.write_u8(v.is_some() as u8);
+            h.write_u64(v.unwrap_or_default().to_bits());
+        }
+        let mut h = std::collections::hash_map::DefaultHasher::new();
+        h.write_usize(self.calib_dimension.w);
+        h.write_usize(self.calib_dimension.h);
+        // The raw lists, not the padded `get_distortion_coeffs`: a profile without coefficients projects from the file
+        // metadata instead (`distortion_coeffs.len() < 4`), and zeros alone wouldn't tell the two apart
+        h.write_usize(self.fisheye_params.camera_matrix.len());
+        for row in &self.fisheye_params.camera_matrix { for v in row { h.write_u64(v.to_bits()); } }
+        h.write_usize(self.fisheye_params.distortion_coeffs.len());
+        for v in &self.fisheye_params.distortion_coeffs { h.write_u64(v.to_bits()); }
+        opt_f64(&mut h, self.fisheye_params.radial_distortion_limit);
+        h.write_u64(self.input_horizontal_stretch.to_bits());
+        h.write_u64(self.input_vertical_stretch.to_bits());
+        h.write_u8(self.asymmetrical as u8);
+        opt_f64(&mut h, self.crop);
+        opt_f64(&mut h, self.focal_length);
+        opt_f64(&mut h, self.optimal_fov);
+        self.distortion_model.hash(&mut h);
+        self.digital_lens.hash(&mut h);
+        h.write_u8(self.digital_lens_params.is_some() as u8);
+        h.write_usize(self.digital_lens_params.as_ref().map_or(0, |v| v.len()));
+        for v in self.digital_lens_params.iter().flatten() { h.write_u64(v.to_bits()); }
+        // Every interpolated calibration is a whole profile of its own (with no interpolations, so this ends)
+        h.write_usize(self.parsed_interpolations.len());
+        for (position, lens) in &self.parsed_interpolations {
+            h.write_i64(*position);
+            h.write_u64(lens.get_checksum());
+        }
+        h.finish()
     }
 
     pub fn get_interpolated_lens_at(&self, val: f64) -> LensProfile {

@@ -20,8 +20,10 @@ mod find_offset { pub mod rs_sync; pub mod essential_matrix; pub mod visual_feat
 use super::gyro_source::TimeIMU;
 
 pub mod optimsync;
+pub mod lens_delay;
+pub mod optical_motion;
 mod autosync;
-pub use autosync::AutosyncProcess;
+pub use autosync::{ AutosyncError, AutosyncProcess, AutosyncResult };
 use crate::util::MapClosest;
 
 pub type GrayImage = image::GrayImage;

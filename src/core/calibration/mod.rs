@@ -159,9 +159,9 @@ impl LensCalibrator {
                         let avg_sharpness = *sharpness.get(0).unwrap_or(&100.0);
                         let mut points = Vec::with_capacity(corners.rows() as usize);
 
-                        let mut digital_lens_params = [0f32; 4];
+                        let mut digital_lens_params = [0f32; 16];
                         if let Some(p) = digital_lens_params_opt {
-                            for (i, v) in p.iter().enumerate() {
+                            for (i, v) in p.iter().take(16).enumerate() {
                                 digital_lens_params[i] = *v as f32;
                             }
                         }

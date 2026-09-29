@@ -3,6 +3,7 @@
 
 use std::collections::BTreeMap;
 use std::cell::RefCell;
+use std::sync::mpsc;
 
 use crate::GyroflowCoreError;
 
@@ -16,6 +17,7 @@ mod cpu_undistort;
 mod pixel_formats;
 // mod interpolation;
 pub mod distortion_models;
+pub mod projection;
 pub use pixel_formats::*;
 pub use compute_params::ComputeParams;
 pub use frame_transform::FrameTransform;
@@ -47,12 +49,47 @@ impl From<&str> for Interpolation {
     }
 }
 
-struct ThreadLocalWgpuCache(RefCell<lru::LruCache<u32, wgpu::WgpuWrapper>>);
+type WgpuCache = lru::LruCache<u32, wgpu::WgpuWrapper>;
+
+lazy_static::lazy_static! {
+    // Keep GPU destruction off Qt-owned render threads without creating a
+    // Rust thread from a TLS destructor. `std::thread::spawn` is not valid
+    // after Rust's own thread-local `Thread` has already been destroyed.
+    static ref WGPU_DROP_QUEUE: mpsc::Sender<WgpuCache> = {
+        let (tx, rx) = mpsc::channel::<WgpuCache>();
+        std::thread::Builder::new()
+            .name("gyroflow-wgpu-drop".into())
+            .spawn(move || {
+                while let Ok(cache) = rx.recv() {
+                    drop(cache);
+                }
+            })
+            .expect("failed to start wgpu drop worker");
+        tx
+    };
+}
+
+fn queue_wgpu_drop(cache: WgpuCache) {
+    if let Err(err) = WGPU_DROP_QUEUE.send(cache) {
+        // Never fall back to destroying Vulkan objects on the calling thread.
+        std::mem::forget(err.0);
+    }
+}
+
+struct ThreadLocalWgpuCache(RefCell<WgpuCache>);
+impl ThreadLocalWgpuCache {
+    fn new() -> Self {
+        // Ensure the worker is created while Rust's thread metadata is valid,
+        // rather than on first access from this type's TLS destructor.
+        lazy_static::initialize(&WGPU_DROP_QUEUE);
+        Self(RefCell::new(WgpuCache::new(std::num::NonZeroUsize::new(15).unwrap())))
+    }
+}
 impl Drop for ThreadLocalWgpuCache {
     fn drop(&mut self) {
         // Workaround for a Vulkan hang on device destroy (https://github.com/gfx-rs/wgpu/issues/4973)
-        let inner = self.0.replace(lru::LruCache::new(std::num::NonZeroUsize::new(1).unwrap()));
-        std::thread::spawn(move || drop(inner));
+        let inner = self.0.replace(WgpuCache::new(std::num::NonZeroUsize::new(1).unwrap()));
+        queue_wgpu_drop(inner);
     }
 }
 
@@ -60,7 +97,7 @@ lazy_static::lazy_static! {
     pub static ref GPU_LIST: parking_lot::RwLock<Vec<String>> = parking_lot::RwLock::new(Vec::new());
 }
 thread_local! {
-    static CACHED_WGPU: ThreadLocalWgpuCache = ThreadLocalWgpuCache(RefCell::new(lru::LruCache::new(std::num::NonZeroUsize::new(15).unwrap())));
+    static CACHED_WGPU: ThreadLocalWgpuCache = ThreadLocalWgpuCache::new();
     #[cfg(feature = "use-opencl")]
     static CACHED_OPENCL: RefCell<lru::LruCache<u32, opencl::OclWrapper>> = RefCell::new(lru::LruCache::new(std::num::NonZeroUsize::new(15).unwrap()));
 }
@@ -71,8 +108,8 @@ thread_local! {
 /// avoid the Vulkan-on-destroy hang (gfx-rs/wgpu#4973).
 pub fn clear_gpu_cache_current_thread() {
     CACHED_WGPU.with(|x| {
-        let inner = x.0.replace(lru::LruCache::new(std::num::NonZeroUsize::new(15).unwrap()));
-        std::thread::spawn(move || drop(inner));
+        let inner = x.0.replace(WgpuCache::new(std::num::NonZeroUsize::new(15).unwrap()));
+        queue_wgpu_drop(inner);
     });
     #[cfg(feature = "use-opencl")]
     CACHED_OPENCL.with(|x| {
@@ -118,9 +155,12 @@ pub struct KernelParams {
     pub background:        [f32; 4], // 16
     pub f:                 [f32; 2], // 8  - focal length in pixels
     pub c:                 [f32; 2], // 16 - lens center
-    pub k:                 [f32; 12], // 16,16,16 - distortion coefficients
+    pub k:                 [f32; 24], // 16 x 6 - distortion coefficients
     pub fov:               f32, // 4
-    pub r_limit:           f32, // 8
+    /// The largest ray angle the source lens model can be asked for, in radians (`<= 0`: no limit).
+    /// Where the radial curve folds, or where the lens's own field ends - see
+    /// `DistortionModel::field_limit`
+    pub field_limit:       f32, // 8
     pub lens_correction_amount:   f32, // 12
     pub input_vertical_stretch:   f32, // 16
     pub input_horizontal_stretch: f32, // 4
@@ -133,7 +173,7 @@ pub struct KernelParams {
     pub translation3d:            [f32; 4], // 16
     pub source_rect:              [i32; 4], // 16 - x, y, w, h
     pub output_rect:              [i32; 4], // 16 - x, y, w, h
-    pub digital_lens_params:      [f32; 4], // 16
+    pub digital_lens_params:      [f32; 16], // 16,16,16,16
     pub safe_area_rect:           [f32; 4], // 16
     pub max_pixel_value:          f32, // 4
     pub distortion_model:         stabilize_spirv::DistortionModel, // 8
@@ -141,7 +181,8 @@ pub struct KernelParams {
     pub pixel_value_limit:        f32, // 16
     pub light_refraction_coefficient: f32, // 4
     pub plane_index:              i32, // 8
-    pub reserved1:                f32, // 12
+    /// [`crate::stabilization::projection::OutputProjection`] as `i32`
+    pub output_projection:        i32, // 12
     pub reserved2:                f32, // 16
     pub ewa_coeffs_p:             [f32; 4], // 16
     pub ewa_coeffs_q:             [f32; 4], // 16
@@ -235,14 +276,8 @@ impl Stabilization {
         {
             let gyro = self.compute_params.gyro.read();
             let file_metadata = gyro.file_metadata.read();
-            if let Some(mc) = file_metadata.mesh_correction.get(frame) {
-                if mc.1[0] > 10.0 {
-                    kernel_flags.set(KernelParamsFlags::HAS_MESH_DATA, true);
-                }
-                if mc.1[0] > 0.0 && mc.1[mc.1[0] as usize] > 0.0 {
-                    kernel_flags.set(KernelParamsFlags::HAS_FPD_DATA, true);
-                }
-            }
+            kernel_flags.set(KernelParamsFlags::HAS_MESH_DATA, file_metadata.mesh_correction.has_mesh(frame));
+            kernel_flags.set(KernelParamsFlags::HAS_FPD_DATA, file_metadata.mesh_correction.has_focal_plane(frame));
             if file_metadata.camera_stab_data.len() > frame {
                 kernel_flags.set(KernelParamsFlags::HAS_IBIS_DATA, true);
             }

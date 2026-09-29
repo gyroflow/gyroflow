@@ -10,7 +10,12 @@
 fn undistort_point(pos_param: vec2<f32>) -> vec2<f32> {
     if (params.k1.x == 0.0 && params.k1.y == 0.0 && params.k1.z == 0.0 && params.k1.w == 0.0
      && params.k2.x == 0.0 && params.k2.y == 0.0 && params.k2.z == 0.0 && params.k2.w == 0.0
-     && params.k3.x == 0.0 && params.k3.y == 0.0 && params.k3.z == 0.0 && params.k3.w == 0.0) { return pos_param; }
+     && params.k3.x == 0.0 && params.k3.y == 0.0 && params.k3.z == 0.0 && params.k3.w == 0.0) {
+        // No calibration: a pinhole, so the image radius is `tan θ`
+        let r = length(pos_param);
+        if (r < 1e-12) { return pos_param; }
+        return pos_param * (atan(r) / r);
+    }
 
     var pos = pos_param;
 
@@ -22,7 +27,8 @@ fn undistort_point(pos_param: vec2<f32>) -> vec2<f32> {
     var scale = 0.0;
 
     if (abs(theta_d) > 1e-6) {
-        for (var i: i32 = 0; i < 10; i = i + 1) {
+        theta = 0.0;
+        for (var i: i32 = 0; i < 15; i = i + 1) {
             let theta2  = theta*theta;
             let theta3  = theta2*theta;
             let theta4  = theta2*theta2;
@@ -45,9 +51,9 @@ fn undistort_point(pos_param: vec2<f32>) -> vec2<f32> {
             let k9_theta9   = params.k3.y * theta9;
             let k10_theta10 = params.k3.z * theta10;
             let k11_theta11 = params.k3.w * theta11;
-            let theta_fix = (theta * (k0 + k1_theta1 + k2_theta2 + k3_theta3 + k4_theta4 + k5_theta5 + k6_theta6 + k7_theta7 + k8_theta8 + k9_theta9 + k10_theta10 + k11_theta11) - theta_d)
-                            /
-                            (k0 + 2.0 * k1_theta1 + 3.0 * k2_theta2 + 4.0 * k3_theta3 + 5.0 * k4_theta4 + 6.0 * k5_theta5 + 7.0 * k6_theta6 + 8.0 * k7_theta7 + 9.0 * k8_theta8 + 10.0 * k9_theta9 + 11.0 * k10_theta10 + 12.0 * k11_theta11);
+            let theta_fix = clamp((theta * (k0 + k1_theta1 + k2_theta2 + k3_theta3 + k4_theta4 + k5_theta5 + k6_theta6 + k7_theta7 + k8_theta8 + k9_theta9 + k10_theta10 + k11_theta11) - theta_d)
+                                  /
+                                  (k0 + 2.0 * k1_theta1 + 3.0 * k2_theta2 + 4.0 * k3_theta3 + 5.0 * k4_theta4 + 6.0 * k5_theta5 + 7.0 * k6_theta6 + 8.0 * k7_theta7 + 9.0 * k8_theta8 + 10.0 * k9_theta9 + 11.0 * k10_theta10 + 12.0 * k11_theta11), -0.9, 0.9);
 
             theta -= theta_fix;
             if (abs(theta_fix) < 1e-6) {
@@ -56,26 +62,36 @@ fn undistort_point(pos_param: vec2<f32>) -> vec2<f32> {
             }
         }
 
-        scale = tan(theta) / theta_d;
+        scale = theta / theta_d;
     } else {
         converged = true;
     }
     let theta_flipped = (theta_d < 0.0 && theta > 0.0) || (theta_d > 0.0 && theta < 0.0);
 
+    // Nothing past 180 degrees is a ray the pipeline can carry: the direction is built out of sin(theta),
+    // which turns over there, so an angle the Newton wandered past it comes back from behind the camera.
+    // See generic_polynomial.rs
+    if (abs(theta) >= 3.14159265) { return vec2<f32>(-99999.0, -99999.0); }
+
     if (converged && !theta_flipped) {
         return pos * scale;
     }
-    return vec2<f32>(0.0, 0.0);
+    return vec2<f32>(-99999.0, -99999.0);
 }
 
 fn distort_point(x: f32, y: f32, z: f32) -> vec2<f32> {
-    let pos = vec2<f32>(x, y) / z;
     if (params.k1.x == 0.0 && params.k1.y == 0.0 && params.k1.z == 0.0 && params.k1.w == 0.0
      && params.k2.x == 0.0 && params.k2.y == 0.0 && params.k2.z == 0.0 && params.k2.w == 0.0
-     && params.k3.x == 0.0 && params.k3.y == 0.0 && params.k3.z == 0.0 && params.k3.w == 0.0) { return pos; }
+     && params.k3.x == 0.0 && params.k3.y == 0.0 && params.k3.z == 0.0 && params.k3.w == 0.0) {
+        // No calibration: a pinhole, which has no image of a ray at or past 90°
+        if (z > 1e-9) { return vec2<f32>(x, y) / z; }
+        return vec2<f32>(x, y) * 1e9;
+    }
+    let pos = vec2<f32>(x, y);
     let r = length(pos);
 
-    let theta = atan(r);
+    // atan2 against the ray's own z, so the angle is right past 90° too
+    let theta = atan2(r, z);
 
     let theta2  = theta*theta;
     let theta3  = theta2*theta;
@@ -103,7 +119,7 @@ fn distort_point(x: f32, y: f32, z: f32) -> vec2<f32> {
                 + theta12 * params.k3.w;
 
     var scale: f32 = 1.0;
-    if (r != 0.0) {
+    if (r > 1e-12) {
         scale = theta_d / r;
     }
 

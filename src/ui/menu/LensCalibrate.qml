@@ -20,7 +20,9 @@ MenuItem {
     property alias previewResolution: previewResolution.currentIndex;
     property alias infoList: infoList;
     property alias maxSharpness: maxSharpness;
+    property alias focalLengthOnly: focalLengthOnly;
     property var calibrationInfo: ({});
+    property string focalLengthFovText: "";
 
     property int videoWidth: 0;
     property int videoHeight: 0;
@@ -50,6 +52,7 @@ MenuItem {
             fovSlider.value = 2;
             xStretch.valueChanged();
             yStretch.valueChanged();
+            if (focalLengthOnly.checked) calib.updateFocalLengthProfile();
         }
     }
     function resetMetadata(): void {
@@ -57,6 +60,57 @@ MenuItem {
             "calibrated_by": calib.calibrationInfo.calibrated_by || settings.value("calibratedBy", "") || controller.get_username(),
             "output_dimension": { "w": 0, "h": 0 }
         };
+    }
+    // Instead of calibrating with a chessboard, synthesize a distortion-free (rectilinear) profile from the focal length alone
+    function updateFocalLengthProfile(): void {
+        if (!focalLengthOnly.checked) {
+            calib.focalLengthFovText = "";
+            for (const x of ["calib_dimension", "orig_dimension", "fisheye_params", "distortion_model", "digital_lens", "focal_length", "crop_factor"]) {
+                delete calib.calibrationInfo[x];
+            }
+            controller.reset_lens_profile();
+            return;
+        }
+        const sx = xStretch.value || 1, sy = yStretch.value || 1;
+        const w = Math.round(calib.videoWidth * sx), h = Math.round(calib.videoHeight * sy);
+        const fl35 = focalLength.value;
+        if (w <= 0 || h <= 0 || fl35 <= 0) return;
+
+        // A 35 mm equivalent focal length is defined by the diagonal field of view of a 36x24 mm frame
+        const diagonal = Math.sqrt(w*w + h*h);
+        const f = fl35 * diagonal / Math.sqrt(36*36 + 24*24);
+
+        calib.calibrationInfo.calib_dimension  = { "w": w, "h": h };
+        calib.calibrationInfo.orig_dimension   = { "w": w, "h": h };
+        calib.calibrationInfo.distortion_model = "opencv_standard";
+        calib.calibrationInfo.digital_lens     = digitalLens.lenses[digitalLens.currentIndex][1] || null;
+        calib.calibrationInfo.focal_length     = fl35;
+        calib.calibrationInfo.crop_factor      = 1.0;
+        calib.calibrationInfo.fisheye_params   = {
+            "RMS_error": 0.0,
+            "camera_matrix": [
+                [ f,   0.0, w / 2 ],
+                [ 0.0, f,   h / 2 ],
+                [ 0.0, 0.0, 1.0   ]
+            ],
+            "distortion_coeffs": [0, 0, 0, 0, 0, 0, 0, 0]
+        };
+
+        calib.focalLengthFovText = qsTr("Field of view: %1° horizontal, %2° diagonal")
+                                   .arg((2 * Math.atan(w / (2 * f)) * 180 / Math.PI).toFixed(1))
+                                   .arg((2 * Math.atan(diagonal / (2 * f)) * 180 / Math.PI).toFixed(1));
+
+        // Apply it to the stabilizer, so that the result can be previewed right away
+        controller.load_lens_profile(JSON.stringify({
+            "calib_dimension":          calib.calibrationInfo.calib_dimension,
+            "orig_dimension":           calib.calibrationInfo.orig_dimension,
+            "fisheye_params":           calib.calibrationInfo.fisheye_params,
+            "distortion_model":         calib.calibrationInfo.distortion_model,
+            "digital_lens":             calib.calibrationInfo.digital_lens,
+            "input_horizontal_stretch": sx,
+            "input_vertical_stretch":   sy,
+            "calibrator_version":       "---"
+        }));
     }
     function updateTable(): void {
         const fields = {
@@ -138,6 +192,22 @@ MenuItem {
         function propChanged() { settings.propChanged(sett); }
     }
 
+    function exportProfile(fileUrl: url, notify: bool): void {
+        const save = (upload) => {
+            // `export_lens_profile` reports failures itself, via `error()` -> a message box
+            if (controller.export_lens_profile(fileUrl, calib.calibrationInfo, upload) && notify)
+                calibrator_window.showNotification(Modal.Info, qsTr("Lens profile exported to %1.").arg("<b>" + filesystem.display_url(fileUrl) + "</b>"));
+        };
+        if (uploadProfile.checked && uploadProfile.enabled) {
+            messageBox(Modal.Info, qsTr("By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.\nDo you want to submit your profile?"), [
+                { text: qsTr("Yes"), accent: true, clicked: () => save(true) },
+                { text: qsTr("No"),                clicked: () => save(false) }
+            ]);
+        } else {
+            save(false);
+        }
+    }
+
     FileDialog {
         id: fileDialog;
         fileMode: FileDialog.SaveFile;
@@ -146,16 +216,7 @@ MenuItem {
         title: qsTr("Export lens profile");
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Lens profiles") + " (*.json)"];
         type: "output-preset";
-        onAccepted: {
-            if (uploadProfile.checked) {
-                messageBox(Modal.Info, qsTr("By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.\nDo you want to submit your profile?"), [
-                    { text: qsTr("Yes"), accent: true, clicked: () => controller.export_lens_profile(selectedFile, calib.calibrationInfo, true) },
-                    { text: qsTr("No"),                clicked: () => controller.export_lens_profile(selectedFile, calib.calibrationInfo, false) }
-                ]);
-            } else {
-                controller.export_lens_profile(selectedFile, calib.calibrationInfo, uploadProfile.checked);
-            }
-        }
+        onAccepted: calib.exportProfile(selectedFile, false);
         Component.onCompleted: {
             if (Qt.platform.os != "android" && Qt.platform.os != "ios") {
                 currentFolder = filesystem.path_to_url(settings.dataDir("lens_profiles"));
@@ -183,7 +244,7 @@ MenuItem {
     Button {
         id: autoCalibBtn;
         text: qsTr("Auto calibrate");
-        enabled: calibrator_window.videoArea.vid.loaded;
+        enabled: calibrator_window.videoArea.vid.loaded && !focalLengthOnly.checked;
         iconName: "spinner"
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
@@ -192,9 +253,53 @@ MenuItem {
         }
     }
 
+    CheckBoxWithContent {
+        id: focalLengthOnly;
+        text: qsTr("No distortion, focal length only");
+        tooltip: qsTr("Instead of calibrating with a chessboard pattern, generate a distortion-free profile from the focal length alone.") + "\n" +
+                 qsTr("Use only if your video is already undistorted (via a rectilinear lens or in-camera processing).");
+        cb.enabled: calibrator_window.videoArea.vid.loaded;
+        cb.onCheckedChanged: {
+            if (focalLengthOnly.checked) {
+                infoList.rms = 0;
+                infoList.model = ({});
+            }
+            calib.updateFocalLengthProfile();
+        }
+
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Focal length");
+            tooltip: qsTr("35 mm equivalent focal length");
+            NumberField {
+                id: focalLength;
+                width: parent.width;
+                height: 25 * dpiScale;
+                unit: qsTr("mm");
+                precision: 1;
+                value: 24;
+                from: 0.1;
+                onValueChanged: if (focalLengthOnly.checked) focalLengthUpdateTimer.restart();
+            }
+        }
+        BasicText {
+            width: parent.width;
+            wrapMode: Text.WordWrap;
+            font.pixelSize: 11 * dpiScale;
+            text: calib.focalLengthFovText;
+            visible: text.length > 0;
+        }
+        Timer {
+            id: focalLengthUpdateTimer;
+            interval: 200;
+            onTriggered: calib.updateFocalLengthProfile();
+        }
+    }
+
     Label {
         position: Label.LeftPosition;
         text: qsTr("Max calibration points");
+        visible: !focalLengthOnly.checked;
 
         NumberField {
             id: maxPoints;
@@ -307,11 +412,18 @@ MenuItem {
         text: qsTr("Export lens profile");
         accent: true;
         iconName: "save"
-        enabled: infoList.rms > 0 && infoList.rms < 100 && calibrator_window.videoArea.vid.loaded;
+        enabled: (focalLengthOnly.checked || (infoList.rms > 0 && infoList.rms < 100)) && calibrator_window.videoArea.vid.loaded;
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
             list.commitAll();
-            fileDialog.selectedFile = controller.export_lens_profile_filename(calib.calibrationInfo);
+            const filename = controller.export_lens_profile_filename(calib.calibrationInfo);
+            if (Qt.platform.os == "ios") {
+                calibrator_window.getSaveFileUrl(filesystem.get_folder(calibrator_window.videoArea.loadedFileUrl), filename, function(url) {
+                    calib.exportProfile(url, true);
+                }, "Lens profile");
+                return;
+            }
+            fileDialog.selectedFile = filename;
             fileDialog.open2();
         }
     }
@@ -319,6 +431,8 @@ MenuItem {
         id: uploadProfile;
         text: qsTr("Upload lens profile to the database");
         checked: true;
+        enabled: !focalLengthOnly.checked;
+        tooltip: enabled? "" : qsTr("Only calibrated profiles can be uploaded to the database.");
     }
     AdvancedSection {
         Label {

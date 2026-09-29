@@ -7,12 +7,14 @@ mod poly3;
 mod poly5;
 mod ptlens;
 mod insta360;
-mod sony;
+pub mod sony;
 mod generic_polynomial;
+mod gopro;
 
 mod gopro_superview;
 mod gopro6_superview;
 mod gopro_hyperview;
+mod gopro_warp;
 mod digital_stretch;
 
 use super::KernelParams;
@@ -46,29 +48,10 @@ macro_rules! impl_models {
                     $(DistortionModels::$name(m) => m.adjust_lens_profile(profile),)*
                 }
             }
-            pub fn radial_distortion_limit(&self, k: &[f64]) -> Option<f64> {
-                let max_theta = std::f64::consts::FRAC_PI_2; // PI/2
-                let mut low = 0.0;
-                let mut high = max_theta;
-                let tolerance = 1e-4;
-
-                while high - low > tolerance {
-                    let mid = (low + high) / 2.0;
-                    let deriv = match &self.inner {
-                        $(DistortionModels::$name(x) => { x.distortion_derivative(mid, k)? })*
-                    };
-                    if deriv > 0.0 {
-                        low = mid;
-                    } else {
-                        high = mid;
-                    }
-                }
-
-                let theta_max = (low + high) / 2.0;
-                if (theta_max - max_theta).abs() > 0.001 {
-                    Some(theta_max.tan())
-                } else {
-                    None
+            /// `d(image radius)/dθ` at ray angle `theta`, ≤ 0 where the model's curve folds back
+            pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
+                match &self.inner {
+                    $(DistortionModels::$name(x) => x.distortion_derivative(theta, k),)*
                 }
             }
 
@@ -97,10 +80,72 @@ impl_models! {
     Insta360          => insta360::Insta360,
     Sony              => sony::Sony,
     GenericPolynomial => generic_polynomial::GenericPolynomial,
+    GoPro             => gopro::GoPro,
 
     // Digital lenses (ie. post-processing)
-    GoProSuperview => gopro_superview::GoProSuperview,
+    GoProSuperview  => gopro_superview::GoProSuperview,
     GoPro6Superview => gopro6_superview::GoPro6Superview,
-    GoProHyperview => gopro_hyperview::GoProHyperview,
-    DigitalStretch => digital_stretch::DigitalStretch,
+    GoProHyperview  => gopro_hyperview::GoProHyperview,
+    GoProWarp       => gopro_warp::GoProWarp,
+    DigitalStretch  => digital_stretch::DigitalStretch,
+}
+
+impl DistortionModel {
+    /// The largest ray angle the model itself can represent, in radians, `None` when it has no such end.
+    /// Not a fold of the calibration - [`Self::radial_distortion_limit`] finds those - but the shape of the
+    /// projection: a rectilinear model images the z=1 plane and has nothing at 90°, and the unified sphere
+    /// of the Insta360 model turns over at `acos(-1/ξ)`
+    pub fn field_limit(&self, k: &[f64]) -> Option<f64> {
+        use DistortionModels as M;
+        match &self.inner {
+            M::OpenCVStandard(_) | M::Poly3(_) | M::Poly5(_) | M::PtLens(_) => Some(std::f64::consts::FRAC_PI_2 - 1e-4),
+            M::Insta360(_) => insta360::Insta360::field_limit(k),
+            _ => None
+        }
+    }
+
+    /// Largest usable ray angle (radians) before the curve folds back (its derivative stops being positive),
+    /// `None` when it rises all the way. The generic way samples the derivative up to 180° and bisects the
+    /// first non-positive step; the Sony spline solves its fold from the coefficients, since each of its
+    /// derivative samples would be a Newton solve and the renderer asks per frame when the file records a
+    /// lens curve per frame
+    pub fn radial_distortion_limit(&self, k: &[f64]) -> Option<f64> {
+        if let DistortionModels::Sony(m) = &self.inner {
+            return m.radial_distortion_limit(k);
+        }
+        // A fisheye can see well past 90°, so the sweep runs to 180° - the pipeline carries rays as angles
+        // and no longer stops at the old z=1 plane asymptote
+        let max_theta = std::f64::consts::PI;
+
+        const STEPS: usize = 256;
+        let mut low = 0.0;
+        let mut high = max_theta;
+        let mut found = false;
+        for i in 1..=STEPS {
+            let theta = i as f64 / STEPS as f64 * max_theta;
+            if self.distortion_derivative(theta, k)? <= 0.0 {
+                high = theta;
+                found = true;
+                break;
+            }
+            low = theta;
+        }
+        if !found { return None; }
+
+        while high - low > 1e-6 {
+            let mid = (low + high) / 2.0;
+            if self.distortion_derivative(mid, k)? > 0.0 {
+                low = mid;
+            } else {
+                high = mid;
+            }
+        }
+
+        let theta_max = (low + high) / 2.0;
+        if (theta_max - max_theta).abs() > 0.001 {
+            Some(theta_max)
+        } else {
+            None
+        }
+    }
 }

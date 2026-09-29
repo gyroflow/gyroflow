@@ -15,7 +15,7 @@ impl Poly3 {
         let inv_k1 = 1.0 / params.k[0];
 
         let rd = (point.0 * point.0 + point.1 * point.1).sqrt();
-        if rd == 0.0 { return None; }
+        if rd == 0.0 { return Some(point); }
 
         let rd_div_k1 = rd * inv_k1;
 
@@ -43,17 +43,18 @@ impl Poly3 {
             return None;
         }
 
-        ru = ru / rd;
+        // `ru` is the radius in the z=1 plane; the pipeline carries rays as angle vectors
+        let s = ru.atan() / rd;
 
         Some((
-            point.0 * ru,
-            point.1 * ru
+            point.0 * s,
+            point.1 * s
         ))
     }
 
     pub fn distort_point(&self, x: f32, y: f32, z: f32, params: &KernelParams) -> (f32, f32) {
-        let x = x / z;
-        let y = y / z;
+        // A rectilinear model has no image of a ray at or past 90°: send it far outside the frame
+        let (x, y) = if z > 1e-9 { (x / z, y / z) } else { (x * 1e9, y * 1e9) };
         let poly2 = params.k[0] * (x.powi(2) + y.powi(2)) + 1.0;
 
         (

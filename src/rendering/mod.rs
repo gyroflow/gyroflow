@@ -355,7 +355,7 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
             let log = FFMPEG_LOG.read().clone();
             if let Some(enc) = ffmpeg_next::encoder::find_by_name("h264_videotoolbox") {
                 let ctx_ptr = unsafe { ffi::avcodec_alloc_context3(enc.as_ptr()) };
-                let context = unsafe { codec::context::Context::wrap(ctx_ptr, Some(Rc::new(0))) };
+                let context = unsafe { codec::context::Context::wrap(ctx_ptr, Some(std::sync::Arc::new(0))) };
                 let mut encoder = context.encoder().video()?;
                 encoder.set_width(1920);
                 encoder.set_height(1080);
@@ -380,8 +380,9 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         proc.video.encoder_params.options.set("b_ref_mode", "disabled");
     }
 
-    if cfg!(target_os = "android") {
+    if encoder.0.contains("mediacodec") {
         proc.video.encoder_params.options.set("ndk_codec", "1");
+        proc.video.encoder_params.options.set("ndk_async", "1");
     }
 
     proc.video.encoder_params.keyframe_distance_s = render_options.keyframe_distance.max(0.0001);
@@ -742,6 +743,83 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     Ok(())
 }
 
+/// "Analyze image optically" (Motion data -> Optical correction): decodes the trim ranges (the whole clip without any)
+/// at about 1000 px wide, tracks them and fits the correction to what they measured, see
+/// `synchronization::optical_motion`. Blocking. `progress` gets the fraction done, and the frames done and in all.
+/// Waits while `pause_flag` is up. Cancelled - by `cancel_flag`, or by another file, a project or Clear replacing what
+/// it measures - it stops decoding and returns "Cancelled"; the first error stops it too
+pub fn analyze_optically(stab: &StabilizationManager, cancel_flag: Arc<AtomicBool>, pause_flag: Option<Arc<AtomicBool>>, progress: impl Fn(f64, usize, usize) + 'static) -> Result<(), String> {
+    use gyroflow_core::synchronization::optical_motion::OpticalMotionAnalysis;
+    use std::sync::atomic::Ordering::Relaxed;
+    let analysis = OpticalMotionAnalysis::from_manager(stab, cancel_flag.clone())?;
+    let size = stab.params.read().size;
+    if size.0 == 0 || size.1 == 0 { return Err("Video is not loaded".into()); }
+    let input_file = stab.input_file.read().clone();
+    let gpu_decoding = stab.gpu_decoding.load(std::sync::atomic::Ordering::SeqCst);
+    // Only the trim ranges
+    let ranges = analysis.ranges_ms();
+    // About 1000 px wide is enough: the tracks are averaged over thousands of points per frame
+    let tw = size.0.min(960) as u32;
+    let th = (((size.1 as f64 * tw as f64 / size.0 as f64) / 2.0).round() * 2.0) as u32;
+
+    let mut decoder_options = ffmpeg_next::Dictionary::new();
+    if input_file.image_sequence_fps > 0.0 {
+        let fps = fps_to_rational(input_file.image_sequence_fps);
+        decoder_options.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
+    }
+    if input_file.image_sequence_start > 0 {
+        decoder_options.set("start_number", &format!("{}", input_file.image_sequence_start));
+    }
+    decoder_options.set("scale", &format!("{tw}x{th}"));
+
+    let analysis = Rc::new(RefCell::new(analysis));
+    let error = Rc::new(RefCell::new(None::<String>));
+    // What the decoder stops on: the analysis cancelled (it knows of more than `cancel_flag`), or the first error.
+    // Every frame after that would be decoded for nothing
+    let stop = Arc::new(AtomicBool::new(false));
+    match VideoProcessor::from_file(&input_file.url, gpu_decoding, 0, Some(decoder_options)) {
+        Ok(mut proc) => {
+            let (analysis2, error2, stop2) = (analysis.clone(), error.clone(), stop.clone());
+            let mut last_progress = std::time::Instant::now();
+            proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
+                if let Some(pause_flag) = &pause_flag {
+                    while pause_flag.load(Relaxed) && !cancel_flag.load(Relaxed) {
+                        std::thread::sleep(std::time::Duration::from_millis(100));
+                    }
+                }
+                        let mut a = analysis2.borrow_mut();
+                if stop2.load(Relaxed) || a.is_cancelled() {
+                    stop2.store(true, Relaxed);
+                    return Ok(());
+                }
+                let result = converter.scale(input_frame, Pixel::GRAY8, tw, th).map_err(|e| e.to_string()).and_then(|small_frame| {
+                    let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
+                    a.feed_frame(timestamp_us, width, height, stride, pixels)
+                });
+                if let Err(e) = result {
+                            error2.borrow_mut().get_or_insert(e);
+                    stop2.store(true, Relaxed);
+                        }
+                        if last_progress.elapsed().as_millis() > 100 {
+                            last_progress = std::time::Instant::now();
+                            let (ready, total) = a.progress();
+                            progress(ready as f64 / total.max(1) as f64 * 0.99, ready, total);
+                }
+                Ok(())
+            });
+            if let Err(e) = proc.start_decoder_only(ranges, stop) {
+                error.borrow_mut().get_or_insert(e.to_string());
+            }
+        },
+        Err(e) => { error.borrow_mut().get_or_insert(e.to_string()); }
+    }
+    if analysis.borrow().is_cancelled() { return Err("Cancelled".into()); }
+    if let Some(e) = error.borrow_mut().take() { return Err(e); }
+    let analysis = Rc::try_unwrap(analysis).map_err(|_| "The decoder is still holding the analysis".to_string())?.into_inner();
+    // Kept, and fitted with the strength set
+    stab.set_optical_measurements(analysis.finish()?)
+}
+
 pub fn init_log() {
 	unsafe {
         ffi::av_log_set_level(ffi::AV_LOG_INFO);
@@ -832,17 +910,12 @@ unsafe fn codec_options(c: *const ffi::AVCodec) {
         let mut ret = String::new();
         let _ = writeln!(ret, "{} <b>{}</b>:\n", ["Decoder", "Encoder"][ffi::av_codec_is_encoder(c) as usize], to_str((*c).name));
 
-        if !(*c).pix_fmts.is_null() {
+        let pix_fmts = ffmpeg_hw::codec_pix_formats(std::ptr::null(), c);
+        if !pix_fmts.is_empty() {
             ret.push_str("Supported pixel formats (-pix_fmt): ");
-            for i in 0..100 {
-                let fmt = (*c).pix_fmts.offset(i);
-                if fmt.is_null() { break; }
-                let p = *fmt;
-                if p == ffi::AVPixelFormat::AV_PIX_FMT_NONE {
-                    break;
-                }
+            for (i, p) in pix_fmts.iter().enumerate() {
                 if i > 0 { ret.push_str(", "); }
-                ret.push_str(&to_str(ffi::av_get_pix_fmt_name(p)));
+                ret.push_str(&to_str(ffi::av_get_pix_fmt_name((*p).into())));
             }
         }
 

@@ -27,12 +27,16 @@ impl OpenCVStandard {
             y = (y0 - delta_y) * icdist;
         }
 
-        Some((x, y))
+        // The solve runs in the z=1 plane; the pipeline carries rays as angle vectors
+        let r = (x * x + y * y).sqrt();
+        if r < 1e-12 { return Some((x, y)); }
+        let s = r.atan() / r;
+        Some((x * s, y * s))
     }
 
     pub fn distort_point(&self, x: f32, y: f32, z: f32, params: &KernelParams) -> (f32, f32) {
-        let x = x / z;
-        let y = y / z;
+        // A rectilinear model has no image of a ray at or past 90°: send it far outside the frame
+        let (x, y) = if z > 1e-9 { (x / z, y / z) } else { (x * 1e9, y * 1e9) };
         let r2 = x * x + y * y;
         let r4 = r2 * r2;
         let r6 = r4 * r2;

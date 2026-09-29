@@ -109,6 +109,15 @@ pub struct StabilizationManager {
     pub params: Arc<RwLock<StabilizationParams>>,
 
     pub sync_data: Arc<RwLock<SyncData>>,
+
+    /// What the last "Analyze image optically" measured, kept so a change of the strength refits the correction without
+    /// another pass over the video. In memory only: a project keeps just the fitted correction. Its lock also orders
+    /// what may replace the correction: a finished analysis or refit, and `invalidate_optical_measurements`
+    pub optical_measurements: Arc<RwLock<Option<Arc<synchronization::optical_motion::OpticalMeasurements>>>>,
+    pub optical_settings: Arc<RwLock<gyro_source::OpticalCorrectionSettings>>,
+    /// Moved on by everything that makes an analysis still running measure the wrong thing (another file, a project,
+    /// Clear): it stops, and what it measured is dropped, see `set_optical_measurements`
+    pub optical_generation: Arc<AtomicU64>,
 }
 
 impl Default for StabilizationManager {
@@ -147,6 +156,10 @@ impl Default for StabilizationManager {
             camera_id: Arc::new(RwLock::new(None)),
 
             sync_data: Arc::new(RwLock::new(SyncData::default())),
+
+            optical_measurements: Arc::new(RwLock::new(None)),
+            optical_settings: Arc::new(RwLock::new(Default::default())),
+            optical_generation: Arc::new(AtomicU64::new(0)),
         }
     }
 }
@@ -159,10 +172,6 @@ impl StabilizationManager {
             params.frame_count = frame_count;
             params.duration_ms = duration_ms;
             params.size = video_size;
-        }
-        if duration_ms < 10000.0 { // If the video is shorter than 10s, use Complementary
-            let mut gyro_source = self.gyro.write();
-            gyro_source.integration_method = 1; // Complementary
         }
 
         self.pose_estimator.sync_results.write().clear();
@@ -178,6 +187,7 @@ impl StabilizationManager {
             gyro.file_url = url.to_string();
             gyro.file_metadata = Default::default();
         }
+        self.invalidate_optical_measurements();
         self.invalidate_smoothing();
         self.invalidate_zooming();
 
@@ -413,103 +423,59 @@ impl StabilizationManager {
         false
     }
 
-    pub fn extract_focal_lengths(compute_params: &ComputeParams) -> Vec<Option<f64>> {
-        use crate::util::MapClosest;
-
-        let gyro = compute_params.gyro.read();
-        let file_metadata = gyro.file_metadata.read();
-
-        if file_metadata.lens_params.is_empty() {
-            return vec![];
-        }
-
-        let mut focal_lengths = Vec::with_capacity(compute_params.frame_count);
-
-        for frame in 0..compute_params.frame_count {
-            let timestamp_ms = crate::timestamp_at_frame(frame as i32, compute_params.scaled_fps);
-            let timestamp_us = (timestamp_ms * 1000.0).round() as i64;
-
-            // Try to get focal length from lens_params (within 100ms window)
-            let focal_length = file_metadata.lens_params.get_closest(&timestamp_us, 100000)
-                .and_then(|val| val.focal_length.map(|fl| fl as f64));
-
-            focal_lengths.push(focal_length);
-        }
-
-        focal_lengths
-    }
-
     fn apply_focal_length_smoothing(params: &mut ComputeParams, stabilization_params: &RwLock<StabilizationParams>) {
-        let (enabled, strength) = {
+        let (enabled, max_zoom_rate) = {
             let sp = stabilization_params.read();
-            (sp.focal_length_smoothing_enabled, sp.focal_length_smoothing_strength)
+            (sp.focal_length_smoothing_enabled, sp.focal_length_max_zoom_rate)
+        };
+        // The base curve evaluates the projection for every frame (a third of a second per minute of 60 fps footage),
+        // and a recompute is requested on every slider change, so it's reused while nothing it depends on changed:
+        // the file and its lens metadata, the lens profile and the video geometry. The settings (the delay, the rate
+        // limit, whether smoothing is on) and the trim only act on the curves derived from it, in O(frames), so
+        // none of them is part of the key and a change of theirs never repeats the sweep
+        use crate::smoothing::focal_length::{ compute_base_curve, derive_curves };
+        let base_key = {
+            use std::hash::Hasher;
+            let mut h = std::collections::hash_map::DefaultHasher::new();
+            let gyro = params.gyro.read();
+            let md = gyro.file_metadata.read();
+            h.write(gyro.file_url.as_bytes());
+            h.write_usize(md.lens_params.len());
+            h.write_usize(md.lens_positions.len());
+            h.write_u64(md.digital_zoom.unwrap_or_default().to_bits());
+            h.write_u64(params.lens.get_checksum());
+            h.write_usize(params.width);
+            h.write_usize(params.height);
+            h.write_u64(params.scaled_fps.to_bits());
+            h.write_usize(params.frame_count);
+            h.finish()
+        };
+        let derive = |base: &[f64]| derive_curves(base, params.lens_metadata_delay_frames, enabled, max_zoom_rate, params.scaled_fps, &params.trim_ranges);
+        let cached = {
+            let sp = stabilization_params.read();
+            (sp.focal_length_base_key == base_key).then(|| derive(&sp.focal_length_base))
+        };
+        let (base, (focal_lengths, smoothed)) = match cached {
+            Some(curves) => (None, curves),
+            None => {
+                let base = compute_base_curve(params);
+                let curves = derive(&base);
+                (Some(base), curves)
+            }
         };
 
-        let focal_lengths = if params.gyro.read().file_metadata.read().lens_params.is_empty() {
-            Vec::new()
-        } else {
-            Self::extract_focal_lengths(params)
-        };
+        params.focal_length_smoothing_enabled = enabled && !smoothed.is_empty();
+        params.focal_length_max_zoom_rate = max_zoom_rate;
+        params.focal_lengths = focal_lengths.clone();
+        params.smoothed_focal_lengths = smoothed.clone();
 
-        let smoothing_active = enabled && !focal_lengths.is_empty();
-
-        let (dequantized_focal_lengths, smoothed_focal_lengths) = if smoothing_active {
-            // Dequantize the raw metadata with a short Gaussian. Camera-quantized focal length
-            // values produce visible stairs; the shader samples position depends on the raw
-            // side of the ratio (through scaled_k), so stairs in raw become stairs in output
-            // unless we feed the ratio a smooth estimate of the true optical state.
-            let dequantize_window = ((params.scaled_fps * 0.5).round() as usize).max(5);
-            let dequantized = crate::smoothing::focal_length::smooth_focal_lengths_gaussian(&focal_lengths, 1.0, dequantize_window);
-
-            // Single-knob mapping (`strength` ∈ [0, 1]). All three dials scale together so the
-            // slider feels monotonic: more smoothness = longer stationary time constant, higher
-            // velocity threshold, AND a longer "fast zoom" time constant so transitions round
-            // off instead of snapping to the raw shape.
-            //
-            //   * `max_smoothness_time` — stationary time constant. Exponential 0.1s → 30s so
-            //     the top of the slider gives genuinely extreme smoothness.
-            //   * `min_smoothness_time` — fast-zoom time constant. Scales from ~0.05s at
-            //     strength=0 (near pass-through) up to ~0.4s at strength=1. This is what keeps
-            //     deliberate zoom edges rounded rather than tracking the raw curve tightly.
-            //   * `velocity_threshold` — how fast a zoom has to be to open the filter. Scales
-            //     0.3 → 8.0 so low smoothness opens on any motion, high smoothness only yields
-            //     to very fast zooms.
-            let s = strength.clamp(0.0, 1.0);
-            let max_smoothness_time = 0.1_f64 * 300.0_f64.powf(s);           // 0.1 .. 30
-            let min_smoothness_time = 0.05_f64 + 0.35_f64 * s * s;           // 0.05 .. 0.40
-            let velocity_threshold  = 0.3_f64 + 7.7_f64 * s.powf(1.5);       // 0.3 .. 8.0
-
-            let smoothed = crate::smoothing::focal_length::smooth_focal_lengths_adaptive(
-                &dequantized,
-                params.scaled_fps,
-                max_smoothness_time,
-                min_smoothness_time,
-                velocity_threshold,
-            );
-            (dequantized, smoothed)
-        } else {
-            (Vec::new(), Vec::new())
-        };
-
-        // Rendering-side state: compute_params drives the shader compensation, so only populate
-        // when smoothing is actually active. `focal_lengths` here holds the DEQUANTIZED curve
-        // (used as the ratio denominator), not the raw metadata — see comment above.
-        if smoothing_active {
-            params.focal_lengths = dequantized_focal_lengths;
-            params.smoothed_focal_lengths = smoothed_focal_lengths.clone();
-            params.focal_length_smoothing_enabled = true;
-        } else {
-            params.focal_lengths.clear();
-            params.smoothed_focal_lengths.clear();
-            params.focal_length_smoothing_enabled = false;
-        }
-
-        // Chart-side state: always expose the RAW focal length curve when per-frame data exists,
-        // so the "FL" timeline toggle works regardless of whether smoothing is enabled. Smoothed
-        // curve is only populated when smoothing is active.
         let mut sp = stabilization_params.write();
         sp.focal_lengths = focal_lengths;
-        sp.smoothed_focal_lengths = smoothed_focal_lengths;
+        sp.smoothed_focal_lengths = smoothed;
+        if let Some(base) = base {
+            sp.focal_length_base = base;
+            sp.focal_length_base_key = base_key;
+        }
     }
 
     pub fn recompute_adaptive_zoom_static(compute_params: &ComputeParams, params: &RwLock<StabilizationParams>) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>) {
@@ -588,7 +554,6 @@ impl StabilizationManager {
                     gyro.smoothed_quaternions = quats;
                 }
 
-                Self::apply_focal_length_smoothing(&mut params, &self.params);
 
                 // Zooming
                 let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
@@ -624,6 +589,7 @@ impl StabilizationManager {
     }
 
     pub fn recompute_blocking(&self) {
+        self.refresh_optical_correction();
         self.recompute_smoothness();
         self.recompute_adaptive_zoom();
         self.recompute_undistortion();
@@ -636,6 +602,8 @@ impl StabilizationManager {
     pub fn recompute_threaded<F: Fn((u64, bool)) + Send + Sync + Clone + 'static>(&self, cb: F) -> u64 {
         //self.recompute_smoothness();
         //self.recompute_adaptive_zoom();
+        // Before the gyro checksum below, which says whether the correction is applied
+        self.refresh_optical_correction();
         let mut params = stabilization::ComputeParams::from_manager(self);
         params.calculate_camera_fovs();
 
@@ -659,8 +627,14 @@ impl StabilizationManager {
             if prevent_recompute.load(SeqCst) { return cb((compute_id, true)); } // we're still loading, don't recompute
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
-            let mut smoothing_changed = false;
-            if smoothing.read().get_state_checksum(gyro_checksum) != smoothing_checksum.load(SeqCst) {
+            let commit = |checksum: &AtomicU64, value: u64| -> bool {
+                checksum.store(value, SeqCst);
+                if current_compute_id.load(SeqCst) != compute_id { checksum.store(0, SeqCst); return false; }
+                true
+            };
+
+            let mut smoothing_recomputed = false;
+            if smoothing.read().get_state_checksum(gyro_checksum, &params) != smoothing_checksum.load(SeqCst) {
                 let (mut smoothing, horizon_lock) = {
                     let lock = smoothing.read();
                     (lock.current().clone(), lock.horizon_lock.clone())
@@ -671,24 +645,29 @@ impl StabilizationManager {
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
                 if gyro_checksum != gyro.read().get_checksum() { return cb((compute_id, true)); }
 
-                let mut lib_gyro = gyro.write();
-                lib_gyro.max_angles = max_angles;
-                lib_gyro.smoothed_quaternions = quats;
-                lib_gyro.smoothing_status = smoothing.get_status_json();
-                gyro_checksum = lib_gyro.get_checksum();
-                smoothing_changed = true;
+                {
+                    let mut lib_gyro = gyro.write();
+                    lib_gyro.max_angles = max_angles;
+                    lib_gyro.smoothed_quaternions = quats;
+                    lib_gyro.smoothing_status = smoothing.get_status_json();
+                    gyro_checksum = lib_gyro.get_checksum();
+                }
+                smoothing_recomputed = true;
             }
-            smoothing_checksum.store(smoothing.read().get_state_checksum(gyro_checksum), SeqCst);
+            let smoothing_state = smoothing.read().get_state_checksum(gyro_checksum, &params);
+            if smoothing_recomputed && !commit(&*smoothing_checksum, smoothing_state) { return cb((compute_id, true)); }
+
+            // Before the zoom: it accounts for the focal length compensation
+            Self::apply_focal_length_smoothing(&mut params, &stabilization_params);
 
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
-            // Run FL smoothing unconditionally so `params.focal_lengths` always carries the
-            // dequantized curve by the time `set_compute_params` stores it. The from_manager
-            // copy pulls raw-for-chart from StabilizationParams, so skipping this step would
-            // leave raw (stair-stepped) values in the rendering-side compute_params.
-            Self::apply_focal_length_smoothing(&mut params, &stabilization_params);
-
-            if smoothing_changed || zooming::get_checksum(&params) != zooming_checksum.load(SeqCst) {
+            let zoom_key = zooming::get_checksum(&params, smoothing_state);
+            // Freshly recomputed quaternions are the plain smoothing output, and the max zoom folds its limit back into
+            // them inside the zoom pass, so a smoothing recompute needs the zoom pass again even when the zoom key still
+            // matches the last commit: a run killed inside the max-zoom iterations leaves that key committed next to
+            // quaternions that no longer carry the limit
+            if smoothing_recomputed || zoom_key != zooming_checksum.load(SeqCst) {
                 let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
                 params.fovs = fovs;
                 params.minimal_fovs = minimal_fovs;
@@ -700,8 +679,6 @@ impl StabilizationManager {
                     stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                     stab_params.minimal_fovs = params.minimal_fovs.clone();
                     stab_params.zooming_debug_points = debug_points;
-
-                    zooming_checksum.store(zooming::get_checksum(&params), SeqCst);
                     (
                         stab_params.max_zoom.unwrap_or(0.0),
                         params.keyframes.get_keyframes(&KeyframeType::MaxZoom).map(|x| x.iter().map(|x| x.1.value).max_by(|a, b| a.total_cmp(b)).unwrap_or(stab_params.max_zoom.unwrap_or(0.0))).unwrap_or(stab_params.max_zoom.unwrap_or(0.0)),
@@ -712,6 +689,11 @@ impl StabilizationManager {
 
                 // Max zoom
                 if max_zoom_max > 50.0 && max_zoom_iters > 0 {
+                    // The iterations rewrite the quaternions with the zoom limit folded in, and the fovs along with them.
+                    // Until they finish, neither is the state its key describes, so a run killed in here has to redo both
+                    smoothing_checksum.store(0, SeqCst);
+                    zooming_checksum.store(0, SeqCst);
+
                     params.smoothing_fov_limit_per_frame.clear();
                     for _ in params.fovs.iter() {
                         params.smoothing_fov_limit_per_frame.push(1.0);
@@ -760,8 +742,8 @@ impl StabilizationManager {
                             lib_gyro.smoothing_status = smoothing.get_status_json();
                         }
 
-                        // FL smoothing state from the outer apply is reused across iterations —
-                        // settings and raw metadata don't change within max-zoom iterations.
+                        // The focal length curves don't change within max-zoom iterations:
+                        // settings and raw metadata are the same, so the outer apply is reused
 
                         let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
                         params.fovs = fovs;
@@ -774,11 +756,14 @@ impl StabilizationManager {
                             stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                             stab_params.minimal_fovs = params.minimal_fovs.clone();
                             stab_params.zooming_debug_points = debug_points;
-
-                            zooming_checksum.store(zooming::get_checksum(&params), SeqCst);
                         }
                     }
+
+                    // The quaternions are final again (zoom limit folded in), which is what the smoothing key describes
+                    if !commit(&*smoothing_checksum, smoothing_state) { return cb((compute_id, true)); }
                 }
+
+                if !commit(&*zooming_checksum, zoom_key) { return cb((compute_id, true)); }
             }
 
             if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
@@ -869,8 +854,10 @@ impl StabilizationManager {
             if !p.zooming_debug_points.is_empty() {
                 if let Some((_, points)) = p.zooming_debug_points.range(timestamp_us - 1000..).next() {
                     for i in 0..points.len() {
+                        // Same total zoom as FrameTransform::at_timestamp: the polygon is measured at fov = 1
                         let mut fov = ((p.fov + if p.fov_overview { 1.0 } else { 0.0 }) * p.fovs.get(frame).unwrap_or(&1.0)).max(0.0001);
                         fov *= p.size.0 as f64 / p.output_size.0.max(1) as f64;
+                        fov *= smoothing::focal_length::compensation(&p.focal_lengths, &p.smoothed_focal_lengths, p.focal_length_smoothing_enabled, frame);
                         let mut pt = points[i];
                         let width_ratio = p.size.0 as f64 / p.output_size.0 as f64;
                         let height_ratio = p.size.1 as f64 / p.output_size.1 as f64;
@@ -1038,7 +1025,7 @@ impl StabilizationManager {
     pub fn set_digital_lens_param(&self, index: usize, value: f64) {
         let mut lens = self.lens.write();
         if lens.digital_lens_params.is_none() {
-            lens.digital_lens_params = Some(vec![0f64; 4]);
+            lens.digital_lens_params = Some(vec![0f64; 16]);
         }
         lens.digital_lens_params.as_mut().unwrap()[index] = value;
         #[cfg(feature = "opencv")]
@@ -1096,6 +1083,148 @@ impl StabilizationManager {
     pub fn recompute_gyro(&self) {
         self.gyro.write().apply_transforms();
         self.invalidate_smoothing();
+    }
+
+    /// Installs a correction (or none) in the context as it is now, so it applies right away when it was measured in it
+    pub fn set_optical_correction(&self, correction: Option<gyro_source::OpticalCorrection>) {
+        let context = correction.is_some().then(|| self.optical_context());
+        {
+            let mut gyro = self.gyro.write();
+            if let Some(context) = context { gyro.optical_context = context; }
+            gyro.optical_correction = correction;
+        }
+        self.recompute_gyro();
+    }
+    pub fn set_optical_correction_enabled(&self, enabled: bool) {
+        let changed = self.gyro.write().optical_correction.as_mut().map(|c| std::mem::replace(&mut c.enabled, enabled) != enabled).unwrap_or_default();
+        if changed { self.recompute_gyro(); }
+    }
+    pub fn clear_optical_correction(&self) {
+        self.invalidate_optical_measurements();
+        self.set_optical_correction(None);
+    }
+    /// Drops the kept measurements and moves `optical_generation` on: an analysis still running stops, and a refit
+    /// still running finds nothing to replace. For everything after which what they measure is for something else
+    fn invalidate_optical_measurements(&self) {
+        let mut kept = self.optical_measurements.write();
+        self.optical_generation.fetch_add(1, SeqCst);
+        *kept = None;
+    }
+    /// The context a correction applies in, as things are now, see `optical_motion::context_checksum`
+    fn optical_context(&self) -> u64 {
+        use synchronization::optical_motion::{ context_checksum, measurement_params };
+        context_checksum(&measurement_params(self))
+    }
+    /// Brings the correction up to date with its context: a sync, a lens profile or a frame timing other than the ones
+    /// it was measured with switches it off (and back on, when they come back), without `integrate` hearing of it. The
+    /// recomputes call this; true when it switched
+    pub fn refresh_optical_correction(&self) -> bool {
+        if self.gyro.read().optical_correction.is_none() { return false; }
+        let context = self.optical_context();
+        let mut gyro = self.gyro.write();
+        gyro.optical_context = context;
+        if gyro.optical_correction_applies() == gyro.optical_correction_applied { return false; }
+        gyro.integrate();
+        drop(gyro);
+        self.invalidate_smoothing();
+        true
+    }
+    /// See `GyroSource::set_ignore_file_motion`. True when anything changed
+    pub fn set_ignore_file_motion(&self, ignore: bool) -> bool {
+        let mut gyro = self.gyro.write();
+        if !gyro.set_ignore_file_motion(ignore) { return false; }
+        self.keyframes.write().update_gyro(&gyro);
+        drop(gyro);
+        self.invalidate_smoothing();
+        true
+    }
+    /// Keeps what an analysis measured and fits the correction to it with the current settings. When what's loaded
+    /// changed since the analysis started (another file, a project, Clear: `optical_generation`), they're dropped
+    /// instead, as "Cancelled"
+    pub fn set_optical_measurements(&self, m: synchronization::optical_motion::OpticalMeasurements) -> Result<(), String> {
+        let m = Arc::new(m);
+        let context = self.optical_context();
+        loop {
+            // A copy: the strength slider would wait for the fit on the settings lock
+            let settings = *self.optical_settings.read();
+            let correction = synchronization::optical_motion::solve(&m, &settings)?;
+            let mut kept = self.optical_measurements.write();
+            if self.optical_generation.load(SeqCst) != m.generation { return Err("Cancelled".into()); }
+            // Moved during the fit: the refit that asked for found no measurements to refit yet, so it's up to this one
+            if *self.optical_settings.read() != settings { continue; }
+            *kept = Some(m);
+            let mut gyro = self.gyro.write();
+            gyro.optical_context = context;
+            gyro.optical_correction = Some(correction);
+            break;
+        }
+        self.recompute_gyro();
+        Ok(())
+    }
+    /// The kept measurements, as long as the correction they gave still sits on what they were measured on: the same
+    /// quaternions (uncorrected), in the same context
+    fn valid_optical_measurements(&self) -> Option<Arc<synchronization::optical_motion::OpticalMeasurements>> {
+        let m = self.optical_measurements.read().clone()?;
+        let gyro = self.gyro.read();
+        (gyro.optical_correction.is_some() && m.quats_checksum == gyro.optical_uncorrected_checksum && m.context_checksum == gyro.optical_context).then_some(m)
+    }
+    /// Sets the strength; true when the correction should be refitted to it, see `refit_optical_correction`
+    pub fn set_optical_correction_strength(&self, strength: f64) -> bool {
+        let settings = { let mut s = self.optical_settings.write(); s.strength = strength.clamp(0.0, 1.0); *s };
+        let differs = self.gyro.read().optical_correction.as_ref().map(|c| c.settings != settings).unwrap_or_default();
+        differs && self.valid_optical_measurements().is_some()
+    }
+    /// Refits the correction to the kept measurements with the current settings (a fraction of a second for a long
+    /// clip, so not on the UI thread). False when there's nothing to refit, or the settings moved on meanwhile. Only
+    /// ever replaces the correction these very measurements gave: never one that Clear, another file or another
+    /// analysis put there while it was fitting
+    pub fn refit_optical_correction(&self) -> Result<bool, String> {
+        let Some(m) = self.valid_optical_measurements() else { return Ok(false) };
+        let settings = *self.optical_settings.read();
+        let mut c = synchronization::optical_motion::solve(&m, &settings)?;
+        {
+            let kept = self.optical_measurements.read();
+            if !kept.as_ref().is_some_and(|k| Arc::ptr_eq(k, &m)) || *self.optical_settings.read() != settings { return Ok(false); }
+            let mut gyro = self.gyro.write();
+            let Some(fitted) = &gyro.optical_correction else { return Ok(false) };
+            c.enabled = fitted.enabled;
+            gyro.optical_correction = Some(c);
+        }
+        self.recompute_gyro();
+        Ok(true)
+    }
+    /// State of the correction measured from the video, for the UI
+    pub fn optical_correction_info(&self) -> serde_json::Value {
+        // Read out under the lock, which is let go of before `valid_optical_measurements` takes it again: a second read
+        // of a parking_lot lock this thread holds deadlocks as soon as a writer queues up in between
+        let (mut info, fitted_with) = {
+            let gyro = self.gyro.read();
+            let (ignore_file_motion, has_motion) = (gyro.ignores_file_motion(), gyro.has_motion());
+            match &gyro.optical_correction {
+                Some(c) => (serde_json::json!({
+                    "available": true,
+                    "enabled": c.enabled,
+                    // Enabled but not applied: measured on other quaternions (another integration method or filter) or
+                    // in another context (sync, lens, frame timing) than the ones there now
+                    "stale": c.enabled && !gyro.optical_correction_applied,
+                    "frames": c.frames,
+                    "measured_frames": c.measured_frames,
+                    "rms_deg": c.rms_deg,
+                    "strength": c.settings.strength,
+                    // The file had no motion data: the analysis measured all of it
+                    "from_video": !c.video_base.is_empty(),
+                    "ignore_file_motion": ignore_file_motion,
+                    "has_motion": has_motion,
+                }), Some(c.settings)),
+                None => (serde_json::json!({ "available": false, "ignore_file_motion": ignore_file_motion, "has_motion": has_motion }), None),
+            }
+        };
+        if let Some(settings) = fitted_with {
+            // Fitted with another strength than the one set, and the measurements to refit aren't here any more (a
+            // project loaded from disk keeps only the correction): only another analysis applies the new one
+            info["outdated"] = (settings != *self.optical_settings.read() && self.valid_optical_measurements().is_none()).into();
+        }
+        info
     }
     pub fn set_sync_lpf(&self, lpf: f64) {
         let params = self.params.read();
@@ -1169,6 +1298,9 @@ impl StabilizationManager {
             smoothing:  Arc::new(RwLock::new(self.smoothing.read().clone())),
             input_file: Arc::new(RwLock::new(self.input_file.read().clone())),
             lens_profile_db: self.lens_profile_db.clone(),
+            // The strength the correction was fitted with: a project written from the clone (a render queue job's, which
+            // "Edit" loads back) says it, and one that says another would refit the correction there
+            optical_settings: Arc::new(RwLock::new(*self.optical_settings.read())),
 
             // NOT cloned:
             // stabilization
@@ -1179,6 +1311,7 @@ impl StabilizationManager {
             // zooming_checksum
             // prevent_recompute
             // camera_id
+            // optical_measurements: they take a lot of memory, and a clone has nothing to refit
             ..Default::default()
         }
     }
@@ -1194,6 +1327,7 @@ impl StabilizationManager {
     }
 
     pub fn clear(&self) {
+        self.invalidate_optical_measurements();
         self.params.write().clear();
         self.invalidate_ongoing_computations();
         self.invalidate_smoothing();
@@ -1210,9 +1344,17 @@ impl StabilizationManager {
         {
             let mut params = self.params.write();
             if (fps - params.fps).abs() > 0.001 {
-                params.fps_scale = Some(fps / params.fps);
+                if params.fps > 0.0 {
+                    let scale = fps / params.fps;
+                    params.set_fps_scale(Some(scale));
+                } else {
+                    // The video frame rate is not known, so there's nothing to scale against.
+                    // This can happen eg. when the file gets unloaded while its telemetry is still being parsed in the background.
+                    log::warn!("Unable to override video fps to {fps}, because the source fps is unknown");
+                    params.set_fps_scale(None);
+                }
             } else {
-                params.fps_scale = None;
+                params.set_fps_scale(None);
             }
             self.gyro.write().init_from_params(&params);
             self.keyframes.write().timestamp_scale = params.fps_scale;
@@ -1331,7 +1473,9 @@ impl StabilizationManager {
                 "max_zoom_iterations":    params.max_zoom_iterations,
                 "frame_offset":           params.frame_offset,
                 "focal_length_smoothing_enabled":  params.focal_length_smoothing_enabled,
-                "focal_length_smoothing_strength": params.focal_length_smoothing_strength,
+                "focal_length_max_zoom_rate":      params.focal_length_max_zoom_rate,
+                "lens_metadata_delay_frames":      params.lens_metadata_delay_frames,
+                "lens_breathing_enabled":          params.lens_breathing_enabled,
             },
             "gyro_source": {
                 "filepath":           gyro.file_url,
@@ -1344,9 +1488,12 @@ impl StabilizationManager {
                 "integration_method": gyro.integration_method,
                 "sample_index":       gyro.file_load_options.sample_index,
                 "detected_source":    gyro.file_metadata.read().detected_source,
+                "optical_correction_enabled": gyro.optical_correction.as_ref().map(|c| c.enabled),
+                "optical_correction_strength": self.optical_settings.read().strength,
+                "ignore_file_motion": gyro.ignores_file_motion(),
             },
 
-            "offsets": gyro.get_offsets(), // timestamp, offset value
+            "offsets": gyro.file_offsets(), // timestamp, offset value
             "keyframes": self.keyframes.read().serialize(),
 
             // "trim_ranges": params.trim_ranges,
@@ -1369,14 +1516,23 @@ impl StabilizationManager {
         }
 
         if let Some(serde_json::Value::Object(obj)) = obj.get_mut("gyro_source") {
+            // Before the guard below: it reads the same lock, and a second read of a parking_lot lock this thread holds
+            // deadlocks as soon as a writer queues up in between
+            let with_motion = if typ == GyroflowProjectType::Simple { None } else { gyro.file_metadata_with_ignored_motion() };
             let file_metadata = gyro.file_metadata.read();
+
+            // The analysis took a pass over every frame, so it's kept with the project whatever its type
+            if let Some(c) = gyro.optical_correction.as_ref().and_then(util::compress_to_base91_cbor) {
+                obj.insert("optical_correction".into(), serde_json::Value::String(c));
+            }
 
             if typ == GyroflowProjectType::Simple {
                 if let Ok(val) = serde_json::to_value(file_metadata.thin()) {
                     obj.insert("file_metadata".into(), val);
                 }
             } else {
-                if let Some(q) = util::compress_to_base91_cbor(&*file_metadata) {
+                // With the file's motion data also while it's set aside, for when it's used again
+                if let Some(q) = util::compress_to_base91_cbor(with_motion.as_ref().unwrap_or(&*file_metadata)) {
                     obj.insert("file_metadata".into(), serde_json::Value::String(q));
                 }
             }
@@ -1480,6 +1636,10 @@ impl StabilizationManager {
                 *videofile = serde_json::Value::String(video_url.clone());
             }
             *is_preset = org_video_url.is_empty();
+            if !*is_preset {
+                // A project replaces what an analysis still running measures, and what the last one measured
+                self.invalidate_optical_measurements();
+            }
 
             if let Some(vid_info) = obj.get("video_info") {
                 let mut params = self.params.write();
@@ -1493,11 +1653,12 @@ impl StabilizationManager {
                 if let Some(v) = vid_info.get("num_frames") .and_then(|x| x.as_u64()) { params.frame_count    = v as usize; }
                 if let Some(v) = vid_info.get("fps")        .and_then(|x| x.as_f64()) { params.fps            = v; }
                 if let Some(v) = vid_info.get("duration_ms").and_then(|x| x.as_f64()) { params.duration_ms    = v; }
-                if let Some(v) = vid_info.get("fps_scale") { params.fps_scale = v.as_f64(); }
+                if let Some(v) = vid_info.get("fps_scale") { params.set_fps_scale(v.as_f64()); }
 
                 self.gyro.write().init_from_params(&params);
                 self.keyframes.write().timestamp_scale = params.fps_scale;
             }
+            let mut ignore_file_motion = None;
             if let Some(serde_json::Value::Object(obj)) = obj.get_mut("gyro_source") {
                 let mut org_gyro_url = obj.get("filepath").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
                 if !org_gyro_url.is_empty() && !org_gyro_url.contains("://") {
@@ -1622,12 +1783,31 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("rotation")     { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_imu_rotation(v[0], v[1], v[2]); }
                 if let Some(v) = obj.get("acc_rotation") { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_acc_rotation(v[0], v[1], v[2]); }
                 if let Some(v) = obj.get("gyro_bias")    { gyro.imu_transforms.gyro_bias = serde_json::from_value(v.clone()).ok(); }
-
-                if let Ok(fls) = util::decompress_from_base91_cbor::<Vec<Option<f64>>>(obj.get("focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
-                    self.params.write().focal_lengths = fls;
+                if let Some(v) = obj.get("optical_correction_strength").and_then(|x| x.as_f64()) { self.optical_settings.write().strength = v; }
+                ignore_file_motion = obj.get("ignore_file_motion").and_then(|x| x.as_bool());
+                if let Ok(mut c) = util::decompress_from_base91_cbor::<crate::gyro_source::OpticalCorrection>(obj.get("optical_correction").and_then(|x| x.as_str()).unwrap_or_default()) {
+                    if let Some(v) = obj.get("optical_correction_enabled").and_then(|x| x.as_bool()) { c.enabled = v; }
+                    gyro.optical_correction = Some(c);
+                    // Integrated with the settings just read, for the checksum it's matched against. Whether it applies
+                    // also depends on what the rest of the project sets (the sync, the lens, the frame timing): the next
+                    // recompute brings that up to date, see `refresh_optical_correction`
+                    gyro.apply_transforms();
                 }
-                if let Ok(fls) = util::decompress_from_base91_cbor::<Vec<Option<f64>>>(obj.get("smoothed_focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
-                    self.params.write().smoothed_focal_lengths = fls;
+
+                {
+                    // The curves of a project file only stand in until the next recompute: they may come from another build
+                    // (older ones stored millimetres, the renderer projects with output pixels) or from other lens metadata
+                    // or settings than the ones loaded now. The base curve they'd be derived from is not stored, so the
+                    // next recompute extracts it (and derives the curves it computed itself) from the loaded data
+                    let mut params = self.params.write();
+                    if let Ok(fls) = util::decompress_from_base91_cbor::<Vec<Option<f64>>>(obj.get("focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
+                        params.focal_lengths = fls;
+                    }
+                    if let Ok(fls) = util::decompress_from_base91_cbor::<Vec<Option<f64>>>(obj.get("smoothed_focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
+                        params.smoothed_focal_lengths = fls;
+                    }
+                    params.focal_length_base.clear();
+                    params.focal_length_base_key = 0;
                 }
 
                 obj.remove("raw_imu");
@@ -1638,6 +1818,7 @@ impl StabilizationManager {
                 obj.remove("file_metadata");
                 obj.remove("focal_lengths");
                 obj.remove("smoothed_focal_lengths");
+                obj.remove("optical_correction");
             }
             if let Some(lens) = obj.get("calibration_data") {
                 let mut l = self.lens.write();
@@ -1729,7 +1910,9 @@ impl StabilizationManager {
                 }
 
                 if let Some(v) = obj.get("focal_length_smoothing_enabled") .and_then(|x| x.as_bool()) { params.focal_length_smoothing_enabled  = v; }
-                if let Some(v) = obj.get("focal_length_smoothing_strength").and_then(|x| x.as_f64())  { params.focal_length_smoothing_strength = v.clamp(0.0, 1.0); }
+                if let Some(v) = obj.get("focal_length_max_zoom_rate").and_then(|x| x.as_f64()) { params.focal_length_max_zoom_rate = v.clamp(0.01, 10.0); }
+                if let Some(v) = obj.get("lens_metadata_delay_frames").and_then(|x| x.as_i64()) { params.lens_metadata_delay_frames = v.clamp(-30, 30) as i32; }
+                if let Some(v) = obj.get("lens_breathing_enabled").and_then(|x| x.as_bool()) { params.lens_breathing_enabled = v; }
 
                 obj.remove("adaptive_zoom_fovs");
             }
@@ -1763,6 +1946,10 @@ impl StabilizationManager {
                 self.keyframes.write().update_gyro(&gyro);
             }
             obj.remove("offsets");
+            // After the sync points, which it sets aside with the motion data
+            if let Some(v) = ignore_file_motion {
+                self.set_ignore_file_motion(v);
+            }
 
             if let Some(keyframes) = obj.get("keyframes") {
                 self.keyframes.write().deserialize(keyframes);
@@ -1939,7 +2126,7 @@ impl StabilizationManager {
                             }
                         }
                         Err(e) => {
-                            log::error!("An error occured: {e:?}");
+                            log::error!("An error occurred: {e:?}");
                             return Err(e);
                         }
                     }

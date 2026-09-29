@@ -115,18 +115,22 @@ impl GyroIntegrator for VQFIntegrator {
 
         let num_samples = imu_data.len();
 
+        let has_magn = false; //imu_data.iter().any(|v| v.magn.is_some_and(|m| m != [0.0, 0.0, 0.0]));
+
         let mut gyr = Vec::with_capacity(num_samples*3);
         let mut acc = Vec::with_capacity(num_samples*3);
-        let mut mag = Vec::with_capacity(num_samples*3);
+        let mut mag = Vec::with_capacity(if has_magn { num_samples*3 } else { 0 });
         let mut quat = Vec::with_capacity(num_samples*4);
         for v in imu_data {
             let g = v.gyro.unwrap_or_default();
-            // zero mag or acc (default) is ignored by VQF
+            // zero acc or mag (default) is ignored by VQF
             let a = v.accl.unwrap_or_default();
-            let m = [0.0, 0.0, 0.0]; // v.magn.unwrap_or_default();
             gyr.extend([-g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD]);
             acc.extend([-a[1], a[0], a[2]]);
-            mag.extend([-m[1], m[0], m[2]]);
+            if has_magn {
+                let m = v.magn.unwrap_or_default();
+                mag.extend([-m[1], m[0], m[2]]);
+            }
             quat.extend([1.0, 0.0, 0.0, 0.0]);
         }
 
@@ -136,7 +140,13 @@ impl GyroIntegrator for VQFIntegrator {
             tau_mag: 40.0,
             ..Default::default()
         };
-        vqf::offline_vqf(&gyr, &acc, Some(&mag), num_samples, sample_time, params, &mut Vec::new(), Some(&mut quat), Some(&mut Vec::new()), &mut Vec::new(), None, None, Some(&mut Vec::new()));
+        if has_magn {
+            // 9D: gyro + accelerometer + magnetometer, the heading-corrected quaternion is the 9D output
+            vqf::offline_vqf(&gyr, &acc, Some(&mag), num_samples, sample_time, params, &mut Vec::new(), Some(&mut quat), Some(&mut Vec::new()), &mut Vec::new(), None, None, Some(&mut Vec::new()));
+        } else {
+            // 6D: gyro + accelerometer only.
+            vqf::offline_vqf(&gyr, &acc, None, num_samples, sample_time, params, &mut quat, None, None, &mut Vec::new(), None, None, None);
+        }
         drop(gyr); drop(acc); drop(mag);
         for (i, v) in imu_data.iter().enumerate() {
             out_quats.insert((v.timestamp_ms * 1000.0) as i64, Quat64::from_quaternion(Quaternion::from_parts(quat[i*4], Vector3::new(quat[i*4+1], quat[i*4+2], quat[i*4+3]))));

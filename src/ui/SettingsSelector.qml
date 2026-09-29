@@ -55,7 +55,8 @@ Modal {
             "Zooming":                    ["adaptive_zoom_window", "adaptive_zoom_center_offset", "adaptive_zoom_method", "additional_rotation", "additional_translation", "max_zoom", "max_zoom_iterations"],
             "Lens correction strength":   ["lens_correction_amount"],
             "Video speed":                ["video_speed", "video_speed_affects_smoothing", "video_speed_affects_zooming", "video_speed_affects_zooming_limit"],
-            "Focal length smoothing":     ["focal_length_smoothing_enabled", "focal_length_smoothing_strength"],
+            "Focal length smoothing":     ["focal_length_smoothing_enabled", "focal_length_max_zoom_rate", "lens_metadata_delay_frames"],
+            "Lens breathing":             ["lens_breathing_enabled"],
         },
         "Export settings|output": {
             "Codec":       ["codec", "codec_options", "bitrate", "use_gpu"],
@@ -72,6 +73,9 @@ Modal {
     }];
 
     property var defaultOff: ["trim_ranges_ms", "offsets", "video_infofps_scale", "video_inforotation", "synchronizationdo_autosync", "plugin_disable_stretch"];
+
+    // Fields (`group + first property name`) that are not available in the loaded file
+    property var unavailable: [];
 
     text: type == "preset"? qsTr("Select settings you want to include in the preset")
         : type == "apply"? qsTr("Select settings you want to apply to all items in the render queue")
@@ -144,6 +148,8 @@ Modal {
             QT_TR_NOOP("Accelerometer");
             QT_TR_NOOP("Quaternion");
             QT_TR_NOOP("Euler angles");
+            QT_TR_NOOP("Focus distances");
+            QT_TR_NOOP("Iris (f/T-stop)");
             QT_TR_NOOP("Minimal FOV scale");
             QT_TR_NOOP("Smoothed FOV scale");
             QT_TR_NOOP("Focal length (if available)");
@@ -197,6 +203,7 @@ Modal {
                                     onClicked: (mouse) => {
                                         const invert = mouse.modifiers & Qt.ControlModifier;
                                         sectionsArea.forAllCheckboxes(sectionsArea, function(cb) {
+                                            if (cb.unavailable) return;
                                             if (invert  && cb.parent == groupCb) return;
                                             if (!invert && cb.parent != groupCb) return;
                                             if (invert && root.defaultOff.includes(cb.group + cb.props[0])) return;
@@ -210,7 +217,9 @@ Modal {
                                 model: modelData[1];
                                 CheckBox {
                                     text: qsTr(modelData[0]);
-                                    checked: !root.defaultOff.includes(group + props[0]);
+                                    unavailable: root.unavailable.includes(group + props[0]);
+                                    checked: !unavailable && !root.defaultOff.includes(group + props[0]);
+                                    tooltip: unavailable? qsTr("This data is not present in the loaded file.") : "";
                                     property string group: modelData[1];
                                     property var props: modelData[2];
                                 }
@@ -258,19 +267,11 @@ Modal {
         RadioButton {
             id: exportPerFrame;
             text: qsTr("Export one sample per frame");
-            onCheckedChanged: {
-                sectionsArea.forAllCheckboxes(sectionsArea, function(cb) {
-                    if (cb.props[0] == "gyroscope" || cb.props[0] == "accelerometer") {
-                        cb.enabled = !checked;
-                        if (!cb.enabled && cb.checked) cb.checked = false;
-                    }
-                });
-            }
         }
     }
     BasicText {
         visible: root.type == "gyro_csv" && exportPerFrame.checked;
-        text: qsTr("When exporting one sample per frame, it's the sample in the middle of the frame, and it ignores rolling shutter correction.");
+        text: qsTr("When exporting one sample per frame, it's the sample in the middle of the frame, and it ignores rolling shutter correction. Gyroscope and accelerometer values are taken from the raw IMU sample closest to that time.");
         color: styleTextColor;
     }
 
@@ -290,9 +291,9 @@ Modal {
                 for (const x of cb.props) {
                     if (cb.group) {
                         if (!finalObj[cb.group]) finalObj[cb.group] = { };
-                        finalObj[cb.group][x] = cb.checked && cb.enabled;
+                        finalObj[cb.group][x] = cb.checked && !cb.unavailable;
                     } else {
-                        finalObj[x] = cb.checked;
+                        finalObj[x] = cb.checked && !cb.unavailable;
                     }
                 }
             });
@@ -349,6 +350,7 @@ Modal {
         }
 
         sectionsArea.forAllCheckboxes(sectionsArea, function(cb) {
+            if (cb.unavailable) return;
             for (const x of cb.props) {
                 if (cb.group) {
                     cb.checked = obj[cb.group] && obj[cb.group][x];
@@ -357,6 +359,5 @@ Modal {
                 }
             }
         });
-        exportPerFrame.checkedChanged();
     }
 }
