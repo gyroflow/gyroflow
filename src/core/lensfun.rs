@@ -197,6 +197,13 @@ fn parse_distortion(node: roxmltree::Node) -> Option<LensfunCalibDistortion> {
 }
 
 fn parse_lens(node: roxmltree::Node) -> Option<LensfunLens> {
+    // Non-rectilinear lenses (fisheye projections: equisolid, equidistant,
+    // stereographic, orthographic, thoby) need a projection conversion that
+    // gyroflow applies through its own fisheye pipeline; importing their
+    // distortion calibrations as rectilinear profiles would be wrong.
+    if let Some(t) = child_text(node, "type") {
+        if t != "rectilinear" { return None; }
+    }
     let maker = child_text_unlocalized(node, "maker")?;
     let model = child_text_unlocalized(node, "model")?;
     let mounts = child_texts(node, "mount");
@@ -690,4 +697,25 @@ mod tests {
         let db = LensfunDatabase::parse(&with_doctype).unwrap();
         assert_eq!(db.lenses.len(), LensfunDatabase::parse(TEST_DB).unwrap().lenses.len());
     }
+
+    #[test]
+    fn skips_non_rectilinear_lens_types() {
+        let xml = r#"<?xml version="1.0"?>
+<lensdatabase version="2">
+  <lens>
+    <maker>Canon</maker><model>Fisheye Lens</model><mount>Canon EF</mount>
+    <type>equisolid</type><cropfactor>1</cropfactor>
+    <calibration><distortion model="ptlens" focal="8" a="0.38" b="-0.71" c="0.40"/></calibration>
+  </lens>
+  <lens>
+    <maker>Canon</maker><model>Rectilinear Lens</model><mount>Canon EF</mount>
+    <type>rectilinear</type><cropfactor>1</cropfactor>
+    <calibration><distortion model="ptlens" focal="28" a="0.01" b="-0.03" c="0.003"/></calibration>
+  </lens>
+</lensdatabase>"#;
+        let db = LensfunDatabase::parse(xml).unwrap();
+        assert_eq!(db.lenses.len(), 1);
+        assert_eq!(db.lenses[0].model, "Rectilinear Lens");
+    }
+
 }
