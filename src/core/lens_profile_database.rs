@@ -16,6 +16,46 @@ enum DataSource {
     SerdeValue(serde_json::Value)
 }
 
+/// The checksum scheme every hand-written/calibrated profile is keyed by in `prepare_list_for_ui`'s
+/// duplicate check: `{identifier}|{w}{h}|{fx}{fy}|{cx}{cy}|{d0}{d1}{d2}{d3}`, truncated to 8 decimals.
+/// Shared between the JSON/`.gyroflow` loader below and the Lensfun XML importer so a Lensfun-derived
+/// profile that happens to be numerically identical to one already on disk is recognized as one, not
+/// silently duplicated under a second checksum scheme of its own.
+fn compute_profile_checksum(profile: &LensProfile) -> Option<String> {
+    let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
+        profile.identifier,
+
+        profile.calib_dimension.w,
+        profile.calib_dimension.h,
+
+        profile.fisheye_params.camera_matrix.get(0)?.get(0)?,
+        profile.fisheye_params.camera_matrix.get(1)?.get(1)?,
+        profile.fisheye_params.camera_matrix.get(0)?.get(2)?,
+        profile.fisheye_params.camera_matrix.get(1)?.get(2)?,
+
+        profile.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
+        profile.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
+        profile.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
+        profile.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
+    );
+    Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())))
+}
+
+/// Inserts a freshly-parsed profile under `key`, warning instead of overwriting when one is already
+/// there - the same "first one wins, the rest are just logged" policy the JSON/`.gyroflow` loader below
+/// already applies to its own profiles, so a Lensfun-derived profile competing with a hand-written one
+/// (or with another Lensfun database that also covers it) is resolved the same way.
+fn insert_lens_profile(map: &mut HashMap<String, LensProfile>, key: String, mut profile: LensProfile, f_name: &str, already_loaded: bool) {
+    if let Some(existing) = map.get(&key) {
+        if !already_loaded {
+            log::warn!("Lens profile already present: {}, path_to_file: {} from {}", key, f_name, existing.path_to_file);
+        }
+    } else {
+        profile.checksum = compute_profile_checksum(&profile);
+        map.insert(key, profile);
+    }
+}
+
 #[derive(Default)]
 pub struct LensProfileDatabase {
     preset_map: HashMap<String, String>,
@@ -109,27 +149,7 @@ impl LensProfileDatabase {
                                 // std::fs::write(f_name, serde_json::to_string_pretty(&prof).unwrap()).unwrap();
                             }
                         } else {
-                            (|| -> Option<()> {
-                                let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
-                                    profile.identifier,
-
-                                    profile.calib_dimension.w,
-                                    profile.calib_dimension.h,
-
-                                    profile.fisheye_params.camera_matrix.get(0)?.get(0)?,
-                                    profile.fisheye_params.camera_matrix.get(1)?.get(1)?,
-                                    profile.fisheye_params.camera_matrix.get(0)?.get(2)?,
-                                    profile.fisheye_params.camera_matrix.get(1)?.get(2)?,
-
-                                    profile.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
-                                );
-
-                                profile.checksum = Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())));
-                                Some(())
-                            })();
+                            profile.checksum = compute_profile_checksum(&profile);
                             self.map.insert(key, profile);
                         }
                     }
@@ -142,6 +162,18 @@ impl LensProfileDatabase {
 
         let mut bundle_loaded = false;
 
+        // Lensfun XML profiles can't go through `load` above the way `.json`/`.gyroflow` ones do: `load`
+        // and this closure would both need to borrow `self.map` mutably for as long as `load_from_dir`
+        // runs, which the borrow checker rejects even though they'd never actually run at the same time.
+        // Each `.xml` database is parsed into ordinary `LensProfile`s here instead and only merged into
+        // `self.map` once every closure above has gone out of scope, right before `resolve_interpolations` runs.
+        let mut xml_lens_profiles: Vec<(String, LensProfile)> = Vec::new();
+        let mut load_lensfun_xml = |data: &str, f_name: &str| {
+            for profile in crate::lensfun::parse_lensfun_xml(data, f_name) {
+                xml_lens_profiles.push((f_name.to_string(), profile));
+            }
+        };
+
         let mut load_from_dir = |dir: PathBuf| {
             walkdir::WalkDir::new(dir).into_iter().for_each(|e| {
                 if let Ok(entry) = e {
@@ -149,6 +181,10 @@ impl LensProfileDatabase {
                     if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
                         if let Ok(data) = std::fs::read_to_string(&f_name) {
                             load(DataSource::String(data), &f_name);
+                        }
+                    } else if f_name.ends_with(".xml") {
+                        if let Ok(data) = std::fs::read_to_string(&f_name) {
+                            load_lensfun_xml(&data, &f_name);
                         }
                     }
                     if !bundle_loaded && f_name.ends_with(".cbor.gz") {
@@ -195,6 +231,11 @@ impl LensProfileDatabase {
         #[cfg(not(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles")))]
         {
             load_from_dir(Self::get_path());
+        }
+
+        for (f_name, profile) in xml_lens_profiles {
+            let key = if !profile.identifier.is_empty() { profile.identifier.clone() } else { f_name.clone() };
+            insert_lens_profile(&mut self.map, key, profile, &f_name, self.loaded);
         }
 
         let copy = self.clone();
