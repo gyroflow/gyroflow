@@ -101,6 +101,36 @@ pub struct LensfunDatabase {
     pub lenses: Vec<LensfunLens>,
 }
 
+
+/// Remove a leading `<!DOCTYPE ...>` declaration (with optional internal
+/// subset `[...]`) so roxmltree accepts real lensfun database files.
+fn strip_doctype(xml: &str) -> &str {
+    let t = xml.trim_start_matches(['\u{feff}', ' ', '\t', '\r', '\n']);
+    if !t.starts_with("<?xml") {
+        // no XML declaration - check for doctype directly
+        if !t.starts_with("<!DOCTYPE") { return xml; }
+    }
+    let start = match t.find("<!DOCTYPE") {
+        Some(i) => i,
+        None => return xml,
+    };
+    let rest = &t[start..];
+    // find the closing '>' that is not inside an internal subset
+    let mut depth = 0usize;
+    for (i, c) in rest.char_indices() {
+        match c {
+            '[' => depth += 1,
+            ']' => depth = depth.saturating_sub(1),
+            '>' if depth == 0 => {
+                let offset = xml.len() - t.len() + start + i + 1;
+                return &xml[offset..];
+            }
+            _ => {}
+        }
+    }
+    xml
+}
+
 fn child_text(node: roxmltree::Node, tag: &str) -> Option<String> {
     node.children()
         .find(|n| n.is_element() && n.tag_name().name() == tag)
@@ -192,6 +222,10 @@ fn parse_lens(node: roxmltree::Node) -> Option<LensfunLens> {
 
 impl LensfunDatabase {
     pub fn parse(xml: &str) -> Result<Self, LensfunError> {
+        // Real lensfun database files start with `<!DOCTYPE lensdatabase SYSTEM
+        // "lensfun-database.dtd">`, which roxmltree refuses. The DTD carries no
+        // information we need, so strip it (including any internal subset).
+        let xml = strip_doctype(xml);
         let doc = roxmltree::Document::parse(xml)?;
         let root = doc.root_element();
         if root.tag_name().name() != "lensdatabase" { return Err(LensfunError::NotALensfunDatabase); }
@@ -645,5 +679,15 @@ mod tests {
                 assert!(err < 0.05, "focal {focal} px ({px},{py}): reference ({ref_x},{ref_y}) vs ({my_x},{my_y}), err {err}px");
             }
         }
+    }
+
+
+    #[test]
+    fn parses_real_lensfun_files_with_doctype() {
+        // Real database files carry a DTD doctype header
+        let body = TEST_DB.split_once("?>").map(|(_, rest)| rest).unwrap_or(TEST_DB);
+        let with_doctype = "<!DOCTYPE lensdatabase SYSTEM \"lensfun-database.dtd\">\n".to_string() + body;
+        let db = LensfunDatabase::parse(&with_doctype).unwrap();
+        assert_eq!(db.lenses.len(), LensfunDatabase::parse(TEST_DB).unwrap().lenses.len());
     }
 }
