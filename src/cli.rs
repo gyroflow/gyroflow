@@ -53,7 +53,7 @@ struct Opts {
     #[argh(option, short = 'd', default = "0")]
     when_done: i32,
 
-    /// output parameters, eg. "{{ 'codec': 'H.265/HEVC', 'bitrate': 150, 'use_gpu': true, 'audio': true }}"
+    /// output parameters. Keys: codec ("H.264/AVC", "H.265/HEVC", "ProRes", "DNxHD", "CineForm", "EXR Sequence", "PNG Sequence", "AV1"), codec_options (eg. "ProRes 422 HQ"), output_path (or output_folder + output_filename, both absolute), output_width, output_height, bitrate (Mbps), use_gpu, audio, pixel_format (eg. "P210LE"), audio_codec ("AAC", "PCM (s16le)", "PCM (s16be)", "PCM (s24le)", "PCM (s24be)"), interpolation ("Bilinear", "Bicubic", "Lanczos4", "EWA: RobidouxSharp", "EWA: Robidoux", "EWA: Mitchell", "EWA: Catmull-Rom"), encoder_options, keyframe_distance, preserve_other_tracks, pad_with_black, export_trims_separately, metadata ({{ 'comment': "..." }}). Eg. "{{ 'codec': 'ProRes', 'codec_options': 'ProRes 422 HQ', 'pixel_format': 'P210LE', 'output_path': '/path/out.mov' }}"
     #[argh(option, short = 'p')]
     out_params: Option<String>,
 
