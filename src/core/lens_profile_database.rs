@@ -16,6 +16,46 @@ enum DataSource {
     SerdeValue(serde_json::Value)
 }
 
+/// The checksum scheme every hand-written/calibrated profile is keyed by in `prepare_list_for_ui`'s
+/// duplicate check: `{identifier}|{w}{h}|{fx}{fy}|{cx}{cy}|{d0}{d1}{d2}{d3}`, truncated to 8 decimals.
+/// Shared between the JSON/`.gyroflow` loader below and the Lensfun XML importer so a Lensfun-derived
+/// profile that happens to be numerically identical to one already on disk is recognized as one, not
+/// silently duplicated under a second checksum scheme of its own.
+fn compute_profile_checksum(profile: &LensProfile) -> Option<String> {
+    let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
+        profile.identifier,
+
+        profile.calib_dimension.w,
+        profile.calib_dimension.h,
+
+        profile.fisheye_params.camera_matrix.get(0)?.get(0)?,
+        profile.fisheye_params.camera_matrix.get(1)?.get(1)?,
+        profile.fisheye_params.camera_matrix.get(0)?.get(2)?,
+        profile.fisheye_params.camera_matrix.get(1)?.get(2)?,
+
+        profile.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
+        profile.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
+        profile.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
+        profile.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
+    );
+    Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())))
+}
+
+/// Inserts a freshly-parsed profile under `key`, warning instead of overwriting when one is already
+/// there - the same "first one wins, the rest are just logged" policy the JSON/`.gyroflow` loader below
+/// already applies to its own profiles, so a Lensfun-derived profile competing with a hand-written one
+/// (or with another Lensfun database that also covers it) is resolved the same way.
+fn insert_lens_profile(map: &mut HashMap<String, LensProfile>, key: String, mut profile: LensProfile, f_name: &str, already_loaded: bool) {
+    if let Some(existing) = map.get(&key) {
+        if !already_loaded {
+            log::warn!("Lens profile already present: {}, path_to_file: {} from {}", key, f_name, existing.path_to_file);
+        }
+    } else {
+        profile.checksum = compute_profile_checksum(&profile);
+        map.insert(key, profile);
+    }
+}
+
 #[derive(Default)]
 pub struct LensProfileDatabase {
     preset_map: HashMap<String, String>,
@@ -109,27 +149,7 @@ impl LensProfileDatabase {
                                 // std::fs::write(f_name, serde_json::to_string_pretty(&prof).unwrap()).unwrap();
                             }
                         } else {
-                            (|| -> Option<()> {
-                                let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
-                                    profile.identifier,
-
-                                    profile.calib_dimension.w,
-                                    profile.calib_dimension.h,
-
-                                    profile.fisheye_params.camera_matrix.get(0)?.get(0)?,
-                                    profile.fisheye_params.camera_matrix.get(1)?.get(1)?,
-                                    profile.fisheye_params.camera_matrix.get(0)?.get(2)?,
-                                    profile.fisheye_params.camera_matrix.get(1)?.get(2)?,
-
-                                    profile.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
-                                );
-
-                                profile.checksum = Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())));
-                                Some(())
-                            })();
+                            profile.checksum = compute_profile_checksum(&profile);
                             self.map.insert(key, profile);
                         }
                     }
@@ -140,135 +160,19 @@ impl LensProfileDatabase {
             }
         };
 
-        // Parses a Lensfun XML file and creates a LensProfile for each <lens> entry found.
-        // Lensfun stores lens profiles using models like PTLens, Poly3, and Poly5, which use
-        // the Hugin coordinate system. This function extracts the distortion coefficients
-        // and rescales them to Gyroflow's internal normalized coordinate system.
-        let mut xml_lens_profiles: Vec<LensProfile> = Vec::new();
-        let mut load_lensfun_xml = |xml_data: &str, f_name: &str| {
-            let doc = match roxmltree::Document::parse(xml_data) {
-                Ok(d) => d,
-                Err(e) => {
-                    log::error!("Error parsing Lensfun XML {}: {:?}", f_name, e);
-                    return;
-                }
-            };
+        let mut bundle_loaded = false;
 
-            for node in doc.descendants().filter(|n| n.has_tag_name("lens")) {
-                let maker = node.children().find(|n| n.has_tag_name("maker")).and_then(|n| n.text()).unwrap_or_default().to_string();
-                let model = node.children().find(|n| n.has_tag_name("model")).and_then(|n| n.text()).unwrap_or_default().to_string();
-                
-                let cropfactor = node.children()
-                    .find(|n| n.has_tag_name("cropfactor"))
-                    .and_then(|n| n.text())
-                    .and_then(|t| t.parse::<f64>().ok())
-                    .unwrap_or(1.0);
-
-                let aspect_ratio_str = node.children()
-                    .find(|n| n.has_tag_name("aspect-ratio"))
-                    .and_then(|n| n.text())
-                    .unwrap_or("4:3");
-
-                let (w, h) = if let Some((w_str, h_str)) = aspect_ratio_str.split_once(':') {
-                    let w = w_str.parse::<usize>().unwrap_or(4000);
-                    let h = h_str.parse::<usize>().unwrap_or(3000);
-                    (w * 1000, h * 1000)
-                } else {
-                    (4000, 3000)
-                };
-
-                if let Some(calib) = node.children().find(|n| n.has_tag_name("calibration")) {
-                    for dist in calib.children().filter(|n| n.has_tag_name("distortion")) {
-                        let model_name = dist.attribute("model").unwrap_or("");
-                        let focal_str = dist.attribute("focal").unwrap_or("0");
-                        let focal = focal_str.parse::<f64>().unwrap_or(0.0);
-                        if focal <= 0.0 { continue; }
-
-                        let mut profile = LensProfile::default();
-                        profile.lens_model = model.clone();
-                        profile.camera_brand = maker.clone();
-                        profile.camera_model = "Lensfun".to_string();
-                        profile.note = "Lensfun".to_string();
-                        profile.calibrated_by = "Lensfun".to_string();
-                        profile.official = true;
-                        profile.focal_length = Some(focal);
-                        profile.crop_factor = Some(cropfactor);
-                        profile.calib_dimension = crate::LensProfile::default().calib_dimension;
-                        profile.calib_dimension.w = w;
-                        profile.calib_dimension.h = h;
-                        profile.orig_dimension = profile.calib_dimension.clone();
-
-                        // Compute the equivalent focal length in pixels for the given crop factor and dimensions.
-                        // Lensfun's internal scaling relies on the sensor diagonal.
-                        let sensor_diag_mm = 43.2666 / cropfactor;
-                        let hypot_pixels = ((w * w + h * h) as f64).sqrt();
-                        let focal_pixels = focal / sensor_diag_mm * hypot_pixels;
-                        
-                        // Set up a standard pinhole camera matrix for the computed focal length
-                        profile.fisheye_params.camera_matrix = vec![
-                            [focal_pixels, 0.0, w as f64 / 2.0],
-                            [0.0, focal_pixels, h as f64 / 2.0],
-                            [0.0, 0.0, 1.0]
-                        ];
-
-                        // Calculate the scaling factor required to convert Lensfun/Hugin coordinates (where r=1 
-                        // is the half-height of the image) into Gyroflow's normalized coordinates.
-                        let hugin_scaling = (w.max(h) as f64) / (2.0 * focal_pixels);
-
-                        match model_name {
-                            "ptlens" => {
-                                let a = dist.attribute("a").and_then(|x| x.parse::<f64>().ok()).unwrap_or(0.0);
-                                let b = dist.attribute("b").and_then(|x| x.parse::<f64>().ok()).unwrap_or(0.0);
-                                let c = dist.attribute("c").and_then(|x| x.parse::<f64>().ok()).unwrap_or(0.0);
-                                let mut k = [a, b, c];
-                                crate::stabilization::distortion_models::ptlens::PtLens::rescale_coeffs(&mut k, hugin_scaling);
-                                profile.distortion_model = Some("ptlens".to_string());
-                                profile.fisheye_params.distortion_coeffs = vec![k[0], k[1], k[2]];
-                            },
-                            "poly3" => {
-                                let k1 = dist.attribute("k1").and_then(|x| x.parse::<f64>().ok()).unwrap_or(0.0);
-                                let mut k = [k1, 0.0, 0.0];
-                                crate::stabilization::distortion_models::poly3::Poly3::rescale_coeffs(&mut k, hugin_scaling);
-                                profile.distortion_model = Some("poly3".to_string());
-                                profile.fisheye_params.distortion_coeffs = vec![k[0]];
-                            },
-                            "poly5" => {
-                                let k1 = dist.attribute("k1").and_then(|x| x.parse::<f64>().ok()).unwrap_or(0.0);
-                                let k2 = dist.attribute("k2").and_then(|x| x.parse::<f64>().ok()).unwrap_or(0.0);
-                                let mut k = [k1, k2, 0.0, 0.0];
-                                crate::stabilization::distortion_models::poly5::Poly5::rescale_coeffs(&mut k, hugin_scaling);
-                                profile.distortion_model = Some("poly5".to_string());
-                                profile.fisheye_params.distortion_coeffs = vec![k[0], k[1]];
-                            },
-                            _ => { continue; }
-                        }
-
-                        profile.path_to_file = f_name.to_string();
-                        profile.identifier = format!("lensfun_{}_{}_{}", maker, model, focal).replace(" ", "_").replace("/", "_");
-                        profile.finalize();
-
-                        let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
-                            profile.identifier,
-                            profile.calib_dimension.w,
-                            profile.calib_dimension.h,
-                            profile.fisheye_params.camera_matrix[0][0],
-                            profile.fisheye_params.camera_matrix[1][1],
-                            profile.fisheye_params.camera_matrix[0][2],
-                            profile.fisheye_params.camera_matrix[1][2],
-                            profile.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
-                            profile.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
-                            profile.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
-                            profile.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
-                        );
-                        profile.checksum = Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())));
-                        
-                        xml_lens_profiles.push(profile);
-                    }
-                }
+        // Lensfun XML profiles can't go through `load` above the way `.json`/`.gyroflow` ones do: `load`
+        // and this closure would both need to borrow `self.map` mutably for as long as `load_from_dir`
+        // runs, which the borrow checker rejects even though they'd never actually run at the same time.
+        // Each `.xml` database is parsed into ordinary `LensProfile`s here instead and only merged into
+        // `self.map` once every closure above has gone out of scope, right before `resolve_interpolations` runs.
+        let mut xml_lens_profiles: Vec<(String, LensProfile)> = Vec::new();
+        let mut load_lensfun_xml = |data: &str, f_name: &str| {
+            for profile in crate::lensfun::parse_lensfun_xml(data, f_name) {
+                xml_lens_profiles.push((f_name.to_string(), profile));
             }
         };
-
-        let mut bundle_loaded = false;
 
         let mut load_from_dir = |dir: PathBuf| {
             walkdir::WalkDir::new(dir).into_iter().for_each(|e| {
@@ -329,8 +233,9 @@ impl LensProfileDatabase {
             load_from_dir(Self::get_path());
         }
 
-        for profile in xml_lens_profiles {
-            self.map.insert(profile.identifier.clone(), profile);
+        for (f_name, profile) in xml_lens_profiles {
+            let key = if !profile.identifier.is_empty() { profile.identifier.clone() } else { f_name.clone() };
+            insert_lens_profile(&mut self.map, key, profile, &f_name, self.loaded);
         }
 
         let copy = self.clone();
