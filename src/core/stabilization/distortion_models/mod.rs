@@ -3,9 +3,9 @@
 
 mod opencv_fisheye;
 mod opencv_standard;
-mod poly3;
-mod poly5;
-mod ptlens;
+pub mod poly3;
+pub mod poly5;
+pub mod ptlens;
 mod insta360;
 pub mod sony;
 mod generic_polynomial;
