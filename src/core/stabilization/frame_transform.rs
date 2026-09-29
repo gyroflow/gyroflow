@@ -285,8 +285,18 @@ impl FrameTransform {
         let gyro = params.gyro.read();
         let file_metadata = gyro.file_metadata.read();
 
-        // Undistorting mesh of the frame, empty when it has none (the kernel flags say so, the buffer is then not uploaded)
-        let mesh_data = file_metadata.mesh_correction.kernel_buffer(frame);
+        // Camera metadata mesh takes precedence. Otherwise use the transient optical residual mesh only when the
+        // correction was actually applied in this lens/sync/timing context.
+        let camera_mesh = file_metadata.mesh_correction.kernel_buffer(frame);
+        let mesh_data = if !camera_mesh.is_empty() {
+            camera_mesh
+        } else if gyro.optical_correction_applied {
+            gyro.optical_correction.as_ref()
+                .and_then(|c| c.residual.kernel_buffer(frame, (params.width, params.height)))
+                .unwrap_or_default()
+        } else {
+            Vec::new()
+        };
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(&params, true, timestamp_ms, &file_metadata);
@@ -459,7 +469,14 @@ impl FrameTransform {
         let gyro = params.gyro.read();
         let file_metadata = gyro.file_metadata.read();
 
-        let mesh_correction = file_metadata.mesh_correction.forward_mesh(frame); // distorting mesh, none when the frame has none
+        let mesh_correction = file_metadata.mesh_correction.forward_mesh(frame).or_else(|| {
+            if gyro.optical_correction_applied {
+                gyro.optical_correction.as_ref()
+                    .and_then(|c| c.residual.forward_mesh(frame, (params.width, params.height)))
+            } else {
+                None
+            }
+        }); // distorting mesh, camera metadata first, then optical residual
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(params, false, timestamp_ms, &file_metadata);

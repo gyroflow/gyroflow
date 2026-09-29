@@ -14,7 +14,7 @@
 //! lens profile or rolling shutter time makes it stale too, see `context_checksum`
 
 use nalgebra::{ UnitQuaternion, Vector3 };
-use super::TimeQuat;
+use super::{ TimeQuat, OpticalResidualCorrection };
 
 /// What only the user can judge: nothing in the metadata says how far the motion data can be trusted
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -51,6 +51,8 @@ pub struct OpticalCorrection {
     /// For a file without motion data: the rotation the analysis measured between the frames, chained - the orientation
     /// the correction sits on. One per frame, (timestamp µs, w x y z); `integrate` uses it densified, see `base_quats`
     pub video_base: Vec<(i64, [f32; 4])>,
+    /// Spatial residual after the global camera rotation, compactly stored as a per-frame 9x9 grid.
+    pub residual: OpticalResidualCorrection,
 
     /// Frames the analysis tracked, and how many of them yielded a measurement
     pub frames: usize,
@@ -81,7 +83,8 @@ impl OpticalCorrection {
 
     /// Whether it was measured on (uncorrected) quaternions of this `checksum`, in this context (`context_checksum`)
     pub fn measured_on(&self, quats_checksum: u64, context_checksum: u64) -> bool {
-        !self.coeffs.is_empty() && self.quats_checksum == quats_checksum && self.context_checksum == context_checksum
+        (!self.coeffs.is_empty() || !self.residual.is_empty())
+            && self.quats_checksum == quats_checksum && self.context_checksum == context_checksum
     }
 
     pub fn apply(&self, quats: &mut TimeQuat) {
@@ -104,6 +107,7 @@ impl OpticalCorrection {
         for (t, q) in self.video_base.iter().step_by((self.video_base.len() / 256).max(1)) {
             hasher.write_i64(*t); hasher.write_u32(q[0].to_bits()); hasher.write_u32(q[1].to_bits()); hasher.write_u32(q[2].to_bits());
         }
+        self.residual.hash_into(hasher);
         hasher.write_usize(self.coeffs.len());
         for c in self.coeffs.iter().step_by((self.coeffs.len() / 512).max(1)) {
             hasher.write_u32(c[0].to_bits()); hasher.write_u32(c[1].to_bits()); hasher.write_u32(c[2].to_bits());

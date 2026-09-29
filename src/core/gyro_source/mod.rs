@@ -7,8 +7,10 @@ mod sony;
 mod canon;
 pub mod splines;
 pub mod optical_correction;
+pub mod optical_residual;
 pub use file_metadata::*;
 pub use optical_correction::{ OpticalCorrection, OpticalCorrectionSettings };
+pub use optical_residual::{ OpticalResidualCorrection, OPTICAL_GRID };
 pub use imu_transforms::*;
 pub use sony::{ interpolate_mesh, MESH_REFINE_SKIP_PX, MESH_REFINE_THRESHOLD_PX };
 
