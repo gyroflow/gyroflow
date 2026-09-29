@@ -3,9 +3,13 @@
 
 mod opencv_fisheye;
 mod opencv_standard;
-pub mod poly3;
-pub mod poly5;
-pub mod ptlens;
+// `pub(crate)`, not `mod`: the Lensfun XML importer (`crate::lensfun`) rescales these models' raw
+// Hugin/PanoTools coefficients itself (`{Poly3,Poly5,PtLens}::rescale_coeffs`), the same way this
+// crate's own calibrator would, so it needs the associated function - but there's no reason for
+// that to widen these modules' visibility past this crate.
+pub(crate) mod poly3;
+pub(crate) mod poly5;
+pub(crate) mod ptlens;
 mod insta360;
 pub mod sony;
 mod generic_polynomial;
