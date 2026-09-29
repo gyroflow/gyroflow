@@ -1457,6 +1457,17 @@ impl RenderQueue {
         job_id
     }
 
+    fn autosync_frame_size(input_width: u32, input_height: u32, target_height: i32) -> (u32, u32) {
+        if input_width == 0 || input_height == 0 || target_height <= 0 {
+            return (input_width.max(1), input_height.max(1));
+        }
+
+        let ratio = input_height as f64 / target_height as f64;
+        let width = (input_width as f64 / ratio).round().max(1.0) as u32;
+
+        (width, target_height as u32)
+    }
+
     fn do_autosync<F: Fn(f64) + Send + Sync + Clone + 'static, F2: Fn((String, String)) + Send + Sync + Clone + 'static>(stab: Arc<StabilizationManager>, processing_cb: F, input_file: &gyroflow_core::InputFile, err: F2, proc_height: i32) {
         let (url, duration_ms) = {
             (stab.input_file.read().url.clone(), stab.params.read().duration_ms)
@@ -1508,8 +1519,6 @@ impl RenderQueue {
 
                     let every_nth_frame = sync_params.every_nth_frame.max(1);
 
-                    let size = stab.params.read().size;
-
                     if let Ok(mut sync) = AutosyncProcess::from_manager(&stab, &timestamps_fract, sync_params, "synchronize".into(), cancel_flag.clone()) {
                         let processing_cb2 = processing_cb.clone();
                         sync.on_progress(move |percent, _ready, _total| {
@@ -1541,8 +1550,6 @@ impl RenderQueue {
                                 stab2.keyframes.write().update_gyro(&gyro);
                             }
                         });
-
-                        let (sw, sh) = ((proc_height as f64 * (size.0 as f64 / size.1 as f64)).round() as u32, proc_height as u32);
 
                         let gpu_decoding = stab.gpu_decoding.load(SeqCst);
 
@@ -1577,6 +1584,7 @@ impl RenderQueue {
                                 let sync2 = sync.clone();
                                 proc.on_frame(move |timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                                     if abs_frame_no % every_nth_frame == 0 {
+                                        let (sw, sh) = Self::autosync_frame_size(input_frame.width(), input_frame.height(), proc_height);
                                         match converter.scale(input_frame, ffmpeg_next::format::Pixel::GRAY8, sw, sh) {
                                             Ok(small_frame) => {
                                                 let (width, height, stride, pixels) = (small_frame.plane_width(0), small_frame.plane_height(0), small_frame.stride(0), small_frame.data(0));
@@ -1816,5 +1824,22 @@ impl RenderQueue {
         if sync_settings.is_object() && !sync_settings.as_object().unwrap().is_empty() {
             stab.lens.write().sync_settings = Some(sync_settings);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::RenderQueue;
+
+    #[test]
+    fn queue_autosync_full_resolution_keeps_frame_size() {
+        assert_eq!(RenderQueue::autosync_frame_size(1920, 1080, -1), (1920, 1080));
+        assert_eq!(RenderQueue::autosync_frame_size(1920, 1080, 0), (1920, 1080));
+    }
+
+    #[test]
+    fn queue_autosync_processing_resolution_preserves_aspect_ratio() {
+        assert_eq!(RenderQueue::autosync_frame_size(1920, 1080, 720), (1280, 720));
+        assert_eq!(RenderQueue::autosync_frame_size(1440, 1080, 720), (960, 720));
     }
 }
