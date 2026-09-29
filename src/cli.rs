@@ -34,6 +34,7 @@ macro_rules! connect {
 
 /** Gyroflow v1.6.3
 Video stabilization using gyroscope data
+Exit codes: 0 - success, 1 - render failure, 2 - invalid arguments
 */
 #[derive(FromArgs)]
 struct Opts {
@@ -185,7 +186,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
         for file in videos.iter().chain(lens_profiles.iter()) {
             if !std::path::Path::new(&file).exists() {
                 log::error!("File {} doesn't exist.", file);
-                return true;
+                std::process::exit(2);
             }
         }
         let mut watching = opts.watch.as_ref().map(|x| !x.is_empty()).unwrap_or_default();
@@ -193,11 +194,11 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
         if !watching {
             if lens_profiles.len() > 1 {
                 log::error!("More than one lens profile!");
-                return true;
+                std::process::exit(2);
             }
             if videos.is_empty() {
                 log::error!("No videos provided!");
-                return true;
+                std::process::exit(2);
             }
 
             log::info!("Videos: {:?}", videos);
@@ -226,6 +227,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
 
         let time = Instant::now();
         let mut queue_printed = false;
+        let render_failed = std::cell::Cell::new(false);
 
         let stab = Arc::new(StabilizationManager::default());
         stab.lens_profile_db.write().load_all();
@@ -296,23 +298,21 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
         }
         if let Some(export_metadata) = opts.export_metadata {
             if !export_metadata.is_empty() {
-                if let Some((opt, path)) = export_metadata.split_once(':') {
-                    if let Ok(opt) = opt.parse::<usize>() {
-                        if !path.is_empty() {
-                            queue.export_metadata = Some((opt, path.to_string(), export_metadata_fields));
-                        }
-                    }
+                if let Some((opt, path)) = parse_type_and_path(&export_metadata) {
+                    queue.export_metadata = Some((opt, path, export_metadata_fields));
+                } else {
+                    log::error!("Invalid --export-metadata value {}. Expected <type>:<path>, eg. \"3:camera.json\".", export_metadata);
+                    std::process::exit(2);
                 }
             }
         }
         if let Some(export_stmap) = opts.export_stmap {
             if !export_stmap.is_empty() {
-                if let Some((opt, path)) = export_stmap.split_once(':') {
-                    if let Ok(opt) = opt.parse::<usize>() {
-                        if !path.is_empty() {
-                            queue.export_stmap = Some((opt, path.to_string()));
-                        }
-                    }
+                if let Some((opt, path)) = parse_type_and_path(&export_stmap) {
+                    queue.export_stmap = Some((opt, path));
+                } else {
+                    log::error!("Invalid --export-stmap value {}. Expected <type>:<path>, eg. \"1:C:/stmaps/\".", export_stmap);
+                    std::process::exit(2);
                 }
             }
         }
@@ -339,7 +339,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             }) {
                 // Nothing is being watched and nothing was queued, so the event loop would just hang forever
                 log::error!("{}", e);
-                return true;
+                std::process::exit(1);
             }
             watching = true;
         }
@@ -441,6 +441,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                 }
             });
             connect!(queue_ptr, q, convert_format, |job_id: &u32, format: &QString, supported: &QString, _candidate: &QString| {
+                render_failed.set(true);
                 log::error!("[{:08x}] Pixel format {} is not supported. Supported are: {}", job_id, format.to_string(), supported.to_string());
             });
             connect!(queue_ptr, q, error, |job_id: &u32, text: &QString, arg: &QString, _callback: &QString| {
@@ -450,6 +451,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                     log::warn!("[{:08x}] File exists, overwriting: {}", job_id, text.to_string().strip_prefix("file_exists:").unwrap());
                     return;
                 }
+                render_failed.set(true);
                 log::error!("[{:08x}] Error: {}", job_id, text.to_string().replace("%1", &arg.to_string()));
             });
             connect!(queue_ptr, q, added, |job_id: &u32| {
@@ -539,7 +541,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             if queue.jobs_added.is_empty() {
                 // Nothing was queued, so `processing_done` will never fire, the queue would never start and the event loop would hang forever
                 log::error!("None of the input files could be added to the render queue.");
-                return true;
+                std::process::exit(1);
             }
         }
 
@@ -553,6 +555,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
 
         log::info!("Done in {:.3}s", time.elapsed().as_millis() as f64 / 1000.0);
 
+        if render_failed.get() { std::process::exit(1); }
         return true;
     }
 
@@ -583,6 +586,13 @@ fn detect_types(all_files: &[String]) -> (Vec<String>, Vec<String>, Vec<String>)
         }
     }
     (videos, lens_profiles, presets)
+}
+
+fn parse_type_and_path(value: &str) -> Option<(usize, String)> { // "3:camera.json" -> (3, "camera.json")
+    let (opt, path) = value.split_once(':')?;
+    let opt = opt.parse::<usize>().ok()?;
+    if path.is_empty() { return None; }
+    Some((opt, path.to_string()))
 }
 
 fn setup_defaults(stab: &Arc<StabilizationManager>, queue: &mut RenderQueue) -> serde_json::Value {
@@ -795,4 +805,24 @@ fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> Result<(), String> {
 
     log::info!("Watching {} folder(s) in {}, waiting for new files...", watched_count, path);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn type_and_path_values_parse() {
+        assert_eq!(parse_type_and_path("3:camera.json"), Some((3, "camera.json".to_string())));
+        assert_eq!(parse_type_and_path("1:C:/stmaps/"), Some((1, "C:/stmaps/".to_string())));
+    }
+
+    #[test]
+    fn malformed_values_are_rejected_not_ignored() {
+        // These used to fall through the parser and render the video instead
+        assert_eq!(parse_type_and_path("3"), None);
+        assert_eq!(parse_type_and_path("3:"), None);
+        assert_eq!(parse_type_and_path(":camera.json"), None);
+        assert_eq!(parse_type_and_path("x:camera.json"), None);
+    }
 }
