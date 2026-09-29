@@ -32,6 +32,7 @@ parking_lot = "0.12.5"
 regex = "1.13"
 bincode = { version = "2.0", features = ["serde"] }
 serde = "1.0"
+roxmltree = "0.20"
 serde_json = "1.0"
 crc32fast = "1.5.0"
 byteorder = "1.5.0"
@@ -120,3 +121,6 @@ ndk-context = { version = "0.1.1" }
 
 [build-dependencies]
 ureq = "3.3"
+
+[dev-dependencies]
+lensfun = "0.7"
