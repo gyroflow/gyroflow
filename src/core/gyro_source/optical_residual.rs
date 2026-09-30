@@ -173,6 +173,7 @@ impl OpticalResidualCorrection {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::stabilization::{distortion_models::DistortionModel, KernelParams, Stabilization};
 
     #[test]
     fn compact_roundtrip_and_inverse_are_consistent() {
@@ -196,6 +197,109 @@ mod tests {
                 let p = interpolate_mesh(q.x, q.y, sz, &inv);
                 let q2 = interpolate_mesh(p.x, p.y, sz, &fwd);
                 assert!((q2 - q).norm() < 0.02, "{q:?} -> {q2:?}");
+            }
+        }
+    }
+
+    #[test]
+    fn render_path_composes_camera_and_optical_mesh_in_inverse_direction() {
+        let size = (1920usize, 1080usize);
+
+        // An identity camera mesh exercises the normal metadata-mesh branch. The local optical grid is a
+        // constant raw->corrected displacement, so render inversion must sample by the opposite displacement.
+        let zero = vec![[0.0f32; 2]; OPTICAL_GRID * OPTICAL_GRID];
+        let camera = OpticalResidualCorrection::from_normalized_frames(0.35, vec![(3, zero)])
+            .kernel_buffer(3, size).unwrap();
+
+        let dx = 10.0f32 / size.0 as f32;
+        let dy = -6.0f32 / size.1 as f32;
+        let optical_grid = vec![[dx, dy]; OPTICAL_GRID * OPTICAL_GRID];
+        let optical = OpticalResidualCorrection::from_normalized_frames(0.35, vec![(3, optical_grid)])
+            .kernel_buffer(3, size).unwrap();
+
+        let mut mesh: Vec<f64> = camera.iter().map(|v| *v as f64).collect();
+        let optical_offset = mesh.len();
+        mesh.extend(optical.iter().map(|v| *v as f64));
+
+        let mut params = KernelParams {
+            width: size.0 as i32,
+            height: size.1 as i32,
+            f: [1000.0, 1000.0],
+            c: [size.0 as f32 / 2.0, size.1 as f32 / 2.0],
+            flags: 512 | 4096, // camera metadata mesh + appended optical residual
+            reserved2: optical_offset as f32,
+            ..Default::default()
+        };
+        // Zero means "not configured" for these stretch fields in the render path, so leave both at zero.
+        params.field_limit = 0.0;
+
+        let identity = [[
+            1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 0.0,
+            0.0, 0.0,
+            0.0, 0.0,
+        ]];
+        let p = Stabilization::rotate_and_distort(
+            (0.0, 0.0),
+            0,
+            &params,
+            &identity,
+            &DistortionModel::default(),
+            None,
+            &mesh,
+        ).unwrap();
+
+        assert!((p.0 - (size.0 as f32 / 2.0 - 10.0)).abs() < 0.15, "x={}", p.0);
+        assert!((p.1 - (size.1 as f32 / 2.0 + 6.0)).abs() < 0.15, "y={}", p.1);
+    }
+
+    #[test]
+    fn render_path_tracks_multiple_temporal_frequencies() {
+        let size = (1920usize, 1080usize);
+        let fps = 60.0f32;
+        let amp_px = 7.0f32;
+        let identity = [[
+            1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 0.0,
+            0.0, 0.0,
+            0.0, 0.0,
+        ]];
+
+        for hz in [0.5f32, 2.0, 8.0] {
+            let frames = (0..120usize).map(|frame| {
+                let t = frame as f32 / fps;
+                let dx_px = amp_px * (std::f32::consts::TAU * hz * t).sin();
+                let grid = vec![[dx_px / size.0 as f32, 0.0]; OPTICAL_GRID * OPTICAL_GRID];
+                (frame, grid)
+            }).collect();
+            let residual = OpticalResidualCorrection::from_normalized_frames(0.35, frames);
+
+            for frame in [7usize, 19, 41, 73, 101] {
+                let t = frame as f32 / fps;
+                let expected_dx = amp_px * (std::f32::consts::TAU * hz * t).sin();
+                let mesh: Vec<f64> = residual.kernel_buffer(frame, size).unwrap()
+                    .into_iter().map(|v| v as f64).collect();
+                let params = KernelParams {
+                    width: size.0 as i32,
+                    height: size.1 as i32,
+                    f: [1000.0, 1000.0],
+                    c: [size.0 as f32 / 2.0, size.1 as f32 / 2.0],
+                    flags: 4096,
+                    ..Default::default()
+                };
+                let p = Stabilization::rotate_and_distort(
+                    (0.0, 0.0), 0, &params, &identity, &DistortionModel::default(), None, &mesh,
+                ).unwrap();
+                let expected_x = size.0 as f32 / 2.0 - expected_dx;
+                assert!(
+                    (p.0 - expected_x).abs() < 0.2,
+                    "hz={hz} frame={frame} expected x={expected_x}, got {}",
+                    p.0
+                );
             }
         }
     }

@@ -377,7 +377,7 @@ impl Stabilization {
 
             uv = (uv.0 + params.c[0], uv.1 + params.c[1]);
 
-            if !mesh_data.is_empty() && mesh_data[0] > 10.0 {
+            if (params.flags & 512) == 512 && !mesh_data.is_empty() && mesh_data[0] > 10.0 {
                 let mesh_size = (mesh_data[3], mesh_data[4]);
                 let origin    = (mesh_data[5] as f32, mesh_data[6] as f32);
                 let crop_size = (mesh_data[7] as f32, mesh_data[8] as f32);
@@ -412,7 +412,7 @@ impl Stabilization {
             }
 
             // FocalPlaneDistortion
-            if !mesh_data.is_empty() && mesh_data[0] > 0.0 && mesh_data[mesh_data[0] as usize] > 0.0 {
+            if (params.flags & 1024) == 1024 && !mesh_data.is_empty() && mesh_data[0] > 0.0 && mesh_data[mesh_data[0] as usize] > 0.0 {
                 let o = mesh_data[0] as usize; // offset to focal plane distortion data
 
                 let mesh_size = (mesh_data[3], mesh_data[4]);
@@ -448,6 +448,37 @@ impl Stabilization {
 
             if params.input_horizontal_stretch > 0.001 { uv.0 /= params.input_horizontal_stretch; }
             if params.input_vertical_stretch   > 0.001 { uv.1 /= params.input_vertical_stretch; }
+
+            // Local optical stabilization is measured in raw decoded-frame pixels, so it is the final
+            // source-side warp. reserved2 points at its transient mesh block appended after camera metadata.
+            if (params.flags & 4096) == 4096 {
+                let base = params.reserved2.max(0.0) as usize;
+                if let Some(optical) = mesh_data.get(base..).filter(|m| m.len() > 9 && m[0] > 10.0) {
+                    let mesh_size = (optical[3], optical[4]);
+                    let origin = (optical[5] as f32, optical[6] as f32);
+                    let crop_size = (optical[7] as f32, optical[8] as f32);
+                    if (params.flags & 128) == 128 { uv.1 = params.height as f32 - uv.1; }
+                    uv.0 = map_coord(uv.0, 0.0, params.width as f32, origin.0, origin.0 + crop_size.0);
+                    uv.1 = map_coord(uv.1, 0.0, params.height as f32, origin.1, origin.1 + crop_size.1);
+
+                    let q = (uv.0 as f64, uv.1 as f64);
+                    let mut new_pos = crate::gyro_source::interpolate_mesh(q.0, q.1, mesh_size, optical);
+                    let o = optical[0] as usize;
+                    let fwd = o + 4 + 2 * optical.get(o).copied().unwrap_or(0.0).max(0.0) as usize;
+                    if optical.len() > fwd + 9 && optical[fwd] > 10.0 {
+                        for _ in 0..2 {
+                            let f = crate::gyro_source::interpolate_mesh(new_pos.x, new_pos.y, mesh_size, &optical[fwd..]);
+                            let (dx, dy) = (q.0 - f.x, q.1 - f.y);
+                            new_pos.x += dx;
+                            new_pos.y += dy;
+                            if dx * dx + dy * dy < 0.0625 { break; }
+                        }
+                    }
+                    uv.0 = map_coord(new_pos.x as f32, origin.0, origin.0 + crop_size.0, 0.0, params.width as f32);
+                    uv.1 = map_coord(new_pos.y as f32, origin.1, origin.1 + crop_size.1, 0.0, params.height as f32);
+                    if (params.flags & 128) == 128 { uv.1 = params.height as f32 - uv.1; }
+                }
+            }
 
             Some(uv)
         }
@@ -775,9 +806,9 @@ impl Stabilization {
 /// "is it in view" test and feeds the offset search a match that was never there
 pub fn undistort_points_with_rolling_shutter(distorted: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, params: &ComputeParams, lens_correction_amount: f64, use_fovs: bool, clamp_to_field: bool) -> Vec<(f32, f32)> {
     if distorted.is_empty() { return Vec::new(); }
-    let (camera_matrix, distortion_coeffs, new_k, rotations, is, mesh, fov, field_limit, breathing) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms, frame, use_fovs);
+    let (camera_matrix, distortion_coeffs, new_k, rotations, is, mesh, optical_mesh, fov, field_limit, breathing) = FrameTransform::at_timestamp_for_points(params, distorted, timestamp_ms, frame, use_fovs);
 
-    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(new_k), Some(rotations), params, lens_correction_amount, fov, timestamp_ms, is, mesh, field_limit, breathing, clamp_to_field)
+    undistort_points(distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(new_k), Some(rotations), params, lens_correction_amount, fov, timestamp_ms, is, mesh, optical_mesh, field_limit, breathing, clamp_to_field)
 }
 /// Optical flow features -> the bearings they arrived on: unit ray directions in the camera's own frame,
 /// `None` where the lens has no image of the feature.
@@ -804,7 +835,7 @@ pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us:
 
     // Optical flow matches real image features in the camera's own frame: no rotation into an output camera,
     // no field clamp, no zoom - just the lens, undone
-    undistort_points_to_rays(distorted, &kernel_params, Matrix3::identity(), None, params, None, None, None, false)
+    undistort_points_to_rays(distorted, &kernel_params, Matrix3::identity(), None, params, None, None, None, None, false)
         .into_iter()
         .map(|ray| ray.map(projection::ray_to_dir).filter(|d| d.0.is_finite() && d.1.is_finite() && d.2.is_finite()))
         .collect()
@@ -822,12 +853,12 @@ pub fn undistort_points_for_optical_motion(distorted: &[(f32, f32)], timestamp_m
 
     // `use_fovs` is what brings lens breathing in, the magnification `at_timestamp` applies on the source side; the
     // zoom it's otherwise about isn't read here
-    let (camera_matrix, distortion_coeffs, _, _, shifts, mesh, _, _, breathing) = FrameTransform::at_timestamp_for_points(params, &full, timestamp_ms, Some(frame), true);
+    let (camera_matrix, distortion_coeffs, _, _, shifts, mesh, optical_mesh, _, _, breathing) = FrameTransform::at_timestamp_for_points(params, &full, timestamp_ms, Some(frame), true);
     // Without rolling shutter correction the shift is looked up once, for the whole frame
     let shifts = shifts.map(|s| if s.len() == 1 { vec![s[0]; full.len()] } else { s });
 
     let kernel_params = point_kernel_params(params, camera_matrix, distortion_coeffs, 0.0, timestamp_ms);
-    undistort_points_to_rays(&full, &kernel_params, Matrix3::identity(), None, params, shifts.as_deref(), mesh.as_deref(), breathing.as_deref(), false)
+    undistort_points_to_rays(&full, &kernel_params, Matrix3::identity(), None, params, shifts.as_deref(), mesh.as_deref(), optical_mesh.as_deref(), breathing.as_deref(), false)
         .into_iter()
         .map(|ray| ray.map(projection::ray_to_dir).filter(|d| d.0.is_finite() && d.1.is_finite() && d.2.is_finite()))
         .collect()
@@ -868,7 +899,7 @@ fn point_kernel_params(params: &ComputeParams, camera_matrix: Matrix3<f64>, dist
 ///
 /// The half of the point path that is about the camera and not about the picture: [`undistort_points`] goes
 /// on to project these onto the output plane, the sync reads them as bearings.
-fn undistort_points_to_rays(distorted: &[(f32, f32)], kernel_params: &KernelParams, rotation: Matrix3<f64>, rot_per_point: Option<&[Matrix3<f64>]>, params: &ComputeParams, shift_per_point: Option<&[(f32, f32, f32, f32, f32)]>, mesh: Option<&[f64]>, breathing_per_point: Option<&[f32]>, clamp_to_field: bool) -> Vec<Option<(f32, f32)>> {
+fn undistort_points_to_rays(distorted: &[(f32, f32)], kernel_params: &KernelParams, rotation: Matrix3<f64>, rot_per_point: Option<&[Matrix3<f64>]>, params: &ComputeParams, shift_per_point: Option<&[(f32, f32, f32, f32, f32)]>, mesh: Option<&[f64]>, optical_mesh: Option<&[f64]>, breathing_per_point: Option<&[f32]>, clamp_to_field: bool) -> Vec<Option<(f32, f32)>> {
     let f = (kernel_params.f[0], kernel_params.f[1]);
     let c = (kernel_params.c[0], kernel_params.c[1]);
     // Only the picture's own outline gets the edge-of-field stand-in below; a caller measuring real image
@@ -892,6 +923,20 @@ fn undistort_points_to_rays(distorted: &[(f32, f32)], kernel_params: &KernelPara
     distorted.iter().enumerate().map(|(index, pi)| {
         let mut x = pi.0;
         let mut y = pi.1;
+
+        // Inverse of rotate_and_distort's final optical lookup: raw source pixel -> optically corrected
+        // source coordinate, before stretch/digital lens and the camera's own FPD/mesh are undone.
+        if let Some(optical) = optical_mesh.filter(|m| m.len() > 9 && m[0] > 10.0) {
+            let mesh_size = (optical[3], optical[4]);
+            let origin = (optical[5] as f32, optical[6] as f32);
+            let crop_size = (optical[7] as f32, optical[8] as f32);
+            x = map_coord(x, 0.0, params.width as f32, origin.0, origin.0 + crop_size.0);
+            y = map_coord(y, 0.0, params.height as f32, origin.1, origin.1 + crop_size.1);
+            let p = crate::gyro_source::interpolate_mesh(x as f64, y as f64, mesh_size, optical);
+            x = map_coord(p.x as f32, origin.0, origin.0 + crop_size.0, 0.0, params.width as f32);
+            y = map_coord(p.y as f32, origin.1, origin.1 + crop_size.1, 0.0, params.height as f32);
+        }
+
         if params.lens.input_horizontal_stretch > 0.001 { x *= params.lens.input_horizontal_stretch as f32; }
         if params.lens.input_vertical_stretch   > 0.001 { y *= params.lens.input_vertical_stretch as f32; }
 
@@ -983,7 +1028,7 @@ fn undistort_points_to_rays(distorted: &[(f32, f32)], kernel_params: &KernelPara
 }
 
 // Ported from OpenCV: https://github.com/opencv/opencv/blob/4.x/modules/calib3d/src/fisheye.cpp#L321
-pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64; 24], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams, lens_correction_amount: f64, fov: f64, timestamp_ms: f64, shift_per_point: Option<Vec<(f32, f32, f32, f32, f32)>>, mesh: Option<Vec<f64>>, field_limit: f64, breathing_per_point: Option<Vec<f32>>, clamp_to_field: bool) -> Vec<(f32, f32)> {
+pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, distortion_coeffs: &[f64; 24], rotation: Matrix3<f64>, p: Option<Matrix3<f64>>, rot_per_point: Option<Vec<Matrix3<f64>>>, params: &ComputeParams, lens_correction_amount: f64, fov: f64, timestamp_ms: f64, shift_per_point: Option<Vec<(f32, f32, f32, f32, f32)>>, mesh: Option<Vec<f64>>, optical_mesh: Option<Vec<f64>>, field_limit: f64, breathing_per_point: Option<Vec<f32>>, clamp_to_field: bool) -> Vec<(f32, f32)> {
     // The rotations act on ray *directions* now, so the output camera matrix is no longer folded into
     // them: `p` is that matrix, applied to the projected plane point at the very end
     let (out_f, out_c) = match p {
@@ -1026,7 +1071,7 @@ pub fn undistort_points(distorted: &[(f32, f32)], camera_matrix: Matrix3<f64>, d
         ((1.0 - amount) * p.0 + amount * u.0 * rp, (1.0 - amount) * p.1 + amount * u.1 * rp)
     };
 
-    let rays = undistort_points_to_rays(distorted, &kernel_params, rotation, rot_per_point.as_deref(), params, shift_per_point.as_deref(), mesh.as_deref(), breathing_per_point.as_deref(), clamp_to_field);
+    let rays = undistort_points_to_rays(distorted, &kernel_params, rotation, rot_per_point.as_deref(), params, shift_per_point.as_deref(), mesh.as_deref(), optical_mesh.as_deref(), breathing_per_point.as_deref(), clamp_to_field);
 
     rays.into_iter().map(|ray| {
         let Some(ray_out) = ray else { return INVALID_POINT };

@@ -285,17 +285,23 @@ impl FrameTransform {
         let gyro = params.gyro.read();
         let file_metadata = gyro.file_metadata.read();
 
-        // Camera metadata mesh takes precedence. Otherwise use the transient optical residual mesh only when the
-        // correction was actually applied in this lens/sync/timing context.
-        let camera_mesh = file_metadata.mesh_correction.kernel_buffer(frame);
-        let mesh_data = if !camera_mesh.is_empty() {
-            camera_mesh
-        } else if gyro.optical_correction_applied {
-            gyro.optical_correction.as_ref()
+        // Camera metadata and the compact optical residual are independent source-side warps. Keep the camera
+        // buffer intact, then append the transient optical block and pass its offset in reserved2. The kernels
+        // apply the optical block last, in raw decoded-frame coordinates; this lets Sony mesh/FPD, IBIS/OIS,
+        // breathing, digital-lens and stretch geometry coexist instead of one mesh silently disabling the other.
+        let mut mesh_data = file_metadata.mesh_correction.kernel_buffer(frame);
+        let optical_mesh_offset = if gyro.optical_correction_applied {
+            if let Some(optical) = gyro.optical_correction.as_ref()
                 .and_then(|c| c.residual.kernel_buffer(frame, (params.width, params.height)))
-                .unwrap_or_default()
+            {
+                let offset = mesh_data.len();
+                mesh_data.extend(optical);
+                offset as f32
+            } else {
+                0.0
+            }
         } else {
-            Vec::new()
+            0.0
         };
 
         // ----------- Rolling shutter correction -----------
@@ -434,6 +440,7 @@ impl FrameTransform {
             translation3d: [0.0, 0.0, 0.0, 0.0], // currently unused
             digital_lens_params,
             light_refraction_coefficient: light_refraction_coefficient as f32,
+            reserved2: optical_mesh_offset,
             ..Default::default()
         };
 
@@ -447,7 +454,7 @@ impl FrameTransform {
         }
     }
 
-    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, use_fovs: bool) -> (Matrix3<f64>, [f64; 24], Matrix3<f64>, Vec<Matrix3<f64>>, Option<Vec<(f32, f32, f32, f32, f32)>>, Option<Vec<f64>>, f64, f64, Option<Vec<f32>>) { // camera_matrix, dist_coeffs, output camera matrix, rotations_per_point, shifts, mesh, fov, field_limit, breathing_per_point
+    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, use_fovs: bool) -> (Matrix3<f64>, [f64; 24], Matrix3<f64>, Vec<Matrix3<f64>>, Option<Vec<(f32, f32, f32, f32, f32)>>, Option<Vec<f64>>, Option<Vec<f64>>, f64, f64, Option<Vec<f32>>) { // camera_matrix, dist_coeffs, output camera matrix, rotations_per_point, shifts, camera mesh, optical mesh, fov, field_limit, breathing_per_point
         // ----------- Keyframes -----------
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
         // ----------- Keyframes -----------
@@ -469,14 +476,16 @@ impl FrameTransform {
         let gyro = params.gyro.read();
         let file_metadata = gyro.file_metadata.read();
 
-        let mesh_correction = file_metadata.mesh_correction.forward_mesh(frame).or_else(|| {
-            if gyro.optical_correction_applied {
-                gyro.optical_correction.as_ref()
-                    .and_then(|c| c.residual.forward_mesh(frame, (params.width, params.height)))
-            } else {
-                None
-            }
-        }); // distorting mesh, camera metadata first, then optical residual
+        // These are separate transforms. The optical residual is measured in raw decoded-frame coordinates,
+        // therefore source->ray applies its forward mesh before digital/lens/camera metadata. Keeping it separate
+        // also lets Sony camera mesh/FPD coexist with optical stabilization.
+        let mesh_correction = file_metadata.mesh_correction.forward_mesh(frame);
+        let optical_mesh = if gyro.optical_correction_applied {
+            gyro.optical_correction.as_ref()
+                .and_then(|c| c.residual.forward_mesh(frame, (params.width, params.height)))
+        } else {
+            None
+        };
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(params, false, timestamp_ms, &file_metadata);
@@ -567,6 +576,6 @@ impl FrameTransform {
             shifts = None;
         }
 
-        (scaled_k, distortion_coeffs, new_k, rotations, shifts, mesh_correction, fov, field_limit, breathing_per_point)
+        (scaled_k, distortion_coeffs, new_k, rotations, shifts, mesh_correction, optical_mesh, fov, field_limit, breathing_per_point)
     }
 }

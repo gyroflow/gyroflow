@@ -165,6 +165,100 @@ vec3 ray_to_dir(vec2 ray) {
     return vec3(ray * (sin(theta) / theta), cos(theta));
 }
 
+
+// Local optical residual is independent of lens-model camera metadata.
+// Qt keeps the shared mesh buffer in a 1x4096 R32F texture; reserved2 is the optical block offset.
+const int OPT_GRID_SIZE = 9;
+float opt_a[OPT_GRID_SIZE]; float opt_b[OPT_GRID_SIZE]; float opt_c[OPT_GRID_SIZE]; float opt_d[OPT_GRID_SIZE];
+float opt_alpha[OPT_GRID_SIZE]; float opt_mu[OPT_GRID_SIZE]; float opt_z[OPT_GRID_SIZE];
+float opt_mesh_data(int idx) {
+    return texture(texMeshData, vec2(0.0, float(idx) / 4095.0)).r;
+}
+void opt_cubic_coefficients(float mesh[OPT_GRID_SIZE], float size) {
+    float h = size / float(OPT_GRID_SIZE - 1);
+    float inv_h = 1.0 / h;
+    float three_inv_h = 3.0 * inv_h;
+    float h_over_3 = h / 3.0;
+    float inv_3h = 1.0 / (3.0 * h);
+    for (int i = 0; i < OPT_GRID_SIZE; i++) opt_a[i] = mesh[i];
+    for (int i = 1; i < OPT_GRID_SIZE - 1; i++)
+        opt_alpha[i] = three_inv_h * (opt_a[i + 1] - 2.0 * opt_a[i] + opt_a[i - 1]);
+    opt_mu[0] = 0.0; opt_z[0] = 0.0;
+    for (int i = 1; i < OPT_GRID_SIZE - 1; i++) {
+        opt_mu[i] = 1.0 / (4.0 - opt_mu[i - 1]);
+        opt_z[i] = (opt_alpha[i] * inv_h - opt_z[i - 1]) * opt_mu[i];
+    }
+    opt_c[OPT_GRID_SIZE - 1] = 0.0;
+    for (int j = OPT_GRID_SIZE - 2; j >= 0; j--) {
+        opt_c[j] = opt_z[j] - opt_mu[j] * opt_c[j + 1];
+        opt_b[j] = (opt_a[j + 1] - opt_a[j]) * inv_h - h_over_3 * (opt_c[j + 1] + 2.0 * opt_c[j]);
+        opt_d[j] = (opt_c[j + 1] - opt_c[j]) * inv_3h;
+    }
+}
+float opt_cubic_interpolate(float x, float size) {
+    if (x <= 0.0) return opt_a[0] + opt_b[0] * x;
+    if (x >= size) {
+        float h = size / float(OPT_GRID_SIZE - 1);
+        float slope = opt_b[OPT_GRID_SIZE - 2] + 2.0 * opt_c[OPT_GRID_SIZE - 2] * h
+                    + 3.0 * opt_d[OPT_GRID_SIZE - 2] * h * h;
+        return opt_a[OPT_GRID_SIZE - 1] + slope * (x - size);
+    }
+    int i = int(max(0.0, min(float(OPT_GRID_SIZE - 2), float(OPT_GRID_SIZE - 1) * x / size)));
+    float dx = x - size * float(i) / float(OPT_GRID_SIZE - 1);
+    return opt_a[i] + opt_b[i] * dx + opt_c[i] * dx * dx + opt_d[i] * dx * dx * dx;
+}
+float opt_bivariate(int base, float size_x, float size_y, int component, float x, float y) {
+    float intermediate[OPT_GRID_SIZE];
+    int i = int(max(0.0, min(float(OPT_GRID_SIZE - 2), float(OPT_GRID_SIZE - 1) * x / size_x)));
+    float dx = x - size_x * float(i) / float(OPT_GRID_SIZE - 1);
+    float dx2 = dx * dx;
+    int block_ = OPT_GRID_SIZE * 4;
+    int offs = base + 9 + OPT_GRID_SIZE * OPT_GRID_SIZE * 2 + block_ * OPT_GRID_SIZE * component + i;
+    for (int j = 0; j < OPT_GRID_SIZE; j++) {
+        intermediate[j] = opt_mesh_data(offs + OPT_GRID_SIZE * 0 + j * block_)
+                        + opt_mesh_data(offs + OPT_GRID_SIZE * 1 + j * block_) * dx
+                        + opt_mesh_data(offs + OPT_GRID_SIZE * 2 + j * block_) * dx2
+                        + opt_mesh_data(offs + OPT_GRID_SIZE * 3 + j * block_) * dx2 * dx;
+    }
+    opt_cubic_coefficients(intermediate, size_y);
+    return opt_cubic_interpolate(y, size_y);
+}
+vec2 opt_interpolate_mesh(int base, vec2 mesh_size, vec2 pos) {
+    return vec2(
+        opt_bivariate(base, mesh_size.x, mesh_size.y, 0, pos.x, pos.y),
+        opt_bivariate(base, mesh_size.x, mesh_size.y, 1, pos.x, pos.y)
+    );
+}
+vec2 apply_optical_mesh(vec2 uv) {
+    if (!bool(params.flags & 4096)) return uv;
+    int base = max(0, int(params.reserved2));
+    if (opt_mesh_data(base) <= 10.0) return uv;
+
+    vec2 mesh_size = vec2(opt_mesh_data(base + 3), opt_mesh_data(base + 4));
+    vec2 origin = vec2(opt_mesh_data(base + 5), opt_mesh_data(base + 6));
+    vec2 crop_size = vec2(opt_mesh_data(base + 7), opt_mesh_data(base + 8));
+    if (bool(params.flags & 128)) uv.y = float(params.height) - uv.y;
+    uv.x = map_coord(uv.x, 0.0, float(params.width), origin.x, origin.x + crop_size.x);
+    uv.y = map_coord(uv.y, 0.0, float(params.height), origin.y, origin.y + crop_size.y);
+
+    vec2 q = uv;
+    uv = opt_interpolate_mesh(base, mesh_size, q);
+    int o = base + int(opt_mesh_data(base));
+    int fwd = o + 4 + 2 * int(max(opt_mesh_data(o), 0.0));
+    if (opt_mesh_data(fwd) > 10.0) {
+        for (int it = 0; it < 2; it++) {
+            vec2 delta = q - opt_interpolate_mesh(fwd, mesh_size, uv);
+            uv += delta;
+            if (dot(delta, delta) < 0.0625) break;
+        }
+    }
+
+    uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0, float(params.width));
+    uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0, float(params.height));
+    if (bool(params.flags & 128)) uv.y = float(params.height) - uv.y;
+    return uv;
+}
+
 vec2 rotate_and_distort(vec2 ray, float idx) {
     vec3 d = ray_to_dir(ray);
     float _x = (d.x * get_param(idx, 0)) + (d.y * get_param(idx, 1)) + (d.z * get_param(idx, 2)) + params.translation3d.x;
@@ -217,6 +311,7 @@ vec2 rotate_and_distort(vec2 ray, float idx) {
         if (params.input_horizontal_stretch > 0.001) { uv.x /= params.input_horizontal_stretch; }
         if (params.input_vertical_stretch   > 0.001) { uv.y /= params.input_vertical_stretch; }
 
+        uv = apply_optical_mesh(uv);
         return uv;
     }
     return vec2(-99999.0, -99999.0);

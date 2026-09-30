@@ -81,6 +81,11 @@ struct Derived {
     frame: usize,
     /// Tracked position in frame b, normalized to the analyzed frame.
     uv: [f32; 2],
+    /// Local derivatives of frame-b's undistorted bearing with respect to one tracked pixel in x/y.
+    /// These carry the lens, mesh, IBIS/OIS and breathing geometry into the residual mesh instead of
+    /// approximating every lens by one focal length.
+    jx: Vector3<f64>,
+    jy: Vector3<f64>,
     /// Where the quaternions put the point in the second frame, and how far off that was (quaternion frame)
     p: Vector3<f64>,
     r: Vector3<f64>,
@@ -465,7 +470,6 @@ impl OpticalMotionAnalysis {
         if self.is_cancelled() { return; }
 
         let derived = self.derive();
-        self.measure_local(&derived, end);
         let rhp = self.high_pass(&derived);
 
         // (seq, band) -> the points
@@ -478,16 +482,19 @@ impl OpticalMotionAnalysis {
         let floor = SIGMA_FLOOR_PX / self.focal_px.max(1.0);
         let gyro = self.params.gyro.clone();
         let vision = &self.vision;
-        let mut ms: Vec<(usize, BandMeasurement)> = groups.par_iter().filter_map(|(&(seq, _), idx)| {
+        let mut ms: Vec<(usize, u8, BandMeasurement)> = groups.par_iter().filter_map(|(&(seq, band), idx)| {
             let gyro = gyro.read();
-            fit_band(&derived, &rhp, idx, floor, &gyro, vision).map(|mut m| { m.pair = seq; (seq, m) })
+            fit_band(&derived, &rhp, idx, floor, &gyro, vision).map(|mut m| { m.pair = seq; (seq, band, m) })
         }).collect();
-        ms.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.ta_us.total_cmp(&b.1.ta_us)));
-        let mut seqs: Vec<usize> = ms.iter().map(|(s, _)| *s).collect();
+        ms.sort_by(|a, b| a.0.cmp(&b.0).then(a.2.ta_us.total_cmp(&b.2.ta_us)));
+        // The local mesh is the part left after exactly the same per-band global rotation that feeds the
+        // optical gyro solver. Using the high-passed track residuals here also keeps slow parallax out.
+        self.measure_local(&derived, &rhp, &groups, &ms);
+        let mut seqs: Vec<usize> = ms.iter().map(|(s, _, _)| *s).collect();
         seqs.sort_unstable();
         seqs.dedup();
         self.measured_pairs += seqs.len();
-        self.measurements.extend(ms.into_iter().map(|(_, m)| m));
+        self.measurements.extend(ms.into_iter().map(|(_, _, m)| m));
 
         self.measured_upto = end;
         let keep_from = end.saturating_sub(HP_MAX);
@@ -505,19 +512,29 @@ impl OpticalMotionAnalysis {
         let per_pair: Vec<Vec<Derived>> = self.pairs.par_iter().map(|pair| {
             let pts_a: Vec<(f32, f32)> = pair.obs.iter().map(|o| (o.a[0], o.a[1])).collect();
             let pts_b: Vec<(f32, f32)> = pair.obs.iter().map(|o| (o.b[0], o.b[1])).collect();
+            let pts_bx: Vec<(f32, f32)> = pair.obs.iter().map(|o| (o.b[0] + 1.0, o.b[1])).collect();
+            let pts_by: Vec<(f32, f32)> = pair.obs.iter().map(|o| (o.b[0], o.b[1] + 1.0)).collect();
             let ba = undistort_points_for_optical_motion(&pts_a, pair.a.timestamp_ms, pair.a.index, params, size);
             let bb = undistort_points_for_optical_motion(&pts_b, pair.b.timestamp_ms, pair.b.index, params, size);
+            let bbx = undistort_points_for_optical_motion(&pts_bx, pair.b.timestamp_ms, pair.b.index, params, size);
+            let bby = undistort_points_for_optical_motion(&pts_by, pair.b.timestamp_ms, pair.b.index, params, size);
             let gyro = params.gyro.read();
             let orient = |t: f64| orientation(&self.vision, &gyro, t);
             let mut out = Vec::with_capacity(pair.obs.len());
             for (i, o) in pair.obs.iter().enumerate() {
-                let (Some(a), Some(b)) = (ba.get(i).copied().flatten(), bb.get(i).copied().flatten()) else { continue };
+                let (Some(a), Some(b), Some(bx), Some(by)) = (
+                    ba.get(i).copied().flatten(),
+                    bb.get(i).copied().flatten(),
+                    bbx.get(i).copied().flatten(),
+                    bby.get(i).copied().flatten(),
+                ) else { continue };
                 let pos_a = if horizontal { o.a[0] } else { o.a[1] };
                 let pos_b = if horizontal { o.b[0] } else { o.b[1] };
                 let ta = pair.a.start_ms + pair.a.per_px_ms * pos_a as f64;
                 let tb = pair.b.start_ms + pair.b.per_px_ms * pos_b as f64;
                 let m = (orient(tb).inverse() * orient(ta)).to_rotation_matrix().into_inner();
                 let (va, vb) = (to_quat_frame(a), to_quat_frame(b));
+                let (vbx, vby) = (to_quat_frame(bx), to_quat_frame(by));
                 let p = m * va;
                 let band = ((pos_a / track_rows) * BANDS as f32).floor().clamp(0.0, (BANDS - 1) as f32) as u8;
                 out.push(Derived {
@@ -526,6 +543,8 @@ impl OpticalMotionAnalysis {
                     band,
                     frame: pair.b.index,
                     uv: [o.b[0] / size.0.max(1) as f32, o.b[1] / size.1.max(1) as f32],
+                    jx: vbx - vb,
+                    jy: vby - vb,
                     p,
                     r: vb - p,
                     ta_ms: ta,
@@ -537,38 +556,44 @@ impl OpticalMotionAnalysis {
         per_pair.into_iter().flatten().collect()
     }
 
-    /// Measures spatial motion left after one robust global rotation for each frame pair.
-    fn measure_local(&mut self, derived: &[Derived], end: usize) {
-        let mut groups: HashMap<usize, Vec<&Derived>> = HashMap::new();
-        for d in derived {
-            if d.seq >= self.measured_upto && d.seq < end {
-                groups.entry(d.seq).or_default().push(d);
-            }
-        }
-        let sx = self.focal_px / self.track_size.0.max(1) as f64;
-        let sy = self.focal_px / self.track_size.1.max(1) as f64;
-        let mut seqs: Vec<_> = groups.into_iter().collect();
-        seqs.sort_by_key(|(seq, _)| *seq);
-        for (_, ds) in seqs {
-            let Some(rho) = fit_pair_rotation(&ds) else { continue };
-            let frame = ds[0].frame;
-            let mut local = Vec::<([f32; 2], [f64; 2])>::with_capacity(ds.len());
-            for d in ds {
-                let global = (d.p + rho.cross(&d.p)).normalize();
-                let observed = (d.p + d.r).normalize();
-                let Some(a) = ray_uv(global) else { continue };
-                let Some(b) = ray_uv(observed) else { continue };
-                let mut dx = (b.0 - a.0) * sx;
-                let mut dy = (b.1 - a.1) * sy;
+    /// Measures spatial motion left after the same per-band global rotation used by the optical gyro solver.
+    /// The input is already high-passed along each persistent track, so slow translation/parallax is not turned
+    /// into a warp. A local source-projection Jacobian maps the remaining ray error back to tracked pixels,
+    /// carrying lens distortion, camera mesh, IBIS/OIS and breathing geometry into the grid.
+    fn measure_local(
+        &mut self,
+        derived: &[Derived],
+        rhp: &[Option<Vector3<f64>>],
+        groups: &HashMap<(usize, u8), Vec<usize>>,
+        fits: &[(usize, u8, BandMeasurement)],
+    ) {
+        let mut local_by_seq: HashMap<usize, (usize, Vec<([f32; 2], [f64; 2])>)> = HashMap::new();
+        for (seq, band, m) in fits {
+            let Some(idx) = groups.get(&(*seq, *band)) else { continue };
+            let Some(&first) = idx.first() else { continue };
+            let entry = local_by_seq.entry(*seq).or_insert_with(|| (derived[first].frame, Vec::new()));
+            for &i in idx {
+                let d = &derived[i];
+                let Some(hp) = rhp.get(i).copied().flatten() else { continue };
+                // Small-angle rotation measured for this readout band. What remains is spatial motion only.
+                let local_ray = hp - m.rho.cross(&d.p);
+                let Some([mut dx, mut dy]) = ray_delta_to_pixels(local_ray, d.jx, d.jy) else { continue };
+                dx /= self.track_size.0.max(1) as f64;
+                dy /= self.track_size.1.max(1) as f64;
                 if !dx.is_finite() || !dy.is_finite() { continue; }
+                // Fail closed on catastrophic tracks/cuts before they reach the spatial robustifier.
                 let mag = (dx * dx + dy * dy).sqrt();
                 if mag > 0.012 {
                     let k = 0.012 / mag;
                     dx *= k;
                     dy *= k;
                 }
-                local.push((d.uv, [dx, dy]));
+                entry.1.push((d.uv, [dx, dy]));
             }
+        }
+        let mut seqs: Vec<_> = local_by_seq.into_iter().collect();
+        seqs.sort_by_key(|(seq, _)| *seq);
+        for (_, (frame, local)) in seqs {
             if let Some(grid) = spatial_grid(&local) {
                 self.local_steps.push(LocalStep { frame, grid });
             }
@@ -615,34 +640,18 @@ fn orientation(vision: &Option<TimeQuat>, gyro: &GyroSource, t_ms: f64) -> UnitQ
     }
 }
 
-/// Image-plane coordinate of a ray in the quaternion frame.
-fn ray_uv(v: Vector3<f64>) -> Option<(f64, f64)> {
-    if v.z.abs() < 1e-9 { return None; }
-    let q = (-v.x / v.z, v.y / v.z);
-    (q.0.is_finite() && q.1.is_finite()).then_some(q)
-}
-
-fn fit_pair_rotation(ds: &[&Derived]) -> Option<Vector3<f64>> {
-    if ds.len() < MIN_BAND_POINTS * 2 { return None; }
-    let mut w = vec![1.0f64; ds.len()];
-    let mut rho = Vector3::zeros();
-    for _ in 0..5 {
-        let mut h = Matrix3::zeros();
-        let mut g = Vector3::zeros();
-        for (d, ww) in ds.iter().zip(&w) {
-            h += (Matrix3::identity() - d.p * d.p.transpose()) * *ww;
-            g += d.p.cross(&d.r) * *ww;
-        }
-        rho = h.try_inverse()? * g;
-        let res: Vec<f64> = ds.iter().map(|d| (d.r - rho.cross(&d.p)).norm()).collect();
-        let mut sorted = res.clone();
-        sorted.sort_by(|a, b| a.total_cmp(b));
-        let scale = (1.4826 * sorted[sorted.len() / 2]).max(1e-8);
-        for (ww, e) in w.iter_mut().zip(res) {
-            *ww = 1.0 / (1.0 + (e / (2.5 * scale)).powi(2));
-        }
-    }
-    (w.iter().sum::<f64>() >= MIN_BAND_POINTS as f64).then_some(rho)
+/// Least-squares pixel displacement whose local source-projection Jacobian produces ray_delta.
+fn ray_delta_to_pixels(ray_delta: Vector3<f64>, jx: Vector3<f64>, jy: Vector3<f64>) -> Option<[f64; 2]> {
+    let a11 = jx.dot(&jx);
+    let a12 = jx.dot(&jy);
+    let a22 = jy.dot(&jy);
+    let b1 = jx.dot(&ray_delta);
+    let b2 = jy.dot(&ray_delta);
+    let det = a11 * a22 - a12 * a12;
+    if !det.is_finite() || det <= 1e-16 { return None; }
+    let dx = (b1 * a22 - b2 * a12) / det;
+    let dy = (a11 * b2 - a12 * b1) / det;
+    (dx.is_finite() && dy.is_finite()).then_some([dx, dy])
 }
 
 fn spatial_grid(points: &[([f32; 2], [f64; 2])]) -> Option<Vec<[f32; 2]>> {

@@ -190,7 +190,7 @@ vec2 interpolate_mesh(int width, int height, vec2 pos) {
 }
 
 vec2 process_coord(vec2 uv, float idx) {
-    if (get_mesh_data(0) > 10.0) {
+    if (bool(params.flags & 512) && get_mesh_data(0) > 10.0) {
         vec2 mesh_size = vec2(get_mesh_data(3), get_mesh_data(4));
         vec2 origin    = vec2(get_mesh_data(5), get_mesh_data(6));
         vec2 crop_size = vec2(get_mesh_data(7), get_mesh_data(8));

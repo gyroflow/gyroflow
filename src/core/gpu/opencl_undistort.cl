@@ -500,7 +500,7 @@ float2 rotate_and_distort(float2 ray, uint idx, __global KernelParams *params, _
             int fwd = o + 4 + 2 * (int)max(mesh_data[o], 0.0f);
             if (mesh_data[fwd] > 10.0f) {
                 for (int it = 0; it < 2; it++) {
-                    float2 delta = q - interpolate_mesh(fwd, mesh_data, mesh_size.x, mesh_size.y, uv);
+                    float2 delta = q - interpolate_mesh(fwd, mesh_data, (int)mesh_size.x, (int)mesh_size.y, uv);
                     uv += delta;
                     if (dot(delta, delta) < 0.0625f) break;
                 }
@@ -547,6 +547,35 @@ float2 rotate_and_distort(float2 ray, uint idx, __global KernelParams *params, _
 
         if (params->input_horizontal_stretch > 0.001f) { uv.x /= params->input_horizontal_stretch; }
         if (params->input_vertical_stretch   > 0.001f) { uv.y /= params->input_vertical_stretch; }
+
+        // Compact optical residual: final source-side warp in raw decoded-frame coordinates.
+        if ((params->flags & 4096) && mesh_data) {
+            int base = max(0, (int)params->reserved2);
+            if (mesh_data[base] > 10.0f) {
+                float2 mesh_size = (float2)(mesh_data[base + 3], mesh_data[base + 4]);
+                float2 origin = (float2)(mesh_data[base + 5], mesh_data[base + 6]);
+                float2 crop_size = (float2)(mesh_data[base + 7], mesh_data[base + 8]);
+                if ((params->flags & 128)) uv.y = (float)params->height - uv.y;
+                uv.x = map_coord(uv.x, 0.0f, (float)params->width, origin.x, origin.x + crop_size.x);
+                uv.y = map_coord(uv.y, 0.0f, (float)params->height, origin.y, origin.y + crop_size.y);
+
+                float2 q = uv;
+                uv = interpolate_mesh(base, mesh_data, (int)mesh_size.x, (int)mesh_size.y, q);
+                int o = base + (int)mesh_data[base];
+                int fwd = o + 4 + 2 * (int)max(mesh_data[o], 0.0f);
+                if (mesh_data[fwd] > 10.0f) {
+                    for (int it = 0; it < 2; it++) {
+                        float2 delta = q - interpolate_mesh(fwd, mesh_data, (int)mesh_size.x, (int)mesh_size.y, uv);
+                        uv += delta;
+                        if (dot(delta, delta) < 0.0625f) break;
+                    }
+                }
+
+                uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0f, (float)params->width);
+                uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0f, (float)params->height);
+                if ((params->flags & 128)) uv.y = (float)params->height - uv.y;
+            }
+        }
 
         return uv;
     }
