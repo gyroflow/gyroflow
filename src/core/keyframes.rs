@@ -107,7 +107,7 @@ impl KeyframeManager {
 
     fn get_closest_timestamp(&self, typ: &KeyframeType, timestamp_us: i64) -> i64 {
         if let Some(x) = self.keyframes.get(typ) {
-            if let Some(existing) = x.range(timestamp_us-1000..=timestamp_us+1000).next() {
+            if let Some(existing) = x.range(timestamp_us-1000..=timestamp_us+1000).min_by_key(|(ts, _)| (**ts - timestamp_us).abs()) {
                 return *existing.0;
             }
         }
@@ -375,4 +375,27 @@ fn interpolate_smooth(prev: Option<(f64, f64)>, p1: (f64, &Keyframe), p2: (f64, 
     (       t3 - 2.0 * t2 + t  ) * h * m1 +
     (-2.0 * t3 + 3.0 * t2      ) * p2.1.value +
     (       t3 -       t2      ) * h * m2
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Reproduces a bug report pattern: two keyframes exist 1100us apart (far enough that
+    // creating the second one didn't snap onto the first). Editing a value at a timestamp
+    // 110us from the second keyframe and 990us from the first must update the second
+    // (closer) keyframe, not the first.
+    #[test]
+    fn set_updates_the_nearest_existing_keyframe_not_the_earliest_in_range() {
+        let mut km = KeyframeManager::new();
+        km.set(&KeyframeType::Fov, 4000, 10.0);
+        km.set(&KeyframeType::Fov, 5100, 20.0);
+
+        km.set(&KeyframeType::Fov, 4990, 99.0);
+
+        let kfs = km.get_keyframes(&KeyframeType::Fov).unwrap();
+        assert_eq!(kfs.len(), 2, "editing near an existing keyframe must not create a third one");
+        assert_eq!(kfs.get(&5100).map(|k| k.value), Some(99.0), "the keyframe 110us away should have been updated");
+        assert_eq!(kfs.get(&4000).map(|k| k.value), Some(10.0), "the keyframe 990us away must stay untouched");
+    }
 }
