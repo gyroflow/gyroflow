@@ -529,6 +529,35 @@ fn rotate_and_distort(ray: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
         if (params.input_horizontal_stretch > 0.001) { uv.x /= params.input_horizontal_stretch; }
         if (params.input_vertical_stretch   > 0.001) { uv.y /= params.input_vertical_stretch; }
 
+        // Compact optical residual: final source-side warp in raw decoded-frame coordinates.
+        if (bool(flags & 4096)) {
+            let base = u32(max(params.reserved2, 0.0));
+            if (base + 9u < arrayLength(&mesh_data) && mesh_data[base] > 10.0) {
+                let mesh_size = vec2<f32>(mesh_data[base + 3u], mesh_data[base + 4u]);
+                let origin = vec2<f32>(mesh_data[base + 5u], mesh_data[base + 6u]);
+                let crop_size = vec2<f32>(mesh_data[base + 7u], mesh_data[base + 8u]);
+                if (bool(flags & 128)) { uv.y = f32(params.height) - uv.y; }
+                uv.x = map_coord(uv.x, 0.0, f32(params.width), origin.x, origin.x + crop_size.x);
+                uv.y = map_coord(uv.y, 0.0, f32(params.height), origin.y, origin.y + crop_size.y);
+
+                let q = uv;
+                uv = interpolate_mesh(i32(base), mesh_size.x, mesh_size.y, q);
+                let o = base + u32(mesh_data[base]);
+                let fwd = o + 4u + 2u * u32(max(mesh_data[o], 0.0));
+                if (fwd + 9u < arrayLength(&mesh_data) && mesh_data[fwd] > 10.0) {
+                    for (var it = 0; it < 2; it++) {
+                        let delta = q - interpolate_mesh(i32(fwd), mesh_size.x, mesh_size.y, uv);
+                        uv += delta;
+                        if (dot(delta, delta) < 0.0625) { break; }
+                    }
+                }
+
+                uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0, f32(params.width));
+                uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0, f32(params.height));
+                if (bool(flags & 128)) { uv.y = f32(params.height) - uv.y; }
+            }
+        }
+
         return uv;
     }
     return vec2<f32>(-99999.0, -99999.0);

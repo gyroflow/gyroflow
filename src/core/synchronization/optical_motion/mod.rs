@@ -26,7 +26,7 @@ use nalgebra::{ DMatrix, Matrix3, Rotation3, UnitQuaternion, Vector3 };
 use rayon::prelude::*;
 
 use crate::StabilizationManager;
-use crate::gyro_source::{ GyroSource, OpticalCorrection, OpticalCorrectionSettings, TimeQuat, optical_correction::{ self, Fnv } };
+use crate::gyro_source::{ GyroSource, OpticalCorrection, OpticalCorrectionSettings, OpticalResidualCorrection, OPTICAL_GRID, TimeQuat, optical_correction::{ self, Fnv } };
 use crate::stabilization::{ ComputeParams, FrameTransform, undistort_points_for_optical_motion };
 use solver::{ BandMeasurement, SolverParams };
 
@@ -44,6 +44,8 @@ const CHUNK: usize = 240;
 const MIN_BAND_POINTS: usize = 25;
 /// Floor of the uncertainty of one band's rotation, in pixels of the tracked frame
 const SIGMA_FLOOR_PX: f64 = 0.01;
+/// Local residual path smoothing. Kept in seconds so its meaning is independent of frame rate.
+const LOCAL_SMOOTH_SECONDS: f64 = 0.35;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Observation {
@@ -76,11 +78,26 @@ struct Derived {
     id: u32,
     seq: usize,
     band: u8,
+    frame: usize,
+    /// Tracked position in frame b, normalized to the analyzed frame.
+    uv: [f32; 2],
+    /// Local derivatives of frame-b's undistorted bearing with respect to one tracked pixel in x/y.
+    /// These carry the lens, mesh, IBIS/OIS and breathing geometry into the residual mesh instead of
+    /// approximating every lens by one focal length.
+    jx: Vector3<f64>,
+    jy: Vector3<f64>,
     /// Where the quaternions put the point in the second frame, and how far off that was (quaternion frame)
     p: Vector3<f64>,
     r: Vector3<f64>,
     ta_ms: f64,
     tb_ms: f64,
+}
+
+#[derive(Clone)]
+struct LocalStep {
+    /// The a-to-b increment belongs to b. Keeping this explicit prevents one-frame lag.
+    frame: usize,
+    grid: Vec<[f32; 2]>,
 }
 
 /// What the image measured: kept (in memory) so a change of the settings refits the correction in a fraction of a
@@ -94,6 +111,8 @@ pub struct OpticalMeasurements {
     pub context_checksum: u64,
     /// For a file without motion data, the orientation measured against, see `OpticalCorrection::video_base`
     pub video_base: Vec<(i64, [f32; 4])>,
+    /// Local motion left after the robust global camera rotation, stabilized on a compact spatial grid.
+    pub residual: OpticalResidualCorrection,
     pub frames: usize,
     pub measured_frames: usize,
     /// `StabilizationManager::optical_generation` when the analysis started: they're only for what was loaded then
@@ -131,6 +150,7 @@ pub fn solve_with(m: &OpticalMeasurements, settings: &OpticalCorrectionSettings,
         quats_checksum: m.quats_checksum,
         context_checksum: m.context_checksum,
         video_base: m.video_base.clone(),
+        residual: m.residual.clone(),
         frames: m.frames,
         measured_frames: m.measured_frames,
         rms_deg,
@@ -220,6 +240,7 @@ pub struct OpticalMotionAnalysis {
     next_seq: usize,
     measured_upto: usize,
     measurements: Vec<BandMeasurement>,
+    local_steps: Vec<LocalStep>,
     measured_pairs: usize,
     frames: usize,
     total_frames: usize,
@@ -284,6 +305,7 @@ impl OpticalMotionAnalysis {
                 next_seq: 0,
                 measured_upto: 0,
                 measurements: Vec::new(),
+                local_steps: Vec::new(),
                 measured_pairs: 0,
                 frames: 0,
                 total_frames,
@@ -373,12 +395,14 @@ impl OpticalMotionAnalysis {
             },
             None => (self.quats_checksum, Vec::new()),
         };
+        let residual = build_local_residual(&self.local_steps, self.scaled_fps);
         Ok(OpticalMeasurements {
             bands: self.measurements,
             scaled_fps: self.scaled_fps,
             quats_checksum,
             context_checksum: self.context_checksum,
             video_base,
+            residual,
             frames: self.frames,
             measured_frames: self.measured_pairs,
             generation: self.generation.1,
@@ -458,16 +482,19 @@ impl OpticalMotionAnalysis {
         let floor = SIGMA_FLOOR_PX / self.focal_px.max(1.0);
         let gyro = self.params.gyro.clone();
         let vision = &self.vision;
-        let mut ms: Vec<(usize, BandMeasurement)> = groups.par_iter().filter_map(|(&(seq, _), idx)| {
+        let mut ms: Vec<(usize, u8, BandMeasurement)> = groups.par_iter().filter_map(|(&(seq, band), idx)| {
             let gyro = gyro.read();
-            fit_band(&derived, &rhp, idx, floor, &gyro, vision).map(|mut m| { m.pair = seq; (seq, m) })
+            fit_band(&derived, &rhp, idx, floor, &gyro, vision).map(|mut m| { m.pair = seq; (seq, band, m) })
         }).collect();
-        ms.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.ta_us.total_cmp(&b.1.ta_us)));
-        let mut seqs: Vec<usize> = ms.iter().map(|(s, _)| *s).collect();
+        ms.sort_by(|a, b| a.0.cmp(&b.0).then(a.2.ta_us.total_cmp(&b.2.ta_us)));
+        // The local mesh is the part left after exactly the same per-band global rotation that feeds the
+        // optical gyro solver. Using the high-passed track residuals here also keeps slow parallax out.
+        self.measure_local(&derived, &rhp, &groups, &ms);
+        let mut seqs: Vec<usize> = ms.iter().map(|(s, _, _)| *s).collect();
         seqs.sort_unstable();
         seqs.dedup();
         self.measured_pairs += seqs.len();
-        self.measurements.extend(ms.into_iter().map(|(_, m)| m));
+        self.measurements.extend(ms.into_iter().map(|(_, _, m)| m));
 
         self.measured_upto = end;
         let keep_from = end.saturating_sub(HP_MAX);
@@ -485,26 +512,92 @@ impl OpticalMotionAnalysis {
         let per_pair: Vec<Vec<Derived>> = self.pairs.par_iter().map(|pair| {
             let pts_a: Vec<(f32, f32)> = pair.obs.iter().map(|o| (o.a[0], o.a[1])).collect();
             let pts_b: Vec<(f32, f32)> = pair.obs.iter().map(|o| (o.b[0], o.b[1])).collect();
+            let pts_bx: Vec<(f32, f32)> = pair.obs.iter().map(|o| (o.b[0] + 1.0, o.b[1])).collect();
+            let pts_by: Vec<(f32, f32)> = pair.obs.iter().map(|o| (o.b[0], o.b[1] + 1.0)).collect();
             let ba = undistort_points_for_optical_motion(&pts_a, pair.a.timestamp_ms, pair.a.index, params, size);
             let bb = undistort_points_for_optical_motion(&pts_b, pair.b.timestamp_ms, pair.b.index, params, size);
+            let bbx = undistort_points_for_optical_motion(&pts_bx, pair.b.timestamp_ms, pair.b.index, params, size);
+            let bby = undistort_points_for_optical_motion(&pts_by, pair.b.timestamp_ms, pair.b.index, params, size);
             let gyro = params.gyro.read();
             let orient = |t: f64| orientation(&self.vision, &gyro, t);
             let mut out = Vec::with_capacity(pair.obs.len());
             for (i, o) in pair.obs.iter().enumerate() {
-                let (Some(a), Some(b)) = (ba.get(i).copied().flatten(), bb.get(i).copied().flatten()) else { continue };
+                let (Some(a), Some(b), Some(bx), Some(by)) = (
+                    ba.get(i).copied().flatten(),
+                    bb.get(i).copied().flatten(),
+                    bbx.get(i).copied().flatten(),
+                    bby.get(i).copied().flatten(),
+                ) else { continue };
                 let pos_a = if horizontal { o.a[0] } else { o.a[1] };
                 let pos_b = if horizontal { o.b[0] } else { o.b[1] };
                 let ta = pair.a.start_ms + pair.a.per_px_ms * pos_a as f64;
                 let tb = pair.b.start_ms + pair.b.per_px_ms * pos_b as f64;
                 let m = (orient(tb).inverse() * orient(ta)).to_rotation_matrix().into_inner();
                 let (va, vb) = (to_quat_frame(a), to_quat_frame(b));
+                let (vbx, vby) = (to_quat_frame(bx), to_quat_frame(by));
                 let p = m * va;
                 let band = ((pos_a / track_rows) * BANDS as f32).floor().clamp(0.0, (BANDS - 1) as f32) as u8;
-                out.push(Derived { id: o.id, seq: pair.seq, band, p, r: vb - p, ta_ms: ta, tb_ms: tb });
+                out.push(Derived {
+                    id: o.id,
+                    seq: pair.seq,
+                    band,
+                    frame: pair.b.index,
+                    uv: [o.b[0] / size.0.max(1) as f32, o.b[1] / size.1.max(1) as f32],
+                    jx: vbx - vb,
+                    jy: vby - vb,
+                    p,
+                    r: vb - p,
+                    ta_ms: ta,
+                    tb_ms: tb,
+                });
             }
             out
         }).collect();
         per_pair.into_iter().flatten().collect()
+    }
+
+    /// Measures spatial motion left after the same per-band global rotation used by the optical gyro solver.
+    /// The input is already high-passed along each persistent track, so slow translation/parallax is not turned
+    /// into a warp. A local source-projection Jacobian maps the remaining ray error back to tracked pixels,
+    /// carrying lens distortion, camera mesh, IBIS/OIS and breathing geometry into the grid.
+    fn measure_local(
+        &mut self,
+        derived: &[Derived],
+        rhp: &[Option<Vector3<f64>>],
+        groups: &HashMap<(usize, u8), Vec<usize>>,
+        fits: &[(usize, u8, BandMeasurement)],
+    ) {
+        let mut local_by_seq: HashMap<usize, (usize, Vec<([f32; 2], [f64; 2])>)> = HashMap::new();
+        for (seq, band, m) in fits {
+            let Some(idx) = groups.get(&(*seq, *band)) else { continue };
+            let Some(&first) = idx.first() else { continue };
+            let entry = local_by_seq.entry(*seq).or_insert_with(|| (derived[first].frame, Vec::new()));
+            for &i in idx {
+                let d = &derived[i];
+                let Some(hp) = rhp.get(i).copied().flatten() else { continue };
+                // Small-angle rotation measured for this readout band. What remains is spatial motion only.
+                let local_ray = hp - m.rho.cross(&d.p);
+                let Some([mut dx, mut dy]) = ray_delta_to_pixels(local_ray, d.jx, d.jy) else { continue };
+                dx /= self.track_size.0.max(1) as f64;
+                dy /= self.track_size.1.max(1) as f64;
+                if !dx.is_finite() || !dy.is_finite() { continue; }
+                // Fail closed on catastrophic tracks/cuts before they reach the spatial robustifier.
+                let mag = (dx * dx + dy * dy).sqrt();
+                if mag > 0.012 {
+                    let k = 0.012 / mag;
+                    dx *= k;
+                    dy *= k;
+                }
+                entry.1.push((d.uv, [dx, dy]));
+            }
+        }
+        let mut seqs: Vec<_> = local_by_seq.into_iter().collect();
+        seqs.sort_by_key(|(seq, _)| *seq);
+        for (_, (frame, local)) in seqs {
+            if let Some(grid) = spatial_grid(&local) {
+                self.local_steps.push(LocalStep { frame, grid });
+            }
+        }
     }
 
     /// Takes the slow part out of each track's residuals: a local quadratic fit (Savitzky-Golay, the fit of the
@@ -545,6 +638,143 @@ fn orientation(vision: &Option<TimeQuat>, gyro: &GyroSource, t_ms: f64) -> UnitQ
         (Some((_, q)), None) | (None, Some((_, q))) => *q,
         (None, None) => UnitQuaternion::identity(),
     }
+}
+
+/// Least-squares pixel displacement whose local source-projection Jacobian produces ray_delta.
+fn ray_delta_to_pixels(ray_delta: Vector3<f64>, jx: Vector3<f64>, jy: Vector3<f64>) -> Option<[f64; 2]> {
+    let a11 = jx.dot(&jx);
+    let a12 = jx.dot(&jy);
+    let a22 = jy.dot(&jy);
+    let b1 = jx.dot(&ray_delta);
+    let b2 = jy.dot(&ray_delta);
+    let det = a11 * a22 - a12 * a12;
+    if !det.is_finite() || det <= 1e-16 { return None; }
+    let dx = (b1 * a22 - b2 * a12) / det;
+    let dy = (a11 * b2 - a12 * b1) / det;
+    (dx.is_finite() && dy.is_finite()).then_some([dx, dy])
+}
+
+fn spatial_grid(points: &[([f32; 2], [f64; 2])]) -> Option<Vec<[f32; 2]>> {
+    if points.len() < MIN_BAND_POINTS * 2 { return None; }
+    let mut grid = vec![[0.0f32; 2]; OPTICAL_GRID * OPTICAL_GRID];
+    let radius2 = 0.30f64.powi(2);
+    let sigma2 = 0.14f64.powi(2);
+    let mut supported = 0usize;
+    for gy in 0..OPTICAL_GRID {
+        for gx in 0..OPTICAL_GRID {
+            let u = gx as f64 / (OPTICAL_GRID - 1) as f64;
+            let v = gy as f64 / (OPTICAL_GRID - 1) as f64;
+            let mut candidates = Vec::new();
+            for &(uv, d) in points {
+                let r2 = (uv[0] as f64 - u).powi(2) + (uv[1] as f64 - v).powi(2);
+                if r2 <= radius2 {
+                    candidates.push((d, (-0.5 * r2 / sigma2).exp()));
+                }
+            }
+            if candidates.len() < 6 { continue; }
+            let sw = candidates.iter().map(|x| x.1).sum::<f64>();
+            if sw <= 0.0 { continue; }
+            let mean = [
+                candidates.iter().map(|x| x.0[0] * x.1).sum::<f64>() / sw,
+                candidates.iter().map(|x| x.0[1] * x.1).sum::<f64>() / sw,
+            ];
+            let mut errs: Vec<f64> = candidates.iter().map(|x| {
+                ((x.0[0] - mean[0]).powi(2) + (x.0[1] - mean[1]).powi(2)).sqrt()
+            }).collect();
+            errs.sort_by(|a,b| a.total_cmp(b));
+            let scale = (1.4826 * errs[errs.len()/2]).max(2e-5);
+            let mut sx = 0.0;
+            let mut sy = 0.0;
+            let mut ww = 0.0;
+            for (d, spatial) in candidates {
+                let e = ((d[0] - mean[0]).powi(2) + (d[1] - mean[1]).powi(2)).sqrt();
+                let robust = 1.0 / (1.0 + (e / (2.5 * scale)).powi(2));
+                let wt = spatial * robust;
+                sx += d[0] * wt;
+                sy += d[1] * wt;
+                ww += wt;
+            }
+            if ww > 1.5 {
+                let support = (ww / 12.0).min(1.0);
+                grid[gy * OPTICAL_GRID + gx] = [(sx / ww * support) as f32, (sy / ww * support) as f32];
+                supported += 1;
+            }
+        }
+    }
+    if supported < OPTICAL_GRID * OPTICAL_GRID / 3 { return None; }
+    let old = grid.clone();
+    for gy in 0..OPTICAL_GRID {
+        for gx in 0..OPTICAL_GRID {
+            let mut x = old[gy * OPTICAL_GRID + gx][0] as f64;
+            let mut y = old[gy * OPTICAL_GRID + gx][1] as f64;
+            let mut n = 1.0;
+            for (dx,dy) in [(-1,0),(1,0),(0,-1),(0,1)] {
+                let xx = gx as isize + dx;
+                let yy = gy as isize + dy;
+                if xx >= 0 && yy >= 0 && xx < OPTICAL_GRID as isize && yy < OPTICAL_GRID as isize {
+                    let q = old[yy as usize * OPTICAL_GRID + xx as usize];
+                    x += q[0] as f64;
+                    y += q[1] as f64;
+                    n += 1.0;
+                }
+            }
+            let i = gy * OPTICAL_GRID + gx;
+            grid[i][0] = (0.6 * old[i][0] as f64 + 0.4 * x / n) as f32;
+            grid[i][1] = (0.6 * old[i][1] as f64 + 0.4 * y / n) as f32;
+        }
+    }
+    Some(grid)
+}
+
+fn build_local_residual(steps: &[LocalStep], fps: f64) -> OpticalResidualCorrection {
+    if steps.is_empty() || fps <= 0.0 { return OpticalResidualCorrection::default(); }
+    let mut steps = steps.to_vec();
+    steps.sort_by_key(|s| s.frame);
+    steps.dedup_by_key(|s| s.frame);
+    let window = (LOCAL_SMOOTH_SECONDS * fps).round().max(3.0) as usize;
+    let radius = (window / 2).max(1);
+    let mut frames = Vec::new();
+    let mut start = 0usize;
+    while start < steps.len() {
+        let mut end = start + 1;
+        while end < steps.len() && steps[end].frame == steps[end - 1].frame + 1 { end += 1; }
+        let run = &steps[start..end];
+        if run.len() >= 5 {
+            let nodes = OPTICAL_GRID * OPTICAL_GRID;
+            let mut paths = vec![vec![[0.0f64; 2]; nodes]; run.len()];
+            for i in 0..run.len() {
+                if i > 0 { paths[i] = paths[i - 1].clone(); }
+                for n in 0..nodes {
+                    paths[i][n][0] += run[i].grid[n][0] as f64;
+                    paths[i][n][1] += run[i].grid[n][1] as f64;
+                }
+            }
+            for i in 0..run.len() {
+                let a = i.saturating_sub(radius);
+                let b = (i + radius + 1).min(run.len());
+                let count = (b - a) as f64;
+                let mut corr = vec![[0.0f32; 2]; nodes];
+                let mut max_mag = 0.0f64;
+                for n in 0..nodes {
+                    let sx = (a..b).map(|j| paths[j][n][0]).sum::<f64>() / count;
+                    let sy = (a..b).map(|j| paths[j][n][1]).sum::<f64>() / count;
+                    let mut cx = sx - paths[i][n][0];
+                    let mut cy = sy - paths[i][n][1];
+                    let mag = (cx * cx + cy * cy).sqrt();
+                    if mag > 0.02 {
+                        let k = 0.02 / mag;
+                        cx *= k;
+                        cy *= k;
+                    }
+                    max_mag = max_mag.max((cx * cx + cy * cy).sqrt());
+                    corr[n] = [cx as f32, cy as f32];
+                }
+                if max_mag > 1e-6 { frames.push((run[i].frame, corr)); }
+            }
+        }
+        start = end;
+    }
+    OpticalResidualCorrection::from_normalized_frames(LOCAL_SMOOTH_SECONDS, frames)
 }
 
 #[cfg_attr(not(feature = "use-opencv"), allow(dead_code))]
@@ -611,4 +841,112 @@ fn fit_band(derived: &[Derived], rhp: &[Option<Vector3<f64>>], idx: &[usize], si
     let m = (orientation(vision, gyro, tb).inverse() * orientation(vision, gyro, ta)).to_rotation_matrix().into_inner();
     let to_gyro_us = |t: f64| (t - gyro.offset_at_video_timestamp(t)) * 1000.0;
     Some(BandMeasurement { pair: 0, ta_us: to_gyro_us(ta), tb_us: to_gyro_us(tb), rho, info, m })
+}
+
+
+#[cfg(test)]
+mod local_residual_tests {
+    use super::*;
+
+    fn sinusoid_steps(fps: f64, hz: f64, frames: usize, amp: f32, first_b: usize) -> Vec<LocalStep> {
+        let nodes = OPTICAL_GRID * OPTICAL_GRID;
+        let mut out = Vec::new();
+        let mut prev = 0.0f32;
+        for i in 0..frames {
+            let t = i as f64 / fps;
+            let path = amp * (std::f64::consts::TAU * hz * t).sin() as f32;
+            let d = path - prev;
+            prev = path;
+            out.push(LocalStep { frame: first_b + i, grid: vec![[d, 0.0]; nodes] });
+        }
+        out
+    }
+
+    fn rms_x(r: &OpticalResidualCorrection) -> f64 {
+        let mut sum = 0.0;
+        let mut n = 0usize;
+        for f in &r.frames {
+            if let Some(g) = r.normalized_grid(f.frame as usize) {
+                for v in g {
+                    sum += (v[0] as f64).powi(2);
+                    n += 1;
+                }
+            }
+        }
+        if n == 0 { 0.0 } else { (sum / n as f64).sqrt() }
+    }
+
+    #[test]
+    fn temporal_window_is_seconds_and_targets_fast_motion() {
+        for fps in [30.0, 60.0, 120.0] {
+            let slow = build_local_residual(&sinusoid_steps(fps, 0.25, (fps * 4.0) as usize, 0.003, 1), fps);
+            let fast = build_local_residual(&sinusoid_steps(fps, 8.0, (fps * 4.0) as usize, 0.003, 1), fps);
+            let rs = rms_x(&slow);
+            let rf = rms_x(&fast);
+            assert!(rf > rs * 2.0, "fps={fps}: fast={rf} slow={rs}");
+        }
+    }
+
+    #[test]
+    fn pair_increment_is_applied_to_frame_b_not_a() {
+        let r = build_local_residual(&sinusoid_steps(60.0, 8.0, 30, 0.003, 17), 60.0);
+        assert!(!r.has_frame(16));
+        assert!(r.frames.iter().all(|f| f.frame >= 17));
+        assert!(r.frames.iter().any(|f| f.frame == 17));
+    }
+
+
+    #[test]
+    fn context_checksum_ignores_installed_optical_residual() {
+        use crate::gyro_source::{ OpticalCorrection, OpticalResidualCorrection, OPTICAL_GRID };
+
+        let stab = crate::StabilizationManager::default();
+        stab.init_from_video_data(1000.0, 30.0, 30, (352, 288));
+        stab.set_output_size(352, 288);
+        let lens = r#"{
+            "name":"optical context test",
+            "calibrator_version":"test",
+            "calib_dimension":{"w":352,"h":288},
+            "orig_dimension":{"w":352,"h":288},
+            "fps":30.0,
+            "distortion_model":"opencv_standard",
+            "fisheye_params":{
+                "camera_matrix":[[300.0,0.0,176.0],[0.0,300.0,144.0],[0.0,0.0,1.0]],
+                "distortion_coeffs":[0.0,0.0,0.0,0.0,0.0]
+            }
+        }"#;
+        stab.load_lens_profile(lens).expect("lens");
+
+        let before = context_checksum(&measurement_params(&stab));
+        let grid = vec![[0.002f32, -0.001f32]; OPTICAL_GRID * OPTICAL_GRID];
+        let residual = OpticalResidualCorrection::from_normalized_frames(0.25,
+            (0..30).map(|f| (f, grid.clone())).collect());
+        {
+            let mut gyro = stab.gyro.write();
+            gyro.optical_correction = Some(OpticalCorrection { enabled: true, residual, ..Default::default() });
+            gyro.optical_correction_applied = true;
+        }
+        let after = context_checksum(&measurement_params(&stab));
+        assert_eq!(before, after, "an installed residual must not fingerprint itself");
+    }
+
+    #[test]
+    fn spatial_grid_rejects_moving_foreground_outliers() {
+        let mut points = Vec::new();
+        for y in 0..12 {
+            for x in 0..16 {
+                let uv = [(x as f32 + 0.5) / 16.0, (y as f32 + 0.5) / 12.0];
+                let d = if x < 4 && y > 3 && y < 9 {
+                    [0.010, -0.008]
+                } else {
+                    [0.0012, -0.0007]
+                };
+                points.push((uv, d));
+            }
+        }
+        let grid = spatial_grid(&points).expect("enough background support");
+        let c = grid[(OPTICAL_GRID / 2) * OPTICAL_GRID + OPTICAL_GRID / 2];
+        assert!((c[0] as f64 - 0.0012).abs() < 0.0015, "center x={}", c[0]);
+        assert!((c[1] as f64 + 0.0007).abs() < 0.0015, "center y={}", c[1]);
+    }
 }

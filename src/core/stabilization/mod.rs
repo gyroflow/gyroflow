@@ -132,6 +132,7 @@ bitflags::bitflags! {
         const HAS_MESH_DATA        = 1 << 9; // 512
         const HAS_FPD_DATA         = 1 << 10; // 1024
         const ANY_UNDERWATER       = 1 << 11; // 2048
+        const HAS_OPTICAL_MESH     = 1 << 12; // 4096, compact local optical residual appended to mesh_data
     }
 }
 
@@ -276,8 +277,12 @@ impl Stabilization {
         {
             let gyro = self.compute_params.gyro.read();
             let file_metadata = gyro.file_metadata.read();
-            kernel_flags.set(KernelParamsFlags::HAS_MESH_DATA, file_metadata.mesh_correction.has_mesh(frame));
+            let has_camera_mesh = file_metadata.mesh_correction.has_mesh(frame);
+            let has_optical_mesh = gyro.optical_correction_applied
+                && gyro.optical_correction.as_ref().map_or(false, |c| c.residual.has_frame(frame));
+            kernel_flags.set(KernelParamsFlags::HAS_MESH_DATA, has_camera_mesh);
             kernel_flags.set(KernelParamsFlags::HAS_FPD_DATA, file_metadata.mesh_correction.has_focal_plane(frame));
+            kernel_flags.set(KernelParamsFlags::HAS_OPTICAL_MESH, has_optical_mesh);
             if file_metadata.camera_stab_data.len() > frame {
                 kernel_flags.set(KernelParamsFlags::HAS_IBIS_DATA, true);
             }
