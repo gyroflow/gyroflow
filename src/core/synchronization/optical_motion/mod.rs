@@ -895,6 +895,41 @@ mod local_residual_tests {
         assert!(r.frames.iter().any(|f| f.frame == 17));
     }
 
+
+    #[test]
+    fn context_checksum_ignores_installed_optical_residual() {
+        use crate::gyro_source::{ OpticalCorrection, OpticalResidualCorrection, OPTICAL_GRID };
+
+        let stab = crate::StabilizationManager::default();
+        stab.init_from_video_data(1000.0, 30.0, 30, (352, 288));
+        stab.set_output_size(352, 288);
+        let lens = r#"{
+            "name":"optical context test",
+            "calibrator_version":"test",
+            "calib_dimension":{"w":352,"h":288},
+            "orig_dimension":{"w":352,"h":288},
+            "fps":30.0,
+            "distortion_model":"opencv_standard",
+            "fisheye_params":{
+                "camera_matrix":[[300.0,0.0,176.0],[0.0,300.0,144.0],[0.0,0.0,1.0]],
+                "distortion_coeffs":[0.0,0.0,0.0,0.0,0.0]
+            }
+        }"#;
+        stab.load_lens_profile(lens).expect("lens");
+
+        let before = context_checksum(&measurement_params(&stab));
+        let grid = vec![[0.002f32, -0.001f32]; OPTICAL_GRID * OPTICAL_GRID];
+        let residual = OpticalResidualCorrection::from_normalized_frames(0.25,
+            (0..30).map(|f| (f, grid.clone())).collect());
+        {
+            let mut gyro = stab.gyro.write();
+            gyro.optical_correction = Some(OpticalCorrection { enabled: true, residual, ..Default::default() });
+            gyro.optical_correction_applied = true;
+        }
+        let after = context_checksum(&measurement_params(&stab));
+        assert_eq!(before, after, "an installed residual must not fingerprint itself");
+    }
+
     #[test]
     fn spatial_grid_rejects_moving_foreground_outliers() {
         let mut points = Vec::new();

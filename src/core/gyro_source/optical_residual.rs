@@ -54,6 +54,7 @@ impl OpticalResidualCorrection {
         self.frames.binary_search_by_key(&(frame as u32), |f| f.frame).ok().map(|i| &self.frames[i])
     }
 
+    #[cfg(test)]
     pub(crate) fn normalized_grid(&self, frame: usize) -> Option<Vec<[f32; 2]>> {
         let f = self.find(frame)?;
         if f.q.len() != OPTICAL_GRID * OPTICAL_GRID * 2 || self.scale <= 0.0 { return None; }

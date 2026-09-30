@@ -853,12 +853,16 @@ pub fn undistort_points_for_optical_motion(distorted: &[(f32, f32)], timestamp_m
 
     // `use_fovs` is what brings lens breathing in, the magnification `at_timestamp` applies on the source side; the
     // zoom it's otherwise about isn't read here
-    let (camera_matrix, distortion_coeffs, _, _, shifts, mesh, optical_mesh, _, _, breathing) = FrameTransform::at_timestamp_for_points(params, &full, timestamp_ms, Some(frame), true);
-    // Without rolling shutter correction the shift is looked up once, for the whole frame
+    let (camera_matrix, distortion_coeffs, _, _, shifts, mesh, _optical_mesh, _, _, breathing) = FrameTransform::at_timestamp_for_points(params, &full, timestamp_ms, Some(frame), true);
+    // The residual is the thing this analysis measures. Feeding an already-installed residual back into the
+    // measurement geometry would make the correction self-referential: its context checksum would change as soon
+    // as it was enabled, and a second analysis would measure the previous correction rather than the decoded frame.
+    // Camera metadata mesh / IBIS / OIS / breathing remain part of the source geometry above; only the optical
+    // residual itself is deliberately excluded here.
     let shifts = shifts.map(|s| if s.len() == 1 { vec![s[0]; full.len()] } else { s });
 
     let kernel_params = point_kernel_params(params, camera_matrix, distortion_coeffs, 0.0, timestamp_ms);
-    undistort_points_to_rays(&full, &kernel_params, Matrix3::identity(), None, params, shifts.as_deref(), mesh.as_deref(), optical_mesh.as_deref(), breathing.as_deref(), false)
+    undistort_points_to_rays(&full, &kernel_params, Matrix3::identity(), None, params, shifts.as_deref(), mesh.as_deref(), None, breathing.as_deref(), false)
         .into_iter()
         .map(|ray| ray.map(projection::ray_to_dir).filter(|d| d.0.is_finite() && d.1.is_finite() && d.2.is_finite()))
         .collect()
