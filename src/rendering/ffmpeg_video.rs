@@ -73,6 +73,9 @@ pub struct VideoTranscoder<'a> {
     pub processing_order: ProcessingOrder,
 
     pub ffmpeg_interpolation: i32,
+
+    /// Whether the header of the output file was written. For some encoders it's delayed until the first packet, see `needs_parameter_sets_from_bitstream`
+    pub header_written: bool,
 }
 
 pub struct RateControl {
@@ -389,12 +392,12 @@ impl<'a> VideoTranscoder<'a> {
 
                             self.encoder = Some(result?);
 
-                            octx.write_header()?;
-                            // format::context::output::dump(&octx, 0, Some(&output_path));
-
-                            for (ost_index, _) in octx.streams().enumerate() {
-                                ost_time_bases[ost_index] = octx.stream(ost_index as _).ok_or(Error::StreamNotFound)?.time_base();
+                            let encoder_name = self.encoder.as_ref().and_then(|x| x.codec()).map(|x| x.name().to_string()).unwrap_or_default();
+                            if !Self::needs_parameter_sets_from_bitstream(&encoder_name) {
+                                Self::write_header(octx, ost_time_bases)?;
+                                self.header_written = true;
                             }
+                            // format::context::output::dump(&octx, 0, Some(&output_path));
 
                             if let Some(ref mut cb) = self.on_encoder_initialized {
                                 cb(self.encoder.as_ref().unwrap())?;
@@ -447,18 +450,11 @@ impl<'a> VideoTranscoder<'a> {
                             ts += rate_control.repeat_interval;
 
                             // Copy of receive_and_process_encoded_packets
-                            let ost_time_base = ost_time_bases[self.output_index.unwrap_or_default()];
                             let octx = octx.as_mut().unwrap();
                             let time_base = self.encoder_params.time_base.unwrap();//self.decoder.as_ref().ok_or(FFmpegError::DecoderNotFound)?.time_base();
                             let mut encoded = Packet::empty();
                             while encoder.receive_packet(&mut encoded).is_ok() {
-                                encoded.set_stream(self.output_index.unwrap_or_default());
-                                encoded.rescale_ts(time_base, ost_time_base);
-                                if octx.format().name().contains("image") {
-                                    encoded.write(octx)?;
-                                } else {
-                                    encoded.write_interleaved(octx)?;
-                                }
+                                Self::write_packet(&mut encoded, octx, self.output_index.unwrap_or_default(), time_base, ost_time_bases, &mut self.header_written)?;
                             }
                         }
                     }
@@ -483,21 +479,94 @@ impl<'a> VideoTranscoder<'a> {
         Ok(status)
     }
 
-    pub fn receive_and_process_encoded_packets(&mut self, octx: &mut format::context::Output, ost_time_base: Rational) -> Result<(), FFmpegError> {
+    pub fn receive_and_process_encoded_packets(&mut self, octx: &mut format::context::Output, ost_time_bases: &mut Vec<Rational>) -> Result<(), FFmpegError> {
         if !self.decode_only {
             let time_base = self.encoder_params.time_base.unwrap();//self.decoder.as_ref().ok_or(FFmpegError::DecoderNotFound)?.time_base();
             let mut encoded = Packet::empty();
             while self.encoder.as_mut().ok_or(FFmpegError::EncoderNotFound)?.receive_packet(&mut encoded).is_ok() {
-                encoded.set_stream(self.output_index.unwrap_or_default());
-                encoded.rescale_ts(time_base, ost_time_base);
-                if octx.format().name().contains("image") {
-                    encoded.write(octx)?;
-                } else {
-                    encoded.write_interleaved(octx)?;
-                }
+                Self::write_packet(&mut encoded, octx, self.output_index.unwrap_or_default(), time_base, ost_time_bases, &mut self.header_written)?;
+            }
+            // Nothing was encoded, the file still needs a header to be valid
+            if !self.header_written {
+                Self::write_header(octx, ost_time_bases)?;
+                self.header_written = true;
             }
         }
         Ok(())
+    }
+
+    /// The VAAPI encoders pass the parameter sets to the driver, which may rewrite them with the values it actually encodes with
+    /// (eg. radeonsi changes `diff_cu_qp_delta_depth` and the transform depth). The extradata created by FFmpeg doesn't follow that,
+    /// so with the `hvc1`/`avc1` tag (parameter sets only in the header) the video can't be decoded. Take them from the first packet instead.
+    fn needs_parameter_sets_from_bitstream(encoder_name: &str) -> bool {
+        encoder_name == "hevc_vaapi" || encoder_name == "h264_vaapi"
+    }
+
+    fn write_header(octx: &mut format::context::Output, ost_time_bases: &mut Vec<Rational>) -> Result<(), FFmpegError> {
+        octx.write_header()?;
+        for (ost_index, _) in octx.streams().enumerate() {
+            ost_time_bases[ost_index] = octx.stream(ost_index as _).ok_or(Error::StreamNotFound)?.time_base();
+        }
+        Ok(())
+    }
+
+    fn write_packet(encoded: &mut Packet, octx: &mut format::context::Output, output_index: usize, time_base: Rational, ost_time_bases: &mut Vec<Rational>, header_written: &mut bool) -> Result<(), FFmpegError> {
+        if !*header_written {
+            let codec_id = octx.stream(output_index).map(|x| x.parameters().id()).unwrap_or(codec::Id::None);
+            if let Some(parameter_sets) = encoded.data().and_then(|data| Self::parameter_sets_from_annexb(data, codec_id)) {
+                log::debug!("Using the parameter sets from the bitstream as extradata ({} bytes)", parameter_sets.len());
+                unsafe {
+                    let par = (*octx.stream(output_index).ok_or(Error::StreamNotFound)?.as_ptr()).codecpar;
+                    ffi::av_freep(&mut (*par).extradata as *mut *mut u8 as *mut std::ffi::c_void);
+                    (*par).extradata = ffi::av_mallocz(parameter_sets.len() + ffi::AV_INPUT_BUFFER_PADDING_SIZE as usize) as *mut u8;
+                    std::ptr::copy_nonoverlapping(parameter_sets.as_ptr(), (*par).extradata, parameter_sets.len());
+                    (*par).extradata_size = parameter_sets.len() as i32;
+                }
+            }
+            Self::write_header(octx, ost_time_bases)?;
+            *header_written = true;
+        }
+        encoded.set_stream(output_index);
+        encoded.rescale_ts(time_base, ost_time_bases[output_index]);
+        if octx.format().name().contains("image") {
+            encoded.write(octx)?;
+        } else {
+            encoded.write_interleaved(octx)?;
+        }
+        Ok(())
+    }
+
+    /// VPS/SPS/PPS (HEVC) or SPS/PPS (H.264) NAL units of an Annex B packet, with their start codes
+    fn parameter_sets_from_annexb(data: &[u8], codec_id: codec::Id) -> Option<Vec<u8>> {
+        let is_parameter_set = |nal: &[u8]| -> bool {
+            match codec_id {
+                codec::Id::HEVC => matches!((nal[0] >> 1) & 0x3f, 32..=34),
+                codec::Id::H264 => matches!(nal[0] & 0x1f, 7 | 8),
+                _ => false
+            }
+        };
+        // Positions of the NAL units, after their start codes
+        let mut starts = Vec::new();
+        let mut i = 0;
+        while i + 3 <= data.len() {
+            if data[i] == 0 && data[i + 1] == 0 && data[i + 2] == 1 {
+                starts.push(i + 3);
+                i += 3;
+            } else {
+                i += 1;
+            }
+        }
+        let mut ret = Vec::new();
+        for (n, &start) in starts.iter().enumerate() {
+            let mut end = starts.get(n + 1).map_or(data.len(), |&next| next - 3);
+            // Trailing zero belongs to the next 4-byte start code
+            while end > start && data[end - 1] == 0 { end -= 1; }
+            if end > start && is_parameter_set(&data[start..end]) {
+                ret.extend_from_slice(&[0, 0, 0, 1]);
+                ret.extend_from_slice(&data[start..end]);
+            }
+        }
+        if ret.is_empty() { None } else { Some(ret) }
     }
 
     /*fn get_format_range(format: format::Pixel) -> (bool, format::Pixel) {
