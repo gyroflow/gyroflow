@@ -64,11 +64,15 @@ impl FieldOfViewAlgorithm for FovIterative<'_> {
         };
 
         if !ranges.is_empty() {
-            // Only within render range.
-            if let Some(max_fov) = fov_values.iter().copied().reduce(f64::max) {
+            // Only within render range. The frames outside get the largest fov of the frames inside, so they never limit
+            // the zoom inside the ranges, but the preview outside of them still shows a sensible zoom. The largest fov of
+            // the whole video would come from frames that are not rendered, often with much more motion, and zoom out far
+            let within_range = |i: usize| ranges.iter().any(|r| i >= (l*r.0).floor() as usize && i <= (l*r.1).ceil() as usize);
+            let max_fov = fov_values.iter().enumerate().filter(|(i, _)| within_range(*i)).map(|(_, v)| *v).reduce(f64::max)
+                .or_else(|| fov_values.iter().copied().reduce(f64::max));
+            if let Some(max_fov) = max_fov {
                 for (i, v) in fov_values.iter_mut().enumerate() {
-                    let within_range = ranges.iter().any(|r| i >= (l*r.0).floor() as usize && i <= (l*r.1).ceil() as usize);
-                    if !within_range {
+                    if !within_range(i) {
                         *v = max_fov;
                     }
                 }
