@@ -212,6 +212,40 @@ pub fn update_rlimit() {
     });
 }
 
+// On Linux with the NVIDIA proprietary driver, Qt Quick's native Wayland rendering
+// path (EGL/Vulkan surface) commonly produces a fully transparent window on
+// compositors like Hyprland/Sway. Route through XWayland instead, since it's a well
+// known issue and this combination is otherwise unusable. Only applies if the user
+// hasn't already forced a platform plugin themselves.
+#[cfg(target_os = "linux")]
+pub fn fix_nvidia_wayland_transparency() {
+    use std::env;
+    // Escape hatch for anyone who wants native Wayland regardless (eg. a driver
+    // version where this is already fixed).
+    if env::var_os("GYROFLOW_NO_NVIDIA_WAYLAND_FIX").is_some() {
+        return;
+    }
+    // Many Wayland desktop environments (eg. Omarchy/Hyprland) already export
+    // QT_QPA_PLATFORM=wayland;xcb globally as a fallback list. Since the "wayland"
+    // platform plugin loads successfully (it just renders a transparent window on
+    // NVIDIA), Qt never falls through to "xcb" on its own. Only back off if the
+    // user/environment picked a *different* first-choice platform than "wayland".
+    let current = env::var("QT_QPA_PLATFORM").unwrap_or_default();
+    let prefers_wayland = current.is_empty() || current.split(';').next() == Some("wayland");
+    if !prefers_wayland {
+        return;
+    }
+    let is_wayland_session = env::var_os("WAYLAND_DISPLAY").is_some() ||
+        env::var("XDG_SESSION_TYPE").map(|v| v == "wayland").unwrap_or(false);
+    if !is_wayland_session || !std::path::Path::new("/proc/driver/nvidia/version").exists() {
+        return;
+    }
+    ::log::debug!("Detected NVIDIA + Wayland (QT_QPA_PLATFORM was {current:?}), forcing xcb to avoid a transparent window");
+    unsafe { env::set_var("QT_QPA_PLATFORM", "xcb"); }
+}
+#[cfg(not(target_os = "linux"))]
+pub fn fix_nvidia_wayland_transparency() { }
+
 pub fn set_android_context() {
     #[cfg(target_os = "android")]
     {
