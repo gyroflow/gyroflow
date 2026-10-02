@@ -241,7 +241,8 @@ pub fn fix_nvidia_wayland_transparency() {
         return;
     }
     ::log::debug!("Detected NVIDIA + Wayland (QT_QPA_PLATFORM was {current:?}), forcing xcb to avoid a transparent window");
-    unsafe { env::set_var("QT_QPA_PLATFORM", "xcb"); }
+    // Set through Qt like the other Qt variables, so it reaches `qgetenv` (on Windows Rust's `set_var` doesn't)
+    cpp!(unsafe [] { qputenv("QT_QPA_PLATFORM", "xcb"); });
 }
 #[cfg(not(target_os = "linux"))]
 pub fn fix_nvidia_wayland_transparency() { }
