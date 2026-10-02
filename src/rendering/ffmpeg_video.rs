@@ -90,6 +90,11 @@ macro_rules! ffmpeg {
 }
 
 impl<'a> VideoTranscoder<'a> {
+    /// Software formats the hardware frames of the encoders take
+    fn is_hw_upload_format(format: format::Pixel) -> bool {
+        matches!(format, format::Pixel::NV12 | format::Pixel::P010LE | format::Pixel::P012LE | format::Pixel::P016LE)
+    }
+
     fn init_encoder(frame: &mut frame::Video, params: &EncoderParams, decoder: &mut decoder::Video, size: (u32, u32), bitrate_mbps: Option<f64>, octx: &mut format::context::Output, output_index: usize, hw_upload_format: &Option<format::Pixel>) -> Result<encoder::video::Video, FFmpegError> {
         let global_header = octx.format().flags().contains(format::Flags::GLOBAL_HEADER);
         let mut ost = octx.stream_mut(output_index).unwrap();
@@ -309,6 +314,15 @@ impl<'a> VideoTranscoder<'a> {
                             };
                             hw_upload_format = Some(target_format);
                             target_format = sw_format;
+                            self.encoder_params.pixel_format = Some(target_format);
+                        }
+                        // Frames from the CPU (eg. software decoding when the GPU can't decode the video) are uploaded to the hardware
+                        // frames of the encoder, which take the semi-planar formats, so convert eg. yuv420p10le to p010le first
+                        if hw_upload_format.is_some() && !Self::is_hw_upload_format(target_format) {
+                            let depth = unsafe { ffi::av_pix_fmt_desc_get(target_format.into()).as_ref().map(|x| x.comp[0].depth).unwrap_or(8) };
+                            target_format = super::ffmpeg_hw::find_best_matching_codec(target_format, &[format::Pixel::NV12, format::Pixel::P010LE])
+                                .unwrap_or(if depth > 8 { format::Pixel::P010LE } else { format::Pixel::NV12 });
+                            log::debug!("Uploading {:?} frames to the encoder as {:?}", in_format, target_format);
                             self.encoder_params.pixel_format = Some(target_format);
                         }
 
