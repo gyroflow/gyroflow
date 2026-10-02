@@ -438,7 +438,8 @@ impl<'a> FfmpegProcessor<'a> {
 
                         match self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, start_ms, end_ms, &mut self.frame_ts) {
                             Ok(encoding_status) => {
-                                if self.video.encoder.is_some() {
+                                // The other streams can be written once the header is written
+                                if self.video.header_written {
                                     video_inited = true;
                                     if !pending_packets.is_empty() {
                                         for (stream, packet, ist_index, ost_index) in pending_packets.drain(..) {
@@ -497,12 +498,11 @@ impl<'a> FfmpegProcessor<'a> {
 
         // Flush encoders and decoders.
         {
-            let ost_time_base = self.ost_time_bases[self.video.output_index.unwrap_or_default()];
             self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof()?;
             // self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.flush();
             self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, start_ms, end_ms, &mut self.frame_ts)?;
             self.video.encoder.as_mut().ok_or(Error::EncoderNotFound)?.send_eof()?;
-            if let Err(e) = self.video.receive_and_process_encoded_packets(&mut octx, ost_time_base) {
+            if let Err(e) = self.video.receive_and_process_encoded_packets(&mut octx, &mut self.ost_time_bases) {
                 log::error!("Failed to flush last packet: {e:?}");
             }
         }
