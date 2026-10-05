@@ -287,6 +287,7 @@ pub struct Controller {
 
     mp4_merge: qt_method!(fn(&self, file_list: QStringList, output_folder: QUrl, output_filename: QString)),
     mp4_merge_progress: qt_signal!(percent: f64, error_string: QString, url: QString),
+    joined_video_duration: qt_method!(fn(&self, url: QUrl) -> f64),
 
     is_nle_installed: qt_method!(fn(&self) -> bool),
     nle_plugins: qt_method!(fn(&self, command: QString, typ: QString) -> QString),
@@ -391,6 +392,9 @@ impl Controller {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
             filesystem::stop_accessing_url(&util::qurl_to_encoded(vid.url.clone()), false);
             filesystem::start_accessing_url(&url, false);
+            // MDK's own io can't open the files a joined video lists (see `joined_video`), FFmpeg's io can. It's a global
+            // option that's read when a video is opened, so it's set for every one
+            MDKVideoItem::setGlobalOption("demuxer.io", if gyroflow_core::joined_video::is_joined(&url) { "0" } else { "1" });
             vid.setUrl(QUrl::from(QString::from(url)), QString::from(custom_decoder));
         }
     }
@@ -2389,9 +2393,11 @@ impl Controller {
         });
         core::run_threaded(move || {
             let mut vidinfo = None;
-            for x in &file_list {
-                match rendering::ffmpeg_processor::FfmpegProcessor::get_video_info(x) {
+            let mut parts = Vec::with_capacity(file_list.len());
+            for url in &file_list {
+                match rendering::ffmpeg_processor::FfmpegProcessor::get_video_info(url) {
                     Ok(x) => {
+                        parts.push(gyroflow_core::joined_video::Part { url: url.clone(), duration_ms: x.duration_ms });
                         if vidinfo.is_none() {
                             vidinfo = Some(x);
                             continue;
@@ -2403,23 +2409,18 @@ impl Controller {
                             }
                         }
                     },
-                    Err(e) => { progress((1.0, format!("Failed to read file metadata: {x}: {e:?}"))); return; }
+                    Err(e) => { progress((1.0, format!("Failed to read file metadata: {url}: {e:?}"))); return; }
                 }
             }
 
-            let mut opened = Vec::with_capacity(file_list.len());
-            for x in &file_list {
-                match filesystem::open_file(&x, false, false) {
-                    Ok(x) => { opened.push(x); },
-                    Err(e) => { progress((1.0, format!("Failed to open file: {x}: {e:?}"))); return; }
-                }
+            // Not a joined copy of the files: that read and wrote all of them (minutes on a memory card, and as much free
+            // space), but a script that lists them, which the preview, the renderer and the motion data read as one video
+            let folder_path = |url: &str| filesystem::url_to_path(url).trim_end_matches(['/', '\\']).to_string();
+            if file_list.iter().any(|x| folder_path(&filesystem::get_folder(x)) != folder_path(&output_folder)) {
+                progress((1.0, "The files have to be in the same folder to join them.".to_string()));
+                return;
             }
-            let mut file_references: Vec<(&mut std::fs::File, usize)> = opened.iter_mut().map(|x| { let s = x.size; (x.get_file(), s) }).collect();
-            let mut opened_output = match filesystem::open_file(&output_url, true, true) {
-                Ok(x) => { x },
-                Err(e) => { progress((1.0, format!("Failed to create file: {output_url}: {e:?}"))); return; }
-            };
-            let res = mp4_merge::join_file_streams(&mut file_references, opened_output.get_file(), |p| progress((p.min(0.9999), String::default())));
+            let res = gyroflow_core::joined_video::write(&output_folder, &output_filename, &parts);
             match res {
                 Ok(_) => {
                     if let Err(e) = Self::merge_gcsv(&file_list, &output_folder, &output_filename) {
@@ -2433,6 +2434,12 @@ impl Controller {
                 Err(e) => progress((1.0, e.to_string()))
             }
         });
+    }
+    /// Duration of a joined video in ms, the sum of the files it lists (its stream has none), 0 for other videos
+    fn joined_video_duration(&self, url: QUrl) -> f64 {
+        let url = util::qurl_to_encoded(url);
+        if !gyroflow_core::joined_video::is_joined(&url) { return 0.0; }
+        gyroflow_core::joined_video::read(&url).map(|x| x.iter().map(|x| x.duration_ms).sum()).unwrap_or_default()
     }
     fn merge_gcsv(file_list: &[String], output_folder: &str, output_filename: &str) -> Result<(), gyroflow_core::GyroflowCoreError> {
         use std::io::{ BufRead, Write, Seek, SeekFrom };

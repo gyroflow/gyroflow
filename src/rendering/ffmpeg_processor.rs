@@ -615,15 +615,25 @@ impl<'a> FfmpegProcessor<'a> {
         }
 
         let context = format::input_with_dictionary(&file.path, dict)?;
-        let created_at = context.metadata().get("creation_time").and_then(|x| chrono::DateTime::parse_from_rfc3339(x).ok()).map(|x| x.timestamp_millis() as u64 / 1000);
+        let mut created_at = context.metadata().get("creation_time").and_then(|x| chrono::DateTime::parse_from_rfc3339(x).ok()).map(|x| x.timestamp_millis() as u64 / 1000);
+        if created_at.is_none() && gyroflow_core::joined_video::is_joined(url) {
+            // The concat demuxer doesn't pass on the metadata of the files
+            created_at = gyroflow_core::joined_video::read(url).ok().and_then(|x| Self::get_video_info(&x.first()?.url).ok()?.created_at);
+        }
         if let Some(stream) = context.streams().best(media::Type::Video) {
             let codec = codec::context::Context::from_parameters(stream.parameters())?;
             if let Ok(video) = codec.decoder().video() {
                 let mut bitrate = video.bit_rate();
                 if bitrate == 0 { bitrate = context.bit_rate() as usize; }
 
+                // The streams of a joined video (an FFmpeg concat script) have no duration, the whole input has
+                let duration_ms = if stream.duration() > 0 {
+                    stream.duration() as f64 * f64::from(stream.time_base()) * 1000.0
+                } else {
+                    context.duration() as f64 / 1000.0 // AV_TIME_BASE
+                };
                 let mut frames = stream.frames() as usize;
-                if frames == 0 { frames = (stream.duration() as f64 * f64::from(stream.time_base()) * f64::from(stream.rate())) as usize; }
+                if frames == 0 { frames = (duration_ms / 1000.0 * f64::from(stream.rate())) as usize; }
 
                 let rotation = {
                     let mut theta = 0.0;
@@ -648,7 +658,7 @@ impl<'a> FfmpegProcessor<'a> {
                 };
 
                 return Ok(VideoInfo {
-                    duration_ms: stream.duration() as f64 * f64::from(stream.time_base()) * 1000.0,
+                    duration_ms,
                     frame_count: frames,
                     fps: f64::from(stream.rate()), // or avg_frame_rate?
                     width: video.width(),

@@ -1666,7 +1666,6 @@ dependencies = [
  "log",
  "lru",
  "mimalloc",
- "mp4-merge",
  "nalgebra 0.34.2",
  "ndk",
  "ndk-context",
@@ -2468,17 +2467,6 @@ checksum = "bb85c154ba489f01b25c0d36ae69a87e4a1c73a72631fc6c0eb6dde34a73e44b"
 dependencies = [
  "num-traits 0.2.19",
  "pxfm",
-]
-
-[[package]]
-name = "mp4-merge"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46583ea1f026fa4ca9c8b5325464bbfaf3668f3e5269b2920af1fda0cd095910"
-dependencies = [
- "byteorder",
- "filetime_creation",
- "log",
 ]
 
 [[package]]

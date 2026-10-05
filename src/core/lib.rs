@@ -19,6 +19,7 @@ pub mod smoothing;
 pub mod filtering;
 pub mod filesystem;
 pub mod gyro_export;
+pub mod joined_video;
 pub mod settings;
 
 pub mod gpu;
@@ -206,7 +207,11 @@ impl StabilizationManager {
         };
 
         let cancel_flag2 = cancel_flag.clone();
-        let mut md = GyroSource::parse_telemetry_file(stream, filesize, &url, options, size, fps, progress_cb, cancel_flag2)?;
+        let mut md = if joined_video::is_joined(url) {
+            joined_video::parse_telemetry(url, options, size, fps, progress_cb, cancel_flag2)?
+        } else {
+            GyroSource::parse_telemetry_file(stream, filesize, &url, options, size, fps, progress_cb, cancel_flag2)?
+        };
         if md.detected_source.as_ref().map(|v| v.starts_with("GoPro ")).unwrap_or_default() {
             // If gopro reports rolling shutter value, it already applied it, ie. the video is already corrected
             md.frame_readout_time = None;

@@ -39,7 +39,6 @@ Item {
     property int fullScreen: 0;
     property string detectedCamera: "";
     property real additionalTopMargin: 0;
-    property var mergedFiles: [];
 
     property Menu.VideoInformation vidInfo: null;
 
@@ -407,8 +406,8 @@ Item {
                 const dlg = messageBox(Modal.Info, qsTr("Split recording has been detected, do you want to automatically join the files (%1) to create one full clip?").arg(list), [
                     { text: qsTr("Yes"), accent: true, clicked: function() {
                         dlg.btnsRow.children[0].enabled = false;
-                        getOutputFile(folder, sequenceList[0], "_joined", "", true, function(outFolder, outFilename, outFullFileUrl) {
-                            root.mergedFiles = sequenceList.map(x => filesystem.get_file_url(folder, x, false).toString());
+                        // Next to the files: the joined video is a list of them (see `joined_video.rs`)
+                        getOutputFile(folder, sequenceList[0], "_joined", "ffconcat", false, function(outFolder, outFilename, outFullFileUrl) {
                             controller.mp4_merge(sequenceList.map(x => filesystem.get_file_url(folder, x, false).toString()), outFolder, outFilename);
                         });
                         return false;
@@ -484,8 +483,7 @@ Item {
                     dlg.btnsRow.children[2].enabled = false;
                     const filename = filesystem.get_filename(urlsCopy[0]);
                     const folder = filesystem.get_folder(urlsCopy[0]);
-                    getOutputFile(folder, filename, "_joined", "", true, function(outFolder, outFilename, outFullFileUrl) {
-                        root.mergedFiles = urlsCopy.map(x => x.toString());
+                    getOutputFile(folder, filename, "_joined", "ffconcat", false, function(outFolder, outFilename, outFullFileUrl) {
                         controller.mp4_merge(urlsCopy.map(x => x.toString()), outFolder, outFilename);
                     });
                     return false;
@@ -714,21 +712,6 @@ Item {
                         vidInfo.loadFromVideoMetadata(md, vid.videoWidth, vid.videoHeight);
                         window.sync.customSyncTimestamps = [];
 
-                        if (root.mergedFiles.length > 1) {
-                            if (loaded) {
-                                const copy = [...root.mergedFiles];
-                                messageBox(Modal.Question, qsTr("Files merged successfully, do you want to delete the original ones?"), [
-                                    { text: qsTr("Yes"), clicked: function() {
-                                        for (const x of copy) {
-                                            filesystem.move_to_trash(x);
-                                        }
-                                        return true;
-                                    } },
-                                    { text: qsTr("No"), accent: true },
-                                ], null, undefined, "delete-after-join");
-                            }
-                            root.mergedFiles = [];
-                        }
 
                         window.lensProfile.selected_manually = false;
 
@@ -736,6 +719,14 @@ Item {
                     }
                     property bool errorShown: false;
                     onMetadataChanged: {
+                        // The stream of a joined video has no duration, only the files it lists have (see `joined_video.rs`)
+                        if (vid.videoWidth > 0 && vid.duration <= 0) {
+                            const joinedMs = controller.joined_video_duration(root.loadedFileUrl);
+                            if (joinedMs > 0) {
+                                vid.videoLoaded(joinedMs, Math.round(joinedMs / 1000 * vid.frameRate), vid.frameRate, vid.videoWidth, vid.videoHeight);
+                                return; // Comes back here with the duration
+                            }
+                        }
                         if (vid.videoWidth > 0) {
                             // Trigger seek to buffer the video frames
                             if (vid.duration == 0) {
