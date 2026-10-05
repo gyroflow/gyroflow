@@ -287,6 +287,7 @@ pub struct Controller {
 
     mp4_merge: qt_method!(fn(&self, file_list: QStringList, output_folder: QUrl, output_filename: QString)),
     mp4_merge_progress: qt_signal!(percent: f64, error_string: QString, url: QString),
+    joined_video_duration: qt_method!(fn(&self, url: QUrl) -> f64),
 
     is_nle_installed: qt_method!(fn(&self) -> bool),
     nle_plugins: qt_method!(fn(&self, command: QString, typ: QString) -> QString),
@@ -2433,6 +2434,12 @@ impl Controller {
                 Err(e) => progress((1.0, e.to_string()))
             }
         });
+    }
+    /// Duration of a joined video in ms, the sum of the files it lists (its stream has none), 0 for other videos
+    fn joined_video_duration(&self, url: QUrl) -> f64 {
+        let url = util::qurl_to_encoded(url);
+        if !gyroflow_core::joined_video::is_joined(&url) { return 0.0; }
+        gyroflow_core::joined_video::read(&url).map(|x| x.iter().map(|x| x.duration_ms).sum()).unwrap_or_default()
     }
     fn merge_gcsv(file_list: &[String], output_folder: &str, output_filename: &str) -> Result<(), gyroflow_core::GyroflowCoreError> {
         use std::io::{ BufRead, Write, Seek, SeekFrom };

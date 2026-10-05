@@ -719,6 +719,14 @@ Item {
                     }
                     property bool errorShown: false;
                     onMetadataChanged: {
+                        // The stream of a joined video has no duration, only the files it lists have (see `joined_video.rs`)
+                        if (vid.videoWidth > 0 && vid.duration <= 0) {
+                            const joinedMs = controller.joined_video_duration(root.loadedFileUrl);
+                            if (joinedMs > 0) {
+                                vid.videoLoaded(joinedMs, Math.round(joinedMs / 1000 * vid.frameRate), vid.frameRate, vid.videoWidth, vid.videoHeight);
+                                return; // Comes back here with the duration
+                            }
+                        }
                         if (vid.videoWidth > 0) {
                             // Trigger seek to buffer the video frames
                             if (vid.duration == 0) {
