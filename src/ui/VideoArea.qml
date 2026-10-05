@@ -745,6 +745,7 @@ Item {
                                     vid.volume = volumeSlider.value / 100.0;
                                 })
                             } else {
+                                bufferTrigger.waited = 0;
                                 bufferTrigger.start();
                             }
                         } else if (!errorShown) {
@@ -758,10 +759,16 @@ Item {
                     Timer {
                         id: bufferTrigger;
                         interval: 150;
+                        property int waited: 0;
                         onTriggered: {
-                            if (!vid.videoWidth) bufferTrigger.start();
+                            if (!vid.videoWidth) { bufferTrigger.start(); return; }
+                            // Only once the first frame is shown (which ends the loading screen), unless it doesn't show up on
+                            // its own: seeking while it's decoded made the decoder start over at the seek target, which kept
+                            // the loading screen up for seconds with videos decoded on the CPU (eg. 5.3K GoPro footage)
+                            if (!vid.loaded && ++bufferTrigger.waited < 20) { bufferTrigger.start(); return; }
                             Qt.callLater(() => {
-                                vid.currentFrame++;
+                                // Not `currentFrame++`: until the first frame is shown, it's still the previous video's frame
+                                vid.currentFrame = 1;
                                 Qt.callLater(() => vid.currentFrame = 0);
                                 if (vid.videoWidth) {
                                     stabEnabledBtn.checked = true;
