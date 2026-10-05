@@ -98,6 +98,12 @@ MenuItem {
     Connections {
         target: controller;
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
+            if (additional_data.cancelled) {
+                // It didn't load anything: nothing below applies (eg. it would pick an integration method for a video
+                // without quaternions), and the project waiting for the file has to load it again
+                root.filename = "";
+                return;
+            }
             root.filename = filename || "";
             root.detectedFormat = camera || "";
             info.updateEntry("File name", filename || "---");

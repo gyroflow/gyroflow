@@ -316,6 +316,10 @@ pub struct Controller {
     processing_info_changed: qt_signal!(),
 
     cancel_flag: Arc<AtomicBool>,
+    // Loading telemetry has its own: the other operations reset the shared one when they start, and a load has to stay
+    // cancelled once a newer one replaced it. Results of a replaced load are dropped, see `begin_telemetry_load`
+    telemetry_cancel_flag: Arc<AtomicBool>,
+    telemetry_load_id: Arc<AtomicUsize>,
     preview_pipeline: Arc<AtomicUsize>,
 
     ongoing_computations: BTreeSet<u64>,
@@ -323,6 +327,9 @@ pub struct Controller {
 
     pub stabilizer: Arc<StabilizationManager>,
 }
+
+// Telemetry loads clear and write the motion data and lens of the stabilizer, so they run one after another
+static TELEMETRY_LOAD_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
 impl Controller {
     pub fn new() -> Self {
@@ -807,24 +814,29 @@ impl Controller {
             let fps = vid.frameRate;
             let frame_count = vid.frameCount as usize;
             let video_size = (vid.videoWidth as usize, vid.videoHeight as usize);
-            self.cancel_flag.store(false, SeqCst);
-            let cancel_flag = self.cancel_flag.clone();
+            let (load_id, cancel_flag) = self.begin_telemetry_load();
+            let current_load_id = self.telemetry_load_id.clone();
+            // A project import this load replaced can't reset it anymore (its results are dropped), and nothing else is loading now
+            self.stabilizer.prevent_recompute.store(false, SeqCst);
 
             if is_main_video {
                 self.set_preview_resolution(self.preview_resolution, player);
             }
 
-            let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (msg, arg): (String, String)| {
+            let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (msg, arg): (String, String)| {
+                if this.telemetry_load_id.load(SeqCst) != load_id { return; }
                 this.error(QString::from(msg), QString::from(arg), QString::default());
             });
 
             let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, progress: f64| {
+                if this.telemetry_load_id.load(SeqCst) != load_id { return; }
                 this.loading_gyro_in_progress = progress < 1.0;
                 this.loading_gyro_progress(progress);
                 this.loading_gyro_in_progress_changed();
             });
             let stab2 = stab.clone();
             let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, params: (bool, QString, QString, bool, serde_json::Value)| {
+                if this.telemetry_load_id.load(SeqCst) != load_id { return; }
                 this.gyro_loaded = params.3; // Contains motion
                 this.gyro_changed();
 
@@ -842,9 +854,11 @@ impl Controller {
                 this.request_recompute();
             });
             let load_lens = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, path: String| {
+                if this.telemetry_load_id.load(SeqCst) != load_id { return; }
                 this.load_lens_profile(path.into());
             });
             let reload_lens = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, _| {
+                if this.telemetry_load_id.load(SeqCst) != load_id { return; }
                 let lens = this.stabilizer.lens.read();
                 if this.lens_loaded || !lens.path_to_file.is_empty() {
                     this.lens_loaded = true;
@@ -863,6 +877,11 @@ impl Controller {
                 self.loading_gyro_in_progress = true;
                 self.loading_gyro_in_progress_changed();
                 core::run_threaded(move || {
+                    let _lock = TELEMETRY_LOAD_LOCK.lock();
+                    // Replaced by a newer load while it waited for the previous one
+                    if current_load_id.load(SeqCst) != load_id { return; }
+                    let load_cancel_flag = cancel_flag.clone();
+
                     let mut additional_data = serde_json::Value::Object(serde_json::Map::new());
                     let additional_obj = additional_data.as_object_mut().unwrap();
 
@@ -886,6 +905,8 @@ impl Controller {
                         }
                     }
 
+                    if current_load_id.load(SeqCst) != load_id { return; }
+
                     stab.recompute_smoothness();
 
                     let gyro = stab.gyro.read();
@@ -894,6 +915,8 @@ impl Controller {
                     let has_raw_gyro = !file_metadata.raw_imu.is_empty();
                     let has_quats = !file_metadata.quaternions.is_empty();
                     let has_motion = has_raw_gyro || has_quats;
+                    // Cancelled, it didn't load anything: the UI must not take the file as loaded and skip loading it again
+                    additional_obj.insert("cancelled".to_owned(),         serde_json::Value::Bool(load_cancel_flag.load(SeqCst)));
                     additional_obj.insert("imu_orientation".to_owned(),   serde_json::Value::String(gyro.imu_transforms.imu_orientation.clone().unwrap_or_else(|| "XYZ".into())));
                     additional_obj.insert("contains_raw_gyro".to_owned(), serde_json::Value::Bool(has_raw_gyro));
                     additional_obj.insert("contains_quats".to_owned(),    serde_json::Value::Bool(has_quats));
@@ -946,6 +969,10 @@ impl Controller {
 
                     finished((is_main_video, filename.into(), QString::from(detected.trim()), has_motion, additional_data));
                 });
+            } else if self.loading_gyro_in_progress {
+                // The load this one replaced won't report that it finished anymore
+                self.loading_gyro_in_progress = false;
+                self.loading_gyro_in_progress_changed();
             }
         }
     }
@@ -1357,6 +1384,17 @@ impl Controller {
 
     fn cancel_current_operation(&mut self) {
         self.cancel_flag.store(true, SeqCst);
+        self.telemetry_cancel_flag.store(true, SeqCst);
+    }
+
+    /// Cancels the telemetry load in progress, if any, and returns the id and cancel flag of a new one.
+    /// Clicking through videos while they load used to run the loads at the same time, and whichever finished last
+    /// wrote its motion data and lens, even of a video that was no longer loaded. Now only the latest load's progress
+    /// and results reach the UI and the stabilizer, and the loads run one after another (see `TELEMETRY_LOAD_LOCK`).
+    fn begin_telemetry_load(&mut self) -> (usize, Arc<AtomicBool>) {
+        self.telemetry_cancel_flag.store(true, SeqCst);
+        self.telemetry_cancel_flag = Arc::new(AtomicBool::new(false));
+        (self.telemetry_load_id.fetch_add(1, SeqCst) + 1, self.telemetry_cancel_flag.clone())
     }
 
     fn export_gyroflow_file(&self, url: QUrl, typ: QString, additional_data: QJsonObject) {
@@ -1466,12 +1504,16 @@ impl Controller {
 
     fn import_gyroflow_file(&mut self, url: QUrl) {
         let url = util::qurl_to_encoded(url);
+        let (load_id, cancel_flag) = self.begin_telemetry_load();
+        let current_load_id = self.telemetry_load_id.clone();
         let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, progress: f64| {
+            if this.telemetry_load_id.load(SeqCst) != load_id { return; }
             this.loading_gyro_in_progress = progress < 1.0;
             this.loading_gyro_progress(progress);
             this.loading_gyro_in_progress_changed();
         });
         let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, obj: Result<serde_json::Value, gyroflow_core::GyroflowCoreError>| {
+            if this.telemetry_load_id.load(SeqCst) != load_id { return; }
             this.loading_gyro_in_progress = false;
             this.loading_gyro_progress(1.0);
             this.loading_gyro_in_progress_changed();
@@ -1482,24 +1524,24 @@ impl Controller {
         });
 
         let stab = self.stabilizer.clone();
-        let cancel_flag = self.cancel_flag.clone();
-        cancel_flag.store(true, SeqCst);
+        self.cancel_flag.store(true, SeqCst); // Other operations still running on the previous project
         core::run_threaded(move || {
-            if Arc::strong_count(&cancel_flag) > 2 {
-                // Wait for other tasks to finish
-                std::thread::sleep(std::time::Duration::from_millis(200));
-            }
-            cancel_flag.store(false, SeqCst);
+            let _lock = TELEMETRY_LOAD_LOCK.lock();
+            if current_load_id.load(SeqCst) != load_id { return; } // Replaced by a newer load while it waited
             finished(stab.import_gyroflow_file(&url, false, progress, cancel_flag, false));
         });
     }
     fn import_gyroflow_data(&mut self, data: QString) {
+        let (load_id, cancel_flag) = self.begin_telemetry_load();
+        let current_load_id = self.telemetry_load_id.clone();
         let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, progress: f64| {
+            if this.telemetry_load_id.load(SeqCst) != load_id { return; }
             this.loading_gyro_in_progress = progress < 1.0;
             this.loading_gyro_progress(progress);
             this.loading_gyro_in_progress_changed();
         });
         let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, obj: Result<serde_json::Value, gyroflow_core::GyroflowCoreError>| {
+            if this.telemetry_load_id.load(SeqCst) != load_id { return; }
             this.loading_gyro_in_progress = false;
             this.loading_gyro_progress(1.0);
             this.loading_gyro_in_progress_changed();
@@ -1509,14 +1551,10 @@ impl Controller {
         });
 
         let stab = self.stabilizer.clone();
-        let cancel_flag = self.cancel_flag.clone();
-        cancel_flag.store(true, SeqCst);
+        self.cancel_flag.store(true, SeqCst); // Other operations still running on the previous project
         core::run_threaded(move || {
-            if Arc::strong_count(&cancel_flag) > 2 {
-                // Wait for other tasks to finish
-                std::thread::sleep(std::time::Duration::from_millis(200));
-            }
-            cancel_flag.store(false, SeqCst);
+            let _lock = TELEMETRY_LOAD_LOCK.lock();
+            if current_load_id.load(SeqCst) != load_id { return; } // Replaced by a newer load while it waited
             let mut is_preset = false;
             finished(stab.import_gyroflow_data(data.to_string().as_bytes(), false, None, progress, cancel_flag, &mut is_preset, false));
         });
