@@ -1,0 +1,142 @@
+.pragma library
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Catalogue metadata does not contain a usable distortion calibration.
+
+function clean(value) { return typeof value === "string" ? value.trim().replace(/\s+/g, " ") : ""; }
+function norm(value) { return clean(value).toLowerCase(); }
+function cameraKey(brand, model) { return JSON.stringify([norm(brand), norm(model)]); }
+function ordered(values) { return values.sort(function(a, b) { return a.localeCompare(b); }); }
+function unique(values) { return ordered(Array.from(new Set(values.filter(function(x) { return !!x; })))); }
+function positive(value) { return typeof value === "number" && isFinite(value) && value > 0; }
+function overlaps(a, b) { return (a || []).some(function(value) { return (b || []).indexOf(value) !== -1; }); }
+function addAlias(map, key, value) {
+    if (!Object.prototype.hasOwnProperty.call(map, key)) map[key] = value;
+    else if (map[key] !== value) map[key] = null; // Ambiguous names must not auto-select.
+}
+
+function build(document) {
+    if (!document || document.schema_version !== 1 || !Array.isArray(document.cameras)
+        || !Array.isArray(document.lenses) || !Array.isArray(document.profiles)) {
+        throw new Error("Unsupported camera catalogue");
+    }
+    var index = { cameras: Object.create(null), aliases: Object.create(null),
+                  brands: [], models: Object.create(null), profiles: Object.create(null),
+                  lenses: document.lenses, lensesByMount: Object.create(null), lensChoices: Object.create(null),
+                  compatible: Object.create(null), count: 0 };
+    document.cameras.forEach(function(camera) {
+        if (!clean(camera.brand) || !clean(camera.model)) return;
+        var id = cameraKey(camera.brand, camera.model);
+        index.cameras[id] = camera;
+        addAlias(index.aliases, id, id);
+        (camera.aliases || []).forEach(function(alias) {
+            addAlias(index.aliases, cameraKey(camera.brand, alias), id);
+        });
+    });
+    document.profiles.forEach(function(profile) {
+        if (!clean(profile.id) || !clean(profile.brand) || !clean(profile.model)) return;
+        var id = index.aliases[cameraKey(profile.brand, profile.model)] || cameraKey(profile.brand, profile.model);
+        if (!index.cameras[id]) {
+            index.cameras[id] = { brand: clean(profile.brand), model: clean(profile.model), mounts: [], aliases: [] };
+            addAlias(index.aliases, id, id);
+        }
+        if (!index.profiles[id]) index.profiles[id] = Object.create(null);
+        var lens = clean(profile.lens);
+        if (!index.profiles[id][lens]) index.profiles[id][lens] = [];
+        index.profiles[id][lens].push(profile);
+        index.count += 1;
+    });
+    Object.keys(index.cameras).forEach(function(id) {
+        var camera = index.cameras[id], brand = clean(camera.brand);
+        if (!index.models[brand]) index.models[brand] = [];
+        index.models[brand].push(camera.model);
+    });
+    index.brands = ordered(Object.keys(index.models));
+    Object.keys(index.models).forEach(function(brand) { index.models[brand] = unique(index.models[brand]); });
+    document.lenses.forEach(function(lens) {
+        (lens.mounts || []).forEach(function(mount) {
+            if (!index.lensesByMount[mount]) index.lensesByMount[mount] = [];
+            index.lensesByMount[mount].push(lens);
+        });
+    });
+    Object.keys(index.profiles).forEach(function(id) {
+        Object.keys(index.profiles[id]).forEach(function(lens) {
+            index.profiles[id][lens].sort(function(a, b) {
+                return (b.official ? 1 : 0) - (a.official ? 1 : 0) ||
+                       (b.rating || 0) - (a.rating || 0) ||
+                       clean(a.name).localeCompare(clean(b.name)) || a.id.localeCompare(b.id);
+            });
+        });
+    });
+    return index;
+}
+
+function resolveCamera(index, brand, model) {
+    return index && index.aliases[cameraKey(brand, model)] || "";
+}
+
+function camera(index, brand, model) {
+    return index && index.cameras[resolveCamera(index, brand, model)] || null;
+}
+
+function lensLabels(index, brand, model) {
+    var id = resolveCamera(index, brand, model);
+    if (!id) return [];
+    if (index.lensChoices[id]) return index.lensChoices[id].slice();
+    var result = Object.keys(index.profiles[id] || {});
+    var body = index.cameras[id];
+    (body.mounts || []).forEach(function(mount) {
+        (index.lensesByMount[mount] || []).forEach(function(lens) {
+            // A smaller image circle must not be suggested for a larger sensor.
+            if (positive(body.crop_factor) && positive(lens.crop_factor) && lens.crop_factor > body.crop_factor * 1.01) return;
+            result.push(clean(lens.model));
+        });
+    });
+    index.lensChoices[id] = unique(result);
+    return index.lensChoices[id].slice();
+}
+
+function profilesFor(index, brand, model, lens) {
+    var id = resolveCamera(index, brand, model);
+    var bucket = index && index.profiles[id];
+    return bucket && bucket[clean(lens)] ? bucket[clean(lens)].slice() : [];
+}
+
+function compatibleCameras(index, brand, model) {
+    var id = resolveCamera(index, brand, model);
+    if (!id) return [];
+    if (index.compatible[id]) return index.compatible[id].slice();
+    var selected = index.cameras[id];
+    if (!positive(selected.crop_factor) || !(selected.mounts || []).length) return [];
+    var result = Object.keys(index.cameras).filter(function(otherId) {
+        if (otherId === id) return false;
+        var other = index.cameras[otherId];
+        return positive(other.crop_factor) && Math.abs(other.crop_factor / selected.crop_factor - 1) <= 0.01
+            && overlaps(selected.mounts, other.mounts);
+    }).map(function(otherId) { return index.cameras[otherId]; });
+    result.sort(function(a, b) { return (a.brand + " " + a.model).localeCompare(b.brand + " " + b.model); });
+    index.compatible[id] = result;
+    return result.slice();
+}
+
+function prefill(index, metadata) {
+    var value = metadata || {};
+    var id = resolveCamera(index, value.brand || value.camera_brand, value.model || value.camera_model);
+    if (!id) return { brand: clean(value.brand || value.camera_brand), model: clean(value.model || value.camera_model),
+                      lens: clean(value.lens_model || value.lens_info), known: false };
+    var body = index.cameras[id];
+    var labels = lensLabels(index, body.brand, body.model);
+    var requested = clean(value.lens_model || value.lens_info);
+    var matches = labels.filter(function(label) { return norm(label) === norm(requested); });
+    return { brand: body.brand, model: body.model, lens: matches.length === 1 ? matches[0] : requested,
+             known: true };
+}
+
+function visibleProfiles(profiles, hidden, showHidden) {
+    return (profiles || []).filter(function(profile) { return showHidden || !hidden[profile.id || profile.checksum]; });
+}
+
+function profileLabel(profile) {
+    return clean(profile.name) + " — " + (profile.width || "?") + "×" + (profile.height || "?")
+        + (positive(profile.focal_length) ? " / " + profile.focal_length + " mm" : "")
+        + (clean(profile.author) ? " / " + profile.author : "");
+}

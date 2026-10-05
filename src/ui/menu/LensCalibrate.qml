@@ -114,9 +114,6 @@ MenuItem {
     }
     function updateTable(): void {
         const fields = {
-            "camera_brand":     QT_TRANSLATE_NOOP("TableList", "Camera brand"),
-            "camera_model":     QT_TRANSLATE_NOOP("TableList", "Camera model"),
-            "lens_model":       QT_TRANSLATE_NOOP("TableList", "Lens model"),
             "camera_setting":   QT_TRANSLATE_NOOP("TableList", "Camera setting"),
             "note":             QT_TRANSLATE_NOOP("TableList", "Additional info"),
             "output_dimension": QT_TRANSLATE_NOOP("TableList", "Default output size"),
@@ -148,6 +145,9 @@ MenuItem {
                 readoutDirection.set(+additional_data.frame_readout_time < 0? "BottomToTop" : "TopToBottom");
             }
 
+            flcb.checked = false;
+            fl.value = 0;
+            crop.value = 1;
             calib.resetMetadata();
             if (additional_data.camera_identifier) {
                 const camera_id = additional_data.camera_identifier;
@@ -160,7 +160,7 @@ MenuItem {
                     if (camera_id.additional) { calib.calibrationInfo.note         = camera_id.additional; }
                     if (camera_id.identifier) { calib.calibrationInfo.identifier   = camera_id.identifier; }
                     if (camera_id.fps)        { calib.calibrationInfo.fps          = camera_id.fps / 1000.0; }
-                    if (+camera_id.focal_length > 0) { flcb.checked = true; fl.value = +camera_id.focal_length; }
+                    if (+camera_id.focal_length > 0) { flcb.checked = true; fl.value = +camera_id.focal_length; calib.calibrationInfo.focal_length = fl.value; }
 
                     if (camera_id.brand === "GoPro" && camera_id.lens_info === "Super") digitalLens.currentIndex = 1;
                     if (camera_id.brand === "GoPro" && camera_id.lens_info === "Hyper") digitalLens.currentIndex = 2;
@@ -171,6 +171,7 @@ MenuItem {
             }
             if (+additional_data.horizontal_stretch > 0.01) xStretch.value = +additional_data.horizontal_stretch;
             if (+additional_data.vertical_stretch   > 0.01) yStretch.value = +additional_data.vertical_stretch;
+            cameraSelector.setMetadata(calib.calibrationInfo);
             calib.updateTable();
             sizeTimer.start();
         }
@@ -199,6 +200,14 @@ MenuItem {
                 calibrator_window.showNotification(Modal.Info, qsTr("Lens profile exported to %1.").arg("<b>" + filesystem.display_url(fileUrl) + "</b>"));
         };
         if (uploadProfile.checked && uploadProfile.enabled) {
+            const problems = JSON.parse(controller.lens_profile_submission_errors(calib.calibrationInfo));
+            if (problems.length) {
+                messageBox(Modal.Warning, problems.join("\n"), [
+                    { text: qsTr("Save without uploading"), clicked: () => save(false) },
+                    { text: qsTr("Cancel") }
+                ]);
+                return;
+            }
             messageBox(Modal.Info, qsTr("By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.\nDo you want to submit your profile?"), [
                 { text: qsTr("Yes"), accent: true, clicked: () => save(true) },
                 { text: qsTr("No"),                clicked: () => save(false) }
@@ -227,6 +236,17 @@ MenuItem {
     InfoMessageSmall {
         show: infoList.rms > 5 && infoList.rms < 100;
         text: qsTr("For a good lens calibration, this value should be less than 5, ideally less than 1.");
+    }
+    CameraLensSelector {
+        id: cameraSelector;
+        backend: controller;
+        calibratorMode: true;
+        onSelectionEdited: (selection) => {
+            calib.calibrationInfo.camera_brand = selection.camera_brand;
+            calib.calibrationInfo.camera_model = selection.camera_model;
+            calib.calibrationInfo.lens_model = selection.lens_model;
+            calib.updateTable();
+        }
     }
     TableList {
         id: infoList;
@@ -633,7 +653,12 @@ MenuItem {
         }
         CheckBoxWithContent {
             id: flcb;
-            text: qsTr("Focal length");
+  text: qsTr("Focal length");
+  cb.onCheckedChanged: {
+      if (!calib.calibrationInfo || !fl || !crop) return;
+      calib.calibrationInfo.focal_length = cb.checked ? fl.value : null;
+      calib.calibrationInfo.crop_factor = cb.checked ? crop.value : null;
+  }
             Label {
                 text: qsTr("Lens native focal length");
                 position: Label.LeftPosition;

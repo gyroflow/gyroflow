@@ -86,6 +86,7 @@ MenuItem {
         target: controller;
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
             root.isSony = (camera || "").startsWith("Sony");
+            if (is_main_video) cameraSelector.setMetadata(additional_data.camera_identifier || {});
             if (is_main_video) {
                 // Every file starts from the defaults (see `StabilizationParams::clear`): breathing compensation on,
                 // no lens metadata delay. A project file loaded afterwards overrides them through loadGyroflow.
@@ -160,6 +161,7 @@ MenuItem {
                     officialInfo.thankYou = false;
                     root.profileName = (filepath || obj.name || "").replace(/^.*?[\/\\]([^\/\\]+?)$/, "$1");
                     root.profileOriginalJson = json_str;
+                    cameraSelector.setMetadata(obj);
                     root.profileChecksum = checksum;
 
                     if (obj.output_dimension && obj.output_dimension.w > 0 && (window.exportSettings.outWidth != obj.output_dimension.w || window.exportSettings.outHeight != obj.output_dimension.h)) {
@@ -226,8 +228,22 @@ MenuItem {
         settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
     }
 
+    CameraLensSelector {
+        id: cameraSelector;
+        backend: controller;
+        onProfileSelected: (profile) => {
+            root.selected_manually = true;
+            controller.load_lens_profile(profile.id);
+        }
+    }
+    CheckBox {
+        id: legacyProfileSearch;
+        text: qsTr("Search presets and legacy profile names");
+        checked: false;
+    }
     SearchField {
         id: search;
+        visible: legacyProfileSearch.checked;
         placeholderText: qsTr("Search...");
         height: 25 * dpiScale;
         width: parent.width;
