@@ -2389,9 +2389,11 @@ impl Controller {
         });
         core::run_threaded(move || {
             let mut vidinfo = None;
-            for x in &file_list {
-                match rendering::ffmpeg_processor::FfmpegProcessor::get_video_info(x) {
+            let mut parts = Vec::with_capacity(file_list.len());
+            for url in &file_list {
+                match rendering::ffmpeg_processor::FfmpegProcessor::get_video_info(url) {
                     Ok(x) => {
+                        parts.push(gyroflow_core::joined_video::Part { url: url.clone(), duration_ms: x.duration_ms });
                         if vidinfo.is_none() {
                             vidinfo = Some(x);
                             continue;
@@ -2403,23 +2405,18 @@ impl Controller {
                             }
                         }
                     },
-                    Err(e) => { progress((1.0, format!("Failed to read file metadata: {x}: {e:?}"))); return; }
+                    Err(e) => { progress((1.0, format!("Failed to read file metadata: {url}: {e:?}"))); return; }
                 }
             }
 
-            let mut opened = Vec::with_capacity(file_list.len());
-            for x in &file_list {
-                match filesystem::open_file(&x, false, false) {
-                    Ok(x) => { opened.push(x); },
-                    Err(e) => { progress((1.0, format!("Failed to open file: {x}: {e:?}"))); return; }
-                }
+            // Not a joined copy of the files: that read and wrote all of them (minutes on a memory card, and as much free
+            // space), but a script that lists them, which the preview, the renderer and the motion data read as one video
+            let folder_path = |url: &str| filesystem::url_to_path(url).trim_end_matches(['/', '\\']).to_string();
+            if file_list.iter().any(|x| folder_path(&filesystem::get_folder(x)) != folder_path(&output_folder)) {
+                progress((1.0, "The files have to be in the same folder to join them.".to_string()));
+                return;
             }
-            let mut file_references: Vec<(&mut std::fs::File, usize)> = opened.iter_mut().map(|x| { let s = x.size; (x.get_file(), s) }).collect();
-            let mut opened_output = match filesystem::open_file(&output_url, true, true) {
-                Ok(x) => { x },
-                Err(e) => { progress((1.0, format!("Failed to create file: {output_url}: {e:?}"))); return; }
-            };
-            let res = mp4_merge::join_file_streams(&mut file_references, opened_output.get_file(), |p| progress((p.min(0.9999), String::default())));
+            let res = gyroflow_core::joined_video::write(&output_folder, &output_filename, &parts);
             match res {
                 Ok(_) => {
                     if let Err(e) = Self::merge_gcsv(&file_list, &output_folder, &output_filename) {
