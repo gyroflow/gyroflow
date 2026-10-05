@@ -391,6 +391,9 @@ impl Controller {
             let vid = unsafe { &mut *vid.as_ptr() }; // vid.borrow_mut()
             filesystem::stop_accessing_url(&util::qurl_to_encoded(vid.url.clone()), false);
             filesystem::start_accessing_url(&url, false);
+            // MDK's own io can't open the files a joined video lists (see `joined_video`), FFmpeg's io can. It's a global
+            // option that's read when a video is opened, so it's set for every one
+            MDKVideoItem::setGlobalOption("demuxer.io", if gyroflow_core::joined_video::is_joined(&url) { "0" } else { "1" });
             vid.setUrl(QUrl::from(QString::from(url)), QString::from(custom_decoder));
         }
     }
