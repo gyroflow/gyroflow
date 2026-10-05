@@ -114,7 +114,7 @@ impl LensProfileDatabase {
             walkdir::WalkDir::new(dir).into_iter().for_each(|e| {
                 if let Ok(entry) = e {
                     let f_name = entry.path().to_string_lossy().replace('\\', "/");
-                    if f_name.ends_with("/__camera_catalog.json") { return; }
+                    if entry.file_name().to_string_lossy().starts_with("__") { return; }
                     if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
                         if let Ok(data) = std::fs::read_to_string(&f_name) {
                             load(DataSource::String(data), &f_name);
