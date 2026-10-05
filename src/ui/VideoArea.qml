@@ -2,6 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 import QtQuick
+import QtQuick.Controls as QQC
 import MDKVideo
 
 import "components/"
@@ -39,6 +40,10 @@ Item {
     property int fullScreen: 0;
     property string detectedCamera: "";
     property real additionalTopMargin: 0;
+    // While the motion data loads, the video plays unstabilized instead of being covered until it's loaded
+    readonly property bool showStabilized: stabEnabledBtn.checked && !controller.loading_gyro_in_progress;
+    onShowStabilizedChanged: { controller.stab_enabled = showStabilized; vid.forceRedraw(); vid.fovChanged(); }
+    Component.onCompleted: controller.stab_enabled = showStabilized; // The core starts with it enabled
     property var mergedFiles: [];
 
     property Menu.VideoInformation vidInfo: null;
@@ -310,13 +315,7 @@ Item {
             videoLoader.cancelable = true;
         }
         function onLoading_gyro_progress(progress: real): void {
-            videoLoader.active = progress < 1;
-            videoLoader.currentFrame = 0;
-            videoLoader.totalFrames = 0;
-            videoLoader.additional = "";
-            videoLoader.text = videoLoader.active? qsTr("Loading gyro data %1...") : "";
-            videoLoader.progress = videoLoader.active? progress : -1;
-            videoLoader.cancelable = true;
+            gyroLoading.progress = progress < 1? progress : 0;
         }
     }
     property Modal externalSdkModal: null;
@@ -620,8 +619,8 @@ Item {
             spacing: 10 * dpiScale;
             Item {
                 id: vidParent;
-                readonly property real orgW: (stabEnabledBtn.checked && root.outWidth > 0? root.outWidth : (vid.videoWidth * window.lensProfile.input_horizontal_stretch));
-                readonly property real orgH: (stabEnabledBtn.checked && root.outHeight > 0? root.outHeight : (vid.videoHeight * window.lensProfile.input_vertical_stretch));
+                readonly property real orgW: (root.showStabilized && root.outWidth > 0? root.outWidth : (vid.videoWidth * window.lensProfile.input_horizontal_stretch));
+                readonly property real orgH: (root.showStabilized && root.outHeight > 0? root.outHeight : (vid.videoHeight * window.lensProfile.input_vertical_stretch));
                 readonly property real ratio: orgW / Math.max(1, orgH);
                 readonly property real w: vidParentParent.width  / parent.columns - (root.fullScreen? 0 : 20 * dpiScale);
                 readonly property real h: vidParentParent.height / parent.rows    - (root.fullScreen? 0 : 20 * dpiScale);
@@ -645,7 +644,7 @@ Item {
                     anchors.fill: parent;
                     property bool loaded: false;
 
-                    property bool stabEnabled: stabEnabledBtn.checked;
+                    property bool stabEnabled: root.showStabilized;
                     transform: [
                         Scale {
                             readonly property real r: vidInfo.videoRotation * (Math.PI / 180);
@@ -1070,7 +1069,6 @@ Item {
                 SmallLinkButton {
                     id: stabEnabledBtn;
                     iconName: "gyroflow";
-                    onCheckedChanged: { controller.stab_enabled = checked; vid.forceRedraw(); vid.fovChanged(); }
                     tooltip: qsTr("Toggle stabilization");
                 }
 
@@ -1212,6 +1210,54 @@ Item {
                 type: InfoMessage.Warning;
                 visible: vid.loaded && !controller.lens_loaded && !isCalibrator;
                 text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.");
+            }
+        }
+        Item {
+            id: gyroLoading;
+            property real progress: 0;
+            visible: opacity > 0;
+            opacity: controller.loading_gyro_in_progress? 1 : 0;
+            Ease on opacity { }
+            anchors.right: parent.right;
+            anchors.rightMargin: 10 * dpiScale;
+            y: infoMessages.y + infoMessages.height + 10 * dpiScale;
+            width: gyroLoadingCol.width + 20 * dpiScale;
+            height: gyroLoadingCol.height + 16 * dpiScale;
+            Rectangle {
+                anchors.fill: parent;
+                color: styleBackground;
+                opacity: 0.8;
+                radius: 5 * dpiScale;
+            }
+            Column {
+                id: gyroLoadingCol;
+                anchors.centerIn: parent;
+                spacing: 6 * dpiScale;
+                BasicText {
+                    leftPadding: 0;
+                    text: qsTr("Loading gyro data %1...").arg("<b>" + (gyroLoading.progress * 100).toFixed(0) + "%</b>");
+                }
+                BasicText {
+                    leftPadding: 0;
+                    font.pixelSize: 11 * dpiScale;
+                    opacity: 0.7;
+                    text: qsTr("The video plays unstabilized until it's loaded.");
+                }
+                Row {
+                    spacing: 8 * dpiScale;
+                    QQC.ProgressBar {
+                        width: 200 * dpiScale;
+                        anchors.verticalCenter: parent.verticalCenter;
+                        value: gyroLoading.progress;
+                    }
+                    LinkButton {
+                        transparent: true;
+                        text: qsTr("Cancel");
+                        leftPadding: 0; rightPadding: 0;
+                        anchors.verticalCenter: parent.verticalCenter;
+                        onClicked: controller.cancel_current_operation();
+                    }
+                }
             }
         }
     }
