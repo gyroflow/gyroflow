@@ -334,24 +334,7 @@ MenuItem {
         id: list;
         columnSpacing: 10 * dpiScale;
         editableFields: ({
-            "Camera brand": {
-                "type": "text",
-                "width": 120,
-                "value": function() { return calib.calibrationInfo.camera_brand || ""; },
-                "onChange": function(value) { calib.calibrationInfo.camera_brand = value; list.updateEntry("Camera brand", value); }
-            },
-            "Camera model": {
-                "type": "text",
-                "width": 120,
-                "value": function() { return calib.calibrationInfo.camera_model || ""; },
-                "onChange": function(value) { calib.calibrationInfo.camera_model = value; list.updateEntry("Camera model", value);  }
-            },
-            "Lens model": {
-                "type": "text",
-                "width": 120,
-                "value": function() { return calib.calibrationInfo.lens_model || ""; },
-                "onChange": function(value) { calib.calibrationInfo.lens_model = value; list.updateEntry("Lens model", value); }
-            },
+            // Camera identity is edited through CameraLensSelector; Other is the manual-entry path.
             "Camera setting": {
                 "type": "text",
                 "width": 120,
