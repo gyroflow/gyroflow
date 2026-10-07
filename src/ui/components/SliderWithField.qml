@@ -62,7 +62,8 @@ Row {
             enabled: root.doubleClickResetEnabled;
             acceptedButtons: Qt.LeftButton;
             gesturePolicy: TapHandler.DragThreshold;
-            onDoubleTapped: field.reset();
+            // Reset after the Slider finishes handling the release event.
+            onDoubleTapped: Qt.callLater(() => field.reset());
         }
 
         ContextMenuMouseArea {
