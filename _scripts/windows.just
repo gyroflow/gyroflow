@@ -51,17 +51,24 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "{{FFmpeg}}")) {
         echo "Downloading {{FFmpeg}}"
-        Invoke-WebRequest -Uri "https://downloads.sourceforge.net/project/avbuild/windows-desktop/{{FFmpeg}}.7z" -OutFile "{{FFmpeg}}.7z" -MaximumRedirection 5 -UserAgent "wget/1.21"
-        7z x -y {{FFmpeg}}.7z
-        del {{FFmpeg}}.7z
+        Invoke-WebRequest -Uri "https://github.com/BtbN/FFmpeg-Builds/releases/download/{{WindowsFFmpegRelease}}/{{FFmpeg}}.zip" -OutFile "{{FFmpeg}}.zip"
+        if ((Get-FileHash -LiteralPath "{{FFmpeg}}.zip" -Algorithm SHA256).Hash.ToLowerInvariant() -ne "{{WindowsFFmpegSHA256}}") {
+            throw "FFmpeg archive SHA-256 mismatch; refusing to extract it."
+        }
+        Expand-Archive -LiteralPath "{{FFmpeg}}.zip" -DestinationPath .
+        Remove-Item -LiteralPath "{{FFmpeg}}.zip"
     }
+    & $Python "{{ProjectDir}}/tests/export-lut/check_windows_ffmpeg.py" "{{FFMPEG_DIR}}"
+    if ($LASTEXITCODE -ne 0) { throw "FFmpeg bundle does not support the required export filters/codecs." }
     # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
 
     # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
     if (-not (Test-Path -Path "vcpkg/installed/{{VcpkgArch}}/lib/opencv_core4.lib")) {
         echo "Downloading OpenCV"
-        rm -Recurse -Force \vcpkg -ErrorAction SilentlyContinue
-        git clone --depth 1 https://github.com/Microsoft/vcpkg.git
+        if (-not (Test-Path -LiteralPath "vcpkg/.vcpkg-root")) {
+            git clone --depth 1 https://github.com/Microsoft/vcpkg.git vcpkg
+            if ($LASTEXITCODE -ne 0) { throw "vcpkg clone failed" }
+        }
         .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
         #Add-Content .\vcpkg\triplets\arm64-windows.cmake -Value  "`nset(VCPKG_CMAKE_SYSTEM_VERSION 10.0.22621.0)"
         #Add-Content .\vcpkg\triplets\arm64-windows.cmake -Value  "`nset(CMAKE_SYSTEM_VERSION 10.0.22621.0)"
@@ -71,8 +78,7 @@ install-deps:
         .\vcpkg\vcpkg install "flatbuffers:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
         .\vcpkg\vcpkg install "opencv4[core,calib3d,opencl,thread,intrinsics]:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
         .\vcpkg\vcpkg install "opencl:{{VcpkgArch}}" --cmake-args=-DVCPKG_BUILD_TYPE=release
-        rm -Recurse -Force .\vcpkg\buildtrees
-        rm -Recurse -Force .\vcpkg\downloads
+        # Keep the local vcpkg checkout and caches for incremental builds/retries.
     }
     # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
 

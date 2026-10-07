@@ -70,7 +70,15 @@ process; global graphics settings were unchanged.
 
 This verifies the shader harness, not the complete Windows application or its
 exports. The default Windows FFmpeg GPL-lite package also lacks `lut3d` and
-`geq`; a complete compatible library bundle is required before export validation.
+`geq`. Windows dependency setup now selects a pinned, SHA-256-verified complete
+FFmpeg 9 GPL shared bundle with MSVC import libraries and headers. Its actual
+DLLs pass the filter/encoder preflight. See `WINDOWS-LUT-TESTING.md` for the
+dependency checks, standalone codec tests and full-app build blocker.
+
+The same shader harness also passes neutral/no-LUT and all four brightness/
+contrast extremes without a LUT on both GPUs: all 49,152 components match
+exactly in each of those ten renders. Transparent/partial-alpha GPU coverage,
+full app interaction and production Rust export remain outstanding on Windows.
 
 ## Remaining limits
 
