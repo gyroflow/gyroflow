@@ -645,6 +645,23 @@ Item {
                     anchors.fill: parent;
                     property bool loaded: false;
 
+                    layer.enabled: loaded && window.exportSettings && window.exportSettings.previewColors
+                        && !window.exportSettings.lutPreviewError && (window.exportSettings.lutPreviewSize >= 2
+                            || window.exportSettings.brightness !== 0 || window.exportSettings.contrast !== 0);
+                    layer.effect: ShaderEffect {
+                        property var source;
+                        property real brightness: window.exportSettings ? window.exportSettings.brightness / 100 : 0;
+                        property real contrast: window.exportSettings ? window.exportSettings.contrast / 100 : 0;
+                        property real lutSize: window.exportSettings ? window.exportSettings.lutPreviewSize : 0;
+                        property var lutTexture: Image {
+                            visible: false;
+                            source: window.exportSettings ? window.exportSettings.lutPreviewSource : "";
+                            smooth: false;
+                            mipmap: false;
+                            cache: false;
+                        }
+                        fragmentShader: "qrc:/src/qt_gpu/compiled/color_preview.frag.qsb";
+                    }
                     property bool stabEnabled: stabEnabledBtn.checked;
                     transform: [
                         Scale {

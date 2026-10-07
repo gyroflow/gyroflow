@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+#[path = "../../../src/rendering/cube_lut.rs"]
+pub mod cube_lut;
 #[path = "../../../src/rendering/export_lut.rs"]
 pub mod export_lut;
 
@@ -108,8 +110,7 @@ mod tests {
     #[test]
     fn invalid_or_empty_lut_fails_instead_of_exporting_uncorrected_video() {
         assert!(ExportLut::new(b"").is_err());
-        let mut invalid = ExportLut::new(b"not a cube file").unwrap();
-        assert!(invalid.apply(&floats(Pixel::GBRPF32LE, 8, 4)).is_err());
+        assert!(ExportLut::new(b"not a cube file").is_err());
     }
 
     #[test]
@@ -160,5 +161,123 @@ mod tests {
         }
         let output = ExportLut::new(&cube(false)).unwrap().apply(&frame).unwrap();
         assert_eq!(output.aspect_ratio(), frame.aspect_ratio());
+    }
+
+    #[test]
+    fn adjustments_match_preview_formula_after_lut_and_preserve_alpha() {
+        let frame = floats(Pixel::GBRAPF32LE, 8, 4);
+        let mut filter = ExportLut::with_adjustments(Some(&cube(true)), 0.1, 0.2).unwrap();
+        let output = filter.apply(&frame).unwrap();
+        for p in 0..4 {
+            for y in 0..4 {
+                for x in 0..8 {
+                    let input = f32::from_le_bytes(
+                        frame.data(p)[y * frame.stride(p) + x * 4..][..4]
+                            .try_into()
+                            .unwrap(),
+                    );
+                    let actual = f32::from_le_bytes(
+                        output.data(p)[y * output.stride(p) + x * 4..][..4]
+                            .try_into()
+                            .unwrap(),
+                    );
+                    let expected = if p == 3 {
+                        input
+                    } else {
+                        ((1.0 - input - 0.5) * 1.2 + 0.6).clamp(0.0, 1.0)
+                    };
+                    assert!(
+                        (actual - expected).abs() < 0.000001,
+                        "{actual} != {expected}"
+                    );
+                }
+            }
+        }
+        assert_eq!(output.pts(), frame.pts());
+    }
+
+    #[test]
+    fn neutral_adjustments_without_lut_are_identity() {
+        let frame = floats(Pixel::GBRPF32LE, 8, 4);
+        let output = ExportLut::with_adjustments(None, 0.0, 0.0)
+            .unwrap()
+            .apply(&frame)
+            .unwrap();
+        for p in 0..3 {
+            assert_eq!(frame.data(p), output.data(p));
+        }
+        assert!(ExportLut::with_adjustments(None, f64::NAN, 0.0).is_err());
+        assert!(ExportLut::with_adjustments(None, 0.0, 0.51).is_err());
+    }
+
+    #[test]
+    fn preview_atlas_keeps_every_float_bit_without_alpha_storage() {
+        let cube = super::cube_lut::CubeLut::parse(&cube(true)).unwrap();
+        let (_, _, atlas) = cube.atlas();
+        for (i, entry) in cube.entries.iter().enumerate() {
+            for (c, value) in entry.iter().enumerate() {
+                let start = (i * 6 + c * 2) * 3;
+                let decoded = f32::from_le_bytes([
+                    atlas[start],
+                    atlas[start + 1],
+                    atlas[start + 2],
+                    atlas[start + 3],
+                ]);
+                assert_eq!(decoded.to_bits(), value.to_bits());
+            }
+        }
+        for invalid in [
+            b"LUT_3D_SIZE 9999\n".as_slice(),
+            b"LUT_3D_SIZE 2\nNaN 0 0\n",
+            b"LUT_1D_SIZE 2\n",
+            b"LUT_3D_SIZE 2\nDOMAIN_MAX 2 2 2\n",
+        ] {
+            assert!(super::cube_lut::CubeLut::parse(invalid).is_err());
+        }
+    }
+    #[test]
+    fn oversized_stream_is_bounded_before_parsing() {
+        use std::io::Read;
+        let mut input = std::io::repeat(b'0').take(128 * 1024 * 1024);
+        assert!(super::cube_lut::CubeLut::read_bounded(&mut input).is_err());
+        assert_eq!(input.limit(), 64 * 1024 * 1024 - 1);
+    }
+    #[test]
+    fn adjustment_extremes_without_lut_clamp_rgb_and_preserve_alpha() {
+        let frame = floats(Pixel::GBRAPF32LE, 8, 4);
+        for brightness in [-0.5_f64, 0.5] {
+            for contrast in [-0.5_f64, 0.5] {
+                let output = ExportLut::with_adjustments(None, brightness, contrast)
+                    .unwrap()
+                    .apply(&frame)
+                    .unwrap();
+                for p in 0..4 {
+                    for y in 0..4 {
+                        for x in 0..8 {
+                            let input = f32::from_le_bytes(
+                                frame.data(p)[y * frame.stride(p) + x * 4..][..4]
+                                    .try_into()
+                                    .unwrap(),
+                            );
+                            let actual = f32::from_le_bytes(
+                                output.data(p)[y * output.stride(p) + x * 4..][..4]
+                                    .try_into()
+                                    .unwrap(),
+                            );
+                            let expected = if p == 3 {
+                                input
+                            } else {
+                                ((input - 0.5) * (1.0 + contrast as f32) + 0.5 + brightness as f32)
+                                    .clamp(0.0, 1.0)
+                            };
+                            assert!(
+                                (actual - expected).abs() < 0.000001,
+                                "{actual} != {expected}"
+                            );
+                        }
+                    }
+                }
+            }
+        }
     }
 }

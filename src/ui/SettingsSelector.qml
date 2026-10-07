@@ -61,6 +61,7 @@ Modal {
         "Export settings|output": {
             "Codec":       ["codec", "codec_options", "bitrate", "use_gpu"],
             "Apply LUT on export": ["lut_url"],
+            "Brightness and contrast": ["brightness", "contrast"],
             "Audio":       ["audio"],
             "Output size": ["output_width", "output_height"],
             "Output path": ["output_folder", "output_filename"],
@@ -134,6 +135,7 @@ Modal {
         QT_TR_NOOP("Export settings");
             QT_TR_NOOP("Codec");
             QT_TR_NOOP("Apply LUT on export");
+            QT_TR_NOOP("Brightness and contrast");
             QT_TR_NOOP("Audio");
             QT_TR_NOOP("Output path");
             QT_TR_NOOP("Output size");

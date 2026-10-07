@@ -5,6 +5,7 @@ mod ffmpeg_audio;
 mod ffmpeg_video;
 mod ffmpeg_video_converter;
 mod export_lut;
+pub(crate) mod cube_lut;
 mod audio_resampler;
 pub mod ffmpeg_processor;
 pub mod ffmpeg_hw;
@@ -274,9 +275,12 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     proc.video.encoder_params.options.set("threads", "auto");
     proc.video.encoder_params.metadata = render_options.get_metadata_dict();
     proc.video.processing_order = order;
-    if !render_options.lut_url.is_empty() {
-        let bytes = gyroflow_core::filesystem::read(&render_options.lut_url).map_err(|e| FFmpegError::ExportLut(format!("Could not read the selected LUT: {e}")))?;
-        proc.video.export_lut = Some(export_lut::ExportLut::new(&bytes).map_err(FFmpegError::ExportLut)?);
+    if !render_options.lut_url.is_empty() || render_options.brightness != 0.0 || render_options.contrast != 0.0 {
+        let bytes = if render_options.lut_url.is_empty() { None } else {
+            let mut file = gyroflow_core::filesystem::open_file(&render_options.lut_url, false, false).map_err(|e| FFmpegError::ExportLut(format!("Could not read the selected LUT: {e}")))?;
+            Some(cube_lut::CubeLut::read_bounded(file.get_file()).map_err(FFmpegError::ExportLut)?)
+        };
+        proc.video.export_lut = Some(export_lut::ExportLut::with_adjustments(bytes.as_deref(), render_options.brightness, render_options.contrast).map_err(FFmpegError::ExportLut)?);
     }
     log::debug!("video_codec: {:?}, processing_order: {:?}", &proc.video_codec, proc.video.processing_order);
 

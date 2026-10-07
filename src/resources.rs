@@ -70,6 +70,7 @@ qrc!(pub rsrc,
 
         "src/core/gpu/compiled/stabilize.frag.qsb",
         "src/qt_gpu/compiled/texture.vert.qsb",
+        "src/qt_gpu/compiled/color_preview.frag.qsb",
         "src/qt_gpu/compiled/undistort_opencv_fisheye.frag.qsb",
         "src/qt_gpu/compiled/undistort_opencv_fisheye_gopro_hyperview.frag.qsb",
         "src/qt_gpu/compiled/undistort_opencv_fisheye_gopro6_superview.frag.qsb",

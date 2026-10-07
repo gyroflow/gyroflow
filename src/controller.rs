@@ -2,6 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use itertools::Itertools;
+use cpp::*;
 use qmetaobject::*;
 use nalgebra::Vector4;
 use std::sync::Arc;
@@ -257,6 +258,7 @@ pub struct Controller {
     copy_to_clipboard: qt_method!(fn(&self, text: QString)),
 
     image_to_b64: qt_method!(fn(&self, img: QImage) -> QString),
+    prepare_preview_lut: qt_method!(fn(&self, url: QUrl) -> QString),
     export_preset: qt_method!(fn(&self, url: QUrl, data: QJsonObject, save_type: QString, preset_name: QString) -> QString),
     export_full_metadata: qt_method!(fn(&self, url: QUrl, gyro_url: QUrl)),
     export_parsed_metadata: qt_method!(fn(&self, url: QUrl)),
@@ -2660,6 +2662,27 @@ impl Controller {
 
     // Utilities
     fn get_username(&self) -> QString { let realname = whoami::realname().unwrap_or_default(); QString::from(if realname.is_empty() { whoami::username().unwrap_or_default() } else { realname }) }
+    fn prepare_preview_lut(&self, url: QUrl) -> QString {
+        let result = (|| -> Result<serde_json::Value, String> {
+            let mut file = filesystem::open_file(&util::qurl_to_encoded(url), false, false).map_err(|e| e.to_string())?;
+            let bytes = rendering::cube_lut::CubeLut::read_bounded(file.get_file())?;
+            let cube = rendering::cube_lut::CubeLut::parse(&bytes)?;
+            let (width, height, data) = cube.atlas();
+            let width = width as i32; let height = height as i32;
+            let ptr = data.as_ptr();
+            let png = cpp!(unsafe [ptr as "const unsigned char *", width as "int", height as "int"] -> QString as "QString" {
+                QImage image(ptr, width, height, width * 3, QImage::Format_RGB888);
+                QByteArray bytes;
+                QBuffer buffer(&bytes);
+                buffer.open(QIODevice::WriteOnly);
+                if (!image.save(&buffer, "PNG")) return QString();
+                return QStringLiteral("data:image/png;base64,") + QString::fromLatin1(bytes.toBase64());
+            });
+            if png.is_empty() { return Err("Could not prepare the LUT preview texture.".into()); }
+            Ok(serde_json::json!({ "size": cube.size, "source": png.to_string() }))
+        })();
+        QString::from(match result { Ok(v) => v.to_string(), Err(e) => serde_json::json!({ "error": e }).to_string() })
+    }
     fn image_to_b64(&self, img: QImage) -> QString { util::image_to_b64(img) }
     fn copy_to_clipboard(&self, text: QString) { util::copy_to_clipboard(text) }
     fn data_folder(&self) -> QUrl { QUrl::from(QString::from(gyroflow_core::filesystem::path_to_url(gyroflow_core::settings::data_dir().to_str().unwrap_or_default()))) }

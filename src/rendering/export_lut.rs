@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-//! An export-only 3D LUT. Frames stay at their original precision and pixel format.
+//! Export LUT and neutral-by-default brightness/contrast, after stabilization.
 use ffmpeg_next::{Error, ffi, filter, format::Pixel, frame::Video};
 use std::{
     ffi::{CStr, CString},
@@ -8,7 +8,9 @@ use std::{
 };
 
 pub struct ExportLut {
-    file: tempfile::NamedTempFile,
+    file: Option<tempfile::NamedTempFile>,
+    brightness: f64,
+    contrast: f64,
     graph: Option<filter::Graph>,
     input: Option<(Pixel, u32, u32, i32, i32, i32, i32)>,
 }
@@ -23,17 +25,38 @@ fn check(result: i32) -> Result<(), String> {
 
 impl ExportLut {
     pub fn new(bytes: &[u8]) -> Result<Self, String> {
-        if bytes.is_empty() {
-            return Err("The selected LUT is empty.".into());
+        Self::with_adjustments(Some(bytes), 0.0, 0.0)
+    }
+
+    pub fn with_adjustments(
+        bytes: Option<&[u8]>,
+        brightness: f64,
+        contrast: f64,
+    ) -> Result<Self, String> {
+        if !brightness.is_finite()
+            || !contrast.is_finite()
+            || brightness.abs() > 0.5
+            || contrast.abs() > 0.5
+        {
+            return Err("Brightness and contrast must be between −50% and +50%.".into());
         }
-        let mut file = tempfile::Builder::new()
-            .suffix(".cube")
-            .tempfile()
-            .map_err(|e| e.to_string())?;
-        file.write_all(bytes).map_err(|e| e.to_string())?;
-        file.flush().map_err(|e| e.to_string())?;
+        let file = if let Some(bytes) = bytes {
+            let cube = super::cube_lut::CubeLut::parse(bytes)?;
+            let mut file = tempfile::Builder::new()
+                .suffix(".cube")
+                .tempfile()
+                .map_err(|e| e.to_string())?;
+            file.write_all(&cube.canonical_cube())
+                .map_err(|e| e.to_string())?;
+            file.flush().map_err(|e| e.to_string())?;
+            Some(file)
+        } else {
+            None
+        };
         Ok(Self {
             file,
+            brightness,
+            contrast,
             graph: None,
             input: None,
         })
@@ -64,7 +87,7 @@ impl ExportLut {
         }
         let has_alpha = unsafe { (*descriptor).flags & ffi::AV_PIX_FMT_FLAG_ALPHA as u64 != 0 };
         let rgb_format = if has_alpha { "gbrapf32le" } else { "gbrpf32le" };
-        let mut rgb = graph
+        let rgb = graph
             .add(
                 &filter::find("format").ok_or("FFmpeg format filter is unavailable")?,
                 "rgb",
@@ -72,36 +95,72 @@ impl ExportLut {
             )
             .map_err(|e| e.to_string())?;
 
-        // Set the filename directly, rather than placing a user path into a filter expression.
-        // This also works with spaces, apostrophes, Unicode and Windows drive letters.
-        let lut_filter =
-            filter::find("lut3d").ok_or("This FFmpeg build does not include the lut3d filter")?;
-        let path = CString::new(self.file.path().to_string_lossy().as_bytes())
-            .map_err(|e| e.to_string())?;
-        let mut lut = unsafe {
-            let ptr = ffi::avfilter_graph_alloc_filter(
-                graph.as_mut_ptr(),
-                lut_filter.as_ptr(),
-                c"lut".as_ptr(),
-            );
-            if ptr.is_null() {
-                return Err("Unable to allocate LUT filter".into());
+        let mut last = rgb;
+        if let Some(file) = &self.file {
+            // Pass the private filename through the option API, never a user expression.
+            let lut_filter = filter::find("lut3d")
+                .ok_or("This FFmpeg build does not include the lut3d filter")?;
+            let path = CString::new(file.path().to_string_lossy().as_bytes())
+                .map_err(|e| e.to_string())?;
+            let mut lut = unsafe {
+                let ptr = ffi::avfilter_graph_alloc_filter(
+                    graph.as_mut_ptr(),
+                    lut_filter.as_ptr(),
+                    c"lut".as_ptr(),
+                );
+                if ptr.is_null() {
+                    return Err("Unable to allocate LUT filter".into());
+                }
+                check(ffi::av_opt_set(
+                    ptr.cast(),
+                    c"file".as_ptr(),
+                    path.as_ptr(),
+                    ffi::AV_OPT_SEARCH_CHILDREN,
+                ))?;
+                check(ffi::av_opt_set_int(
+                    ptr.cast(),
+                    c"interp".as_ptr(),
+                    2,
+                    ffi::AV_OPT_SEARCH_CHILDREN,
+                ))?;
+                check(ffi::avfilter_init_str(ptr, std::ptr::null()))?;
+                filter::Context::wrap(ptr)
+            };
+            unsafe {
+                check(ffi::avfilter_link(
+                    last.as_mut_ptr(),
+                    0,
+                    lut.as_mut_ptr(),
+                    0,
+                ))?;
             }
-            check(ffi::av_opt_set(
-                ptr.cast(),
-                c"file".as_ptr(),
-                path.as_ptr(),
-                ffi::AV_OPT_SEARCH_CHILDREN,
-            ))?;
-            check(ffi::av_opt_set_int(
-                ptr.cast(),
-                c"interp".as_ptr(),
-                2,
-                ffi::AV_OPT_SEARCH_CHILDREN,
-            ))?;
-            check(ffi::avfilter_init_str(ptr, std::ptr::null()))?;
-            filter::Context::wrap(ptr)
-        };
+            last = lut;
+        }
+        if self.brightness != 0.0 || self.contrast != 0.0 {
+            // Float RGB, the same affine transform and clamp as color_preview.frag.
+            let gain = 1.0 + self.contrast;
+            let offset = 0.5 + self.brightness;
+            let args = format!(
+                "r=clip((r(X,Y)-0.5)*{gain}+{offset},0,1):g=clip((g(X,Y)-0.5)*{gain}+{offset},0,1):b=clip((b(X,Y)-0.5)*{gain}+{offset},0,1):a=alpha(X,Y):interpolation=nearest"
+            );
+            let mut adjust = graph
+                .add(
+                    &filter::find("geq")
+                        .ok_or("This FFmpeg build does not include the geq filter")?,
+                    "adjust",
+                    &args,
+                )
+                .map_err(|e| e.to_string())?;
+            unsafe {
+                check(ffi::avfilter_link(
+                    last.as_mut_ptr(),
+                    0,
+                    adjust.as_mut_ptr(),
+                    0,
+                ))?;
+            }
+            last = adjust;
+        }
         let pixel_name =
             unsafe { CStr::from_ptr(ffi::av_get_pix_fmt_name(pixel)) }.to_string_lossy();
         let mut output_format = graph
@@ -122,12 +181,14 @@ impl ExportLut {
             check(ffi::avfilter_link(
                 source.as_mut_ptr(),
                 0,
-                rgb.as_mut_ptr(),
+                graph
+                    .get("rgb")
+                    .ok_or("LUT RGB input is unavailable")?
+                    .as_mut_ptr(),
                 0,
             ))?;
-            check(ffi::avfilter_link(rgb.as_mut_ptr(), 0, lut.as_mut_ptr(), 0))?;
             check(ffi::avfilter_link(
-                lut.as_mut_ptr(),
+                last.as_mut_ptr(),
                 0,
                 output_format.as_mut_ptr(),
                 0,
