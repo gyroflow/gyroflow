@@ -5,6 +5,11 @@ In **Color settings**, select **Choose LUT…**, pick a LUT, then export as usua
 **Clear** disables the LUT. Brightness and contrast run from −50% to +50%; zero
 is neutral. Double-click either slider to reset it; **Reset adjustments** restores both to zero.
 Color settings has its own collapsible section above Export settings.
+**Recent LUTs** remembers up to eight successfully selected local files across
+app restarts, with the last-used LUT first. Select an entry to apply it. Clearing
+a LUT retains its history; history alone does not apply a LUT to a new clip.
+If a recent file was moved or deleted, its selection shows the normal LUT error;
+use Clear or select another file to continue.
 Presets and Apply to all also group the LUT and adjustments under Color settings;
 the saved `output` fields are unchanged.
 
@@ -34,8 +39,8 @@ already has the LUT applied, so avoid applying the same conversion again.
   are limited to 64 MB. A canonical private cube gives the FFmpeg parser the
   same lattice values even when the input has a BOM or indented directives.
 - The preview caches the chosen LUT while export reads it at render start.
-  If the LUT file is edited externally, Clear and choose it again to refresh
-  the preview. Keep a selected LUT file available until queued exports finish.
+  If the LUT file is edited externally, reselect it in Recent LUTs (or Clear
+  and choose it again) to refresh the preview. Keep a selected LUT file available until queued exports finish.
 - Preview uses Gyroflow's existing RGBA8 display pipeline. Matching color math
   does not guarantee pixel-identical display and ten-bit export, HDR, or full
   display color management. A size-128 atlas needs a 1536×8192 GPU texture;
