@@ -211,8 +211,8 @@ These Windows x64 LUT acceptance gates are now passed on this laptop. This does
 not establish ARM64 runtime support, partial-alpha GPU correctness or broad
 camera/hardware coverage. Preserve the official app and user settings.
 
-The Windows fixes through `034f118a56cfe43bce362bbf3d6a7ae68e15a0bd` were reviewed
-and published through the authenticated Mac session. The feature branch remote
-head was independently verified from Windows. Git Credential Manager sign-in on
-this laptop is therefore not a current blocker. New changes after that commit
-remain local until separately verified and published.
+The Windows code, tests and acceptance notes through
+`4cb3a2f37ca12c55f30b8ed330fe9eb1f5e21664` are published on
+`codex/lut-preview-controls`. Authenticated Windows pushes work. The installed
+executable matches the verified release build byte for byte; later acceptance
+documentation changes do not require rebuilding unchanged application code.

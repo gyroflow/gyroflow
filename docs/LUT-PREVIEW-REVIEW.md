@@ -49,7 +49,7 @@ The preview package includes HLSL shader model 5.0 for Direct3D. Re-baked with
 `qsb --qsbversion 64` to match the existing shader serialization format (6)
 and remain compatible with the repository's Windows Qt 6.7.3 build. The same
 16,384-color Mac GPU comparison still matches exactly. This removes a package
-version mismatch; Windows compilation/runtime remain unverified.
+version mismatch. The later Windows x64 build and runtime checks below pass.
 
 ## Windows Direct3D shader verification (2026-10-07)
 
@@ -80,14 +80,15 @@ contrast extremes without a LUT on both GPUs: all 49,152 components match
 exactly in each of those ten renders. Transparent/partial-alpha GPU coverage
 remains unverified. The resumed Windows build, 11 production Rust tests and complete software
 stabilization/color export comparison now pass; all 857 decoded frames and
-timestamps match exactly. Native visual interaction and current NVIDIA encoding
-remain outstanding. See [the Windows checkpoint](WINDOWS-LUT-TESTING.md).
+timestamps match exactly. Native visual controls, project/preset/queue restart
+persistence and an actual 857-frame ten-bit NVIDIA HEVC export/full decode also
+pass on the installed Windows x64 application. See
+[the Windows checkpoint](WINDOWS-LUT-TESTING.md) for the measured scope.
 
 ## Remaining limits
 
-- Windows visual controls, queue persistence after restart and current NVIDIA
-  encoding remain unverified. Linux/mobile and sandboxed persistence also need
-  runtime validation.
+- Windows x64 acceptance passed on the tested Intel/NVIDIA laptop. ARM64 runtime,
+  Linux/mobile and sandboxed persistence still need runtime validation.
 - Preview uses the existing RGBA8 display path; ten-bit export remains ten-bit.
   Same color math is not an HDR/display color-management guarantee.
 - LUT file changes outside the app require Clear/reselection to refresh preview;
