@@ -62,6 +62,11 @@ included in this repository.
   GPU HEVC encoding and the LUT, retaining ten-bit output.
 - The 19.753-second / 1,184-frame clip exported with software HEVC encoding and
   the LUT at 720p. A separate export with the LUT disabled also completed.
+- A lossless 720p comparison locked the same project, stabilization settings,
+  lens profile, and input video. All 487 decoded frame hashes and timestamps
+  matched between (a) LUT applied within Gyroflow and (b) LUT-off stabilized
+  video with the equivalent color transform applied separately by FFmpeg.
+  This verifies the LUT did not change stabilization or framing in that clip.
 - A saved project retained the selected LUT URL; invalid LUT export reported an
   explicit error rather than completing without color conversion.
 - The Mac UI loaded the clip, opened the native LUT picker, accepted the DJI LUT,
