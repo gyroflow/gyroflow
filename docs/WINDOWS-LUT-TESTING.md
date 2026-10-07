@@ -21,7 +21,9 @@ build, installation or stabilization test.
   `autobuild-2026-10-06-13-06`, with SHA-256 verification before extraction.
   The x64 archive hash is
   `9d971d67fea48100b623e65d3ffba480215244931492b23a41374cec7511b1ce`.
-  ARM64 has a separately pinned archive/hash; ARM64 runtime is untested.
+  ARM64 has a separately pinned archive/hash; its archive hash, seven target DLL
+  PE machines, seven MSVC import-library COFF machines and header ABI majors pass
+  structural checks on this x64 laptop. ARM64 runtime is untested.
 - The replacement bundle's actual x64 DLLs expose FFmpeg 9 ABIs (avfilter 12,
   avcodec 63, avutil 61), required filters, libx264/libx265, ProRes and FFV1,
   with development headers and MSVC `.lib` import libraries.
@@ -39,12 +41,22 @@ build, installation or stabilization test.
 
 ## Reproduce the completed checks
 
-Python's standard library suffices for the DLL preflight. Run on Windows with
-Python matching the bundle's native architecture:
+Python's standard library suffices for the DLL preflight. On a matching native
+host it loads the actual DLLs and requires all filters/encoders. The existing
+ARM64 CI job runs on x64 Windows, so cross builds instead validate the target's
+PE/COFF machines, import libraries and header ABIs, and explicitly report
+`structural-only`, `runtime_verified: false`. They do not attempt to load ARM64
+DLLs in x64 Python. The install recipe supplies `--target-arch` to reject an
+incorrectly selected bundle. Native runtime checks remain strict:
 
 ```powershell
 python tests/export-lut/check_windows_ffmpeg.py $env:FFMPEG_DIR
 ```
+
+On this laptop, the real pinned ARM64 bundle passes structural checks with
+`--target-arch arm64`. Passing `--target-arch x64` to that same bundle fails with
+`Wrong DLL target architecture`; the native x64 GPL-lite bundle still fails on
+missing `lut3d`/`geq`. No ARM64 runtime or complete ARM64 CI build is claimed.
 
 For actual Direct3D shader checks, install Pillow in an isolated environment and
 provide the private fixture folder containing `input.png`, `atlas.png`, and

@@ -58,7 +58,7 @@ install-deps:
         Expand-Archive -LiteralPath "{{FFmpeg}}.zip" -DestinationPath .
         Remove-Item -LiteralPath "{{FFmpeg}}.zip"
     }
-    & $Python "{{ProjectDir}}/tests/export-lut/check_windows_ffmpeg.py" "{{FFMPEG_DIR}}"
+    & $Python "{{ProjectDir}}/tests/export-lut/check_windows_ffmpeg.py" "{{FFMPEG_DIR}}" --target-arch "{{FFMPEG_ARCH}}"
     if ($LASTEXITCODE -ne 0) { throw "FFmpeg bundle does not support the required export filters/codecs." }
     # ――――――――――――――――――――――――――――――――――――――― FFmpeg ――――――――――――――――――――――――――――――――――――――――
 
