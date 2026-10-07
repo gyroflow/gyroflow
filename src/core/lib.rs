@@ -1509,6 +1509,7 @@ impl StabilizationManager {
                 obj.insert("filepath_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(&gyro.file_url, false, _project_url)));
             }
             if let Some(serde_json::Value::Object(obj)) = obj.get_mut("output") {
+                obj.remove("lut_bookmark");
                 if let Some(lut_url) = obj.get("lut_url").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
                     obj.insert("lut_bookmark".into(), serde_json::Value::String(filesystem::apple::create_bookmark(lut_url, false, _project_url)));
                 }
@@ -1934,7 +1935,7 @@ impl StabilizationManager {
                     }
                 }
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
-                if let Some(v) = obj.get("lut_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty()) {
+                if let Some(v) = obj.get("lut_bookmark").and_then(|x| x.as_str()).filter(|x| !x.is_empty() && obj.get("lut_url").and_then(|x| x.as_str()).is_some_and(|x| !x.is_empty())) {
                     let (resolved, _is_stale) = filesystem::apple::resolve_bookmark(v, url);
                     if !resolved.is_empty() {
                         obj.insert("lut_url".into(), serde_json::Value::String(resolved));

@@ -119,7 +119,12 @@ impl RenderOptions {
     }
     pub fn get_metadata_dict(&self) -> ffmpeg_next::Dictionary<'_> {
         let mut metadata = ffmpeg_next::Dictionary::new();
-        metadata.set("comment", format!("Original filename: {}\n{}", self.input_filename, self.metadata.comment).trim());
+        let mut comment = format!("Original filename: {}\n{}", self.input_filename, self.metadata.comment);
+        if !self.lut_url.is_empty() {
+            let name = filesystem::get_filename(&self.lut_url).replace(['\r', '\n'], " ");
+            comment.push_str(&format!("\nGyroflow export LUT applied: {name}"));
+        }
+        metadata.set("comment", comment.trim());
         metadata
     }
     pub fn update_from_json(&mut self, obj: &serde_json::Value) {

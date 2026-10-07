@@ -239,7 +239,7 @@ MenuItem {
             if (output.hasOwnProperty("use_gpu")) root.outGpu   = output.use_gpu;
             if (output.hasOwnProperty("audio"))   root.outAudio = output.audio;
 
-            root.lutUrl = output.lut_url || "";
+            if (output.hasOwnProperty("lut_url") || obj.videofile) root.lutUrl = output.lut_url || "";
 
             // Advanced
             if (output.hasOwnProperty("encoder_options"))       encoderOptions.text         = output.encoder_options;
@@ -277,16 +277,40 @@ MenuItem {
             }
         }
     }
-    BasicText {
+    Rectangle {
         width: parent.width;
+        height: lutStatus.height + 24 * dpiScale;
         visible: !!root.lutUrl;
-        text: filesystem.get_filename(root.lutUrl);
-        elide: Text.ElideMiddle;
-    }
-    InfoMessage {
-        type: InfoMessage.Info;
-        text: qsTr("The selected LUT is applied to the exported video. The preview keeps its original colors.");
-        visible: !!root.lutUrl;
+        radius: 6 * dpiScale;
+        color: Qt.rgba(0.22, 0.70, 0.44, 0.10);
+        border.color: Qt.rgba(0.22, 0.70, 0.44, 0.35);
+        Column {
+            id: lutStatus;
+            x: 12 * dpiScale;
+            y: 12 * dpiScale;
+            width: parent.width - 24 * dpiScale;
+            spacing: 5 * dpiScale;
+            BasicText {
+                leftPadding: 0;
+                text: qsTr("✓ LUT applied on export");
+                font.bold: true;
+                color: "#54bf85";
+            }
+            BasicText {
+                width: parent.width;
+                leftPadding: 0;
+                text: filesystem.get_filename(root.lutUrl);
+                wrapMode: Text.Wrap;
+            }
+            BasicText {
+                width: parent.width;
+                leftPadding: 0;
+                text: qsTr("The preview shows original colors.");
+                font.pixelSize: 11 * dpiScale;
+                opacity: 0.7;
+                wrapMode: Text.WordWrap;
+            }
+        }
     }
 
     ComboBox {

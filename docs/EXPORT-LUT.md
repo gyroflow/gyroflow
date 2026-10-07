@@ -23,6 +23,11 @@ already has the LUT applied, so avoid applying the same conversion again.
   to the frame's pixel format. Ten-bit precision and alpha are retained.
 - FFmpeg must include `buffer`, `format`, `lut3d`, and `buffersink`. Missing or
   unreadable LUTs and invalid cube files fail the render with an export LUT error.
+- Export comments include `Gyroflow export LUT applied: <filename>` when a LUT
+  is selected. Existing user comments are retained. Downstream tools can use
+  this explicit marker to avoid repeating the conversion.
+- Partial presets that do not include the LUT field preserve the current LUT.
+  Clear removes its URL and its saved Apple bookmark.
 - The LUT is computed on the CPU. Stabilization and encoding can still use the GPU.
 
 ## Reproducible filter tests
@@ -34,7 +39,7 @@ cargo test --manifest-path tests/export-lut/Cargo.toml
 ```
 
 The tests exercise identity and inversion transforms, timestamps, dimensions,
-alpha, graph reconstruction, malformed LUT rejection, and ten-bit YUV.
+alpha, sample aspect ratio, graph reconstruction, malformed LUT rejection, and ten-bit YUV.
 `tests/export-lut/examples/apply_raw_10bit.rs` also runs the production filter on
 one packed limited-range BT.709 YUV420P10LE frame for comparison with FFmpeg:
 
@@ -51,11 +56,11 @@ cmp production.raw reference.raw
 ## Local verification (2026-10-07)
 
 Tested on Apple M4 Max, macOS 27, Qt 6.11.2, Rust 1.99.0, and FFmpeg 9.0.1.
-Two DJI O4 Pro recordings were 3840×2160, 59.94 fps, ten-bit HEVC, with usable
+Three DJI O4 Pro recordings were 3840×2160, 59.94 fps, ten-bit HEVC, with usable
 embedded motion data. Media and the DJI LUT are local test inputs and are not
 included in this repository.
 
-- Five automated filter tests passed.
+- Six automated filter tests passed, including non-square sample aspect ratio.
 - A real 4K frame with the DJI O4 D-Log M to Rec.709 LUT matched the independent
   FFmpeg reference byte for byte.
 - The full renderer exported the 8.125-second / 487-frame clip at 4K with Apple
@@ -67,6 +72,16 @@ included in this repository.
   matched between (a) LUT applied within Gyroflow and (b) LUT-off stabilized
   video with the equivalent color transform applied separately by FFmpeg.
   This verifies the LUT did not change stabilization or framing in that clip.
+- The new 14.298-second / 857-frame moving-drone clip passed the same lossless
+  comparison at full 3840×2160 resolution. All 857 decoded pixel hashes and
+  timestamps matched exactly. This isolates the LUT from stabilization; it
+  does not establish the cause of any vibration present in the recording.
+- A real export carried the LUT comment marker. A downstream Easy Eject test
+  created and verified a sharing copy without a second LUT, reused its matching
+  receipt, and confirmed both input files were unchanged.
+- The refined green status card displayed the selected LUT filename. A real
+  UI save/Clear/save check confirmed the cleared project had no selected URL
+  or stale bookmark, and the preserved original project reloaded the LUT.
 - A saved project retained the selected LUT URL; invalid LUT export reported an
   explicit error rather than completing without color conversion.
 - The Mac UI loaded the clip, opened the native LUT picker, accepted the DJI LUT,

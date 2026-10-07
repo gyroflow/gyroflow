@@ -10,7 +10,7 @@ use std::{
 pub struct ExportLut {
     file: tempfile::NamedTempFile,
     graph: Option<filter::Graph>,
-    input: Option<(Pixel, u32, u32, i32, i32)>,
+    input: Option<(Pixel, u32, u32, i32, i32, i32, i32)>,
 }
 
 fn check(result: i32) -> Result<(), String> {
@@ -48,9 +48,15 @@ impl ExportLut {
                 (*frame.as_ptr()).color_range as i32,
             )
         };
+        let aspect = frame.aspect_ratio();
+        let (aspect_num, aspect_den) = if aspect.numerator() > 0 && aspect.denominator() > 0 {
+            (aspect.numerator(), aspect.denominator())
+        } else {
+            (1, 1)
+        };
         let mut source = graph.add(&filter::find("buffer").ok_or("FFmpeg buffer filter is unavailable")?, "in", &format!(
-            "video_size={}x{}:pix_fmt={}:time_base=1/1000000:pixel_aspect=1/1:colorspace={}:range={}",
-            frame.width(), frame.height(), pixel as i32, color_space, color_range
+            "video_size={}x{}:pix_fmt={}:time_base=1/1000000:pixel_aspect={}/{}:colorspace={}:range={}",
+            frame.width(), frame.height(), pixel as i32, aspect_num, aspect_den, color_space, color_range
         )).map_err(|e| e.to_string())?;
         let descriptor = unsafe { ffi::av_pix_fmt_desc_get(pixel) };
         if descriptor.is_null() {
@@ -145,6 +151,8 @@ impl ExportLut {
                 frame.height(),
                 (*frame.as_ptr()).colorspace as i32,
                 (*frame.as_ptr()).color_range as i32,
+                frame.aspect_ratio().numerator(),
+                frame.aspect_ratio().denominator(),
             )
         };
         if self.input != Some(signature) {

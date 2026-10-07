@@ -151,4 +151,14 @@ mod tests {
             );
         }
     }
+    #[test]
+    fn lut_preserves_non_square_pixel_geometry() {
+        let mut frame = floats(Pixel::GBRPF32LE, 8, 4);
+        unsafe {
+            (*frame.as_mut_ptr()).sample_aspect_ratio =
+                ffmpeg_next::ffi::AVRational { num: 4, den: 3 };
+        }
+        let output = ExportLut::new(&cube(false)).unwrap().apply(&frame).unwrap();
+        assert_eq!(output.aspect_ratio(), frame.aspect_ratio());
+    }
 }
