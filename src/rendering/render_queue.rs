@@ -78,6 +78,7 @@ pub struct RenderOptions {
     pub use_gpu: bool,
     pub audio: bool,
     pub pixel_format: String,
+    pub lut_url: String,
 
     // Advanced
     pub encoder_options: String,
@@ -131,6 +132,8 @@ impl RenderOptions {
             if let Some(v) = obj.get("use_gpu")        .and_then(|x| x.as_bool()) { self.use_gpu = v; }
             if let Some(v) = obj.get("audio")          .and_then(|x| x.as_bool()) { self.audio = v; }
             if let Some(v) = obj.get("pixel_format")   .and_then(|x| x.as_str())  { self.pixel_format = v.to_string(); }
+
+            if let Some(v) = obj.get("lut_url").and_then(|x| x.as_str()) { self.lut_url = v.to_string(); }
 
             // Advanced
             if let Some(v) = obj.get("encoder_options")        .and_then(|x| x.as_str())  { self.encoder_options = v.to_string(); }
@@ -1038,6 +1041,11 @@ impl RenderQueue {
                     };
                     if export_project != 4 {
                         if let Err(e) = result {
+                            if matches!(e, rendering::FFmpegError::ExportLut(_)) {
+                                // A bad LUT cannot be fixed by trying another decoder.
+                                err(("An error occurred: %1".to_string(), e.to_string()));
+                                break 'ranges;
+                            }
                             err((e.to_string(), String::new()));
                         } else {
                             progress((1.0, 1, 1, true, false));

@@ -4,6 +4,7 @@
 mod ffmpeg_audio;
 mod ffmpeg_video;
 mod ffmpeg_video_converter;
+mod export_lut;
 mod audio_resampler;
 pub mod ffmpeg_processor;
 pub mod ffmpeg_hw;
@@ -273,6 +274,10 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     proc.video.encoder_params.options.set("threads", "auto");
     proc.video.encoder_params.metadata = render_options.get_metadata_dict();
     proc.video.processing_order = order;
+    if !render_options.lut_url.is_empty() {
+        let bytes = gyroflow_core::filesystem::read(&render_options.lut_url).map_err(|e| FFmpegError::ExportLut(format!("Could not read the selected LUT: {e}")))?;
+        proc.video.export_lut = Some(export_lut::ExportLut::new(&bytes).map_err(FFmpegError::ExportLut)?);
+    }
     log::debug!("video_codec: {:?}, processing_order: {:?}", &proc.video_codec, proc.video.processing_order);
 
     if !render_options.pad_with_black && !render_options.preserve_other_tracks && !trim_ranges.is_empty() {

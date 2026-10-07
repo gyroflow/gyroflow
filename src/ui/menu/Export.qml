@@ -111,6 +111,7 @@ MenuItem {
     property alias preserveOutputPath: preserveOutputPath;
     property alias exportTrimsSeparately: exportTrimsSeparately;
     property string outCodecOptions: "";
+    property string lutUrl: "";
     property real originalWidth: outWidth;
     property real originalHeight: outHeight;
 
@@ -130,6 +131,7 @@ MenuItem {
             use_gpu:        root.outGpu,
             audio:          root.outAudio,
             pixel_format:   "",
+            lut_url:        root.lutUrl,
 
             // Advanced
             encoder_options:       encoderOpts,
@@ -237,6 +239,8 @@ MenuItem {
             if (output.hasOwnProperty("use_gpu")) root.outGpu   = output.use_gpu;
             if (output.hasOwnProperty("audio"))   root.outAudio = output.audio;
 
+            root.lutUrl = output.lut_url || "";
+
             // Advanced
             if (output.hasOwnProperty("encoder_options"))       encoderOptions.text         = output.encoder_options;
             if (output.hasOwnProperty("keyframe_distance"))     keyframeDistance.value      = +output.keyframe_distance;
@@ -249,6 +253,40 @@ MenuItem {
                 metadataComment.text = output.metadata.comment || "";
             }
         }
+    }
+
+    FileDialog {
+        id: lutDialog;
+        title: qsTr("Choose an export LUT");
+        nameFilters: [qsTr("3D LUT files") + " (*.cube *.CUBE)"];
+        type: "export-lut";
+        onAccepted: root.lutUrl = selectedFile.toString();
+    }
+    Label {
+        text: qsTr("Apply LUT on export");
+        Row {
+            spacing: 6 * dpiScale;
+            Button {
+                text: qsTr("Choose LUT…");
+                onClicked: lutDialog.open2();
+            }
+            Button {
+                text: qsTr("Clear");
+                visible: !!root.lutUrl;
+                onClicked: root.lutUrl = "";
+            }
+        }
+    }
+    BasicText {
+        width: parent.width;
+        visible: !!root.lutUrl;
+        text: filesystem.get_filename(root.lutUrl);
+        elide: Text.ElideMiddle;
+    }
+    InfoMessage {
+        type: InfoMessage.Info;
+        text: qsTr("The selected LUT is applied to the exported video. The preview keeps its original colors.");
+        visible: !!root.lutUrl;
     }
 
     ComboBox {

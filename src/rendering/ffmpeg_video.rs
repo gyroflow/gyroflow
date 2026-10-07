@@ -57,6 +57,7 @@ pub struct VideoTranscoder<'a> {
     pub codec_supported_formats: Vec<format::Pixel>,
 
     pub encoder_converter: Option<software::scaling::Context>,
+    pub export_lut: Option<super::export_lut::ExportLut>,
 
     pub decode_only: bool,
     pub gpu_decoding: bool,
@@ -367,6 +368,13 @@ impl<'a> VideoTranscoder<'a> {
 
                                 final_frame = self.buffers.output_frame_post.as_mut().unwrap();
                             }
+                        }
+
+                        // Apply the chosen LUT after stabilization and before the single encode.
+                        let mut lut_frame;
+                        if let Some(lut) = self.export_lut.as_mut() {
+                            lut_frame = lut.apply(final_frame).map_err(FFmpegError::ExportLut)?;
+                            final_frame = &mut lut_frame;
                         }
 
                         if self.encoder.is_none() {
