@@ -112,8 +112,8 @@ MenuItem {
     property alias exportTrimsSeparately: exportTrimsSeparately;
     property string outCodecOptions: "";
     property string lutUrl: "";
-    property alias brightness: brightnessSlider.value;
-    property alias contrast: contrastSlider.value;
+    property real brightness: 0;
+    property real contrast: 0;
     property bool previewColors: true;
     property string lutPreviewSource: "";
     property real lutPreviewSize: 0;
@@ -271,108 +271,6 @@ MenuItem {
                 metadataComment.text = output.metadata.comment || "";
             }
         }
-    }
-
-    FileDialog {
-        id: lutDialog;
-        title: qsTr("Choose an export LUT");
-        nameFilters: [qsTr("3D LUT files") + " (*.cube *.CUBE)"];
-        type: "export-lut";
-        onAccepted: root.lutUrl = selectedFile.toString();
-    }
-    Label {
-        text: qsTr("LUT and color");
-        Row {
-            spacing: 6 * dpiScale;
-            Button {
-                text: qsTr("Choose LUT…");
-                onClicked: lutDialog.open2();
-            }
-            Button {
-                text: qsTr("Clear");
-                visible: !!root.lutUrl && !root.lutPreviewError;
-                onClicked: root.lutUrl = "";
-            }
-        }
-    }
-    InfoMessageSmall {
-        show: !!root.lutPreviewError;
-        type: InfoMessage.Error;
-        text: root.lutPreviewError;
-    }
-    Rectangle {
-        width: parent.width;
-        height: lutStatus.height + 24 * dpiScale;
-        visible: !!root.lutUrl && !root.lutPreviewError;
-        radius: 6 * dpiScale;
-        color: Qt.rgba(0.22, 0.70, 0.44, 0.10);
-        border.color: Qt.rgba(0.22, 0.70, 0.44, 0.35);
-        Column {
-            id: lutStatus;
-            x: 12 * dpiScale;
-            y: 12 * dpiScale;
-            width: parent.width - 24 * dpiScale;
-            spacing: 5 * dpiScale;
-            BasicText {
-                leftPadding: 0;
-                text: qsTr("✓ LUT applied to export");
-                font.bold: true;
-                color: "#54bf85";
-            }
-            BasicText {
-                width: parent.width;
-                leftPadding: 0;
-                text: filesystem.get_filename(root.lutUrl);
-                wrapMode: Text.Wrap;
-            }
-            BasicText {
-                width: parent.width;
-                leftPadding: 0;
-                text: root.previewColors ? qsTr("Shown in the preview.") : qsTr("Preview colors are switched off.");
-                font.pixelSize: 11 * dpiScale;
-                opacity: 0.7;
-                wrapMode: Text.WordWrap;
-            }
-        }
-    }
-
-    Label {
-        text: qsTr("Brightness");
-        SliderWithField {
-            id: brightnessSlider;
-            doubleClickResetEnabled: true;
-            width: parent.width;
-            from: -50; to: 50; field.from: -50; field.to: 50; defaultValue: 0; precision: 0; unit: "%";
-        }
-    }
-    Label {
-        text: qsTr("Contrast");
-        SliderWithField {
-            id: contrastSlider;
-            doubleClickResetEnabled: true;
-            width: parent.width;
-            from: -50; to: 50; field.from: -50; field.to: 50; defaultValue: 0; precision: 0; unit: "%";
-        }
-    }
-    Row {
-        spacing: 8 * dpiScale;
-        CheckBox {
-            text: qsTr("Preview colors");
-            checked: root.previewColors;
-            onToggled: root.previewColors = checked;
-        }
-        Button {
-            text: qsTr("Reset adjustments");
-            enabled: root.brightness !== 0 || root.contrast !== 0;
-            onClicked: { root.brightness = 0; root.contrast = 0; }
-        }
-    }
-    BasicText {
-        width: parent.width;
-        wrapMode: Text.WordWrap;
-        font.pixelSize: 11 * dpiScale;
-        opacity: 0.7;
-        text: qsTr("Brightness and contrast are applied after the LUT and included in export. Double-click a slider to reset it.");
     }
 
     ComboBox {

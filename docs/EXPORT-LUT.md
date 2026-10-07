@@ -1,9 +1,12 @@
 # LUT preview and export colors
 
 This prototype adds a user-selected 3D `.cube` LUT to Gyroflow's normal export.
-In **Export settings**, select **Choose LUT…**, pick a LUT, then export as usual.
+In **Color settings**, select **Choose LUT…**, pick a LUT, then export as usual.
 **Clear** disables the LUT. Brightness and contrast run from −50% to +50%; zero
-is neutral. **Reset adjustments** restores both to zero.
+is neutral. Double-click either slider to reset it; **Reset adjustments** restores both to zero.
+Color settings has its own collapsible section above Export settings.
+Presets and Apply to all also group the LUT and adjustments under Color settings;
+the saved `output` fields are unchanged.
 
 The LUT is applied after stabilization and before encoding, in the same export.
 The preview shows the selected LUT and color adjustments. **Preview colors**
