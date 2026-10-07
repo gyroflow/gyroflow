@@ -6,3 +6,5 @@ edition = "2024"
 [dependencies]
 ffmpeg-next = { version = "9.0.0", default-features = false, features = ["codec", "filter", "format", "software-scaling"] }
 tempfile = "3"
+rayon = "1.10"
+bytemuck = "1.25"

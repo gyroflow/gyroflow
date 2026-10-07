@@ -53,7 +53,7 @@ already has the LUT applied, so avoid applying the same conversion again.
   option API, avoiding filter-expression escaping of user paths.
 - The filter uses float planar RGB, tetrahedral interpolation, then converts back
   to the frame's pixel format. Ten-bit precision and alpha are retained.
-- FFmpeg must include `buffer`, `format`, `lut3d`, `geq`, and `buffersink`. Missing or
+- FFmpeg must include `buffer`, `format`, `scale`, `lut3d`, and `buffersink`. Missing or
   unreadable LUTs and invalid cube files fail the render with an export LUT error.
 - Export comments include `Gyroflow export LUT applied: <filename>` when a LUT
   is selected. Existing user comments are retained. Downstream tools can use
@@ -61,6 +61,11 @@ already has the LUT applied, so avoid applying the same conversion again.
 - Partial presets that do not include the LUT field preserve the current LUT.
   Clear removes its URL and its saved Apple bookmark.
 - Export color processing is computed on the CPU. Stabilization and encoding can still use the GPU.
+  Nonzero brightness/contrast use direct parallel float-plane arithmetic, replacing
+  the general `geq` expression interpreter. LUT interpolation is unchanged. RGB
+  converts back using the original YUV matrix/range; writable frame ownership,
+  alpha, row padding, ten-bit precision and sample aspect ratio are preserved.
+  Neutral exports bypass color processing. See [performance research and checks](COLOR-PERFORMANCE.md).
 
 ## Reproducible filter tests
 

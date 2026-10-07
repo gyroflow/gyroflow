@@ -280,4 +280,214 @@ mod tests {
             }
         }
     }
+
+    // Independent FFmpeg geq oracle: the previous export adjustment pipeline.
+    fn geq_reference(frame: &Video, brightness: f64, contrast: f64) -> Video {
+        use ffmpeg_next::{ffi, filter};
+        let mut graph = filter::Graph::new();
+        let pixel: ffi::AVPixelFormat = frame.format().into();
+        let aspect = frame.aspect_ratio();
+        let source_args = format!(
+            "video_size={}x{}:pix_fmt={}:time_base=1/1000000:pixel_aspect={}/{}:colorspace={}:range={}",
+            frame.width(),
+            frame.height(),
+            pixel as i32,
+            aspect.numerator().max(1),
+            aspect.denominator().max(1),
+            frame.color_space() as i32,
+            frame.color_range() as i32
+        );
+        graph
+            .add(&filter::find("buffer").unwrap(), "in", &source_args)
+            .unwrap();
+        graph
+            .add(&filter::find("buffersink").unwrap(), "out", "")
+            .unwrap();
+        let channels = ['r', 'g', 'b']
+            .map(|c| {
+                format!(
+                    "{c}='clip(({c}(X,Y)-0.5)*{}+{},0,1)'",
+                    1.0 + contrast,
+                    0.5 + brightness
+                )
+            })
+            .join(":");
+        let alpha = frame.format() == Pixel::GBRAPF32LE;
+        let name = unsafe { std::ffi::CStr::from_ptr(ffi::av_get_pix_fmt_name(pixel)) }
+            .to_str()
+            .unwrap();
+        let filters = format!(
+            "format={},geq={channels}:a='alpha(X,Y)':interpolation=nearest,format={name}",
+            if alpha { "gbrapf32le" } else { "gbrpf32le" }
+        );
+        graph
+            .output("in", 0)
+            .unwrap()
+            .input("out", 0)
+            .unwrap()
+            .parse(&filters)
+            .unwrap();
+        graph.validate().unwrap();
+        let mut source = graph.get("in").unwrap();
+        assert_eq!(
+            unsafe {
+                ffi::av_buffersrc_add_frame_flags(
+                    source.as_mut_ptr(),
+                    frame.as_ptr().cast_mut(),
+                    ffi::AV_BUFFERSRC_FLAG_KEEP_REF as i32,
+                )
+            },
+            0
+        );
+        let mut output = Video::empty();
+        graph.get("out").unwrap().sink().frame(&mut output).unwrap();
+        output
+    }
+
+    fn assert_active_pixels_equal(a: &Video, b: &Video) {
+        assert_eq!(
+            (
+                a.format(),
+                a.width(),
+                a.height(),
+                a.pts(),
+                a.aspect_ratio(),
+                a.color_space(),
+                a.color_range()
+            ),
+            (
+                b.format(),
+                b.width(),
+                b.height(),
+                b.pts(),
+                b.aspect_ratio(),
+                b.color_space(),
+                b.color_range()
+            )
+        );
+        for p in 0..a.planes() {
+            let row_bytes = match a.format() {
+                Pixel::GBRPF32LE | Pixel::GBRAPF32LE => a.width() as usize * 4,
+                Pixel::P010LE => a.width() as usize * 2,
+                Pixel::YUV420P10LE => a.plane_width(p) as usize * 2,
+                _ => panic!("Unexpected fixture format"),
+            };
+            for y in 0..a.plane_height(p) as usize {
+                assert_eq!(
+                    &a.data(p)[y * a.stride(p)..][..row_bytes],
+                    &b.data(p)[y * b.stride(p)..][..row_bytes],
+                    "plane {p}, row {y}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn native_adjustments_match_geq_bits_and_do_not_mutate_shared_odd_width_frames() {
+        let mut frame = floats(Pixel::GBRAPF32LE, 17, 5);
+        for p in 0..4 {
+            let stride = frame.stride(p);
+            frame.data_mut(p).fill(0xA5);
+            for y in 0..5 {
+                for x in 0..17 {
+                    let value = (x as f32 - 3.0) / 10.0 + p as f32 * 0.03;
+                    frame.data_mut(p)[y * stride + x * 4..][..4]
+                        .copy_from_slice(&value.to_le_bytes());
+                }
+            }
+        }
+        let saved: Vec<Vec<u8>> = (0..4).map(|p| frame.data(p).to_vec()).collect();
+        for (brightness, contrast) in [
+            (-0.5, -0.5),
+            (0.5, 0.5),
+            (0.0, 0.2),
+            (0.1, 0.0),
+            (0.1, 0.2),
+            (-0.123, 0.234),
+        ] {
+            let reference = geq_reference(&frame, brightness, contrast);
+            let mut filter = ExportLut::with_adjustments(None, brightness, contrast).unwrap();
+            for _ in 0..2 {
+                let output = filter.apply(&frame).unwrap();
+                assert_active_pixels_equal(&reference, &output);
+                for p in 0..4 {
+                    assert_eq!(frame.data(p), saved[p]);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn adjusted_ten_bit_frames_match_geq_and_rebuild_for_format_size_and_color_changes() {
+        ffmpeg_next::init().unwrap();
+        let mut filter = ExportLut::with_adjustments(None, 0.1, 0.2).unwrap();
+        for (pixel, w, h, space, range) in [
+            (
+                Pixel::YUV420P10LE,
+                18,
+                10,
+                ffmpeg_next::color::Space::BT709,
+                ffmpeg_next::color::Range::MPEG,
+            ),
+            (
+                Pixel::P010LE,
+                32,
+                16,
+                ffmpeg_next::color::Space::BT709,
+                ffmpeg_next::color::Range::MPEG,
+            ),
+            (
+                Pixel::YUV420P10LE,
+                18,
+                10,
+                ffmpeg_next::color::Space::BT2020NCL,
+                ffmpeg_next::color::Range::JPEG,
+            ),
+            (
+                Pixel::YUV420P10LE,
+                18,
+                10,
+                ffmpeg_next::color::Space::Unspecified,
+                ffmpeg_next::color::Range::Unspecified,
+            ),
+        ] {
+            let mut frame = Video::new(pixel, w, h);
+            frame.set_pts(Some(98765));
+            frame.set_color_space(space);
+            frame.set_color_range(range);
+            unsafe {
+                (*frame.as_mut_ptr()).sample_aspect_ratio =
+                    ffmpeg_next::ffi::AVRational { num: 4, den: 3 };
+            }
+            for p in 0..frame.planes() {
+                let stride = frame.stride(p);
+                let row_samples = if pixel == Pixel::P010LE {
+                    w as usize
+                } else {
+                    frame.plane_width(p) as usize
+                };
+                for y in 0..frame.plane_height(p) as usize {
+                    for x in 0..row_samples {
+                        let value: u16 = ((x * 37 + y * 13 + p * 97) % 1024) as u16;
+                        let stored = if pixel == Pixel::P010LE {
+                            value << 6
+                        } else {
+                            value
+                        };
+                        frame.data_mut(p)[y * stride + x * 2..][..2]
+                            .copy_from_slice(&stored.to_le_bytes());
+                    }
+                }
+            }
+            let saved: Vec<Vec<u8>> = (0..frame.planes())
+                .map(|p| frame.data(p).to_vec())
+                .collect();
+            let reference = geq_reference(&frame, 0.1, 0.2);
+            let output = filter.apply(&frame).unwrap();
+            assert_active_pixels_equal(&reference, &output);
+            for p in 0..frame.planes() {
+                assert_eq!(frame.data(p), saved[p]);
+            }
+        }
+    }
 }

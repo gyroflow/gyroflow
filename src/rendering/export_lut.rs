@@ -2,6 +2,7 @@
 
 //! Export LUT and neutral-by-default brightness/contrast, after stabilization.
 use ffmpeg_next::{Error, ffi, filter, format::Pixel, frame::Video};
+use rayon::prelude::*;
 use std::{
     ffi::{CStr, CString},
     io::Write,
@@ -12,6 +13,7 @@ pub struct ExportLut {
     brightness: f64,
     contrast: f64,
     graph: Option<filter::Graph>,
+    output_graph: Option<filter::Graph>,
     input: Option<(Pixel, u32, u32, i32, i32, i32, i32)>,
 }
 
@@ -58,11 +60,17 @@ impl ExportLut {
             brightness,
             contrast,
             graph: None,
+            output_graph: None,
             input: None,
         })
     }
 
-    fn build_graph(&self, frame: &Video) -> Result<filter::Graph, String> {
+    fn build_graph(
+        &self,
+        frame: &Video,
+        output_pixel: Pixel,
+        apply_lut: bool,
+    ) -> Result<filter::Graph, String> {
         let mut graph = filter::Graph::new();
         let pixel: ffi::AVPixelFormat = frame.format().into();
         let (color_space, color_range) = unsafe {
@@ -96,7 +104,7 @@ impl ExportLut {
             .map_err(|e| e.to_string())?;
 
         let mut last = rgb;
-        if let Some(file) = &self.file {
+        if let Some(file) = self.file.as_ref().filter(|_| apply_lut) {
             // Pass the private filename through the option API, never a user expression.
             let lut_filter = filter::find("lut3d")
                 .ok_or("This FFmpeg build does not include the lut3d filter")?;
@@ -136,33 +144,34 @@ impl ExportLut {
             }
             last = lut;
         }
-        if self.brightness != 0.0 || self.contrast != 0.0 {
-            // Float RGB, the same affine transform and clamp as color_preview.frag.
-            let gain = 1.0 + self.contrast;
-            let offset = 0.5 + self.brightness;
-            let args = format!(
-                "r=clip((r(X,Y)-0.5)*{gain}+{offset},0,1):g=clip((g(X,Y)-0.5)*{gain}+{offset},0,1):b=clip((b(X,Y)-0.5)*{gain}+{offset},0,1):a=alpha(X,Y):interpolation=nearest"
-            );
-            let mut adjust = graph
+        let output_descriptor = unsafe { ffi::av_pix_fmt_desc_get(output_pixel.into()) };
+        if output_descriptor.is_null() {
+            return Err("Unsupported color output pixel format".into());
+        }
+        if !apply_lut
+            && unsafe { (*output_descriptor).flags & ffi::AV_PIX_FMT_FLAG_RGB as u64 == 0 }
+        {
+            // Separate RGB graphs cannot negotiate the original YUV matrix/range
+            // across their boundary. Specify them on the conversion itself.
+            let mut scale = graph
                 .add(
-                    &filter::find("geq")
-                        .ok_or("This FFmpeg build does not include the geq filter")?,
-                    "adjust",
-                    &args,
+                    &filter::find("scale").ok_or("FFmpeg scale filter is unavailable")?,
+                    "restore_yuv",
+                    &format!("out_color_matrix={color_space}:out_range={color_range}"),
                 )
                 .map_err(|e| e.to_string())?;
             unsafe {
                 check(ffi::avfilter_link(
                     last.as_mut_ptr(),
                     0,
-                    adjust.as_mut_ptr(),
+                    scale.as_mut_ptr(),
                     0,
                 ))?;
             }
-            last = adjust;
+            last = scale;
         }
-        let pixel_name =
-            unsafe { CStr::from_ptr(ffi::av_get_pix_fmt_name(pixel)) }.to_string_lossy();
+        let pixel_name = unsafe { CStr::from_ptr(ffi::av_get_pix_fmt_name(output_pixel.into())) }
+            .to_string_lossy();
         let mut output_format = graph
             .add(
                 &filter::find("format").ok_or("FFmpeg format filter is unavailable")?,
@@ -216,11 +225,80 @@ impl ExportLut {
                 frame.aspect_ratio().denominator(),
             )
         };
+        let needs_adjustment = self.brightness != 0.0 || self.contrast != 0.0;
         if self.input != Some(signature) {
-            self.graph = Some(self.build_graph(frame)?);
+            let output_pixel = if needs_adjustment {
+                let descriptor = unsafe { ffi::av_pix_fmt_desc_get(frame.format().into()) };
+                if descriptor.is_null() {
+                    return Err("Unsupported color input pixel format".into());
+                }
+                if unsafe { (*descriptor).flags & ffi::AV_PIX_FMT_FLAG_ALPHA as u64 != 0 } {
+                    Pixel::GBRAPF32LE
+                } else {
+                    Pixel::GBRPF32LE
+                }
+            } else {
+                frame.format()
+            };
+            self.graph = Some(self.build_graph(frame, output_pixel, true)?);
+            self.output_graph = None;
             self.input = Some(signature);
         }
         let graph = self.graph.as_mut().ok_or("LUT filter is unavailable")?;
+        let mut output = Self::run_graph(graph, frame)?;
+        if needs_adjustment {
+            self.adjust_rgb(&mut output)?;
+            // Carry the original conversion matrix/range across the native
+            // RGB stage, just as the previous single filter graph did.
+            output.set_color_space(frame.color_space());
+            output.set_color_range(frame.color_range());
+            if self.output_graph.is_none() {
+                self.output_graph = Some(self.build_graph(&output, frame.format(), false)?);
+            }
+            output = Self::run_graph(
+                self.output_graph
+                    .as_mut()
+                    .ok_or("Color output filter is unavailable")?,
+                &output,
+            )?;
+        }
+        Ok(output)
+    }
+
+    fn adjust_rgb(&self, frame: &mut Video) -> Result<(), String> {
+        if !matches!(frame.format(), Pixel::GBRPF32LE | Pixel::GBRAPF32LE) {
+            return Err("Color adjustments require planar float RGB".into());
+        }
+        // The LUT-free graph may return a reference to the caller's frame.
+        // Make it writable before changing RGB; alpha and padding are untouched.
+        unsafe {
+            check(ffi::av_frame_make_writable(frame.as_mut_ptr()))?;
+        }
+        let width = frame.width() as usize;
+        let gain = 1.0 + self.contrast;
+        let offset = 0.5 + self.brightness;
+        for plane in 0..3 {
+            let stride = frame.stride(plane);
+            if stride < width * 4 || stride % 4 != 0 {
+                return Err("Invalid float RGB row stride".into());
+            }
+            let samples: &mut [f32] = bytemuck::try_cast_slice_mut(frame.data_mut(plane))
+                .map_err(|_| "Invalid float RGB plane alignment")?;
+            samples.par_chunks_exact_mut(stride / 4).for_each(|row| {
+                for sample in &mut row[..width] {
+                    // Match geq's f64 evaluation and final float storage, without
+                    // reassociation/FMA or per-pixel expression interpretation.
+                    // The graph uses explicit little-endian float formats.
+                    let input = f32::from_bits(u32::from_le(sample.to_bits()));
+                    let output = (((input as f64 - 0.5) * gain + offset).clamp(0.0, 1.0)) as f32;
+                    *sample = f32::from_bits(output.to_bits().to_le());
+                }
+            });
+        }
+        Ok(())
+    }
+
+    fn run_graph(graph: &mut filter::Graph, frame: &Video) -> Result<Video, String> {
         // The wrapper's source().add() consumes the AVFrame even though it takes a
         // shared reference. Keep the caller's stabilization buffers intact.
         let mut source = graph.get("in").ok_or("LUT input is unavailable")?;
