@@ -1041,11 +1041,6 @@ impl RenderQueue {
                     };
                     if export_project != 4 {
                         if let Err(e) = result {
-                            if matches!(e, rendering::FFmpegError::ExportLut(_)) {
-                                // A bad LUT cannot be fixed by trying another decoder.
-                                err(("An error occurred: %1".to_string(), e.to_string()));
-                                break 'ranges;
-                            }
                             err((e.to_string(), String::new()));
                         } else {
                             progress((1.0, 1, 1, true, false));
@@ -1103,6 +1098,11 @@ impl RenderQueue {
                     loop {
                         let result = rendering::render(stab.clone(), progress.clone(), &input_file, &render_options, i, range, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone());
                         if let Err(e) = result {
+                            if matches!(e, rendering::FFmpegError::ExportLut(_)) {
+                                // A bad LUT cannot be fixed by trying another decoder.
+                                err(("An error occurred: %1".to_string(), e.to_string()));
+                                break 'ranges;
+                            }
                             if let rendering::FFmpegError::PixelFormatNotSupported((fmt, supported, candidate)) = e {
                                 let candidate = if let Some(c) = candidate { format!("{c:?}").to_ascii_lowercase().to_string() } else { String::new() };
                                 convert_format((format!("{fmt:?}"), supported.into_iter().map(|v| format!("{:?}", v)).collect::<Vec<String>>().join(","), candidate));
