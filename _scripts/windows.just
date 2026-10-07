@@ -83,15 +83,35 @@ install-deps:
     # ――――――――――――――――――――――――――――――――――――――― OpenCV ――――――――――――――――――――――――――――――――――――――――
 
     # ――――――――――――――――――――――――――――――――――――――― LLVM ――――――――――――――――――――――――――――――――――――――――
-    if (-not (Test-Path -Path "{{LLVMPath}}\libclang.dll")) {
-        $Arch = "win64"
+    $Clang = "{{LLVMPath}}\clang.exe"
+    $LLVMReady = (Test-Path -LiteralPath "{{LLVMPath}}\libclang.dll") -and (Test-Path -LiteralPath $Clang)
+    if ($LLVMReady) {
+        $ClangVersion = (& $Clang --version) -join " "
+        $LLVMReady = $LASTEXITCODE -eq 0 -and ($ClangVersion -match "clang version (\d+)" -and [int]$Matches[1] -ge 20)
+    }
+    if (-not $LLVMReady) {
+        # LLVM runs on the build host, including x64-to-ARM64 cross builds.
+        $LLVMHost = "x86_64"
+        $LLVMSHA256 = "f229769f11d6a6edc8ada599c0cda964b7dee6ab1a08c6cf9dd7f513e85b107f"
         if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") {
-            $Arch = "woa64";
+            $LLVMHost = "aarch64"
+            $LLVMSHA256 = "0df3e81e8fe26370dd2b60b9e009d81cd130d3fdc41b257434aa663c5d9f0c13"
         }
-        echo "Downloading LLVM"
-        wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-$Arch.exe" -O "llvm.exe"
-        7z x -y llvm.exe -ollvm
-        del "llvm.exe"
+        $LLVMPackage = "clang+llvm-20.1.8-$LLVMHost-pc-windows-msvc"
+        $LLVMArchive = "$LLVMPackage.tar.xz"
+        if (-not (Test-Path -LiteralPath $LLVMArchive)) {
+            Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.8/$LLVMArchive" -OutFile $LLVMArchive
+        }
+        if ((Get-FileHash -LiteralPath $LLVMArchive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $LLVMSHA256) {
+            throw "LLVM archive SHA-256 mismatch; refusing to extract it."
+        }
+        New-Item -ItemType Directory -Path "llvm" -Force | Out-Null
+        # Only the compiler, matching libclang and resource headers are needed.
+        # Portable archive extraction avoids running an installer or editing PATH.
+        tar -xf $LLVMArchive -C llvm --strip-components 1 "$LLVMPackage/bin/clang.exe" "$LLVMPackage/bin/libclang.dll" "$LLVMPackage/lib/clang"
+        if ($LASTEXITCODE -ne 0) { throw "LLVM portable archive extraction failed." }
+        & .\llvm\bin\clang.exe --version
+        if ($LASTEXITCODE -ne 0) { throw "LLVM compiler does not execute." }
     }
     # ――――――――――――――――――――――――――――――――――――――― LLVM ――――――――――――――――――――――――――――――――――――――――
 

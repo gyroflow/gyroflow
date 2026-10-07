@@ -73,16 +73,21 @@ exports. The default Windows FFmpeg GPL-lite package also lacks `lut3d` and
 `geq`. Windows dependency setup now selects a pinned, SHA-256-verified complete
 FFmpeg 9 GPL shared bundle with MSVC import libraries and headers. Its actual
 DLLs pass the filter/encoder preflight. See `WINDOWS-LUT-TESTING.md` for the
-dependency checks, standalone codec tests and full-app build blocker.
+dependency checks, standalone codec tests and resumed full-app evidence.
 
 The same shader harness also passes neutral/no-LUT and all four brightness/
 contrast extremes without a LUT on both GPUs: all 49,152 components match
-exactly in each of those ten renders. Transparent/partial-alpha GPU coverage,
-full app interaction and production Rust export remain outstanding on Windows.
+exactly in each of those ten renders. Transparent/partial-alpha GPU coverage
+remains unverified. The resumed Windows build, 11 production Rust tests and complete software
+stabilization/color export comparison now pass; all 857 decoded frames and
+timestamps match exactly. Native visual interaction and current NVIDIA encoding
+remain outstanding. See [the Windows checkpoint](WINDOWS-LUT-TESTING.md).
 
 ## Remaining limits
 
-- Windows/Linux/mobile and sandboxed persistence need runtime validation.
+- Windows visual controls, queue persistence after restart and current NVIDIA
+  encoding remain unverified. Linux/mobile and sandboxed persistence also need
+  runtime validation.
 - Preview uses the existing RGBA8 display path; ten-bit export remains ten-bit.
   Same color math is not an HDR/display color-management guarantee.
 - LUT file changes outside the app require Clear/reselection to refresh preview;

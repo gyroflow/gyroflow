@@ -1,8 +1,9 @@
 # Windows LUT verification checkpoint
 
 Tested 2026-10-07 on Windows 11 Home build 26300, Qt 6.7.3, Intel Arc 140T and
-NVIDIA RTX 5070 Ti Laptop. This checkpoint is **not** a completed Windows app
-build, installation or stabilization test.
+NVIDIA RTX 5070 Ti Laptop. The resumed release build, software
+stabilization/export and portable startup are verified below. Complete Windows
+visual UI checks and current NVIDIA encoding remain outstanding.
 
 ## Fixed and verified
 
@@ -75,42 +76,104 @@ the saved logs on other machines. Selection is limited to each test process.
 x64 and ARM64 variable evaluation select their matching pinned packages/hashes.
 The entire dependency recipe has not been run successfully.
 
-## Current blocker and resume
+## Resumed Windows build
 
-Rust 1.99.0, Qt 6.7.3, the pinned FFmpeg bundle, Just 1.58.0, a local Python
-environment with libclang 18.1.1, and a bootstrapped local vcpkg checkout are ready.
-OpenCV is not built yet. The Microsoft Visual Studio Build Tools 2026 installer
-timed out at Windows' administrator prompt (exit 1602). The production command
-`cargo test --locked --manifest-path tests/export-lut/Cargo.toml` fails with
-`linker link.exe not found` (exit 101); **no Rust tests passed on Windows yet**.
+The official Microsoft Visual Studio Build Tools 2026 installation completed
+successfully with MSVC 14.51.36231 and Windows SDK 10.0.26100.0. The normal
+installation prompt was resolved by the user. No security setting was changed
+by this work.
 
-Once the user is present to approve Windows' normal administrator prompt, resume
-with the same official Microsoft package, without changing security settings:
+All **11 production parser/filter tests pass on Windows** with the pinned native
+FFmpeg bundle and libclang 18.1.1:
 
 ```powershell
-winget install --id Microsoft.VisualStudio.BuildTools --exact --version 18.10.2 --source winget --accept-source-agreements --accept-package-agreements --override "--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --locale en-US"
+cargo test --locked --manifest-path tests/export-lut/Cargo.toml
 ```
 
-Use a fresh Visual Studio developer terminal. In the isolated source checkout,
-add the prepared Cargo/Just/Qt/local Python directories to that terminal's PATH,
-set `FFMPEG_DIR` to the pinned bundle and `FFMPEG_ARCH=x64`, and set
-`LIBCLANG_PATH` to the local environment's `Lib/site-packages/clang/native`.
-Keep `CARGO_TARGET_DIR` in the checkout's ignored `ext/` directory, outside
-OneDrive. Run the 11 production parser/filter tests, finish OpenCV dependencies,
-build the full release app, and package a separate portable **Gyroflow LUT Preview**
-using its matching runtime DLLs. Existing official Gyroflow and user settings
-must remain preserved.
+These tests exercise the production Rust parser/filter code, including bounded
+reads and errors, identity/float precision and timestamps, non-square geometry,
+LUT/adjustment alpha, the four no-LUT adjustment extremes, ten-bit YUV properties
+and graph size changes. Logs are retained in the ignored local build directory.
+They do not replace full application stabilization/export checks.
 
-Required remaining gates: execute the full app under current Windows protections;
-verify its actual GPU/backend and controls; chosen/invalid/cleared LUT and reset;
-comparison/playback framing; project, preset and job persistence; actual Gyroflow
-neutral-versus-colored stabilized frame/timestamp comparison on the supplied
-clip; full output decode/precision/metadata; then install and verify the portable
-app. This environment's computer-use surface currently does not expose native
-app control, so visual UI evidence also remains outstanding. Do not substitute
-the completed external-tool checks for those gates.
+OpenCV 4.14.0, FlatBuffers 25.12.19 and OpenCL installed successfully through the
+local vcpkg checkout. The full release application build completed successfully,
+using Rust 1.99.0, Qt 6.7.3 and the same pinned FFmpeg bundle. Existing upstream
+unused-variable/dead-code warnings remain; no warning-free build is claimed. Build products stay
+in the ignored checkout-local `ext/cargo-app` directory, outside OneDrive.
+Copies of the supplied project have Windows file URLs and separate neutral and
+colored output paths; original clip, LUT and project remain preserved.
 
-Git push on this laptop waits for Git Credential Manager sign-in. The bounded
-local commits can instead be transferred as a git bundle for review/publishing
-through the already authenticated Mac session. Until that session confirms a
-push, local commits must not be described as published.
+The first application build exposed two compiler setup problems: the local
+libclang wheel did not include a `clang.exe`, and LLVM 19.1.7 was rejected by the
+new MSVC headers (`STL1000`, requires Clang 20 or newer). Windows setup now pins
+LLVM 20.1.8 portable archives, verifies the official release SHA-256, extracts
+only the compiler, matching libclang and resource headers, and checks the
+compiler version before reuse. The package follows the **build host** architecture,
+so an x64-to-ARM64 cross build uses x64 Clang. No installer or global PATH change
+is required. The x64 archive hash is
+`f229769f11d6a6edc8ada599c0cda964b7dee6ab1a08c6cf9dd7f513e85b107f`;
+ARM64 is separately pinned to
+`0df3e81e8fe26370dd2b60b9e009d81cd130d3fdc41b257434aa663c5d9f0c13`.
+Actual x64 compiler execution and the complete build passed; ARM64 compiler
+execution is untested. Recipe parsing and the version-readiness check also pass.
+The local MDK 0.39.0 playback SDK was extracted separately and supplied with
+`MDK_SDK`; its archive hash is
+`5620e05359f692f6d9ecabc6e49bf62adf4e061f568a18355210bfac70f716a5`.
+
+### Full application and export evidence
+
+- The actual release application starts and reports its version (exit 0).
+- Neutral and DJI LUT/+10% brightness/+20% contrast stabilized exports both
+  complete all 857 frames of the supplied moving-drone clip with software
+  lossless HEVC encoding at 1280x720. Both retain 60000/1001 fps, 14.297617 seconds,
+  limited-range BT.709 and ten-bit YUV420.
+- Independent FFmpeg color processing of the neutral stabilized export matches
+  **every decoded frame hash and timestamp exactly** against the colored
+  Gyroflow export. Both videos decode completely without errors. The colored
+  export contains both LUT and adjustment metadata markers. This verifies that
+  the new color processing preserves stabilization/framing for this clip.
+- `tests/export-lut/check_app_exports.py` reproduces the comparison with
+  user-supplied lossless outputs and a LUT. It requires an explicit expected
+  frame count, uses a new output directory, and keeps copied fixtures and results
+  outside tracked source. It is an opt-in integration check, not a default test.
+- A malformed size-33 LUT with incomplete data is explicitly refused:
+  `Could not apply the selected export LUT: The LUT is incomplete.` No completed
+  output video is created. The inherited CLI still exits 0 for failed jobs;
+  return code alone is not counted as export success.
+- Production project export/reload retains the chosen LUT and +10%/+20%
+  settings. Applying a separate preset to a queued project retains its LUT and
+  +17%/-23% adjustments in the exported project.
+- The original supplied clip and LUT still match their initial SHA-256 hashes.
+- A separate portable app has Qt/QML plugins, matching FFmpeg/MDK/OpenCV DLLs,
+  Microsoft runtime DLLs and official lens profiles v41. Its version check passes
+  with only Windows system directories on PATH. A user-visible copy is prepared
+  under the user's Documents folder, leaving the official app separate.
+- Native UI accessibility confirms the app loaded the chosen project, LUT Clear
+  control, brightness 10, contrast 20, Preview colors and Reset adjustments.
+  Desktop input is currently denied (`GetCursorPos: Access is denied`), and the
+  screenshot shows the screensaver rather than usable app pixels. **This is not
+  visual preview/control proof.** No lock or display setting was changed.
+- A fresh full-app NVIDIA HEVC test using encoder-supported P010 fails with
+  `CUDA_ERROR_NO_DEVICE` / `no encode device`. A fresh standalone FFmpeg NVENC
+  test fails the same way; NVIDIA-SMI reports insufficient permissions. Earlier
+  synthetic NVIDIA dependency tests passed, but current full-app NVIDIA encoding
+  is therefore **not verified**. No driver, security or graphics settings changed.
+
+To repeat the actual frame comparison on explicit private fixtures:
+
+```powershell
+python tests/export-lut/check_app_exports.py <ffmpeg-bin> <neutral-lossless.mp4> <colored-lossless.mp4> <user-supplied.cube> <new-result-folder> --expected-frames 857
+```
+
+Required remaining gates: obtain usable native desktop access; visually verify
+chosen/invalid/cleared LUT, reset, comparison/playback framing and project/preset/
+job persistence; resolve the current NVIDIA device-access failure without
+changing security settings; verify the final installed app and launcher through
+the normal interactive desktop. Preserve the official app and user settings.
+
+The Windows fixes through `034f118a56cfe43bce362bbf3d6a7ae68e15a0bd` were reviewed
+and published through the authenticated Mac session. The feature branch remote
+head was independently verified from Windows. Git Credential Manager sign-in on
+this laptop is therefore not a current blocker. New changes after that commit
+remain local until separately verified and published.
