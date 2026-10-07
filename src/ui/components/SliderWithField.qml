@@ -18,6 +18,7 @@ Row {
     property alias precision: field.precision;
     property string keyframe: "";
     property bool keyframesEnabled: false;
+    property bool doubleClickResetEnabled: false;
     property real scaler: 1;
 
     property bool preventChange: false;
@@ -56,6 +57,13 @@ Row {
         onValueChanged: if (!preventChange) field.value = value;
         unit: field.unit;
         precision: field.precision;
+
+        TapHandler {
+            enabled: root.doubleClickResetEnabled;
+            acceptedButtons: Qt.LeftButton;
+            gesturePolicy: TapHandler.DragThreshold;
+            onDoubleTapped: field.reset();
+        }
 
         ContextMenuMouseArea {
             underlyingItem: slider;

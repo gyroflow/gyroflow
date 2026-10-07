@@ -340,6 +340,7 @@ MenuItem {
         text: qsTr("Brightness");
         SliderWithField {
             id: brightnessSlider;
+            doubleClickResetEnabled: true;
             width: parent.width;
             from: -50; to: 50; field.from: -50; field.to: 50; defaultValue: 0; precision: 0; unit: "%";
         }
@@ -348,6 +349,7 @@ MenuItem {
         text: qsTr("Contrast");
         SliderWithField {
             id: contrastSlider;
+            doubleClickResetEnabled: true;
             width: parent.width;
             from: -50; to: 50; field.from: -50; field.to: 50; defaultValue: 0; precision: 0; unit: "%";
         }
@@ -370,7 +372,7 @@ MenuItem {
         wrapMode: Text.WordWrap;
         font.pixelSize: 11 * dpiScale;
         opacity: 0.7;
-        text: qsTr("Brightness and contrast are applied after the LUT and included in export.");
+        text: qsTr("Brightness and contrast are applied after the LUT and included in export. Double-click a slider to reset it.");
     }
 
     ComboBox {
