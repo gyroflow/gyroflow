@@ -42,10 +42,14 @@ vec3 applyLut(vec3 rgb) {
         else if (d.g >= d.b) order = ivec3(1, 2, 0);
         else order = ivec3(2, 1, 0);
     }
-    ivec3 a = lo;
-    a[order.x] = hi[order.x];
-    ivec3 b = a;
-    b[order.y] = hi[order.y];
+    // HLSL Shader Model 5 cannot assign a dynamically indexed vector component.
+    // Construct the same tetrahedron vertices with addressable components.
+    ivec3 a = ivec3(order.x == 0 ? hi.x : lo.x,
+                   order.x == 1 ? hi.y : lo.y,
+                   order.x == 2 ? hi.z : lo.z);
+    ivec3 b = ivec3(order.y == 0 ? hi.x : a.x,
+                   order.y == 1 ? hi.y : a.y,
+                   order.y == 2 ? hi.z : a.z);
     vec3 v0 = entry(lo), v1 = entry(a), v2 = entry(b), v3 = entry(hi);
     return v0 + d[order.x] * (v1 - v0) + d[order.y] * (v2 - v1) + d[order.z] * (v3 - v2);
 }

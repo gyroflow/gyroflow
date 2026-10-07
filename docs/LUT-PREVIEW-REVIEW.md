@@ -51,6 +51,27 @@ and remain compatible with the repository's Windows Qt 6.7.3 build. The same
 16,384-color Mac GPU comparison still matches exactly. This removes a package
 version mismatch; Windows compilation/runtime remain unverified.
 
+## Windows Direct3D shader verification (2026-10-07)
+
+The original HLSL failed to compile on Qt 6.7.3 with error X3500: dynamically
+indexed vector components cannot be used as assignment targets. Constructing
+each component explicitly fixes the same tetrahedron vertices without changing
+the interpolation. The replacement package retains QSB serialization version 6,
+GLSL 150/300 ES, HLSL 5.0 and MSL 1.2.
+
+The actual Qt shader harness rendered the supplied 128-by-128 DJI LUT fixture
+through Direct3D 11 on both Intel Arc 140T and NVIDIA RTX 5070 Ti Laptop GPUs.
+Compared with the Mac production-filter reference at brightness +10% and
+contrast +20%, 83 of 49,152 Intel RGB components and 1,087 NVIDIA components
+differed, each by at most one RGB24 level. Alpha was fully opaque. Windows
+150% display scaling produced a 192-by-192 grab, normalized with nearest-neighbor
+sampling before comparison. Adapter selection was scoped to each harness
+process; global graphics settings were unchanged.
+
+This verifies the shader harness, not the complete Windows application or its
+exports. The default Windows FFmpeg GPL-lite package also lacks `lut3d` and
+`geq`; a complete compatible library bundle is required before export validation.
+
 ## Remaining limits
 
 - Windows/Linux/mobile and sandboxed persistence need runtime validation.
