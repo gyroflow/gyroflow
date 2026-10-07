@@ -1,9 +1,9 @@
 # Windows LUT verification checkpoint
 
 Tested 2026-10-07 on Windows 11 Home build 26300, Qt 6.7.3, Intel Arc 140T and
-NVIDIA RTX 5070 Ti Laptop. The resumed release build, software
-stabilization/export and portable startup are verified below. Complete Windows
-visual UI checks and current NVIDIA encoding remain outstanding.
+NVIDIA RTX 5070 Ti Laptop. The resumed release build, software and NVIDIA
+stabilization/export, interactive LUT controls, restart persistence and portable
+desktop shortcut are verified below. ARM64 runtime verification remains open.
 
 ## Fixed and verified
 
@@ -149,16 +149,57 @@ The local MDK 0.39.0 playback SDK was extracted separately and supplied with
   Microsoft runtime DLLs and official lens profiles v41. Its version check passes
   with only Windows system directories on PATH. A user-visible copy is prepared
   under the user's Documents folder, leaving the official app separate.
-- Native UI accessibility confirms the app loaded the chosen project, LUT Clear
-  control, brightness 10, contrast 20, Preview colors and Reset adjustments.
-  Desktop input is currently denied (`GetCursorPos: Access is denied`), and the
-  screenshot shows the screensaver rather than usable app pixels. **This is not
-  visual preview/control proof.** No lock or display setting was changed.
-- A fresh full-app NVIDIA HEVC test using encoder-supported P010 fails with
-  `CUDA_ERROR_NO_DEVICE` / `no encode device`. A fresh standalone FFmpeg NVENC
-  test fails the same way; NVIDIA-SMI reports insufficient permissions. Earlier
-  synthetic NVIDIA dependency tests passed, but current full-app NVIDIA encoding
-  is therefore **not verified**. No driver, security or graphics settings changed.
+- Initial desktop input was denied and captures showed the screensaver; those
+  observations were not counted as visual proof. Later usable desktop access
+  allowed the interactive checks below without changing security settings.
+- Initial full-app NVIDIA HEVC and standalone NVENC tests failed with
+  `CUDA_ERROR_NO_DEVICE`. The installed G-Helper utility was not running, so its
+  saved automatic GPU preference had not enabled the NVIDIA device. Starting
+  that existing utility applied the saved preference; the device became present
+  and both standalone NVENC and a full-app export succeeded. The latter completed
+  all 857 frames in 51.462 seconds at 1280x720, 60000/1001 fps, ten-bit HEVC/P010.
+  Independent probing counted 857 frames and full FFmpeg decoding passed with
+  `-v error -xerror`. This hardware export uses lossy encoding; the exact frame
+  hash proof above applies to the software lossless exports. The charger was
+  reported as 70 W by the user, who accepts battery supplementation. No driver
+  or security setting was changed, and no new G-Helper autostart was installed.
+
+### Interactive installation and preview correction
+
+The portable executable must keep the upstream name **`gyroflow.exe`** (the
+standard packaging recipe uses `Gyroflow.exe`). A custom local installation had
+renamed it `GyroflowLUTPreview.exe`, triggering a large MDK QR overlay in the
+video preview. Restoring the upstream filename, with identical executable bytes
+and unchanged embedded upstream key, removed the overlay. Playback then worked
+without the obstruction. Keep the separate folder and desktop shortcut named
+"Gyroflow LUT Preview" to distinguish this build; do not rename its executable.
+The corrected desktop shortcut was launched and verified interactively after
+closing the earlier instance. The incorrectly named copy was moved to the
+private test-fixture backup directory.
+
+Actual installed-app UI checks passed:
+
+- The selected official user-supplied DJI LUT appears by name with its green
+  export/preview status. Playback advances through the moving clip without a QR
+  overlay. On the same paused frame (793/857), switching Preview colors off and
+  back on visibly changes the colors while preserving frame position, zoom and
+  framing; the export LUT remains selected.
+- Reset adjustments changes both fields to zero, disables itself and retains
+  the LUT. Clear removes the LUT status and returns to the ungraded preview.
+  Selecting the disposable incomplete LUT shows the red `The LUT is incomplete.`
+  error. Selecting the valid LUT again clears that error and restores its status.
+- Editing brightness to +17% and contrast to -23% visibly updates the preview.
+  Saving the private project writes `brightness: 0.17`, `contrast: -0.23` and the
+  exact chosen LUT file URL. Reopening that file through the GUI after restarting
+  restores all three controls.
+- Create settings preset includes the checked LUT and brightness/contrast
+  selections. Save to file preserves those values and leaves `output_filename`
+  empty. After restarting, clearing/resetting the current colors and opening the
+  saved preset through the GUI restores the LUT and +17%/-23% adjustments.
+- Adding a disposable job to the queue leaves it unrendered. Closing the app and
+  launching its corrected shortcut presents the unfinished-queue prompt. Opening
+  that queue and choosing Edit restores the same LUT and +17%/-23% adjustments.
+  No originals or existing output videos were overwritten.
 
 To repeat the actual frame comparison on explicit private fixtures:
 
@@ -166,11 +207,9 @@ To repeat the actual frame comparison on explicit private fixtures:
 python tests/export-lut/check_app_exports.py <ffmpeg-bin> <neutral-lossless.mp4> <colored-lossless.mp4> <user-supplied.cube> <new-result-folder> --expected-frames 857
 ```
 
-Required remaining gates: obtain usable native desktop access; visually verify
-chosen/invalid/cleared LUT, reset, comparison/playback framing and project/preset/
-job persistence; resolve the current NVIDIA device-access failure without
-changing security settings; verify the final installed app and launcher through
-the normal interactive desktop. Preserve the official app and user settings.
+These Windows x64 LUT acceptance gates are now passed on this laptop. This does
+not establish ARM64 runtime support, partial-alpha GPU correctness or broad
+camera/hardware coverage. Preserve the official app and user settings.
 
 The Windows fixes through `034f118a56cfe43bce362bbf3d6a7ae68e15a0bd` were reviewed
 and published through the authenticated Mac session. The feature branch remote
