@@ -43,6 +43,14 @@ frame. The adjustment-only preview also worked after Clear. The original user
 project was restored after save testing. The development app was rebuilt and
 ad-hoc signature checked; the official Gyroflow application was not replaced.
 
+## Windows source compatibility follow-up
+
+The preview package includes HLSL shader model 5.0 for Direct3D. Re-baked with
+`qsb --qsbversion 64` to match the existing shader serialization format (6)
+and remain compatible with the repository's Windows Qt 6.7.3 build. The same
+16,384-color Mac GPU comparison still matches exactly. This removes a package
+version mismatch; Windows compilation/runtime remain unverified.
+
 ## Remaining limits
 
 - Windows/Linux/mobile and sandboxed persistence need runtime validation.
