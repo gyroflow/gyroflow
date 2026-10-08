@@ -36,6 +36,7 @@ function build(document) {
         throw new Error("Unsupported camera catalogue");
     }
     var index = { cameras: Object.create(null), aliases: Object.create(null),
+                  modelAliases: Object.create(null),
                   brands: [], models: Object.create(null), profiles: Object.create(null),
                   lenses: document.lenses, lensesByMount: Object.create(null), lensChoices: Object.create(null),
                   compatible: Object.create(null), count: 0 };
@@ -46,6 +47,7 @@ function build(document) {
         var id = cameraKey(camera.brand, camera.model);
         index.cameras[id] = camera;
         index.aliases[id] = id;
+        addAlias(index.modelAliases, norm(camera.model), id);
     });
     document.cameras.forEach(function(camera) {
         if (!record(camera) || !clean(camera.brand) || !clean(camera.model)) return;
@@ -56,6 +58,7 @@ function build(document) {
             if (!Object.prototype.hasOwnProperty.call(index.cameras, key)) {
                 addAlias(index.aliases, key, id);
             }
+            addAlias(index.modelAliases, norm(alias), id);
         });
     });
     document.profiles.forEach(function(profile) {
@@ -64,6 +67,7 @@ function build(document) {
         if (!index.cameras[id]) {
             index.cameras[id] = { brand: clean(profile.brand), model: clean(profile.model), mounts: [], aliases: [] };
             addAlias(index.aliases, id, id);
+            addAlias(index.modelAliases, norm(profile.model), id);
         }
         if (!index.profiles[id]) index.profiles[id] = Object.create(null);
         var lens = clean(profile.lens);
@@ -99,7 +103,10 @@ function build(document) {
 }
 
 function resolveCamera(index, brand, model) {
-    return index && index.aliases[cameraKey(brand, model)] || "";
+    if (!index) return "";
+    var branded = index.aliases[cameraKey(brand, model)] || "";
+    if (branded || clean(brand)) return branded;
+    return index.modelAliases[norm(model)] || "";
 }
 
 function camera(index, brand, model) {
