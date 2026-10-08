@@ -81,21 +81,52 @@ pub fn submission_errors(info: &Value, catalog: &Value) -> Vec<String> {
         }
     }
     let lens = info["lens_model"].as_str().unwrap_or("");
-    let named_zoom = ZOOM_NAME.captures(lens).is_some_and(|c| {
-        matches!((c[1].parse::<f64>(), c[2].parse::<f64>()), (Ok(a), Ok(b)) if a > 0.0 && b > a)
+    // A range written in the selected lens name is the most specific promise.
+    let named_range = ZOOM_NAME.captures(lens).and_then(|c| {
+        let min = c[1].parse::<f64>().ok()?;
+        let max = c[2].parse::<f64>().ok()?;
+        (min.is_finite() && max.is_finite() && min > 0.0 && max > min).then_some((min, max))
     });
-    let catalog_zoom = catalog["lenses"].as_array().is_some_and(|lenses| lenses.iter().any(|entry| {
-        let name_matches = entry["model"].as_str().is_some_and(|name| name.trim().eq_ignore_ascii_case(lens.trim()))
-            || entry["aliases"].as_array().is_some_and(|a| a.iter().any(|v| v.as_str().is_some_and(|s| s.trim().eq_ignore_ascii_case(lens.trim()))));
-        let range_zoom = matches!((entry["min_focal_length"].as_f64(), entry["max_focal_length"].as_f64()), (Some(a), Some(b)) if a > 0.0 && b > a);
-        let sampled_zoom = entry["sampled_focal_lengths"].as_array().is_some_and(|a| {
-            let positive: Vec<_> = a.iter().filter_map(Value::as_f64).filter(|n| n.is_finite() && *n > 0.0).collect();
-            positive.first().is_some_and(|first| positive.iter().any(|v| (*v - *first).abs() > 0.01))
-        });
-        name_matches && (range_zoom || sampled_zoom)
-    }));
-    if (named_zoom || catalog_zoom || info["lens_is_zoom"].as_bool() == Some(true)) && !positive(&info["focal_length"]) {
+    let mut catalog_zoom = false;
+    let mut catalog_ranges = Vec::new();
+    if let Some(lenses) = catalog["lenses"].as_array() {
+        for entry in lenses {
+            let name_matches = entry["model"].as_str().is_some_and(|name| name.trim().eq_ignore_ascii_case(lens.trim()))
+                || entry["aliases"].as_array().is_some_and(|aliases| aliases.iter().any(|v| v.as_str().is_some_and(|s| s.trim().eq_ignore_ascii_case(lens.trim()))));
+            if !name_matches {
+                continue;
+            }
+            if let (Some(min), Some(max)) = (entry["min_focal_length"].as_f64(), entry["max_focal_length"].as_f64()) {
+                if min.is_finite() && max.is_finite() && min > 0.0 && max > min {
+                    catalog_ranges.push((min, max));
+                    catalog_zoom = true;
+                }
+            }
+            if let Some(samples) = entry["sampled_focal_lengths"].as_array() {
+                let positive: Vec<_> = samples.iter().filter_map(Value::as_f64)
+                    .filter(|n| n.is_finite() && *n > 0.0).collect();
+                catalog_zoom |= positive.first().is_some_and(|first| positive.iter().any(|v| (*v - *first).abs() > 0.01));
+            }
+        }
+    }
+    let focal = info["focal_length"].as_f64().filter(|v| v.is_finite() && *v > 0.0);
+    if (named_range.is_some() || catalog_zoom || info["lens_is_zoom"].as_bool() == Some(true)) && focal.is_none() {
         errors.push("Specify the actual focal length used to calibrate this zoom lens before uploading.".into());
+    }
+    if let Some(focal) = focal {
+        let allowed = if let Some((min, max)) = named_range {
+            // Endpoints are legitimate focal lengths.
+            Some(focal >= min && focal <= max)
+        } else if !catalog_ranges.is_empty() {
+            // Multiple matching catalog records/aliases are alternatives.
+            Some(catalog_ranges.iter().any(|(min, max)| focal >= *min && focal <= *max))
+        } else {
+            // Unknown/manual lenses cannot be rejected on speculative bounds.
+            None
+        };
+        if allowed == Some(false) {
+            errors.push("The focal length is outside the selected zoom lens's documented range.".into());
+        }
     }
     errors
 }
@@ -150,4 +181,33 @@ mod tests {
         info["focal_length"] = json!(20.0);
         assert!(submission_errors(&info, &catalog).is_empty());
     }
+    #[test]
+    fn upload_rejects_named_zoom_out_of_range_but_accepts_endpoints() {
+        let catalog = json!({"lenses":[]});
+        let mut info = json!({"camera_brand":"Sony","camera_model":"A7","lens_model":"24–70mm Zoom","focal_length":200.0});
+        assert_eq!(submission_errors(&info, &catalog).len(), 1);
+        for valid in [24.0, 70.0] {
+            info["focal_length"] = json!(valid);
+            assert!(submission_errors(&info, &catalog).is_empty());
+        }
+        info["lens_model"] = json!("Unknown manual lens");
+        info["focal_length"] = json!(200.0);
+        assert!(submission_errors(&info, &catalog).is_empty());
+    }
+
+    #[test]
+    fn upload_rejects_catalog_alias_out_of_range_and_allows_other_matching_ranges() {
+        let catalog = json!({"lenses":[
+            {"model":"PZ One","aliases":["My Zoom"],"min_focal_length":10.0,"max_focal_length":30.0},
+            {"model":"PZ Two","aliases":["My Zoom"],"min_focal_length":20.0,"max_focal_length":80.0},
+            {"model":"Unrelated","min_focal_length":100.0,"max_focal_length":400.0}
+        ]});
+        let mut info = json!({"camera_brand":"Example","camera_model":"Body","lens_model":"My Zoom","focal_length":90.0});
+        assert_eq!(submission_errors(&info, &catalog).len(), 1);
+        info["focal_length"] = json!(80.0);
+        assert!(submission_errors(&info, &catalog).is_empty());
+        info["focal_length"] = json!(10.0);
+        assert!(submission_errors(&info, &catalog).is_empty());
+    }
+
 }
