@@ -9,6 +9,8 @@ import argparse
 import hashlib
 import json
 import math
+import os
+import tempfile
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
@@ -135,6 +137,52 @@ def generate(profiles: Path, lensfun: Path, profile_revision: str, lensfun_revis
             "lenses": [lenses[k] for k in sorted(lenses)], "mounts": dict(sorted(mounts.items()))}
 
 
+
+def write_catalog(output: Path, document: dict, profiles: Path, lensfun: Path) -> None:
+    """Write a generated catalogue without destroying source inputs or old output."""
+    output_resolved = output.resolve()
+    profile_root = profiles.resolve()
+    lensfun_root = lensfun.resolve()
+
+    # The profile repository intentionally accepts this one reserved metadata
+    # file. Ordinary profile JSONs and all Lensfun XMLs are source data.
+    reserved = profile_root / "__camera_catalog.json"
+    if output_resolved.is_relative_to(lensfun_root) or (
+        output_resolved.is_relative_to(profile_root) and output_resolved != reserved
+    ):
+        raise ValueError("Refusing to overwrite catalogue input tree with generated metadata")
+
+    # Also protect external targets reached through input symlinks. A symlink
+    # source may live outside the nominal tree but is still an input.
+    for root, glob in ((profiles, "*.json"), (lensfun, "*.xml")):
+        for source in root.rglob(glob):
+            if root == profiles and (
+                source.name.startswith("__") or source.name == "camera_catalog.json"
+            ):
+                continue
+            if source.resolve() == output_resolved:
+                raise ValueError(f"Refusing to overwrite input: {source}")
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        # A failed/disk-full write must leave an earlier working catalogue in
+        # place. The temporary file is created on the same filesystem.
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=output.parent,
+            prefix=".camera-catalog-", suffix=".tmp", delete=False,
+        ) as stream:
+            temporary = Path(stream.name)
+            json.dump(document, stream, ensure_ascii=False, indent=2)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, output)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profiles", type=Path, required=True)
@@ -149,8 +197,10 @@ def main() -> None:
         document = generate(args.profiles, args.lensfun, args.profiles_revision, args.lensfun_revision)
     except (ValueError, OSError, ET.ParseError) as exc:
         parser.exit(1, f"Catalogue generation failed: {exc}\n")
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    try:
+        write_catalog(args.output, document, args.profiles, args.lensfun)
+    except (OSError, ValueError) as exc:
+        parser.exit(1, f"Catalogue output failed: {exc}\n")
     print(json.dumps({"cameras": len(document["cameras"]), "lenses": len(document["lenses"]),
                       "sources": document["sources"]}))
 
