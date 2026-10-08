@@ -86,7 +86,12 @@ MenuItem {
         target: controller;
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
             root.isSony = (camera || "").startsWith("Sony");
-            if (is_main_video) cameraSelector.setMetadata(additional_data.camera_identifier || {});
+            if (is_main_video) {
+                // Some clips have no camera_identifier payload. Clear stale
+                // selectors instead of throwing on null/missing telemetry.
+                const identifier = additional_data && additional_data.camera_identifier;
+                cameraSelector.setMetadata(identifier || {});
+            }
             if (is_main_video) {
                 // Every file starts from the defaults (see `StabilizationParams::clear`): breathing compensation on,
                 // no lens metadata delay. A project file loaded afterwards overrides them through loadGyroflow.
@@ -134,15 +139,20 @@ MenuItem {
                         "Calibrated by":   obj.calibrated_by
                     };
 
-                    if (+obj.focal_length > 0) lensInfo["Focal length"] = obj.focal_length.toFixed(2) + " mm";
-                    if (+obj.crop_factor  > 0) lensInfo["Crop factor"]  = obj.crop_factor.toFixed(2) + "x";
+                    // Legacy/downloaded profiles may encode measured numbers as JSON
+                    // strings. Format the converted finite value, never call toFixed on
+                    // the raw string (which aborts the entire load signal handler).
+                    const focalLength = Number(obj.focal_length);
+                    const cropFactor = Number(obj.crop_factor);
+                    if (Number.isFinite(focalLength) && focalLength > 0) lensInfo["Focal length"] = focalLength.toFixed(2) + " mm";
+                    if (Number.isFinite(cropFactor) && cropFactor > 0) lensInfo["Crop factor"] = cropFactor.toFixed(2) + "x";
                     if (obj.asymmetrical) lensInfo["Asymmetrical"] = qsTr("Yes");
                     if (obj.distortion_model && obj.distortion_model != "opencv_fisheye") lensInfo["Distortion model"] = obj.distortion_model;
                     if (obj.digital_lens) lensInfo["Digital lens"] = obj.digital_lens;
 
                     info.model = lensInfo;
 
-                    root.cropFactor = +obj.crop_factor;
+                    root.cropFactor = Number.isFinite(cropFactor) && cropFactor > 0 ? cropFactor : 0;
 
                     if (!root.selected_manually &&
                            (obj.calibrated_by == "Eddy" ||
