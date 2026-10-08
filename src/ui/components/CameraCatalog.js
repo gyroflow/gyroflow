@@ -8,7 +8,9 @@ function cameraKey(brand, model) { return JSON.stringify([norm(brand), norm(mode
 function ordered(values) { return values.sort(function(a, b) { return a.localeCompare(b); }); }
 function unique(values) { return ordered(Array.from(new Set(values.filter(function(x) { return !!x; })))); }
 function positive(value) { return typeof value === "number" && isFinite(value) && value > 0; }
-function overlaps(a, b) { return (a || []).some(function(value) { return (b || []).indexOf(value) !== -1; }); }
+function list(value) { return Array.isArray(value) ? value : []; }
+function record(value) { return !!value && typeof value === "object" && !Array.isArray(value); }
+function overlaps(a, b) { return list(a).some(function(value) { return list(b).indexOf(value) !== -1; }); }
 function addAlias(map, key, value) {
     if (!Object.prototype.hasOwnProperty.call(map, key)) map[key] = value;
     else if (map[key] !== value) map[key] = null; // Ambiguous names must not auto-select.
@@ -26,15 +28,16 @@ function build(document) {
     // Reserve every canonical model ID before considering aliases. Otherwise
     // one camera's alias can invalidate a real model added earlier/later.
     document.cameras.forEach(function(camera) {
-        if (!clean(camera.brand) || !clean(camera.model)) return;
+        if (!record(camera) || !clean(camera.brand) || !clean(camera.model)) return;
         var id = cameraKey(camera.brand, camera.model);
         index.cameras[id] = camera;
         index.aliases[id] = id;
     });
     document.cameras.forEach(function(camera) {
-        if (!clean(camera.brand) || !clean(camera.model)) return;
+        if (!record(camera) || !clean(camera.brand) || !clean(camera.model)) return;
         var id = cameraKey(camera.brand, camera.model);
-        (camera.aliases || []).forEach(function(alias) {
+        list(camera.aliases).forEach(function(alias) {
+            if (!clean(alias)) return;
             var key = cameraKey(camera.brand, alias);
             if (!Object.prototype.hasOwnProperty.call(index.cameras, key)) {
                 addAlias(index.aliases, key, id);
@@ -42,7 +45,7 @@ function build(document) {
         });
     });
     document.profiles.forEach(function(profile) {
-        if (!clean(profile.id) || !clean(profile.brand) || !clean(profile.model)) return;
+        if (!record(profile) || !clean(profile.id) || !clean(profile.brand) || !clean(profile.model)) return;
         var id = index.aliases[cameraKey(profile.brand, profile.model)] || cameraKey(profile.brand, profile.model);
         if (!index.cameras[id]) {
             index.cameras[id] = { brand: clean(profile.brand), model: clean(profile.model), mounts: [], aliases: [] };
@@ -62,7 +65,9 @@ function build(document) {
     index.brands = ordered(Object.keys(index.models));
     Object.keys(index.models).forEach(function(brand) { index.models[brand] = unique(index.models[brand]); });
     document.lenses.forEach(function(lens) {
-        (lens.mounts || []).forEach(function(mount) {
+        if (!record(lens) || !clean(lens.model)) return;
+        list(lens.mounts).forEach(function(mount) {
+            if (!clean(mount)) return;
             if (!index.lensesByMount[mount]) index.lensesByMount[mount] = [];
             index.lensesByMount[mount].push(lens);
         });
@@ -93,7 +98,7 @@ function lensLabels(index, brand, model) {
     if (index.lensChoices[id]) return index.lensChoices[id].slice();
     var result = Object.keys(index.profiles[id] || {});
     var body = index.cameras[id];
-    (body.mounts || []).forEach(function(mount) {
+    list(body.mounts).forEach(function(mount) {
         (index.lensesByMount[mount] || []).forEach(function(lens) {
             // A smaller image circle must not be suggested for a larger sensor.
             if (positive(body.crop_factor) && positive(lens.crop_factor) && lens.crop_factor > body.crop_factor * 1.01) return;
@@ -115,7 +120,7 @@ function compatibleCameras(index, brand, model) {
     if (!id) return [];
     if (index.compatible[id]) return index.compatible[id].slice();
     var selected = index.cameras[id];
-    if (!positive(selected.crop_factor) || !(selected.mounts || []).length) return [];
+    if (!positive(selected.crop_factor) || !list(selected.mounts).length) return [];
     var result = Object.keys(index.cameras).filter(function(otherId) {
         if (otherId === id) return false;
         var other = index.cameras[otherId];
