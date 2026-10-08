@@ -28,6 +28,21 @@ const document = {
 };
 const index = context.build(document);
 assert.equal(context.prefill(index, {brand:'sony',model:'Alpha 7 IV'}).model, 'ILCE-7M4');
+assert.deepEqual(
+  plain(context.prefill(index, {model:'Alpha 7 IV'})),
+  {brand:'Sony', model:'ILCE-7M4', lens:'', known:true}
+);
+assert.equal(context.prefill(index, {brand:'Canon', model:'ILCE-7M4'}).known, false);
+const ambiguousUnbranded = context.build({
+  schema_version:1,
+  cameras:[
+    {brand:'Sony', model:'Shared Body', aliases:[], mounts:[]},
+    {brand:'Canon', model:'Shared Body', aliases:[], mounts:[]}
+  ],
+  lenses:[],
+  profiles:[]
+});
+assert.equal(context.prefill(ambiguousUnbranded, {model:'Shared Body'}).known, false);
 assert.equal(
   context.prefill(index, {
     brand:'Sony', model:'ILCE-7M4',
