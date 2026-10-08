@@ -23,13 +23,22 @@ function build(document) {
                   brands: [], models: Object.create(null), profiles: Object.create(null),
                   lenses: document.lenses, lensesByMount: Object.create(null), lensChoices: Object.create(null),
                   compatible: Object.create(null), count: 0 };
+    // Reserve every canonical model ID before considering aliases. Otherwise
+    // one camera's alias can invalidate a real model added earlier/later.
     document.cameras.forEach(function(camera) {
         if (!clean(camera.brand) || !clean(camera.model)) return;
         var id = cameraKey(camera.brand, camera.model);
         index.cameras[id] = camera;
-        addAlias(index.aliases, id, id);
+        index.aliases[id] = id;
+    });
+    document.cameras.forEach(function(camera) {
+        if (!clean(camera.brand) || !clean(camera.model)) return;
+        var id = cameraKey(camera.brand, camera.model);
         (camera.aliases || []).forEach(function(alias) {
-            addAlias(index.aliases, cameraKey(camera.brand, alias), id);
+            var key = cameraKey(camera.brand, alias);
+            if (!Object.prototype.hasOwnProperty.call(index.cameras, key)) {
+                addAlias(index.aliases, key, id);
+            }
         });
     });
     document.profiles.forEach(function(profile) {
