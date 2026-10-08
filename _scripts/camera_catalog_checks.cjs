@@ -31,6 +31,20 @@ assert.equal(context.prefill(index, {brand:'sony',model:'Alpha 7 IV'}).model, 'I
 assert.equal(context.prefill(index, {brand:'Sony',model:'ILCE'}).known, false);
 assert.deepEqual(plain(context.profilesFor(index,'Sony','ILCE-7M4','FE 24–70mm F2.8')).map(p=>p.id), ['profile-b','profile-a']);
 console.log('PASS metadata alias + profile indexing');
+// A user-selectable canonical ID must beat another model's alias regardless
+// of source order, while two truly competing aliases stay ambiguous.
+const collidingModels = [
+  {brand:'Sony', model:'A', aliases:['Shared'], mounts:[]},
+  {brand:'Sony', model:'B', aliases:['A','Shared'], mounts:[]}
+];
+for (const cameras of [collidingModels, collidingModels.slice().reverse()]) {
+  const collisionIndex = context.build({schema_version:1, cameras, lenses:[], profiles:[]});
+  assert.equal(context.resolveCamera(collisionIndex, 'Sony', 'A'), JSON.stringify(['sony','a']));
+  assert.equal(context.resolveCamera(collisionIndex, 'Sony', 'B'), JSON.stringify(['sony','b']));
+  assert.equal(context.resolveCamera(collisionIndex, 'Sony', 'Shared'), '');
+}
+console.log('PASS canonical camera IDs outrank colliding aliases');
+
 assert.equal(context.profilesFor(index,'Sony','ILCE-7M3','FE 24–70mm F2.8').length, 0);
 assert.deepEqual(plain(context.compatibleCameras(index,'Sony','ILCE-7M4')).map(c=>c.model), ['ILCE-7M3']);
 assert.equal(context.lensLabels(index,'Sony','ILCE-7M4').includes('E 16–50mm F3.5–5.6'), false);
