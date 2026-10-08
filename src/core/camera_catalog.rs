@@ -39,13 +39,23 @@ pub fn parse_catalog(text: &str) -> Result<Value, String> {
     Ok(value)
 }
 
+/// A schema-valid but empty auto-update is not a usable camera/lens database.
+/// Keep parsing permissive for tooling, but never promote empty metadata over
+/// the bundled catalogue that drives user-visible camera/lens selectors.
+pub fn has_deliverable_metadata(value: &Value) -> bool {
+    value["cameras"].as_array().is_some_and(|rows| !rows.is_empty())
+        || value["lenses"].as_array().is_some_and(|rows| !rows.is_empty())
+}
+
 pub fn load_catalog(bundled: &str, cached: &Path) -> Value {
     // Failed/incompatible updates retain the bundled catalogue; never turn a
     // network/parse failure into an empty list of known cameras.
     if std::fs::metadata(cached).is_ok_and(|m| m.len() <= MAX_CATALOG_BYTES) {
         if let Ok(text) = std::fs::read_to_string(cached) {
             if let Ok(value) = parse_catalog(&text) {
-                return value;
+                if has_deliverable_metadata(&value) {
+                    return value;
+                }
             }
         }
     }
@@ -98,6 +108,29 @@ mod tests {
         assert!(parse_catalog(r#"{"schema_version":2,"cameras":[],"lenses":[]}"#).is_err());
         assert!(parse_catalog(r#"{"schema_version":1,"cameras":[{}],"lenses":[]}"#).is_err());
         assert!(parse_catalog(r#"{"schema_version":1,"cameras":[],"lenses":[]}"#).is_ok());
+    }
+    #[test]
+    fn valid_but_empty_cached_catalog_cannot_replace_bundled_metadata() {
+        let empty = r#"{"schema_version":1,"cameras":[],"lenses":[]}"#;
+        let bundled = r#"{"schema_version":1,"cameras":[{"brand":"Sony","model":"Test Camera"}],"lenses":[]}"#;
+        assert!(parse_catalog(empty).is_ok());
+        assert!(!has_deliverable_metadata(&parse_catalog(empty).unwrap()));
+
+        let tmp = std::env::temp_dir().join(format!(
+            "gyroflow-empty-camera-catalog-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()
+        ));
+        std::fs::write(&tmp, empty).unwrap();
+        let loaded = load_catalog(bundled, &tmp);
+        std::fs::remove_file(&tmp).unwrap();
+        assert_eq!(loaded["cameras"][0]["model"], "Test Camera");
+
+        std::fs::write(&tmp, bundled).unwrap();
+        let loaded_cache = load_catalog(empty, &tmp);
+        std::fs::remove_file(&tmp).unwrap();
+        assert_eq!(loaded_cache["cameras"][0]["model"], "Test Camera");
     }
     #[test]
     fn upload_requires_an_identifiable_setup_and_zoom_focal_length() {
