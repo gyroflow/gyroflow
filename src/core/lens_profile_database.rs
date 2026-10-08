@@ -131,7 +131,10 @@ impl LensProfileDatabase {
                                         if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
                                         if f_name == "__camera_catalog.json" {
                             match camera_catalog::parse_catalog(&profile.to_string()) {
-                                Ok(value) => self.camera_catalog_from_bundle = Some(value),
+                                Ok(value) if camera_catalog::has_deliverable_metadata(&value) => {
+                                self.camera_catalog_from_bundle = Some(value);
+                            },
+                            Ok(_) => log::warn!("Ignoring empty camera catalogue metadata update"),
                                 Err(error) => log::warn!("Ignoring invalid camera catalogue metadata: {error}"),
                             }
                             continue;
@@ -163,7 +166,10 @@ impl LensProfileDatabase {
                         if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
                         if f_name == "__camera_catalog.json" {
                             match camera_catalog::parse_catalog(&profile.to_string()) {
-                                Ok(value) => self.camera_catalog_from_bundle = Some(value),
+                                Ok(value) if camera_catalog::has_deliverable_metadata(&value) => {
+                                self.camera_catalog_from_bundle = Some(value);
+                            },
+                            Ok(_) => log::warn!("Ignoring empty camera catalogue metadata update"),
                                 Err(error) => log::warn!("Ignoring invalid camera catalogue metadata: {error}"),
                             }
                             continue;
@@ -350,8 +356,11 @@ impl LensProfileDatabase {
         self.list_for_ui.sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
 
         let cache = crate::settings::data_dir().join("lens_profiles").join("__camera_catalog.json");
-        let mut catalog = self.camera_catalog_from_bundle.clone().unwrap_or_else(||
-            camera_catalog::load_catalog(include_str!("../../resources/camera_catalog.json"), &cache));
+        let mut catalog = self.camera_catalog_from_bundle.as_ref()
+            .filter(|value| camera_catalog::has_deliverable_metadata(value))
+            .cloned()
+            .unwrap_or_else(|| camera_catalog::load_catalog(
+                include_str!("../../resources/camera_catalog.json"), &cache));
         let mut profiles: Vec<serde_json::Value> = self.map.iter()
             .filter(|(_, v)| !v.path_to_file.ends_with(".gyroflow") && !v.is_copy)
             .map(|(id, v)| serde_json::json!({
