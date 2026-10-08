@@ -153,10 +153,23 @@ function prefill(index, metadata) {
                       lens: clean(value.lens_model || value.lens_info), known: false };
     var body = index.cameras[id];
     var labels = lensLabels(index, body.brand, body.model);
-    var requested = clean(value.lens_model || value.lens_info);
-    var matches = labels.filter(function(label) { return norm(label) === norm(requested); });
-    return { brand: body.brand, model: body.model, lens: matches.length === 1 ? matches[0] : requested,
-             known: true };
+    var lensModel = clean(value.lens_model);
+    var lensInfo = clean(value.lens_info);
+    var candidates = [];
+    if (lensModel) candidates.push(lensModel);
+    if (lensInfo && norm(lensInfo) !== norm(lensModel)) candidates.push(lensInfo);
+    if (lensModel && lensInfo && norm(lensModel) !== norm(lensInfo)) {
+        candidates.push(clean(lensModel + " " + lensInfo));
+    }
+    var requested = candidates.length ? candidates[0] : "";
+    for (var i = 0; i < candidates.length; ++i) {
+        var matches = labels.filter(function(label) { return norm(label) === norm(candidates[i]); });
+        if (matches.length === 1) {
+            requested = matches[0];
+            break;
+        }
+    }
+    return { brand: body.brand, model: body.model, lens: requested, known: true };
 }
 
 function visibleProfiles(profiles, hidden, showHidden) {
