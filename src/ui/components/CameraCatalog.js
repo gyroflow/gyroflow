@@ -11,6 +11,20 @@ function positive(value) { return typeof value === "number" && isFinite(value) &
 function list(value) { return Array.isArray(value) ? value : []; }
 function record(value) { return !!value && typeof value === "object" && !Array.isArray(value); }
 function overlaps(a, b) { return list(a).some(function(value) { return list(b).indexOf(value) !== -1; }); }
+function profileKey(profile) { return profile ? clean(profile.id || profile.checksum) : ""; }
+function normalizeHidden(value) {
+    var result = Object.create(null);
+    if (!record(value)) return result;
+    Object.keys(value).forEach(function(key) {
+        if (value[key] === true) result[key] = true;
+    });
+    return result;
+}
+function isProfileHidden(hidden, profile) {
+    var key = profileKey(profile);
+    return !!key && record(hidden) && Object.prototype.hasOwnProperty.call(hidden, key)
+        && hidden[key] === true;
+}
 function addAlias(map, key, value) {
     if (!Object.prototype.hasOwnProperty.call(map, key)) map[key] = value;
     else if (map[key] !== value) map[key] = null; // Ambiguous names must not auto-select.
@@ -146,7 +160,7 @@ function prefill(index, metadata) {
 }
 
 function visibleProfiles(profiles, hidden, showHidden) {
-    return (profiles || []).filter(function(profile) { return showHidden || !hidden[profile.id || profile.checksum]; });
+    return (profiles || []).filter(function(profile) { return showHidden || !isProfileHidden(hidden, profile); });
 }
 
 function profileLabel(profile) {

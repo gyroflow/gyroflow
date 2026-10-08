@@ -77,6 +77,17 @@ assert.equal(context.visibleProfiles(profiles,{'profile-a':true},true).length, 2
 assert.equal(context.profilesFor(index,'Sony','ILCE-7M4','FE 24–70mm F2.8').length, 2);
 assert.throws(() => context.build({schema_version:2,cameras:[],lenses:[],profiles:[]}));
 assert.equal(context.visibleProfiles([{id:'one',checksum:'same'},{id:'two',checksum:'same'}],{one:true},false).length,1);
+const specialProfiles = [{id:'toString'}, {id:'constructor'}, {id:'__proto__'}];
+assert.deepEqual(plain(context.visibleProfiles(specialProfiles, {}, false)).map(p=>p.id),
+                 ['toString','constructor','__proto__']);
+const specialHidden = context.normalizeHidden(JSON.parse('{"__proto__":true,"toString":true,"ignored":"yes"}'));
+assert.equal(Object.getPrototypeOf(specialHidden), null);
+assert.deepEqual(plain(context.visibleProfiles(specialProfiles, specialHidden, false)).map(p=>p.id),
+                 ['constructor']);
+delete specialHidden.__proto__;
+assert.deepEqual(plain(context.visibleProfiles(specialProfiles, specialHidden, false)).map(p=>p.id),
+                 ['constructor','__proto__']);
+assert.deepEqual(plain(context.normalizeHidden([])), {});
 console.log('PASS reversible review + invalid catalogue rejection');
 if (process.argv.includes('--benchmark')) {
   const count = 50000, queries = 2000;

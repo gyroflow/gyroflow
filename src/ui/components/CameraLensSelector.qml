@@ -87,17 +87,18 @@ Column {
     function toggleHidden() {
         var profile = profiles[profileBox.currentIndex]
         if (!profile) return
-        var copy = Object.assign({}, hidden)
-        var key = profile.id || profile.checksum
-        if (copy[key]) delete copy[key]
+        var copy = Catalog.normalizeHidden(hidden)
+        var key = Catalog.profileKey(profile)
+        if (!key) return
+        if (Catalog.isProfileHidden(copy, profile)) delete copy[key]
         else copy[key] = true
         hidden = copy
         settings.setValue("hiddenLensProfiles", JSON.stringify(hidden))
         refreshProfiles(true)
     }
     Component.onCompleted: {
-        try { hidden = JSON.parse(settings.value("hiddenLensProfiles", "{}")) || {} }
-        catch (error) { hidden = {} }
+        try { hidden = Catalog.normalizeHidden(JSON.parse(settings.value("hiddenLensProfiles", "{}"))) }
+        catch (error) { hidden = Catalog.normalizeHidden(null) }
         if (calibratorMode) backend.load_profiles(true)
         else reload()
     }
@@ -185,7 +186,7 @@ Column {
         Button {
             enabled: root.profiles.length > 0
             property var selected: root.profiles[profileBox.currentIndex]
-            text: selected && root.hidden[selected.id || selected.checksum] ? qsTr("Restore profile") : qsTr("Hide profile locally")
+            text: Catalog.isProfileHidden(root.hidden, selected) ? qsTr("Restore profile") : qsTr("Hide profile locally")
             onClicked: root.toggleHidden()
         }
         CheckBox { id: includeHidden; text: qsTr("Show hidden profiles"); checked: false; onCheckedChanged: root.refreshProfiles(true) }
