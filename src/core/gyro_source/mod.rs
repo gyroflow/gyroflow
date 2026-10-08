@@ -5,10 +5,11 @@ mod file_metadata;
 mod imu_transforms;
 mod sony;
 mod canon;
+mod motioncam;
 pub mod splines;
 pub mod optical_correction;
 pub use file_metadata::*;
-pub use optical_correction::{ OpticalCorrection, OpticalCorrectionSettings };
+pub use optical_correction::{ OpticalCorrection, OpticalCorrectionSettings, TrackingMethod };
 pub use imu_transforms::*;
 pub use sony::{ interpolate_mesh, MESH_REFINE_SKIP_PX, MESH_REFINE_THRESHOLD_PX };
 
@@ -172,7 +173,10 @@ impl GyroSource {
             blackbox_gyro_only: true,
             tag_blacklist: [
                 TagFilter::EntireGroup(GroupId::UnknownGroup(0xf000)),
-                TagFilter::EntireGroup(GroupId::UnknownGroup(0x0))
+                TagFilter::EntireGroup(GroupId::UnknownGroup(0x0)),
+                // Not used here, and they are most of a MotionCam clip's metadata
+                TagFilter::EntireGroup(GroupId::Custom("FrameMetadata".into())),
+                TagFilter::SpecificTag(GroupId::Lens, TagId::Shading),
             ].into(),
             ..Default::default()
         };
@@ -281,8 +285,8 @@ impl GyroSource {
                         if let Some(v) = map.get_t(TagId::ZoomRingPosition) as Option<&f32> {
                             lens_info.zoom_ring_position = Some(*v);
                         }
-                        let (pfl_scale, pfl_valid) = match tag_map.get(&GroupId::Imager).and_then(|im| im.get_t(TagId::Custom("ActiveAreaAspectRatio".into())) as Option<&(u32, u32)>) {
-                            Some(&(aw, ah)) if aw > 0 && ah > 0 && size.0 > 0 && size.1 > 0 => {
+                        let (pfl_scale, pfl_valid) = match canon::recorded_frame_size(tag_map) {
+                            Some((aw, ah)) if aw > 0 && ah > 0 && size.0 > 0 && size.1 > 0 => {
                                 let aspect_matches = ((aw as f64 / ah as f64) / (size.0 as f64 / size.1 as f64) - 1.0).abs() < 0.02;
                                 (size.0 as f32 / aw as f32, aspect_matches)
                             }
@@ -574,6 +578,15 @@ impl GyroSource {
                         canon::init_lens_profile(&mut md, &input, tag_map, size, info);
                     }
                     // --------------------------------- Canon ---------------------------------
+
+                    // --------------------------------- MotionCam ---------------------------------
+                    if input.camera_type() == "MotionCam" {
+                        if let Some(offset) = motioncam::get_time_offset(&md, tag_map, info, fps) {
+                            md.per_frame_time_offsets.push(offset);
+                        }
+                        motioncam::init_lens_profile(&mut md, &input, tag_map, size, info);
+                    }
+                    // --------------------------------- MotionCam ---------------------------------
 
                     // --------------------------------- Insta360 ---------------------------------
                     // Timing
