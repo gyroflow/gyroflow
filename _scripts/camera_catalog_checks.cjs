@@ -28,6 +28,27 @@ const document = {
 };
 const index = context.build(document);
 assert.equal(context.prefill(index, {brand:'sony',model:'Alpha 7 IV'}).model, 'ILCE-7M4');
+assert.equal(
+  context.prefill(index, {
+    brand:'Sony', model:'ILCE-7M4',
+    lens_model:'Telemetry default', lens_info:'FE 24–70mm F2.8'
+  }).lens,
+  'FE 24–70mm F2.8'
+);
+assert.equal(
+  context.prefill(index, {
+    brand:'Sony', model:'ILCE-7M4',
+    lens_model:'FE', lens_info:'24–70mm F2.8'
+  }).lens,
+  'FE 24–70mm F2.8'
+);
+assert.equal(
+  context.prefill(index, {
+    brand:'Sony', model:'ILCE-7M4',
+    lens_model:'Manual prime', lens_info:'Unmatched metadata'
+  }).lens,
+  'Manual prime'
+);
 assert.equal(context.prefill(index, {brand:'Sony',model:'ILCE'}).known, false);
 assert.deepEqual(plain(context.profilesFor(index,'Sony','ILCE-7M4','FE 24–70mm F2.8')).map(p=>p.id), ['profile-b','profile-a']);
 console.log('PASS metadata alias + profile indexing');
