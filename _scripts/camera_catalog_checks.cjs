@@ -45,6 +45,28 @@ for (const cameras of [collidingModels, collidingModels.slice().reverse()]) {
 }
 console.log('PASS canonical camera IDs outrank colliding aliases');
 
+// Remote metadata may be valid schema JSON but contain malformed individual
+// entries. Ignore those without losing unrelated known cameras and profiles.
+const malformedRecords = context.build({
+  schema_version: 1,
+  cameras: [null, false, [], {
+    brand: 'Sony', model: 'Bad imported camera',
+    aliases: 'not-an-array', mounts: 'not-an-array', crop_factor: 1
+  }, ...document.cameras],
+  lenses: [null, false, {brand:'Other', model:'Broken metadata', mounts:{value:'Sony E'}},
+           ...document.lenses],
+  profiles: [null, false, {id:42, brand:'Sony', model:'ILCE-7M4'},
+             ...document.profiles]
+});
+assert.equal(context.prefill(malformedRecords, {brand:'Sony',model:'Alpha 7 IV'}).model, 'ILCE-7M4');
+assert.deepEqual(plain(context.profilesFor(malformedRecords,'Sony','ILCE-7M4','FE 24–70mm F2.8')).map(p=>p.id),
+                 ['profile-b','profile-a']);
+assert.deepEqual(plain(context.lensLabels(malformedRecords,'Sony','Bad imported camera')), []);
+assert.deepEqual(plain(context.compatibleCameras(malformedRecords,'Sony','Bad imported camera')), []);
+console.log('PASS malformed downloaded records do not invalidate remaining catalog');
+
+
+
 assert.equal(context.profilesFor(index,'Sony','ILCE-7M3','FE 24–70mm F2.8').length, 0);
 assert.deepEqual(plain(context.compatibleCameras(index,'Sony','ILCE-7M4')).map(c=>c.model), ['ILCE-7M3']);
 assert.equal(context.lensLabels(index,'Sony','ILCE-7M4').includes('E 16–50mm F3.5–5.6'), false);
