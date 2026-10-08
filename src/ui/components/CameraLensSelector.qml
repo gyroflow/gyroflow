@@ -43,12 +43,14 @@ Column {
         recommendations = catalogIndex ? Catalog.compatibleCameras(catalogIndex, brand, cameraModel) : []
         refreshProfiles()
     }
-    function refreshProfiles() {
+    function refreshProfiles(applyReplacement) {
         var previous = profiles[profileBox.currentIndex]
         var rows = catalogIndex ? Catalog.profilesFor(catalogIndex, brand, cameraModel, lensModel) : []
         profiles = Catalog.visibleProfiles(rows, hidden, includeHidden.checked)
         var keep = previous ? profiles.findIndex(function(p) { return p.id === previous.id }) : -1
         profileBox.currentIndex = keep >= 0 ? keep : (profiles.length ? 0 : -1)
+        // Review filters must keep the preview aligned with a replacement row.
+        if (applyReplacement && profileBox.currentIndex >= 0 && keep < 0) applyProfile()
     }
     function setMetadata(value) {
         metadata = value || {}
@@ -91,7 +93,7 @@ Column {
         else copy[key] = true
         hidden = copy
         settings.setValue("hiddenLensProfiles", JSON.stringify(hidden))
-        refreshProfiles()
+        refreshProfiles(true)
     }
     Component.onCompleted: {
         try { hidden = JSON.parse(settings.value("hiddenLensProfiles", "{}")) || {} }
@@ -186,7 +188,7 @@ Column {
             text: selected && root.hidden[selected.id || selected.checksum] ? qsTr("Restore profile") : qsTr("Hide profile locally")
             onClicked: root.toggleHidden()
         }
-        CheckBox { id: includeHidden; text: qsTr("Show hidden profiles"); checked: false; onCheckedChanged: root.refreshProfiles() }
+        CheckBox { id: includeHidden; text: qsTr("Show hidden profiles"); checked: false; onCheckedChanged: root.refreshProfiles(true) }
         BasicText {
             visible: root.recommendations.length > 0; width: parent.width; wrapMode: Text.WordWrap
             text: qsTr("Cameras below share a mount and crop factor. Verify the recording mode and lens; this does not guarantee identical calibration.")
