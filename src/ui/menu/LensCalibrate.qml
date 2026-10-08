@@ -166,7 +166,7 @@ MenuItem {
                     if (camera_id.brand === "GoPro" && camera_id.lens_info === "Hyper") digitalLens.currentIndex = 2;
 
                     // RED KOMODO is global shutter
-                    gs.checked = camera_id.model.startsWith("KOMODO");
+                    gs.checked = (camera_id.model || "").startsWith("KOMODO");
                 }
             }
             if (+additional_data.horizontal_stretch > 0.01) xStretch.value = +additional_data.horizontal_stretch;
