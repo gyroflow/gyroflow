@@ -25,9 +25,14 @@ impl EstimatePoseTrait for PoseFindEssentialMat {
             let pts11 = undistort_points_for_optical_flow(&pts1, timestamp_us, params, size);
             let pts22 = undistort_points_for_optical_flow(&pts2, next_timestamp_us, params, size);
 
+            // OpenCV's estimator takes pinhole plane points with an identity camera matrix, so the bearings
+            // come back to the z=1 plane here - and a ray at or past 90° has no place in it
             let (pts1, pts2): (Vec<Point2f>, Vec<Point2f>) = pts11.into_iter().zip(pts22)
-                .filter(|(a, b)| is_valid_point(*a) && is_valid_point(*b))
-                .map(|(a, b)| (Point2f::new(a.0, a.1), Point2f::new(b.0, b.1)))
+                .filter_map(|(a, b)| {
+                    let (a, b) = (a?, b?);
+                    if a.2 <= 1e-6 || b.2 <= 1e-6 { return None; }
+                    Some((Point2f::new(a.0 / a.2, a.1 / a.2), Point2f::new(b.0 / b.2, b.1 / b.2)))
+                })
                 .unzip();
 
             let a1_pts = Mat::from_slice(&pts1)?;

@@ -349,7 +349,7 @@ En raison des limitations du système d'encodage vidéo, le rendu en arrière-pl
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="683"/>
-      <source>An error occured: %1</source>
+      <source>An error occurred: %1</source>
       <translation>Une erreur est survenue : %1</translation>
     </message>
     <message>

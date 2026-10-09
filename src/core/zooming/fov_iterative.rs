@@ -6,6 +6,9 @@ use crate::stabilization::undistort_points_with_rolling_shutter;
 use crate::keyframes::*;
 use parking_lot::RwLock;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
+use std::collections::HashMap;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::Hasher;
 
 /*
 Iterative FOV calculation:
@@ -19,9 +22,13 @@ Iterative FOV calculation:
 pub struct FovIterative<'a> {
     input_dim: (f32, f32),
     output_dim: (f32, f32),
+    /// The output frame's real width in pixels, which is what a resample stretch is counted in
+    org_output_width: usize,
     output_inv_aspect: f32,
     compute_params: &'a ComputeParams,
     debug_points: RwLock<BTreeMap<i64, Vec<(f64, f64)>>>,
+    /// `zooming::max_zoom_out_fov` by the lens data it was computed from, see [`FovIterative::max_fov_at`]
+    zoom_limits: RwLock<HashMap<u64, f64>>,
 }
 impl FieldOfViewAlgorithm for FovIterative<'_> {
     fn get_debug_points(&self) -> BTreeMap<i64, Vec<(f64, f64)>> {
@@ -82,10 +89,34 @@ impl<'a>  FovIterative<'a> {
         Self {
             input_dim,
             output_dim,
+            org_output_width: org_output_size.0,
             output_inv_aspect,
             compute_params,
-            debug_points: RwLock::new(BTreeMap::new())
+            debug_points: RwLock::new(BTreeMap::new()),
+            zoom_limits: RwLock::new(HashMap::new())
         }
+    }
+
+    /// How far the zoom may open at all at this frame (`zooming::max_zoom_out_fov`), cached on the lens data
+    /// it is computed from. The search is a 200-sample sweep plus two bisections - about 1200 evaluations of
+    /// the lens model, each a Newton solve on some of them - and it depends on the frame only through that
+    /// lens data, which on a lens that doesn't move is the same for every frame of the clip. Everything else
+    /// it reads (the frame size, the distortion model, the output projection and width) is fixed for the
+    /// whole pass, so the key is the lens data and the correction strength alone
+    fn max_fov_at(&self, ts: f64, amount: f64) -> f64 {
+        let p = self.compute_params;
+        let lens = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(p, ts, p.framebuffer_inverted);
+        let mut hasher = DefaultHasher::new();
+        for v in [lens.0[(0, 0)], lens.0[(1, 1)], lens.0[(0, 2)], lens.0[(1, 2)], lens.2, lens.3, lens.4, amount] {
+            hasher.write_u64(v.to_bits());
+        }
+        for v in lens.1.iter() { hasher.write_u64(v.to_bits()); }
+        let key = hasher.finish();
+        if let Some(v) = self.zoom_limits.read().get(&key) { return *v; }
+
+        let v = super::max_zoom_out_fov_for_lens(p, amount, self.org_output_width, &lens);
+        self.zoom_limits.write().insert(key, v);
+        v
     }
 
     fn find_fov(&self, rect: &[(f32, f32)], ts: f64, frame: usize, center: &Point2D, keyframe_values: &(f64, f64, f64)) -> f64 {
@@ -95,11 +126,38 @@ impl<'a>  FovIterative<'a> {
         let adaptive_zoom_center_y = keyframe_values.1;
         let lens_correction_amount = keyframe_values.2;
 
+        // How far the zoom may open at all (`zooming::max_zoom_out_fov`). It is also where a border point that
+        // has no position stands in: a ray past what the output projection can hold lands on its infinity,
+        // the picture is then unbounded in that direction, and the zoom's own limit is the honest edge there
+        let max_fov = self.max_fov_at(ts, lens_correction_amount);
+        // The stand-in goes on the *boundary of the rectangle* that limit stands for, not on a circle through
+        // it. `nearest_edge` inscribes an aspect-matched rectangle through every point it keeps, so a point
+        // placed on the circle through that rectangle would, in a corner direction, fit a rectangle a factor of
+        // cos(φ) smaller - 0.87·max_fov on 16:9, 0.71·max_fov on a square frame, ie. a picture cropped
+        // tighter than the bound it is meant to express, and on an X4/X5 at high correction *every* border
+        // point is a stand-in. On the rectangle each direction gives back exactly `max_fov`, which is also
+        // what the render then draws, so the debug overlay drawn from these points stays honest
+        let half = ((max_fov * self.output_dim.0 as f64 / 2.0) as f32, (max_fov * self.output_dim.1 as f64 / 2.0) as f32);
+        let stand_in = |polygon: &mut Vec<(f32, f32)>| {
+            if !(half.0 > 0.0) || !(half.1 > 0.0) { return; }
+            for p in polygon.iter_mut() {
+                if !crate::stabilization::is_valid_point(*p) { continue; }
+                let d = (p.0 - center.0, p.1 - center.1);
+                if d.0.abs().max(d.1.abs()) <= 1.0e6 { continue; }
+                // The point where the ray from the center leaves that rectangle
+                let m = (d.0.abs() / half.0).max(d.1.abs() / half.1);
+                if m > 0.0 && m.is_finite() {
+                    *p = (center.0 + d.0 / m, center.1 + d.1 / m);
+                }
+            }
+        };
+
         let mut polygon = undistort_points_with_rolling_shutter(&rect, ts, Some(frame), &self.compute_params, lens_correction_amount, false, true);
         for (x, y) in polygon.iter_mut() {
             *x -= adaptive_zoom_center_x as f32 * self.input_dim.0;
             *y -= adaptive_zoom_center_y as f32 * self.input_dim.1;
         }
+        stand_in(&mut polygon);
         if self.compute_params.zooming_debug_points {
             self.debug_points.write().insert(ts_us, polygon.iter().map(|(x, y)| ((x / self.input_dim.0) as f64, (y / self.input_dim.1) as f64)).collect());
         }
@@ -124,13 +182,16 @@ impl<'a>  FovIterative<'a> {
                     *x -= adaptive_zoom_center_x as f32 * self.input_dim.0;
                     *y -= adaptive_zoom_center_y as f32 * self.input_dim.1;
                 }
+                stand_in(&mut polygon);
                 nearest = self.nearest_edge(&polygon, center, nearest.1);
             } else {
                 break;
             }
         }
 
-        (nearest.1.0 * 2.0 / self.output_dim.0) as f64
+        let fov = (nearest.1.0 * 2.0 / self.output_dim.0) as f64;
+        // ... and however far the polygon reaches, the zoom stops where the picture stops being worth showing
+        if max_fov > 0.0 { fov.min(max_fov) } else { fov }
     }
 
     fn nearest_edge(&self, polygon: &[(f32, f32)], center: &Point2D, initial: (f32, f32)) -> (Option<usize>, (f32, f32)) {

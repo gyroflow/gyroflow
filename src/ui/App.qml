@@ -680,7 +680,7 @@ Rectangle {
     Component.onCompleted: {
         controller.check_updates();
 
-        QT_TRANSLATE_NOOP("App", "An error occured: %1");
+        QT_TRANSLATE_NOOP("App", "An error occurred: %1");
         QT_TRANSLATE_NOOP("App", "Gyroflow file exported to %1.");
         QT_TRANSLATE_NOOP("App", "--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--", "Translate this to the native name of your language");
         QT_TRANSLATE_NOOP("App", "Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.");

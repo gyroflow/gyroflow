@@ -36,39 +36,43 @@ impl GoPro {
     }
 
     /// `point` range: normalized (recorded pixel - c) / f
-    /// From image to ray (direction in the normalized image plane, |.| = tan θ)
+    /// From image to ray, as an angle vector (`θ·û`, see `stabilization::projection`)
     pub fn undistort_point(&self, point: (f32, f32), params: &KernelParams) -> Option<(f32, f32)> {
-        if params.k[1] == 0.0 { return Some(point); }
+        if params.k[1] == 0.0 {
+            let r = (point.0 * point.0 + point.1 * point.1).sqrt();
+            if r < 1e-12 { return Some(point); }
+            let s = r.atan() / r;
+            return Some((point.0 * s, point.1 * s));
+        }
         let r_norm = (point.0 * point.0 + point.1 * point.1).sqrt();
         if r_norm < 1e-9 { return Some(point); }
         let p = r_norm / params.k[1];
         let theta = Self::poly_eval(p, &params.k);
-        // tan() wraps/flips sign at θ≥90° (the over-FOV concentric-ring fold): the wrapped rays come out
-        // small, slip under r_limit in rotate_and_distort, and get sampled. Clamp the angle just under 90°
-        // and continue the radius linearly (C1) past it so over-FOV rays stay large & monotonic — r_limit
-        // (= tan(ZFOV/2)) then clips them to background. distort_point uses the exact inverse continuation.
-        const TMAX: f32 = 1.5533; // ~89°, just under tan()'s 90° asymptote
-        let tt = TMAX.tan();
-        let rr = if theta < TMAX { theta.tan() } else { tt + (theta - TMAX) * (1.0 + tt * tt) };
-        let scale = rr / r_norm;
+        // The POLY is a fit over the camera's own frame, and the zoom search and the correction blend both
+        // read it past that. Outside its fit range it is free to run negative - a degree-6 polynomial with
+        // a negative leading term always does eventually - or past 180°, and neither is an angle this
+        // pipeline can carry: a negative `theta` flips `scale`, so the ray comes back pointing at the
+        // opposite side of the frame and `undistort_coord` takes *that* azimuth for its tangential
+        // correction, and past 180° `ray_to_dir`'s `sin θ` has turned over and the ray arrives from behind
+        // the camera. There is no image of this point; `Sony::undistort_point` ends the same way
+        if !(theta > 0.0 && theta < std::f32::consts::PI) { return None; }
+        let scale = theta / r_norm;
         Some((point.0 * scale, point.1 * scale))
     }
 
     /// `(x, y, z)` is the ray; returns normalized coord (× f + c → image pixel).
     /// From ray to image.
     pub fn distort_point(&self, x: f32, y: f32, z: f32, params: &KernelParams) -> (f32, f32) {
-        let pos = (x / z, y / z);
-        if params.k[1] == 0.0 { return pos; }
-        let r = (pos.0 * pos.0 + pos.1 * pos.1).sqrt();
-        // Inverse of undistort_point's angle clamp: past tan(89°) recover θ from the linear continuation
-        // instead of atan() (which saturates at 90° and would fold every over-FOV ray back onto the frame).
-        const TMAX: f32 = 1.5533; // ~89°
-        let tt = TMAX.tan();
-        let theta = if r < tt { r.atan() } else { TMAX + (r - tt) / (1.0 + tt * tt) };
+        // No POLY block: a pinhole, which has no image of a ray at or past 90°
+        if params.k[1] == 0.0 { return if z > 1e-9 { (x / z, y / z) } else { (x * 1e9, y * 1e9) }; }
+        let r = (x * x + y * y).sqrt();
+        if r < 1e-12 { return (0.0, 0.0); }
+        // atan2 against the ray's own z: a GoPro's 150°+ field needs the angle, not a z=1 plane radius
+        let theta = r.atan2(z);
         let p = Self::poly_invert(theta, &params.k);
         let r_norm = params.k[1] * p;
-        let scale = if r < 1e-9 { 1.0 } else { r_norm / r };
-        (pos.0 * scale, pos.1 * scale)
+        let scale = r_norm / r;
+        (x * scale, y * scale)
     }
 
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }

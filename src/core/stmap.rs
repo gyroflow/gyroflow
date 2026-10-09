@@ -58,8 +58,8 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
         let mesh_data = transform.mesh_data.iter().map(|x| *x as f64).collect::<Vec<f64>>();
 
         let bbox = fov_iterative::FovIterative::new(&compute_params, org_output_size).points_around_rect(width as f32, height as f32, 31, 31);
-        let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh, fov, r_limit) = FrameTransform::at_timestamp_for_points(&compute_params, &bbox, timestamp, Some(frame), false);
-        let undistorted_bbox = undistort_points(&bbox, camera_matrix, &distortion_coeffs, rotations[0], None, Some(rotations), &compute_params, 1.0, fov, timestamp, is, mesh, r_limit);
+        let (camera_matrix, distortion_coeffs, new_k, rotations, is, mesh, fov, field_limit, breathing) = FrameTransform::at_timestamp_for_points(&compute_params, &bbox, timestamp, Some(frame), false);
+        let undistorted_bbox = undistort_points(&bbox, camera_matrix, &distortion_coeffs, rotations[0], Some(new_k), Some(rotations), &compute_params, 1.0, fov, timestamp, is, mesh, field_limit, breathing, true);
 
         let mut min_x = 0.0;
         let mut min_y = 0.0;
@@ -86,7 +86,16 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
         transform.kernel_params.output_height = new_height as i32;
         transform.kernel_params.flags = kernel_flags.bits();
 
-        let r_limit_sq = transform.kernel_params.r_limit * transform.kernel_params.r_limit;
+
+        // Output pixel -> ray, the way `undistort_coord` does it: the STMap is written at full lens
+        // correction, so it is the output projection's own ray
+        let out_c = (transform.kernel_params.output_width as f32 / 2.0, transform.kernel_params.output_height as f32 / 2.0);
+        let stretch = if transform.kernel_params.input_horizontal_stretch > 0.01 { 1.0 / transform.kernel_params.input_horizontal_stretch } else { 1.0 };
+        let out_f = (transform.kernel_params.f[0] * stretch / transform.kernel_params.fov, transform.kernel_params.f[1] * stretch / transform.kernel_params.fov);
+        let proj = transform.kernel_params.output_projection;
+        let ray_at = |x: f32, y: f32| -> (f32, f32) {
+            crate::stabilization::projection::unproject(((x - out_c.0) / out_f.0, (y - out_c.1) / out_f.1), proj)
+        };
 
         let undist = parallel_exr(new_width, new_height, |x, y| {
             ///////////////////////////////////////////////////////////////////
@@ -98,7 +107,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
             };
             if transform.kernel_params.matrix_count > 1 {
                 let idx = transform.kernel_params.matrix_count as usize / 2;
-                if let Some(pt) = Stabilization::rotate_and_distort((x as f32, y as f32), idx, &transform.kernel_params, &transform.matrices, &compute_params.distortion_model, compute_params.digital_lens.as_ref(), r_limit_sq, &mesh_data) {
+                if let Some(pt) = Stabilization::rotate_and_distort(ray_at(x as f32, y as f32), idx, &transform.kernel_params, &transform.matrices, &compute_params.distortion_model, compute_params.digital_lens.as_ref(), &mesh_data) {
                     if compute_params.frame_readout_direction.is_horizontal() {
                         sy = (pt.0.round() as i32).min(transform.kernel_params.width).max(0) as usize;
                     } else {
@@ -109,7 +118,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
             ///////////////////////////////////////////////////////////////////
 
             let idx = sy.min(transform.kernel_params.matrix_count as usize - 1);
-            Stabilization::rotate_and_distort((x as f32, y as f32), idx, &transform.kernel_params, &transform.matrices, &compute_params.distortion_model, compute_params.digital_lens.as_ref(), r_limit_sq, &mesh_data)
+            Stabilization::rotate_and_distort(ray_at(x as f32, y as f32), idx, &transform.kernel_params, &transform.matrices, &compute_params.distortion_model, compute_params.digital_lens.as_ref(), &mesh_data)
         });
 
         compute_params.width              = width; compute_params.height              = height;
@@ -117,8 +126,8 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
 
         let dist = parallel_exr(width, height, |x, y| {
             let distorted = [(x as f32, y as f32)];
-            let (camera_matrix, distortion_coeffs, _p, rotations, is, mesh, fov, _r_limit) = FrameTransform::at_timestamp_for_points(&compute_params, &distorted, timestamp, Some(frame), true);
-            undistort_points(&distorted, camera_matrix, &distortion_coeffs, rotations[0], None, Some(rotations), &compute_params, 1.0, fov, timestamp, is, mesh, 0.0).first().copied().filter(|p| is_valid_point(*p))
+            let (camera_matrix, distortion_coeffs, new_k, rotations, is, mesh, fov, field_limit, breathing) = FrameTransform::at_timestamp_for_points(&compute_params, &distorted, timestamp, Some(frame), true);
+            undistort_points(&distorted, camera_matrix, &distortion_coeffs, rotations[0], Some(new_k), Some(rotations), &compute_params, 1.0, fov, timestamp, is, mesh, field_limit, breathing, true).first().copied().filter(|p| is_valid_point(*p))
         });
 
         (filename_base.clone(), frame, dist, undist)

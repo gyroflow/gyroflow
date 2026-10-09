@@ -29,6 +29,9 @@ pub struct ComputeParams {
     pub output_height: usize,
     pub video_rotation: f64,
     pub lens_correction_amount: f64,
+    /// [`crate::stabilization::projection::OutputProjection`] as `i32`. Always `Rectilinear` for now - the
+    /// pipeline reads it everywhere, but nothing in the UI picks another one yet
+    pub output_projection: i32,
     pub light_refraction_coefficient: f64,
     pub video_speed: f64,
     pub video_speed_affects_smoothing: bool,
@@ -93,7 +96,7 @@ impl ComputeParams {
 
         let digital_lens_params = lens.digital_lens_params.clone();
 
-        Self {
+        let mut ret = Self {
             gyro: mgr.gyro.clone(),
             lens,
             camera_diagonal_fovs: Vec::new(),
@@ -118,6 +121,7 @@ impl ComputeParams {
             background_margin: params.background_margin,
             background_margin_feather: params.background_margin_feather,
             lens_correction_amount: params.lens_correction_amount,
+            output_projection: crate::stabilization::projection::OutputProjection::Rectilinear as i32,
             light_refraction_coefficient: params.light_refraction_coefficient,
             framebuffer_inverted: params.framebuffer_inverted,
             frame_readout_time: params.frame_readout_time,
@@ -143,7 +147,7 @@ impl ComputeParams {
 
             keyframes: mgr.keyframes.read().clone(),
 
-            zooming_debug_points: false,
+            zooming_debug_points: true,
 
             focal_lengths: params.focal_lengths.clone(),
             smoothed_focal_lengths: params.smoothed_focal_lengths.clone(),
@@ -152,7 +156,17 @@ impl ComputeParams {
             lens_metadata_delay_frames: params.lens_metadata_delay_frames,
 
             lens_breathing_enabled: params.lens_breathing_enabled,
-        }
+        };
+        // Everything above is a read of `mgr.params`, and nothing below needs it. The projection is measured
+        // on the lens data, which takes the `gyro` and `file_metadata` locks (`get_lens_data_at_timestamp`),
+        // and this runs under `stabilization.write()` at some call sites - so the guard is dropped first
+        // rather than held across two more locks it has no reason to be nested with
+        drop(params);
+
+        // Rectilinear for every lens rectilinear can hold, stereographic for the ones it can't (a 200° body) -
+        // measured on the lens data the render will use, so the choice and the picture agree
+        ret.output_projection = crate::stabilization::projection::OutputProjection::for_lens(&ret) as i32;
+        ret
     }
 
     pub fn calculate_camera_fovs(&mut self) {
@@ -185,8 +199,6 @@ impl std::fmt::Debug for ComputeParams {
          .field("gyro.duration_ms", &gyro.duration_ms)
          .field("gyro.imu_lpf", &gyro.imu_transforms.imu_lpf)
          .field("gyro.imu_mf", &gyro.imu_transforms.imu_mf)
-         .field("gyro.glitch_filter", &gyro.imu_transforms.glitch_filter)
-         .field("gyro.glitch_strength", &gyro.imu_transforms.glitch_strength)
          .field("gyro.gyro_bias", &gyro.imu_transforms.gyro_bias)
          .field("gyro.integration_method", &gyro.integration_method)
          .field("fovs.len", &self.fovs.len())

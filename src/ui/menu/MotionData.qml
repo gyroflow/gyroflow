@@ -27,7 +27,7 @@ MenuItem {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: [ "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "gcsv", "360", "log", "bin", "braw", "r3d", "nev", "gpmf", "crm", "zraw", "jsonl" ];
+        property var extensions: [ "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "gcsv", "360", "log", "bin", "braw", "r3d", "nev", "gpmf", "crm", "zraw", "jsonl", "mcraw" ];
 
         title: qsTr("Choose a motion data file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Motion data files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
@@ -68,12 +68,11 @@ MenuItem {
                 lpf.value = +gyro.lpf;
                 lpfcb.checked = lpf.value > 0;
             }
-            if (typeof gyro.glitch_strength === "number" && +gyro.glitch_strength > 0) {
-                glitchStrength.value = +gyro.glitch_strength;
+            if (typeof gyro.optical_correction_strength === "number") {
+                opticalStrength.value = Math.round(gyro.optical_correction_strength * 100);
             }
-            if (gyro.hasOwnProperty("glitch_filter")) {
-                glitchcb.checked = !!gyro.glitch_filter;
-            }
+            // The checkbox from the core, which has the project's correction and whether it's on (`optical_correction_enabled`)
+            Qt.callLater(opticalcb.updateInfo);
             if (typeof gyro.sample_index === "number") {
                 currentLog.currentIndex = gyro.sample_index + 1;
             }
@@ -126,7 +125,8 @@ MenuItem {
 
             controller.set_imu_lpf(lpfcb.checked? lpf.value : 0);
             controller.set_imu_median_filter(mfcb.checked? mf.value : 0);
-            controller.set_glitch_filter(glitchcb.checked, glitchStrength.value);
+            controller.set_optical_correction_strength(opticalStrength.value / 100);
+            Qt.callLater(opticalcb.updateInfo);
             controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
             controller.set_acc_rotation(arot.checked? ap.value : 0, arot.checked? ar.value : 0, arot.checked? ay.value : 0);
             Qt.callLater(controller.recompute_gyro);
@@ -293,30 +293,94 @@ MenuItem {
         }
     }
     CheckBoxWithContent {
-        id: glitchcb;
-        text: qsTr("Glitch filtering");
-        tooltip: qsTr("Detect and repair short bursts of corrupt gyro data");
-        onCheckedChanged: {
-            controller.set_glitch_filter(checked, glitchStrength.value);
-            Qt.callLater(controller.recompute_gyro);
+        id: opticalcb;
+        text: qsTr("Optical correction");
+        tooltip: qsTr("Measure the camera rotation from the video itself and correct the motion data where they disagree. Useful when vibrations corrupt the gyro data, e.g. on a hard-mounted FPV camera. The analysis goes through every frame of the selected trim range.");
+        property var info: ({ available: false });
+        // Always opticalcb.info: this file has an element with the id `info` too, and ids come before properties
+        function updateInfo(): void {
+            try { opticalcb.info = JSON.parse(controller.optical_correction_info()); } catch (e) { opticalcb.info = { available: false }; }
+            const info = opticalcb.info;
+            // The core has the say: with a correction (an analysis, also the one Auto sync runs on a file without motion
+            // data, a project) the checkbox shows whether it's on, without one it stays as it was left, and ignoring
+            // the file's motion data keeps this section open. Set once: its handler, for a `false` on the way, would
+            // bring the ignored motion data back
+            const checked = !!info.ignore_file_motion || (info.available? !!info.enabled : opticalcb.checked);
+            if (opticalcb.checked !== checked) opticalcb.checked = checked;
+            if (ignoreFileMotion.checked !== !!info.ignore_file_motion) ignoreFileMotion.checked = !!info.ignore_file_motion;
         }
+        onCheckedChanged: {
+            controller.set_optical_correction_enabled(checked);
+            // Off means the motion data as it is
+            if (!checked) controller.set_ignore_file_motion(false);
+        }
+
+        Row {
+            anchors.horizontalCenter: parent.horizontalCenter;
+            spacing: 5 * dpiScale;
+            Button {
+                text: qsTr("Analyze");
+                iconName: "spinner";
+                enabled: !controller.sync_in_progress && window.videoArea.vid.loaded;
+                onClicked: controller.analyze_optically();
+            }
+            LinkButton {
+                anchors.verticalCenter: parent.verticalCenter;
+                text: qsTr("Clear");
+                leftPadding: 6 * dpiScale;
+                rightPadding: 6 * dpiScale;
+                visible: !!opticalcb.info.available;
+                enabled: !controller.sync_in_progress;
+                onClicked: controller.clear_optical_correction();
+            }
+        }
+        BasicText {
+            width: parent.width;
+            wrapMode: Text.WordWrap;
+            horizontalAlignment: Text.AlignHCenter;
+            visible: text.length > 0;
+            text: opticalcb.info.ignore_file_motion && !opticalcb.info.from_video? qsTr("Click Analyze to measure the motion from the video.") :
+                  !opticalcb.info.available? "" :
+                  opticalcb.info.stale? qsTr("The motion data, the sync, the lens or the rolling shutter changed since the analysis. Analyze again to apply the correction.") :
+                  opticalcb.info.outdated && opticalcb.info.has_motion? qsTr("Analyze again to apply the new strength.") :
+                  opticalcb.info.from_video? "" :
+                  qsTr("Measured in %1 of %2 frames, correction %3°").arg(opticalcb.info.measured_frames).arg(opticalcb.info.frames).arg((+opticalcb.info.rms_deg).toFixed(3));
+        }
+        CheckBox {
+            id: ignoreFileMotion;
+            text: qsTr("Ignore motion data from the file");
+            tooltip: qsTr("Measure all of the camera motion from the video, like for a file without motion data, instead of correcting the motion data. For motion data too broken to correct, e.g. a gyro that glitches or saturates for seconds at a time.");
+            onCheckedChanged: controller.set_ignore_file_motion(checked);
+        }
+
         Label {
             text: qsTr("Strength");
             width: parent.width;
-            tooltip: qsTr("Higher values detect glitches more aggressively (catching weaker and longer bursts with more passes), but may affect real fast motion. Lower values only repair the obvious, large glitches. 50% is the default.");
+            // Without motion data to correct (none in the file, or ignored), the motion and its correction come from
+            // the same tracks: the correction only refines within the frames, the strength changes next to nothing
+            visible: !!opticalcb.info.has_motion;
+            tooltip: qsTr("How far the correction may take the motion data from what it says. Lower values only correct small, fast errors like vibration. Higher values let the image override the motion data also where it's off by a lot or for longer, like gyro glitches, but follow the image's own mistakes (moving objects, water) more too.");
             SliderWithField {
-                id: glitchStrength;
+                id: opticalStrength;
                 defaultValue: 50;
                 to: 100;
                 value: 50;
                 unit: "%";
                 precision: 0;
                 width: parent.width;
-                onValueChanged: {
-                    controller.set_glitch_filter(glitchcb.checked, value);
-                    Qt.callLater(controller.recompute_gyro);
+                // Each change refits the correction (up to half a second on a long clip): not on every step of a drag
+                onValueChanged: opticalStrengthTimer.restart();
+                Timer {
+                    id: opticalStrengthTimer;
+                    interval: 150;
+                    onTriggered: controller.set_optical_correction_strength(opticalStrength.value / 100);
                 }
             }
+        }
+        Connections {
+            target: controller;
+            function onOptical_correction_changed(): void { opticalcb.updateInfo(); }
+            function onChart_data_changed(): void { Qt.callLater(opticalcb.updateInfo); }
         }
     }
     Item {

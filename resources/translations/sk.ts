@@ -349,7 +349,7 @@ Kôli limitácii video enkodéra, renderovanie na pozadí nieje podporované.</t
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="683"/>
-      <source>An error occured: %1</source>
+      <source>An error occurred: %1</source>
       <translation>Vyskytla sa chyba: %1</translation>
     </message>
     <message>

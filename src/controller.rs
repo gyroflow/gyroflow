@@ -107,12 +107,19 @@ pub struct Controller {
     set_sync_lpf: qt_method!(fn(&self, lpf: f64)),
     set_imu_lpf: qt_method!(fn(&self, lpf: f64)),
     set_imu_median_filter: qt_method!(fn(&self, size: i32)),
-    set_glitch_filter: qt_method!(fn(&self, enabled: bool, strength: f64)),
     set_imu_rotation: qt_method!(fn(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64)),
     set_acc_rotation: qt_method!(fn(&self, pitch_deg: f64, roll_deg: f64, yaw_deg: f64)),
     set_imu_orientation: qt_method!(fn(&self, orientation: String)),
     set_imu_bias: qt_method!(fn(&self, bx: f64, by: f64, bz: f64)),
     recompute_gyro: qt_method!(fn(&self)),
+
+    analyze_optically: qt_method!(fn(&mut self)),
+    set_optical_correction_enabled: qt_method!(fn(&self, enabled: bool)),
+    clear_optical_correction: qt_method!(fn(&mut self)),
+    set_ignore_file_motion: qt_method!(fn(&mut self, ignore: bool)),
+    set_optical_correction_strength: qt_method!(fn(&mut self, strength: f64)),
+    optical_correction_info: qt_method!(fn(&self) -> QString),
+    optical_correction_changed: qt_signal!(),
 
     override_video_fps: qt_method!(fn(&self, fps: f64, recompute: bool)),
     get_org_duration_ms: qt_method!(fn(&self) -> f64),
@@ -313,6 +320,7 @@ pub struct Controller {
     preview_pipeline: Arc<AtomicUsize>,
 
     ongoing_computations: BTreeSet<u64>,
+    optical_analysis_running: bool,
 
     pub stabilizer: Arc<StabilizationManager>,
 }
@@ -396,13 +404,18 @@ impl Controller {
     }
 
     fn start_autosync(&mut self, timestamps_fract: String, sync_params: String, mode: String) {
+        if mode == "synchronize" && !self.stabilizer.gyro.read().has_motion() {
+            // Nothing to synchronize: the motion comes from the video itself, and the optical analysis measures it
+            // (per row, parallax aside) far better than the pose estimation of the sync points did
+            return self.analyze_optically();
+        }
         rendering::clear_log();
 
         let sync_params = serde_json::from_str(&sync_params) as serde_json::Result<synchronization::SyncParams>;
         if let Err(e) = sync_params {
             self.sync_in_progress = false;
             self.sync_in_progress_changed();
-            return self.error(QString::from("An error occured: %1"), QString::from(format!("JSON parse error: {}", e)), QString::default());
+            return self.error(QString::from("An error occurred: %1"), QString::from(format!("JSON parse error: {}", e)), QString::default());
         }
         let mut sync_params = sync_params.unwrap();
 
@@ -507,7 +520,7 @@ impl Controller {
                 Ok(sync) => sync,
                 // No zoom to measure on: the same outcome as an analysis that found none, with its own message
                 Err(AutosyncError::NoZoomInMetadata) => return set_lens_delay(None),
-                Err(AutosyncError::InvalidParameters) => return err(("An error occured: %1".to_string(), "Invalid parameters".to_string())),
+                Err(AutosyncError::InvalidParameters) => return err(("An error occurred: %1".to_string(), "Invalid parameters".to_string())),
             };
             sync.on_progress(move |percent, ready, total| {
                 progress((percent, ready, total));
@@ -559,7 +572,7 @@ impl Controller {
                                     sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
                                 },
                                 Err(e) => {
-                                    err2(("An error occured: %1".to_string(), e.to_string()))
+                                    err2(("An error occurred: %1".to_string(), e.to_string()))
                                 }
                             }
                             frame_no += 1;
@@ -568,14 +581,61 @@ impl Controller {
                         Ok(())
                     });
                     if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
-                        err(("An error occured: %1".to_string(), e.to_string()));
+                        err(("An error occurred: %1".to_string(), e.to_string()));
                     }
                     sync.finished_feeding_frames();
                 }
                 Err(error) => {
-                    err(("An error occured: %1".to_string(), error.to_string()));
+                    err(("An error occurred: %1".to_string(), error.to_string()));
                 }
             };
+        });
+    }
+
+    /// "Analyze image optically": tracks every frame of the trim ranges (the whole clip without any) and measures the
+    /// correction of the motion data, see `synchronization::optical_motion`. Reports progress like the synchronization does
+    fn analyze_optically(&mut self) {
+        // One at a time: Auto sync on a file without motion data comes here too, and the timeline can start it while
+        // an analysis runs
+        if self.optical_analysis_running { return; }
+        self.optical_analysis_running = true;
+        rendering::clear_log();
+
+        self.sync_in_progress = true;
+        self.sync_in_progress_changed();
+        self.sync_progress(0.0, 0, 0);
+        self.cancel_flag.store(false, SeqCst);
+
+        let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (percent, ready, total): (f64, usize, usize)| {
+            this.sync_progress(percent, ready, total);
+        });
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, result: Result<(), String>| {
+            this.optical_analysis_running = false;
+            this.sync_in_progress = false;
+            this.sync_in_progress_changed();
+            this.sync_progress(1.0, 0, 0);
+            match result {
+                Ok(()) => {
+                    this.stabilizer.invalidate_zooming();
+                    this.request_recompute();
+                    this.chart_data_changed();
+                },
+                Err(e) if e == "Cancelled" => { },
+                Err(e) => {
+                    let mut arg = e;
+                    arg.push_str("\n\n");
+                    arg.push_str(&rendering::get_log());
+                    this.error(QString::from("An error occured: %1"), QString::from(arg), QString::default());
+                }
+            }
+            this.optical_correction_changed();
+        });
+
+        let stabilizer = self.stabilizer.clone();
+        let cancel_flag = self.cancel_flag.clone();
+        core::run_threaded(move || {
+            // Fitted with the strength set here too, so a long clip's fit doesn't hold up the UI
+            finished(rendering::analyze_optically(&stabilizer, cancel_flag, None, move |percent, ready, total| progress((percent, ready, total))));
         });
     }
 
@@ -821,7 +881,7 @@ impl Controller {
                                 }
 
                                 if let Err(e) = stab.load_gyro_data(file.get_file(), filesize, &url, is_main_video, &load_options, progress, cancel_flag) {
-                                    err(("An error occured: %1".to_string(), e.to_string()));
+                                    err(("An error occurred: %1".to_string(), e.to_string()));
                                 }
                             }
                         }
@@ -893,7 +953,7 @@ impl Controller {
     fn load_lens_profile(&mut self, url_or_id: QString) {
         let (json, filepath, checksum) = {
             if let Err(e) = self.stabilizer.load_lens_profile(&url_or_id.to_string()) {
-                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+                self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
             }
             let lens = self.stabilizer.lens.read();
             (lens.get_json().unwrap_or_default(), lens.path_to_file.clone(), lens.checksum.clone().unwrap_or_default())
@@ -1274,6 +1334,9 @@ impl Controller {
 
     fn recompute_threaded(&mut self) {
         if self.stabilizer.params.read().duration_ms <= 0.0 { return; }
+        // The recompute brings the optical correction up to date with the sync, the lens and the frame timing, which
+        // may switch it on or off
+        let optical_applied = self.stabilizer.gyro.read().optical_correction_applied;
         let id = self.stabilizer.recompute_threaded(util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (id, _discarded): (u64, bool)| {
             if !this.ongoing_computations.contains(&id) {
                 ::log::error!("Unknown compute_id: {}", id);
@@ -1286,6 +1349,11 @@ impl Controller {
         self.ongoing_computations.insert(id);
 
         self.compute_progress(id, 0.0);
+
+        if self.stabilizer.gyro.read().optical_correction_applied != optical_applied {
+            self.chart_data_changed();
+            self.optical_correction_changed();
+        }
     }
 
     fn cancel_current_operation(&mut self) {
@@ -1305,7 +1373,7 @@ impl Controller {
             match res {
                 "ok" => this.message(QString::from("Gyroflow file exported to %1."), QString::from(format!("<b>{}</b>", filesystem::display_url(&arg))), QString::default(), QString::from("gyroflow-exported")),
                 "location" => this.request_location(QString::from(arg), typ_str.clone()),
-                "err" => this.error(QString::from("An error occured: %1"), QString::from(arg), QString::default()),
+                "err" => this.error(QString::from("An error occurred: %1"), QString::from(arg), QString::default()),
                 _ => { }
             }
             this.request_recompute();
@@ -1470,7 +1538,7 @@ impl Controller {
                 util::serde_json_to_qt_object(&thin_obj)
             },
             Err(e) => {
-                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+                self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
                 QJsonObject::default()
             }
         }
@@ -1525,13 +1593,53 @@ impl Controller {
 
     wrap_simple_method!(set_imu_lpf, v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_imu_median_filter, size: i32; recompute; chart_data_changed);
-    wrap_simple_method!(set_glitch_filter, enabled: bool, strength: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_imu_rotation, pitch_deg: f64, roll_deg: f64, yaw_deg: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_acc_rotation, pitch_deg: f64, roll_deg: f64, yaw_deg: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_imu_orientation, v: String; recompute; chart_data_changed);
     wrap_simple_method!(set_sync_lpf, v: f64; recompute; chart_data_changed);
     wrap_simple_method!(set_imu_bias, bx: f64, by: f64, bz: f64; recompute; chart_data_changed);
     wrap_simple_method!(recompute_gyro,; recompute; chart_data_changed);
+    wrap_simple_method!(set_optical_correction_enabled, enabled: bool; recompute; chart_data_changed);
+
+    fn clear_optical_correction(&mut self) {
+        self.stabilizer.clear_optical_correction();
+        self.request_recompute();
+        self.chart_data_changed();
+        self.optical_correction_changed();
+    }
+    /// Sets the file's own motion data aside, for the motion measured from the video, or brings it back
+    fn set_ignore_file_motion(&mut self, ignore: bool) {
+        if self.stabilizer.set_ignore_file_motion(ignore) {
+            self.stabilizer.invalidate_zooming();
+            self.request_recompute();
+            self.update_offset_model();
+            self.optical_correction_changed();
+        }
+    }
+    /// Refits the correction to the measurements of the last analysis, when they're still around: a fraction of a
+    /// second, off the UI thread
+    fn set_optical_correction_strength(&mut self, strength: f64) {
+        if !self.stabilizer.set_optical_correction_strength(strength) {
+            return self.optical_correction_changed();
+        }
+        let done = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, result: Result<bool, String>| {
+            match result {
+                Ok(true) => {
+                    this.stabilizer.invalidate_zooming();
+                    this.request_recompute();
+                    this.chart_data_changed();
+                },
+                Ok(false) => { },
+                Err(e) => this.error(QString::from("An error occured: %1"), QString::from(e), QString::default()),
+            }
+            this.optical_correction_changed();
+        });
+        let stabilizer = self.stabilizer.clone();
+        core::run_threaded(move || done(stabilizer.refit_optical_correction()));
+    }
+    fn optical_correction_info(&self) -> QString {
+        QString::from(self.stabilizer.optical_correction_info().to_string())
+    }
     wrap_simple_method!(set_device, v: i32);
 
     fn get_org_duration_ms   (&self) -> f64 { self.stabilizer.params.read().duration_ms }
@@ -1787,18 +1895,18 @@ impl Controller {
                                         cal.feed_frame(timestamp_us, frame, (width, height), org_size, stride, pt_scale, pixels, cancel_flag2.clone(), total, processed.clone(), progress.clone());
                                     },
                                     Err(e) => {
-                                        err2(("An error occured: %1".to_string(), e.to_string()))
+                                        err2(("An error occurred: %1".to_string(), e.to_string()))
                                     }
                                 }
                             }
                             Ok(())
                         });
                         if let Err(e) = proc.start_decoder_only(ranges, cancel_flag.clone()) {
-                            err(("An error occured: %1".to_string(), e.to_string()));
+                            err(("An error occurred: %1".to_string(), e.to_string()));
                         }
                     }
                     Err(error) => {
-                        err(("An error occured: %1".to_string(), error.to_string()));
+                        err(("An error occurred: %1".to_string(), error.to_string()));
                     }
                 }
                 // Don't lock the UI trying to draw chessboards while we calibrate
@@ -1811,7 +1919,7 @@ impl Controller {
                 let mut lock = cal.write();
                 let cal = lock.as_mut().unwrap();
                 if let Err(e) = cal.calibrate(is_forced) {
-                    err(("An error occured: %1".to_string(), format!("{:?}", e)));
+                    err(("An error occurred: %1".to_string(), format!("{:?}", e)));
                 } else {
                     if cal.rms < 100.0 {
                         stab.lens.write().set_from_calibrator(cal);
@@ -1927,10 +2035,10 @@ impl Controller {
                         }
                         true
                     }
-                    Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
+                    Err(e) => { self.error(QString::from("An error occurred: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
                 }
             },
-            Err(e) => { self.error(QString::from("An error occured: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
+            Err(e) => { self.error(QString::from("An error occurred: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
         }
     }
 
@@ -2086,7 +2194,7 @@ impl Controller {
         }
         let contents = content.to_json_pretty();
         if let Err(e) = filesystem::write(&url, contents.to_slice()) {
-            self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+            self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
         }
         QString::from(filesystem::display_url(&url))
     }
@@ -2097,13 +2205,13 @@ impl Controller {
             Ok(filesystem::write(&util::qurl_to_encoded(url), contents.as_bytes())?)
         };
         if let Err(e) = result() {
-            self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+            self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
         }
     }
     fn export_parsed_metadata(&self, url: QUrl) {
         if let Ok(contents) = serde_json::to_string_pretty(&self.stabilizer.gyro.read().file_metadata) {
             if let Err(e) = filesystem::write(&util::qurl_to_encoded(url), contents.as_bytes()) {
-                self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+                self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
             }
         }
     }
@@ -2113,7 +2221,7 @@ impl Controller {
 
         let contents = gyroflow_core::gyro_export::export_gyro_data(&filename, fields.to_json().to_str().unwrap(), &self.stabilizer);
         if let Err(e) = filesystem::write(&url, contents.as_bytes()) {
-            self.error(QString::from("An error occured: %1"), QString::from(e.to_string()), QString::default());
+            self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
         }
     }
 
@@ -2473,7 +2581,7 @@ impl Controller {
             this.stmap_progress(ready as f64 / total as f64, ready, total);
         });
         let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, msg: String| {
-            this.error(QString::from("An error occured: %1"), QString::from(msg), QString::default());
+            this.error(QString::from("An error occurred: %1"), QString::from(msg), QString::default());
         });
 
         self.cancel_flag.store(false, SeqCst);
@@ -2486,7 +2594,7 @@ impl Controller {
         {
             let params = stab.params.read();
             if params.size.0 <= 0 || params.size.1 <= 0 {
-                self.error(QString::from("An error occured: %1"), QString::from("Video is not loaded"), QString::default());
+                self.error(QString::from("An error occurred: %1"), QString::from("Video is not loaded"), QString::default());
                 return;
             }
         }
@@ -2535,7 +2643,7 @@ impl Controller {
                         };
                         match result {
                             Ok(r) => signal(r),
-                            Err(e) => signal(format!("An error occured: {e:?}"))
+                            Err(e) => signal(format!("An error occurred: {e:?}"))
                         }
                     });
                     Ok(String::new())
@@ -2546,7 +2654,7 @@ impl Controller {
             };
             match result {
                 Ok(r) => QString::from(r),
-                Err(e) => QString::from(format!("An error occured: {e:?}"))
+                Err(e) => QString::from(format!("An error occurred: {e:?}"))
             }
         }
         #[cfg(not(any(target_os = "windows", target_os = "macos")))] { QString::default() }

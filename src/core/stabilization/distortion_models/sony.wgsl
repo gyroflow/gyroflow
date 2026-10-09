@@ -68,27 +68,28 @@ fn sony_radius_at(n: i32, theta: f32) -> f32 {
 
 fn undistort_point(pos: vec2<f32>) -> vec2<f32> {
     let n = sony_segments();
-    if (n == 0) { return pos; }
     let r = length(pos);
+    // No lens curve: a pinhole, so the image radius is `tan θ`
+    if (n == 0) {
+        if (r < 1e-12) { return pos; }
+        return pos * (atan(r) / r);
+    }
     if (r < 1e-9) { return pos; }
     let theta = sony_angle_at(n, r);
     if (theta <= 0.0) { return vec2<f32>(-99999.0, -99999.0); }
-    // Clamp the angle just under tan()'s 90° asymptote and continue the radius linearly past it, so over-FOV rays
-    // stay large and monotonic (no fold back into the frame) and r_limit clips them. See sony.rs / gopro.rs.
-    let TMAX = 1.5533; let tt = 57.14902; // TMAX ≈ 89°, tt = tan(TMAX)
-    var rr: f32; if (theta < TMAX) { rr = tan(theta); } else { rr = tt + (theta - TMAX) * (1.0 + tt * tt); }
-    if (params.r_limit > 0.0 && rr > params.r_limit) { return vec2<f32>(-99999.0, -99999.0); }
-    return pos * (rr / r);
+    return pos * (theta / r);
 }
 
 fn distort_point(x: f32, y: f32, z: f32) -> vec2<f32> {
-    let pos = vec2<f32>(x, y) / z;
+    let pos = vec2<f32>(x, y);
     let n = sony_segments();
-    if (n == 0) { return pos; }
+    // No lens curve: a pinhole, which has no image of a ray at or past 90°
+    if (n == 0) {
+        if (z > 1e-9) { return pos / z; }
+        return pos * 1e9;
+    }
     let r = length(pos);
-    if (r < 1e-9) { return pos; }
-    // Inverse of undistort_point's angle clamp
-    let TMAX = 1.5533; let tt = 57.14902;
-    var theta: f32; if (r < tt) { theta = atan(r); } else { theta = TMAX + (r - tt) / (1.0 + tt * tt); }
+    if (r < 1e-12) { return vec2<f32>(0.0, 0.0); }
+    let theta = atan2(r, z);
     return pos * (sony_radius_at(n, theta) / r);
 }

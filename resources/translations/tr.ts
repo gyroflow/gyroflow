@@ -347,7 +347,7 @@ Sisteminizin video enkoderlerinin sınırlarından ötürü arkaplanda render i�
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="683"/>
-      <source>An error occured: %1</source>
+      <source>An error occurred: %1</source>
       <translation>Bir hata oluştu: %1</translation>
     </message>
     <message>

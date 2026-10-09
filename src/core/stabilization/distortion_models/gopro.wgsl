@@ -23,29 +23,32 @@ fn gopro_poly_invert(theta: f32) -> f32 {
 }
 
 fn undistort_point(pos: vec2<f32>) -> vec2<f32> {
-    if (params.k1.y == 0.0) { return pos; }
     let r_norm = length(pos);
+    // No POLY block: a pinhole, so the image radius is `tan θ`
+    if (params.k1.y == 0.0) {
+        if (r_norm < 1e-12) { return pos; }
+        return pos * (atan(r_norm) / r_norm);
+    }
     if (r_norm < 1e-9) { return pos; }
     let p = r_norm / params.k1.y;
     let theta = gopro_poly_eval(p);
-    // Clamp the angle just under tan()'s 90° asymptote and continue the radius linearly past it so over-FOV
-    // rays stay large & monotonic (no wrap/fold -> r_limit clips them to background). See gopro.rs.
-    let TMAX = 1.5533; let tt = 57.14902; // TMAX ≈ 89°, tt = tan(TMAX)
-    var rr: f32; if (theta < TMAX) { rr = tan(theta); } else { rr = tt + (theta - TMAX) * (1.0 + tt * tt); }
-    let scale = rr / r_norm;
-    return pos * scale;
+    // Outside its fit range the POLY is free to run negative or past 180°, and neither is an angle this
+    // pipeline can carry - a negative theta hands back the ray from the opposite side of the frame, and
+    // past 180 degrees sin(theta) has turned over and the ray arrives from behind the camera. See gopro.rs
+    if (!(theta > 0.0 && theta < 3.14159265)) { return vec2<f32>(-99999.0, -99999.0); }
+    return pos * (theta / r_norm);
 }
 
 fn distort_point(x: f32, y: f32, z: f32) -> vec2<f32> {
-    let pos = vec2<f32>(x, y) / z;
-    if (params.k1.y == 0.0) { return pos; }
+    // No POLY block: a pinhole, which has no image of a ray at or past 90°
+    if (params.k1.y == 0.0) {
+        if (z > 1e-9) { return vec2<f32>(x, y) / z; }
+        return vec2<f32>(x, y) * 1e9;
+    }
+    let pos = vec2<f32>(x, y);
     let r = length(pos);
-    // Inverse of undistort_point's angle clamp (see gopro.rs / gopro.wgsl undistort_point).
-    let TMAX = 1.5533; let tt = 57.14902;
-    var theta: f32; if (r < tt) { theta = atan(r); } else { theta = TMAX + (r - tt) / (1.0 + tt * tt); }
-    let p = gopro_poly_invert(theta);
-    let r_norm = params.k1.y * p;
-    var scale: f32 = 1.0;
-    if (r != 0.0) { scale = r_norm / r; }
-    return pos * scale;
+    if (r < 1e-12) { return vec2<f32>(0.0, 0.0); }
+    // atan2 against the ray's own z: a GoPro's 150°+ field needs the angle, not a z=1 plane radius
+    let theta = atan2(r, z);
+    return pos * (params.k1.y * gopro_poly_invert(theta) / r);
 }

@@ -69,6 +69,14 @@ struct Opts {
     #[argh(switch)]
     stdout_progress: bool,
 
+    /// analyze the video optically before rendering and correct the motion data with it (Motion data -> Optical correction), with this strength in %, eg. 50. Files without motion data get all of their motion measured from the video
+    #[argh(option)]
+    optical_correction: Option<f64>,
+
+    /// ignore the motion data in the files and measure all of the motion from the video (implies --optical-correction)
+    #[argh(switch)]
+    ignore_file_motion: bool,
+
     /// export project file instead of rendering: 1 - default project, 2 - with gyro data, 3 - with processed gyro data, 4 - video + project file
     #[argh(option, default = "0")]
     export_project: u32,
@@ -256,6 +264,18 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                 if let Some(sync) = parsed_preset.get("synchronization") {
                     gyroflow_core::util::merge_json(additional_data.get_mut("synchronization").unwrap(), sync);
                 }
+            }
+        }
+
+        if opts.optical_correction.is_some() || opts.ignore_file_motion {
+            // In the synchronization settings: they reach every job like autosync's, and presets can have them too
+            let sync = additional_data.get_mut("synchronization").unwrap();
+            sync["do_optical_correction"] = true.into();
+            if let Some(strength) = opts.optical_correction {
+                sync["optical_correction_strength"] = (strength / 100.0).clamp(0.0, 1.0).into();
+            }
+            if opts.ignore_file_motion {
+                sync["ignore_file_motion"] = true.into();
             }
         }
 

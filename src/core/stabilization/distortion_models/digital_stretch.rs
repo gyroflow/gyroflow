@@ -46,14 +46,11 @@ impl DigitalStretch {
     pub fn wgsl_functions(&self) -> &'static str {
         r#"
         fn digital_undistort_point(uv: vec2<f32>) -> vec2<f32> {
-            uv.x = uv.x / params.digital_lens_params[0].x;
-            uv.y = uv.y / params.digital_lens_params[0].y;
-            return uv;
+            // A parameter is an immutable binding in WGSL, so this cannot assign into `uv`
+            return uv / vec2<f32>(params.digital_lens_params[0].x, params.digital_lens_params[0].y);
         }
         fn digital_distort_point(uv: vec2<f32>) -> vec2<f32> {
-            uv.x = uv.x * params.digital_lens_params[0].x;
-            uv.y = uv.y * params.digital_lens_params[0].y;
-            return uv;
+            return uv * vec2<f32>(params.digital_lens_params[0].x, params.digital_lens_params[0].y);
         }"#
     }
 }

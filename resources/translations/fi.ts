@@ -348,7 +348,7 @@ Due to limitations of the system video encoders, rendering in the background is 
     </message>
     <message>
       <location filename="../../src/ui/App.qml" line="683"/>
-      <source>An error occured: %1</source>
+      <source>An error occurred: %1</source>
       <translation>Tapahtui virhe: %1</translation>
     </message>
     <message>
