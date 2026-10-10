@@ -54,7 +54,9 @@ struct Job {
     additional_data: String,
     cancel_flag: Arc<AtomicBool>,
     project_data: Option<String>,
-    stab: Arc<StabilizationManager>
+    stab: Arc<StabilizationManager>,
+    /// Settings were applied to the job, but the motion data wasn't processed with them yet. It's done when the job starts rendering
+    gyro_outdated: Arc<AtomicBool>
 }
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -478,7 +480,8 @@ impl RenderQueue {
             additional_data,
             cancel_flag: Default::default(),
             project_data,
-            stab: stab.clone()
+            stab: stab.clone(),
+            gyro_outdated: Default::default()
         });
         self.update_queue_indices();
 
@@ -952,7 +955,11 @@ impl RenderQueue {
             }
 
             let processing2 = processing.clone();
+            let gyro_outdated = job.gyro_outdated.clone();
             core::run_threaded(move || {
+                if gyro_outdated.swap(false, SeqCst) {
+                    stab.recompute_gyro();
+                }
                 // Before the sync: motion data set aside has nothing to sync
                 let optical = Self::optical_correction_requested(&stab);
                 Self::do_autosync(stab.clone(), processing, &input_file, err2, proc_height);
@@ -1711,10 +1718,16 @@ impl RenderQueue {
                         }
                     }
 
+                    // Only store the settings here. Processing the motion data and computing the smoothing and zooming
+                    // happens when the job starts rendering, so applying settings to a long queue doesn't stall the UI
                     let mut is_preset = false;
-                    if let Err(e) = job.stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset, false) {
+                    if let Err(e) = job.stab.import_gyroflow_data(&data_vec, false, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset, false) {
                         ::log::error!("Failed to update queue stab data: {:?}", e);
                     }
+                    job.gyro_outdated.store(true, SeqCst);
+                    // The render options are the source of the output size, the stabilizer needs it for the FOV and zooming
+                    job.stab.set_output_size(job.render_options.output_width, job.render_options.output_height);
+                    job.stab.init_size();
 
                     Self::update_sync_settings(&job.stab, &sync_options);
                     job.project_data = Self::get_gyroflow_data_internal(&job.stab, &job.additional_data, &job.render_options);
