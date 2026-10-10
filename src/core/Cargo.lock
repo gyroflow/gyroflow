@@ -1184,6 +1184,7 @@ dependencies = [
  "wgpu",
  "whoami",
  "windows 0.62.2",
+ "xml-rs",
 ]
 
 [[package]]
