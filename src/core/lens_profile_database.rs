@@ -6,6 +6,8 @@ use std::collections::{ HashSet, HashMap, BTreeMap };
 use crate::LensProfile;
 use std::path::PathBuf;
 use std::io::Read;
+#[path = "camera_catalog.rs"]
+pub mod camera_catalog;
 
 #[cfg(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles"))]
 static LENS_PROFILES_STATIC: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../resources/camera_presets/profiles.cbor.gz"));
@@ -22,6 +24,8 @@ pub struct LensProfileDatabase {
     map: HashMap<String, LensProfile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
     list_for_ui: Vec<(String, String, String, bool, f64, i32, String)>,
+    camera_catalog_for_ui: String,
+    camera_catalog_from_bundle: Option<serde_json::Value>,
     pub loaded: bool,
     pub version: u32,
 }
@@ -73,6 +77,7 @@ impl LensProfileDatabase {
 
         let _time = std::time::Instant::now();
 
+        let mut alternatives = Vec::new();
         let mut load = |data: DataSource, f_name: &str| {
             if f_name.ends_with(".gyroflow") {
                 let mut profile = LensProfile::default();
@@ -93,45 +98,8 @@ impl LensProfileDatabase {
             match parsed {
                 Ok(mut v) => {
                     v.path_to_file = f_name.to_string();
-                    for mut profile in v.get_all_matching_profiles() {
-                        let key = if !profile.identifier.is_empty() {
-                            profile.identifier.clone()
-                        } else {
-                            f_name.to_string()
-                        };
-                        if self.map.contains_key(&key) {
-                            if !self.loaded {
-                                log::warn!("Lens profile already present: {}, path_to_file: {} from {}", key, f_name, self.map.get(&key).unwrap().path_to_file);
-
-                                // let prof = std::fs::read(&f_name).unwrap();
-                                // let mut prof: serde_json::Value = serde_json::from_slice(&prof).unwrap();
-                                // *prof.get_mut("identifier").unwrap() = serde_json::Value::String(String::new());
-                                // std::fs::write(f_name, serde_json::to_string_pretty(&prof).unwrap()).unwrap();
-                            }
-                        } else {
-                            (|| -> Option<()> {
-                                let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
-                                    profile.identifier,
-
-                                    profile.calib_dimension.w,
-                                    profile.calib_dimension.h,
-
-                                    profile.fisheye_params.camera_matrix.get(0)?.get(0)?,
-                                    profile.fisheye_params.camera_matrix.get(1)?.get(1)?,
-                                    profile.fisheye_params.camera_matrix.get(0)?.get(2)?,
-                                    profile.fisheye_params.camera_matrix.get(1)?.get(2)?,
-
-                                    profile.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
-                                );
-
-                                profile.checksum = Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())));
-                                Some(())
-                            })();
-                            self.map.insert(key, profile);
-                        }
+                    for profile in v.get_all_matching_profiles() {
+                        Self::insert_profile(&mut self.map, profile, &mut alternatives);
                     }
                 },
                 Err(e) => {
@@ -146,6 +114,7 @@ impl LensProfileDatabase {
             walkdir::WalkDir::new(dir).into_iter().for_each(|e| {
                 if let Ok(entry) = e {
                     let f_name = entry.path().to_string_lossy().replace('\\', "/");
+                    if entry.file_name().to_string_lossy().starts_with("__") { return; }
                     if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
                         if let Ok(data) = std::fs::read_to_string(&f_name) {
                             load(DataSource::String(data), &f_name);
@@ -160,7 +129,17 @@ impl LensProfileDatabase {
                                     bundle_loaded = true;
                                     for (f_name, profile) in array {
                                         if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
-                                        if f_name.starts_with("__") { continue; }
+                                        if f_name == "__camera_catalog.json" {
+                            match camera_catalog::parse_catalog(&profile.to_string()) {
+                                Ok(value) if camera_catalog::has_deliverable_metadata(&value) => {
+                                self.camera_catalog_from_bundle = Some(value);
+                            },
+                            Ok(_) => log::warn!("Ignoring empty camera catalogue metadata update"),
+                                Err(error) => log::warn!("Ignoring invalid camera catalogue metadata: {error}"),
+                            }
+                            continue;
+                        }
+                        if f_name.starts_with("__") { continue; }
                                         load(DataSource::SerdeValue(profile), &f_name);
                                     }
                                 }
@@ -185,6 +164,16 @@ impl LensProfileDatabase {
                 if let Ok(array) = ciborium::from_reader::<Vec<(String, serde_json::Value)>, _>(std::io::Cursor::new(decompressed)) {
                     for (f_name, profile) in array {
                         if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
+                        if f_name == "__camera_catalog.json" {
+                            match camera_catalog::parse_catalog(&profile.to_string()) {
+                                Ok(value) if camera_catalog::has_deliverable_metadata(&value) => {
+                                self.camera_catalog_from_bundle = Some(value);
+                            },
+                            Ok(_) => log::warn!("Ignoring empty camera catalogue metadata update"),
+                                Err(error) => log::warn!("Ignoring invalid camera catalogue metadata: {error}"),
+                            }
+                            continue;
+                        }
                         if f_name.starts_with("__") { continue; }
                         load(DataSource::SerdeValue(profile), &f_name);
                     }
@@ -197,6 +186,8 @@ impl LensProfileDatabase {
             load_from_dir(Self::get_path());
         }
 
+        self.insert_alternatives(alternatives);
+
         let copy = self.clone();
         for (_, v) in self.map.iter_mut() {
             v.resolve_interpolations(&copy);
@@ -206,11 +197,98 @@ impl LensProfileDatabase {
         self.loaded = true;
     }
 
+    // Keep the first loaded profile as the automatic identifier match. Alternative
+    // calibrations are indexed after every canonical ID has been seen, so an
+    // internal review key cannot occupy a real camera identifier during loading.
+    fn insert_profile(map: &mut HashMap<String, LensProfile>, mut profile: LensProfile, alternatives: &mut Vec<LensProfile>) {
+        let key = if profile.identifier.is_empty() {
+            profile.path_to_file.clone()
+        } else {
+            profile.identifier.clone()
+        };
+
+        (|| -> Option<()> {
+            let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
+                profile.identifier,
+
+                profile.calib_dimension.w,
+                profile.calib_dimension.h,
+
+                profile.fisheye_params.camera_matrix.get(0)?.get(0)?,
+                profile.fisheye_params.camera_matrix.get(1)?.get(1)?,
+                profile.fisheye_params.camera_matrix.get(0)?.get(2)?,
+                profile.fisheye_params.camera_matrix.get(1)?.get(2)?,
+
+                profile.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
+                profile.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
+                profile.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
+                profile.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
+            );
+
+            profile.checksum = Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())));
+            Some(())
+        })();
+
+        use std::collections::hash_map::Entry;
+        match map.entry(key.clone()) {
+            Entry::Vacant(entry) => { entry.insert(profile); },
+            Entry::Occupied(mut entry) => {
+                // A later reload may introduce a real ID equal to a previous
+                // review key. Move that alternative aside instead of shadowing
+                // the real ID. Its original identifier is never rewritten.
+                if !entry.get().identifier.is_empty() && entry.get().identifier != key {
+                    alternatives.push(entry.insert(profile));
+                } else {
+                    alternatives.push(profile);
+                }
+            }
+        }
+    }
+
+    fn insert_alternatives(&mut self, alternatives: Vec<LensProfile>) {
+        for profile in alternatives {
+            let mut key = if profile.identifier.is_empty() {
+                profile.path_to_file.clone()
+            } else {
+                profile.identifier.clone()
+            };
+            // The legacy checksum covers only some calibration parameters. Do
+            // not use it to deduplicate different optical models or metadata.
+            // get_json_value excludes runtime path, rating and checksum fields.
+            let mut payload = profile.get_json_value().ok();
+            if let Some(payload) = &mut payload { payload.sort_all_objects(); }
+            let alternate_key = payload.as_ref().and_then(|value| serde_json::to_vec(value).ok())
+                .map(|bytes| format!("{}#{:08x}", key, crc32fast::hash(&bytes)))
+                .unwrap_or_else(|| format!("{}#{}", key, profile.path_to_file));
+            let mut suffix = 0;
+            loop {
+                match self.map.get(&key) {
+                    None => {
+                        self.map.insert(key, profile);
+                        break;
+                    },
+                    Some(existing) => {
+                        if existing.is_copy == profile.is_copy && payload.as_ref().is_some_and(|payload| {
+                            existing.get_json_value().is_ok_and(|value| &value == payload)
+                        }) {
+                            // The same profile can occur in a downloaded bundle
+                            // and the bundled fallback. Keep its preferred copy.
+                            break;
+                        }
+                    }
+                }
+                suffix += 1;
+                key = if suffix == 1 { alternate_key.clone() } else { format!("{}#{}", alternate_key, suffix) };
+            }
+        }
+    }
+
     pub fn set_from_db(&mut self, b: Self) {
         self.map = b.map;
         self.preset_map = b.preset_map;
         self.loaded = b.loaded;
         self.version = b.version;
+        self.camera_catalog_from_bundle = b.camera_catalog_from_bundle;
         if self.loaded {
             let cbs: Vec<_> = self.loaded_callbacks.drain(..).collect();
             for cb in cbs {
@@ -229,6 +307,8 @@ impl LensProfileDatabase {
             path
         }).collect()
     }
+
+    pub fn camera_catalog(&self) -> &str { &self.camera_catalog_for_ui }
 
     pub fn prepare_list_for_ui(&mut self) {
         // (name, path_to_file, crc32, official, rating, aspect_ratio*1000, author)
@@ -274,6 +354,26 @@ impl LensProfileDatabase {
             }
         }
         self.list_for_ui.sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
+
+        let cache = crate::settings::data_dir().join("lens_profiles").join("__camera_catalog.json");
+        let mut catalog = self.camera_catalog_from_bundle.as_ref()
+            .filter(|value| camera_catalog::has_deliverable_metadata(value))
+            .cloned()
+            .unwrap_or_else(|| camera_catalog::load_catalog(
+                include_str!("../../resources/camera_catalog.json"), &cache));
+        let mut profiles: Vec<serde_json::Value> = self.map.iter()
+            .filter(|(_, v)| !v.path_to_file.ends_with(".gyroflow") && !v.is_copy)
+            .map(|(id, v)| serde_json::json!({
+                "id": id, "name": v.get_display_name(), "brand": v.camera_brand,
+                "model": v.camera_model, "lens": v.lens_model, "checksum": v.checksum,
+                "official": v.official, "rating": v.rating, "author": v.calibrated_by,
+                "width": v.calib_dimension.w, "height": v.calib_dimension.h,
+                "focal_length": v.focal_length, "fps": v.fps
+            })).collect();
+        profiles.sort_by(|a, b| a["id"].as_str().cmp(&b["id"].as_str()));
+        catalog["profiles"] = serde_json::Value::Array(profiles);
+        self.camera_catalog_for_ui = catalog.to_string();
+
     }
 
     pub fn search(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<(String, String, String, bool, f64, i32, String)> {
@@ -530,5 +630,98 @@ impl LensProfileDatabase {
                 }
             }
         }
+    }
+}
+
+
+#[cfg(test)]
+mod identifier_retention_tests {
+    use super::*;
+
+    fn profile(path: &str, author: &str, coefficient: f64) -> LensProfile {
+        let mut profile = LensProfile::default();
+        profile.identifier = "maker-body-wide".into();
+        profile.path_to_file = path.into();
+        profile.camera_brand = "Maker".into();
+        profile.camera_model = "Body".into();
+        profile.lens_model = "Wide".into();
+        profile.calibrated_by = author.into();
+        profile.calib_dimension.w = 1920;
+        profile.calib_dimension.h = 1080;
+        profile.fisheye_params.camera_matrix = vec![
+            [1000.0, 0.0, 960.0], [0.0, 1000.0, 540.0], [0.0, 0.0, 1.0],
+        ];
+        profile.fisheye_params.distortion_coeffs = vec![coefficient, 0.0, 0.0, 0.0];
+        profile
+    }
+
+    fn load(db: &mut LensProfileDatabase, profiles: Vec<LensProfile>) {
+        let mut alternatives = Vec::new();
+        for profile in profiles {
+            LensProfileDatabase::insert_profile(&mut db.map, profile, &mut alternatives);
+        }
+        db.insert_alternatives(alternatives);
+        db.prepare_list_for_ui();
+    }
+
+    #[test]
+    fn distinct_calibrations_remain_selectable_without_changing_automatic_match() {
+        let mut db = LensProfileDatabase::default();
+        let preferred = profile("user/preferred.json", "First", 0.1);
+        let alternate = profile("bundle/alternate.json", "Second", 0.2);
+        let mut mirror = preferred.clone();
+        mirror.path_to_file = "fallback/preferred.json".into();
+        let mut alternate_mirror = alternate.clone();
+        alternate_mirror.path_to_file = "fallback/alternate.json".into();
+        load(&mut db, vec![preferred, alternate, mirror, alternate_mirror]);
+
+        assert_eq!(db.map.len(), 2);
+        assert_eq!(db.get_by_id("maker-body-wide").unwrap().path_to_file, "user/preferred.json");
+        let rows = db.search("Maker Body", &HashSet::new(), 0, 0);
+        assert_eq!(rows.len(), 2);
+        let mut authors: Vec<_> = rows.iter().map(|row| {
+            let selected = db.get_by_id(&row.1).expect("every review key must load its profile");
+            assert_eq!(selected.identifier, "maker-body-wide");
+            selected.calibrated_by.as_str()
+        }).collect();
+        authors.sort();
+        assert_eq!(authors, vec!["First", "Second"]);
+    }
+
+    #[test]
+    fn same_path_and_legacy_checksum_do_not_collapse_distinct_metadata() {
+        let mut db = LensProfileDatabase::default();
+        let first = profile("same.json", "Author", 0.1);
+        let mut second = first.clone();
+        second.focal_length = Some(24.0);
+        let mut third = first.clone();
+        third.focal_length = Some(35.0);
+        let records = vec![first, second, third];
+        load(&mut db, records.clone());
+        assert_eq!(db.map.len(), 3);
+        let keys: HashSet<_> = db.map.keys().cloned().collect();
+        let checksums: HashSet<_> = db.map.values().map(|p| p.checksum.clone()).collect();
+        assert_eq!(checksums.len(), 1, "fixture must exercise equal legacy checksums");
+
+        load(&mut db, records);
+        assert_eq!(db.map.len(), 3, "reloading must not multiply alternatives");
+        assert_eq!(db.map.keys().cloned().collect::<HashSet<_>>(), keys);
+    }
+
+    #[test]
+    fn real_identifiers_take_precedence_over_internal_review_keys_on_reload() {
+        let mut db = LensProfileDatabase::default();
+        let first = profile("first.json", "First", 0.1);
+        let alternate = profile("alternate.json", "Second", 0.2);
+        load(&mut db, vec![first.clone(), alternate.clone()]);
+        let review_key = db.map.iter().find(|(_, value)| value.calibrated_by == "Second").unwrap().0.clone();
+        let mut new_camera = profile("new-camera.json", "New camera", 0.3);
+        new_camera.identifier = review_key.clone();
+        load(&mut db, vec![first, alternate, new_camera]);
+
+        assert_eq!(db.get_by_id(&review_key).unwrap().calibrated_by, "New camera");
+        assert_eq!(db.get_by_id("maker-body-wide").unwrap().calibrated_by, "First");
+        assert_eq!(db.map.len(), 3);
+        assert!(db.map.values().any(|profile| profile.calibrated_by == "Second"));
     }
 }
