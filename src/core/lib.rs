@@ -207,6 +207,8 @@ impl StabilizationManager {
 
         let cancel_flag2 = cancel_flag.clone();
         let mut md = GyroSource::parse_telemetry_file(stream, filesize, &url, options, size, fps, progress_cb, cancel_flag2)?;
+        // The parsers return what they read until then, but a cancelled load (eg. replaced by the next video) mustn't set any of it
+        if cancel_flag.load(SeqCst) { return Ok(()); }
         if md.detected_source.as_ref().map(|v| v.starts_with("GoPro ")).unwrap_or_default() {
             // If gopro reports rolling shutter value, it already applied it, ie. the video is already corrected
             md.frame_readout_time = None;
