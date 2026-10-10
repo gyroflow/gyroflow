@@ -99,6 +99,8 @@ pub struct Controller {
 
     load_profiles: qt_method!(fn(&self, reload_from_disk: bool)),
     all_profiles_loaded: qt_signal!(),
+    camera_catalog: qt_method!(fn(&self) -> QString),
+    lens_profile_submission_errors: qt_method!(fn(&self, info: QJsonObject) -> QString),
     search_lens_profile_finished: qt_signal!(profiles: QVariantList),
     search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
     fetch_profiles_from_github: qt_method!(fn(&self)),
@@ -2018,6 +2020,18 @@ impl Controller {
         let url = util::qurl_to_encoded(url);
         let info_json = info.to_json().to_string();
 
+        // Enforce the same contract for the interactive and batch export paths.
+        // Incomplete local exports remain available when upload is disabled.
+        if upload {
+            let info: core::camera_catalog::SubmissionInfo = serde_json::from_str(&info_json).unwrap_or_default();
+            let db = self.stabilizer.lens_profile_db.read();
+            let errors = db.camera_catalog.submission_errors(&info);
+            if !errors.is_empty() {
+                self.error(QString::from("An error occurred: %1"), QString::from(errors.join("\n")), QString::default());
+                return false;
+            }
+        }
+
         match core::lens_profile::LensProfile::from_json(&info_json) {
             Ok(mut profile) => {
                 self.fill_profile_from_calibrator(&mut profile);
@@ -2039,6 +2053,18 @@ impl Controller {
             },
             Err(e) => { self.error(QString::from("An error occurred: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
         }
+    }
+
+    fn camera_catalog(&self) -> QString {
+        QString::from(self.stabilizer.lens_profile_db.read().camera_catalog())
+    }
+
+    fn lens_profile_submission_errors(&self, info: QJsonObject) -> QString {
+        let info_str = info.to_json().to_string();
+        let info: core::camera_catalog::SubmissionInfo = serde_json::from_str(&info_str).unwrap_or_default();
+        let db = self.stabilizer.lens_profile_db.read();
+        let errors = db.camera_catalog.submission_errors(&info);
+        QString::from(serde_json::to_string(&errors).unwrap_or_else(|_| "[]".into()))
     }
 
     fn load_profiles(&self, reload_from_disk: bool) {

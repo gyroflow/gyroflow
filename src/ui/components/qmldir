@@ -3,6 +3,7 @@ Action 1.0 Action.qml
 AdvancedSection 1.0 AdvancedSection.qml
 BasicText 1.0 BasicText.qml
 Button 1.0 Button.qml
+CameraLensSelector 1.0 CameraLensSelector.qml
 CheckBox 1.0 CheckBox.qml
 CheckBoxWithContent 1.0 CheckBoxWithContent.qml
 ComboBox 1.0 ComboBox.qml
