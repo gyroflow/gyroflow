@@ -13,7 +13,8 @@ static LENS_PROFILES_STATIC: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST
 #[allow(dead_code)]
 enum DataSource {
     String(String),
-    SerdeValue(serde_json::Value)
+    SerdeValue(serde_json::Value),
+    LensfunXml(String)
 }
 
 #[derive(Default)]
@@ -73,6 +74,45 @@ impl LensProfileDatabase {
 
         let _time = std::time::Instant::now();
 
+        fn insert_profile_into(map: &mut HashMap<String, LensProfile>, loaded: bool, mut v: LensProfile, f_name: &str) {
+            v.path_to_file = f_name.to_string();
+            for mut profile in v.get_all_matching_profiles() {
+                let key = if !profile.identifier.is_empty() {
+                    profile.identifier.clone()
+                } else {
+                    f_name.to_string()
+                };
+                if map.contains_key(&key) {
+                    if !loaded {
+                        log::warn!("Lens profile already present: {}, path_to_file: {} from {}", key, f_name, map.get(&key).unwrap().path_to_file);
+                    }
+                } else {
+                    (|| -> Option<()> {
+                        let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
+                            profile.identifier,
+
+                            profile.calib_dimension.w,
+                            profile.calib_dimension.h,
+
+                            profile.fisheye_params.camera_matrix.get(0)?.get(0)?,
+                            profile.fisheye_params.camera_matrix.get(1)?.get(1)?,
+                            profile.fisheye_params.camera_matrix.get(0)?.get(2)?,
+                            profile.fisheye_params.camera_matrix.get(1)?.get(2)?,
+
+                            profile.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
+                            profile.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
+                            profile.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
+                            profile.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
+                        );
+
+                        profile.checksum = Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())));
+                        Some(())
+                    })();
+                    map.insert(key, profile);
+                }
+            }
+        }
+
         let mut load = |data: DataSource, f_name: &str| {
             if f_name.ends_with(".gyroflow") {
                 let mut profile = LensProfile::default();
@@ -83,56 +123,35 @@ impl LensProfileDatabase {
                 match data {
                     DataSource::String(v)     => { self.preset_map.insert(f_name.to_string(), v); }
                     DataSource::SerdeValue(v) => { self.preset_map.insert(f_name.to_string(), serde_json::to_string(&v).unwrap()); }
+                    DataSource::LensfunXml(_) => { }
+                }
+                return;
+            }
+            if let DataSource::LensfunXml(x) = data {
+                match crate::lensfun::LensfunDatabase::parse(&x) {
+                    Ok(db) => {
+                        let profiles = db.to_lens_profiles(f_name);
+                        if profiles.is_empty() {
+                            log::warn!("Lensfun XML contained no supported lens calibrations: {}", f_name);
+                        }
+                        for profile in profiles {
+                            insert_profile_into(&mut self.map, self.loaded, profile, f_name);
+                        }
+                    }
+                    Err(e) => {
+                        log::error!("Error parsing Lensfun XML {}: {}", f_name, e);
+                    }
                 }
                 return;
             }
             let parsed = match data {
                 DataSource::String(x)     => LensProfile::from_json(&x),
-                DataSource::SerdeValue(x) => LensProfile::from_value(x)
+                DataSource::SerdeValue(x) => LensProfile::from_value(x),
+                DataSource::LensfunXml(_) => unreachable!()
             };
             match parsed {
-                Ok(mut v) => {
-                    v.path_to_file = f_name.to_string();
-                    for mut profile in v.get_all_matching_profiles() {
-                        let key = if !profile.identifier.is_empty() {
-                            profile.identifier.clone()
-                        } else {
-                            f_name.to_string()
-                        };
-                        if self.map.contains_key(&key) {
-                            if !self.loaded {
-                                log::warn!("Lens profile already present: {}, path_to_file: {} from {}", key, f_name, self.map.get(&key).unwrap().path_to_file);
-
-                                // let prof = std::fs::read(&f_name).unwrap();
-                                // let mut prof: serde_json::Value = serde_json::from_slice(&prof).unwrap();
-                                // *prof.get_mut("identifier").unwrap() = serde_json::Value::String(String::new());
-                                // std::fs::write(f_name, serde_json::to_string_pretty(&prof).unwrap()).unwrap();
-                            }
-                        } else {
-                            (|| -> Option<()> {
-                                let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
-                                    profile.identifier,
-
-                                    profile.calib_dimension.w,
-                                    profile.calib_dimension.h,
-
-                                    profile.fisheye_params.camera_matrix.get(0)?.get(0)?,
-                                    profile.fisheye_params.camera_matrix.get(1)?.get(1)?,
-                                    profile.fisheye_params.camera_matrix.get(0)?.get(2)?,
-                                    profile.fisheye_params.camera_matrix.get(1)?.get(2)?,
-
-                                    profile.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
-                                );
-
-                                profile.checksum = Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())));
-                                Some(())
-                            })();
-                            self.map.insert(key, profile);
-                        }
-                    }
+                Ok(v) => {
+                    insert_profile_into(&mut self.map, self.loaded, v, f_name);
                 },
                 Err(e) => {
                     log::error!("Error parsing lens profile: {}: {:?}", f_name, e);
@@ -149,6 +168,11 @@ impl LensProfileDatabase {
                     if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
                         if let Ok(data) = std::fs::read_to_string(&f_name) {
                             load(DataSource::String(data), &f_name);
+                        }
+                    }
+                    if f_name.ends_with(".xml") {
+                        if let Ok(data) = std::fs::read_to_string(&f_name) {
+                            load(DataSource::LensfunXml(data), &f_name);
                         }
                     }
                     if !bundle_loaded && f_name.ends_with(".cbor.gz") {
