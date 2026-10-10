@@ -4,6 +4,7 @@
 use std::cmp::Ordering;
 use std::collections::{ HashSet, HashMap, BTreeMap };
 use crate::LensProfile;
+use crate::lensfun_database::LensfunDatabase;
 use std::path::PathBuf;
 use std::io::Read;
 
@@ -22,12 +23,93 @@ pub struct LensProfileDatabase {
     map: HashMap<String, LensProfile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
     list_for_ui: Vec<(String, String, String, bool, f64, i32, String)>,
+    lensfun_db: LensfunDatabase,
     pub loaded: bool,
     pub version: u32,
 }
 impl Clone for LensProfileDatabase {
     fn clone(&self) -> Self {
-        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), loaded: self.loaded, ..Default::default() }
+        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), lensfun_db: self.lensfun_db.clone(), loaded: self.loaded, ..Default::default() }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn lensfun_fixture() -> LensfunDatabase {
+        LensfunDatabase::from_xml_str(r#"
+            <lensdatabase>
+                <camera>
+                    <maker>Sony</maker>
+                    <model>ILCE-7SM3</model>
+                    <mount>Sony E</mount>
+                    <cropfactor>1.0</cropfactor>
+                </camera>
+                <lens>
+                    <maker>Sony</maker>
+                    <model>FE 24mm F1.4 GM</model>
+                    <mount>Sony E</mount>
+                    <calibration>
+                        <distortion model="poly3" focal="24" k1="-0.01" />
+                    </calibration>
+                </lens>
+            </lensdatabase>
+        "#).unwrap()
+    }
+
+    #[test]
+    fn clone_preserves_lensfun_database() {
+        let mut db = LensProfileDatabase::default();
+        db.lensfun_db.extend(lensfun_fixture());
+
+        let cloned = db.clone();
+
+        assert_eq!(cloned.lensfun_db().cameras.len(), 1);
+        assert_eq!(cloned.lensfun_db().lenses_for_mount("Sony E").len(), 1);
+    }
+
+    #[test]
+    fn set_from_db_preserves_lensfun_database() {
+        let mut source = LensProfileDatabase::default();
+        source.lensfun_db.extend(lensfun_fixture());
+
+        let mut target = LensProfileDatabase::default();
+        target.set_from_db(source);
+
+        assert_eq!(target.lensfun_db().cameras[0].model, "ILCE-7SM3");
+        assert_eq!(target.lensfun_db().lenses_for_mount("Sony E")[0].display_name(), "Sony FE 24mm F1.4 GM");
+    }
+
+    #[test]
+    fn exports_lensfun_metadata_json_for_ui_selectors() {
+        let mut db = LensProfileDatabase::default();
+        db.lensfun_db.extend(lensfun_fixture());
+
+        let metadata: serde_json::Value = serde_json::from_str(&db.lensfun_metadata_json()).unwrap();
+
+        assert_eq!(metadata[0]["maker"], "Sony");
+        assert_eq!(metadata[0]["model"], "FE 24mm F1.4 GM");
+        assert_eq!(metadata[0]["mounts"][0], "Sony E");
+        assert_eq!(metadata[0]["focal_lengths"][0], 24.0);
+        assert_eq!(metadata[0]["distortion_models"][0], "poly3");
+    }
+
+    #[test]
+    fn loads_lensfun_profiles_into_searchable_database() {
+        let mut db = LensProfileDatabase::default();
+        db.lensfun_db.extend(lensfun_fixture());
+
+        db.load_lensfun_profiles();
+        db.prepare_list_for_ui();
+
+        let profiles = db.search("sony 24", &HashSet::new(), 0, 0);
+        assert_eq!(profiles.len(), 1);
+        assert!(profiles[0].1.starts_with("lensfun://sony/ilce-7sm3/sony-fe-24mm-f1-4-gm/24/poly3"));
+
+        let profile = db.get_by_id(&profiles[0].1).unwrap();
+        assert_eq!(profile.distortion_model.as_deref(), Some("poly3"));
+        assert_eq!(profile.focal_length, Some(24.0));
     }
 }
 
@@ -151,6 +233,13 @@ impl LensProfileDatabase {
                             load(DataSource::String(data), &f_name);
                         }
                     }
+                    if f_name.ends_with(".xml") {
+                        match std::fs::read_to_string(&f_name).map(|data| LensfunDatabase::from_xml_str(&data)) {
+                            Ok(Ok(db)) => self.lensfun_db.extend(db),
+                            Ok(Err(e)) => log::warn!("Error parsing Lensfun database: {}: {:?}", f_name, e),
+                            Err(e) => log::warn!("Error reading Lensfun database: {}: {:?}", f_name, e),
+                        }
+                    }
                     if !bundle_loaded && f_name.ends_with(".cbor.gz") {
                         if let Ok(data) = std::fs::read(&f_name) {
                             let mut e = flate2::read::GzDecoder::new(std::io::Cursor::new(data));
@@ -197,6 +286,7 @@ impl LensProfileDatabase {
             load_from_dir(Self::get_path());
         }
 
+        self.load_lensfun_profiles();
         let copy = self.clone();
         for (_, v) in self.map.iter_mut() {
             v.resolve_interpolations(&copy);
@@ -209,6 +299,7 @@ impl LensProfileDatabase {
     pub fn set_from_db(&mut self, b: Self) {
         self.map = b.map;
         self.preset_map = b.preset_map;
+        self.lensfun_db = b.lensfun_db;
         self.loaded = b.loaded;
         self.version = b.version;
         if self.loaded {
@@ -274,6 +365,20 @@ impl LensProfileDatabase {
             }
         }
         self.list_for_ui.sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
+    }
+
+    pub fn lensfun_db(&self) -> &LensfunDatabase {
+        &self.lensfun_db
+    }
+
+    pub fn lensfun_metadata_json(&self) -> String {
+        serde_json::to_string(&self.lensfun_db.lens_metadata()).unwrap_or_else(|_| "[]".to_string())
+    }
+
+    fn load_lensfun_profiles(&mut self) {
+        for (id, profile) in self.lensfun_db.lens_profiles() {
+            self.map.entry(id).or_insert(profile);
+        }
     }
 
     pub fn search(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<(String, String, String, bool, f64, i32, String)> {
