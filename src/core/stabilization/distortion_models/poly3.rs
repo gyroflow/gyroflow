@@ -85,17 +85,7 @@ impl Poly3 {
     pub fn wgsl_functions(&self)   -> &'static str { include_str!("poly3.wgsl") }
 }
 
-// TODO
-// let focal = 28;
-// let crop_factor = 1.0;
-// let aspect_ratio = 4.0 / 3.0;
-
-// let real_focal = real_focal.unwrap_or_else(|| match model {
-//     "ptlens" => focal * (1.0 - k[0] - k[1] - k[2]),
-//     "poly3"  => focal * (1.0 - k[0]),
-//     _ => focal
-// });
-// let hugin_scale_in_millimeters = 36.0.hypot(24.0) / crop_factor / aspect_ratio.hypot(1.0) / 2.0;
-// let hugin_scaling = real_focal / hugin_scale_in_millimeters;
-// rescale_coeffs(k, hugin_scaling);
+// The real-focal fallback and hugin_scaling this TODO sketched out are now implemented in
+// `crate::lensfun`, which imports Lensfun's own XML lens-profile database through exactly this
+// `rescale_coeffs` (and poly5's/ptlens's) using that formula.
 
