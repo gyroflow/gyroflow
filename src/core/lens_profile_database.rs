@@ -25,6 +25,29 @@ pub struct LensProfileDatabase {
     pub loaded: bool,
     pub version: u32,
 }
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize)]
+pub struct CameraMetadataIndex {
+    pub brands: Vec<CameraBrandMetadata>,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize)]
+pub struct CameraBrandMetadata {
+    pub name: String,
+    pub models: Vec<CameraModelMetadata>,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize)]
+pub struct CameraModelMetadata {
+    pub name: String,
+    pub lenses: Vec<LensMetadata>,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize)]
+pub struct LensMetadata {
+    pub name: String,
+    pub settings: Vec<String>,
+}
 impl Clone for LensProfileDatabase {
     fn clone(&self) -> Self {
         Self { map: self.map.clone(), preset_map: self.preset_map.clone(), loaded: self.loaded, ..Default::default() }
@@ -274,6 +297,50 @@ impl LensProfileDatabase {
             }
         }
         self.list_for_ui.sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
+    }
+
+    pub fn camera_metadata_index(&self) -> CameraMetadataIndex {
+        let mut index = BTreeMap::<String, BTreeMap<String, BTreeMap<String, BTreeMap<String, ()>>>>::new();
+
+        for profile in self.map.values() {
+            if profile.is_copy ||
+               profile.camera_brand.trim().is_empty() ||
+               profile.camera_model.trim().is_empty() ||
+               profile.lens_model.trim().is_empty() {
+                continue;
+            }
+
+            index
+                .entry(profile.camera_brand.trim().to_string())
+                .or_default()
+                .entry(profile.camera_model.trim().to_string())
+                .or_default()
+                .entry(profile.lens_model.trim().to_string())
+                .or_default()
+                .insert(profile.camera_setting.trim().to_string(), ());
+        }
+
+        CameraMetadataIndex {
+            brands: index
+                .into_iter()
+                .map(|(name, models)| CameraBrandMetadata {
+                    name,
+                    models: models
+                        .into_iter()
+                        .map(|(name, lenses)| CameraModelMetadata {
+                            name,
+                            lenses: lenses
+                                .into_iter()
+                                .map(|(name, settings)| LensMetadata {
+                                    name,
+                                    settings: settings.into_keys().filter(|x| !x.is_empty()).collect(),
+                                })
+                                .collect(),
+                        })
+                        .collect(),
+                })
+                .collect(),
+        }
     }
 
     pub fn search(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<(String, String, String, bool, f64, i32, String)> {
@@ -530,5 +597,51 @@ impl LensProfileDatabase {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn profile(brand: &str, model: &str, lens: &str, setting: &str) -> LensProfile {
+        LensProfile {
+            camera_brand: brand.into(),
+            camera_model: model.into(),
+            lens_model: lens.into(),
+            camera_setting: setting.into(),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn camera_metadata_index_groups_and_sorts_profiles() {
+        let mut db = LensProfileDatabase::default();
+        db.map.insert("b".into(), profile("Sony", "A7S III", "FE 24mm F1.4 GM", "16:9"));
+        db.map.insert("a".into(), profile("Canon", "R5", "RF 15-35mm F2.8", "4:3"));
+        db.map.insert("c".into(), profile("Sony", "A7S III", "FE 24mm F1.4 GM", "4:3"));
+
+        let index = db.camera_metadata_index();
+
+        assert_eq!(index.brands.iter().map(|x| x.name.as_str()).collect::<Vec<_>>(), vec!["Canon", "Sony"]);
+        assert_eq!(index.brands[1].models[0].name, "A7S III");
+        assert_eq!(index.brands[1].models[0].lenses[0].name, "FE 24mm F1.4 GM");
+        assert_eq!(index.brands[1].models[0].lenses[0].settings, vec!["16:9", "4:3"]);
+    }
+
+    #[test]
+    fn camera_metadata_index_skips_incomplete_or_copy_profiles() {
+        let mut copy = profile("Sony", "A7S III", "FE 24mm F1.4 GM", "16:9");
+        copy.is_copy = true;
+
+        let mut db = LensProfileDatabase::default();
+        db.map.insert("copy".into(), copy);
+        db.map.insert("missing-lens".into(), profile("Sony", "A7S III", "", "16:9"));
+        db.map.insert("ok".into(), profile("Sony", "A7S III", "FE 24mm F1.4 GM", ""));
+
+        let index = db.camera_metadata_index();
+
+        assert_eq!(index.brands.len(), 1);
+        assert_eq!(index.brands[0].models[0].lenses[0].settings, Vec::<String>::new());
     }
 }
