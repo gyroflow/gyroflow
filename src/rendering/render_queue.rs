@@ -1617,7 +1617,7 @@ impl RenderQueue {
 
     /// Whether the job's synchronization settings ask for "Analyze image optically" (`do_optical_correction`, from the
     /// CLI's --optical-correction or a preset), with a file without motion data asking for it with autosync too. Applies
-    /// `ignore_file_motion` and `optical_correction_strength` along with it
+    /// `ignore_file_motion`, `optical_correction_strength`, `optical_correction_per_frame` and `optical_tracking` along with it
     fn optical_correction_requested(stab: &StabilizationManager) -> bool {
         let sync_settings = stab.lens.read().sync_settings.clone().unwrap_or_default();
         let flag = |key: &str| sync_settings.get(key).and_then(|v| v.as_bool()).unwrap_or_default();
@@ -1625,6 +1625,12 @@ impl RenderQueue {
         if !requested && !(flag("do_autosync") && !stab.gyro.read().has_motion()) { return false; }
         if let Some(strength) = sync_settings.get("optical_correction_strength").and_then(|v| v.as_f64()) {
             stab.set_optical_correction_strength(strength);
+        }
+        if let Some(per_frame) = sync_settings.get("optical_correction_per_frame").and_then(|v| v.as_bool()) {
+            stab.set_optical_correction_per_frame(per_frame);
+        }
+        if let Some(method) = sync_settings.get("optical_tracking").and_then(|v| v.as_str()) {
+            if !stab.set_optical_tracking(method) { ::log::warn!("Unknown optical tracking method: {method}"); }
         }
         if flag("ignore_file_motion") {
             stab.set_ignore_file_motion(true);
@@ -1648,6 +1654,8 @@ impl RenderQueue {
             Ok(()) => {
                 let info = stab.optical_correction_info();
                 ::log::info!("Optical correction: measured in {} of {} frames, correction {:.3} deg", info["measured_frames"], info["frames"], info["rms_deg"].as_f64().unwrap_or_default());
+                // The job renders with the correction: the tracks it was measured from are for editing, in the app
+                stab.release_optical_measurements();
                 Ok(())
             },
             Err(e) if cancel_flag.load(SeqCst) || !stab.gyro.read().has_motion() => Err(format!("Optical analysis failed: {e}")),

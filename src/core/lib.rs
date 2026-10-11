@@ -27,7 +27,7 @@ pub mod util;
 pub mod stabilization_params;
 
 use std::sync::{ Arc, atomic::{ AtomicU64, AtomicBool, Ordering::SeqCst } };
-use std::collections::BTreeMap;
+use std::collections::{ BTreeMap, BTreeSet, HashSet };
 use keyframes::*;
 use parking_lot::{ RwLock, RwLockUpgradableReadGuard };
 use nalgebra::Vector4;
@@ -118,6 +118,11 @@ pub struct StabilizationManager {
     /// Moved on by everything that makes an analysis still running measure the wrong thing (another file, a project,
     /// Clear): it stops, and what it measured is dropped, see `set_optical_measurements`
     pub optical_generation: Arc<AtomicU64>,
+    /// How the next analysis follows the points: the user's choice, kept from one file to the next
+    pub optical_tracking: Arc<RwLock<gyro_source::TrackingMethod>>,
+    /// Tracks the user took out of what "Analyze image optically" measured, by where they start: out of the analysis
+    /// kept, and of every analysis after it that tracks them again (see `TrackStart`). Per file, kept in the project
+    pub optical_removed_tracks: Arc<RwLock<BTreeSet<synchronization::optical_motion::TrackStart>>>,
 }
 
 impl Default for StabilizationManager {
@@ -160,6 +165,8 @@ impl Default for StabilizationManager {
             optical_measurements: Arc::new(RwLock::new(None)),
             optical_settings: Arc::new(RwLock::new(Default::default())),
             optical_generation: Arc::new(AtomicU64::new(0)),
+            optical_tracking: Arc::new(RwLock::new(Default::default())),
+            optical_removed_tracks: Arc::new(RwLock::new(Default::default())),
         }
     }
 }
@@ -841,6 +848,22 @@ impl StabilizationManager {
                     }
                 }
             }
+            if p.show_tracked_points {
+                // On the input frame, like the features: the stabilization moves them along with the picture
+                if let Some(m) = self.optical_measurements.try_read().and_then(|m| m.clone()) {
+                    use synchronization::optical_motion::PointState;
+                    for (_, x, y, state) in self.optical_points_in_frame(&m, frame) {
+                        let (color, alpha) = match state {
+                            PointState::Used         => (Color::Green,   Alpha::Alpha100),
+                            PointState::Downweighted => (Color::Yellow,  Alpha::Alpha100),
+                            PointState::Rejected     => (Color::Red,     Alpha::Alpha100),
+                            // Not returned: not used, or taken out
+                            PointState::Unused | PointState::Removed => continue,
+                        };
+                        drawing.put_pixel((x * size.0 as f32) as i32, (y * size.1 as f32) as i32, color, alpha, Stage::OnInput, y_inverted, 2);
+                    }
+                }
+            }
             #[cfg(feature = "opencv")]
             if p.is_calibrator {
                 let lock = self.lens_calibrator.read();
@@ -937,6 +960,7 @@ impl StabilizationManager {
     pub fn set_of_method(&self, v: u32) { self.params.write().of_method = v; self.pose_estimator.clear(); }
     pub fn set_show_detected_features(&self, v: bool) { self.params.write().show_detected_features = v; }
     pub fn set_show_optical_flow     (&self, v: bool) { self.params.write().show_optical_flow      = v; }
+    pub fn set_show_tracked_points   (&self, v: bool) { self.params.write().show_tracked_points    = v; }
     pub fn set_stab_enabled          (&self, v: bool) { self.params.write().stab_enabled           = v; }
     pub fn set_frame_readout_time    (&self, v: f64)  { self.params.write().frame_readout_time     = v; }
     pub fn set_frame_readout_direction(&self, v: impl Into<ReadoutDirection>) { self.params.write().frame_readout_direction = v.into(); }
@@ -1142,6 +1166,25 @@ impl StabilizationManager {
     /// changed since the analysis started (another file, a project, Clear: `optical_generation`), they're dropped
     /// instead, as "Cancelled"
     pub fn set_optical_measurements(&self, m: synchronization::optical_motion::OpticalMeasurements) -> Result<(), String> {
+        // The tracks taken out of an analysis before that this one tracked again: out of this one too
+        let removed = m.tracks.ids_of(self.optical_removed_tracks.read().iter());
+        let m = if removed.is_empty() { m } else {
+            ::log::info!("Optical analysis: measuring again without the {} tracks removed before", removed.len());
+            let generation = m.generation;
+            match m.remeasure(removed, || self.optical_generation.load(SeqCst) != generation) {
+                Ok(without) => without,
+                Err(e) if e == "Cancelled" => return Err(e),
+                Err(e) => {
+                    // Too little left without them: the analysis is worth more than what was taken out of another one,
+                    // so they're put back, like an edit that can't be measured (`remeasure_optical_correction`)
+                    let mut removed = self.optical_removed_tracks.write();
+                    if self.optical_generation.load(SeqCst) != generation { return Err("Cancelled".into()); }
+                    ::log::warn!("Optical analysis: {e} without the tracks removed before, they're put back");
+                    removed.retain(|s| m.tracks.ids_of(std::iter::once(s)).is_empty());
+                    m
+                }
+            }
+        };
         let m = Arc::new(m);
         let context = self.optical_context();
         loop {
@@ -1170,7 +1213,15 @@ impl StabilizationManager {
     }
     /// Sets the strength; true when the correction should be refitted to it, see `refit_optical_correction`
     pub fn set_optical_correction_strength(&self, strength: f64) -> bool {
-        let settings = { let mut s = self.optical_settings.write(); s.strength = strength.clamp(0.0, 1.0); *s };
+        self.update_optical_settings(|s| s.strength = strength.clamp(0.0, 1.0))
+    }
+    /// One correction per frame instead of per band of rows, see `OpticalCorrectionSettings::per_frame`; true when the
+    /// correction should be refitted to it, see `refit_optical_correction`
+    pub fn set_optical_correction_per_frame(&self, per_frame: bool) -> bool {
+        self.update_optical_settings(|s| s.per_frame = per_frame)
+    }
+    fn update_optical_settings(&self, update: impl FnOnce(&mut gyro_source::OpticalCorrectionSettings)) -> bool {
+        let settings = { let mut s = self.optical_settings.write(); update(&mut s); *s };
         let differs = self.gyro.read().optical_correction.as_ref().map(|c| c.settings != settings).unwrap_or_default();
         differs && self.valid_optical_measurements().is_some()
     }
@@ -1193,6 +1244,170 @@ impl StabilizationManager {
         self.recompute_gyro();
         Ok(true)
     }
+    /// How the next "Analyze image optically" follows the points, "klt" or "dis". False for neither
+    pub fn set_optical_tracking(&self, name: &str) -> bool {
+        let Some(method) = gyro_source::TrackingMethod::from_name(name) else { return false };
+        *self.optical_tracking.write() = method;
+        true
+    }
+    /// Takes the tracks `ids` of the kept analysis out of what it measured, or puts them back (`remove` false). Returns
+    /// the ones that weren't already: when any, `remeasure_optical_correction` brings the correction up to date
+    pub fn remove_optical_tracks(&self, ids: &[u32], remove: bool) -> Vec<u32> {
+        let Some(m) = self.optical_measurements.read().clone() else { return Vec::new() };
+        let mut removed = self.optical_removed_tracks.write();
+        ids.iter().copied().filter(|id| {
+            let Some(start) = m.tracks.start_of(*id) else { return false };
+            if remove { removed.insert(start) } else { removed.remove(&start) }
+        }).collect()
+    }
+    /// Puts back every track taken out. True when there were any
+    pub fn restore_optical_tracks(&self) -> bool {
+        let mut removed = self.optical_removed_tracks.write();
+        let had = !removed.is_empty();
+        removed.clear();
+        had
+    }
+    /// Measures the kept analysis again without the tracks taken out now (`optical_removed_tracks`), and fits the
+    /// correction to that: a second or so per minute of video, so not on the UI thread. False when there's nothing to
+    /// do, or when it was overtaken - by another change of the tracks taken out (whose own call measures that), another
+    /// analysis, another file. Like a refit, only ever replaces the correction the kept measurements gave.
+    ///
+    /// All or nothing: what can't be measured (too little of the image left without the tracks taken out) is undone -
+    /// the tracks taken out go back to the ones the kept analysis left out - and the error says so. Without that the
+    /// tracks would look taken out while the correction still had them, and nothing would ever measure them again
+    pub fn remeasure_optical_correction(&self) -> Result<bool, String> {
+        let Some(m) = self.valid_optical_measurements() else { return Ok(false) };
+        let removed = self.optical_removed_tracks.read().clone();
+        let excluded = m.tracks.ids_of(&removed);
+        if excluded == *m.excluded { return Ok(false); }
+        // One lock at a time: the fit below takes them the other way round
+        let overtaken = || {
+            let same = *self.optical_removed_tracks.read() == removed;
+            !same || !self.optical_measurements.read().as_ref().is_some_and(|k| Arc::ptr_eq(k, &m))
+        };
+        let failed = |e: String| -> Result<bool, String> {
+            if !self.revert_optical_tracks(&m, &removed) { return Ok(false); }
+            Err(if e == "Not enough of the image could be tracked" {
+                "Too little of the image is left to measure without the tracks taken out, so they were put back".into()
+            } else {
+                format!("{e}. The tracks taken out were put back")
+            })
+        };
+        let new = Arc::new(match m.remeasure(excluded, overtaken) {
+            Ok(new) => new,
+            Err(e) if e == "Cancelled" => return Ok(false),
+            Err(e) => return failed(e),
+        });
+        loop {
+            // A copy: the strength slider would wait for the fit on the settings lock
+            let settings = *self.optical_settings.read();
+            let mut c = match synchronization::optical_motion::solve(&new, &settings) {
+                Ok(c) => c,
+                Err(e) => return failed(e),
+            };
+            let mut kept = self.optical_measurements.write();
+            if !kept.as_ref().is_some_and(|k| Arc::ptr_eq(k, &m)) || *self.optical_removed_tracks.read() != removed { return Ok(false); }
+            // Moved during the fit: the refit that asked for it refitted the measurements replaced here
+            if *self.optical_settings.read() != settings { continue; }
+            let mut gyro = self.gyro.write();
+            let Some(fitted) = &gyro.optical_correction else { return Ok(false) };
+            c.enabled = fitted.enabled;
+            gyro.optical_correction = Some(c);
+            *kept = Some(new);
+            break;
+        }
+        self.recompute_gyro();
+        Ok(true)
+    }
+    /// Takes the tracks taken out back to the ones the kept analysis `m` left out, after `tried` couldn't be measured -
+    /// unless they're no longer `tried` or `m` no longer the kept analysis: what overtook it measures its own. Tracks of
+    /// other analyses (of another trim range) stay as they are. True when it did
+    fn revert_optical_tracks(&self, m: &Arc<synchronization::optical_motion::OpticalMeasurements>, tried: &BTreeSet<synchronization::optical_motion::TrackStart>) -> bool {
+        // In the order the fit takes them
+        let kept = self.optical_measurements.read();
+        let mut removed = self.optical_removed_tracks.write();
+        if *removed != *tried || !kept.as_ref().is_some_and(|k| Arc::ptr_eq(k, m)) { return false; }
+        removed.retain(|s| m.tracks.ids_of(std::iter::once(s)).is_empty());
+        removed.extend(m.excluded.iter().filter_map(|id| m.tracks.start_of(*id)));
+        true
+    }
+    /// Whether the kept analysis could be measured without the tracks taken out now and isn't: they were taken out (or
+    /// put back) while it was out of date - another lens, sync, motion data - and it isn't any more. Then
+    /// `remeasure_optical_correction` catches up
+    pub fn optical_tracks_unmeasured(&self) -> bool {
+        let Some(m) = self.valid_optical_measurements() else { return false };
+        let removed = self.optical_removed_tracks.read();
+        m.tracks.ids_of(removed.iter()) != *m.excluded
+    }
+    /// Lets go of what the last analysis kept to refit the correction and to take tracks out of it (the correction
+    /// stays): a render job, which does neither, doesn't hold on to the tracks of a long clip
+    pub fn release_optical_measurements(&self) {
+        *self.optical_measurements.write() = None;
+    }
+    /// The frame at a moment of the file (µs), numbered as the analysis numbers them (`OpticalMotionAnalysis::feed_frame`)
+    fn optical_frame_at(&self, file_timestamp_us: i64) -> usize {
+        let (scale, fps) = { let p = self.params.read(); (p.fps_scale, p.get_scaled_fps()) };
+        frame_at_timestamp(file_timestamp_us as f64 / 1000.0 / scale.unwrap_or(1.0), fps).max(0) as usize
+    }
+    /// The tracks of the analysis `m` taken out now: until measuring again catches up, not quite the ones it left out
+    fn optical_removed_ids(&self, m: &synchronization::optical_motion::OpticalMeasurements) -> HashSet<u32> {
+        self.optical_removed_tracks.try_read().map(|removed| m.tracks.ids_of(removed.iter())).unwrap_or_else(|| (*m.excluded).clone())
+    }
+    /// The points the analysis `m` tracked in the frame `index` that the correction is measured with, as the user has
+    /// them now: not the ones it didn't use (too short a track, too few points in their rows), not the tracks taken out,
+    /// and the ones put back only once measuring again catches up
+    fn optical_points_in_frame(&self, m: &synchronization::optical_motion::OpticalMeasurements, index: usize) -> Vec<(u32, f32, f32, synchronization::optical_motion::PointState)> {
+        use synchronization::optical_motion::PointState;
+        let removed = self.optical_removed_ids(m);
+        m.points_at(index).into_iter()
+            .filter(|p| !removed.contains(&p.0) && !matches!(p.3, PointState::Unused | PointState::Removed))
+            .collect()
+    }
+    /// Where points of the input frame `index` (relative to it) are in the stabilized picture as the preview renders it,
+    /// upright, relative to it: see `optical_motion::to_output`
+    fn optical_placement(&self, stabilized: bool) -> impl Fn(usize, &[(f32, f32)]) -> Vec<Option<(f32, f32)>> + Send + Sync + 'static {
+        let params = stabilized.then(|| {
+            let mut params = ComputeParams::from_manager(self);
+            params.framebuffer_inverted = false;
+            params
+        });
+        move |index, points| match &params {
+            Some(params) => synchronization::optical_motion::to_output(params, index, points),
+            None => synchronization::optical_motion::as_tracked(index, points),
+        }
+    }
+    /// Where the last "Analyze image optically" tracked points in the frame at a moment of the file (µs), but the tracks
+    /// taken out: their track, where they are relative to the frame (0 to 1), and what became of them. With `stabilized`,
+    /// where they are in the stabilized picture the preview shows, and only the ones in it
+    pub fn optical_tracked_points(&self, file_timestamp_us: i64, stabilized: bool) -> Vec<(u32, f32, f32, synchronization::optical_motion::PointState)> {
+        let Some(m) = self.optical_measurements.read().clone() else { return Vec::new() };
+        let index = self.optical_frame_at(file_timestamp_us);
+        let mut points = self.optical_points_in_frame(&m, index);
+        if stabilized {
+            let placed = self.optical_placement(true)(index, &points.iter().map(|p| (p.1, p.2)).collect::<Vec<_>>());
+            points = points.into_iter().zip(placed)
+                .filter_map(|(p, at)| at.filter(|(x, y)| (0.0..=1.0).contains(x) && (0.0..=1.0).contains(y)).map(|(x, y)| (p.0, x, y, p.3)))
+                .collect();
+        }
+        points
+    }
+    /// The tracks (but the ones taken out) with a point within `rect` (x0, y0, x1, y1, relative to the frame - the
+    /// stabilized one with `stabilized`) in the frame at a moment of the file (µs), or in any frame. Every frame of a long
+    /// clip placed in the stabilized picture takes seconds: not on the UI thread. None once `cancelled`
+    pub fn optical_tracks_in_rect(&self, file_timestamp_us: i64, rect: [f32; 4], all_frames: bool, stabilized: bool, cancelled: impl Fn() -> bool + Sync) -> Option<Vec<u32>> {
+        let Some(m) = self.optical_measurements.read().clone() else { return Some(Vec::new()) };
+        let frames = if all_frames { 0..=usize::MAX } else { let i = self.optical_frame_at(file_timestamp_us); i..=i };
+        m.tracks.in_rect(frames, rect, &self.optical_removed_ids(&m), self.optical_placement(stabilized), cancelled)
+    }
+    /// Where the tracks `ids` are in the frames up to `reach` away from the one at a moment of the file (µs): per track,
+    /// how many frames from that one, and where, relative to the frame (the stabilized one with `stabilized`)
+    pub fn optical_track_paths(&self, ids: &HashSet<u32>, file_timestamp_us: i64, reach: usize, stabilized: bool) -> Vec<(u32, Vec<(i64, f32, f32)>)> {
+        let Some(m) = self.optical_measurements.read().clone() else { return Vec::new() };
+        let i = self.optical_frame_at(file_timestamp_us);
+        m.tracks.paths(ids, i.saturating_sub(reach)..=i + reach, self.optical_placement(stabilized)).into_iter()
+            .map(|(id, path)| (id, path.into_iter().map(|(f, x, y)| (f as i64 - i as i64, x, y)).collect()))
+            .collect()
+    }
     /// State of the correction measured from the video, for the UI
     pub fn optical_correction_info(&self) -> serde_json::Value {
         // Read out under the lock, which is let go of before `valid_optical_measurements` takes it again: a second read
@@ -1211,18 +1426,47 @@ impl StabilizationManager {
                     "measured_frames": c.measured_frames,
                     "rms_deg": c.rms_deg,
                     "strength": c.settings.strength,
+                    "per_frame": c.settings.per_frame,
                     // The file had no motion data: the analysis measured all of it
                     "from_video": !c.video_base.is_empty(),
                     "ignore_file_motion": ignore_file_motion,
                     "has_motion": has_motion,
-                }), Some(c.settings)),
+                }), Some((c.settings, c.tracking))),
                 None => (serde_json::json!({ "available": false, "ignore_file_motion": ignore_file_motion, "has_motion": has_motion }), None),
             }
         };
-        if let Some(settings) = fitted_with {
-            // Fitted with another strength than the one set, and the measurements to refit aren't here any more (a
-            // project loaded from disk keeps only the correction): only another analysis applies the new one
-            info["outdated"] = (settings != *self.optical_settings.read() && self.valid_optical_measurements().is_none()).into();
+        // What "Show tracked points" can show: an analysis of this session, a project keeps only the correction
+        let kept = self.optical_measurements.read().clone();
+        info["tracked_points"] = kept.as_ref().is_some_and(|m| !m.tracks.is_empty()).into();
+        // Which analysis's tracks they are: the same through measuring again, another for another analysis, which numbers
+        // its tracks anew
+        info["tracks_key"] = kept.as_ref().map(|m| Arc::as_ptr(&m.tracks) as usize as u64).unwrap_or_default().into();
+        // Only measurements the correction still sits on can be measured again without some of the tracks
+        let editable = kept.is_some() && self.valid_optical_measurements().is_some();
+        info["tracks_editable"] = editable.into();
+        {
+            let removed = self.optical_removed_tracks.read();
+            // Of this analysis when there is one, otherwise all the project remembers
+            let (count, pending) = match &kept {
+                Some(m) => { let ids = m.tracks.ids_of(removed.iter()); (ids.len(), editable && ids != *m.excluded) },
+                None => (removed.len(), false),
+            };
+            info["removed_tracks"] = count.into();
+            // Taken out or put back, and not measured again yet
+            info["removed_tracks_pending"] = pending.into();
+        }
+        let tracking = *self.optical_tracking.read();
+        info["tracking"] = tracking.name().into();
+        if let Some((fitted, fitted_tracking)) = fitted_with {
+            // Tracked another way than the one set now: still a correction, the new one applies from the next analysis
+            info["tracking_changed"] = (fitted_tracking != tracking).into();
+            // Fitted with other settings than the ones set, and the measurements to refit aren't here any more (a
+            // project loaded from disk keeps only the correction): only another analysis applies the new ones. The
+            // strength doesn't count without motion data to correct: the motion and its correction come from the same
+            // tracks, and it changes next to nothing
+            let set = *self.optical_settings.read();
+            let differs = set.per_frame != fitted.per_frame || (info["has_motion"] == true && set.strength != fitted.strength);
+            info["outdated"] = (differs && self.valid_optical_measurements().is_none()).into();
         }
         info
     }
@@ -1301,6 +1545,9 @@ impl StabilizationManager {
             // The strength the correction was fitted with: a project written from the clone (a render queue job's, which
             // "Edit" loads back) says it, and one that says another would refit the correction there
             optical_settings: Arc::new(RwLock::new(*self.optical_settings.read())),
+            // How a render queue job's own analysis tracks, and what it leaves out of that
+            optical_tracking: Arc::new(RwLock::new(*self.optical_tracking.read())),
+            optical_removed_tracks: Arc::new(RwLock::new(self.optical_removed_tracks.read().clone())),
 
             // NOT cloned:
             // stabilization
@@ -1336,6 +1583,7 @@ impl StabilizationManager {
 
         *self.gyro.write() = GyroSource::new();
         self.keyframes.write().clear();
+        self.optical_removed_tracks.write().clear();
 
         self.pose_estimator.clear();
     }
@@ -1490,6 +1738,9 @@ impl StabilizationManager {
                 "detected_source":    gyro.file_metadata.read().detected_source,
                 "optical_correction_enabled": gyro.optical_correction.as_ref().map(|c| c.enabled),
                 "optical_correction_strength": self.optical_settings.read().strength,
+                "optical_correction_per_frame": self.optical_settings.read().per_frame,
+                "optical_tracking": self.optical_tracking.read().name(),
+                "optical_removed_tracks": *self.optical_removed_tracks.read(),
                 "ignore_file_motion": gyro.ignores_file_motion(),
             },
 
@@ -1784,6 +2035,9 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("acc_rotation") { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_acc_rotation(v[0], v[1], v[2]); }
                 if let Some(v) = obj.get("gyro_bias")    { gyro.imu_transforms.gyro_bias = serde_json::from_value(v.clone()).ok(); }
                 if let Some(v) = obj.get("optical_correction_strength").and_then(|x| x.as_f64()) { self.optical_settings.write().strength = v; }
+                if let Some(v) = obj.get("optical_correction_per_frame").and_then(|x| x.as_bool()) { self.optical_settings.write().per_frame = v; }
+                if let Some(v) = obj.get("optical_tracking").and_then(|x| x.as_str()).and_then(gyro_source::TrackingMethod::from_name) { *self.optical_tracking.write() = v; }
+                if let Some(v) = obj.get("optical_removed_tracks") { *self.optical_removed_tracks.write() = serde_json::from_value(v.clone()).unwrap_or_default(); }
                 ignore_file_motion = obj.get("ignore_file_motion").and_then(|x| x.as_bool());
                 if let Ok(mut c) = util::decompress_from_base91_cbor::<crate::gyro_source::OpticalCorrection>(obj.get("optical_correction").and_then(|x| x.as_str()).unwrap_or_default()) {
                     if let Some(v) = obj.get("optical_correction_enabled").and_then(|x| x.as_bool()) { c.enabled = v; }

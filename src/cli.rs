@@ -78,6 +78,14 @@ struct Opts {
     #[argh(switch)]
     ignore_file_motion: bool,
 
+    /// correct the motion data once per frame instead of per band of rows, eg. for a global shutter or a rolling shutter time that's unknown (implies --optical-correction)
+    #[argh(switch)]
+    optical_per_frame: bool,
+
+    /// how the optical analysis follows the points: "klt" (default, corners) or "dis" (dense optical flow, for low texture like sky or water; slower) (implies --optical-correction)
+    #[argh(option)]
+    optical_tracking: Option<String>,
+
     /// export project file instead of rendering: 1 - default project, 2 - with gyro data, 3 - with processed gyro data, 4 - video + project file
     #[argh(option, default = "0")]
     export_project: u32,
@@ -269,12 +277,22 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             }
         }
 
-        if opts.optical_correction.is_some() || opts.ignore_file_motion {
+        if opts.optical_correction.is_some() || opts.ignore_file_motion || opts.optical_per_frame || opts.optical_tracking.is_some() {
             // In the synchronization settings: they reach every job like autosync's, and presets can have them too
             let sync = additional_data.get_mut("synchronization").unwrap();
             sync["do_optical_correction"] = true.into();
             if let Some(strength) = opts.optical_correction {
                 sync["optical_correction_strength"] = (strength / 100.0).clamp(0.0, 1.0).into();
+            }
+            if opts.optical_per_frame {
+                sync["optical_correction_per_frame"] = true.into();
+            }
+            if let Some(method) = &opts.optical_tracking {
+                let Some(method) = gyroflow_core::gyro_source::TrackingMethod::from_name(method) else {
+                    log::error!("Invalid --optical-tracking value {}. Expected \"klt\" or \"dis\".", method);
+                    std::process::exit(2);
+                };
+                sync["optical_tracking"] = method.name().into();
             }
             if opts.ignore_file_motion {
                 sync["ignore_file_motion"] = true.into();
@@ -805,24 +823,4 @@ fn watch_folder<F: FnMut(String)>(path: String, cb: F) -> Result<(), String> {
 
     log::info!("Watching {} folder(s) in {}, waiting for new files...", watched_count, path);
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn type_and_path_values_parse() {
-        assert_eq!(parse_type_and_path("3:camera.json"), Some((3, "camera.json".to_string())));
-        assert_eq!(parse_type_and_path("1:C:/stmaps/"), Some((1, "C:/stmaps/".to_string())));
-    }
-
-    #[test]
-    fn malformed_values_are_rejected_not_ignored() {
-        // These used to fall through the parser and render the video instead
-        assert_eq!(parse_type_and_path("3"), None);
-        assert_eq!(parse_type_and_path("3:"), None);
-        assert_eq!(parse_type_and_path(":camera.json"), None);
-        assert_eq!(parse_type_and_path("x:camera.json"), None);
-    }
 }

@@ -25,6 +25,7 @@ Item {
     property alias infoMessages: infoMessages;
     property alias gridGuide: gridGuide;
     property alias secondPreview: secondPreview;
+    property alias opticalPointEditor: opticalPointEditor;
 
     property int outWidth: window? window.exportSettings.outWidth : 0;
     property int outHeight: window? window.exportSettings.outHeight : 0;
@@ -42,6 +43,11 @@ Item {
     property var mergedFiles: [];
 
     property Menu.VideoInformation vidInfo: null;
+
+    // Picking the tracked points of the optical analysis, on the preview as it is: stabilized, where every removal shows
+    // in how steady it gets, or with the stabilization off
+    function setOpticalPointEditing(on: bool): void { opticalPointEditor.active = on; }
+    onLoadedFileUrlChanged: root.setOpticalPointEditing(false);
 
     function loadGyroflowData(obj: var, queueJobId: var): void {
         root.pendingGyroflowData = null;
@@ -782,6 +788,12 @@ Item {
                         radius: 5 * dpiScale;
                         anchors.fill: parent;
                         anchors.margins: -border.width;
+                    }
+                    OpticalPointEditor {
+                        id: opticalPointEditor;
+                        anchors.fill: parent;
+                        timestampUs: vid.timestamp * 1000;
+                        stabilized: vid.stabEnabled;
                     }
                 }
 
