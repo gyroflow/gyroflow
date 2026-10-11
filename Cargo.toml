@@ -91,6 +91,12 @@ oslog = "0.2"
 objc2 = "0.6"
 objc2-metal = "0.3"
 
+[target.'cfg(target_os = "ios")'.dependencies]
+# libc 0.2.190 made `mach_task_self` macOS-only, which breaks `num_threads` (via `time`) on iOS.
+# Cargo keeps one libc 0.2.x for all targets, so this caps it everywhere.
+# Remove once a libc release with rust-lang/libc#5612 is out.
+libc = ">=0.2.183, <0.2.190"
+
 [build-dependencies]
 cpp_build = "0.5.11"
 winres = "0.1.12"

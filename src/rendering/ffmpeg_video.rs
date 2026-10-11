@@ -204,7 +204,7 @@ impl<'a> VideoTranscoder<'a> {
                         frame_ts.first = Some(timestamp_us);
                     }
                     ts -= frame_ts.first.unwrap();
-                    ts += frame_ts.add_video;
+                    ts += frame_ts.range_offset;
 
                     let mut rate_control = RateControl {
                         out_timestamp_us: ts,
