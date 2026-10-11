@@ -768,7 +768,7 @@ Item {
                         interval: 150;
                         property int waited: 0;
                         onTriggered: {
-                            if (!vid.videoWidth) { bufferTrigger.start(); return; }
+                            if (!vid.videoWidth) return; // The file failed to load, the next one starts it again in onMetadataChanged
                             // Only once the first frame is shown (which ends the loading screen), unless it doesn't show up on
                             // its own: seeking while it's decoded made the decoder start over at the seek target, which kept
                             // the loading screen up for seconds with videos decoded on the CPU (eg. 5.3K GoPro footage)

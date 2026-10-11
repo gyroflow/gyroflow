@@ -331,6 +331,8 @@ pub struct Controller {
     // cancelled once a newer one replaced it. Results of a replaced load are dropped, see `begin_telemetry_load`
     telemetry_cancel_flag: Arc<AtomicBool>,
     telemetry_load_id: Arc<AtomicUsize>,
+    // Telemetry loads clear and write the motion data and lens of the stabilizer, so they run one after another
+    telemetry_queue: util::SerialQueue,
     preview_pipeline: Arc<AtomicUsize>,
 
     ongoing_computations: BTreeSet<u64>,
@@ -342,9 +344,6 @@ pub struct Controller {
 
     pub stabilizer: Arc<StabilizationManager>,
 }
-
-// Telemetry loads clear and write the motion data and lens of the stabilizer, so they run one after another
-static TELEMETRY_LOAD_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
 impl Controller {
     pub fn new() -> Self {
@@ -892,8 +891,7 @@ impl Controller {
 
                 self.loading_gyro_in_progress = true;
                 self.loading_gyro_in_progress_changed();
-                core::run_threaded(move || {
-                    let _lock = TELEMETRY_LOAD_LOCK.lock();
+                self.telemetry_queue.run(move || {
                     // Replaced by a newer load while it waited for the previous one
                     if current_load_id.load(SeqCst) != load_id { return; }
                     let load_cancel_flag = cancel_flag.clone();
@@ -1411,7 +1409,7 @@ impl Controller {
     /// Cancels the telemetry load in progress, if any, and returns the id and cancel flag of a new one.
     /// Clicking through videos while they load used to run the loads at the same time, and whichever finished last
     /// wrote its motion data and lens, even of a video that was no longer loaded. Now only the latest load's progress
-    /// and results reach the UI and the stabilizer, and the loads run one after another (see `TELEMETRY_LOAD_LOCK`).
+    /// and results reach the UI and the stabilizer, and the loads run one after another (see `telemetry_queue`).
     fn begin_telemetry_load(&mut self) -> (usize, Arc<AtomicBool>) {
         self.telemetry_cancel_flag.store(true, SeqCst);
         self.telemetry_cancel_flag = Arc::new(AtomicBool::new(false));
@@ -1546,8 +1544,7 @@ impl Controller {
 
         let stab = self.stabilizer.clone();
         self.cancel_flag.store(true, SeqCst); // Other operations still running on the previous project
-        core::run_threaded(move || {
-            let _lock = TELEMETRY_LOAD_LOCK.lock();
+        self.telemetry_queue.run(move || {
             if current_load_id.load(SeqCst) != load_id { return; } // Replaced by a newer load while it waited
             finished(stab.import_gyroflow_file(&url, false, progress, cancel_flag, false));
         });
@@ -1573,8 +1570,7 @@ impl Controller {
 
         let stab = self.stabilizer.clone();
         self.cancel_flag.store(true, SeqCst); // Other operations still running on the previous project
-        core::run_threaded(move || {
-            let _lock = TELEMETRY_LOAD_LOCK.lock();
+        self.telemetry_queue.run(move || {
             if current_load_id.load(SeqCst) != load_id { return; } // Replaced by a newer load while it waited
             let mut is_preset = false;
             finished(stab.import_gyroflow_data(data.to_string().as_bytes(), false, None, progress, cancel_flag, &mut is_preset, false));
