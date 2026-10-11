@@ -598,7 +598,7 @@ MenuItem {
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 0;
-                tooltip: qsTr("\"Copy\" keeps the original audio track without re-encoding it.\nIf the output file format doesn't support the original audio codec, it will be encoded to AAC.");
+                tooltip: qsTr("\"Copy\" keeps the original audio track without re-encoding it.\nIf the output file format can't store the original audio codec (e.g. PCM in .mp4), it will be encoded to AAC.");
             }
         }
         Label {

@@ -320,11 +320,11 @@ impl<'a> VideoTranscoder<'a> {
                             self.encoder_params.pixel_format = Some(target_format);
                         }
                         // Frames from the CPU (eg. software decoding when the GPU can't decode the video) are uploaded to the hardware
-                        // frames of the encoder, which take the semi-planar formats, so convert eg. yuv420p10le to p010le first
-                        if hw_upload_format.is_some() && !Self::is_hw_upload_format(target_format) {
+                        // frames of the encoder, which take the semi-planar formats, so convert eg. yuv420p10le to p010le first.
+                        // Frames downloaded from the GPU already are in a format it holds (eg. Y210 for 4:2:2 on Intel), keep them
+                        if hw_upload_format.is_some() && hw_formats.is_none() && !Self::is_hw_upload_format(target_format) {
                             let depth = unsafe { ffi::av_pix_fmt_desc_get(target_format.into()).as_ref().map(|x| x.comp[0].depth).unwrap_or(8) };
-                            target_format = super::ffmpeg_hw::find_best_matching_codec(target_format, &[format::Pixel::NV12, format::Pixel::P010LE])
-                                .unwrap_or(if depth > 8 { format::Pixel::P010LE } else { format::Pixel::NV12 });
+                            target_format = if depth > 8 { format::Pixel::P010LE } else { format::Pixel::NV12 };
                             log::debug!("Uploading {:?} frames to the encoder as {:?}", in_format, target_format);
                             self.encoder_params.pixel_format = Some(target_format);
                         }
@@ -530,11 +530,16 @@ impl<'a> VideoTranscoder<'a> {
             if let Some(parameter_sets) = encoded.data().and_then(|data| Self::parameter_sets_from_annexb(data, codec_id)) {
                 log::debug!("Using the parameter sets from the bitstream as extradata ({} bytes)", parameter_sets.len());
                 unsafe {
-                    let par = (*octx.stream(output_index).ok_or(Error::StreamNotFound)?.as_ptr()).codecpar;
-                    ffi::av_freep(&mut (*par).extradata as *mut *mut u8 as *mut std::ffi::c_void);
-                    (*par).extradata = ffi::av_mallocz(parameter_sets.len() + ffi::AV_INPUT_BUFFER_PADDING_SIZE as usize) as *mut u8;
-                    std::ptr::copy_nonoverlapping(parameter_sets.as_ptr(), (*par).extradata, parameter_sets.len());
-                    (*par).extradata_size = parameter_sets.len() as i32;
+                    let par = (*octx.stream_mut(output_index).ok_or(Error::StreamNotFound)?.as_mut_ptr()).codecpar;
+                    let extradata = ffi::av_mallocz(parameter_sets.len() + ffi::AV_INPUT_BUFFER_PADDING_SIZE as usize) as *mut u8;
+                    if extradata.is_null() {
+                        log::error!("Failed to allocate the extradata, keeping the parameter sets of the encoder");
+                    } else {
+                        std::ptr::copy_nonoverlapping(parameter_sets.as_ptr(), extradata, parameter_sets.len());
+                        ffi::av_freep(&mut (*par).extradata as *mut *mut u8 as *mut std::ffi::c_void);
+                        (*par).extradata = extradata;
+                        (*par).extradata_size = parameter_sets.len() as i32;
+                    }
                 }
             }
             Self::write_header(octx, ost_time_bases)?;

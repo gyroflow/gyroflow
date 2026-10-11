@@ -496,9 +496,8 @@ impl<'a> FfmpegProcessor<'a> {
         }
         log::debug!("Output metadata: {:?}", &metadata);
         octx.set_metadata(metadata);
-        // Header will be written after video encoder is initalized, in ffmpeg_video.rs:init_encoder
-
-        let mut video_inited = false;
+        // Header will be written after video encoder is initalized, in ffmpeg_video.rs:init_encoder, or with its first packet
+        // for the encoders that need the parameter sets from the bitstream (see `VideoTranscoder::header_written`)
 
         let process_stream = |atranscoders: &mut HashMap<usize, AudioTranscoder>, octx: &mut format::context::Output, mut packet: ffmpeg_next::Packet, start_ms: Option<f64>, ist_index: usize, ost_index: isize, ost_time_base: Rational, frame_ts: &mut FrameTimestamps| -> Result<(), Error> {
             let ist_time_base = ist_time_bases[ist_index];
@@ -559,10 +558,11 @@ impl<'a> FfmpegProcessor<'a> {
             Ok(())
         };
 
-        // Audio and data packets wait for the muxer header (written once the video encoder is initialized), for the first video
-        // frame of the range, which sets where the range starts in the output, and past the end of the range, for the video to end
-        let must_wait = |frame_ts: &FrameTimestamps, video_inited: bool, packet: &ffmpeg_next::Packet, ist_index: usize, end_ms: Option<f64>| -> bool {
-            !video_inited || frame_ts.first.is_none() || (frame_ts.range_end.is_none() && end_ms.is_some_and(|end| {
+        // Audio and data packets wait for the muxer header (written once the video encoder is initialized, or with its first packet),
+        // for the first video frame of the range, which sets where the range starts in the output, and past the end of the range,
+        // for the video to end
+        let must_wait = |frame_ts: &FrameTimestamps, header_written: bool, packet: &ffmpeg_next::Packet, ist_index: usize, end_ms: Option<f64>| -> bool {
+            !header_written || frame_ts.first.is_none() || (frame_ts.range_end.is_none() && end_ms.is_some_and(|end| {
                 packet.pts().or(packet.dts()).is_some_and(|ts| ts.rescale(ist_time_bases[ist_index], (1, 1000000)) as f64 / 1000.0 > end)
             }))
         };
@@ -601,18 +601,21 @@ impl<'a> FfmpegProcessor<'a> {
                                     encoding_video = false;
                                     self.frame_ts.end_range();
                                 }
+                                // Decoding errors stop the export only until the first frame reached the encoder. Not tied to the header,
+                                // which for some encoders waits for their first packet, a few frames later
+                                if self.video.encoder.is_some() {
+                                    any_encoded = true;
+                                }
                                 // The other streams can be written once the header is written
                                 if self.video.header_written {
-                                    video_inited = true;
                                     for (packet, ist_index, ost_index) in std::mem::take(&mut pending_packets) {
-                                        if must_wait(&self.frame_ts, video_inited, &packet, ist_index, end_ms) {
+                                        if must_wait(&self.frame_ts, self.video.header_written, &packet, ist_index, end_ms) {
                                             pending_packets.push((packet, ist_index, ost_index));
                                         } else if !self.frame_ts.is_finished(ist_index) {
                                             let ost_time_base = self.ost_time_bases[ost_index as usize];
                                             process_stream(&mut atranscoders, &mut octx, packet, start_ms, ist_index, ost_index, ost_time_base, &mut self.frame_ts)?;
                                         }
                                     }
-                                    any_encoded = true;
                                 }
                                 while pause_flag.load(Relaxed) {
                                     std::thread::sleep(std::time::Duration::from_millis(100));
@@ -627,7 +630,7 @@ impl<'a> FfmpegProcessor<'a> {
                     }
                 } else if !self.frame_ts.is_finished(ist_index) {
                     // Audio, or a data track kept by "Preserve other tracks"
-                    if must_wait(&self.frame_ts, video_inited, &packet, ist_index, end_ms) {
+                    if must_wait(&self.frame_ts, self.video.header_written, &packet, ist_index, end_ms) {
                         pending_packets.push((packet, ist_index, ost_index));
                         continue;
                     }
@@ -669,9 +672,10 @@ impl<'a> FfmpegProcessor<'a> {
                 log::error!("Failed to flush last packet: {e:?}");
             }
         }
-        // The audio that waited for the video to reach the end of the last range, when it only did in the decoder flush
+        // The audio that waited for the video to reach the end of the last range, or for the header, when the video only got
+        // there in the decoder or encoder flush
         for (packet, ist_index, ost_index) in pending_packets {
-            if !must_wait(&self.frame_ts, video_inited, &packet, ist_index, end_ms) && !self.frame_ts.is_finished(ist_index) {
+            if !must_wait(&self.frame_ts, self.video.header_written, &packet, ist_index, end_ms) && !self.frame_ts.is_finished(ist_index) {
                 let ost_time_base = self.ost_time_bases[ost_index as usize];
                 process_stream(&mut atranscoders, &mut octx, packet, start_ms, ist_index, ost_index, ost_time_base, &mut self.frame_ts)?;
             }
