@@ -59,7 +59,7 @@ const MAX_EDGE_STRETCH: f64 = 4.0;
 /// It bounds the *fov*, not the polygon: the polygon is the picture's own outline, and clamping that would
 /// make the zoom overlay - and the STMap, and the sync - disagree with what the render actually draws.
 pub fn max_zoom_out_fov(params: &ComputeParams, amount: f64, output_width: usize, timestamp_ms: f64) -> f64 {
-    let lens = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(params, timestamp_ms, params.framebuffer_inverted);
+    let lens = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(params, timestamp_ms, false);
     max_zoom_out_fov_for_lens(params, amount, output_width, &lens)
 }
 

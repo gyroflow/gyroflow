@@ -105,7 +105,7 @@ impl<'a>  FovIterative<'a> {
     /// whole pass, so the key is the lens data and the correction strength alone
     fn max_fov_at(&self, ts: f64, amount: f64) -> f64 {
         let p = self.compute_params;
-        let lens = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(p, ts, p.framebuffer_inverted);
+        let lens = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(p, ts, false);
         let mut hasher = DefaultHasher::new();
         for v in [lens.0[(0, 0)], lens.0[(1, 1)], lens.0[(0, 2)], lens.0[(1, 2)], lens.2, lens.3, lens.4, amount] {
             hasher.write_u64(v.to_bits());

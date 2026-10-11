@@ -91,6 +91,20 @@ impl_models! {
 }
 
 impl DistortionModel {
+    /// The coefficients of the image mirrored vertically (`y` -> `-y`, a framebuffer upside down): the terms odd in
+    /// `y` change sign, the tangential `p1` and the thin prism of the `y` offset. Radial models are symmetric
+    pub fn mirror_coefficients_y(&self, k: &mut [f64]) {
+        use DistortionModels as M;
+        let odd: &[usize] = match &self.inner {
+            M::OpenCVStandard(_) => &[2, 10, 11], // p1, s3, s4
+            M::Insta360(_) => &[3],               // p1
+            _ => &[],
+        };
+        for &i in odd {
+            if let Some(v) = k.get_mut(i) { *v = -*v; }
+        }
+    }
+
     /// The largest ray angle the model itself can represent, in radians, `None` when it has no such end.
     /// Not a fold of the calibration - [`Self::radial_distortion_limit`] finds those - but the shape of the
     /// projection: a rectilinear model images the z=1 plane and has nothing at 90°, and the unified sphere

@@ -127,7 +127,7 @@ impl FrameTransform {
 
         let mut focal_length = lens.focal_length;
 
-        let mut camera_matrix = lens.get_camera_matrix((params.width, params.height), invert_asym_lens);
+        let mut camera_matrix = lens.get_camera_matrix((params.width, params.height));
         let mut distortion_coeffs = lens.get_distortion_coeffs();
 
         let mut radial_distortion_limit = lens.radial_distortion_limit_rad().unwrap_or_default();
@@ -153,7 +153,7 @@ impl FrameTransform {
                     camera_matrix[(1, 1)] = fy;
                     if let Some((cx, cy)) = val.principal_point {
                         camera_matrix[(0, 2)] = cx as f64;
-                        camera_matrix[(1, 2)] = if invert_asym_lens { params.height as f64 - cy as f64 } else { cy as f64 };
+                        camera_matrix[(1, 2)] = cy as f64;
                     }
                     stretch_lens = false;
                     per_frame = true;
@@ -227,6 +227,15 @@ impl FrameTransform {
             camera_matrix[(1, 1)] *= zoom_scale;
         }
 
+        // The frame upside down (`framebuffer_inverted`, the kernel's frame then) is the image mirrored vertically: the
+        // principal point, and the terms of the distortion that are odd in y. The kernel divides `y` by the vertical
+        // stretch after adding the principal point, so `y -> height - y` is `cy -> stretch * height - cy`. Mirrored here,
+        // once, on the finished matrix, it holds wherever the matrix came from: a profile, the default or the metadata
+        if invert_asym_lens {
+            camera_matrix[(1, 2)] = params.height as f64 * input_vertical_stretch - camera_matrix[(1, 2)];
+            params.distortion_model.mirror_coefficients_y(&mut distortion_coeffs);
+        }
+
         // The largest ray angle this lens has an image for: where its calibration folds, and where the
         // model's own projection ends (`DistortionModel::field_limit`), whichever comes first
         let mut field_limit = radial_distortion_limit;
@@ -259,7 +268,7 @@ impl FrameTransform {
             field_limit,
             input_horizontal_stretch,
             input_vertical_stretch,
-            focal_length, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, false);
+            focal_length, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, params.framebuffer_inverted);
         let focal_scale = Self::dequantize_camera_matrix(params, frame, &mut camera_matrix);
         let focal_length = focal_length.map(|f| f * focal_scale);
         // ----------- Lens -----------
@@ -444,7 +453,8 @@ impl FrameTransform {
 
         let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, params.scaled_fps) as usize);
 
-        let (mut camera_matrix, distortion_coeffs, field_limit, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, params.framebuffer_inverted);
+        // Points are always the right way up, like the rotations and the readout below
+        let (mut camera_matrix, distortion_coeffs, field_limit, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, false);
         Self::dequantize_camera_matrix(params, frame, &mut camera_matrix);
 
         // The focal length compensation is part of the applied zoom, not of the base projection:

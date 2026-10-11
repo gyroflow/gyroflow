@@ -95,7 +95,7 @@ objc2-metal = "0.3"
 cpp_build = "0.5.11"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.6"
+cc = "1.7"
 
 [[bin]]
 name = "gyroflow"
