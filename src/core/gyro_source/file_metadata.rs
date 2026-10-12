@@ -116,6 +116,11 @@ pub struct FileMetadata {
     /// into `mesh_correction` on load (`sony::upgrade_legacy_mesh_buffers`)
     #[serde(rename = "mesh_correction", skip_serializing)]
     pub legacy_mesh_correction: Vec<(Vec<f64>, Vec<f32>)>,
+    /// The residual pass' per-frame mesh, built from the optical measurements when the user turns it on. Kept here
+    /// because the render path reads it beside `mesh_correction` (see `frame_transform`), but never serialized: a
+    /// project keeps the correction and the settings, and rebuilds the mesh from the measurements in milliseconds
+    #[serde(skip)]
+    pub residual_mesh: Option<crate::synchronization::optical_motion::residual::ResidualMesh>,
     pub lens_breathing:      Vec<BreathingFrame>,
     /// Cache of `lens_focal_length_varies`, the renderer asks per frame
     #[serde(skip)]
@@ -144,6 +149,7 @@ impl FileMetadata {
             camera_stab_data:        Default::default(),
             mesh_correction:         Default::default(),
             legacy_mesh_correction:  Default::default(),
+            residual_mesh:           Default::default(),
             lens_breathing:          Default::default(),
             focal_length_varies_cache: Default::default(),
         }
@@ -479,6 +485,10 @@ impl ReadOnlyFileMetadata {
         let mut md = self.0.read().clone();
         motion.clone().put_into(&mut md);
         md
+    }
+    /// The residual pass' per-frame mesh, see `FileMetadata::residual_mesh`. Never serialized with the file
+    pub fn set_residual_mesh(&mut self, v: Option<crate::synchronization::optical_motion::residual::ResidualMesh>) {
+        self.modify(|md| md.residual_mesh = v);
     }
 }
 impl serde::Serialize for ReadOnlyFileMetadata {

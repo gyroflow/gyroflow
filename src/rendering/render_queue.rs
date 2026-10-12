@@ -1633,6 +1633,12 @@ impl RenderQueue {
         if let Some(strength) = sync_settings.get("optical_correction_strength").and_then(|v| v.as_f64()) {
             stab.set_optical_correction_strength(strength);
         }
+        if let Some(on) = sync_settings.get("optical_residual_enabled").and_then(|v| v.as_bool()) {
+            stab.set_residual_enabled(on);
+        }
+        if let Some(strength) = sync_settings.get("optical_residual_strength").and_then(|v| v.as_f64()) {
+            stab.set_residual_strength(strength);
+        }
         if let Some(per_frame) = sync_settings.get("optical_correction_per_frame").and_then(|v| v.as_bool()) {
             stab.set_optical_correction_per_frame(per_frame);
         }
@@ -1661,6 +1667,12 @@ impl RenderQueue {
             Ok(()) => {
                 let info = stab.optical_correction_info();
                 ::log::info!("Optical correction: measured in {} of {} frames, correction {:.3} deg", info["measured_frames"], info["frames"], info["rms_deg"].as_f64().unwrap_or_default());
+                // The residual pass, when the job's settings ask for it, from the measurements just taken
+                if *stab.residual_settings.read().enabled {
+                    let residual_us = std::time::Instant::now();
+                    let built = stab.build_residual_pass();
+                    ::log::info!("Optical residual pass: {} ({:.2} s)", if built { "mesh built" } else { "no mesh (nothing to build it from)" }, residual_us.elapsed().as_secs_f64());
+                }
                 // The job renders with the correction: the tracks it was measured from are for editing, in the app
                 stab.release_optical_measurements();
                 Ok(())
