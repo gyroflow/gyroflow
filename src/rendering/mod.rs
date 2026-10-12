@@ -247,13 +247,16 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     let render_options_dict = render_options.get_encoder_options_dict();
     let hwaccel_device = render_options_dict.get("hwaccel_device");
 
-    match render_options.audio_codec.as_ref() {
-        "AAC"         => proc.audio_codec = ffmpeg_next::codec::Id::AAC,
-        "PCM (s16le)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S16LE,
-        "PCM (s16be)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S16BE,
-        "PCM (s24le)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S24LE,
-        "PCM (s24be)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S24BE,
-        _ => { }
+    match render_options.audio_codec.to_ascii_lowercase().as_str() {
+        "aac" | ""    => proc.audio_codec = ffmpeg_next::codec::Id::AAC,
+        "pcm (s16le)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S16LE,
+        "pcm (s16be)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S16BE,
+        "pcm (s24le)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S24LE,
+        "pcm (s24be)" => proc.audio_codec = ffmpeg_next::codec::Id::PCM_S24BE,
+        // Copy the original audio track without re-encoding. `audio_codec` is kept as a fallback
+        // in case the output container can't store the original codec
+        "copy"        => proc.audio_copy = true,
+        other => ::log::warn!("Unknown audio codec {other:?}, using AAC")
     }
 
     let interpolation: Interpolation = render_options.interpolation.as_str().into();
@@ -787,7 +790,7 @@ pub fn analyze_optically(stab: &StabilizationManager, cancel_flag: Arc<AtomicBoo
                         std::thread::sleep(std::time::Duration::from_millis(100));
                     }
                 }
-                        let mut a = analysis2.borrow_mut();
+                let mut a = analysis2.borrow_mut();
                 if stop2.load(Relaxed) || a.is_cancelled() {
                     stop2.store(true, Relaxed);
                     return Ok(());
@@ -797,13 +800,13 @@ pub fn analyze_optically(stab: &StabilizationManager, cancel_flag: Arc<AtomicBoo
                     a.feed_frame(timestamp_us, width, height, stride, pixels)
                 });
                 if let Err(e) = result {
-                            error2.borrow_mut().get_or_insert(e);
+                    error2.borrow_mut().get_or_insert(e);
                     stop2.store(true, Relaxed);
-                        }
-                        if last_progress.elapsed().as_millis() > 100 {
-                            last_progress = std::time::Instant::now();
-                            let (ready, total) = a.progress();
-                            progress(ready as f64 / total.max(1) as f64 * 0.99, ready, total);
+                }
+                if last_progress.elapsed().as_millis() > 100 {
+                    last_progress = std::time::Instant::now();
+                    let (ready, total) = a.progress();
+                    progress(ready as f64 / total.max(1) as f64 * 0.99, ready, total);
                 }
                 Ok(())
             });
@@ -846,10 +849,15 @@ type VaList = ffi::va_list;
 #[cfg(any(all(target_os = "linux", target_arch = "x86_64"), all(target_os = "macos", target_arch = "x86_64")))]
 type VaList = *mut ffi::__va_list_tag;
 
+/// Its address in the `opaque` field of a format context drops the log messages of that context: probes whose failures are expected
+pub static SILENT_LOG: u8 = 0;
+
 #[allow(improper_ctypes_definitions)]
 unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_char, vl: VaList) {
     unsafe {
-        if level <= ffi::av_log_get_level() {
+        let is_silent = !avcl.is_null() && *(avcl as *const *const ffi::AVClass) == ffi::avformat_get_class() &&
+                        (*(avcl as *const ffi::AVFormatContext)).opaque == &SILENT_LOG as *const u8 as *mut c_void;
+        if level <= ffi::av_log_get_level() && !is_silent {
             let mut line = vec![0u8; 2048];
             let mut prefix: i32 = *LAST_PREFIX.read();
 

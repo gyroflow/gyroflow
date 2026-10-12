@@ -111,6 +111,8 @@ pub struct StabilizationParams {
     pub stab_enabled: bool,
     pub show_detected_features: bool,
     pub show_optical_flow: bool,
+    /// Where "Analyze image optically" tracked points, see `OpticalMeasurements::points`
+    pub show_tracked_points: bool,
 
     pub frame_offset: i32,
 
@@ -145,6 +147,7 @@ impl Default for StabilizationParams {
             stab_enabled: true,
             show_detected_features: true,
             show_optical_flow: true,
+            show_tracked_points: false,
             frame_readout_time: 0.0,
             frame_readout_direction: ReadoutDirection::TopToBottom,
             adaptive_zoom_window: 4.0,
@@ -312,6 +315,7 @@ impl StabilizationParams {
             stab_enabled:              self.stab_enabled,
             show_detected_features:    self.show_detected_features,
             show_optical_flow:         self.show_optical_flow,
+            show_tracked_points:       self.show_tracked_points,
             background:                self.background,
             adaptive_zoom_window:      self.adaptive_zoom_window,
             framebuffer_inverted:      self.framebuffer_inverted,

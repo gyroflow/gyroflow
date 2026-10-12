@@ -24,9 +24,34 @@ pub struct OpticalCorrectionSettings {
     /// errors of a vibrating gyro; high lets the image override the motion data down to slow motion and by degrees - a
     /// gyro whose gain collapses during a roll, glitches - at the cost of following the image's own mistakes too
     pub strength: f64,
+    /// One correction per frame instead of one per band of rows: it can't follow what changes within a frame
+    /// (vibration), but doesn't need every band of rows measured either - for a global shutter, too little texture
+    /// to track in parts of the frame, or a rolling shutter time that's wrong or unknown
+    pub per_frame: bool,
 }
 impl Default for OpticalCorrectionSettings {
-    fn default() -> Self { Self { strength: 0.5 } }
+    fn default() -> Self { Self { strength: 0.5, per_frame: false } }
+}
+
+/// How the analysis follows the points from one frame to the next. Unlike the settings above it takes another
+/// analysis: what it changes is what's measured
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum TrackingMethod {
+    /// Pyramidal Lucas-Kanade at corners: the most accurate where there's texture to track
+    #[default]
+    Klt,
+    /// Dense optical flow (DIS), sampled at the same points: a flow everywhere, also where corners are few and weak
+    /// (sky, water, fog), at a few times the time
+    Dis,
+}
+impl TrackingMethod {
+    pub fn from_name(name: &str) -> Option<Self> {
+        match name.to_ascii_lowercase().as_str() { "klt" => Some(Self::Klt), "dis" => Some(Self::Dis), _ => None }
+    }
+    pub fn name(&self) -> &'static str {
+        match self { Self::Klt => "klt", Self::Dis => "dis" }
+    }
 }
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -51,6 +76,9 @@ pub struct OpticalCorrection {
     /// For a file without motion data: the rotation the analysis measured between the frames, chained - the orientation
     /// the correction sits on. One per frame, (timestamp µs, w x y z); `integrate` uses it densified, see `base_quats`
     pub video_base: Vec<(i64, [f32; 4])>,
+    /// How the analysis followed the points. Only to tell the user it changed since: the correction still applies, it's
+    /// just measured the other way
+    pub tracking: TrackingMethod,
 
     /// Frames the analysis tracked, and how many of them yielded a measurement
     pub frames: usize,
@@ -96,6 +124,7 @@ impl OpticalCorrection {
     pub fn hash_into(&self, hasher: &mut impl std::hash::Hasher) {
         hasher.write_u8(self.enabled as u8);
         hasher.write_u64(self.settings.strength.to_bits());
+        hasher.write_u8(self.settings.per_frame as u8);
         hasher.write_u64(self.quats_checksum);
         hasher.write_u64(self.context_checksum);
         hasher.write_u64(self.start_us.to_bits());

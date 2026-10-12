@@ -8,7 +8,12 @@ impl BrawSdk {
         if let Ok(path) = super::SDK_PATH.as_ref() {
             let mut path = path.clone();
             path.push("_");
-            if cfg!(target_os = "windows") {
+            if cfg!(all(target_os = "windows", target_arch = "aarch64")) {
+                // The ARM64 SDK has no CUDA decoder and no AVX modules
+                return
+                    path.with_file_name("BlackmagicRawAPI.dll").exists() &&
+                    path.with_file_name("DecoderOpenCL.dll").exists();
+            } else if cfg!(target_os = "windows") {
                 return
                     path.with_file_name("BlackmagicRawAPI.dll").exists() &&
                     path.with_file_name("DecoderCUDA.dll").exists() &&
@@ -32,12 +37,14 @@ impl BrawSdk {
     }
 
     pub fn get_download_url(sdk_base: &str) -> Option<String> {
-        let filename = if cfg!(target_os = "windows") {
-            "Blackmagic_RAW_SDK_Windows_5.0.0.tar.gz"
+        let filename = if cfg!(all(target_os = "windows", target_arch = "aarch64")) {
+            "Blackmagic_RAW_SDK_Windows_arm64_6.0.0.tar.gz"
+        } else if cfg!(target_os = "windows") {
+            "Blackmagic_RAW_SDK_Windows_6.0.0.tar.gz"
         } else if cfg!(target_os = "macos") {
-            "Blackmagic_RAW_SDK_MacOS_5.0.0.tar.gz"
+            "Blackmagic_RAW_SDK_MacOS_6.0.0.tar.gz"
         } else if cfg!(target_os = "linux") {
-            "Blackmagic_RAW_SDK_Linux_5.0.0.tar.gz"
+            "Blackmagic_RAW_SDK_Linux_6.0.0.tar.gz"
         } else {
             return None;
         };

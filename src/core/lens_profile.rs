@@ -271,7 +271,8 @@ impl LensProfile {
         ret
     }
 
-    fn get_camera_matrix_internal(&self, invert_h: bool) -> Option<nalgebra::Matrix3<f64>> {
+    /// The calibration's camera matrix, upright. An upside-down framebuffer mirrors it in `FrameTransform::get_lens_data_at_lens_timestamp`
+    fn get_camera_matrix_internal(&self) -> Option<nalgebra::Matrix3<f64>> {
         if self.fisheye_params.camera_matrix.len() == 3 {
             let mut mat = nalgebra::Matrix3::from_rows(&[
                 self.fisheye_params.camera_matrix[0].into(),
@@ -281,8 +282,6 @@ impl LensProfile {
             if !self.asymmetrical {
                 mat[(0, 2)] = self.calib_dimension.w as f64 / 2.0;
                 mat[(1, 2)] = self.calib_dimension.h as f64 / 2.0;
-            } else if invert_h {
-                mat[(1, 2)] = self.calib_dimension.h as f64 - mat[(1, 2)];
             }
             if let Some(crop) = self.crop {
                 mat[(0, 0)] /= crop;
@@ -293,9 +292,9 @@ impl LensProfile {
             None
         }
     }
-    pub fn get_camera_matrix(&self, size: (usize, usize), invert_h: bool) -> nalgebra::Matrix3<f64> {
+    pub fn get_camera_matrix(&self, size: (usize, usize)) -> nalgebra::Matrix3<f64> {
         if self.fisheye_params.camera_matrix.len() == 3 {
-            let mat = self.get_camera_matrix_internal(invert_h).unwrap();
+            let mat = self.get_camera_matrix_internal().unwrap();
 
             // TODO: this didn't really work, try to figure it out and re-enable
             // if self.optimal_fov.is_none() && self.num_images > 3 {

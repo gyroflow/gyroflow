@@ -1153,9 +1153,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f74872d07caf508b30a21f6836e7d7016a2eaf7d9ff4f48deaa58cd8a0407630"
+checksum = "50a649af8a827553c29fb0cb4bd4a6f1a0dd695bd3232b9bc98bd9c8a3ffbb8b"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -3452,6 +3452,7 @@ dependencies = [
  "jni 0.22.4",
  "keep-awake",
  "lazy_static",
+ "libc",
  "log",
  "lru",
  "mimalloc",
@@ -4214,9 +4215,9 @@ checksum = "7a79a3332a6609480d7d0c9eab957bca6b455b91bb84e66d19f5ff66294b85b8"
 
 [[package]]
 name = "libc"
-version = "0.2.190"
+version = "0.2.189"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78"
+checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
 
 [[package]]
 name = "libloading"
@@ -6647,9 +6648,9 @@ checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
 
 [[package]]
 name = "simple-easing"
-version = "1.0.2"
+version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c82d449ab1bccfeec125893c6875008206f038d4eb8a09e1e10caf86f44d574e"
+checksum = "99968bca2a24946625e54935909e9c1c314066a1005f5a302a5e4bfc83b0239a"
 
 [[package]]
 name = "simplelog"
@@ -7038,7 +7039,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.4.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=8bd825d#8bd825db33700c4d4472fae61eada27a65aea7a8"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=a94d7ed#a94d7ed06929eb9145411227c7f187189b96016f"
 dependencies = [
  "argh",
  "byteorder",

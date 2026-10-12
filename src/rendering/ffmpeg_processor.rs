@@ -15,15 +15,117 @@ use super::ffmpeg_audio::*;
 #[cfg(target_os = "android")]
 use super::ffmpeg_android::*;
 
+/// Maps the input timestamps of the current trim range to the output timeline. All streams share the same mapping
+/// (`ts - first + range_offset`), so they stay in sync across trim ranges
 #[derive(Debug, Default)]
 pub struct FrameTimestamps {
+    /// Input timestamp (µs) of the start of the current trim range, set by its first video frame
     pub first: Option<i64>,
+    /// Output timestamp (µs) of the start of the current trim range: where the video of the previous one ended
+    pub range_offset: i64,
+    /// Output timestamp (µs) where the video of the current trim range ended, once it has. Its audio ends there too
+    pub range_end: Option<i64>,
     pub last_video: Option<i64>,
-    pub last_audio: Option<i64>,
-    pub add_audio: i64,
-    pub add_video: i64,
     pub last_duration_video: i64,
-    pub last_duration_audio: i64,
+    /// Audio streams and copied data streams, by input stream index
+    streams: HashMap<usize, StreamTimeline>,
+}
+
+/// The part of a unit (packet or decoded frame) of an audio or data stream that goes in the output
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Placement {
+    /// Output timestamp (µs) of the part
+    pub ts_us: i64,
+    /// Where the part starts in the unit, and its duration (µs). Only units of raw samples are cut, the others are written whole
+    pub skip_us: i64,
+    pub duration_us: i64,
+}
+
+/// Where an audio or data stream is in the output
+#[derive(Debug, Default)]
+struct StreamTimeline {
+    /// Output timestamp (µs) of the last unit written
+    last: Option<i64>,
+    /// Output timestamp (µs) where the last unit written ends
+    end: i64,
+    /// A unit was written in the current trim range
+    in_range: bool,
+    /// The stream went past the end of the current trim range
+    finished: bool,
+}
+
+impl FrameTimestamps {
+    /// The video of the current trim range ended
+    pub fn end_range(&mut self) {
+        self.range_end = Some(self.last_video.unwrap_or_default() + self.last_duration_video);
+    }
+
+    /// The next trim range starts in the output where the video of the previous one ended
+    pub fn start_next_range(&mut self) {
+        self.range_offset = self.last_video.unwrap_or_default() + self.last_duration_video;
+        self.range_end = None;
+        self.first = None;
+        for stream in self.streams.values_mut() {
+            stream.in_range = false;
+            stream.finished = false;
+        }
+    }
+
+    pub fn is_finished(&self, stream_index: usize) -> bool {
+        self.streams.get(&stream_index).is_some_and(|x| x.finished)
+    }
+
+    /// Places a unit (packet or decoded frame) of an audio or data stream in the output, from its input timestamp and duration (µs).
+    /// A stream is written from where it left off (in the previous range, the audio runs a bit past the video), or from the start of the
+    /// range, up to where the video of the range ends. `divisible` units (raw samples) are cut exactly there, the others are written whole
+    /// if they're mostly inside. `None` if nothing of the unit is written, also when it has no timestamp and doesn't follow a written unit
+    pub fn place(&mut self, stream_index: usize, timestamp_us: Option<i64>, duration_us: i64, divisible: bool, start_ms: Option<f64>) -> Option<Placement> {
+        let stream = self.streams.entry(stream_index).or_default();
+        if stream.finished {
+            return None;
+        }
+        let duration_us = duration_us.max(0);
+        let (out_ts, range_start) = match timestamp_us {
+            Some(ts) => {
+                let first = *self.first.get_or_insert(ts);
+                // From the start of the trim range to its first video frame, the input maps to just before `range_offset`
+                let range_start = start_ms.map_or(i64::MIN, |start| (start * 1000.0).round() as i64 - first + self.range_offset);
+                (ts - first + self.range_offset, range_start)
+            }
+            // Continues the unit before it
+            None if stream.in_range => (stream.end, i64::MIN),
+            None => return None
+        };
+        // `end` starts at 0, the start of the output
+        let from = stream.end.max(range_start);
+        let to = self.range_end.unwrap_or(i64::MAX);
+
+        let (skip, duration) = if divisible && duration_us > 0 {
+            let skip = (from - out_ts).clamp(0, duration_us);
+            let end = to.saturating_sub(out_ts).clamp(0, duration_us);
+            stream.finished = out_ts + duration_us >= to;
+            if end <= skip {
+                return None;
+            }
+            (skip, end - skip)
+        } else {
+            // Half a unit of tolerance: rounded timestamps (to µs here, often to ms by the container) don't line up exactly,
+            // and at a range boundary it keeps the unit closest to where the stream left off
+            let middle = out_ts + duration_us / 2;
+            if middle > to {
+                stream.finished = true;
+                return None;
+            }
+            if out_ts < 0 || middle < from || stream.last.is_some_and(|last| out_ts <= last) {
+                return None;
+            }
+            (0, duration_us)
+        };
+        stream.last = Some(out_ts + skip);
+        stream.end = out_ts + skip + duration;
+        stream.in_range = true;
+        Some(Placement { ts_us: out_ts + skip, skip_us: skip, duration_us: duration })
+    }
 }
 
 pub struct FfmpegProcessor<'a> {
@@ -32,6 +134,7 @@ pub struct FfmpegProcessor<'a> {
     pub video_codec: Option<String>,
 
     pub audio_codec: codec::Id,
+    pub audio_copy: bool,
 
     input_context: format::context::Input,
 
@@ -211,6 +314,7 @@ impl<'a> FfmpegProcessor<'a> {
             video_codec: None,
 
             audio_codec: codec::Id::AAC,
+            audio_copy: false,
 
             ost_time_bases: Vec::new(),
 
@@ -247,8 +351,11 @@ impl<'a> FfmpegProcessor<'a> {
 
         let mut stream_mapping: Vec<isize> = vec![0; self.input_context.nb_streams() as _];
         let mut ist_time_bases = vec![Rational(0, 0); self.input_context.nb_streams() as _];
+        // Copied audio streams of raw samples, which are cut at the exact sample: size of a sample (all channels) and the rate
+        let mut raw_pcm_streams = vec![None; self.input_context.nb_streams() as _];
         self.ost_time_bases.resize(self.input_context.nb_streams() as _, Rational(0, 0));
         let mut atranscoders = HashMap::new();
+        let mut audio_streams = Vec::new();
         let mut output_index = 0usize;
 
         let mut start_ms = None;
@@ -332,16 +439,23 @@ impl<'a> FfmpegProcessor<'a> {
 
                 output_index += 1;
             } else if medium == media::Type::Audio && self.audio_codec != codec::Id::None {
-                if self.preserve_other_tracks/*stream.codec().id() == self.audio_codec*/ {
+                let mut copy_audio = self.preserve_other_tracks || self.audio_copy;
+                if copy_audio && !Self::can_copy_stream(&octx, &stream.parameters()) {
+                    log::warn!("Output format {} can't store audio codec {:?}, transcoding it to {:?} instead", octx.format().name(), stream.parameters().id(), self.audio_codec);
+                    copy_audio = false;
+                }
+                if copy_audio {
                     // Direct stream copy
                     let mut ost = octx.add_stream(encoder::find(codec::Id::None))?;
                     ost.set_parameters(stream.parameters());
                     // We need to set codec_tag to 0 lest we run into incompatible codec tag issues when muxing into a different container format.
                     unsafe { (*ost.parameters().as_mut_ptr()).codec_tag = 0; }
+                    raw_pcm_streams[i] = raw_pcm_layout(&stream.parameters());
                 } else {
                     // Transcode audio
                     atranscoders.insert(i, AudioTranscoder::new(self.audio_codec, &stream, &mut octx, output_index as _)?);
                 }
+                audio_streams.push(i);
                 output_index += 1;
             } else if self.preserve_other_tracks && medium == media::Type::Data {
                 // Direct stream copy
@@ -349,6 +463,17 @@ impl<'a> FfmpegProcessor<'a> {
                 ost.set_parameters(stream.parameters());
                 ost.set_avg_frame_rate(stream.avg_frame_rate());
                 output_index += 1;
+            } else {
+                // Not in the output (audio disabled)
+                stream_mapping[i] = -1;
+            }
+        }
+        if self.preserve_other_tracks && start_ms.is_none() {
+            // The other tracks are kept as they are, so keep their timing relative to the video too: shift all streams by the start
+            // of the file (like ffmpeg does) rather than by the first video frame, which would push earlier audio and data out
+            let start_time = unsafe { (*self.input_context.as_ptr()).start_time };
+            if start_time != ffi::AV_NOPTS_VALUE {
+                self.frame_ts.first = Some(start_time.rescale(rescale::TIME_BASE, (1, 1000000)));
             }
         }
         let mut updated_creation_time = None;
@@ -371,48 +496,82 @@ impl<'a> FfmpegProcessor<'a> {
         }
         log::debug!("Output metadata: {:?}", &metadata);
         octx.set_metadata(metadata);
-        // Header will be written after video encoder is initalized, in ffmpeg_video.rs:init_encoder
+        // Header will be written after video encoder is initalized, in ffmpeg_video.rs:init_encoder, or with its first packet
+        // for the encoders that need the parameter sets from the bitstream (see `VideoTranscoder::header_written`)
 
-        let mut video_inited = false;
-        // let mut copied_stream_first_pts = None;
-        // let mut copied_stream_first_dts = None;
-
-        let process_stream = |atranscoders: &mut HashMap<usize, AudioTranscoder>, octx: &mut format::context::Output, stream: Stream, mut packet: ffmpeg_next::Packet, start_ms: Option<f64>, end_ms: Option<f64>, ist_index: usize, ost_index: isize, ost_time_base: Rational, frame_ts: &mut FrameTimestamps| -> Result<bool, Error> {
+        let process_stream = |atranscoders: &mut HashMap<usize, AudioTranscoder>, octx: &mut format::context::Output, mut packet: ffmpeg_next::Packet, start_ms: Option<f64>, ist_index: usize, ost_index: isize, ost_time_base: Rational, frame_ts: &mut FrameTimestamps| -> Result<(), Error> {
+            let ist_time_base = ist_time_bases[ist_index];
             match atranscoders.get_mut(&ist_index) {
                 Some(atranscoder) => {
-                    packet.rescale_ts(stream.time_base(), atranscoder.decoder.time_base());
+                    packet.rescale_ts(ist_time_base, atranscoder.decoder.time_base());
                     atranscoder.decoder.send_packet(&packet)?;
-                    let status = atranscoder.receive_and_process_decoded_frames(octx, ost_time_base, start_ms, end_ms, frame_ts)?;
-                    if status == Status::Finish {
-                        return Ok(true);
-                    }
+                    atranscoder.receive_and_process_decoded_frames(octx, ost_time_base, start_ms, frame_ts)?;
                 }
                 None => {
-                    // Direct stream copy
-                    // TODO: Wrong pts, shifted by length of packet, would need to synchronize with first video frame pts
-                    // if copied_stream_first_pts.is_none() {
-                    //     copied_stream_first_pts = packet.pts();
-                    //     copied_stream_first_dts = packet.dts();
-                    // }
+                    // Direct stream copy, on the same output timeline as the video
+                    let timestamp_us = packet.pts().or(packet.dts()).map(|x| x.rescale(ist_time_base, (1, 1000000)));
+                    let raw_samples = raw_pcm_streams[ist_index];
+                    let duration_us = match raw_samples {
+                        Some((sample_size, rate)) => ((packet.size() / sample_size) as i64).rescale((1, rate), (1, 1000000)),
+                        None => packet.duration().rescale(ist_time_base, (1, 1000000))
+                    };
+                    let Some(placement) = frame_ts.place(ist_index, timestamp_us, duration_us, raw_samples.is_some(), start_ms) else {
+                        return Ok(());
+                    };
+                    let mut sample_count = None;
+                    if let Some((sample_size, rate)) = raw_samples {
+                        // Raw samples, cut to the samples that are written
+                        let samples = packet.size() / sample_size;
+                        let skip = (placement.skip_us.rescale((1, 1000000), (1, rate)).max(0) as usize).min(samples);
+                        let count = (placement.duration_us.rescale((1, 1000000), (1, rate)).max(0) as usize).min(samples - skip);
+                        if count == 0 {
+                            return Ok(());
+                        }
+                        unsafe {
+                            use ffmpeg_next::packet::Mut;
+                            let packet = packet.as_mut_ptr();
+                            (*packet).data = (*packet).data.add(skip * sample_size);
+                            (*packet).size = (count * sample_size) as i32;
+                        }
+                        sample_count = Some((count as i64, rate));
+                    }
 
-                    packet.rescale_ts(ist_time_bases[ist_index], ost_time_base);
+                    packet.rescale_ts(ist_time_base, ost_time_base);
+                    if let Some(timestamp_us) = timestamp_us {
+                        // The shift is the same for the whole range, so the packets keep their exact spacing (and pts-dts delay)
+                        let shift = (placement.ts_us - timestamp_us).rescale((1, 1000000), ost_time_base);
+                        packet.set_pts(packet.pts().map(|x| x + shift));
+                        packet.set_dts(packet.dts().map(|x| x + shift));
+                    } else {
+                        let ts = placement.ts_us.rescale((1, 1000000), ost_time_base);
+                        packet.set_pts(Some(ts));
+                        packet.set_dts(Some(ts));
+                    }
+                    if let Some((count, rate)) = sample_count {
+                        packet.set_duration(count.rescale((1, rate), ost_time_base));
+                    }
                     packet.set_position(-1);
                     packet.set_stream(ost_index as _);
-                    // packet.set_pts(packet.pts().map(|x| x - copied_stream_first_pts.unwrap_or_default()));
-                    // packet.set_dts(packet.dts().map(|x| x - copied_stream_first_dts.unwrap_or_default()));
                     packet.write_interleaved(octx)?;
                 }
             }
-            Ok(false)
+            Ok(())
+        };
+
+        // Audio and data packets wait for the muxer header (written once the video encoder is initialized, or with its first packet),
+        // for the first video frame of the range, which sets where the range starts in the output, and past the end of the range,
+        // for the video to end
+        let must_wait = |frame_ts: &FrameTimestamps, header_written: bool, packet: &ffmpeg_next::Packet, ist_index: usize, end_ms: Option<f64>| -> bool {
+            !header_written || frame_ts.first.is_none() || (frame_ts.range_end.is_none() && end_ms.is_some_and(|end| {
+                packet.pts().or(packet.dts()).is_some_and(|ts| ts.rescale(ist_time_bases[ist_index], (1, 1000000)) as f64 / 1000.0 > end)
+            }))
         };
 
         let mut any_encoded = false;
+        let mut pending_packets: Vec<(ffmpeg_next::Packet, usize, isize)> = Vec::new();
 
         loop {
-            let mut pending_packets: Vec<(Stream, ffmpeg_next::Packet, usize, isize)> = Vec::new();
-
             let mut encoding_video = true;
-            let mut encoding_audio = self.audio_codec != codec::Id::None;
 
             for (stream, mut packet) in self.input_context.packets() {
                 let ist_index = stream.index();
@@ -438,18 +597,25 @@ impl<'a> FfmpegProcessor<'a> {
 
                         match self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, start_ms, end_ms, &mut self.frame_ts) {
                             Ok(encoding_status) => {
-                                if self.video.encoder.is_some() {
-                                    video_inited = true;
-                                    if !pending_packets.is_empty() {
-                                        for (stream, packet, ist_index, ost_index) in pending_packets.drain(..) {
-                                            let ost_time_base = self.ost_time_bases[ost_index as usize];
-                                            process_stream(&mut atranscoders, &mut octx, stream, packet, start_ms, end_ms, ist_index, ost_index, ost_time_base, &mut self.frame_ts)?;
-                                        }
-                                    }
-                                    any_encoded = true;
-                                }
                                 if encoding_status == Status::Finish {
                                     encoding_video = false;
+                                    self.frame_ts.end_range();
+                                }
+                                // Decoding errors stop the export only until the first frame reached the encoder. Not tied to the header,
+                                // which for some encoders waits for their first packet, a few frames later
+                                if self.video.encoder.is_some() {
+                                    any_encoded = true;
+                                }
+                                // The other streams can be written once the header is written
+                                if self.video.header_written {
+                                    for (packet, ist_index, ost_index) in std::mem::take(&mut pending_packets) {
+                                        if must_wait(&self.frame_ts, self.video.header_written, &packet, ist_index, end_ms) {
+                                            pending_packets.push((packet, ist_index, ost_index));
+                                        } else if !self.frame_ts.is_finished(ist_index) {
+                                            let ost_time_base = self.ost_time_bases[ost_index as usize];
+                                            process_stream(&mut atranscoders, &mut octx, packet, start_ms, ist_index, ost_index, ost_time_base, &mut self.frame_ts)?;
+                                        }
+                                    }
                                 }
                                 while pause_flag.load(Relaxed) {
                                     std::thread::sleep(std::time::Duration::from_millis(100));
@@ -462,19 +628,17 @@ impl<'a> FfmpegProcessor<'a> {
                             }
                         }
                     }
-                } else if self.audio_codec != codec::Id::None || self.preserve_other_tracks {
-                    if encoding_audio {
-                        if !video_inited {
-                            pending_packets.push((stream, packet, ist_index, ost_index));
-                            continue;
-                        }
-                        let ost_time_base = self.ost_time_bases[ost_index as usize];
-                        if process_stream(&mut atranscoders, &mut octx, stream, packet, start_ms, end_ms, ist_index, ost_index, ost_time_base, &mut self.frame_ts)? {
-                            encoding_audio = false;
-                        }
+                } else if !self.frame_ts.is_finished(ist_index) {
+                    // Audio, or a data track kept by "Preserve other tracks"
+                    if must_wait(&self.frame_ts, self.video.header_written, &packet, ist_index, end_ms) {
+                        pending_packets.push((packet, ist_index, ost_index));
+                        continue;
                     }
+                    let ost_time_base = self.ost_time_bases[ost_index as usize];
+                    process_stream(&mut atranscoders, &mut octx, packet, start_ms, ist_index, ost_index, ost_time_base, &mut self.frame_ts)?;
                 }
-                if (!encoding_video && !encoding_audio) || cancel_flag.load(Relaxed) {
+                let audio_finished = audio_streams.iter().all(|x| self.frame_ts.is_finished(*x));
+                if (!encoding_video && audio_finished) || cancel_flag.load(Relaxed) {
                     break;
                 }
             }
@@ -484,11 +648,11 @@ impl<'a> FfmpegProcessor<'a> {
                     start_ms = Some(start);
                     let position = (start as i64).rescale((1, 1000), rescale::TIME_BASE);
                     self.input_context.seek(position, ..position)?;
-                    self.frame_ts.add_video = self.frame_ts.last_video.unwrap_or_default() + self.frame_ts.last_duration_video;
-                    self.frame_ts.add_audio = self.frame_ts.last_audio.unwrap_or_default() + self.frame_ts.last_duration_audio;
-                    self.frame_ts.first = None;
+                    self.frame_ts.start_next_range();
                 }
                 end_ms = next_range.1;
+                // Past the end of a range that the video didn't reach
+                pending_packets.clear();
                 continue;
             } else {
                 break;
@@ -497,19 +661,29 @@ impl<'a> FfmpegProcessor<'a> {
 
         // Flush encoders and decoders.
         {
-            let ost_time_base = self.ost_time_bases[self.video.output_index.unwrap_or_default()];
             self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof()?;
             // self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.flush();
-            self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, start_ms, end_ms, &mut self.frame_ts)?;
+            let encoding_status = self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, start_ms, end_ms, &mut self.frame_ts)?;
+            if encoding_status == Status::Finish && self.frame_ts.range_end.is_none() {
+                self.frame_ts.end_range();
+            }
             self.video.encoder.as_mut().ok_or(Error::EncoderNotFound)?.send_eof()?;
-            if let Err(e) = self.video.receive_and_process_encoded_packets(&mut octx, ost_time_base) {
+            if let Err(e) = self.video.receive_and_process_encoded_packets(&mut octx, &mut self.ost_time_bases) {
                 log::error!("Failed to flush last packet: {e:?}");
             }
         }
+        // The audio that waited for the video to reach the end of the last range, or for the header, when the video only got
+        // there in the decoder or encoder flush
+        for (packet, ist_index, ost_index) in pending_packets {
+            if !must_wait(&self.frame_ts, self.video.header_written, &packet, ist_index, end_ms) && !self.frame_ts.is_finished(ist_index) {
+                let ost_time_base = self.ost_time_bases[ost_index as usize];
+                process_stream(&mut atranscoders, &mut octx, packet, start_ms, ist_index, ost_index, ost_time_base, &mut self.frame_ts)?;
+            }
+        }
         if self.audio_codec != codec::Id::None {
-            for (ost_index, transcoder) in atranscoders.iter_mut() {
-                let ost_time_base = self.ost_time_bases[*ost_index];
-                transcoder.flush(&mut octx, ost_time_base, start_ms, end_ms, &mut self.frame_ts)?;
+            for transcoder in atranscoders.values_mut() {
+                let ost_time_base = self.ost_time_bases[transcoder.ost_index];
+                transcoder.flush(&mut octx, ost_time_base, start_ms, &mut self.frame_ts)?;
             }
         }
 
@@ -606,6 +780,109 @@ impl<'a> FfmpegProcessor<'a> {
         self.video.on_encoder_initialized = Some(Box::new(cb));
     }
 
+    /// Whether the output format can store `params` as a direct stream copy, in a form that's widely readable.
+    /// The codec has to be in the muxer's own tag table (mov stores the others with Microsoft-style tags that hardly anything reads),
+    /// but muxers also reject some of the codecs listed there when they're set up (mov takes FLAC, Opus and TrueHD only in .mp4,
+    /// and TrueHD there only as experimental), so this sets up the same muxer for real, on a scratch context that writes nowhere
+    fn can_copy_stream(octx: &format::context::Output, params: &codec::Parameters) -> bool {
+        unsafe extern "C" fn write_nowhere(_: *mut std::ffi::c_void, _: *const u8, size: i32) -> i32 { size }
+        // Seekable, mov refuses non-seekable output unless it's fragmented
+        unsafe extern "C" fn seek_nowhere(_: *mut std::ffi::c_void, offset: i64, whence: i32) -> i64 {
+            if whence & ffi::AVSEEK_SIZE != 0 { -1 } else { offset }
+        }
+
+        // 1: in the table, 0: not in it, negative: the muxer has no table, only setting it up can tell
+        if unsafe { ffi::avformat_query_codec(octx.format().as_ptr(), params.id().into(), ffi::FF_COMPLIANCE_NORMAL) } == 0 {
+            return false;
+        }
+
+        let mut ctx = std::ptr::null_mut();
+        unsafe { ffi::avformat_alloc_output_context2(&mut ctx, (*octx.as_ptr()).oformat, std::ptr::null(), (*octx.as_ptr()).url); }
+        !ctx.is_null() && unsafe {
+            // The muxer logs why it refuses the codec, which isn't an error of the render
+            (*ctx).opaque = &super::SILENT_LOG as *const u8 as *mut std::ffi::c_void;
+
+            const BUFFER_SIZE: i32 = 4096;
+            let buffer = ffi::av_malloc(BUFFER_SIZE as usize) as *mut u8;
+            if !buffer.is_null() {
+                (*ctx).pb = ffi::avio_alloc_context(buffer, BUFFER_SIZE, 1, std::ptr::null_mut(), None, Some(write_nowhere), Some(seek_nowhere));
+                if (*ctx).pb.is_null() {
+                    ffi::av_free(buffer as *mut _);
+                }
+            }
+            let stream = ffi::avformat_new_stream(ctx, std::ptr::null());
+            let mut can_copy = !(*ctx).pb.is_null() && !stream.is_null() && ffi::avcodec_parameters_copy((*stream).codecpar, params.as_ptr()) >= 0;
+            if can_copy {
+                // Same as the real output
+                (*(*stream).codecpar).codec_tag = 0;
+                can_copy = ffi::avformat_write_header(ctx, std::ptr::null_mut()) >= 0;
+                // FFmpeg stores PCM in ISO MP4 as ISO/IEC 23003-5 'ipcm'/'fpcm', which few applications read yet
+                // (QuickTime .mov has its own PCM sample entries, read everywhere)
+                let tag = (*(*stream).codecpar).codec_tag;
+                can_copy &= tag != u32::from_le_bytes(*b"ipcm") && tag != u32::from_le_bytes(*b"fpcm");
+            }
+            if !(*ctx).pb.is_null() {
+                ffi::av_freep(&mut (*(*ctx).pb).buffer as *mut *mut u8 as *mut std::ffi::c_void);
+                ffi::avio_context_free(&mut (*ctx).pb);
+            }
+            ffi::avformat_free_context(ctx);
+            can_copy
+        }
+    }
+
+    /// Rotation (degrees clockwise) to display the picture, and whether it's also mirrored, from an FFmpeg display matrix (stream or frame side data).
+    /// Gyroflow can't mirror, so for a mirrored matrix this is the rotation that keeps the picture upright, only mirrored left-right.
+    /// FFmpeg builds those as a rotation followed by a horizontal flip of the displayed picture (av_exif_orientation_to_matrix),
+    /// so the flip is undone first: the rotation of the whole matrix reads e.g. EXIF orientation 2 (mirrored) as 180° (upside down)
+    fn display_matrix_rotation(display_matrix: &[u8]) -> Option<(f64, bool)> {
+        if display_matrix.len() != 9 * 4 { return None; }
+        let mut matrix = [0i32; 9];
+        for (x, bytes) in matrix.iter_mut().zip(display_matrix.chunks_exact(4)) {
+            *x = i32::from_ne_bytes(bytes.try_into().ok()?);
+        }
+        let mirrored = (matrix[0] as i64) * (matrix[4] as i64) - (matrix[1] as i64) * (matrix[3] as i64) < 0;
+        if mirrored {
+            unsafe { ffi::av_display_matrix_flip(matrix.as_mut_ptr(), 1, 0); }
+        }
+        let rotation = -unsafe { ffi::av_display_rotation_get(matrix.as_ptr()) };
+        rotation.is_finite().then_some((rotation, mirrored))
+    }
+
+    /// Rotation attached to the decoded frames rather than to the stream: the EXIF orientation of images (e.g. DNG/TIFF/JPEG image sequences)
+    /// or an H.264/HEVC display orientation SEI, which FFmpeg exports as a per-frame display matrix.
+    /// The player (MDK) applies it on its own, so it has to be known to keep everything else consistent.
+    /// Decodes the first frame, but only for codecs that can have one, and for H.264/HEVC only when the first packet has that SEI
+    fn first_frame_rotation(context: &mut format::context::Input, stream_index: usize, decoder: &mut ffmpeg_next::decoder::Video) -> Option<(f64, bool)> {
+        use codec::Id;
+        let codec_id = decoder.id();
+        let is_video = matches!(codec_id, Id::H264 | Id::HEVC);
+        if !is_video && !matches!(codec_id, Id::TIFF | Id::MJPEG | Id::PNG | Id::WEBP | Id::JPEGXL | Id::CRI) {
+            return None;
+        }
+        let extradata = unsafe {
+            let params = context.stream(stream_index)?.parameters().as_ptr();
+            if (*params).extradata.is_null() { Vec::new() } else { std::slice::from_raw_parts((*params).extradata, (*params).extradata_size.max(0) as usize).to_vec() }
+        };
+
+        let get_rotation = |frame: &frame::Video| Self::display_matrix_rotation(frame.side_data(frame::side_data::Type::DisplayMatrix)?.data());
+        let mut frame = frame::Video::empty();
+        // Frame reordering can hold the first frame back by a few packets
+        for (i, (_, packet)) in context.packets().filter(|(stream, _)| stream.index() == stream_index).take(16).enumerate() {
+            if i == 0 && is_video && !has_display_orientation_sei(codec_id, &extradata, packet.data().unwrap_or_default()) {
+                return None;
+            }
+            decoder.send_packet(&packet).ok()?;
+            match decoder.receive_frame(&mut frame) {
+                Ok(()) => return get_rotation(&frame),
+                Err(ffmpeg_next::Error::Other { errno }) if errno == ffmpeg_next::util::error::EAGAIN => { }
+                Err(_) => return None
+            }
+        }
+        decoder.send_eof().ok()?;
+        decoder.receive_frame(&mut frame).ok()?;
+        get_rotation(&frame)
+    }
+
     pub fn get_video_info(url: &str) -> Result<VideoInfo, ffmpeg_next::Error> {
         let mut file = FfmpegPathWrapper::new(url, false).map_err(|_| ffmpeg_next::Error::ProtocolNotFound)?;
         let mut dict = Dictionary::new();
@@ -614,53 +891,126 @@ impl<'a> FfmpegProcessor<'a> {
             file.path = "fd:".into();
         }
 
-        let context = format::input_with_dictionary(&file.path, dict)?;
+        let mut context = format::input_with_dictionary(&file.path, dict)?;
         let created_at = context.metadata().get("creation_time").and_then(|x| chrono::DateTime::parse_from_rfc3339(x).ok()).map(|x| x.timestamp_millis() as u64 / 1000);
         if let Some(stream) = context.streams().best(media::Type::Video) {
             let codec = codec::context::Context::from_parameters(stream.parameters())?;
-            if let Ok(video) = codec.decoder().video() {
+            if let Ok(mut video) = codec.decoder().video() {
                 let mut bitrate = video.bit_rate();
                 if bitrate == 0 { bitrate = context.bit_rate() as usize; }
 
                 let mut frames = stream.frames() as usize;
                 if frames == 0 { frames = (stream.duration() as f64 * f64::from(stream.time_base()) * f64::from(stream.rate())) as usize; }
 
-                let rotation = {
-                    let mut theta = 0.0;
-                    if let Some(rotate_tag) = stream.metadata().get("rotate") {
-                        if let Ok(num) = rotate_tag.parse::<f64>() {
-                            theta = num;
-                        }
-                    }
-                    if theta == 0.0 {
-                        for side_data in stream.side_data() {
-                            if side_data.kind() == codec::packet::side_data::Type::DisplayMatrix {
-                                let display_matrix = side_data.data();
-                                if display_matrix.len() == 9*4 {
-                                    theta = -unsafe { ffi::av_display_rotation_get(display_matrix.as_ptr() as *const i32) };
-                                }
-                            }
-                        }
-                    }
+                let rotate_tag = stream.metadata().get("rotate").and_then(|x| x.parse::<f64>().ok()).map(|x| (x, false));
+                let display_matrix = stream.side_data().find(|x| x.kind() == codec::packet::side_data::Type::DisplayMatrix).and_then(|x| Self::display_matrix_rotation(x.data()));
+                let stream_rotation = rotate_tag.filter(|x| x.0 != 0.0).or(display_matrix).filter(|(theta, mirrored)| *theta != 0.0 || *mirrored);
 
-                    theta -= 360.0 * (theta / 360.0 + 0.9 / 360.0).floor();
-                    theta as i32
-                };
+                let stream_index = stream.index();
+                let duration_ms = stream.duration() as f64 * f64::from(stream.time_base()) * 1000.0;
+                let fps = f64::from(stream.rate()); // or avg_frame_rate?
+                let (width, height) = (video.width(), video.height());
+
+                // Same as the player: the stream rotation, otherwise the one on the frames
+                let (mut theta, mirrored) = stream_rotation.or_else(|| Self::first_frame_rotation(&mut context, stream_index, &mut video)).unwrap_or_default();
+                if mirrored {
+                    log::warn!("{url} is mirrored for display, which isn't supported, the output won't be mirrored");
+                }
+                theta = theta.round();
+                theta -= 360.0 * (theta / 360.0 + 0.9 / 360.0).floor();
 
                 return Ok(VideoInfo {
-                    duration_ms: stream.duration() as f64 * f64::from(stream.time_base()) * 1000.0,
+                    duration_ms,
                     frame_count: frames,
-                    fps: f64::from(stream.rate()), // or avg_frame_rate?
-                    width: video.width(),
-                    height: video.height(),
+                    fps,
+                    width,
+                    height,
                     bitrate: bitrate as f64 / 1024.0 / 1024.0,
-                    rotation,
+                    rotation: theta as i32,
                     created_at
                 });
             }
         }
         Err(ffmpeg_next::Error::StreamNotFound)
     }
+}
+
+/// Size of one sample (all channels) and sample rate of raw PCM, which can be cut at any sample
+fn raw_pcm_layout(params: &codec::Parameters) -> Option<(usize, i32)> {
+    use codec::Id;
+    let bytes = match params.id() {
+        Id::PCM_S8 | Id::PCM_U8 => 1,
+        Id::PCM_S16LE | Id::PCM_S16BE | Id::PCM_U16LE | Id::PCM_U16BE => 2,
+        Id::PCM_S24LE | Id::PCM_S24BE | Id::PCM_U24LE | Id::PCM_U24BE => 3,
+        Id::PCM_S32LE | Id::PCM_S32BE | Id::PCM_U32LE | Id::PCM_U32BE | Id::PCM_F32LE | Id::PCM_F32BE => 4,
+        Id::PCM_S64LE | Id::PCM_S64BE | Id::PCM_F64LE | Id::PCM_F64BE => 8,
+        _ => return None
+    };
+    let (channels, rate) = unsafe { ((*params.as_ptr()).ch_layout.nb_channels, (*params.as_ptr()).sample_rate) };
+    (channels > 0 && rate > 0).then_some((bytes * channels as usize, rate))
+}
+
+/// Whether an H.264/HEVC access unit has a display orientation SEI (payloadType 47), the only source of a frame display matrix in these streams.
+/// Takes both packet formats: NAL units prefixed with their size (mp4, the size length is in the avcC/hvcC extradata) and Annex B start codes
+fn has_display_orientation_sei(codec_id: codec::Id, extradata: &[u8], data: &[u8]) -> bool {
+    let hevc = codec_id == codec::Id::HEVC;
+    let size_length = match extradata {
+        [1, ..] if !hevc && extradata.len() > 4  => Some((extradata[4]  & 3) as usize + 1),
+        [1, ..] if  hevc && extradata.len() > 21 => Some((extradata[21] & 3) as usize + 1),
+        _ => None
+    };
+    let mut nal_units = Vec::new();
+    if let Some(size_length) = size_length {
+        let mut rest = data;
+        while rest.len() > size_length {
+            let (size, tail) = rest.split_at(size_length);
+            let size = size.iter().fold(0, |size, &x| (size << 8) | x as usize);
+            if size > tail.len() { break; }
+            nal_units.push(&tail[..size]);
+            rest = &tail[size..];
+        }
+    } else {
+        // Each unit runs up to the next 00 00 01. A 4-byte start code leaves a zero at the end of the unit before it, which doesn't matter here
+        let starts: Vec<usize> = (2..data.len()).filter(|&i| data[i] == 1 && data[i - 1] == 0 && data[i - 2] == 0).map(|i| i + 1).collect();
+        for (i, &start) in starts.iter().enumerate() {
+            let end = starts.get(i + 1).map_or(data.len(), |next| next - 3);
+            nal_units.push(&data[start..end.max(start)]);
+        }
+    }
+
+    nal_units.into_iter().any(|nal| {
+        let (is_sei, header_length) = match nal.first() {
+            Some(x) if hevc => (matches!((x >> 1) & 0x3F, 39 | 40), 2), // Prefix and suffix SEI
+            Some(x) => (x & 0x1F == 6, 1),
+            None => (false, 0)
+        };
+        if !is_sei || nal.len() <= header_length { return false; }
+
+        // Remove the emulation prevention bytes (00 00 03 -> 00 00)
+        let mut rbsp = Vec::with_capacity(nal.len());
+        let mut zeros = 0;
+        for &x in &nal[header_length..] {
+            if zeros >= 2 && x == 3 { zeros = 0; continue; }
+            zeros = if x == 0 { zeros + 1 } else { 0 };
+            rbsp.push(x);
+        }
+        // sei_message()s: payloadType and payloadSize, coded as a run of 0xFF bytes plus a last byte, then the payload
+        let mut pos = 0;
+        let read_value = |pos: &mut usize| -> Option<usize> {
+            let mut value = 0;
+            loop {
+                let x = *rbsp.get(*pos)?;
+                *pos += 1;
+                value += x as usize;
+                if x != 0xFF { return Some(value); }
+            }
+        };
+        while let (Some(payload_type), Some(payload_size)) = (read_value(&mut pos), read_value(&mut pos)) {
+            if payload_type == 47 { return true; }
+            pos += payload_size;
+        }
+        false
+    })
 }
 
 /* unsafe extern "C" fn get_hw_format(ctx: *mut ffi::AVCodecContext, pix_fmts: *const ffi::AVPixelFormat) -> ffi::AVPixelFormat {

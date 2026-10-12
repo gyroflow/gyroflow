@@ -27,6 +27,7 @@ Menu 1.0 Menu.qml
 MenuItem 1.0 MenuItem.qml
 Modal 1.0 Modal.qml
 NumberField 1.0 NumberField.qml
+OpticalPointEditor 1.0 OpticalPointEditor.qml
 OutputPathField 1.0 OutputPathField.qml
 Popup 1.0 Popup.qml
 PopupDelegate 1.0 PopupDelegate.qml

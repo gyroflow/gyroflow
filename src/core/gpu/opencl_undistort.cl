@@ -680,6 +680,9 @@ float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global c
 
     int idx = min(sy, params->matrix_count - 1) * 16;
     float2 uv = rotate_and_distort(ray, idx, params, matrices, mesh_data);
+    // No picture for this ray (past the field limit, outside Snell's window): it stays the background, as on the CPU.
+    // The input rotation would turn the marker into a real position, and the edge modes would then clamp it into the frame
+    if (uv.x <= -99998.0f) return uv;
 
     float2 frame_size = (float2)((float)params->width, (float)params->height);
     if (params->input_rotation != 0.0f) {
@@ -689,19 +692,22 @@ float2 undistort_coord(float2 out_pos, __global KernelParams *params, __global c
         uv = rotate_point(uv, rotation, size / (float2)2.0f, frame_size / (float2)2.0f);
     }
 
+    // `uv` is in the input frame now, turned by the input rotation, so its edges are those of `frame_size`
+    int frame_width = (int)frame_size.x;
+    int frame_height = (int)frame_size.y;
     switch (params->background_mode) {
         case 1: { // edge repeat
-            uv = max((float2)(3.0f, 3.0f), min((float2)(params->width - 3, params->height - 3), uv));
+            uv = max((float2)(3.0f, 3.0f), min((float2)(frame_width - 3, frame_height - 3), uv));
         } break;
         case 2: { // edge mirror
             int rx = round(uv.x);
             int ry = round(uv.y);
-            int width3 = (params->width - 3);
-            int height3 = (params->height - 3);
+            int width3 = (frame_width - 3);
+            int height3 = (frame_height - 3);
             if (rx > width3)  uv.x = width3  - (rx - width3);
-            if (rx < 3)       uv.x = 3 + params->width - (width3  + rx);
+            if (rx < 3)       uv.x = 3 + frame_width - (width3  + rx);
             if (ry > height3) uv.y = height3 - (ry - height3);
-            if (ry < 3)       uv.y = 3 + params->height - (height3 + ry);
+            if (ry < 3)       uv.y = 3 + frame_height - (height3 + ry);
         } break;
     }
 
@@ -754,25 +760,29 @@ __kernel void undistort_image(__global const uchar *srcptr, __global uchar *dstp
         DATA_TYPE final_pix;
         if (uv.x > -99998.0f) {
             if (params->background_mode == 3) { // margin with feather
-                float widthf  = (params->width  - 1);
-                float heightf = (params->height - 1);
-
-                float feather = max(0.0001f, params->background_margin_feather * heightf);
-                float2 pt2 = uv;
-                float alpha = 1.0f;
-                if ((uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather)) {
-                    alpha = fmax(0.0f, fmin(1.0f, fmin(fmin(widthf - uv.x, heightf - uv.y), fmin(uv.x, uv.y)) / feather));
-                    pt2 /= (float2)(widthf, heightf);
-                    pt2 = ((pt2 - 0.5f) * (1.0f - params->background_margin)) + 0.5f;
-                    pt2 *= (float2)(widthf, heightf);
-                }
-
                 float2 frame_size = (float2)((float)params->width, (float)params->height);
                 if (params->input_rotation != 0.0f) {
                     float rotation = params->input_rotation * (M_PI_F / 180.0f);
                     float2 size = frame_size;
                     frame_size = fabs(round(rotate_point(size, rotation, (float2)(0.0f, 0.0f), (float2)(0.0f, 0.0f))));
                 }
+                // `uv` is in the input frame, turned by the input rotation, so the margin follows `frame_size`.
+                // Pixel centres are on whole coordinates, so the picture spans 0 ..= size - 1
+                float widthf  = (frame_size.x - 1);
+                float heightf = (frame_size.y - 1);
+
+                // A fraction of the picture's own height, whichever way the input buffer is turned
+                float feather = max(0.0001f, params->background_margin_feather * (float)(params->height - 1));
+                float2 pt2 = uv;
+                float alpha = 1.0f;
+                if ((uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather)) {
+                    alpha = fmax(0.0f, fmin(1.0f, fmin(fmin(widthf - uv.x, heightf - uv.y), fmin(uv.x, uv.y)) / feather));
+                    // Pulled towards the middle of that span, so the margin is the same on both sides
+                    pt2 /= (float2)(widthf, heightf);
+                    pt2 = ((pt2 - 0.5f) * (1.0f - params->background_margin)) + 0.5f;
+                    pt2 *= (float2)(widthf, heightf);
+                }
+
                 uv.x  = map_coord(uv.x,  0.0f, (float)frame_size.x, (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));
                 uv.y  = map_coord(uv.y,  0.0f, (float)frame_size.y, (float)params->source_rect.y, (float)(params->source_rect.y + params->source_rect.w));
                 pt2.x = map_coord(pt2.x, 0.0f, (float)frame_size.x, (float)params->source_rect.x, (float)(params->source_rect.x + params->source_rect.z));

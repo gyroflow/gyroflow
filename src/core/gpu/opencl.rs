@@ -245,7 +245,9 @@ impl OclWrapper {
                         }
                         let flags = if is_in { MemFlags::new().read_only().host_no_access() }
                                     else     { MemFlags::new().read_write().host_no_access() };
-                        Ok((Buffer::builder().queue(ocl_queue.clone()).len(buf.size.1 * buf.size.2).flags(flags).build()?, None))
+                        // `undistort_image` binds the output, and the input if it's not copied, to the kernel directly, so they only need a placeholder
+                        let len = if is_in && buf.texture_copy { buf.size.1 * buf.size.2 } else { 4 };
+                        Ok((Buffer::builder().queue(ocl_queue.clone()).len(len).flags(flags).build()?, None))
                     },
                     BufferSource::OpenGL { texture, .. } => {
                         let flags = if is_in { MemFlags::new().read_only() }

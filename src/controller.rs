@@ -6,7 +6,7 @@ use qmetaobject::*;
 use nalgebra::Vector4;
 use std::sync::Arc;
 use std::cell::RefCell;
-use std::sync::atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst };
+use std::sync::atomic::{ AtomicBool, AtomicU32, AtomicUsize, Ordering::SeqCst };
 use std::collections::{ BTreeMap, BTreeSet, HashSet };
 use std::str::FromStr;
 
@@ -118,8 +118,18 @@ pub struct Controller {
     clear_optical_correction: qt_method!(fn(&mut self)),
     set_ignore_file_motion: qt_method!(fn(&mut self, ignore: bool)),
     set_optical_correction_strength: qt_method!(fn(&mut self, strength: f64)),
+    set_optical_correction_per_frame: qt_method!(fn(&mut self, per_frame: bool)),
+    set_optical_tracking: qt_method!(fn(&mut self, method: String)),
     optical_correction_info: qt_method!(fn(&self) -> QString),
     optical_correction_changed: qt_signal!(),
+    optical_tracked_points: qt_method!(fn(&self, timestamp_us: f64, stabilized: bool) -> QString),
+    find_optical_tracks_in_rect: qt_method!(fn(&self, timestamp_us: f64, x0: f64, y0: f64, x1: f64, y1: f64, all_frames: bool, stabilized: bool) -> u32),
+    cancel_optical_track_search: qt_method!(fn(&self)),
+    optical_tracks_found: qt_signal!(search: u32, ids: QString),
+    optical_track_paths: qt_method!(fn(&self, ids: String, timestamp_us: f64, reach: usize, stabilized: bool) -> QString),
+    remove_optical_tracks: qt_method!(fn(&mut self, ids: String, remove: bool) -> QString),
+    restore_optical_tracks: qt_method!(fn(&mut self)),
+    optical_tracks_changed: qt_signal!(),
 
     override_video_fps: qt_method!(fn(&self, fps: f64, recompute: bool)),
     get_org_duration_ms: qt_method!(fn(&self) -> f64),
@@ -133,6 +143,7 @@ pub struct Controller {
     stab_enabled: qt_property!(bool; WRITE set_stab_enabled),
     show_detected_features: qt_property!(bool; WRITE set_show_detected_features),
     show_optical_flow: qt_property!(bool; WRITE set_show_optical_flow),
+    show_tracked_points: qt_property!(bool; WRITE set_show_tracked_points),
     fov: qt_property!(f64; WRITE set_fov),
     fov_overview: qt_property!(bool; WRITE set_fov_overview),
     show_safe_area: qt_property!(bool; WRITE set_show_safe_area),
@@ -317,10 +328,20 @@ pub struct Controller {
     processing_info_changed: qt_signal!(),
 
     cancel_flag: Arc<AtomicBool>,
+    // Loading telemetry has its own: the other operations reset the shared one when they start, and a load has to stay
+    // cancelled once a newer one replaced it. Results of a replaced load are dropped, see `begin_telemetry_load`
+    telemetry_cancel_flag: Arc<AtomicBool>,
+    telemetry_load_id: Arc<AtomicUsize>,
+    // Telemetry loads clear and write the motion data and lens of the stabilizer, so they run one after another
+    telemetry_queue: util::SerialQueue,
     preview_pipeline: Arc<AtomicUsize>,
 
     ongoing_computations: BTreeSet<u64>,
     optical_analysis_running: bool,
+    /// The last of `find_optical_tracks_in_rect`'s searches: the ones before it stop
+    optical_track_search: Arc<AtomicU32>,
+    /// `remeasure_optical_correction`s running
+    optical_remeasures: usize,
 
     pub stabilizer: Arc<StabilizationManager>,
 }
@@ -629,6 +650,7 @@ impl Controller {
                 }
             }
             this.optical_correction_changed();
+            this.optical_tracks_changed();
         });
 
         let stabilizer = self.stabilizer.clone();
@@ -808,24 +830,29 @@ impl Controller {
             let fps = vid.frameRate;
             let frame_count = vid.frameCount as usize;
             let video_size = (vid.videoWidth as usize, vid.videoHeight as usize);
-            self.cancel_flag.store(false, SeqCst);
-            let cancel_flag = self.cancel_flag.clone();
+            let (load_id, cancel_flag) = self.begin_telemetry_load();
+            let current_load_id = self.telemetry_load_id.clone();
+            // A project import this load replaced can't reset it anymore (its results are dropped), and nothing else is loading now
+            self.stabilizer.prevent_recompute.store(false, SeqCst);
 
             if is_main_video {
                 self.set_preview_resolution(self.preview_resolution, player);
             }
 
-            let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (msg, arg): (String, String)| {
+            let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (msg, arg): (String, String)| {
+                if this.telemetry_load_id.load(SeqCst) != load_id { return; }
                 this.error(QString::from(msg), QString::from(arg), QString::default());
             });
 
             let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, progress: f64| {
+                if this.telemetry_load_id.load(SeqCst) != load_id { return; }
                 this.loading_gyro_in_progress = progress < 1.0;
                 this.loading_gyro_progress(progress);
                 this.loading_gyro_in_progress_changed();
             });
             let stab2 = stab.clone();
             let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, params: (bool, QString, QString, bool, serde_json::Value)| {
+                if this.telemetry_load_id.load(SeqCst) != load_id { return; }
                 this.gyro_loaded = params.3; // Contains motion
                 this.gyro_changed();
 
@@ -843,9 +870,11 @@ impl Controller {
                 this.request_recompute();
             });
             let load_lens = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, path: String| {
+                if this.telemetry_load_id.load(SeqCst) != load_id { return; }
                 this.load_lens_profile(path.into());
             });
             let reload_lens = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, _| {
+                if this.telemetry_load_id.load(SeqCst) != load_id { return; }
                 let lens = this.stabilizer.lens.read();
                 if this.lens_loaded || !lens.path_to_file.is_empty() {
                     this.lens_loaded = true;
@@ -863,7 +892,11 @@ impl Controller {
 
                 self.loading_gyro_in_progress = true;
                 self.loading_gyro_in_progress_changed();
-                core::run_threaded(move || {
+                self.telemetry_queue.run(move || {
+                    // Replaced by a newer load while it waited for the previous one
+                    if current_load_id.load(SeqCst) != load_id { return; }
+                    let load_cancel_flag = cancel_flag.clone();
+
                     let mut additional_data = serde_json::Value::Object(serde_json::Map::new());
                     let additional_obj = additional_data.as_object_mut().unwrap();
 
@@ -887,6 +920,8 @@ impl Controller {
                         }
                     }
 
+                    if current_load_id.load(SeqCst) != load_id { return; }
+
                     stab.recompute_smoothness();
 
                     let gyro = stab.gyro.read();
@@ -895,6 +930,8 @@ impl Controller {
                     let has_raw_gyro = !file_metadata.raw_imu.is_empty();
                     let has_quats = !file_metadata.quaternions.is_empty();
                     let has_motion = has_raw_gyro || has_quats;
+                    // Cancelled, it didn't load anything: the UI must not take the file as loaded and skip loading it again
+                    additional_obj.insert("cancelled".to_owned(),         serde_json::Value::Bool(load_cancel_flag.load(SeqCst)));
                     additional_obj.insert("imu_orientation".to_owned(),   serde_json::Value::String(gyro.imu_transforms.imu_orientation.clone().unwrap_or_else(|| "XYZ".into())));
                     additional_obj.insert("contains_raw_gyro".to_owned(), serde_json::Value::Bool(has_raw_gyro));
                     additional_obj.insert("contains_quats".to_owned(),    serde_json::Value::Bool(has_quats));
@@ -947,6 +984,10 @@ impl Controller {
 
                     finished((is_main_video, filename.into(), QString::from(detected.trim()), has_motion, additional_data));
                 });
+            } else if self.loading_gyro_in_progress {
+                // The load this one replaced won't report that it finished anymore
+                self.loading_gyro_in_progress = false;
+                self.loading_gyro_in_progress_changed();
             }
         }
     }
@@ -1354,10 +1395,26 @@ impl Controller {
             self.chart_data_changed();
             self.optical_correction_changed();
         }
+        // Tracks taken out (or put back) while the analysis was out of date, and now it isn't: measured now, or they'd
+        // look taken out of a correction that still has them
+        if self.optical_remeasures == 0 && self.stabilizer.optical_tracks_unmeasured() {
+            self.remeasure_optical_correction();
+        }
     }
 
     fn cancel_current_operation(&mut self) {
         self.cancel_flag.store(true, SeqCst);
+        self.telemetry_cancel_flag.store(true, SeqCst);
+    }
+
+    /// Cancels the telemetry load in progress, if any, and returns the id and cancel flag of a new one.
+    /// Clicking through videos while they load used to run the loads at the same time, and whichever finished last
+    /// wrote its motion data and lens, even of a video that was no longer loaded. Now only the latest load's progress
+    /// and results reach the UI and the stabilizer, and the loads run one after another (see `telemetry_queue`).
+    fn begin_telemetry_load(&mut self) -> (usize, Arc<AtomicBool>) {
+        self.telemetry_cancel_flag.store(true, SeqCst);
+        self.telemetry_cancel_flag = Arc::new(AtomicBool::new(false));
+        (self.telemetry_load_id.fetch_add(1, SeqCst) + 1, self.telemetry_cancel_flag.clone())
     }
 
     fn export_gyroflow_file(&self, url: QUrl, typ: QString, additional_data: QJsonObject) {
@@ -1467,12 +1524,16 @@ impl Controller {
 
     fn import_gyroflow_file(&mut self, url: QUrl) {
         let url = util::qurl_to_encoded(url);
+        let (load_id, cancel_flag) = self.begin_telemetry_load();
+        let current_load_id = self.telemetry_load_id.clone();
         let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, progress: f64| {
+            if this.telemetry_load_id.load(SeqCst) != load_id { return; }
             this.loading_gyro_in_progress = progress < 1.0;
             this.loading_gyro_progress(progress);
             this.loading_gyro_in_progress_changed();
         });
         let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, obj: Result<serde_json::Value, gyroflow_core::GyroflowCoreError>| {
+            if this.telemetry_load_id.load(SeqCst) != load_id { return; }
             this.loading_gyro_in_progress = false;
             this.loading_gyro_progress(1.0);
             this.loading_gyro_in_progress_changed();
@@ -1483,24 +1544,23 @@ impl Controller {
         });
 
         let stab = self.stabilizer.clone();
-        let cancel_flag = self.cancel_flag.clone();
-        cancel_flag.store(true, SeqCst);
-        core::run_threaded(move || {
-            if Arc::strong_count(&cancel_flag) > 2 {
-                // Wait for other tasks to finish
-                std::thread::sleep(std::time::Duration::from_millis(200));
-            }
-            cancel_flag.store(false, SeqCst);
+        self.cancel_flag.store(true, SeqCst); // Other operations still running on the previous project
+        self.telemetry_queue.run(move || {
+            if current_load_id.load(SeqCst) != load_id { return; } // Replaced by a newer load while it waited
             finished(stab.import_gyroflow_file(&url, false, progress, cancel_flag, false));
         });
     }
     fn import_gyroflow_data(&mut self, data: QString) {
+        let (load_id, cancel_flag) = self.begin_telemetry_load();
+        let current_load_id = self.telemetry_load_id.clone();
         let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, progress: f64| {
+            if this.telemetry_load_id.load(SeqCst) != load_id { return; }
             this.loading_gyro_in_progress = progress < 1.0;
             this.loading_gyro_progress(progress);
             this.loading_gyro_in_progress_changed();
         });
         let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, obj: Result<serde_json::Value, gyroflow_core::GyroflowCoreError>| {
+            if this.telemetry_load_id.load(SeqCst) != load_id { return; }
             this.loading_gyro_in_progress = false;
             this.loading_gyro_progress(1.0);
             this.loading_gyro_in_progress_changed();
@@ -1510,14 +1570,9 @@ impl Controller {
         });
 
         let stab = self.stabilizer.clone();
-        let cancel_flag = self.cancel_flag.clone();
-        cancel_flag.store(true, SeqCst);
-        core::run_threaded(move || {
-            if Arc::strong_count(&cancel_flag) > 2 {
-                // Wait for other tasks to finish
-                std::thread::sleep(std::time::Duration::from_millis(200));
-            }
-            cancel_flag.store(false, SeqCst);
+        self.cancel_flag.store(true, SeqCst); // Other operations still running on the previous project
+        self.telemetry_queue.run(move || {
+            if current_load_id.load(SeqCst) != load_id { return; } // Replaced by a newer load while it waited
             let mut is_preset = false;
             finished(stab.import_gyroflow_data(data.to_string().as_bytes(), false, None, progress, cancel_flag, &mut is_preset, false));
         });
@@ -1556,6 +1611,7 @@ impl Controller {
     wrap_simple_method!(set_stab_enabled,           v: bool);
     wrap_simple_method!(set_show_detected_features, v: bool);
     wrap_simple_method!(set_show_optical_flow,      v: bool);
+    wrap_simple_method!(set_show_tracked_points,    v: bool);
     wrap_simple_method!(set_digital_lens_name,      v: String; recompute);
     wrap_simple_method!(set_digital_lens_param,     i: usize, v: f64; recompute);
     wrap_simple_method!(set_fov_overview,       v: bool; recompute);
@@ -1606,6 +1662,7 @@ impl Controller {
         self.request_recompute();
         self.chart_data_changed();
         self.optical_correction_changed();
+        self.optical_tracks_changed();
     }
     /// Sets the file's own motion data aside, for the motion measured from the video, or brings it back
     fn set_ignore_file_motion(&mut self, ignore: bool) {
@@ -1616,10 +1673,24 @@ impl Controller {
             self.optical_correction_changed();
         }
     }
-    /// Refits the correction to the measurements of the last analysis, when they're still around: a fraction of a
-    /// second, off the UI thread
     fn set_optical_correction_strength(&mut self, strength: f64) {
-        if !self.stabilizer.set_optical_correction_strength(strength) {
+        let refit = self.stabilizer.set_optical_correction_strength(strength);
+        self.refit_optical_correction(refit);
+    }
+    fn set_optical_correction_per_frame(&mut self, per_frame: bool) {
+        let refit = self.stabilizer.set_optical_correction_per_frame(per_frame);
+        self.refit_optical_correction(refit);
+    }
+    /// "klt" or "dis", for the next analysis
+    fn set_optical_tracking(&mut self, method: String) {
+        if self.stabilizer.set_optical_tracking(&method) {
+            self.optical_correction_changed();
+        }
+    }
+    /// Refits the correction to the measurements of the last analysis after a change of its settings, when they're
+    /// still around (`refit`): a fraction of a second, off the UI thread
+    fn refit_optical_correction(&mut self, refit: bool) {
+        if !refit {
             return self.optical_correction_changed();
         }
         let done = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, result: Result<bool, String>| {
@@ -1639,6 +1710,84 @@ impl Controller {
     }
     fn optical_correction_info(&self) -> QString {
         QString::from(self.stabilizer.optical_correction_info().to_string())
+    }
+    /// Where the last analysis tracked points in the frame at `timestamp_us` (the file's own time), for the point editor:
+    /// `[x, y, state, track, ...]`, relative to the frame (the stabilized one with `stabilized`), `state` as `PointState`
+    fn optical_tracked_points(&self, timestamp_us: f64, stabilized: bool) -> QString {
+        let flat: Vec<f64> = self.stabilizer.optical_tracked_points(timestamp_us.round() as i64, stabilized).into_iter()
+            .flat_map(|(id, x, y, s)| [x as f64, y as f64, s as u8 as f64, id as f64]).collect();
+        QString::from(serde_json::to_string(&flat).unwrap_or_default())
+    }
+    /// Looks for the tracks with a point within a box (relative to the frame, the stabilized one with `stabilized`) in
+    /// the frame at `timestamp_us` (the file's own time), or in any frame: off the UI thread, every frame of a long clip
+    /// takes seconds. Returns which search it is, and `optical_tracks_found` brings what it found (a JSON array of
+    /// their ids), unless another search or `cancel_optical_track_search` overtook it
+    fn find_optical_tracks_in_rect(&self, timestamp_us: f64, x0: f64, y0: f64, x1: f64, y1: f64, all_frames: bool, stabilized: bool) -> u32 {
+        let rect = [x0.min(x1) as f32, y0.min(y1) as f32, x0.max(x1) as f32, y0.max(y1) as f32];
+        let search = self.optical_track_search.fetch_add(1, SeqCst).wrapping_add(1);
+        let latest = self.optical_track_search.clone();
+        let found = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (search, ids): (u32, Vec<u32>)| {
+            this.optical_tracks_found(search, QString::from(serde_json::to_string(&ids).unwrap_or_default()));
+        });
+        let stabilizer = self.stabilizer.clone();
+        core::run_threaded(move || {
+            let overtaken = || latest.load(SeqCst) != search;
+            if let Some(ids) = stabilizer.optical_tracks_in_rect(timestamp_us.round() as i64, rect, all_frames, stabilized, overtaken) {
+                found((search, ids));
+            }
+        });
+        search
+    }
+    fn cancel_optical_track_search(&self) {
+        self.optical_track_search.fetch_add(1, SeqCst);
+    }
+    /// Where the tracks `ids` (a JSON array) are in the frames up to `reach` away from the one at `timestamp_us`:
+    /// `{ "id": [frames from that one, x, y, ...] }`, relative to the frame (the stabilized one with `stabilized`)
+    fn optical_track_paths(&self, ids: String, timestamp_us: f64, reach: usize, stabilized: bool) -> QString {
+        let ids: std::collections::HashSet<u32> = serde_json::from_str(&ids).unwrap_or_default();
+        let paths: serde_json::Map<String, serde_json::Value> = self.stabilizer.optical_track_paths(&ids, timestamp_us.round() as i64, reach, stabilized).into_iter()
+            .map(|(id, path)| (id.to_string(), path.into_iter().flat_map(|(f, x, y)| [f as f64, x as f64, y as f64]).collect::<Vec<f64>>().into()))
+            .collect();
+        QString::from(serde_json::Value::Object(paths).to_string())
+    }
+    /// Takes the tracks `ids` (a JSON array) out of what the analysis measured, or puts them back (`remove` false).
+    /// Returns the ones that weren't already, a JSON array: what an undo changes back
+    fn remove_optical_tracks(&mut self, ids: String, remove: bool) -> QString {
+        let ids: Vec<u32> = serde_json::from_str(&ids).unwrap_or_default();
+        let changed = self.stabilizer.remove_optical_tracks(&ids, remove);
+        self.optical_tracks_edited(!changed.is_empty());
+        QString::from(serde_json::to_string(&changed).unwrap_or_default())
+    }
+    fn restore_optical_tracks(&mut self) {
+        let changed = self.stabilizer.restore_optical_tracks();
+        self.optical_tracks_edited(changed);
+    }
+    /// The points show the change right away; the correction follows once the analysis is measured again without the
+    /// tracks taken out, off the UI thread. A change while that runs overtakes it, and measures again itself
+    fn optical_tracks_edited(&mut self, changed: bool) {
+        if !changed { return; }
+        self.optical_tracks_changed();
+        self.optical_correction_changed();
+        self.remeasure_optical_correction();
+    }
+    fn remeasure_optical_correction(&mut self) {
+        self.optical_remeasures += 1;
+        let done = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, result: Result<bool, String>| {
+            this.optical_remeasures = this.optical_remeasures.saturating_sub(1);
+            match result {
+                Ok(true) => {
+                    this.stabilizer.invalidate_zooming();
+                    this.request_recompute();
+                    this.chart_data_changed();
+                },
+                Ok(false) => { },
+                Err(e) => this.error(QString::from("An error occured: %1"), QString::from(e), QString::default()),
+            }
+            this.optical_tracks_changed();
+            this.optical_correction_changed();
+        });
+        let stabilizer = self.stabilizer.clone();
+        core::run_threaded(move || done(stabilizer.remeasure_optical_correction()));
     }
     wrap_simple_method!(set_device, v: i32);
 

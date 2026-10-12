@@ -11,7 +11,12 @@ impl REDSdk {
         if let Ok(path) = super::SDK_PATH.as_ref() {
             let mut path = path.clone();
             path.push("_");
-            if cfg!(target_os = "windows") {
+            if cfg!(all(target_os = "windows", target_arch = "aarch64")) {
+                // ARM64 libraries have the -a64 suffix, and there is no CUDA or separate GPU decoder library
+                return
+                    path.with_file_name("REDR3D-a64.dll").exists() &&
+                    path.with_file_name("REDOpenCL-a64.dll").exists();
+            } else if cfg!(target_os = "windows") {
                 return
                     path.with_file_name("REDDecoder-x64.dll").exists() &&
                     path.with_file_name("REDR3D-x64.dll").exists() &&
@@ -37,12 +42,14 @@ impl REDSdk {
     }
 
     pub fn get_download_url(sdk_base: &str) -> Option<String> {
-        let filename = if cfg!(target_os = "windows") {
-            "RED_SDK_Windows_9.1.2.tar.gz"
+        let filename = if cfg!(all(target_os = "windows", target_arch = "aarch64")) {
+            "RED_SDK_Windows_arm64_9.2.1.tar.gz"
+        } else if cfg!(target_os = "windows") {
+            "RED_SDK_Windows_9.2.1.tar.gz"
         } else if cfg!(target_os = "macos") {
-            "RED_SDK_MacOS_9.1.2.tar.gz"
+            "RED_SDK_MacOS_9.2.1.tar.gz"
         } else if cfg!(target_os = "linux") {
-            "RED_SDK_Linux_9.1.2.tar.gz"
+            "RED_SDK_Linux_9.2.1.tar.gz"
         } else {
             return None;
         };
