@@ -250,6 +250,8 @@ pub struct Controller {
 
     check_updates: qt_method!(fn(&self)),
     updates_available: qt_signal!(version: QString, changelog: QString),
+    check_server_message: qt_method!(fn(&self)),
+    server_message: qt_signal!(json: QString),
     rate_profile: qt_method!(fn(&self, name: QString, json: QString, checksum: QString, is_good: bool)),
     request_profile_ratings: qt_method!(fn(&self)),
 
@@ -1899,6 +1901,25 @@ impl Controller {
                     }
                 }
             }
+        });
+    }
+
+    fn check_server_message(&self) {
+        let show = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, json: String| {
+            this.server_message(QString::from(json))
+        });
+        core::run_threaded(move || {
+            let url = format!("https://api.gyroflow.xyz/message?version={}&os={}", env!("CARGO_PKG_VERSION"), std::env::consts::OS);
+            let Ok(Ok(body)) = ureq::get(url).call().map(|x| x.into_body().read_to_string()) else { return; };
+            let Ok(mut msg) = serde_json::from_str::<serde_json::Value>(&body) else { return; };
+            if msg.get("type").and_then(|x| x.as_str()).is_none() { return; }
+
+            // QML can't fetch https itself, so download the image here and only show the message once it's ready
+            if let Some(image_url) = msg.get("image").and_then(|x| x.as_str()) {
+                let Some(data_url) = util::download_as_data_url(image_url) else { return; };
+                msg["image"] = data_url.into();
+            }
+            show(msg.to_string());
         });
     }
 

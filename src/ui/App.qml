@@ -521,7 +521,7 @@ Rectangle {
         videoArea: videoArea;
     }
 
-    function showNotification(type: int, text: string, textFormat: var, container: var): void {
+    function showNotification(type: int, text: string, textFormat: var, container: var, timeoutMs: var): void {
         if (typeof textFormat === "undefined" || !textFormat) textFormat = text.includes("<b>")? Text.StyledText : Text.AutoText; // default
         const im = Qt.createComponent("components/InfoMessage.qml").createObject(container || window.videoArea.infoMessages, {
             text: text,
@@ -530,7 +530,7 @@ Rectangle {
         });
         im.t.textFormat = textFormat;
         im.opacity = 1;
-        Qt.createQmlObject("import QtQuick; Timer { interval: 5000; running: true; }", im, "t1").onTriggered.connect(() => {
+        Qt.createQmlObject("import QtQuick; Timer { interval: " + (+timeoutMs || 5000) + "; running: true; }", im, "t1").onTriggered.connect(() => {
             im.opacity = 0;
             im.height = -5 * dpiScale;
             im.destroy(700);
@@ -638,6 +638,36 @@ Rectangle {
             const el = messageBox(Modal.Info, heading + changelog, [ { text: qsTr("Download"),accent: true, clicked: () => openUpdatePage() },{ text: qsTr("Close") }], undefined, Text.MarkdownText);
             el.t.horizontalAlignment = Text.AlignLeft;
         }
+        function onServer_message(json: string): void {
+            const msg = JSON.parse(json);
+            const identifier = msg.id? "message-" + msg.id : "";
+            if (identifier && +settings.value("dontShowAgain-" + identifier, 0)) return;
+            if (identifier && msg.once) settings.setValue("dontShowAgain-" + identifier, 1);
+
+            const icons = { none: Modal.NoIcon, info: Modal.Info, warning: Modal.Warning, error: Modal.Error, success: Modal.Success, question: Modal.Question };
+            const icon = icons[msg.icon] ?? Modal.Info;
+            const text = (msg.text || "").replace(/\n/g, "<br>");
+            switch (msg.type) {
+                case "notification":
+                    showNotification(icon, text, Text.StyledText, undefined, (msg.timeout || 0) * 1000);
+                    break;
+                case "popup": {
+                    const buttons = (msg.buttons || [{ text: qsTr("Close") }]).map(b => ({ text: b.text, accent: b.accent, clicked: () => { if (b.url) Qt.openUrlExternally(b.url); } }));
+                    const el = messageBox(icon, text, buttons, undefined, Text.StyledText, msg.dont_show_again? identifier : "");
+                    el.dontShowAgain.text = qsTr("Don't show again");
+                    break;
+                }
+                case "image": {
+                    const el = Qt.createComponent("components/ImageModal.qml").createObject(window, { source: msg.image, url: msg.url || "", links: msg.links || [], showDontShowAgain: !!(identifier && msg.dont_show_again) });
+                    window.isDialogOpened = true;
+                    el.closed.connect((dontShowAgain) => {
+                        window.isDialogOpened = false;
+                        if (dontShowAgain) settings.setValue("dontShowAgain-" + identifier, 1);
+                    });
+                    break;
+                }
+            }
+        }
         function onRequest_location(url: string, type: string): void {
             gfFileDialog.projectType = type;
             gfFileDialog.currentFolder = filesystem.get_folder(url);
@@ -679,6 +709,7 @@ Rectangle {
 
     Component.onCompleted: {
         controller.check_updates();
+        controller.check_server_message();
 
         QT_TRANSLATE_NOOP("App", "An error occurred: %1");
         QT_TRANSLATE_NOOP("App", "Gyroflow file exported to %1.");

@@ -504,6 +504,19 @@ pub fn image_to_b64(img: QImage) -> QString {
     })
 }
 
+pub fn download_as_data_url(url: &str) -> Option<String> {
+    let mut response = ureq::get(url).call().ok()?;
+    let mime = response.body().mime_type()?.to_owned();
+    if !mime.starts_with("image/") { return None; }
+    let data = response.body_mut().read_to_vec().ok()?;
+    let ptr = data.as_ptr();
+    let len = data.len();
+    let b64 = cpp!(unsafe [ptr as "const char *", len as "size_t"] -> QString as "QString" {
+        return QString::fromLatin1(QByteArray::fromRawData(ptr, len).toBase64());
+    });
+    Some(format!("data:{mime};base64,{b64}"))
+}
+
 pub fn update_file_times(output_url: &str, input_url: &str, additional_ms: Option<f64>) {
     if let Err(e) = || -> std::io::Result<()> {
         let input_path = gyroflow_core::filesystem::url_to_path(input_url);
