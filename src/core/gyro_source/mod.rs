@@ -970,7 +970,7 @@ impl GyroSource {
             self.raw_imu = file_metadata.raw_imu.clone();
             for x in self.raw_imu.iter_mut() {
                 if let Some(g) = x.gyro.as_mut() {
-                    self.imu_transforms.transform(g, false);
+                    self.imu_transforms.transform_gyro(g);
                 }
                 if let Some(a) = x.accl.as_mut() {
                     self.imu_transforms.transform(a, true);
