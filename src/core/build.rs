@@ -14,4 +14,25 @@ fn main() {
             }
         }
     }
+
+    // Generate burn model code from ONNX when AI optical flow is enabled (issue #45).
+    // The .onnx is expected at resources/gmflow/ — shipped pre-built or downloaded out-of-band.
+    // TODO(#45): download from a hosted release asset once the URL is finalised.
+    #[cfg(feature = "use-burn")]
+    {
+        let onnx_path = format!(
+            "{project_dir}/../../resources/gmflow/gmflow-scale2-regrefine6-320x576-opset16-sim.onnx"
+        );
+        if !std::path::Path::new(&onnx_path).exists() {
+            panic!(
+                "AI optical flow is enabled (feature use-burn) but gmflow ONNX not found at {onnx_path}. \
+                 Export it from AdrianEddy/unimatch + onnx-simplifier and place it there."
+            );
+        }
+        println!("cargo:rerun-if-changed={onnx_path}");
+        burn_onnx::ModelGen::new()
+            .input(&onnx_path)
+            .out_dir("model/")
+            .run_from_script();
+    }
 }
