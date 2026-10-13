@@ -199,14 +199,16 @@ vec2 process_coord(vec2 uv, float idx) {
         uv.x = map_coord(uv.x, 0.0, params.width,  origin.x, origin.x + crop_size.x);
         uv.y = map_coord(uv.y, 0.0, params.height, origin.y, origin.y + crop_size.y);
 
+        // The shear of every band above this one in full, and of this one down to the row. A fixed loop with no
+        // branch in it, as in the OpenCL kernel (issue 1255)
         int idx = min(7, max(0, int(floor(uv.y / stblz_grid))));
         float delta = uv.y - stblz_grid * float(idx);
-        uv.x -= get_mesh_data(o + 4 + idx * 2 + 0) * delta;
-        uv.y -= get_mesh_data(o + 4 + idx * 2 + 1) * delta;
-        for (int j = 0; j < idx; j++) {
-            uv.x -= get_mesh_data(o + 4 + j * 2 + 0) * stblz_grid;
-            uv.y -= get_mesh_data(o + 4 + j * 2 + 1) * stblz_grid;
+        vec2 shift = vec2(0.0);
+        for (int j = 0; j < 8; j++) {
+            float w = j < idx ? stblz_grid : (j == idx ? delta : 0.0);
+            shift += vec2(get_mesh_data(o + 4 + j * 2 + 0), get_mesh_data(o + 4 + j * 2 + 1)) * w;
         }
+        uv -= shift;
 
         uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0, params.width);
         uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0, params.height);

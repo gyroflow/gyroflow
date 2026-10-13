@@ -526,14 +526,18 @@ float2 rotate_and_distort(float2 ray, uint idx, __global KernelParams *params, _
             uv.x = map_coord(uv.x, 0.0f, (float)params->width,  origin.x, origin.x + crop_size.x);
             uv.y = map_coord(uv.y, 0.0f, (float)params->height, origin.y, origin.y + crop_size.y);
 
+            // The shear of every band above this one in full, and of this one down to the row. A fixed loop with no
+            // branch in it: with one that ran up to `idx`, macOS OpenCL on a Radeon Pro 580X drew the picture jumping
+            // back at every band edge, as if the bands above were left out of the sum (issue 1255)
             int idx = min(7, max(0, (int)floor(uv.y / stblz_grid)));
             float delta = uv.y - stblz_grid * (float)idx;
-            uv.x -= mesh_data[o + 4 + idx * 2 + 0] * delta;
-            uv.y -= mesh_data[o + 4 + idx * 2 + 1] * delta;
-            for (int j = 0; j < idx; j++) {
-                uv.x -= mesh_data[o + 4 + j * 2 + 0] * stblz_grid;
-                uv.y -= mesh_data[o + 4 + j * 2 + 1] * stblz_grid;
+            float2 shift = (float2)(0.0f, 0.0f);
+            #pragma unroll
+            for (int j = 0; j < 8; j++) {
+                float w = j < idx ? stblz_grid : (j == idx ? delta : 0.0f);
+                shift += (float2)(mesh_data[o + 4 + j * 2 + 0], mesh_data[o + 4 + j * 2 + 1]) * w;
             }
+            uv -= shift;
 
             uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0f, (float)params->width);
             uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0f, (float)params->height);
