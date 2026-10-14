@@ -647,7 +647,7 @@ impl Controller {
                     let mut arg = e;
                     arg.push_str("\n\n");
                     arg.push_str(&rendering::get_log());
-                    this.error(QString::from("An error occured: %1"), QString::from(arg), QString::default());
+                    this.error(QString::from("An error occurred: %1"), QString::from(arg), QString::default());
                 }
             }
             this.optical_correction_changed();
@@ -1702,7 +1702,7 @@ impl Controller {
                     this.chart_data_changed();
                 },
                 Ok(false) => { },
-                Err(e) => this.error(QString::from("An error occured: %1"), QString::from(e), QString::default()),
+                Err(e) => this.error(QString::from("An error occurred: %1"), QString::from(e), QString::default()),
             }
             this.optical_correction_changed();
         });
@@ -1782,7 +1782,7 @@ impl Controller {
                     this.chart_data_changed();
                 },
                 Ok(false) => { },
-                Err(e) => this.error(QString::from("An error occured: %1"), QString::from(e), QString::default()),
+                Err(e) => this.error(QString::from("An error occurred: %1"), QString::from(e), QString::default()),
             }
             this.optical_tracks_changed();
             this.optical_correction_changed();

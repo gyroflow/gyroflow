@@ -1713,6 +1713,11 @@ impl StabilizationManager {
                 "horizon_lock_roll":      horizon_lock.horizonroll,
                 "horizon_lock_pitch_enabled": horizon_lock.lock_pitch,
                 "horizon_lock_pitch":     horizon_lock.horizonpitch,
+                "automatic_lock":         horizon_lock.automatic_lock,
+                "turn_threshold":         horizon_lock.turn_threshold,
+                "turn_smoothing_ms":      horizon_lock.turn_smoothing_ms,
+                "turn_multiplier":        horizon_lock.turn_multiplier,
+                "tilt_accel_limit":       horizon_lock.tilt_accel_limit.is_finite().then_some(horizon_lock.tilt_accel_limit), // null = no limit
                 "use_gravity_vectors":    gyro.use_gravity_vectors,
                 "horizon_lock_integration_method": gyro.horizon_lock_integration_method,
                 "video_speed":                   params.video_speed,
