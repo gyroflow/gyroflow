@@ -6,6 +6,7 @@ pub mod gyro_source;
 pub mod imu_integration;
 pub mod lens_profile;
 pub mod lens_profile_database;
+pub mod camera_catalog;
 #[cfg(feature = "opencv")]
 pub mod calibration;
 pub mod synchronization;
@@ -35,6 +36,7 @@ use gyro_source::{ GyroSource, Quat64, TimeQuat, TimeVec };
 use stabilization_params::{ ReadoutDirection, StabilizationParams };
 use lens_profile::LensProfile;
 use lens_profile_database::LensProfileDatabase;
+pub use camera_catalog::CameraCatalog;
 use smoothing::Smoothing;
 use stabilization::{ Stabilization, KernelParamsFlags, ComputeParams };
 use camera_identifier::CameraIdentifier;
