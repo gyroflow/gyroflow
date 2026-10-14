@@ -123,6 +123,66 @@ pub struct StabilizationManager {
     /// Tracks the user took out of what "Analyze image optically" measured, by where they start: out of the analysis
     /// kept, and of every analysis after it that tracks them again (see `TrackStart`). Per file, kept in the project
     pub optical_removed_tracks: Arc<RwLock<BTreeSet<synchronization::optical_motion::TrackStart>>>,
+    /// Settings of the residual pass (see `optical_motion::residual`). Off by default: the global pass stays in
+    /// charge until the user opts in
+    pub residual_settings: Arc<RwLock<synchronization::optical_motion::residual::ResidualSettings>>,
+}
+
+impl StabilizationManager {
+    /// Builds the residual pass' per-frame mesh from the kept measurements, with the current settings, and installs
+    /// it on the file's metadata for the render to consume (see `frame_transform`). False when there's nothing to
+    /// build it from: no measurements, or a file without motion data (where the bands already carry the whole
+    /// motion, and a mesh would double it). Never touches a camera's own mesh: the render path only ever fills an
+    /// empty slot with it, so Sony's IBIS stays in charge where it exists
+    pub fn build_residual_pass(&self) -> bool {
+        let Some(m) = self.valid_optical_measurements() else { return false };
+        if m.residual_pairs.is_empty() { return false; }
+        let settings = *self.residual_settings.read();
+        if !settings.enabled { return false; }
+        // The fields come out in the analysis resolution's pixels (the tracks' frame); the render is at the source's,
+        // so the residual and the mesh geometry are scaled into it before the table is built
+        let (tr_w, tr_h) = { let (a, b) = m.tracks.residual_track_size(); (a.max(1) as f64, b.max(1) as f64) };
+        let params = synchronization::optical_motion::measurement_params(self);
+        let size = (params.width.max(1) as f64, params.height.max(1) as f64);
+        let (sx, sy) = (size.0 / tr_w, size.1 / tr_h);
+        let mut fields: Vec<synchronization::optical_motion::residual::ResidualField> = m.residual_pairs.iter().map(|pair| {
+            let mut field = synchronization::optical_motion::residual::field_from_pair(
+                pair.seq, pair.frame, &pair.obs, &pair.bands, &pair.pts,
+                &|t: f64| self.gyro.read().org_quat_at_timestamp(t),
+                pair.ta_ms, pair.tb_ms, m.tracks.focal_px(), (tr_w, tr_h),
+                settings.max_residual_px,
+            );
+            for c in field.cells.iter_mut() {
+                c.dx *= sx;
+                c.dy *= sy;
+            }
+            field.size = size;
+            field
+        }).collect();
+        let mesh = synchronization::optical_motion::residual::build_mesh(&mut fields, size, &settings);
+        self.gyro.write().file_metadata.set_residual_mesh(if mesh.is_empty() { None } else { Some(mesh) });
+        self.invalidate_smoothing();
+        true
+    }
+    /// The residual pass on or off (with the current settings); true when the mesh should be rebuilt
+    pub fn set_residual_enabled(&self, on: bool) -> bool {
+        let changed = {
+            let mut s = self.residual_settings.write();
+            let was = s.enabled;
+            s.enabled = on;
+            was != on
+        };
+        if changed && !on {
+            self.gyro.write().file_metadata.set_residual_mesh(None);
+        }
+        changed && on
+    }
+    /// The residual strength; true when the mesh should be rebuilt
+    pub fn set_residual_strength(&self, strength: f64) -> bool {
+        let mut s = self.residual_settings.write();
+        s.strength = strength.clamp(0.0, 1.0);
+        s.enabled
+    }
 }
 
 impl Default for StabilizationManager {
@@ -167,6 +227,7 @@ impl Default for StabilizationManager {
             optical_generation: Arc::new(AtomicU64::new(0)),
             optical_tracking: Arc::new(RwLock::new(Default::default())),
             optical_removed_tracks: Arc::new(RwLock::new(Default::default())),
+            residual_settings: Arc::new(RwLock::new(Default::default())),
         }
     }
 }
@@ -195,6 +256,7 @@ impl StabilizationManager {
             gyro.file_metadata = Default::default();
         }
         self.invalidate_optical_measurements();
+        self.gyro.write().file_metadata.set_residual_mesh(None);
         self.invalidate_smoothing();
         self.invalidate_zooming();
 
@@ -1127,6 +1189,7 @@ impl StabilizationManager {
     }
     pub fn clear_optical_correction(&self) {
         self.invalidate_optical_measurements();
+        self.gyro.write().file_metadata.set_residual_mesh(None);
         self.set_optical_correction(None);
     }
     /// Drops the kept measurements and moves `optical_generation` on: an analysis still running stops, and a refit
@@ -1577,6 +1640,7 @@ impl StabilizationManager {
 
     pub fn clear(&self) {
         self.invalidate_optical_measurements();
+        self.gyro.write().file_metadata.set_residual_mesh(None);
         self.params.write().clear();
         self.invalidate_ongoing_computations();
         self.invalidate_smoothing();
@@ -1897,6 +1961,7 @@ impl StabilizationManager {
             if !*is_preset {
                 // A project replaces what an analysis still running measures, and what the last one measured
                 self.invalidate_optical_measurements();
+        self.gyro.write().file_metadata.set_residual_mesh(None);
             }
 
             if let Some(vid_info) = obj.get("video_info") {
