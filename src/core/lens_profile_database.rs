@@ -278,6 +278,11 @@ impl LensProfileDatabase {
 
     pub fn search(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<(String, String, String, bool, f64, i32, String)> {
         let text = text.to_ascii_lowercase()
+            // Normalize common LensFun naming punctuation.
+            // Example: "18–55mm f/3.5-5.6" -> "18-55mm f 3.5-5.6"
+            .replace('–', "-")
+            .replace('—', "-")
+            .replace('/', " ")
             .replace("bmpcc4k",  "blackmagic pocket cinema camera 4k")
             .replace("bmpcc6k",  "blackmagic pocket cinema camera 6k")
             .replace("bmpcc",    "blackmagic pocket cinema camera")
