@@ -70,6 +70,24 @@ macro_rules! impl_models {
     };
 }
 
+
+impl DistortionModel {
+    /// Rescale distortion coefficients from Hugin normalization (radius
+    /// normalized by the half-diagonal in millimeters) into gyroflow's
+    /// focal-length (tan-space) normalization. `hugin_scaling` is
+    /// `real_focal / hugin_scale_in_millimeters`; see the derivation at the
+    /// bottom of `poly3.rs`. Returns `false` for models that have no Hugin
+    /// normalization (everything other than poly3/poly5/ptlens).
+    pub fn rescale_coeffs(&self, k: &mut [f64], hugin_scaling: f64) -> bool {
+        match &self.inner {
+            DistortionModels::Poly3(_)  => { poly3::Poly3::rescale_coeffs(k, hugin_scaling); true }
+            DistortionModels::Poly5(_)  => { poly5::Poly5::rescale_coeffs(k, hugin_scaling); true }
+            DistortionModels::PtLens(_) => { ptlens::PtLens::rescale_coeffs(k, hugin_scaling); true }
+            _ => false,
+        }
+    }
+}
+
 impl_models! {
     // Physical lenses
     OpenCVFisheye  => opencv_fisheye::OpenCVFisheye,
