@@ -22,6 +22,10 @@ pub struct LensProfileDatabase {
     map: HashMap<String, LensProfile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
     list_for_ui: Vec<(String, String, String, bool, f64, i32, String)>,
+    #[cfg(feature = "lensfun-import")]
+    lensfun_query: String,
+    #[cfg(feature = "lensfun-import")]
+    lensfun_ids: Vec<String>,
     pub loaded: bool,
     pub version: u32,
 }
@@ -207,6 +211,12 @@ impl LensProfileDatabase {
     }
 
     pub fn set_from_db(&mut self, b: Self) {
+        // The map is replaced wholesale, so anything imported from Lensfun is
+        // gone with it. Forgetting that here would leave the query set
+        // claiming those profiles are still present, and they would never be
+        // imported again.
+        #[cfg(feature = "lensfun-import")]
+        { self.lensfun_query.clear(); self.lensfun_ids.clear(); }
         self.map = b.map;
         self.preset_map = b.preset_map;
         self.loaded = b.loaded;
@@ -217,6 +227,48 @@ impl LensProfileDatabase {
                 cb(&self);
             }
         }
+    }
+
+    /// Whether `query` still needs to be looked up in the Lensfun database.
+    ///
+    /// Deliberately takes `&self`: the caller checks this under a read lock,
+    /// synthesises outside it, and only then takes a write lock, so a search
+    /// keystroke never blocks other readers for the length of an import.
+    #[cfg(feature = "lensfun-import")]
+    pub fn needs_lensfun_import(&self, query: &str) -> bool {
+        let key = query.trim().to_ascii_lowercase();
+        key.chars().count() >= 3 && key != self.lensfun_query
+    }
+
+    /// Add profiles synthesised from the Lensfun database for `query`.
+    ///
+    /// Returns how many were actually new, so the caller can skip rebuilding
+    /// the UI list when nothing changed. Profiles are keyed by their
+    /// `lensfun://` identifier, which makes repeating a search idempotent.
+    #[cfg(feature = "lensfun-import")]
+    pub fn add_lensfun_profiles(&mut self, query: &str, profiles: Vec<LensProfile>) -> usize {
+        // Only the newest query's profiles are kept. The search box fires on
+        // every keystroke, so "sony a7iv" arrives as "son", "sony", "sony a"
+        // and so on; retaining each of those would grow the map without bound
+        // and make every later `prepare_list_for_ui` slower, all for entries
+        // the user has already typed past.
+        let mut changed = 0;
+        for id in std::mem::take(&mut self.lensfun_ids) {
+            if self.map.remove(&id).is_some() { changed += 1; }
+        }
+        self.lensfun_query = query.trim().to_ascii_lowercase();
+        for mut profile in profiles {
+            if profile.identifier.is_empty() || self.map.contains_key(&profile.identifier) { continue; }
+            profile.path_to_file = profile.identifier.clone();
+            profile.checksum = Some(format!("{:08x}", crc32fast::hash(profile.identifier.as_bytes())));
+            self.lensfun_ids.push(profile.identifier.clone());
+            self.map.insert(profile.identifier.clone(), profile);
+            changed += 1;
+        }
+        if changed > 0 {
+            log::debug!("Lensfun profiles for query {query:?}: map changed by {changed} entries");
+        }
+        changed
     }
 
     pub fn get_all_filenames(&self) -> Vec<String> {
