@@ -1,0 +1,213 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//! Metadata shared by the selectors and the upload boundary. Lensfun entries
+//! deliberately do not implement `LensProfile` and cannot be loaded as geometry.
+
+use serde_json::{json, Value};
+use std::path::Path;
+use std::sync::LazyLock;
+
+const MAX_CATALOG_BYTES: u64 = 16 * 1024 * 1024;
+static ZOOM_NAME: LazyLock<regex::Regex> = LazyLock::new(|| {
+    regex::Regex::new(r"(?i)(\d+(?:\.\d+)?)\s*[-–—]\s*(\d+(?:\.\d+)?)\s*mm\b").unwrap()
+});
+
+pub fn parse_catalog(text: &str) -> Result<Value, String> {
+    if text.len() as u64 > MAX_CATALOG_BYTES {
+        return Err("Camera catalogue is too large".into());
+    }
+    let value: Value = serde_json::from_str(text).map_err(|e| e.to_string())?;
+    if value["schema_version"].as_u64() != Some(1) {
+        return Err("Unsupported camera catalogue version".into());
+    }
+    for collection in ["cameras", "lenses"] {
+        let rows = value[collection].as_array().ok_or("Invalid camera catalogue collection")?;
+        for row in rows {
+            for field in ["brand", "model"] {
+                if row[field].as_str().is_none_or(|s| s.trim().is_empty()) {
+                    return Err("Camera catalogue entry is missing its identity".into());
+                }
+            }
+            for field in ["mounts", "aliases"] {
+                if let Some(v) = row.get(field) {
+                    if !v.as_array().is_some_and(|a| a.iter().all(Value::is_string)) {
+                        return Err("Invalid camera catalogue aliases or mounts".into());
+                    }
+                }
+            }
+        }
+    }
+    Ok(value)
+}
+
+/// A schema-valid but empty auto-update is not a usable camera/lens database.
+/// Keep parsing permissive for tooling, but never promote empty metadata over
+/// the bundled catalogue that drives user-visible camera/lens selectors.
+pub fn has_deliverable_metadata(value: &Value) -> bool {
+    value["cameras"].as_array().is_some_and(|rows| !rows.is_empty())
+        || value["lenses"].as_array().is_some_and(|rows| !rows.is_empty())
+}
+
+pub fn load_catalog(bundled: &str, cached: &Path) -> Value {
+    // Failed/incompatible updates retain the bundled catalogue; never turn a
+    // network/parse failure into an empty list of known cameras.
+    if std::fs::metadata(cached).is_ok_and(|m| m.len() <= MAX_CATALOG_BYTES) {
+        if let Ok(text) = std::fs::read_to_string(cached) {
+            if let Ok(value) = parse_catalog(&text) {
+                if has_deliverable_metadata(&value) {
+                    return value;
+                }
+            }
+        }
+    }
+    parse_catalog(bundled).unwrap_or_else(|_| json!({"schema_version":1,"cameras":[],"lenses":[],"mounts":{}}))
+}
+
+fn meaningful(value: &Value) -> bool {
+    value.as_str().is_some_and(|s| {
+        let s = s.trim().to_lowercase();
+        !s.is_empty() && !["---", "?", "unknown", "other", "n/a", "none"].contains(&s.as_str())
+    })
+}
+
+fn positive(value: &Value) -> bool {
+    value.as_f64().is_some_and(|v| v.is_finite() && v > 0.0)
+}
+
+pub fn submission_errors(info: &Value, catalog: &Value) -> Vec<String> {
+    let mut errors = Vec::new();
+    for (key, label) in [("camera_brand", "camera brand"), ("camera_model", "camera model"), ("lens_model", "lens model (or an explicit built-in lens description)")] {
+        if !meaningful(&info[key]) {
+            errors.push(format!("Enter a specific {label} before uploading."));
+        }
+    }
+    let lens = info["lens_model"].as_str().unwrap_or("");
+    // A range written in the selected lens name is the most specific promise.
+    let named_range = ZOOM_NAME.captures(lens).and_then(|c| {
+        let min = c[1].parse::<f64>().ok()?;
+        let max = c[2].parse::<f64>().ok()?;
+        (min.is_finite() && max.is_finite() && min > 0.0 && max > min).then_some((min, max))
+    });
+    let mut catalog_zoom = false;
+    let mut catalog_ranges = Vec::new();
+    if let Some(lenses) = catalog["lenses"].as_array() {
+        for entry in lenses {
+            let name_matches = entry["model"].as_str().is_some_and(|name| name.trim().eq_ignore_ascii_case(lens.trim()))
+                || entry["aliases"].as_array().is_some_and(|aliases| aliases.iter().any(|v| v.as_str().is_some_and(|s| s.trim().eq_ignore_ascii_case(lens.trim()))));
+            if !name_matches {
+                continue;
+            }
+            if let (Some(min), Some(max)) = (entry["min_focal_length"].as_f64(), entry["max_focal_length"].as_f64()) {
+                if min.is_finite() && max.is_finite() && min > 0.0 && max > min {
+                    catalog_ranges.push((min, max));
+                    catalog_zoom = true;
+                }
+            }
+            if let Some(samples) = entry["sampled_focal_lengths"].as_array() {
+                let positive: Vec<_> = samples.iter().filter_map(Value::as_f64)
+                    .filter(|n| n.is_finite() && *n > 0.0).collect();
+                catalog_zoom |= positive.first().is_some_and(|first| positive.iter().any(|v| (*v - *first).abs() > 0.01));
+            }
+        }
+    }
+    let focal = info["focal_length"].as_f64().filter(|v| v.is_finite() && *v > 0.0);
+    if (named_range.is_some() || catalog_zoom || info["lens_is_zoom"].as_bool() == Some(true)) && focal.is_none() {
+        errors.push("Specify the actual focal length used to calibrate this zoom lens before uploading.".into());
+    }
+    if let Some(focal) = focal {
+        let allowed = if let Some((min, max)) = named_range {
+            // Endpoints are legitimate focal lengths.
+            Some(focal >= min && focal <= max)
+        } else if !catalog_ranges.is_empty() {
+            // Multiple matching catalog records/aliases are alternatives.
+            Some(catalog_ranges.iter().any(|(min, max)| focal >= *min && focal <= *max))
+        } else {
+            // Unknown/manual lenses cannot be rejected on speculative bounds.
+            None
+        };
+        if allowed == Some(false) {
+            errors.push("The focal length is outside the selected zoom lens's documented range.".into());
+        }
+    }
+    errors
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn malformed_catalog_is_not_an_empty_success() {
+        assert!(parse_catalog(r#"{"schema_version":2,"cameras":[],"lenses":[]}"#).is_err());
+        assert!(parse_catalog(r#"{"schema_version":1,"cameras":[{}],"lenses":[]}"#).is_err());
+        assert!(parse_catalog(r#"{"schema_version":1,"cameras":[],"lenses":[]}"#).is_ok());
+    }
+    #[test]
+    fn valid_but_empty_cached_catalog_cannot_replace_bundled_metadata() {
+        let empty = r#"{"schema_version":1,"cameras":[],"lenses":[]}"#;
+        let bundled = r#"{"schema_version":1,"cameras":[{"brand":"Sony","model":"Test Camera"}],"lenses":[]}"#;
+        assert!(parse_catalog(empty).is_ok());
+        assert!(!has_deliverable_metadata(&parse_catalog(empty).unwrap()));
+
+        let tmp = std::env::temp_dir().join(format!(
+            "gyroflow-empty-camera-catalog-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()
+        ));
+        std::fs::write(&tmp, empty).unwrap();
+        let loaded = load_catalog(bundled, &tmp);
+        std::fs::remove_file(&tmp).unwrap();
+        assert_eq!(loaded["cameras"][0]["model"], "Test Camera");
+
+        std::fs::write(&tmp, bundled).unwrap();
+        let loaded_cache = load_catalog(empty, &tmp);
+        std::fs::remove_file(&tmp).unwrap();
+        assert_eq!(loaded_cache["cameras"][0]["model"], "Test Camera");
+    }
+    #[test]
+    fn upload_requires_an_identifiable_setup_and_zoom_focal_length() {
+        let catalog = json!({"lenses":[]});
+        let mut info = json!({"camera_brand":"Sony","camera_model":"ILCE-7M4","lens_model":"FE 24–70mm F2.8"});
+        assert_eq!(submission_errors(&info, &catalog).len(), 1);
+        info["focal_length"] = json!(35.0);
+        assert!(submission_errors(&info, &catalog).is_empty());
+        info["camera_model"] = json!("  --- ");
+        assert_eq!(submission_errors(&info, &catalog).len(), 1);
+    }
+    #[test]
+    fn catalog_detects_zoom_without_a_range_in_the_name() {
+        let catalog = json!({"lenses":[{"model":"Power Zoom","min_focal_length":10.0,"max_focal_length":30.0}]});
+        let mut info = json!({"camera_brand":"Example","camera_model":"Body","lens_model":"Power Zoom","focal_length":0});
+        assert_eq!(submission_errors(&info, &catalog).len(), 1);
+        info["focal_length"] = json!(20.0);
+        assert!(submission_errors(&info, &catalog).is_empty());
+    }
+    #[test]
+    fn upload_rejects_named_zoom_out_of_range_but_accepts_endpoints() {
+        let catalog = json!({"lenses":[]});
+        let mut info = json!({"camera_brand":"Sony","camera_model":"A7","lens_model":"24–70mm Zoom","focal_length":200.0});
+        assert_eq!(submission_errors(&info, &catalog).len(), 1);
+        for valid in [24.0, 70.0] {
+            info["focal_length"] = json!(valid);
+            assert!(submission_errors(&info, &catalog).is_empty());
+        }
+        info["lens_model"] = json!("Unknown manual lens");
+        info["focal_length"] = json!(200.0);
+        assert!(submission_errors(&info, &catalog).is_empty());
+    }
+
+    #[test]
+    fn upload_rejects_catalog_alias_out_of_range_and_allows_other_matching_ranges() {
+        let catalog = json!({"lenses":[
+            {"model":"PZ One","aliases":["My Zoom"],"min_focal_length":10.0,"max_focal_length":30.0},
+            {"model":"PZ Two","aliases":["My Zoom"],"min_focal_length":20.0,"max_focal_length":80.0},
+            {"model":"Unrelated","min_focal_length":100.0,"max_focal_length":400.0}
+        ]});
+        let mut info = json!({"camera_brand":"Example","camera_model":"Body","lens_model":"My Zoom","focal_length":90.0});
+        assert_eq!(submission_errors(&info, &catalog).len(), 1);
+        info["focal_length"] = json!(80.0);
+        assert!(submission_errors(&info, &catalog).is_empty());
+        info["focal_length"] = json!(10.0);
+        assert!(submission_errors(&info, &catalog).is_empty());
+    }
+
+}
