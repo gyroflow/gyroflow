@@ -49,11 +49,6 @@ Item {
 
     property Menu.VideoInformation vidInfo: null;
 
-    // Picking the tracked points of the optical analysis, on the preview as it is: stabilized, where every removal shows
-    // in how steady it gets, or with the stabilization off
-    function setOpticalPointEditing(on: bool): void { opticalPointEditor.active = on; }
-    onLoadedFileUrlChanged: root.setOpticalPointEditing(false);
-
     function loadGyroflowData(obj: var, queueJobId: var): void {
         root.pendingGyroflowData = null;
         root.pendingQueueJobId = 0;

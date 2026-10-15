@@ -121,7 +121,7 @@ pub struct OpticalMeasurements {
     pub measured_frames: usize,
     /// `StabilizationManager::optical_generation` when the analysis started: they're only for what was loaded then
     pub generation: u64,
-    /// What was tracked, for "Show tracked points" and for measuring again without some of it
+    /// What was tracked, for "Show/edit tracked points" and for measuring again without some of it
     pub tracks: Arc<Tracks>,
     /// The tracks left out of these measurements
     pub excluded: Arc<HashSet<u32>>,
@@ -160,7 +160,7 @@ impl PackedStates {
     pub fn is_empty(&self) -> bool { self.len == 0 }
 }
 
-/// What became of a tracked point, for "Show tracked points"
+/// What became of a tracked point, for "Show/edit tracked points"
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum PointState {
@@ -1012,7 +1012,7 @@ struct Measuring {
     measured_upto: usize,
     measurements: Vec<BandMeasurement>,
     measured_pairs: usize,
-    /// What became of each point of each pair measured, for "Show tracked points", and where each pair's start
+    /// What became of each point of each pair measured, for "Show/edit tracked points", and where each pair's start
     states: PackedStates,
     states_from: Vec<u64>,
     observations: u64,
@@ -1184,7 +1184,7 @@ impl Measuring {
             fit_band(&derived, &rhp, idx, floor, &gyro, vision).map(|(mut m, w)| { m.pair = seq; (seq, m, idx, w) })
         }).collect();
 
-        // What became of each point, for "Show tracked points"
+        // What became of each point, for "Show/edit tracked points"
         debug_assert_eq!(self.states.len() as u64, self.states_from.get(self.measured_upto).copied().unwrap_or(self.observations));
         for seq in self.measured_upto..end {
             let n = self.pair(seq).obs.len();

@@ -143,7 +143,6 @@ pub struct Controller {
     stab_enabled: qt_property!(bool; WRITE set_stab_enabled),
     show_detected_features: qt_property!(bool; WRITE set_show_detected_features),
     show_optical_flow: qt_property!(bool; WRITE set_show_optical_flow),
-    show_tracked_points: qt_property!(bool; WRITE set_show_tracked_points),
     fov: qt_property!(f64; WRITE set_fov),
     fov_overview: qt_property!(bool; WRITE set_fov_overview),
     show_safe_area: qt_property!(bool; WRITE set_show_safe_area),
@@ -1612,7 +1611,6 @@ impl Controller {
     wrap_simple_method!(set_stab_enabled,           v: bool);
     wrap_simple_method!(set_show_detected_features, v: bool);
     wrap_simple_method!(set_show_optical_flow,      v: bool);
-    wrap_simple_method!(set_show_tracked_points,    v: bool);
     wrap_simple_method!(set_digital_lens_name,      v: String; recompute);
     wrap_simple_method!(set_digital_lens_param,     i: usize, v: f64; recompute);
     wrap_simple_method!(set_fov_overview,       v: bool; recompute);
@@ -1720,9 +1718,10 @@ impl Controller {
         QString::from(serde_json::to_string(&flat).unwrap_or_default())
     }
     /// Looks for the tracks with a point within a box (relative to the frame, the stabilized one with `stabilized`) in
-    /// the frame at `timestamp_us` (the file's own time), or in any frame: off the UI thread, every frame of a long clip
-    /// takes seconds. Returns which search it is, and `optical_tracks_found` brings what it found (a JSON array of
-    /// their ids), unless another search or `cancel_optical_track_search` overtook it
+    /// the frame at `timestamp_us` (the file's own time), or within the part of the camera frame the box covers there
+    /// in any frame: off the UI thread, every frame of a long clip takes seconds. Returns which search it is, and
+    /// `optical_tracks_found` brings what it found (a JSON array of their ids), unless another search or
+    /// `cancel_optical_track_search` overtook it
     fn find_optical_tracks_in_rect(&self, timestamp_us: f64, x0: f64, y0: f64, x1: f64, y1: f64, all_frames: bool, stabilized: bool) -> u32 {
         let rect = [x0.min(x1) as f32, y0.min(y1) as f32, x0.max(x1) as f32, y0.max(y1) as f32];
         let search = self.optical_track_search.fetch_add(1, SeqCst).wrapping_add(1);
