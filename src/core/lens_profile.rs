@@ -92,6 +92,34 @@ impl LensProfile {
         }
     }
 
+    pub fn validate_submission(&self) -> Result<(), String> {
+        if self.camera_brand.trim().is_empty() {
+            return Err("Camera brand is required".to_string());
+        }
+        if self.camera_model.trim().is_empty() {
+            return Err("Camera model is required".to_string());
+        }
+        if self.lens_model.trim().is_empty() {
+            return Err("Lens model is required".to_string());
+        }
+        if self.focal_length.is_none() || self.focal_length.unwrap_or(0.0) <= 0.0 {
+            return Err("Focal length must be specified".to_string());
+        }
+        if self.calib_dimension.w == 0 || self.calib_dimension.h == 0 {
+            return Err("Calibration dimensions must be valid".to_string());
+        }
+        Ok(())
+    }
+
+    pub fn setup_identifier(&self) -> String {
+        format!("{} | {} | {} | {}mm",
+            self.camera_brand.trim(),
+            self.camera_model.trim(),
+            self.lens_model.trim(),
+            self.focal_length.map_or("?".to_string(), |f| format!("{:.1}", f))
+        )
+    }
+
     pub fn from_value(json: serde_json::Value) -> Result<Self, serde_json::Error> {
         let mut lens: Result<Self, serde_json::Error> = serde_json::from_value(json);
         if let Ok(ref mut lens) = lens { lens.init(); }
