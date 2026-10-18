@@ -968,7 +968,7 @@ impl RenderQueue {
                         return if cancel_flag.load(SeqCst) {
                             err(("Optical analysis cancelled%1".to_string(), String::new()))
                         } else {
-                            err(("An error occured: %1".to_string(), e))
+                            err(("An error occurred: %1".to_string(), e))
                         };
                     }
                 }

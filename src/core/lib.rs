@@ -850,22 +850,6 @@ impl StabilizationManager {
                     }
                 }
             }
-            if p.show_tracked_points {
-                // On the input frame, like the features: the stabilization moves them along with the picture
-                if let Some(m) = self.optical_measurements.try_read().and_then(|m| m.clone()) {
-                    use synchronization::optical_motion::PointState;
-                    for (_, x, y, state) in self.optical_points_in_frame(&m, frame) {
-                        let (color, alpha) = match state {
-                            PointState::Used         => (Color::Green,   Alpha::Alpha100),
-                            PointState::Downweighted => (Color::Yellow,  Alpha::Alpha100),
-                            PointState::Rejected     => (Color::Red,     Alpha::Alpha100),
-                            // Not returned: not used, or taken out
-                            PointState::Unused | PointState::Removed => continue,
-                        };
-                        drawing.put_pixel((x * size.0 as f32) as i32, (y * size.1 as f32) as i32, color, alpha, Stage::OnInput, y_inverted, 2);
-                    }
-                }
-            }
             #[cfg(feature = "opencv")]
             if p.is_calibrator {
                 let lock = self.lens_calibrator.read();
@@ -962,7 +946,6 @@ impl StabilizationManager {
     pub fn set_of_method(&self, v: u32) { self.params.write().of_method = v; self.pose_estimator.clear(); }
     pub fn set_show_detected_features(&self, v: bool) { self.params.write().show_detected_features = v; }
     pub fn set_show_optical_flow     (&self, v: bool) { self.params.write().show_optical_flow      = v; }
-    pub fn set_show_tracked_points   (&self, v: bool) { self.params.write().show_tracked_points    = v; }
     pub fn set_stab_enabled          (&self, v: bool) { self.params.write().stab_enabled           = v; }
     pub fn set_frame_readout_time    (&self, v: f64)  { self.params.write().frame_readout_time     = v; }
     pub fn set_frame_readout_direction(&self, v: impl Into<ReadoutDirection>) { self.params.write().frame_readout_direction = v.into(); }
@@ -1394,12 +1377,18 @@ impl StabilizationManager {
         points
     }
     /// The tracks (but the ones taken out) with a point within `rect` (x0, y0, x1, y1, relative to the frame - the
-    /// stabilized one with `stabilized`) in the frame at a moment of the file (µs), or in any frame. Every frame of a long
-    /// clip placed in the stabilized picture takes seconds: not on the UI thread. None once `cancelled`
+    /// stabilized one with `stabilized`) in the frame at a moment of the file (µs), or with `all_frames`, within the
+    /// part of the camera frame `rect` covers there in any frame. Every frame of a long clip placed in the stabilized
+    /// picture takes seconds: not on the UI thread. None once `cancelled`
     pub fn optical_tracks_in_rect(&self, file_timestamp_us: i64, rect: [f32; 4], all_frames: bool, stabilized: bool, cancelled: impl Fn() -> bool + Sync) -> Option<Vec<u32>> {
         let Some(m) = self.optical_measurements.read().clone() else { return Some(Vec::new()) };
-        let frames = if all_frames { 0..=usize::MAX } else { let i = self.optical_frame_at(file_timestamp_us); i..=i };
-        m.tracks.in_rect(frames, rect, &self.optical_removed_ids(&m), self.optical_placement(stabilized), cancelled)
+        let shown = self.optical_frame_at(file_timestamp_us);
+        let frames = if all_frames { 0..=usize::MAX } else { shown..=shown };
+        // Every frame's points placed the way the frame shown is: over the whole clip, what's fixed to the camera
+        // (propellers, the drone's body, on-screen graphics) is what stays in the box, not what the stabilized
+        // picture holds still there
+        let place = self.optical_placement(stabilized);
+        m.tracks.in_rect(frames, rect, &self.optical_removed_ids(&m), move |_, points: &[(f32, f32)]| place(shown, points), cancelled)
     }
     /// Where the tracks `ids` are in the frames up to `reach` away from the one at a moment of the file (µs): per track,
     /// how many frames from that one, and where, relative to the frame (the stabilized one with `stabilized`)
@@ -1437,7 +1426,7 @@ impl StabilizationManager {
                 None => (serde_json::json!({ "available": false, "ignore_file_motion": ignore_file_motion, "has_motion": has_motion }), None),
             }
         };
-        // What "Show tracked points" can show: an analysis of this session, a project keeps only the correction
+        // What "Show/edit tracked points" can show: an analysis of this session, a project keeps only the correction
         let kept = self.optical_measurements.read().clone();
         info["tracked_points"] = kept.as_ref().is_some_and(|m| !m.tracks.is_empty()).into();
         // Which analysis's tracks they are: the same through measuring again, another for another analysis, which numbers
@@ -1713,6 +1702,11 @@ impl StabilizationManager {
                 "horizon_lock_roll":      horizon_lock.horizonroll,
                 "horizon_lock_pitch_enabled": horizon_lock.lock_pitch,
                 "horizon_lock_pitch":     horizon_lock.horizonpitch,
+                "automatic_lock":         horizon_lock.automatic_lock,
+                "turn_threshold":         horizon_lock.turn_threshold,
+                "turn_smoothing_ms":      horizon_lock.turn_smoothing_ms,
+                "turn_multiplier":        horizon_lock.turn_multiplier,
+                "tilt_accel_limit":       horizon_lock.tilt_accel_limit.is_finite().then_some(horizon_lock.tilt_accel_limit), // null = no limit
                 "use_gravity_vectors":    gyro.use_gravity_vectors,
                 "horizon_lock_integration_method": gyro.horizon_lock_integration_method,
                 "video_speed":                   params.video_speed,

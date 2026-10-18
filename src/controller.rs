@@ -143,7 +143,6 @@ pub struct Controller {
     stab_enabled: qt_property!(bool; WRITE set_stab_enabled),
     show_detected_features: qt_property!(bool; WRITE set_show_detected_features),
     show_optical_flow: qt_property!(bool; WRITE set_show_optical_flow),
-    show_tracked_points: qt_property!(bool; WRITE set_show_tracked_points),
     fov: qt_property!(f64; WRITE set_fov),
     fov_overview: qt_property!(bool; WRITE set_fov_overview),
     show_safe_area: qt_property!(bool; WRITE set_show_safe_area),
@@ -250,6 +249,8 @@ pub struct Controller {
 
     check_updates: qt_method!(fn(&self)),
     updates_available: qt_signal!(version: QString, changelog: QString),
+    check_server_message: qt_method!(fn(&self)),
+    server_message: qt_signal!(json: QString),
     rate_profile: qt_method!(fn(&self, name: QString, json: QString, checksum: QString, is_good: bool)),
     request_profile_ratings: qt_method!(fn(&self)),
 
@@ -646,7 +647,7 @@ impl Controller {
                     let mut arg = e;
                     arg.push_str("\n\n");
                     arg.push_str(&rendering::get_log());
-                    this.error(QString::from("An error occured: %1"), QString::from(arg), QString::default());
+                    this.error(QString::from("An error occurred: %1"), QString::from(arg), QString::default());
                 }
             }
             this.optical_correction_changed();
@@ -1611,7 +1612,6 @@ impl Controller {
     wrap_simple_method!(set_stab_enabled,           v: bool);
     wrap_simple_method!(set_show_detected_features, v: bool);
     wrap_simple_method!(set_show_optical_flow,      v: bool);
-    wrap_simple_method!(set_show_tracked_points,    v: bool);
     wrap_simple_method!(set_digital_lens_name,      v: String; recompute);
     wrap_simple_method!(set_digital_lens_param,     i: usize, v: f64; recompute);
     wrap_simple_method!(set_fov_overview,       v: bool; recompute);
@@ -1701,7 +1701,7 @@ impl Controller {
                     this.chart_data_changed();
                 },
                 Ok(false) => { },
-                Err(e) => this.error(QString::from("An error occured: %1"), QString::from(e), QString::default()),
+                Err(e) => this.error(QString::from("An error occurred: %1"), QString::from(e), QString::default()),
             }
             this.optical_correction_changed();
         });
@@ -1719,9 +1719,10 @@ impl Controller {
         QString::from(serde_json::to_string(&flat).unwrap_or_default())
     }
     /// Looks for the tracks with a point within a box (relative to the frame, the stabilized one with `stabilized`) in
-    /// the frame at `timestamp_us` (the file's own time), or in any frame: off the UI thread, every frame of a long clip
-    /// takes seconds. Returns which search it is, and `optical_tracks_found` brings what it found (a JSON array of
-    /// their ids), unless another search or `cancel_optical_track_search` overtook it
+    /// the frame at `timestamp_us` (the file's own time), or within the part of the camera frame the box covers there
+    /// in any frame: off the UI thread, every frame of a long clip takes seconds. Returns which search it is, and
+    /// `optical_tracks_found` brings what it found (a JSON array of their ids), unless another search or
+    /// `cancel_optical_track_search` overtook it
     fn find_optical_tracks_in_rect(&self, timestamp_us: f64, x0: f64, y0: f64, x1: f64, y1: f64, all_frames: bool, stabilized: bool) -> u32 {
         let rect = [x0.min(x1) as f32, y0.min(y1) as f32, x0.max(x1) as f32, y0.max(y1) as f32];
         let search = self.optical_track_search.fetch_add(1, SeqCst).wrapping_add(1);
@@ -1781,7 +1782,7 @@ impl Controller {
                     this.chart_data_changed();
                 },
                 Ok(false) => { },
-                Err(e) => this.error(QString::from("An error occured: %1"), QString::from(e), QString::default()),
+                Err(e) => this.error(QString::from("An error occurred: %1"), QString::from(e), QString::default()),
             }
             this.optical_tracks_changed();
             this.optical_correction_changed();
@@ -1900,6 +1901,25 @@ impl Controller {
                     }
                 }
             }
+        });
+    }
+
+    fn check_server_message(&self) {
+        let show = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, json: String| {
+            this.server_message(QString::from(json))
+        });
+        core::run_threaded(move || {
+            let url = format!("https://api.gyroflow.xyz/message?version={}&os={}", env!("CARGO_PKG_VERSION"), std::env::consts::OS);
+            let Ok(Ok(body)) = ureq::get(url).call().map(|x| x.into_body().read_to_string()) else { return; };
+            let Ok(mut msg) = serde_json::from_str::<serde_json::Value>(&body) else { return; };
+            if msg.get("type").and_then(|x| x.as_str()).is_none() { return; }
+
+            // QML can't fetch https itself, so download the image here and only show the message once it's ready
+            if let Some(image_url) = msg.get("image").and_then(|x| x.as_str()) {
+                let Some(data_url) = util::download_as_data_url(image_url) else { return; };
+                msg["image"] = data_url.into();
+            }
+            show(msg.to_string());
         });
     }
 

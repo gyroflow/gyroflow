@@ -128,26 +128,13 @@ MenuItem {
                 horizonPitchSlider.value = lockPitchCb.checked? +stab.horizon_lock_pitch : 0;
             }
 
-            const turnThresholdValue  = stab.turn_threshold      !== undefined ? +stab.turn_threshold      : 5.0;
-            const turnSmoothMsValue   = stab.turn_smoothing_ms   !== undefined ? +stab.turn_smoothing_ms   : 500.0;
-            const turnMultiplierValue = stab.turn_multiplier     !== undefined ? +stab.turn_multiplier     : 1.0;
+            turnThresholdSlider.value  = stab.turn_threshold    != null ? +stab.turn_threshold    : 5.0;
+            turnSmoothnessSlider.value = stab.turn_smoothing_ms != null ? +stab.turn_smoothing_ms : 500.0;
+            turnMultiplierSlider.value = stab.turn_multiplier   != null ? +stab.turn_multiplier   : 1.0;
 
-            turnThreshold  = turnThresholdValue;
-            turnSmoothMs   = turnSmoothMsValue;
-            turnMultiplier = turnMultiplierValue;
-
-            // Keep corresponding sliders (if present) in sync with the loaded values
-            if (typeof turnThresholdSlider  !== "undefined" && turnThresholdSlider)  turnThresholdSlider.value  = turnThresholdValue;
-            if (typeof turnSmoothMsSlider   !== "undefined" && turnSmoothMsSlider)   turnSmoothMsSlider.value   = turnSmoothMsValue;
-            if (typeof turnMultiplierSlider !== "undefined" && turnMultiplierSlider) turnMultiplierSlider.value = turnMultiplierValue;
-
-            if (stab.tilt_accel_limit !== undefined && +stab.tilt_accel_limit < Infinity) {
-                tiltAccelLimitCb.checked = true;
-                tiltAccelLimit = +stab.tilt_accel_limit;
-            } else {
-                tiltAccelLimitCb.checked = false;
-                tiltAccelLimit = Infinity;
-            }
+            // A missing or null `tilt_accel_limit` means no limit
+            tiltAccelLimitCb.checked = stab.tilt_accel_limit != null && +stab.tilt_accel_limit < Infinity;
+            if (tiltAccelLimitCb.checked) tiltAccelLimitSlider.value = +stab.tilt_accel_limit;
 
             autoLockCb.checked = !!stab.automatic_lock;
             horizonSlider.enabled = !autoLockCb.checked;
@@ -191,19 +178,13 @@ MenuItem {
         return traverseChildren(smoothingOptions, "param-" + name);
     }
 
-    property real turnThreshold: 5.0  // Roll rate threshold (°/s) for horizon tilt
-    property real turnSmoothMs: 500.0 // EMA smoothing time constant in ms
-    property real turnMultiplier: 1.0 // Multiplier applied to dynamic tilt (1x default)
-    property real tiltAccelLimit: Infinity // Tilt acceleration/deceleration limit (°/s²)
-
-
     function updateHorizonLock(): void {
         const lockAmount = horizonCb.checked? (autoLockCb.checked ? 100.0 : horizonSlider.value) : 0.0;
         const roll = horizonCb.checked? horizonRollSlider.value : 0.0;
         const pitch = horizonCb.checked && lockPitchCb.checked? horizonPitchSlider.value : 0.0;
         const lockPitch = horizonCb.checked && lockPitchCb.checked;
-        const accelLimit = tiltAccelLimitCb.checked ? tiltAccelLimit : Infinity;
-        controller.set_horizon_lock(lockAmount, roll, lockPitch, pitch, autoLockCb.checked, turnThreshold, turnSmoothMs, turnMultiplier, accelLimit);
+        const accelLimit = tiltAccelLimitCb.checked ? tiltAccelLimitSlider.value : Infinity;
+        controller.set_horizon_lock(lockAmount, roll, lockPitch, pitch, autoLockCb.checked, turnThresholdSlider.value, turnSmoothnessSlider.value, turnMultiplierSlider.value, accelLimit);
         controller.set_use_gravity_vectors(useGravityVectors.checked);
         controller.set_horizon_lock_integration_method(integrationMethod.currentIndex);
     }
@@ -437,6 +418,9 @@ MenuItem {
             id: lockPitchCb;
             text: qsTr("Lock pitch angle");
             checked: false;
+            // The gravity vector horizon lock only levels the roll
+            unavailable: controller.has_gravity_vectors && useGravityVectors.checked;
+            tooltip: unavailable? qsTr("Pitch locking is not available when using gravity vectors.") : "";
             onCheckedChanged: Qt.callLater(updateHorizonLock);
         }
 
@@ -445,6 +429,7 @@ MenuItem {
             spacing: 2 * dpiScale;
             text: qsTr("Pitch angle correction");
             visible: lockPitchCb.checked;
+            enabled: !lockPitchCb.unavailable;
             SliderWithField {
                 id: horizonPitchSlider;
                 width: parent.width;
@@ -506,10 +491,7 @@ MenuItem {
                     unit: qsTr("°/s");
                     precision: 1;
                     value: 5.0;
-                    onValueChanged: {
-                        turnThreshold = value;
-                        Qt.callLater(updateHorizonLock);
-                    }
+                    onValueChanged: Qt.callLater(updateHorizonLock);
                 }
             }
 
@@ -527,10 +509,7 @@ MenuItem {
                     unit: qsTr("ms");
                     precision: 0;
                     value: 500.0;
-                    onValueChanged: {
-                        turnSmoothMs = value;
-                        Qt.callLater(updateHorizonLock);
-                    }
+                    onValueChanged: Qt.callLater(updateHorizonLock);
                 }
             }
 
@@ -548,10 +527,7 @@ MenuItem {
                     unit: "x";
                     precision: 2;
                     value: 1.0;
-                    onValueChanged: {
-                        turnMultiplier = value;
-                        Qt.callLater(updateHorizonLock);
-                    }
+                    onValueChanged: Qt.callLater(updateHorizonLock);
                 }
             }
 
@@ -575,10 +551,7 @@ MenuItem {
                         unit: qsTr("°/s²");
                         precision: 1;
                         value: 3.0;
-                        onValueChanged: {
-                            tiltAccelLimit = value;
-                            Qt.callLater(updateHorizonLock);
-                        }
+                        onValueChanged: Qt.callLater(updateHorizonLock);
                     }
                 }
             }

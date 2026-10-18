@@ -49,11 +49,6 @@ Item {
 
     property Menu.VideoInformation vidInfo: null;
 
-    // Picking the tracked points of the optical analysis, on the preview as it is: stabilized, where every removal shows
-    // in how steady it gets, or with the stabilization off
-    function setOpticalPointEditing(on: bool): void { opticalPointEditor.active = on; }
-    onLoadedFileUrlChanged: root.setOpticalPointEditing(false);
-
     function loadGyroflowData(obj: var, queueJobId: var): void {
         root.pendingGyroflowData = null;
         root.pendingQueueJobId = 0;
@@ -1240,32 +1235,35 @@ Item {
             opacity: controller.loading_gyro_in_progress? 1 : 0;
             Ease on opacity { }
             anchors.right: parent.right;
-            anchors.rightMargin: 10 * dpiScale;
-            y: infoMessages.y + infoMessages.height + 10 * dpiScale;
-            width: gyroLoadingCol.width + 20 * dpiScale;
-            height: gyroLoadingCol.height + 16 * dpiScale;
+            anchors.bottom: parent.bottom;
+            anchors.rightMargin: 20 * dpiScale;
+            // In full screen and in the mobile layout the timeline is drawn over the bottom of the video area
+            anchors.bottomMargin: Math.max(0, vidParentParent.height - tlcol.y) + 20 * dpiScale;
+            width: gyroLoadingCol.width + 2 * 14 * dpiScale;
+            height: gyroLoadingCol.height + 2 * 12 * dpiScale;
             Rectangle {
                 anchors.fill: parent;
                 color: styleBackground;
                 opacity: 0.8;
-                radius: 5 * dpiScale;
+                radius: 6 * dpiScale;
             }
             Column {
                 id: gyroLoadingCol;
                 anchors.centerIn: parent;
-                spacing: 6 * dpiScale;
+                spacing: 4 * dpiScale;
                 BasicText {
                     leftPadding: 0;
                     text: qsTr("Loading gyro data %1...").arg("<b>" + (gyroLoading.progress * 100).toFixed(0) + "%</b>");
                 }
                 BasicText {
                     leftPadding: 0;
+                    bottomPadding: 8 * dpiScale;
                     font.pixelSize: 11 * dpiScale;
                     opacity: 0.7;
                     text: qsTr("The video plays unstabilized until it's loaded.");
                 }
                 Row {
-                    spacing: 8 * dpiScale;
+                    spacing: 12 * dpiScale;
                     QQC.ProgressBar {
                         width: 200 * dpiScale;
                         anchors.verticalCenter: parent.verticalCenter;
@@ -1274,7 +1272,7 @@ Item {
                     LinkButton {
                         transparent: true;
                         text: qsTr("Cancel");
-                        leftPadding: 0; rightPadding: 0;
+                        leftPadding: 0; rightPadding: 0; topPadding: 0; bottomPadding: 0;
                         anchors.verticalCenter: parent.verticalCenter;
                         onClicked: controller.cancel_current_operation();
                     }

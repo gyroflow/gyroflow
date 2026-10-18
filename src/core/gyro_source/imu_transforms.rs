@@ -16,12 +16,16 @@ pub struct IMUTransforms {
     pub gyro_bias: Option<[f64; 3]>,
 }
 impl IMUTransforms {
-    pub fn transform(&self, v: &mut [f64; 3], is_acc: bool) {
+    /// Gyro samples get the bias first: it's in the frame of the samples, before the orientation
+    pub fn transform_gyro(&self, v: &mut [f64; 3]) {
         if let Some(bias) = self.gyro_bias {
             v[0] += bias[0];
             v[1] += bias[1];
             v[2] += bias[2];
         }
+        self.transform(v, false);
+    }
+    pub fn transform(&self, v: &mut [f64; 3], is_acc: bool) {
         if let Some(ref orientation) = self.imu_orientation {
             if orientation != "XYZ" {
                 *v = Self::orient(v, orientation.as_bytes());

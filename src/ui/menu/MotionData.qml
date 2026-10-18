@@ -309,7 +309,7 @@ MenuItem {
     CheckBoxWithContent {
         id: opticalcb;
         text: qsTr("Optical correction");
-        tooltip: qsTr("Measure the camera rotation from the video itself and correct the motion data where they disagree. Useful when vibrations corrupt the gyro data, e.g. on a hard-mounted FPV camera. The analysis goes through every frame of the selected trim range.");
+        tooltip: qsTr("Measure the camera rotation from the video and correct the motion data where they disagree, e.g. gyro errors caused by vibration. Only the trim range is analyzed.");
         property var info: ({ available: false });
         // Always opticalcb.info: this file has an element with the id `info` too, and ids come before properties
         function updateInfo(): void {
@@ -353,18 +353,22 @@ MenuItem {
             wrapMode: Text.WordWrap;
             horizontalAlignment: Text.AlignHCenter;
             visible: text.length > 0;
-            text: opticalcb.info.ignore_file_motion && !opticalcb.info.from_video? qsTr("Click Analyze to measure the motion from the video.") :
-                  !opticalcb.info.available? "" :
-                  opticalcb.info.stale? qsTr("The motion data, the sync, the lens or the rolling shutter changed since the analysis. Analyze again to apply the correction.") :
-                  opticalcb.info.outdated? qsTr("Analyze again to apply the new settings.") :
-                  opticalcb.info.tracking_changed? qsTr("The tracking method changed since the analysis. Analyze again to apply it.") :
-                  opticalcb.info.from_video? "" :
-                  qsTr("Measured in %1 of %2 frames, correction %3°").arg(opticalcb.info.measured_frames).arg(opticalcb.info.frames).arg((+opticalcb.info.rms_deg).toFixed(3));
+            text: {
+                const i = opticalcb.info;
+                // Stale: measured on other motion data, sync, lens or frame timing, and not applied
+                return !i.available? "" :
+                       i.stale || (i.ignore_file_motion && !i.from_video)? qsTr("Out of date and not applied, analyze again.") :
+                       i.outdated || i.tracking_changed? qsTr("Analyze again to apply the new settings.") :
+                       i.from_video? "" :
+                       qsTr("Measured in %1 of %2 frames, correction %3°").arg(i.measured_frames).arg(i.frames).arg((+i.rms_deg).toFixed(3));
+            }
         }
         CheckBox {
             id: ignoreFileMotion;
             text: qsTr("Ignore motion data from the file");
-            tooltip: qsTr("Measure all of the camera motion from the video, like for a file without motion data, instead of correcting the motion data. For motion data too broken to correct, e.g. a gyro that glitches or saturates for seconds at a time.");
+            tooltip: qsTr("Measure all of the motion from the video instead of correcting the motion data, when it's too broken to correct.");
+            // Nothing to ignore in a file without motion data
+            visible: !!opticalcb.info.has_motion || !!opticalcb.info.ignore_file_motion;
             onCheckedChanged: controller.set_ignore_file_motion(checked);
         }
 
@@ -376,7 +380,7 @@ MenuItem {
                 model: [QT_TRANSLATE_NOOP("Popup", "KLT (corners)"), QT_TRANSLATE_NOOP("Popup", "DIS (dense flow)")];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
-                tooltip: qsTr("How the analysis follows the points from one frame to the next. KLT tracks corners and is the most accurate wherever the image has detail. DIS follows a dense optical flow, which also reaches weaker detail (clouds, water, fog), but takes a few times longer and follows fast motion less well. Takes a new analysis.");
+                tooltip: qsTr("KLT is the most accurate where the image has detail. DIS also follows weak detail like clouds or water, but is slower and loses fast motion more easily.");
                 onCurrentIndexChanged: controller.set_optical_tracking(currentIndex === 1? "dis" : "klt");
             }
         }
@@ -388,7 +392,7 @@ MenuItem {
                 model: [QT_TRANSLATE_NOOP("Popup", "Per row"), QT_TRANSLATE_NOOP("Popup", "Per frame")];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
-                tooltip: qsTr("Per row corrects each band of rows on its own, which also removes vibration within a frame (jello). Per frame corrects whole frames only: use it for a global shutter camera, when parts of the frame have nothing to track (sky, water), or when the rolling shutter time is wrong or unknown.");
+                tooltip: qsTr("Per row also removes vibration within a frame (jello). Per frame suits global shutter cameras, frames with large areas without detail, or an unknown rolling shutter time.");
                 onCurrentIndexChanged: controller.set_optical_correction_per_frame(currentIndex === 1);
             }
         }
@@ -398,7 +402,7 @@ MenuItem {
             // Without motion data to correct (none in the file, or ignored), the motion and its correction come from
             // the same tracks: the correction only refines within the frames, the strength changes next to nothing
             visible: !!opticalcb.info.has_motion;
-            tooltip: qsTr("How far the correction may take the motion data from what it says. Lower values only correct small, fast errors like vibration. Higher values let the image override the motion data also where it's off by a lot or for longer, like gyro glitches, but follow the image's own mistakes (moving objects, water) more too.");
+            tooltip: qsTr("Low values only correct small, fast errors like vibration. High values also correct large and long errors like gyro glitches, but follow moving objects in the image more.");
             SliderWithField {
                 id: opticalStrength;
                 defaultValue: 50;
@@ -416,60 +420,30 @@ MenuItem {
                 }
             }
         }
-        Label {
-            position: Label.LeftPosition;
-            text: qsTr("Tracked points");
-            tooltip: qsTr("Take the points on something that moves on its own (vehicles, people, water) or with the camera (propellers, the drone's body, a dashboard, on-screen graphics) out of the analysis, where it took them for the scene. The correction is measured again without them right away, and an analysis of the same frames after this one leaves them out too.");
-            // Only after an analysis in this session (a project keeps the correction, not the tracks), or with tracks
-            // removed to put back
-            visible: !!opticalcb.info.tracked_points || +opticalcb.info.removed_tracks > 0;
-            Row {
-                spacing: 5 * dpiScale;
-                readonly property bool editing: !!window.videoArea.opticalPointEditor.active;
-                LinkButton {
-                    text: parent.editing? qsTr("Done") : qsTr("Edit");
-                    leftPadding: 0;
-                    rightPadding: 6 * dpiScale;
-                    enabled: parent.editing || (!!opticalcb.info.tracked_points && window.videoArea.vid.loaded);
-                    onClicked: window.videoArea.setOpticalPointEditing(!parent.editing);
-                }
-                LinkButton {
-                    text: qsTr("Restore all");
-                    leftPadding: 6 * dpiScale;
-                    rightPadding: 6 * dpiScale;
-                    visible: +opticalcb.info.removed_tracks > 0;
-                    onClicked: controller.restore_optical_tracks();
-                }
-                BasicText {
-                    anchors.verticalCenter: parent.verticalCenter;
-                    leftPadding: 0;
-                    // Without an analysis to measure again (out of date, or a project's), they wait for the next one
-                    text: opticalcb.info.removed_tracks_pending? qsTr("Updating...") :
-                          +opticalcb.info.removed_tracks === 0? qsTr("None removed") :
-                          opticalcb.info.tracks_editable? qsTr("%n track(s) removed", "", +opticalcb.info.removed_tracks) :
-                          qsTr("%n track(s) removed, left out of the next analysis", "", +opticalcb.info.removed_tracks);
-                }
-            }
-        }
-        BasicText {
-            width: parent.width;
-            wrapMode: Text.WordWrap;
-            visible: !!window.videoArea.opticalPointEditor.active;
-            text: (opticalcb.info.tracks_editable? "" : qsTr("The analysis is out of date: the tracks taken out now are left out of the next analysis.") + "\n\n") +
-                  qsTr("Click a point to select its track, or drag a box to select the tracks of every point in it - with Ctrl, of every point that is ever in it. Shift adds to the selection. A selected track is followed through the frames around the current one.\nDelete removes the selected tracks from the analysis and stabilizes again without them, Ctrl+Z brings them back. Right-click for more.");
-        }
         CheckBox {
-            id: showTrackedPoints;
-            text: qsTr("Show tracked points");
-            tooltip: qsTr("Show on the video the points the analysis measured the motion with: green where they were used, yellow where they counted less and red where they were rejected (moving objects, reflections). Points it didn't use, like ones tracked for too short, aren't shown.");
+            id: editTrackedPoints;
+            text: qsTr("Show/edit tracked points");
+            tooltip: qsTr("Green: used, yellow: counted less, red: rejected. Click or drag to select tracks, Shift adds, Ctrl+drag selects that part of the camera frame through the whole clip (e.g. propellers). Delete removes them, Ctrl+Z brings them back.");
             // Only after an analysis in this session: a project keeps the correction, not the tracks
             visible: !!opticalcb.info.tracked_points;
             checked: false;
-            // Not twice: while editing, the editor draws them
-            readonly property bool shown: checked && !window.videoArea.opticalPointEditor.active;
-            onShownChanged: {
-                controller.show_tracked_points = shown;
-                window.videoArea.vid.forceRedraw();
+            // Stays checked through files without tracks, for the next analysis
+            readonly property bool shown: checked && opticalcb.checked && !!opticalcb.info.tracked_points;
+            onShownChanged: window.videoArea.opticalPointEditor.active = shown;
+        }
+        Row {
+            spacing: 5 * dpiScale;
+            // Also without the tracks: a project remembers what was taken out, for the next analysis
+            visible: +opticalcb.info.removed_tracks > 0;
+            BasicText {
+                anchors.verticalCenter: parent.verticalCenter;
+                text: opticalcb.info.removed_tracks_pending? qsTr("Updating...") : qsTr("%n track(s) removed", "", +opticalcb.info.removed_tracks);
+            }
+            LinkButton {
+                text: qsTr("Restore all");
+                leftPadding: 6 * dpiScale;
+                rightPadding: 6 * dpiScale;
+                onClicked: controller.restore_optical_tracks();
             }
         }
         Connections {

@@ -50,7 +50,7 @@ Modal {
         "Stabilization|stabilization": {
             "FOV":                        ["fov"],
             "Smoothing params":           ["method", "smoothing_params"],
-            "Horizon lock":               ["horizon_lock_amount", "horizon_lock_roll", "horizon_lock_pitch_enabled", "horizon_lock_pitch", "use_gravity_vectors"],
+            "Horizon lock":               ["horizon_lock_amount", "horizon_lock_roll", "horizon_lock_pitch_enabled", "horizon_lock_pitch", "use_gravity_vectors", "automatic_lock", "turn_threshold", "turn_smoothing_ms", "turn_multiplier", "tilt_accel_limit"],
             "Rolling shutter correction": ["frame_readout_time", "frame_readout_direction"],
             "Zooming":                    ["adaptive_zoom_window", "adaptive_zoom_center_offset", "adaptive_zoom_method", "additional_rotation", "additional_translation", "max_zoom", "max_zoom_iterations"],
             "Lens correction strength":   ["lens_correction_amount"],
@@ -105,7 +105,7 @@ Modal {
             QT_TR_NOOP("Rotation");
             QT_TR_NOOP("Frame rate");
         QT_TR_NOOP("Lens profile");
-            QT_TR_NOOP("Disable Gyroflow's stretch");
+            QT_TR_NOOP("Disable lens stretch (for plugins)");
         QT_TR_NOOP("Motion data");
             QT_TR_NOOP("Low pass filter");
             QT_TR_NOOP("Median filter");

@@ -147,7 +147,7 @@ impl ComputeParams {
 
             keyframes: mgr.keyframes.read().clone(),
 
-            zooming_debug_points: true,
+            zooming_debug_points: false,
 
             focal_lengths: params.focal_lengths.clone(),
             smoothed_focal_lengths: params.smoothed_focal_lengths.clone(),

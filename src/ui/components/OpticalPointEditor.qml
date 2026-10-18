@@ -3,11 +3,11 @@
 
 import QtQuick
 
-// Takes tracked points out of "Analyze image optically" (Motion data -> Optical correction -> Tracked points -> Edit),
-// on the preview as it is: a child of the video item, over the stabilized picture - where the core places the points
-// the way the render does, so they sit on what they were tracked on - or over the frame as decoded with the
-// stabilization off. What's selected is tracks, not points: the selection follows them from frame to frame, drawn
-// through the frames around the one shown. Taking them out measures the analysis again without them in the core
+// Shows the tracked points of "Analyze image optically" (Motion data -> Optical correction -> Show/edit tracked points)
+// and takes them out, on the preview as it is: a child of the video item, over the stabilized picture - where the core
+// places the points the way the render does, so they sit on what they were tracked on - or over the frame as decoded
+// with the stabilization off. What's selected is tracks, not points: the selection follows them from frame to frame,
+// drawn through the frames around the one shown. Taking them out measures the analysis again without them in the core
 // (`StabilizationManager::remove_optical_tracks`), and the preview stabilizes again with that; the points are gone
 // right away. Ctrl+Z brings them back
 Item {
@@ -74,7 +74,7 @@ Item {
         setSelection([], false);
         checkTracks();
         refresh();
-        if (active) forceActiveFocus();
+        // Not focused until clicked: it turns on by itself after an analysis, and takes over Ctrl+A
     }
     onTimestampUsChanged: refresh();
     onStabilizedChanged: refresh();
@@ -257,7 +257,8 @@ Item {
             if (root.band) {
                 const b = root.band;
                 root.searchAdds = shift;
-                root.search = controller.find_optical_tracks_in_rect(root.timestampUs, b.x0 / width, b.y0 / height, b.x1 / width, b.y1 / height, !!(mouse.modifiers & Qt.ControlModifier), root.stabilized);
+                // Over every frame as the box showed it, also when Ctrl was let go of before the button
+                root.search = controller.find_optical_tracks_in_rect(root.timestampUs, b.x0 / width, b.y0 / height, b.x1 / width, b.y1 / height, b.allFrames, root.stabilized);
                 cursorShape = Qt.BusyCursor;
                 return;
             }
