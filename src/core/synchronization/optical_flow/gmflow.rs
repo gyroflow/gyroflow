@@ -26,26 +26,26 @@ mod inference {
     use std::sync::{ Arc, OnceLock };
     use std::time::Duration;
     use image::GrayImage;
-    use burn::backend::NdArray;
-    use burn::tensor::backend::Backend as BurnBackend;
-    use burn::tensor::{ Bytes, Tensor, TensorData };
+    use burn::tensor::{ Bytes, Device, Tensor, TensorData };
     use sha2::{ Digest, Sha256 };
 
-    pub type Backend = NdArray<f32>;
     pub const MODEL_W: usize = 576;
     pub const MODEL_H: usize = 320;
 
     // Model weights are hosted separately rather than embedded to avoid a ~145 MB library bloat
     // for users who do not enable the ai-optical-flow feature. The .bpk is a burn-store dump of
     // the gmflow-scale2-regrefine6 weights (MIT, derived from autonomousvision/unimatch) converted
-    // via burn-onnx 0.21.0-pre.3. The SHA-256 pin defends against tampering on the download path.
+    // via burn-onnx 0.21.0-pre.3; burn 0.22 loads it unchanged (same parameter names and shapes).
+    // The SHA-256 pin defends against tampering on the download path.
     const MODEL_URL: &str = "https://github.com/yasumorishima/gyroflow-models/releases/download/v1.0.0/gmflow-scale2-regrefine6-320x576-opset16-sim.bpk";
     const MODEL_SHA256: &str = "31feee698842928715e9ba693b69a492d85ace31c646df6f3eabd53e240cd5e9";
     const MODEL_FILENAME: &str = "gmflow-scale2-regrefine6-320x576-opset16-sim.bpk";
 
-    static MODEL: OnceLock<Option<Arc<Model<Backend>>>> = OnceLock::new();
+    static MODEL: OnceLock<Option<Arc<Model>>> = OnceLock::new();
 
-    fn device() -> <Backend as BurnBackend>::Device { Default::default() }
+    // burn's flex CPU backend. Unlike NdArray (6 dimensions at most) it handles the 7-D reshape
+    // in gmflow's convex upsampling (unimatch utils.py, upsample_flow_with_mask).
+    fn device() -> Device { Device::flex() }
 
     fn cache_path() -> PathBuf {
         crate::settings::data_dir().join("ai_models").join(MODEL_FILENAME)
@@ -109,7 +109,7 @@ mod inference {
         Ok(bytes)
     }
 
-    pub fn model() -> Option<Arc<Model<Backend>>> {
+    pub fn model() -> Option<Arc<Model>> {
         MODEL
             .get_or_init(|| match ensure_model_bytes() {
                 Ok(raw) => {
@@ -134,7 +134,7 @@ mod inference {
         pub pad_y: usize,
     }
 
-    pub fn preprocess(img: &GrayImage) -> (Tensor<Backend, 4>, LetterboxParams) {
+    pub fn preprocess(img: &GrayImage) -> (Tensor<4>, LetterboxParams) {
         let (iw, ih) = (img.width() as f32, img.height() as f32);
         let scale = (MODEL_W as f32 / iw).min(MODEL_H as f32 / ih);
         let new_w = ((iw * scale).round() as usize).min(MODEL_W).max(1);
@@ -169,7 +169,7 @@ mod inference {
             third.copy_from_slice(first);
         }
 
-        let tensor = Tensor::<Backend, 4>::from_data(
+        let tensor = Tensor::<4>::from_data(
             TensorData::new(data, [1usize, 3, MODEL_H, MODEL_W]),
             &device(),
         );
@@ -185,7 +185,7 @@ mod inference {
         let (t1, _) = preprocess(img1);
         let m = model()?;
         let flow = m.forward(t0, t1);
-        let data = flow.into_data().to_vec::<f32>().ok()?;
+        let data = flow.into_data().try_into_vec::<f32>().ok()?;
         Some((data, lb0))
     }
 }

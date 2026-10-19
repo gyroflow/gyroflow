@@ -30,9 +30,11 @@ fn main() {
             );
         }
         println!("cargo:rerun-if-changed={onnx_path}");
+        // Weights are downloaded at runtime (gmflow.rs), so only `from_bytes` is generated.
         burn_onnx::ModelGen::new()
             .input(&onnx_path)
             .out_dir("model/")
+            .load_strategy(burn_onnx::LoadStrategy::Bytes)
             .run_from_script();
     }
 }

@@ -80,8 +80,8 @@ rustfft = "6.4.1"
 exr = "1.74"
 opencv = { version = "0.99", default-features = false, features = [ "calib3d", "features2d", "imgproc", "optflow", "clang-runtime" ], optional = true } #"imgcodecs","objdetect","sfm",
 median = "0.3"
-burn = { version = "=0.21.0-pre.3", default-features = false, features = ["ndarray", "std"], optional = true }
-burn-store = { version = "=0.21.0-pre.3", default-features = false, features = ["std", "burnpack"], optional = true }
+burn = { version = "0.22", default-features = false, features = ["flex", "std", "store"], optional = true }
+burn-store = { version = "0.22", default-features = false, features = ["std"], optional = true }
 sha2 = { version = "0.10", optional = true }
 ureq = { version = "3.3", optional = true }
 
@@ -124,5 +124,5 @@ ndk-sys = { version = "0.6.0" }
 ndk-context = { version = "0.1.1" }
 
 [build-dependencies]
-burn-onnx = { version = "=0.21.0-pre.3", optional = true }
+burn-onnx = { version = "0.22", optional = true }
 ureq = "3.4"
