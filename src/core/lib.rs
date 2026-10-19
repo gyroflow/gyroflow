@@ -2355,7 +2355,7 @@ impl StabilizationManager {
             };
 
             let id_str = self.camera_id.read().as_ref().map(|v| v.get_identifier_for_autoload()).unwrap_or_default();
-            if !id_str.is_empty() && !has_builtin_profile {
+            if (!id_str.is_empty() || self.camera_id.read().is_some()) && !has_builtin_profile {
                 let mut db = self.lens_profile_db.read();
                 if !db.loaded {
                     drop(db);
@@ -2365,8 +2365,13 @@ impl StabilizationManager {
                     }
                     db = self.lens_profile_db.read();
                 }
-                if db.contains_id(&id_str) {
-                    match self.load_lens_profile(&id_str) {
+                let target_id = if db.contains_id(&id_str) {
+                    Some(id_str)
+                } else {
+                    self.camera_id.read().as_ref().and_then(|cam_id| db.find_compatible_profile_id(cam_id))
+                };
+                if let Some(target_id) = target_id {
+                    match self.load_lens_profile(&target_id) {
                         Ok(_) => {
                             let (fr, frd) = { let lens = self.lens.read(); (lens.frame_readout_time, lens.frame_readout_direction) };
                             if let Some(fr) = fr {

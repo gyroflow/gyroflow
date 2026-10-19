@@ -958,11 +958,15 @@ impl Controller {
                     let camera_id = stab.camera_id.read();
 
                     let id_str = camera_id.as_ref().map(|v| v.get_identifier_for_autoload()).unwrap_or_default();
-                    if is_main_video && !id_str.is_empty() && !has_builtin_profile {
+                    if is_main_video && (!id_str.is_empty() || camera_id.is_some()) && !has_builtin_profile {
+                        let cam_id_clone = camera_id.clone();
                         let mut db = stab.lens_profile_db.write();
                         db.on_loaded(move |db| {
                             if db.contains_id(&id_str) {
                                 load_lens(id_str);
+                            } else if let Some(matching_id) = cam_id_clone.as_ref().and_then(|c| db.find_compatible_profile_id(c)) {
+                                ::log::info!("Auto-selected compatible lens profile: {}", matching_id);
+                                load_lens(matching_id);
                             }
                         });
                     }
@@ -2190,6 +2194,14 @@ impl Controller {
         match core::lens_profile::LensProfile::from_json(&info_json) {
             Ok(mut profile) => {
                 self.fill_profile_from_calibrator(&mut profile);
+
+                if upload {
+                    if let Err(errors) = profile.validate_for_submission() {
+                        let err_msg = errors.join("\n• ");
+                        self.error(QString::from("Cannot submit incomplete lens profile:\n• %1"), QString::from(err_msg), QString::default());
+                        return false;
+                    }
+                }
 
                 match profile.save_to_file(&url) {
                     Ok(json) => {

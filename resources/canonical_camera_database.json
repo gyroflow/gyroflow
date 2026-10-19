@@ -1,0 +1,974 @@
+{
+  "schema_version": 1,
+  "last_updated": 1792420995,
+  "description": "Gyroflow Canonical Camera and Lens Profile Registry with Compatibility Matrix",
+  "brands": [
+    {
+      "name": "Sony",
+      "mounts": [
+        "Sony E",
+        "Sony FE",
+        "Sony A",
+        "Fixed"
+      ],
+      "cameras": [
+        {
+          "model": "FX3",
+          "sensor_type": "Full Frame",
+          "sensor_width_mm": 35.6,
+          "sensor_height_mm": 23.8,
+          "crop_factor": 1.0,
+          "mount": "Sony E",
+          "compatible_mounts": [
+            "Sony E",
+            "Sony FE"
+          ],
+          "compatible_cameras": [
+            "A7S III",
+            "A7 IV",
+            "A1",
+            "FX6"
+          ]
+        },
+        {
+          "model": "A7S III",
+          "sensor_type": "Full Frame",
+          "sensor_width_mm": 35.6,
+          "sensor_height_mm": 23.8,
+          "crop_factor": 1.0,
+          "mount": "Sony E",
+          "compatible_mounts": [
+            "Sony E",
+            "Sony FE"
+          ],
+          "compatible_cameras": [
+            "FX3",
+            "A7 IV",
+            "A1",
+            "FX6"
+          ]
+        },
+        {
+          "model": "A7 IV",
+          "sensor_type": "Full Frame",
+          "sensor_width_mm": 35.9,
+          "sensor_height_mm": 23.9,
+          "crop_factor": 1.0,
+          "mount": "Sony E",
+          "compatible_mounts": [
+            "Sony E",
+            "Sony FE"
+          ],
+          "compatible_cameras": [
+            "FX3",
+            "A7S III",
+            "A7C II",
+            "A1"
+          ]
+        },
+        {
+          "model": "FX30",
+          "sensor_type": "APS-C",
+          "sensor_width_mm": 23.3,
+          "sensor_height_mm": 15.5,
+          "crop_factor": 1.5,
+          "mount": "Sony E",
+          "compatible_mounts": [
+            "Sony E",
+            "Sony FE"
+          ],
+          "compatible_cameras": [
+            "A6700",
+            "ZV-E10 II",
+            "A6600"
+          ]
+        },
+        {
+          "model": "A6700",
+          "sensor_type": "APS-C",
+          "sensor_width_mm": 23.3,
+          "sensor_height_mm": 15.5,
+          "crop_factor": 1.5,
+          "mount": "Sony E",
+          "compatible_mounts": [
+            "Sony E",
+            "Sony FE"
+          ],
+          "compatible_cameras": [
+            "FX30",
+            "ZV-E10 II",
+            "A6600",
+            "A6400"
+          ]
+        },
+        {
+          "model": "ZV-E10",
+          "sensor_type": "APS-C",
+          "sensor_width_mm": 23.5,
+          "sensor_height_mm": 15.6,
+          "crop_factor": 1.53,
+          "mount": "Sony E",
+          "compatible_mounts": [
+            "Sony E",
+            "Sony FE"
+          ],
+          "compatible_cameras": [
+            "A6400",
+            "A6100",
+            "A6600"
+          ]
+        },
+        {
+          "model": "ZV-1",
+          "sensor_type": "1-inch",
+          "sensor_width_mm": 13.2,
+          "sensor_height_mm": 8.8,
+          "crop_factor": 2.72,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "ZV-1 II",
+            "RX100 VII"
+          ]
+        }
+      ],
+      "lenses": [
+        {
+          "model": "FE 24-70mm F2.8 GM II",
+          "mount": "Sony E",
+          "is_zoom": true,
+          "min_focal_length": 24.0,
+          "max_focal_length": 70.0,
+          "max_aperture": 2.8,
+          "compatible_sensor": "Full Frame"
+        },
+        {
+          "model": "FE 16-35mm F2.8 GM II",
+          "mount": "Sony E",
+          "is_zoom": true,
+          "min_focal_length": 16.0,
+          "max_focal_length": 35.0,
+          "max_aperture": 2.8,
+          "compatible_sensor": "Full Frame"
+        },
+        {
+          "model": "FE 20-70mm F4 G",
+          "mount": "Sony E",
+          "is_zoom": true,
+          "min_focal_length": 20.0,
+          "max_focal_length": 70.0,
+          "max_aperture": 4.0,
+          "compatible_sensor": "Full Frame"
+        },
+        {
+          "model": "FE 35mm F1.4 GM",
+          "mount": "Sony E",
+          "is_zoom": false,
+          "min_focal_length": 35.0,
+          "max_focal_length": 35.0,
+          "max_aperture": 1.4,
+          "compatible_sensor": "Full Frame"
+        },
+        {
+          "model": "FE 50mm F1.2 GM",
+          "mount": "Sony E",
+          "is_zoom": false,
+          "min_focal_length": 50.0,
+          "max_focal_length": 50.0,
+          "max_aperture": 1.2,
+          "compatible_sensor": "Full Frame"
+        },
+        {
+          "model": "E 11mm F1.8",
+          "mount": "Sony E",
+          "is_zoom": false,
+          "min_focal_length": 11.0,
+          "max_focal_length": 11.0,
+          "max_aperture": 1.8,
+          "compatible_sensor": "APS-C"
+        },
+        {
+          "model": "E 15mm F1.4 G",
+          "mount": "Sony E",
+          "is_zoom": false,
+          "min_focal_length": 15.0,
+          "max_focal_length": 15.0,
+          "max_aperture": 1.4,
+          "compatible_sensor": "APS-C"
+        },
+        {
+          "model": "E PZ 10-20mm F4 G",
+          "mount": "Sony E",
+          "is_zoom": true,
+          "min_focal_length": 10.0,
+          "max_focal_length": 20.0,
+          "max_aperture": 4.0,
+          "compatible_sensor": "APS-C"
+        }
+      ]
+    },
+    {
+      "name": "Canon",
+      "mounts": [
+        "Canon RF",
+        "Canon EF",
+        "Canon EF-S",
+        "Fixed"
+      ],
+      "cameras": [
+        {
+          "model": "EOS R5",
+          "sensor_type": "Full Frame",
+          "sensor_width_mm": 36.0,
+          "sensor_height_mm": 24.0,
+          "crop_factor": 1.0,
+          "mount": "Canon RF",
+          "compatible_mounts": [
+            "Canon RF"
+          ],
+          "compatible_cameras": [
+            "EOS R5 C",
+            "EOS R6 Mark II",
+            "EOS R3"
+          ]
+        },
+        {
+          "model": "EOS R6 Mark II",
+          "sensor_type": "Full Frame",
+          "sensor_width_mm": 35.9,
+          "sensor_height_mm": 23.9,
+          "crop_factor": 1.0,
+          "mount": "Canon RF",
+          "compatible_mounts": [
+            "Canon RF"
+          ],
+          "compatible_cameras": [
+            "EOS R5",
+            "EOS R6",
+            "EOS R8"
+          ]
+        },
+        {
+          "model": "EOS R7",
+          "sensor_type": "APS-C",
+          "sensor_width_mm": 22.3,
+          "sensor_height_mm": 14.9,
+          "crop_factor": 1.6,
+          "mount": "Canon RF",
+          "compatible_mounts": [
+            "Canon RF"
+          ],
+          "compatible_cameras": [
+            "EOS R10",
+            "EOS R50"
+          ]
+        },
+        {
+          "model": "EOS C70",
+          "sensor_type": "Super 35",
+          "sensor_width_mm": 26.2,
+          "sensor_height_mm": 13.8,
+          "crop_factor": 1.45,
+          "mount": "Canon RF",
+          "compatible_mounts": [
+            "Canon RF"
+          ],
+          "compatible_cameras": [
+            "EOS C300 Mark III"
+          ]
+        }
+      ],
+      "lenses": [
+        {
+          "model": "RF 24-70mm F2.8 L IS USM",
+          "mount": "Canon RF",
+          "is_zoom": true,
+          "min_focal_length": 24.0,
+          "max_focal_length": 70.0,
+          "max_aperture": 2.8,
+          "compatible_sensor": "Full Frame"
+        },
+        {
+          "model": "RF 15-35mm F2.8 L IS USM",
+          "mount": "Canon RF",
+          "is_zoom": true,
+          "min_focal_length": 15.0,
+          "max_focal_length": 35.0,
+          "max_aperture": 2.8,
+          "compatible_sensor": "Full Frame"
+        },
+        {
+          "model": "RF 50mm F1.2 L USM",
+          "mount": "Canon RF",
+          "is_zoom": false,
+          "min_focal_length": 50.0,
+          "max_focal_length": 50.0,
+          "max_aperture": 1.2,
+          "compatible_sensor": "Full Frame"
+        }
+      ]
+    },
+    {
+      "name": "Panasonic",
+      "mounts": [
+        "Micro Four Thirds",
+        "Leica L"
+      ],
+      "cameras": [
+        {
+          "model": "Lumix GH6",
+          "sensor_type": "Micro Four Thirds",
+          "sensor_width_mm": 17.3,
+          "sensor_height_mm": 13.0,
+          "crop_factor": 2.0,
+          "mount": "Micro Four Thirds",
+          "compatible_mounts": [
+            "Micro Four Thirds"
+          ],
+          "compatible_cameras": [
+            "Lumix GH5",
+            "Lumix GH5S",
+            "Lumix GH7",
+            "Lumix BGH1"
+          ]
+        },
+        {
+          "model": "Lumix S5 II",
+          "sensor_type": "Full Frame",
+          "sensor_width_mm": 35.6,
+          "sensor_height_mm": 23.8,
+          "crop_factor": 1.0,
+          "mount": "Leica L",
+          "compatible_mounts": [
+            "Leica L"
+          ],
+          "compatible_cameras": [
+            "Lumix S5 IIX",
+            "Lumix S5",
+            "Lumix S1H"
+          ]
+        }
+      ],
+      "lenses": [
+        {
+          "model": "Leica DG Vario-Elmarit 12-60mm F2.8-4.0",
+          "mount": "Micro Four Thirds",
+          "is_zoom": true,
+          "min_focal_length": 12.0,
+          "max_focal_length": 60.0,
+          "max_aperture": 2.8,
+          "compatible_sensor": "Micro Four Thirds"
+        },
+        {
+          "model": "Lumix S 24-70mm F2.8 Pro",
+          "mount": "Leica L",
+          "is_zoom": true,
+          "min_focal_length": 24.0,
+          "max_focal_length": 70.0,
+          "max_aperture": 2.8,
+          "compatible_sensor": "Full Frame"
+        }
+      ]
+    },
+    {
+      "name": "Blackmagic Design",
+      "mounts": [
+        "Micro Four Thirds",
+        "Canon EF",
+        "Leica L",
+        "PL"
+      ],
+      "cameras": [
+        {
+          "model": "Pocket Cinema Camera 4K",
+          "sensor_type": "Micro Four Thirds",
+          "sensor_width_mm": 18.96,
+          "sensor_height_mm": 10.0,
+          "crop_factor": 1.9,
+          "mount": "Micro Four Thirds",
+          "compatible_mounts": [
+            "Micro Four Thirds"
+          ],
+          "compatible_cameras": [
+            "Micro Cinema Camera 4K"
+          ]
+        },
+        {
+          "model": "Pocket Cinema Camera 6K",
+          "sensor_type": "Super 35",
+          "sensor_width_mm": 23.1,
+          "sensor_height_mm": 12.99,
+          "crop_factor": 1.56,
+          "mount": "Canon EF",
+          "compatible_mounts": [
+            "Canon EF"
+          ],
+          "compatible_cameras": [
+            "Pocket Cinema Camera 6K Pro",
+            "Pocket Cinema Camera 6K G2"
+          ]
+        },
+        {
+          "model": "Cinema Camera 6K",
+          "sensor_type": "Full Frame",
+          "sensor_width_mm": 36.0,
+          "sensor_height_mm": 24.0,
+          "crop_factor": 1.0,
+          "mount": "Leica L",
+          "compatible_mounts": [
+            "Leica L"
+          ],
+          "compatible_cameras": [
+            "PYXIS 6K"
+          ]
+        }
+      ],
+      "lenses": []
+    },
+    {
+      "name": "GoPro",
+      "mounts": [
+        "Fixed"
+      ],
+      "cameras": [
+        {
+          "model": "HERO13 Black",
+          "sensor_type": "1/1.9-inch",
+          "sensor_width_mm": 6.4,
+          "sensor_height_mm": 5.6,
+          "crop_factor": 5.0,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "HERO12 Black",
+            "HERO11 Black",
+            "HERO11 Black Mini"
+          ]
+        },
+        {
+          "model": "HERO12 Black",
+          "sensor_type": "1/1.9-inch",
+          "sensor_width_mm": 6.4,
+          "sensor_height_mm": 5.6,
+          "crop_factor": 5.0,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "HERO13 Black",
+            "HERO11 Black",
+            "HERO11 Black Mini"
+          ]
+        },
+        {
+          "model": "HERO11 Black",
+          "sensor_type": "1/1.9-inch",
+          "sensor_width_mm": 6.4,
+          "sensor_height_mm": 5.6,
+          "crop_factor": 5.0,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "HERO12 Black",
+            "HERO13 Black",
+            "HERO11 Black Mini"
+          ]
+        },
+        {
+          "model": "HERO10 Black",
+          "sensor_type": "1/2.3-inch",
+          "sensor_width_mm": 6.17,
+          "sensor_height_mm": 4.55,
+          "crop_factor": 5.6,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "HERO9 Black"
+          ]
+        },
+        {
+          "model": "HERO9 Black",
+          "sensor_type": "1/2.3-inch",
+          "sensor_width_mm": 6.17,
+          "sensor_height_mm": 4.55,
+          "crop_factor": 5.6,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "HERO10 Black"
+          ]
+        },
+        {
+          "model": "HERO8 Black",
+          "sensor_type": "1/2.3-inch",
+          "sensor_width_mm": 6.17,
+          "sensor_height_mm": 4.55,
+          "crop_factor": 5.6,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "HERO7 Black",
+            "HERO6 Black"
+          ]
+        }
+      ],
+      "lenses": [
+        {
+          "model": "Standard Wide",
+          "mount": "Fixed",
+          "is_zoom": false,
+          "min_focal_length": 2.92,
+          "max_focal_length": 2.92,
+          "max_aperture": 2.5,
+          "compatible_sensor": "1/1.9-inch"
+        },
+        {
+          "model": "Max Lens Mod",
+          "mount": "Fixed",
+          "is_zoom": false,
+          "min_focal_length": 2.4,
+          "max_focal_length": 2.4,
+          "max_aperture": 2.5,
+          "compatible_sensor": "1/1.9-inch"
+        },
+        {
+          "model": "Max Lens Mod 2.0",
+          "mount": "Fixed",
+          "is_zoom": false,
+          "min_focal_length": 2.1,
+          "max_focal_length": 2.1,
+          "max_aperture": 2.5,
+          "compatible_sensor": "1/1.9-inch"
+        }
+      ]
+    },
+    {
+      "name": "DJI",
+      "mounts": [
+        "Fixed",
+        "DL Mount"
+      ],
+      "cameras": [
+        {
+          "model": "Osmo Action 4",
+          "sensor_type": "1/1.3-inch",
+          "sensor_width_mm": 9.6,
+          "sensor_height_mm": 7.2,
+          "crop_factor": 3.6,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "Osmo Action 5 Pro"
+          ]
+        },
+        {
+          "model": "Osmo Action 3",
+          "sensor_type": "1/1.7-inch",
+          "sensor_width_mm": 7.6,
+          "sensor_height_mm": 5.7,
+          "crop_factor": 4.5,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "Action 2"
+          ]
+        },
+        {
+          "model": "Action 2",
+          "sensor_type": "1/1.7-inch",
+          "sensor_width_mm": 7.6,
+          "sensor_height_mm": 5.7,
+          "crop_factor": 4.5,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "Osmo Action 3"
+          ]
+        },
+        {
+          "model": "O3 Air Unit",
+          "sensor_type": "1/1.7-inch",
+          "sensor_width_mm": 7.6,
+          "sensor_height_mm": 5.7,
+          "crop_factor": 4.5,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "Avata",
+            "Action 2"
+          ]
+        },
+        {
+          "model": "Avata 2",
+          "sensor_type": "1/1.3-inch",
+          "sensor_width_mm": 9.6,
+          "sensor_height_mm": 7.2,
+          "crop_factor": 3.6,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "Osmo Action 4"
+          ]
+        }
+      ],
+      "lenses": [
+        {
+          "model": "Standard 155 FOV",
+          "mount": "Fixed",
+          "is_zoom": false,
+          "min_focal_length": 2.7,
+          "max_focal_length": 2.7,
+          "max_aperture": 2.8,
+          "compatible_sensor": "1/1.3-inch"
+        }
+      ]
+    },
+    {
+      "name": "Insta360",
+      "mounts": [
+        "Fixed"
+      ],
+      "cameras": [
+        {
+          "model": "Ace Pro",
+          "sensor_type": "1/1.3-inch",
+          "sensor_width_mm": 9.6,
+          "sensor_height_mm": 7.2,
+          "crop_factor": 3.6,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "Ace Pro 2"
+          ]
+        },
+        {
+          "model": "ONE RS 4K Boost",
+          "sensor_type": "1/2-inch",
+          "sensor_width_mm": 6.4,
+          "sensor_height_mm": 4.8,
+          "crop_factor": 5.4,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "ONE R 4K"
+          ]
+        },
+        {
+          "model": "ONE RS 1-Inch 360",
+          "sensor_type": "Dual 1-inch",
+          "sensor_width_mm": 13.2,
+          "sensor_height_mm": 8.8,
+          "crop_factor": 2.72,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": []
+        },
+        {
+          "model": "X3",
+          "sensor_type": "Dual 1/2-inch",
+          "sensor_width_mm": 6.4,
+          "sensor_height_mm": 4.8,
+          "crop_factor": 5.4,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "X4"
+          ]
+        }
+      ],
+      "lenses": [
+        {
+          "model": "4K Boost Lens",
+          "mount": "Fixed",
+          "is_zoom": false,
+          "min_focal_length": 3.2,
+          "max_focal_length": 3.2,
+          "max_aperture": 2.4,
+          "compatible_sensor": "1/2-inch"
+        }
+      ]
+    },
+    {
+      "name": "Nikon",
+      "mounts": [
+        "Nikon Z",
+        "Nikon F"
+      ],
+      "cameras": [
+        {
+          "model": "Z8",
+          "sensor_type": "Full Frame",
+          "sensor_width_mm": 35.9,
+          "sensor_height_mm": 23.9,
+          "crop_factor": 1.0,
+          "mount": "Nikon Z",
+          "compatible_mounts": [
+            "Nikon Z"
+          ],
+          "compatible_cameras": [
+            "Z9",
+            "Z6 III",
+            "Zf"
+          ]
+        },
+        {
+          "model": "Z6 III",
+          "sensor_type": "Full Frame",
+          "sensor_width_mm": 35.9,
+          "sensor_height_mm": 23.9,
+          "crop_factor": 1.0,
+          "mount": "Nikon Z",
+          "compatible_mounts": [
+            "Nikon Z"
+          ],
+          "compatible_cameras": [
+            "Z8",
+            "Z9",
+            "Z6 II"
+          ]
+        }
+      ],
+      "lenses": [
+        {
+          "model": "NIKKOR Z 24-70mm f/2.8 S",
+          "mount": "Nikon Z",
+          "is_zoom": true,
+          "min_focal_length": 24.0,
+          "max_focal_length": 70.0,
+          "max_aperture": 2.8,
+          "compatible_sensor": "Full Frame"
+        }
+      ]
+    },
+    {
+      "name": "Fujifilm",
+      "mounts": [
+        "Fujifilm X",
+        "Fujifilm GFX"
+      ],
+      "cameras": [
+        {
+          "model": "X-T5",
+          "sensor_type": "APS-C",
+          "sensor_width_mm": 23.5,
+          "sensor_height_mm": 15.7,
+          "crop_factor": 1.5,
+          "mount": "Fujifilm X",
+          "compatible_mounts": [
+            "Fujifilm X"
+          ],
+          "compatible_cameras": [
+            "X-T4",
+            "X-H2",
+            "X-H2S",
+            "X-S20"
+          ]
+        },
+        {
+          "model": "X-H2S",
+          "sensor_type": "APS-C",
+          "sensor_width_mm": 23.5,
+          "sensor_height_mm": 15.6,
+          "crop_factor": 1.5,
+          "mount": "Fujifilm X",
+          "compatible_mounts": [
+            "Fujifilm X"
+          ],
+          "compatible_cameras": [
+            "X-T5",
+            "X-H2",
+            "X-T4"
+          ]
+        }
+      ],
+      "lenses": [
+        {
+          "model": "XF 16-55mm F2.8 R LM WR",
+          "mount": "Fujifilm X",
+          "is_zoom": true,
+          "min_focal_length": 16.0,
+          "max_focal_length": 55.0,
+          "max_aperture": 2.8,
+          "compatible_sensor": "APS-C"
+        }
+      ]
+    },
+    {
+      "name": "RED",
+      "mounts": [
+        "Canon RF",
+        "PL"
+      ],
+      "cameras": [
+        {
+          "model": "KOMODO 6K",
+          "sensor_type": "Super 35",
+          "sensor_width_mm": 27.03,
+          "sensor_height_mm": 14.26,
+          "crop_factor": 1.42,
+          "mount": "Canon RF",
+          "compatible_mounts": [
+            "Canon RF"
+          ],
+          "compatible_cameras": [
+            "KOMODO-X 6K"
+          ]
+        },
+        {
+          "model": "KOMODO-X 6K",
+          "sensor_type": "Super 35",
+          "sensor_width_mm": 27.03,
+          "sensor_height_mm": 14.26,
+          "crop_factor": 1.42,
+          "mount": "Canon RF",
+          "compatible_mounts": [
+            "Canon RF"
+          ],
+          "compatible_cameras": [
+            "KOMODO 6K"
+          ]
+        },
+        {
+          "model": "V-RAPTOR 8K VV",
+          "sensor_type": "Large Format",
+          "sensor_width_mm": 40.96,
+          "sensor_height_mm": 21.6,
+          "crop_factor": 0.93,
+          "mount": "Canon RF",
+          "compatible_mounts": [
+            "Canon RF"
+          ],
+          "compatible_cameras": [
+            "V-RAPTOR [X] 8K VV"
+          ]
+        }
+      ],
+      "lenses": []
+    },
+    {
+      "name": "RunCam",
+      "mounts": [
+        "Fixed",
+        "M12"
+      ],
+      "cameras": [
+        {
+          "model": "Thumb Pro",
+          "sensor_type": "1/2.3-inch",
+          "sensor_width_mm": 6.17,
+          "sensor_height_mm": 4.55,
+          "crop_factor": 5.6,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "Thumb Pro V2"
+          ]
+        },
+        {
+          "model": "Thumb",
+          "sensor_type": "1/2.3-inch",
+          "sensor_width_mm": 6.17,
+          "sensor_height_mm": 4.55,
+          "crop_factor": 5.6,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": []
+        }
+      ],
+      "lenses": [
+        {
+          "model": "Stock 150 FOV",
+          "mount": "Fixed",
+          "is_zoom": false,
+          "min_focal_length": 2.5,
+          "max_focal_length": 2.5,
+          "max_aperture": 2.8,
+          "compatible_sensor": "1/2.3-inch"
+        }
+      ]
+    },
+    {
+      "name": "Caddx",
+      "mounts": [
+        "Fixed",
+        "M12"
+      ],
+      "cameras": [
+        {
+          "model": "Walnut",
+          "sensor_type": "1/2.3-inch",
+          "sensor_width_mm": 6.17,
+          "sensor_height_mm": 4.55,
+          "crop_factor": 5.6,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "RunCam Thumb Pro"
+          ]
+        },
+        {
+          "model": "Peanut",
+          "sensor_type": "1/2.3-inch",
+          "sensor_width_mm": 6.17,
+          "sensor_height_mm": 4.55,
+          "crop_factor": 5.6,
+          "mount": "Fixed",
+          "compatible_mounts": [
+            "Fixed"
+          ],
+          "compatible_cameras": [
+            "Insta360 GO 2"
+          ]
+        }
+      ],
+      "lenses": [
+        {
+          "model": "Stock FPV Lens",
+          "mount": "Fixed",
+          "is_zoom": false,
+          "min_focal_length": 2.1,
+          "max_focal_length": 2.1,
+          "max_aperture": 2.0,
+          "compatible_sensor": "1/2.3-inch"
+        }
+      ]
+    }
+  ]
+}
