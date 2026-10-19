@@ -27,6 +27,7 @@ mod inference {
     use std::time::Duration;
     use image::GrayImage;
     use burn::tensor::{ Bytes, Device, Tensor, TensorData };
+    use burn_store::{ BurnpackStore, ModuleSnapshot };
     use sha2::{ Digest, Sha256 };
 
     pub const MODEL_W: usize = 576;
@@ -113,8 +114,17 @@ mod inference {
         MODEL
             .get_or_init(|| match ensure_model_bytes() {
                 Ok(raw) => {
-                    let bytes = Bytes::from_bytes_vec(raw);
-                    Some(Arc::new(Model::from_bytes(bytes, &device())))
+                    // Load through the store rather than the generated `from_bytes`, which panics on a
+                    // bad file; this runs on a rayon worker, so report and disable gmflow instead.
+                    let mut store = BurnpackStore::from_bytes(Some(Bytes::from_bytes_vec(raw)));
+                    let mut m = Model::new(&device());
+                    match m.load_from(&mut store) {
+                        Ok(_) => Some(Arc::new(m)),
+                        Err(e) => {
+                            log::error!("gmflow: failed to load model weights: {}", e);
+                            None
+                        }
+                    }
                 }
                 Err(e) => {
                     log::error!("gmflow: failed to load model: {}", e);
@@ -275,7 +285,7 @@ impl OpticalFlowTrait for OFGmflow {
             let (flow, lb) = match inference::compute_flow(&self.img, &next.img) {
                 Some(v) => v,
                 None => {
-                    log::error!("gmflow: backend returned non-f32 tensor");
+                    log::error!("gmflow: no flow (model not loaded, or the output was not f32)");
                     return None;
                 }
             };

@@ -335,7 +335,7 @@ MenuItem {
         }
         InfoMessageSmall {
             show: syncMethod.currentValue == "Gmflow (AI)";
-            text: qsTr("Gmflow is an experimental AI-based optical flow backend. Requires a build with the ai-optical-flow Cargo feature and the gmflow model weights. CPU inference is slow; see docs for GPU instructions.");
+            text: qsTr("Gmflow is an experimental AI-based optical flow backend. Requires a build with the ai-optical-flow Cargo feature; the model weights (about 150 MB) are downloaded on first use. It runs on the CPU and takes several seconds per frame pair.");
         }
         Label {
             position: Label.LeftPosition;
