@@ -1681,7 +1681,7 @@ impl Controller {
         let refit = self.stabilizer.set_optical_correction_per_frame(per_frame);
         self.refit_optical_correction(refit);
     }
-    /// "klt" or "dis", for the next analysis
+    /// "klt", "dis" or "gmflow", for the next analysis
     fn set_optical_tracking(&mut self, method: String) {
         if self.stabilizer.set_optical_tracking(&method) {
             self.optical_correction_changed();

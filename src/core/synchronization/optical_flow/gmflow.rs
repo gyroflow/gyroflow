@@ -23,9 +23,10 @@ mod inference {
     use super::model::Model;
     use std::io::Read;
     use std::path::PathBuf;
-    use std::sync::{ Arc, OnceLock };
-    use std::time::Duration;
+    use std::sync::Arc;
+    use std::time::{ Duration, Instant };
     use image::GrayImage;
+    use parking_lot::Mutex;
     use burn::tensor::{ Bytes, Device, Tensor, TensorData };
     use burn_store::{ BurnpackStore, ModuleSnapshot };
     use sha2::{ Digest, Sha256 };
@@ -42,12 +43,13 @@ mod inference {
     const MODEL_SHA256: &str = "31feee698842928715e9ba693b69a492d85ace31c646df6f3eabd53e240cd5e9";
     const MODEL_FILENAME: &str = "gmflow-scale2-regrefine6-320x576-opset16-sim.bpk";
 
-    // The CPU model always exists as the fallback; the GPU one only when a GPU was picked.
-    static CPU_MODEL: OnceLock<Option<Arc<Model>>> = OnceLock::new();
+    // The model on each device, loaded on first use. The CPU one is the fallback; the GPU one only exists when a GPU
+    // was picked. A failed load is not kept: the next use tries again (see `load_model` for how often).
+    static CPU_MODEL: Mutex<Option<Arc<Model>>> = Mutex::new(None);
     #[cfg(feature = "use-burn-gpu")]
-    static GPU: OnceLock<Option<(Device, String)>> = OnceLock::new();
+    static GPU: std::sync::OnceLock<Option<(Device, String)>> = std::sync::OnceLock::new();
     #[cfg(feature = "use-burn-gpu")]
-    static GPU_MODEL: OnceLock<Option<Arc<Model>>> = OnceLock::new();
+    static GPU_MODEL: Mutex<Option<Arc<Model>>> = Mutex::new(None);
     #[cfg(feature = "use-burn-gpu")]
     static GPU_FAILED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
@@ -189,26 +191,66 @@ mod inference {
         Ok(bytes)
     }
 
-    fn load_model(device: &Device) -> Option<Arc<Model>> {
-        match ensure_model_bytes() {
-            Ok(raw) => {
-                // Load through the store rather than the generated `from_bytes`, which panics on a
-                // bad file; this runs on a rayon worker, so report and disable gmflow instead.
-                let mut store = BurnpackStore::from_bytes(Some(Bytes::from_bytes_vec(raw)));
-                let mut m = Model::new(device);
-                match m.load_from(&mut store) {
-                    Ok(_) => Some(Arc::new(m)),
-                    Err(e) => {
-                        log::error!("gmflow: failed to load model weights: {}", e);
-                        None
-                    }
-                }
-            }
-            Err(e) => {
-                log::error!("gmflow: failed to load model: {}", e);
-                None
-            }
+    // How long a failure to get the weights (no network, a bad download) is taken as the answer before trying again:
+    // every pair of a sync or of an analysis asks for the model, and each try may wait out the download's timeouts.
+    const RETRY_AFTER: Duration = Duration::from_secs(60);
+
+    // Loads the weights onto `device`, downloading them first if they're not cached. Errors are logged when they
+    // happen, not when a recent one is handed out again.
+    fn load_model(device: &Device) -> Result<Arc<Model>, String> {
+        static WEIGHTS_FAILED: Mutex<Option<(Instant, String)>> = Mutex::new(None);
+        if let Some((at, why)) = &*WEIGHTS_FAILED.lock() {
+            if at.elapsed() < RETRY_AFTER { return Err(why.clone()); }
         }
+        let raw = ensure_model_bytes().map_err(|e| {
+            let why = format!("could not get the model: {}", e);
+            log::error!("gmflow: {}", why);
+            *WEIGHTS_FAILED.lock() = Some((Instant::now(), why.clone()));
+            why
+        })?;
+        *WEIGHTS_FAILED.lock() = None;
+        // Load through the store rather than the generated `from_bytes`, which panics on a
+        // bad file; this runs on a rayon worker, so report and disable gmflow instead.
+        let mut store = BurnpackStore::from_bytes(Some(Bytes::from_bytes_vec(raw)));
+        let mut m = Model::new(device);
+        m.load_from(&mut store).map_err(|e| {
+            let why = format!("failed to load model weights: {}", e);
+            log::error!("gmflow: {}", why);
+            why
+        })?;
+        Ok(Arc::new(m))
+    }
+
+    // The model in `slot`, loaded onto `device` if it isn't yet. One load at a time: the others wait for it.
+    fn model_on(slot: &Mutex<Option<Arc<Model>>>, device: &Device) -> Result<Arc<Model>, String> {
+        let mut slot = slot.lock();
+        if let Some(m) = &*slot { return Ok(m.clone()); }
+        let m = load_model(device)?;
+        *slot = Some(m.clone());
+        Ok(m)
+    }
+
+    // Gets gmflow ready before a long run (Motion data -> Optical correction with gmflow tracking): picks the device,
+    // downloads the weights if needed and loads them, so that waiting and failing happen before the first frame
+    // rather than inside it. What it will run on, or why it can't run.
+    pub fn prepare() -> Result<String, String> {
+        #[cfg(feature = "use-burn-gpu")]
+        if let Some((device, name)) = gpu() {
+            let loaded = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| model_on(&GPU_MODEL, device)));
+            let why = match loaded {
+                Ok(Ok(_)) => return Ok(name.clone()),
+                Ok(Err(e)) => e,
+                Err(_) => "panic in the wgpu runtime".to_owned(),
+            };
+            // Not the GPU's fault if the CPU can't load the weights either
+            model_on(&CPU_MODEL, &Device::flex())?;
+            if !GPU_FAILED.swap(true, std::sync::atomic::Ordering::Relaxed) {
+                log::error!("gmflow: the GPU failed ({}: {}); continuing on the CPU (flex)", name, why);
+            }
+            return Ok("flex (CPU)".to_owned());
+        }
+        model_on(&CPU_MODEL, &Device::flex())?;
+        Ok("flex (CPU)".to_owned())
     }
 
     // Aspect-preserving letterbox mapping parameters. `scale` is model-pixels per
@@ -217,6 +259,9 @@ mod inference {
     // tensor into `forward` without cloning.
     pub struct LetterboxParams {
         pub scale: f32,
+        // The exact ratios of each axis: `scale` but for the rounding of the resized size
+        pub sx: f32,
+        pub sy: f32,
         pub pad_x: usize,
         pub pad_y: usize,
     }
@@ -260,7 +305,7 @@ mod inference {
             TensorData::new(data, [1usize, 3, MODEL_H, MODEL_W]),
             device,
         );
-        (tensor, LetterboxParams { scale, pad_x, pad_y })
+        (tensor, LetterboxParams { scale, sx: new_w as f32 / iw, sy: new_h as f32 / ih, pad_x, pad_y })
     }
 
     fn run(model: &Model, device: &Device, img0: &GrayImage, img1: &GrayImage) -> Result<(Vec<f32>, LetterboxParams), String> {
@@ -293,12 +338,12 @@ mod inference {
         if let Some((device, name)) = gpu() {
             // Loading the weights onto the GPU is inside the guard too: it allocates GPU memory.
             let ran = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                GPU_MODEL.get_or_init(|| load_model(device)).as_ref().map(|m| run(m, device, img0, img1))
+                model_on(&GPU_MODEL, device).map(|m| run(&m, device, img0, img1))
             }));
             let why = match ran {
-                Ok(Some(Ok(v))) => return Some(v),
-                Ok(Some(Err(e))) => Some(e),
-                Ok(None) => None, // no weights (already logged); the CPU will not have them either
+                Ok(Ok(Ok(v))) => return Some(v),
+                Ok(Ok(Err(e))) => Some(e),
+                Ok(Err(_)) => None, // no weights (logged); the CPU will not have them either
                 Err(_) => Some("panic in the wgpu runtime".to_owned()),
             };
             if let Some(why) = why {
@@ -307,19 +352,63 @@ mod inference {
                 }
             }
         }
+        #[cfg(not(feature = "use-burn-gpu"))]
+        {
+            static LOGGED: std::sync::Once = std::sync::Once::new();
+            LOGGED.call_once(|| log::info!("gmflow: running on the CPU (flex)"));
+        }
         let device = Device::flex();
-        let m = CPU_MODEL.get_or_init(|| {
-            #[cfg(not(feature = "use-burn-gpu"))]
-            log::info!("gmflow: running on the CPU (flex)");
-            load_model(&device)
-        }).as_ref()?;
-        match run(m, &device, img0, img1) {
+        let m = model_on(&CPU_MODEL, &device).ok()?;
+        match run(&m, &device, img0, img1) {
             Ok(v) => Some(v),
             Err(e) => {
                 log::error!("gmflow: {}", e);
                 None
             }
         }
+    }
+}
+
+/// gmflow's dense flow from one frame to another, for the optical analysis (Motion data -> Optical correction ->
+/// Tracking: gmflow). The model sees the frames letterboxed into 576x320, so the flow is that coarse: `at` maps a point
+/// of the frame into it and back
+#[cfg(feature = "use-burn")]
+pub struct GmflowDenseFlow {
+    flow: Vec<f32>,
+    sx: f32,
+    sy: f32,
+    pad_x: f32,
+    pad_y: f32,
+}
+
+#[cfg(feature = "use-burn")]
+impl GmflowDenseFlow {
+    /// Picks the device and loads the model (downloading it on first use), before the first `compute`: what it will run
+    /// on ("flex (CPU)" or "wgpu: ..."), or why gmflow can't run
+    pub fn prepare() -> Result<String, String> { inference::prepare() }
+
+    /// The flow from `a` to `b` (same size), on the GPU or the CPU, see `inference`. None, logged, when gmflow can't run
+    pub fn compute(a: &image::GrayImage, b: &image::GrayImage) -> Option<Self> {
+        let (flow, lb) = inference::compute_flow(a, b)?;
+        if flow.len() < 2 * inference::MODEL_H * inference::MODEL_W { return None; }
+        Some(Self { flow, sx: lb.sx.max(1e-6), sy: lb.sy.max(1e-6), pad_x: lb.pad_x as f32, pad_y: lb.pad_y as f32 })
+    }
+
+    /// How far the point (x, y) of the first frame, in its pixels, moved by in the second one: bilinear between the
+    /// model's pixels, pixel centres matched as the resize does. None outside of what the model saw
+    pub fn at(&self, x: f32, y: f32) -> Option<(f32, f32)> {
+        let (w, h) = (inference::MODEL_W, inference::MODEL_H);
+        let mx = (x + 0.5) * self.sx - 0.5 + self.pad_x;
+        let my = (y + 0.5) * self.sy - 0.5 + self.pad_y;
+        if !(mx >= 0.0 && my >= 0.0 && mx <= (w - 1) as f32 && my <= (h - 1) as f32) { return None; }
+        let (x0, y0) = (mx.floor() as usize, my.floor() as usize);
+        let (x1, y1) = ((x0 + 1).min(w - 1), (y0 + 1).min(h - 1));
+        let (fx, fy) = (mx - x0 as f32, my - y0 as f32);
+        let plane = |k: usize| {
+            let at = |x: usize, y: usize| self.flow[k * w * h + y * w + x];
+            (at(x0, y0) * (1.0 - fx) + at(x1, y0) * fx) * (1.0 - fy) + (at(x0, y1) * (1.0 - fx) + at(x1, y1) * fx) * fy
+        };
+        Some((plane(0) / self.sx, plane(1) / self.sy))
     }
 }
 

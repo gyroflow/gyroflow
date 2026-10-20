@@ -1229,7 +1229,8 @@ impl StabilizationManager {
         self.recompute_gyro();
         Ok(true)
     }
-    /// How the next "Analyze image optically" follows the points, "klt" or "dis". False for neither
+    /// How the next "Analyze image optically" follows the points, "klt", "dis" or "gmflow". False for none of them, or
+    /// for one this build doesn't have
     pub fn set_optical_tracking(&self, name: &str) -> bool {
         let Some(method) = gyro_source::TrackingMethod::from_name(name) else { return false };
         *self.optical_tracking.write() = method;
@@ -1450,7 +1451,8 @@ impl StabilizationManager {
         info["tracking"] = tracking.name().into();
         if let Some((fitted, fitted_tracking)) = fitted_with {
             // Tracked another way than the one set now: still a correction, the new one applies from the next analysis
-            info["tracking_changed"] = (fitted_tracking != tracking).into();
+            // Not when it was fitted with a method this build doesn't have: nothing was changed to apply
+            info["tracking_changed"] = (fitted_tracking != tracking && fitted_tracking.available()).into();
             // Fitted with other settings than the ones set, and the measurements to refit aren't here any more (a
             // project loaded from disk keeps only the correction): only another analysis applies the new ones. The
             // strength doesn't count without motion data to correct: the motion and its correction come from the same

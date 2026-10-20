@@ -807,6 +807,12 @@ fn to_quat_frame(b: (f32, f32, f32)) -> Vector3<f64> {
     Vector3::new(b.0 as f64, -b.1 as f64, -b.2 as f64).normalize()
 }
 
+/// The tracker's errors for the user: OpenCV's own, or gmflow's (made as OpenCV errors to go the same way), as they are
+#[cfg(feature = "use-opencv")]
+fn tracker_error(e: opencv::Error) -> String {
+    if e.message.starts_with("gmflow") { e.message } else { format!("OpenCV error: {e:?}") }
+}
+
 pub struct OpticalMotionAnalysis {
     fps_scale: Option<f64>,
     scaled_fps: f64,
@@ -868,9 +874,20 @@ impl OpticalMotionAnalysis {
                 (p.fps_scale, p.get_scaled_fps(), p.frame_readout_direction.is_horizontal(), ranges_ms, total_frames)
             };
             let setup = Setup { params, horizontal_readout, track_size: (0, 0), focal_px: 0.0, from_video };
+            // gmflow downloads its model on first use and may be on the CPU: both settled here, before the first
+            // frame, where a failure can say why and the wait isn't one frame that never ends
+            #[cfg(feature = "use-burn")]
+            if tracking == TrackingMethod::Gmflow {
+                let device = crate::synchronization::optical_flow::GmflowDenseFlow::prepare().map_err(|e| format!("gmflow: {e}"))?;
+                ::log::info!("Optical analysis with gmflow on {device}{}", if device.starts_with("flex") { ": without a GPU this takes tens of seconds per frame" } else { "" });
+            }
+            let mut tracker = tracker::Tracker::new(MAX_POINTS, tracking).map_err(tracker_error)?;
+            // A frame of gmflow is two passes of the model: cancelling waits for one at most
+            let (cancel, optical_generation) = (cancel_flag.clone(), stab.optical_generation.clone());
+            tracker.set_stop(Box::new(move || cancel.load(Relaxed) || optical_generation.load(SeqCst) != generation));
             Ok(Self {
                 fps_scale, scaled_fps, quats_checksum, context_checksum,
-                tracker: tracker::Tracker::new(MAX_POINTS, tracking).map_err(|e| format!("OpenCV error: {e:?}"))?,
+                tracker,
                 tracking,
                 last: None,
                 tracks: Default::default(),
@@ -923,7 +940,7 @@ impl OpticalMotionAnalysis {
         #[cfg(feature = "use-opencv")]
         {
             if !continuous { self.tracker.reset(); }
-            let obs = self.tracker.track(width, height, stride, pixels).map_err(|e| format!("OpenCV error: {e:?}"))?;
+            let obs = self.tracker.track(width, height, stride, pixels).map_err(tracker_error)?;
             if continuous && !obs.is_empty() {
                 if let Some(a) = self.last {
                     // Measured as it's kept: measuring the kept tracks again gives the very same

@@ -75,7 +75,7 @@ MenuItem {
                 opticalPerFrame.currentIndex = gyro.optical_correction_per_frame? 1 : 0;
             }
             if (typeof gyro.optical_tracking === "string") {
-                opticalTracking.currentIndex = gyro.optical_tracking === "dis"? 1 : 0;
+                opticalTracking.currentIndex = Math.max(0, opticalTracking.methods.indexOf(gyro.optical_tracking));
             }
             // The checkbox from the core, which has the project's correction and whether it's on (`optical_correction_enabled`)
             Qt.callLater(opticalcb.updateInfo);
@@ -139,7 +139,7 @@ MenuItem {
             controller.set_imu_median_filter(mfcb.checked? mf.value : 0);
             controller.set_optical_correction_strength(opticalStrength.value / 100);
             controller.set_optical_correction_per_frame(opticalPerFrame.currentIndex === 1);
-            controller.set_optical_tracking(opticalTracking.currentIndex === 1? "dis" : "klt");
+            controller.set_optical_tracking(opticalTracking.methods[opticalTracking.currentIndex] || "klt");
             Qt.callLater(opticalcb.updateInfo);
             controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
             controller.set_acc_rotation(arot.checked? ap.value : 0, arot.checked? ar.value : 0, arot.checked? ay.value : 0);
@@ -377,11 +377,15 @@ MenuItem {
             text: qsTr("Tracking");
             ComboBox {
                 id: opticalTracking;
-                model: [QT_TRANSLATE_NOOP("Popup", "KLT (corners)"), QT_TRANSLATE_NOOP("Popup", "DIS (dense flow)")];
+                // gmflow only in builds with the ai-optical-flow feature
+                readonly property var methods: controller.has_ai_optical_flow()? ["klt", "dis", "gmflow"] : ["klt", "dis"];
+                model: controller.has_ai_optical_flow()? [QT_TRANSLATE_NOOP("Popup", "KLT (corners)"), QT_TRANSLATE_NOOP("Popup", "DIS (dense flow)"), QT_TRANSLATE_NOOP("Popup", "gmflow (AI dense flow)")]
+                                                       : [QT_TRANSLATE_NOOP("Popup", "KLT (corners)"), QT_TRANSLATE_NOOP("Popup", "DIS (dense flow)")];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
-                tooltip: qsTr("KLT is the most accurate where the image has detail. DIS also follows weak detail like clouds or water, but is slower and loses fast motion more easily.");
-                onCurrentIndexChanged: controller.set_optical_tracking(currentIndex === 1? "dis" : "klt");
+                tooltip: controller.has_ai_optical_flow()? qsTr("KLT is the most accurate where the image has detail. DIS also follows weak detail like clouds or water, but is slower and loses fast motion more easily. gmflow (AI) follows large motion and weak detail best, but needs a GPU to be practical: on the CPU it takes tens of seconds per frame. The model (about 150 MB) is downloaded on first use.")
+                                                         : qsTr("KLT is the most accurate where the image has detail. DIS also follows weak detail like clouds or water, but is slower and loses fast motion more easily.");
+                onCurrentIndexChanged: controller.set_optical_tracking(methods[currentIndex] || "klt");
             }
         }
         Label {

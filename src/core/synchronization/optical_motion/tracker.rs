@@ -3,8 +3,8 @@
 
 //! Persistent feature tracks from one frame to the next. Every pair of consecutive frames yields the points that
 //! survived a forward-backward check, with the id of the track they belong to: the analysis needs whole tracks, to
-//! take the slow parallax of each point out of its motion. KLT starts its points at corners, DIS on a regular grid
-//! (see `TrackingMethod`); both away from glare
+//! take the slow parallax of each point out of its motion. KLT starts its points at corners, DIS and gmflow on a
+//! regular grid (see `TrackingMethod`); all away from glare
 
 use opencv::{ core::{ self, Mat, Point, Point2f, Ptr, Rect, Scalar, Size, TermCriteria, Vec2f, Vector, CV_8UC1 }, prelude::*, imgproc, video };
 use super::{ Observation, TrackingMethod };
@@ -41,10 +41,26 @@ const DIS_FB_MAX: f32 = 0.3;
 /// own are 1 or 2, a half or a quarter, upsampled from there)
 const DIS_PRESET: i32 = video::DISOpticalFlow_PRESET_MEDIUM;
 const DIS_FINEST_SCALE: i32 = 1;
+/// How far a point may end up from where it started, tracked forward and back again through gmflow's flow, pixels of
+/// the tracked frame. DIS's limit, for the same reason (two flows computed apart, each smoothed); not tuned on
+/// footage of its own yet. gmflow's flow is coarser than the frame (576x320 against about 960 wide), which this
+/// leaves room for
+#[cfg(feature = "use-burn")]
+const GMFLOW_FB_MAX: f32 = 0.3;
+
+/// How the points are followed, see `TrackingMethod`
+enum Dense {
+    /// None: KLT, at corners
+    Klt,
+    Dis(Ptr<video::DISOpticalFlow>),
+    #[cfg(feature = "use-burn")]
+    Gmflow,
+}
 
 pub struct Tracker {
-    /// DIS, when it follows the points through the dense flow; KLT without
-    dis: Option<Ptr<video::DISOpticalFlow>>,
+    dense: Dense,
+    /// Whether to give up on the frame being tracked (cancelled), checked between the passes of gmflow
+    stop: Box<dyn Fn() -> bool + Send + Sync>,
     prev: Option<Mat>,
     size: (i32, i32),
     points: Vec<Point2f>,
@@ -55,15 +71,25 @@ pub struct Tracker {
 
 impl Tracker {
     pub fn new(max_points: usize, method: TrackingMethod) -> Result<Self, opencv::Error> {
-        let dis = match method {
-            TrackingMethod::Klt => None,
+        let dense = match method {
+            TrackingMethod::Klt => Dense::Klt,
             TrackingMethod::Dis => {
                 let mut dis = video::DISOpticalFlow::create(DIS_PRESET)?;
                 if DIS_FINEST_SCALE >= 0 { dis.set_finest_scale(DIS_FINEST_SCALE)?; }
-                Some(dis)
+                Dense::Dis(dis)
             },
+            #[cfg(feature = "use-burn")]
+            TrackingMethod::Gmflow => Dense::Gmflow,
+            #[cfg(not(feature = "use-burn"))]
+            TrackingMethod::Gmflow => return Err(opencv::Error::new(core::StsNotImplemented, "gmflow tracking needs a build with the ai-optical-flow feature")),
         };
-        Ok(Self { dis, prev: None, size: (0, 0), points: Vec::new(), ids: Vec::new(), next_id: 0, max_points })
+        Ok(Self { dense, stop: Box::new(|| false), prev: None, size: (0, 0), points: Vec::new(), ids: Vec::new(), next_id: 0, max_points })
+    }
+
+    /// What says to give up on a frame halfway (gmflow takes tens of seconds per frame without a GPU): it then tracks
+    /// nothing, and whoever stopped it ignores the rest
+    pub fn set_stop(&mut self, stop: Box<dyn Fn() -> bool + Send + Sync>) {
+        self.stop = stop;
     }
 
     /// Forget everything: the next frame starts new tracks (a gap in the decoded frames, a cut)
@@ -85,9 +111,11 @@ impl Tracker {
         if let Some(prev) = self.prev.take() {
             self.replenish(&prev)?;
             if !self.points.is_empty() {
-                let moved = match &mut self.dis {
-                    None => Self::klt(&prev, &cur, &self.points)?,
-                    Some(dis) => Self::dense(dis, &prev, &cur, &self.points)?,
+                let moved = match &mut self.dense {
+                    Dense::Klt => Self::klt(&prev, &cur, &self.points)?,
+                    Dense::Dis(dis) => Self::dense(dis, &prev, &cur, &self.points)?,
+                    #[cfg(feature = "use-burn")]
+                    Dense::Gmflow => Self::gmflow(&prev, &cur, &self.points, &*self.stop)?,
                 };
                 let mut points = Vec::with_capacity(self.points.len());
                 let mut ids = Vec::with_capacity(self.points.len());
@@ -155,6 +183,38 @@ impl Tracker {
         }).collect())
     }
 
+    /// Where each point went, by gmflow's dense flow (Xu et al. 2022, see `optical_flow::GmflowDenseFlow`) from this
+    /// frame to the next and back, like `dense`: None where the two don't agree at the point (`GMFLOW_FB_MAX`). Two
+    /// passes of the model per frame: a fraction of a second on a GPU, tens of seconds on the CPU, with `stop` asked
+    /// before each. An error when it can't run at all, which stops the analysis: every frame after it would fail the
+    /// same way
+    #[cfg(feature = "use-burn")]
+    fn gmflow(prev: &Mat, cur: &Mat, points: &[Point2f], stop: &dyn Fn() -> bool) -> Result<Vec<Option<Point2f>>, opencv::Error> {
+        use crate::synchronization::optical_flow::GmflowDenseFlow;
+        let to_image = |m: &Mat| -> Result<image::GrayImage, opencv::Error> {
+            let (w, h) = (m.cols() as u32, m.rows() as u32);
+            let mut data = Vec::with_capacity((w * h) as usize);
+            for y in 0..m.rows() { data.extend_from_slice(m.at_row::<u8>(y)?); }
+            image::GrayImage::from_raw(w, h, data).ok_or_else(|| opencv::Error::new(core::StsBadArg, "frame size"))
+        };
+        let (a, b) = (to_image(prev)?, to_image(cur)?);
+        let failed = || opencv::Error::new(core::StsError, "gmflow could not compute the flow, see the log");
+        if stop() { return Ok(vec![None; points.len()]); }
+        let forward = GmflowDenseFlow::compute(&a, &b).ok_or_else(failed)?;
+        if stop() { return Ok(vec![None; points.len()]); }
+        let backward = GmflowDenseFlow::compute(&b, &a).ok_or_else(failed)?;
+        let (w, h) = (prev.cols() as f32, prev.rows() as f32);
+        let inside = |p: Point2f| p.x >= 0.0 && p.y >= 0.0 && p.x <= w - 1.0 && p.y <= h - 1.0;
+        Ok(points.iter().map(|&a| {
+            let (dx, dy) = forward.at(a.x, a.y)?;
+            let moved = Point2f::new(a.x + dx, a.y + dy);
+            if !inside(moved) { return None; }
+            let (bx, by) = backward.at(moved.x, moved.y)?;
+            let back = Point2f::new(moved.x + bx, moved.y + by);
+            (((back.x - a.x).powi(2) + (back.y - a.y).powi(2)).sqrt() < GMFLOW_FB_MAX).then_some(moved)
+        }).collect())
+    }
+
     /// Tops the tracks up with new corners, away from the ones already tracked: first each cell of a grid up to its
     /// share, then with whatever the cells without enough corners (clear sky) left, the strongest anywhere. All at once
     /// the strongest corners (buildings, boats, glints on water) took every track, and rows of cloudy sky - as good a
@@ -163,7 +223,7 @@ impl Tracker {
     /// noise of flat areas: clouds track as well as anything at a hundredth of a pixel back and forth, and flat sky
     /// still gets nothing
     fn replenish(&mut self, img: &Mat) -> Result<(), opencv::Error> {
-        if self.dis.is_some() { return self.replenish_grid(img); }
+        if !matches!(self.dense, Dense::Klt) { return self.replenish_grid(img); }
         if self.points.len() >= self.max_points { return Ok(()); }
         let (w, h) = self.size;
         let min_distance = (w.max(h) as f64 / 120.0).max(4.0);
@@ -211,8 +271,8 @@ impl Tracker {
         Ok(())
     }
 
-    /// DIS's points: a regular grid, a new point in the middle of every cell (of about the size `max_points` of them fill
-    /// the frame with) that has none left. The dense flow doesn't need a corner there, only something to see: where
+    /// DIS's and gmflow's points: a regular grid, a new point in the middle of every cell (of about the size
+    /// `max_points` of them fill the frame with) that has none left. The dense flow doesn't need a corner there, only something to see: where
     /// there's no detail at all (clear sky, clipped highlights) it only has what it smoothed in from around, so those
     /// cells stay empty - a point there would count as a measurement of rows nothing was seen in
     fn replenish_grid(&mut self, img: &Mat) -> Result<(), opencv::Error> {
@@ -286,5 +346,44 @@ impl Tracker {
         self.points.push(p);
         self.ids.push(self.next_id);
         self.next_id = self.next_id.wrapping_add(1);
+    }
+}
+
+#[cfg(all(test, feature = "use-burn"))]
+mod tests {
+    use super::*;
+
+    /// A textured frame and the same one moved by (dx, dy) whole pixels, 960x540 like the analysis decodes
+    fn shifted_pair(dx: usize, dy: usize) -> (Vec<u8>, Vec<u8>, u32, u32) {
+        let (w, h) = (960usize, 540usize);
+        let tex = |x: usize, y: usize| -> u8 {
+            let (x, y) = (x as f32, y as f32);
+            let v = 128.0 + 50.0 * (x * 0.071).sin() * (y * 0.053).cos() + 40.0 * ((x * 0.013 + y * 0.029).sin() * 3.0).sin()
+                + 25.0 * (((x as i32 * 13 + y as i32 * 7) & 0x3f) as f32 / 63.0 - 0.5);
+            v.clamp(0.0, 255.0) as u8
+        };
+        let a: Vec<u8> = (0..h).flat_map(|y| (0..w).map(move |x| (x, y))).map(|(x, y)| tex(x + dx, y + dy)).collect();
+        let b: Vec<u8> = (0..h).flat_map(|y| (0..w).map(move |x| (x, y))).map(|(x, y)| tex(x, y)).collect();
+        (a, b, w as u32, h as u32)
+    }
+
+    /// The median motion of the points tracked from one frame to the next, and how many there were
+    fn median_motion(method: TrackingMethod, dx: usize, dy: usize) -> ((f32, f32), usize) {
+        let (a, b, w, h) = shifted_pair(dx, dy);
+        let mut t = Tracker::new(1500, method).unwrap();
+        assert!(t.track(w, h, w as usize, &a).unwrap().is_empty());
+        let obs = t.track(w, h, w as usize, &b).unwrap();
+        assert!(obs.len() > 100, "{method:?}: only {} points tracked", obs.len());
+        let median = |k: usize| { let mut v: Vec<f32> = obs.iter().map(|o| o.b[k] - o.a[k]).collect(); v.sort_by(f32::total_cmp); v[v.len() / 2] };
+        ((median(0), median(1)), obs.len())
+    }
+
+    // Downloads the model (about 150 MB) and takes two passes of it: run with --ignored
+    #[test]
+    #[ignore]
+    fn gmflow_follows_a_known_shift() {
+        let ((mx, my), n) = median_motion(TrackingMethod::Gmflow, 3, 1);
+        println!("gmflow: {n} points, median motion ({mx:.3}, {my:.3}), expected (3, 1)");
+        assert!((mx - 3.0).abs() < 0.2 && (my - 1.0).abs() < 0.2);
     }
 }
