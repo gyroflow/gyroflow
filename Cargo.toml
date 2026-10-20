@@ -10,7 +10,6 @@ default = ["opencv"]
 opencl = ["gyroflow-core/use-opencl"]
 opencv = ["gyroflow-core/use-opencv"]
 ai-optical-flow = ["gyroflow-core/use-burn"]
-ai-optical-flow-gpu = ["ai-optical-flow", "gyroflow-core/use-burn-gpu"]
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 gyroflow-core = { path = "src/core/", features = ["use-opencv", "use-opencl"] }

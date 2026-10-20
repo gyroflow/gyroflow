@@ -23,11 +23,13 @@ mod inference {
     use super::model::Model;
     use std::io::Read;
     use std::path::PathBuf;
-    use std::sync::Arc;
+    use std::sync::{ Arc, OnceLock };
+    use std::sync::atomic::{ AtomicBool, Ordering::Relaxed };
     use std::time::{ Duration, Instant };
     use image::GrayImage;
     use parking_lot::Mutex;
-    use burn::tensor::{ Bytes, Device, Tensor, TensorData };
+    use burn::tensor::{ Bytes, Device, DeviceKind, Tensor, TensorData };
+    use burn::tensor::wgpu::WgpuBackend;
     use burn_store::{ BurnpackStore, ModuleSnapshot };
     use sha2::{ Digest, Sha256 };
 
@@ -43,91 +45,98 @@ mod inference {
     const MODEL_SHA256: &str = "31feee698842928715e9ba693b69a492d85ace31c646df6f3eabd53e240cd5e9";
     const MODEL_FILENAME: &str = "gmflow-scale2-regrefine6-320x576-opset16-sim.bpk";
 
-    // The model on each device, loaded on first use. The CPU one is the fallback; the GPU one only exists when a GPU
-    // was picked. A failed load is not kept: the next use tries again (see `load_model` for how often).
-    static CPU_MODEL: Mutex<Option<Arc<Model>>> = Mutex::new(None);
-    #[cfg(feature = "use-burn-gpu")]
-    static GPU: std::sync::OnceLock<Option<(Device, String)>> = std::sync::OnceLock::new();
-    #[cfg(feature = "use-burn-gpu")]
-    static GPU_MODEL: Mutex<Option<Arc<Model>>> = Mutex::new(None);
-    #[cfg(feature = "use-burn-gpu")]
-    static GPU_FAILED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+    // gmflow runs on the GPU only: Vulkan on Windows, Linux and Android, Metal on macOS and iOS (the graphics API is
+    // pinned, there is no fallback to another one). Without a usable GPU it doesn't run, and says why.
+    #[cfg(target_vendor = "apple")]
+    const GRAPHICS_API: WgpuBackend = WgpuBackend::Metal;
+    #[cfg(not(target_vendor = "apple"))]
+    const GRAPHICS_API: WgpuBackend = WgpuBackend::Vulkan;
 
-    // The device is picked once per process and logged once. With the `use-burn-gpu` feature a
-    // hardware GPU is tried first (discrete, then integrated) through burn's wgpu runtime;
-    // without one, or if it fails to start, gmflow runs on burn's flex CPU backend. Unlike
-    // NdArray (6 dimensions at most), flex handles the 7-D reshape in gmflow's convex upsampling
-    // (unimatch utils.py, upsample_flow_with_mask). If the GPU fails later, while running the
-    // model, gmflow switches to the CPU for the rest of the process.
-    //
-    // GYROFLOW_GMFLOW_DEVICE overrides the choice: `cpu` forces flex, `gpu` takes wgpu's default
-    // adapter even when it is a software one such as Mesa lavapipe (used by CI, far too slow for
-    // real use, which is why it is never picked on its own).
-    #[cfg(feature = "use-burn-gpu")]
-    fn gpu() -> Option<&'static (Device, String)> {
-        if GPU_FAILED.load(std::sync::atomic::Ordering::Relaxed) { return None; }
-        GPU.get_or_init(|| match gpu::select() {
-            Ok(found) => {
-                log::info!("gmflow: running on {}", found.1);
-                Some(found)
+    // The largest single tensor of the model, which the GPU must be able to hold as one storage buffer: the transformer's
+    // feed-forward layer, [2, 11520, 1024] f32 (both frames at 1/4 of 576x320, 4 x 256 channels). Measured on the exported
+    // graph (every output, static shapes). The local correlations, 456 MiB as unimatch writes them, are exported 9 window
+    // offsets at a time so that they stay below this; 128 MiB is all that Vulkan guarantees, and what many Android GPUs have.
+    const LARGEST_BUFFER: u64 = 2 * 11520 * 1024 * 4;
+
+    // The device, picked once per process: a hardware GPU (discrete, then integrated, then virtual) that can hold the
+    // model's largest buffer. GYROFLOW_GMFLOW_DEVICE=any takes the graphics API's default adapter even when it's a software
+    // one such as Mesa lavapipe; for tests only (CI has no GPU), far too slow for real use.
+    static GPU: OnceLock<Result<(Device, String), String>> = OnceLock::new();
+    // Set when the GPU failed while running the model (a lost device, a shader the driver rejects): gmflow stays off for
+    // the rest of the process, with the reason logged once
+    static GPU_FAILED: Mutex<Option<String>> = Mutex::new(None);
+    static MODEL: Mutex<Option<Arc<Model>>> = Mutex::new(None);
+
+    fn gpu() -> Result<&'static (Device, String), String> {
+        if let Some(why) = &*GPU_FAILED.lock() { return Err(why.clone()); }
+        GPU.get_or_init(|| {
+            let picked = select();
+            match &picked {
+                Ok((_, name)) => log::info!("gmflow: running on {}", name),
+                Err(why) => log::error!("gmflow: can't run: {}", why),
             }
-            Err(why) => {
-                log::info!("gmflow: running on the CPU (flex); {}", why);
-                None
-            }
-        }).as_ref()
+            picked
+        }).as_ref().map_err(|e| e.clone())
     }
 
-    // What gmflow ran on, for tests: "flex (CPU)", "wgpu: <adapter> (<type>, <api>)", or
-    // "flex (CPU) after wgpu: ... failed" when a GPU was picked and then failed at run time.
+    // What gmflow runs on, for tests: "wgpu: <adapter> (<type>, <api>)", or why it can't run
     #[cfg(test)]
     pub fn device_name() -> String {
-        #[cfg(feature = "use-burn-gpu")]
-        if let Some(Some((_, name))) = GPU.get() {
-            if GPU_FAILED.load(std::sync::atomic::Ordering::Relaxed) {
-                return format!("flex (CPU) after {} failed", name);
-            }
-            return name.clone();
-        }
-        "flex (CPU)".to_owned()
+        match gpu() { Ok((_, name)) => name.clone(), Err(why) => format!("no GPU: {}", why) }
     }
 
-    #[cfg(feature = "use-burn-gpu")]
-    mod gpu {
-        use burn::tensor::{ Device, DeviceKind };
-
-        pub fn select() -> Result<(Device, String), String> {
-            let choice = std::env::var("GYROFLOW_GMFLOW_DEVICE").unwrap_or_default().to_ascii_lowercase();
-            let kinds = match choice.as_str() {
-                "cpu" => return Err("GYROFLOW_GMFLOW_DEVICE=cpu".to_owned()),
-                "gpu" => vec![DeviceKind::DefaultDevice],
-                _ => vec![DeviceKind::DiscreteGpu(0), DeviceKind::IntegratedGpu(0)],
-            };
-            let mut errors = Vec::new();
-            for kind in kinds {
-                match init(kind) {
-                    Ok(found) => return Ok(found),
-                    Err(e) => errors.push(e),
-                }
+    fn select() -> Result<(Device, String), String> {
+        set_kernel_cache();
+        let any = std::env::var("GYROFLOW_GMFLOW_DEVICE").unwrap_or_default().eq_ignore_ascii_case("any");
+        let kinds = if any { vec![DeviceKind::DefaultDevice] } else { vec![DeviceKind::DiscreteGpu(0), DeviceKind::IntegratedGpu(0), DeviceKind::VirtualGpu(0)] };
+        let mut errors = Vec::new();
+        for kind in kinds {
+            match init(kind, any) {
+                Ok(found) => return Ok(found),
+                Err(e) => errors.push(e),
             }
-            Err(format!("no usable GPU: {}", errors.join("; ")))
         }
+        Err(format!("no usable {:?} GPU ({})", GRAPHICS_API, errors.join("; ")))
+    }
 
-        // A missing adapter comes back as an error; a panic inside the wgpu stack (a broken
-        // driver) is caught too, so a bad GPU setup only costs the GPU, not gmflow.
-        fn init(kind: DeviceKind) -> Result<(Device, String), String> {
-            let label = format!("{:?}", kind);
-            let started = std::panic::catch_unwind(|| Device::wgpu_options().device_kind(kind).init_with_setup());
-            match started {
-                Ok(Ok((device, setup))) => {
-                    let info = setup.adapter.get_info();
-                    Ok((device, format!("wgpu: {} ({:?}, {:?})", info.name, info.device_type, info.backend)))
-                }
-                Ok(Err(e)) => Err(format!("{}: {}", label, e)),
-                Err(_) => Err(format!("{}: the wgpu runtime panicked while starting", label)),
-            }
+    // A missing adapter comes back as an error; a panic inside the wgpu stack (a broken driver) is caught too
+    fn init(kind: DeviceKind, allow_software: bool) -> Result<(Device, String), String> {
+        let label = format!("{:?}", kind);
+        let started = std::panic::catch_unwind(|| Device::wgpu_options().graphics_api(GRAPHICS_API).device_kind(kind).init_with_setup());
+        let (device, setup) = match started {
+            Ok(Ok(found)) => found,
+            Ok(Err(e)) => return Err(format!("{}: {}", label, e)),
+            Err(_) => return Err(format!("{}: the wgpu runtime panicked while starting", label)),
+        };
+        let info = setup.adapter.get_info();
+        let name = format!("wgpu: {} ({:?}, {:?})", info.name, info.device_type, info.backend);
+        if info.device_type == burn::tensor::wgpu::wgpu::DeviceType::Cpu && !allow_software {
+            return Err(format!("{}: {} is a software renderer", label, info.name));
+        }
+        // What the adapter can do, not the device: cubecl raises the device's binding size to u64::MAX where Vulkan has
+        // 64-bit indexing, so only the adapter's limit says what a buffer can be
+        let limits = setup.adapter.limits();
+        let room = (limits.max_storage_buffer_binding_size as u64).min(limits.max_buffer_size);
+        if room < LARGEST_BUFFER {
+            return Err(format!("{}: {} holds at most {} MiB in one buffer, gmflow needs {} MiB", label, info.name, room >> 20, LARGEST_BUFFER >> 20));
+        }
+        Ok((device, name))
+    }
+
+    // cubecl keeps the kernels it compiled and the results of tuning them (seconds to tens of seconds on first use) in a
+    // cache: in Gyroflow's data directory, not in the working directory or a Cargo `target/` above it (its default)
+    #[cfg(not(target_os = "ios"))]
+    fn set_kernel_cache() {
+        use burn::cubecl::config::{ CubeClRuntimeConfig, RuntimeConfig, cache::CacheConfig };
+        let mut config = CubeClRuntimeConfig::default();
+        config.environment.path = CacheConfig::Directory(crate::settings::data_dir().join("ai_models").join("gpu_cache"));
+        if !CubeClRuntimeConfig::try_set(config) {
+            log::debug!("gmflow: cubecl was configured already, keeping its kernel cache location");
         }
     }
+    // cubecl has no file cache on iOS
+    #[cfg(target_os = "ios")]
+    fn set_kernel_cache() {}
 
     fn cache_path() -> PathBuf {
         crate::settings::data_dir().join("ai_models").join(MODEL_FILENAME)
@@ -213,44 +222,52 @@ mod inference {
         // bad file; this runs on a rayon worker, so report and disable gmflow instead.
         let mut store = BurnpackStore::from_bytes(Some(Bytes::from_bytes_vec(raw)));
         let mut m = Model::new(device);
-        m.load_from(&mut store).map_err(|e| {
+        let applied = m.load_from(&mut store).map_err(|e| {
             let why = format!("failed to load model weights: {}", e);
             log::error!("gmflow: {}", why);
             why
         })?;
+        // Every tensor of the model must come from the file, and every tensor of the file must be used
+        if !applied.missing.is_empty() || !applied.unused.is_empty() || !applied.errors.is_empty() {
+            let why = format!("the weights file doesn't match the model: {} missing, {} unused, {} errors (first: {:?} {:?} {:?})",
+                applied.missing.len(), applied.unused.len(), applied.errors.len(), applied.missing.first(), applied.unused.first(), applied.errors.first());
+            log::error!("gmflow: {}", why);
+            return Err(why);
+        }
         Ok(Arc::new(m))
     }
 
-    // The model in `slot`, loaded onto `device` if it isn't yet. One load at a time: the others wait for it.
-    fn model_on(slot: &Mutex<Option<Arc<Model>>>, device: &Device) -> Result<Arc<Model>, String> {
-        let mut slot = slot.lock();
+    // The model on the GPU, loaded if it isn't yet. One load at a time: the others wait for it.
+    fn model_on(device: &Device) -> Result<Arc<Model>, String> {
+        let mut slot = MODEL.lock();
         if let Some(m) = &*slot { return Ok(m.clone()); }
         let m = load_model(device)?;
         *slot = Some(m.clone());
         Ok(m)
     }
 
-    // Gets gmflow ready before a long run (Motion data -> Optical correction with gmflow tracking): picks the device,
+    // Turns gmflow off for the rest of the process after the GPU failed while running it
+    fn gpu_failed(name: &str, why: String) -> String {
+        let why = format!("the GPU failed ({}: {})", name, why);
+        let mut failed = GPU_FAILED.lock();
+        if failed.is_none() {
+            log::error!("gmflow: {}; gmflow is off until Gyroflow is restarted", why);
+            *failed = Some(why.clone());
+        }
+        why
+    }
+
+    // Gets gmflow ready before a long run (Motion data -> Optical correction with gmflow tracking): picks the GPU,
     // downloads the weights if needed and loads them, so that waiting and failing happen before the first frame
     // rather than inside it. What it will run on, or why it can't run.
     pub fn prepare() -> Result<String, String> {
-        #[cfg(feature = "use-burn-gpu")]
-        if let Some((device, name)) = gpu() {
-            let loaded = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| model_on(&GPU_MODEL, device)));
-            let why = match loaded {
-                Ok(Ok(_)) => return Ok(name.clone()),
-                Ok(Err(e)) => e,
-                Err(_) => "panic in the wgpu runtime".to_owned(),
-            };
-            // Not the GPU's fault if the CPU can't load the weights either
-            model_on(&CPU_MODEL, &Device::flex())?;
-            if !GPU_FAILED.swap(true, std::sync::atomic::Ordering::Relaxed) {
-                log::error!("gmflow: the GPU failed ({}: {}); continuing on the CPU (flex)", name, why);
-            }
-            return Ok("flex (CPU)".to_owned());
+        let (device, name) = gpu()?;
+        // Loading the weights allocates GPU memory: a panic there is the GPU's
+        match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| model_on(device))) {
+            Ok(Ok(_)) => Ok(name.clone()),
+            Ok(Err(e)) => Err(e),
+            Err(_) => Err(gpu_failed(name, "panic in the wgpu runtime while loading the weights".to_owned())),
         }
-        model_on(&CPU_MODEL, &Device::flex())?;
-        Ok("flex (CPU)".to_owned())
     }
 
     // Aspect-preserving letterbox mapping parameters. `scale` is model-pixels per
@@ -266,7 +283,8 @@ mod inference {
         pub pad_y: usize,
     }
 
-    pub fn preprocess(img: &GrayImage, device: &Device) -> (Tensor<4>, LetterboxParams) {
+    // The model's input for one frame: [1, 3, MODEL_H, MODEL_W], letterboxed, raw 0-255 grey in all 3 channels
+    pub fn preprocess(img: &GrayImage) -> (Vec<f32>, LetterboxParams) {
         let (iw, ih) = (img.width() as f32, img.height() as f32);
         let scale = (MODEL_W as f32 / iw).min(MODEL_H as f32 / ih);
         let new_w = ((iw * scale).round() as usize).min(MODEL_W).max(1);
@@ -300,21 +318,29 @@ mod inference {
             second.copy_from_slice(first);
             third.copy_from_slice(first);
         }
-
-        let tensor = Tensor::<4>::from_data(
-            TensorData::new(data, [1usize, 3, MODEL_H, MODEL_W]),
-            device,
-        );
-        (tensor, LetterboxParams { scale, sx: new_w as f32 / iw, sy: new_h as f32 / ih, pad_x, pad_y })
+        (data, LetterboxParams { scale, sx: new_w as f32 / iw, sy: new_h as f32 / ih, pad_x, pad_y })
     }
 
-    fn run(model: &Model, device: &Device, img0: &GrayImage, img1: &GrayImage) -> Result<(Vec<f32>, LetterboxParams), String> {
-        let (t0, lb0) = preprocess(img0, device);
-        let (t1, _) = preprocess(img1, device);
-        let flow = model.forward(t0, t1);
-        let data = flow.try_into_data().map_err(|e| short_error(&e.to_string()))?;
-        let data = data.try_into_vec::<f32>().map_err(|e| format!("output is not f32: {:?}", e))?;
-        Ok((data, lb0))
+    // One pass of the model on the GPU, inputs as `preprocess` makes them; the flow, [1, 2, MODEL_H, MODEL_W]. An error or
+    // a panic inside the wgpu runtime (a shader that doesn't compile, a lost device, out of memory) turns gmflow off.
+    pub fn forward(in0: Vec<f32>, in1: Vec<f32>) -> Result<Vec<f32>, String> {
+        let (device, name) = gpu()?;
+        let ran = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> Result<Result<Vec<f32>, String>, String> {
+            // No weights is not the GPU's fault: Err on the outside
+            let model = model_on(device)?;
+            let shape = [1usize, 3, MODEL_H, MODEL_W];
+            let t0 = Tensor::<4>::from_data(TensorData::new(in0, shape), device);
+            let t1 = Tensor::<4>::from_data(TensorData::new(in1, shape), device);
+            let flow = model.forward(t0, t1);
+            Ok(flow.try_into_data().map_err(|e| short_error(&e.to_string()))
+                .and_then(|d| d.try_into_vec::<f32>().map_err(|e| format!("output is not f32: {:?}", e))))
+        }));
+        match ran {
+            Ok(Ok(Ok(v))) => Ok(v),
+            Ok(Ok(Err(e))) => Err(gpu_failed(name, e)),
+            Ok(Err(e)) => Err(e),
+            Err(_) => Err(gpu_failed(name, "panic in the wgpu runtime".to_owned())),
+        }
     }
 
     // burn's execution errors list every kernel skipped after the first failure (hundreds of
@@ -329,40 +355,13 @@ mod inference {
 
     // Returns the flow and the first frame's letterbox parameters, so callers can invert the
     // mapping back into original-frame coordinates, or `None` (logged) if gmflow cannot run.
-    // Tensors are moved (not cloned) into `forward` to avoid ~4.4 MB of redundant allocations per
-    // pair at 320x576. On the GPU, an error or a panic inside the wgpu runtime (a shader that
-    // does not compile, a lost device, out of memory) turns the GPU off for good and the pair is
-    // computed again on the CPU, so a bad driver costs speed, not the sync.
     pub fn compute_flow(img0: &GrayImage, img1: &GrayImage) -> Option<(Vec<f32>, LetterboxParams)> {
-        #[cfg(feature = "use-burn-gpu")]
-        if let Some((device, name)) = gpu() {
-            // Loading the weights onto the GPU is inside the guard too: it allocates GPU memory.
-            let ran = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                model_on(&GPU_MODEL, device).map(|m| run(&m, device, img0, img1))
-            }));
-            let why = match ran {
-                Ok(Ok(Ok(v))) => return Some(v),
-                Ok(Ok(Err(e))) => Some(e),
-                Ok(Err(_)) => None, // no weights (logged); the CPU will not have them either
-                Err(_) => Some("panic in the wgpu runtime".to_owned()),
-            };
-            if let Some(why) = why {
-                if !GPU_FAILED.swap(true, std::sync::atomic::Ordering::Relaxed) {
-                    log::error!("gmflow: the GPU failed ({}: {}); continuing on the CPU (flex)", name, why);
-                }
-            }
-        }
-        #[cfg(not(feature = "use-burn-gpu"))]
-        {
-            static LOGGED: std::sync::Once = std::sync::Once::new();
-            LOGGED.call_once(|| log::info!("gmflow: running on the CPU (flex)"));
-        }
-        let device = Device::flex();
-        let m = model_on(&CPU_MODEL, &device).ok()?;
-        match run(&m, &device, img0, img1) {
-            Ok(v) => Some(v),
+        let (in0, lb0) = preprocess(img0);
+        let (in1, _) = preprocess(img1);
+        match forward(in0, in1) {
+            Ok(flow) => Some((flow, lb0)),
             Err(e) => {
-                log::error!("gmflow: {}", e);
+                log::debug!("gmflow: no flow: {}", e);
                 None
             }
         }
@@ -383,11 +382,11 @@ pub struct GmflowDenseFlow {
 
 #[cfg(feature = "use-burn")]
 impl GmflowDenseFlow {
-    /// Picks the device and loads the model (downloading it on first use), before the first `compute`: what it will run
-    /// on ("flex (CPU)" or "wgpu: ..."), or why gmflow can't run
+    /// Picks the GPU and loads the model (downloading it on first use), before the first `compute`: what it will run on
+    /// ("wgpu: ..."), or why gmflow can't run
     pub fn prepare() -> Result<String, String> { inference::prepare() }
 
-    /// The flow from `a` to `b` (same size), on the GPU or the CPU, see `inference`. None, logged, when gmflow can't run
+    /// The flow from `a` to `b` (same size), on the GPU, see `inference`. None, logged, when gmflow can't run
     pub fn compute(a: &image::GrayImage, b: &image::GrayImage) -> Option<Self> {
         let (flow, lb) = inference::compute_flow(a, b)?;
         if flow.len() < 2 * inference::MODEL_H * inference::MODEL_W { return None; }
@@ -497,7 +496,7 @@ impl OpticalFlowTrait for OFGmflow {
             let (flow, lb) = match inference::compute_flow(&self.img, &next.img) {
                 Some(v) => v,
                 None => {
-                    log::error!("gmflow: no flow (model not loaded, or the output was not f32)");
+                    log::error!("gmflow: no flow (no usable GPU, the model is not loaded, or the GPU failed; see above)");
                     return None;
                 }
             };
@@ -590,21 +589,64 @@ mod tests {
         let of_b = OpticalFlowMethod::OFGmflow(OFGmflow::detect_features(1_000_000, img_b, w, h));
         let pair = if let OpticalFlowMethod::OFGmflow(ref a) = of_a { a.optical_flow_to(&of_b) } else { None };
         println!("gmflow device: {}", inference::device_name());
-        // CI sets GYROFLOW_GMFLOW_DEVICE to say which path this run must take.
-        let wanted = std::env::var("GYROFLOW_GMFLOW_DEVICE").unwrap_or_default().to_ascii_lowercase();
-        match wanted.as_str() {
-            // A GPU must have been picked; it may then fail at run time and hand over to the CPU
-            // (lavapipe, for one, cannot hold gmflow's largest buffer).
-            "gpu" => assert!(inference::device_name().contains("wgpu:"), "asked for the GPU, got {}", inference::device_name()),
-            "cpu" => assert_eq!(inference::device_name(), "flex (CPU)"),
-            _ => {}
-        }
+        assert!(inference::device_name().starts_with("wgpu:"), "gmflow found no GPU: {}", inference::device_name());
         let (pts_a, pts_b) = pair.expect("gmflow returned no matches");
-        assert!(!pts_a.is_empty(), "no tracked points");
-        let mut dxs: Vec<f32> = pts_a.iter().zip(pts_b.iter()).map(|((ax,_),(bx,_))| bx - ax).collect();
-        dxs.sort_by(|a,b| a.partial_cmp(b).unwrap());
-        let median = dxs[dxs.len()/2];
-        println!("gmflow median dx = {median:.3} (expected ~{shift})");
-        assert!((median - shift as f32).abs() < 2.0, "median dx {median} not near expected {shift}");
+        assert!(pts_a.len() >= 100, "only {} tracked points", pts_a.len());
+        let moved: Vec<(f32, f32)> = pts_a.iter().zip(pts_b.iter()).map(|((ax, ay), (bx, by))| (bx - ax, by - ay)).collect();
+        let median = |mut v: Vec<f32>| { v.sort_by(|a, b| a.partial_cmp(b).unwrap()); v[v.len() / 2] };
+        let (mx, my) = (median(moved.iter().map(|m| m.0).collect()), median(moved.iter().map(|m| m.1).collect()));
+        let near = moved.iter().filter(|m| (m.0 - shift as f32).abs() < 1.0 && m.1.abs() < 1.0).count() as f32 / moved.len() as f32;
+        println!("gmflow median ({mx:.3}, {my:.3}), expected ({shift}, 0); {:.1}% of {} points within 1 px", near * 100.0, moved.len());
+        assert!((mx - shift as f32).abs() < 0.5 && my.abs() < 0.5, "median ({mx}, {my}) not near ({shift}, 0)");
+        assert!(near >= 0.75, "only {:.1}% of the points within 1 px of the shift", near * 100.0);
+    }
+
+    // The model on the GPU against PyTorch, on the inputs and outputs that ci-gpu/export_gpu.py writes (GMFLOW_REF_DIR):
+    // a synthetic 4 px shift and two pairs of a real video
+    #[test]
+    #[ignore]
+    fn gmflow_matches_pytorch() {
+        let dir = std::path::PathBuf::from(std::env::var("GMFLOW_REF_DIR").expect("GMFLOW_REF_DIR: where export_gpu.py wrote pair*.f32"));
+        let read = |name: String| -> Vec<f32> {
+            let bytes = std::fs::read(dir.join(&name)).unwrap_or_else(|e| panic!("{name}: {e}"));
+            bytes.chunks_exact(4).map(|b| f32::from_le_bytes([b[0], b[1], b[2], b[3]])).collect()
+        };
+        let mut checked = 0;
+        for k in 0.. {
+            if !dir.join(format!("pair{k}_torch.f32")).exists() { break; }
+            let reference = read(format!("pair{k}_torch.f32"));
+            let started = std::time::Instant::now();
+            let flow = inference::forward(read(format!("pair{k}_in0.f32")), read(format!("pair{k}_in1.f32"))).expect("gmflow did not run");
+            println!("pair {k}: one pass {:.3} s{}", started.elapsed().as_secs_f64(), if k == 0 { " (the first: kernels compiled and tuned)" } else { "" });
+            assert_eq!(flow.len(), reference.len());
+            let diffs: Vec<f32> = flow.iter().zip(&reference).map(|(a, b)| (a - b).abs()).collect();
+            assert!(diffs.iter().all(|d| d.is_finite()), "pair {k}: non-finite output");
+            let max = diffs.iter().cloned().fold(0.0f32, f32::max);
+            let mean = diffs.iter().map(|&d| d as f64).sum::<f64>() / diffs.len() as f64;
+            println!("pair {k} on {}: max |gpu - torch| {max:.2e} px, mean {mean:.2e} px", inference::device_name());
+            // Pre-registered before the first GPU run
+            assert!(max <= 1e-2 && mean <= 1e-4, "pair {k}: max {max:e}, mean {mean:e}");
+            checked += 1;
+        }
+        assert!(checked >= 3, "found {checked} reference pairs in {dir:?}");
+        // Warm: the same pair again, a few times
+        let (in0, in1) = (read("pair1_in0.f32".to_owned()), read("pair1_in1.f32".to_owned()));
+        let runs: usize = std::env::var("GMFLOW_WARM_RUNS").ok().and_then(|v| v.parse().ok()).unwrap_or(5);
+        let started = std::time::Instant::now();
+        for _ in 0..runs { inference::forward(in0.clone(), in1.clone()).expect("gmflow did not run"); }
+        println!("warm: {:.3} s per pass on {} (mean of {runs})", started.elapsed().as_secs_f64() / runs as f64, inference::device_name());
+    }
+
+    // Without a usable GPU gmflow must not run, and must say why: GMFLOW_EXPECT_ERROR is a piece of the reason the
+    // machine running the test should give (on CI, whose only Vulkan is a software one that the automatic choice doesn't consider: "no usable Vulkan GPU")
+    #[test]
+    #[ignore]
+    fn gmflow_refuses_without_a_gpu() {
+        let expected = std::env::var("GMFLOW_EXPECT_ERROR").expect("GMFLOW_EXPECT_ERROR: a piece of the expected reason");
+        assert!(std::env::var("GYROFLOW_GMFLOW_DEVICE").is_err(), "GYROFLOW_GMFLOW_DEVICE would change what is picked");
+        let why = inference::prepare().expect_err("gmflow picked a device");
+        println!("gmflow refused: {why}");
+        assert!(why.contains(&expected), "reason {why:?} doesn't contain {expected:?}");
+        assert!(inference::compute_flow(&image::GrayImage::new(64, 64), &image::GrayImage::new(64, 64)).is_none(), "gmflow computed a flow anyway");
     }
 }

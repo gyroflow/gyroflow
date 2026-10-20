@@ -874,12 +874,12 @@ impl OpticalMotionAnalysis {
                 (p.fps_scale, p.get_scaled_fps(), p.frame_readout_direction.is_horizontal(), ranges_ms, total_frames)
             };
             let setup = Setup { params, horizontal_readout, track_size: (0, 0), focal_px: 0.0, from_video };
-            // gmflow downloads its model on first use and may be on the CPU: both settled here, before the first
-            // frame, where a failure can say why and the wait isn't one frame that never ends
+            // gmflow downloads its model on first use and needs a GPU: both settled here, before the first frame,
+            // where a failure can say why and the wait isn't one frame that never ends
             #[cfg(feature = "use-burn")]
             if tracking == TrackingMethod::Gmflow {
                 let device = crate::synchronization::optical_flow::GmflowDenseFlow::prepare().map_err(|e| format!("gmflow: {e}"))?;
-                ::log::info!("Optical analysis with gmflow on {device}{}", if device.starts_with("flex") { ": without a GPU this takes tens of seconds per frame" } else { "" });
+                ::log::info!("Optical analysis with gmflow on {device}");
             }
             let mut tracker = tracker::Tracker::new(MAX_POINTS, tracking).map_err(tracker_error)?;
             // A frame of gmflow is two passes of the model: cancelling waits for one at most

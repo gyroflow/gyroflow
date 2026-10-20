@@ -87,8 +87,8 @@ impl Tracker {
         Ok(Self { dense, stop: Box::new(|| false), prev: None, size: (0, 0), points: Vec::new(), ids: Vec::new(), next_id: 0, max_points })
     }
 
-    /// What says to give up on a frame halfway (gmflow takes tens of seconds per frame without a GPU): it then tracks
-    /// nothing, and whoever stopped it ignores the rest
+    /// What says to give up on a frame halfway (between gmflow's two passes): it then tracks nothing, and whoever
+    /// stopped it ignores the rest
     pub fn set_stop(&mut self, stop: Box<dyn Fn() -> bool + Send + Sync>) {
         self.stop = stop;
     }
@@ -186,9 +186,8 @@ impl Tracker {
 
     /// Where each point went, by gmflow's dense flow (Xu et al. 2022, see `optical_flow::GmflowDenseFlow`) from this
     /// frame to the next and back, like `dense`: None where the two don't agree at the point (`GMFLOW_FB_MAX`). Two
-    /// passes of the model per frame: a fraction of a second on a GPU, tens of seconds on the CPU, with `stop` asked
-    /// before each. An error when it can't run at all, which stops the analysis: every frame after it would fail the
-    /// same way
+    /// passes of the model per frame, on the GPU, with `stop` asked before each. An error when it can't run at all (no
+    /// usable GPU, no model), which stops the analysis: every frame after it would fail the same way
     #[cfg(feature = "use-burn")]
     fn gmflow(prev: &Mat, cur: &Mat, points: &[Point2f], stop: &dyn Fn() -> bool) -> Result<Vec<Option<Point2f>>, opencv::Error> {
         use crate::synchronization::optical_flow::GmflowDenseFlow;

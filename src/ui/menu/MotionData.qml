@@ -383,7 +383,7 @@ MenuItem {
                                                        : [QT_TRANSLATE_NOOP("Popup", "KLT (corners)"), QT_TRANSLATE_NOOP("Popup", "DIS (dense flow)")];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
-                tooltip: controller.has_ai_optical_flow()? qsTr("KLT is the most accurate where the image has detail. DIS also follows weak detail like clouds or water, but is slower and loses fast motion more easily. gmflow (AI) follows large motion and weak detail best, but needs a GPU to be practical: on the CPU it takes tens of seconds per frame. The model (about 150 MB) is downloaded on first use.")
+                tooltip: controller.has_ai_optical_flow()? qsTr("KLT is the most accurate where the image has detail. DIS also follows weak detail like clouds or water, but is slower and loses fast motion more easily. gmflow (AI dense flow) runs on the GPU (Vulkan, or Metal on Apple systems); without one it is not available. The model (about 150 MB) is downloaded on first use.")
                                                          : qsTr("KLT is the most accurate where the image has detail. DIS also follows weak detail like clouds or water, but is slower and loses fast motion more easily.");
                 onCurrentIndexChanged: controller.set_optical_tracking(methods[currentIndex] || "klt");
             }

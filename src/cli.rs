@@ -82,7 +82,7 @@ struct Opts {
     #[argh(switch)]
     optical_per_frame: bool,
 
-    /// how the optical analysis follows the points: "klt" (default, corners), "dis" (dense optical flow, for low texture like sky or water; slower) or "gmflow" (AI dense optical flow, in builds with ai-optical-flow; needs a GPU to be practical) (implies --optical-correction)
+    /// how the optical analysis follows the points: "klt" (default, corners), "dis" (dense optical flow, for low texture like sky or water; slower) or "gmflow" (AI dense optical flow, in builds with ai-optical-flow; runs on the GPU: Vulkan, or Metal on Apple systems) (implies --optical-correction)
     #[argh(option)]
     optical_tracking: Option<String>,
 
