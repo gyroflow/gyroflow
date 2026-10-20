@@ -105,6 +105,9 @@ default = []
 use-opencl = ["ocl", "ocl-interop"]
 use-opencv = ["opencv"]
 use-burn = ["dep:burn", "dep:burn-store", "dep:burn-onnx", "dep:sha2", "dep:ureq"]
+# gmflow on the GPU through burn's wgpu runtime, falling back to the CPU. Separate from use-burn
+# because burn's wgpu stack adds about 150 crates (cubecl, its autotune cache database, ...).
+use-burn-gpu = ["use-burn", "burn/wgpu"]
 bundle-lens-profiles = []
 cache-gyro-metadata = []
 
