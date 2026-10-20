@@ -42,11 +42,12 @@ const DIS_FB_MAX: f32 = 0.3;
 const DIS_PRESET: i32 = video::DISOpticalFlow_PRESET_MEDIUM;
 const DIS_FINEST_SCALE: i32 = 1;
 /// How far a point may end up from where it started, tracked forward and back again through gmflow's flow, pixels of
-/// the tracked frame. DIS's limit, for the same reason (two flows computed apart, each smoothed); not tuned on
-/// footage of its own yet. gmflow's flow is coarser than the frame (576x320 against about 960 wide), which this
-/// leaves room for
+/// the tracked frame. Tighter than DIS's: measured with the motion from the video alone against the motion data, two
+/// stretches of 60 frames of a GoPro HERO6 test clip (2 degrees of motion per frame), the frame-to-frame rotation was
+/// off by 0.062 and 0.061 degrees rms at 0.2 px - KLT 0.063 and 0.052, DIS 0.059 and 0.055 - and by 0.067 and 0.20
+/// at DIS's 0.3 px. Below 0.15 px too few tracks last (0.10 px: 0.17 degrees, under 0.07 px nothing to measure)
 #[cfg(feature = "use-burn")]
-const GMFLOW_FB_MAX: f32 = 0.3;
+const GMFLOW_FB_MAX: f32 = 0.2;
 
 /// How the points are followed, see `TrackingMethod`
 enum Dense {
