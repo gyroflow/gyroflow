@@ -92,13 +92,11 @@ objc2-metal = "0.3"
 objc2-core-foundation = "0.3"
 objc2-foundation = "0.3"
 
-# gmflow (feature use-burn) runs on the GPU only: Vulkan, or Metal on Apple systems. Native MSL kernels are
-# macOS-only in cubecl 0.11, so iOS gets burn's WGSL kernels, still on Metal
+# gmflow (feature use-burn) runs on the GPU only: Vulkan (SPIR-V kernels), or Metal on Apple systems with WGSL kernels
+# (burn's native MSL kernels need macOS 15 and an Apple7/Mac2 GPU, and are not available at all on iOS)
 [target.'cfg(not(target_vendor = "apple"))'.dependencies]
 burn = { version = "0.22", default-features = false, features = ["std", "autotune", "fusion", "cubecl", "vulkan"], optional = true }
-[target.'cfg(target_os = "macos")'.dependencies]
-burn = { version = "0.22", default-features = false, features = ["std", "autotune", "fusion", "cubecl", "metal"], optional = true }
-[target.'cfg(target_os = "ios")'.dependencies]
+[target.'cfg(target_vendor = "apple")'.dependencies]
 burn = { version = "0.22", default-features = false, features = ["std", "autotune", "fusion", "cubecl", "wgpu"], optional = true }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]

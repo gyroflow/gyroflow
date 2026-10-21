@@ -24,7 +24,6 @@ mod inference {
     use std::io::Read;
     use std::path::PathBuf;
     use std::sync::{ Arc, OnceLock };
-    use std::sync::atomic::{ AtomicBool, Ordering::Relaxed };
     use std::time::{ Duration, Instant };
     use image::GrayImage;
     use parking_lot::Mutex;
@@ -37,12 +36,15 @@ mod inference {
     pub const MODEL_H: usize = 320;
 
     // Model weights are hosted separately rather than embedded to avoid a ~145 MB library bloat
-    // for users who do not enable the ai-optical-flow feature. The .bpk is a burn-store dump of
-    // the gmflow-scale2-regrefine6 weights (MIT, derived from autonomousvision/unimatch) converted
-    // via burn-onnx 0.21.0-pre.3; burn 0.22 loads it unchanged (same parameter names and shapes).
-    // The SHA-256 pin defends against tampering on the download path.
-    const MODEL_URL: &str = "https://github.com/yasumorishima/gyroflow-models/releases/download/v1.0.0/gmflow-scale2-regrefine6-320x576-opset16-sim.bpk";
-    const MODEL_SHA256: &str = "31feee698842928715e9ba693b69a492d85ace31c646df6f3eabd53e240cd5e9";
+    // for users who do not enable the ai-optical-flow feature. The .bpk is the weights file that burn-onnx 0.22 writes
+    // next to the generated code, from the ONNX that build.rs pins (gmflow-scale2-regrefine6, MIT, derived from
+    // autonomousvision/unimatch): its tensors are named after that graph, so the two go together. Each build writes
+    // fresh random parameter ids into it and nothing else differs; loading matches tensors by name, so the hosted file
+    // is one such build. The SHA-256 pin defends against tampering on the download path. GYROFLOW_GMFLOW_WEIGHTS=<path>
+    // takes the file from there instead of downloading it (offline installs, packaging, tests); it must still match
+    // the pin.
+    const MODEL_URL: &str = "https://github.com/yasumorishima/gyroflow-models/releases/download/v1.1.0/gmflow-scale2-regrefine6-320x576-opset16-sim.bpk";
+    const MODEL_SHA256: &str = "4f89e462a8457023fdadb9383c9b04d8fd56420329e56aa7c36d5e7387f269d5";
     const MODEL_FILENAME: &str = "gmflow-scale2-regrefine6-320x576-opset16-sim.bpk";
 
     // gmflow runs on the GPU only: Vulkan on Windows, Linux and Android, Metal on macOS and iOS (the graphics API is
@@ -87,11 +89,13 @@ mod inference {
 
     fn select() -> Result<(Device, String), String> {
         set_kernel_cache();
+        // burn selects adapters by the type the graphics API reports, so software renderers (lavapipe, SwiftShader:
+        // type Cpu) are never among these
         let any = std::env::var("GYROFLOW_GMFLOW_DEVICE").unwrap_or_default().eq_ignore_ascii_case("any");
         let kinds = if any { vec![DeviceKind::DefaultDevice] } else { vec![DeviceKind::DiscreteGpu(0), DeviceKind::IntegratedGpu(0), DeviceKind::VirtualGpu(0)] };
         let mut errors = Vec::new();
         for kind in kinds {
-            match init(kind, any) {
+            match init(kind) {
                 Ok(found) => return Ok(found),
                 Err(e) => errors.push(e),
             }
@@ -100,7 +104,7 @@ mod inference {
     }
 
     // A missing adapter comes back as an error; a panic inside the wgpu stack (a broken driver) is caught too
-    fn init(kind: DeviceKind, allow_software: bool) -> Result<(Device, String), String> {
+    fn init(kind: DeviceKind) -> Result<(Device, String), String> {
         let label = format!("{:?}", kind);
         let started = std::panic::catch_unwind(|| Device::wgpu_options().graphics_api(GRAPHICS_API).device_kind(kind).init_with_setup());
         let (device, setup) = match started {
@@ -110,9 +114,6 @@ mod inference {
         };
         let info = setup.adapter.get_info();
         let name = format!("wgpu: {} ({:?}, {:?})", info.name, info.device_type, info.backend);
-        if info.device_type == burn::tensor::wgpu::wgpu::DeviceType::Cpu && !allow_software {
-            return Err(format!("{}: {} is a software renderer", label, info.name));
-        }
         // What the adapter can do, not the device: cubecl raises the device's binding size to u64::MAX where Vulkan has
         // 64-bit indexing, so only the adapter's limit says what a buffer can be
         let limits = setup.adapter.limits();
@@ -128,7 +129,8 @@ mod inference {
     #[cfg(not(target_os = "ios"))]
     fn set_kernel_cache() {
         use burn::cubecl::config::{ CubeClRuntimeConfig, RuntimeConfig, cache::CacheConfig };
-        let mut config = CubeClRuntimeConfig::default();
+        // Its CUBECL_* environment variables still apply
+        let mut config = CubeClRuntimeConfig::default().override_from_env();
         config.environment.path = CacheConfig::Directory(crate::settings::data_dir().join("ai_models").join("gpu_cache"));
         if !CubeClRuntimeConfig::try_set(config) {
             log::debug!("gmflow: cubecl was configured already, keeping its kernel cache location");
@@ -154,10 +156,18 @@ mod inference {
                 Err(_) => return false,
             }
         }
-        actual.as_slice() == expected
+        actual[..] == expected[..]
     }
 
     fn ensure_model_bytes() -> Result<Vec<u8>, String> {
+        if let Some(local) = std::env::var_os("GYROFLOW_GMFLOW_WEIGHTS") {
+            let bytes = std::fs::read(&local).map_err(|e| format!("GYROFLOW_GMFLOW_WEIGHTS {:?}: {}", local, e))?;
+            if !verify_sha256(&bytes, MODEL_SHA256) {
+                return Err(format!("GYROFLOW_GMFLOW_WEIGHTS {:?} is not the weights this build expects (SHA-256 {})", local, MODEL_SHA256));
+            }
+            log::info!("gmflow: using the model at {:?}", local);
+            return Ok(bytes);
+        }
         let path = cache_path();
         if let Ok(bytes) = std::fs::read(&path) {
             if verify_sha256(&bytes, MODEL_SHA256) {
@@ -205,9 +215,12 @@ mod inference {
     const RETRY_AFTER: Duration = Duration::from_secs(60);
 
     // Loads the weights onto `device`, downloading them first if they're not cached. Errors are logged when they
-    // happen, not when a recent one is handed out again.
+    // happen, not when a recent one is handed out again. A file that doesn't load is the answer for good: it passed the
+    // SHA-256 pin, so it would fail the same way every time.
     fn load_model(device: &Device) -> Result<Arc<Model>, String> {
         static WEIGHTS_FAILED: Mutex<Option<(Instant, String)>> = Mutex::new(None);
+        static LOAD_FAILED: OnceLock<String> = OnceLock::new();
+        if let Some(why) = LOAD_FAILED.get() { return Err(why.clone()); }
         if let Some((at, why)) = &*WEIGHTS_FAILED.lock() {
             if at.elapsed() < RETRY_AFTER { return Err(why.clone()); }
         }
@@ -225,14 +238,14 @@ mod inference {
         let applied = m.load_from(&mut store).map_err(|e| {
             let why = format!("failed to load model weights: {}", e);
             log::error!("gmflow: {}", why);
-            why
+            LOAD_FAILED.get_or_init(|| why.clone()).clone()
         })?;
         // Every tensor of the model must come from the file, and every tensor of the file must be used
         if !applied.missing.is_empty() || !applied.unused.is_empty() || !applied.errors.is_empty() {
             let why = format!("the weights file doesn't match the model: {} missing, {} unused, {} errors (first: {:?} {:?} {:?})",
                 applied.missing.len(), applied.unused.len(), applied.errors.len(), applied.missing.first(), applied.unused.first(), applied.errors.first());
             log::error!("gmflow: {}", why);
-            return Err(why);
+            return Err(LOAD_FAILED.get_or_init(|| why).clone());
         }
         Ok(Arc::new(m))
     }
@@ -325,6 +338,12 @@ mod inference {
     // a panic inside the wgpu runtime (a shader that doesn't compile, a lost device, out of memory) turns gmflow off.
     pub fn forward(in0: Vec<f32>, in1: Vec<f32>) -> Result<Vec<f32>, String> {
         let (device, name) = gpu()?;
+        // One pass at a time: the sync asks for many pairs in parallel, and several passes side by side would only
+        // share the GPU while each holding its own activations (out of memory on small GPUs)
+        static ONE_PASS: Mutex<()> = Mutex::new(());
+        let _one = ONE_PASS.lock();
+        // Waited while another pass failed on the GPU: don't run on it again
+        if let Some(why) = &*GPU_FAILED.lock() { return Err(why.clone()); }
         let ran = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> Result<Result<Vec<f32>, String>, String> {
             // No weights is not the GPU's fault: Err on the outside
             let model = model_on(device)?;
@@ -341,6 +360,15 @@ mod inference {
             Ok(Err(e)) => Err(e),
             Err(_) => Err(gpu_failed(name, "panic in the wgpu runtime".to_owned())),
         }
+    }
+
+    // One pass on a device of the caller's (tests: a GPU set up with smaller limits), weights loaded for it
+    #[cfg(test)]
+    pub fn forward_on(device: &Device, in0: Vec<f32>, in1: Vec<f32>) -> Result<Vec<f32>, String> {
+        let model = load_model(device)?;
+        let shape = [1usize, 3, MODEL_H, MODEL_W];
+        let flow = model.forward(Tensor::<4>::from_data(TensorData::new(in0, shape), device), Tensor::<4>::from_data(TensorData::new(in1, shape), device));
+        flow.try_into_data().map_err(|e| short_error(&e.to_string()))?.try_into_vec::<f32>().map_err(|e| format!("output is not f32: {:?}", e))
     }
 
     // burn's execution errors list every kernel skipped after the first failure (hundreds of
@@ -496,7 +524,8 @@ impl OpticalFlowTrait for OFGmflow {
             let (flow, lb) = match inference::compute_flow(&self.img, &next.img) {
                 Some(v) => v,
                 None => {
-                    log::error!("gmflow: no flow (no usable GPU, the model is not loaded, or the GPU failed; see above)");
+                    // Why was logged once, where it happened (no usable GPU, no model, the GPU failed)
+                    log::debug!("gmflow: no flow");
                     return None;
                 }
             };
@@ -566,14 +595,18 @@ mod tests {
     fn synthetic_pair(w: u32, h: u32, shift: u32) -> (Arc<image::GrayImage>, Arc<image::GrayImage>) {
         let mut a = image::GrayImage::new(w, h);
         let mut b = image::GrayImage::new(w, h);
+        // Smooth texture at a few scales, so that it survives the model's downscaling without aliasing (a pattern
+        // finer than the pixels of a scaled-down frame would move differently from the frame)
+        let tex = |x: f32, y: f32| -> u8 {
+            let v = 128.0 + 45.0 * (x * 0.071).sin() * (y * 0.053).cos() + 35.0 * ((x * 0.013 + y * 0.029).sin() * 3.0).sin()
+                + 25.0 * (x * 0.23 + y * 0.11).sin() * (y * 0.19 - x * 0.07).cos();
+            v.round().clamp(0.0, 255.0) as u8
+        };
         for y in 0..h {
             for x in 0..w {
-                // High-frequency texture pattern so the texture filter accepts the samples.
-                let v = (((x as i32 * 13 + y as i32 * 7) & 0xff) ^ ((x as i32 / 4) & 0xff)) as u8;
-                a.put_pixel(x, y, image::Luma([v]));
-                let sx = x.saturating_sub(shift);
-                let v2 = (((sx as i32 * 13 + y as i32 * 7) & 0xff) ^ ((sx as i32 / 4) & 0xff)) as u8;
-                b.put_pixel(x, y, image::Luma([v2]));
+                a.put_pixel(x, y, image::Luma([tex(x as f32, y as f32)]));
+                // The same frame moved `shift` px right
+                b.put_pixel(x, y, image::Luma([tex(x as f32 - shift as f32, y as f32)]));
             }
         }
         (Arc::new(a), Arc::new(b))
@@ -582,7 +615,14 @@ mod tests {
     #[test]
     #[ignore]
     fn gmflow_detects_known_shift() {
-        let (w, h) = (576u32, 320u32);
+        // The model's own size, a 16:9 frame scaled down (0.45), and a 4:3 one letterboxed (bars left and right)
+        for (w, h) in [(576u32, 320u32), (1280, 720), (640, 480)] {
+            println!("frame {w}x{h}");
+            known_shift(w, h);
+        }
+    }
+
+    fn known_shift(w: u32, h: u32) {
         let shift = 4u32;
         let (img_a, img_b) = synthetic_pair(w, h, shift);
         let of_a = OpticalFlowMethod::OFGmflow(OFGmflow::detect_features(0, img_a, w, h));
@@ -635,6 +675,55 @@ mod tests {
         let started = std::time::Instant::now();
         for _ in 0..runs { inference::forward(in0.clone(), in1.clone()).expect("gmflow did not run"); }
         println!("warm: {:.3} s per pass on {} (mean of {runs})", started.elapsed().as_secs_f64() / runs as f64, inference::device_name());
+    }
+
+    // The whole model with no buffer over 128 MiB, which is all that Vulkan guarantees and what many Android GPUs have,
+    // against PyTorch. Vulkan: cubecl makes the device itself, as in Gyroflow (its SPIR-V kernels need the extensions it
+    // enables), with the adapter's own limits, so this needs a device with no more than 128 MiB of its own, such as Mesa
+    // lavapipe (maxStorageBufferRange 128 MiB, no 64-bit indexing). Metal: the device cubecl makes for its WGSL kernels,
+    // with lower limits. Either way the limits the device ended up with are checked before the model runs.
+    #[test]
+    #[ignore]
+    fn gmflow_runs_within_128_mib_buffers() {
+        const MIB_128: u64 = 128 << 20;
+        #[cfg(not(target_vendor = "apple"))]
+        let (device, limits, name) = {
+            let (device, setup) = burn::tensor::Device::wgpu_options().graphics_api(burn::tensor::wgpu::WgpuBackend::Vulkan).device_kind(burn::tensor::DeviceKind::DefaultDevice).init_with_setup().expect("Vulkan");
+            (device, setup.device.limits(), setup.adapter.get_info().name)
+        };
+        #[cfg(target_vendor = "apple")]
+        let (device, limits, name) = {
+            use burn::tensor::wgpu::{ WgpuSetup, wgpu };
+            let backend = wgpu::Backend::Metal;
+            let instance = wgpu::Instance::new(wgpu::InstanceDescriptor { backends: backend.into(), ..wgpu::InstanceDescriptor::new_without_display_handle() });
+            let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions { power_preference: wgpu::PowerPreference::HighPerformance, ..Default::default() })).expect("no adapter");
+            let mut limits = adapter.limits();
+            limits.max_buffer_size = limits.max_buffer_size.min(MIB_128);
+            limits.max_storage_buffer_binding_size = limits.max_storage_buffer_binding_size.min(MIB_128 as _);
+            let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
+                label: None,
+                required_features: adapter.features().difference(wgpu::Features::MAPPABLE_PRIMARY_BUFFERS),
+                required_limits: limits,
+                memory_hints: wgpu::MemoryHints::MemoryUsage,
+                trace: wgpu::Trace::Off,
+                // As cubecl does: the features it asks for include the experimental ones the adapter has
+                experimental_features: unsafe { wgpu::ExperimentalFeatures::enabled() },
+            })).expect("device");
+            let (limits, name) = (device.limits(), adapter.get_info().name);
+            let device = burn::tensor::Device::wgpu_options().setup(WgpuSetup { instance, adapter, device, queue, backend }).init().expect("burn on that device");
+            (device, limits, name)
+        };
+        let room = (limits.max_storage_buffer_binding_size as u64).min(limits.max_buffer_size);
+        println!("adapter {:?}, buffers up to {} MiB, bindings up to {} MiB", name, limits.max_buffer_size >> 20, (limits.max_storage_buffer_binding_size as u64) >> 20);
+        assert!(room <= MIB_128, "this device allows buffers of {} MiB; the test needs one that allows at most 128 MiB", room >> 20);
+        let dir = std::path::PathBuf::from(std::env::var("GMFLOW_REF_DIR").expect("GMFLOW_REF_DIR"));
+        let read = |name: &str| -> Vec<f32> { std::fs::read(dir.join(name)).unwrap().chunks_exact(4).map(|b| f32::from_le_bytes([b[0], b[1], b[2], b[3]])).collect() };
+        let flow = inference::forward_on(&device, read("pair1_in0.f32"), read("pair1_in1.f32")).expect("gmflow did not run within 128 MiB buffers");
+        let reference = read("pair1_torch.f32");
+        let max = flow.iter().zip(&reference).map(|(a, b)| (a - b).abs()).fold(0.0f32, f32::max);
+        let mean = flow.iter().zip(&reference).map(|(a, b)| (a - b).abs() as f64).sum::<f64>() / flow.len() as f64;
+        println!("within 128 MiB buffers: max |gpu - torch| {max:.2e} px, mean {mean:.2e} px");
+        assert!(max <= 1e-2 && mean <= 1e-4, "max {max:e}, mean {mean:e}");
     }
 
     // Without a usable GPU gmflow must not run, and must say why: GMFLOW_EXPECT_ERROR is a piece of the reason the

@@ -17,20 +17,37 @@ fn main() {
 
     // Generate burn model code from ONNX when AI optical flow is enabled (issue #45). The ONNX is gmflow-scale2-regrefine6
     // exported with memory-light local correlations, so that no tensor needs a GPU buffer of 128 MiB or more (see
-    // synchronization/optical_flow/gmflow.rs). Downloaded once into resources/gmflow/, pinned by SHA-256.
+    // synchronization/optical_flow/gmflow.rs). Downloaded once into resources/gmflow/, pinned by SHA-256;
+    // GYROFLOW_GMFLOW_ONNX=<path> takes it from there instead (offline builds), still pinned.
     #[cfg(feature = "use-burn")]
     {
         use sha2::Digest;
         use std::io::Read;
         const ONNX_URL: &str = "https://github.com/yasumorishima/gyroflow-models/releases/download/v1.1.0/gmflow-scale2-regrefine6-320x576-opset16-sim.onnx";
         const ONNX_SHA256: &str = "cc3f5d4efae6d52acd90cf51775737a9abd17d820acc87bad14b02f2fa8025b0";
-        let onnx_dir = format!("{project_dir}/../../resources/gmflow");
-        let onnx_path = format!("{onnx_dir}/gmflow-scale2-regrefine6-320x576-opset16-sim.onnx");
+        println!("cargo:rerun-if-env-changed=GYROFLOW_GMFLOW_ONNX");
         let sha256 = |bytes: &[u8]| format!("{:x}", sha2::Sha256::digest(bytes));
+        let onnx_dir = format!("{project_dir}/../../resources/gmflow");
+        let onnx_path = match std::env::var("GYROFLOW_GMFLOW_ONNX") {
+            Ok(path) => {
+                let got = std::fs::read(&path).map(|b| sha256(&b)).unwrap_or_else(|e| panic!("GYROFLOW_GMFLOW_ONNX {path}: {e}"));
+                if got != ONNX_SHA256 {
+                    panic!("GYROFLOW_GMFLOW_ONNX {path} has SHA-256 {got}, expected {ONNX_SHA256}");
+                }
+                path
+            }
+            Err(_) => format!("{onnx_dir}/gmflow-scale2-regrefine6-320x576-opset16-sim.onnx"),
+        };
         if std::fs::read(&onnx_path).map(|b| sha256(&b)).ok().as_deref() != Some(ONNX_SHA256) {
             std::fs::create_dir_all(&onnx_dir).unwrap_or_else(|e| panic!("Failed to create {onnx_dir}: {e:?}"));
             let mut bytes = Vec::new();
-            ureq::get(ONNX_URL).call()
+            // A stalled download fails the build instead of hanging it
+            let agent: ureq::Agent = ureq::Agent::config_builder()
+                .timeout_global(Some(std::time::Duration::from_secs(1200)))
+                .timeout_connect(Some(std::time::Duration::from_secs(30)))
+                .build()
+                .into();
+            agent.get(ONNX_URL).call()
                 .unwrap_or_else(|e| panic!("AI optical flow (feature use-burn): could not download the gmflow ONNX from {ONNX_URL}: {e}"))
                 .into_body().into_reader().read_to_end(&mut bytes)
                 .unwrap_or_else(|e| panic!("AI optical flow (feature use-burn): could not download the gmflow ONNX from {ONNX_URL}: {e}"));
