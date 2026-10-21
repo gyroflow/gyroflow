@@ -487,7 +487,7 @@ impl StabilizationManager {
         }
     }
 
-    pub fn recompute_adaptive_zoom_static(compute_params: &ComputeParams, params: &RwLock<StabilizationParams>) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>) {
+    pub fn recompute_adaptive_zoom_static(compute_params: &ComputeParams, params: &RwLock<StabilizationParams>) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>, Vec<f64>) {
         let (frames, fps, method) = {
             let params = params.read();
             (params.frame_count, params.get_scaled_fps(), params.adaptive_zoom_method)
@@ -496,6 +496,23 @@ impl StabilizationManager {
 
         zooming::calculate_fovs(compute_params, &timestamps, method.into())
     }
+    /// One iteration of the zoom limit: lowers the smoothing of every frame zoomed in more than the limit allows, judged
+    /// by `limit_fovs` (see `zooming::calculate_fovs`). Returns whether there was any
+    fn lower_smoothing_over_zoom_limit(params: &mut ComputeParams, limit_fovs: &[f64], iter: usize) -> bool {
+        let thresholds = [0.95, 0.9, 0.85, 0.8];
+        let threshold = *thresholds.get(iter).unwrap_or(thresholds.last().unwrap());
+        let mut any_above_limit = false;
+        for (i, fov) in limit_fovs.iter().enumerate() {
+            let Some(fov_limit) = zooming::zoom_limit_fov(params, i) else { continue; };
+            if *fov < fov_limit {
+                any_above_limit = true;
+                if let Some(v) = params.smoothing_fov_limit_per_frame.get_mut(i) {
+                    *v *= (*fov / fov_limit).min(threshold);
+                }
+            }
+        }
+        any_above_limit
+    }
     pub fn recompute_adaptive_zoom(&self) {
         let mut params = stabilization::ComputeParams::from_manager(self);
         params.calculate_camera_fovs();
@@ -503,20 +520,18 @@ impl StabilizationManager {
         Self::apply_focal_length_smoothing(&mut params, &self.params);
 
         let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
-        let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &self.params);
+        let (fovs, minimal_fovs, debug_points, mut limit_fovs) = Self::recompute_adaptive_zoom_static(&params, &self.params);
         params.fovs = fovs;
         params.minimal_fovs = minimal_fovs;
 
-        let (max_zoom_param, max_zoom_max, max_zoom_iters, scaling_factor) = {
+        let (max_zoom_max, max_zoom_iters) = {
             let mut stab_params = self.params.write();
             stab_params.set_fovs( params.fovs.clone(), lens_fov_adjustment);
             stab_params.minimal_fovs = params.minimal_fovs.clone();
             stab_params.zooming_debug_points = debug_points;
             (
-                stab_params.max_zoom.unwrap_or(0.0),
                 params.keyframes.get_keyframes(&KeyframeType::MaxZoom).map(|x| x.iter().map(|x| x.1.value).max_by(|a, b| a.total_cmp(b)).unwrap_or(stab_params.max_zoom.unwrap_or(0.0))).unwrap_or(stab_params.max_zoom.unwrap_or(0.0)),
                 stab_params.max_zoom_iterations,
-                stab_params.size.0 as f64 / stab_params.output_size.0 as f64
             )
         };
 
@@ -526,24 +541,8 @@ impl StabilizationManager {
             for _ in params.fovs.iter() {
                 params.smoothing_fov_limit_per_frame.push(1.0);
             }
-            let thresholds = [0.95, 0.9, 0.85, 0.8];
             for iter in 0..max_zoom_iters {
-                let mut any_above_limit = false;
-                for (i, fov) in params.fovs.iter().enumerate() {
-                    let ts = crate::timestamp_at_frame(i as i32, params.scaled_fps);
-                    let mut zoom_limit = params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0;
-
-                    if params.video_speed_affects_zooming_limit && (params.video_speed != 1.0 || params.keyframes.is_keyframed(&KeyframeType::VideoSpeed)) {
-                        let vid_speed = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(params.video_speed).abs();
-                        zoom_limit *= (1.0 + ((vid_speed - 1.0) / 4.0)).min(1.8);
-                    }
-
-                    let fov_limit = 1.0 / (zoom_limit * scaling_factor);
-                    if *fov < fov_limit {
-                        any_above_limit = true;
-                        params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(*thresholds.get(iter).unwrap_or(thresholds.last().unwrap()));
-                    }
-                }
+                let any_above_limit = Self::lower_smoothing_over_zoom_limit(&mut params, &limit_fovs, iter);
                 log::debug!("Max zoom iteration {iter}/{max_zoom_iters}, any above limit: {any_above_limit}");
                 if !any_above_limit {
                     if iter == 0 {
@@ -566,9 +565,10 @@ impl StabilizationManager {
 
                 // Zooming
                 let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
-                let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &self.params);
+                let (fovs, minimal_fovs, debug_points, new_limit_fovs) = Self::recompute_adaptive_zoom_static(&params, &self.params);
                 params.fovs = fovs;
                 params.minimal_fovs = minimal_fovs;
+                limit_fovs = new_limit_fovs;
                 {
                     let mut stab_params = self.params.write();
                     stab_params.set_fovs(params.fovs.clone(), lens_fov_adjustment);
@@ -677,22 +677,20 @@ impl StabilizationManager {
             // matches the last commit: a run killed inside the max-zoom iterations leaves that key committed next to
             // quaternions that no longer carry the limit
             if smoothing_recomputed || zoom_key != zooming_checksum.load(SeqCst) {
-                let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
+                let (fovs, minimal_fovs, debug_points, mut limit_fovs) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
                 params.fovs = fovs;
                 params.minimal_fovs = minimal_fovs;
 
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
-                let (max_zoom_param, max_zoom_max, max_zoom_iters, scaling_factor) = {
+                let (max_zoom_max, max_zoom_iters) = {
                     let mut stab_params = stabilization_params.write();
                     stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                     stab_params.minimal_fovs = params.minimal_fovs.clone();
                     stab_params.zooming_debug_points = debug_points;
                     (
-                        stab_params.max_zoom.unwrap_or(0.0),
                         params.keyframes.get_keyframes(&KeyframeType::MaxZoom).map(|x| x.iter().map(|x| x.1.value).max_by(|a, b| a.total_cmp(b)).unwrap_or(stab_params.max_zoom.unwrap_or(0.0))).unwrap_or(stab_params.max_zoom.unwrap_or(0.0)),
                         stab_params.max_zoom_iterations,
-                        stab_params.size.0 as f64 / stab_params.output_size.0 as f64
                     )
                 };
 
@@ -707,24 +705,8 @@ impl StabilizationManager {
                     for _ in params.fovs.iter() {
                         params.smoothing_fov_limit_per_frame.push(1.0);
                     }
-                    let thresholds = [0.95, 0.9, 0.85, 0.8];
                     for iter in 0..max_zoom_iters {
-                        let mut any_above_limit = false;
-                        for (i, fov) in params.fovs.iter().enumerate() {
-                            let ts = crate::timestamp_at_frame(i as i32, params.scaled_fps);
-                            let mut zoom_limit = params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0;
-
-                            if params.video_speed_affects_zooming_limit && (params.video_speed != 1.0 || params.keyframes.is_keyframed(&KeyframeType::VideoSpeed)) {
-                                let vid_speed = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(params.video_speed).abs();
-                                zoom_limit *= (1.0 + ((vid_speed - 1.0) / 4.0)).min(1.8);
-                            }
-
-                            let fov_limit = 1.0 / (zoom_limit * scaling_factor);
-                            if *fov < fov_limit {
-                                any_above_limit = true;
-                                params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(*thresholds.get(iter).unwrap_or(thresholds.last().unwrap()));
-                            }
-                        }
+                        let any_above_limit = Self::lower_smoothing_over_zoom_limit(&mut params, &limit_fovs, iter);
                         log::debug!("Max zoom iteration {iter}/{max_zoom_iters}, any above limit: {any_above_limit}");
                         if !any_above_limit {
                             if iter == 0 {
@@ -754,9 +736,10 @@ impl StabilizationManager {
                         // The focal length curves don't change within max-zoom iterations:
                         // settings and raw metadata are the same, so the outer apply is reused
 
-                        let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
+                        let (fovs, minimal_fovs, debug_points, new_limit_fovs) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
                         params.fovs = fovs;
                         params.minimal_fovs = minimal_fovs;
+                        limit_fovs = new_limit_fovs;
 
                         if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
@@ -975,6 +958,14 @@ impl StabilizationManager {
         let mut params = self.params.write();
         params.max_zoom = if v > 50.0 { Some(v) } else { None };
         params.max_zoom_iterations = iters.max(1);
+        self.invalidate_smoothing();
+    }
+    pub fn set_fixed_zoom(&self, v: bool) {
+        self.params.write().fixed_zoom = v;
+        self.invalidate_smoothing(); // the zoom limit folds into the smoothing
+    }
+    pub fn set_zoom_limit_whole_clip(&self, v: bool) {
+        self.params.write().zoom_limit_whole_clip = v;
         self.invalidate_smoothing();
     }
 
@@ -1715,6 +1706,8 @@ impl StabilizationManager {
                 "video_speed_affects_zooming_limit": params.video_speed_affects_zooming_limit,
                 "max_zoom":               params.max_zoom,
                 "max_zoom_iterations":    params.max_zoom_iterations,
+                "fixed_zoom":             params.fixed_zoom,
+                "zoom_limit_whole_clip":  params.zoom_limit_whole_clip,
                 "frame_offset":           params.frame_offset,
                 "focal_length_smoothing_enabled":  params.focal_length_smoothing_enabled,
                 "focal_length_max_zoom_rate":      params.focal_length_max_zoom_rate,
@@ -2088,6 +2081,13 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("horizontal_rs")         .and_then(|x| x.as_bool()) { if v { params.frame_readout_direction = if params.frame_readout_time < 0.0 { ReadoutDirection::RightToLeft } else { ReadoutDirection::LeftToRight }; } }
                 if let Some(v) = obj.get("max_zoom")              .and_then(|x| x.as_f64()) { params.max_zoom                = Some(v); }
                 if let Some(v) = obj.get("max_zoom_iterations")   .and_then(|x| x.as_i64()) { params.max_zoom_iterations     = v as _; }
+                if let Some(v) = obj.get("fixed_zoom")            .and_then(|x| x.as_bool()) { params.fixed_zoom             = v; }
+                // Projects from before it was there were made with the zoom limit lowering the smoothing of the whole clip.
+                // A preset without it leaves it alone, so an old default preset doesn't turn it on for every new video
+                match obj.get("zoom_limit_whole_clip").and_then(|x| x.as_bool()) {
+                    Some(v) => params.zoom_limit_whole_clip = v,
+                    None => if !*is_preset { params.zoom_limit_whole_clip = true; }
+                }
 
                 if let Some(v) = obj.get("video_speed").and_then(|x| x.as_f64()) { params.video_speed = v; }
                 if let Some(v) = obj.get("video_speed_affects_smoothing")    .and_then(|x| x.as_bool()) { params.video_speed_affects_smoothing     = v; }

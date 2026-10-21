@@ -150,6 +150,8 @@ pub struct Controller {
     frame_readout_direction: qt_property!(i32; WRITE set_frame_readout_direction),
 
     adaptive_zoom: qt_property!(f64; WRITE set_adaptive_zoom),
+    fixed_zoom: qt_property!(bool; WRITE set_fixed_zoom),
+    zoom_limit_whole_clip: qt_property!(bool; WRITE set_zoom_limit_whole_clip),
     zooming_center_x: qt_property!(f64; WRITE set_zooming_center_x),
     zooming_center_y: qt_property!(f64; WRITE set_zooming_center_y),
     zooming_method: qt_property!(i32; WRITE set_zooming_method),
@@ -1620,6 +1622,8 @@ impl Controller {
     wrap_simple_method!(set_frame_readout_direction, v: i32; recompute);
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_max_zoom,           v: f64, i: usize; recompute; zooming_data_changed);
+    wrap_simple_method!(set_fixed_zoom,         v: bool; recompute; zooming_data_changed);
+    wrap_simple_method!(set_zoom_limit_whole_clip, v: bool; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_center_x,   v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_center_y,   v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_additional_rotation_x,v: f64; recompute; zooming_data_changed);
