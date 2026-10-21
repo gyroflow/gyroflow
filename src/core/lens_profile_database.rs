@@ -4,11 +4,14 @@
 use std::cmp::Ordering;
 use std::collections::{ HashSet, HashMap, BTreeMap };
 use crate::LensProfile;
+use crate::camera_registry::CameraRegistry;
 use std::path::PathBuf;
 use std::io::Read;
 
 #[cfg(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles"))]
 static LENS_PROFILES_STATIC: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../resources/camera_presets/profiles.cbor.gz"));
+
+static CAMERA_REGISTRY_STATIC: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../resources/camera_registry.json"));
 
 #[allow(dead_code)]
 enum DataSource {
@@ -24,10 +27,21 @@ pub struct LensProfileDatabase {
     list_for_ui: Vec<(String, String, String, bool, f64, i32, String)>,
     pub loaded: bool,
     pub version: u32,
+    pub camera_registry: CameraRegistry,
+    hidden_profiles: HashSet<String>,
+    review_groups: HashMap<String, Vec<String>>,
 }
 impl Clone for LensProfileDatabase {
     fn clone(&self) -> Self {
-        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), loaded: self.loaded, ..Default::default() }
+        Self {
+            map: self.map.clone(),
+            preset_map: self.preset_map.clone(),
+            loaded: self.loaded,
+            camera_registry: self.camera_registry.clone(),
+            hidden_profiles: self.hidden_profiles.clone(),
+            review_groups: self.review_groups.clone(),
+            ..Default::default()
+        }
     }
 }
 
@@ -202,8 +216,51 @@ impl LensProfileDatabase {
             v.resolve_interpolations(&copy);
         }
 
+        self.load_camera_registry();
+        self.load_hidden_profiles();
+        self.build_review_groups();
+
         ::log::info!("Loaded {} lens profiles in {:.3}ms", self.map.len(), _time.elapsed().as_micros() as f64 / 1000.0);
         self.loaded = true;
+    }
+
+    fn load_camera_registry(&mut self) {
+        if let Ok(registry) = CameraRegistry::load_from_json(std::str::from_utf8(CAMERA_REGISTRY_STATIC).unwrap_or("{}")) {
+            self.camera_registry = registry;
+            ::log::info!("Loaded camera registry with {} brands", self.camera_registry.brands.len());
+        } else {
+            ::log::warn!("Failed to load bundled camera registry");
+        }
+
+        let registry_path = Self::get_path().join("camera_registry.json");
+        if registry_path.exists() {
+            if let Ok(content) = std::fs::read_to_string(&registry_path) {
+                if let Ok(registry) = CameraRegistry::load_from_json(&content) {
+                    if registry.version > self.camera_registry.version {
+                        self.camera_registry = registry;
+                        ::log::info!("Updated camera registry from file");
+                    }
+                }
+            }
+        }
+    }
+
+    fn build_review_groups(&mut self) {
+        self.review_groups.clear();
+        for (key, profile) in &self.map {
+            if profile.path_to_file.ends_with(".gyroflow") {
+                continue;
+            }
+            let group_key = format!(
+                "{}|{}|{}|{}x{}",
+                profile.camera_brand.to_lowercase(),
+                profile.camera_model.to_lowercase(),
+                profile.lens_model.to_lowercase(),
+                profile.calib_dimension.w,
+                profile.calib_dimension.h
+            );
+            self.review_groups.entry(group_key).or_default().push(key.clone());
+        }
     }
 
     pub fn set_from_db(&mut self, b: Self) {
@@ -211,6 +268,8 @@ impl LensProfileDatabase {
         self.preset_map = b.preset_map;
         self.loaded = b.loaded;
         self.version = b.version;
+        self.camera_registry = b.camera_registry;
+        self.review_groups = b.review_groups;
         if self.loaded {
             let cbs: Vec<_> = self.loaded_callbacks.drain(..).collect();
             for cb in cbs {
@@ -529,6 +588,281 @@ impl LensProfileDatabase {
                     println!("Write error {:?}", new_path);
                 }
             }
+        }
+    }
+
+    // -------------------------------------------------------------------
+    // ---------------------- Camera selector methods --------------------
+    // -------------------------------------------------------------------
+
+    pub fn get_camera_brands(&self) -> Vec<String> {
+        let mut brands: HashSet<String> = self.camera_registry.get_brands()
+            .into_iter()
+            .map(|s| s.to_string())
+            .collect();
+
+        for profile in self.map.values() {
+            if !profile.camera_brand.is_empty() {
+                brands.insert(self.camera_registry.normalize_brand(&profile.camera_brand));
+            }
+        }
+
+        let mut result: Vec<_> = brands.into_iter().collect();
+        result.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        result
+    }
+
+    pub fn get_camera_models(&self, brand: &str) -> Vec<String> {
+        let mut models: HashSet<String> = HashSet::new();
+
+        for camera in self.camera_registry.get_cameras_for_brand(brand) {
+            models.insert(camera.name.clone());
+        }
+
+        let brand_lower = brand.to_lowercase();
+        for profile in self.map.values() {
+            if profile.camera_brand.to_lowercase() == brand_lower && !profile.camera_model.is_empty() {
+                models.insert(profile.camera_model.clone());
+            }
+        }
+
+        let mut result: Vec<_> = models.into_iter().collect();
+        result.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        result
+    }
+
+    pub fn get_lens_models(&self, brand: &str) -> Vec<String> {
+        let mut lenses: HashSet<String> = HashSet::new();
+
+        for lens in self.camera_registry.get_lenses_for_brand(brand) {
+            lenses.insert(lens.name.clone());
+        }
+
+        let brand_lower = brand.to_lowercase();
+        for profile in self.map.values() {
+            if profile.camera_brand.to_lowercase() == brand_lower && !profile.lens_model.is_empty() {
+                lenses.insert(profile.lens_model.clone());
+            }
+        }
+
+        let mut result: Vec<_> = lenses.into_iter().collect();
+        result.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        result
+    }
+
+    pub fn get_compatible_lenses(&self, brand: &str, model: &str) -> Vec<(String, String)> {
+        let mut result = self.camera_registry.get_compatible_lenses(brand, model);
+
+        let brand_lower = brand.to_lowercase();
+        let model_lower = model.to_lowercase();
+        for profile in self.map.values() {
+            if profile.camera_brand.to_lowercase() == brand_lower
+                && profile.camera_model.to_lowercase() == model_lower
+                && !profile.lens_model.is_empty()
+            {
+                let lens_entry = (brand.to_string(), profile.lens_model.clone());
+                if !result.contains(&lens_entry) {
+                    result.push(lens_entry);
+                }
+            }
+        }
+
+        result.sort_by(|a, b| {
+            let cmp = a.0.to_lowercase().cmp(&b.0.to_lowercase());
+            if cmp == Ordering::Equal {
+                a.1.to_lowercase().cmp(&b.1.to_lowercase())
+            } else {
+                cmp
+            }
+        });
+        result
+    }
+
+    pub fn get_compatible_cameras(&self, brand: &str, model: &str) -> Vec<(String, String, f64)> {
+        self.camera_registry.get_compatible_cameras(brand, model)
+    }
+
+    pub fn is_zoom_lens(&self, brand: &str, lens_model: &str) -> bool {
+        self.camera_registry.is_zoom_lens(brand, lens_model)
+    }
+
+    pub fn is_fixed_lens_camera(&self, brand: &str, model: &str) -> bool {
+        if let Some((_, camera)) = self.camera_registry.get_camera(brand, model) {
+            return camera.fixed_lens;
+        }
+        false
+    }
+
+    pub fn search_by_camera(&self, brand: &str, model: &str, lens: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<(String, String, String, bool, f64, i32, String)> {
+        let brand_lower = brand.to_lowercase();
+        let model_lower = model.to_lowercase();
+        let lens_lower = lens.to_lowercase();
+
+        let mut filtered: Vec<_> = self.list_for_ui.iter().filter(|(name, key, checksum, _, _, _, _)| {
+            if self.hidden_profiles.contains(checksum) {
+                return false;
+            }
+
+            if let Some(profile) = self.map.get(key) {
+                let matches_brand = brand.is_empty() || profile.camera_brand.to_lowercase() == brand_lower;
+                let matches_model = model.is_empty() || profile.camera_model.to_lowercase() == model_lower;
+                let matches_lens = lens.is_empty() || profile.lens_model.to_lowercase().contains(&lens_lower);
+
+                return matches_brand && matches_model && matches_lens;
+            }
+
+            false
+        }).collect();
+
+        filtered.sort_by(|a, b| {
+            let a_priority = a.1.ends_with(".gyroflow") || favorites.contains(&a.2);
+            let b_priority = b.1.ends_with(".gyroflow") || favorites.contains(&b.2);
+            if a_priority && !b_priority { return Ordering::Less; }
+            if b_priority && !a_priority { return Ordering::Greater; }
+
+            let a_priority2 = a.5 != 0 && aspect_ratio == a.5;
+            let b_priority2 = b.5 != 0 && aspect_ratio == b.5;
+            if a_priority2 && !b_priority2 { return Ordering::Less; }
+            if b_priority2 && !a_priority2 { return Ordering::Greater; }
+
+            let a_priority3 = a.5 != 0 && aspect_ratio_swapped == a.5;
+            let b_priority3 = b.5 != 0 && aspect_ratio_swapped == b.5;
+            if a_priority3 && !b_priority3 { return Ordering::Less; }
+            if b_priority3 && !a_priority3 { return Ordering::Greater; }
+
+            a.0.cmp(&b.0)
+        });
+
+        filtered.into_iter().take(200).cloned().collect()
+    }
+
+    // -------------------------------------------------------------------
+    // ---------------------- Profile review methods ---------------------
+    // -------------------------------------------------------------------
+
+    pub fn get_review_group(&self, profile_key: &str) -> Vec<String> {
+        if let Some(profile) = self.map.get(profile_key) {
+            let group_key = format!(
+                "{}|{}|{}|{}x{}",
+                profile.camera_brand.to_lowercase(),
+                profile.camera_model.to_lowercase(),
+                profile.lens_model.to_lowercase(),
+                profile.calib_dimension.w,
+                profile.calib_dimension.h
+            );
+            if let Some(group) = self.review_groups.get(&group_key) {
+                return group.clone();
+            }
+        }
+        vec![profile_key.to_string()]
+    }
+
+    pub fn get_profiles_for_setup(&self, brand: &str, model: &str, lens: &str, width: usize, height: usize) -> Vec<&LensProfile> {
+        let brand_lower = brand.to_lowercase();
+        let model_lower = model.to_lowercase();
+        let lens_lower = lens.to_lowercase();
+
+        self.map.values().filter(|p| {
+            p.camera_brand.to_lowercase() == brand_lower
+                && p.camera_model.to_lowercase() == model_lower
+                && p.lens_model.to_lowercase() == lens_lower
+                && p.calib_dimension.w == width
+                && p.calib_dimension.h == height
+                && !self.hidden_profiles.contains(p.checksum.as_deref().unwrap_or(""))
+        }).collect()
+    }
+
+    pub fn hide_profile(&mut self, checksum: &str) {
+        self.hidden_profiles.insert(checksum.to_string());
+        self.save_hidden_profiles();
+    }
+
+    pub fn unhide_profile(&mut self, checksum: &str) {
+        self.hidden_profiles.remove(checksum);
+        self.save_hidden_profiles();
+    }
+
+    pub fn is_profile_hidden(&self, checksum: &str) -> bool {
+        self.hidden_profiles.contains(checksum)
+    }
+
+    pub fn get_hidden_profiles(&self) -> Vec<String> {
+        self.hidden_profiles.iter().cloned().collect()
+    }
+
+    fn save_hidden_profiles(&self) {
+        let path = crate::settings::data_dir().join("hidden_profiles.json");
+        let hidden: Vec<_> = self.hidden_profiles.iter().collect();
+        if let Ok(json) = serde_json::to_string(&hidden) {
+            let _ = std::fs::write(path, json);
+        }
+    }
+
+    pub fn load_hidden_profiles(&mut self) {
+        let path = crate::settings::data_dir().join("hidden_profiles.json");
+        if path.exists() {
+            if let Ok(content) = std::fs::read_to_string(&path) {
+                if let Ok(hidden) = serde_json::from_str::<Vec<String>>(&content) {
+                    self.hidden_profiles = hidden.into_iter().collect();
+                }
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------
+    // ---------------------- Calibrator validation ----------------------
+    // -------------------------------------------------------------------
+
+    pub fn validate_profile_for_upload(&self, profile: &LensProfile) -> Result<(), Vec<String>> {
+        let mut errors = Vec::new();
+
+        if profile.camera_brand.trim().is_empty() {
+            errors.push("Camera brand is required".to_string());
+        }
+
+        if profile.camera_model.trim().is_empty() {
+            errors.push("Camera model is required".to_string());
+        }
+
+        if !self.is_fixed_lens_camera(&profile.camera_brand, &profile.camera_model) {
+            if profile.lens_model.trim().is_empty() {
+                errors.push("Lens model is required for interchangeable lens cameras".to_string());
+            }
+
+            if self.is_zoom_lens(&profile.camera_brand, &profile.lens_model) {
+                if profile.focal_length.is_none() || profile.focal_length.unwrap_or(0.0) <= 0.0 {
+                    errors.push("Focal length is required for zoom lenses".to_string());
+                }
+            }
+        }
+
+        if profile.calib_dimension.w == 0 || profile.calib_dimension.h == 0 {
+            errors.push("Valid calibration dimensions are required".to_string());
+        }
+
+        if profile.fps <= 0.0 {
+            errors.push("Valid frame rate is required".to_string());
+        }
+
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors)
+        }
+    }
+
+    pub fn normalize_profile_metadata(&self, profile: &mut LensProfile) {
+        profile.camera_brand = self.camera_registry.normalize_brand(&profile.camera_brand);
+
+        if let Some((_, camera)) = self.camera_registry.get_camera(&profile.camera_brand, &profile.camera_model) {
+            profile.camera_model = camera.name.clone();
+            if profile.crop_factor.is_none() {
+                profile.crop_factor = camera.crop_factor;
+            }
+        }
+
+        if let Some((_, lens)) = self.camera_registry.get_lens(&profile.camera_brand, &profile.lens_model) {
+            profile.lens_model = lens.name.clone();
         }
     }
 }
