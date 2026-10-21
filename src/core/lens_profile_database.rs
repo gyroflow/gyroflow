@@ -86,6 +86,29 @@ impl LensProfileDatabase {
                 }
                 return;
             }
+            if f_name.ends_with(".xml") {
+                // Lensfun database files (https://lensfun.github.io/)
+                let xml = match data {
+                    DataSource::String(v) => v,
+                    DataSource::SerdeValue(v) => v.as_str().map(|x| x.to_string()).unwrap_or_default()
+                };
+                match crate::lensfun::LensfunDatabase::parse(&xml) {
+                    Ok(lf_db) => {
+                        for mut profile in lf_db.to_lens_profiles() {
+                            profile.path_to_file = f_name.to_string();
+                            let key = profile.identifier.clone();
+                            if !self.map.contains_key(&key) {
+                                Self::set_checksum(&mut profile);
+                                self.map.insert(key, profile);
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        log::error!("Error parsing Lensfun database: {}: {:?}", f_name, e);
+                    }
+                }
+                return;
+            }
             let parsed = match data {
                 DataSource::String(x)     => LensProfile::from_json(&x),
                 DataSource::SerdeValue(x) => LensProfile::from_value(x)
@@ -109,27 +132,7 @@ impl LensProfileDatabase {
                                 // std::fs::write(f_name, serde_json::to_string_pretty(&prof).unwrap()).unwrap();
                             }
                         } else {
-                            (|| -> Option<()> {
-                                let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
-                                    profile.identifier,
-
-                                    profile.calib_dimension.w,
-                                    profile.calib_dimension.h,
-
-                                    profile.fisheye_params.camera_matrix.get(0)?.get(0)?,
-                                    profile.fisheye_params.camera_matrix.get(1)?.get(1)?,
-                                    profile.fisheye_params.camera_matrix.get(0)?.get(2)?,
-                                    profile.fisheye_params.camera_matrix.get(1)?.get(2)?,
-
-                                    profile.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
-                                    profile.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
-                                );
-
-                                profile.checksum = Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())));
-                                Some(())
-                            })();
+                            Self::set_checksum(&mut profile);
                             self.map.insert(key, profile);
                         }
                     }
@@ -146,7 +149,7 @@ impl LensProfileDatabase {
             walkdir::WalkDir::new(dir).into_iter().for_each(|e| {
                 if let Ok(entry) = e {
                     let f_name = entry.path().to_string_lossy().replace('\\', "/");
-                    if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
+                    if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") || f_name.ends_with(".xml") {
                         if let Ok(data) = std::fs::read_to_string(&f_name) {
                             load(DataSource::String(data), &f_name);
                         }
@@ -204,6 +207,30 @@ impl LensProfileDatabase {
 
         ::log::info!("Loaded {} lens profiles in {:.3}ms", self.map.len(), _time.elapsed().as_micros() as f64 / 1000.0);
         self.loaded = true;
+    }
+
+    fn set_checksum(profile: &mut LensProfile) {
+        (|| -> Option<()> {
+            let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
+                profile.identifier,
+
+                profile.calib_dimension.w,
+                profile.calib_dimension.h,
+
+                profile.fisheye_params.camera_matrix.get(0)?.get(0)?,
+                profile.fisheye_params.camera_matrix.get(1)?.get(1)?,
+                profile.fisheye_params.camera_matrix.get(0)?.get(2)?,
+                profile.fisheye_params.camera_matrix.get(1)?.get(2)?,
+
+                profile.fisheye_params.distortion_coeffs.get(0).unwrap_or(&0.0),
+                profile.fisheye_params.distortion_coeffs.get(1).unwrap_or(&0.0),
+                profile.fisheye_params.distortion_coeffs.get(2).unwrap_or(&0.0),
+                profile.fisheye_params.distortion_coeffs.get(3).unwrap_or(&0.0)
+            );
+
+            profile.checksum = Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())));
+            Some(())
+        })();
     }
 
     pub fn set_from_db(&mut self, b: Self) {
