@@ -57,6 +57,8 @@ pub struct ComputeParams {
     pub smoothing_fov_limit_per_frame: Vec<f64>,
     pub max_zoom: Option<f64>,
     pub max_zoom_iterations: usize,
+    pub fixed_zoom: bool,
+    pub zoom_limit_whole_clip: bool,
 
     pub zooming_debug_points: bool,
 
@@ -104,6 +106,8 @@ impl ComputeParams {
             smoothing_fov_limit_per_frame: Vec::new(),
             max_zoom: params.max_zoom.clone(),
             max_zoom_iterations: params.max_zoom_iterations,
+            fixed_zoom: params.fixed_zoom,
+            zoom_limit_whole_clip: params.zoom_limit_whole_clip,
 
             frame_count: params.frame_count,
             fov_scale: params.fov,
@@ -226,6 +230,8 @@ impl std::fmt::Debug for ComputeParams {
          .field("additional_rotation",       &self.additional_rotation)
          .field("additional_translation",    &self.additional_translation)
          .field("adaptive_zoom_method",      &self.adaptive_zoom_method)
+         .field("fixed_zoom",                &self.fixed_zoom)
+         .field("zoom_limit_whole_clip",     &self.zoom_limit_whole_clip)
          .field("framebuffer_inverted",      &self.framebuffer_inverted)
          .field("zooming_debug_points",      &self.zooming_debug_points)
          .field("distortion_model",          &self.distortion_model.id())

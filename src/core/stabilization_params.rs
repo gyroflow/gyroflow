@@ -80,6 +80,8 @@ pub struct StabilizationParams {
     pub fov_overview: bool,
     pub max_zoom: Option<f64>,
     pub max_zoom_iterations: usize,
+    pub fixed_zoom: bool, // static zoom at exactly `max_zoom`, see zooming::calculate_fovs
+    pub zoom_limit_whole_clip: bool, // static zoom: the zoom limit lowers the smoothing of the whole clip, as it did before
     pub show_safe_area: bool,
     pub fovs: Vec<f64>,
     pub minimal_fovs: Vec<f64>,
@@ -161,6 +163,8 @@ impl Default for StabilizationParams {
 
             max_zoom: Some(130.0),
             max_zoom_iterations: 5,
+            fixed_zoom: false,
+            zoom_limit_whole_clip: false,
 
             lens_correction_amount: 1.0,
             light_refraction_coefficient: 1.0,
@@ -331,6 +335,7 @@ impl StabilizationParams {
             show_safe_area:            self.show_safe_area,
             max_zoom:                  self.max_zoom,
             max_zoom_iterations:       self.max_zoom_iterations,
+            fixed_zoom:                self.fixed_zoom,
             focal_length_smoothing_enabled: self.focal_length_smoothing_enabled,
             focal_length_max_zoom_rate: self.focal_length_max_zoom_rate,
             ..Self::default()

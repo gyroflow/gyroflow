@@ -26,6 +26,7 @@ MenuItem {
         id: sett;
         property alias smoothingMethod: smoothingMethod.currentIndex;
         property alias croppingMode: croppingMode.currentIndex;
+        property alias staticZoomLevel: staticZoomLevel.currentIndex;
         property alias adaptiveZoom: adaptiveZoom.value;
         property alias correctionAmount: correctionAmount.value;
         property alias useGravityVectors: useGravityVectors.checked;
@@ -95,6 +96,12 @@ MenuItem {
                 additionalTranslationZ.value = stab.additional_translation[2];
             }
             if (stab.hasOwnProperty("max_zoom") && +stab.max_zoom > 50) maxZoomSlider.value = +stab.max_zoom;
+            // A project (it has a video) from before these existed: automatic zoom level, and the zoom limit lowering
+            // the smoothing of the whole clip, the way it was made. A preset without them leaves them alone
+            if (stab.hasOwnProperty("fixed_zoom")) staticZoomLevel.currentIndex = stab.fixed_zoom? 1 : 0;
+            else if (obj.videofile) staticZoomLevel.currentIndex = 0;
+            if (stab.hasOwnProperty("zoom_limit_whole_clip")) zoomLimitWholeClip.checked = !!stab.zoom_limit_whole_clip;
+            else if (obj.videofile) zoomLimitWholeClip.checked = true;
             if (stab.hasOwnProperty("max_zoom_terations") && +stab.max_zoom_terations > 0) maxZoomIterations.value = +stab.max_zoom_terations;
             if (stab.hasOwnProperty("adaptive_zoom_method")) zoomingMethod.currentIndex = +stab.adaptive_zoom_method;
             if (stab.hasOwnProperty("use_gravity_vectors")) {
@@ -611,10 +618,27 @@ MenuItem {
         }
     }
     Label {
-        text: qsTr("Zoom limit");
-        visible: smoothingMethod.currentIndex == 1 || smoothingMethod.currentIndex == 2;
+        text: qsTr("Zoom level");
+        visible: croppingMode.currentIndex == 2;
         position: Label.LeftPosition;
-        tooltip: qsTr("Zoom limit is calculated approximately.\nIf you need more accuracy, increase the number of iterations in \"Advanced\" below.");
+        tooltip: qsTr("Automatic: as much as the video needs, up to the zoom limit.\nManual: exactly the zoom you set, in every video, so you know the framing while shooting. The smoothing is lowered only where the frame wouldn't fit otherwise.");
+        ComboBox {
+            id: staticZoomLevel;
+            model: [QT_TRANSLATE_NOOP("Popup", "Automatic"), QT_TRANSLATE_NOOP("Popup", "Manual")];
+            font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+            currentIndex: 0;
+            Component.onCompleted: currentIndexChanged();
+            onCurrentIndexChanged: controller.fixed_zoom = currentIndex == 1;
+            readonly property bool manual: croppingMode.currentIndex == 2 && currentIndex == 1;
+        }
+    }
+    Label {
+        text: staticZoomLevel.manual? qsTr("Zoom") : qsTr("Zoom limit");
+        visible: smoothingMethod.currentIndex == 1 || smoothingMethod.currentIndex == 2 || staticZoomLevel.manual;
+        position: Label.LeftPosition;
+        tooltip: staticZoomLevel.manual? qsTr("The whole video is zoomed in exactly this much, and the smoothing is lowered only where the frame wouldn't fit otherwise.\nIf you need more accuracy, increase the number of iterations in \"Advanced\" below.")
+                                               : qsTr("Zoom limit is calculated approximately.\nIf you need more accuracy, increase the number of iterations in \"Advanced\" below.");
         SliderWithField {
             id: maxZoomSlider;
             value: 130;
@@ -628,6 +652,10 @@ MenuItem {
             keyframe: "MaxZoom";
             onValueChanged: controller.set_max_zoom(maxZoomSlider.value, maxZoomIterations.value);
         }
+    }
+    InfoMessageSmall {
+        show: staticZoomLevel.manual && maxValues.maxZoom > maxZoomSlider.value + 0.5;
+        text: qsTr("The frame doesn't fit in %1 zoom even with the smoothing lowered, so the video is zoomed in to %2. Increase the zoom limit iterations in \"Advanced\", or the zoom.").arg("<b>" + maxZoomSlider.value.toFixed(0) + "%</b>").arg("<b>" + maxValues.maxZoom.toFixed(1) + "%</b>");
     }
     Label {
         text: qsTr("Zooming speed");
@@ -954,6 +982,14 @@ MenuItem {
                 slider.stepSize: 1;
                 onValueChanged: controller.set_max_zoom(maxZoomSlider.value, maxZoomIterations.value);
             }
+        }
+        CheckBox {
+            id: zoomLimitWholeClip;
+            text: qsTr("Zoom limit lowers the smoothing of the whole clip");
+            tooltip: qsTr("How the zoom limit worked with static zoom before: one hard moment lowers the smoothing everywhere.\nProjects saved before this option existed open with it on, so they look the same.");
+            visible: croppingMode.currentIndex == 2 && (smoothingMethod.currentIndex == 1 || smoothingMethod.currentIndex == 2);
+            checked: false;
+            onCheckedChanged: controller.zoom_limit_whole_clip = checked;
         }
     }
 }
