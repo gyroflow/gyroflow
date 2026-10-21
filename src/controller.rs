@@ -150,8 +150,8 @@ pub struct Controller {
     frame_readout_direction: qt_property!(i32; WRITE set_frame_readout_direction),
 
     adaptive_zoom: qt_property!(f64; WRITE set_adaptive_zoom),
-    fixed_zoom: qt_property!(bool; WRITE set_fixed_zoom),
-    zoom_limit_whole_clip: qt_property!(bool; WRITE set_zoom_limit_whole_clip),
+    fixed_zoom: qt_property!(bool; READ get_fixed_zoom WRITE set_fixed_zoom),
+    zoom_limit_whole_clip: qt_property!(bool; READ get_zoom_limit_whole_clip WRITE set_zoom_limit_whole_clip),
     zooming_center_x: qt_property!(f64; WRITE set_zooming_center_x),
     zooming_center_y: qt_property!(f64; WRITE set_zooming_center_y),
     zooming_method: qt_property!(i32; WRITE set_zooming_method),
@@ -232,6 +232,7 @@ pub struct Controller {
     mesh_at_frame: qt_method!(fn(&self, frame: usize) -> QVariantList),
     get_scaling_ratio: qt_method!(fn(&self) -> f64),
     get_min_fov: qt_method!(fn(&self) -> f64),
+    get_manual_zoom_missed: qt_method!(fn(&self) -> f64),
 
     init_calibrator: qt_method!(fn(&mut self)),
 
@@ -1800,6 +1801,9 @@ impl Controller {
     fn get_scaled_fps        (&self) -> f64 { self.stabilizer.params.read().get_scaled_fps() }
     fn get_scaling_ratio     (&self) -> f64 { self.stabilizer.get_scaling_ratio() }
     fn get_min_fov           (&self) -> f64 { self.stabilizer.get_min_fov() }
+    fn get_manual_zoom_missed(&self) -> f64 { self.stabilizer.manual_zoom_missed().unwrap_or(0.0) }
+    fn get_fixed_zoom        (&self) -> bool { self.stabilizer.params.read().fixed_zoom }
+    fn get_zoom_limit_whole_clip(&self) -> bool { self.stabilizer.params.read().zoom_limit_whole_clip }
     fn set_video_created_at  (&self, timestamp: u64) { self.stabilizer.params.write().video_created_at = if timestamp > 0 { Some(timestamp) } else { None }; }
 
     fn set_trim_ranges(&self, ranges: QString) {
@@ -2364,8 +2368,18 @@ impl Controller {
                 _ => { ::log::error!("Unknown save_type: {save_type}"); }
             }
         }
-        let contents = content.to_json_pretty();
-        if let Err(e) = filesystem::write(&url, contents.to_slice()) {
+        let mut contents = content.to_json_pretty().to_slice().to_vec();
+        // `zoom_limit_whole_clip` turned on because the project came from before it existed belongs to that project, a
+        // new preset gets the current behavior
+        if self.stabilizer.params.read().zoom_limit_whole_clip_from_old_file {
+            if let Ok(mut obj) = serde_json::from_slice::<serde_json::Value>(&contents) {
+                if let Some(v) = obj.get_mut("stabilization").and_then(|x| x.get_mut("zoom_limit_whole_clip")) {
+                    *v = serde_json::Value::Bool(false);
+                    if let Ok(new_contents) = serde_json::to_vec_pretty(&obj) { contents = new_contents; }
+                }
+            }
+        }
+        if let Err(e) = filesystem::write(&url, &contents) {
             self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
         }
         QString::from(filesystem::display_url(&url))

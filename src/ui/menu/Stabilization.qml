@@ -96,12 +96,9 @@ MenuItem {
                 additionalTranslationZ.value = stab.additional_translation[2];
             }
             if (stab.hasOwnProperty("max_zoom") && +stab.max_zoom > 50) maxZoomSlider.value = +stab.max_zoom;
-            // A project (it has a video) from before these existed: automatic zoom level, and the zoom limit lowering
-            // the smoothing of the whole clip, the way it was made. A preset without them leaves them alone
-            if (stab.hasOwnProperty("fixed_zoom")) staticZoomLevel.currentIndex = stab.fixed_zoom? 1 : 0;
-            else if (obj.videofile) staticZoomLevel.currentIndex = 0;
-            if (stab.hasOwnProperty("zoom_limit_whole_clip")) zoomLimitWholeClip.checked = !!stab.zoom_limit_whole_clip;
-            else if (obj.videofile) zoomLimitWholeClip.checked = true;
+            // The core settles these on import, also for files from before they existed
+            staticZoomLevel.currentIndex = controller.fixed_zoom? 1 : 0;
+            zoomLimitWholeClip.checked = controller.zoom_limit_whole_clip;
             if (stab.hasOwnProperty("max_zoom_terations") && +stab.max_zoom_terations > 0) maxZoomIterations.value = +stab.max_zoom_terations;
             if (stab.hasOwnProperty("adaptive_zoom_method")) zoomingMethod.currentIndex = +stab.adaptive_zoom_method;
             if (stab.hasOwnProperty("use_gravity_vectors")) {
@@ -206,6 +203,7 @@ MenuItem {
                 maxValues.maxYaw   = max_angles[1];
                 maxValues.maxRoll  = max_angles[2];
                 maxValues.maxZoom  = min_fov > 0.0001? (100 / min_fov) : min_fov;
+                maxValues.manualZoomMissed = controller.get_manual_zoom_missed();
                 const status = controller.get_smoothing_status();
                 // Clear current params
                 for (let i = smoothingStatus.children.length; i > 0; --i) {
@@ -579,6 +577,7 @@ MenuItem {
         property real maxYaw: 0;
         property real maxRoll: 0;
         property real maxZoom: 0;
+        property real manualZoomMissed: 0; // the manual zoom level the frame doesn't fit in, 0 when it does
         show: true;
         //color: styleBackground;
         color: "transparent";
@@ -654,8 +653,12 @@ MenuItem {
         }
     }
     InfoMessageSmall {
-        show: staticZoomLevel.manual && maxValues.maxZoom > maxZoomSlider.value + 0.5;
-        text: qsTr("The frame doesn't fit in %1 zoom even with the smoothing lowered, so the video is zoomed in to %2. Increase the zoom limit iterations in \"Advanced\", or the zoom.").arg("<b>" + maxZoomSlider.value.toFixed(0) + "%</b>").arg("<b>" + maxValues.maxZoom.toFixed(1) + "%</b>");
+        show: staticZoomLevel.manual && maxValues.manualZoomMissed > 0;
+        readonly property string target: "<b>" + maxValues.manualZoomMissed.toFixed(0) + "%</b>";
+        readonly property string actual: "<b>" + maxValues.maxZoom.toFixed(1) + "%</b>";
+        text: smoothingMethod.currentIndex == 1 || smoothingMethod.currentIndex == 2
+            ? qsTr("The frame doesn't fit in %1 zoom even with the smoothing lowered, so the video is zoomed in to %2. Increase the zoom limit iterations in \"Advanced\", or the zoom.").arg(target).arg(actual)
+            : qsTr("This smoothing method can't be lowered to fit the frame in %1 zoom, so the video is zoomed in to %2.").arg(target).arg(actual);
     }
     Label {
         text: qsTr("Zooming speed");

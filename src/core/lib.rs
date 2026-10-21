@@ -497,13 +497,14 @@ impl StabilizationManager {
         zooming::calculate_fovs(compute_params, &timestamps, method.into())
     }
     /// One iteration of the zoom limit: lowers the smoothing of every frame zoomed in more than the limit allows, judged
-    /// by `limit_fovs` (see `zooming::calculate_fovs`). Returns whether there was any
+    /// by `limit_fovs` (see `zooming::calculate_fovs`). Returns whether any frame was over the limit
     fn lower_smoothing_over_zoom_limit(params: &mut ComputeParams, limit_fovs: &[f64], iter: usize) -> bool {
         let thresholds = [0.95, 0.9, 0.85, 0.8];
         let threshold = *thresholds.get(iter).unwrap_or(thresholds.last().unwrap());
+        let fov_limits = zooming::zoom_limit_fovs(params);
         let mut any_above_limit = false;
         for (i, fov) in limit_fovs.iter().enumerate() {
-            let Some(fov_limit) = zooming::zoom_limit_fov(params, i) else { continue; };
+            let Some(fov_limit) = fov_limits.get(i).copied().flatten() else { continue; };
             if *fov < fov_limit {
                 any_above_limit = true;
                 if let Some(v) = params.smoothing_fov_limit_per_frame.get_mut(i) {
@@ -524,19 +525,16 @@ impl StabilizationManager {
         params.fovs = fovs;
         params.minimal_fovs = minimal_fovs;
 
-        let (max_zoom_max, max_zoom_iters) = {
+        {
             let mut stab_params = self.params.write();
             stab_params.set_fovs( params.fovs.clone(), lens_fov_adjustment);
             stab_params.minimal_fovs = params.minimal_fovs.clone();
             stab_params.zooming_debug_points = debug_points;
-            (
-                params.keyframes.get_keyframes(&KeyframeType::MaxZoom).map(|x| x.iter().map(|x| x.1.value).max_by(|a, b| a.total_cmp(b)).unwrap_or(stab_params.max_zoom.unwrap_or(0.0))).unwrap_or(stab_params.max_zoom.unwrap_or(0.0)),
-                stab_params.max_zoom_iterations,
-            )
-        };
+        }
+        let max_zoom_iters = params.max_zoom_iterations;
 
         // Max zoom
-        if max_zoom_max > 50.0 && max_zoom_iters > 0 {
+        if zooming::zoom_limit_runs(&params) {
             params.smoothing_fov_limit_per_frame.clear();
             for _ in params.fovs.iter() {
                 params.smoothing_fov_limit_per_frame.push(1.0);
@@ -683,19 +681,16 @@ impl StabilizationManager {
 
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
-                let (max_zoom_max, max_zoom_iters) = {
+                {
                     let mut stab_params = stabilization_params.write();
                     stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                     stab_params.minimal_fovs = params.minimal_fovs.clone();
                     stab_params.zooming_debug_points = debug_points;
-                    (
-                        params.keyframes.get_keyframes(&KeyframeType::MaxZoom).map(|x| x.iter().map(|x| x.1.value).max_by(|a, b| a.total_cmp(b)).unwrap_or(stab_params.max_zoom.unwrap_or(0.0))).unwrap_or(stab_params.max_zoom.unwrap_or(0.0)),
-                        stab_params.max_zoom_iterations,
-                    )
-                };
+                }
+                let max_zoom_iters = params.max_zoom_iterations;
 
                 // Max zoom
-                if max_zoom_max > 50.0 && max_zoom_iters > 0 {
+                if zooming::zoom_limit_runs(&params) {
                     // The iterations rewrite the quaternions with the zoom limit folded in, and the fovs along with them.
                     // Until they finish, neither is the state its key describes, so a run killed in here has to redo both
                     smoothing_checksum.store(0, SeqCst);
@@ -965,8 +960,23 @@ impl StabilizationManager {
         self.invalidate_smoothing(); // the zoom limit folds into the smoothing
     }
     pub fn set_zoom_limit_whole_clip(&self, v: bool) {
-        self.params.write().zoom_limit_whole_clip = v;
+        {
+            let mut params = self.params.write();
+            if params.zoom_limit_whole_clip == v { return; } // the UI showing what was loaded, it stays as it came
+            params.zoom_limit_whole_clip = v;
+            params.zoom_limit_whole_clip_from_old_file = false;
+        }
         self.invalidate_smoothing();
+    }
+    /// With the manual zoom level: the zoom (%) it's set to, when the frame doesn't fit in it even with the smoothing lowered
+    /// and the video had to be zoomed in further. `None` when it fits, or with another zoom level
+    pub fn manual_zoom_missed(&self) -> Option<f64> {
+        let params = stabilization::ComputeParams::from_manager(self);
+        if !zooming::is_manual_zoom(&params) { return None; }
+        let target = zooming::zoom_limit_fovs(&params).into_iter().flatten().next()?;
+        let fov = params.fovs.iter().copied().reduce(f64::min)?;
+        let scaling_factor = params.width as f64 / params.output_width.max(1) as f64;
+        (fov < target - 1e-6).then(|| 100.0 / (target * scaling_factor))
     }
 
     pub fn set_video_speed(&self, v: f64, link_with_smoothness: bool, link_with_zooming: bool, link_with_zooming_limit: bool) {
@@ -2081,12 +2091,17 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("horizontal_rs")         .and_then(|x| x.as_bool()) { if v { params.frame_readout_direction = if params.frame_readout_time < 0.0 { ReadoutDirection::RightToLeft } else { ReadoutDirection::LeftToRight }; } }
                 if let Some(v) = obj.get("max_zoom")              .and_then(|x| x.as_f64()) { params.max_zoom                = Some(v); }
                 if let Some(v) = obj.get("max_zoom_iterations")   .and_then(|x| x.as_i64()) { params.max_zoom_iterations     = v as _; }
-                if let Some(v) = obj.get("fixed_zoom")            .and_then(|x| x.as_bool()) { params.fixed_zoom             = v; }
-                // Projects from before it was there were made with the zoom limit lowering the smoothing of the whole clip.
-                // A preset without it leaves it alone, so an old default preset doesn't turn it on for every new video
+                // A project, or a preset with zoom settings, from before these keys: automatic zoom level, and the zoom limit
+                // lowering the smoothing of the whole clip, so it renders the way it was made. A preset without zoom settings
+                // leaves them alone
+                let old_zoom_settings = !*is_preset || ["adaptive_zoom_window", "max_zoom", "max_zoom_iterations"].iter().any(|x| obj.get(*x).is_some());
+                match obj.get("fixed_zoom").and_then(|x| x.as_bool()) {
+                    Some(v) => params.fixed_zoom = v,
+                    None => if old_zoom_settings { params.fixed_zoom = false; }
+                }
                 match obj.get("zoom_limit_whole_clip").and_then(|x| x.as_bool()) {
-                    Some(v) => params.zoom_limit_whole_clip = v,
-                    None => if !*is_preset { params.zoom_limit_whole_clip = true; }
+                    Some(v) => { params.zoom_limit_whole_clip = v; params.zoom_limit_whole_clip_from_old_file = false; }
+                    None => if old_zoom_settings { params.zoom_limit_whole_clip = true; params.zoom_limit_whole_clip_from_old_file = true; }
                 }
 
                 if let Some(v) = obj.get("video_speed").and_then(|x| x.as_f64()) { params.video_speed = v; }
