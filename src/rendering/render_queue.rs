@@ -1241,6 +1241,8 @@ impl RenderQueue {
                             adaptive_zoom_method:      params.adaptive_zoom_method,
                             max_zoom:                  params.max_zoom,
                             max_zoom_iterations:       params.max_zoom_iterations,
+                            fixed_zoom:                params.fixed_zoom,
+                            zoom_limit_whole_clip:     params.zoom_limit_whole_clip,
                             ..Default::default()
                         })),
                         input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { url: if is_gf_data { String::new() } else { url.clone() }, project_file_url: None, image_sequence_start: 0, image_sequence_fps: 0.0, preset_name: None, preset_output_size: None })),

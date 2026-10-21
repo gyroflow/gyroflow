@@ -82,6 +82,7 @@ pub struct StabilizationParams {
     pub max_zoom_iterations: usize,
     pub fixed_zoom: bool, // static zoom at exactly `max_zoom`, see zooming::calculate_fovs
     pub zoom_limit_whole_clip: bool, // static zoom: the zoom limit lowers the smoothing of the whole clip, as it did before
+    pub zoom_limit_whole_clip_from_old_file: bool, // `zoom_limit_whole_clip` comes from a file from before it existed, not from the user
     pub show_safe_area: bool,
     pub fovs: Vec<f64>,
     pub minimal_fovs: Vec<f64>,
@@ -165,6 +166,7 @@ impl Default for StabilizationParams {
             max_zoom_iterations: 5,
             fixed_zoom: false,
             zoom_limit_whole_clip: false,
+            zoom_limit_whole_clip_from_old_file: false,
 
             lens_correction_amount: 1.0,
             light_refraction_coefficient: 1.0,
