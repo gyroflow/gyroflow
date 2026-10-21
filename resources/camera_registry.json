@@ -1,0 +1,386 @@
+{
+  "version": 1,
+  "brands": [
+    {
+      "name": "Sony",
+      "aliases": ["ILCE", "ILME", "α", "Alpha"],
+      "cameras": [
+        {"name": "A7 III", "aliases": ["ILCE-7M3", "a7iii", "a73"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "A7 IV", "aliases": ["ILCE-7M4", "a7iv", "a74"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "A7R III", "aliases": ["ILCE-7RM3", "a7riii", "a7r3"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "A7R IV", "aliases": ["ILCE-7RM4", "a7riv", "a7r4"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "A7R V", "aliases": ["ILCE-7RM5", "a7rv", "a7r5"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "A7S II", "aliases": ["ILCE-7SM2", "a7sii", "a7s2"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "A7S III", "aliases": ["ILCE-7SM3", "a7siii", "a7s3"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "A7C", "aliases": ["ILCE-7C"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "A7C II", "aliases": ["ILCE-7CM2"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "A9", "aliases": ["ILCE-9"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "A9 II", "aliases": ["ILCE-9M2"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "A9 III", "aliases": ["ILCE-9M3"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "A1", "aliases": ["ILCE-1"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "FX3", "aliases": ["ILME-FX3"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "FX6", "aliases": ["ILME-FX6"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "FX30", "aliases": ["ILME-FX30"], "mount": "Sony E", "crop_factor": 1.5},
+        {"name": "A6000", "aliases": ["ILCE-6000", "a6000"], "mount": "Sony E", "crop_factor": 1.5},
+        {"name": "A6100", "aliases": ["ILCE-6100"], "mount": "Sony E", "crop_factor": 1.5},
+        {"name": "A6300", "aliases": ["ILCE-6300"], "mount": "Sony E", "crop_factor": 1.5},
+        {"name": "A6400", "aliases": ["ILCE-6400"], "mount": "Sony E", "crop_factor": 1.5},
+        {"name": "A6500", "aliases": ["ILCE-6500"], "mount": "Sony E", "crop_factor": 1.5},
+        {"name": "A6600", "aliases": ["ILCE-6600"], "mount": "Sony E", "crop_factor": 1.5},
+        {"name": "A6700", "aliases": ["ILCE-6700"], "mount": "Sony E", "crop_factor": 1.5},
+        {"name": "ZV-E1", "aliases": ["ZV-E1"], "mount": "Sony E", "crop_factor": 1.0},
+        {"name": "ZV-E10", "aliases": ["ZV-E10"], "mount": "Sony E", "crop_factor": 1.5},
+        {"name": "ZV-E10 II", "aliases": ["ZV-E10M2"], "mount": "Sony E", "crop_factor": 1.5},
+        {"name": "RX100 VII", "aliases": ["DSC-RX100M7"], "mount": "", "crop_factor": 2.7, "fixed_lens": true, "fixed_lens_name": "Zeiss Vario-Sonnar T* 24-200mm f/2.8-4.5"},
+        {"name": "RX10 IV", "aliases": ["DSC-RX10M4"], "mount": "", "crop_factor": 2.7, "fixed_lens": true},
+        {"name": "ZV-1", "aliases": ["ZV-1"], "mount": "", "crop_factor": 2.7, "fixed_lens": true}
+      ],
+      "lenses": [
+        {"name": "FE 12-24mm f/2.8 GM", "mounts": ["Sony E"], "is_zoom": true, "min_focal_mm": 12.0, "max_focal_mm": 24.0},
+        {"name": "FE 14mm f/1.8 GM", "mounts": ["Sony E"], "is_zoom": false},
+        {"name": "FE 16-35mm f/2.8 GM", "mounts": ["Sony E"], "is_zoom": true},
+        {"name": "FE 16-35mm f/2.8 GM II", "mounts": ["Sony E"], "is_zoom": true},
+        {"name": "FE 20mm f/1.8 G", "mounts": ["Sony E"], "is_zoom": false},
+        {"name": "FE 24mm f/1.4 GM", "mounts": ["Sony E"], "is_zoom": false},
+        {"name": "FE 24-70mm f/2.8 GM", "mounts": ["Sony E"], "is_zoom": true},
+        {"name": "FE 24-70mm f/2.8 GM II", "mounts": ["Sony E"], "is_zoom": true},
+        {"name": "FE 24-105mm f/4 G OSS", "mounts": ["Sony E"], "is_zoom": true},
+        {"name": "FE 35mm f/1.4 GM", "mounts": ["Sony E"], "is_zoom": false},
+        {"name": "FE 50mm f/1.2 GM", "mounts": ["Sony E"], "is_zoom": false},
+        {"name": "FE 50mm f/1.4 GM", "mounts": ["Sony E"], "is_zoom": false},
+        {"name": "FE 70-200mm f/2.8 GM OSS", "mounts": ["Sony E"], "is_zoom": true},
+        {"name": "FE 70-200mm f/2.8 GM OSS II", "mounts": ["Sony E"], "is_zoom": true},
+        {"name": "FE 85mm f/1.4 GM", "mounts": ["Sony E"], "is_zoom": false},
+        {"name": "FE 135mm f/1.8 GM", "mounts": ["Sony E"], "is_zoom": false},
+        {"name": "E 10-18mm f/4 OSS", "mounts": ["Sony E"], "is_zoom": true},
+        {"name": "E 16-55mm f/2.8 G", "mounts": ["Sony E"], "is_zoom": true},
+        {"name": "E 18-135mm f/3.5-5.6 OSS", "mounts": ["Sony E"], "is_zoom": true}
+      ]
+    },
+    {
+      "name": "Canon",
+      "aliases": ["EOS"],
+      "cameras": [
+        {"name": "EOS R3", "mount": "Canon RF", "crop_factor": 1.0},
+        {"name": "EOS R5", "mount": "Canon RF", "crop_factor": 1.0},
+        {"name": "EOS R5 C", "mount": "Canon RF", "crop_factor": 1.0},
+        {"name": "EOS R6", "mount": "Canon RF", "crop_factor": 1.0},
+        {"name": "EOS R6 Mark II", "aliases": ["EOS R6 II"], "mount": "Canon RF", "crop_factor": 1.0},
+        {"name": "EOS R7", "mount": "Canon RF", "crop_factor": 1.6},
+        {"name": "EOS R8", "mount": "Canon RF", "crop_factor": 1.0},
+        {"name": "EOS R10", "mount": "Canon RF", "crop_factor": 1.6},
+        {"name": "EOS R50", "mount": "Canon RF", "crop_factor": 1.6},
+        {"name": "EOS R100", "mount": "Canon RF", "crop_factor": 1.6},
+        {"name": "EOS 5D Mark IV", "aliases": ["5D4"], "mount": "Canon EF", "crop_factor": 1.0},
+        {"name": "EOS 5D Mark III", "aliases": ["5D3"], "mount": "Canon EF", "crop_factor": 1.0},
+        {"name": "EOS 6D Mark II", "aliases": ["6D2"], "mount": "Canon EF", "crop_factor": 1.0},
+        {"name": "EOS 7D Mark II", "aliases": ["7D2"], "mount": "Canon EF", "crop_factor": 1.6},
+        {"name": "EOS 80D", "mount": "Canon EF", "crop_factor": 1.6},
+        {"name": "EOS 90D", "mount": "Canon EF", "crop_factor": 1.6},
+        {"name": "EOS M50", "aliases": ["M50"], "mount": "Canon EF-M", "crop_factor": 1.6},
+        {"name": "EOS M50 Mark II", "mount": "Canon EF-M", "crop_factor": 1.6}
+      ],
+      "lenses": [
+        {"name": "RF 14-35mm f/4 L IS USM", "mounts": ["Canon RF"], "is_zoom": true},
+        {"name": "RF 15-35mm f/2.8 L IS USM", "mounts": ["Canon RF"], "is_zoom": true},
+        {"name": "RF 24-70mm f/2.8 L IS USM", "mounts": ["Canon RF"], "is_zoom": true},
+        {"name": "RF 24-105mm f/4 L IS USM", "mounts": ["Canon RF"], "is_zoom": true},
+        {"name": "RF 28-70mm f/2 L USM", "mounts": ["Canon RF"], "is_zoom": true},
+        {"name": "RF 35mm f/1.8 Macro IS STM", "mounts": ["Canon RF"], "is_zoom": false},
+        {"name": "RF 50mm f/1.2 L USM", "mounts": ["Canon RF"], "is_zoom": false},
+        {"name": "RF 70-200mm f/2.8 L IS USM", "mounts": ["Canon RF"], "is_zoom": true},
+        {"name": "RF 85mm f/1.2 L USM", "mounts": ["Canon RF"], "is_zoom": false},
+        {"name": "EF 16-35mm f/2.8L III USM", "mounts": ["Canon EF", "Canon RF"], "is_zoom": true},
+        {"name": "EF 24-70mm f/2.8L II USM", "mounts": ["Canon EF", "Canon RF"], "is_zoom": true},
+        {"name": "EF 24-105mm f/4L IS II USM", "mounts": ["Canon EF", "Canon RF"], "is_zoom": true},
+        {"name": "EF 70-200mm f/2.8L IS III USM", "mounts": ["Canon EF", "Canon RF"], "is_zoom": true}
+      ]
+    },
+    {
+      "name": "Nikon",
+      "aliases": [],
+      "cameras": [
+        {"name": "Z 5", "aliases": ["Z5"], "mount": "Nikon Z", "crop_factor": 1.0},
+        {"name": "Z 6", "aliases": ["Z6"], "mount": "Nikon Z", "crop_factor": 1.0},
+        {"name": "Z 6II", "aliases": ["Z6 II", "Z 6 II"], "mount": "Nikon Z", "crop_factor": 1.0},
+        {"name": "Z 6III", "aliases": ["Z6 III", "Z 6 III"], "mount": "Nikon Z", "crop_factor": 1.0},
+        {"name": "Z 7", "aliases": ["Z7"], "mount": "Nikon Z", "crop_factor": 1.0},
+        {"name": "Z 7II", "aliases": ["Z7 II", "Z 7 II"], "mount": "Nikon Z", "crop_factor": 1.0},
+        {"name": "Z 8", "aliases": ["Z8"], "mount": "Nikon Z", "crop_factor": 1.0},
+        {"name": "Z 9", "aliases": ["Z9"], "mount": "Nikon Z", "crop_factor": 1.0},
+        {"name": "Z f", "aliases": ["Zf"], "mount": "Nikon Z", "crop_factor": 1.0},
+        {"name": "Z fc", "aliases": ["Zfc"], "mount": "Nikon Z", "crop_factor": 1.5},
+        {"name": "Z 30", "aliases": ["Z30"], "mount": "Nikon Z", "crop_factor": 1.5},
+        {"name": "Z 50", "aliases": ["Z50"], "mount": "Nikon Z", "crop_factor": 1.5},
+        {"name": "D850", "mount": "Nikon F", "crop_factor": 1.0},
+        {"name": "D780", "mount": "Nikon F", "crop_factor": 1.0},
+        {"name": "D750", "mount": "Nikon F", "crop_factor": 1.0},
+        {"name": "D500", "mount": "Nikon F", "crop_factor": 1.5},
+        {"name": "D7500", "mount": "Nikon F", "crop_factor": 1.5}
+      ],
+      "lenses": [
+        {"name": "NIKKOR Z 14-24mm f/2.8 S", "mounts": ["Nikon Z"], "is_zoom": true},
+        {"name": "NIKKOR Z 14-30mm f/4 S", "mounts": ["Nikon Z"], "is_zoom": true},
+        {"name": "NIKKOR Z 24-70mm f/2.8 S", "mounts": ["Nikon Z"], "is_zoom": true},
+        {"name": "NIKKOR Z 24-70mm f/4 S", "mounts": ["Nikon Z"], "is_zoom": true},
+        {"name": "NIKKOR Z 24-120mm f/4 S", "mounts": ["Nikon Z"], "is_zoom": true},
+        {"name": "NIKKOR Z 35mm f/1.8 S", "mounts": ["Nikon Z"], "is_zoom": false},
+        {"name": "NIKKOR Z 50mm f/1.2 S", "mounts": ["Nikon Z"], "is_zoom": false},
+        {"name": "NIKKOR Z 50mm f/1.8 S", "mounts": ["Nikon Z"], "is_zoom": false},
+        {"name": "NIKKOR Z 70-200mm f/2.8 VR S", "mounts": ["Nikon Z"], "is_zoom": true},
+        {"name": "NIKKOR Z 85mm f/1.2 S", "mounts": ["Nikon Z"], "is_zoom": false},
+        {"name": "AF-S NIKKOR 14-24mm f/2.8G ED", "mounts": ["Nikon F", "Nikon Z"], "is_zoom": true},
+        {"name": "AF-S NIKKOR 24-70mm f/2.8E ED VR", "mounts": ["Nikon F", "Nikon Z"], "is_zoom": true},
+        {"name": "AF-S NIKKOR 70-200mm f/2.8E FL ED VR", "mounts": ["Nikon F", "Nikon Z"], "is_zoom": true}
+      ]
+    },
+    {
+      "name": "GoPro",
+      "aliases": ["Hero", "HERO"],
+      "cameras": [
+        {"name": "HERO5 Black", "aliases": ["Hero5", "GoPro5"], "mount": "", "fixed_lens": true},
+        {"name": "HERO5 Session", "aliases": ["Session5"], "mount": "", "fixed_lens": true},
+        {"name": "HERO6 Black", "aliases": ["Hero6", "GoPro6"], "mount": "", "fixed_lens": true},
+        {"name": "HERO7 Black", "aliases": ["Hero7", "GoPro7"], "mount": "", "fixed_lens": true},
+        {"name": "HERO8 Black", "aliases": ["Hero8", "GoPro8"], "mount": "", "fixed_lens": true},
+        {"name": "HERO9 Black", "aliases": ["Hero9", "GoPro9"], "mount": "", "fixed_lens": true},
+        {"name": "HERO10 Black", "aliases": ["Hero10", "GoPro10"], "mount": "", "fixed_lens": true},
+        {"name": "HERO11 Black", "aliases": ["Hero11", "GoPro11"], "mount": "", "fixed_lens": true},
+        {"name": "HERO11 Black Mini", "aliases": ["Hero11 Mini"], "mount": "", "fixed_lens": true},
+        {"name": "HERO12 Black", "aliases": ["Hero12", "GoPro12"], "mount": "", "fixed_lens": true},
+        {"name": "HERO13 Black", "aliases": ["Hero13", "GoPro13"], "mount": "", "fixed_lens": true},
+        {"name": "MAX", "aliases": ["GoPro MAX"], "mount": "", "fixed_lens": true}
+      ],
+      "lenses": []
+    },
+    {
+      "name": "DJI",
+      "aliases": ["Osmo", "Mavic"],
+      "cameras": [
+        {"name": "Osmo Action", "mount": "", "fixed_lens": true},
+        {"name": "Osmo Action 3", "mount": "", "fixed_lens": true},
+        {"name": "Osmo Action 4", "mount": "", "fixed_lens": true},
+        {"name": "Osmo Action 5 Pro", "mount": "", "fixed_lens": true},
+        {"name": "Osmo Pocket", "mount": "", "fixed_lens": true},
+        {"name": "Osmo Pocket 2", "mount": "", "fixed_lens": true},
+        {"name": "Osmo Pocket 3", "mount": "", "fixed_lens": true},
+        {"name": "Mavic Air 2", "mount": "", "fixed_lens": true},
+        {"name": "Mavic Air 2S", "mount": "", "fixed_lens": true},
+        {"name": "Mavic 3", "mount": "", "fixed_lens": true, "crop_factor": 1.0},
+        {"name": "Mavic 3 Pro", "mount": "", "fixed_lens": true},
+        {"name": "Mavic 3 Cine", "mount": "", "fixed_lens": true},
+        {"name": "Mini 2", "mount": "", "fixed_lens": true},
+        {"name": "Mini 3", "mount": "", "fixed_lens": true},
+        {"name": "Mini 3 Pro", "mount": "", "fixed_lens": true},
+        {"name": "Mini 4 Pro", "mount": "", "fixed_lens": true},
+        {"name": "Avata", "mount": "", "fixed_lens": true},
+        {"name": "Avata 2", "mount": "", "fixed_lens": true}
+      ],
+      "lenses": []
+    },
+    {
+      "name": "Insta360",
+      "aliases": ["ONE", "GO"],
+      "cameras": [
+        {"name": "ONE R", "mount": "", "fixed_lens": true},
+        {"name": "ONE RS", "mount": "", "fixed_lens": true},
+        {"name": "ONE X", "mount": "", "fixed_lens": true},
+        {"name": "ONE X2", "mount": "", "fixed_lens": true},
+        {"name": "ONE X3", "mount": "", "fixed_lens": true},
+        {"name": "GO 2", "mount": "", "fixed_lens": true},
+        {"name": "GO 3", "mount": "", "fixed_lens": true},
+        {"name": "Ace", "mount": "", "fixed_lens": true},
+        {"name": "Ace Pro", "mount": "", "fixed_lens": true}
+      ],
+      "lenses": []
+    },
+    {
+      "name": "Panasonic",
+      "aliases": ["Lumix", "DC-", "DMC-"],
+      "cameras": [
+        {"name": "S1", "aliases": ["DC-S1", "Lumix S1"], "mount": "Leica L", "crop_factor": 1.0},
+        {"name": "S1H", "aliases": ["DC-S1H", "Lumix S1H"], "mount": "Leica L", "crop_factor": 1.0},
+        {"name": "S1R", "aliases": ["DC-S1R", "Lumix S1R"], "mount": "Leica L", "crop_factor": 1.0},
+        {"name": "S5", "aliases": ["DC-S5", "Lumix S5"], "mount": "Leica L", "crop_factor": 1.0},
+        {"name": "S5 II", "aliases": ["DC-S5M2", "Lumix S5 II"], "mount": "Leica L", "crop_factor": 1.0},
+        {"name": "S5 IIX", "aliases": ["DC-S5M2X", "Lumix S5 IIX"], "mount": "Leica L", "crop_factor": 1.0},
+        {"name": "GH5", "aliases": ["DC-GH5", "Lumix GH5"], "mount": "Micro Four Thirds", "crop_factor": 2.0},
+        {"name": "GH5 II", "aliases": ["DC-GH5M2"], "mount": "Micro Four Thirds", "crop_factor": 2.0},
+        {"name": "GH5S", "aliases": ["DC-GH5S"], "mount": "Micro Four Thirds", "crop_factor": 2.0},
+        {"name": "GH6", "aliases": ["DC-GH6", "Lumix GH6"], "mount": "Micro Four Thirds", "crop_factor": 2.0},
+        {"name": "G9", "aliases": ["DC-G9", "Lumix G9"], "mount": "Micro Four Thirds", "crop_factor": 2.0},
+        {"name": "G9 II", "aliases": ["DC-G9M2"], "mount": "Micro Four Thirds", "crop_factor": 2.0}
+      ],
+      "lenses": [
+        {"name": "LUMIX S 20-60mm f/3.5-5.6", "mounts": ["Leica L"], "is_zoom": true},
+        {"name": "LUMIX S 24-105mm f/4 Macro O.I.S.", "mounts": ["Leica L"], "is_zoom": true},
+        {"name": "LUMIX S PRO 16-35mm f/4", "mounts": ["Leica L"], "is_zoom": true},
+        {"name": "LUMIX S PRO 24-70mm f/2.8", "mounts": ["Leica L"], "is_zoom": true},
+        {"name": "LUMIX S PRO 50mm f/1.4", "mounts": ["Leica L"], "is_zoom": false},
+        {"name": "LUMIX S PRO 70-200mm f/2.8 O.I.S.", "mounts": ["Leica L"], "is_zoom": true},
+        {"name": "LEICA DG VARIO-ELMARIT 8-18mm f/2.8-4.0", "mounts": ["Micro Four Thirds"], "is_zoom": true},
+        {"name": "LEICA DG VARIO-ELMARIT 12-60mm f/2.8-4.0", "mounts": ["Micro Four Thirds"], "is_zoom": true}
+      ]
+    },
+    {
+      "name": "Fujifilm",
+      "aliases": ["Fuji", "X-"],
+      "cameras": [
+        {"name": "X-T5", "aliases": ["XT5"], "mount": "Fujifilm X", "crop_factor": 1.5},
+        {"name": "X-T4", "aliases": ["XT4"], "mount": "Fujifilm X", "crop_factor": 1.5},
+        {"name": "X-T3", "aliases": ["XT3"], "mount": "Fujifilm X", "crop_factor": 1.5},
+        {"name": "X-H2", "aliases": ["XH2"], "mount": "Fujifilm X", "crop_factor": 1.5},
+        {"name": "X-H2S", "aliases": ["XH2S"], "mount": "Fujifilm X", "crop_factor": 1.5},
+        {"name": "X-S10", "aliases": ["XS10"], "mount": "Fujifilm X", "crop_factor": 1.5},
+        {"name": "X-S20", "aliases": ["XS20"], "mount": "Fujifilm X", "crop_factor": 1.5},
+        {"name": "X-T30 II", "aliases": ["XT30 II"], "mount": "Fujifilm X", "crop_factor": 1.5},
+        {"name": "X-T50", "aliases": ["XT50"], "mount": "Fujifilm X", "crop_factor": 1.5},
+        {"name": "GFX 50S II", "mount": "Fujifilm GFX", "crop_factor": 0.79},
+        {"name": "GFX 100", "mount": "Fujifilm GFX", "crop_factor": 0.79},
+        {"name": "GFX 100 II", "mount": "Fujifilm GFX", "crop_factor": 0.79},
+        {"name": "GFX 100S", "mount": "Fujifilm GFX", "crop_factor": 0.79},
+        {"name": "X100V", "mount": "", "fixed_lens": true, "crop_factor": 1.5},
+        {"name": "X100VI", "mount": "", "fixed_lens": true, "crop_factor": 1.5}
+      ],
+      "lenses": [
+        {"name": "XF 10-24mm f/4 R OIS WR", "mounts": ["Fujifilm X"], "is_zoom": true},
+        {"name": "XF 16-55mm f/2.8 R LM WR", "mounts": ["Fujifilm X"], "is_zoom": true},
+        {"name": "XF 16-80mm f/4 R OIS WR", "mounts": ["Fujifilm X"], "is_zoom": true},
+        {"name": "XF 18-55mm f/2.8-4 R LM OIS", "mounts": ["Fujifilm X"], "is_zoom": true},
+        {"name": "XF 23mm f/1.4 R LM WR", "mounts": ["Fujifilm X"], "is_zoom": false},
+        {"name": "XF 33mm f/1.4 R LM WR", "mounts": ["Fujifilm X"], "is_zoom": false},
+        {"name": "XF 35mm f/1.4 R", "mounts": ["Fujifilm X"], "is_zoom": false},
+        {"name": "XF 50-140mm f/2.8 R LM OIS WR", "mounts": ["Fujifilm X"], "is_zoom": true},
+        {"name": "XF 56mm f/1.2 R WR", "mounts": ["Fujifilm X"], "is_zoom": false}
+      ]
+    },
+    {
+      "name": "Blackmagic",
+      "aliases": ["BMPCC", "BMCC", "BRAW"],
+      "cameras": [
+        {"name": "Pocket Cinema Camera 4K", "aliases": ["BMPCC 4K", "BMPCC4K"], "mount": "Micro Four Thirds", "crop_factor": 1.9},
+        {"name": "Pocket Cinema Camera 6K", "aliases": ["BMPCC 6K", "BMPCC6K"], "mount": "Canon EF", "crop_factor": 1.55},
+        {"name": "Pocket Cinema Camera 6K G2", "aliases": ["BMPCC 6K G2"], "mount": "Canon EF", "crop_factor": 1.55},
+        {"name": "Pocket Cinema Camera 6K Pro", "aliases": ["BMPCC 6K Pro"], "mount": "Canon EF", "crop_factor": 1.55},
+        {"name": "Cinema Camera 6K", "aliases": ["BMCC 6K"], "mount": "Leica L", "crop_factor": 1.0}
+      ],
+      "lenses": []
+    },
+    {
+      "name": "Olympus",
+      "aliases": ["OM System", "OM-D", "PEN"],
+      "cameras": [
+        {"name": "OM-D E-M1 Mark III", "aliases": ["E-M1 III", "E-M1III"], "mount": "Micro Four Thirds", "crop_factor": 2.0},
+        {"name": "OM-D E-M1X", "aliases": ["E-M1X"], "mount": "Micro Four Thirds", "crop_factor": 2.0},
+        {"name": "OM-D E-M5 Mark III", "aliases": ["E-M5 III"], "mount": "Micro Four Thirds", "crop_factor": 2.0},
+        {"name": "OM-D E-M10 Mark IV", "aliases": ["E-M10 IV"], "mount": "Micro Four Thirds", "crop_factor": 2.0},
+        {"name": "OM-1", "mount": "Micro Four Thirds", "crop_factor": 2.0},
+        {"name": "OM-1 Mark II", "aliases": ["OM-1 II"], "mount": "Micro Four Thirds", "crop_factor": 2.0},
+        {"name": "OM-5", "mount": "Micro Four Thirds", "crop_factor": 2.0}
+      ],
+      "lenses": [
+        {"name": "M.Zuiko Digital ED 7-14mm f/2.8 PRO", "mounts": ["Micro Four Thirds"], "is_zoom": true},
+        {"name": "M.Zuiko Digital ED 8-25mm f/4.0 PRO", "mounts": ["Micro Four Thirds"], "is_zoom": true},
+        {"name": "M.Zuiko Digital ED 12-40mm f/2.8 PRO II", "mounts": ["Micro Four Thirds"], "is_zoom": true},
+        {"name": "M.Zuiko Digital ED 12-100mm f/4.0 IS PRO", "mounts": ["Micro Four Thirds"], "is_zoom": true},
+        {"name": "M.Zuiko Digital ED 25mm f/1.2 PRO", "mounts": ["Micro Four Thirds"], "is_zoom": false},
+        {"name": "M.Zuiko Digital ED 40-150mm f/2.8 PRO", "mounts": ["Micro Four Thirds"], "is_zoom": true},
+        {"name": "M.Zuiko Digital ED 45mm f/1.2 PRO", "mounts": ["Micro Four Thirds"], "is_zoom": false}
+      ]
+    },
+    {
+      "name": "RED",
+      "aliases": ["DSMC", "KOMODO"],
+      "cameras": [
+        {"name": "KOMODO 6K", "aliases": ["KOMODO"], "mount": "Canon RF", "crop_factor": 1.53},
+        {"name": "KOMODO-X 6K", "aliases": ["KOMODO-X"], "mount": "Canon RF", "crop_factor": 1.53},
+        {"name": "V-RAPTOR 8K VV", "aliases": ["V-RAPTOR"], "mount": "Canon RF", "crop_factor": 1.0},
+        {"name": "V-RAPTOR XL 8K VV", "aliases": ["V-RAPTOR XL"], "mount": "Canon RF", "crop_factor": 1.0},
+        {"name": "DSMC2 MONSTRO 8K VV", "aliases": ["MONSTRO"], "mount": "Canon RF", "crop_factor": 1.0},
+        {"name": "DSMC2 HELIUM 8K S35", "aliases": ["HELIUM"], "mount": "Canon RF", "crop_factor": 1.39}
+      ],
+      "lenses": []
+    },
+    {
+      "name": "RunCam",
+      "aliases": [],
+      "cameras": [
+        {"name": "5 Orange", "mount": "", "fixed_lens": true},
+        {"name": "Thumb", "mount": "", "fixed_lens": true},
+        {"name": "Thumb Pro", "mount": "", "fixed_lens": true}
+      ],
+      "lenses": []
+    },
+    {
+      "name": "Caddx",
+      "aliases": [],
+      "cameras": [
+        {"name": "Peanut", "mount": "", "fixed_lens": true},
+        {"name": "Walnut", "mount": "", "fixed_lens": true}
+      ],
+      "lenses": []
+    },
+    {
+      "name": "Sigma",
+      "aliases": [],
+      "cameras": [
+        {"name": "fp", "mount": "Leica L", "crop_factor": 1.0},
+        {"name": "fp L", "mount": "Leica L", "crop_factor": 1.0}
+      ],
+      "lenses": [
+        {"name": "14-24mm f/2.8 DG DN Art", "mounts": ["Sony E", "Leica L"], "is_zoom": true},
+        {"name": "16-28mm f/2.8 DG DN Contemporary", "mounts": ["Sony E", "Leica L"], "is_zoom": true},
+        {"name": "24-70mm f/2.8 DG DN Art", "mounts": ["Sony E", "Leica L"], "is_zoom": true},
+        {"name": "28-70mm f/2.8 DG DN Contemporary", "mounts": ["Sony E", "Leica L"], "is_zoom": true},
+        {"name": "35mm f/1.4 DG DN Art", "mounts": ["Sony E", "Leica L"], "is_zoom": false},
+        {"name": "50mm f/1.4 DG DN Art", "mounts": ["Sony E", "Leica L"], "is_zoom": false},
+        {"name": "70-200mm f/2.8 DG DN OS Sports", "mounts": ["Sony E", "Leica L"], "is_zoom": true},
+        {"name": "85mm f/1.4 DG DN Art", "mounts": ["Sony E", "Leica L"], "is_zoom": false},
+        {"name": "18-35mm f/1.8 DC HSM Art", "mounts": ["Canon EF", "Nikon F", "Sony A"], "is_zoom": true},
+        {"name": "50-100mm f/1.8 DC HSM Art", "mounts": ["Canon EF", "Nikon F", "Sony A"], "is_zoom": true}
+      ]
+    },
+    {
+      "name": "Tamron",
+      "aliases": [],
+      "cameras": [],
+      "lenses": [
+        {"name": "17-28mm f/2.8 Di III RXD", "mounts": ["Sony E"], "is_zoom": true},
+        {"name": "20-40mm f/2.8 Di III VXD", "mounts": ["Sony E"], "is_zoom": true},
+        {"name": "28-75mm f/2.8 Di III VXD G2", "mounts": ["Sony E"], "is_zoom": true},
+        {"name": "35-150mm f/2-2.8 Di III VXD", "mounts": ["Sony E"], "is_zoom": true},
+        {"name": "70-180mm f/2.8 Di III VXD", "mounts": ["Sony E"], "is_zoom": true}
+      ]
+    },
+    {
+      "name": "Samyang",
+      "aliases": ["Rokinon"],
+      "cameras": [],
+      "lenses": [
+        {"name": "AF 14mm f/2.8", "mounts": ["Sony E", "Canon RF", "Nikon Z"], "is_zoom": false},
+        {"name": "AF 24mm f/1.8", "mounts": ["Sony E"], "is_zoom": false},
+        {"name": "AF 35mm f/1.4", "mounts": ["Sony E"], "is_zoom": false},
+        {"name": "AF 50mm f/1.4", "mounts": ["Sony E"], "is_zoom": false},
+        {"name": "AF 75mm f/1.8", "mounts": ["Sony E"], "is_zoom": false},
+        {"name": "AF 85mm f/1.4", "mounts": ["Sony E"], "is_zoom": false}
+      ]
+    }
+  ],
+  "mounts": [
+    {"name": "Sony E", "compatible_mounts": [], "flange_distance_mm": 18.0},
+    {"name": "Sony A", "compatible_mounts": ["Sony E"], "flange_distance_mm": 44.5},
+    {"name": "Canon EF", "compatible_mounts": [], "flange_distance_mm": 44.0},
+    {"name": "Canon EF-S", "compatible_mounts": ["Canon EF"], "flange_distance_mm": 44.0},
+    {"name": "Canon RF", "compatible_mounts": ["Canon EF", "Canon EF-S"], "flange_distance_mm": 20.0},
+    {"name": "Canon EF-M", "compatible_mounts": ["Canon EF", "Canon EF-S"], "flange_distance_mm": 18.0},
+    {"name": "Nikon F", "compatible_mounts": [], "flange_distance_mm": 46.5},
+    {"name": "Nikon Z", "compatible_mounts": ["Nikon F"], "flange_distance_mm": 16.0},
+    {"name": "Micro Four Thirds", "compatible_mounts": [], "flange_distance_mm": 19.25},
+    {"name": "Fujifilm X", "compatible_mounts": [], "flange_distance_mm": 17.7},
+    {"name": "Fujifilm GFX", "compatible_mounts": [], "flange_distance_mm": 26.7},
+    {"name": "Leica L", "compatible_mounts": [], "flange_distance_mm": 20.0},
+    {"name": "Leica M", "compatible_mounts": [], "flange_distance_mm": 27.8},
+    {"name": "ARRI PL", "compatible_mounts": [], "flange_distance_mm": 52.0}
+  ],
+  "lensfun_lenses": []
+}
