@@ -151,6 +151,19 @@ impl LensProfileDatabase {
                             load(DataSource::String(data), &f_name);
                         }
                     }
+                    if f_name.ends_with(".xml") {
+                        if let Ok(data) = std::fs::read_to_string(&f_name) {
+                            if let Ok(profiles) = crate::lensfun::parse_lensfun_xml(&data) {
+                                for mut profile in profiles {
+                                    profile.path_to_file = f_name.clone();
+                                    let key = profile.identifier.clone();
+                                    if !self.map.contains_key(&key) {
+                                        self.map.insert(key, profile);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     if !bundle_loaded && f_name.ends_with(".cbor.gz") {
                         if let Ok(data) = std::fs::read(&f_name) {
                             let mut e = flate2::read::GzDecoder::new(std::io::Cursor::new(data));
@@ -531,4 +544,48 @@ impl LensProfileDatabase {
             }
         }
     }
+
+    pub fn load_lensfun_xml(&mut self, xml_str: &str) -> Result<usize, String> {
+        let profiles = crate::lensfun::parse_lensfun_xml(xml_str)?;
+        let count = profiles.len();
+        for mut profile in profiles {
+            profile.path_to_file = "lensfun.xml".to_string();
+            let key = profile.identifier.clone();
+            self.map.insert(key, profile);
+        }
+        self.prepare_list_for_ui();
+        self.loaded = true;
+        Ok(count)
+    }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_lens_profile_database_load_lensfun_xml() {
+        let mut db = LensProfileDatabase::default();
+        let xml = r#"
+        <lensdatabase version="1">
+            <lens>
+                <maker>Sony</maker>
+                <model>FE 24mm F1.4 GM</model>
+                <mount>Sony E</mount>
+                <cropfactor>1.0</cropfactor>
+                <calibration>
+                    <distortion model="poly3" focal="24" k1="-0.015" />
+                </calibration>
+            </lens>
+        </lensdatabase>
+        "#;
+        let count = db.load_lensfun_xml(xml).expect("Should load Lensfun XML");
+        assert_eq!(count, 1);
+        assert!(!db.map.is_empty());
+        let prof = db.map.values().next().unwrap();
+        assert_eq!(prof.camera_brand, "Sony");
+        assert_eq!(prof.lens_model, "FE 24mm F1.4 GM");
+        assert_eq!(prof.distortion_model.as_deref(), Some("poly3"));
+    }
+}
+
