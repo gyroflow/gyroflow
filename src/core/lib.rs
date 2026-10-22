@@ -6,7 +6,6 @@ pub mod gyro_source;
 pub mod imu_integration;
 pub mod lens_profile;
 pub mod lens_profile_database;
-#[cfg(feature = "opencv")]
 pub mod calibration;
 pub mod synchronization;
 pub mod stabilization;
@@ -941,6 +940,7 @@ impl StabilizationManager {
     pub fn set_fov_overview          (&self, v: bool) { self.params.write().fov_overview           = v; }
     pub fn set_show_safe_area        (&self, v: bool) { self.params.write().show_safe_area         = v; }
     pub fn set_lens_correction_amount(&self, v: f64)  { self.params.write().lens_correction_amount = v; self.invalidate_zooming(); }
+    pub fn set_output_projection     (&self, v: i32)  { self.params.write().output_projection      = v; self.invalidate_zooming(); }
     pub fn set_frame_offset          (&self, v: i32)  { self.params.write().frame_offset           = v; }
     pub fn set_light_refraction_coefficient(&self, v: f64) { self.params.write().light_refraction_coefficient = v; self.invalidate_zooming(); }
     pub fn set_background_color      (&self, bg: Vector4<f32>) { self.params.write().background = bg; }
@@ -1699,6 +1699,7 @@ impl StabilizationManager {
                 "additional_rotation":    params.additional_rotation,
                 "additional_translation": params.additional_translation,
                 "lens_correction_amount": params.lens_correction_amount,
+                "output_projection":      stabilization::projection::setting_name(params.output_projection),
                 "horizon_lock_amount":    horizon_amount,
                 "horizon_lock_roll":      horizon_lock.horizonroll,
                 "horizon_lock_pitch_enabled": horizon_lock.lock_pitch,
@@ -2087,6 +2088,12 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("frame_readout_direction").and_then(|x| x.as_str()) { params.frame_readout_direction = v.into(); }
                 if let Some(v) = obj.get("adaptive_zoom_window")  .and_then(|x| x.as_f64()) { params.adaptive_zoom_window    = v; }
                 if let Some(v) = obj.get("lens_correction_amount").and_then(|x| x.as_f64()) { params.lens_correction_amount  = v; }
+                // A project from before the setting draws rectilinear, the way it was made, and so does one with a name this
+                // version doesn't know, whatever the file open before it was set to. A preset without it leaves it alone
+                match obj.get("output_projection").and_then(|x| x.as_str()).and_then(stabilization::projection::setting_from_name) {
+                    Some(v) => params.output_projection = v,
+                    None => if !*is_preset { params.output_projection = stabilization::projection::OutputProjection::Rectilinear as i32; }
+                }
                 if let Some(v) = obj.get("frame_offset")          .and_then(|x| x.as_i64()) { params.frame_offset            = v as i32; }
                 if let Some(v) = obj.get("horizontal_rs")         .and_then(|x| x.as_bool()) { if v { params.frame_readout_direction = if params.frame_readout_time < 0.0 { ReadoutDirection::RightToLeft } else { ReadoutDirection::LeftToRight }; } }
                 if let Some(v) = obj.get("max_zoom")              .and_then(|x| x.as_f64()) { params.max_zoom                = Some(v); }

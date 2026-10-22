@@ -103,6 +103,10 @@ pub struct StabilizationParams {
     pub video_rotation: f64,
 
     pub lens_correction_amount: f64,
+    /// The output projection picked in the Lens profile section: a
+    /// [`crate::stabilization::projection::OutputProjection`] as `i32`, or `projection::AUTOMATIC`. Per file, like
+    /// the lens itself: `clear` puts it back to rectilinear
+    pub output_projection: i32,
     pub light_refraction_coefficient: f64,
     pub background_mode: BackgroundMode,
     pub background_margin: f64,
@@ -169,6 +173,7 @@ impl Default for StabilizationParams {
             zoom_limit_whole_clip_from_old_file: false,
 
             lens_correction_amount: 1.0,
+            output_projection: crate::stabilization::projection::OutputProjection::Rectilinear as i32,
             light_refraction_coefficient: 1.0,
             background_mode: BackgroundMode::SolidColor,
             background_margin: 0.0,

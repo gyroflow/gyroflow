@@ -99,7 +99,7 @@ MenuItem {
             // The core settles these on import, also for files from before they existed
             staticZoomLevel.currentIndex = controller.fixed_zoom? 1 : 0;
             zoomLimitWholeClip.checked = controller.zoom_limit_whole_clip;
-            if (stab.hasOwnProperty("max_zoom_terations") && +stab.max_zoom_terations > 0) maxZoomIterations.value = +stab.max_zoom_terations;
+            if (stab.hasOwnProperty("max_zoom_iterations") && +stab.max_zoom_iterations > 0) maxZoomIterations.value = +stab.max_zoom_iterations;
             if (stab.hasOwnProperty("adaptive_zoom_method")) zoomingMethod.currentIndex = +stab.adaptive_zoom_method;
             if (stab.hasOwnProperty("use_gravity_vectors")) {
                 useGravityVectors.checked = !!stab.use_gravity_vectors;

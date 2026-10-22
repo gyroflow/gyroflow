@@ -59,6 +59,8 @@ MenuItem {
         if (stab.hasOwnProperty("lens_breathing_enabled")) {
             lensBreathing.checked = !!stab.lens_breathing_enabled;
         }
+        // The core settled it on import: a project from before it draws rectilinear, a preset without it leaves it alone
+        outputProjection.setValue(controller.output_projection);
     }
 
     Component.onCompleted: {
@@ -75,6 +77,7 @@ MenuItem {
         QT_TRANSLATE_NOOP("TableList", "Asymmetrical");
         QT_TRANSLATE_NOOP("TableList", "Distortion model");
         QT_TRANSLATE_NOOP("TableList", "Digital lens");
+        QT_TRANSLATE_NOOP("TableList", "Output projection");
     }
     Timer {
         id: profilesUpdateTimer;
@@ -91,6 +94,7 @@ MenuItem {
                 // no lens metadata delay. A project file loaded afterwards overrides them through loadGyroflow.
                 lensBreathing.checked = controller.lens_breathing_enabled;
                 lensDelay.value = controller.lens_metadata_delay_frames;
+                outputProjection.setValue(controller.output_projection);
             }
         }
         function onLens_metadata_delay_changed(): void {
@@ -138,6 +142,7 @@ MenuItem {
                     if (obj.asymmetrical) lensInfo["Asymmetrical"] = qsTr("Yes");
                     if (obj.distortion_model && obj.distortion_model != "opencv_fisheye") lensInfo["Distortion model"] = obj.distortion_model;
                     if (obj.digital_lens) lensInfo["Digital lens"] = obj.digital_lens;
+                    lensInfo["Output projection"] = outputProjection.text;
 
                     info.model = lensInfo;
 
@@ -322,6 +327,38 @@ MenuItem {
         id: info;
         copyable: true;
         model: ({ })
+        editableFields: ({
+            "Output projection": {
+                "type": "choice",
+                "options": outputProjection.options,
+                "tooltips": outputProjection.tooltips,
+                "value": function() { return outputProjection.currentIndex; },
+                "onChange": function(index) { outputProjection.currentIndex = index; }
+            }
+        });
+    }
+
+    QtObject {
+        id: outputProjection;
+        // Index -> `OutputProjection` as i32, -1 is "Automatic" (`projection::AUTOMATIC`)
+        property var values: [0, 1, 2, 3, 4, -1];
+        property var options: [QT_TRANSLATE_NOOP("Popup", "Rectilinear"), QT_TRANSLATE_NOOP("Popup", "Stereographic"), QT_TRANSLATE_NOOP("Popup", "Equidistant"), QT_TRANSLATE_NOOP("Popup", "Equisolid angle"), QT_TRANSLATE_NOOP("Popup", "Orthographic"), QT_TRANSLATE_NOOP("Popup", "Automatic")];
+        property var tooltips: ([
+            qsTr("Straight lines stay straight. A lens that sees more than 180° can't be shown whole, so its edges are cropped."),
+            qsTr("Fisheye that keeps shapes natural but bends straight lines. Shows the whole picture of a lens wider than 180°."),
+            qsTr("Fisheye where the distance from the center is proportional to the angle. Shows the whole picture of a lens wider than 180°."),
+            qsTr("Fisheye that keeps areas in proportion. Shows the whole picture of a lens wider than 180°."),
+            qsTr("Fisheye that compresses the edges strongly. Shows at most 180°."),
+            qsTr("Rectilinear, or stereographic when the lens sees more than 180°.")
+        ]);
+        property int currentIndex: 0;
+        property string text: qsTranslate("Popup", options[currentIndex]);
+        function setValue(v: int): void {
+            const i = values.indexOf(v);
+            currentIndex = i >= 0? i : 0;
+        }
+        onCurrentIndexChanged: controller.output_projection = values[currentIndex];
+        onTextChanged: if (info.model.hasOwnProperty("Output projection")) info.updateEntry("Output projection", text);
     }
 
     CheckBox {

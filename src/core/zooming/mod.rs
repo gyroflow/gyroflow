@@ -350,6 +350,8 @@ pub fn get_checksum(compute_params: &ComputeParams, smoothing_checksum: u64) -> 
     // (`ComputeParams::from_manager` derives them from the profile and nothing else writes them)
     hasher.write_u64(compute_params.lens.get_checksum());
     hasher.write_u64(compute_params.lens_correction_amount.to_bits());
+    // The projection the picture is drawn in, resolved: "Automatic" is a function of the lens above
+    hasher.write_i32(compute_params.output_projection);
     hasher.write_u64(compute_params.light_refraction_coefficient.to_bits());
 
     // Video geometry, timing and rolling shutter

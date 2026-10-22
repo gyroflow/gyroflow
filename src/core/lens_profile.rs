@@ -138,15 +138,20 @@ impl LensProfile {
         self.optimal_fov = None;
 
         self.asymmetrical = cal.asymmetrical;
+        // The model the coefficients came from, which the one picked for the next fit may not be yet
+        self.distortion_model = cal.fitted_model.distortion_model().map(str::to_string);
 
         self.fisheye_params = CameraParams {
             RMS_error: cal.rms,
             camera_matrix: cal.k.row_iter().map(|x| [x[0], x[1], x[2]]).collect(),
-            distortion_coeffs: cal.d.as_slice().to_vec(),
+            distortion_coeffs: cal.d.clone(),
             radial_distortion_limit: None
         };
 
         self.finalize();
+        // The field limit, where the curve folds, as a loaded profile has it: without it the calibrator's own preview
+        // has no limit for a fit whose curve folds inside the frame
+        self.init();
     }
 
     pub fn finalize(&mut self) {

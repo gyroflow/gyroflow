@@ -1228,6 +1228,7 @@ impl RenderQueue {
                             background:             params.background,
                             adaptive_zoom_window:   params.adaptive_zoom_window,
                             lens_correction_amount: params.lens_correction_amount,
+                            output_projection:      params.output_projection,
                             light_refraction_coefficient: params.light_refraction_coefficient,
                             background_mode:           params.background_mode,
                             background_margin:         params.background_margin,
