@@ -137,6 +137,7 @@ pub struct FfmpegProcessor<'a> {
     pub audio_copy: bool,
 
     input_context: format::context::Input,
+    input_url: String,
 
     pub video: VideoTranscoder<'a>,
 
@@ -145,6 +146,10 @@ pub struct FfmpegProcessor<'a> {
     pub decoder_fps: f64,
 
     pub preserve_other_tracks: bool,
+    /// Camera tracks left out of the render, to append to the output once it's written (set by `render`)
+    pub camera_tracks: Option<super::camera_tracks::CameraTracks>,
+    /// The data tracks to preserve that the output won't have, and why (set by `render`)
+    pub tracks_not_copied: Vec<String>,
 
     #[cfg(target_os = "android")]
     pub android_handles: Option<AndroidHWHandles>,
@@ -165,6 +170,7 @@ pub enum Status {
 #[derive(Debug)]
 pub enum FFmpegError {
     EncoderNotFound,
+    NoWorkingEncoder(String),
     DecoderNotFound,
     NoSupportedFormats,
     NoOutputContext,
@@ -190,6 +196,7 @@ impl std::fmt::Display for FFmpegError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             FFmpegError::EncoderNotFound             => write!(f, "Encoder not found"),
+            FFmpegError::NoWorkingEncoder(codec)     => write!(f, "No working encoder for {codec}"),
             FFmpegError::DecoderNotFound             => write!(f, "Decoder not found"),
             FFmpegError::NoSupportedFormats          => write!(f, "No supported formats"),
             FFmpegError::NoOutputContext             => write!(f, "No output context"),
@@ -323,6 +330,8 @@ impl<'a> FfmpegProcessor<'a> {
             ranges_ms: Vec::new(),
 
             preserve_other_tracks: false,
+            camera_tracks: None,
+            tracks_not_copied: Vec::new(),
 
             decoder_fps,
 
@@ -342,6 +351,7 @@ impl<'a> FfmpegProcessor<'a> {
             },
 
             input_context,
+            input_url: url.to_owned(),
         })
     }
 
@@ -395,6 +405,29 @@ impl<'a> FfmpegProcessor<'a> {
             metadata.set(k, v);
         }
 
+        // FFmpeg writes the data tracks it doesn't know with an empty sample description, which nothing can read. From an MP4/MOV
+        // to an MP4/MOV, they're left out, and the camera's tracks are appended to the output once it's written (`camera_tracks`)
+        let is_mp4_input = self.input_context.format().name().split(',').any(|x| x == "mov" || x == "mp4");
+        let mut copy_camera_tracks = self.preserve_other_tracks && is_mp4_input && (output_format == "mov" || output_format == "mp4");
+        let codec_tag = |stream: &Stream| unsafe { (*stream.parameters().as_ptr()).codec_tag }.to_le_bytes();
+        // The only data tracks FFmpeg writes a sample description for
+        let ffmpeg_writes = |tag: &[u8; 4]| tag == b"tmcd" || tag == b"gpmd";
+        // Only the tracks that can be appended are left out, FFmpeg writes the others as before. Why they can't be
+        let not_copyable: HashMap<u32, String> = if copy_camera_tracks {
+            let track_ids: Vec<u32> = self.input_context.streams()
+                .filter(|x| x.parameters().medium() == media::Type::Data && !ffmpeg_writes(&codec_tag(x)))
+                .map(|x| x.id() as u32).collect();
+            super::camera_tracks::check_tracks(&self.input_url, &track_ids).unwrap_or_else(|e| {
+                // Nor its metadata
+                log::warn!("Can't read the input to copy its camera tracks: {e:?}");
+                copy_camera_tracks = false;
+                track_ids.iter().map(|id| (*id, e.to_string())).collect()
+            })
+        } else {
+            HashMap::new()
+        };
+        let mut camera_track_ids = Vec::new();
+
         for (i, stream) in self.input_context.streams().enumerate() {
             // Copy timecode from stream if global metadata doesn't have it
             if let Some(timecode) = stream.metadata().get("timecode") {
@@ -439,7 +472,8 @@ impl<'a> FfmpegProcessor<'a> {
 
                 output_index += 1;
             } else if medium == media::Type::Audio && self.audio_codec != codec::Id::None {
-                let mut copy_audio = self.preserve_other_tracks || self.audio_copy;
+                // Only "Copy" copies it, also with "Preserve other tracks" (which makes a .mov for it, see `RenderQueue::get_output_filename`)
+                let mut copy_audio = self.audio_copy;
                 if copy_audio && !Self::can_copy_stream(&octx, &stream.parameters()) {
                     log::warn!("Output format {} can't store audio codec {:?}, transcoding it to {:?} instead", octx.format().name(), stream.parameters().id(), self.audio_codec);
                     copy_audio = false;
@@ -458,11 +492,31 @@ impl<'a> FfmpegProcessor<'a> {
                 audio_streams.push(i);
                 output_index += 1;
             } else if self.preserve_other_tracks && medium == media::Type::Data {
-                // Direct stream copy
-                let mut ost = octx.add_stream(encoder::find(codec::Id::None))?;
-                ost.set_parameters(stream.parameters());
-                ost.set_avg_frame_rate(stream.avg_frame_rate());
-                output_index += 1;
+                let tag = codec_tag(&stream);
+                let id = stream.id() as u32;
+                let not_copyable = not_copyable.get(&id);
+                if copy_camera_tracks && !ffmpeg_writes(&tag) && not_copyable.is_none() {
+                    // Appended once the output is written
+                    camera_track_ids.push(id);
+                    stream_mapping[i] = -1;
+                } else if output_format == "mp4" && &tag != b"gpmd" {
+                    // Not in the mp4 muxer's tags. It makes the timecode track from the `timecode` metadata
+                    log::info!("Not copying data stream {i} ({}), the .mp4 format can't store it", String::from_utf8_lossy(&tag));
+                    if &tag != b"tmcd" {
+                        let why = not_copyable.cloned().unwrap_or_else(|| "the .mp4 format can't store it".into());
+                        self.tracks_not_copied.push(format!("Track {id} ({}): {why}", String::from_utf8_lossy(&tag)));
+                    }
+                    stream_mapping[i] = -1;
+                } else {
+                    if let Some(why) = not_copyable {
+                        log::warn!("Can't copy track {id} of the camera ({why}), FFmpeg writes it");
+                    }
+                    // Direct stream copy
+                    let mut ost = octx.add_stream(encoder::find(codec::Id::None))?;
+                    ost.set_parameters(stream.parameters());
+                    ost.set_avg_frame_rate(stream.avg_frame_rate());
+                    output_index += 1;
+                }
             } else {
                 // Not in the output (audio disabled)
                 stream_mapping[i] = -1;
@@ -475,6 +529,11 @@ impl<'a> FfmpegProcessor<'a> {
             if start_time != ffi::AV_NOPTS_VALUE {
                 self.frame_ts.first = Some(start_time.rescale(rescale::TIME_BASE, (1, 1000000)));
             }
+        }
+        if copy_camera_tracks {
+            // The streams FFmpeg writes, in its order: they get the output indexes in the order of the input
+            let ffmpeg_track_ids = self.input_context.streams().filter(|x| stream_mapping[x.index()] >= 0).map(|x| x.id() as u32).collect();
+            self.camera_tracks = Some(super::camera_tracks::CameraTracks { track_ids: camera_track_ids, ffmpeg_track_ids, start_us: self.frame_ts.first.unwrap_or_default() });
         }
         let mut updated_creation_time = None;
         if let Some(start_ms) = start_ms {

@@ -11,6 +11,7 @@ pub mod render_queue;
 pub mod mdk_processor;
 pub mod video_processor;
 pub mod zero_copy;
+pub mod camera_tracks;
 use gyroflow_core::settings;
 use zero_copy::*;
 #[cfg(target_os = "android")]
@@ -21,7 +22,7 @@ pub use self::ffmpeg_processor::{ FfmpegProcessor, FFmpegError };
 use render_queue::RenderOptions;
 use crate::core::{ StabilizationManager, stabilization::* };
 use ffmpeg_next::{ format::Pixel, frame::Video, codec, Error, ffi };
-use std::cell::RefCell;
+use std::cell::{ Cell, RefCell };
 use std::ffi::c_void;
 use std::os::raw::c_char;
 use std::os::raw::c_int;
@@ -78,11 +79,12 @@ pub fn set_gpu_type_from_name(name: &str) {
     ::log::debug!("GPU type: {:?}, from name: {}", gpu_type, name);
 }
 
-pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, bool)> { // -> (name, is_gpu)
+/// The encoders of `codec` on this platform, in the order they're tried. `get_possible_encoders` leaves out those that can't be used here
+fn platform_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, bool)> { // -> (name, is_gpu)
     if codec.contains("PNG") || codec.contains("png") { return vec![("png", false)]; }
     if codec.contains("EXR") || codec.contains("exr") { return vec![("exr", false)]; }
 
-    let mut encoders = if use_gpu {
+    if use_gpu {
         match codec {
             "H.264/AVC" => vec![
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -128,20 +130,26 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
                 ("hevc_mediacodec",   true),
                 ("libx265",           false),
             ],
+            // Each is probed, only the newer GPUs encode AV1. There's no VideoToolbox AV1 encoder, and av1_mf is left out:
+            // the NVIDIA AV1 MFT makes 1088 lines out of 1080
             "AV1" => vec![
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("av1_nvenc",        true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("av1_amf",          true),
+                #[cfg(any(target_os = "linux"))]
+                ("av1_vaapi",        true),
                 #[cfg(any(target_os = "windows", target_os = "linux"))]
                 ("av1_qsv",          true),
-                #[cfg(any(target_os = "linux"))]
-                ("av1_vaapi",         true),
+                #[cfg(any(target_os = "windows", target_os = "linux"))]
+                ("av1_vulkan",       true),
+                #[cfg(target_os = "windows")]
+                ("av1_d3d12va",      true),
                 #[cfg(target_os = "android")]
                 ("av1_mediacodec",   true),
+                ("libsvtav1",        false),
                 ("librav1e",         false),
                 ("libaom-av1",       false),
-                ("libsvtav1",        false),
             ],
             "ProRes" => vec![
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -161,10 +169,14 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
             "ProRes"     => vec![("prores_ks", false)],
             "DNxHD"      => vec![("dnxhd", false)],
             "CineForm"   => vec![("cfhd", false)],
-            "AV1"        => vec![("librav1e", false), ("libaom-av1", false), ("libsvtav1", false)],
+            "AV1"        => vec![("libsvtav1", false), ("librav1e", false), ("libaom-av1", false)],
             _            => vec![]
         }
-    };
+    }
+}
+
+pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, bool)> { // -> (name, is_gpu)
+    let mut encoders = platform_encoders(codec, use_gpu);
 
     let gpu_type = *GPU_TYPE.read();
     if gpu_type != GpuType::Nvidia {
@@ -184,9 +196,11 @@ pub fn get_possible_encoders(codec: &str, use_gpu: bool) -> Vec<(&'static str, b
     encoders
 }
 
-pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &gyroflow_core::InputFile, render_options: &RenderOptions, gpu_decoder_index: i32, trim_range_ind: Option<usize>, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>, encoder_initialized: F2) -> Result<(), FFmpegError>
+/// `warning` gets what the output doesn't have of what was asked for, before the last `progress`
+pub fn render<F, F2, F3>(stab: Arc<StabilizationManager>, progress: F, input_file: &gyroflow_core::InputFile, render_options: &RenderOptions, gpu_decoder_index: i32, trim_range_ind: Option<usize>, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>, encoder_initialized: F2, warning: F3) -> Result<(), FFmpegError>
     where F: Fn((f64, usize, usize, bool, bool)) + Send + Sync + Clone,
-          F2: Fn(String) + Send + Sync + Clone
+          F2: Fn(String) + Send + Sync + Clone,
+          F3: Fn(String)
 {
     log::debug!("ffmpeg_hw::supported_gpu_backends: {:?}", ffmpeg_hw::supported_gpu_backends());
 
@@ -268,7 +282,13 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
 
     log::debug!("interpolation: {:?}", &interpolation);
     log::debug!("proc.gpu_device: {:?}", &proc.gpu_device);
-    let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(&render_options.codec, render_options.use_gpu), hwaccel_device);
+    let possible_encoders = get_possible_encoders(&render_options.codec, render_options.use_gpu);
+    let encoder = match ffmpeg_hw::find_encoder_that_works(&possible_encoders, hwaccel_device) {
+        Some(encoder) => encoder,
+        // The GPU can't encode it, and there's no software encoder in the build, nor one to download like the GPL ones
+        None if render_options.codec == "AV1" => return Err(FFmpegError::NoWorkingEncoder(render_options.codec.clone())),
+        None => ffmpeg_hw::find_working_encoder(&possible_encoders, hwaccel_device),
+    };
     proc.video_codec = Some(encoder.0.to_owned());
     proc.video.gpu_encoding = encoder.1;
     proc.video.ffmpeg_interpolation = ffmpeg_interpolation.bits();
@@ -383,9 +403,8 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
         proc.video.encoder_params.options.set("b_ref_mode", "disabled");
     }
 
-    if encoder.0.contains("mediacodec") {
-        proc.video.encoder_params.options.set("ndk_codec", "1");
-        proc.video.encoder_params.options.set("ndk_async", "1");
+    for (k, v) in ffmpeg_hw::encoder_required_options(encoder.0) {
+        proc.video.encoder_params.options.set(k, v);
     }
 
     proc.video.encoder_params.keyframe_distance_s = render_options.keyframe_distance.max(0.0001);
@@ -711,11 +730,31 @@ pub fn render<F, F2>(stab: Arc<StabilizationManager>, progress: F, input_file: &
     if cfg!(not(any(target_os = "android", target_os = "ios"))) && !is_sequence {
         render_filename = format!("{filename}.tmp");
     }
-    proc.render(folder, &render_filename, (output_width as u32, output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag, pause_flag)?;
+    proc.render(folder, &render_filename, (output_width as u32, output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag.clone(), pause_flag)?;
 
+    let camera_tracks = proc.camera_tracks.take();
+    let mut tracks_not_copied = std::mem::take(&mut proc.tracks_not_copied);
     drop(proc);
 
     let output_url = gyroflow_core::filesystem::get_file_url(folder, &filename, false);
+
+    if let Some(mut camera_tracks) = camera_tracks {
+        // They don't match the video once its speed changed, like the audio
+        if is_speed_changed {
+            camera_tracks.track_ids.clear();
+        }
+        if !cancel_flag.load(std::sync::atomic::Ordering::SeqCst) {
+            // Before the rename, the output appears once it's complete
+            let rendered_url = gyroflow_core::filesystem::get_file_url(folder, &render_filename, false);
+            if let Err(e) = camera_tracks::copy_camera_tracks(&rendered_url, &input_file.url, &camera_tracks) {
+                ::log::error!("Failed to copy the camera tracks and metadata: {e:?}");
+                tracks_not_copied.push(format!("The camera tracks and metadata: {e}"));
+            }
+        }
+    }
+    if !tracks_not_copied.is_empty() && !cancel_flag.load(std::sync::atomic::Ordering::SeqCst) {
+        warning(format!("camera_tracks:{}", tracks_not_copied.join("\n")));
+    }
 
     if render_filename != filename {
         let output_url_temp = gyroflow_core::filesystem::get_file_url(folder, &render_filename, false);
@@ -852,6 +891,13 @@ type VaList = *mut ffi::__va_list_tag;
 /// Its address in the `opaque` field of a format context drops the log messages of that context: probes whose failures are expected
 pub static SILENT_LOG: u8 = 0;
 
+thread_local! {
+    /// Set on the thread opening an encoder to see if it works here (see `ffmpeg_hw::needs_probe`). The errors of one that doesn't
+    /// are expected, they go to the log file only, where they tell why
+    pub static PROBING_ENCODER: Cell<bool> = const { Cell::new(false) };
+}
+fn is_probing_encoder() -> bool { PROBING_ENCODER.try_with(|x| x.get()).unwrap_or(false) }
+
 #[allow(improper_ctypes_definitions)]
 unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_char, vl: VaList) {
     unsafe {
@@ -879,6 +925,11 @@ unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_cha
                     }
                     *LAST_PREFIX.write() = prefix;
 
+                    if is_probing_encoder() {
+                        ::log::debug!("{}", line.trim());
+                        return;
+                    }
+
                     // ffi::av_log_default_callback(avcl, level, fmt, vl);
 
                     match level {
@@ -899,7 +950,7 @@ unsafe extern "C" fn ffmpeg_log(avcl: *mut c_void, level: i32, fmt: *const c_cha
     }
 }
 
-pub fn append_log(msg: &str) { ::log::debug!("{}", msg); FFMPEG_LOG.write().push_str(msg); }
+pub fn append_log(msg: &str) { ::log::debug!("{}", msg); if !is_probing_encoder() { FFMPEG_LOG.write().push_str(msg); } }
 pub fn get_log() -> String { FFMPEG_LOG.read().clone() }
 pub fn clear_log() { FFMPEG_LOG.write().clear() }
 
@@ -956,6 +1007,21 @@ unsafe fn show_help_children(mut class: *const ffi::AVClass, flags: c_int) {
 pub fn get_default_encoder(codec: &str, gpu: bool) -> String {
     let encoder = ffmpeg_hw::find_working_encoder(&get_possible_encoders(codec, gpu), None);
     encoder.0.to_string()
+}
+/// The encoders `codec` is rendered with here, on the GPU and on the CPU. `None` when none works. It may open the GPU encoders, see `ffmpeg_hw::needs_probe`
+pub fn get_working_encoders(codec: &str) -> (Option<&'static str>, Option<&'static str>) {
+    // Only those in the build: the others would add "Codec not found" to the log of a render running meanwhile
+    let encoders = |use_gpu: bool| -> Vec<_> {
+        get_possible_encoders(codec, use_gpu).into_iter().filter(|x| x.1 == use_gpu && ffmpeg_next::encoder::find_by_name(x.0).is_some()).collect()
+    };
+    (
+        ffmpeg_hw::find_encoder_that_works(&encoders(true),  None).map(|x| x.0),
+        ffmpeg_hw::find_encoder_that_works(&encoders(false), None).map(|x| x.0)
+    )
+}
+/// Whether there's an encoder of `codec` in the build for this platform, working here or not
+pub fn has_encoder(codec: &str) -> bool {
+    platform_encoders(codec, true).iter().any(|x| ffmpeg_next::encoder::find_by_name(x.0).is_some())
 }
 pub fn get_encoder_options(name: &str) -> String {
 	init_log();

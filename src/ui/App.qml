@@ -757,11 +757,17 @@ Rectangle {
         if (text.startsWith("file_exists:")) {
             return qsTr("Output file already exists, do you want to overwrite it?");
         }
+        if (text.startsWith("camera_tracks:")) {
+            return qsTr("Not all of the camera's tracks and metadata could be copied to the output:") + "\n" + text.substring(14);
+        }
         if (text.startsWith("uses_cpu")) {
             return qsTr("GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.\nIf you have a modern device, latest GPU drivers and you think this shouldn't happen, report this on GitHub including gyroflow.log file.");
         }
         if (text.includes("hevc") && text.includes("-12912")) {
             return qsTr("Your GPU doesn't support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.");
+        }
+        if (text.includes("No working encoder for AV1")) {
+            return qsTr("Your GPU can't encode AV1. AV1 encoding requires NVIDIA GeForce RTX 40, AMD Radeon RX 7000, Intel Arc or a newer GPU.\nIf your computer has more than one GPU, select another one in \"Device for rendering\" in the advanced export settings.");
         }
         if (text.includes("failed to decode picture") && text.includes("-12909")) {
             return qsTr("GPU decoder failed to decode this file. Disable GPU decoding in \"Advanced\" and try again.") + "\n\n" + text;
