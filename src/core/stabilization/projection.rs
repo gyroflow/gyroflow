@@ -44,11 +44,14 @@
 //! smear. All of them agree with `ρ ≈ θ` near the axis, so the focal length keeps its meaning whichever
 //! one is picked.
 //!
-//! Nothing in the UI selects one yet. [`OutputProjection::for_lens`] picks it: rectilinear for every lens
-//! rectilinear can hold, which is the picture Gyroflow has always drawn, and stereographic for the ones it
-//! cannot - a lens that sees past 90° from its own axis has border rays with no rectilinear position at
-//! all, at any correction strength above zero, so its picture has no edge for the zoom to fit and its
-//! periphery is the asymptote.
+//! The Lens profile section picks it (`StabilizationParams::output_projection`, saved in the project), and
+//! it is rectilinear unless picked otherwise, for every lens. That is the picture Gyroflow has always drawn,
+//! and it still has an edge on a lens that sees past 90° from its own axis: the zoom's sweep stops at
+//! rectilinear's own end and its stretch bound keeps the smeared periphery out of the frame
+//! (`zooming::max_zoom_out_fov`). "Automatic" is [`OutputProjection::for_lens`] - stereographic for a lens
+//! rectilinear cannot hold - and it is not the default because a fisheye picture reads as a lens profile
+//! that didn't apply, and because the field it judges by often ends where a calibration's polynomial
+//! folds, which two profiles of one lens put at different angles.
 
 #[repr(i32)]
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
@@ -67,19 +70,21 @@ pub enum OutputProjection {
 }
 
 impl OutputProjection {
-    /// The projection to draw a lens with when nothing has chosen one. Rectilinear, unless the lens sees so
-    /// far that rectilinear has no image of the lens's own frame: past 90° `tan` has no value, so a 200°
-    /// body's border rays land nowhere at any correction strength above zero - the picture is then unbounded
-    /// and smeared at the edge, and the zoom has no outline to fit. A projection finite to 180° holds all of
-    /// it. The line is drawn at 85° from the axis: `tan 85° = 11.4`, a rectilinear image already eleven
-    /// times its own paraxial scale at that ray, which no lens that reaches it was ever usable at anyway.
+    /// The projection "Automatic" draws a lens with. Rectilinear, unless the lens sees so far that
+    /// rectilinear has no image of the lens's own frame: past 90° `tan` has no value, so a 200° body's
+    /// border rays land nowhere at any correction strength above zero. A projection finite to 180° holds all
+    /// of it. The line is drawn at 90° itself, where rectilinear runs out, rather than somewhere before it:
+    /// up to there a lens can still be drawn straight and cropped. At 85° it also caught 41 of the bundled
+    /// database's profiles, ordinary wide lenses on a7/FX3/R7/GH5/BMPCC bodies among them, whose
+    /// calibrations happen to extrapolate past 85° at the frame corner; 59 reach past 90°, mostly circular
+    /// and full-frame fisheyes, Insta360 lenses and FPV ultra-wides.
     ///
     /// Measured on the lens data the render draws the clip's first frame with - the camera matrix scaled to
     /// the video, the lens's own field limit - and at the frame's corners as the source lens saw them: a
     /// SuperView frame is the lens's 4:3 frame stretched to 16:9, so its corner read as the lens's own lies
-    /// far outside the lens's real frame and puts an ordinary GoPro past 85°
+    /// far outside the lens's real frame and puts an ordinary GoPro past the line
     pub fn for_lens(params: &super::ComputeParams) -> Self {
-        const FAR: f64 = 85.0 * std::f64::consts::PI / 180.0;
+        const FAR: f64 = 90.0 * std::f64::consts::PI / 180.0;
         let (w, h) = (params.width as f64, params.height as f64);
         if !(w > 0.0) || !(h > 0.0) { return Self::Rectilinear; }
         let (camera_matrix, coeffs, field_limit, sh, sv, _, _) = super::FrameTransform::get_lens_data_at_timestamp(params, 0.0, false);
@@ -142,6 +147,19 @@ impl OutputProjection {
             _ => Self::Rectilinear,
         }
     }
+    /// The name a project file stores it under
+    pub fn name(&self) -> &'static str {
+        match self {
+            Self::Rectilinear    => "rectilinear",
+            Self::Stereographic  => "stereographic",
+            Self::Equidistant    => "equidistant",
+            Self::EquisolidAngle => "equisolid",
+            Self::Orthographic   => "orthographic",
+        }
+    }
+    pub fn from_name(name: &str) -> Option<Self> {
+        [Self::Rectilinear, Self::Stereographic, Self::Equidistant, Self::EquisolidAngle, Self::Orthographic].into_iter().find(|p| p.name() == name)
+    }
     /// Ray angle of a normalized output radius
     pub fn theta_of_radius(&self, r: f64) -> f64 {
         match self {
@@ -187,6 +205,18 @@ impl OutputProjection {
             Self::Orthographic   => t.cos(),
         }
     }
+}
+
+/// `StabilizationParams::output_projection` for "Automatic": [`OutputProjection::for_lens`] picks it, for the
+/// clip's own lens, every time the compute params are built
+pub const AUTOMATIC: i32 = -1;
+
+/// The setting as a project file stores it: a projection's name, or "automatic"
+pub fn setting_name(v: i32) -> &'static str {
+    if v == AUTOMATIC { "automatic" } else { OutputProjection::from_i32(v).name() }
+}
+pub fn setting_from_name(name: &str) -> Option<i32> {
+    if name == "automatic" { Some(AUTOMATIC) } else { OutputProjection::from_name(name).map(|p| p as i32) }
 }
 
 /// Output plane point → ray (angle vector)

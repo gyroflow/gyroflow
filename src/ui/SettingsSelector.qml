@@ -52,8 +52,9 @@ Modal {
             "Smoothing params":           ["method", "smoothing_params"],
             "Horizon lock":               ["horizon_lock_amount", "horizon_lock_roll", "horizon_lock_pitch_enabled", "horizon_lock_pitch", "use_gravity_vectors", "automatic_lock", "turn_threshold", "turn_smoothing_ms", "turn_multiplier", "tilt_accel_limit"],
             "Rolling shutter correction": ["frame_readout_time", "frame_readout_direction"],
-            "Zooming":                    ["adaptive_zoom_window", "adaptive_zoom_center_offset", "adaptive_zoom_method", "additional_rotation", "additional_translation", "max_zoom", "max_zoom_iterations"],
+            "Zooming":                    ["adaptive_zoom_window", "adaptive_zoom_center_offset", "adaptive_zoom_method", "additional_rotation", "additional_translation", "max_zoom", "max_zoom_iterations", "fixed_zoom", "zoom_limit_whole_clip"],
             "Lens correction strength":   ["lens_correction_amount"],
+            "Output projection":          ["output_projection"],
             "Video speed":                ["video_speed", "video_speed_affects_smoothing", "video_speed_affects_zooming", "video_speed_affects_zooming_limit"],
             "Focal length smoothing":     ["focal_length_smoothing_enabled", "focal_length_max_zoom_rate", "lens_metadata_delay_frames"],
             "Lens breathing":             ["lens_breathing_enabled"],
@@ -129,6 +130,7 @@ Modal {
             QT_TR_NOOP("Rolling shutter correction");
             QT_TR_NOOP("Zooming");
             QT_TR_NOOP("Lens correction strength");
+            QT_TR_NOOP("Output projection");
             QT_TR_NOOP("Video speed");
         QT_TR_NOOP("Export settings");
             QT_TR_NOOP("Codec");

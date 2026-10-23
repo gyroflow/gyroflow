@@ -150,6 +150,8 @@ pub struct Controller {
     frame_readout_direction: qt_property!(i32; WRITE set_frame_readout_direction),
 
     adaptive_zoom: qt_property!(f64; WRITE set_adaptive_zoom),
+    fixed_zoom: qt_property!(bool; READ get_fixed_zoom WRITE set_fixed_zoom),
+    zoom_limit_whole_clip: qt_property!(bool; READ get_zoom_limit_whole_clip WRITE set_zoom_limit_whole_clip),
     zooming_center_x: qt_property!(f64; WRITE set_zooming_center_x),
     zooming_center_y: qt_property!(f64; WRITE set_zooming_center_y),
     zooming_method: qt_property!(i32; WRITE set_zooming_method),
@@ -169,6 +171,7 @@ pub struct Controller {
     additional_translation_z: qt_property!(f64; WRITE set_additional_translation_z),
 
     lens_correction_amount: qt_property!(f64; WRITE set_lens_correction_amount),
+    output_projection: qt_property!(i32; READ get_output_projection WRITE set_output_projection),
     frame_offset: qt_property!(i32; WRITE set_frame_offset),
     light_refraction_coefficient: qt_property!(f64; WRITE set_light_refraction_coefficient),
     set_video_speed: qt_method!(fn(&self, v: f64, s: bool, z: bool, zl: bool)),
@@ -215,6 +218,10 @@ pub struct Controller {
     calib_in_progress: qt_property!(bool; NOTIFY calib_in_progress_changed),
     calib_in_progress_changed: qt_signal!(),
     calib_progress: qt_signal!(progress: f64, rms: f64, ready: usize, total: usize, good: usize, sharpness: f64),
+    /// `calibration::CalibrationMethod` and `CalibrationModel` as `i32`, which `init_calibrator` puts into the calibrator.
+    /// Every file gets a new controller, so QML sets them again for each one (`applyCalibrationChoice`)
+    calibration_method: qt_property!(i32; WRITE set_calibration_method),
+    calibration_model: qt_property!(i32; WRITE set_calibration_model),
 
     loading_gyro_in_progress: qt_property!(bool; NOTIFY loading_gyro_in_progress_changed),
     loading_gyro_in_progress_changed: qt_signal!(),
@@ -230,6 +237,7 @@ pub struct Controller {
     mesh_at_frame: qt_method!(fn(&self, frame: usize) -> QVariantList),
     get_scaling_ratio: qt_method!(fn(&self) -> f64),
     get_min_fov: qt_method!(fn(&self) -> f64),
+    get_manual_zoom_missed: qt_method!(fn(&self) -> f64),
 
     init_calibrator: qt_method!(fn(&mut self)),
 
@@ -1621,6 +1629,8 @@ impl Controller {
     wrap_simple_method!(set_frame_readout_direction, v: i32; recompute);
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_max_zoom,           v: f64, i: usize; recompute; zooming_data_changed);
+    wrap_simple_method!(set_fixed_zoom,         v: bool; recompute; zooming_data_changed);
+    wrap_simple_method!(set_zoom_limit_whole_clip, v: bool; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_center_x,   v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_center_y,   v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_additional_rotation_x,v: f64; recompute; zooming_data_changed);
@@ -1633,6 +1643,7 @@ impl Controller {
     wrap_simple_method!(set_of_method,          v: u32; recompute; chart_data_changed);
 
     wrap_simple_method!(set_lens_correction_amount,    v: f64; recompute; zooming_data_changed);
+    wrap_simple_method!(set_output_projection,         v: i32; recompute; zooming_data_changed);
     wrap_simple_method!(set_frame_offset,              v: i32; recompute);
     wrap_simple_method!(set_light_refraction_coefficient, v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_input_horizontal_stretch,  v: f64; recompute);
@@ -1797,6 +1808,9 @@ impl Controller {
     fn get_scaled_fps        (&self) -> f64 { self.stabilizer.params.read().get_scaled_fps() }
     fn get_scaling_ratio     (&self) -> f64 { self.stabilizer.get_scaling_ratio() }
     fn get_min_fov           (&self) -> f64 { self.stabilizer.get_min_fov() }
+    fn get_manual_zoom_missed(&self) -> f64 { self.stabilizer.manual_zoom_missed().unwrap_or(0.0) }
+    fn get_fixed_zoom        (&self) -> bool { self.stabilizer.params.read().fixed_zoom }
+    fn get_zoom_limit_whole_clip(&self) -> bool { self.stabilizer.params.read().zoom_limit_whole_clip }
     fn set_video_created_at  (&self, timestamp: u64) { self.stabilizer.params.write().video_created_at = if timestamp > 0 { Some(timestamp) } else { None }; }
 
     fn set_trim_ranges(&self, ranges: QString) {
@@ -1927,7 +1941,10 @@ impl Controller {
         #[cfg(feature = "opencv")]
         {
             self.stabilizer.params.write().is_calibrator = true;
-            *self.stabilizer.lens_calibrator.write() = Some(LensCalibrator::new());
+            let mut cal = LensCalibrator::new();
+            cal.method = self.calibration_method.into();
+            cal.model = self.calibration_model.into();
+            *self.stabilizer.lens_calibrator.write() = Some(cal);
             self.stabilizer.set_smoothing_method(2); // Plain 3D
             self.stabilizer.set_smoothing_param("time_constant", 2.0);
             self.stabilizer.set_max_zoom(0.0, 0);
@@ -2078,28 +2095,17 @@ impl Controller {
                         err(("An error occurred: %1".to_string(), error.to_string()));
                     }
                 }
-                // Don't lock the UI trying to draw chessboards while we calibrate
-                stab.params.write().is_calibrator = false;
-
                 while processed.load(SeqCst) < total_read.load(SeqCst) {
                     std::thread::sleep(std::time::Duration::from_millis(500));
                 }
 
-                let mut lock = cal.write();
-                let cal = lock.as_mut().unwrap();
-                if let Err(e) = cal.calibrate(is_forced) {
-                    err(("An error occurred: %1".to_string(), format!("{:?}", e)));
-                } else {
-                    if cal.rms < 100.0 {
-                        stab.lens.write().set_from_calibrator(cal);
-                    }
-                    ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
+                match LensCalibrator::calibrate_shared(&cal, is_forced, false) {
+                    Some(Ok(fit)) => Self::show_calibration(&stab, &fit),
+                    Some(Err(e)) => err(("An error occurred: %1".to_string(), format!("{:?}", e))),
+                    None => { }
                 }
-
-                let good = cal.image_points.read().len();
-                progress((total, total, good, cal.rms, *cal.sum_sharpness.read() / good.max(1) as f64));
-
-                stab.params.write().is_calibrator = true;
+                let (rms, good, sharpness) = Self::calibration_summary(&stab);
+                progress((total, total, good, rms, sharpness));
             });
         }
     }
@@ -2124,38 +2130,104 @@ impl Controller {
     }
 
     fn add_calibration_point(&mut self, timestamp_us: i64, no_marker: bool) {
+        // One calibration at a time: the end of this one would tell the UI the running one is done
+        if self.calib_in_progress { return; }
         self.start_autocalibrate(0, 1, 1, 1000.0, timestamp_us as f64 / 1000.0, no_marker);
     }
     fn remove_calibration_point(&mut self, timestamp_us: i64) {
         #[cfg(feature = "opencv")]
         {
-            let cal = self.stabilizer.lens_calibrator.clone();
-            let mut rms = 0.0;
+            if self.calib_in_progress { return; }
             {
-                let mut lock = cal.write();
-                let cal = lock.as_mut().unwrap();
-                let mut frame_to_remove = None;
-                for x in &cal.used_points {
-                    if x.1.timestamp_us == timestamp_us {
-                        frame_to_remove = Some(*x.0);
-                        break;
-                    }
-                }
-                if let Some(f) = frame_to_remove {
+                let mut lock = self.stabilizer.lens_calibrator.write();
+                let Some(cal) = lock.as_mut() else { return; };
+                if let Some(f) = cal.used_points.iter().find(|x| x.1.timestamp_us == timestamp_us).map(|x| *x.0) {
                     cal.forced_frames.remove(&f);
                     cal.used_points.remove(&f);
                 }
-                if cal.calibrate(true).is_ok() {
-                    rms = cal.rms;
-                    self.stabilizer.lens.write().set_from_calibrator(cal);
-                    ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
-                }
             }
-            self.update_calib_model();
-            if rms > 0.0 {
-                self.calib_progress(1.0, rms, 1, 1, 1, 0.0);
+            self.refit_calibration(true, false);
+        }
+    }
+
+    fn set_calibration_method(&mut self, v: i32) {
+        self.calibration_method = v;
+        self.apply_calibration_choice();
+    }
+    fn set_calibration_model(&mut self, v: i32) {
+        self.calibration_model = v;
+        self.apply_calibration_choice();
+    }
+    /// Puts the method and the model chosen into the calibrator
+    fn apply_calibration_choice(&mut self) {
+        #[cfg(feature = "opencv")]
+        {
+            let method = core::calibration::CalibrationMethod::from(self.calibration_method);
+            let model = core::calibration::CalibrationModel::from(self.calibration_model);
+            let refit = match self.stabilizer.lens_calibrator.write().as_mut() {
+                Some(cal) => {
+                    let changed = cal.method != method || cal.model != model;
+                    cal.method = method;
+                    cal.model = model;
+                    changed && !cal.image_points.read().is_empty()
+                }
+                None => false
+            };
+            // The boards are already found: fit them again with the new choice, without reading the video again.
+            // A calibration still running picks it up when it gets to the fit (the panel is disabled until then)
+            if refit && !self.calib_in_progress {
+                self.refit_calibration(false, true);
             }
         }
+    }
+
+    /// Fits the lens again on the boards already found, the way the end of `start_autocalibrate` does: all of them
+    /// after the method or the model changed, where a failed fit clears the one before (`clear_on_failure`) rather
+    /// than leaving it under the new choice, or the ones in use after one was removed
+    #[cfg(feature = "opencv")]
+    fn refit_calibration(&mut self, only_used: bool, clear_on_failure: bool) {
+        self.calib_in_progress = true;
+        self.calib_in_progress_changed();
+
+        let done = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (rms, good, sharpness, cleared): (f64, usize, f64, bool)| {
+            // No fit, so no lens either
+            if cleared { this.reset_lens_profile(); }
+            this.calib_in_progress = false;
+            this.calib_in_progress_changed();
+            this.calib_progress(1.0, rms, good, good, good, sharpness);
+            this.update_calib_model();
+        });
+        let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (msg, arg): (String, String)| {
+            this.error(QString::from(msg), QString::from(arg), QString::default());
+        });
+
+        let stab = self.stabilizer.clone();
+        core::run_threaded(move || {
+            let result = LensCalibrator::calibrate_shared(&stab.lens_calibrator, only_used, clear_on_failure);
+            match &result {
+                Some(Ok(fit)) => Self::show_calibration(&stab, fit),
+                Some(Err(e)) => err(("An error occurred: %1".to_string(), format!("{:?}", e))),
+                None => { }
+            }
+            let (rms, good, sharpness) = Self::calibration_summary(&stab);
+            done((rms, good, sharpness, clear_on_failure && matches!(result, Some(Err(_)))));
+        });
+    }
+    /// The lens of a fit for the preview, unless it's too far off to be worth showing
+    #[cfg(feature = "opencv")]
+    fn show_calibration(stab: &StabilizationManager, cal: &LensCalibrator) {
+        if cal.rms < 100.0 {
+            stab.lens.write().set_from_calibrator(cal);
+        }
+        ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {:?}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
+    }
+    /// The calibrator's rms, its number of good frames and their average sharpness, for `calib_progress`
+    #[cfg(feature = "opencv")]
+    fn calibration_summary(stab: &StabilizationManager) -> (f64, usize, f64) {
+        stab.lens_calibrator.read().as_ref().map(|cal| {
+            let good = cal.image_points.read().len();
+            (cal.rms, good, *cal.sum_sharpness.read() / good.max(1) as f64)
+        }).unwrap_or_default()
     }
 
     /// A profile generated directly (eg. from the focal length) already carries its camera matrix,
@@ -2361,8 +2433,18 @@ impl Controller {
                 _ => { ::log::error!("Unknown save_type: {save_type}"); }
             }
         }
-        let contents = content.to_json_pretty();
-        if let Err(e) = filesystem::write(&url, contents.to_slice()) {
+        let mut contents = content.to_json_pretty().to_slice().to_vec();
+        // `zoom_limit_whole_clip` turned on because the project came from before it existed belongs to that project, a
+        // new preset gets the current behavior
+        if self.stabilizer.params.read().zoom_limit_whole_clip_from_old_file {
+            if let Ok(mut obj) = serde_json::from_slice::<serde_json::Value>(&contents) {
+                if let Some(v) = obj.get_mut("stabilization").and_then(|x| x.get_mut("zoom_limit_whole_clip")) {
+                    *v = serde_json::Value::Bool(false);
+                    if let Ok(new_contents) = serde_json::to_vec_pretty(&obj) { contents = new_contents; }
+                }
+            }
+        }
+        if let Err(e) = filesystem::write(&url, &contents) {
             self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
         }
         QString::from(filesystem::display_url(&url))
@@ -2492,6 +2574,9 @@ impl Controller {
     fn set_lens_breathing_enabled(&mut self, v: bool) {
         self.stabilizer.params.write().lens_breathing_enabled = v;
         self.request_recompute();
+    }
+    fn get_output_projection(&self) -> i32 {
+        self.stabilizer.params.read().output_projection
     }
 
     fn get_focal_length_smoothing_enabled(&self) -> bool {

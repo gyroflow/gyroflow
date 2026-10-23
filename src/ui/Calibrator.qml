@@ -133,6 +133,7 @@ Window {
             ui_tools.init_calibrator();
             Qt.callLater(() => {
                 controller.init_player(videoArea.vid);
+                lensCalib.applyCalibrationChoice();
                 Qt.callLater(() => {
                     videoArea.loadFile(file);
                 });

@@ -29,8 +29,8 @@ pub struct ComputeParams {
     pub output_height: usize,
     pub video_rotation: f64,
     pub lens_correction_amount: f64,
-    /// [`crate::stabilization::projection::OutputProjection`] as `i32`. Always `Rectilinear` for now - the
-    /// pipeline reads it everywhere, but nothing in the UI picks another one yet
+    /// [`crate::stabilization::projection::OutputProjection`] as `i32`: the one picked in the Lens profile
+    /// section, with "Automatic" already resolved for the clip's lens, so never `projection::AUTOMATIC` here
     pub output_projection: i32,
     pub light_refraction_coefficient: f64,
     pub video_speed: f64,
@@ -57,6 +57,8 @@ pub struct ComputeParams {
     pub smoothing_fov_limit_per_frame: Vec<f64>,
     pub max_zoom: Option<f64>,
     pub max_zoom_iterations: usize,
+    pub fixed_zoom: bool,
+    pub zoom_limit_whole_clip: bool,
 
     pub zooming_debug_points: bool,
 
@@ -104,6 +106,8 @@ impl ComputeParams {
             smoothing_fov_limit_per_frame: Vec::new(),
             max_zoom: params.max_zoom.clone(),
             max_zoom_iterations: params.max_zoom_iterations,
+            fixed_zoom: params.fixed_zoom,
+            zoom_limit_whole_clip: params.zoom_limit_whole_clip,
 
             frame_count: params.frame_count,
             fov_scale: params.fov,
@@ -121,7 +125,7 @@ impl ComputeParams {
             background_margin: params.background_margin,
             background_margin_feather: params.background_margin_feather,
             lens_correction_amount: params.lens_correction_amount,
-            output_projection: crate::stabilization::projection::OutputProjection::Rectilinear as i32,
+            output_projection: params.output_projection,
             light_refraction_coefficient: params.light_refraction_coefficient,
             framebuffer_inverted: params.framebuffer_inverted,
             frame_readout_time: params.frame_readout_time,
@@ -157,15 +161,17 @@ impl ComputeParams {
 
             lens_breathing_enabled: params.lens_breathing_enabled,
         };
-        // Everything above is a read of `mgr.params`, and nothing below needs it. The projection is measured
-        // on the lens data, which takes the `gyro` and `file_metadata` locks (`get_lens_data_at_timestamp`),
+        // Everything above is a read of `mgr.params`, and nothing below needs it. "Automatic" measures the
+        // projection on the lens data, which takes the `gyro` and `file_metadata` locks (`get_lens_data_at_timestamp`),
         // and this runs under `stabilization.write()` at some call sites - so the guard is dropped first
         // rather than held across two more locks it has no reason to be nested with
         drop(params);
 
-        // Rectilinear for every lens rectilinear can hold, stereographic for the ones it can't (a 200° body) -
-        // measured on the lens data the render will use, so the choice and the picture agree
-        ret.output_projection = crate::stabilization::projection::OutputProjection::for_lens(&ret) as i32;
+        // "Automatic": rectilinear for every lens rectilinear can hold, stereographic for the ones it can't (a
+        // 200° body) - measured on the lens data the render will use, so the choice and the picture agree
+        if ret.output_projection == crate::stabilization::projection::AUTOMATIC {
+            ret.output_projection = crate::stabilization::projection::OutputProjection::for_lens(&ret) as i32;
+        }
         ret
     }
 
@@ -226,6 +232,8 @@ impl std::fmt::Debug for ComputeParams {
          .field("additional_rotation",       &self.additional_rotation)
          .field("additional_translation",    &self.additional_translation)
          .field("adaptive_zoom_method",      &self.adaptive_zoom_method)
+         .field("fixed_zoom",                &self.fixed_zoom)
+         .field("zoom_limit_whole_clip",     &self.zoom_limit_whole_clip)
          .field("framebuffer_inverted",      &self.framebuffer_inverted)
          .field("zooming_debug_points",      &self.zooming_debug_points)
          .field("distortion_model",          &self.distortion_model.id())

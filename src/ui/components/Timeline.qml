@@ -681,6 +681,8 @@ Item {
                     id: addCalibAction;
                     iconName: "plus";
                     text: qsTr("Add calibration point");
+                    // One calibration at a time (`Controller::add_calibration_point`)
+                    enabled: !controller.calib_in_progress;
                     onTriggered: {
                         const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
                         controller.add_calibration_point(pos * root.durationMs * 1000, calibrator_window.lensCalib.noMarker);

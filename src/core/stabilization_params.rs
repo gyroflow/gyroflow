@@ -80,6 +80,9 @@ pub struct StabilizationParams {
     pub fov_overview: bool,
     pub max_zoom: Option<f64>,
     pub max_zoom_iterations: usize,
+    pub fixed_zoom: bool, // static zoom at exactly `max_zoom`, see zooming::calculate_fovs
+    pub zoom_limit_whole_clip: bool, // static zoom: the zoom limit lowers the smoothing of the whole clip, as it did before
+    pub zoom_limit_whole_clip_from_old_file: bool, // `zoom_limit_whole_clip` comes from a file from before it existed, not from the user
     pub show_safe_area: bool,
     pub fovs: Vec<f64>,
     pub minimal_fovs: Vec<f64>,
@@ -100,6 +103,10 @@ pub struct StabilizationParams {
     pub video_rotation: f64,
 
     pub lens_correction_amount: f64,
+    /// The output projection picked in the Lens profile section: a
+    /// [`crate::stabilization::projection::OutputProjection`] as `i32`, or `projection::AUTOMATIC`. Per file, like
+    /// the lens itself: `clear` puts it back to rectilinear
+    pub output_projection: i32,
     pub light_refraction_coefficient: f64,
     pub background_mode: BackgroundMode,
     pub background_margin: f64,
@@ -161,8 +168,12 @@ impl Default for StabilizationParams {
 
             max_zoom: Some(130.0),
             max_zoom_iterations: 5,
+            fixed_zoom: false,
+            zoom_limit_whole_clip: false,
+            zoom_limit_whole_clip_from_old_file: false,
 
             lens_correction_amount: 1.0,
+            output_projection: crate::stabilization::projection::OutputProjection::Rectilinear as i32,
             light_refraction_coefficient: 1.0,
             background_mode: BackgroundMode::SolidColor,
             background_margin: 0.0,
@@ -331,6 +342,7 @@ impl StabilizationParams {
             show_safe_area:            self.show_safe_area,
             max_zoom:                  self.max_zoom,
             max_zoom_iterations:       self.max_zoom_iterations,
+            fixed_zoom:                self.fixed_zoom,
             focal_length_smoothing_enabled: self.focal_length_smoothing_enabled,
             focal_length_max_zoom_rate: self.focal_length_max_zoom_rate,
             ..Self::default()
