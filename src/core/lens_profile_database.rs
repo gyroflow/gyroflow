@@ -10,10 +10,67 @@ use std::io::Read;
 #[cfg(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles"))]
 static LENS_PROFILES_STATIC: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../resources/camera_presets/profiles.cbor.gz"));
 
+static CANONICAL_DB_DEFAULT: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../resources/canonical_camera_database.json"));
+
 #[allow(dead_code)]
 enum DataSource {
     String(String),
     SerdeValue(serde_json::Value)
+}
+
+use serde::{ Serialize, Deserialize };
+
+pub const CANONICAL_DB_VERSION: u32 = 1;
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default, PartialEq)]
+pub struct CanonicalCamera {
+    pub model: String,
+    pub sensor_type: String,
+    pub sensor_width_mm: f64,
+    pub sensor_height_mm: f64,
+    pub crop_factor: f64,
+    pub mount: String,
+    #[serde(default)]
+    pub compatible_mounts: Vec<String>,
+    #[serde(default)]
+    pub compatible_cameras: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default, PartialEq)]
+pub struct CanonicalLens {
+    pub model: String,
+    pub mount: String,
+    #[serde(default)]
+    pub is_zoom: bool,
+    #[serde(default)]
+    pub min_focal_length: f64,
+    #[serde(default)]
+    pub max_focal_length: f64,
+    #[serde(default)]
+    pub max_aperture: f64,
+    #[serde(default)]
+    pub compatible_sensor: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default, PartialEq)]
+pub struct CanonicalBrand {
+    pub name: String,
+    #[serde(default)]
+    pub mounts: Vec<String>,
+    #[serde(default)]
+    pub cameras: Vec<CanonicalCamera>,
+    #[serde(default)]
+    pub lenses: Vec<CanonicalLens>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default, PartialEq)]
+pub struct CanonicalDatabase {
+    pub schema_version: u32,
+    pub last_updated: u64,
+    #[serde(default)]
+    pub description: String,
+    #[serde(default)]
+    pub brands: Vec<CanonicalBrand>,
 }
 
 #[derive(Default)]
@@ -24,10 +81,17 @@ pub struct LensProfileDatabase {
     list_for_ui: Vec<(String, String, String, bool, f64, i32, String)>,
     pub loaded: bool,
     pub version: u32,
+    pub canonical_database: Option<CanonicalDatabase>,
 }
 impl Clone for LensProfileDatabase {
     fn clone(&self) -> Self {
-        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), loaded: self.loaded, ..Default::default() }
+        Self {
+            map: self.map.clone(),
+            preset_map: self.preset_map.clone(),
+            loaded: self.loaded,
+            canonical_database: self.canonical_database.clone(),
+            ..Default::default()
+        }
     }
 }
 
@@ -66,6 +130,203 @@ impl LensProfileDatabase {
         log::warn!("Unknown lens directory: {:?}, exe: {:?}", candidates[0], exe_parent);
 
         std::fs::canonicalize(&candidates[0]).unwrap_or_default()
+    }
+
+    pub fn get_canonical_db_path() -> PathBuf {
+        let candidates = [
+            crate::settings::data_dir().join("canonical_camera_database.json"),
+            Self::get_path().join("canonical_camera_database.json"),
+            PathBuf::from("./resources/canonical_camera_database.json"),
+            PathBuf::from("../resources/canonical_camera_database.json"),
+            PathBuf::from("../../resources/canonical_camera_database.json"),
+        ];
+        for path in &candidates {
+            if path.exists() {
+                return path.clone();
+            }
+        }
+        candidates[0].clone()
+    }
+
+    pub fn load_canonical_database(&mut self) -> std::result::Result<&CanonicalDatabase, String> {
+        let path = Self::get_canonical_db_path();
+        let db: CanonicalDatabase = if path.exists() {
+            match std::fs::read_to_string(&path) {
+                Ok(content) => match serde_json::from_str(&content) {
+                    Ok(parsed) => parsed,
+                    Err(e) => {
+                        log::warn!("Failed to parse canonical database from {:?}: {:?}, using embedded default", path, e);
+                        serde_json::from_str(CANONICAL_DB_DEFAULT).map_err(|e| format!("Failed to parse embedded default: {:?}", e))?
+                    }
+                },
+                Err(e) => {
+                    log::warn!("Failed to read canonical database from {:?}: {:?}, using embedded default", path, e);
+                    serde_json::from_str(CANONICAL_DB_DEFAULT).map_err(|e| format!("Failed to parse embedded default: {:?}", e))?
+                }
+            }
+        } else {
+            serde_json::from_str(CANONICAL_DB_DEFAULT).map_err(|e| format!("Failed to parse embedded canonical database: {:?}", e))?
+        };
+
+        if db.schema_version == 0 || db.schema_version > CANONICAL_DB_VERSION + 2 {
+            return Err(format!("Unsupported canonical database schema version: {}", db.schema_version));
+        }
+
+        self.canonical_database = Some(db);
+        Ok(self.canonical_database.as_ref().unwrap())
+    }
+
+    pub fn ensure_canonical_database(&mut self) -> &CanonicalDatabase {
+        if self.canonical_database.is_none() {
+            let _ = self.load_canonical_database();
+        }
+        if self.canonical_database.is_none() {
+            self.canonical_database = serde_json::from_str(CANONICAL_DB_DEFAULT).ok();
+        }
+        self.canonical_database.as_ref().expect("Canonical database must be initialized")
+    }
+
+    pub fn update_canonical_database(&mut self, json_str: &str) -> std::result::Result<usize, String> {
+        let new_db: CanonicalDatabase = serde_json::from_str(json_str).map_err(|e| format!("JSON parse error: {:?}", e))?;
+        if new_db.schema_version == 0 || new_db.schema_version > CANONICAL_DB_VERSION + 2 {
+            return Err(format!("Unsupported schema version: {}", new_db.schema_version));
+        }
+
+        let total_items = new_db.brands.iter().map(|b| b.cameras.len() + b.lenses.len()).sum();
+        let target_path = crate::settings::data_dir().join("canonical_camera_database.json");
+        if let Some(parent) = target_path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        let _ = std::fs::write(&target_path, json_str);
+
+        self.canonical_database = Some(new_db);
+        Ok(total_items)
+    }
+
+    pub fn get_canonical_database(&self) -> Option<&CanonicalDatabase> {
+        self.canonical_database.as_ref()
+    }
+
+    pub fn get_all_brands(&self) -> Vec<String> {
+        if let Some(db) = &self.canonical_database {
+            db.brands.iter().map(|b| b.name.clone()).collect()
+        } else if let Ok(db) = serde_json::from_str::<CanonicalDatabase>(CANONICAL_DB_DEFAULT) {
+            db.brands.iter().map(|b| b.name.clone()).collect()
+        } else {
+            Vec::new()
+        }
+    }
+
+    pub fn get_models_for_brand(&self, brand: &str) -> Vec<CanonicalCamera> {
+        let brand_clean = brand.trim().to_ascii_lowercase();
+        let brands = if let Some(db) = &self.canonical_database {
+            &db.brands
+        } else {
+            return Vec::new();
+        };
+        for b in brands {
+            if b.name.to_ascii_lowercase() == brand_clean {
+                return b.cameras.clone();
+            }
+        }
+        Vec::new()
+    }
+
+    pub fn get_lenses_for_brand(&self, brand: &str) -> Vec<CanonicalLens> {
+        let brand_clean = brand.trim().to_ascii_lowercase();
+        let brands = if let Some(db) = &self.canonical_database {
+            &db.brands
+        } else {
+            return Vec::new();
+        };
+        for b in brands {
+            if b.name.to_ascii_lowercase() == brand_clean {
+                return b.lenses.clone();
+            }
+        }
+        Vec::new()
+    }
+
+    pub fn find_canonical_camera(&self, brand: &str, model: &str) -> Option<CanonicalCamera> {
+        let brand_clean = brand.trim().to_ascii_lowercase();
+        let model_clean = model.trim().to_ascii_lowercase().replace([' ', '-', '_'], "");
+        let brands = if let Some(db) = &self.canonical_database {
+            &db.brands
+        } else {
+            return None;
+        };
+        for b in brands {
+            if b.name.to_ascii_lowercase() == brand_clean {
+                for cam in &b.cameras {
+                    let cam_clean = cam.model.to_ascii_lowercase().replace([' ', '-', '_'], "");
+                    if cam_clean == model_clean || cam_clean.contains(&model_clean) || model_clean.contains(&cam_clean) {
+                        return Some(cam.clone());
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    pub fn find_canonical_lens(&self, brand: &str, lens_model: &str) -> Option<CanonicalLens> {
+        let brand_clean = brand.trim().to_ascii_lowercase();
+        let lens_clean = lens_model.trim().to_ascii_lowercase().replace([' ', '-', '_'], "");
+        let brands = if let Some(db) = &self.canonical_database {
+            &db.brands
+        } else {
+            return None;
+        };
+        for b in brands {
+            if b.name.to_ascii_lowercase() == brand_clean {
+                for lens in &b.lenses {
+                    let l_clean = lens.model.to_ascii_lowercase().replace([' ', '-', '_'], "");
+                    if l_clean == lens_clean || l_clean.contains(&lens_clean) || lens_clean.contains(&l_clean) {
+                        return Some(lens.clone());
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    pub fn get_compatible_cameras(&self, brand: &str, model: &str) -> Vec<String> {
+        if let Some(cam) = self.find_canonical_camera(brand, model) {
+            cam.compatible_cameras
+        } else {
+            Vec::new()
+        }
+    }
+
+    pub fn get_compatible_lenses(&self, brand: &str, camera_model: &str) -> Vec<CanonicalLens> {
+        if let Some(cam) = self.find_canonical_camera(brand, camera_model) {
+            let lenses = self.get_lenses_for_brand(brand);
+            lenses.into_iter().filter(|l| {
+                l.mount == cam.mount || cam.compatible_mounts.contains(&l.mount)
+            }).collect()
+        } else {
+            Vec::new()
+        }
+    }
+
+    pub fn find_compatible_profile_id(&self, cam_id: &crate::camera_identifier::CameraIdentifier) -> Option<String> {
+        for (id, profile) in &self.map {
+            if crate::camera_identifier::are_cameras_compatible(&cam_id.brand, &cam_id.model, &profile.camera_brand, &profile.camera_model) {
+                if !cam_id.lens_model.is_empty() && !profile.lens_model.is_empty() {
+                    let l1 = cam_id.lens_model.to_ascii_lowercase().replace([' ', '-', '_'], "");
+                    let l2 = profile.lens_model.to_ascii_lowercase().replace([' ', '-', '_'], "");
+                    if !l1.contains(&l2) && !l2.contains(&l1) {
+                        continue;
+                    }
+                }
+                if let (Some(fl1), Some(fl2)) = (cam_id.focal_length, profile.focal_length) {
+                    if (fl1 - fl2).abs() > 1.0 {
+                        continue;
+                    }
+                }
+                return Some(id.clone());
+            }
+        }
+        None
     }
 
     pub fn load_all(&mut self) {
@@ -202,6 +463,8 @@ impl LensProfileDatabase {
             v.resolve_interpolations(&copy);
         }
 
+        let _ = self.load_canonical_database();
+
         ::log::info!("Loaded {} lens profiles in {:.3}ms", self.map.len(), _time.elapsed().as_micros() as f64 / 1000.0);
         self.loaded = true;
     }
@@ -211,6 +474,7 @@ impl LensProfileDatabase {
         self.preset_map = b.preset_map;
         self.loaded = b.loaded;
         self.version = b.version;
+        self.canonical_database = b.canonical_database;
         if self.loaded {
             let cbs: Vec<_> = self.loaded_callbacks.drain(..).collect();
             for cb in cbs {
@@ -532,3 +796,104 @@ impl LensProfileDatabase {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_canonical_database_embedded_fallback() {
+        let mut db = LensProfileDatabase::default();
+        let canonical = db.load_canonical_database().expect("Should load embedded canonical DB");
+        assert_eq!(canonical.schema_version, 1);
+        assert!(canonical.brands.len() >= 9);
+
+        let brands = db.get_all_brands();
+        assert!(brands.contains(&"Sony".to_string()));
+        assert!(brands.contains(&"GoPro".to_string()));
+        assert!(brands.contains(&"DJI".to_string()));
+        assert!(brands.contains(&"RED".to_string()));
+    }
+
+    #[test]
+    fn test_canonical_camera_querying() {
+        let mut db = LensProfileDatabase::default();
+        let _ = db.load_canonical_database();
+
+        let fx3 = db.find_canonical_camera("Sony", "FX3");
+        assert!(fx3.is_some());
+        let fx3 = fx3.unwrap();
+        assert_eq!(fx3.sensor_type, "Full Frame");
+        assert_eq!(fx3.crop_factor, 1.0);
+        assert!(fx3.compatible_cameras.contains(&"A7S III".to_string()));
+
+        let hero13 = db.find_canonical_camera("GoPro", "HERO13 Black");
+        assert!(hero13.is_some());
+        assert!(hero13.unwrap().compatible_cameras.contains(&"HERO11 Black".to_string()));
+
+        let compat = db.get_compatible_cameras("Sony", "FX3");
+        assert!(compat.contains(&"A7S III".to_string()));
+    }
+
+    #[test]
+    fn test_canonical_lenses_and_mounts() {
+        let mut db = LensProfileDatabase::default();
+        let _ = db.load_canonical_database();
+
+        let lenses = db.get_compatible_lenses("Sony", "FX3");
+        assert!(!lenses.is_empty());
+        let has_24_70 = lenses.iter().any(|l| l.model.contains("24-70mm"));
+        assert!(has_24_70);
+
+        let lens = db.find_canonical_lens("Sony", "FE 24-70mm F2.8 GM II");
+        assert!(lens.is_some());
+        let lens = lens.unwrap();
+        assert!(lens.is_zoom);
+        assert_eq!(lens.min_focal_length, 24.0);
+        assert_eq!(lens.max_focal_length, 70.0);
+    }
+
+    #[test]
+    fn test_canonical_database_auto_update() {
+        let mut db = LensProfileDatabase::default();
+        let _ = db.load_canonical_database();
+
+        let invalid_version_json = r#"{
+            "schema_version": 999,
+            "last_updated": 100,
+            "description": "Invalid",
+            "brands": []
+        }"#;
+        assert!(db.update_canonical_database(invalid_version_json).is_err());
+
+        let valid_update_json = r#"{
+            "schema_version": 1,
+            "last_updated": 1800000000,
+            "description": "Updated Test DB",
+            "brands": [
+                {
+                    "name": "CustomBrand",
+                    "mounts": ["CustomMount"],
+                    "cameras": [
+                        {
+                            "model": "CamX",
+                            "sensor_type": "Full Frame",
+                            "sensor_width_mm": 36.0,
+                            "sensor_height_mm": 24.0,
+                            "crop_factor": 1.0,
+                            "mount": "CustomMount",
+                            "compatible_mounts": ["CustomMount"],
+                            "compatible_cameras": []
+                        }
+                    ],
+                    "lenses": []
+                }
+            ]
+        }"#;
+        let res = db.update_canonical_database(valid_update_json);
+        assert!(res.is_ok());
+        assert_eq!(res.unwrap(), 1);
+        assert!(db.find_canonical_camera("CustomBrand", "CamX").is_some());
+    }
+}
+

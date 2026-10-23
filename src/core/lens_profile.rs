@@ -669,4 +669,132 @@ impl LensProfile {
             self.parsed_interpolations = interpolations;
         }
     }
+
+    pub fn validate_for_submission(&self) -> std::result::Result<(), Vec<String>> {
+        let mut errors = Vec::new();
+
+        let brand = self.camera_brand.trim();
+        let model = self.camera_model.trim();
+        let lens = self.lens_model.trim();
+
+        if brand.is_empty() {
+            errors.push("Camera brand is required and cannot be empty.".to_string());
+        }
+
+        if model.is_empty() {
+            errors.push("Camera model is required and cannot be empty.".to_string());
+        } else if model.eq_ignore_ascii_case("other") || model.eq_ignore_ascii_case("unknown") {
+            let note = self.note.trim();
+            let setting = self.camera_setting.trim();
+            if note.is_empty() && setting.is_empty() {
+                errors.push("When camera model is 'Other', a specific descriptive model must be provided in notes or camera setting.".to_string());
+            }
+        }
+
+        let interchangeable_brands = [
+            "sony", "canon", "nikon", "fujifilm", "fuji", "panasonic",
+            "blackmagic", "blackmagic design", "red", "leica", "hasselblad"
+        ];
+        let is_interchangeable = interchangeable_brands.iter().any(|b| brand.to_ascii_lowercase().contains(b));
+        if is_interchangeable && (lens.is_empty() || lens.eq_ignore_ascii_case("other") || lens.eq_ignore_ascii_case("unknown")) {
+            errors.push(format!("Interchangeable lens camera ('{}') requires a specific lens model.", brand));
+        }
+
+        if self.calib_dimension.w == 0 || self.calib_dimension.h == 0 {
+            errors.push("Calibration dimensions must be non-zero (both width and height are required).".to_string());
+        }
+
+        if self.fisheye_params.camera_matrix.len() < 3
+            || self.fisheye_params.camera_matrix[0][0] <= 0.0
+            || self.fisheye_params.camera_matrix[1][1] <= 0.0
+        {
+            errors.push("Invalid camera matrix: focal lengths (fx, fy) must be positive non-zero values.".to_string());
+        }
+
+        if self.fisheye_params.distortion_coeffs.is_empty() {
+            errors.push("Distortion coefficients are missing. Calibration must be computed before submission.".to_string());
+        }
+
+        let rms = self.fisheye_params.RMS_error;
+        if rms <= 0.0 || rms.is_nan() {
+            errors.push("Calibration RMS error must be greater than 0.".to_string());
+        } else if rms > 10.0 {
+            errors.push(format!("Calibration RMS error ({:.2} px) is too high (> 10.0 px). Please re-calibrate for accurate results.", rms));
+        }
+
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors)
+        }
+    }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn create_valid_profile() -> LensProfile {
+        let mut p = LensProfile::default();
+        p.camera_brand = "Sony".to_string();
+        p.camera_model = "FX3".to_string();
+        p.lens_model = "FE 24-70mm F2.8 GM II".to_string();
+        p.calib_dimension = Dimensions { w: 3840, h: 2160 };
+        p.fisheye_params.camera_matrix = vec![
+            [2500.0, 0.0, 1920.0],
+            [0.0, 2500.0, 1080.0],
+            [0.0, 0.0, 1.0],
+        ];
+        p.fisheye_params.distortion_coeffs = vec![0.05, -0.02, 0.001, -0.0005];
+        p.fisheye_params.RMS_error = 0.42;
+        p
+    }
+
+    #[test]
+    fn test_validate_for_submission_valid() {
+        let profile = create_valid_profile();
+        assert!(profile.validate_for_submission().is_ok());
+    }
+
+    #[test]
+    fn test_validate_for_submission_missing_brand_model() {
+        let mut profile = create_valid_profile();
+        profile.camera_brand.clear();
+        profile.camera_model.clear();
+        let res = profile.validate_for_submission();
+        assert!(res.is_err());
+        let errors = res.unwrap_err();
+        assert!(errors.iter().any(|e| e.contains("brand is required")));
+        assert!(errors.iter().any(|e| e.contains("model is required")));
+    }
+
+    #[test]
+    fn test_validate_for_submission_interchangeable_requires_lens() {
+        let mut profile = create_valid_profile();
+        profile.lens_model.clear();
+        let res = profile.validate_for_submission();
+        assert!(res.is_err());
+        let errors = res.unwrap_err();
+        assert!(errors.iter().any(|e| e.contains("Interchangeable lens camera")));
+    }
+
+    #[test]
+    fn test_validate_for_submission_invalid_rms_and_matrix() {
+        let mut profile = create_valid_profile();
+        profile.fisheye_params.RMS_error = 0.0;
+        profile.fisheye_params.distortion_coeffs.clear();
+        let res = profile.validate_for_submission();
+        assert!(res.is_err());
+        let errors = res.unwrap_err();
+        assert!(errors.iter().any(|e| e.contains("RMS error")));
+        assert!(errors.iter().any(|e| e.contains("Distortion coefficients")));
+
+        // High RMS
+        let mut profile_high_rms = create_valid_profile();
+        profile_high_rms.fisheye_params.RMS_error = 15.5;
+        let res2 = profile_high_rms.validate_for_submission();
+        assert!(res2.is_err());
+        assert!(res2.unwrap_err().iter().any(|e| e.contains("too high")));
+    }
+}
+
