@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright Ã‚Â© 2021-2022 Adrian <adrian.eddy at gmail>
 
 use std::collections::{ HashSet, BTreeMap };
 use itertools::Itertools;
@@ -81,7 +81,7 @@ pub struct LensProfile {
     pub is_copy: bool,
     pub rating: Option<f64>,
     pub checksum: Option<String>,
-    parsed_interpolations: BTreeMap<i64, LensProfile>,
+    pub(crate) parsed_interpolations: BTreeMap<i64, LensProfile>,
 }
 
 impl LensProfile {
@@ -118,6 +118,27 @@ impl LensProfile {
 
     pub fn load_from_file(&mut self, url: &str) -> std::result::Result<(), crate::GyroflowCoreError> {
         self.load_from_data(&crate::filesystem::read_to_string(url)?)
+    }
+    pub fn validate_for_submission(&self) -> Result<(), &'static str> {
+        let brand = self.camera_brand.trim();
+        let model = self.camera_model.trim();
+        let lens = self.lens_model.trim();
+        if brand.is_empty() || brand.eq_ignore_ascii_case("unknown") || brand.eq_ignore_ascii_case("none") {
+            return Err("Camera brand must be specified.");
+        }
+        if model.is_empty() || model.eq_ignore_ascii_case("unknown") || model.eq_ignore_ascii_case("none") {
+            return Err("Camera model must be specified.");
+        }
+        if lens.is_empty() || lens.eq_ignore_ascii_case("unknown") || lens.eq_ignore_ascii_case("none") {
+            return Err("Lens model must be specified.");
+        }
+        if self.calib_dimension.w == 0 || self.calib_dimension.h == 0 {
+            return Err("Calibration dimensions must be greater than zero.");
+        }
+        if self.fisheye_params.camera_matrix.is_empty() {
+            return Err("Camera matrix must not be empty.");
+        }
+        Ok(())
     }
 
     pub fn load_from_json_value(&mut self, v: &serde_json::Value) -> Option<()> {
@@ -324,8 +345,8 @@ impl LensProfile {
     /// The one profile that stores something else is GoPro's: `init` leaves its `radial_distortion_limit`
     /// alone (the POLY radial map has no fold to solve for), and telemetry-parser writes the recorded
     /// frame's corner angle there as `tan(ZFOV/2)` - the units `r_limit` had before the pipeline started
-    /// carrying rays as angles. Read through here rather than off the field, or a 150° body comes out as a
-    /// 3.73 radian field limit, which is past 180° and so clips nothing at all.
+    /// carrying rays as angles. Read through here rather than off the field, or a 150Ã‚Â° body comes out as a
+    /// 3.73 radian field limit, which is past 180Ã‚Â° and so clips nothing at all.
     pub fn radial_distortion_limit_rad(&self) -> Option<f64> {
         let limit = self.fisheye_params.radial_distortion_limit.filter(|l| *l > 0.0)?;
         Some(if self.distortion_model.as_deref() == Some("gopro") { limit.atan() } else { limit })

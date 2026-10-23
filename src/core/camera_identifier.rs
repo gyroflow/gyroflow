@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright Â© 2021-2022 Adrian <adrian.eddy at gmail>
 
 use serde::{ Serialize, Deserialize };
 
@@ -204,6 +204,14 @@ impl CameraIdentifier {
         self.identifier.replace("hero12", "hero11")
                        .replace("hero13", "hero11")
                        .replace("hero11blackmini", "hero11black")
+    }
+    pub fn normalize_with_db(&mut self, db: &crate::camera_database::CameraDatabase) {
+        if !self.brand.is_empty() {
+            let (b, m) = db.normalize_camera(&self.brand, &self.model);
+            self.brand = b;
+            self.model = m;
+            self.identifier = self.get_identifier();
+        }
     }
 
     fn get_identifier(&self) -> String {

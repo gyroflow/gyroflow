@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright Â© 2021-2022 Adrian <adrian.eddy at gmail>
 
 use itertools::Itertools;
 use qmetaobject::*;
@@ -2247,6 +2247,12 @@ impl Controller {
 
         if let Ok(mut profile) = core::lens_profile::LensProfile::from_json(&info_json) {
             self.fill_profile_from_calibrator(&mut profile);
+                if upload {
+                    if let Err(err_msg) = profile.validate_for_submission() {
+                        self.error(QString::from("Cannot upload lens profile: %1"), QString::from(err_msg), QString::default());
+                        return false;
+                    }
+                }
             let name = profile.get_name()
                 .replace([':', '|', '*', ':'], "_")
                 .replace(['<', '"', '>', '/', '\\'], "");
@@ -2262,6 +2268,12 @@ impl Controller {
         match core::lens_profile::LensProfile::from_json(&info_json) {
             Ok(mut profile) => {
                 self.fill_profile_from_calibrator(&mut profile);
+                if upload {
+                    if let Err(err_msg) = profile.validate_for_submission() {
+                        self.error(QString::from("Cannot upload lens profile: %1"), QString::from(err_msg), QString::default());
+                        return false;
+                    }
+                }
 
                 match profile.save_to_file(&url) {
                     Ok(json) => {
@@ -2652,7 +2664,7 @@ impl Controller {
                         }
                         if let Some(vidinfo) = &vidinfo {
                             if vidinfo.width != x.width || vidinfo.height != x.height || (vidinfo.fps * 100.0).round() as i32 != (x.fps * 100.0).round() as i32 || vidinfo.rotation != x.rotation {
-                                progress((1.0, format!("Video metadata mismatch: {}x{}@{:.2} {}° vs {}x{}@{:.2} {}°", vidinfo.width, vidinfo.height, vidinfo.fps, vidinfo.rotation, x.width, x.height, x.fps, x.rotation)));
+                                progress((1.0, format!("Video metadata mismatch: {}x{}@{:.2} {}Â° vs {}x{}@{:.2} {}Â°", vidinfo.width, vidinfo.height, vidinfo.fps, vidinfo.rotation, x.width, x.height, x.fps, x.rotation)));
                                 return;
                             }
                         }

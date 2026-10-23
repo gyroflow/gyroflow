@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright Ã‚Â© 2021-2022 Adrian <adrian.eddy at gmail>
 
 use std::cmp::Ordering;
 use std::collections::{ HashSet, HashMap, BTreeMap };
@@ -11,6 +11,8 @@ use std::io::Read;
 static LENS_PROFILES_STATIC: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../resources/camera_presets/profiles.cbor.gz"));
 
 #[allow(dead_code)]
+static CAMERA_DATABASE_STATIC: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../resources/camera_database.json"));
+
 enum DataSource {
     String(String),
     SerdeValue(serde_json::Value)
@@ -22,12 +24,13 @@ pub struct LensProfileDatabase {
     map: HashMap<String, LensProfile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
     list_for_ui: Vec<(String, String, String, bool, f64, i32, String)>,
+    pub camera_db: crate::camera_database::CameraDatabase,
     pub loaded: bool,
     pub version: u32,
 }
 impl Clone for LensProfileDatabase {
     fn clone(&self) -> Self {
-        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), loaded: self.loaded, ..Default::default() }
+        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), camera_db: self.camera_db.clone(), loaded: self.loaded, version: self.version, ..Default::default() }
     }
 }
 
@@ -39,6 +42,14 @@ impl LensProfileDatabase {
             #[cfg(any(target_os = "macos", target_os = "ios"))]
             PathBuf::from("../Resources/camera_presets/"),
             PathBuf::from("./resources/camera_presets/"),
+            PathBuf::from("../../resources/camera_presets/"),
+            PathBuf::from("../resources/camera_presets/"),
+            PathBuf::from("./resources/camera_presets/"),
+            PathBuf::from("../../resources/camera_presets/"),
+            PathBuf::from("../resources/camera_presets/"),
+            PathBuf::from("./resources/camera_presets/"),
+            PathBuf::from("../../resources/camera_presets/"),
+            PathBuf::from("../resources/camera_presets/"),
             PathBuf::from("./camera_presets/"),
             PathBuf::from("./lens_profiles/")
         ];
@@ -72,6 +83,18 @@ impl LensProfileDatabase {
         log::info!("Lens profiles directory: {:?}", Self::get_path());
 
         let _time = std::time::Instant::now();
+
+        if let Ok(db) = crate::camera_database::CameraDatabase::from_json(CAMERA_DATABASE_STATIC) {
+            self.camera_db = db;
+        }
+        let runtime_cam_db = Self::get_path().join("camera_database.json");
+        if runtime_cam_db.exists() {
+            if let Ok(data) = std::fs::read_to_string(&runtime_cam_db) {
+                if let Ok(db) = crate::camera_database::CameraDatabase::from_json(&data) {
+                    self.camera_db = db;
+                }
+            }
+        }
 
         let mut load = |data: DataSource, f_name: &str| {
             if f_name.ends_with(".gyroflow") {
@@ -202,6 +225,32 @@ impl LensProfileDatabase {
             v.resolve_interpolations(&copy);
         }
 
+        for v in self.map.values() {
+            if !v.camera_brand.is_empty() && !v.camera_model.is_empty() {
+                let norm_b = self.camera_db.normalize_brand(&v.camera_brand);
+                let norm_m = self.camera_db.normalize_model(&norm_b, &v.camera_model);
+                if self.camera_db.get_camera(&norm_b, &norm_m).is_none() {
+                    self.camera_db.add_camera(crate::camera_database::CameraInfo {
+                        brand: norm_b.clone(),
+                        model: norm_m.clone(),
+                        crop_factor: v.crop_factor,
+                        ..Default::default()
+                    });
+                }
+                if !v.lens_model.is_empty() {
+                    self.camera_db.add_lens(crate::camera_database::LensInfo {
+                        brand: norm_b.clone(),
+                        model: v.lens_model.clone(),
+                        crop_factor: v.crop_factor,
+                        min_focal: v.focal_length,
+                        max_focal: v.focal_length,
+                        ..Default::default()
+                    });
+                }
+            }
+        }
+        self.camera_db.rebuild_indices();
+
         ::log::info!("Loaded {} lens profiles in {:.3}ms", self.map.len(), _time.elapsed().as_micros() as f64 / 1000.0);
         self.loaded = true;
     }
@@ -210,6 +259,7 @@ impl LensProfileDatabase {
         self.map = b.map;
         self.preset_map = b.preset_map;
         self.loaded = b.loaded;
+        self.camera_db = b.camera_db;
         self.version = b.version;
         if self.loaded {
             let cbs: Vec<_> = self.loaded_callbacks.drain(..).collect();
@@ -391,6 +441,125 @@ impl LensProfileDatabase {
     }
 
     // -------------------------------------------------------------------
+    pub fn get_brands(&self) -> Vec<String> {
+        let mut set: HashSet<String> = self.camera_db.get_brands().into_iter().collect();
+        for v in self.map.values() {
+            if !v.camera_brand.is_empty() {
+                set.insert(self.camera_db.normalize_brand(&v.camera_brand));
+            }
+        }
+        let mut list: Vec<_> = set.into_iter().collect();
+        list.sort();
+        list
+    }
+
+    pub fn get_models(&self, brand: &str) -> Vec<String> {
+        let norm_brand = self.camera_db.normalize_brand(brand);
+        let mut set: HashSet<String> = self.camera_db.get_models(&norm_brand).into_iter().collect();
+        let b_lower = norm_brand.to_ascii_lowercase();
+
+        for v in self.map.values() {
+            if v.camera_brand.to_ascii_lowercase() == b_lower && !v.camera_model.is_empty() {
+                set.insert(self.camera_db.normalize_model(&norm_brand, &v.camera_model));
+            }
+        }
+        let mut list: Vec<_> = set.into_iter().collect();
+        list.sort();
+        list
+    }
+
+    pub fn get_lenses(&self, brand: &str, model: &str) -> Vec<String> {
+        let norm_brand = self.camera_db.normalize_brand(brand);
+        let norm_model = self.camera_db.normalize_model(&norm_brand, model);
+        let mut set: HashSet<String> = self.camera_db.get_lenses_for_camera(&norm_brand, &norm_model).into_iter().collect();
+
+        let b_lower = norm_brand.to_ascii_lowercase();
+        let m_lower = norm_model.to_ascii_lowercase();
+
+        for v in self.map.values() {
+            let vb = self.camera_db.normalize_brand(&v.camera_brand).to_ascii_lowercase();
+            let vm = self.camera_db.normalize_model(&norm_brand, &v.camera_model).to_ascii_lowercase();
+            if vb == b_lower && vm == m_lower && !v.lens_model.is_empty() {
+                set.insert(v.lens_model.clone());
+            }
+        }
+        let mut list: Vec<_> = set.into_iter().collect();
+        list.sort();
+        list
+    }
+
+    pub fn find_profiles(&self, brand: Option<&str>, model: Option<&str>, lens: Option<&str>) -> Vec<&LensProfile> {
+        let b_norm = brand.map(|b| self.camera_db.normalize_brand(b).to_ascii_lowercase());
+        let m_norm = model.map(|m| m.to_ascii_lowercase());
+        let l_norm = lens.map(|l| l.to_ascii_lowercase());
+
+        self.map.values().filter(|p| {
+            if let Some(b) = &b_norm {
+                let pb = self.camera_db.normalize_brand(&p.camera_brand).to_ascii_lowercase();
+                if pb != *b && !pb.contains(b.as_str()) {
+                    return false;
+                }
+            }
+            if let Some(m) = &m_norm {
+                let pm = self.camera_db.normalize_model(&p.camera_brand, &p.camera_model).to_ascii_lowercase();
+                if pm != *m && !pm.contains(m.as_str()) {
+                    return false;
+                }
+            }
+            if let Some(l) = &l_norm {
+                let pl = p.lens_model.to_ascii_lowercase();
+                if pl != *l && !pl.contains(l.as_str()) {
+                    return false;
+                }
+            }
+            true
+        }).collect()
+    }
+
+    pub fn load_from_lensfun(&mut self, xml_str: &str) -> Result<usize, String> {
+        let mut lf = crate::lensfun::LensfunDatabase::new();
+        lf.parse_xml(std::io::Cursor::new(xml_str))?;
+
+        lf.populate_camera_database(&mut self.camera_db);
+
+        let profiles = lf.to_lens_profiles();
+        let count = profiles.len();
+
+        for profile in profiles {
+            let key = if !profile.identifier.is_empty() {
+                profile.identifier.clone()
+            } else {
+                profile.get_name()
+            };
+
+            if let Ok(json_str) = profile.get_json() {
+                self.preset_map.insert(key.clone(), json_str);
+            }
+            self.map.insert(key, profile);
+        }
+
+        self.prepare_list_for_ui();
+        Ok(count)
+    }
+
+    pub fn load_lensfun_file<P: AsRef<std::path::Path>>(&mut self, path: P) -> Result<usize, String> {
+        let xml_str = std::fs::read_to_string(path).map_err(|e| format!("Failed to read file: {:?}", e))?;
+        self.load_from_lensfun(&xml_str)
+    }
+
+    pub fn load_lensfun_dir<P: AsRef<std::path::Path>>(&mut self, dir: P) -> Result<usize, String> {
+        let mut total = 0;
+        for entry in walkdir::WalkDir::new(dir).into_iter().filter_map(|e| e.ok()) {
+            let p = entry.path();
+            if p.extension().map_or(false, |ext| ext.eq_ignore_ascii_case("xml")) {
+                if let Ok(count) = self.load_lensfun_file(p) {
+                    total += count;
+                }
+            }
+        }
+        Ok(total)
+    }
+
     // ---------------------- Maintenance functions ----------------------
     // -------------------------------------------------------------------
 
