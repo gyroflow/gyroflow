@@ -9,6 +9,8 @@ qrc!(pub rsrc,
         "src/ui/menu/qmldir",
         "src/ui/qmldir",
 
+        "resources/CAMERA_DATABASE.md",
+        "resources/CAMERA_DATABASE_LICENSE.txt",
         "resources/shadow.png",
         "resources/icon.png",
         "resources/logo_black.svg",

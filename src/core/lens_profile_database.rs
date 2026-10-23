@@ -22,12 +22,14 @@ pub struct LensProfileDatabase {
     map: HashMap<String, LensProfile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
     list_for_ui: Vec<(String, String, String, bool, f64, i32, String)>,
+    pub camera_database: crate::camera_database::CameraDatabase,
+    profile_setups: HashMap<String, (String, String)>,
     pub loaded: bool,
     pub version: u32,
 }
 impl Clone for LensProfileDatabase {
     fn clone(&self) -> Self {
-        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), loaded: self.loaded, ..Default::default() }
+        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), loaded: self.loaded, version: self.version, camera_database: self.camera_database.clone(), profile_setups: self.profile_setups.clone(), ..Default::default() }
     }
 }
 
@@ -69,9 +71,15 @@ impl LensProfileDatabase {
     }
 
     pub fn load_all(&mut self) {
-        log::info!("Lens profiles directory: {:?}", Self::get_path());
+        self.load_directories(crate::settings::data_dir().join("lens_profiles"), Self::get_path());
+    }
+
+    fn load_directories(&mut self, preferred_path: PathBuf, fallback_path: PathBuf) {
+        log::info!("Lens profiles directory: {:?}", fallback_path);
 
         let _time = std::time::Instant::now();
+        let mut camera_database = crate::camera_database::CameraDatabase::bundled();
+        let mut catalogue_from_bundle = false;
 
         let mut load = |data: DataSource, f_name: &str| {
             if f_name.ends_with(".gyroflow") {
@@ -94,21 +102,19 @@ impl LensProfileDatabase {
                 Ok(mut v) => {
                     v.path_to_file = f_name.to_string();
                     for mut profile in v.get_all_matching_profiles() {
-                        let key = if !profile.identifier.is_empty() {
+                        let mut key = if !profile.identifier.is_empty() {
                             profile.identifier.clone()
                         } else {
                             f_name.to_string()
                         };
-                        if self.map.contains_key(&key) {
-                            if !self.loaded {
-                                log::warn!("Lens profile already present: {}, path_to_file: {} from {}", key, f_name, self.map.get(&key).unwrap().path_to_file);
-
-                                // let prof = std::fs::read(&f_name).unwrap();
-                                // let mut prof: serde_json::Value = serde_json::from_slice(&prof).unwrap();
-                                // *prof.get_mut("identifier").unwrap() = serde_json::Value::String(String::new());
-                                // std::fs::write(f_name, serde_json::to_string_pretty(&prof).unwrap()).unwrap();
-                            }
-                        } else {
+                        if let Some(existing) = self.map.get(&key) {
+                            if existing.path_to_file == f_name { continue; }
+                            // Retain every submission for review; the first profile
+                            // keeps the metadata identifier used for automatic loading.
+                            key = format!("{f_name}#{}", profile.identifier);
+                            if self.map.contains_key(&key) { continue; }
+                        }
+                        {
                             (|| -> Option<()> {
                                 let to_checksum = format!("{}|{}{}|{:.8}{:.8}|{:.8}{:.8}|{:.8}{:.8}{:.8}{:.8}",
                                     profile.identifier,
@@ -143,9 +149,21 @@ impl LensProfileDatabase {
         let mut bundle_loaded = false;
 
         let mut load_from_dir = |dir: PathBuf| {
-            walkdir::WalkDir::new(dir).into_iter().for_each(|e| {
+            walkdir::WalkDir::new(dir).into_iter()
+                // A checkout of lens_profiles can contain the source Lensfun
+                // submodule. Its JSON metadata is not a Gyroflow calibration.
+                .filter_entry(|entry| entry.file_name() != ".git" && !(entry.file_type().is_dir() && entry.path().join("data/db/lensfun-database.dtd").is_file()))
+                .for_each(|e| {
                 if let Ok(entry) = e {
                     let f_name = entry.path().to_string_lossy().replace('\\', "/");
+                    if entry.file_name() == "camera_database.json" {
+                        if !catalogue_from_bundle {
+                            if let Ok(data) = std::fs::read(&f_name) {
+                                if let Ok(db) = serde_json::from_slice(&data).and_then(crate::camera_database::CameraDatabase::from_value) { camera_database = db; }
+                            }
+                        }
+                        return;
+                    }
                     if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
                         if let Ok(data) = std::fs::read_to_string(&f_name) {
                             load(DataSource::String(data), &f_name);
@@ -160,6 +178,13 @@ impl LensProfileDatabase {
                                     bundle_loaded = true;
                                     for (f_name, profile) in array {
                                         if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
+                                        if f_name == "__camera_database" {
+                                            match crate::camera_database::CameraDatabase::from_value(profile) {
+                                                Ok(db) => { camera_database = db; catalogue_from_bundle = true; }
+                                                Err(e) => log::warn!("Ignoring invalid camera catalogue: {e}"),
+                                            }
+                                            continue;
+                                        }
                                         if f_name.starts_with("__") { continue; }
                                         load(DataSource::SerdeValue(profile), &f_name);
                                     }
@@ -171,7 +196,6 @@ impl LensProfileDatabase {
             });
         };
 
-        let preferred_path = crate::settings::data_dir().join("lens_profiles");
         if preferred_path.exists() && std::fs::read_dir(&preferred_path).map(|x| x.count()).unwrap_or(0) > 0 {
             ::log::info!("Loading lens profiles from {}", preferred_path.display());
             load_from_dir(preferred_path);
@@ -185,6 +209,13 @@ impl LensProfileDatabase {
                 if let Ok(array) = ciborium::from_reader::<Vec<(String, serde_json::Value)>, _>(std::io::Cursor::new(decompressed)) {
                     for (f_name, profile) in array {
                         if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
+                        if f_name == "__camera_database" {
+                            match crate::camera_database::CameraDatabase::from_value(profile) {
+                                Ok(db) => { camera_database = db; }
+                                Err(e) => log::warn!("Ignoring invalid camera catalogue: {e}"),
+                            }
+                            continue;
+                        }
                         if f_name.starts_with("__") { continue; }
                         load(DataSource::SerdeValue(profile), &f_name);
                     }
@@ -194,8 +225,11 @@ impl LensProfileDatabase {
 
         #[cfg(not(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles")))]
         {
-            load_from_dir(Self::get_path());
+            load_from_dir(fallback_path);
         }
+
+        self.camera_database = camera_database;
+        self.camera_database.add_profiles(self.map.values());
 
         let copy = self.clone();
         for (_, v) in self.map.iter_mut() {
@@ -211,6 +245,8 @@ impl LensProfileDatabase {
         self.preset_map = b.preset_map;
         self.loaded = b.loaded;
         self.version = b.version;
+        self.camera_database = b.camera_database;
+        self.profile_setups = b.profile_setups;
         if self.loaded {
             let cbs: Vec<_> = self.loaded_callbacks.drain(..).collect();
             for cb in cbs {
@@ -231,6 +267,11 @@ impl LensProfileDatabase {
     }
 
     pub fn prepare_list_for_ui(&mut self) {
+        self.profile_setups = self.map.iter().map(|(id, profile)| {
+            let camera = self.camera_database.camera(&profile.camera_brand, &profile.camera_model);
+            let lens = self.camera_database.lens(camera, &profile.lens_model);
+            (id.clone(), (camera.map(|c| c.id.clone()).unwrap_or_default(), lens.map(|l| l.id.clone()).unwrap_or_default()))
+        }).collect();
         // (name, path_to_file, crc32, official, rating, aspect_ratio*1000, author)
         let mut set = HashSet::with_capacity(self.map.len());
         let mut checksum_map = HashMap::with_capacity(self.map.len());
@@ -341,6 +382,47 @@ impl LensProfileDatabase {
         });
 
         filtered.into_iter().take(200).cloned().collect()
+    }
+
+    /// All submitted profiles for a setup, including alternate calibrations.
+    /// Similar-camera profiles are suggestions and never loaded automatically.
+    pub fn browse(&self, selection: &crate::camera_database::Selection, compatible: bool) -> serde_json::Value {
+        use crate::camera_database::{normalized, normalized_brand};
+        if selection.camera_brand.is_empty() { return serde_json::json!([]); }
+        let camera = self.camera_database.camera(&selection.camera_brand, &selection.camera_model);
+        let lens = self.camera_database.lens(camera, &selection.lens_model);
+        let mut rows = Vec::new();
+        for (name, id, crc, official, rating, aspect_ratio, author) in &self.list_for_ui {
+            let Some(profile) = self.map.get(id) else { continue; };
+            if profile.path_to_file.ends_with(".gyroflow") { continue; }
+            let Some((camera_id, lens_id)) = self.profile_setups.get(id) else { continue; };
+            let exact = if selection.camera_model.is_empty() {
+                normalized_brand(&profile.camera_brand) == normalized_brand(&selection.camera_brand)
+            } else {
+                camera.is_some_and(|c| &c.id == camera_id)
+            };
+            let suggested = !exact && compatible && camera.zip(self.camera_database.camera_by_id(camera_id))
+                .is_some_and(|(a,b)| self.camera_database.compatible_cameras(a,b));
+            if !exact && !suggested { continue; }
+            if !selection.lens_model.is_empty() {
+                let matches = lens.map(|l| &l.id == lens_id).unwrap_or_else(|| exact && normalized(&profile.lens_model) == normalized(&selection.lens_model));
+                if !matches { continue; }
+            }
+            rows.push(serde_json::json!({
+                "name": name, "id": id, "checksum": crc, "official": official, "rating": rating,
+                "aspect_ratio": aspect_ratio, "author": author, "suggested": suggested,
+                "camera": format!("{} {}", profile.camera_brand, profile.camera_model),
+                "lens": profile.lens_model, "focal_length": profile.focal_length,
+                "width": profile.calib_dimension.w, "height": profile.calib_dimension.h, "fps": profile.fps,
+                "setting": profile.camera_setting
+            }));
+        }
+        rows.sort_by(|a,b| a["suggested"].as_bool().cmp(&b["suggested"].as_bool())
+            .then_with(|| b["official"].as_bool().cmp(&a["official"].as_bool()))
+            .then_with(|| b["rating"].as_f64().unwrap_or_default().total_cmp(&a["rating"].as_f64().unwrap_or_default()))
+            .then_with(|| a["name"].as_str().cmp(&b["name"].as_str()))
+            .then_with(|| a["id"].as_str().cmp(&b["id"].as_str())));
+        serde_json::Value::Array(rows)
     }
 
     pub fn set_profile_ratings(&mut self, json: &str) {
@@ -532,3 +614,7 @@ impl LensProfileDatabase {
         }
     }
 }
+
+#[cfg(all(test, not(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles"))))]
+#[path = "lens_profile_database_tests.rs"]
+mod catalogue_tests;
