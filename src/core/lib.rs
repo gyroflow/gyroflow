@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright Â© 2021-2022 Adrian <adrian.eddy at gmail>
 #![recursion_limit = "256"]
 
 pub mod gyro_source;
@@ -10,6 +10,8 @@ pub mod calibration;
 pub mod synchronization;
 pub mod stabilization;
 pub mod camera_identifier;
+pub mod camera_database;
+pub mod lensfun;
 pub mod keyframes;
 pub mod stmap;
 
@@ -1330,7 +1332,7 @@ impl StabilizationManager {
     pub fn release_optical_measurements(&self) {
         *self.optical_measurements.write() = None;
     }
-    /// The frame at a moment of the file (µs), numbered as the analysis numbers them (`OpticalMotionAnalysis::feed_frame`)
+    /// The frame at a moment of the file (Âµs), numbered as the analysis numbers them (`OpticalMotionAnalysis::feed_frame`)
     fn optical_frame_at(&self, file_timestamp_us: i64) -> usize {
         let (scale, fps) = { let p = self.params.read(); (p.fps_scale, p.get_scaled_fps()) };
         frame_at_timestamp(file_timestamp_us as f64 / 1000.0 / scale.unwrap_or(1.0), fps).max(0) as usize
@@ -1362,7 +1364,7 @@ impl StabilizationManager {
             None => synchronization::optical_motion::as_tracked(index, points),
         }
     }
-    /// Where the last "Analyze image optically" tracked points in the frame at a moment of the file (µs), but the tracks
+    /// Where the last "Analyze image optically" tracked points in the frame at a moment of the file (Âµs), but the tracks
     /// taken out: their track, where they are relative to the frame (0 to 1), and what became of them. With `stabilized`,
     /// where they are in the stabilized picture the preview shows, and only the ones in it
     pub fn optical_tracked_points(&self, file_timestamp_us: i64, stabilized: bool) -> Vec<(u32, f32, f32, synchronization::optical_motion::PointState)> {
@@ -1378,7 +1380,7 @@ impl StabilizationManager {
         points
     }
     /// The tracks (but the ones taken out) with a point within `rect` (x0, y0, x1, y1, relative to the frame - the
-    /// stabilized one with `stabilized`) in the frame at a moment of the file (µs), or with `all_frames`, within the
+    /// stabilized one with `stabilized`) in the frame at a moment of the file (Âµs), or with `all_frames`, within the
     /// part of the camera frame `rect` covers there in any frame. Every frame of a long clip placed in the stabilized
     /// picture takes seconds: not on the UI thread. None once `cancelled`
     pub fn optical_tracks_in_rect(&self, file_timestamp_us: i64, rect: [f32; 4], all_frames: bool, stabilized: bool, cancelled: impl Fn() -> bool + Sync) -> Option<Vec<u32>> {
@@ -1391,7 +1393,7 @@ impl StabilizationManager {
         let place = self.optical_placement(stabilized);
         m.tracks.in_rect(frames, rect, &self.optical_removed_ids(&m), move |_, points: &[(f32, f32)]| place(shown, points), cancelled)
     }
-    /// Where the tracks `ids` are in the frames up to `reach` away from the one at a moment of the file (µs): per track,
+    /// Where the tracks `ids` are in the frames up to `reach` away from the one at a moment of the file (Âµs): per track,
     /// how many frames from that one, and where, relative to the frame (the stabilized one with `stabilized`)
     pub fn optical_track_paths(&self, ids: &HashSet<u32>, file_timestamp_us: i64, reach: usize, stabilized: bool) -> Vec<(u32, Vec<(i64, f32, f32)>)> {
         let Some(m) = self.optical_measurements.read().clone() else { return Vec::new() };

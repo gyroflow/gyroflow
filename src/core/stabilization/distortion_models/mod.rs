@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright © 2022 Adrian <adrian.eddy at gmail>
+// Copyright Â© 2022 Adrian <adrian.eddy at gmail>
 
 mod opencv_fisheye;
 mod opencv_standard;
@@ -21,6 +21,7 @@ use super::KernelParams;
 
 // The models a chessboard calibration can fit (`calibration::solver`), which calls their `distort` directly
 pub use self::{ opencv_fisheye::OpenCVFisheye, opencv_standard::OpenCVStandard, generic_polynomial::GenericPolynomial };
+pub use self::{ poly3::Poly3, poly5::Poly5, ptlens::PtLens };
 
 /// The float types a model's math is written for: `f32` in the render, `f64` in the calibration solver, whose
 /// Jacobian is a finite difference that single precision would drown. A model writes its projection once, generic
@@ -80,7 +81,7 @@ macro_rules! impl_models {
                     $(DistortionModels::$name(m) => m.adjust_lens_profile(profile),)*
                 }
             }
-            /// `d(image radius)/dθ` at ray angle `theta`, ≤ 0 where the model's curve folds back
+            /// `d(image radius)/dÎ¸` at ray angle `theta`, â‰¤ 0 where the model's curve folds back
             pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
                 match &self.inner {
                     $(DistortionModels::$name(x) => x.distortion_derivative(theta, k),)*
@@ -139,8 +140,8 @@ impl DistortionModel {
 
     /// The largest ray angle the model itself can represent, in radians, `None` when it has no such end.
     /// Not a fold of the calibration - [`Self::radial_distortion_limit`] finds those - but the shape of the
-    /// projection: a rectilinear model images the z=1 plane and has nothing at 90°, and the unified sphere
-    /// of the Insta360 model turns over at `acos(-1/ξ)`
+    /// projection: a rectilinear model images the z=1 plane and has nothing at 90Â°, and the unified sphere
+    /// of the Insta360 model turns over at `acos(-1/Î¾)`
     pub fn field_limit(&self, k: &[f64]) -> Option<f64> {
         use DistortionModels as M;
         match &self.inner {
@@ -151,7 +152,7 @@ impl DistortionModel {
     }
 
     /// Largest usable ray angle (radians) before the curve folds back (its derivative stops being positive),
-    /// `None` when it rises all the way. The generic way samples the derivative up to 180° and bisects the
+    /// `None` when it rises all the way. The generic way samples the derivative up to 180Â° and bisects the
     /// first non-positive step; the Sony spline solves its fold from the coefficients, since each of its
     /// derivative samples would be a Newton solve and the renderer asks per frame when the file records a
     /// lens curve per frame
@@ -159,7 +160,7 @@ impl DistortionModel {
         if let DistortionModels::Sony(m) = &self.inner {
             return m.radial_distortion_limit(k);
         }
-        // A fisheye can see well past 90°, so the sweep runs to 180° - the pipeline carries rays as angles
+        // A fisheye can see well past 90Â°, so the sweep runs to 180Â° - the pipeline carries rays as angles
         // and no longer stops at the old z=1 plane asymptote
         let max_theta = std::f64::consts::PI;
 
