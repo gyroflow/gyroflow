@@ -44,13 +44,23 @@ pub enum TrackingMethod {
     /// Dense optical flow (DIS), sampled at the same points: a flow everywhere, also where corners are few and weak
     /// (sky, water, fog), at a few times the time
     Dis,
+    /// Dense optical flow from gmflow (AI, Unimatch), sampled like DIS: a flow everywhere that holds up through large
+    /// motion and weak detail, but coarse (the model sees 576x320) and slow, practical on a GPU. Only in builds with
+    /// the `use-burn` feature, see `available`
+    Gmflow,
 }
 impl TrackingMethod {
+    /// None for a name it doesn't know, or for a method this build doesn't have
     pub fn from_name(name: &str) -> Option<Self> {
-        match name.to_ascii_lowercase().as_str() { "klt" => Some(Self::Klt), "dis" => Some(Self::Dis), _ => None }
+        let method = match name.to_ascii_lowercase().as_str() { "klt" => Self::Klt, "dis" => Self::Dis, "gmflow" => Self::Gmflow, _ => return None };
+        method.available().then_some(method)
     }
     pub fn name(&self) -> &'static str {
-        match self { Self::Klt => "klt", Self::Dis => "dis" }
+        match self { Self::Klt => "klt", Self::Dis => "dis", Self::Gmflow => "gmflow" }
+    }
+    /// Whether this build can track with it
+    pub fn available(&self) -> bool {
+        match self { Self::Klt | Self::Dis => true, Self::Gmflow => cfg!(feature = "use-burn") }
     }
 }
 
