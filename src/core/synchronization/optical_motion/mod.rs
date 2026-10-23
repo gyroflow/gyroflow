@@ -20,6 +20,7 @@
 //! video again (`OpticalMeasurements::remeasure`)
 
 pub mod solver;
+pub mod residual;
 mod odometry;
 #[cfg(feature = "use-opencv")]
 mod tracker;
@@ -33,6 +34,8 @@ use rayon::prelude::*;
 use crate::StabilizationManager;
 use crate::gyro_source::{ GyroSource, OpticalCorrection, OpticalCorrectionSettings, TimeQuat, TrackingMethod, optical_correction::{ self, Fnv } };
 use crate::stabilization::{ ComputeParams, FrameTransform, undistort_points_for_optical_motion };
+
+use residual::{ ResidualBand, ResidualPoint };
 use solver::{ BandMeasurement, SolverParams };
 
 /// Tracks kept alive per frame
@@ -127,6 +130,9 @@ pub struct OpticalMeasurements {
     pub excluded: Arc<HashSet<u32>>,
     /// What became of each point of each frame pair of `tracks`, in the same order
     pub states: PackedStates,
+    /// What the residual pass needs from every measured frame pair, in the pairs' order (see `ResidualPairDebug`).
+    /// Empty for a file without motion data, where there is no global pass to leave a residual to
+    pub residual_pairs: Vec<ResidualPairDebug>,
 }
 
 /// What became of each point of each frame pair, in the order of the pairs and of their observations: `PointState` in
@@ -486,6 +492,10 @@ impl TracksBuilder {
 
 impl Tracks {
     pub fn is_empty(&self) -> bool { self.entries.is_empty() }
+    /// The focal length in pixels of the tracked frames, what `residual::field_from_pair` projects with
+    pub fn focal_px(&self) -> f64 { self.setup.focal_px }
+    /// The tracked frames' size in px, the residuals' coordinate space
+    pub fn residual_track_size(&self) -> (u32, u32) { self.setup.track_size }
 
     /// The memory it takes, bytes
     pub fn size(&self) -> usize {
@@ -726,6 +736,7 @@ impl OpticalMeasurements {
             tracks: self.tracks.clone(),
             excluded: measured.excluded,
             states: measured.states,
+            residual_pairs: measured.residual,
         })
     }
 
@@ -970,6 +981,7 @@ impl OpticalMotionAnalysis {
             tracks: Arc::new(tracks),
             excluded: measured.excluded,
             states: measured.states,
+            residual_pairs: measured.residual,
         })
     }
 }
@@ -977,6 +989,8 @@ impl OpticalMotionAnalysis {
 /// What `Measuring` measured
 struct Measured {
     bands: Vec<BandMeasurement>,
+    /// What the residual pass needs, per pair; only for a file with motion data
+    residual: Vec<ResidualPairDebug>,
     quats_checksum: u64,
     video_base: Vec<(i64, [f32; 4])>,
     measured_pairs: usize,
@@ -1017,6 +1031,9 @@ struct Measuring {
     states_from: Vec<u64>,
     observations: u64,
     sg_cache: HashMap<usize, DMatrix<f64>>,
+    /// What the residual pass needs, per pair (see `ResidualPairDebug`); only for a file with motion data, where the
+    /// bands are fit against the quaternions
+    residual: Vec<ResidualPairDebug>,
 }
 
 impl Measuring {
@@ -1039,6 +1056,7 @@ impl Measuring {
             states_from: Vec::new(),
             observations: 0,
             sg_cache: HashMap::new(),
+            residual: Vec::new(),
         }
     }
 
@@ -1090,6 +1108,7 @@ impl Measuring {
             measured_pairs: self.measured_pairs,
             excluded: self.excluded,
             states: self.states,
+            residual: self.residual,
         })
     }
 
@@ -1194,6 +1213,40 @@ impl Measuring {
             for (&i, &w) in idx.iter().zip(w) {
                 let d = &derived[i];
                 self.states.set(self.states_from[d.seq] as usize + d.k as usize, PointState::from_weight(w));
+            }
+        }
+
+        // What the residual pass needs from the pairs just measured: their observations, their bands' fits and the
+        // weight each point ended up with. Only for a file with motion data: without it the bands measure the whole
+        // rotation (there is no global pass to leave a residual), and a mesh would double it
+        if self.vision.is_some() {
+            for &(seq, _, _, _) in &fits {
+                let pair = self.pair(seq);
+                let (frame_a, frame_b) = (pair.a, pair.b);
+                let obs = pair.obs.clone();
+                let mut pts = vec![ResidualPoint { k: 0, band: 0, weight: 0.0 }; obs.len()];
+                // The points of this pair's fits, by their k: (fit index within the pair, weight)
+                let mut by_k: HashMap<u32, (usize, f64)> = HashMap::new();
+                for (bi, (bseq, _m, idx, w)) in fits.iter().enumerate() {
+                    if *bseq != seq { continue; }
+                    for (&i, &w) in idx.iter().zip(w) {
+                        let d = &derived[i];
+                        by_k.insert(d.k, (bi, w));
+                    }
+                }
+                for (k, _) in obs.iter().enumerate() {
+                    let (band, weight) = by_k.get(&(k as u32)).copied().unwrap_or((0, 0.0));
+                    pts[k] = ResidualPoint { k, band, weight };
+                }
+                self.residual.push(ResidualPairDebug {
+                    seq,
+                    frame: frame_a.index,
+                    ta_ms: frame_a.mid_ms,
+                    tb_ms: frame_b.mid_ms,
+                    obs,
+                    bands: fits.iter().filter(|(s, ..)| *s == seq).map(|(_, m, ..)| ResidualBand { m: m.m, rho: m.rho }).collect(),
+                    pts,
+                });
             }
         }
 
@@ -1352,6 +1405,20 @@ fn fit_band(derived: &[Derived], rhp: &[Option<Vector3<f64>>], idx: &[usize], si
     let m = (orientation(vision, gyro, tb).inverse() * orientation(vision, gyro, ta)).to_rotation_matrix().into_inner();
     let to_gyro_us = |t: f64| (t - gyro.offset_at_video_timestamp(t)) * 1000.0;
     Some((BandMeasurement { pair: 0, ta_us: to_gyro_us(ta), tb_us: to_gyro_us(tb), rho, info, m }, w))
+}
+
+/// Everything the residual pass needs from one measured frame pair: the pair's observations, the band fits the
+/// robust pass produced, and the weight each point ended up with (its band's, or none if it was excluded or its
+/// band never fit). Carried through `Measuring::process` into `OpticalMeasurements::residual_pairs`
+pub struct ResidualPairDebug {
+    pub seq: usize,
+    pub frame: usize,
+    pub ta_ms: f64,
+    pub tb_ms: f64,
+    pub obs: Vec<Observation>,
+    pub bands: Vec<ResidualBand>,
+    /// Per point of `obs`: (band, weight)
+    pub pts: Vec<ResidualPoint>,
 }
 
 #[cfg(test)]
