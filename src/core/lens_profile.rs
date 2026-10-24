@@ -160,6 +160,37 @@ impl LensProfile {
         self.name = self.get_name();
     }
 
+    /// A distortion-free (rectilinear) lens of a 35 mm equivalent focal length, in place of a calibration, for a video
+    /// that has no distortion to correct: a rectilinear lens, or one corrected in camera. The 35 mm equivalent is the
+    /// diagonal field of view of a 36x24 mm frame
+    pub fn from_focal_length(width: usize, height: usize, focal_length_35mm: f64) -> Option<Self> {
+        if width == 0 || height == 0 || !focal_length_35mm.is_finite() || focal_length_35mm <= 0.0 { return None; }
+        let (w, h) = (width as f64, height as f64);
+        let f = focal_length_35mm * (w * w + h * h).sqrt() / (36.0f64 * 36.0 + 24.0 * 24.0).sqrt();
+
+        let mut profile = Self {
+            calib_dimension: Dimensions { w: width, h: height },
+            orig_dimension:  Dimensions { w: width, h: height },
+            input_horizontal_stretch: 1.0,
+            input_vertical_stretch:   1.0,
+            official: true,
+            distortion_model: Some("opencv_standard".into()),
+            focal_length: Some(focal_length_35mm),
+            crop_factor: Some(1.0),
+            fisheye_params: CameraParams {
+                camera_matrix: vec![[f, 0.0, w / 2.0], [0.0, f, h / 2.0], [0.0, 0.0, 1.0]],
+                // Zero, but there: with fewer than 4 the focal length in the lens metadata of the file takes over
+                // (`FrameTransform::get_lens_data_at_lens_timestamp`)
+                distortion_coeffs: vec![0.0; 8],
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        profile.init();
+        profile.finalize();
+        Some(profile)
+    }
+
     pub fn get_json_value(&self) -> Result<serde_json::Value, serde_json::error::Error> {
         let mut v = serde_json::to_value(&self)?;
         if let Some(obj) = v.as_object_mut() {

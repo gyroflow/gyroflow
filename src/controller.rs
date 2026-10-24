@@ -55,6 +55,8 @@ pub struct Controller {
     load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, sample_index: i32, project_version: u32)),
     load_lens_profile: qt_method!(fn(&mut self, url_or_id: QString)),
     reset_lens_profile: qt_method!(fn(&mut self)),
+    load_focal_length_profile: qt_method!(fn(&mut self, focal_length_35mm: f64)),
+    restore_lens_profile: qt_method!(fn(&mut self)),
     get_preset_contents: qt_method!(fn(&mut self, url_or_id: QString) -> QString),
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool) -> bool),
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
@@ -351,6 +353,9 @@ pub struct Controller {
     /// `remeasure_optical_correction`s running
     optical_remeasures: usize,
 
+    /// The unofficial profile `load_focal_length_profile` replaced, for `restore_lens_profile`
+    replaced_lens_profile: Option<core::lens_profile::LensProfile>,
+
     pub stabilizer: Arc<StabilizationManager>,
 }
 
@@ -365,6 +370,8 @@ impl Controller {
 
     fn load_video(&mut self, url: QUrl, player: QJSValue) {
         self.stabilizer.clear();
+        // The lens stays for the next file, but the profile a generated one replaced was the previous file's
+        self.replaced_lens_profile = None;
         let url = util::qurl_to_encoded(url.clone());
         let filename = filesystem::get_filename(&url);
 
@@ -1000,6 +1007,7 @@ impl Controller {
         }
     }
     fn load_lens_profile(&mut self, url_or_id: QString) {
+        self.replaced_lens_profile = None;
         let (json, filepath, checksum) = {
             if let Err(e) = self.stabilizer.load_lens_profile(&url_or_id.to_string()) {
                 self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
@@ -1031,6 +1039,36 @@ impl Controller {
         }
         self.lens_loaded = false;
         self.lens_changed();
+        self.request_recompute();
+    }
+    /// Replaces the lens with a distortion-free one of this 35 mm equivalent focal length (`LensProfile::from_focal_length`),
+    /// for a file with no profile or an unofficial one. It's the lens of the project then, saved in it like any profile
+    fn load_focal_length_profile(&mut self, focal_length_35mm: f64) {
+        let size = self.stabilizer.params.read().size;
+        let Some(profile) = core::lens_profile::LensProfile::from_focal_length(size.0, size.1, focal_length_35mm) else { return; };
+        let json = profile.get_json().unwrap_or_default();
+        let replaced = std::mem::replace(&mut *self.stabilizer.lens.write(), profile);
+        // An unofficial profile comes back with `restore_lens_profile`. A generated one is official, so a new focal
+        // length keeps the profile the first one replaced, and one kept from the previous file is nothing to go back to
+        if self.lens_loaded && !replaced.official {
+            self.replaced_lens_profile = Some(replaced);
+        }
+        self.lens_loaded = true;
+        self.lens_changed();
+        self.lens_profile_loaded(QString::from(json), QString::default(), QString::default());
+        self.request_recompute();
+    }
+    /// Puts back the unofficial profile `load_focal_length_profile` replaced, or no profile when it replaced none
+    fn restore_lens_profile(&mut self) {
+        let Some(lens) = self.replaced_lens_profile.take() else {
+            self.reset_lens_profile();
+            return;
+        };
+        let (json, filepath, checksum) = (lens.get_json().unwrap_or_default(), lens.path_to_file.clone(), lens.checksum.clone().unwrap_or_default());
+        *self.stabilizer.lens.write() = lens;
+        self.lens_loaded = true;
+        self.lens_changed();
+        self.lens_profile_loaded(QString::from(json), QString::from(filepath), QString::from(checksum));
         self.request_recompute();
     }
     fn load_default_preset(&mut self) {
@@ -1589,6 +1627,7 @@ impl Controller {
         match result {
             Ok(thin_obj) => {
                 if thin_obj.as_object().unwrap().contains_key("calibration_data") {
+                    self.replaced_lens_profile = None;
                     self.lens_loaded = true;
                     self.lens_changed();
                     let lens_json = self.stabilizer.lens.read().get_json().unwrap_or_default();
@@ -2229,13 +2268,9 @@ impl Controller {
         }).unwrap_or_default()
     }
 
-    /// A profile generated directly (eg. from the focal length) already carries its camera matrix,
-    /// only the ones coming from the chessboard calibration need to be filled in.
+    /// The lens of the chessboard calibration, into the profile being exported
+    #[cfg_attr(not(feature = "opencv"), allow(unused_variables))]
     fn fill_profile_from_calibrator(&self, profile: &mut core::lens_profile::LensProfile) {
-        if profile.fisheye_params.camera_matrix.len() == 3 && profile.calib_dimension.w > 0 && profile.calib_dimension.h > 0 {
-            profile.finalize();
-            return;
-        }
         #[cfg(feature = "opencv")]
         if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
             profile.set_from_calibrator(cal);
