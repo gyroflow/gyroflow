@@ -885,274 +885,242 @@ Se o formato do arquivo de saída não puder armazenar o codec de áudio origina
       <translation>Calibração</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="239"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="185"/>
       <source>For a good lens calibration, this value should be less than 5, ideally less than 1.</source>
       <translation>Para uma boa calibração de lentes, este valor deve ser inferior a 5, idealmente inferior a 1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="256"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="202"/>
       <source>Auto calibrate</source>
       <translation>Calibrar automaticamente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="311"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="214"/>
       <source>Max calibration points</source>
       <translation>Máximo de pontos de calibração</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="226"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="497"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="172"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="398"/>
       <source>Export lens profile</source>
       <translation>Exportar perfil de lente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="227"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="173"/>
       <source>Lens profiles</source>
       <translation>Perfis de lentes</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="212"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="158"/>
       <source>By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.
 Do you want to submit your profile?</source>
       <translation>Ao enviar seu perfil de lente para o banco de dados, você concorda em publicá-lo e distribuí-lo com o Gyroflow conforme os termos da GPLv3.
 Você deseja enviar seu perfil?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="107"/>
-      <source>Field of view: %1° horizontal, %2° diagonal</source>
-      <translation>Campo de visão: %1° na horizontal, %2° na diagonal</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="209"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="155"/>
       <source>Lens profile exported to %1.</source>
       <translation>Perfil de lente exportado para %1.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="213"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="672"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="159"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="571"/>
       <source>Yes</source>
       <translation>Sim</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="214"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="676"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="160"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="575"/>
       <source>No</source>
       <translation>Não</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="268"/>
-      <source>No distortion, focal length only</source>
-      <translation>Sem distorção, somente distância focal</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="269"/>
-      <source>Instead of calibrating with a chessboard pattern, generate a distortion-free profile from the focal length alone.</source>
-      <translation>Em vez de calibrar com um padrão de tabuleiro de xadrez, gera um perfil sem distorção apenas a partir da distância focal.</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="270"/>
-      <source>Use only if your video is already undistorted (via a rectilinear lens or in-camera processing).</source>
-      <translation>Use somente se o seu vídeo já estiver sem distorção (por uma lente retilínea ou pelo processamento na própria câmera).</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="283"/>
-      <source>35 mm equivalent focal length</source>
-      <translation>Distância focal equivalente a 35 mm</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="374"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="277"/>
       <source>Invalid format</source>
       <translation>Formato inválido</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="374"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="277"/>
       <source>Ok</source>
       <translation>Confirmar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="388"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="291"/>
       <source>Distortion model</source>
       <translation>Modelo de distorção</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="390"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="292"/>
       <source>The distortion model the lens profile is fitted to. Switching it fits the patterns already found again, without analyzing the video again.</source>
       <translation>O modelo de distorção ao qual o perfil de lente é ajustado. Ao trocá-lo, os padrões já encontrados são reajustados, sem analisar o vídeo novamente.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="397"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="299"/>
       <source>Fisheye model (Kannala-Brandt). Right for action cameras, drones and any wide lens.</source>
       <translation>Modelo olho de peixe (Kannala-Brandt). Indicado para câmeras de ação, drones e qualquer lente grande-angular.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="398"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="300"/>
       <source>Pinhole with radial and tangential distortion. For rectilinear lenses with little distortion: it can&apos;t describe anything 90° or more from the center.</source>
       <translation>Modelo pinhole com distorção radial e tangencial. Para lentes retilíneas com pouca distorção: não consegue descrever nada a 90° ou mais do centro.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="399"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="301"/>
       <source>Fisheye model with both odd and even powers of the angle, for lenses the fisheye model doesn&apos;t fit well. Always calibrated with Gyroflow&apos;s method.</source>
       <translation>Modelo olho de peixe com potências ímpares e pares do ângulo, para lentes às quais o modelo olho de peixe não se ajusta bem. Sempre calibrado com o método do Gyroflow.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="424"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="326"/>
       <source>Calibration method</source>
       <translation>Método de calibração</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="426"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="327"/>
       <source>Switching it fits the patterns already found again, without analyzing the video again.</source>
       <translation>Ao trocá-lo, os padrões já encontrados são reajustados, sem analisar o vídeo novamente.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="433"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="334"/>
       <source>OpenCV&apos;s own calibration of the model, on random sets of frames. Its fisheye calibration can&apos;t take a lens that sees more than 180°, and often fails close to it.</source>
       <translation>A calibração do próprio OpenCV para o modelo, em conjuntos aleatórios de quadros. A calibração olho de peixe do OpenCV não aceita uma lente que vê mais de 180° e costuma falhar perto disso.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="434"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="335"/>
       <source>Gyroflow&apos;s own calibration, on all frames at once. With a fisheye model it also calibrates lenses that see more than 180°, and it leaves out frames that don&apos;t agree with the rest, like ones bent by the rolling shutter of a fast move.</source>
       <translation>A calibração própria do Gyroflow, em todos os quadros de uma vez. Com um modelo olho de peixe, ela também calibra lentes que veem mais de 180° e deixa de fora os quadros que não concordam com os demais, como os deformados pelo rolamento do obturador em um movimento rápido.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="458"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="359"/>
       <source>OpenCV has no generic polynomial model, so it&apos;s calibrated with Gyroflow&apos;s method.</source>
       <translation>O OpenCV não tem o modelo Generic polynomial, então a calibração é feita com o método do Gyroflow.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="517"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="418"/>
       <source>Upload lens profile to the database</source>
       <translation>Enviar o perfil de lente para o banco de dados</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="520"/>
-      <source>Only calibrated profiles can be uploaded to the database.</source>
-      <translation>Somente perfis calibrados podem ser enviados ao banco de dados.</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="525"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="424"/>
       <source>FOV</source>
       <translation>Campo de visão</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="538"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="437"/>
       <source>Analyze every n-th frame</source>
       <translation>Analisar a cada n quadros</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="550"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="449"/>
       <source>Sharpness limit</source>
       <translation>Limite de nitidez</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="559"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="458"/>
       <source>px</source>
       <translation>px</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="567"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="466"/>
       <source>Digital lens</source>
       <translation>Lente digital</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="628"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="527"/>
       <source>Input horizontal stretch</source>
       <translation>Esticamento horizontal de entrada</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="645"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="544"/>
       <source>Input vertical stretch</source>
       <translation>Esticamento vertical de entrada</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="671"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="570"/>
       <source>Do you want to update the output resolution to %1?</source>
       <translation>Deseja atualizar a resolução de saída para %1?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="685"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="584"/>
       <source>Iterations</source>
       <translation>Iterações</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="698"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="597"/>
       <source>Low pass filter</source>
       <translation>Filtro de passagem baixa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="707"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="606"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="282"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="722"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="621"/>
       <source>Focal length</source>
       <translation>Distância focal</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="724"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="623"/>
       <source>Lens native focal length</source>
       <translation>Distância focal nativa da lente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="288"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="728"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="627"/>
       <source>mm</source>
       <translation>mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="737"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="636"/>
       <source>Crop factor</source>
       <translation>Fator de corte</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="741"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="640"/>
       <source>x</source>
       <translation>x</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="753"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="652"/>
       <source>Preview resolution</source>
       <translation>Resolução da pré-visualização</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="776"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="675"/>
       <source>Processing resolution</source>
       <translation>Resolução de processamento</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="799"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="698"/>
       <source>Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</source>
       <translation>A calibração de lente deve ser processada na resolução total ou pelo menos em 4k. Altere esta configuração somente se souber o que está fazendo.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="802"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="701"/>
       <source>Lens is asymmetrical</source>
       <translation>A lente é assimétrica</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="809"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="708"/>
       <source>Sensor is global shutter</source>
       <translation>O sensor tem obturador global</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="816"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="715"/>
       <source>Plain chessboard pattern (previous version without dots in the middle)</source>
       <translation>Padrão de tabuleiro de xadrez simples (versão anterior sem pontos no meio)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="462"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="363"/>
       <source>Rolling shutter correction</source>
       <translation>Correção do rolamento do obturador</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="472"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="373"/>
       <source>Frame readout time</source>
       <translation>Tempo de leitura do quadro</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="479"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="380"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
@@ -1165,197 +1133,227 @@ Você deseja enviar seu perfil?</translation>
       <translation>Perfil de lente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="41"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="43"/>
       <source>Choose a lens profile</source>
       <translation>Escolha um perfil de lente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="42"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="44"/>
       <source>Lens profiles</source>
       <translation>Perfis de lentes</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="107"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="119"/>
       <source>The lens metadata delay could not be estimated. The clip needs a zoom recorded in the lens metadata, and the picture has to follow it clearly.</source>
       <translation>Não foi possível estimar o atraso dos metadados da lente. O clipe precisa ter um zoom gravado nos metadados da lente, e a imagem deve acompanhá-lo claramente.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="107"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="119"/>
       <source>Ok</source>
       <translation>Confirmar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="142"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="154"/>
       <source>Yes</source>
       <translation>Sim</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="236"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="281"/>
       <source>Search...</source>
       <translation>Pesquisar...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="259"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="304"/>
       <source>Open file</source>
       <translation>Abrir arquivo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="264"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="309"/>
       <source>Create new</source>
       <translation>Criar novo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="290"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="338"/>
+      <source>No distortion, focal length only</source>
+      <translation>Sem distorção, somente distância focal</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="339"/>
+      <source>Instead of a lens profile, use a lens without any distortion, of this focal length.</source>
+      <translation>Em vez de um perfil de lente, usa uma lente sem nenhuma distorção, com esta distância focal.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="340"/>
+      <source>Use only if your video is already undistorted (via a rectilinear lens or in-camera processing).</source>
+      <translation>Use somente se o vídeo já estiver sem distorção (graças a uma lente retilínea ou ao processamento na câmera).</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="383"/>
+      <source>Focal length (35 mm equiv.)</source>
+      <translation>Distância focal (equiv. 35 mm)</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="384"/>
+      <source>The focal length with the same field of view on a full frame (36x24 mm) sensor: the focal length of the lens multiplied by the crop factor of the sensor.</source>
+      <translation>A distância focal que dá o mesmo campo de visão em um sensor full frame (36x24 mm): a distância focal da lente multiplicada pelo fator de corte do sensor.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="389"/>
+      <source>mm</source>
+      <translation>mm</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="410"/>
       <source>Rate this profile: [Good] | [Bad]</source>
       <translation>Avalie este perfil: [Bom] | [Ruim]</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="292"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="412"/>
       <source>Thank you for rating this profile.</source>
       <translation>Obrigado por avaliar este perfil.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="322"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="442"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
       <translation>A proporção do perfil da lente não corresponde à proporção do arquivo. O resultado não parecerá correto.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="323"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="443"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
       <translation>As dimensões do perfil da lente não correspondem às dimensões do arquivo. O resultado pode não parecer correto.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="347"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="467"/>
       <source>Straight lines stay straight. A lens that sees more than 180° can&apos;t be shown whole, so its edges are cropped.</source>
       <translation>As linhas retas continuam retas. Uma lente que vê mais de 180° não pode ser exibida por inteiro, por isso as bordas são recortadas.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="348"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="468"/>
       <source>Fisheye that keeps shapes natural but bends straight lines. Shows the whole picture of a lens wider than 180°.</source>
       <translation>Olho de peixe que mantém as formas naturais, mas curva as linhas retas. Mostra a imagem inteira de uma lente de mais de 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="349"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
       <source>Fisheye where the distance from the center is proportional to the angle. Shows the whole picture of a lens wider than 180°.</source>
       <translation>Olho de peixe em que a distância do centro é proporcional ao ângulo. Mostra a imagem inteira de uma lente de mais de 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="350"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="470"/>
       <source>Fisheye that keeps areas in proportion. Shows the whole picture of a lens wider than 180°.</source>
       <translation>Olho de peixe que mantém as áreas em proporção. Mostra a imagem inteira de uma lente de mais de 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="351"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="471"/>
       <source>Fisheye that compresses the edges strongly. Shows at most 180°.</source>
       <translation>Olho de peixe que comprime fortemente as bordas. Mostra no máximo 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="352"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="472"/>
       <source>Rectilinear, or stereographic when the lens sees more than 180°.</source>
       <translation>Retilínea, ou estereográfica quando a lente vê mais de 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="366"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="486"/>
       <source>Lens breathing compensation</source>
       <translation>Compensação de respiração da lente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="368"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="488"/>
       <source>Keeps the field of view constant while focusing, using the lens breathing data recorded by the camera.</source>
       <translation>Mantém o campo de visão constante ao focar, usando os dados de respiração da lente gravados pela câmera.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="374"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="494"/>
       <source>Advanced</source>
       <translation>Avançado</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="379"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="505"/>
       <source>Lens is under water</source>
       <translation>A lente está submersa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="381"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="507"/>
       <source>Enable if you&apos;re filming under water. This will adjust the refraction coefficient.</source>
       <translation>Ative se estiver filmando debaixo da água. Isso ajusta o coeficiente de refração.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="402"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="528"/>
       <source>Enable keyframing</source>
       <translation>Ativar quadros-chave</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="415"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="541"/>
       <source>Add keyframe</source>
       <translation>Adicionar quadro-chave</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="427"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="553"/>
       <source>Lens metadata delay</source>
       <translation>Atraso dos metadados da lente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="430"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="556"/>
       <source>How many frames later than the picture the lens reports its focal length. It depends on the lens, not on the frame rate: some report two frames late.</source>
       <translation>Com quantos quadros de atraso em relação à imagem a lente informa sua distância focal. Depende da lente, não da taxa de quadros: algumas informam com dois quadros de atraso.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="431"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="557"/>
       <source>&quot;Analyze&quot; measures it on the zooms recorded in this clip. Positive values read the lens metadata later.</source>
       <translation>&quot;Analisar&quot; mede esse atraso nos zooms gravados neste clipe. Valores positivos leem os metadados da lente mais tarde.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="439"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="565"/>
       <source>frames</source>
       <translation>quadros</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="450"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="576"/>
       <source>Analyze</source>
       <translation>Analisar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="519"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="645"/>
       <source>Export STMap</source>
       <translation>Exportar STMap</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="525"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="651"/>
       <source>This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?</source>
       <translation>Este arquivo contém metadados da lente por quadro. Deseja exportar uma sequência de STMap ou um quadro único?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="526"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="652"/>
       <source>Single frame</source>
       <translation>Quadro único</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="527"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="653"/>
       <source>STMap sequence</source>
       <translation>Sequência de STMap</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="541"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="667"/>
       <source>Exporting %1...</source>
       <translation>Exportando %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="478"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="604"/>
       <source>Pixel focal length</source>
       <translation>Distância focal em pixels</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="289"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="409"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee its correctness. Use at your own risk.</source>
       <translation>Este perfil de lente não é oficial, não podemos garantir sua precisão. Use por sua conta e risco.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="488"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="614"/>
       <source>Focal center</source>
       <translation>Centro focal</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="498"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="624"/>
       <source>Distortion coefficients</source>
       <translation>Coeficientes de distorção</translation>
     </message>
@@ -1916,8 +1914,8 @@ Abra o &lt;b&gt;Terminal&lt;/b&gt; e digite o seguinte comando:</translation>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="59"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="757"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="779"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="656"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="678"/>
       <location filename="../../src/ui/menu/Synchronization.qml" line="314"/>
       <source>Full</source>
       <translation>Completa</translation>
@@ -2083,57 +2081,57 @@ Abra o &lt;b&gt;Terminal&lt;/b&gt; e digite o seguinte comando:</translation>
       <translation>Fechar o Gyroflow</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="395"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="297"/>
       <source>OpenCV fisheye</source>
       <translation>OpenCV fisheye</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="395"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="297"/>
       <source>OpenCV standard</source>
       <translation>OpenCV standard</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="395"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="297"/>
       <source>Generic polynomial</source>
       <translation>Generic polynomial</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="431"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="332"/>
       <source>OpenCV</source>
       <translation>OpenCV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="431"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="332"/>
       <source>Gyroflow</source>
       <translation>Gyroflow</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="345"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
       <source>Rectilinear</source>
       <translation>Retilínea</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="345"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
       <source>Stereographic</source>
       <translation>Estereográfica</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="345"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
       <source>Equidistant</source>
       <translation>Equidistante</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="345"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
       <source>Equisolid angle</source>
       <translation>Equivalente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="345"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
       <source>Orthographic</source>
       <translation>Ortográfica</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="345"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
       <location filename="../../src/ui/menu/Stabilization.qml" line="626"/>
       <source>Automatic</source>
       <translation>Auto</translation>
@@ -3436,96 +3434,96 @@ Certifique-se de definir o valor correto do rolamento do obturador antes de sinc
       <translation>Câmera detectada</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="69"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="71"/>
       <source>Camera</source>
       <translation>Câmera</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="70"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="72"/>
       <source>Lens</source>
       <translation>Lente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="71"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="73"/>
       <source>Setting</source>
       <translation>Configurações</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="73"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="75"/>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="31"/>
       <source>Dimensions</source>
       <translation>Dimensões</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="75"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="77"/>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="56"/>
       <source>Focal length</source>
       <translation>Distância focal</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="76"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="78"/>
       <source>Crop factor</source>
       <translation>Fator de corte</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="77"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="79"/>
       <source>Asymmetrical</source>
       <translation>Assimétrica</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="78"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="80"/>
       <source>Distortion model</source>
       <translation>Modelo de distorção</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="79"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="81"/>
       <source>Digital lens</source>
       <translation>Lente digital</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="80"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="82"/>
       <source>Output projection</source>
       <translation>Projeção de saída</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="125"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="71"/>
       <source>Camera brand</source>
       <translation>Marca da câmera</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="126"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="72"/>
       <source>Camera model</source>
       <translation>Modelo da câmera</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="127"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="73"/>
       <source>Lens model</source>
       <translation>Modelo da lente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="128"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="74"/>
       <source>Camera setting</source>
       <translation>Configurações da câmera</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="129"/>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="72"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="75"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="74"/>
       <source>Additional info</source>
       <translation>Informação adicional</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="130"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="76"/>
       <source>Default output size</source>
       <translation>Tamanho de saída padrão</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="131"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="77"/>
       <source>Identifier</source>
       <translation>Identificador</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="132"/>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="74"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="78"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="76"/>
       <source>Calibrated by</source>
       <translation>Calibrado por</translation>
     </message>

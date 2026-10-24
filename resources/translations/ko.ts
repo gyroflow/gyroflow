@@ -884,274 +884,242 @@ If the output file format can&apos;t store the original audio codec (e.g. PCM in
       <translation>교정</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="239"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="185"/>
       <source>For a good lens calibration, this value should be less than 5, ideally less than 1.</source>
       <translation>렌즈 교정을 적절히 한 경우 이 값이 5 미만이며, 이상적인 값은 1 미만입니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="256"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="202"/>
       <source>Auto calibrate</source>
       <translation>자동 교정</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="311"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="214"/>
       <source>Max calibration points</source>
       <translation>최대 교정 지점 수</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="226"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="497"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="172"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="398"/>
       <source>Export lens profile</source>
       <translation>렌즈 프로필 내보내기</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="227"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="173"/>
       <source>Lens profiles</source>
       <translation>렌즈 프로필</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="212"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="158"/>
       <source>By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.
 Do you want to submit your profile?</source>
       <translation>당신은 렌즈 프로필을 데이터베이스에 업로드함으로써, GPLv3 약관에 따라 렌즈 프로필을 Gyroflow와 함께 게시(publish) 및 배포(distribute)하는 것에 동의합니다.
 프로필을 제출하시겠습니까?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="107"/>
-      <source>Field of view: %1° horizontal, %2° diagonal</source>
-      <translation>화각: 수평 %1°, 대각선 %2°</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="209"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="155"/>
       <source>Lens profile exported to %1.</source>
       <translation>렌즈 프로필을 %1 위치로 내보냈습니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="213"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="672"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="159"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="571"/>
       <source>Yes</source>
       <translation>예</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="214"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="676"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="160"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="575"/>
       <source>No</source>
       <translation>아니요</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="268"/>
-      <source>No distortion, focal length only</source>
-      <translation>왜곡 없음, 초점 거리만 사용</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="269"/>
-      <source>Instead of calibrating with a chessboard pattern, generate a distortion-free profile from the focal length alone.</source>
-      <translation>체스판 패턴으로 교정하는 대신, 초점 거리만으로 왜곡 없는 프로필을 생성합니다.</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="270"/>
-      <source>Use only if your video is already undistorted (via a rectilinear lens or in-camera processing).</source>
-      <translation>영상에 이미 왜곡이 없는 경우(직선 투영 렌즈를 사용했거나 카메라 내부에서 처리된 경우)에만 사용하세요.</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="283"/>
-      <source>35 mm equivalent focal length</source>
-      <translation>35 mm 환산 초점 거리</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="374"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="277"/>
       <source>Invalid format</source>
       <translation>유효하지 않은 형식</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="374"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="277"/>
       <source>Ok</source>
       <translation>확인</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="388"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="291"/>
       <source>Distortion model</source>
       <translation>왜곡 모델</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="390"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="292"/>
       <source>The distortion model the lens profile is fitted to. Switching it fits the patterns already found again, without analyzing the video again.</source>
       <translation>렌즈 프로필을 피팅할 왜곡 모델입니다. 변경하면 영상을 다시 분석하지 않고, 이미 찾은 패턴으로 다시 피팅합니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="397"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="299"/>
       <source>Fisheye model (Kannala-Brandt). Right for action cameras, drones and any wide lens.</source>
       <translation>어안 모델(Kannala-Brandt)입니다. 액션 카메라, 드론 및 모든 광각 렌즈에 적합합니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="398"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="300"/>
       <source>Pinhole with radial and tangential distortion. For rectilinear lenses with little distortion: it can&apos;t describe anything 90° or more from the center.</source>
       <translation>방사 왜곡과 접선 왜곡을 포함하는 핀홀 모델입니다. 왜곡이 적은 직선 투영 렌즈용이며, 중심에서 90° 이상 떨어진 부분은 표현할 수 없습니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="399"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="301"/>
       <source>Fisheye model with both odd and even powers of the angle, for lenses the fisheye model doesn&apos;t fit well. Always calibrated with Gyroflow&apos;s method.</source>
       <translation>각도의 홀수 및 짝수 거듭제곱을 모두 사용하는 어안 모델로, 일반 어안 모델이 잘 맞지 않는 렌즈에 사용합니다. 항상 Gyroflow 방식으로 교정합니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="424"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="326"/>
       <source>Calibration method</source>
       <translation>교정 방식</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="426"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="327"/>
       <source>Switching it fits the patterns already found again, without analyzing the video again.</source>
       <translation>변경하면 영상을 다시 분석하지 않고, 이미 찾은 패턴으로 다시 피팅합니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="433"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="334"/>
       <source>OpenCV&apos;s own calibration of the model, on random sets of frames. Its fisheye calibration can&apos;t take a lens that sees more than 180°, and often fails close to it.</source>
       <translation>OpenCV 자체의 모델 교정으로, 무작위로 고른 프레임 세트에서 수행합니다. OpenCV의 어안 교정은 화각이 180°를 넘는 렌즈를 처리할 수 없으며, 180°에 가까워도 실패하는 경우가 많습니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="434"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="335"/>
       <source>Gyroflow&apos;s own calibration, on all frames at once. With a fisheye model it also calibrates lenses that see more than 180°, and it leaves out frames that don&apos;t agree with the rest, like ones bent by the rolling shutter of a fast move.</source>
       <translation>Gyroflow 자체 교정으로, 모든 프레임을 한 번에 사용합니다. 어안 모델에서는 화각이 180°를 넘는 렌즈도 교정할 수 있으며, 빠른 움직임에서 롤링 셔터로 휘어진 프레임처럼 나머지와 맞지 않는 프레임은 제외합니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="458"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="359"/>
       <source>OpenCV has no generic polynomial model, so it&apos;s calibrated with Gyroflow&apos;s method.</source>
       <translation>OpenCV에는 Generic polynomial 모델이 없으므로 Gyroflow 방식으로 교정합니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="517"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="418"/>
       <source>Upload lens profile to the database</source>
       <translation>렌즈 프로필을 데이터베이스에 업로드하기</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="520"/>
-      <source>Only calibrated profiles can be uploaded to the database.</source>
-      <translation>교정된 프로필만 데이터베이스에 업로드할 수 있습니다.</translation>
-    </message>
-    <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="525"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="424"/>
       <source>FOV</source>
       <translation>FOV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="538"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="437"/>
       <source>Analyze every n-th frame</source>
       <translation>n번째 프레임마다 분석</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="550"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="449"/>
       <source>Sharpness limit</source>
       <translation>선명도 상한</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="559"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="458"/>
       <source>px</source>
       <translation>px</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="567"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="466"/>
       <source>Digital lens</source>
       <translation>디지털 렌즈</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="628"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="527"/>
       <source>Input horizontal stretch</source>
       <translation>수평 배율 입력</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="645"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="544"/>
       <source>Input vertical stretch</source>
       <translation>수직 배율 입력</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="671"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="570"/>
       <source>Do you want to update the output resolution to %1?</source>
       <translation>출력 해상도를 %1 (으)로 업데이트하시겠습니까?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="685"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="584"/>
       <source>Iterations</source>
       <translation>반복 횟수</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="698"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="597"/>
       <source>Low pass filter</source>
       <translation>로우패스 필터</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="707"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="606"/>
       <source>Hz</source>
       <translation>Hz</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="282"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="722"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="621"/>
       <source>Focal length</source>
       <translation>초점 거리</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="724"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="623"/>
       <source>Lens native focal length</source>
       <translation>렌즈 기본 초점 거리</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="288"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="728"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="627"/>
       <source>mm</source>
       <translation>mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="737"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="636"/>
       <source>Crop factor</source>
       <translation>크롭 배율</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="741"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="640"/>
       <source>x</source>
       <translation>x</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="753"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="652"/>
       <source>Preview resolution</source>
       <translation>미리 보기 해상도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="776"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="675"/>
       <source>Processing resolution</source>
       <translation>처리 해상도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="799"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="698"/>
       <source>Lens calibration should be processed at full resolution or at least at 4k. Change this setting only if you know what you&apos;re doing.</source>
       <translation>렌즈 교정은 전체 해상도 또는 최소 4k에서 수행해야 합니다. 본인이 무엇을 하는지 이해하는 경우에만 이 설정을 변경하세요.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="802"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="701"/>
       <source>Lens is asymmetrical</source>
       <translation>비대칭 렌즈</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="809"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="708"/>
       <source>Sensor is global shutter</source>
       <translation>센서가 글로벌 셔터임</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="816"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="715"/>
       <source>Plain chessboard pattern (previous version without dots in the middle)</source>
       <translation>일반 체스판 패턴 (중앙 점 없는 이전 버전)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="462"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="363"/>
       <source>Rolling shutter correction</source>
       <translation>롤링 셔터 보정</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="472"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="373"/>
       <source>Frame readout time</source>
       <translation>프레임 리드아웃 시간</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="479"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="380"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
@@ -1164,197 +1132,227 @@ Do you want to submit your profile?</source>
       <translation>렌즈 프로필</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="41"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="43"/>
       <source>Choose a lens profile</source>
       <translation>렌즈 프로필 선택하기</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="42"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="44"/>
       <source>Lens profiles</source>
       <translation>렌즈 프로필</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="107"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="119"/>
       <source>The lens metadata delay could not be estimated. The clip needs a zoom recorded in the lens metadata, and the picture has to follow it clearly.</source>
       <translation>렌즈 메타데이터 지연을 추정할 수 없습니다. 클립의 렌즈 메타데이터에 줌이 기록되어 있어야 하며, 영상이 그 줌을 뚜렷하게 따라가야 합니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="107"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="119"/>
       <source>Ok</source>
       <translation>확인</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="142"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="154"/>
       <source>Yes</source>
       <translation>예</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="236"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="281"/>
       <source>Search...</source>
       <translation>찾아보기...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="259"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="304"/>
       <source>Open file</source>
       <translation>파일 열기</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="264"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="309"/>
       <source>Create new</source>
       <translation>새 항목</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="290"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="338"/>
+      <source>No distortion, focal length only</source>
+      <translation>왜곡 없음, 초점 거리만 사용</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="339"/>
+      <source>Instead of a lens profile, use a lens without any distortion, of this focal length.</source>
+      <translation>렌즈 프로필 대신, 이 초점 거리를 가진 왜곡 없는 렌즈를 사용합니다.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="340"/>
+      <source>Use only if your video is already undistorted (via a rectilinear lens or in-camera processing).</source>
+      <translation>영상의 왜곡이 이미 보정된 경우(직선 투영 렌즈 또는 카메라 내부 처리)에만 사용하세요.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="383"/>
+      <source>Focal length (35 mm equiv.)</source>
+      <translation>초점 거리(35 mm 환산)</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="384"/>
+      <source>The focal length with the same field of view on a full frame (36x24 mm) sensor: the focal length of the lens multiplied by the crop factor of the sensor.</source>
+      <translation>풀프레임(36x24 mm) 센서에서 같은 화각을 내는 초점 거리로, 렌즈의 초점 거리에 센서의 크롭 배율을 곱한 값입니다.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="389"/>
+      <source>mm</source>
+      <translation>mm</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="410"/>
       <source>Rate this profile: [Good] | [Bad]</source>
       <translation>이 프로필 평가: [Good] | [Bad]</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="292"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="412"/>
       <source>Thank you for rating this profile.</source>
       <translation>평가해 주셔서 감사합니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="322"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="442"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
       <translation>렌즈 프로필의 종횡비가 파일과 일치하지 않습니다. 결과가 올바르지 않을 수 있습니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="323"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="443"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
       <translation>렌즈 프로필의 해상도가 파일과 일치하지 않습니다. 결과가 올바르지 않을 수 있습니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="347"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="467"/>
       <source>Straight lines stay straight. A lens that sees more than 180° can&apos;t be shown whole, so its edges are cropped.</source>
       <translation>직선이 직선 그대로 유지됩니다. 화각이 180°를 넘는 렌즈는 전체를 보여줄 수 없어 가장자리가 잘립니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="348"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="468"/>
       <source>Fisheye that keeps shapes natural but bends straight lines. Shows the whole picture of a lens wider than 180°.</source>
       <translation>형태는 자연스럽게 유지하지만 직선은 휘어지는 어안 투영입니다. 화각이 180°보다 넓은 렌즈의 영상을 전부 보여줍니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="349"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
       <source>Fisheye where the distance from the center is proportional to the angle. Shows the whole picture of a lens wider than 180°.</source>
       <translation>중심으로부터의 거리가 각도에 비례하는 어안 투영입니다. 화각이 180°보다 넓은 렌즈의 영상을 전부 보여줍니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="350"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="470"/>
       <source>Fisheye that keeps areas in proportion. Shows the whole picture of a lens wider than 180°.</source>
       <translation>면적 비율을 유지하는 어안 투영입니다. 화각이 180°보다 넓은 렌즈의 영상을 전부 보여줍니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="351"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="471"/>
       <source>Fisheye that compresses the edges strongly. Shows at most 180°.</source>
       <translation>가장자리를 강하게 압축하는 어안 투영입니다. 최대 180°까지만 보여줍니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="352"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="472"/>
       <source>Rectilinear, or stereographic when the lens sees more than 180°.</source>
       <translation>직선 투영을 사용하며, 렌즈 화각이 180°를 넘으면 평사 투영을 사용합니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="366"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="486"/>
       <source>Lens breathing compensation</source>
       <translation>렌즈 브리딩 보정</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="368"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="488"/>
       <source>Keeps the field of view constant while focusing, using the lens breathing data recorded by the camera.</source>
       <translation>카메라가 기록한 렌즈 브리딩 데이터를 사용해 초점을 맞추는 동안 화각을 일정하게 유지합니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="374"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="494"/>
       <source>Advanced</source>
       <translation>고급</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="379"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="505"/>
       <source>Lens is under water</source>
       <translation>렌즈가 물 속에 있음</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="381"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="507"/>
       <source>Enable if you&apos;re filming under water. This will adjust the refraction coefficient.</source>
       <translation>수중 촬영 시 활성화합니다. 굴절 계수를 조정됩니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="402"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="528"/>
       <source>Enable keyframing</source>
       <translation>키프레임 활성화</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="415"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="541"/>
       <source>Add keyframe</source>
       <translation>키프레임 추가</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="427"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="553"/>
       <source>Lens metadata delay</source>
       <translation>렌즈 메타데이터 지연</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="430"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="556"/>
       <source>How many frames later than the picture the lens reports its focal length. It depends on the lens, not on the frame rate: some report two frames late.</source>
       <translation>렌즈가 영상보다 몇 프레임 늦게 초점 거리를 보고하는지를 나타냅니다. 프레임 레이트가 아니라 렌즈에 따라 달라지며, 2프레임 늦게 보고하는 렌즈도 있습니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="431"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="557"/>
       <source>&quot;Analyze&quot; measures it on the zooms recorded in this clip. Positive values read the lens metadata later.</source>
       <translation>&quot;분석&quot;은 이 클립에 기록된 줌 구간에서 이 값을 측정합니다. 양수 값은 렌즈 메타데이터를 더 늦게 읽습니다.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="439"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="565"/>
       <source>frames</source>
       <translation>프레임</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="450"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="576"/>
       <source>Analyze</source>
       <translation>분석</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="519"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="645"/>
       <source>Export STMap</source>
       <translation>STMap 내보내기</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="525"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="651"/>
       <source>This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?</source>
       <translation>이 파일에는 프레임 별 렌즈 메타데이터가 포함되어 있습니다. STMap 시퀀스 또는 단일 프레임 중 어떤 것을 내보낼까요?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="526"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="652"/>
       <source>Single frame</source>
       <translation>단일 프레임</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="527"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="653"/>
       <source>STMap sequence</source>
       <translation>STMap 시퀀스</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="541"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="667"/>
       <source>Exporting %1...</source>
       <translation>%1 내보내는 중...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="478"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="604"/>
       <source>Pixel focal length</source>
       <translation>픽셀 초점 거리</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="289"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="409"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee its correctness. Use at your own risk.</source>
       <translation>이 렌즈 프로필은 비공식적이며 정확도가 떨어질 수 있습니다. 자신의 책임하에 사용하세요.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="488"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="614"/>
       <source>Focal center</source>
       <translation>초점 중앙</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="498"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="624"/>
       <source>Distortion coefficients</source>
       <translation>왜곡 계수</translation>
     </message>
@@ -1914,8 +1912,8 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</source>
     </message>
     <message>
       <location filename="../../src/ui/menu/Advanced.qml" line="59"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="757"/>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="779"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="656"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="678"/>
       <location filename="../../src/ui/menu/Synchronization.qml" line="314"/>
       <source>Full</source>
       <translation>원본</translation>
@@ -2081,57 +2079,57 @@ Open &lt;b&gt;Terminal&lt;/b&gt; and enter the following command:</source>
       <translation>Gyroflow 종료</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="395"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="297"/>
       <source>OpenCV fisheye</source>
       <translation>OpenCV fisheye</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="395"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="297"/>
       <source>OpenCV standard</source>
       <translation>OpenCV standard</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="395"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="297"/>
       <source>Generic polynomial</source>
       <translation>Generic polynomial</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="431"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="332"/>
       <source>OpenCV</source>
       <translation>OpenCV</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="431"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="332"/>
       <source>Gyroflow</source>
       <translation>Gyroflow</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="345"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
       <source>Rectilinear</source>
       <translation>직선 투영</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="345"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
       <source>Stereographic</source>
       <translation>평사 투영</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="345"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
       <source>Equidistant</source>
       <translation>등거리 투영</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="345"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
       <source>Equisolid angle</source>
       <translation>등입체각 투영</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="345"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
       <source>Orthographic</source>
       <translation>정사 투영</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="345"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
       <location filename="../../src/ui/menu/Stabilization.qml" line="626"/>
       <source>Automatic</source>
       <translation>자동</translation>
@@ -3434,96 +3432,96 @@ Make sure you have proper rolling shutter value set before syncing.</source>
       <translation>감지된 카메라</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="69"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="71"/>
       <source>Camera</source>
       <translation>카메라</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="70"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="72"/>
       <source>Lens</source>
       <translation>렌즈</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="71"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="73"/>
       <source>Setting</source>
       <translation>설정</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="73"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="75"/>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="31"/>
       <source>Dimensions</source>
       <translation>해상도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="75"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="77"/>
       <location filename="../../src/ui/menu/VideoInformation.qml" line="56"/>
       <source>Focal length</source>
       <translation>초점 거리</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="76"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="78"/>
       <source>Crop factor</source>
       <translation>크롭 배율</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="77"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="79"/>
       <source>Asymmetrical</source>
       <translation>비대칭</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="78"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="80"/>
       <source>Distortion model</source>
       <translation>왜곡 모델</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="79"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="81"/>
       <source>Digital lens</source>
       <translation>디지털 렌즈</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="80"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="82"/>
       <source>Output projection</source>
       <translation>출력 투영</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="125"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="71"/>
       <source>Camera brand</source>
       <translation>카메라 브랜드</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="126"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="72"/>
       <source>Camera model</source>
       <translation>카메라 모델</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="127"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="73"/>
       <source>Lens model</source>
       <translation>렌즈 모델</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="128"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="74"/>
       <source>Camera setting</source>
       <translation>카메라 설정</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="129"/>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="72"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="75"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="74"/>
       <source>Additional info</source>
       <translation>추가 정보</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="130"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="76"/>
       <source>Default output size</source>
       <translation>기본 출력 해상도</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="131"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="77"/>
       <source>Identifier</source>
       <translation>식별자</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensCalibrate.qml" line="132"/>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="74"/>
+      <location filename="../../src/ui/menu/LensCalibrate.qml" line="78"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="76"/>
       <source>Calibrated by</source>
       <translation>교정자 이름</translation>
     </message>
