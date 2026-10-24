@@ -1158,202 +1158,207 @@ Chceš nahrať tvoj profil?</translation>
       <translation>Áno</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="281"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="285"/>
       <source>Search...</source>
       <translation>Hľadaj...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="304"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="308"/>
       <source>Open file</source>
       <translation>Otvor súbor</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="309"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="313"/>
       <source>Create new</source>
       <translation>Vytvor nový</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="338"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="342"/>
       <source>No distortion, focal length only</source>
       <translation>Bez skreslenia, len ohnisková vzdialenosť</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="339"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="343"/>
       <source>Instead of a lens profile, use a lens without any distortion, of this focal length.</source>
       <translation>Namiesto profilu objektívu sa použije objektív bez akéhokoľvek skreslenia s touto ohniskovou vzdialenosťou.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="340"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="344"/>
       <source>Use only if your video is already undistorted (via a rectilinear lens or in-camera processing).</source>
       <translation>Používajte iba vtedy, ak je vaše video už bez skreslenia (vďaka priamočiaremu objektívu alebo spracovaniu v kamere).</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="383"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="387"/>
       <source>Focal length (35 mm equiv.)</source>
       <translation>Ohnisková vzdialenosť (ekv. 35 mm)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="384"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="388"/>
       <source>The focal length with the same field of view on a full frame (36x24 mm) sensor: the focal length of the lens multiplied by the crop factor of the sensor.</source>
       <translation>Ohnisková vzdialenosť, ktorá dáva rovnaké zorné pole na plnoformátovom snímači (36x24 mm): ohnisková vzdialenosť objektívu vynásobená faktorom orezania snímača.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="389"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="393"/>
       <source>mm</source>
       <translation>mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="410"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="414"/>
       <source>Rate this profile: [Good] | [Bad]</source>
       <translation>Ohodnoť tento profil: [Good] | [Bad]</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="412"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="416"/>
       <source>Thank you for rating this profile.</source>
       <translation>Ďakujem vám za ohodnotenie tohto profilu.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="442"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="446"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
       <translation>Pomer strán zvoleného profilu sa nezhoduje s pomerom strán súboru. Vysledok nemusí byť správny.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="443"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="447"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
       <translation>Rozlíšenie zvoleného profilu sa nezhoduje s rozlíšením súboru. Vysledok nemusí byť správny.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="467"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="471"/>
       <source>Straight lines stay straight. A lens that sees more than 180° can&apos;t be shown whole, so its edges are cropped.</source>
       <translation>Rovné čiary zostanú rovné. Obraz objektívu so zorným poľom nad 180° sa nedá zobraziť celý, preto sa jeho okraje orežú.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="468"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="472"/>
       <source>Fisheye that keeps shapes natural but bends straight lines. Shows the whole picture of a lens wider than 180°.</source>
       <translation>Rybie oko, ktoré zachováva prirodzené tvary, ale ohýba rovné čiary. Zobrazí celý obraz objektívu so zorným poľom nad 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="473"/>
       <source>Fisheye where the distance from the center is proportional to the angle. Shows the whole picture of a lens wider than 180°.</source>
       <translation>Rybie oko, v ktorom je vzdialenosť od stredu úmerná uhlu. Zobrazí celý obraz objektívu so zorným poľom nad 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="470"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="474"/>
       <source>Fisheye that keeps areas in proportion. Shows the whole picture of a lens wider than 180°.</source>
       <translation>Rybie oko, ktoré zachováva pomer plôch. Zobrazí celý obraz objektívu so zorným poľom nad 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="471"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="475"/>
       <source>Fisheye that compresses the edges strongly. Shows at most 180°.</source>
       <translation>Rybie oko, ktoré silno stláča okraje. Zobrazí najviac 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="472"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="476"/>
       <source>Rectilinear, or stereographic when the lens sees more than 180°.</source>
       <translation>Priamočiara, alebo stereografická, ak má objektív zorné pole nad 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="486"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="490"/>
       <source>Lens breathing compensation</source>
       <translation>Kompenzácia dýchania objektívu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="488"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="492"/>
       <source>Keeps the field of view constant while focusing, using the lens breathing data recorded by the camera.</source>
       <translation>Pri zaostrovaní udržiava konštantné zorné pole pomocou údajov o dýchaní objektívu, ktoré zaznamenala kamera.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="494"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="498"/>
       <source>Advanced</source>
       <translation>Pokročilé</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="505"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="509"/>
       <source>Lens is under water</source>
       <translation>Objektív je pod vodou</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="507"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="511"/>
       <source>Enable if you&apos;re filming under water. This will adjust the refraction coefficient.</source>
       <translation>Použije sa, ak bolo video natočené pod vodou. Bude upravený koeficient refrakcie.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="528"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="532"/>
       <source>Enable keyframing</source>
       <translation>Aktívne kľúčové snímky</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="541"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="545"/>
       <source>Add keyframe</source>
       <translation>Pridať kľúčový snímok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="553"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="557"/>
       <source>Lens metadata delay</source>
       <translation>Oneskorenie metadát objektívu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="556"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="560"/>
       <source>How many frames later than the picture the lens reports its focal length. It depends on the lens, not on the frame rate: some report two frames late.</source>
       <translation>O koľko snímkov neskôr ako obraz objektív hlási svoju ohniskovú vzdialenosť. Závisí od objektívu, nie od snímkovej frekvencie: niektoré ju hlásia o dva snímky neskôr.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="557"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="561"/>
       <source>&quot;Analyze&quot; measures it on the zooms recorded in this clip. Positive values read the lens metadata later.</source>
       <translation>&quot;Analyzovať&quot; zmeria oneskorenie na zoomoch zaznamenaných v tomto klipe. Pri kladných hodnotách sa metadáta objektívu čítajú neskôr.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="565"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="569"/>
       <source>frames</source>
       <translation>snímkov</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="576"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="580"/>
       <source>Analyze</source>
       <translation>Analyzovať</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="645"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="651"/>
       <source>Export STMap</source>
       <translation>Exportovať ako STMap</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="651"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="657"/>
       <source>This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?</source>
       <translation>Tento súbor obsahuje metadata objektívu pre každý snímok zvlášť. Chceš exportovať STMap sekvenciu alebo samotný snímok?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="652"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="658"/>
       <source>Single frame</source>
       <translation>Samotný snímok</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="653"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="659"/>
       <source>STMap sequence</source>
       <translation>STMap sekvencia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="667"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="673"/>
       <source>Exporting %1...</source>
       <translation>Exportovanie %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="604"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="680"/>
+      <source>Clear</source>
+      <translation>Vymazať</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="608"/>
       <source>Pixel focal length</source>
       <translation>Ohnisková vzdialenosť v pixeloch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="409"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="413"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee its correctness. Use at your own risk.</source>
       <translation>Tento profil objektívu nie je oficiálne podporovaný, negarantujeme jeho správne fungovanie. Používaj na vlastné riziko.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="614"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="618"/>
       <source>Focal center</source>
       <translation>Stred ohniskovej vzdialenosti</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="624"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="628"/>
       <source>Distortion coefficients</source>
       <translation>Koeficienty skreslenia</translation>
     </message>
@@ -2013,22 +2018,27 @@ Otvor &lt;b&gt;Terminál&lt;/b&gt; a zadaj tento príkaz:</translation>
       <translation>Pevne nastavená pozícia kamery</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="605"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="261"/>
+      <source>Optimal path</source>
+      <translation>Optimálna dráha</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="610"/>
       <source>No zooming</source>
       <translation>Bez priblíženia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="605"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="610"/>
       <source>Dynamic zooming</source>
       <translation>Dynamické priblíženie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="605"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="610"/>
       <source>Static zoom</source>
       <translation>Pevné priblíženie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="626"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="631"/>
       <source>Manual</source>
       <translation>Manuálne</translation>
     </message>
@@ -2108,33 +2118,33 @@ Otvor &lt;b&gt;Terminál&lt;/b&gt; a zadaj tento príkaz:</translation>
       <translation>Gyroflow</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
       <source>Rectilinear</source>
       <translation>Priamočiara</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
       <source>Stereographic</source>
       <translation>Stereografická</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
       <source>Equidistant</source>
       <translation>Ekvidistantná</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
       <source>Equisolid angle</source>
       <translation>Rovnoplošná</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
       <source>Orthographic</source>
       <translation>Ortografická</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="626"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="631"/>
       <source>Automatic</source>
       <translation>Automaticky</translation>
     </message>
@@ -2807,409 +2817,414 @@ Klikni na OK pre výber cieľovej zložky.</translation>
       <translation>Stabilizácia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="262"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="263"/>
       <source>Pitch smoothness</source>
       <translation>Pitch (náklon)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="263"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="264"/>
       <source>Yaw smoothness</source>
       <translation>Yaw (rotácia)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="264"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="265"/>
       <source>Roll smoothness</source>
       <translation>Roll (bočný náklon)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="265"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="266"/>
       <source>Smoothness</source>
       <translation>Vyhladenie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="266"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="267"/>
       <source>Per axis</source>
       <translation>Pre os</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="267"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="268"/>
       <source>Max smoothness</source>
       <translation>Maximálne vyhladenie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="268"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="269"/>
       <source>Max smoothness at high velocity</source>
       <translation>Max vyhl. pri rýchlom pohybe</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="269"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="270"/>
       <source>Second smoothing pass</source>
       <translation>Dodatočné vyhladenie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="270"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="271"/>
       <source>Only within trim range</source>
       <translation>Iba v označenom rozsahu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="271"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="272"/>
+      <source>Keep within zoom limit</source>
+      <translation>Držať v rámci limitu priblíženia</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
       <source>Yaw angle correction</source>
       <translation>Yaw - korekcia uhla</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="272"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="435"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="274"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="440"/>
       <source>Pitch angle correction</source>
       <translation>Pitch - korekcia uhla</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="407"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="275"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="412"/>
       <source>Roll angle correction</source>
       <translation>Roll - korekcia uhla</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="274"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="276"/>
       <source>Yaw angle</source>
       <translation>Yaw uhol</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="275"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="277"/>
       <source>Pitch angle</source>
       <translation>Pitch uhol</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="276"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="278"/>
       <source>Roll angle</source>
       <translation>Roll uhol</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="424"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="429"/>
       <source>Lock pitch angle</source>
       <translation>Zamknúť uhol pitch</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="428"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="433"/>
       <source>Pitch locking is not available when using gravity vectors.</source>
       <translation>Zamknutie uhla pitch nie je dostupné pri použití vektorov gravitácie.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="478"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="483"/>
       <source>Automatic lock</source>
       <translation>Automatické zamknutie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="486"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="491"/>
       <source>Turn threshold</source>
       <translation>Prah zatáčania</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="487"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="492"/>
       <source>When roll rate exceeds this threshold, horizon tilts proportionally to roll rate (°/s → °)</source>
       <translation>Keď rýchlosť bočného náklonu (roll) prekročí tento prah, horizont sa nakloní úmerne tejto rýchlosti (°/s → °)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="496"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="501"/>
       <source>°/s</source>
       <translation>°/s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="506"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="511"/>
       <source>Turn smoothness</source>
       <translation>Vyhladenie zatáčania</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="507"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="512"/>
       <source>Smoothing time constant for turn detection (ms)</source>
       <translation>Časová konštanta vyhladenia pri detekcii zatáčania (ms)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="524"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="529"/>
       <source>Turn multiplier</source>
       <translation>Násobiteľ zatáčania</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="525"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="530"/>
       <source>Multiplier for dynamic tilt: tilt = multiplier * roll_rate (°/s → °)</source>
       <translation>Násobiteľ dynamického náklonu: náklon = násobiteľ * rýchlosť roll (°/s → °)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="541"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="546"/>
       <source>Limit tilt acceleration</source>
       <translation>Obmedziť zrýchlenie náklonu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="547"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="552"/>
       <source>Tilt acceleration limit</source>
       <translation>Limit zrýchlenia náklonu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="548"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="553"/>
       <source>Limits how fast the tilt can accelerate or decelerate (°/s²). Prevents jerky horizon movements.</source>
       <translation>Obmedzuje, ako rýchlo môže náklon zrýchľovať alebo spomaľovať (°/s²). Zabraňuje trhaným pohybom horizontu.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="556"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="561"/>
       <source>°/s²</source>
       <translation>°/s²</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="620"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="625"/>
       <source>Zoom level</source>
       <translation>Úroveň priblíženia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="623"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="628"/>
       <source>Automatic: as much as the video needs, up to the zoom limit.
 Manual: exactly the zoom you set, in every video, so you know the framing while shooting. The smoothing is lowered only where the frame wouldn&apos;t fit otherwise.</source>
       <translation>Automaticky: toľko, koľko video potrebuje, maximálne do limitu priblíženia.
 Manuálne: presne nastavené priblíženie v každom videu, takže už pri natáčaní vieš, ako bude záber orezaný. Vyhladenie sa zníži len tam, kde by sa záber inak nezmestil do pôvodného obrazu.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="636"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="641"/>
       <source>Zoom</source>
       <translation>Priblíženie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="639"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="644"/>
       <source>The whole video is zoomed in exactly this much, and the smoothing is lowered only where the frame wouldn&apos;t fit otherwise.
 If you need more accuracy, increase the number of iterations in &quot;Advanced&quot; below.</source>
       <translation>Celé video sa priblíži presne na túto hodnotu a vyhladenie sa zníži len tam, kde by sa záber inak nezmestil do pôvodného obrazu.
 Ak potrebuješ vyššiu presnosť, môžeš zvýšiť počet iterácií v &quot;Pokročilé&quot; nižšie.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="660"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="665"/>
       <source>The frame doesn&apos;t fit in %1 zoom even with the smoothing lowered, so the video is zoomed in to %2. Increase the zoom limit iterations in &quot;Advanced&quot;, or the zoom.</source>
       <translation>Záber sa pri priblížení %1 nezmestí ani so zníženým vyhladením, preto sa video priblíži na %2. Zvýš iterácie limitu priblíženia v &quot;Pokročilé&quot; alebo samotné priblíženie.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="661"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="666"/>
       <source>This smoothing method can&apos;t be lowered to fit the frame in %1 zoom, so the video is zoomed in to %2.</source>
       <translation>Túto metódu vyhladenia nemožno zoslabiť tak, aby sa záber zmestil pri priblížení %1, preto sa video priblíži na %2.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="702"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="707"/>
       <source>Stabilize focal length</source>
       <translation>Stabilizovať ohniskovú vzdialenosť</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="704"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="709"/>
       <source>Limits how fast the picture may zoom when the lens metadata records a changing focal length.</source>
       <translation>Obmedzuje rýchlosť zoomu obrazu, keď metadáta objektívu zaznamenávajú meniacu sa ohniskovú vzdialenosť.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="705"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="710"/>
       <source>Zooms slower than the limit pass through untouched. Faster zooms are spread out by cropping ahead of a zoom-in and after a zoom-out. Lower values give a smoother zoom and more crop.</source>
       <translation>Zoomy pomalšie než limit zostanú nezmenené. Rýchlejšie zoomy sa rozložia v čase orezaním ešte pred priblížením a ešte po oddialení. Nižšie hodnoty dávajú plynulejší zoom a viac orezania.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="714"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="719"/>
       <source>Max zoom speed</source>
       <translation>Max. rýchlosť zoomu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="735"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="740"/>
       <source>FOV is greater than 1.0, you may see black borders</source>
       <translation>Zorné pole je väčšie ako 1.0, je možné, že uvidíš čierne okraje</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="740"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="745"/>
       <source>FOV</source>
       <translation>Zorné pole (FOV)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="856"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="861"/>
       <source>Link with zooming limit</source>
       <translation>Prepojiť s limitom priblíženia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="929"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="934"/>
       <source>Additional 3D rotation</source>
       <translation>Dodatočná 3D rotácia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="933"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="938"/>
       <source>Pitch</source>
       <translation>Pitch (náklon)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="938"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="943"/>
       <source>Yaw</source>
       <translation>Yaw (rotácia)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="943"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="948"/>
       <source>Roll</source>
       <translation>Roll (bočný náklon)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="950"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="955"/>
       <source>Additional 3D translation</source>
       <translation>Dodatočný 3D prevod</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="965"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="970"/>
       <source>Z</source>
       <translation>Z</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="991"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="996"/>
       <source>Zoom limit lowers the smoothing of the whole clip</source>
       <translation>Limit priblíženia znižuje vyhladenie celého klipu</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="992"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="997"/>
       <source>How the zoom limit worked with static zoom before: one hard moment lowers the smoothing everywhere.
 Projects saved before this option existed open with it on, so they look the same.</source>
       <translation>Takto predtým fungoval limit priblíženia pri pevnom priblížení: jeden náročný moment zníži vyhladenie v celom klipe.
 Projekty uložené predtým, ako táto voľba existovala, sa otvoria s ňou zapnutou, takže vyzerajú rovnako.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="383"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="388"/>
       <source>Lock horizon</source>
       <translation>Zamknutý horizont</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="388"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="393"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
       <translation>Činiteľ zamknutia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="396"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="902"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="919"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="401"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="907"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="924"/>
       <source>%</source>
       <translation>%</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="415"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="445"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="420"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="450"/>
       <source>°</source>
       <translation>°</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="453"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="458"/>
       <source>Use gravity vectors</source>
       <translation>Použiť vektory gravitácie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="461"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="466"/>
       <source>Integration method</source>
       <translation>Metóda integrácie</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="471"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="476"/>
       <source>IMU integration method for keeping track of the horizon and adjust built-in quaternions</source>
       <translation>Metóda integrácie IMU pre zachovanie sledovania horizontu a úpravy vstavaných kvaterniónov</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="570"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="575"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
       <translation>Ak horizont nie je v správnom uhle, skús inú metódu integrácie v časti &quot;Pohybové dáta&quot;.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="592"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="597"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
       <translation>Max. rotácia: Pitch: %1, Yaw: %2, Roll: %3</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="597"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="602"/>
       <source>Max zoom: %1</source>
       <translation>Max. zoom: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="636"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="641"/>
       <source>Zoom limit</source>
       <translation>Limit priblíženia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="640"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="645"/>
       <source>Zoom limit is calculated approximately.
 If you need more accuracy, increase the number of iterations in &quot;Advanced&quot; below.</source>
       <translation>Limit priblíženia je vypočítaný približne.
 Ak potrebuješ vyššiu presnosť, môžeš zvýšiť počet iterácií v &quot;Pokročilé&quot; nižšie.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="664"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="669"/>
       <source>Zooming speed</source>
       <translation>Rýchlosť priblíženia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="673"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="678"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="682"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="687"/>
       <source>Lens correction</source>
       <translation>Korekcia skreslenia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="863"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="868"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
       <translation>Ak sa kľúčuje rýchlosť priblíženia odporúča sa použiť metóda "Envelope follower". Gaussov filter môže viesť k čiernym okrajom v zobrazení.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="868"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="873"/>
       <source>Zooming method</source>
       <translation>Metóda priblíženia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="888"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="893"/>
       <source>Zooming center offset</source>
       <translation>Odchýlka stredu približenia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="893"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="955"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="898"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="960"/>
       <source>X</source>
       <translation>X</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="910"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="960"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="915"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="965"/>
       <source>Y</source>
       <translation>Y</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="973"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="978"/>
       <source>Zoom limit iterations</source>
       <translation>Iterácie limitu priblíženia</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="974"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="979"/>
       <source>More iterations = more accurate limit, but also slower to calculate.</source>
       <translation>Viac iterácií = presnejší limit, ale taktiež pomalší výpočet.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="755"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="760"/>
       <source>Rolling shutter correction</source>
       <translation>Korekcia rolling-shutter</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="762"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="767"/>
       <source>Frame readout time</source>
       <translation>Čas načítania snímku</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="514"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="769"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="519"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="774"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="784"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="789"/>
       <source>Video speed</source>
       <translation>Rýchlosť videa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="830"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="835"/>
       <source>Link with smoothing</source>
       <translation>Prepojiť so stabilizáciou</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="843"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="848"/>
       <source>Link with zooming speed</source>
       <translation>Prepojiť s rýchlosťou priblíženia</translation>
     </message>

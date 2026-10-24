@@ -1158,202 +1158,207 @@ Você deseja enviar seu perfil?</translation>
       <translation>Sim</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="281"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="285"/>
       <source>Search...</source>
       <translation>Pesquisar...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="304"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="308"/>
       <source>Open file</source>
       <translation>Abrir arquivo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="309"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="313"/>
       <source>Create new</source>
       <translation>Criar novo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="338"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="342"/>
       <source>No distortion, focal length only</source>
       <translation>Sem distorção, somente distância focal</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="339"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="343"/>
       <source>Instead of a lens profile, use a lens without any distortion, of this focal length.</source>
       <translation>Em vez de um perfil de lente, usa uma lente sem nenhuma distorção, com esta distância focal.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="340"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="344"/>
       <source>Use only if your video is already undistorted (via a rectilinear lens or in-camera processing).</source>
       <translation>Use somente se o vídeo já estiver sem distorção (graças a uma lente retilínea ou ao processamento na câmera).</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="383"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="387"/>
       <source>Focal length (35 mm equiv.)</source>
       <translation>Distância focal (equiv. 35 mm)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="384"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="388"/>
       <source>The focal length with the same field of view on a full frame (36x24 mm) sensor: the focal length of the lens multiplied by the crop factor of the sensor.</source>
       <translation>A distância focal que dá o mesmo campo de visão em um sensor full frame (36x24 mm): a distância focal da lente multiplicada pelo fator de corte do sensor.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="389"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="393"/>
       <source>mm</source>
       <translation>mm</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="410"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="414"/>
       <source>Rate this profile: [Good] | [Bad]</source>
       <translation>Avalie este perfil: [Bom] | [Ruim]</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="412"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="416"/>
       <source>Thank you for rating this profile.</source>
       <translation>Obrigado por avaliar este perfil.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="442"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="446"/>
       <source>Lens profile aspect ratio doesn&apos;t match the file aspect ratio. The result will not look correct.</source>
       <translation>A proporção do perfil da lente não corresponde à proporção do arquivo. O resultado não parecerá correto.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="443"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="447"/>
       <source>Lens profile dimensions don&apos;t match the file dimensions. The result may not look correct.</source>
       <translation>As dimensões do perfil da lente não correspondem às dimensões do arquivo. O resultado pode não parecer correto.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="467"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="471"/>
       <source>Straight lines stay straight. A lens that sees more than 180° can&apos;t be shown whole, so its edges are cropped.</source>
       <translation>As linhas retas continuam retas. Uma lente que vê mais de 180° não pode ser exibida por inteiro, por isso as bordas são recortadas.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="468"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="472"/>
       <source>Fisheye that keeps shapes natural but bends straight lines. Shows the whole picture of a lens wider than 180°.</source>
       <translation>Olho de peixe que mantém as formas naturais, mas curva as linhas retas. Mostra a imagem inteira de uma lente de mais de 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="473"/>
       <source>Fisheye where the distance from the center is proportional to the angle. Shows the whole picture of a lens wider than 180°.</source>
       <translation>Olho de peixe em que a distância do centro é proporcional ao ângulo. Mostra a imagem inteira de uma lente de mais de 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="470"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="474"/>
       <source>Fisheye that keeps areas in proportion. Shows the whole picture of a lens wider than 180°.</source>
       <translation>Olho de peixe que mantém as áreas em proporção. Mostra a imagem inteira de uma lente de mais de 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="471"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="475"/>
       <source>Fisheye that compresses the edges strongly. Shows at most 180°.</source>
       <translation>Olho de peixe que comprime fortemente as bordas. Mostra no máximo 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="472"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="476"/>
       <source>Rectilinear, or stereographic when the lens sees more than 180°.</source>
       <translation>Retilínea, ou estereográfica quando a lente vê mais de 180°.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="486"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="490"/>
       <source>Lens breathing compensation</source>
       <translation>Compensação de respiração da lente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="488"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="492"/>
       <source>Keeps the field of view constant while focusing, using the lens breathing data recorded by the camera.</source>
       <translation>Mantém o campo de visão constante ao focar, usando os dados de respiração da lente gravados pela câmera.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="494"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="498"/>
       <source>Advanced</source>
       <translation>Avançado</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="505"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="509"/>
       <source>Lens is under water</source>
       <translation>A lente está submersa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="507"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="511"/>
       <source>Enable if you&apos;re filming under water. This will adjust the refraction coefficient.</source>
       <translation>Ative se estiver filmando debaixo da água. Isso ajusta o coeficiente de refração.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="528"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="532"/>
       <source>Enable keyframing</source>
       <translation>Ativar quadros-chave</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="541"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="545"/>
       <source>Add keyframe</source>
       <translation>Adicionar quadro-chave</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="553"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="557"/>
       <source>Lens metadata delay</source>
       <translation>Atraso dos metadados da lente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="556"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="560"/>
       <source>How many frames later than the picture the lens reports its focal length. It depends on the lens, not on the frame rate: some report two frames late.</source>
       <translation>Com quantos quadros de atraso em relação à imagem a lente informa sua distância focal. Depende da lente, não da taxa de quadros: algumas informam com dois quadros de atraso.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="557"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="561"/>
       <source>&quot;Analyze&quot; measures it on the zooms recorded in this clip. Positive values read the lens metadata later.</source>
       <translation>&quot;Analisar&quot; mede esse atraso nos zooms gravados neste clipe. Valores positivos leem os metadados da lente mais tarde.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="565"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="569"/>
       <source>frames</source>
       <translation>quadros</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="576"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="580"/>
       <source>Analyze</source>
       <translation>Analisar</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="645"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="651"/>
       <source>Export STMap</source>
       <translation>Exportar STMap</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="651"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="657"/>
       <source>This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?</source>
       <translation>Este arquivo contém metadados da lente por quadro. Deseja exportar uma sequência de STMap ou um quadro único?</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="652"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="658"/>
       <source>Single frame</source>
       <translation>Quadro único</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="653"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="659"/>
       <source>STMap sequence</source>
       <translation>Sequência de STMap</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="667"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="673"/>
       <source>Exporting %1...</source>
       <translation>Exportando %1...</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="604"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="680"/>
+      <source>Clear</source>
+      <translation>Limpar</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="608"/>
       <source>Pixel focal length</source>
       <translation>Distância focal em pixels</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="409"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="413"/>
       <source>This lens profile is unofficial, we can&apos;t guarantee its correctness. Use at your own risk.</source>
       <translation>Este perfil de lente não é oficial, não podemos garantir sua precisão. Use por sua conta e risco.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="614"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="618"/>
       <source>Focal center</source>
       <translation>Centro focal</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="624"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="628"/>
       <source>Distortion coefficients</source>
       <translation>Coeficientes de distorção</translation>
     </message>
@@ -2011,22 +2016,27 @@ Abra o &lt;b&gt;Terminal&lt;/b&gt; e digite o seguinte comando:</translation>
       <translation>Câmera fixa</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="605"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="261"/>
+      <source>Optimal path</source>
+      <translation>Trajetória ótima</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="610"/>
       <source>No zooming</source>
       <translation>Sem ampliação</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="605"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="610"/>
       <source>Dynamic zooming</source>
       <translation>Ampliação dinâmica</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="605"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="610"/>
       <source>Static zoom</source>
       <translation>Ampliação estática</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="626"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="631"/>
       <source>Manual</source>
       <translation>Manual</translation>
     </message>
@@ -2106,33 +2116,33 @@ Abra o &lt;b&gt;Terminal&lt;/b&gt; e digite o seguinte comando:</translation>
       <translation>Gyroflow</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
       <source>Rectilinear</source>
       <translation>Retilínea</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
       <source>Stereographic</source>
       <translation>Estereográfica</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
       <source>Equidistant</source>
       <translation>Equidistante</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
       <source>Equisolid angle</source>
       <translation>Equivalente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
       <source>Orthographic</source>
       <translation>Ortográfica</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/LensProfile.qml" line="465"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="626"/>
+      <location filename="../../src/ui/menu/LensProfile.qml" line="469"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="631"/>
       <source>Automatic</source>
       <translation>Auto</translation>
     </message>
@@ -2805,409 +2815,414 @@ Clique em Confirmar e selecione a pasta de destino.</translation>
       <translation>Estabilização</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="262"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="263"/>
       <source>Pitch smoothness</source>
       <translation>Suavidade da inclinação</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="263"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="264"/>
       <source>Yaw smoothness</source>
       <translation>Suavidade da guinada</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="264"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="265"/>
       <source>Roll smoothness</source>
       <translation>Suavidade da rolagem</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="265"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="266"/>
       <source>Smoothness</source>
       <translation>Suavidade</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="266"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="267"/>
       <source>Per axis</source>
       <translation>Eixo por eixo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="267"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="268"/>
       <source>Max smoothness</source>
       <translation>Suavidade máxima</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="268"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="269"/>
       <source>Max smoothness at high velocity</source>
       <translation>Suavidade máxima em alta velocidade</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="269"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="270"/>
       <source>Second smoothing pass</source>
       <translation>Segunda passagem de suavização</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="270"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="271"/>
       <source>Only within trim range</source>
       <translation>Somente dentro do intervalo de corte</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="271"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="272"/>
+      <source>Keep within zoom limit</source>
+      <translation>Manter dentro do limite de ampliação</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
       <source>Yaw angle correction</source>
       <translation>Correção do ângulo de guinada</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="272"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="435"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="274"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="440"/>
       <source>Pitch angle correction</source>
       <translation>Correção do ângulo de inclinação</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="273"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="407"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="275"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="412"/>
       <source>Roll angle correction</source>
       <translation>Correção do ângulo de rolagem</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="274"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="276"/>
       <source>Yaw angle</source>
       <translation>Ângulo de guinada</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="275"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="277"/>
       <source>Pitch angle</source>
       <translation>Ângulo de inclinação</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="276"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="278"/>
       <source>Roll angle</source>
       <translation>Ângulo de rolagem</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="424"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="429"/>
       <source>Lock pitch angle</source>
       <translation>Bloquear ângulo de inclinação</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="428"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="433"/>
       <source>Pitch locking is not available when using gravity vectors.</source>
       <translation>O bloqueio da inclinação não está disponível ao usar vetores de gravidade.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="478"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="483"/>
       <source>Automatic lock</source>
       <translation>Bloqueio automático</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="486"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="491"/>
       <source>Turn threshold</source>
       <translation>Limiar de curva</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="487"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="492"/>
       <source>When roll rate exceeds this threshold, horizon tilts proportionally to roll rate (°/s → °)</source>
       <translation>Quando a velocidade de rolagem ultrapassa este limiar, o horizonte se inclina proporcionalmente à velocidade de rolagem (°/s → °)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="496"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="501"/>
       <source>°/s</source>
       <translation>°/s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="506"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="511"/>
       <source>Turn smoothness</source>
       <translation>Suavidade da curva</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="507"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="512"/>
       <source>Smoothing time constant for turn detection (ms)</source>
       <translation>Constante de tempo da suavização para a detecção de curvas (ms)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="524"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="529"/>
       <source>Turn multiplier</source>
       <translation>Multiplicador de curva</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="525"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="530"/>
       <source>Multiplier for dynamic tilt: tilt = multiplier * roll_rate (°/s → °)</source>
       <translation>Multiplicador da inclinação lateral dinâmica: inclinação lateral = multiplicador * velocidade de rolagem (°/s → °)</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="541"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="546"/>
       <source>Limit tilt acceleration</source>
       <translation>Limitar aceleração da inclinação lateral</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="547"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="552"/>
       <source>Tilt acceleration limit</source>
       <translation>Limite de aceleração da inclinação lateral</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="548"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="553"/>
       <source>Limits how fast the tilt can accelerate or decelerate (°/s²). Prevents jerky horizon movements.</source>
       <translation>Limita a rapidez com que a inclinação lateral pode acelerar ou desacelerar (°/s²). Evita movimentos bruscos do horizonte.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="556"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="561"/>
       <source>°/s²</source>
       <translation>°/s²</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="620"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="625"/>
       <source>Zoom level</source>
       <translation>Nível de ampliação</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="623"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="628"/>
       <source>Automatic: as much as the video needs, up to the zoom limit.
 Manual: exactly the zoom you set, in every video, so you know the framing while shooting. The smoothing is lowered only where the frame wouldn&apos;t fit otherwise.</source>
       <translation>Auto: o quanto o vídeo precisar, até o limite de ampliação.
 Manual: exatamente a ampliação que você definir, em todos os vídeos, para já saber o enquadramento ao filmar. A suavização só é reduzida onde o quadro não caberia de outra forma.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="636"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="641"/>
       <source>Zoom</source>
       <translation>Ampliação</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="639"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="644"/>
       <source>The whole video is zoomed in exactly this much, and the smoothing is lowered only where the frame wouldn&apos;t fit otherwise.
 If you need more accuracy, increase the number of iterations in &quot;Advanced&quot; below.</source>
       <translation>O vídeo inteiro recebe exatamente esta ampliação, e a suavização só é reduzida onde o quadro não caberia de outra forma.
 Se precisar de mais precisão, aumente o número de iterações em &quot;Avançado&quot; abaixo.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="660"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="665"/>
       <source>The frame doesn&apos;t fit in %1 zoom even with the smoothing lowered, so the video is zoomed in to %2. Increase the zoom limit iterations in &quot;Advanced&quot;, or the zoom.</source>
       <translation>O quadro não cabe com %1 de ampliação mesmo com a suavização reduzida, por isso o vídeo é ampliado para %2. Aumente as iterações do limite de ampliação em &quot;Avançado&quot; ou a ampliação.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="661"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="666"/>
       <source>This smoothing method can&apos;t be lowered to fit the frame in %1 zoom, so the video is zoomed in to %2.</source>
       <translation>A suavização deste método não pode ser reduzida para que o quadro caiba com %1 de ampliação, por isso o vídeo é ampliado para %2.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="702"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="707"/>
       <source>Stabilize focal length</source>
       <translation>Estabilizar distância focal</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="704"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="709"/>
       <source>Limits how fast the picture may zoom when the lens metadata records a changing focal length.</source>
       <translation>Limita a velocidade do zoom da imagem quando os metadados da lente registram mudanças na distância focal.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="705"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="710"/>
       <source>Zooms slower than the limit pass through untouched. Faster zooms are spread out by cropping ahead of a zoom-in and after a zoom-out. Lower values give a smoother zoom and more crop.</source>
       <translation>Zooms mais lentos que o limite passam sem alteração. Zooms mais rápidos são diluídos no tempo, recortando a imagem antes de um zoom de aproximação e depois de um zoom de afastamento. Valores menores resultam em um zoom mais suave e em mais recorte.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="714"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="719"/>
       <source>Max zoom speed</source>
       <translation>Velocidade máxima do zoom</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="735"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="740"/>
       <source>FOV is greater than 1.0, you may see black borders</source>
       <translation>O Campo de Visão é maior que 1.0, você pode ver bordas pretas</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="740"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="745"/>
       <source>FOV</source>
       <translation>Campo de visão</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="856"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="861"/>
       <source>Link with zooming limit</source>
       <translation>Vincular ao limite de ampliação</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="929"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="934"/>
       <source>Additional 3D rotation</source>
       <translation>Rotação 3D adicional</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="933"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="938"/>
       <source>Pitch</source>
       <translation>Inclinação</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="938"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="943"/>
       <source>Yaw</source>
       <translation>Guinada</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="943"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="948"/>
       <source>Roll</source>
       <translation>Rolagem</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="950"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="955"/>
       <source>Additional 3D translation</source>
       <translation>Translação 3D adicional</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="965"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="970"/>
       <source>Z</source>
       <translation>Z</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="991"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="996"/>
       <source>Zoom limit lowers the smoothing of the whole clip</source>
       <translation>O limite de ampliação reduz a suavização do clipe inteiro</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="992"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="997"/>
       <source>How the zoom limit worked with static zoom before: one hard moment lowers the smoothing everywhere.
 Projects saved before this option existed open with it on, so they look the same.</source>
       <translation>Como o limite de ampliação funcionava antes com a ampliação estática: um único trecho difícil reduz a suavização em todo o clipe.
 Projetos salvos antes da existência desta opção abrem com ela ativada, para que continuem com a mesma aparência.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="383"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="388"/>
       <source>Lock horizon</source>
       <translation>Bloquear horizonte</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="388"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="393"/>
       <source>Lock amount</source>
       <comment>Horizon locking amount</comment>
       <translation>Valor de bloqueio</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="396"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="902"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="919"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="401"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="907"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="924"/>
       <source>%</source>
       <translation>%</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="415"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="445"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="420"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="450"/>
       <source>°</source>
       <translation>°</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="453"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="458"/>
       <source>Use gravity vectors</source>
       <translation>Usar vetores de gravidade</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="461"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="466"/>
       <source>Integration method</source>
       <translation>Método de integração</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="471"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="476"/>
       <source>IMU integration method for keeping track of the horizon and adjust built-in quaternions</source>
       <translation>Método de integração IMU para acompanhar o horizonte e ajustar os quatérnios embutidos</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="570"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="575"/>
       <source>If the horizon is not locked well, try a different integration method in the &quot;Motion data&quot; section.</source>
       <translation>Se o horizonte não estiver bem bloqueado, experimente outro método de integração na seção &quot;Dados de movimento&quot;.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="592"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="597"/>
       <source>Max rotation: Pitch: %1, Yaw: %2, Roll: %3</source>
       <translation>Rotação máxima: Inclinação: %1, Guinada: %2, Rolagem: %3</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="597"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="602"/>
       <source>Max zoom: %1</source>
       <translation>Ampliação máxima: %1</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="636"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="641"/>
       <source>Zoom limit</source>
       <translation>Limite de ampliação</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="640"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="645"/>
       <source>Zoom limit is calculated approximately.
 If you need more accuracy, increase the number of iterations in &quot;Advanced&quot; below.</source>
       <translation>O limite de ampliação é calculado de forma aproximada.
 Se precisar de mais precisão, aumente o número de iterações em &quot;Avançado&quot; abaixo.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="664"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="669"/>
       <source>Zooming speed</source>
       <translation>Velocidade de ampliação</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="673"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="678"/>
       <source>s</source>
       <translation>s</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="682"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="687"/>
       <source>Lens correction</source>
       <translation>Correção de lente</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="863"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="868"/>
       <source>When keyframing zooming speed, it is recommended to use the Envelope follower method. Gaussian filter might lead to black borders in view.</source>
       <translation>Ao usar quadros-chave na velocidade de ampliação, recomenda-se o método Envelope follower. O Gaussian filter pode causar bordas pretas na imagem.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="868"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="873"/>
       <source>Zooming method</source>
       <translation>Método de ampliação</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="888"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="893"/>
       <source>Zooming center offset</source>
       <translation>Deslocamento do centro da ampliação</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="893"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="955"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="898"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="960"/>
       <source>X</source>
       <translation>X</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="910"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="960"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="915"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="965"/>
       <source>Y</source>
       <translation>Y</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="973"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="978"/>
       <source>Zoom limit iterations</source>
       <translation>Iterações do limite de ampliação</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="974"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="979"/>
       <source>More iterations = more accurate limit, but also slower to calculate.</source>
       <translation>Mais iterações = limite mais preciso, mas também cálculo mais lento.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="755"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="760"/>
       <source>Rolling shutter correction</source>
       <translation>Correção do rolamento do obturador</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="762"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="767"/>
       <source>Frame readout time</source>
       <translation>Tempo de leitura do quadro</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="514"/>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="769"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="519"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="774"/>
       <source>ms</source>
       <translation>ms</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="784"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="789"/>
       <source>Video speed</source>
       <translation>Velocidade do vídeo</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="830"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="835"/>
       <source>Link with smoothing</source>
       <translation>Vincular à suavização</translation>
     </message>
     <message>
-      <location filename="../../src/ui/menu/Stabilization.qml" line="843"/>
+      <location filename="../../src/ui/menu/Stabilization.qml" line="848"/>
       <source>Link with zooming speed</source>
       <translation>Vincular à velocidade de ampliação</translation>
     </message>

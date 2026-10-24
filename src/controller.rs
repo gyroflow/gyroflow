@@ -57,6 +57,7 @@ pub struct Controller {
     reset_lens_profile: qt_method!(fn(&mut self)),
     load_focal_length_profile: qt_method!(fn(&mut self, focal_length_35mm: f64)),
     restore_lens_profile: qt_method!(fn(&mut self)),
+    clear_lens_profile: qt_method!(fn(&mut self)),
     get_preset_contents: qt_method!(fn(&mut self, url_or_id: QString) -> QString),
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool) -> bool),
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
@@ -1071,6 +1072,16 @@ impl Controller {
         self.lens_profile_loaded(QString::from(json), QString::from(filepath), QString::from(checksum));
         self.request_recompute();
     }
+    /// Unloads the profile with everything it brought, stretch and digital lens too (`reset_lens_profile` keeps those for
+    /// the calibrator), so it doesn't stay for the next file either. An empty `lens_profile_loaded` tells the UI there's none
+    fn clear_lens_profile(&mut self) {
+        self.replaced_lens_profile = None;
+        *self.stabilizer.lens.write() = Default::default();
+        self.lens_loaded = false;
+        self.lens_changed();
+        self.lens_profile_loaded(QString::default(), QString::default(), QString::default());
+        self.request_recompute();
+    }
     fn load_default_preset(&mut self) {
         // Assumes regular filesystem
         let local_path = gyroflow_core::lens_profile_database::LensProfileDatabase::get_path().join("default.gyroflow");
@@ -1628,9 +1639,13 @@ impl Controller {
             Ok(thin_obj) => {
                 if thin_obj.as_object().unwrap().contains_key("calibration_data") {
                     self.replaced_lens_profile = None;
-                    self.lens_loaded = true;
+                    // A project saved with no profile (never loaded, or cleared) has an empty one
+                    let lens_json = {
+                        let lens = self.stabilizer.lens.read();
+                        self.lens_loaded = !lens.fisheye_params.camera_matrix.is_empty();
+                        if self.lens_loaded { lens.get_json().unwrap_or_default() } else { String::new() }
+                    };
                     self.lens_changed();
-                    let lens_json = self.stabilizer.lens.read().get_json().unwrap_or_default();
                     self.lens_profile_loaded(QString::from(lens_json), QString::default(), QString::default());
                 }
                 self.update_offset_model();

@@ -230,6 +230,8 @@ MenuItem {
                     }
                 }
                 Qt.callLater(controller.recompute_threaded);
+            } else { // `controller.clear_lens_profile`, or a project saved with none
+                root.lensCleared();
             }
         }
     }
@@ -248,15 +250,17 @@ MenuItem {
         root.restoring = true;
         controller.restore_lens_profile();
         root.restoring = false;
-        if (!controller.lens_loaded) {
-            focalLengthOnly.syncNone();
-            info.model = ({});
-            root.calibWidth = 0;
-            root.calibHeight = 0;
-            root.cropFactor = 0;
-            root.input_horizontal_stretch = 1;
-            root.input_vertical_stretch = 1;
-        }
+        if (!controller.lens_loaded) root.lensCleared();
+    }
+    function lensCleared(): void {
+        focalLengthOnly.syncNone();
+        info.model = ({});
+        officialInfo.show = false;
+        root.calibWidth = 0;
+        root.calibHeight = 0;
+        root.cropFactor = 0;
+        root.input_horizontal_stretch = 1;
+        root.input_vertical_stretch = 1;
     }
 
     property int currentVideoAspectRatio: Math.round((root.videoWidth / Math.max(1, root.videoHeight)) * 1000);
@@ -640,34 +644,42 @@ MenuItem {
                 }
             }
         }
-        LinkButton {
+        Row {
             anchors.horizontalCenter: parent.horizontalCenter;
-            text: qsTr("Export STMap");
-            OutputPathField { id: opf; visible: false; }
-            enabled: window.videoArea.vid.loaded;
-            onClicked: {
-                opf.selectFolder("", function(folder_url) {
-                    if (controller.has_per_frame_lens_data()) {
-                        messageBox(Modal.Question, qsTr("This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?"), [
-                            { text: qsTr("Single frame"), accent: true, clicked: () => { controller.export_stmap(folder_url, false); } },
-                            { text: qsTr("STMap sequence"), clicked: () => { controller.export_stmap(folder_url, true); } },
-                        ]);
-                    } else {
-                        controller.export_stmap(folder_url, false);
-                    }
-                });
-            }
-
-            Connections {
-                target: controller;
-                function onStmap_progress(progress: real, ready: int, total: int): void {
-                    window.videoArea.videoLoader.active = progress < 1;
-                    window.videoArea.videoLoader.currentFrame = ready;
-                    window.videoArea.videoLoader.totalFrames = total;
-                    window.videoArea.videoLoader.text = progress < 1? qsTr("Exporting %1...") : "";
-                    window.videoArea.videoLoader.progress = progress < 1? progress : -1;
-                    window.videoArea.videoLoader.cancelable = true;
+            spacing: 5 * dpiScale;
+            LinkButton {
+                text: qsTr("Export STMap");
+                OutputPathField { id: opf; visible: false; }
+                enabled: window.videoArea.vid.loaded;
+                onClicked: {
+                    opf.selectFolder("", function(folder_url) {
+                        if (controller.has_per_frame_lens_data()) {
+                            messageBox(Modal.Question, qsTr("This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?"), [
+                                { text: qsTr("Single frame"), accent: true, clicked: () => { controller.export_stmap(folder_url, false); } },
+                                { text: qsTr("STMap sequence"), clicked: () => { controller.export_stmap(folder_url, true); } },
+                            ]);
+                        } else {
+                            controller.export_stmap(folder_url, false);
+                        }
+                    });
                 }
+
+                Connections {
+                    target: controller;
+                    function onStmap_progress(progress: real, ready: int, total: int): void {
+                        window.videoArea.videoLoader.active = progress < 1;
+                        window.videoArea.videoLoader.currentFrame = ready;
+                        window.videoArea.videoLoader.totalFrames = total;
+                        window.videoArea.videoLoader.text = progress < 1? qsTr("Exporting %1...") : "";
+                        window.videoArea.videoLoader.progress = progress < 1? progress : -1;
+                        window.videoArea.videoLoader.cancelable = true;
+                    }
+                }
+            }
+            LinkButton {
+                text: qsTr("Clear");
+                visible: controller.lens_loaded;
+                onClicked: controller.clear_lens_profile();
             }
         }
     }
