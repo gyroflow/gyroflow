@@ -200,7 +200,7 @@ Item {
                             error_string += "\n" + qsTr("This is often caused by read-only file system.\nMake sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.");
                         }
                         if (Qt.platform.os == "windows") {
-                            error_string += "\n" + qsTr("This is often caused by read-only file system.\nIf you have Gyroflow in C:\\Program Files\\, then you'll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.");
+                            error_string += "\n" + qsTr("This is often caused by read-only file system.\nIf you have Gyroflow in %1, then you'll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.").arg("C:\\Program Files\\");
                         }
                         messageBox(Modal.Error, error_string, [ { text: qsTr("Ok") } ]);
                     }
