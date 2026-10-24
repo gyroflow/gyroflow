@@ -4207,13 +4207,6 @@ Make sure you copied the Gyroflow app to your Applications folder, instead of ru
 Переконайтеся, що ви скопіювали Gyroflow до папки з додатками, замість безпосередньої роботи з .dmg.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="203"/>
-      <source>This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation>Це трапилось, бо файлова система, доступна лише для читання.
-Якщо Gyroflow встановлено у C:Program Files, тоді вам необхідно запустити Gyroflow як адміністратор, щоб розпакувати SDK в папку Gyroflow.</translation>
-    </message>
-    <message>
       <location filename="../../src/ui/VideoArea.qml" line="1256"/>
       <source>Loading gyro data %1...</source>
       <translation>Завантаження gyro даних %1...</translation>
@@ -4237,6 +4230,13 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
       <location filename="../../src/ui/VideoArea.qml" line="80"/>
       <source>Preset can be applied only after loading a video.</source>
       <translation>Пресет можна застосувати лише після завантаження відео.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="203"/>
+      <source>This is often caused by read-only file system.
+If you have Gyroflow in %1, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
+      <translation>Зазвичай це спричинено тим, що файлова система доступна лише для читання.
+Якщо Gyroflow встановлено в %1, потрібно запустити Gyroflow від імені адміністратора, щоб розпакувати SDK у папку Gyroflow.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="251"/>

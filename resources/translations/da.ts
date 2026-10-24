@@ -4205,13 +4205,6 @@ Make sure you copied the Gyroflow app to your Applications folder, instead of ru
 Sørg for at kopiere Gyroflow-appen til din "Applications"-mappe i stedet for at køre den direkte fra .dmg-filen.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="203"/>
-      <source>This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation>Dette skyldes ofte et skrivebeskyttet filsystem. 
-Hvis du har Gyroflow i C:Program Files, skal du køre Gyroflow som administrator for at udpakke SDK'en til Gyroflow-mappen.</translation>
-    </message>
-    <message>
       <location filename="../../src/ui/VideoArea.qml" line="1256"/>
       <source>Loading gyro data %1...</source>
       <translation>Indlæser gyro data %1...</translation>
@@ -4235,6 +4228,13 @@ Hvis du har Gyroflow i C:Program Files, skal du køre Gyroflow som administrator
       <location filename="../../src/ui/VideoArea.qml" line="80"/>
       <source>Preset can be applied only after loading a video.</source>
       <translation>En forudindstilling kan først anvendes, når en video er indlæst.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="203"/>
+      <source>This is often caused by read-only file system.
+If you have Gyroflow in %1, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
+      <translation>Dette skyldes ofte et skrivebeskyttet filsystem.
+Hvis du har Gyroflow i %1, skal du køre Gyroflow som administrator for at udpakke SDK'en til Gyroflow-mappen.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="251"/>

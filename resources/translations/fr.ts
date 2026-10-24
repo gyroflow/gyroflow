@@ -4204,13 +4204,6 @@ Make sure you copied the Gyroflow app to your Applications folder, instead of ru
 Assurez-vous d'avoir copié l'application Gyroflow dans votre dossier Applications, plutôt que de l'exécuter directement depuis le .dmg.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="203"/>
-      <source>This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation>Ceci est souvent causé par un système de fichiers en lecture seule.
-Si Gyroflow se trouve dans C:Program Files, vous devrez l'exécuter en tant qu'administrateur afin d'extraire le SDK dans le dossier Gyroflow.</translation>
-    </message>
-    <message>
       <location filename="../../src/ui/VideoArea.qml" line="1256"/>
       <source>Loading gyro data %1...</source>
       <translation>Chargement des données gyro %1...</translation>
@@ -4234,6 +4227,13 @@ Si Gyroflow se trouve dans C:Program Files, vous devrez l'exécuter en tant qu'a
       <location filename="../../src/ui/VideoArea.qml" line="80"/>
       <source>Preset can be applied only after loading a video.</source>
       <translation>Le préréglage ne peut être appliqué qu'après le chargement d'une vidéo.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="203"/>
+      <source>This is often caused by read-only file system.
+If you have Gyroflow in %1, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
+      <translation>Ceci est souvent causé par un système de fichiers en lecture seule.
+Si Gyroflow se trouve dans %1, vous devrez l'exécuter en tant qu'administrateur afin d'extraire le SDK dans le dossier Gyroflow.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="251"/>

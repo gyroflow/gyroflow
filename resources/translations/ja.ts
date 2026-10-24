@@ -4206,13 +4206,6 @@ Make sure you copied the Gyroflow app to your Applications folder, instead of ru
 .dmgから直接実行するのではなく、GyroflowアプリをApplicationsフォルダにコピーしてください。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="203"/>
-      <source>This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation>これは、ファイルシステムが読み取り専用であることが原因であることが多いです。
-GyroflowがC:Program Filesにある場合、SDKをGyroflowフォルダに展開するために、Gyroflowを管理者として実行する必要があります。</translation>
-    </message>
-    <message>
       <location filename="../../src/ui/VideoArea.qml" line="1256"/>
       <source>Loading gyro data %1...</source>
       <translation>ジャイロ データ %1 を読み込み中...</translation>
@@ -4236,6 +4229,13 @@ GyroflowがC:Program Filesにある場合、SDKをGyroflowフォルダに展開�
       <location filename="../../src/ui/VideoArea.qml" line="80"/>
       <source>Preset can be applied only after loading a video.</source>
       <translation>プリセットは動画を読み込んだ後にのみ適用できます。</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="203"/>
+      <source>This is often caused by read-only file system.
+If you have Gyroflow in %1, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
+      <translation>これは、ファイルシステムが読み取り専用であることが原因であることが多いです。
+Gyroflowが%1にある場合、SDKをGyroflowフォルダに展開するために、Gyroflowを管理者として実行する必要があります。</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="251"/>

@@ -4206,13 +4206,6 @@ Make sure you copied the Gyroflow app to your Applications folder, instead of ru
 Proverite da li ste kopirali aplikaciju Gyroflow u fasciklu Applications, umesto da je pokrećete direktno iz .dmg fajla.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="203"/>
-      <source>This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation>Ovo je često uzrokovano sistemom fajlova samo za čitanje.
-Ako imate Gyroflow u C:Program Files, moraćete da pokrenete Gyroflow kao Administrator kako biste raspakovali SDK u Gyroflow fasciklu.</translation>
-    </message>
-    <message>
       <location filename="../../src/ui/VideoArea.qml" line="1256"/>
       <source>Loading gyro data %1...</source>
       <translation>Učitavanje gyro podataka %1...</translation>
@@ -4236,6 +4229,13 @@ Ako imate Gyroflow u C:Program Files, moraćete da pokrenete Gyroflow kao Admini
       <location filename="../../src/ui/VideoArea.qml" line="80"/>
       <source>Preset can be applied only after loading a video.</source>
       <translation>Preset se može primeniti tek nakon učitavanja videa.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="203"/>
+      <source>This is often caused by read-only file system.
+If you have Gyroflow in %1, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
+      <translation>Ovo je često uzrokovano sistemom fajlova samo za čitanje.
+Ako imate Gyroflow u %1, moraćete da pokrenete Gyroflow kao Administrator kako biste raspakovali SDK u Gyroflow fasciklu.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="251"/>

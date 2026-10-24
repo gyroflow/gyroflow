@@ -4205,13 +4205,6 @@ Make sure you copied the Gyroflow app to your Applications folder, instead of ru
 Varmista, että olet kopioinut Gyroflow-sovelluksen Ohjelmat-kansioon etkä suorita sitä suoraan .dmg-tiedostosta.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="203"/>
-      <source>This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation>Tämä johtuu usein siitä, että tiedostojärjestelmä on vain luku -tilassa.
-Jos Gyroflow on kansiossa C:\Program Files, sinun on suoritettava Gyroflow järjestelmänvalvojana, jotta SDK voidaan purkaa Gyroflow-kansioon.</translation>
-    </message>
-    <message>
       <location filename="../../src/ui/VideoArea.qml" line="1256"/>
       <source>Loading gyro data %1...</source>
       <translation>Ladataan gyrotietoja %1...</translation>
@@ -4235,6 +4228,13 @@ Jos Gyroflow on kansiossa C:\Program Files, sinun on suoritettava Gyroflow järj
       <location filename="../../src/ui/VideoArea.qml" line="80"/>
       <source>Preset can be applied only after loading a video.</source>
       <translation>Esiasetusta voi soveltaa vasta, kun video on ladattu.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="203"/>
+      <source>This is often caused by read-only file system.
+If you have Gyroflow in %1, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
+      <translation>Tämä johtuu usein siitä, että tiedostojärjestelmä on vain luku -tilassa.
+Jos Gyroflow on kansiossa %1, sinun on suoritettava Gyroflow järjestelmänvalvojana, jotta SDK voidaan purkaa Gyroflow-kansioon.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="251"/>

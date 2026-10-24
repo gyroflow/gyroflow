@@ -4199,13 +4199,6 @@ Make sure you copied the Gyroflow app to your Applications folder, instead of ru
 Pastikan Anda menyalin aplikasi Gyroflow ke Application folder, alih-alih menjalankannya langsung dari .dmg.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="203"/>
-      <source>This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation>Hal ini sering kali disebabkan oleh sistem file read-only.
-Jika Anda memiliki Gyroflow di C:Program Files, Anda harus menjalankan Gyroflow sebagai Administrator untuk mengekstrak SDK ke folder Gyroflow.</translation>
-    </message>
-    <message>
       <location filename="../../src/ui/VideoArea.qml" line="1256"/>
       <source>Loading gyro data %1...</source>
       <translation>Memuat data gyro %1...</translation>
@@ -4229,6 +4222,13 @@ Jika Anda memiliki Gyroflow di C:Program Files, Anda harus menjalankan Gyroflow 
       <location filename="../../src/ui/VideoArea.qml" line="80"/>
       <source>Preset can be applied only after loading a video.</source>
       <translation>Preset hanya bisa diterapkan setelah memuat video.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="203"/>
+      <source>This is often caused by read-only file system.
+If you have Gyroflow in %1, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
+      <translation>Hal ini sering kali disebabkan oleh sistem file read-only.
+Jika Anda memiliki Gyroflow di %1, Anda harus menjalankan Gyroflow sebagai Administrator untuk mengekstrak SDK ke folder Gyroflow.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="251"/>

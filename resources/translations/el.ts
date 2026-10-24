@@ -4205,13 +4205,6 @@ Make sure you copied the Gyroflow app to your Applications folder, instead of ru
 Βεβαιωθείτε ότι έχετε αντιγράψει την εφαρμογή Gyroflow στον φάκελο «Εφαρμογές», αντί να την εκτελείτε απευθείας από το .dmg.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="203"/>
-      <source>This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation>Αυτό συχνά οφείλεται σε σύστημα αρχείων μόνο για ανάγνωση.
-Αν το Gyroflow βρίσκεται στο C:\Program Files\, πρέπει να εκτελέσετε το Gyroflow ως διαχειριστής για να αποσυμπιεστεί το SDK στον φάκελο του Gyroflow.</translation>
-    </message>
-    <message>
       <location filename="../../src/ui/VideoArea.qml" line="1256"/>
       <source>Loading gyro data %1...</source>
       <translation>Φόρτωση δεδομένων γυροσκοπίου %1...</translation>
@@ -4235,6 +4228,13 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
       <location filename="../../src/ui/VideoArea.qml" line="80"/>
       <source>Preset can be applied only after loading a video.</source>
       <translation>Η προκαθορισμένη ρύθμιση μπορεί να εφαρμοστεί μόνο αφού φορτωθεί ένα βίντεο.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="203"/>
+      <source>This is often caused by read-only file system.
+If you have Gyroflow in %1, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
+      <translation>Αυτό συχνά οφείλεται σε σύστημα αρχείων μόνο για ανάγνωση.
+Αν το Gyroflow βρίσκεται στο %1, πρέπει να εκτελέσετε το Gyroflow ως διαχειριστής για να αποσυμπιεστεί το SDK στον φάκελο του Gyroflow.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="251"/>

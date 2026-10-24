@@ -4206,13 +4206,6 @@ Make sure you copied the Gyroflow app to your Applications folder, instead of ru
 Uisti sa, že je Gyroflow umiestnený v "Applications folder" namiesto spúštania z .dmg súboru priamo.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="203"/>
-      <source>This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation>Toto je zvyčajne spôsobené pretože je súborový systém "iba na čítanie"
-Ak je Gyroflow umiestnený v "C:\Program Files" je potrebné ho spustiť ako Administrátor, pretože je potrebné extrahovať SDK do adresára Gyroflow.</translation>
-    </message>
-    <message>
       <location filename="../../src/ui/VideoArea.qml" line="1256"/>
       <source>Loading gyro data %1...</source>
       <translation>Nahrávam gyro data %1...</translation>
@@ -4236,6 +4229,13 @@ Ak je Gyroflow umiestnený v "C:\Program Files" je potrebné ho spustiť ako Adm
       <location filename="../../src/ui/VideoArea.qml" line="80"/>
       <source>Preset can be applied only after loading a video.</source>
       <translation>Predvoľbu možno použiť až po načítaní videa.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="203"/>
+      <source>This is often caused by read-only file system.
+If you have Gyroflow in %1, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
+      <translation>Toto je zvyčajne spôsobené tým, že súborový systém je iba na čítanie.
+Ak je Gyroflow umiestnený v %1, je potrebné ho spustiť ako Administrátor, aby bolo možné extrahovať SDK do adresára Gyroflow.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="251"/>

@@ -4193,12 +4193,6 @@ Make sure you copied the Gyroflow app to your Applications folder, instead of ru
       <translation>Bu durum genelde salt okunur dosya sisteminden kaynaklanır. Gyroflow uygulamasını, doğrudan .dmg'den çalıştırmak yerine Uygulamalar klasörüne kopyaladığınızdan emin olun.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="203"/>
-      <source>This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation>Bu durum genelde salt okunur dosya sisteminden kaynaklanır. Gyroflow uygulaması Program Files klasörünüzdeyse, SDK'i bu klasöre ayıklamak için uygulamayı yönetici olarak çalıştırmanız gerekir.</translation>
-    </message>
-    <message>
       <location filename="../../src/ui/VideoArea.qml" line="1256"/>
       <source>Loading gyro data %1...</source>
       <translation>Gyro verisi yükleniyor %1...</translation>
@@ -4222,6 +4216,13 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
       <location filename="../../src/ui/VideoArea.qml" line="80"/>
       <source>Preset can be applied only after loading a video.</source>
       <translation>Önayar yalnızca bir video yüklendikten sonra uygulanabilir.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="203"/>
+      <source>This is often caused by read-only file system.
+If you have Gyroflow in %1, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
+      <translation>Bu durum genelde salt okunur dosya sisteminden kaynaklanır.
+Gyroflow uygulaması %1 klasöründeyse, SDK'yı Gyroflow klasörüne ayıklamak için uygulamayı yönetici olarak çalıştırmanız gerekir.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="251"/>

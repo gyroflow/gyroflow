@@ -4203,13 +4203,6 @@ Make sure you copied the Gyroflow app to your Applications folder, instead of ru
 .dmg 파일을 직접 실행하는 대신, Gyroflow 앱을 Application 폴더로 복사하세요.</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="203"/>
-      <source>This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation>이는 종종 읽기 전용 파일 시스템으로 인해 발생합니다.
-Gyroflow가 C:Program Files에 있다면, Gyroflow를 관리자 권한으로 실행해야 SDK를 Gyroflow 폴더에 압축 해제할 수 있습니다.</translation>
-    </message>
-    <message>
       <location filename="../../src/ui/VideoArea.qml" line="1256"/>
       <source>Loading gyro data %1...</source>
       <translation>자이로 데이터 %1 로드 중...</translation>
@@ -4233,6 +4226,13 @@ Gyroflow가 C:Program Files에 있다면, Gyroflow를 관리자 권한으로 실
       <location filename="../../src/ui/VideoArea.qml" line="80"/>
       <source>Preset can be applied only after loading a video.</source>
       <translation>프리셋은 영상을 로드한 후에만 적용할 수 있습니다.</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="203"/>
+      <source>This is often caused by read-only file system.
+If you have Gyroflow in %1, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
+      <translation>이는 종종 읽기 전용 파일 시스템으로 인해 발생합니다.
+Gyroflow가 %1에 있다면, Gyroflow를 관리자 권한으로 실행해야 SDK를 Gyroflow 폴더에 압축 해제할 수 있습니다.</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="251"/>

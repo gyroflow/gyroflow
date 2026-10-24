@@ -4204,13 +4204,6 @@ Make sure you copied the Gyroflow app to your Applications folder, instead of ru
 确保您已经将 Gyroflow 应用程序复制到了到您的应用程序文件夹内，而不要直接从 .dmg 镜像内运行。</translation>
     </message>
     <message>
-      <location filename="../../src/ui/VideoArea.qml" line="203"/>
-      <source>This is often caused by read-only file system.
-If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
-      <translation>这通常是由只读文件系统造成的。
-如果您将 Gyroflow 放在 C 盘的 Program Files 文件夹内，那么您需要以管理员身份运行 Gyroflow 才能将 SDK 提取到 Gyroflow 文件夹中。</translation>
-    </message>
-    <message>
       <location filename="../../src/ui/VideoArea.qml" line="1256"/>
       <source>Loading gyro data %1...</source>
       <translation>正在加载陀螺数据 %1...</translation>
@@ -4234,6 +4227,13 @@ If you have Gyroflow in C:Program Files, then you&apos;ll need to run Gyroflow a
       <location filename="../../src/ui/VideoArea.qml" line="80"/>
       <source>Preset can be applied only after loading a video.</source>
       <translation>只有在加载视频后才能应用预设。</translation>
+    </message>
+    <message>
+      <location filename="../../src/ui/VideoArea.qml" line="203"/>
+      <source>This is often caused by read-only file system.
+If you have Gyroflow in %1, then you&apos;ll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.</source>
+      <translation>这通常是由只读文件系统造成的。
+如果您将 Gyroflow 放在 %1 文件夹内，那么您需要以管理员身份运行 Gyroflow 才能将 SDK 提取到 Gyroflow 文件夹中。</translation>
     </message>
     <message>
       <location filename="../../src/ui/VideoArea.qml" line="251"/>
