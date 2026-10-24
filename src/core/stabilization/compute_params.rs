@@ -55,6 +55,10 @@ pub struct ComputeParams {
     pub suppress_rotation: bool,
     pub fov_algorithm_margin: f32,
     pub smoothing_fov_limit_per_frame: Vec<f64>,
+    /// The lens per lens state, for the crop constraint of the optimal smoothing, see `calculate_camera_fovs`
+    pub smoothing_crop_lenses: Option<Arc<crate::smoothing::optimal::crop::CropLenses>>,
+    /// Per frame, the time (ms) the render reads its orientations at, in the motion's own timeline, see `calculate_camera_fovs`
+    pub smoothing_frame_times: Option<Arc<Vec<f64>>>,
     pub max_zoom: Option<f64>,
     pub max_zoom_iterations: usize,
     pub fixed_zoom: bool,
@@ -104,6 +108,8 @@ impl ComputeParams {
             camera_diagonal_fovs: Vec::new(),
 
             smoothing_fov_limit_per_frame: Vec::new(),
+            smoothing_crop_lenses: None,
+            smoothing_frame_times: None,
             max_zoom: params.max_zoom.clone(),
             max_zoom_iterations: params.max_zoom_iterations,
             fixed_zoom: params.fixed_zoom,
@@ -184,14 +190,33 @@ impl ComputeParams {
             1 // FOV is constant (ie. lens is fixed focal length)
         };
         self.camera_diagonal_fovs = Vec::with_capacity(frame_count);
+        // The smoothing runs under the gyro lock and can't look the lens up itself, so the crop constraint of the
+        // optimal smoothing takes it from here, the same lookups
+        let mut crop_lenses = crate::smoothing::optimal::crop::CropLenses::default();
         for f in 0..frame_count as i32 {
             let timestamp = crate::timestamp_at_frame(f, self.scaled_fps);
-            let (camera_matrix, _, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&self, timestamp, false);
+            let lens = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&self, timestamp, false);
+            let camera_matrix = lens.0;
             let diag_length = ((self.width.pow(2) + self.height.pow(2)) as f64).sqrt();
             // let diag_pixel_focal_length = (camera_matrix[(0, 0)].powi(2) + camera_matrix[(1, 1)].powi(2)).sqrt();
             let d_fov = 2.0 * ((diag_length / (2.0 * camera_matrix[(1, 1)])).atan()) * 180.0 / std::f64::consts::PI;
             self.camera_diagonal_fovs.push(d_fov);
+            crop_lenses.push(self, f as usize, &lens);
         }
+        crop_lenses.finish();
+        self.smoothing_crop_lenses = Some(Arc::new(crop_lenses));
+
+        // ... and the time the render reads each frame's orientations at, in the motion's own timeline: the frame's
+        // time with its per-frame offset, less the sync offset there (`GyroSource::quat_at_timestamp`)
+        let times = {
+            let gyro = self.gyro.read();
+            let file_metadata = gyro.file_metadata.read();
+            (0..self.frame_count).map(|f| {
+                let t = crate::timestamp_at_frame(f as i32, self.scaled_fps) + file_metadata.per_frame_time_offsets.get(f).unwrap_or(&0.0);
+                t - gyro.offset_at_video_timestamp(t)
+            }).collect()
+        };
+        self.smoothing_frame_times = Some(Arc::new(times));
     }
 }
 

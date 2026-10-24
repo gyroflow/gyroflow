@@ -1983,7 +1983,8 @@ impl Controller {
             cal.method = self.calibration_method.into();
             cal.model = self.calibration_model.into();
             *self.stabilizer.lens_calibrator.write() = Some(cal);
-            self.stabilizer.set_smoothing_method(2); // Plain 3D
+            let plain_3d = self.stabilizer.get_smoothing_algs().iter().position(|x| x == "Plain 3D").unwrap_or(3);
+            self.stabilizer.set_smoothing_method(plain_3d);
             self.stabilizer.set_smoothing_param("time_constant", 2.0);
             self.stabilizer.set_max_zoom(0.0, 0);
             self.stabilizer.set_adaptive_zoom(0.0);

@@ -258,6 +258,7 @@ MenuItem {
         QT_TRANSLATE_NOOP("Popup", "Default"),
         QT_TRANSLATE_NOOP("Popup", "Plain 3D");
         QT_TRANSLATE_NOOP("Popup", "Fixed camera");
+        QT_TRANSLATE_NOOP("Popup", "Optimal path");
 
         QT_TRANSLATE_NOOP("Stabilization", "Pitch smoothness");
         QT_TRANSLATE_NOOP("Stabilization", "Yaw smoothness");
@@ -268,6 +269,7 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Max smoothness at high velocity");
         QT_TRANSLATE_NOOP("Stabilization", "Second smoothing pass");
         QT_TRANSLATE_NOOP("Stabilization", "Only within trim range");
+        QT_TRANSLATE_NOOP("Stabilization", "Keep within zoom limit");
         QT_TRANSLATE_NOOP("Stabilization", "Yaw angle correction");
         QT_TRANSLATE_NOOP("Stabilization", "Pitch angle correction");
         QT_TRANSLATE_NOOP("Stabilization", "Roll angle correction");
@@ -282,6 +284,9 @@ MenuItem {
         font.pixelSize: 12 * dpiScale;
         width: parent.width;
         currentIndex: 1;
+        // Default (1) and Plain 3D (3) get their smoothing lowered by the zoom limit's iterations; Optimal path (2) keeps
+        // the frame within the limit itself, with the iterations catching what its crop model can't see
+        readonly property bool followsZoomLimit: currentIndex >= 1 && currentIndex <= 3;
         Component.onCompleted: currentIndexChanged();
         onCurrentIndexChanged: {
             // Clear current params
@@ -297,7 +302,7 @@ MenuItem {
                     // TODO: figure out a better way than constructing a string
                     let str = "";
                     const add = x.custom_qml || "";
-                    const isPercent = smoothingMethod.currentIndex == 1 && (x.keyframe == "SmoothingParamSmoothness" || x.keyframe == "SmoothingParamPitch" || x.keyframe == "SmoothingParamYaw" || x.keyframe == "SmoothingParamRoll");
+                    const isPercent = (smoothingMethod.currentIndex == 1 || smoothingMethod.currentIndex == 2) && (x.keyframe == "SmoothingParamSmoothness" || x.keyframe == "SmoothingParamPitch" || x.keyframe == "SmoothingParamYaw" || x.keyframe == "SmoothingParamRoll");
                     if (isPercent) {
                         x.from      *= 100.0;
                         x.to        *= 100.0;
@@ -634,7 +639,7 @@ MenuItem {
     }
     Label {
         text: staticZoomLevel.manual? qsTr("Zoom") : qsTr("Zoom limit");
-        visible: smoothingMethod.currentIndex == 1 || smoothingMethod.currentIndex == 2 || staticZoomLevel.manual;
+        visible: smoothingMethod.followsZoomLimit || staticZoomLevel.manual;
         position: Label.LeftPosition;
         tooltip: staticZoomLevel.manual? qsTr("The whole video is zoomed in exactly this much, and the smoothing is lowered only where the frame wouldn't fit otherwise.\nIf you need more accuracy, increase the number of iterations in \"Advanced\" below.")
                                                : qsTr("Zoom limit is calculated approximately.\nIf you need more accuracy, increase the number of iterations in \"Advanced\" below.");
@@ -656,7 +661,7 @@ MenuItem {
         show: staticZoomLevel.manual && maxValues.manualZoomMissed > 0;
         readonly property string target: "<b>" + maxValues.manualZoomMissed.toFixed(0) + "%</b>";
         readonly property string actual: "<b>" + maxValues.maxZoom.toFixed(1) + "%</b>";
-        text: smoothingMethod.currentIndex == 1 || smoothingMethod.currentIndex == 2
+        text: smoothingMethod.followsZoomLimit
             ? qsTr("The frame doesn't fit in %1 zoom even with the smoothing lowered, so the video is zoomed in to %2. Increase the zoom limit iterations in \"Advanced\", or the zoom.").arg(target).arg(actual)
             : qsTr("This smoothing method can't be lowered to fit the frame in %1 zoom, so the video is zoomed in to %2.").arg(target).arg(actual);
     }
@@ -969,7 +974,7 @@ MenuItem {
             }
         }
         Label {
-            visible: smoothingMethod.currentIndex == 1 || smoothingMethod.currentIndex == 2;
+            visible: smoothingMethod.followsZoomLimit;
             text: qsTr("Zoom limit iterations");
             tooltip: qsTr("More iterations = more accurate limit, but also slower to calculate.");
             position: Label.LeftPosition;
@@ -990,7 +995,7 @@ MenuItem {
             id: zoomLimitWholeClip;
             text: qsTr("Zoom limit lowers the smoothing of the whole clip");
             tooltip: qsTr("How the zoom limit worked with static zoom before: one hard moment lowers the smoothing everywhere.\nProjects saved before this option existed open with it on, so they look the same.");
-            visible: croppingMode.currentIndex == 2 && (smoothingMethod.currentIndex == 1 || smoothingMethod.currentIndex == 2);
+            visible: croppingMode.currentIndex == 2 && smoothingMethod.followsZoomLimit;
             checked: false;
             onCheckedChanged: controller.zoom_limit_whole_clip = checked;
         }

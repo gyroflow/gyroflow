@@ -797,7 +797,7 @@ impl GyroSource {
             // Lock horizon, then smooth
             horizon_lock.lock(&mut smoothed_quaternions, &self.quaternions, &file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, compute_params);
             let locked_quaternions = smoothed_quaternions;
-            smoothed_quaternions = alg.smooth(&locked_quaternions, self.duration_ms, compute_params);
+            smoothed_quaternions = alg.smooth_with_original(&locked_quaternions, &self.quaternions, self.duration_ms, compute_params);
 
             // "Only within trim range" replaces the motion outside of the trim ranges before smoothing, so it doesn't affect
             // the smoothing inside of them. The result outside of the ranges has nothing to do with the real motion then,
@@ -806,7 +806,7 @@ impl GyroSource {
             if !compute_params.trim_ranges.is_empty() && alg.get_parameter("trim_range_only") > 0.5 {
                 let mut whole_video = compute_params.clone();
                 whole_video.trim_ranges.clear();
-                let whole_smoothed = alg.smooth(&locked_quaternions, self.duration_ms, &whole_video);
+                let whole_smoothed = alg.smooth_with_original(&locked_quaternions, &self.quaternions, self.duration_ms, &whole_video);
                 let duration_us = compute_params.scaled_duration_ms * 1000.0;
                 let ranges = compute_params.trim_ranges.iter().map(|x| ((x.0 * duration_us).round() as i64, (x.1 * duration_us).round() as i64)).collect::<Vec<_>>();
                 for (ts, q) in smoothed_quaternions.iter_mut() {

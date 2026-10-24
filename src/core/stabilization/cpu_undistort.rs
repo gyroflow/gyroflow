@@ -208,7 +208,69 @@ impl Stabilization {
     /// what the picture does (the STMap export, the tests) can ask the same code the frame is drawn with
     /// rather than a copy of it that drifts. `out_c`/`out_f` are the output plane the projection reads,
     /// `(pixel - out_c) / out_f`, built by the caller because they are the same for every pixel
-    pub fn undistort_coord(mut out_pos: Vector2<f32>, params: &KernelParams, matrices: &[[f32; 16]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, mesh_data: &[f64], out_c: &Vector2<f32>, out_f: &Vector2<f32>) -> Option<Vector2<f32>> {
+    pub fn undistort_coord(out_pos: Vector2<f32>, params: &KernelParams, matrices: &[[f32; 16]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, mesh_data: &[f64], out_c: &Vector2<f32>, out_f: &Vector2<f32>) -> Option<Vector2<f32>> {
+        let (ray, out_pos) = Self::output_ray(out_pos, params, distortion_model, digital_lens, out_c, out_f)?;
+
+        ///////////////////////////////////////////////////////////////////
+        // Calculate source `y` for rolling shutter
+        let mut sy = if (params.flags & 16) == 16 { // Horizontal RS
+            (out_pos.x.round() as i32).min(params.width).max(0) as usize
+        } else {
+            (out_pos.y.round() as i32).min(params.height).max(0) as usize
+        };
+        if params.matrix_count > 1 {
+            let idx = params.matrix_count as usize / 2;
+            if let Some(pt) = Stabilization::rotate_and_distort(ray, idx, params, matrices, distortion_model, digital_lens, mesh_data) {
+                if (params.flags & 16) == 16 { // Horizontal RS
+                    sy = (pt.0.round() as i32).min(params.width).max(0) as usize;
+                } else {
+                    sy = (pt.1.round() as i32).min(params.height).max(0) as usize;
+                }
+            }
+        }
+        ///////////////////////////////////////////////////////////////////
+
+        let idx = sy.min(params.matrix_count as usize - 1);
+        let mut uv = Stabilization::rotate_and_distort(ray, idx, params, matrices, distortion_model, digital_lens, mesh_data)?;
+        let mut frame_size = (params.width as f32, params.height as f32);
+        if params.input_rotation != 0.0 {
+            let rotation = params.input_rotation * (std::f32::consts::PI / 180.0);
+            let size = frame_size;
+            frame_size = rotate_point(size, rotation, (0.0, 0.0), (0.0, 0.0));
+            frame_size = (frame_size.0.abs().round(), frame_size.1.abs().round());
+            uv = rotate_point(uv, rotation, (size.0 / 2.0, size.1 / 2.0), (frame_size.0 / 2.0, frame_size.1 / 2.0));
+        }
+
+        // `uv` is in the input frame now, turned by the input rotation, so its edges are those of `frame_size`
+        let (width_f, height_f) = frame_size;
+        if params.background_mode == 1 { // Edge repeat
+            uv = (
+                uv.0.max(3.0).min(width_f  - 3.0),
+                uv.1.max(3.0).min(height_f - 3.0),
+            );
+        } else if params.background_mode == 2 { // Edge mirror
+            let rx = uv.0.round();
+            let ry = uv.1.round();
+            let width3 = width_f - 3.0;
+            let height3 = height_f - 3.0;
+            if rx > width3  { uv.0 = width3  - (rx - width3); }
+            if rx < 3.0     { uv.0 = 3.0 + width_f - (width3  + rx); }
+            if ry > height3 { uv.1 = height3 - (ry - height3); }
+            if ry < 3.0     { uv.1 = 3.0 + height_f - (height3 + ry); }
+        }
+        if params.background_mode != 3 {
+            uv = (
+                map_coord(uv.0, 0.0, frame_size.0, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),
+                map_coord(uv.1, 0.0, frame_size.1, params.source_rect[1] as f32, (params.source_rect[1] + params.source_rect[3]) as f32)
+            );
+        }
+        Some(Vector2::new(uv.0, uv.1))
+    }
+
+    /// Output pixel -> the ray it shows, as an angle vector in the output camera's frame (see [`super::projection`]),
+    /// and the pixel in the output frame's own coordinates. The first half of [`Self::undistort_coord`], for whatever
+    /// needs to rotate the rays of the output itself (the crop constraint of `smoothing::optimal`)
+    pub fn output_ray(mut out_pos: Vector2<f32>, params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, out_c: &Vector2<f32>, out_f: &Vector2<f32>) -> Option<((f32, f32), Vector2<f32>)> {
         out_pos.x = map_coord(out_pos.x, params.output_rect[0] as f32, (params.output_rect[0] + params.output_rect[2]) as f32, 0.0, params.output_width  as f32);
         out_pos.y = map_coord(out_pos.y, params.output_rect[1] as f32, (params.output_rect[1] + params.output_rect[3]) as f32, 0.0, params.output_height as f32);
         out_pos.x += params.translation2d[0];
@@ -340,61 +402,7 @@ impl Stabilization {
             }
         }
         ///////////////////////////////////////////////////////////////////
-
-        ///////////////////////////////////////////////////////////////////
-        // Calculate source `y` for rolling shutter
-        let mut sy = if (params.flags & 16) == 16 { // Horizontal RS
-            (out_pos.x.round() as i32).min(params.width).max(0) as usize
-        } else {
-            (out_pos.y.round() as i32).min(params.height).max(0) as usize
-        };
-        if params.matrix_count > 1 {
-            let idx = params.matrix_count as usize / 2;
-            if let Some(pt) = Stabilization::rotate_and_distort(ray, idx, params, matrices, distortion_model, digital_lens, mesh_data) {
-                if (params.flags & 16) == 16 { // Horizontal RS
-                    sy = (pt.0.round() as i32).min(params.width).max(0) as usize;
-                } else {
-                    sy = (pt.1.round() as i32).min(params.height).max(0) as usize;
-                }
-            }
-        }
-        ///////////////////////////////////////////////////////////////////
-
-        let idx = sy.min(params.matrix_count as usize - 1);
-        let mut uv = Stabilization::rotate_and_distort(ray, idx, params, matrices, distortion_model, digital_lens, mesh_data)?;
-        let mut frame_size = (params.width as f32, params.height as f32);
-        if params.input_rotation != 0.0 {
-            let rotation = params.input_rotation * (std::f32::consts::PI / 180.0);
-            let size = frame_size;
-            frame_size = rotate_point(size, rotation, (0.0, 0.0), (0.0, 0.0));
-            frame_size = (frame_size.0.abs().round(), frame_size.1.abs().round());
-            uv = rotate_point(uv, rotation, (size.0 / 2.0, size.1 / 2.0), (frame_size.0 / 2.0, frame_size.1 / 2.0));
-        }
-
-        // `uv` is in the input frame now, turned by the input rotation, so its edges are those of `frame_size`
-        let (width_f, height_f) = frame_size;
-        if params.background_mode == 1 { // Edge repeat
-            uv = (
-                uv.0.max(3.0).min(width_f  - 3.0),
-                uv.1.max(3.0).min(height_f - 3.0),
-            );
-        } else if params.background_mode == 2 { // Edge mirror
-            let rx = uv.0.round();
-            let ry = uv.1.round();
-            let width3 = width_f - 3.0;
-            let height3 = height_f - 3.0;
-            if rx > width3  { uv.0 = width3  - (rx - width3); }
-            if rx < 3.0     { uv.0 = 3.0 + width_f - (width3  + rx); }
-            if ry > height3 { uv.1 = height3 - (ry - height3); }
-            if ry < 3.0     { uv.1 = 3.0 + height_f - (height3 + ry); }
-        }
-        if params.background_mode != 3 {
-            uv = (
-                map_coord(uv.0, 0.0, frame_size.0, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),
-                map_coord(uv.1, 0.0, frame_size.1, params.source_rect[1] as f32, (params.source_rect[1] + params.source_rect[3]) as f32)
-            );
-        }
-        Some(Vector2::new(uv.0, uv.1))
+        Some((ray, out_pos))
     }
 
     /// Ray -> source pixel. `ray` is an angle vector (`θ·û`, see [`super::projection`]) in the output
