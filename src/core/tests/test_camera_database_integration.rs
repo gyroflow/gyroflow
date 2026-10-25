@@ -95,6 +95,18 @@ fn test_lens_profile_validation() {
         radial_distortion_limit: None,
     };
 
+    // Zoom lens without focal length info must be rejected
+    assert!(valid_profile.validate_for_submission().is_err());
+
+    // Zoom lens with specific focal length succeeds
+    valid_profile.focal_length = Some(24.0);
+    assert!(valid_profile.validate_for_submission().is_ok());
+
+    // Vague lens name on mirrorless camera must be rejected
+    valid_profile.lens_model = "Standard".into();
+    assert!(valid_profile.validate_for_submission().is_err());
+
+    valid_profile.lens_model = "FE 35mm F1.4 GM".into();
     assert!(valid_profile.validate_for_submission().is_ok());
 
     // Missing brand

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright Â© 2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 mod opencv_fisheye;
 mod opencv_standard;
@@ -140,7 +140,7 @@ impl DistortionModel {
 
     /// The largest ray angle the model itself can represent, in radians, `None` when it has no such end.
     /// Not a fold of the calibration - [`Self::radial_distortion_limit`] finds those - but the shape of the
-    /// projection: a rectilinear model images the z=1 plane and has nothing at 90Â°, and the unified sphere
+    /// projection: a rectilinear model images the z=1 plane and has nothing at 90°, and the unified sphere
     /// of the Insta360 model turns over at `acos(-1/Î¾)`
     pub fn field_limit(&self, k: &[f64]) -> Option<f64> {
         use DistortionModels as M;
@@ -152,7 +152,7 @@ impl DistortionModel {
     }
 
     /// Largest usable ray angle (radians) before the curve folds back (its derivative stops being positive),
-    /// `None` when it rises all the way. The generic way samples the derivative up to 180Â° and bisects the
+    /// `None` when it rises all the way. The generic way samples the derivative up to 180° and bisects the
     /// first non-positive step; the Sony spline solves its fold from the coefficients, since each of its
     /// derivative samples would be a Newton solve and the renderer asks per frame when the file records a
     /// lens curve per frame
@@ -160,7 +160,7 @@ impl DistortionModel {
         if let DistortionModels::Sony(m) = &self.inner {
             return m.radial_distortion_limit(k);
         }
-        // A fisheye can see well past 90Â°, so the sweep runs to 180Â° - the pipeline carries rays as angles
+        // A fisheye can see well past 90°, so the sweep runs to 180° - the pipeline carries rays as angles
         // and no longer stops at the old z=1 plane asymptote
         let max_theta = std::f64::consts::PI;
 

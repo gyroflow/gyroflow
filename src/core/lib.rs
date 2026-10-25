@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright Â© 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 #![recursion_limit = "256"]
 
 pub mod gyro_source;

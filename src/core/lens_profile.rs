@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright Ã‚Â© 2021-2022 Adrian <adrian.eddy at gmail>
+// Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use std::collections::{ HashSet, BTreeMap };
 use itertools::Itertools;
@@ -123,15 +123,59 @@ impl LensProfile {
         let brand = self.camera_brand.trim();
         let model = self.camera_model.trim();
         let lens = self.lens_model.trim();
-        if brand.is_empty() || brand.eq_ignore_ascii_case("unknown") || brand.eq_ignore_ascii_case("none") {
+        let setting = self.camera_setting.trim();
+        let note = self.note.trim();
+
+        let is_placeholder = |s: &str| {
+            s.is_empty()
+                || s.eq_ignore_ascii_case("unknown")
+                || s.eq_ignore_ascii_case("none")
+                || s.eq_ignore_ascii_case("other")
+                || s.eq_ignore_ascii_case("---")
+                || s.eq_ignore_ascii_case("n/a")
+        };
+
+        if is_placeholder(brand) {
             return Err("Camera brand must be specified.");
         }
-        if model.is_empty() || model.eq_ignore_ascii_case("unknown") || model.eq_ignore_ascii_case("none") {
+        if is_placeholder(model) {
             return Err("Camera model must be specified.");
         }
-        if lens.is_empty() || lens.eq_ignore_ascii_case("unknown") || lens.eq_ignore_ascii_case("none") {
+        if is_placeholder(lens) {
             return Err("Lens model must be specified.");
         }
+
+        let fixed_lens_brands = ["gopro", "dji", "insta360", "runcam", "caddx", "hawkeye", "walksnail", "betafpv", "foxwhoop", "sjcam", "xiaomi", "garmin"];
+        let is_fixed_lens_brand = fixed_lens_brands.iter().any(|b| brand.to_ascii_lowercase().contains(b));
+        let vague_lens_terms = ["standard", "default", "kit", "kit lens", "lens", "prime", "zoom", "wide", "stock"];
+        if !is_fixed_lens_brand && (lens.len() < 2 || vague_lens_terms.iter().any(|v| lens.eq_ignore_ascii_case(v))) {
+            return Err("Interchangeable-lens / mirrorless camera requires explicit lens model and focal parameters.");
+        }
+
+        let lens_lower = lens.to_ascii_lowercase();
+        let has_zoom_range = {
+            let bytes = lens_lower.as_bytes();
+            let mut found = false;
+            for i in 1..bytes.len().saturating_sub(1) {
+                if bytes[i] == b'-' && bytes[i - 1].is_ascii_digit() && bytes[i + 1].is_ascii_digit() {
+                    if lens_lower.contains("mm") || lens_lower.contains("f/") || lens_lower.contains("f2") || lens_lower.contains("f4") {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            found
+        };
+        if has_zoom_range {
+            let has_focal = self.focal_length.unwrap_or(0.0) > 0.0
+                || setting.to_ascii_lowercase().contains("mm")
+                || note.to_ascii_lowercase().contains("mm")
+                || !self.parsed_interpolations.is_empty();
+            if !has_focal {
+                return Err("Zoom lens requires specific focal length information (in focal_length, camera setting, or note).");
+            }
+        }
+
         if self.calib_dimension.w == 0 || self.calib_dimension.h == 0 {
             return Err("Calibration dimensions must be greater than zero.");
         }
@@ -345,8 +389,8 @@ impl LensProfile {
     /// The one profile that stores something else is GoPro's: `init` leaves its `radial_distortion_limit`
     /// alone (the POLY radial map has no fold to solve for), and telemetry-parser writes the recorded
     /// frame's corner angle there as `tan(ZFOV/2)` - the units `r_limit` had before the pipeline started
-    /// carrying rays as angles. Read through here rather than off the field, or a 150Ã‚Â° body comes out as a
-    /// 3.73 radian field limit, which is past 180Ã‚Â° and so clips nothing at all.
+    /// carrying rays as angles. Read through here rather than off the field, or a 150° body comes out as a
+    /// 3.73 radian field limit, which is past 180° and so clips nothing at all.
     pub fn radial_distortion_limit_rad(&self) -> Option<f64> {
         let limit = self.fisheye_params.radial_distortion_limit.filter(|l| *l > 0.0)?;
         Some(if self.distortion_model.as_deref() == Some("gopro") { limit.atan() } else { limit })

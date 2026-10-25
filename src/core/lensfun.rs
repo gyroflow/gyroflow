@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright Ãƒâ€šÃ‚Â© 2024 Adrian <adrian.eddy at gmail>
+// Copyright Ãƒâ€š© 2024 Adrian <adrian.eddy at gmail>
 // Lensfun XML database parser and converter for Gyroflow
 
 use std::io::Read;

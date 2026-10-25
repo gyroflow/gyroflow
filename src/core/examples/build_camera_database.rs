@@ -148,7 +148,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ("ttartisan", "TTArtisan"),
         ("7artisans", "7Artisans"),
         ("meike", "Meike"),
-        ("voigtlander", "VoigtlÃ¤nder"), ("voigtlÃ¤nder", "VoigtlÃ¤nder"),
+        ("voigtlander", "Voigtländer"), ("voigtländer", "Voigtländer"),
         ("dzo", "DZOFILM"), ("dzofilm", "DZOFILM"),
     ];
     for (k, v) in brand_aliases_tuples {

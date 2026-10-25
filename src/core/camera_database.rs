@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Copyright Ã‚Â© 2024 Adrian <adrian.eddy at gmail>
+// Copyright © 2024 Adrian <adrian.eddy at gmail>
 
 use std::collections::{HashMap, HashSet, BTreeMap, BTreeSet};
 use serde::{Serialize, Deserialize};
