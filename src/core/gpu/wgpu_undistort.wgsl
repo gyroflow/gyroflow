@@ -508,14 +508,16 @@ fn rotate_and_distort(ray: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
             uv.x = map_coord(uv.x, 0.0, f32(params.width),  origin.x, origin.x + crop_size.x);
             uv.y = map_coord(uv.y, 0.0, f32(params.height), origin.y, origin.y + crop_size.y);
 
+            // The shear of every band above this one in full, and of this one down to the row. A fixed loop with no
+            // branch in it, as in the OpenCL kernel (issue 1255)
             let idx2 = u32(min(7, max(0, i32(floor(uv.y / stblz_grid)))));
             let delta = uv.y - stblz_grid * f32(idx2);
-            uv.x -= mesh_data[o + 4 + idx2 * 2 + 0] * delta;
-            uv.y -= mesh_data[o + 4 + idx2 * 2 + 1] * delta;
-            for (var j = 0u; j < idx2; j++) {
-                uv.x -= mesh_data[o + 4 + j * 2 + 0] * stblz_grid;
-                uv.y -= mesh_data[o + 4 + j * 2 + 1] * stblz_grid;
+            var shift = vec2<f32>(0.0, 0.0);
+            for (var j = 0u; j < 8u; j++) {
+                let w = select(select(0.0, delta, j == idx2), stblz_grid, j < idx2);
+                shift += vec2<f32>(mesh_data[o + 4 + j * 2 + 0], mesh_data[o + 4 + j * 2 + 1]) * w;
             }
+            uv -= shift;
 
             uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0, f32(params.width));
             uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0, f32(params.height));

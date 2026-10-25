@@ -80,6 +80,9 @@ pub struct StabilizationParams {
     pub fov_overview: bool,
     pub max_zoom: Option<f64>,
     pub max_zoom_iterations: usize,
+    pub fixed_zoom: bool, // static zoom at exactly `max_zoom`, see zooming::calculate_fovs
+    pub zoom_limit_whole_clip: bool, // static zoom: the zoom limit lowers the smoothing of the whole clip, as it did before
+    pub zoom_limit_whole_clip_from_old_file: bool, // `zoom_limit_whole_clip` comes from a file from before it existed, not from the user
     pub show_safe_area: bool,
     pub fovs: Vec<f64>,
     pub minimal_fovs: Vec<f64>,
@@ -100,6 +103,10 @@ pub struct StabilizationParams {
     pub video_rotation: f64,
 
     pub lens_correction_amount: f64,
+    /// The output projection picked in the Lens profile section: a
+    /// [`crate::stabilization::projection::OutputProjection`] as `i32`, or `projection::AUTOMATIC`. Per file, like
+    /// the lens itself: `clear` puts it back to rectilinear
+    pub output_projection: i32,
     pub light_refraction_coefficient: f64,
     pub background_mode: BackgroundMode,
     pub background_margin: f64,
@@ -111,8 +118,6 @@ pub struct StabilizationParams {
     pub stab_enabled: bool,
     pub show_detected_features: bool,
     pub show_optical_flow: bool,
-    /// Where "Analyze image optically" tracked points, see `OpticalMeasurements::points`
-    pub show_tracked_points: bool,
 
     pub frame_offset: i32,
 
@@ -147,7 +152,6 @@ impl Default for StabilizationParams {
             stab_enabled: true,
             show_detected_features: true,
             show_optical_flow: true,
-            show_tracked_points: false,
             frame_readout_time: 0.0,
             frame_readout_direction: ReadoutDirection::TopToBottom,
             adaptive_zoom_window: 4.0,
@@ -164,8 +168,12 @@ impl Default for StabilizationParams {
 
             max_zoom: Some(130.0),
             max_zoom_iterations: 5,
+            fixed_zoom: false,
+            zoom_limit_whole_clip: false,
+            zoom_limit_whole_clip_from_old_file: false,
 
             lens_correction_amount: 1.0,
+            output_projection: crate::stabilization::projection::OutputProjection::Rectilinear as i32,
             light_refraction_coefficient: 1.0,
             background_mode: BackgroundMode::SolidColor,
             background_margin: 0.0,
@@ -315,7 +323,6 @@ impl StabilizationParams {
             stab_enabled:              self.stab_enabled,
             show_detected_features:    self.show_detected_features,
             show_optical_flow:         self.show_optical_flow,
-            show_tracked_points:       self.show_tracked_points,
             background:                self.background,
             adaptive_zoom_window:      self.adaptive_zoom_window,
             framebuffer_inverted:      self.framebuffer_inverted,
@@ -335,6 +342,7 @@ impl StabilizationParams {
             show_safe_area:            self.show_safe_area,
             max_zoom:                  self.max_zoom,
             max_zoom_iterations:       self.max_zoom_iterations,
+            fixed_zoom:                self.fixed_zoom,
             focal_length_smoothing_enabled: self.focal_length_smoothing_enabled,
             focal_length_max_zoom_rate: self.focal_length_max_zoom_rate,
             ..Self::default()

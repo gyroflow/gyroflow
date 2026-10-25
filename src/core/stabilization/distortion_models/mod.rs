@@ -19,6 +19,38 @@ mod digital_stretch;
 
 use super::KernelParams;
 
+// The models a chessboard calibration can fit (`calibration::solver`), which calls their `distort` directly
+pub use self::{ opencv_fisheye::OpenCVFisheye, opencv_standard::OpenCVStandard, generic_polynomial::GenericPolynomial };
+
+/// The float types a model's math is written for: `f32` in the render, `f64` in the calibration solver, whose
+/// Jacobian is a finite difference that single precision would drown. A model writes its projection once, generic
+/// over this, and `distort_point` calls it with `f32`.
+///
+/// The functions are std's own, so the render's `f32` math is what it was before it was generic. nalgebra's
+/// `RealField` would route them through `libm` here, because `ahrs` builds nalgebra with `libm-force`: an `atan2`
+/// a few ulp off std's, and a fisheye `distort_point` about twice as slow in a release build
+pub trait Real: Copy + PartialOrd
+    + std::ops::Add<Output = Self> + std::ops::Sub<Output = Self> + std::ops::Mul<Output = Self> + std::ops::Div<Output = Self>
+{
+    fn from_f64(v: f64) -> Self;
+    fn sqrt(self) -> Self;
+    fn atan2(self, x: Self) -> Self;
+}
+macro_rules! impl_real {
+    ($($t:ty),*) => {$(
+        impl Real for $t {
+            #[inline(always)] fn from_f64(v: f64) -> Self { v as $t }
+            #[inline(always)] fn sqrt(self) -> Self { <$t>::sqrt(self) }
+            #[inline(always)] fn atan2(self, x: Self) -> Self { <$t>::atan2(self, x) }
+        }
+    )*};
+}
+impl_real!(f32, f64);
+
+/// A constant in the model's precision
+#[inline(always)]
+pub fn c<T: Real>(v: f64) -> T { T::from_f64(v) }
+
 macro_rules! impl_models {
     ($($name:ident => $class:ty,)*) => {
         #[derive(Clone)]

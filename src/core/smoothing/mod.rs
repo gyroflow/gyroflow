@@ -7,6 +7,7 @@ pub mod plain;
 pub mod fixed;
 pub mod default_algo;
 pub mod focal_length;
+pub mod optimal;
 
 pub use nalgebra::*;
 use super::gyro_source::{ TimeQuat, Quat64 };
@@ -27,8 +28,15 @@ pub trait SmoothingAlgorithm: DynClone {
     fn get_parameter(&self, name: &str) -> f64;
 
     fn get_checksum(&self) -> u64;
+    /// What the result depends on in `compute_params` beyond what `Smoothing::get_state_checksum` already covers
+    fn get_compute_checksum(&self, _compute_params: &ComputeParams) -> u64 { 0 }
 
     fn smooth(&self, quats: &TimeQuat, duration: f64, _compute_params: &ComputeParams) -> TimeQuat;
+    /// `smooth`, for an algorithm that needs `original` too: the camera's own orientation, before the horizon lock and
+    /// the additional rotation, which is what the render corrects (`smoothed⁻¹·original`)
+    fn smooth_with_original(&self, quats: &TimeQuat, _original: &TimeQuat, duration: f64, compute_params: &ComputeParams) -> TimeQuat {
+        self.smooth(quats, duration, compute_params)
+    }
 }
 clone_trait_object!(SmoothingAlgorithm);
 
@@ -38,6 +46,7 @@ impl Default for Algs {
         Self(vec![
             Box::new(self::none::None::default()),
             Box::new(self::default_algo::DefaultAlgo::default()),
+            Box::new(self::optimal::Optimal::default()),
             Box::new(self::plain::Plain::default()),
             Box::new(self::fixed::Fixed::default())
         ])
@@ -109,6 +118,7 @@ impl Smoothing {
         hasher.write_u64(gyro_checksum);
         hasher.write_usize(self.current_id);
         hasher.write_u64(self.algs.0[self.current_id].get_checksum());
+        hasher.write_u64(self.algs.0[self.current_id].get_compute_checksum(compute_params));
         hasher.write_u64(self.horizon_lock.get_checksum());
         hasher.write_usize(compute_params.camera_diagonal_fovs.len());
         for fov in &compute_params.camera_diagonal_fovs { hasher.write_u64(fov.to_bits()); }

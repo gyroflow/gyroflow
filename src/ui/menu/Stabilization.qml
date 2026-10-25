@@ -26,6 +26,7 @@ MenuItem {
         id: sett;
         property alias smoothingMethod: smoothingMethod.currentIndex;
         property alias croppingMode: croppingMode.currentIndex;
+        property alias staticZoomLevel: staticZoomLevel.currentIndex;
         property alias adaptiveZoom: adaptiveZoom.value;
         property alias correctionAmount: correctionAmount.value;
         property alias useGravityVectors: useGravityVectors.checked;
@@ -95,7 +96,10 @@ MenuItem {
                 additionalTranslationZ.value = stab.additional_translation[2];
             }
             if (stab.hasOwnProperty("max_zoom") && +stab.max_zoom > 50) maxZoomSlider.value = +stab.max_zoom;
-            if (stab.hasOwnProperty("max_zoom_terations") && +stab.max_zoom_terations > 0) maxZoomIterations.value = +stab.max_zoom_terations;
+            // The core settles these on import, also for files from before they existed
+            staticZoomLevel.currentIndex = controller.fixed_zoom? 1 : 0;
+            zoomLimitWholeClip.checked = controller.zoom_limit_whole_clip;
+            if (stab.hasOwnProperty("max_zoom_iterations") && +stab.max_zoom_iterations > 0) maxZoomIterations.value = +stab.max_zoom_iterations;
             if (stab.hasOwnProperty("adaptive_zoom_method")) zoomingMethod.currentIndex = +stab.adaptive_zoom_method;
             if (stab.hasOwnProperty("use_gravity_vectors")) {
                 useGravityVectors.checked = !!stab.use_gravity_vectors;
@@ -128,26 +132,13 @@ MenuItem {
                 horizonPitchSlider.value = lockPitchCb.checked? +stab.horizon_lock_pitch : 0;
             }
 
-            const turnThresholdValue  = stab.turn_threshold      !== undefined ? +stab.turn_threshold      : 5.0;
-            const turnSmoothMsValue   = stab.turn_smoothing_ms   !== undefined ? +stab.turn_smoothing_ms   : 500.0;
-            const turnMultiplierValue = stab.turn_multiplier     !== undefined ? +stab.turn_multiplier     : 1.0;
+            turnThresholdSlider.value  = stab.turn_threshold    != null ? +stab.turn_threshold    : 5.0;
+            turnSmoothnessSlider.value = stab.turn_smoothing_ms != null ? +stab.turn_smoothing_ms : 500.0;
+            turnMultiplierSlider.value = stab.turn_multiplier   != null ? +stab.turn_multiplier   : 1.0;
 
-            turnThreshold  = turnThresholdValue;
-            turnSmoothMs   = turnSmoothMsValue;
-            turnMultiplier = turnMultiplierValue;
-
-            // Keep corresponding sliders (if present) in sync with the loaded values
-            if (typeof turnThresholdSlider  !== "undefined" && turnThresholdSlider)  turnThresholdSlider.value  = turnThresholdValue;
-            if (typeof turnSmoothMsSlider   !== "undefined" && turnSmoothMsSlider)   turnSmoothMsSlider.value   = turnSmoothMsValue;
-            if (typeof turnMultiplierSlider !== "undefined" && turnMultiplierSlider) turnMultiplierSlider.value = turnMultiplierValue;
-
-            if (stab.tilt_accel_limit !== undefined && +stab.tilt_accel_limit < Infinity) {
-                tiltAccelLimitCb.checked = true;
-                tiltAccelLimit = +stab.tilt_accel_limit;
-            } else {
-                tiltAccelLimitCb.checked = false;
-                tiltAccelLimit = Infinity;
-            }
+            // A missing or null `tilt_accel_limit` means no limit
+            tiltAccelLimitCb.checked = stab.tilt_accel_limit != null && +stab.tilt_accel_limit < Infinity;
+            if (tiltAccelLimitCb.checked) tiltAccelLimitSlider.value = +stab.tilt_accel_limit;
 
             autoLockCb.checked = !!stab.automatic_lock;
             horizonSlider.enabled = !autoLockCb.checked;
@@ -191,19 +182,13 @@ MenuItem {
         return traverseChildren(smoothingOptions, "param-" + name);
     }
 
-    property real turnThreshold: 5.0  // Roll rate threshold (°/s) for horizon tilt
-    property real turnSmoothMs: 500.0 // EMA smoothing time constant in ms
-    property real turnMultiplier: 1.0 // Multiplier applied to dynamic tilt (1x default)
-    property real tiltAccelLimit: Infinity // Tilt acceleration/deceleration limit (°/s²)
-
-
     function updateHorizonLock(): void {
         const lockAmount = horizonCb.checked? (autoLockCb.checked ? 100.0 : horizonSlider.value) : 0.0;
         const roll = horizonCb.checked? horizonRollSlider.value : 0.0;
         const pitch = horizonCb.checked && lockPitchCb.checked? horizonPitchSlider.value : 0.0;
         const lockPitch = horizonCb.checked && lockPitchCb.checked;
-        const accelLimit = tiltAccelLimitCb.checked ? tiltAccelLimit : Infinity;
-        controller.set_horizon_lock(lockAmount, roll, lockPitch, pitch, autoLockCb.checked, turnThreshold, turnSmoothMs, turnMultiplier, accelLimit);
+        const accelLimit = tiltAccelLimitCb.checked ? tiltAccelLimitSlider.value : Infinity;
+        controller.set_horizon_lock(lockAmount, roll, lockPitch, pitch, autoLockCb.checked, turnThresholdSlider.value, turnSmoothnessSlider.value, turnMultiplierSlider.value, accelLimit);
         controller.set_use_gravity_vectors(useGravityVectors.checked);
         controller.set_horizon_lock_integration_method(integrationMethod.currentIndex);
     }
@@ -218,6 +203,7 @@ MenuItem {
                 maxValues.maxYaw   = max_angles[1];
                 maxValues.maxRoll  = max_angles[2];
                 maxValues.maxZoom  = min_fov > 0.0001? (100 / min_fov) : min_fov;
+                maxValues.manualZoomMissed = controller.get_manual_zoom_missed();
                 const status = controller.get_smoothing_status();
                 // Clear current params
                 for (let i = smoothingStatus.children.length; i > 0; --i) {
@@ -272,6 +258,7 @@ MenuItem {
         QT_TRANSLATE_NOOP("Popup", "Default"),
         QT_TRANSLATE_NOOP("Popup", "Plain 3D");
         QT_TRANSLATE_NOOP("Popup", "Fixed camera");
+        QT_TRANSLATE_NOOP("Popup", "Optimal path");
 
         QT_TRANSLATE_NOOP("Stabilization", "Pitch smoothness");
         QT_TRANSLATE_NOOP("Stabilization", "Yaw smoothness");
@@ -282,6 +269,7 @@ MenuItem {
         QT_TRANSLATE_NOOP("Stabilization", "Max smoothness at high velocity");
         QT_TRANSLATE_NOOP("Stabilization", "Second smoothing pass");
         QT_TRANSLATE_NOOP("Stabilization", "Only within trim range");
+        QT_TRANSLATE_NOOP("Stabilization", "Keep within zoom limit");
         QT_TRANSLATE_NOOP("Stabilization", "Yaw angle correction");
         QT_TRANSLATE_NOOP("Stabilization", "Pitch angle correction");
         QT_TRANSLATE_NOOP("Stabilization", "Roll angle correction");
@@ -296,6 +284,9 @@ MenuItem {
         font.pixelSize: 12 * dpiScale;
         width: parent.width;
         currentIndex: 1;
+        // Default (1) and Plain 3D (3) get their smoothing lowered by the zoom limit's iterations; Optimal path (2) keeps
+        // the frame within the limit itself, with the iterations catching what its crop model can't see
+        readonly property bool followsZoomLimit: currentIndex >= 1 && currentIndex <= 3;
         Component.onCompleted: currentIndexChanged();
         onCurrentIndexChanged: {
             // Clear current params
@@ -311,7 +302,7 @@ MenuItem {
                     // TODO: figure out a better way than constructing a string
                     let str = "";
                     const add = x.custom_qml || "";
-                    const isPercent = smoothingMethod.currentIndex == 1 && (x.keyframe == "SmoothingParamSmoothness" || x.keyframe == "SmoothingParamPitch" || x.keyframe == "SmoothingParamYaw" || x.keyframe == "SmoothingParamRoll");
+                    const isPercent = (smoothingMethod.currentIndex == 1 || smoothingMethod.currentIndex == 2) && (x.keyframe == "SmoothingParamSmoothness" || x.keyframe == "SmoothingParamPitch" || x.keyframe == "SmoothingParamYaw" || x.keyframe == "SmoothingParamRoll");
                     if (isPercent) {
                         x.from      *= 100.0;
                         x.to        *= 100.0;
@@ -437,6 +428,9 @@ MenuItem {
             id: lockPitchCb;
             text: qsTr("Lock pitch angle");
             checked: false;
+            // The gravity vector horizon lock only levels the roll
+            unavailable: controller.has_gravity_vectors && useGravityVectors.checked;
+            tooltip: unavailable? qsTr("Pitch locking is not available when using gravity vectors.") : "";
             onCheckedChanged: Qt.callLater(updateHorizonLock);
         }
 
@@ -445,6 +439,7 @@ MenuItem {
             spacing: 2 * dpiScale;
             text: qsTr("Pitch angle correction");
             visible: lockPitchCb.checked;
+            enabled: !lockPitchCb.unavailable;
             SliderWithField {
                 id: horizonPitchSlider;
                 width: parent.width;
@@ -506,10 +501,7 @@ MenuItem {
                     unit: qsTr("°/s");
                     precision: 1;
                     value: 5.0;
-                    onValueChanged: {
-                        turnThreshold = value;
-                        Qt.callLater(updateHorizonLock);
-                    }
+                    onValueChanged: Qt.callLater(updateHorizonLock);
                 }
             }
 
@@ -527,10 +519,7 @@ MenuItem {
                     unit: qsTr("ms");
                     precision: 0;
                     value: 500.0;
-                    onValueChanged: {
-                        turnSmoothMs = value;
-                        Qt.callLater(updateHorizonLock);
-                    }
+                    onValueChanged: Qt.callLater(updateHorizonLock);
                 }
             }
 
@@ -548,10 +537,7 @@ MenuItem {
                     unit: "x";
                     precision: 2;
                     value: 1.0;
-                    onValueChanged: {
-                        turnMultiplier = value;
-                        Qt.callLater(updateHorizonLock);
-                    }
+                    onValueChanged: Qt.callLater(updateHorizonLock);
                 }
             }
 
@@ -575,10 +561,7 @@ MenuItem {
                         unit: qsTr("°/s²");
                         precision: 1;
                         value: 3.0;
-                        onValueChanged: {
-                            tiltAccelLimit = value;
-                            Qt.callLater(updateHorizonLock);
-                        }
+                        onValueChanged: Qt.callLater(updateHorizonLock);
                     }
                 }
             }
@@ -599,6 +582,7 @@ MenuItem {
         property real maxYaw: 0;
         property real maxRoll: 0;
         property real maxZoom: 0;
+        property real manualZoomMissed: 0; // the manual zoom level the frame doesn't fit in, 0 when it does
         show: true;
         //color: styleBackground;
         color: "transparent";
@@ -638,10 +622,27 @@ MenuItem {
         }
     }
     Label {
-        text: qsTr("Zoom limit");
-        visible: smoothingMethod.currentIndex == 1 || smoothingMethod.currentIndex == 2;
+        text: qsTr("Zoom level");
+        visible: croppingMode.currentIndex == 2;
         position: Label.LeftPosition;
-        tooltip: qsTr("Zoom limit is calculated approximately.\nIf you need more accuracy, increase the number of iterations in \"Advanced\" below.");
+        tooltip: qsTr("Automatic: as much as the video needs, up to the zoom limit.\nManual: exactly the zoom you set, in every video, so you know the framing while shooting. The smoothing is lowered only where the frame wouldn't fit otherwise.");
+        ComboBox {
+            id: staticZoomLevel;
+            model: [QT_TRANSLATE_NOOP("Popup", "Automatic"), QT_TRANSLATE_NOOP("Popup", "Manual")];
+            font.pixelSize: 12 * dpiScale;
+            width: parent.width;
+            currentIndex: 0;
+            Component.onCompleted: currentIndexChanged();
+            onCurrentIndexChanged: controller.fixed_zoom = currentIndex == 1;
+            readonly property bool manual: croppingMode.currentIndex == 2 && currentIndex == 1;
+        }
+    }
+    Label {
+        text: staticZoomLevel.manual? qsTr("Zoom") : qsTr("Zoom limit");
+        visible: smoothingMethod.followsZoomLimit || staticZoomLevel.manual;
+        position: Label.LeftPosition;
+        tooltip: staticZoomLevel.manual? qsTr("The whole video is zoomed in exactly this much, and the smoothing is lowered only where the frame wouldn't fit otherwise.\nIf you need more accuracy, increase the number of iterations in \"Advanced\" below.")
+                                               : qsTr("Zoom limit is calculated approximately.\nIf you need more accuracy, increase the number of iterations in \"Advanced\" below.");
         SliderWithField {
             id: maxZoomSlider;
             value: 130;
@@ -655,6 +656,14 @@ MenuItem {
             keyframe: "MaxZoom";
             onValueChanged: controller.set_max_zoom(maxZoomSlider.value, maxZoomIterations.value);
         }
+    }
+    InfoMessageSmall {
+        show: staticZoomLevel.manual && maxValues.manualZoomMissed > 0;
+        readonly property string target: "<b>" + maxValues.manualZoomMissed.toFixed(0) + "%</b>";
+        readonly property string actual: "<b>" + maxValues.maxZoom.toFixed(1) + "%</b>";
+        text: smoothingMethod.followsZoomLimit
+            ? qsTr("The frame doesn't fit in %1 zoom even with the smoothing lowered, so the video is zoomed in to %2. Increase the zoom limit iterations in \"Advanced\", or the zoom.").arg(target).arg(actual)
+            : qsTr("This smoothing method can't be lowered to fit the frame in %1 zoom, so the video is zoomed in to %2.").arg(target).arg(actual);
     }
     Label {
         text: qsTr("Zooming speed");
@@ -965,7 +974,7 @@ MenuItem {
             }
         }
         Label {
-            visible: smoothingMethod.currentIndex == 1 || smoothingMethod.currentIndex == 2;
+            visible: smoothingMethod.followsZoomLimit;
             text: qsTr("Zoom limit iterations");
             tooltip: qsTr("More iterations = more accurate limit, but also slower to calculate.");
             position: Label.LeftPosition;
@@ -981,6 +990,14 @@ MenuItem {
                 slider.stepSize: 1;
                 onValueChanged: controller.set_max_zoom(maxZoomSlider.value, maxZoomIterations.value);
             }
+        }
+        CheckBox {
+            id: zoomLimitWholeClip;
+            text: qsTr("Zoom limit lowers the smoothing of the whole clip");
+            tooltip: qsTr("How the zoom limit worked with static zoom before: one hard moment lowers the smoothing everywhere.\nProjects saved before this option existed open with it on, so they look the same.");
+            visible: croppingMode.currentIndex == 2 && smoothingMethod.followsZoomLimit;
+            checked: false;
+            onCheckedChanged: controller.zoom_limit_whole_clip = checked;
         }
     }
 }

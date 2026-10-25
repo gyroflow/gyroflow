@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "a94d7ed" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "6d03623" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { version = "0.8", features = ["field_access"] }
 
@@ -28,7 +28,7 @@ rayon = "1.12"
 biquad = "0.6.0"
 fastrand = "2.5"
 lazy_static = "1.5.1"
-parking_lot = "0.12.5"
+parking_lot = "0.13"
 regex = "1.13"
 bincode = { version = "2.0", features = ["serde"] }
 serde = "1.0"
@@ -45,7 +45,7 @@ bitflags = "2.13"
 enum_delegate = "0.2.0"
 simple-easing = "1.1.1"
 half = "2.7"
-lru = "0.18"
+lru = "0.19"
 thiserror = "2.0.21"
 ciborium = "0.2.2"
 dyn-clone = "1.0"
@@ -78,7 +78,7 @@ ocl = { version = "0.19.7", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.4.1"
 exr = "1.74"
-opencv = { version = "0.99", default-features = false, features = [ "calib3d", "features2d", "imgproc", "optflow", "clang-runtime" ], optional = true } #"imgcodecs","objdetect","sfm",
+opencv = { version = "0.101", default-features = false, features = [ "calib3d", "features2d", "imgproc", "optflow", "clang-runtime" ], optional = true } #"imgcodecs","objdetect","sfm",
 median = "0.3"
 
 wgpu = { version = "30", features = ["spirv", "naga-ir"] }

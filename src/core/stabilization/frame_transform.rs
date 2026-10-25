@@ -4,7 +4,7 @@
 use nalgebra::Matrix3;
 use super::{ ComputeParams, KernelParams };
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
-use crate::gyro_source::FileMetadata;
+use crate::gyro_source::{ FileMetadata, Quat64 };
 use crate::keyframes::KeyframeType;
 use crate::util::{ MapClosest, map_coord };
 
@@ -246,6 +246,23 @@ impl FrameTransform {
         (camera_matrix, distortion_coeffs, field_limit, input_horizontal_stretch, input_vertical_stretch, focal_length, per_frame)
     }
 
+    /// The rotation of one kernel matrix row: `quat` takes the output camera to the source camera at that row (gyro
+    /// axes), the video rotation turns it, it's flipped into the image axes (y down - or, for an upside-down framebuffer,
+    /// mirrored the other way) and transposed. The kernel carries rays as directions, not as points of the z=1 plane, so
+    /// the output camera matrix isn't folded in: `undistort_coord` turns the output pixel into a ray before this.
+    /// The flipped matrix is orthonormal (a rotation conjugated by a diagonal ±1 flip), so its inverse is its transpose
+    pub fn kernel_rotation(quat: &Quat64, image_rotation: &Matrix3<f64>, framebuffer_inverted: bool) -> Matrix3<f32> {
+        let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
+        if framebuffer_inverted {
+            r[(0, 2)] *= -1.0; r[(1, 2)] *= -1.0;
+            r[(2, 0)] *= -1.0; r[(2, 1)] *= -1.0;
+        } else {
+            r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
+            r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
+        }
+        nalgebra::convert(r.transpose())
+    }
+
     pub fn at_timestamp(params: &ComputeParams, timestamp_ms: f64, frame: usize) -> Self {
         // ----------- Keyframes -----------
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
@@ -345,16 +362,6 @@ impl FrameTransform {
                      * quat1
                      * gyro.org_quat_at_timestamp(quat_time);
 
-
-            let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
-            if params.framebuffer_inverted {
-                r[(0, 2)] *= -1.0; r[(1, 2)] *= -1.0;
-                r[(2, 0)] *= -1.0; r[(2, 1)] *= -1.0;
-            } else {
-                r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
-                r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
-            }
-
             let (mut sx, mut sy, mut ra, mut ox, mut oy) = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
                 let y_sensor = sensor_row(y, is.crop_area.1 as f64, is.crop_area.3 as f64);
 
@@ -373,18 +380,14 @@ impl FrameTransform {
                 (0.0, 0.0, 0.0, 0.0, 0.0)
             };
 
-            if params.suppress_rotation {
-                r = Matrix3::identity();
+            let i_r = if params.suppress_rotation {
                 if params.frame_readout_time == 0.0 {
                     sx = 0.0; sy = 0.0; ra = 0.0; ox = 0.0; oy = 0.0;
                 }
-            }
-
-            // The kernel carries rays as directions, not as points of the z=1 plane, so the output camera
-            // matrix is no longer folded in here: this is the rotation alone, and `undistort_coord` turns the
-            // output pixel into a ray before it. `r` is orthonormal (a rotation, at most conjugated by a
-            // diagonal ±1 flip above), so its inverse is its transpose
-            let i_r: Matrix3<f32> = nalgebra::convert(r.transpose());
+                Matrix3::identity()
+            } else {
+                Self::kernel_rotation(&quat, &image_rotation, params.framebuffer_inverted)
+            };
             // Lens breathing: the row's magnification of the source image, applied where the lens images the
             // ray (`gyro_source::sony::breathing`). It used to be a zoom of the output plane folded into the
             // matrix, which is the same thing only paraxially - breathing is a change of the source lens's

@@ -31,6 +31,8 @@ MenuItem {
 
     property bool fetched_from_github: false;
     property bool selected_manually: false;
+    // `restoreLensProfile` shows the profile it puts back, but doesn't apply its settings again or close the panel
+    property bool restoring: false;
 
     property bool isSony: false;
 
@@ -59,6 +61,8 @@ MenuItem {
         if (stab.hasOwnProperty("lens_breathing_enabled")) {
             lensBreathing.checked = !!stab.lens_breathing_enabled;
         }
+        // The core settled it on import: a project from before it draws rectilinear, a preset without it leaves it alone
+        outputProjection.setValue(controller.output_projection);
     }
 
     Component.onCompleted: {
@@ -75,6 +79,7 @@ MenuItem {
         QT_TRANSLATE_NOOP("TableList", "Asymmetrical");
         QT_TRANSLATE_NOOP("TableList", "Distortion model");
         QT_TRANSLATE_NOOP("TableList", "Digital lens");
+        QT_TRANSLATE_NOOP("TableList", "Output projection");
     }
     Timer {
         id: profilesUpdateTimer;
@@ -91,6 +96,17 @@ MenuItem {
                 // no lens metadata delay. A project file loaded afterwards overrides them through loadGyroflow.
                 lensBreathing.checked = controller.lens_breathing_enabled;
                 lensDelay.value = controller.lens_metadata_delay_frames;
+                outputProjection.setValue(controller.output_projection);
+            }
+            // A generated lens stays for the next file like any profile, made again for its size. Motion data with the
+            // focal length of every frame in its lens metadata gets none: with no profile, that's the lens already
+            if (focalLengthOnly.checked) {
+                if (controller.has_per_frame_focal_length) {
+                    root.restoreLensProfile();
+                } else if (is_main_video) {
+                    focalLengthOnly.inAdvanced = false; // The profile it was ticked over was the previous file's
+                    controller.load_focal_length_profile(focalLength.value);
+                }
             }
         }
         function onLens_metadata_delay_changed(): void {
@@ -138,12 +154,19 @@ MenuItem {
                     if (obj.asymmetrical) lensInfo["Asymmetrical"] = qsTr("Yes");
                     if (obj.distortion_model && obj.distortion_model != "opencv_fisheye") lensInfo["Distortion model"] = obj.distortion_model;
                     if (obj.digital_lens) lensInfo["Digital lens"] = obj.digital_lens;
+                    lensInfo["Output projection"] = outputProjection.text;
+
+                    const focalLengthOnlyMm = root.focalLengthOnlyOf(obj);
+                    focalLengthOnly.sync(focalLengthOnlyMm, !!obj.official);
+                    if (focalLengthOnlyMm > 0) { // The checkbox tells the rest
+                        lensInfo = { "Dimensions": lensInfo["Dimensions"], "Output projection": lensInfo["Output projection"] };
+                    }
 
                     info.model = lensInfo;
 
                     root.cropFactor = +obj.crop_factor;
 
-                    if (!root.selected_manually &&
+                    if (!root.selected_manually && !root.restoring &&
                            (obj.calibrated_by == "Eddy" ||
                             obj.calibrated_by == "GoPro" ||
                             obj.calibrated_by == "DJI" ||
@@ -162,19 +185,21 @@ MenuItem {
                     root.profileOriginalJson = json_str;
                     root.profileChecksum = checksum;
 
-                    if (obj.output_dimension && obj.output_dimension.w > 0 && (window.exportSettings.outWidth != obj.output_dimension.w || window.exportSettings.outHeight != obj.output_dimension.h)) {
-                        Qt.callLater(window.exportSettings.lensProfileLoaded, obj.output_dimension.w, obj.output_dimension.h);
-                    }
-                    if (+obj.frame_readout_time && Math.abs(+obj.frame_readout_time) > 0) {
-                        window.stab.setFrameReadoutTime(obj.frame_readout_time, obj.frame_readout_direction);
-                    }
-                    if (+obj.gyro_lpf && Math.abs(+obj.gyro_lpf) > 0) {
-                        window.motionData.setGyroLpf(obj.gyro_lpf);
-                    }
-                    if (obj.sync_settings && Object.keys(obj.sync_settings).length > 0) {
-                        window.sync.loadGyroflow({
-                            synchronization: obj.sync_settings
-                        });
+                    if (!root.restoring) {
+                        if (obj.output_dimension && obj.output_dimension.w > 0 && (window.exportSettings.outWidth != obj.output_dimension.w || window.exportSettings.outHeight != obj.output_dimension.h)) {
+                            Qt.callLater(window.exportSettings.lensProfileLoaded, obj.output_dimension.w, obj.output_dimension.h);
+                        }
+                        if (+obj.frame_readout_time && Math.abs(+obj.frame_readout_time) > 0) {
+                            window.stab.setFrameReadoutTime(obj.frame_readout_time, obj.frame_readout_direction);
+                        }
+                        if (+obj.gyro_lpf && Math.abs(+obj.gyro_lpf) > 0) {
+                            window.motionData.setGyroLpf(obj.gyro_lpf);
+                        }
+                        if (obj.sync_settings && Object.keys(obj.sync_settings).length > 0) {
+                            window.sync.loadGyroflow({
+                                synchronization: obj.sync_settings
+                            });
+                        }
                     }
 
                     root.input_horizontal_stretch = obj.input_horizontal_stretch > 0.01? obj.input_horizontal_stretch : 1.0;
@@ -200,13 +225,42 @@ MenuItem {
                         console.log(-((mtrx[1][2] / (obj.calib_dimension.h / 2.0)) - 1.0));
                     }*/
                     // If focal length in pixels is large, it's more likely that Almeida pose estimator will yield better results
-                    if (mtrx[0][0] > 10000) {
+                    if (mtrx[0][0] > 10000 && !root.restoring) {
                         window.sync.poseMethod.currentIndex = 1; // Almeida
                     }
                 }
                 Qt.callLater(controller.recompute_threaded);
+            } else { // `controller.clear_lens_profile`, or a project saved with none
+                root.lensCleared();
             }
         }
+    }
+
+    // The 35 mm equivalent focal length of a profile without any distortion (`controller.load_focal_length_profile`
+    // makes them), or 0 for a calibrated one
+    function focalLengthOnlyOf(obj: var): real {
+        const coeffs = obj.fisheye_params?.distortion_coeffs || [];
+        const mtrx   = obj.fisheye_params?.camera_matrix || [];
+        if (obj.distortion_model != "opencv_standard" || coeffs.some(x => x != 0) || mtrx.length != 3 || obj.interpolations) return 0;
+        const w = obj.calib_dimension.w, h = obj.calib_dimension.h;
+        return mtrx[0][0] * Math.sqrt(36*36 + 24*24) / Math.max(1, Math.sqrt(w*w + h*h));
+    }
+    // Unticked: the unofficial profile it was ticked over comes back (`controller.restore_lens_profile`), or no profile
+    function restoreLensProfile(): void {
+        root.restoring = true;
+        controller.restore_lens_profile();
+        root.restoring = false;
+        if (!controller.lens_loaded) root.lensCleared();
+    }
+    function lensCleared(): void {
+        focalLengthOnly.syncNone();
+        info.model = ({});
+        officialInfo.show = false;
+        root.calibWidth = 0;
+        root.calibHeight = 0;
+        root.cropFactor = 0;
+        root.input_horizontal_stretch = 1;
+        root.input_vertical_stretch = 1;
     }
 
     property int currentVideoAspectRatio: Math.round((root.videoWidth / Math.max(1, root.videoHeight)) * 1000);
@@ -275,6 +329,81 @@ MenuItem {
         }
     }
 
+    // The checkbox below is here for a file with no profile, and in Advanced (`focalLengthOnlyAdvanced`) over an unofficial one
+    Item {
+        id: focalLengthOnlyMain;
+        width: parent.width;
+        height: childrenRect.height;
+        visible: focalLengthOnly.shown && !focalLengthOnly.inAdvanced;
+    }
+    CheckBoxWithContent {
+        id: focalLengthOnly;
+        parent: focalLengthOnly.inAdvanced? focalLengthOnlyAdvanced : focalLengthOnlyMain;
+        text: qsTr("No distortion, focal length only");
+        tooltip: qsTr("Instead of a lens profile, use a lens without any distortion, of this focal length.") + "\n" +
+                 qsTr("Use only if your video is already undistorted (via a rectilinear lens or in-camera processing).");
+        // Offered with no profile, over an unofficial one (in Advanced) and over its own, which stays where it was ticked.
+        // Set by `sync` rather than bound to the lens: just unticked, it's still over its own profile until the one it
+        // puts back is loaded, and mustn't hide or move under the click
+        property bool offered: true;
+        property bool inAdvanced: false;
+        // With no profile, the focal length the lens metadata has for every frame is used, with no distortion. Where it
+        // has only millimetres with no sensor size to turn them into pixels, a generated profile would scale them against
+        // its 35 mm equivalent (`FrameTransform::get_lens_data_at_lens_timestamp`), wrong on any smaller sensor
+        readonly property bool shown: window.videoArea.vid.loaded && !controller.loading_gyro_in_progress && !controller.has_per_frame_focal_length && offered;
+        property bool syncing: false;
+        cb.onCheckedChanged: {
+            if (focalLengthOnly.syncing) return;
+            if (focalLengthOnly.checked) controller.load_focal_length_profile(focalLength.value);
+            else root.restoreLensProfile();
+        }
+        // Shows the lens that's loaded (`focalLengthOnlyOf`), without loading anything: a generated one of this focal
+        // length, or for 0 a calibrated one, which has it in Advanced when it's unofficial and nowhere when it's official
+        function sync(focal_length: real, official: bool): void {
+            focalLengthOnly.syncing = true;
+            if (focal_length > 0) {
+                // Ticked by a project or for the file before, not over a profile here: unticking leaves none
+                if (!focalLengthOnly.checked) focalLengthOnly.inAdvanced = false;
+                focalLengthOnly.offered = true;
+                // The value comes back from the profile while it's being typed: only rounding apart, it's left alone
+                if (Math.abs(focalLength.value - focal_length) > 1e-6) focalLength.value = focal_length;
+            } else {
+                focalLengthOnly.offered = !official;
+                focalLengthOnly.inAdvanced = true;
+            }
+            focalLengthOnly.checked = focal_length > 0;
+            focalLengthOnly.syncing = false;
+        }
+        function syncNone(): void {
+            focalLengthOnly.syncing = true;
+            focalLengthOnly.offered = true;
+            focalLengthOnly.inAdvanced = false;
+            focalLengthOnly.checked = false;
+            focalLengthOnly.syncing = false;
+        }
+
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Focal length (35 mm equiv.)");
+            tooltip: qsTr("The focal length with the same field of view on a full frame (36x24 mm) sensor: the focal length of the lens multiplied by the crop factor of the sensor.");
+            NumberField {
+                id: focalLength;
+                width: parent.width;
+                height: 25 * dpiScale;
+                unit: qsTr("mm");
+                precision: 1;
+                value: 24;
+                from: 0.1;
+                onValueChanged: if (focalLengthOnly.checked && !focalLengthOnly.syncing) focalLengthTimer.restart();
+            }
+        }
+        Timer {
+            id: focalLengthTimer;
+            interval: 200;
+            onTriggered: if (focalLengthOnly.checked) controller.load_focal_length_profile(focalLength.value);
+        }
+    }
+
     InfoMessageSmall {
         id: officialInfo;
         type: InfoMessage.Warning;
@@ -322,6 +451,38 @@ MenuItem {
         id: info;
         copyable: true;
         model: ({ })
+        editableFields: ({
+            "Output projection": {
+                "type": "choice",
+                "options": outputProjection.options,
+                "tooltips": outputProjection.tooltips,
+                "value": function() { return outputProjection.currentIndex; },
+                "onChange": function(index) { outputProjection.currentIndex = index; }
+            }
+        });
+    }
+
+    QtObject {
+        id: outputProjection;
+        // Index -> `OutputProjection` as i32, -1 is "Automatic" (`projection::AUTOMATIC`)
+        property var values: [0, 1, 2, 3, 4, -1];
+        property var options: [QT_TRANSLATE_NOOP("Popup", "Rectilinear"), QT_TRANSLATE_NOOP("Popup", "Stereographic"), QT_TRANSLATE_NOOP("Popup", "Equidistant"), QT_TRANSLATE_NOOP("Popup", "Equisolid angle"), QT_TRANSLATE_NOOP("Popup", "Orthographic"), QT_TRANSLATE_NOOP("Popup", "Automatic")];
+        property var tooltips: ([
+            qsTr("Straight lines stay straight. A lens that sees more than 180° can't be shown whole, so its edges are cropped."),
+            qsTr("Fisheye that keeps shapes natural but bends straight lines. Shows the whole picture of a lens wider than 180°."),
+            qsTr("Fisheye where the distance from the center is proportional to the angle. Shows the whole picture of a lens wider than 180°."),
+            qsTr("Fisheye that keeps areas in proportion. Shows the whole picture of a lens wider than 180°."),
+            qsTr("Fisheye that compresses the edges strongly. Shows at most 180°."),
+            qsTr("Rectilinear, or stereographic when the lens sees more than 180°.")
+        ]);
+        property int currentIndex: 0;
+        property string text: qsTranslate("Popup", options[currentIndex]);
+        function setValue(v: int): void {
+            const i = values.indexOf(v);
+            currentIndex = i >= 0? i : 0;
+        }
+        onCurrentIndexChanged: controller.output_projection = values[currentIndex];
+        onTextChanged: if (info.model.hasOwnProperty("Output projection")) info.updateEntry("Output projection", text);
     }
 
     CheckBox {
@@ -337,6 +498,12 @@ MenuItem {
         btn.text: qsTr("Advanced");
         visible: Object.keys(info.model).length > 0
 
+        Item {
+            id: focalLengthOnlyAdvanced;
+            width: parent.width;
+            height: childrenRect.height;
+            visible: focalLengthOnly.shown && focalLengthOnly.inAdvanced;
+        }
         CheckBox {
             id: isUnderwater;
             text: qsTr("Lens is under water");
@@ -477,34 +644,42 @@ MenuItem {
                 }
             }
         }
-        LinkButton {
+        Row {
             anchors.horizontalCenter: parent.horizontalCenter;
-            text: qsTr("Export STMap");
-            OutputPathField { id: opf; visible: false; }
-            enabled: window.videoArea.vid.loaded;
-            onClicked: {
-                opf.selectFolder("", function(folder_url) {
-                    if (controller.has_per_frame_lens_data()) {
-                        messageBox(Modal.Question, qsTr("This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?"), [
-                            { text: qsTr("Single frame"), accent: true, clicked: () => { controller.export_stmap(folder_url, false); } },
-                            { text: qsTr("STMap sequence"), clicked: () => { controller.export_stmap(folder_url, true); } },
-                        ]);
-                    } else {
-                        controller.export_stmap(folder_url, false);
-                    }
-                });
-            }
-
-            Connections {
-                target: controller;
-                function onStmap_progress(progress: real, ready: int, total: int): void {
-                    window.videoArea.videoLoader.active = progress < 1;
-                    window.videoArea.videoLoader.currentFrame = ready;
-                    window.videoArea.videoLoader.totalFrames = total;
-                    window.videoArea.videoLoader.text = progress < 1? qsTr("Exporting %1...") : "";
-                    window.videoArea.videoLoader.progress = progress < 1? progress : -1;
-                    window.videoArea.videoLoader.cancelable = true;
+            spacing: 5 * dpiScale;
+            LinkButton {
+                text: qsTr("Export STMap");
+                OutputPathField { id: opf; visible: false; }
+                enabled: window.videoArea.vid.loaded;
+                onClicked: {
+                    opf.selectFolder("", function(folder_url) {
+                        if (controller.has_per_frame_lens_data()) {
+                            messageBox(Modal.Question, qsTr("This file contains per-frame lens metadata. Do you want to export an STMap sequence or a single frame?"), [
+                                { text: qsTr("Single frame"), accent: true, clicked: () => { controller.export_stmap(folder_url, false); } },
+                                { text: qsTr("STMap sequence"), clicked: () => { controller.export_stmap(folder_url, true); } },
+                            ]);
+                        } else {
+                            controller.export_stmap(folder_url, false);
+                        }
+                    });
                 }
+
+                Connections {
+                    target: controller;
+                    function onStmap_progress(progress: real, ready: int, total: int): void {
+                        window.videoArea.videoLoader.active = progress < 1;
+                        window.videoArea.videoLoader.currentFrame = ready;
+                        window.videoArea.videoLoader.totalFrames = total;
+                        window.videoArea.videoLoader.text = progress < 1? qsTr("Exporting %1...") : "";
+                        window.videoArea.videoLoader.progress = progress < 1? progress : -1;
+                        window.videoArea.videoLoader.cancelable = true;
+                    }
+                }
+            }
+            LinkButton {
+                text: qsTr("Clear");
+                visible: controller.lens_loaded;
+                onClicked: controller.clear_lens_profile();
             }
         }
     }

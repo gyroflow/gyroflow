@@ -55,6 +55,9 @@ pub struct Controller {
     load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, sample_index: i32, project_version: u32)),
     load_lens_profile: qt_method!(fn(&mut self, url_or_id: QString)),
     reset_lens_profile: qt_method!(fn(&mut self)),
+    load_focal_length_profile: qt_method!(fn(&mut self, focal_length_35mm: f64)),
+    restore_lens_profile: qt_method!(fn(&mut self)),
+    clear_lens_profile: qt_method!(fn(&mut self)),
     get_preset_contents: qt_method!(fn(&mut self, url_or_id: QString) -> QString),
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool) -> bool),
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
@@ -143,7 +146,6 @@ pub struct Controller {
     stab_enabled: qt_property!(bool; WRITE set_stab_enabled),
     show_detected_features: qt_property!(bool; WRITE set_show_detected_features),
     show_optical_flow: qt_property!(bool; WRITE set_show_optical_flow),
-    show_tracked_points: qt_property!(bool; WRITE set_show_tracked_points),
     fov: qt_property!(f64; WRITE set_fov),
     fov_overview: qt_property!(bool; WRITE set_fov_overview),
     show_safe_area: qt_property!(bool; WRITE set_show_safe_area),
@@ -151,6 +153,8 @@ pub struct Controller {
     frame_readout_direction: qt_property!(i32; WRITE set_frame_readout_direction),
 
     adaptive_zoom: qt_property!(f64; WRITE set_adaptive_zoom),
+    fixed_zoom: qt_property!(bool; READ get_fixed_zoom WRITE set_fixed_zoom),
+    zoom_limit_whole_clip: qt_property!(bool; READ get_zoom_limit_whole_clip WRITE set_zoom_limit_whole_clip),
     zooming_center_x: qt_property!(f64; WRITE set_zooming_center_x),
     zooming_center_y: qt_property!(f64; WRITE set_zooming_center_y),
     zooming_method: qt_property!(i32; WRITE set_zooming_method),
@@ -170,6 +174,7 @@ pub struct Controller {
     additional_translation_z: qt_property!(f64; WRITE set_additional_translation_z),
 
     lens_correction_amount: qt_property!(f64; WRITE set_lens_correction_amount),
+    output_projection: qt_property!(i32; READ get_output_projection WRITE set_output_projection),
     frame_offset: qt_property!(i32; WRITE set_frame_offset),
     light_refraction_coefficient: qt_property!(f64; WRITE set_light_refraction_coefficient),
     set_video_speed: qt_method!(fn(&self, v: f64, s: bool, z: bool, zl: bool)),
@@ -216,6 +221,10 @@ pub struct Controller {
     calib_in_progress: qt_property!(bool; NOTIFY calib_in_progress_changed),
     calib_in_progress_changed: qt_signal!(),
     calib_progress: qt_signal!(progress: f64, rms: f64, ready: usize, total: usize, good: usize, sharpness: f64),
+    /// `calibration::CalibrationMethod` and `CalibrationModel` as `i32`, which `init_calibrator` puts into the calibrator.
+    /// Every file gets a new controller, so QML sets them again for each one (`applyCalibrationChoice`)
+    calibration_method: qt_property!(i32; WRITE set_calibration_method),
+    calibration_model: qt_property!(i32; WRITE set_calibration_model),
 
     loading_gyro_in_progress: qt_property!(bool; NOTIFY loading_gyro_in_progress_changed),
     loading_gyro_in_progress_changed: qt_signal!(),
@@ -231,6 +240,7 @@ pub struct Controller {
     mesh_at_frame: qt_method!(fn(&self, frame: usize) -> QVariantList),
     get_scaling_ratio: qt_method!(fn(&self) -> f64),
     get_min_fov: qt_method!(fn(&self) -> f64),
+    get_manual_zoom_missed: qt_method!(fn(&self) -> f64),
 
     init_calibrator: qt_method!(fn(&mut self)),
 
@@ -344,6 +354,9 @@ pub struct Controller {
     /// `remeasure_optical_correction`s running
     optical_remeasures: usize,
 
+    /// The unofficial profile `load_focal_length_profile` replaced, for `restore_lens_profile`
+    replaced_lens_profile: Option<core::lens_profile::LensProfile>,
+
     pub stabilizer: Arc<StabilizationManager>,
 }
 
@@ -358,6 +371,8 @@ impl Controller {
 
     fn load_video(&mut self, url: QUrl, player: QJSValue) {
         self.stabilizer.clear();
+        // The lens stays for the next file, but the profile a generated one replaced was the previous file's
+        self.replaced_lens_profile = None;
         let url = util::qurl_to_encoded(url.clone());
         let filename = filesystem::get_filename(&url);
 
@@ -647,7 +662,7 @@ impl Controller {
                     let mut arg = e;
                     arg.push_str("\n\n");
                     arg.push_str(&rendering::get_log());
-                    this.error(QString::from("An error occured: %1"), QString::from(arg), QString::default());
+                    this.error(QString::from("An error occurred: %1"), QString::from(arg), QString::default());
                 }
             }
             this.optical_correction_changed();
@@ -993,6 +1008,7 @@ impl Controller {
         }
     }
     fn load_lens_profile(&mut self, url_or_id: QString) {
+        self.replaced_lens_profile = None;
         let (json, filepath, checksum) = {
             if let Err(e) = self.stabilizer.load_lens_profile(&url_or_id.to_string()) {
                 self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
@@ -1024,6 +1040,46 @@ impl Controller {
         }
         self.lens_loaded = false;
         self.lens_changed();
+        self.request_recompute();
+    }
+    /// Replaces the lens with a distortion-free one of this 35 mm equivalent focal length (`LensProfile::from_focal_length`),
+    /// for a file with no profile or an unofficial one. It's the lens of the project then, saved in it like any profile
+    fn load_focal_length_profile(&mut self, focal_length_35mm: f64) {
+        let size = self.stabilizer.params.read().size;
+        let Some(profile) = core::lens_profile::LensProfile::from_focal_length(size.0, size.1, focal_length_35mm) else { return; };
+        let json = profile.get_json().unwrap_or_default();
+        let replaced = std::mem::replace(&mut *self.stabilizer.lens.write(), profile);
+        // An unofficial profile comes back with `restore_lens_profile`. A generated one is official, so a new focal
+        // length keeps the profile the first one replaced, and one kept from the previous file is nothing to go back to
+        if self.lens_loaded && !replaced.official {
+            self.replaced_lens_profile = Some(replaced);
+        }
+        self.lens_loaded = true;
+        self.lens_changed();
+        self.lens_profile_loaded(QString::from(json), QString::default(), QString::default());
+        self.request_recompute();
+    }
+    /// Puts back the unofficial profile `load_focal_length_profile` replaced, or no profile when it replaced none
+    fn restore_lens_profile(&mut self) {
+        let Some(lens) = self.replaced_lens_profile.take() else {
+            self.reset_lens_profile();
+            return;
+        };
+        let (json, filepath, checksum) = (lens.get_json().unwrap_or_default(), lens.path_to_file.clone(), lens.checksum.clone().unwrap_or_default());
+        *self.stabilizer.lens.write() = lens;
+        self.lens_loaded = true;
+        self.lens_changed();
+        self.lens_profile_loaded(QString::from(json), QString::from(filepath), QString::from(checksum));
+        self.request_recompute();
+    }
+    /// Unloads the profile with everything it brought, stretch and digital lens too (`reset_lens_profile` keeps those for
+    /// the calibrator), so it doesn't stay for the next file either. An empty `lens_profile_loaded` tells the UI there's none
+    fn clear_lens_profile(&mut self) {
+        self.replaced_lens_profile = None;
+        *self.stabilizer.lens.write() = Default::default();
+        self.lens_loaded = false;
+        self.lens_changed();
+        self.lens_profile_loaded(QString::default(), QString::default(), QString::default());
         self.request_recompute();
     }
     fn load_default_preset(&mut self) {
@@ -1582,9 +1638,14 @@ impl Controller {
         match result {
             Ok(thin_obj) => {
                 if thin_obj.as_object().unwrap().contains_key("calibration_data") {
-                    self.lens_loaded = true;
+                    self.replaced_lens_profile = None;
+                    // A project saved with no profile (never loaded, or cleared) has an empty one
+                    let lens_json = {
+                        let lens = self.stabilizer.lens.read();
+                        self.lens_loaded = !lens.fisheye_params.camera_matrix.is_empty();
+                        if self.lens_loaded { lens.get_json().unwrap_or_default() } else { String::new() }
+                    };
                     self.lens_changed();
-                    let lens_json = self.stabilizer.lens.read().get_json().unwrap_or_default();
                     self.lens_profile_loaded(QString::from(lens_json), QString::default(), QString::default());
                 }
                 self.update_offset_model();
@@ -1612,7 +1673,6 @@ impl Controller {
     wrap_simple_method!(set_stab_enabled,           v: bool);
     wrap_simple_method!(set_show_detected_features, v: bool);
     wrap_simple_method!(set_show_optical_flow,      v: bool);
-    wrap_simple_method!(set_show_tracked_points,    v: bool);
     wrap_simple_method!(set_digital_lens_name,      v: String; recompute);
     wrap_simple_method!(set_digital_lens_param,     i: usize, v: f64; recompute);
     wrap_simple_method!(set_fov_overview,       v: bool; recompute);
@@ -1622,6 +1682,8 @@ impl Controller {
     wrap_simple_method!(set_frame_readout_direction, v: i32; recompute);
     wrap_simple_method!(set_adaptive_zoom,      v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_max_zoom,           v: f64, i: usize; recompute; zooming_data_changed);
+    wrap_simple_method!(set_fixed_zoom,         v: bool; recompute; zooming_data_changed);
+    wrap_simple_method!(set_zoom_limit_whole_clip, v: bool; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_center_x,   v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_zooming_center_y,   v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_additional_rotation_x,v: f64; recompute; zooming_data_changed);
@@ -1634,6 +1696,7 @@ impl Controller {
     wrap_simple_method!(set_of_method,          v: u32; recompute; chart_data_changed);
 
     wrap_simple_method!(set_lens_correction_amount,    v: f64; recompute; zooming_data_changed);
+    wrap_simple_method!(set_output_projection,         v: i32; recompute; zooming_data_changed);
     wrap_simple_method!(set_frame_offset,              v: i32; recompute);
     wrap_simple_method!(set_light_refraction_coefficient, v: f64; recompute; zooming_data_changed);
     wrap_simple_method!(set_input_horizontal_stretch,  v: f64; recompute);
@@ -1702,7 +1765,7 @@ impl Controller {
                     this.chart_data_changed();
                 },
                 Ok(false) => { },
-                Err(e) => this.error(QString::from("An error occured: %1"), QString::from(e), QString::default()),
+                Err(e) => this.error(QString::from("An error occurred: %1"), QString::from(e), QString::default()),
             }
             this.optical_correction_changed();
         });
@@ -1720,9 +1783,10 @@ impl Controller {
         QString::from(serde_json::to_string(&flat).unwrap_or_default())
     }
     /// Looks for the tracks with a point within a box (relative to the frame, the stabilized one with `stabilized`) in
-    /// the frame at `timestamp_us` (the file's own time), or in any frame: off the UI thread, every frame of a long clip
-    /// takes seconds. Returns which search it is, and `optical_tracks_found` brings what it found (a JSON array of
-    /// their ids), unless another search or `cancel_optical_track_search` overtook it
+    /// the frame at `timestamp_us` (the file's own time), or within the part of the camera frame the box covers there
+    /// in any frame: off the UI thread, every frame of a long clip takes seconds. Returns which search it is, and
+    /// `optical_tracks_found` brings what it found (a JSON array of their ids), unless another search or
+    /// `cancel_optical_track_search` overtook it
     fn find_optical_tracks_in_rect(&self, timestamp_us: f64, x0: f64, y0: f64, x1: f64, y1: f64, all_frames: bool, stabilized: bool) -> u32 {
         let rect = [x0.min(x1) as f32, y0.min(y1) as f32, x0.max(x1) as f32, y0.max(y1) as f32];
         let search = self.optical_track_search.fetch_add(1, SeqCst).wrapping_add(1);
@@ -1782,7 +1846,7 @@ impl Controller {
                     this.chart_data_changed();
                 },
                 Ok(false) => { },
-                Err(e) => this.error(QString::from("An error occured: %1"), QString::from(e), QString::default()),
+                Err(e) => this.error(QString::from("An error occurred: %1"), QString::from(e), QString::default()),
             }
             this.optical_tracks_changed();
             this.optical_correction_changed();
@@ -1797,6 +1861,9 @@ impl Controller {
     fn get_scaled_fps        (&self) -> f64 { self.stabilizer.params.read().get_scaled_fps() }
     fn get_scaling_ratio     (&self) -> f64 { self.stabilizer.get_scaling_ratio() }
     fn get_min_fov           (&self) -> f64 { self.stabilizer.get_min_fov() }
+    fn get_manual_zoom_missed(&self) -> f64 { self.stabilizer.manual_zoom_missed().unwrap_or(0.0) }
+    fn get_fixed_zoom        (&self) -> bool { self.stabilizer.params.read().fixed_zoom }
+    fn get_zoom_limit_whole_clip(&self) -> bool { self.stabilizer.params.read().zoom_limit_whole_clip }
     fn set_video_created_at  (&self, timestamp: u64) { self.stabilizer.params.write().video_created_at = if timestamp > 0 { Some(timestamp) } else { None }; }
 
     fn set_trim_ranges(&self, ranges: QString) {
@@ -1927,8 +1994,12 @@ impl Controller {
         #[cfg(feature = "opencv")]
         {
             self.stabilizer.params.write().is_calibrator = true;
-            *self.stabilizer.lens_calibrator.write() = Some(LensCalibrator::new());
-            self.stabilizer.set_smoothing_method(2); // Plain 3D
+            let mut cal = LensCalibrator::new();
+            cal.method = self.calibration_method.into();
+            cal.model = self.calibration_model.into();
+            *self.stabilizer.lens_calibrator.write() = Some(cal);
+            let plain_3d = self.stabilizer.get_smoothing_algs().iter().position(|x| x == "Plain 3D").unwrap_or(3);
+            self.stabilizer.set_smoothing_method(plain_3d);
             self.stabilizer.set_smoothing_param("time_constant", 2.0);
             self.stabilizer.set_max_zoom(0.0, 0);
             self.stabilizer.set_adaptive_zoom(0.0);
@@ -2078,28 +2149,17 @@ impl Controller {
                         err(("An error occurred: %1".to_string(), error.to_string()));
                     }
                 }
-                // Don't lock the UI trying to draw chessboards while we calibrate
-                stab.params.write().is_calibrator = false;
-
                 while processed.load(SeqCst) < total_read.load(SeqCst) {
                     std::thread::sleep(std::time::Duration::from_millis(500));
                 }
 
-                let mut lock = cal.write();
-                let cal = lock.as_mut().unwrap();
-                if let Err(e) = cal.calibrate(is_forced) {
-                    err(("An error occurred: %1".to_string(), format!("{:?}", e)));
-                } else {
-                    if cal.rms < 100.0 {
-                        stab.lens.write().set_from_calibrator(cal);
-                    }
-                    ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
+                match LensCalibrator::calibrate_shared(&cal, is_forced, false) {
+                    Some(Ok(fit)) => Self::show_calibration(&stab, &fit),
+                    Some(Err(e)) => err(("An error occurred: %1".to_string(), format!("{:?}", e))),
+                    None => { }
                 }
-
-                let good = cal.image_points.read().len();
-                progress((total, total, good, cal.rms, *cal.sum_sharpness.read() / good.max(1) as f64));
-
-                stab.params.write().is_calibrator = true;
+                let (rms, good, sharpness) = Self::calibration_summary(&stab);
+                progress((total, total, good, rms, sharpness));
             });
         }
     }
@@ -2124,47 +2184,109 @@ impl Controller {
     }
 
     fn add_calibration_point(&mut self, timestamp_us: i64, no_marker: bool) {
+        // One calibration at a time: the end of this one would tell the UI the running one is done
+        if self.calib_in_progress { return; }
         self.start_autocalibrate(0, 1, 1, 1000.0, timestamp_us as f64 / 1000.0, no_marker);
     }
     fn remove_calibration_point(&mut self, timestamp_us: i64) {
         #[cfg(feature = "opencv")]
         {
-            let cal = self.stabilizer.lens_calibrator.clone();
-            let mut rms = 0.0;
+            if self.calib_in_progress { return; }
             {
-                let mut lock = cal.write();
-                let cal = lock.as_mut().unwrap();
-                let mut frame_to_remove = None;
-                for x in &cal.used_points {
-                    if x.1.timestamp_us == timestamp_us {
-                        frame_to_remove = Some(*x.0);
-                        break;
-                    }
-                }
-                if let Some(f) = frame_to_remove {
+                let mut lock = self.stabilizer.lens_calibrator.write();
+                let Some(cal) = lock.as_mut() else { return; };
+                if let Some(f) = cal.used_points.iter().find(|x| x.1.timestamp_us == timestamp_us).map(|x| *x.0) {
                     cal.forced_frames.remove(&f);
                     cal.used_points.remove(&f);
                 }
-                if cal.calibrate(true).is_ok() {
-                    rms = cal.rms;
-                    self.stabilizer.lens.write().set_from_calibrator(cal);
-                    ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
-                }
             }
-            self.update_calib_model();
-            if rms > 0.0 {
-                self.calib_progress(1.0, rms, 1, 1, 1, 0.0);
+            self.refit_calibration(true, false);
+        }
+    }
+
+    fn set_calibration_method(&mut self, v: i32) {
+        self.calibration_method = v;
+        self.apply_calibration_choice();
+    }
+    fn set_calibration_model(&mut self, v: i32) {
+        self.calibration_model = v;
+        self.apply_calibration_choice();
+    }
+    /// Puts the method and the model chosen into the calibrator
+    fn apply_calibration_choice(&mut self) {
+        #[cfg(feature = "opencv")]
+        {
+            let method = core::calibration::CalibrationMethod::from(self.calibration_method);
+            let model = core::calibration::CalibrationModel::from(self.calibration_model);
+            let refit = match self.stabilizer.lens_calibrator.write().as_mut() {
+                Some(cal) => {
+                    let changed = cal.method != method || cal.model != model;
+                    cal.method = method;
+                    cal.model = model;
+                    changed && !cal.image_points.read().is_empty()
+                }
+                None => false
+            };
+            // The boards are already found: fit them again with the new choice, without reading the video again.
+            // A calibration still running picks it up when it gets to the fit (the panel is disabled until then)
+            if refit && !self.calib_in_progress {
+                self.refit_calibration(false, true);
             }
         }
     }
 
-    /// A profile generated directly (eg. from the focal length) already carries its camera matrix,
-    /// only the ones coming from the chessboard calibration need to be filled in.
-    fn fill_profile_from_calibrator(&self, profile: &mut core::lens_profile::LensProfile) {
-        if profile.fisheye_params.camera_matrix.len() == 3 && profile.calib_dimension.w > 0 && profile.calib_dimension.h > 0 {
-            profile.finalize();
-            return;
+    /// Fits the lens again on the boards already found, the way the end of `start_autocalibrate` does: all of them
+    /// after the method or the model changed, where a failed fit clears the one before (`clear_on_failure`) rather
+    /// than leaving it under the new choice, or the ones in use after one was removed
+    #[cfg(feature = "opencv")]
+    fn refit_calibration(&mut self, only_used: bool, clear_on_failure: bool) {
+        self.calib_in_progress = true;
+        self.calib_in_progress_changed();
+
+        let done = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (rms, good, sharpness, cleared): (f64, usize, f64, bool)| {
+            // No fit, so no lens either
+            if cleared { this.reset_lens_profile(); }
+            this.calib_in_progress = false;
+            this.calib_in_progress_changed();
+            this.calib_progress(1.0, rms, good, good, good, sharpness);
+            this.update_calib_model();
+        });
+        let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (msg, arg): (String, String)| {
+            this.error(QString::from(msg), QString::from(arg), QString::default());
+        });
+
+        let stab = self.stabilizer.clone();
+        core::run_threaded(move || {
+            let result = LensCalibrator::calibrate_shared(&stab.lens_calibrator, only_used, clear_on_failure);
+            match &result {
+                Some(Ok(fit)) => Self::show_calibration(&stab, fit),
+                Some(Err(e)) => err(("An error occurred: %1".to_string(), format!("{:?}", e))),
+                None => { }
+            }
+            let (rms, good, sharpness) = Self::calibration_summary(&stab);
+            done((rms, good, sharpness, clear_on_failure && matches!(result, Some(Err(_)))));
+        });
+    }
+    /// The lens of a fit for the preview, unless it's too far off to be worth showing
+    #[cfg(feature = "opencv")]
+    fn show_calibration(stab: &StabilizationManager, cal: &LensCalibrator) {
+        if cal.rms < 100.0 {
+            stab.lens.write().set_from_calibrator(cal);
         }
+        ::log::debug!("rms: {}, used_frames: {:?}, camera_matrix: {}, coefficients: {:?}", cal.rms, cal.used_points.keys(), cal.k, cal.d);
+    }
+    /// The calibrator's rms, its number of good frames and their average sharpness, for `calib_progress`
+    #[cfg(feature = "opencv")]
+    fn calibration_summary(stab: &StabilizationManager) -> (f64, usize, f64) {
+        stab.lens_calibrator.read().as_ref().map(|cal| {
+            let good = cal.image_points.read().len();
+            (cal.rms, good, *cal.sum_sharpness.read() / good.max(1) as f64)
+        }).unwrap_or_default()
+    }
+
+    /// The lens of the chessboard calibration, into the profile being exported
+    #[cfg_attr(not(feature = "opencv"), allow(unused_variables))]
+    fn fill_profile_from_calibrator(&self, profile: &mut core::lens_profile::LensProfile) {
         #[cfg(feature = "opencv")]
         if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
             profile.set_from_calibrator(cal);
@@ -2361,8 +2483,18 @@ impl Controller {
                 _ => { ::log::error!("Unknown save_type: {save_type}"); }
             }
         }
-        let contents = content.to_json_pretty();
-        if let Err(e) = filesystem::write(&url, contents.to_slice()) {
+        let mut contents = content.to_json_pretty().to_slice().to_vec();
+        // `zoom_limit_whole_clip` turned on because the project came from before it existed belongs to that project, a
+        // new preset gets the current behavior
+        if self.stabilizer.params.read().zoom_limit_whole_clip_from_old_file {
+            if let Ok(mut obj) = serde_json::from_slice::<serde_json::Value>(&contents) {
+                if let Some(v) = obj.get_mut("stabilization").and_then(|x| x.get_mut("zoom_limit_whole_clip")) {
+                    *v = serde_json::Value::Bool(false);
+                    if let Ok(new_contents) = serde_json::to_vec_pretty(&obj) { contents = new_contents; }
+                }
+            }
+        }
+        if let Err(e) = filesystem::write(&url, &contents) {
             self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
         }
         QString::from(filesystem::display_url(&url))
@@ -2492,6 +2624,9 @@ impl Controller {
     fn set_lens_breathing_enabled(&mut self, v: bool) {
         self.stabilizer.params.write().lens_breathing_enabled = v;
         self.request_recompute();
+    }
+    fn get_output_projection(&self) -> i32 {
+        self.stabilizer.params.read().output_projection
     }
 
     fn get_focal_length_smoothing_enabled(&self) -> bool {
