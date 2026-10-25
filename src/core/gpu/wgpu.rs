@@ -120,6 +120,36 @@ impl WgpuWrapper {
         }
     }
 
+    /// The adapter for compute work besides the rendering, like the optical analysis' tracking: the one of the processing
+    /// device `selected` (its index in `GPU_LIST`) when it has one - a wgpu entry, numbered as the rendering numbers them
+    /// (`StabilizationManager::update_device`), or an OpenCL one of a GPU that has a wgpu adapter too - else the
+    /// high-performance one. Always one of `ADAPTERS`, so a GPU is the same adapter every time, also one of two GPUs of a
+    /// kind. None without a GPU, or with only a software one
+    pub fn compute_adapter(selected: Option<usize>) -> Option<Adapter> {
+        if ADAPTERS.read().is_empty() { Self::list_devices(); }
+        let (entry, first_wgpu) = {
+            let devices = crate::stabilization::GPU_LIST.read();
+            (selected.and_then(|i| devices.get(i).cloned()), devices.iter().position(|d| d.starts_with("[wgpu]")))
+        };
+        let adapters = ADAPTERS.read();
+        let same = entry.and_then(|entry| {
+            if entry.starts_with("[wgpu]") {
+                let a = adapters.get(selected?.checked_sub(first_wgpu?)?)?;
+                let info = a.get_info();
+                (entry == format!("[wgpu] {} ({:?})", info.name, info.backend)).then_some(a)
+            } else if entry.starts_with("[OpenCL]") {
+                // Listed as "<platform> <device name>: <version>": the whole name, not one it starts with ("RTX 4070" of
+                // an "RTX 4070 Ti")
+                adapters.iter().find(|a| { let name = a.get_info().name; !name.is_empty() && entry.contains(&format!(" {name}: ")) })
+            } else {
+                None
+            }
+        }).filter(|a| a.get_info().device_type != wgpu::DeviceType::Cpu);
+        // Else the one `request_adapter` picks for high performance: by the type, in the order of the backends
+        same.or_else(|| [wgpu::DeviceType::DiscreteGpu, wgpu::DeviceType::IntegratedGpu, wgpu::DeviceType::Other, wgpu::DeviceType::VirtualGpu].iter()
+            .find_map(|t| adapters.iter().find(|a| a.get_info().device_type == *t))).cloned()
+    }
+
     pub fn initialize_context() -> Option<(String, String)> {
         let instance = INSTANCE.lock();
 

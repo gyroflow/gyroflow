@@ -21,8 +21,8 @@
 
 pub mod solver;
 mod odometry;
-#[cfg(feature = "use-opencv")]
 mod tracker;
+mod gpu_klt;
 
 use std::collections::{ BTreeSet, HashMap, HashSet };
 use std::ops::{ ControlFlow, RangeInclusive };
@@ -36,7 +36,6 @@ use crate::stabilization::{ ComputeParams, FrameTransform, undistort_points_for_
 use solver::{ BandMeasurement, SolverParams };
 
 /// Tracks kept alive per frame
-#[cfg(feature = "use-opencv")]
 const MAX_POINTS: usize = 1500;
 /// Bands of rows (along the readout) each frame pair is measured in
 const BANDS: usize = 6;
@@ -384,7 +383,6 @@ struct TracksBuilder {
 impl TracksBuilder {
     /// The next pair the tracker gave (between the frames `a` and `b` of `size` pixels), as it's kept and measured: its
     /// positions in fixed point, and its observations in the order of the points of `a`, see `Entry::continued`
-    #[cfg_attr(not(any(test, feature = "use-opencv")), allow(dead_code))]
     fn push(&mut self, a: Frame, b: Frame, mut obs: Vec<Observation>, size: (u32, u32)) -> Pair {
         // The tracker's order already, but it's what the order of the new points of a frame is
         obs.sort_unstable_by_key(|o| o.id);
@@ -812,7 +810,6 @@ pub struct OpticalMotionAnalysis {
     scaled_fps: f64,
     quats_checksum: u64,
     context_checksum: u64,
-    #[cfg(feature = "use-opencv")]
     tracker: tracker::Tracker,
     tracking: TrackingMethod,
     last: Option<Frame>,
@@ -833,56 +830,55 @@ pub struct OpticalMotionAnalysis {
 
 impl OpticalMotionAnalysis {
     pub fn from_manager(stab: &StabilizationManager, cancel_flag: Arc<AtomicBool>) -> Result<Self, String> {
-        #[cfg(not(feature = "use-opencv"))]
-        { let _ = (stab, cancel_flag); return Err("Optical analysis is not available in this build".into()); }
+        // Before anything is read: whatever changes it from here on is a reason to stop
+        let generation = stab.optical_generation.load(SeqCst);
+        let mut params = measurement_params(stab);
 
-        #[cfg(feature = "use-opencv")]
-        {
-            // Before anything is read: whatever changes it from here on is a reason to stop
-            let generation = stab.optical_generation.load(SeqCst);
-            let mut params = measurement_params(stab);
-
-            let mut gyro = stab.gyro.read().clone();
-            // Without motion data in the file (also after an analysis of such a file: its orientation is only in the
-            // correction) the analysis measures the motion itself
-            let from_video = !gyro.file_metadata.read().has_motion();
-            if gyro.optical_correction.take().is_some() {
-                gyro.integrate();
-            }
-            if from_video {
-                gyro.quaternions.clear();
-            } else if gyro.quaternions.len() < 2 {
-                return Err("No motion data to correct".into());
-            }
-            let quats_checksum = optical_correction::checksum(&gyro.quaternions);
-            params.gyro = Arc::new(parking_lot::RwLock::new(gyro));
-            let tracking = *stab.optical_tracking.read();
-            let context_checksum = context_checksum(&params);
-
-            let (fps_scale, scaled_fps, horizontal_readout, ranges_ms, total_frames) = {
-                let p = stab.params.read();
-                // Only what's going to be exported: the trim ranges, or the whole clip without any
-                let ranges: Vec<(f64, f64)> = if p.trim_ranges.is_empty() { vec![(0.0, 1.0)] } else { p.trim_ranges.clone() };
-                let ranges_ms = ranges.iter().map(|(a, b)| (a * p.duration_ms, b * p.duration_ms)).collect::<Vec<_>>();
-                let total_frames = ranges.iter().map(|(a, b)| ((b - a) * p.frame_count as f64).round() as usize).sum();
-                (p.fps_scale, p.get_scaled_fps(), p.frame_readout_direction.is_horizontal(), ranges_ms, total_frames)
-            };
-            let setup = Setup { params, horizontal_readout, track_size: (0, 0), focal_px: 0.0, from_video };
-            Ok(Self {
-                fps_scale, scaled_fps, quats_checksum, context_checksum,
-                tracker: tracker::Tracker::new(MAX_POINTS, tracking).map_err(|e| format!("OpenCV error: {e:?}"))?,
-                tracking,
-                last: None,
-                tracks: Default::default(),
-                measuring: Measuring::new(setup, Default::default()),
-                frames: 0,
-                total_frames,
-                ranges_ms,
-                cancel_flag,
-                generation: (stab.optical_generation.clone(), generation),
-                cancelled: AtomicBool::new(false),
-            })
+        let mut gyro = stab.gyro.read().clone();
+        // Without motion data in the file (also after an analysis of such a file: its orientation is only in the
+        // correction) the analysis measures the motion itself
+        let from_video = !gyro.file_metadata.read().has_motion();
+        if gyro.optical_correction.take().is_some() {
+            gyro.integrate();
         }
+        if from_video {
+            gyro.quaternions.clear();
+        } else if gyro.quaternions.len() < 2 {
+            return Err("No motion data to correct".into());
+        }
+        let quats_checksum = optical_correction::checksum(&gyro.quaternions);
+        params.gyro = Arc::new(parking_lot::RwLock::new(gyro));
+        let tracking = *stab.optical_tracking.read();
+        let context_checksum = context_checksum(&params);
+
+        let (fps_scale, scaled_fps, horizontal_readout, ranges_ms, total_frames) = {
+            let p = stab.params.read();
+            // Only what's going to be exported: the trim ranges, or the whole clip without any
+            let ranges: Vec<(f64, f64)> = if p.trim_ranges.is_empty() { vec![(0.0, 1.0)] } else { p.trim_ranges.clone() };
+            let ranges_ms = ranges.iter().map(|(a, b)| (a * p.duration_ms, b * p.duration_ms)).collect::<Vec<_>>();
+            let total_frames = ranges.iter().map(|(a, b)| ((b - a) * p.frame_count as f64).round() as usize).sum();
+            (p.fps_scale, p.get_scaled_fps(), p.frame_readout_direction.is_horizontal(), ranges_ms, total_frames)
+        };
+        let setup = Setup { params, horizontal_readout, track_size: (0, 0), focal_px: 0.0, from_video };
+        // KLT on the GPU selected for processing (or another one), on the CPU when that's what's selected
+        let device = match stab.params.read().current_device {
+            i if i < 0 || !std::env::var("NO_WGPU").unwrap_or_default().is_empty() => tracker::KltDevice::Cpu,
+            i => tracker::KltDevice::Gpu(Some(i as usize)),
+        };
+        Ok(Self {
+            fps_scale, scaled_fps, quats_checksum, context_checksum,
+            tracker: tracker::Tracker::new(MAX_POINTS, tracking, device)?,
+            tracking,
+            last: None,
+            tracks: Default::default(),
+            measuring: Measuring::new(setup, Default::default()),
+            frames: 0,
+            total_frames,
+            ranges_ms,
+            cancel_flag,
+            generation: (stab.optical_generation.clone(), generation),
+            cancelled: AtomicBool::new(false),
+        })
     }
 
     /// Whether it's been cancelled, or overtaken by another file, a project or Clear: then the frames fed are ignored
@@ -920,20 +916,15 @@ impl OpticalMotionAnalysis {
         let frame = self.measuring.frame(index, ts_ms);
         let continuous = self.last.map(|l| index == l.index + 1).unwrap_or(false);
 
-        #[cfg(feature = "use-opencv")]
-        {
-            if !continuous { self.tracker.reset(); }
-            let obs = self.tracker.track(width, height, stride, pixels).map_err(|e| format!("OpenCV error: {e:?}"))?;
-            if continuous && !obs.is_empty() {
-                if let Some(a) = self.last {
-                    // Measured as it's kept: measuring the kept tracks again gives the very same
-                    let pair = self.tracks.push(a, frame, obs, self.measuring.setup.track_size);
-                    self.measuring.push(pair);
-                }
+        if !continuous { self.tracker.reset(); }
+        let obs = self.tracker.track(width, height, stride, pixels)?;
+        if continuous && !obs.is_empty() {
+            if let Some(a) = self.last {
+                // Measured as it's kept: measuring the kept tracks again gives the very same
+                let pair = self.tracks.push(a, frame, obs, self.measuring.setup.track_size);
+                self.measuring.push(pair);
             }
         }
-        #[cfg(not(feature = "use-opencv"))]
-        { let _ = (continuous, stride, pixels); }
 
         self.last = Some(frame);
         self.frames += 1;
@@ -955,7 +946,8 @@ impl OpticalMotionAnalysis {
         let points = self.tracks.observations;
         let (setup, measured) = self.measuring.finish(self.quats_checksum);
         let tracks = self.tracks.finish(setup);
-        ::log::info!("Optical analysis: {} frames, {} measured pairs, {} band measurements, {} tracked points kept in {:.1} MB{}", self.frames, measured.measured_pairs, measured.bands.len(),
+        let tracked = format!(", {}", self.tracker.describe());
+        ::log::info!("Optical analysis: {} frames, {} measured pairs, {} band measurements, {} tracked points kept in {:.1} MB{}{tracked}", self.frames, measured.measured_pairs, measured.bands.len(),
             points, tracks.size() as f64 / 1e6, if tracks.setup.from_video { ", motion from the video" } else { "" });
         Ok(OpticalMeasurements {
             bands: measured.bands,

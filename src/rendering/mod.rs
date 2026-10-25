@@ -772,13 +772,14 @@ pub fn render<F, F2, F3>(stab: Arc<StabilizationManager>, progress: F, input_fil
         progress((1.0, render_frame_count, render_frame_count, true, false));
     }
 
-    crate::util::update_file_times(&output_url, &input_file.url, start_ms);
-
     if render_options.preserve_other_tracks {
         if let Err(e) = crate::util::copy_insta360_metadata(&output_url, &input_file.url) {
             ::log::error!("Failed to copy Insta360 metadata: {e:?}");
         }
     }
+
+    // After the last write to the output: appending the Insta360 metadata would reset the modification time
+    crate::util::update_file_times(&output_url, &input_file.url, start_ms);
 
     crate::util::report_lens_profile_usage(lens_checksum);
 
