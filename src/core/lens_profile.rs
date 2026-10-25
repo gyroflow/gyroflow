@@ -81,7 +81,7 @@ pub struct LensProfile {
     pub is_copy: bool,
     pub rating: Option<f64>,
     pub checksum: Option<String>,
-    parsed_interpolations: BTreeMap<i64, LensProfile>,
+    pub(crate) parsed_interpolations: BTreeMap<i64, LensProfile>,
 }
 
 impl LensProfile {

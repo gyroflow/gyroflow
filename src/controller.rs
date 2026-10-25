@@ -106,6 +106,17 @@ pub struct Controller {
     search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
     fetch_profiles_from_github: qt_method!(fn(&self)),
     lens_profiles_updated: qt_signal!(reload_from_disk: bool),
+    search_lens_profile_by_selectors: qt_method!(fn(&self, brand: QString, model: QString, lens: QString, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
+    compatible_cameras_used: qt_signal!(cameras: QStringList),
+    get_camera_brands: qt_method!(fn(&self) -> QStringList),
+    get_camera_models: qt_method!(fn(&self, brand: QString) -> QStringList),
+    get_lens_models: qt_method!(fn(&self, brand: QString, model: QString) -> QStringList),
+    is_fixed_lens_camera: qt_method!(fn(&self, brand: QString, model: QString) -> bool),
+    is_zoom_lens: qt_method!(fn(&self, lens: QString) -> bool),
+    normalize_camera_identifier: qt_method!(fn(&self, brand: QString, model: QString, lens: QString) -> QStringList),
+    get_review_group: qt_method!(fn(&self, filename_or_id: QString) -> QVariantList),
+    hide_lens_profile: qt_method!(fn(&mut self, id_or_checksum: QString)),
+    validate_lens_profile_for_upload: qt_method!(fn(&self, info: QJsonObject) -> QStringList),
 
     set_sync_lpf: qt_method!(fn(&self, lpf: f64)),
     set_imu_lpf: qt_method!(fn(&self, lpf: f64)),
@@ -2312,6 +2323,12 @@ impl Controller {
         match core::lens_profile::LensProfile::from_json(&info_json) {
             Ok(mut profile) => {
                 self.fill_profile_from_calibrator(&mut profile);
+                if upload {
+                    if let Err(errs) = self.stabilizer.lens_profile_db.read().validate_profile_for_upload(&profile) {
+                        self.error(QString::from("Cannot upload ambiguous lens profile: %1"), QString::from(errs.join(" ")), QString::default());
+                        return false;
+                    }
+                }
 
                 match profile.save_to_file(&url) {
                     Ok(json) => {
@@ -2330,6 +2347,89 @@ impl Controller {
             },
             Err(e) => { self.error(QString::from("An error occurred: %1"), QString::from(format!("{:?}", e)), QString::default()); false }
         }
+    }
+    fn validate_lens_profile_for_upload(&self, info: QJsonObject) -> QStringList {
+        let info_json = info.to_json().to_string();
+        if let Ok(mut profile) = core::lens_profile::LensProfile::from_json(&info_json) {
+            self.fill_profile_from_calibrator(&mut profile);
+            if let Err(errs) = self.stabilizer.lens_profile_db.read().validate_profile_for_upload(&profile) {
+                return errs.into_iter().map(QString::from).collect();
+            }
+            return QStringList::default();
+        }
+        vec![QString::from("Invalid lens profile JSON")].into_iter().collect()
+    }
+
+    fn get_camera_brands(&self) -> QStringList {
+        self.stabilizer.lens_profile_db.read().get_camera_brands().into_iter().map(QString::from).collect()
+    }
+
+    fn get_camera_models(&self, brand: QString) -> QStringList {
+        self.stabilizer.lens_profile_db.read().get_camera_models(&brand.to_string()).into_iter().map(QString::from).collect()
+    }
+
+    fn get_lens_models(&self, brand: QString, model: QString) -> QStringList {
+        self.stabilizer.lens_profile_db.read().get_lens_models(&brand.to_string(), &model.to_string()).into_iter().map(QString::from).collect()
+    }
+
+    fn is_fixed_lens_camera(&self, brand: QString, model: QString) -> bool {
+        self.stabilizer.lens_profile_db.read().is_fixed_lens_camera(&brand.to_string(), &model.to_string())
+    }
+
+    fn is_zoom_lens(&self, lens: QString) -> bool {
+        self.stabilizer.lens_profile_db.read().is_zoom_lens(&lens.to_string())
+    }
+
+    fn normalize_camera_identifier(&self, brand: QString, model: QString, lens: QString) -> QStringList {
+        let (b, m, l) = self.stabilizer.lens_profile_db.read().normalize_camera_id(&brand.to_string(), &model.to_string(), &lens.to_string());
+        vec![QString::from(b), QString::from(m), QString::from(l)].into_iter().collect()
+    }
+
+    fn get_review_group(&self, filename_or_id: QString) -> QVariantList {
+        self.stabilizer.lens_profile_db.read().get_review_group(&filename_or_id.to_string()).into_iter().map(|(name, id, author, rating)| {
+            let mut list = QVariantList::from_iter([
+                QString::from(name),
+                QString::from(id),
+                QString::from(author),
+            ].into_iter());
+            list.push(rating.into());
+            list.into()
+        }).collect()
+    }
+
+    fn hide_lens_profile(&mut self, id_or_checksum: QString) {
+        self.stabilizer.lens_profile_db.write().hide_profile(&id_or_checksum.to_string());
+        self.lens_profiles_updated(false);
+    }
+
+    fn search_lens_profile_by_selectors(&self, brand: QString, model: QString, lens: QString, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32) {
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, (profiles, compat): (QVariantList, QStringList)| {
+            this.compatible_cameras_used(compat);
+            this.search_lens_profile_finished(profiles);
+        });
+        let db = self.stabilizer.lens_profile_db.clone();
+        let brand = brand.to_string();
+        let model = model.to_string();
+        let lens = lens.to_string();
+        let text = text.to_string();
+        let favorites = HashSet::<String>::from_iter(favorites.into_iter().map(|x| x.to_qbytearray().to_string()));
+        core::run_threaded(move || {
+            let (results, compat_cams) = db.read().search_by_selectors(&brand, &model, &lens, &text, &favorites, aspect_ratio, aspect_ratio_swapped);
+            let profiles = results.into_iter().map(|(name, file, crc, official, rating, aspect_ratio, _author)| {
+                let mut list = QVariantList::from_iter([
+                    QString::from(name),
+                    QString::from(file),
+                    QString::from(crc)
+                ].into_iter());
+                list.push(official.into());
+                list.push(rating.into());
+                list.push(aspect_ratio.into());
+                list
+            }).collect();
+            let compat_qlist: QStringList = compat_cams.into_iter().map(QString::from).collect();
+
+            finished((profiles, compat_qlist));
+        });
     }
 
     fn load_profiles(&self, reload_from_disk: bool) {
