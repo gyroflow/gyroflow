@@ -32,6 +32,82 @@ impl Clone for LensProfileDatabase {
 }
 
 impl LensProfileDatabase {
+    pub fn get_brands(&self) -> Vec<String> {
+        let mut brands: HashSet<String> = HashSet::new();
+        for profile in self.map.values() {
+            if !profile.camera_brand.trim().is_empty() {
+                brands.insert(profile.camera_brand.trim().to_string());
+            }
+        }
+        let mut res: Vec<String> = brands.into_iter().collect();
+        res.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        res
+    }
+
+    pub fn get_models(&self, brand: &str) -> Vec<String> {
+        let mut models: HashSet<String> = HashSet::new();
+        let brand_lower = brand.trim().to_lowercase();
+        for profile in self.map.values() {
+            if brand.is_empty() || profile.camera_brand.trim().to_lowercase() == brand_lower {
+                if !profile.camera_model.trim().is_empty() {
+                    models.insert(profile.camera_model.trim().to_string());
+                }
+            }
+        }
+        let mut res: Vec<String> = models.into_iter().collect();
+        res.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        res
+    }
+
+    pub fn get_lenses(&self, brand: &str, model: &str) -> Vec<String> {
+        let mut lenses: HashSet<String> = HashSet::new();
+        let brand_lower = brand.trim().to_lowercase();
+        let model_lower = model.trim().to_lowercase();
+        for profile in self.map.values() {
+            let brand_match = brand.is_empty() || profile.camera_brand.trim().to_lowercase() == brand_lower;
+            let model_match = model.is_empty() || profile.camera_model.trim().to_lowercase() == model_lower;
+            if brand_match && model_match {
+                if !profile.lens_model.trim().is_empty() {
+                    lenses.insert(profile.lens_model.trim().to_string());
+                }
+            }
+        }
+        let mut res: Vec<String> = lenses.into_iter().collect();
+        res.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        res
+    }
+
+    pub fn get_profiles_by_setup(&self, brand: &str, model: &str, lens: &str) -> Vec<&LensProfile> {
+        let brand_lower = brand.trim().to_lowercase();
+        let model_lower = model.trim().to_lowercase();
+        let lens_lower = lens.trim().to_lowercase();
+        self.map.values().filter(|p| {
+            (brand.is_empty() || p.camera_brand.trim().to_lowercase() == brand_lower) &&
+            (model.is_empty() || p.camera_model.trim().to_lowercase() == model_lower) &&
+            (lens.is_empty() || p.lens_model.trim().to_lowercase() == lens_lower)
+        }).collect()
+    }
+
+    pub fn is_camera_compatible(&self, profile: &LensProfile, target_brand: &str, target_model: &str) -> bool {
+        let p_brand = profile.camera_brand.trim().to_lowercase();
+        let t_brand = target_brand.trim().to_lowercase();
+        if p_brand.is_empty() || t_brand.is_empty() {
+            return false;
+        }
+        if p_brand != t_brand {
+            return false;
+        }
+        let p_model = profile.camera_model.trim().to_lowercase();
+        let t_model = target_model.trim().to_lowercase();
+        if p_model == t_model {
+            return true;
+        }
+        if profile.crop_factor.map_or(false, |c| (c - 1.0).abs() < 0.15) || profile.lens_model.to_lowercase().contains("full frame") || profile.camera_setting.to_lowercase().contains("full frame") {
+            return true;
+        }
+        false
+    }
+
     pub fn get_path() -> PathBuf {
         // return std::fs::canonicalize("D:/lens_review/").unwrap_or_default();
 

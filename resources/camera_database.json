@@ -1,0 +1,197 @@
+{
+  "version": 1,
+  "brands": [
+    {
+      "name": "Sony",
+      "models": [
+        {
+          "name": "A7 III",
+          "mount": "Sony E",
+          "sensor_size": "Full Frame",
+          "crop_factor": 1.0,
+          "lenses": ["FE 24-70mm F2.8 GM", "FE 16-35mm F2.8 GM", "FE 20mm F1.8 G", "FE 85mm F1.8"]
+        },
+        {
+          "name": "A6600",
+          "mount": "Sony E",
+          "sensor_size": "APS-C",
+          "crop_factor": 1.5,
+          "lenses": ["E 16-55mm F2.8 G", "E 10-18mm F4 OSS", "E 15mm F1.4 G"]
+        },
+        {
+          "name": "FX3",
+          "mount": "Sony E",
+          "sensor_size": "Full Frame",
+          "crop_factor": 1.0,
+          "lenses": ["FE 24-70mm F2.8 GM", "FE 16-35mm F2.8 GM", "FE 24mm F1.4 GM"]
+        },
+        {
+          "name": "FX6",
+          "mount": "Sony E",
+          "sensor_size": "Full Frame",
+          "crop_factor": 1.0,
+          "lenses": ["FE 24-70mm F2.8 GM", "FE 16-35mm F2.8 GM"]
+        }
+      ]
+    },
+    {
+      "name": "GoPro",
+      "models": [
+        {
+          "name": "HERO10 Black",
+          "mount": "Fixed",
+          "sensor_size": "1/2.3\"",
+          "crop_factor": 5.6,
+          "lenses": ["Standard Lens", "Max Lens Mod"]
+        },
+        {
+          "name": "HERO11 Black",
+          "mount": "Fixed",
+          "sensor_size": "1/1.9\"",
+          "crop_factor": 5.0,
+          "lenses": ["Standard Lens"]
+        },
+        {
+          "name": "HERO9 Black",
+          "mount": "Fixed",
+          "sensor_size": "1/2.3\"",
+          "crop_factor": 5.6,
+          "lenses": ["Standard Lens", "Max Lens Mod"]
+        }
+      ]
+    },
+    {
+      "name": "DJI",
+      "models": [
+        {
+          "name": "Avata",
+          "mount": "Fixed",
+          "sensor_size": "1/1.7\"",
+          "crop_factor": 4.5,
+          "lenses": ["Standard Lens"]
+        },
+        {
+          "name": "Action 2",
+          "mount": "Fixed",
+          "sensor_size": "1/1.7\"",
+          "crop_factor": 4.5,
+          "lenses": ["Standard Lens"]
+        },
+        {
+          "name": "Osmo Action 3",
+          "mount": "Fixed",
+          "sensor_size": "1/1.7\"",
+          "crop_factor": 4.5,
+          "lenses": ["Standard Lens"]
+        },
+        {
+          "name": "O3 Air Unit",
+          "mount": "Fixed",
+          "sensor_size": "1/1.7\"",
+          "crop_factor": 4.5,
+          "lenses": ["Standard Lens"]
+        }
+      ]
+    },
+    {
+      "name": "Canon",
+      "models": [
+        {
+          "name": "EOS R6",
+          "mount": "Canon RF",
+          "sensor_size": "Full Frame",
+          "crop_factor": 1.0,
+          "lenses": ["RF 24-70mm F2.8L IS USM", "RF 15-35mm F2.8L IS USM"]
+        },
+        {
+          "name": "EOS R5",
+          "mount": "Canon RF",
+          "sensor_size": "Full Frame",
+          "crop_factor": 1.0,
+          "lenses": ["RF 24-70mm F2.8L IS USM", "RF 15-35mm F2.8L IS USM"]
+        }
+      ]
+    },
+    {
+      "name": "Panasonic",
+      "models": [
+        {
+          "name": "Lumix GH6",
+          "mount": "Micro Four Thirds",
+          "sensor_size": "Micro Four Thirds",
+          "crop_factor": 2.0,
+          "lenses": ["Leica DG Vario-Elmarit 12-60mm F2.8-4.0", "Lumix G 12-35mm F2.8 II"]
+        },
+        {
+          "name": "Lumix GH5",
+          "mount": "Micro Four Thirds",
+          "sensor_size": "Micro Four Thirds",
+          "crop_factor": 2.0,
+          "lenses": ["Lumix G 12-35mm F2.8 II", "Olympus M.Zuiko 12-40mm F2.8 PRO"]
+        }
+      ]
+    },
+    {
+      "name": "Fujifilm",
+      "models": [
+        {
+          "name": "X-T4",
+          "mount": "Fujifilm X",
+          "sensor_size": "APS-C",
+          "crop_factor": 1.5,
+          "lenses": ["XF 16-55mm F2.8 R LM WR", "XF 10-24mm F4 R OIS WR"]
+        },
+        {
+          "name": "X-H2S",
+          "mount": "Fujifilm X",
+          "sensor_size": "APS-C",
+          "crop_factor": 1.5,
+          "lenses": ["XF 16-55mm F2.8 R LM WR", "XF 18-120mm F4 LM PZ WR"]
+        }
+      ]
+    },
+    {
+      "name": "Insta360",
+      "models": [
+        {
+          "name": "ONE RS 4K Boost",
+          "mount": "Fixed",
+          "sensor_size": "1/2\"",
+          "crop_factor": 5.4,
+          "lenses": ["4K Boost Lens"]
+        },
+        {
+          "name": "X3",
+          "mount": "Fixed",
+          "sensor_size": "1/2\"",
+          "crop_factor": 5.4,
+          "lenses": ["Dual 360 Lens"]
+        }
+      ]
+    },
+    {
+      "name": "RunCam",
+      "models": [
+        {
+          "name": "Thumb Pro",
+          "mount": "Fixed",
+          "sensor_size": "1/3\"",
+          "crop_factor": 7.2,
+          "lenses": ["Standard Lens"]
+        }
+      ]
+    },
+    {
+      "name": "Caddx",
+      "models": [
+        {
+          "name": "Walnut",
+          "mount": "Fixed",
+          "sensor_size": "1/2.3\"",
+          "crop_factor": 5.6,
+          "lenses": ["Standard Lens"]
+        }
+      ]
+    }
+  ]
+}
