@@ -726,17 +726,44 @@ pub fn render<F, F2, F3>(stab: Arc<StabilizationManager>, progress: F, input_fil
     }
 
     let start_ms = proc.ranges_ms.first().and_then(|x| x.0);
-    let mut render_filename = filename.clone();
-    if cfg!(not(any(target_os = "android", target_os = "ios"))) && !is_sequence {
-        render_filename = format!("{filename}.tmp");
+    let output_url = gyroflow_core::filesystem::get_file_url(folder, &filename, false);
+    // Never onto the input: writing over an input file, or a frame of the input image sequence (by file identity, so another
+    // spelling, a letter case variant or a link of it too), would destroy it. Before the output is checked, so that's what's said
+    if let Some(input) = output_overwrites_input(input_file, total_frame_count, folder, &filename, is_sequence.then_some(render_frame_count), &cancel_flag) {
+        return Err(FFmpegError::OutputIsInput(gyroflow_core::filesystem::display_url(&output_url), input));
     }
-    proc.render(folder, &render_filename, (output_width as u32, output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag.clone(), pause_flag)?;
+    // Where the render goes, checked before it starts, as the merge's output is (`filesystem::output_target`): a symbolic link
+    // there is followed, and what's there must be a file that can be written to, and replaced where the render is renamed onto it
+    let mut temp = None;
+    let (render_folder, render_filename) = if is_sequence {
+        // FFmpeg writes each frame in place: Android's documents have no paths to check
+        if cfg!(not(target_os = "android")) {
+            check_sequence(folder, &filename, render_frame_count, &cancel_flag)?;
+        }
+        (folder.clone(), filename.clone())
+    } else if cfg!(any(target_os = "android", target_os = "ios")) {
+        // Written in place there. Android's documents have no links, and no paths to check
+        if cfg!(target_os = "ios") {
+            gyroflow_core::filesystem::output_target(&output_url, gyroflow_core::filesystem::Overwrite::InPlace).map_err(|e| FFmpegError::Output(e.to_string()))?;
+        }
+        (folder.clone(), filename.clone())
+    } else {
+        // A new file next to the one that gets the output's name, which it gets once it's complete
+        let target = gyroflow_core::filesystem::output_target(&output_url, gyroflow_core::filesystem::Overwrite::Rename).map_err(|e| FFmpegError::Output(e.to_string()))?;
+        let file = gyroflow_core::filesystem::TempOutput::create(&output_url, target, temp_name(&filename)).map_err(|e| FFmpegError::Output(e.to_string()))?;
+        // What FFmpeg is given: the URL of its folder, and its name
+        let dir = file.path().parent().map(|x| x.display().to_string()).unwrap_or_default();
+        let to = (gyroflow_core::filesystem::path_to_url(&format!("{dir}{}", std::path::MAIN_SEPARATOR)), file.path().file_name().unwrap_or_default().to_string_lossy().into_owned());
+        temp = Some(file);
+        to
+    };
+    proc.render(&render_folder, &render_filename, (output_width as u32, output_height as u32), if render_options.bitrate > 0.0 { Some(render_options.bitrate) } else { None }, cancel_flag.clone(), pause_flag)?;
 
     let camera_tracks = proc.camera_tracks.take();
     let mut tracks_not_copied = std::mem::take(&mut proc.tracks_not_copied);
     drop(proc);
 
-    let output_url = gyroflow_core::filesystem::get_file_url(folder, &filename, false);
+    let rendered_url = gyroflow_core::filesystem::get_file_url(&render_folder, &render_filename, false);
 
     if let Some(mut camera_tracks) = camera_tracks {
         // They don't match the video once its speed changed, like the audio
@@ -745,7 +772,6 @@ pub fn render<F, F2, F3>(stab: Arc<StabilizationManager>, progress: F, input_fil
         }
         if !cancel_flag.load(std::sync::atomic::Ordering::SeqCst) {
             // Before the rename, the output appears once it's complete
-            let rendered_url = gyroflow_core::filesystem::get_file_url(folder, &render_filename, false);
             if let Err(e) = camera_tracks::copy_camera_tracks(&rendered_url, &input_file.url, &camera_tracks) {
                 ::log::error!("Failed to copy the camera tracks and metadata: {e:?}");
                 tracks_not_copied.push(format!("The camera tracks and metadata: {e}"));
@@ -756,11 +782,15 @@ pub fn render<F, F2, F3>(stab: Arc<StabilizationManager>, progress: F, input_fil
         warning(format!("camera_tracks:{}", tracks_not_copied.join("\n")));
     }
 
-    if render_filename != filename {
-        let output_url_temp = gyroflow_core::filesystem::get_file_url(folder, &render_filename, false);
-        if let Err(e) = std::fs::rename(&gyroflow_core::filesystem::url_to_path(&output_url_temp), &gyroflow_core::filesystem::url_to_path(&output_url)) {
-            ::log::error!("Failed to rename file from {output_url_temp} to {output_url}: {e:?}");
+    if render_options.preserve_other_tracks {
+        // Before the rename too
+        if let Err(e) = crate::util::copy_insta360_metadata(&rendered_url, &input_file.url) {
+            ::log::error!("Failed to copy Insta360 metadata: {e:?}");
         }
+    }
+
+    if let Some(temp) = temp {
+        temp.publish().map_err(|e| FFmpegError::Output(e.to_string()))?;
     }
 
     let re = regex::Regex::new(r#"%[0-9]+d"#).unwrap();
@@ -772,17 +802,94 @@ pub fn render<F, F2, F3>(stab: Arc<StabilizationManager>, progress: F, input_fil
         progress((1.0, render_frame_count, render_frame_count, true, false));
     }
 
-    if render_options.preserve_other_tracks {
-        if let Err(e) = crate::util::copy_insta360_metadata(&output_url, &input_file.url) {
-            ::log::error!("Failed to copy Insta360 metadata: {e:?}");
-        }
-    }
-
     // After the last write to the output: appending the Insta360 metadata would reset the modification time
     crate::util::update_file_times(&output_url, &input_file.url, start_ms);
 
     crate::util::report_lens_profile_usage(lens_checksum);
 
+    Ok(())
+}
+
+/// The names of the file a render writes on desktop (`filesystem::TempOutput`), for the output `filename`: `<output name>.tmp`,
+/// the name the render always wrote, or `<stem>.<n>.<extension>.tmp` where that's in use. FFmpeg tells the container by the
+/// output's extension, before `.tmp` (`FfmpegProcessor::render`)
+fn temp_name(filename: &str) -> impl Fn(&std::ffi::OsStr, u32) -> std::ffi::OsString {
+    let suffix = format!(".{}", filename.rfind('.').map(|x| &filename[x + 1..]).unwrap_or("mp4"));
+    move |file, n| {
+        let file = file.to_string_lossy();
+        let stem = match file.len().checked_sub(suffix.len()) {
+            Some(at) if file.is_char_boundary(at) && file[at..].eq_ignore_ascii_case(&suffix) => &file[..at],
+            _ => &file[..]
+        };
+        std::ffi::OsString::from(if n == 0 { format!("{stem}{suffix}.tmp") } else { format!("{stem}.{n}{suffix}.tmp") })
+    }
+}
+
+/// Whether the render queue's `codec` renders an image sequence, which FFmpeg's image2 muxer writes
+pub fn is_sequence_codec(codec: &str) -> bool {
+    matches!(codec, "PNG Sequence" | "EXR Sequence")
+}
+
+/// The input file that rendering `input_file` (`frame_count` frames) to `filename` in `folder` would destroy, writing over it,
+/// as it's shown. The output is an image sequence where `output_frames` is `Some`, its frames 1 to that. See
+/// `filesystem::output_overwrites_input`; the frames of an input image sequence are the ones FFmpeg's image2 demuxer can read:
+/// from the first there of the 5 numbers from `image_sequence_start`, `frame_count` of them
+pub fn output_overwrites_input(input_file: &gyroflow_core::InputFile, frame_count: usize, folder: &str, filename: &str, output_frames: Option<usize>, cancel_flag: &AtomicBool) -> Option<String> {
+    let start = input_file.image_sequence_start.max(0) as usize;
+    gyroflow_core::filesystem::output_overwrites_input(folder, filename, output_frames, &input_file.url, start..=start.saturating_add(4).saturating_add(frame_count), cancel_flag)
+}
+
+/// That the image sequence `filename` can be rendered in `folder`, `frames` frames: FFmpeg writes each frame in place, so every
+/// one that's there already must be a file that can be written to, or a symbolic link to where one can be
+/// (`filesystem::path_target`). The frames are named as FFmpeg names them (`filesystem::FramePath`), from 1 (the render sets no
+/// `start_number`). The first is checked as a single output is, and the others only where they're there, as the listing of
+/// their folder tells (`FramePath::find`). Stops when `cancel_flag` is up; the render then stops at once, as when it's cancelled
+fn check_sequence(folder: &str, filename: &str, frames: usize, cancel_flag: &AtomicBool) -> Result<(), FFmpegError> {
+    use gyroflow_core::filesystem::{ self, FramePath, Overwrite };
+    use std::sync::atomic::Ordering::Relaxed;
+    let frames = frames.max(1);
+    // The path FFmpeg gets on desktop and iOS (`FfmpegProcessor::render`, `FfmpegPathWrapper::new`)
+    let path = filesystem::url_to_path(&filesystem::get_file_url(folder, filename, true));
+    let check = |path: &str| filesystem::path_target(std::path::Path::new(path), Overwrite::InPlace, &|| path.to_owned()).map(drop).map_err(|e| FFmpegError::Output(e.to_string()));
+    let Some(pattern) = FramePath::parse(&path) else {
+        // FFmpeg writes the first frame to the path as it is, and refuses the second
+        if frames > 1 {
+            return Err(FFmpegError::Output(format!("The frames of the image sequence {path} can't be numbered: FFmpeg takes each % in the path for the start of the frame number (%d, or %05d for five digits) or of %% (a %), and a sequence needs that number. Choose another name or folder for the output.")));
+        }
+        return check(&path);
+    };
+    // Nothing is written
+    if pattern.too_long() {
+        return Ok(());
+    }
+    // The first frame: a file name, in a folder that's there
+    check(&pattern.frame(1))?;
+    // A file there by a frame's name needs only to be written to; anything else is checked as the first frame was, and a name
+    // the frame's can only be taken for is first asked for by the frame's
+    let check_frame = |(n, exact, file): (usize, bool, bool)| {
+        let path = pattern.frame(n);
+        if n == 1 {
+            Ok(())
+        } else if file {
+            filesystem::file_target(std::path::Path::new(&path), Overwrite::InPlace, &|| path.clone()).map(drop).map_err(|e| FFmpegError::Output(e.to_string()))
+        } else if exact || !std::fs::symlink_metadata(&path).is_err_and(|e| e.kind() == std::io::ErrorKind::NotFound) {
+            check(&path)
+        } else {
+            Ok(())
+        }
+    };
+    if let Some(found) = pattern.find(&(1..=frames), folder, cancel_flag) {
+        for x in found {
+            if cancel_flag.load(Relaxed) { break; }
+            check_frame(x)?;
+        }
+    } else {
+        // A number in a folder's name, or a folder that can't be listed: each name is asked for
+        for n in 2..=frames {
+            if cancel_flag.load(Relaxed) { break; }
+            check_frame((n, false, false))?;
+        }
+    }
     Ok(())
 }
 

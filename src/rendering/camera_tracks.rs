@@ -26,6 +26,8 @@ pub struct CameraTracks {
 const CONTAINERS: [&[u8; 4]; 7] = [b"moov", b"trak", b"mdia", b"minf", b"stbl", b"edts", b"udta"];
 /// The `udta` and `ilst` items that FFmpeg reads as `encoder`
 const ENCODER_KEYS: [&[u8; 4]; 3] = [b"\xa9too", b"\xa9swr", b"\xa9enc"];
+/// A segment table in `moov/udta`: it maps the frames of the file it's in to the recordings they were cut from
+const SEGMENT_TABLE: &[u8; 4] = b"MTRM";
 
 /// A box: its payload, or for the containers, the boxes in it
 #[derive(Debug, Clone)]
@@ -453,7 +455,8 @@ pub fn check_tracks(input_url: &str, track_ids: &[u32]) -> io::Result<HashMap<u3
     }).collect())
 }
 
-/// Appends the camera's `tracks` of `input_url` to the MP4/MOV output written by FFmpeg, and merges the camera's metadata (`udta`) into it.
+/// Appends the camera's `tracks` of `input_url` to the MP4/MOV output written by FFmpeg, and merges the camera's metadata (`udta`) into it,
+/// except the segment table.
 /// The output stays as it was until the new `moov` is written after it, then its `moov` becomes free space
 pub fn copy_camera_tracks(output_url: &str, input_url: &str, tracks: &CameraTracks) -> io::Result<()> {
     if !filesystem::exists(output_url) {
@@ -465,7 +468,12 @@ pub fn copy_camera_tracks(output_url: &str, input_url: &str, tracks: &CameraTrac
     let traks: Vec<Atom> = in_moov.children.iter().flatten()
         .filter(|x| &x.typ == b"trak" && track_id(x).is_some_and(|id| tracks.track_ids.contains(&id)))
         .cloned().collect();
-    let camera_udta = in_moov.child(b"udta").and_then(|x| x.children.as_ref());
+    // The output's frames aren't the camera file's (the render's trim ranges, its frame rate), so the camera file's segment table
+    // would describe frames that aren't there. A `udta` that held only the table has nothing to merge
+    let camera_udta: Option<Vec<Atom>> = in_moov.child(b"udta").and_then(|x| x.children.as_ref()).and_then(|children| {
+        let kept: Vec<Atom> = children.iter().filter(|x| &x.typ != SEGMENT_TABLE).cloned().collect();
+        (kept.len() == children.len() || !kept.is_empty()).then_some(kept)
+    });
     // File-level metadata (Sony's XML and lens profile)
     let file_metas: Vec<Atom> = in_metas.into_iter().filter(|meta| {
         let movable = is_self_contained(meta);
@@ -520,7 +528,7 @@ pub fn copy_camera_tracks(output_url: &str, input_url: &str, tracks: &CameraTrac
         let at = mvhd.payload.len().checked_sub(4).ok_or_else(|| invalid("Truncated mvhd".into()))?;
         put(&mut mvhd.payload, at, next_id as u64, false);
     }
-    if let Some(camera_udta) = camera_udta {
+    if let Some(camera_udta) = &camera_udta {
         let output_udta = children.iter().find(|x| &x.typ == b"udta").and_then(|x| x.children.clone()).unwrap_or_default();
         let udta = Atom::container(b"udta", merge_udta(camera_udta, &output_udta));
         match children.iter().position(|x| &x.typ == b"udta") {

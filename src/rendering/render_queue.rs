@@ -1130,8 +1130,8 @@ impl RenderQueue {
                                 stab.gpu_decoding.store(false, SeqCst);
                                 continue;
                             }
-                            // Another decoder won't make an encoder work
-                            if rendered_frames.load(SeqCst) == 0 && !matches!(e, rendering::FFmpegError::NoWorkingEncoder(_)) {
+                            // Another decoder won't make an encoder work, nor another output of the input, nor one that can't be written
+                            if rendered_frames.load(SeqCst) == 0 && !matches!(e, rendering::FFmpegError::NoWorkingEncoder(_) | rendering::FFmpegError::OutputIsInput(..) | rendering::FFmpegError::Output(_)) {
                                 if (0..4).contains(&i) {
                                     // Try 4 times with different GPU decoders
                                     i += 1;
@@ -1203,7 +1203,13 @@ impl RenderQueue {
         let is_rendering = self.export_metadata.is_none() && self.export_stmap.is_none();
         let processing_done = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, _: ()| {
             if let Some(job) = this.jobs.get(&job_id) {
-                if is_rendering && filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
+                if let Some(msg) = is_rendering.then(|| Self::output_is_input(job)).flatten() {
+                    update_model!(this, job_id, itm {
+                        itm.error_string = msg.clone();
+                        itm.status = JobStatus::Error;
+                    });
+                    this.error(job_id, msg, QString::default(), QString::default());
+                } else if is_rendering && filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
                     let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
                     update_model!(this, job_id, itm {
                         itm.error_string = msg.clone();
@@ -1742,7 +1748,11 @@ impl RenderQueue {
                         itm.output_filename = QString::from(job.render_options.output_filename.as_str());
                         itm.output_folder   = QString::from(job.render_options.output_folder.as_str());
                         itm.display_output_path = QString::from(filesystem::display_folder_filename(job.render_options.output_folder.as_str(), job.render_options.output_filename.as_str()));
-                        if filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
+                        if let Some(msg) = Self::output_is_input(job) {
+                            itm.error_string = msg.clone();
+                            itm.status = JobStatus::Error;
+                            err((job_id, msg.to_string()));
+                        } else if filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
                             let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
                             itm.error_string = msg.clone();
                             itm.status = JobStatus::Error;
@@ -1769,6 +1779,18 @@ impl RenderQueue {
                 }
             }
         }
+    }
+
+    /// Why the job can't render to its output: it would write over its input file, or a frame of its input image sequence
+    /// (`rendering::output_overwrites_input`, which `rendering::render` refuses too)
+    fn output_is_input(job: &Job) -> Option<QString> {
+        let (folder, filename) = (&job.render_options.output_folder, &job.render_options.output_filename);
+        let frame_count = job.stab.params.read().frame_count;
+        let output_frames = rendering::is_sequence_codec(&job.render_options.codec).then_some(frame_count);
+        let input_file = job.stab.input_file.read().clone();
+        let input = rendering::output_overwrites_input(&input_file, frame_count, folder, filename, output_frames, &AtomicBool::new(false))?;
+        let output = filesystem::display_url(&filesystem::get_file_url(folder, filename, false));
+        Some(QString::from(rendering::FFmpegError::OutputIsInput(output, input).to_string()))
     }
 
     fn file_exists_in_folder(&self, folder: QUrl, filename: QString) -> bool {

@@ -795,7 +795,7 @@ fn frame_timing(params: &ComputeParams, index: usize, timestamp_ms: f64, rows: u
     let gyro = params.gyro.read();
     let md = gyro.file_metadata.read();
     let readout = FrameTransform::get_frame_readout_time(params, false, timestamp_ms, &md);
-    let ts = timestamp_ms + md.per_frame_time_offsets.get(index).unwrap_or(&0.0);
+    let ts = timestamp_ms + md.frame_time_offset(index);
     Frame { index, timestamp_ms, start_ms: ts - readout / 2.0, per_px_ms: readout / rows.max(1) as f64, mid_ms: ts }
 }
 

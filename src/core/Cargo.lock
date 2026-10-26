@@ -1266,12 +1266,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87"
 
 [[package]]
-name = "human-sort"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "140a09c9305e6d5e557e2ed7cbc68e05765a7d4213975b87cb04920689cc6219"
-
-[[package]]
 name = "iana-time-zone"
 version = "0.1.65"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2238,9 +2232,9 @@ dependencies = [
 
 [[package]]
 name = "ordered-float"
-version = "5.5.0"
+version = "5.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c7c9e0d9b23589f26070720bac724174bfec1083e82f7854cdd0267518343c0"
+checksum = "7f59006ce1e204c30956638535b74d317bca99477b9356dfaec54c37f6f600ab"
 dependencies = [
  "num-traits 0.2.19",
 ]
@@ -3150,7 +3144,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.4.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=6d03623#6d0362314ce058e411c3efa5c12991eafc2e2cd8"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=e8e0d7d#e8e0d7dd7828387061f0f1d2da0d93353a16486f"
 dependencies = [
  "argh",
  "byteorder",
@@ -3159,7 +3153,6 @@ dependencies = [
  "fc-blackbox-patched",
  "half",
  "hex-literal",
- "human-sort",
  "jni 0.22.4",
  "log",
  "memchr",

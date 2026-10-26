@@ -212,7 +212,7 @@ impl ComputeParams {
             let gyro = self.gyro.read();
             let file_metadata = gyro.file_metadata.read();
             (0..self.frame_count).map(|f| {
-                let t = crate::timestamp_at_frame(f as i32, self.scaled_fps) + file_metadata.per_frame_time_offsets.get(f).unwrap_or(&0.0);
+                let t = crate::timestamp_at_frame(f as i32, self.scaled_fps) + file_metadata.frame_time_offset(f);
                 t - gyro.offset_at_video_timestamp(t)
             }).collect()
         };

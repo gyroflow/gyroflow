@@ -206,13 +206,15 @@ impl StabilizationManager {
             }
         };
 
-        let (fps, size) = {
+        let (fps, size, frame_count) = {
             let params = self.params.read();
-            (params.fps, params.size)
+            (params.fps, params.size, params.frame_count)
         };
+        // The per-frame tables are the video's
+        let parse_options = gyro_source::FileLoadOptions { video_frames: options.video_frames.or((frame_count > 0).then_some(frame_count)), ..options.clone() };
 
         let cancel_flag2 = cancel_flag.clone();
-        let mut md = GyroSource::parse_telemetry_file(stream, filesize, &url, options, size, fps, progress_cb, cancel_flag2)?;
+        let mut md = GyroSource::parse_telemetry_file(stream, filesize, &url, &parse_options, size, fps, progress_cb, cancel_flag2)?;
         // The parsers return what they read until then, but a cancelled load (eg. replaced by the next video) mustn't set any of it
         if cancel_flag.load(SeqCst) { return Ok(()); }
         if md.detected_source.as_ref().map(|v| v.starts_with("GoPro ")).unwrap_or_default() {
@@ -220,9 +222,11 @@ impl StabilizationManager {
             md.frame_readout_time = None;
         }
 
+        // The profile of the database the file names (a .gcsv `lensprofile`, a Gyroflow protobuf `lens_profile`), set up
+        // for the video at the end, once the file's camera is known
+        let mut referenced_lens = None;
         if is_main_video {
             if let Some(ref lens) = md.lens_profile {
-                let mut l = self.lens.write();
                 if let Some(lens_str) = lens.as_str() {
                     let mut db = self.lens_profile_db.read();
                     if !db.loaded {
@@ -233,10 +237,9 @@ impl StabilizationManager {
                         }
                         db = self.lens_profile_db.read();
                     }
-                    if let Some(found) = db.find(lens_str) {
-                        *l = found.clone();
-                    }
+                    referenced_lens = db.find(lens_str).cloned();
                 } else if lens.is_object() {
+                    let mut l = self.lens.write();
                     l.load_from_json_value(lens);
                     l.path_to_file = filesystem::url_to_path(url);
                     let db = self.lens_profile_db.read();
@@ -283,7 +286,21 @@ impl StabilizationManager {
         if let Some(id) = camera_id {
             *self.camera_id.write() = Some(id);
         }
+        if let Some(mut lens) = referenced_lens {
+            // As `load_lens_profile` sets up every profile it loads: a profile gives the same lens whichever way it's
+            // loaded, picked or named by the file
+            let (size, fps, camera_id) = self.lens_video_context();
+            lens.adapt_to_video(size, fps, &camera_id);
+            *self.lens.write() = lens;
+        }
         Ok(())
+    }
+
+    /// What a lens profile is set up for when it's loaded (`LensProfile::adapt_to_video`): the video's size and frame
+    /// rate, and the autoload identifier of the camera of the motion data loaded last
+    fn lens_video_context(&self) -> ((usize, usize), f64, String) {
+        let params = self.params.read();
+        (params.size, params.fps, self.camera_id.read().as_ref().map(|x| x.get_identifier_for_autoload()).unwrap_or_default())
     }
 
     pub fn load_lens_profile(&self, url: &str) -> Result<(), crate::GyroflowCoreError> {
@@ -301,70 +318,10 @@ impl StabilizationManager {
         } else {
             (self.lens.write().load_from_file(&url), false)
         };
-        let (width, height, aspect, id, fps) = {
-            let params = self.params.read();
-            (params.size.0, params.size.1, ((params.size.0 * 100) as f64 / params.size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.get_identifier_for_autoload()).unwrap_or_default(), (params.fps * 100.0).round() as i32)
-        };
+        let (size, fps, camera_id) = self.lens_video_context();
 
         let mut lens = self.lens.write();
-
-        // Check if the lens profile needs to be swapped for vertical
-        let lens_aspect_swapped = ((lens.calib_dimension.h * 100) as f64 / lens.calib_dimension.w.max(1) as f64).round() as u32;
-        if (width == lens.calib_dimension.h && height == lens.calib_dimension.w) || lens_aspect_swapped == aspect {
-            log::info!("Lens profile swapped from {}x{} to {}x{} to match the video aspect", lens.calib_dimension.w, lens.calib_dimension.h, lens.calib_dimension.h, lens.calib_dimension.w);
-            *lens = lens.swapped();
-        }
-
-        let matching = lens.get_all_matching_profiles();
-        if matching.len() > 1 {
-            let mut found = false;
-            if !id.is_empty() && lens.identifier == id {
-                found = true;
-            }
-            // Find best match for:
-            if !found {
-                // 1. Identifier
-                for x in &matching {
-                    if !id.is_empty() && x.identifier == id {
-                        *lens = x.clone(); found = true; break;
-                    }
-                }
-            }
-            if !found {
-                // 2. Resolution and fps
-                for x in &matching {
-                    if width == x.calib_dimension.w && height == x.calib_dimension.h && fps == (x.fps * 100.0).round() as i32 {
-                        *lens = x.clone(); found = true; break;
-                    }
-                }
-            }
-            if !found {
-                // 3. Aspect ratio and fps
-                for x in &matching {
-                    let a = ((x.calib_dimension.w * 100) as f64 / x.calib_dimension.h.max(1) as f64).round() as u32;
-                    if a == aspect && fps == (x.fps * 100.0).round() as i32 {
-                        *lens = x.clone(); break;
-                    }
-                }
-            }
-            if !found {
-                // 4. Resolution
-                for x in &matching {
-                    if width == x.calib_dimension.w && height == x.calib_dimension.h {
-                        *lens = x.clone(); found = true; break;
-                    }
-                }
-            }
-            if !found {
-                // 5. Aspect ratio
-                for x in &matching {
-                    let a = ((x.calib_dimension.w * 100) as f64 / x.calib_dimension.h.max(1) as f64).round() as u32;
-                    if a == aspect {
-                        *lens = x.clone(); break;
-                    }
-                }
-            }
-        }
+        lens.adapt_to_video(size, fps, &camera_id);
         if !from_db {
             lens.resolve_interpolations(&db);
         }
@@ -1806,7 +1763,7 @@ impl StabilizationManager {
                     imu_timestamps.push(timestamp_ms);
 
                     let frame = ((timestamp_ms - params.frame_readout_time / 2.0) * (params.get_scaled_fps() / 1000.0)).ceil() as usize;
-                    imu_timestamps_final.push(timestamp_ms - file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0));
+                    imu_timestamps_final.push(timestamp_ms - file_metadata.frame_time_offset(frame));
                 }
                 util::compress_to_base91_cbor(&imu_timestamps)           .and_then(|s| obj.insert("synced_imu_timestamps" .into(), serde_json::Value::String(s)));
                 util::compress_to_base91_cbor(&imu_timestamps_final)     .and_then(|s| obj.insert("synced_imu_timestamps_with_per_frame_offset".into(), serde_json::Value::String(s)));
@@ -2365,9 +2322,17 @@ impl StabilizationManager {
 
         if metadata.width > 0 && metadata.height > 0 && metadata.duration_s > 0.0 && metadata.fps > 0.0 {
             let video_size = (metadata.width as usize, metadata.height as usize);
-            let frame_count = (metadata.duration_s * metadata.fps).ceil() as usize;
+            // The video's duration at its frame rate is a whole number of frames, which the product misses by the
+            // rounding of the two (13.847166666666666 s at 29.970029970029973 fps is 415.00000000000006 frames): less
+            // than a millionth of a frame over a whole one is that rounding, not a frame more
+            let frames = metadata.duration_s * metadata.fps;
+            let frame_count = (frames - 1e-6).ceil().max(1.0) as usize;
 
             self.init_from_video_data(metadata.duration_s * 1000.0, metadata.fps, frame_count, video_size);
+            // The camera identifier is this video's, from its own metadata: a video without one (no metadata the parser
+            // reads) isn't the previous video's camera, and mustn't autoload its lens profile below. The app starts every
+            // video the same way (`clear`)
+            *self.camera_id.write() = None;
             let _ = self.load_gyro_data(stream, filesize, url, true, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
 
             let has_builtin_profile = {

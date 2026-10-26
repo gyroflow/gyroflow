@@ -24,7 +24,7 @@ impl FrameTransform {
         let mut scale = 1.0;
         telemetry_parser::try_block!({
             let val = file_metadata.lens_params_closest((timestamp_ms * 1000.0).round() as i64, 100000, |v| v.has_readout_scale())?; // closest within 100ms
-            scale = val.capture_area_size?.1 as f64 / val.sensor_size_px?.1 as f64;
+            scale = val.readout_scale()?;
         });
         if can_invert && params.framebuffer_inverted && !params.frame_readout_direction.is_horizontal() {
             frame_readout_time *= -1.0;
@@ -318,14 +318,14 @@ impl FrameTransform {
         let frame_readout_time = Self::get_frame_readout_time(&params, true, timestamp_ms, &file_metadata);
 
         let row_readout_time = frame_readout_time / if params.frame_readout_direction.is_horizontal() { params.width } else { params.height } as f64;
-        let timestamp_ms = timestamp_ms + file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
+        let timestamp_ms = timestamp_ms + file_metadata.frame_time_offset(frame);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
 
         // let frame_period = 1000.0 / params.scaled_fps as f64;
         // dbg!(frame_period);
 
-        let is_scale = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
+        let is_scale = if let Some(is) = file_metadata.camera_stab_at(frame) {
             (
                 params.width  as f64 / is.crop_area.2 as f64 / is.pixel_pitch.0 as f64,
                 params.height as f64 / is.crop_area.3 as f64 / is.pixel_pitch.1 as f64 * (if params.framebuffer_inverted { -1.0 } else { 1.0 }),
@@ -343,7 +343,7 @@ impl FrameTransform {
         // Only compute 1 matrix if not using rolling shutter correction
         let rows = if frame_readout_time.abs() > 0.0 { if params.frame_readout_direction.is_horizontal() { params.width } else { params.height } } else { 1 };
 
-        let breathing = if params.lens_breathing_enabled { file_metadata.lens_breathing.get(frame).filter(|b| !b.scale.is_empty()) } else { None };
+        let breathing = if params.lens_breathing_enabled { file_metadata.lens_breathing_at(frame) } else { None };
 
         // Sensor row a matrix row is looked up at, for the per-row data (sensor and lens shift, lens breathing).
         // Without rolling shutter correction the single matrix stands for the whole frame and is evaluated at its
@@ -362,7 +362,7 @@ impl FrameTransform {
                      * quat1
                      * gyro.org_quat_at_timestamp(quat_time);
 
-            let (mut sx, mut sy, mut ra, mut ox, mut oy) = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
+            let (mut sx, mut sy, mut ra, mut ox, mut oy) = if let Some(is) = file_metadata.camera_stab_at(frame) {
                 let y_sensor = sensor_row(y, is.crop_area.1 as f64, is.crop_area.3 as f64);
 
                 let s = is.ibis_spline.interpolate(y_sensor + is.offset).unwrap_or_default();
@@ -478,7 +478,7 @@ impl FrameTransform {
         let frame_readout_time = Self::get_frame_readout_time(params, false, timestamp_ms, &file_metadata);
 
         let row_readout_time = frame_readout_time / if params.frame_readout_direction.is_horizontal() { params.width } else { params.height } as f64;
-        let timestamp_ms = timestamp_ms + file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
+        let timestamp_ms = timestamp_ms + file_metadata.frame_time_offset(frame);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
 
@@ -497,7 +497,7 @@ impl FrameTransform {
         // part of the applied zoom and not of the base projection, so it follows `use_fovs` too: the measurements at
         // fov = 1 (zoom polygon, sync, features) describe the picture the zoom is fitted around, and a zoom folded
         // into them would only let the fit relax and undo it
-        let breathing = if use_fovs && params.lens_breathing_enabled { file_metadata.lens_breathing.get(frame).filter(|b| !b.scale.is_empty()) } else { None };
+        let breathing = if use_fovs && params.lens_breathing_enabled { file_metadata.lens_breathing_at(frame) } else { None };
 
         let rotations_breathing: Vec<(Matrix3<f64>, f32)> = points_iter.iter().map(|&(x, y)| {
             let quat_time = if frame_readout_time.abs() > 0.0 {
@@ -538,7 +538,7 @@ impl FrameTransform {
         // `None` when nothing breathes, so the common path carries no per-point vector at all
         let breathing_per_point: Option<Vec<f32>> = breathing.map(|_| rotations_breathing.iter().map(|x| x.1).collect());
 
-        let mut shifts: Option<Vec<(f32, f32, f32, f32, f32)>> = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
+        let mut shifts: Option<Vec<(f32, f32, f32, f32, f32)>> = if let Some(is) = file_metadata.camera_stab_at(frame) {
             let is_scale = (
                 params.width  as f64 / is.crop_area.2 as f64 / is.pixel_pitch.0 as f64,
                 params.height as f64 / is.crop_area.3 as f64 / is.pixel_pitch.1 as f64,

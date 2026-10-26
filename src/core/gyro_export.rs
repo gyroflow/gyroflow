@@ -124,7 +124,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
             let mut timestamp_ms = gyro_timestamp_ms;
             timestamp_ms += gyro.offset_at_gyro_timestamp(timestamp_ms);
 
-            let final_timestamp = timestamp_ms - file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
+            let final_timestamp = timestamp_ms - file_metadata.frame_time_offset(frame);
             if final_timestamp >= (frame + 1) as f64 * frame_duration {
                 frame += 1;
             }
@@ -135,7 +135,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
         (0..params.frame_count).map(|frame| {
             let timestamp_ms = frame as f64 / scaled_fps * 1000.0 + (params.frame_readout_time / 2.0);
 
-            let middle_timestamp = timestamp_ms + file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
+            let middle_timestamp = timestamp_ms + file_metadata.frame_time_offset(frame);
 
             // Raw IMU is only available at the actual sample times, so take the sample closest to the middle of the frame readout
             let gyro_timestamp_ms = middle_timestamp - gyro.offset_at_video_timestamp(middle_timestamp);

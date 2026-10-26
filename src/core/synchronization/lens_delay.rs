@@ -152,7 +152,8 @@ pub fn zoom_ranges(meta_ln: &[f64], fps: f64, window_ms: f64, max_windows: usize
 /// `None` rather than a guess
 pub fn frame_of_stamp(stamp_us: i64, per_frame_time_offsets: &[f64], fps: f64) -> Option<usize> {
     if !(fps > 0.0) { return None; }
-    let offset_us = |f: usize| (per_frame_time_offsets.get(f).copied().unwrap_or(0.0) * 1000.0).round() as i64;
+    // Looked up like the stamping looks it up (`FileMetadata::frame_time_offset`)
+    let offset_us = |f: usize| (crate::gyro_source::per_frame_entry(per_frame_time_offsets, f).copied().unwrap_or(0.0) * 1000.0).round() as i64;
     let guess = crate::frame_at_timestamp(stamp_us as f64 / 1000.0, fps).max(0) as usize;
     let reach = per_frame_time_offsets.iter().fold(0.0f64, |m, o| m.max(o.abs()));
     let reach = crate::frame_at_timestamp(reach, fps).max(0) as usize + 1;

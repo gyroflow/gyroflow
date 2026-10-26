@@ -25,7 +25,11 @@ pub struct LensParams {
     pub focus_distance: Option<f32>, // meters
     pub iris_fstop: Option<f32>, // f-number
     pub iris_tstop: Option<f32>, // T-number
-    pub zoom_ring_position: Option<f32> // percent of the zoom ring travel
+    pub zoom_ring_position: Option<f32>, // percent of the zoom ring travel
+    /// Sensor rows the clip's frame readout time spans, when not the sensor's whole height (`sensor_size_px`, which Sony
+    /// and Android report the readout time for): the Gyroflow protobuf's readout time is the picture's, the capture area
+    /// it shows (`gyroflow.proto`)
+    pub readout_span_rows: Option<f32>,
 }
 impl LensParams {
     /// Whether the imager geometry is complete enough to be used for the stabilization
@@ -41,7 +45,12 @@ impl LensParams {
             || !self.distortion_coefficients.is_empty()
     }
     pub fn has_readout_scale(&self) -> bool {
-        self.capture_area_size.is_some() && self.sensor_size_px.is_some()
+        self.capture_area_size.is_some() && (self.readout_span_rows.is_some() || self.sensor_size_px.is_some())
+    }
+    /// The part of the clip's readout time the capture area's rows take
+    pub fn readout_scale(&self) -> Option<f64> {
+        let span = self.readout_span_rows.or(self.sensor_size_px.map(|x| x.1 as f32))?;
+        (span > 0.0).then(|| self.capture_area_size.map(|x| x.1 as f64 / span as f64)).flatten()
     }
 }
 
@@ -108,6 +117,11 @@ pub struct FileMetadata {
     pub digital_zoom:        Option<f64>,
     pub has_accurate_timestamps: bool,
     pub additional_data:     serde_json::Value,
+    // The per-frame tables below (and `MeshCorrections::frames`) have entry k for video frame k, every frame up to the
+    // last one the metadata describes: a frame without data of its own has its neighbours' (`gyro_source::per_frame`).
+    // They're read through `frame_time_offset`, `camera_stab_at`, `lens_breathing_at` and `MeshCorrections::frame`
+    /// Offset of each frame's capture (the middle of its exposure and readout, in the motion data's time) from its time
+    /// in the video, in ms
     pub per_frame_time_offsets: Vec<f64>,
     pub camera_stab_data:    Vec<CameraStabData>,
     #[serde(rename = "mesh_corrections")]
@@ -160,6 +174,18 @@ impl FileMetadata {
     pub fn has_mesh_correction(&self) -> bool {
         !self.mesh_correction.is_empty()
     }
+    /// Offset of a frame's capture from its time in the video (`per_frame_time_offsets`), 0 without the table
+    pub fn frame_time_offset(&self, frame: usize) -> f64 {
+        per_frame_entry(&self.per_frame_time_offsets, frame).copied().unwrap_or(0.0)
+    }
+    /// The in-camera stabilizer's sensor and lens shift of a frame (`camera_stab_data`)
+    pub fn camera_stab_at(&self, frame: usize) -> Option<&CameraStabData> {
+        per_frame_entry(&self.camera_stab_data, frame)
+    }
+    /// The lens breathing compensation of a frame (`lens_breathing`), `None` where it has none
+    pub fn lens_breathing_at(&self, frame: usize) -> Option<&BreathingFrame> {
+        per_frame_entry(&self.lens_breathing, frame).filter(|b| !b.scale.is_empty())
+    }
     /// More than 0.2% between the smallest and the largest value
     fn varies(it: &mut dyn Iterator<Item = f64>) -> bool {
         let (mut min, mut max, mut count) = (f64::MAX, 0.0f64, 0usize);
@@ -209,6 +235,14 @@ impl FileMetadata {
             None
         }
     }
+}
+
+/// Entry `frame` of a per-frame table. The readers ask for every frame of the video, which can go on past the last
+/// frame the metadata describes (a camera that stops writing it a frame or two early, a video longer than the motion
+/// file): those frames continue the last one, like a frame without metadata inside the table continues its
+/// neighbours'. `None` for an empty table
+pub fn per_frame_entry<T>(table: &[T], frame: usize) -> Option<&T> {
+    table.get(frame).or_else(|| table.last())
 }
 
 // ------------- Mesh correction -------------
@@ -274,13 +308,13 @@ impl MeshCorrections {
     pub fn is_empty(&self) -> bool {
         !self.frames.iter().any(|f| !f.is_empty())
     }
+    /// No corrections, and none of the storage they took
     pub fn clear(&mut self) {
-        self.tables.clear();
-        self.frames.clear();
+        *self = Self::default();
     }
     /// The correction of a frame, `None` when it has none
     pub fn frame(&self, frame: usize) -> Option<&MeshFrame> {
-        self.frames.get(frame).filter(|f| !f.is_empty())
+        per_frame_entry(&self.frames, frame).filter(|f| !f.is_empty())
     }
     pub fn has_mesh(&self, frame: usize) -> bool {
         self.frame(frame).map_or(false, |f| f.table.is_some())
