@@ -44,6 +44,12 @@ pub struct CameraEntry {
     pub crop_factor: Option<f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub equivalent_sensor_diagonal_mm: Option<f64>,
+    /// Physical sensor size from a Gyroflow profile, when that profile recorded one.
+    /// Lensfun only supplies a crop factor, so these stay absent for those bodies.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sensor_width_mm: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sensor_height_mm: Option<f64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
@@ -388,5 +394,17 @@ mod tests {
         assert!(catalog.submission_errors(&info).is_empty());
         info.focal_length = Some(10.0);
         assert!(catalog.submission_errors(&info).is_empty());
+    }
+
+    #[test]
+    fn sensor_dimensions_survive_the_typed_catalog() {
+        let text = r#"{"schema_version":1,"cameras":[{"brand":"Sony","model":"A","crop_factor":1.5,"equivalent_sensor_diagonal_mm":28.84441,"sensor_width_mm":23.5,"sensor_height_mm":15.6}],"lenses":[]}"#;
+        let catalog = parse_catalog(text).unwrap();
+        assert_eq!(catalog.cameras[0].sensor_width_mm, Some(23.5));
+        assert_eq!(catalog.cameras[0].sensor_height_mm, Some(15.6));
+        assert_eq!(catalog.cameras[0].equivalent_sensor_diagonal_mm, Some(28.84441));
+        let encoded = serde_json::to_string(&catalog).unwrap();
+        assert!(encoded.contains("sensor_width_mm"));
+        assert!(encoded.contains("equivalent_sensor_diagonal_mm"));
     }
 }

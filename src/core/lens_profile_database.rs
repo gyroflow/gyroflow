@@ -17,6 +17,38 @@ enum DataSource {
     SerdeValue(serde_json::Value)
 }
 
+/// Object key order is not part of profile identity. `serde_json::Map` is a
+/// `BTreeMap` unless some dependency enables `preserve_order`, so sort before hashing.
+fn canonical_json(value: &serde_json::Value) -> serde_json::Value {
+    match value {
+        serde_json::Value::Object(map) => {
+            let mut entries: Vec<(String, serde_json::Value)> = map.iter()
+                .map(|(key, child)| (key.clone(), canonical_json(child)))
+                .collect();
+            entries.sort_by(|a, b| a.0.cmp(&b.0));
+            serde_json::Value::Object(entries.into_iter().collect())
+        },
+        serde_json::Value::Array(items) => serde_json::Value::Array(items.iter().map(canonical_json).collect()),
+        other => other.clone(),
+    }
+}
+
+/// `compress.rs` in gyroflow/lens_profiles stores each JSON file as a parsed
+/// value. Accept a raw string as well, in case a future packer stores the file text.
+fn adopt_bundle_catalog(slot: &mut Option<camera_catalog::CameraCatalog>, value: &serde_json::Value) {
+    let text = match value {
+        serde_json::Value::String(text) => text.clone(),
+        other => other.to_string(),
+    };
+    match camera_catalog::parse_catalog(&text) {
+        Ok(catalog) if camera_catalog::has_deliverable_metadata(&catalog) => {
+            *slot = Some(catalog);
+        },
+        Ok(_) => log::warn!("Ignoring empty camera catalogue metadata update"),
+        Err(error) => log::warn!("Ignoring invalid camera catalogue metadata: {error}"),
+    }
+}
+
 #[derive(Default)]
 pub struct LensProfileDatabase {
     preset_map: HashMap<String, String>,
@@ -139,16 +171,10 @@ impl LensProfileDatabase {
                                     for (f_name, profile) in array {
                                         if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
                                         if f_name == "__camera_catalog.json" {
-                            match camera_catalog::parse_catalog(&profile.to_string()) {
-                                Ok(value) if camera_catalog::has_deliverable_metadata(&value) => {
-                                self.camera_catalog_from_bundle = Some(value);
-                            },
-                            Ok(_) => log::warn!("Ignoring empty camera catalogue metadata update"),
-                                Err(error) => log::warn!("Ignoring invalid camera catalogue metadata: {error}"),
-                            }
-                            continue;
-                        }
-                        if f_name.starts_with("__") { continue; }
+                                            adopt_bundle_catalog(&mut self.camera_catalog_from_bundle, &profile);
+                                            continue;
+                                        }
+                                        if f_name.starts_with("__") { continue; }
                                         load(DataSource::SerdeValue(profile), &f_name);
                                     }
                                 }
@@ -174,13 +200,7 @@ impl LensProfileDatabase {
                     for (f_name, profile) in array {
                         if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
                         if f_name == "__camera_catalog.json" {
-                            match camera_catalog::parse_catalog(&profile.to_string()) {
-                                Ok(value) if camera_catalog::has_deliverable_metadata(&value) => {
-                                self.camera_catalog_from_bundle = Some(value);
-                            },
-                            Ok(_) => log::warn!("Ignoring empty camera catalogue metadata update"),
-                                Err(error) => log::warn!("Ignoring invalid camera catalogue metadata: {error}"),
-                            }
+                            adopt_bundle_catalog(&mut self.camera_catalog_from_bundle, &profile);
                             continue;
                         }
                         if f_name.starts_with("__") { continue; }
@@ -264,8 +284,7 @@ impl LensProfileDatabase {
             // The legacy checksum covers only some calibration parameters. Do
             // not use it to deduplicate different optical models or metadata.
             // get_json_value excludes runtime path, rating and checksum fields.
-            let mut payload = profile.get_json_value().ok();
-            if let Some(payload) = &mut payload { payload.sort_all_objects(); }
+            let payload = profile.get_json_value().ok().map(|value| canonical_json(&value));
             let alternate_key = payload.as_ref().and_then(|value| serde_json::to_vec(value).ok())
                 .map(|bytes| format!("{}#{:08x}", key, crc32fast::hash(&bytes)))
                 .unwrap_or_else(|| format!("{}#{}", key, profile.path_to_file));
@@ -278,7 +297,7 @@ impl LensProfileDatabase {
                     },
                     Some(existing) => {
                         if existing.is_copy == profile.is_copy && payload.as_ref().is_some_and(|payload| {
-                            existing.get_json_value().is_ok_and(|value| &value == payload)
+                            existing.get_json_value().is_ok_and(|value| canonical_json(&value) == *payload)
                         }) {
                             // The same profile can occur in a downloaded bundle
                             // and the bundled fallback. Keep its preferred copy.
