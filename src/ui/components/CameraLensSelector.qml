@@ -161,12 +161,18 @@ Column {
         width: parent.width; wrapMode: Text.WordWrap
         property var cameraInfo: Catalog.camera(root.catalogIndex, root.brand, root.cameraModel)
         visible: !!cameraInfo && (!!cameraInfo.crop_factor || (cameraInfo.mounts || []).length > 0 || !!cameraInfo.equivalent_sensor_diagonal_mm || (cameraInfo.sensor_width_mm && cameraInfo.sensor_height_mm))
-        text: cameraInfo ? (cameraInfo.mounts || []).join(", ") +
-            (cameraInfo.crop_factor ? " · " + qsTr("Crop factor: %1×").arg(cameraInfo.crop_factor) : "") +
-            (cameraInfo.sensor_width_mm && cameraInfo.sensor_height_mm
-                ? " · " + cameraInfo.sensor_width_mm + "×" + cameraInfo.sensor_height_mm + " mm"
-                : (cameraInfo.equivalent_sensor_diagonal_mm
-                    ? " · " + qsTr("Equivalent sensor diagonal: %1 mm").arg(cameraInfo.equivalent_sensor_diagonal_mm) : "")) : ""
+        text: {
+            if (!cameraInfo) return "";
+            const parts = [];
+            const mounts = cameraInfo.mounts || [];
+            if (mounts.length) parts.push(mounts.join(", "));
+            if (cameraInfo.crop_factor) parts.push(qsTr("Crop factor: %1×").arg(cameraInfo.crop_factor));
+            if (cameraInfo.sensor_width_mm && cameraInfo.sensor_height_mm)
+                parts.push(cameraInfo.sensor_width_mm + "×" + cameraInfo.sensor_height_mm + " mm");
+            else if (cameraInfo.equivalent_sensor_diagonal_mm)
+                parts.push(qsTr("Equivalent sensor diagonal: %1 mm").arg(cameraInfo.equivalent_sensor_diagonal_mm));
+            return parts.join(" · ");
+        }
     }
     Column {
         visible: !root.calibratorMode; width: parent.width; spacing: 6 * dpiScale
