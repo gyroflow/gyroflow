@@ -7,22 +7,67 @@
 
 #[cfg(feature = "use-opencv")]
 use opencv::{
-    core::{ Mat, Size, Point2f, Vector, Point3d, TermCriteria, TermCriteria_Type, CV_8UC1 },
+    core::{ Mat, Size, Point2f, Vector, Point3d, Point3f, TermCriteria, TermCriteria_Type, CV_8UC1 },
     prelude::{ MatTraitConst, MatTraitConstManual },
     calib3d::{ CALIB_CB_MARKER, Fisheye_CALIB_RECOMPUTE_EXTRINSIC, Fisheye_CALIB_FIX_SKEW }
 };
 
-use rand::prelude::IteratorRandom;
-use std::{ ffi::c_void, collections::{ BTreeSet, BTreeMap, HashSet } };
-use std::sync::atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst };
+// The calibrator itself needs OpenCV, to find the chessboards (and for its `OpenCV` method); the module builds without
+// it for `solver`, which is pure Rust
+#[cfg(feature = "opencv")]
+use {
+    rand::prelude::IteratorRandom,
+    std::{ ffi::c_void, collections::BTreeSet },
+    std::sync::atomic::{ AtomicBool, AtomicUsize, Ordering::SeqCst },
+    rayon::iter::{ ParallelIterator, IntoParallelIterator },
+    crate::stabilization::distortion_models::{ DistortionModel, OpenCVFisheye, OpenCVStandard, GenericPolynomial },
+};
+use std::collections::{ BTreeMap, HashSet };
 use std::sync::Arc;
-use nalgebra::{ Matrix3, Vector4 };
+use nalgebra::Matrix3;
 use parking_lot::RwLock;
-use rayon::iter::{ ParallelIterator, IntoParallelIterator };
-
-use crate::stabilization::distortion_models::DistortionModel;
 
 pub mod drawing;
+pub mod solver;
+
+/// Which solver `LensCalibrator::calibrate` fits the lens with, from the boards `feed_frame` found
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CalibrationMethod {
+    /// OpenCV's own calibration of the model (`cv::fisheye::calibrate`, `cv::calibrateCamera`) on `iterations` random
+    /// sets of `max_images` frames, the one with the lowest error kept. Its fisheye can't take a board past 90° from
+    /// the lens axis, and on a lens that reaches that far it often fails outright
+    #[default]
+    OpenCV,
+    /// [`solver`] on every frame at once, with the model's own projection, so it calibrates lenses wider than 180°
+    Gyroflow,
+}
+impl From<i32> for CalibrationMethod {
+    fn from(v: i32) -> Self { if v == 1 { Self::Gyroflow } else { Self::OpenCV } }
+}
+
+/// The lens model `LensCalibrator::calibrate` fits
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CalibrationModel {
+    #[default]
+    OpenCVFisheye,
+    OpenCVStandard,
+    /// OpenCV has no such model: always fitted by [`solver`], whichever the method
+    GenericPolynomial,
+}
+impl CalibrationModel {
+    /// The profile's `distortion_model`. `None` for `opencv_fisheye`: it's the default, and the profiles calibrated
+    /// before there was a choice leave it out
+    pub fn distortion_model(&self) -> Option<&'static str> {
+        match self {
+            Self::OpenCVFisheye     => None,
+            Self::OpenCVStandard    => Some("opencv_standard"),
+            Self::GenericPolynomial => Some("generic_polynomial"),
+        }
+    }
+}
+impl From<i32> for CalibrationModel {
+    fn from(v: i32) -> Self { match v { 1 => Self::OpenCVStandard, 2 => Self::GenericPolynomial, _ => Self::OpenCVFisheye } }
+}
 
 #[derive(Clone, Default, Debug)]
 pub struct Detected {
@@ -32,7 +77,7 @@ pub struct Detected {
     pub avg_sharpness: f64,
     pub is_forced: bool
 }
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct LensCalibrator {
     pub rows: usize,
     pub columns: usize,
@@ -48,7 +93,11 @@ pub struct LensCalibrator {
     pub objp: Vec<(f64, f64)>,
 
     pub k: Matrix3<f64>,
-    pub d: Vector4<f64>,
+    /// The model's distortion coefficients, as many as the method fitted
+    pub d: Vec<f64>,
+    /// The model `k` and `d` were fitted with. `model` is the choice for the next fit, and differs from this one
+    /// from when it's changed until a fit with it succeeds
+    pub fitted_model: CalibrationModel,
 
     pub sum_sharpness: Arc<RwLock<f64>>,
 
@@ -60,11 +109,19 @@ pub struct LensCalibrator {
     pub digital_lens_params: Option<Vec<f64>>,
     pub asymmetrical: bool,
 
+    pub method: CalibrationMethod,
+    pub model: CalibrationModel,
+
     pub all_matches: Arc<RwLock<BTreeMap<i32, Detected>>>, // frame, Detected
     pub image_points: Arc<RwLock<BTreeMap<i32, Detected>>>, // frame, Detected
-    pub used_points: BTreeMap<i32, Detected> // frame, Detected
+    pub used_points: BTreeMap<i32, Detected>, // frame, Detected
+
+    /// Counts the fits `calibrate_shared` started, so one that a later one overtook isn't stored over it
+    #[cfg(feature = "opencv")]
+    fit_generation: u64,
 }
 
+#[cfg(feature = "opencv")]
 impl LensCalibrator {
     pub fn new() -> Self {
         #[cfg(feature = "opencv")]
@@ -203,6 +260,10 @@ impl LensCalibrator {
     }
 
     pub fn calibrate(&mut self, only_used: bool) -> Result<(), opencv::Error> {
+        if self.method == CalibrationMethod::Gyroflow || self.model == CalibrationModel::GenericPolynomial {
+            return self.calibrate_with_solver(only_used);
+        }
+        let model = self.model;
         let calib_criteria = TermCriteria::new(TermCriteria_Type::EPS as i32 | TermCriteria_Type::COUNT as i32, 30, 1e-6)?;
 
         let found_frames: BTreeSet<i32> = if only_used {
@@ -211,7 +272,7 @@ impl LensCalibrator {
             self.image_points.read().keys().copied().collect()
         };
 
-        let find_min = |a: (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>), b: (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>)| -> (f64, Matrix3::<f64>, Vector4::<f64>, Vec<i32>) { if a.0 < b.0 { a } else { b } };
+        let find_min = |a: (f64, Matrix3::<f64>, Vec<f64>, Vec<i32>), b: (f64, Matrix3::<f64>, Vec<f64>, Vec<i32>)| -> (f64, Matrix3::<f64>, Vec<f64>, Vec<i32>) { if a.0 < b.0 { a } else { b } };
 
         let image_points = self.image_points.read().clone();
         let mut width = self.width as i32;
@@ -260,7 +321,7 @@ impl LensCalibrator {
             let final_frames: Vec<i32> = candidate_frames.iter().chain(forced_frames.iter()).filter_map(|k| Some(image_points.get(k)?.frame)).collect();
 
             if final_frames.len() == 1 {
-                return (999.0000, Matrix3::<f64>::default(), Vector4::<f64>::default(), final_frames);
+                return (999.0000, Matrix3::<f64>::default(), Vec::new(), final_frames);
             }
 
             let imgpoints = Vector::<Vector<Point2f>>::from_iter(
@@ -268,21 +329,32 @@ impl LensCalibrator {
                     image_points.get(k)?.points.iter().map(|(x, y)| Point2f::new(*x as f32, *y as f32))
                 ))
             ));
-            let objpoints = Vector::<Vector<Point3d>>::from_iter(
-                (0..imgpoints.len()).into_iter().map(|_| Vector::<Point3d>::from_iter(
-                    objp.iter().map(|(x, y)| Point3d::new(*x, *y, 0.0))
-                ))
-            );
 
             let mut k  = Mat::default(); let mut d  = Mat::default();
             let mut rv = Mat::default(); let mut tv = Mat::default();
             // let mut nop = Mat::default();
 
             // match opencv::calib3d::calibrate_camera_ro(&objpoints, &imgpoints, size, 13, &mut k, &mut d, &mut rv, &mut tv, &mut nop, Fisheye_CALIB_RECOMPUTE_EXTRINSIC | Fisheye_CALIB_FIX_SKEW, calib_criteria) {
-            match opencv::calib3d::calibrate(&objpoints, &imgpoints, size, &mut k, &mut d, &mut rv, &mut tv, Fisheye_CALIB_RECOMPUTE_EXTRINSIC | Fisheye_CALIB_FIX_SKEW, calib_criteria) {
+            let result = if model == CalibrationModel::OpenCVStandard {
+                // k1, k2, p1, p2, k3: the coefficients `opencv_standard` reads first. It wants single-precision board points
+                let objpoints = Vector::<Vector<Point3f>>::from_iter(
+                    (0..imgpoints.len()).into_iter().map(|_| Vector::<Point3f>::from_iter(
+                        objp.iter().map(|(x, y)| Point3f::new(*x as f32, *y as f32, 0.0))
+                    ))
+                );
+                opencv::calib3d::calibrate_camera(&objpoints, &imgpoints, size, &mut k, &mut d, &mut rv, &mut tv, 0, calib_criteria)
+            } else {
+                let objpoints = Vector::<Vector<Point3d>>::from_iter(
+                    (0..imgpoints.len()).into_iter().map(|_| Vector::<Point3d>::from_iter(
+                        objp.iter().map(|(x, y)| Point3d::new(*x, *y, 0.0))
+                    ))
+                );
+                opencv::calib3d::calibrate(&objpoints, &imgpoints, size, &mut k, &mut d, &mut rv, &mut tv, Fisheye_CALIB_RECOMPUTE_EXTRINSIC | Fisheye_CALIB_FIX_SKEW, calib_criteria)
+            };
+            match result {
                 Ok(rms) => {
                     if let Ok(k) = cv_to_mat3(k) {
-                        if let Ok(d) = cv_to_vec4(d) {
+                        if let Ok(d) = cv_to_vec(d) {
                             return (rms, k, d, final_frames);
                         }
                     }
@@ -291,12 +363,13 @@ impl LensCalibrator {
                     log::warn!("Failed to calibrate! {:?}", e);
                 }
             }
-            (999.0000, Matrix3::<f64>::default(), Vector4::<f64>::default(), Vec::new())
+            (999.0000, Matrix3::<f64>::default(), Vec::new(), Vec::new())
         }).reduce_with(find_min);
 
         if let Some((rms, k, d, used_frames)) = result {
             self.k = k;
             self.d = d;
+            self.fitted_model = model;
             self.rms = rms;
             self.used_points = used_frames.into_iter().filter_map(|f| Some((f, image_points.get(&f)?.clone()))).collect();
 
@@ -305,6 +378,99 @@ impl LensCalibrator {
             Err(opencv::Error::new(0, "Unable to calibrate camera".to_string()))
         }
     }
+
+    /// [`CalibrationMethod::Gyroflow`], and any method for `generic_polynomial`: every frame at once rather than random
+    /// sets of them (so `max_images` and `iterations` don't apply), the frames that fit far worse than the rest left
+    /// out of `used_points`
+    fn calibrate_with_solver(&mut self, only_used: bool) -> Result<(), opencv::Error> {
+        let image_points = self.image_points.read().clone();
+        let candidates: BTreeSet<i32> = if only_used {
+            self.used_points.keys().copied().collect()
+        } else {
+            image_points.keys().copied().collect()
+        };
+        let frames: Vec<i32> = candidates.into_iter().chain(self.forced_frames.iter().copied())
+            .collect::<BTreeSet<i32>>().into_iter()
+            .filter(|f| image_points.contains_key(f))
+            .collect();
+        let views: Vec<Vec<(f64, f64)>> = frames.iter().map(|f| image_points[f].points.iter().map(|p| (p.0 as f64, p.1 as f64)).collect()).collect();
+        let protected: Vec<usize> = (0..frames.len()).filter(|&i| self.forced_frames.contains(&frames[i])).collect();
+
+        let started = std::time::Instant::now();
+        let (size, board) = ((self.width, self.height), &self.objp);
+        let fit = match self.model {
+            CalibrationModel::OpenCVFisheye     => solver::calibrate(&OpenCVFisheye::default(),     board, &views, size, &protected),
+            CalibrationModel::OpenCVStandard    => solver::calibrate(&OpenCVStandard::default(),    board, &views, size, &protected),
+            CalibrationModel::GenericPolynomial => solver::calibrate(&GenericPolynomial::default(), board, &views, size, &protected),
+        };
+        let Some(c) = fit else {
+            return Err(opencv::Error::new(0, "Unable to calibrate camera".to_string()));
+        };
+        log::info!("Calibrated {:?} in {:.2}s on {} of {} frames: rms {:.4} px, f = ({:.2}, {:.2}), c = ({:.2}, {:.2}), k = {:?}, boards up to {:.1}° from the axis",
+            self.model, started.elapsed().as_secs_f64(), c.kept.len(), frames.len(), c.rms, c.f.0, c.f.1, c.c.0, c.c.1, &c.k[..c.fitted], c.max_corner_angle.to_degrees());
+        for &i in protected.iter().filter(|i| !c.kept.contains(i)) {
+            log::warn!("Frame {} was added by hand, but its pattern couldn't be fitted with the others, so it's left out", frames[i]);
+        }
+
+        self.k = Matrix3::new(c.f.0, 0.0, c.c.0, 0.0, c.f.1, c.c.1, 0.0, 0.0, 1.0);
+        self.d = c.k[..c.fitted].to_vec();
+        self.fitted_model = self.model;
+        self.rms = c.rms;
+        self.used_points = c.kept.iter().map(|&i| (frames[i], image_points[&frames[i]].clone())).collect();
+        Ok(())
+    }
+
+    /// `calibrate` on the calibrator `shared` holds, without holding its lock during the fit, which can take seconds:
+    /// a frame added meanwhile, or the preview drawing the boards, only waits for the copy the fit starts from and for
+    /// the store. The fit runs on a pool of its own (`fit_pool`), so no job of the app's pool ends up waiting inside it
+    /// either. It's stored unless a later fit started meanwhile or the calibrator was replaced. A failed one leaves the
+    /// previous fit in place, or clears it with `clear_on_failure`, so an export has nothing to write.
+    /// Returns the calibrator with the fit; `None` when there's no calibrator or a later fit overtook this one
+    pub fn calibrate_shared(shared: &RwLock<Option<Self>>, only_used: bool, clear_on_failure: bool) -> Option<Result<Self, opencv::Error>> {
+        let (mut cal, generation) = {
+            let mut lock = shared.write();
+            let current = lock.as_mut()?;
+            current.fit_generation += 1;
+            (current.clone(), current.fit_generation)
+        };
+        // From a thread outside both pools: a worker of the app's pool waiting for the fit would run other jobs of
+        // that pool meanwhile, on top of it
+        let result = std::thread::scope(|s| s.spawn(|| fit_pool().install(|| cal.calibrate(only_used))).join())
+            .unwrap_or_else(|_| Err(opencv::Error::new(0, "The calibration failed unexpectedly".to_string())));
+        if result.is_err() && clear_on_failure {
+            cal.clear_fit();
+        }
+
+        let mut lock = shared.write();
+        let current = lock.as_mut()?;
+        if current.fit_generation != generation || !Arc::ptr_eq(&current.image_points, &cal.image_points) {
+            return None;
+        }
+        if result.is_ok() || clear_on_failure {
+            current.k            = cal.k;
+            current.d            = cal.d.clone();
+            current.fitted_model = cal.fitted_model;
+            current.rms          = cal.rms;
+            current.used_points  = cal.used_points.clone();
+        }
+        Some(result.map(|()| cal))
+    }
+
+    /// Forgets the fit, as if there had never been one
+    fn clear_fit(&mut self) {
+        self.k = Matrix3::default();
+        self.d.clear();
+        self.rms = 0.0;
+        self.used_points.clear();
+    }
+}
+
+/// The pool every `calibrate_shared` fit runs its parallel work on (the solver's, OpenCV's random sets), away from
+/// the app's pool, whose jobs may be waiting for the calibrator
+#[cfg(feature = "opencv")]
+fn fit_pool() -> &'static rayon::ThreadPool {
+    static POOL: std::sync::OnceLock<rayon::ThreadPool> = std::sync::OnceLock::new();
+    POOL.get_or_init(|| rayon::ThreadPoolBuilder::new().thread_name(|i| format!("Calibration {i}")).build().expect("Failed to start the calibration threads"))
 }
 
 #[cfg(feature = "use-opencv")]
@@ -320,16 +486,11 @@ fn cv_to_mat3(r1: Mat) -> Result<Matrix3<f64>, opencv::Error> {
 }
 
 #[cfg(feature = "use-opencv")]
-fn cv_to_vec4(v: Mat) -> Result<Vector4<f64>, opencv::Error> {
+fn cv_to_vec(v: Mat) -> Result<Vec<f64>, opencv::Error> {
     if v.typ() != opencv::core::CV_64FC1 {
         return Err(opencv::Error::new(0, "Invalid matrix type".to_string()));
     }
-    Ok(Vector4::new(
-        *v.at::<f64>(0)?,
-        *v.at::<f64>(1)?,
-        *v.at::<f64>(2)?,
-        *v.at::<f64>(3)?
-    ))
+    (0..v.total() as i32).map(|i| v.at::<f64>(i).copied()).collect()
 }
 
 // https://github.com/Tangram-Vision/Tangram-Vision-Blog/blob/main/2021.05.28_CalibrationFromScratch/src/main.rs

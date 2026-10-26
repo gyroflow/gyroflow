@@ -4,11 +4,13 @@
 mod complementary_v2;
 mod complementary;
 mod vqf;
+pub mod gyro_bias;
 
 use std::collections::BTreeMap;
 use nalgebra::*;
 use super::gyro_source::{TimeIMU, Quat64, TimeQuat};
 use ahrs::{Ahrs, Madgwick, Mahony};
+use gyro_bias::GyroBias;
 
 // TODO: Magnetometer calculations are disabled in Complementary and VQF. Figure out what's wrong and enable them
 
@@ -67,10 +69,12 @@ impl GyroIntegrator for ComplementaryIntegrator {
         // Limit initial settle time for short videos
         f.set_initial_settle_time((duration_ms / 1000.0 * 0.05).min(2.0));
         //f.set_orientation(init_pos_q.scalar(), -init_pos_q.vector()[0], -init_pos_q.vector()[1], -init_pos_q.vector()[2]);
+        let bias = GyroBias::estimate(imu_data);
         let mut counter = 0;
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_ms;
         for v in imu_data {
             if let Some(g) = v.gyro.as_ref() {
+                let g = &GyroBias::remove(bias.as_ref(), v.timestamp_ms, g);
                 let mut a = v.accl.unwrap_or_default();
                 if a[0].abs() == 0.0 && a[1].abs() == 0.0 && a[2].abs() == 0.0 { a[0] += 0.0000001; }
                 let acc = Vector3::new(-a[1], a[0], a[2]);
@@ -109,6 +113,12 @@ impl GyroIntegrator for ComplementaryIntegrator {
 
 impl GyroIntegrator for VQFIntegrator {
     fn integrate(imu_data: &[TimeIMU], duration_ms: f64) -> TimeQuat {
+        Self::integrate_with_bias(imu_data, duration_ms, GyroBias::estimate(imu_data).as_ref())
+    }
+}
+impl VQFIntegrator {
+    /// `bias` is removed from the gyro samples first, VQF then estimates what's left
+    pub fn integrate_with_bias(imu_data: &[TimeIMU], duration_ms: f64, bias: Option<&GyroBias>) -> TimeQuat {
         if imu_data.is_empty() { return BTreeMap::new(); }
         let mut out_quats = BTreeMap::new();
         let sample_time = duration_ms / (imu_data.len() * 1000) as f64;
@@ -122,7 +132,7 @@ impl GyroIntegrator for VQFIntegrator {
         let mut mag = Vec::with_capacity(if has_magn { num_samples*3 } else { 0 });
         let mut quat = Vec::with_capacity(num_samples*4);
         for v in imu_data {
-            let g = v.gyro.unwrap_or_default();
+            let g = v.gyro.map(|g| GyroBias::remove(bias, v.timestamp_ms, &g)).unwrap_or_default();
             // zero acc or mag (default) is ignored by VQF
             let a = v.accl.unwrap_or_default();
             gyr.extend([-g[1] * DEG2RAD, g[0] * DEG2RAD, g[2] * DEG2RAD]);
@@ -202,9 +212,11 @@ impl GyroIntegrator for SimpleGyroAccelIntegrator {
         let sample_time_ms = duration_ms / imu_data.len() as f64;
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_ms;
         let start_time = prev_time;
+        let bias = GyroBias::estimate(imu_data);
 
         for v in imu_data {
             if let Some(g) = v.gyro.as_ref() {
+                let g = &GyroBias::remove(bias.as_ref(), v.timestamp_ms, g);
                 let mut omega = Vector3::new(-g[1], g[0], g[2]) * (std::f64::consts::PI / 180.0);
 
                 let a = v.accl.unwrap_or_default();
@@ -250,9 +262,11 @@ impl GyroIntegrator for MahonyIntegrator {
         let sample_time_s = duration_ms / 1000.0 / imu_data.len() as f64;
 
         let mut ahrs = Mahony::new_with_quat(sample_time_s, 0.5, 0.0, init_pos);
+        let bias = GyroBias::estimate(imu_data);
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_s;
         for v in imu_data {
             if let Some(g) = v.gyro.as_ref() {
+                let g = &GyroBias::remove(bias.as_ref(), v.timestamp_ms, g);
                 let gyro = Vector3::new(-g[1], g[0], g[2]) * (std::f64::consts::PI / 180.0);
                 let mut a = v.accl.unwrap_or_default();
                 if a[0].abs() == 0.0 && a[1].abs() == 0.0 && a[2].abs() == 0.0 { a[0] += 0.0000001; }
@@ -294,9 +308,11 @@ impl GyroIntegrator for MadgwickIntegrator {
         let sample_time_s = duration_ms / 1000.0 / imu_data.len() as f64;
 
         let mut ahrs = Madgwick::new_with_quat(sample_time_s, 0.02, init_pos);
+        let bias = GyroBias::estimate(imu_data);
         let mut prev_time = imu_data[0].timestamp_ms - sample_time_s;
         for v in imu_data {
             if let Some(g) = v.gyro.as_ref() {
+                let g = &GyroBias::remove(bias.as_ref(), v.timestamp_ms, g);
                 let gyro = Vector3::new(-g[1], g[0], g[2]) * (std::f64::consts::PI / 180.0);
                 let mut a = v.accl.unwrap_or_default();
                 if a[0].abs() == 0.0 && a[1].abs() == 0.0 && a[2].abs() == 0.0 { a[0] += 0.0000001; }

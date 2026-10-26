@@ -29,8 +29,8 @@ pub struct ComputeParams {
     pub output_height: usize,
     pub video_rotation: f64,
     pub lens_correction_amount: f64,
-    /// [`crate::stabilization::projection::OutputProjection`] as `i32`. Always `Rectilinear` for now - the
-    /// pipeline reads it everywhere, but nothing in the UI picks another one yet
+    /// [`crate::stabilization::projection::OutputProjection`] as `i32`: the one picked in the Lens profile
+    /// section, with "Automatic" already resolved for the clip's lens, so never `projection::AUTOMATIC` here
     pub output_projection: i32,
     pub light_refraction_coefficient: f64,
     pub video_speed: f64,
@@ -55,8 +55,14 @@ pub struct ComputeParams {
     pub suppress_rotation: bool,
     pub fov_algorithm_margin: f32,
     pub smoothing_fov_limit_per_frame: Vec<f64>,
+    /// The lens per lens state, for the crop constraint of the optimal smoothing, see `calculate_camera_fovs`
+    pub smoothing_crop_lenses: Option<Arc<crate::smoothing::optimal::crop::CropLenses>>,
+    /// Per frame, the time (ms) the render reads its orientations at, in the motion's own timeline, see `calculate_camera_fovs`
+    pub smoothing_frame_times: Option<Arc<Vec<f64>>>,
     pub max_zoom: Option<f64>,
     pub max_zoom_iterations: usize,
+    pub fixed_zoom: bool,
+    pub zoom_limit_whole_clip: bool,
 
     pub zooming_debug_points: bool,
 
@@ -102,8 +108,12 @@ impl ComputeParams {
             camera_diagonal_fovs: Vec::new(),
 
             smoothing_fov_limit_per_frame: Vec::new(),
+            smoothing_crop_lenses: None,
+            smoothing_frame_times: None,
             max_zoom: params.max_zoom.clone(),
             max_zoom_iterations: params.max_zoom_iterations,
+            fixed_zoom: params.fixed_zoom,
+            zoom_limit_whole_clip: params.zoom_limit_whole_clip,
 
             frame_count: params.frame_count,
             fov_scale: params.fov,
@@ -121,7 +131,7 @@ impl ComputeParams {
             background_margin: params.background_margin,
             background_margin_feather: params.background_margin_feather,
             lens_correction_amount: params.lens_correction_amount,
-            output_projection: crate::stabilization::projection::OutputProjection::Rectilinear as i32,
+            output_projection: params.output_projection,
             light_refraction_coefficient: params.light_refraction_coefficient,
             framebuffer_inverted: params.framebuffer_inverted,
             frame_readout_time: params.frame_readout_time,
@@ -147,7 +157,7 @@ impl ComputeParams {
 
             keyframes: mgr.keyframes.read().clone(),
 
-            zooming_debug_points: true,
+            zooming_debug_points: false,
 
             focal_lengths: params.focal_lengths.clone(),
             smoothed_focal_lengths: params.smoothed_focal_lengths.clone(),
@@ -157,15 +167,17 @@ impl ComputeParams {
 
             lens_breathing_enabled: params.lens_breathing_enabled,
         };
-        // Everything above is a read of `mgr.params`, and nothing below needs it. The projection is measured
-        // on the lens data, which takes the `gyro` and `file_metadata` locks (`get_lens_data_at_timestamp`),
+        // Everything above is a read of `mgr.params`, and nothing below needs it. "Automatic" measures the
+        // projection on the lens data, which takes the `gyro` and `file_metadata` locks (`get_lens_data_at_timestamp`),
         // and this runs under `stabilization.write()` at some call sites - so the guard is dropped first
         // rather than held across two more locks it has no reason to be nested with
         drop(params);
 
-        // Rectilinear for every lens rectilinear can hold, stereographic for the ones it can't (a 200° body) -
-        // measured on the lens data the render will use, so the choice and the picture agree
-        ret.output_projection = crate::stabilization::projection::OutputProjection::for_lens(&ret) as i32;
+        // "Automatic": rectilinear for every lens rectilinear can hold, stereographic for the ones it can't (a
+        // 200° body) - measured on the lens data the render will use, so the choice and the picture agree
+        if ret.output_projection == crate::stabilization::projection::AUTOMATIC {
+            ret.output_projection = crate::stabilization::projection::OutputProjection::for_lens(&ret) as i32;
+        }
         ret
     }
 
@@ -178,14 +190,33 @@ impl ComputeParams {
             1 // FOV is constant (ie. lens is fixed focal length)
         };
         self.camera_diagonal_fovs = Vec::with_capacity(frame_count);
+        // The smoothing runs under the gyro lock and can't look the lens up itself, so the crop constraint of the
+        // optimal smoothing takes it from here, the same lookups
+        let mut crop_lenses = crate::smoothing::optimal::crop::CropLenses::default();
         for f in 0..frame_count as i32 {
             let timestamp = crate::timestamp_at_frame(f, self.scaled_fps);
-            let (camera_matrix, _, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&self, timestamp, false);
+            let lens = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&self, timestamp, false);
+            let camera_matrix = lens.0;
             let diag_length = ((self.width.pow(2) + self.height.pow(2)) as f64).sqrt();
             // let diag_pixel_focal_length = (camera_matrix[(0, 0)].powi(2) + camera_matrix[(1, 1)].powi(2)).sqrt();
             let d_fov = 2.0 * ((diag_length / (2.0 * camera_matrix[(1, 1)])).atan()) * 180.0 / std::f64::consts::PI;
             self.camera_diagonal_fovs.push(d_fov);
+            crop_lenses.push(self, f as usize, &lens);
         }
+        crop_lenses.finish();
+        self.smoothing_crop_lenses = Some(Arc::new(crop_lenses));
+
+        // ... and the time the render reads each frame's orientations at, in the motion's own timeline: the frame's
+        // time with its per-frame offset, less the sync offset there (`GyroSource::quat_at_timestamp`)
+        let times = {
+            let gyro = self.gyro.read();
+            let file_metadata = gyro.file_metadata.read();
+            (0..self.frame_count).map(|f| {
+                let t = crate::timestamp_at_frame(f as i32, self.scaled_fps) + file_metadata.per_frame_time_offsets.get(f).unwrap_or(&0.0);
+                t - gyro.offset_at_video_timestamp(t)
+            }).collect()
+        };
+        self.smoothing_frame_times = Some(Arc::new(times));
     }
 }
 
@@ -226,6 +257,8 @@ impl std::fmt::Debug for ComputeParams {
          .field("additional_rotation",       &self.additional_rotation)
          .field("additional_translation",    &self.additional_translation)
          .field("adaptive_zoom_method",      &self.adaptive_zoom_method)
+         .field("fixed_zoom",                &self.fixed_zoom)
+         .field("zoom_limit_whole_clip",     &self.zoom_limit_whole_clip)
          .field("framebuffer_inverted",      &self.framebuffer_inverted)
          .field("zooming_debug_points",      &self.zooming_debug_points)
          .field("distortion_model",          &self.distortion_model.id())

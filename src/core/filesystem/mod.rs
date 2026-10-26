@@ -493,7 +493,8 @@ pub fn open_file(url: &str, writing: bool, truncate: bool) -> Result<FileWrapper
 
     #[cfg(target_os = "android")]
     {
-        return FileWrapper::open_android(url, if writing && truncate { "wt" } else if writing { "w" } else { "r" });
+        // "w" can truncate too (it does in ParcelFileDescriptor.parseMode), "rw" keeps the content like on the other platforms
+        return FileWrapper::open_android(url, if writing && truncate { "wt" } else if writing { "rw" } else { "r" });
     }
     #[cfg(not(target_os = "android"))]
     {

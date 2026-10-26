@@ -133,6 +133,7 @@ Window {
             ui_tools.init_calibrator();
             Qt.callLater(() => {
                 controller.init_player(videoArea.vid);
+                lensCalib.applyCalibrationChoice();
                 Qt.callLater(() => {
                     videoArea.loadFile(file);
                 });
@@ -208,7 +209,7 @@ Window {
                             }
 
                             calibrator_window.getSaveFileUrl(folder, output, function(url) {
-                                controller.export_lens_profile(url, lensCalib.calibrationInfo, lensCalib.uploadProfile.checked && lensCalib.uploadProfile.enabled);
+                                controller.export_lens_profile(url, lensCalib.calibrationInfo, lensCalib.uploadProfile.checked);
                             }, "Lens profile");
                         }
                         batch.runIn(1000, function() { batch.start(); });

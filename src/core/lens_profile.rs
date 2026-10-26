@@ -138,21 +138,57 @@ impl LensProfile {
         self.optimal_fov = None;
 
         self.asymmetrical = cal.asymmetrical;
+        // The model the coefficients came from, which the one picked for the next fit may not be yet
+        self.distortion_model = cal.fitted_model.distortion_model().map(str::to_string);
 
         self.fisheye_params = CameraParams {
             RMS_error: cal.rms,
             camera_matrix: cal.k.row_iter().map(|x| [x[0], x[1], x[2]]).collect(),
-            distortion_coeffs: cal.d.as_slice().to_vec(),
+            distortion_coeffs: cal.d.clone(),
             radial_distortion_limit: None
         };
 
         self.finalize();
+        // The field limit, where the curve folds, as a loaded profile has it: without it the calibrator's own preview
+        // has no limit for a fit whose curve folds inside the frame
+        self.init();
     }
 
     pub fn finalize(&mut self) {
         self.calibrator_version = env!("CARGO_PKG_VERSION").to_string();
         self.date = time::OffsetDateTime::now_local().map(|v| v.date().to_string()).unwrap_or_default();
         self.name = self.get_name();
+    }
+
+    /// A distortion-free (rectilinear) lens of a 35 mm equivalent focal length, in place of a calibration, for a video
+    /// that has no distortion to correct: a rectilinear lens, or one corrected in camera. The 35 mm equivalent is the
+    /// diagonal field of view of a 36x24 mm frame
+    pub fn from_focal_length(width: usize, height: usize, focal_length_35mm: f64) -> Option<Self> {
+        if width == 0 || height == 0 || !focal_length_35mm.is_finite() || focal_length_35mm <= 0.0 { return None; }
+        let (w, h) = (width as f64, height as f64);
+        let f = focal_length_35mm * (w * w + h * h).sqrt() / (36.0f64 * 36.0 + 24.0 * 24.0).sqrt();
+
+        let mut profile = Self {
+            calib_dimension: Dimensions { w: width, h: height },
+            orig_dimension:  Dimensions { w: width, h: height },
+            input_horizontal_stretch: 1.0,
+            input_vertical_stretch:   1.0,
+            official: true,
+            distortion_model: Some("opencv_standard".into()),
+            focal_length: Some(focal_length_35mm),
+            crop_factor: Some(1.0),
+            fisheye_params: CameraParams {
+                camera_matrix: vec![[f, 0.0, w / 2.0], [0.0, f, h / 2.0], [0.0, 0.0, 1.0]],
+                // Zero, but there: with fewer than 4 the focal length in the lens metadata of the file takes over
+                // (`FrameTransform::get_lens_data_at_lens_timestamp`)
+                distortion_coeffs: vec![0.0; 8],
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        profile.init();
+        profile.finalize();
+        Some(profile)
     }
 
     pub fn get_json_value(&self) -> Result<serde_json::Value, serde_json::error::Error> {
@@ -271,7 +307,8 @@ impl LensProfile {
         ret
     }
 
-    fn get_camera_matrix_internal(&self, invert_h: bool) -> Option<nalgebra::Matrix3<f64>> {
+    /// The calibration's camera matrix, upright. An upside-down framebuffer mirrors it in `FrameTransform::get_lens_data_at_lens_timestamp`
+    fn get_camera_matrix_internal(&self) -> Option<nalgebra::Matrix3<f64>> {
         if self.fisheye_params.camera_matrix.len() == 3 {
             let mut mat = nalgebra::Matrix3::from_rows(&[
                 self.fisheye_params.camera_matrix[0].into(),
@@ -281,8 +318,6 @@ impl LensProfile {
             if !self.asymmetrical {
                 mat[(0, 2)] = self.calib_dimension.w as f64 / 2.0;
                 mat[(1, 2)] = self.calib_dimension.h as f64 / 2.0;
-            } else if invert_h {
-                mat[(1, 2)] = self.calib_dimension.h as f64 - mat[(1, 2)];
             }
             if let Some(crop) = self.crop {
                 mat[(0, 0)] /= crop;
@@ -293,9 +328,9 @@ impl LensProfile {
             None
         }
     }
-    pub fn get_camera_matrix(&self, size: (usize, usize), invert_h: bool) -> nalgebra::Matrix3<f64> {
+    pub fn get_camera_matrix(&self, size: (usize, usize)) -> nalgebra::Matrix3<f64> {
         if self.fisheye_params.camera_matrix.len() == 3 {
-            let mat = self.get_camera_matrix_internal(invert_h).unwrap();
+            let mat = self.get_camera_matrix_internal().unwrap();
 
             // TODO: this didn't really work, try to figure it out and re-enable
             // if self.optimal_fov.is_none() && self.num_images > 3 {

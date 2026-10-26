@@ -98,6 +98,69 @@ pub const COEFFS: [f32; 64+128+256 + 9*4 + 4] = [
 // ];
 // const ALPHAS: [f32; 4] = [ 1.0, 0.75, 0.50, 0.25 ];
 
+/// The kernel parameters as the SPIR-V kernel's struct, field by field. The two are separate definitions of one layout
+/// (packed arrays here, glam vectors there), so a transmute between them fails, or silently misreads, whenever they
+/// drift apart or the build picks up another revision of `stabilize_spirv` (it's built as a dylib, which cargo doesn't
+/// give a hashed file name, so builds of different revisions in one target dir replace each other's)
+fn spirv_kernel_params(params: &KernelParams) -> stabilize_spirv::KernelParams {
+    use stabilize_spirv::glam::{ Vec2, Vec4, IVec4 };
+    let p = *params; // packed, the fields are read by value
+    let (k, digital_lens_params) = (p.k, p.digital_lens_params);
+    let vec4 = |a: &[f32]| Vec4::new(a[0], a[1], a[2], a[3]);
+    stabilize_spirv::KernelParams {
+        width:                     p.width,
+        height:                    p.height,
+        stride:                    p.stride,
+        output_width:              p.output_width,
+        output_height:             p.output_height,
+        output_stride:             p.output_stride,
+        matrix_count:              p.matrix_count,
+        interpolation:             p.interpolation,
+        background_mode:           p.background_mode,
+        flags:                     p.flags,
+        bytes_per_pixel:           p.bytes_per_pixel,
+        pix_element_count:         p.pix_element_count,
+        background:                Vec4::from_array(p.background),
+        f:                         Vec2::from_array(p.f),
+        c:                         Vec2::from_array(p.c),
+        k1:                        vec4(&k[0..4]),
+        k2:                        vec4(&k[4..8]),
+        k3:                        vec4(&k[8..12]),
+        k4:                        vec4(&k[12..16]),
+        k5:                        vec4(&k[16..20]),
+        k6:                        vec4(&k[20..24]),
+        fov:                       p.fov,
+        field_limit:               p.field_limit,
+        lens_correction_amount:    p.lens_correction_amount,
+        input_vertical_stretch:    p.input_vertical_stretch,
+        input_horizontal_stretch:  p.input_horizontal_stretch,
+        background_margin:         p.background_margin,
+        background_margin_feather: p.background_margin_feather,
+        canvas_scale:              p.canvas_scale,
+        input_rotation:            p.input_rotation,
+        output_rotation:           p.output_rotation,
+        translation2d:             Vec2::from_array(p.translation2d),
+        translation3d:             Vec4::from_array(p.translation3d),
+        source_rect:               IVec4::from_array(p.source_rect),
+        output_rect:               IVec4::from_array(p.output_rect),
+        digital_lens_params:       vec4(&digital_lens_params[0..4]),
+        digital_lens_params2:      vec4(&digital_lens_params[4..8]),
+        digital_lens_params3:      vec4(&digital_lens_params[8..12]),
+        digital_lens_params4:      vec4(&digital_lens_params[12..16]),
+        safe_area_rect:            Vec4::from_array(p.safe_area_rect),
+        max_pixel_value:           p.max_pixel_value,
+        distortion_model:          p.distortion_model as u32,
+        digital_lens:              p.digital_lens as u32,
+        pixel_value_limit:         p.pixel_value_limit,
+        light_refraction_coefficient: p.light_refraction_coefficient,
+        plane_index:               p.plane_index,
+        output_projection:         p.output_projection,
+        reserved2:                 p.reserved2,
+        ewa_coeffs_p:              Vec4::from_array(p.ewa_coeffs_p),
+        ewa_coeffs_q:              Vec4::from_array(p.ewa_coeffs_q),
+    }
+}
+
 impl Stabilization {
     pub fn undistort_image_cpu_spirv<T: PixelType>(buffers: &mut Buffers, params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, matrices: &[[f32; 16]], drawing: &[u8]) -> bool {
         if let BufferSource::Cpu { buffer: input } = &mut buffers.input.data {
@@ -107,10 +170,10 @@ impl Stabilization {
                     return false;
                 }
 
+                let params2 = spirv_kernel_params(params);
                 output.par_chunks_mut(buffers.output.size.2).enumerate().for_each(|(y, row_bytes)| { // Parallel iterator over buffer rows
                     row_bytes.chunks_mut(params.bytes_per_pixel as usize).enumerate().for_each(|(x, pix_chunk)| { // iterator over row pixels
                         let matrices2: &[f32] = unsafe { std::slice::from_raw_parts(matrices.as_ptr() as *const f32, matrices.len() * 16 ) };
-                        let params2: stabilize_spirv::KernelParams  = unsafe { std::mem::transmute(*params) };
                         let drawing2: &[u32]  = unsafe { std::slice::from_raw_parts(drawing.as_ptr() as *const u32, drawing.len() / 4 ) };
 
                         let color = stabilize_spirv::undistort(
@@ -145,7 +208,69 @@ impl Stabilization {
     /// what the picture does (the STMap export, the tests) can ask the same code the frame is drawn with
     /// rather than a copy of it that drifts. `out_c`/`out_f` are the output plane the projection reads,
     /// `(pixel - out_c) / out_f`, built by the caller because they are the same for every pixel
-    pub fn undistort_coord(mut out_pos: Vector2<f32>, params: &KernelParams, matrices: &[[f32; 16]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, mesh_data: &[f64], out_c: &Vector2<f32>, out_f: &Vector2<f32>) -> Option<Vector2<f32>> {
+    pub fn undistort_coord(out_pos: Vector2<f32>, params: &KernelParams, matrices: &[[f32; 16]], distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, mesh_data: &[f64], out_c: &Vector2<f32>, out_f: &Vector2<f32>) -> Option<Vector2<f32>> {
+        let (ray, out_pos) = Self::output_ray(out_pos, params, distortion_model, digital_lens, out_c, out_f)?;
+
+        ///////////////////////////////////////////////////////////////////
+        // Calculate source `y` for rolling shutter
+        let mut sy = if (params.flags & 16) == 16 { // Horizontal RS
+            (out_pos.x.round() as i32).min(params.width).max(0) as usize
+        } else {
+            (out_pos.y.round() as i32).min(params.height).max(0) as usize
+        };
+        if params.matrix_count > 1 {
+            let idx = params.matrix_count as usize / 2;
+            if let Some(pt) = Stabilization::rotate_and_distort(ray, idx, params, matrices, distortion_model, digital_lens, mesh_data) {
+                if (params.flags & 16) == 16 { // Horizontal RS
+                    sy = (pt.0.round() as i32).min(params.width).max(0) as usize;
+                } else {
+                    sy = (pt.1.round() as i32).min(params.height).max(0) as usize;
+                }
+            }
+        }
+        ///////////////////////////////////////////////////////////////////
+
+        let idx = sy.min(params.matrix_count as usize - 1);
+        let mut uv = Stabilization::rotate_and_distort(ray, idx, params, matrices, distortion_model, digital_lens, mesh_data)?;
+        let mut frame_size = (params.width as f32, params.height as f32);
+        if params.input_rotation != 0.0 {
+            let rotation = params.input_rotation * (std::f32::consts::PI / 180.0);
+            let size = frame_size;
+            frame_size = rotate_point(size, rotation, (0.0, 0.0), (0.0, 0.0));
+            frame_size = (frame_size.0.abs().round(), frame_size.1.abs().round());
+            uv = rotate_point(uv, rotation, (size.0 / 2.0, size.1 / 2.0), (frame_size.0 / 2.0, frame_size.1 / 2.0));
+        }
+
+        // `uv` is in the input frame now, turned by the input rotation, so its edges are those of `frame_size`
+        let (width_f, height_f) = frame_size;
+        if params.background_mode == 1 { // Edge repeat
+            uv = (
+                uv.0.max(3.0).min(width_f  - 3.0),
+                uv.1.max(3.0).min(height_f - 3.0),
+            );
+        } else if params.background_mode == 2 { // Edge mirror
+            let rx = uv.0.round();
+            let ry = uv.1.round();
+            let width3 = width_f - 3.0;
+            let height3 = height_f - 3.0;
+            if rx > width3  { uv.0 = width3  - (rx - width3); }
+            if rx < 3.0     { uv.0 = 3.0 + width_f - (width3  + rx); }
+            if ry > height3 { uv.1 = height3 - (ry - height3); }
+            if ry < 3.0     { uv.1 = 3.0 + height_f - (height3 + ry); }
+        }
+        if params.background_mode != 3 {
+            uv = (
+                map_coord(uv.0, 0.0, frame_size.0, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),
+                map_coord(uv.1, 0.0, frame_size.1, params.source_rect[1] as f32, (params.source_rect[1] + params.source_rect[3]) as f32)
+            );
+        }
+        Some(Vector2::new(uv.0, uv.1))
+    }
+
+    /// Output pixel -> the ray it shows, as an angle vector in the output camera's frame (see [`super::projection`]),
+    /// and the pixel in the output frame's own coordinates. The first half of [`Self::undistort_coord`], for whatever
+    /// needs to rotate the rays of the output itself (the crop constraint of `smoothing::optimal`)
+    pub fn output_ray(mut out_pos: Vector2<f32>, params: &KernelParams, distortion_model: &DistortionModel, digital_lens: Option<&DistortionModel>, out_c: &Vector2<f32>, out_f: &Vector2<f32>) -> Option<((f32, f32), Vector2<f32>)> {
         out_pos.x = map_coord(out_pos.x, params.output_rect[0] as f32, (params.output_rect[0] + params.output_rect[2]) as f32, 0.0, params.output_width  as f32);
         out_pos.y = map_coord(out_pos.y, params.output_rect[1] as f32, (params.output_rect[1] + params.output_rect[3]) as f32, 0.0, params.output_height as f32);
         out_pos.x += params.translation2d[0];
@@ -277,61 +402,7 @@ impl Stabilization {
             }
         }
         ///////////////////////////////////////////////////////////////////
-
-        ///////////////////////////////////////////////////////////////////
-        // Calculate source `y` for rolling shutter
-        let mut sy = if (params.flags & 16) == 16 { // Horizontal RS
-            (out_pos.x.round() as i32).min(params.width).max(0) as usize
-        } else {
-            (out_pos.y.round() as i32).min(params.height).max(0) as usize
-        };
-        if params.matrix_count > 1 {
-            let idx = params.matrix_count as usize / 2;
-            if let Some(pt) = Stabilization::rotate_and_distort(ray, idx, params, matrices, distortion_model, digital_lens, mesh_data) {
-                if (params.flags & 16) == 16 { // Horizontal RS
-                    sy = (pt.0.round() as i32).min(params.width).max(0) as usize;
-                } else {
-                    sy = (pt.1.round() as i32).min(params.height).max(0) as usize;
-                }
-            }
-        }
-        ///////////////////////////////////////////////////////////////////
-
-        let idx = sy.min(params.matrix_count as usize - 1);
-        let mut uv = Stabilization::rotate_and_distort(ray, idx, params, matrices, distortion_model, digital_lens, mesh_data)?;
-        let mut frame_size = (params.width as f32, params.height as f32);
-        if params.input_rotation != 0.0 {
-            let rotation = params.input_rotation * (std::f32::consts::PI / 180.0);
-            let size = frame_size;
-            frame_size = rotate_point(size, rotation, (0.0, 0.0), (0.0, 0.0));
-            frame_size = (frame_size.0.abs().round(), frame_size.1.abs().round());
-            uv = rotate_point(uv, rotation, (size.0 / 2.0, size.1 / 2.0), (frame_size.0 / 2.0, frame_size.1 / 2.0));
-        }
-
-        let width_f = params.width as f32;
-        let height_f = params.height as f32;
-        if params.background_mode == 1 { // Edge repeat
-            uv = (
-                uv.0.max(3.0).min(width_f  - 3.0),
-                uv.1.max(3.0).min(height_f - 3.0),
-            );
-        } else if params.background_mode == 2 { // Edge mirror
-            let rx = uv.0.round();
-            let ry = uv.1.round();
-            let width3 = width_f - 3.0;
-            let height3 = height_f - 3.0;
-            if rx > width3  { uv.0 = width3  - (rx - width3); }
-            if rx < 3.0     { uv.0 = 3.0 + width_f - (width3  + rx); }
-            if ry > height3 { uv.1 = height3 - (ry - height3); }
-            if ry < 3.0     { uv.1 = 3.0 + height_f - (height3 + ry); }
-        }
-        if params.background_mode != 3 {
-            uv = (
-                map_coord(uv.0, 0.0, frame_size.0, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),
-                map_coord(uv.1, 0.0, frame_size.1, params.source_rect[1] as f32, (params.source_rect[1] + params.source_rect[3]) as f32)
-            );
-        }
-        Some(Vector2::new(uv.0, uv.1))
+        Some((ray, out_pos))
     }
 
     /// Ray -> source pixel. `ray` is an angle vector (`θ·û`, see [`super::projection`]) in the output
@@ -702,24 +773,7 @@ impl Stabilization {
                                     }
                                 }
 
-                                let width_f = params.width as f32;
-                                let height_f = params.height as f32;
                                 if params.background_mode == 3 { // Margin with feather
-                                    let widthf  = width_f - 1.0;
-                                    let heightf = height_f - 1.0;
-
-                                    let feather = (params.background_margin_feather * heightf).max(0.0001);
-                                    let mut pt2 = uv;
-                                    let mut alpha = 1.0;
-                                    if (uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather) {
-                                        alpha = ((widthf - uv.x).min(heightf - uv.y).min(uv.x).min(uv.y) / feather).min(1.0).max(0.0);
-                                        let size_f = Vector2::new(width_f, height_f);
-                                        let half = Vector2::from_element(0.5);
-                                        pt2.component_div_assign(&size_f);
-                                        pt2 = ((pt2 - half) * (1.0 - params.background_margin)) + half;
-                                        pt2.component_mul_assign(&size_f);
-                                    }
-
                                     let mut frame_size = (params.width as f32, params.height as f32);
                                     if params.input_rotation != 0.0 {
                                         let rotation = params.input_rotation * (std::f32::consts::PI / 180.0);
@@ -727,6 +781,25 @@ impl Stabilization {
                                         frame_size = rotate_point(size, rotation, (0.0, 0.0), (0.0, 0.0));
                                         frame_size = (frame_size.0.abs().round(), frame_size.1.abs().round());
                                     }
+                                    // `uv` is in the input frame, turned by the input rotation, so the margin follows `frame_size`.
+                                    // Pixel centres are on whole coordinates, so the picture spans 0 ..= size - 1
+                                    let widthf  = frame_size.0 - 1.0;
+                                    let heightf = frame_size.1 - 1.0;
+
+                                    // A fraction of the picture's own height, whichever way the input buffer is turned
+                                    let feather = (params.background_margin_feather * (params.height as f32 - 1.0)).max(0.0001);
+                                    let mut pt2 = uv;
+                                    let mut alpha = 1.0;
+                                    if (uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather) {
+                                        alpha = ((widthf - uv.x).min(heightf - uv.y).min(uv.x).min(uv.y) / feather).min(1.0).max(0.0);
+                                        // Pulled towards the middle of that span, so the margin is the same on both sides
+                                        let size_f = Vector2::new(widthf, heightf);
+                                        let half = Vector2::from_element(0.5);
+                                        pt2.component_div_assign(&size_f);
+                                        pt2 = ((pt2 - half) * (1.0 - params.background_margin)) + half;
+                                        pt2.component_mul_assign(&size_f);
+                                    }
+
                                     uv  = Vector2::new(map_coord(uv.x,  0.0, frame_size.0, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),
                                                        map_coord(uv.y,  0.0, frame_size.1, params.source_rect[1] as f32, (params.source_rect[1] + params.source_rect[3]) as f32));
                                     pt2 = Vector2::new(map_coord(pt2.x, 0.0, frame_size.0, params.source_rect[0] as f32, (params.source_rect[0] + params.source_rect[2]) as f32),

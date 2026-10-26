@@ -109,9 +109,38 @@ fn map() -> Arc<RwLock<HashMap<String, serde_json::Value>>> {
         if let Ok(v) = serde_json::from_str::<HashMap<String, serde_json::Value>>(&std::fs::read_to_string(file).unwrap_or_default()) {
             map = v;
         }
+        migrate(&mut map);
 
         Arc::new(RwLock::new(map))
     }).clone()
+}
+
+/// Brings settings written by an older version up to date, in memory: the file follows with the next `set`. Until then
+/// every start migrates the same old file again, so the result is the same either way
+fn migrate(map: &mut HashMap<String, serde_json::Value>) {
+    // 1: "Optimal path" went in after "Default" in the smoothing methods, which the settings store by index
+    // ("smoothingMethod", and each method's parameters as "smoothing-<index>-<name>"): Plain 3D moved from 2 to 3 and
+    // Fixed camera from 3 to 4. A 4 can't be from a release, which had no fifth method; the development builds had
+    // Optimal path there
+    if map.get("settingsVersion").and_then(|v| v.as_u64()).unwrap_or(0) < 1 {
+        let moved = |i: u64| match i { 2 => 3, 3 => 4, 4 => 2, i => i };
+        if let Some(m) = map.get("smoothingMethod").and_then(|v| v.as_u64().or_else(|| v.as_f64().map(|f| f as u64))) {
+            map.insert("smoothingMethod".into(), moved(m).into());
+        }
+        // All out first, then all back in: the new indices overlap the old ones
+        let keys: Vec<String> = map.keys().filter(|k| k.starts_with("smoothing-")).cloned().collect();
+        let mut params = Vec::with_capacity(keys.len());
+        for k in keys {
+            let Some((i, name)) = k.strip_prefix("smoothing-").and_then(|r| r.split_once('-')) else { continue; };
+            let Ok(i) = i.parse::<u64>() else { continue; };
+            let name = name.to_owned();
+            if let Some(v) = map.remove(&k) { params.push((moved(i), name, v)); }
+        }
+        for (i, name, v) in params {
+            map.insert(format!("smoothing-{i}-{name}"), v);
+        }
+        map.insert("settingsVersion".into(), 1.into());
+    }
 }
 
 fn timestamp() -> usize { std::time::SystemTime::now().duration_since(std::time::SystemTime::UNIX_EPOCH).unwrap().as_secs() as usize }

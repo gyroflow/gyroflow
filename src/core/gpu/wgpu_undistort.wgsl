@@ -508,14 +508,16 @@ fn rotate_and_distort(ray: vec2<f32>, idx: u32, f: vec2<f32>, c: vec2<f32>, k1: 
             uv.x = map_coord(uv.x, 0.0, f32(params.width),  origin.x, origin.x + crop_size.x);
             uv.y = map_coord(uv.y, 0.0, f32(params.height), origin.y, origin.y + crop_size.y);
 
+            // The shear of every band above this one in full, and of this one down to the row. A fixed loop with no
+            // branch in it, as in the OpenCL kernel (issue 1255)
             let idx2 = u32(min(7, max(0, i32(floor(uv.y / stblz_grid)))));
             let delta = uv.y - stblz_grid * f32(idx2);
-            uv.x -= mesh_data[o + 4 + idx2 * 2 + 0] * delta;
-            uv.y -= mesh_data[o + 4 + idx2 * 2 + 1] * delta;
-            for (var j = 0u; j < idx2; j++) {
-                uv.x -= mesh_data[o + 4 + j * 2 + 0] * stblz_grid;
-                uv.y -= mesh_data[o + 4 + j * 2 + 1] * stblz_grid;
+            var shift = vec2<f32>(0.0, 0.0);
+            for (var j = 0u; j < 8u; j++) {
+                let w = select(select(0.0, delta, j == idx2), stblz_grid, j < idx2);
+                shift += vec2<f32>(mesh_data[o + 4 + j * 2 + 0], mesh_data[o + 4 + j * 2 + 1]) * w;
             }
+            uv -= shift;
 
             uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0, f32(params.width));
             uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0, f32(params.height));
@@ -677,6 +679,9 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
 
     let idx: u32 = min(sy, u32(params.matrix_count - 1)) * 16u;
     var uv = rotate_and_distort(ray, idx, params.f, params.c, params.k1, params.k2, params.k3);
+    // No picture for this ray (past the field limit, outside Snell's window): it stays the background, as on the CPU.
+    // The input rotation would turn the marker into a real position, and the edge modes would then clamp it into the frame
+    if (uv.x <= -99998.0) { return uv; }
 
     var frame_size = vec2<f32>(f32(params.width), f32(params.height));
     if (params.input_rotation != 0.0) {
@@ -686,8 +691,9 @@ fn undistort_coord(position: vec2<f32>) -> vec2<f32> {
         uv = rotate_point(uv, rotation, size / 2.0, frame_size / 2.0);
     }
 
-    let width_f = f32(params.width);
-    let height_f = f32(params.height);
+    // `uv` is in the input frame now, turned by the input rotation, so its edges are those of `frame_size`
+    let width_f = frame_size.x;
+    let height_f = frame_size.y;
     if (params.background_mode == 1) { // edge repeat
         uv = max(vec2<f32>(3.0, 3.0), min(vec2<f32>(width_f - 3.0, height_f - 3.0), uv));
     } else if (params.background_mode == 2) { // edge mirror
@@ -750,28 +756,30 @@ fn undistort(position: vec2<f32>) -> vec4<SCALAR> {
     var pixel: vec4<f32> = bg;
 
     if (uv.x > -99998.0) {
-        let width_f = f32(params.width);
-        let height_f = f32(params.height);
         if (params.background_mode == 3) { // margin with feather
-            let widthf  = (width_f - 1.0);
-            let heightf = (height_f - 1.0);
-
-            let feather = max(0.0001, params.background_margin_feather * heightf);
-            var pt2 = uv;
-            var alpha = 1.0;
-            if ((uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather)) {
-                alpha = max(0.0, min(1.0, min(min(widthf - uv.x, heightf - uv.y), min(uv.x, uv.y)) / feather));
-                pt2 /= vec2<f32>(width_f, height_f);
-                pt2 = ((pt2 - 0.5) * (1.0 - params.background_margin)) + 0.5;
-                pt2 *= vec2<f32>(width_f, height_f);
-            }
-
             var frame_size = vec2<f32>(f32(params.width), f32(params.height));
             if (params.input_rotation != 0.0) {
                 let rotation = params.input_rotation * (3.14159265359 / 180.0);
                 let size = frame_size;
                 frame_size = abs(round(rotate_point(size, rotation, vec2<f32>(0.0, 0.0), vec2<f32>(0.0, 0.0))));
             }
+            // `uv` is in the input frame, turned by the input rotation, so the margin follows `frame_size`.
+            // Pixel centres are on whole coordinates, so the picture spans 0 ..= size - 1
+            let widthf  = (frame_size.x - 1.0);
+            let heightf = (frame_size.y - 1.0);
+
+            // A fraction of the picture's own height, whichever way the input buffer is turned
+            let feather = max(0.0001, params.background_margin_feather * (f32(params.height) - 1.0));
+            var pt2 = uv;
+            var alpha = 1.0;
+            if ((uv.x > widthf - feather) || (uv.x < feather) || (uv.y > heightf - feather) || (uv.y < feather)) {
+                alpha = max(0.0, min(1.0, min(min(widthf - uv.x, heightf - uv.y), min(uv.x, uv.y)) / feather));
+                // Pulled towards the middle of that span, so the margin is the same on both sides
+                pt2 /= vec2<f32>(widthf, heightf);
+                pt2 = ((pt2 - 0.5) * (1.0 - params.background_margin)) + 0.5;
+                pt2 *= vec2<f32>(widthf, heightf);
+            }
+
             if (bool(flags & 32)) { // Uses source rect
                 uv  = vec2<f32>(map_coord(uv.x,  0.0, f32(frame_size.x), f32(params.source_rect.x), f32(params.source_rect.x + params.source_rect.z)),
                                 map_coord(uv.y,  0.0, f32(frame_size.y), f32(params.source_rect.y), f32(params.source_rect.y + params.source_rect.w)));

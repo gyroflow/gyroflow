@@ -61,6 +61,33 @@ pub fn qt_queued_callback_mut<T: QObject + 'static, T2: Send + 'static, F: FnMut
     })
 }
 
+/// Runs jobs one after another in the order they were queued, on a thread of its own, started with the first job.
+/// For jobs that wait for the previous one to finish: a job of the rayon pool (`core::run_threaded`) waiting for its turn
+/// blocks a worker of the pool, and a worker that waits for its own parallel work runs other jobs of the pool meanwhile,
+/// so the next job waiting for the turn can start on the very thread that holds it, and wait forever
+#[derive(Default)]
+pub struct SerialQueue {
+    sender: std::sync::OnceLock<std::sync::mpsc::Sender<Box<dyn FnOnce() + Send>>>,
+}
+impl SerialQueue {
+    pub fn run(&self, job: impl FnOnce() + Send + 'static) {
+        let sender = self.sender.get_or_init(|| {
+            let (sender, receiver) = std::sync::mpsc::channel::<Box<dyn FnOnce() + Send>>();
+            std::thread::Builder::new().name("SerialQueue".into()).spawn(move || {
+                // Ends when the queue is dropped
+                for job in receiver {
+                    // A panic would end the thread, and every job queued after it would never run
+                    if std::panic::catch_unwind(std::panic::AssertUnwindSafe(job)).is_err() {
+                        ::log::error!("A job of the serial queue panicked");
+                    }
+                }
+            }).expect("Failed to start the serial queue thread");
+            sender
+        });
+        let _ = sender.send(Box::new(job));
+    }
+}
+
 #[macro_export]
 macro_rules! wrap_simple_method {
     ($name:ident, $($param:ident:$type:ty),*) => {
@@ -475,6 +502,19 @@ pub fn image_to_b64(img: QImage) -> QString {
         b64.append(QString::fromLatin1(byteArray.toBase64().data()));
         return b64;
     })
+}
+
+pub fn download_as_data_url(url: &str) -> Option<String> {
+    let mut response = ureq::get(url).call().ok()?;
+    let mime = response.body().mime_type()?.to_owned();
+    if !mime.starts_with("image/") { return None; }
+    let data = response.body_mut().read_to_vec().ok()?;
+    let ptr = data.as_ptr();
+    let len = data.len();
+    let b64 = cpp!(unsafe [ptr as "const char *", len as "size_t"] -> QString as "QString" {
+        return QString::fromLatin1(QByteArray::fromRawData(ptr, len).toBase64());
+    });
+    Some(format!("data:{mime};base64,{b64}"))
 }
 
 pub fn update_file_times(output_url: &str, input_url: &str, additional_ms: Option<f64>) {

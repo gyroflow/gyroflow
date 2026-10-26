@@ -19,6 +19,38 @@ mod digital_stretch;
 
 use super::KernelParams;
 
+// The models a chessboard calibration can fit (`calibration::solver`), which calls their `distort` directly
+pub use self::{ opencv_fisheye::OpenCVFisheye, opencv_standard::OpenCVStandard, generic_polynomial::GenericPolynomial };
+
+/// The float types a model's math is written for: `f32` in the render, `f64` in the calibration solver, whose
+/// Jacobian is a finite difference that single precision would drown. A model writes its projection once, generic
+/// over this, and `distort_point` calls it with `f32`.
+///
+/// The functions are std's own, so the render's `f32` math is what it was before it was generic. nalgebra's
+/// `RealField` would route them through `libm` here, because `ahrs` builds nalgebra with `libm-force`: an `atan2`
+/// a few ulp off std's, and a fisheye `distort_point` about twice as slow in a release build
+pub trait Real: Copy + PartialOrd
+    + std::ops::Add<Output = Self> + std::ops::Sub<Output = Self> + std::ops::Mul<Output = Self> + std::ops::Div<Output = Self>
+{
+    fn from_f64(v: f64) -> Self;
+    fn sqrt(self) -> Self;
+    fn atan2(self, x: Self) -> Self;
+}
+macro_rules! impl_real {
+    ($($t:ty),*) => {$(
+        impl Real for $t {
+            #[inline(always)] fn from_f64(v: f64) -> Self { v as $t }
+            #[inline(always)] fn sqrt(self) -> Self { <$t>::sqrt(self) }
+            #[inline(always)] fn atan2(self, x: Self) -> Self { <$t>::atan2(self, x) }
+        }
+    )*};
+}
+impl_real!(f32, f64);
+
+/// A constant in the model's precision
+#[inline(always)]
+pub fn c<T: Real>(v: f64) -> T { T::from_f64(v) }
+
 macro_rules! impl_models {
     ($($name:ident => $class:ty,)*) => {
         #[derive(Clone)]
@@ -91,6 +123,20 @@ impl_models! {
 }
 
 impl DistortionModel {
+    /// The coefficients of the image mirrored vertically (`y` -> `-y`, a framebuffer upside down): the terms odd in
+    /// `y` change sign, the tangential `p1` and the thin prism of the `y` offset. Radial models are symmetric
+    pub fn mirror_coefficients_y(&self, k: &mut [f64]) {
+        use DistortionModels as M;
+        let odd: &[usize] = match &self.inner {
+            M::OpenCVStandard(_) => &[2, 10, 11], // p1, s3, s4
+            M::Insta360(_) => &[3],               // p1
+            _ => &[],
+        };
+        for &i in odd {
+            if let Some(v) = k.get_mut(i) { *v = -*v; }
+        }
+    }
+
     /// The largest ray angle the model itself can represent, in radians, `None` when it has no such end.
     /// Not a fold of the calibration - [`Self::radial_distortion_limit`] finds those - but the shape of the
     /// projection: a rectilinear model images the z=1 plane and has nothing at 90°, and the unified sphere

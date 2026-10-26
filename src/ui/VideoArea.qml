@@ -2,6 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 import QtQuick
+import QtQuick.Controls as QQC
 import MDKVideo
 
 import "components/"
@@ -25,6 +26,7 @@ Item {
     property alias infoMessages: infoMessages;
     property alias gridGuide: gridGuide;
     property alias secondPreview: secondPreview;
+    property alias opticalPointEditor: opticalPointEditor;
 
     property int outWidth: window? window.exportSettings.outWidth : 0;
     property int outHeight: window? window.exportSettings.outHeight : 0;
@@ -39,6 +41,10 @@ Item {
     property int fullScreen: 0;
     property string detectedCamera: "";
     property real additionalTopMargin: 0;
+    // While the motion data loads, the video plays unstabilized instead of being covered until it's loaded
+    readonly property bool showStabilized: stabEnabledBtn.checked && !controller.loading_gyro_in_progress;
+    onShowStabilizedChanged: { controller.stab_enabled = showStabilized; vid.forceRedraw(); vid.fovChanged(); }
+    Component.onCompleted: controller.stab_enabled = showStabilized; // The core starts with it enabled
     property var mergedFiles: [];
 
     property Menu.VideoInformation vidInfo: null;
@@ -194,7 +200,7 @@ Item {
                             error_string += "\n" + qsTr("This is often caused by read-only file system.\nMake sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.");
                         }
                         if (Qt.platform.os == "windows") {
-                            error_string += "\n" + qsTr("This is often caused by read-only file system.\nIf you have Gyroflow in C:\\Program Files\\, then you'll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.");
+                            error_string += "\n" + qsTr("This is often caused by read-only file system.\nIf you have Gyroflow in %1, then you'll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.").arg("C:\\Program Files\\");
                         }
                         messageBox(Modal.Error, error_string, [ { text: qsTr("Ok") } ]);
                     }
@@ -310,13 +316,7 @@ Item {
             videoLoader.cancelable = true;
         }
         function onLoading_gyro_progress(progress: real): void {
-            videoLoader.active = progress < 1;
-            videoLoader.currentFrame = 0;
-            videoLoader.totalFrames = 0;
-            videoLoader.additional = "";
-            videoLoader.text = videoLoader.active? qsTr("Loading gyro data %1...") : "";
-            videoLoader.progress = videoLoader.active? progress : -1;
-            videoLoader.cancelable = true;
+            gyroLoading.progress = progress < 1? progress : 0;
         }
     }
     property Modal externalSdkModal: null;
@@ -620,8 +620,8 @@ Item {
             spacing: 10 * dpiScale;
             Item {
                 id: vidParent;
-                readonly property real orgW: (stabEnabledBtn.checked && root.outWidth > 0? root.outWidth : (vid.videoWidth * window.lensProfile.input_horizontal_stretch));
-                readonly property real orgH: (stabEnabledBtn.checked && root.outHeight > 0? root.outHeight : (vid.videoHeight * window.lensProfile.input_vertical_stretch));
+                readonly property real orgW: (root.showStabilized && root.outWidth > 0? root.outWidth : (vid.videoWidth * window.lensProfile.input_horizontal_stretch));
+                readonly property real orgH: (root.showStabilized && root.outHeight > 0? root.outHeight : (vid.videoHeight * window.lensProfile.input_vertical_stretch));
                 readonly property real ratio: orgW / Math.max(1, orgH);
                 readonly property real w: vidParentParent.width  / parent.columns - (root.fullScreen? 0 : 20 * dpiScale);
                 readonly property real h: vidParentParent.height / parent.rows    - (root.fullScreen? 0 : 20 * dpiScale);
@@ -645,7 +645,7 @@ Item {
                     anchors.fill: parent;
                     property bool loaded: false;
 
-                    property bool stabEnabled: stabEnabledBtn.checked;
+                    property bool stabEnabled: root.showStabilized;
                     transform: [
                         Scale {
                             readonly property real r: vidInfo.videoRotation * (Math.PI / 180);
@@ -704,6 +704,8 @@ Item {
                         timeline.resetZoom();
 
                         controller.video_file_loaded(vid);
+                        // Already now, not only once the gyro data is loaded: the video plays while it loads, and the playhead needs them
+                        Qt.callLater(timeline.updateDurations);
                         window.motionData.filename = "";
 
                         if (root.pendingGyroflowData) {
@@ -745,6 +747,7 @@ Item {
                                     vid.volume = volumeSlider.value / 100.0;
                                 })
                             } else {
+                                bufferTrigger.waited = 0;
                                 bufferTrigger.start();
                             }
                         } else if (!errorShown) {
@@ -758,10 +761,16 @@ Item {
                     Timer {
                         id: bufferTrigger;
                         interval: 150;
+                        property int waited: 0;
                         onTriggered: {
-                            if (!vid.videoWidth) bufferTrigger.start();
+                            if (!vid.videoWidth) return; // The file failed to load, the next one starts it again in onMetadataChanged
+                            // Only once the first frame is shown (which ends the loading screen), unless it doesn't show up on
+                            // its own: seeking while it's decoded made the decoder start over at the seek target, which kept
+                            // the loading screen up for seconds with videos decoded on the CPU (eg. 5.3K GoPro footage)
+                            if (!vid.loaded && ++bufferTrigger.waited < 20) { bufferTrigger.start(); return; }
                             Qt.callLater(() => {
-                                vid.currentFrame++;
+                                // Not `currentFrame++`: until the first frame is shown, it's still the previous video's frame
+                                vid.currentFrame = 1;
                                 Qt.callLater(() => vid.currentFrame = 0);
                                 if (vid.videoWidth) {
                                     stabEnabledBtn.checked = true;
@@ -782,6 +791,12 @@ Item {
                         radius: 5 * dpiScale;
                         anchors.fill: parent;
                         anchors.margins: -border.width;
+                    }
+                    OpticalPointEditor {
+                        id: opticalPointEditor;
+                        anchors.fill: parent;
+                        timestampUs: vid.timestamp * 1000;
+                        stabilized: vid.stabEnabled;
                     }
                 }
 
@@ -1070,7 +1085,6 @@ Item {
                 SmallLinkButton {
                     id: stabEnabledBtn;
                     iconName: "gyroflow";
-                    onCheckedChanged: { controller.stab_enabled = checked; vid.forceRedraw(); vid.fovChanged(); }
                     tooltip: qsTr("Toggle stabilization");
                 }
 
@@ -1212,6 +1226,57 @@ Item {
                 type: InfoMessage.Warning;
                 visible: vid.loaded && !controller.lens_loaded && !isCalibrator;
                 text: qsTr("Lens profile is not loaded, the results will not look correct. Please load a lens profile for your camera.");
+            }
+        }
+        Item {
+            id: gyroLoading;
+            property real progress: 0;
+            visible: opacity > 0;
+            opacity: controller.loading_gyro_in_progress? 1 : 0;
+            Ease on opacity { }
+            anchors.right: parent.right;
+            anchors.bottom: parent.bottom;
+            anchors.rightMargin: 20 * dpiScale;
+            // In full screen and in the mobile layout the timeline is drawn over the bottom of the video area
+            anchors.bottomMargin: Math.max(0, vidParentParent.height - tlcol.y) + 20 * dpiScale;
+            width: gyroLoadingCol.width + 2 * 14 * dpiScale;
+            height: gyroLoadingCol.height + 2 * 12 * dpiScale;
+            Rectangle {
+                anchors.fill: parent;
+                color: styleBackground;
+                opacity: 0.8;
+                radius: 6 * dpiScale;
+            }
+            Column {
+                id: gyroLoadingCol;
+                anchors.centerIn: parent;
+                spacing: 4 * dpiScale;
+                BasicText {
+                    leftPadding: 0;
+                    text: qsTr("Loading gyro data %1...").arg("<b>" + (gyroLoading.progress * 100).toFixed(0) + "%</b>");
+                }
+                BasicText {
+                    leftPadding: 0;
+                    bottomPadding: 8 * dpiScale;
+                    font.pixelSize: 11 * dpiScale;
+                    opacity: 0.7;
+                    text: qsTr("The video plays unstabilized until it's loaded.");
+                }
+                Row {
+                    spacing: 12 * dpiScale;
+                    QQC.ProgressBar {
+                        width: 200 * dpiScale;
+                        anchors.verticalCenter: parent.verticalCenter;
+                        value: gyroLoading.progress;
+                    }
+                    LinkButton {
+                        transparent: true;
+                        text: qsTr("Cancel");
+                        leftPadding: 0; rightPadding: 0; topPadding: 0; bottomPadding: 0;
+                        anchors.verticalCenter: parent.verticalCenter;
+                        onClicked: controller.cancel_current_operation();
+                    }
+                }
             }
         }
     }

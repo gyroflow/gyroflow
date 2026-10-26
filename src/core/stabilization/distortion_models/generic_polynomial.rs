@@ -10,6 +10,7 @@
 // (mathematical no-op: 0·θⁿ = 0).
 
 use crate::stabilization::KernelParams;
+use super::{ Real, c };
 
 #[derive(Default, Clone)]
 pub struct GenericPolynomial { }
@@ -106,8 +107,12 @@ impl GenericPolynomial {
             // No calibration: a pinhole, which has no image of a ray at or past 90°
             return if z > 1e-9 { (x / z, y / z) } else { (x * 1e9, y * 1e9) };
         }
+        Self::distort(x, y, z, &params.k)
+    }
 
-        let r = (x.powi(2) + y.powi(2)).sqrt();
+    /// The projection itself, in either precision (see `Real`)
+    pub fn distort<T: Real>(x: T, y: T, z: T, k: &[T]) -> (T, T) {
+        let r = (x * x + y * y).sqrt();
 
         // atan2 against the ray's own z, so the angle is right past 90° too
         let theta = r.atan2(z);
@@ -124,20 +129,20 @@ impl GenericPolynomial {
         let theta11 = theta5*theta6;
         let theta12 = theta6*theta6;
 
-        let theta_d = theta   * params.k[0]
-                    + theta2  * params.k[1]
-                    + theta3  * params.k[2]
-                    + theta4  * params.k[3]
-                    + theta5  * params.k[4]
-                    + theta6  * params.k[5]
-                    + theta7  * params.k[6]
-                    + theta8  * params.k[7]
-                    + theta9  * params.k[8]
-                    + theta10 * params.k[9]
-                    + theta11 * params.k[10]
-                    + theta12 * params.k[11];
+        let theta_d = theta   * k[0]
+                    + theta2  * k[1]
+                    + theta3  * k[2]
+                    + theta4  * k[3]
+                    + theta5  * k[4]
+                    + theta6  * k[5]
+                    + theta7  * k[6]
+                    + theta8  * k[7]
+                    + theta9  * k[8]
+                    + theta10 * k[9]
+                    + theta11 * k[10]
+                    + theta12 * k[11];
 
-        let scale = if r < 1e-12 { 1.0 } else { theta_d / r };
+        let scale = if r < c(1e-12) { c(1.0) } else { theta_d / r };
 
         (x * scale, y * scale)
     }

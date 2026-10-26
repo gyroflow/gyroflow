@@ -35,6 +35,9 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
     // The maps describe the lens and the motion per frame; the focal length envelope is a zoom on top of
     // that and would only shrink the bounding box computed below
     compute_params.focal_length_smoothing_enabled = false;
+    // The maps are upright pictures. The GUI hands over the preview's parameters, whose framebuffer is upside down
+    // on OpenGL: left on, that mirrors the lens of the undistort map and flips the readout and sensor shift per frame
+    compute_params.framebuffer_inverted = false;
 
     let mut kernel_flags = KernelParamsFlags::empty();
     kernel_flags.set(KernelParamsFlags::HAS_DIGITAL_LENS, compute_params.digital_lens.is_some());

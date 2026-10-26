@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-use std::collections::BTreeMap;
 use std::cell::RefCell;
 use std::sync::mpsc;
 
@@ -206,9 +205,22 @@ impl BackendType {
     pub fn is_wgpu(&self) -> bool { matches!(self, Self::Wgpu(_)) }
 }
 
+/// The most recently used frame transforms, so the cache doesn't grow with every rendered frame (a matrix per row, ~120 kB per 4k frame)
+pub struct FrameTransformCache(lru::LruCache<i64, FrameTransform>);
+impl Default for FrameTransformCache {
+    fn default() -> Self { Self(lru::LruCache::new(std::num::NonZeroUsize::new(100).unwrap())) }
+}
+impl std::ops::Deref for FrameTransformCache {
+    type Target = lru::LruCache<i64, FrameTransform>;
+    fn deref(&self) -> &Self::Target { &self.0 }
+}
+impl std::ops::DerefMut for FrameTransformCache {
+    fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
+}
+
 #[derive(Default)]
 pub struct Stabilization {
-    pub stab_data: BTreeMap<i64, FrameTransform>,
+    pub stab_data: FrameTransformCache,
 
     pub size:        (usize, usize), // width, height
     pub output_size: (usize, usize), // width, height
@@ -383,7 +395,7 @@ impl Stabilization {
                 transform.kernel_params.max_pixel_value = 1.0;
                 transform.kernel_params.pixel_value_limit = 1.0;
             }
-            self.stab_data.insert(timestamp_us, transform);
+            self.stab_data.put(timestamp_us, transform);
         }
     }
 
@@ -428,7 +440,7 @@ impl Stabilization {
     }
 
     pub fn get_undistortion_data(&self, timestamp_us: i64) -> Option<&FrameTransform> {
-        self.stab_data.get(&timestamp_us)
+        self.stab_data.peek(&timestamp_us)
     }
 
     pub fn list_devices(&self) -> Vec<String> {
@@ -607,7 +619,9 @@ impl Stabilization {
         }
 
         self.init_backends::<T>(timestamp_us, frame, buffers);
-        self.ensure_stab_data_at_timestamp::<T>(timestamp_us, frame, buffers, false);
+        if self.cache_frame_transform { // Without the cache, `process_pixels` computes the transform itself and never reads it from `stab_data`
+            self.ensure_stab_data_at_timestamp::<T>(timestamp_us, frame, buffers, false);
+        }
 
         if self.share_wgpu_instances {
             if wgpu::is_buffer_supported(buffers) && CACHED_WGPU.with(|x| !x.0.borrow().is_empty()) {
@@ -655,7 +669,7 @@ impl Stabilization {
             if !self.cache_frame_transform {
                 _tmp_transform.as_ref()
             } else {
-                self.stab_data.get(&timestamp_us)
+                self.stab_data.peek(&timestamp_us)
             }
         );
 

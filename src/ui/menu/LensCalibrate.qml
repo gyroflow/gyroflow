@@ -20,9 +20,9 @@ MenuItem {
     property alias previewResolution: previewResolution.currentIndex;
     property alias infoList: infoList;
     property alias maxSharpness: maxSharpness;
-    property alias focalLengthOnly: focalLengthOnly;
     property var calibrationInfo: ({});
-    property string focalLengthFovText: "";
+    // OpenCV's random sets of frames are what runs: its method, on a model OpenCV has (`LensCalibrator::calibrate`)
+    readonly property bool opencvSearch: calibMethod.currentIndex == 0 && calibModel.currentIndex != 2;
 
     property int videoWidth: 0;
     property int videoHeight: 0;
@@ -52,65 +52,19 @@ MenuItem {
             fovSlider.value = 2;
             xStretch.valueChanged();
             yStretch.valueChanged();
-            if (focalLengthOnly.checked) calib.updateFocalLengthProfile();
         }
+    }
+    // Every file gets a new calibrator controller (`ui_tools.init_calibrator`), which starts from the defaults: give it
+    // the choices made here
+    function applyCalibrationChoice(): void {
+        controller.calibration_model = calibModel.currentIndex;
+        controller.calibration_method = calibMethod.currentIndex;
     }
     function resetMetadata(): void {
         calib.calibrationInfo = {
             "calibrated_by": calib.calibrationInfo.calibrated_by || settings.value("calibratedBy", "") || controller.get_username(),
             "output_dimension": { "w": 0, "h": 0 }
         };
-    }
-    // Instead of calibrating with a chessboard, synthesize a distortion-free (rectilinear) profile from the focal length alone
-    function updateFocalLengthProfile(): void {
-        if (!focalLengthOnly.checked) {
-            calib.focalLengthFovText = "";
-            for (const x of ["calib_dimension", "orig_dimension", "fisheye_params", "distortion_model", "digital_lens", "focal_length", "crop_factor"]) {
-                delete calib.calibrationInfo[x];
-            }
-            controller.reset_lens_profile();
-            return;
-        }
-        const sx = xStretch.value || 1, sy = yStretch.value || 1;
-        const w = Math.round(calib.videoWidth * sx), h = Math.round(calib.videoHeight * sy);
-        const fl35 = focalLength.value;
-        if (w <= 0 || h <= 0 || fl35 <= 0) return;
-
-        // A 35 mm equivalent focal length is defined by the diagonal field of view of a 36x24 mm frame
-        const diagonal = Math.sqrt(w*w + h*h);
-        const f = fl35 * diagonal / Math.sqrt(36*36 + 24*24);
-
-        calib.calibrationInfo.calib_dimension  = { "w": w, "h": h };
-        calib.calibrationInfo.orig_dimension   = { "w": w, "h": h };
-        calib.calibrationInfo.distortion_model = "opencv_standard";
-        calib.calibrationInfo.digital_lens     = digitalLens.lenses[digitalLens.currentIndex][1] || null;
-        calib.calibrationInfo.focal_length     = fl35;
-        calib.calibrationInfo.crop_factor      = 1.0;
-        calib.calibrationInfo.fisheye_params   = {
-            "RMS_error": 0.0,
-            "camera_matrix": [
-                [ f,   0.0, w / 2 ],
-                [ 0.0, f,   h / 2 ],
-                [ 0.0, 0.0, 1.0   ]
-            ],
-            "distortion_coeffs": [0, 0, 0, 0, 0, 0, 0, 0]
-        };
-
-        calib.focalLengthFovText = qsTr("Field of view: %1° horizontal, %2° diagonal")
-                                   .arg((2 * Math.atan(w / (2 * f)) * 180 / Math.PI).toFixed(1))
-                                   .arg((2 * Math.atan(diagonal / (2 * f)) * 180 / Math.PI).toFixed(1));
-
-        // Apply it to the stabilizer, so that the result can be previewed right away
-        controller.load_lens_profile(JSON.stringify({
-            "calib_dimension":          calib.calibrationInfo.calib_dimension,
-            "orig_dimension":           calib.calibrationInfo.orig_dimension,
-            "fisheye_params":           calib.calibrationInfo.fisheye_params,
-            "distortion_model":         calib.calibrationInfo.distortion_model,
-            "digital_lens":             calib.calibrationInfo.digital_lens,
-            "input_horizontal_stretch": sx,
-            "input_vertical_stretch":   sy,
-            "calibrator_version":       "---"
-        }));
     }
     function updateTable(): void {
         const fields = {
@@ -188,6 +142,8 @@ MenuItem {
         property alias calib_everyNthFrame: everyNthFrame.value;
         property alias calib_iterations: iterations.value;
         property alias calib_maxSharpness: maxSharpness.value;
+        property alias calib_method: calibMethod.currentIndex;
+        property alias calib_model: calibModel.currentIndex;
 
         Component.onCompleted: settings.init(sett);
         function propChanged() { settings.propChanged(sett); }
@@ -264,7 +220,7 @@ MenuItem {
     Button {
         id: autoCalibBtn;
         text: qsTr("Auto calibrate");
-        enabled: calibrator_window.videoArea.vid.loaded && !focalLengthOnly.checked;
+        enabled: calibrator_window.videoArea.vid.loaded;
         iconName: "spinner"
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
@@ -273,53 +229,11 @@ MenuItem {
         }
     }
 
-    CheckBoxWithContent {
-        id: focalLengthOnly;
-        text: qsTr("No distortion, focal length only");
-        tooltip: qsTr("Instead of calibrating with a chessboard pattern, generate a distortion-free profile from the focal length alone.") + "\n" +
-                 qsTr("Use only if your video is already undistorted (via a rectilinear lens or in-camera processing).");
-        cb.enabled: calibrator_window.videoArea.vid.loaded;
-        cb.onCheckedChanged: {
-            if (focalLengthOnly.checked) {
-                infoList.rms = 0;
-                infoList.model = ({});
-            }
-            calib.updateFocalLengthProfile();
-        }
-
-        Label {
-            position: Label.LeftPosition;
-            text: qsTr("Focal length");
-            tooltip: qsTr("35 mm equivalent focal length");
-            NumberField {
-                id: focalLength;
-                width: parent.width;
-                height: 25 * dpiScale;
-                unit: qsTr("mm");
-                precision: 1;
-                value: 24;
-                from: 0.1;
-                onValueChanged: if (focalLengthOnly.checked) focalLengthUpdateTimer.restart();
-            }
-        }
-        BasicText {
-            width: parent.width;
-            wrapMode: Text.WordWrap;
-            font.pixelSize: 11 * dpiScale;
-            text: calib.focalLengthFovText;
-            visible: text.length > 0;
-        }
-        Timer {
-            id: focalLengthUpdateTimer;
-            interval: 200;
-            onTriggered: calib.updateFocalLengthProfile();
-        }
-    }
-
     Label {
         position: Label.LeftPosition;
         text: qsTr("Max calibration points");
-        visible: !focalLengthOnly.checked;
+        // Only OpenCV's search picks sets of frames; Gyroflow's fits them all
+        visible: calib.opencvSearch;
 
         NumberField {
             id: maxPoints;
@@ -375,6 +289,78 @@ MenuItem {
             }
         });
     }
+    Label {
+        position: Label.LeftPosition;
+        text: qsTr("Distortion model");
+        tooltip: qsTr("The distortion model the lens profile is fitted to. Switching it fits the patterns already found again, without analyzing the video again.");
+
+        LinkButton {
+            id: calibModel;
+            // `calibration::CalibrationModel` as i32
+            property var options: [QT_TRANSLATE_NOOP("Popup", "OpenCV fisheye"), QT_TRANSLATE_NOOP("Popup", "OpenCV standard"), QT_TRANSLATE_NOOP("Popup", "Generic polynomial")];
+            property var tooltips: ([
+                qsTr("Fisheye model (Kannala-Brandt). Right for action cameras, drones and any wide lens."),
+                qsTr("Pinhole with radial and tangential distortion. For rectilinear lenses with little distortion: it can't describe anything 90° or more from the center."),
+                qsTr("Fisheye model with both odd and even powers of the angle, for lenses the fisheye model doesn't fit well. Always calibrated with Gyroflow's method.")
+            ]);
+            property int currentIndex: 0;
+            text: qsTranslate("Popup", options[currentIndex]);
+            tooltip: tooltips[currentIndex];
+            leftPadding: 6 * dpiScale;
+            rightPadding: 6 * dpiScale;
+            onCurrentIndexChanged: controller.calibration_model = currentIndex;
+            Component.onCompleted: controller.calibration_model = currentIndex;
+            onClicked: if (modelPopup.visible) { modelPopup.close(); } else { modelPopup.open(); }
+            Popup {
+                id: modelPopup;
+                model: parent.options;
+                currentIndex: parent.currentIndex;
+                width: maxItemWidth + 10 * dpiScale;
+                y: parent.height;
+                itemHeight: 25 * dpiScale;
+                font.pixelSize: 11 * dpiScale;
+                onClicked: i => calibModel.currentIndex = i;
+            }
+        }
+    }
+
+    Label {
+        position: Label.LeftPosition;
+        text: qsTr("Calibration method");
+        tooltip: qsTr("Switching it fits the patterns already found again, without analyzing the video again.");
+
+        LinkButton {
+            id: calibMethod;
+            // `calibration::CalibrationMethod` as i32
+            property var options: [QT_TRANSLATE_NOOP("Popup", "OpenCV"), QT_TRANSLATE_NOOP("Popup", "Gyroflow")];
+            property var tooltips: ([
+                qsTr("OpenCV's own calibration of the model, on random sets of frames. Its fisheye calibration can't take a lens that sees more than 180°, and often fails close to it."),
+                qsTr("Gyroflow's own calibration, on all frames at once. With a fisheye model it also calibrates lenses that see more than 180°, and it leaves out frames that don't agree with the rest, like ones bent by the rolling shutter of a fast move.")
+            ]);
+            property int currentIndex: 0;
+            text: qsTranslate("Popup", options[currentIndex]);
+            tooltip: tooltips[currentIndex];
+            leftPadding: 6 * dpiScale;
+            rightPadding: 6 * dpiScale;
+            onCurrentIndexChanged: controller.calibration_method = currentIndex;
+            Component.onCompleted: controller.calibration_method = currentIndex;
+            onClicked: if (methodPopup.visible) { methodPopup.close(); } else { methodPopup.open(); }
+            Popup {
+                id: methodPopup;
+                model: parent.options;
+                currentIndex: parent.currentIndex;
+                width: maxItemWidth + 10 * dpiScale;
+                y: parent.height;
+                itemHeight: 25 * dpiScale;
+                font.pixelSize: 11 * dpiScale;
+                onClicked: i => calibMethod.currentIndex = i;
+            }
+        }
+    }
+    InfoMessageSmall {
+        show: calibMethod.currentIndex == 0 && calibModel.currentIndex == 2;
+        text: qsTr("OpenCV has no generic polynomial model, so it's calibrated with Gyroflow's method.");
+    }
     CheckBoxWithContent {
         id: shutterCb;
         text: qsTr("Rolling shutter correction");
@@ -415,7 +401,7 @@ MenuItem {
         text: qsTr("Export lens profile");
         accent: true;
         iconName: "save"
-        enabled: (focalLengthOnly.checked || (infoList.rms > 0 && infoList.rms < 100)) && calibrator_window.videoArea.vid.loaded;
+        enabled: infoList.rms > 0 && infoList.rms < 100 && calibrator_window.videoArea.vid.loaded;
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
             list.commitAll();
@@ -434,8 +420,6 @@ MenuItem {
         id: uploadProfile;
         text: qsTr("Upload lens profile to the database");
         checked: true;
-        enabled: !focalLengthOnly.checked;
-        tooltip: enabled? "" : qsTr("Only calibrated profiles can be uploaded to the database.");
     }
     AdvancedSection {
         Label {
@@ -601,6 +585,7 @@ MenuItem {
         Label {
             position: Label.LeftPosition;
             text: qsTr("Iterations");
+            visible: calib.opencvSearch;
 
             NumberField {
                 id: iterations;

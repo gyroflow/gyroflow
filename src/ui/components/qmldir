@@ -17,6 +17,7 @@ FileDialog 1.0 FileDialog.qml
 FrequencyChart 1.0 FrequencyChart.qml
 GridGuide 1.0 GridGuide.qml
 Hr 1.0 Hr.qml
+ImageModal 1.0 ImageModal.qml
 InfoMessage 1.0 InfoMessage.qml
 InfoMessageSmall 1.0 InfoMessageSmall.qml
 ItemLoader 1.0 ItemLoader.qml
@@ -28,6 +29,7 @@ Menu 1.0 Menu.qml
 MenuItem 1.0 MenuItem.qml
 Modal 1.0 Modal.qml
 NumberField 1.0 NumberField.qml
+OpticalPointEditor 1.0 OpticalPointEditor.qml
 OutputPathField 1.0 OutputPathField.qml
 Popup 1.0 Popup.qml
 PopupDelegate 1.0 PopupDelegate.qml

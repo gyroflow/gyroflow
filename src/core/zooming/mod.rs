@@ -9,6 +9,7 @@ use std::hash::Hasher;
 use std::collections::BTreeMap;
 
 use crate::stabilization::ComputeParams;
+use crate::keyframes::KeyframeType;
 
 #[derive(Default, Clone, Copy, Debug)]
 pub struct Point2D(f32, f32);
@@ -59,7 +60,7 @@ const MAX_EDGE_STRETCH: f64 = 4.0;
 /// It bounds the *fov*, not the polygon: the polygon is the picture's own outline, and clamping that would
 /// make the zoom overlay - and the STMap, and the sync - disagree with what the render actually draws.
 pub fn max_zoom_out_fov(params: &ComputeParams, amount: f64, output_width: usize, timestamp_ms: f64) -> f64 {
-    let lens = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(params, timestamp_ms, params.framebuffer_inverted);
+    let lens = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(params, timestamp_ms, false);
     max_zoom_out_fov_for_lens(params, amount, output_width, &lens)
 }
 
@@ -173,10 +174,72 @@ pub fn max_zoom_out_fov_for_lens(params: &ComputeParams, amount: f64, output_wid
     2.0 * best * (fx / sh) / params.width.max(1) as f64
 }
 
-pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)], method: ZoomMethod) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>)  {
+/// Zooming speed (s) of the curve the zoom limit judges a static zoom by, see `calculate_fovs`
+const STATIC_ZOOM_LIMIT_WINDOW: f64 = 4.0;
+
+/// Whether the zoom limit iterations run: a zoom limit is set (or keyframed) and there's at least one iteration
+pub fn zoom_limit_runs(params: &ComputeParams) -> bool {
+    let max_zoom = params.keyframes.get_keyframes(&KeyframeType::MaxZoom)
+        .and_then(|x| x.values().map(|k| k.value).reduce(f64::max))
+        .unwrap_or(params.max_zoom.unwrap_or(0.0));
+    max_zoom > 50.0 && params.max_zoom_iterations > 0
+}
+
+/// Whether the zoom level is the manual one: a static zoom at exactly the zoom limit
+pub fn is_manual_zoom(params: &ComputeParams) -> bool {
+    params.fixed_zoom && params.adaptive_zoom_window < -0.9
+}
+
+/// The zoom limit (`max_zoom`, keyframed, scaled by the video speed when linked and `with_speed`) at `frame` as a fov in
+/// the units [`calculate_fovs`] returns, `None` when there's no limit
+fn zoom_limit_fov_at(params: &ComputeParams, frame: usize, with_speed: bool) -> Option<f64> {
+    let ts = crate::timestamp_at_frame(frame as i32, params.scaled_fps);
+    let max_zoom = params.max_zoom.unwrap_or(0.0);
+    let mut zoom_limit = params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom);
+    if zoom_limit <= 50.0 { return None; }
+    zoom_limit /= 100.0;
+
+    if with_speed && params.video_speed_affects_zooming_limit && (params.video_speed != 1.0 || params.keyframes.is_keyframed(&KeyframeType::VideoSpeed)) {
+        let vid_speed = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(params.video_speed).abs();
+        zoom_limit *= (1.0 + ((vid_speed - 1.0) / 4.0)).min(1.8);
+    }
+
+    let scaling_factor = params.width as f64 / params.output_width.max(1) as f64;
+    Some(1.0 / (zoom_limit * scaling_factor))
+}
+
+/// The zoom limit at every frame as a fov (`None` where there's none). A frame whose fov is below it is zoomed in more
+/// than allowed. A static zoom is one zoom for the whole clip, so every frame is held to the strictest limit in the clip,
+/// otherwise a frame with a looser limit would let the zoom past the others'. With the manual zoom level that limit is the
+/// zoom itself, exactly what the slider says, so the video speed doesn't scale it
+pub fn zoom_limit_fovs(params: &ComputeParams) -> Vec<Option<f64>> {
+    let frames = params.frame_count;
+    if params.adaptive_zoom_window < -0.9 {
+        let with_speed = !params.fixed_zoom;
+        let strictest = (0..frames).filter_map(|i| zoom_limit_fov_at(params, i, with_speed)).reduce(f64::max);
+        vec![strictest; frames]
+    } else {
+        (0..frames).map(|i| zoom_limit_fov_at(params, i, true)).collect()
+    }
+}
+
+/// Returns the fovs to apply, the minimal fovs (the honest per-frame measurement), the debug points, and the fovs the
+/// zoom limit judges each frame by: the applied ones, except for static zoom, where all frames get the worst one. Judged
+/// by that, one bad moment would put every frame over the limit and lower the smoothing of the whole clip instead of only
+/// where the frame doesn't fit, so static zoom is judged by what the dynamic zoom would do there
+pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)], method: ZoomMethod) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>, Vec<f64>)  {
     if timestamps.is_empty() {
         return Default::default();
     }
+
+    // Manual zoom level: static zoom at the zoom limit, read before the output size is swapped for the source size below
+    let manual_zoom = if is_manual_zoom(compute_params) {
+        zoom_limit_fovs(compute_params).into_iter().flatten().next()
+    } else {
+        None
+    };
+    // Only when the limit iterations will run: the curve below is for them alone
+    let judge_by_curve = compute_params.adaptive_zoom_window < -0.9 && !compute_params.zoom_limit_whole_clip && zoom_limit_runs(compute_params);
 
     let mut compute_params = compute_params.clone();
     compute_params.fov_scale = 1.0;
@@ -214,11 +277,19 @@ pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)
     // `final_fovs_minimal` is the honest measurement the FOV warning and the safe-area overlay compare
     // against 1.0; with focal length smoothing that's `coverage`, the frame relative to the compensated view
     let final_fovs_minimal = coverage;
-    let mut final_fovs = if compute_params.adaptive_zoom_window < -0.9 {
-        // Static zoom
-        if let Some(max_f) = fov_values.iter().copied().reduce(f64::min) {
-            fov_values.iter_mut().for_each(|v| *v = max_f);
-        }
+    let static_zoom = compute_params.adaptive_zoom_window < -0.9;
+    // How the zoom limit judges the frames of a static zoom. Not by the fov they each need: the crop a frame needs builds up
+    // over the frames before it, so lowering the smoothing on that frame alone takes many iterations and cuts it in jerks.
+    // A dynamic zoom curve spreads it over the moment around, the way the dynamic zoom gets judged. It's always the same
+    // curve, whatever the zooming method and its keyframes, as those are settings of the dynamic zoom only.
+    // `zoom_limit_whole_clip` keeps the behavior from before: every frame judged by the worst one
+    let mut limit_fovs = if judge_by_curve {
+        Some(zoom_dynamic::limit_curve(&fov_values, STATIC_ZOOM_LIMIT_WINDOW, compute_params.scaled_fps))
+    } else {
+        None
+    };
+    let mut final_fovs = if static_zoom {
+        // Static zoom, set to the worst frame below, after the margin
         fov_values
     } else if compute_params.adaptive_zoom_window > 0.0001 {
         // Dynamic zoom
@@ -244,10 +315,28 @@ pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)
         if min_dim > 0.0 {
             let inset = 2.0 * compute_params.fov_algorithm_margin as f64 / min_dim;
             final_fovs.iter_mut().for_each(|v| *v = (*v - inset).max(0.001)); // same floor as FrameTransform::get_fov
+            if let Some(l) = limit_fovs.as_mut() { l.iter_mut().for_each(|v| *v = (*v - inset).max(0.001)); }
         }
     }
 
-    (final_fovs, final_fovs_minimal, debug_points)
+    let mut limit_fovs = limit_fovs.unwrap_or_else(|| final_fovs.clone());
+    if static_zoom && compute_params.zoom_limit_whole_clip {
+        if let Some(max_f) = limit_fovs.iter().copied().reduce(f64::min) {
+            limit_fovs.iter_mut().for_each(|v| *v = max_f);
+        }
+    }
+    if static_zoom {
+        // Fixed zoom never opens wider than the zoom limit, so every clip gets the same crop. The limit iterations lower
+        // the smoothing wherever a frame needs more than that, so it only zooms in further when even that doesn't fit
+        if let Some(limit) = manual_zoom {
+            final_fovs.iter_mut().for_each(|v| *v = v.min(limit));
+        }
+        if let Some(max_f) = final_fovs.iter().copied().reduce(f64::min) {
+            final_fovs.iter_mut().for_each(|v| *v = max_f);
+        }
+    }
+
+    (final_fovs, final_fovs_minimal, debug_points, limit_fovs)
 }
 
 /// Key of everything the zoom pass reads, so `recompute_threaded` can tell whether the stored fovs are stale.
@@ -261,6 +350,8 @@ pub fn get_checksum(compute_params: &ComputeParams, smoothing_checksum: u64) -> 
     // (`ComputeParams::from_manager` derives them from the profile and nothing else writes them)
     hasher.write_u64(compute_params.lens.get_checksum());
     hasher.write_u64(compute_params.lens_correction_amount.to_bits());
+    // The projection the picture is drawn in, resolved: "Automatic" is a function of the lens above
+    hasher.write_i32(compute_params.output_projection);
     hasher.write_u64(compute_params.light_refraction_coefficient.to_bits());
 
     // Video geometry, timing and rolling shutter
@@ -290,6 +381,8 @@ pub fn get_checksum(compute_params: &ComputeParams, smoothing_checksum: u64) -> 
     hasher.write_u64(compute_params.additional_translation.2.to_bits());
     hasher.write_u64(compute_params.max_zoom.unwrap_or_default().to_bits());
     hasher.write_usize(compute_params.max_zoom_iterations);
+    hasher.write_u8(compute_params.fixed_zoom as u8);
+    hasher.write_u8(compute_params.zoom_limit_whole_clip as u8);
     hasher.write_u32(compute_params.fov_algorithm_margin.to_bits());
 
     // Focal length stabilization: the zoom accounts for the compensation, so it has to follow the curves themselves

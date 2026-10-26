@@ -7,7 +7,6 @@ pub mod imu_integration;
 pub mod lens_profile;
 pub mod lens_profile_database;
 pub mod camera_catalog;
-#[cfg(feature = "opencv")]
 pub mod calibration;
 pub mod synchronization;
 pub mod stabilization;
@@ -28,7 +27,7 @@ pub mod util;
 pub mod stabilization_params;
 
 use std::sync::{ Arc, atomic::{ AtomicU64, AtomicBool, Ordering::SeqCst } };
-use std::collections::BTreeMap;
+use std::collections::{ BTreeMap, BTreeSet, HashSet };
 use keyframes::*;
 use parking_lot::{ RwLock, RwLockUpgradableReadGuard };
 use nalgebra::Vector4;
@@ -120,6 +119,11 @@ pub struct StabilizationManager {
     /// Moved on by everything that makes an analysis still running measure the wrong thing (another file, a project,
     /// Clear): it stops, and what it measured is dropped, see `set_optical_measurements`
     pub optical_generation: Arc<AtomicU64>,
+    /// How the next analysis follows the points: the user's choice, kept from one file to the next
+    pub optical_tracking: Arc<RwLock<gyro_source::TrackingMethod>>,
+    /// Tracks the user took out of what "Analyze image optically" measured, by where they start: out of the analysis
+    /// kept, and of every analysis after it that tracks them again (see `TrackStart`). Per file, kept in the project
+    pub optical_removed_tracks: Arc<RwLock<BTreeSet<synchronization::optical_motion::TrackStart>>>,
 }
 
 impl Default for StabilizationManager {
@@ -162,6 +166,8 @@ impl Default for StabilizationManager {
             optical_measurements: Arc::new(RwLock::new(None)),
             optical_settings: Arc::new(RwLock::new(Default::default())),
             optical_generation: Arc::new(AtomicU64::new(0)),
+            optical_tracking: Arc::new(RwLock::new(Default::default())),
+            optical_removed_tracks: Arc::new(RwLock::new(Default::default())),
         }
     }
 }
@@ -209,6 +215,8 @@ impl StabilizationManager {
 
         let cancel_flag2 = cancel_flag.clone();
         let mut md = GyroSource::parse_telemetry_file(stream, filesize, &url, options, size, fps, progress_cb, cancel_flag2)?;
+        // The parsers return what they read until then, but a cancelled load (eg. replaced by the next video) mustn't set any of it
+        if cancel_flag.load(SeqCst) { return Ok(()); }
         if md.detected_source.as_ref().map(|v| v.starts_with("GoPro ")).unwrap_or_default() {
             // If gopro reports rolling shutter value, it already applied it, ie. the video is already corrected
             md.frame_readout_time = None;
@@ -480,7 +488,7 @@ impl StabilizationManager {
         }
     }
 
-    pub fn recompute_adaptive_zoom_static(compute_params: &ComputeParams, params: &RwLock<StabilizationParams>) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>) {
+    pub fn recompute_adaptive_zoom_static(compute_params: &ComputeParams, params: &RwLock<StabilizationParams>) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>, Vec<f64>) {
         let (frames, fps, method) = {
             let params = params.read();
             (params.frame_count, params.get_scaled_fps(), params.adaptive_zoom_method)
@@ -489,6 +497,24 @@ impl StabilizationManager {
 
         zooming::calculate_fovs(compute_params, &timestamps, method.into())
     }
+    /// One iteration of the zoom limit: lowers the smoothing of every frame zoomed in more than the limit allows, judged
+    /// by `limit_fovs` (see `zooming::calculate_fovs`). Returns whether any frame was over the limit
+    fn lower_smoothing_over_zoom_limit(params: &mut ComputeParams, limit_fovs: &[f64], iter: usize) -> bool {
+        let thresholds = [0.95, 0.9, 0.85, 0.8];
+        let threshold = *thresholds.get(iter).unwrap_or(thresholds.last().unwrap());
+        let fov_limits = zooming::zoom_limit_fovs(params);
+        let mut any_above_limit = false;
+        for (i, fov) in limit_fovs.iter().enumerate() {
+            let Some(fov_limit) = fov_limits.get(i).copied().flatten() else { continue; };
+            if *fov < fov_limit {
+                any_above_limit = true;
+                if let Some(v) = params.smoothing_fov_limit_per_frame.get_mut(i) {
+                    *v *= (*fov / fov_limit).min(threshold);
+                }
+            }
+        }
+        any_above_limit
+    }
     pub fn recompute_adaptive_zoom(&self) {
         let mut params = stabilization::ComputeParams::from_manager(self);
         params.calculate_camera_fovs();
@@ -496,47 +522,26 @@ impl StabilizationManager {
         Self::apply_focal_length_smoothing(&mut params, &self.params);
 
         let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
-        let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &self.params);
+        let (fovs, minimal_fovs, debug_points, mut limit_fovs) = Self::recompute_adaptive_zoom_static(&params, &self.params);
         params.fovs = fovs;
         params.minimal_fovs = minimal_fovs;
 
-        let (max_zoom_param, max_zoom_max, max_zoom_iters, scaling_factor) = {
+        {
             let mut stab_params = self.params.write();
             stab_params.set_fovs( params.fovs.clone(), lens_fov_adjustment);
             stab_params.minimal_fovs = params.minimal_fovs.clone();
             stab_params.zooming_debug_points = debug_points;
-            (
-                stab_params.max_zoom.unwrap_or(0.0),
-                params.keyframes.get_keyframes(&KeyframeType::MaxZoom).map(|x| x.iter().map(|x| x.1.value).max_by(|a, b| a.total_cmp(b)).unwrap_or(stab_params.max_zoom.unwrap_or(0.0))).unwrap_or(stab_params.max_zoom.unwrap_or(0.0)),
-                stab_params.max_zoom_iterations,
-                stab_params.size.0 as f64 / stab_params.output_size.0 as f64
-            )
-        };
+        }
+        let max_zoom_iters = params.max_zoom_iterations;
 
         // Max zoom
-        if max_zoom_max > 50.0 && max_zoom_iters > 0 {
+        if zooming::zoom_limit_runs(&params) {
             params.smoothing_fov_limit_per_frame.clear();
             for _ in params.fovs.iter() {
                 params.smoothing_fov_limit_per_frame.push(1.0);
             }
-            let thresholds = [0.95, 0.9, 0.85, 0.8];
             for iter in 0..max_zoom_iters {
-                let mut any_above_limit = false;
-                for (i, fov) in params.fovs.iter().enumerate() {
-                    let ts = crate::timestamp_at_frame(i as i32, params.scaled_fps);
-                    let mut zoom_limit = params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0;
-
-                    if params.video_speed_affects_zooming_limit && (params.video_speed != 1.0 || params.keyframes.is_keyframed(&KeyframeType::VideoSpeed)) {
-                        let vid_speed = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(params.video_speed).abs();
-                        zoom_limit *= (1.0 + ((vid_speed - 1.0) / 4.0)).min(1.8);
-                    }
-
-                    let fov_limit = 1.0 / (zoom_limit * scaling_factor);
-                    if *fov < fov_limit {
-                        any_above_limit = true;
-                        params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(*thresholds.get(iter).unwrap_or(thresholds.last().unwrap()));
-                    }
-                }
+                let any_above_limit = Self::lower_smoothing_over_zoom_limit(&mut params, &limit_fovs, iter);
                 log::debug!("Max zoom iteration {iter}/{max_zoom_iters}, any above limit: {any_above_limit}");
                 if !any_above_limit {
                     if iter == 0 {
@@ -559,9 +564,10 @@ impl StabilizationManager {
 
                 // Zooming
                 let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
-                let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &self.params);
+                let (fovs, minimal_fovs, debug_points, new_limit_fovs) = Self::recompute_adaptive_zoom_static(&params, &self.params);
                 params.fovs = fovs;
                 params.minimal_fovs = minimal_fovs;
+                limit_fovs = new_limit_fovs;
                 {
                     let mut stab_params = self.params.write();
                     stab_params.set_fovs(params.fovs.clone(), lens_fov_adjustment);
@@ -670,27 +676,22 @@ impl StabilizationManager {
             // matches the last commit: a run killed inside the max-zoom iterations leaves that key committed next to
             // quaternions that no longer carry the limit
             if smoothing_recomputed || zoom_key != zooming_checksum.load(SeqCst) {
-                let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
+                let (fovs, minimal_fovs, debug_points, mut limit_fovs) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
                 params.fovs = fovs;
                 params.minimal_fovs = minimal_fovs;
 
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
-                let (max_zoom_param, max_zoom_max, max_zoom_iters, scaling_factor) = {
+                {
                     let mut stab_params = stabilization_params.write();
                     stab_params.set_fovs(params.fovs.clone(), params.lens.optimal_fov.unwrap_or(1.0));
                     stab_params.minimal_fovs = params.minimal_fovs.clone();
                     stab_params.zooming_debug_points = debug_points;
-                    (
-                        stab_params.max_zoom.unwrap_or(0.0),
-                        params.keyframes.get_keyframes(&KeyframeType::MaxZoom).map(|x| x.iter().map(|x| x.1.value).max_by(|a, b| a.total_cmp(b)).unwrap_or(stab_params.max_zoom.unwrap_or(0.0))).unwrap_or(stab_params.max_zoom.unwrap_or(0.0)),
-                        stab_params.max_zoom_iterations,
-                        stab_params.size.0 as f64 / stab_params.output_size.0 as f64
-                    )
-                };
+                }
+                let max_zoom_iters = params.max_zoom_iterations;
 
                 // Max zoom
-                if max_zoom_max > 50.0 && max_zoom_iters > 0 {
+                if zooming::zoom_limit_runs(&params) {
                     // The iterations rewrite the quaternions with the zoom limit folded in, and the fovs along with them.
                     // Until they finish, neither is the state its key describes, so a run killed in here has to redo both
                     smoothing_checksum.store(0, SeqCst);
@@ -700,24 +701,8 @@ impl StabilizationManager {
                     for _ in params.fovs.iter() {
                         params.smoothing_fov_limit_per_frame.push(1.0);
                     }
-                    let thresholds = [0.95, 0.9, 0.85, 0.8];
                     for iter in 0..max_zoom_iters {
-                        let mut any_above_limit = false;
-                        for (i, fov) in params.fovs.iter().enumerate() {
-                            let ts = crate::timestamp_at_frame(i as i32, params.scaled_fps);
-                            let mut zoom_limit = params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom_param) / 100.0;
-
-                            if params.video_speed_affects_zooming_limit && (params.video_speed != 1.0 || params.keyframes.is_keyframed(&KeyframeType::VideoSpeed)) {
-                                let vid_speed = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, ts).unwrap_or(params.video_speed).abs();
-                                zoom_limit *= (1.0 + ((vid_speed - 1.0) / 4.0)).min(1.8);
-                            }
-
-                            let fov_limit = 1.0 / (zoom_limit * scaling_factor);
-                            if *fov < fov_limit {
-                                any_above_limit = true;
-                                params.smoothing_fov_limit_per_frame[i] *= (*fov / fov_limit).min(*thresholds.get(iter).unwrap_or(thresholds.last().unwrap()));
-                            }
-                        }
+                        let any_above_limit = Self::lower_smoothing_over_zoom_limit(&mut params, &limit_fovs, iter);
                         log::debug!("Max zoom iteration {iter}/{max_zoom_iters}, any above limit: {any_above_limit}");
                         if !any_above_limit {
                             if iter == 0 {
@@ -747,9 +732,10 @@ impl StabilizationManager {
                         // The focal length curves don't change within max-zoom iterations:
                         // settings and raw metadata are the same, so the outer apply is reused
 
-                        let (fovs, minimal_fovs, debug_points) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
+                        let (fovs, minimal_fovs, debug_points, new_limit_fovs) = Self::recompute_adaptive_zoom_static(&params, &stabilization_params);
                         params.fovs = fovs;
                         params.minimal_fovs = minimal_fovs;
+                        limit_fovs = new_limit_fovs;
 
                         if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
@@ -956,6 +942,7 @@ impl StabilizationManager {
     pub fn set_fov_overview          (&self, v: bool) { self.params.write().fov_overview           = v; }
     pub fn set_show_safe_area        (&self, v: bool) { self.params.write().show_safe_area         = v; }
     pub fn set_lens_correction_amount(&self, v: f64)  { self.params.write().lens_correction_amount = v; self.invalidate_zooming(); }
+    pub fn set_output_projection     (&self, v: i32)  { self.params.write().output_projection      = v; self.invalidate_zooming(); }
     pub fn set_frame_offset          (&self, v: i32)  { self.params.write().frame_offset           = v; }
     pub fn set_light_refraction_coefficient(&self, v: f64) { self.params.write().light_refraction_coefficient = v; self.invalidate_zooming(); }
     pub fn set_background_color      (&self, bg: Vector4<f32>) { self.params.write().background = bg; }
@@ -969,6 +956,29 @@ impl StabilizationManager {
         params.max_zoom = if v > 50.0 { Some(v) } else { None };
         params.max_zoom_iterations = iters.max(1);
         self.invalidate_smoothing();
+    }
+    pub fn set_fixed_zoom(&self, v: bool) {
+        self.params.write().fixed_zoom = v;
+        self.invalidate_smoothing(); // the zoom limit folds into the smoothing
+    }
+    pub fn set_zoom_limit_whole_clip(&self, v: bool) {
+        {
+            let mut params = self.params.write();
+            if params.zoom_limit_whole_clip == v { return; } // the UI showing what was loaded, it stays as it came
+            params.zoom_limit_whole_clip = v;
+            params.zoom_limit_whole_clip_from_old_file = false;
+        }
+        self.invalidate_smoothing();
+    }
+    /// With the manual zoom level: the zoom (%) it's set to, when the frame doesn't fit in it even with the smoothing lowered
+    /// and the video had to be zoomed in further. `None` when it fits, or with another zoom level
+    pub fn manual_zoom_missed(&self) -> Option<f64> {
+        let params = stabilization::ComputeParams::from_manager(self);
+        if !zooming::is_manual_zoom(&params) { return None; }
+        let target = zooming::zoom_limit_fovs(&params).into_iter().flatten().next()?;
+        let fov = params.fovs.iter().copied().reduce(f64::min)?;
+        let scaling_factor = params.width as f64 / params.output_width.max(1) as f64;
+        (fov < target - 1e-6).then(|| 100.0 / (target * scaling_factor))
     }
 
     pub fn set_video_speed(&self, v: f64, link_with_smoothness: bool, link_with_zooming: bool, link_with_zooming_limit: bool) {
@@ -1144,6 +1154,25 @@ impl StabilizationManager {
     /// changed since the analysis started (another file, a project, Clear: `optical_generation`), they're dropped
     /// instead, as "Cancelled"
     pub fn set_optical_measurements(&self, m: synchronization::optical_motion::OpticalMeasurements) -> Result<(), String> {
+        // The tracks taken out of an analysis before that this one tracked again: out of this one too
+        let removed = m.tracks.ids_of(self.optical_removed_tracks.read().iter());
+        let m = if removed.is_empty() { m } else {
+            ::log::info!("Optical analysis: measuring again without the {} tracks removed before", removed.len());
+            let generation = m.generation;
+            match m.remeasure(removed, || self.optical_generation.load(SeqCst) != generation) {
+                Ok(without) => without,
+                Err(e) if e == "Cancelled" => return Err(e),
+                Err(e) => {
+                    // Too little left without them: the analysis is worth more than what was taken out of another one,
+                    // so they're put back, like an edit that can't be measured (`remeasure_optical_correction`)
+                    let mut removed = self.optical_removed_tracks.write();
+                    if self.optical_generation.load(SeqCst) != generation { return Err("Cancelled".into()); }
+                    ::log::warn!("Optical analysis: {e} without the tracks removed before, they're put back");
+                    removed.retain(|s| m.tracks.ids_of(std::iter::once(s)).is_empty());
+                    m
+                }
+            }
+        };
         let m = Arc::new(m);
         let context = self.optical_context();
         loop {
@@ -1172,7 +1201,15 @@ impl StabilizationManager {
     }
     /// Sets the strength; true when the correction should be refitted to it, see `refit_optical_correction`
     pub fn set_optical_correction_strength(&self, strength: f64) -> bool {
-        let settings = { let mut s = self.optical_settings.write(); s.strength = strength.clamp(0.0, 1.0); *s };
+        self.update_optical_settings(|s| s.strength = strength.clamp(0.0, 1.0))
+    }
+    /// One correction per frame instead of per band of rows, see `OpticalCorrectionSettings::per_frame`; true when the
+    /// correction should be refitted to it, see `refit_optical_correction`
+    pub fn set_optical_correction_per_frame(&self, per_frame: bool) -> bool {
+        self.update_optical_settings(|s| s.per_frame = per_frame)
+    }
+    fn update_optical_settings(&self, update: impl FnOnce(&mut gyro_source::OpticalCorrectionSettings)) -> bool {
+        let settings = { let mut s = self.optical_settings.write(); update(&mut s); *s };
         let differs = self.gyro.read().optical_correction.as_ref().map(|c| c.settings != settings).unwrap_or_default();
         differs && self.valid_optical_measurements().is_some()
     }
@@ -1195,6 +1232,176 @@ impl StabilizationManager {
         self.recompute_gyro();
         Ok(true)
     }
+    /// How the next "Analyze image optically" follows the points, "klt" or "dis". False for neither
+    pub fn set_optical_tracking(&self, name: &str) -> bool {
+        let Some(method) = gyro_source::TrackingMethod::from_name(name) else { return false };
+        *self.optical_tracking.write() = method;
+        true
+    }
+    /// Takes the tracks `ids` of the kept analysis out of what it measured, or puts them back (`remove` false). Returns
+    /// the ones that weren't already: when any, `remeasure_optical_correction` brings the correction up to date
+    pub fn remove_optical_tracks(&self, ids: &[u32], remove: bool) -> Vec<u32> {
+        let Some(m) = self.optical_measurements.read().clone() else { return Vec::new() };
+        let mut removed = self.optical_removed_tracks.write();
+        ids.iter().copied().filter(|id| {
+            let Some(start) = m.tracks.start_of(*id) else { return false };
+            if remove { removed.insert(start) } else { removed.remove(&start) }
+        }).collect()
+    }
+    /// Puts back every track taken out. True when there were any
+    pub fn restore_optical_tracks(&self) -> bool {
+        let mut removed = self.optical_removed_tracks.write();
+        let had = !removed.is_empty();
+        removed.clear();
+        had
+    }
+    /// Measures the kept analysis again without the tracks taken out now (`optical_removed_tracks`), and fits the
+    /// correction to that: a second or so per minute of video, so not on the UI thread. False when there's nothing to
+    /// do, or when it was overtaken - by another change of the tracks taken out (whose own call measures that), another
+    /// analysis, another file. Like a refit, only ever replaces the correction the kept measurements gave.
+    ///
+    /// All or nothing: what can't be measured (too little of the image left without the tracks taken out) is undone -
+    /// the tracks taken out go back to the ones the kept analysis left out - and the error says so. Without that the
+    /// tracks would look taken out while the correction still had them, and nothing would ever measure them again
+    pub fn remeasure_optical_correction(&self) -> Result<bool, String> {
+        let Some(m) = self.valid_optical_measurements() else { return Ok(false) };
+        let removed = self.optical_removed_tracks.read().clone();
+        let excluded = m.tracks.ids_of(&removed);
+        if excluded == *m.excluded { return Ok(false); }
+        // One lock at a time: the fit below takes them the other way round
+        let overtaken = || {
+            let same = *self.optical_removed_tracks.read() == removed;
+            !same || !self.optical_measurements.read().as_ref().is_some_and(|k| Arc::ptr_eq(k, &m))
+        };
+        let failed = |e: String| -> Result<bool, String> {
+            if !self.revert_optical_tracks(&m, &removed) { return Ok(false); }
+            Err(if e == "Not enough of the image could be tracked" {
+                "Too little of the image is left to measure without the tracks taken out, so they were put back".into()
+            } else {
+                format!("{e}. The tracks taken out were put back")
+            })
+        };
+        let new = Arc::new(match m.remeasure(excluded, overtaken) {
+            Ok(new) => new,
+            Err(e) if e == "Cancelled" => return Ok(false),
+            Err(e) => return failed(e),
+        });
+        loop {
+            // A copy: the strength slider would wait for the fit on the settings lock
+            let settings = *self.optical_settings.read();
+            let mut c = match synchronization::optical_motion::solve(&new, &settings) {
+                Ok(c) => c,
+                Err(e) => return failed(e),
+            };
+            let mut kept = self.optical_measurements.write();
+            if !kept.as_ref().is_some_and(|k| Arc::ptr_eq(k, &m)) || *self.optical_removed_tracks.read() != removed { return Ok(false); }
+            // Moved during the fit: the refit that asked for it refitted the measurements replaced here
+            if *self.optical_settings.read() != settings { continue; }
+            let mut gyro = self.gyro.write();
+            let Some(fitted) = &gyro.optical_correction else { return Ok(false) };
+            c.enabled = fitted.enabled;
+            gyro.optical_correction = Some(c);
+            *kept = Some(new);
+            break;
+        }
+        self.recompute_gyro();
+        Ok(true)
+    }
+    /// Takes the tracks taken out back to the ones the kept analysis `m` left out, after `tried` couldn't be measured -
+    /// unless they're no longer `tried` or `m` no longer the kept analysis: what overtook it measures its own. Tracks of
+    /// other analyses (of another trim range) stay as they are. True when it did
+    fn revert_optical_tracks(&self, m: &Arc<synchronization::optical_motion::OpticalMeasurements>, tried: &BTreeSet<synchronization::optical_motion::TrackStart>) -> bool {
+        // In the order the fit takes them
+        let kept = self.optical_measurements.read();
+        let mut removed = self.optical_removed_tracks.write();
+        if *removed != *tried || !kept.as_ref().is_some_and(|k| Arc::ptr_eq(k, m)) { return false; }
+        removed.retain(|s| m.tracks.ids_of(std::iter::once(s)).is_empty());
+        removed.extend(m.excluded.iter().filter_map(|id| m.tracks.start_of(*id)));
+        true
+    }
+    /// Whether the kept analysis could be measured without the tracks taken out now and isn't: they were taken out (or
+    /// put back) while it was out of date - another lens, sync, motion data - and it isn't any more. Then
+    /// `remeasure_optical_correction` catches up
+    pub fn optical_tracks_unmeasured(&self) -> bool {
+        let Some(m) = self.valid_optical_measurements() else { return false };
+        let removed = self.optical_removed_tracks.read();
+        m.tracks.ids_of(removed.iter()) != *m.excluded
+    }
+    /// Lets go of what the last analysis kept to refit the correction and to take tracks out of it (the correction
+    /// stays): a render job, which does neither, doesn't hold on to the tracks of a long clip
+    pub fn release_optical_measurements(&self) {
+        *self.optical_measurements.write() = None;
+    }
+    /// The frame at a moment of the file (µs), numbered as the analysis numbers them (`OpticalMotionAnalysis::feed_frame`)
+    fn optical_frame_at(&self, file_timestamp_us: i64) -> usize {
+        let (scale, fps) = { let p = self.params.read(); (p.fps_scale, p.get_scaled_fps()) };
+        frame_at_timestamp(file_timestamp_us as f64 / 1000.0 / scale.unwrap_or(1.0), fps).max(0) as usize
+    }
+    /// The tracks of the analysis `m` taken out now: until measuring again catches up, not quite the ones it left out
+    fn optical_removed_ids(&self, m: &synchronization::optical_motion::OpticalMeasurements) -> HashSet<u32> {
+        self.optical_removed_tracks.try_read().map(|removed| m.tracks.ids_of(removed.iter())).unwrap_or_else(|| (*m.excluded).clone())
+    }
+    /// The points the analysis `m` tracked in the frame `index` that the correction is measured with, as the user has
+    /// them now: not the ones it didn't use (too short a track, too few points in their rows), not the tracks taken out,
+    /// and the ones put back only once measuring again catches up
+    fn optical_points_in_frame(&self, m: &synchronization::optical_motion::OpticalMeasurements, index: usize) -> Vec<(u32, f32, f32, synchronization::optical_motion::PointState)> {
+        use synchronization::optical_motion::PointState;
+        let removed = self.optical_removed_ids(m);
+        m.points_at(index).into_iter()
+            .filter(|p| !removed.contains(&p.0) && !matches!(p.3, PointState::Unused | PointState::Removed))
+            .collect()
+    }
+    /// Where points of the input frame `index` (relative to it) are in the stabilized picture as the preview renders it,
+    /// upright, relative to it: see `optical_motion::to_output`
+    fn optical_placement(&self, stabilized: bool) -> impl Fn(usize, &[(f32, f32)]) -> Vec<Option<(f32, f32)>> + Send + Sync + 'static {
+        let params = stabilized.then(|| {
+            let mut params = ComputeParams::from_manager(self);
+            params.framebuffer_inverted = false;
+            params
+        });
+        move |index, points| match &params {
+            Some(params) => synchronization::optical_motion::to_output(params, index, points),
+            None => synchronization::optical_motion::as_tracked(index, points),
+        }
+    }
+    /// Where the last "Analyze image optically" tracked points in the frame at a moment of the file (µs), but the tracks
+    /// taken out: their track, where they are relative to the frame (0 to 1), and what became of them. With `stabilized`,
+    /// where they are in the stabilized picture the preview shows, and only the ones in it
+    pub fn optical_tracked_points(&self, file_timestamp_us: i64, stabilized: bool) -> Vec<(u32, f32, f32, synchronization::optical_motion::PointState)> {
+        let Some(m) = self.optical_measurements.read().clone() else { return Vec::new() };
+        let index = self.optical_frame_at(file_timestamp_us);
+        let mut points = self.optical_points_in_frame(&m, index);
+        if stabilized {
+            let placed = self.optical_placement(true)(index, &points.iter().map(|p| (p.1, p.2)).collect::<Vec<_>>());
+            points = points.into_iter().zip(placed)
+                .filter_map(|(p, at)| at.filter(|(x, y)| (0.0..=1.0).contains(x) && (0.0..=1.0).contains(y)).map(|(x, y)| (p.0, x, y, p.3)))
+                .collect();
+        }
+        points
+    }
+    /// The tracks (but the ones taken out) with a point within `rect` (x0, y0, x1, y1, relative to the frame - the
+    /// stabilized one with `stabilized`) in the frame at a moment of the file (µs), or with `all_frames`, within the
+    /// part of the camera frame `rect` covers there in any frame. Every frame of a long clip placed in the stabilized
+    /// picture takes seconds: not on the UI thread. None once `cancelled`
+    pub fn optical_tracks_in_rect(&self, file_timestamp_us: i64, rect: [f32; 4], all_frames: bool, stabilized: bool, cancelled: impl Fn() -> bool + Sync) -> Option<Vec<u32>> {
+        let Some(m) = self.optical_measurements.read().clone() else { return Some(Vec::new()) };
+        let shown = self.optical_frame_at(file_timestamp_us);
+        let frames = if all_frames { 0..=usize::MAX } else { shown..=shown };
+        // Every frame's points placed the way the frame shown is: over the whole clip, what's fixed to the camera
+        // (propellers, the drone's body, on-screen graphics) is what stays in the box, not what the stabilized
+        // picture holds still there
+        let place = self.optical_placement(stabilized);
+        m.tracks.in_rect(frames, rect, &self.optical_removed_ids(&m), move |_, points: &[(f32, f32)]| place(shown, points), cancelled)
+    }
+    /// Where the tracks `ids` are in the frames up to `reach` away from the one at a moment of the file (µs): per track,
+    /// how many frames from that one, and where, relative to the frame (the stabilized one with `stabilized`)
+    pub fn optical_track_paths(&self, ids: &HashSet<u32>, file_timestamp_us: i64, reach: usize, stabilized: bool) -> Vec<(u32, Vec<(i64, f32, f32)>)> {
+        let Some(m) = self.optical_measurements.read().clone() else { return Vec::new() };
+        let i = self.optical_frame_at(file_timestamp_us);
+        m.tracks.paths(ids, i.saturating_sub(reach)..=i + reach, self.optical_placement(stabilized)).into_iter()
+            .map(|(id, path)| (id, path.into_iter().map(|(f, x, y)| (f as i64 - i as i64, x, y)).collect()))
+            .collect()
+    }
     /// State of the correction measured from the video, for the UI
     pub fn optical_correction_info(&self) -> serde_json::Value {
         // Read out under the lock, which is let go of before `valid_optical_measurements` takes it again: a second read
@@ -1213,18 +1420,47 @@ impl StabilizationManager {
                     "measured_frames": c.measured_frames,
                     "rms_deg": c.rms_deg,
                     "strength": c.settings.strength,
+                    "per_frame": c.settings.per_frame,
                     // The file had no motion data: the analysis measured all of it
                     "from_video": !c.video_base.is_empty(),
                     "ignore_file_motion": ignore_file_motion,
                     "has_motion": has_motion,
-                }), Some(c.settings)),
+                }), Some((c.settings, c.tracking))),
                 None => (serde_json::json!({ "available": false, "ignore_file_motion": ignore_file_motion, "has_motion": has_motion }), None),
             }
         };
-        if let Some(settings) = fitted_with {
-            // Fitted with another strength than the one set, and the measurements to refit aren't here any more (a
-            // project loaded from disk keeps only the correction): only another analysis applies the new one
-            info["outdated"] = (settings != *self.optical_settings.read() && self.valid_optical_measurements().is_none()).into();
+        // What "Show/edit tracked points" can show: an analysis of this session, a project keeps only the correction
+        let kept = self.optical_measurements.read().clone();
+        info["tracked_points"] = kept.as_ref().is_some_and(|m| !m.tracks.is_empty()).into();
+        // Which analysis's tracks they are: the same through measuring again, another for another analysis, which numbers
+        // its tracks anew
+        info["tracks_key"] = kept.as_ref().map(|m| Arc::as_ptr(&m.tracks) as usize as u64).unwrap_or_default().into();
+        // Only measurements the correction still sits on can be measured again without some of the tracks
+        let editable = kept.is_some() && self.valid_optical_measurements().is_some();
+        info["tracks_editable"] = editable.into();
+        {
+            let removed = self.optical_removed_tracks.read();
+            // Of this analysis when there is one, otherwise all the project remembers
+            let (count, pending) = match &kept {
+                Some(m) => { let ids = m.tracks.ids_of(removed.iter()); (ids.len(), editable && ids != *m.excluded) },
+                None => (removed.len(), false),
+            };
+            info["removed_tracks"] = count.into();
+            // Taken out or put back, and not measured again yet
+            info["removed_tracks_pending"] = pending.into();
+        }
+        let tracking = *self.optical_tracking.read();
+        info["tracking"] = tracking.name().into();
+        if let Some((fitted, fitted_tracking)) = fitted_with {
+            // Tracked another way than the one set now: still a correction, the new one applies from the next analysis
+            info["tracking_changed"] = (fitted_tracking != tracking).into();
+            // Fitted with other settings than the ones set, and the measurements to refit aren't here any more (a
+            // project loaded from disk keeps only the correction): only another analysis applies the new ones. The
+            // strength doesn't count without motion data to correct: the motion and its correction come from the same
+            // tracks, and it changes next to nothing
+            let set = *self.optical_settings.read();
+            let differs = set.per_frame != fitted.per_frame || (info["has_motion"] == true && set.strength != fitted.strength);
+            info["outdated"] = (differs && self.valid_optical_measurements().is_none()).into();
         }
         info
     }
@@ -1303,6 +1539,9 @@ impl StabilizationManager {
             // The strength the correction was fitted with: a project written from the clone (a render queue job's, which
             // "Edit" loads back) says it, and one that says another would refit the correction there
             optical_settings: Arc::new(RwLock::new(*self.optical_settings.read())),
+            // How a render queue job's own analysis tracks, and what it leaves out of that
+            optical_tracking: Arc::new(RwLock::new(*self.optical_tracking.read())),
+            optical_removed_tracks: Arc::new(RwLock::new(self.optical_removed_tracks.read().clone())),
 
             // NOT cloned:
             // stabilization
@@ -1338,6 +1577,7 @@ impl StabilizationManager {
 
         *self.gyro.write() = GyroSource::new();
         self.keyframes.write().clear();
+        self.optical_removed_tracks.write().clear();
 
         self.pose_estimator.clear();
     }
@@ -1461,10 +1701,16 @@ impl StabilizationManager {
                 "additional_rotation":    params.additional_rotation,
                 "additional_translation": params.additional_translation,
                 "lens_correction_amount": params.lens_correction_amount,
+                "output_projection":      stabilization::projection::setting_name(params.output_projection),
                 "horizon_lock_amount":    horizon_amount,
                 "horizon_lock_roll":      horizon_lock.horizonroll,
                 "horizon_lock_pitch_enabled": horizon_lock.lock_pitch,
                 "horizon_lock_pitch":     horizon_lock.horizonpitch,
+                "automatic_lock":         horizon_lock.automatic_lock,
+                "turn_threshold":         horizon_lock.turn_threshold,
+                "turn_smoothing_ms":      horizon_lock.turn_smoothing_ms,
+                "turn_multiplier":        horizon_lock.turn_multiplier,
+                "tilt_accel_limit":       horizon_lock.tilt_accel_limit.is_finite().then_some(horizon_lock.tilt_accel_limit), // null = no limit
                 "use_gravity_vectors":    gyro.use_gravity_vectors,
                 "horizon_lock_integration_method": gyro.horizon_lock_integration_method,
                 "video_speed":                   params.video_speed,
@@ -1473,6 +1719,8 @@ impl StabilizationManager {
                 "video_speed_affects_zooming_limit": params.video_speed_affects_zooming_limit,
                 "max_zoom":               params.max_zoom,
                 "max_zoom_iterations":    params.max_zoom_iterations,
+                "fixed_zoom":             params.fixed_zoom,
+                "zoom_limit_whole_clip":  params.zoom_limit_whole_clip,
                 "frame_offset":           params.frame_offset,
                 "focal_length_smoothing_enabled":  params.focal_length_smoothing_enabled,
                 "focal_length_max_zoom_rate":      params.focal_length_max_zoom_rate,
@@ -1492,6 +1740,9 @@ impl StabilizationManager {
                 "detected_source":    gyro.file_metadata.read().detected_source,
                 "optical_correction_enabled": gyro.optical_correction.as_ref().map(|c| c.enabled),
                 "optical_correction_strength": self.optical_settings.read().strength,
+                "optical_correction_per_frame": self.optical_settings.read().per_frame,
+                "optical_tracking": self.optical_tracking.read().name(),
+                "optical_removed_tracks": *self.optical_removed_tracks.read(),
                 "ignore_file_motion": gyro.ignores_file_motion(),
             },
 
@@ -1786,6 +2037,9 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("acc_rotation") { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_acc_rotation(v[0], v[1], v[2]); }
                 if let Some(v) = obj.get("gyro_bias")    { gyro.imu_transforms.gyro_bias = serde_json::from_value(v.clone()).ok(); }
                 if let Some(v) = obj.get("optical_correction_strength").and_then(|x| x.as_f64()) { self.optical_settings.write().strength = v; }
+                if let Some(v) = obj.get("optical_correction_per_frame").and_then(|x| x.as_bool()) { self.optical_settings.write().per_frame = v; }
+                if let Some(v) = obj.get("optical_tracking").and_then(|x| x.as_str()).and_then(gyro_source::TrackingMethod::from_name) { *self.optical_tracking.write() = v; }
+                if let Some(v) = obj.get("optical_removed_tracks") { *self.optical_removed_tracks.write() = serde_json::from_value(v.clone()).unwrap_or_default(); }
                 ignore_file_motion = obj.get("ignore_file_motion").and_then(|x| x.as_bool());
                 if let Ok(mut c) = util::decompress_from_base91_cbor::<crate::gyro_source::OpticalCorrection>(obj.get("optical_correction").and_then(|x| x.as_str()).unwrap_or_default()) {
                     if let Some(v) = obj.get("optical_correction_enabled").and_then(|x| x.as_bool()) { c.enabled = v; }
@@ -1836,10 +2090,28 @@ impl StabilizationManager {
                 if let Some(v) = obj.get("frame_readout_direction").and_then(|x| x.as_str()) { params.frame_readout_direction = v.into(); }
                 if let Some(v) = obj.get("adaptive_zoom_window")  .and_then(|x| x.as_f64()) { params.adaptive_zoom_window    = v; }
                 if let Some(v) = obj.get("lens_correction_amount").and_then(|x| x.as_f64()) { params.lens_correction_amount  = v; }
+                // A project from before the setting draws rectilinear, the way it was made, and so does one with a name this
+                // version doesn't know, whatever the file open before it was set to. A preset without it leaves it alone
+                match obj.get("output_projection").and_then(|x| x.as_str()).and_then(stabilization::projection::setting_from_name) {
+                    Some(v) => params.output_projection = v,
+                    None => if !*is_preset { params.output_projection = stabilization::projection::OutputProjection::Rectilinear as i32; }
+                }
                 if let Some(v) = obj.get("frame_offset")          .and_then(|x| x.as_i64()) { params.frame_offset            = v as i32; }
                 if let Some(v) = obj.get("horizontal_rs")         .and_then(|x| x.as_bool()) { if v { params.frame_readout_direction = if params.frame_readout_time < 0.0 { ReadoutDirection::RightToLeft } else { ReadoutDirection::LeftToRight }; } }
                 if let Some(v) = obj.get("max_zoom")              .and_then(|x| x.as_f64()) { params.max_zoom                = Some(v); }
                 if let Some(v) = obj.get("max_zoom_iterations")   .and_then(|x| x.as_i64()) { params.max_zoom_iterations     = v as _; }
+                // A project, or a preset with zoom settings, from before these keys: automatic zoom level, and the zoom limit
+                // lowering the smoothing of the whole clip, so it renders the way it was made. A preset without zoom settings
+                // leaves them alone
+                let old_zoom_settings = !*is_preset || ["adaptive_zoom_window", "max_zoom", "max_zoom_iterations"].iter().any(|x| obj.get(*x).is_some());
+                match obj.get("fixed_zoom").and_then(|x| x.as_bool()) {
+                    Some(v) => params.fixed_zoom = v,
+                    None => if old_zoom_settings { params.fixed_zoom = false; }
+                }
+                match obj.get("zoom_limit_whole_clip").and_then(|x| x.as_bool()) {
+                    Some(v) => { params.zoom_limit_whole_clip = v; params.zoom_limit_whole_clip_from_old_file = false; }
+                    None => if old_zoom_settings { params.zoom_limit_whole_clip = true; params.zoom_limit_whole_clip_from_old_file = true; }
+                }
 
                 if let Some(v) = obj.get("video_speed").and_then(|x| x.as_f64()) { params.video_speed = v; }
                 if let Some(v) = obj.get("video_speed_affects_smoothing")    .and_then(|x| x.as_bool()) { params.video_speed_affects_smoothing     = v; }

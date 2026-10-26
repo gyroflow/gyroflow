@@ -71,6 +71,12 @@ MenuItem {
             if (typeof gyro.optical_correction_strength === "number") {
                 opticalStrength.value = Math.round(gyro.optical_correction_strength * 100);
             }
+            if (typeof gyro.optical_correction_per_frame === "boolean") {
+                opticalPerFrame.currentIndex = gyro.optical_correction_per_frame? 1 : 0;
+            }
+            if (typeof gyro.optical_tracking === "string") {
+                opticalTracking.currentIndex = gyro.optical_tracking === "dis"? 1 : 0;
+            }
             // The checkbox from the core, which has the project's correction and whether it's on (`optical_correction_enabled`)
             Qt.callLater(opticalcb.updateInfo);
             if (typeof gyro.sample_index === "number") {
@@ -98,6 +104,12 @@ MenuItem {
     Connections {
         target: controller;
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
+            if (additional_data.cancelled) {
+                // It didn't load anything: nothing below applies (eg. it would pick an integration method for a video
+                // without quaternions), and the project waiting for the file has to load it again
+                root.filename = "";
+                return;
+            }
             root.filename = filename || "";
             root.detectedFormat = camera || "";
             info.updateEntry("File name", filename || "---");
@@ -126,6 +138,8 @@ MenuItem {
             controller.set_imu_lpf(lpfcb.checked? lpf.value : 0);
             controller.set_imu_median_filter(mfcb.checked? mf.value : 0);
             controller.set_optical_correction_strength(opticalStrength.value / 100);
+            controller.set_optical_correction_per_frame(opticalPerFrame.currentIndex === 1);
+            controller.set_optical_tracking(opticalTracking.currentIndex === 1? "dis" : "klt");
             Qt.callLater(opticalcb.updateInfo);
             controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
             controller.set_acc_rotation(arot.checked? ap.value : 0, arot.checked? ar.value : 0, arot.checked? ay.value : 0);
@@ -295,7 +309,7 @@ MenuItem {
     CheckBoxWithContent {
         id: opticalcb;
         text: qsTr("Optical correction");
-        tooltip: qsTr("Measure the camera rotation from the video itself and correct the motion data where they disagree. Useful when vibrations corrupt the gyro data, e.g. on a hard-mounted FPV camera. The analysis goes through every frame of the selected trim range.");
+        tooltip: qsTr("Measure the camera rotation from the video and correct the motion data where they disagree, e.g. gyro errors caused by vibration. Only the trim range is analyzed.");
         property var info: ({ available: false });
         // Always opticalcb.info: this file has an element with the id `info` too, and ids come before properties
         function updateInfo(): void {
@@ -339,27 +353,56 @@ MenuItem {
             wrapMode: Text.WordWrap;
             horizontalAlignment: Text.AlignHCenter;
             visible: text.length > 0;
-            text: opticalcb.info.ignore_file_motion && !opticalcb.info.from_video? qsTr("Click Analyze to measure the motion from the video.") :
-                  !opticalcb.info.available? "" :
-                  opticalcb.info.stale? qsTr("The motion data, the sync, the lens or the rolling shutter changed since the analysis. Analyze again to apply the correction.") :
-                  opticalcb.info.outdated && opticalcb.info.has_motion? qsTr("Analyze again to apply the new strength.") :
-                  opticalcb.info.from_video? "" :
-                  qsTr("Measured in %1 of %2 frames, correction %3°").arg(opticalcb.info.measured_frames).arg(opticalcb.info.frames).arg((+opticalcb.info.rms_deg).toFixed(3));
+            text: {
+                const i = opticalcb.info;
+                // Stale: measured on other motion data, sync, lens or frame timing, and not applied
+                return !i.available? "" :
+                       i.stale || (i.ignore_file_motion && !i.from_video)? qsTr("Out of date and not applied, analyze again.") :
+                       i.outdated || i.tracking_changed? qsTr("Analyze again to apply the new settings.") :
+                       i.from_video? "" :
+                       qsTr("Measured in %1 of %2 frames, correction %3°").arg(i.measured_frames).arg(i.frames).arg((+i.rms_deg).toFixed(3));
+            }
         }
         CheckBox {
             id: ignoreFileMotion;
             text: qsTr("Ignore motion data from the file");
-            tooltip: qsTr("Measure all of the camera motion from the video, like for a file without motion data, instead of correcting the motion data. For motion data too broken to correct, e.g. a gyro that glitches or saturates for seconds at a time.");
+            tooltip: qsTr("Measure all of the motion from the video instead of correcting the motion data, when it's too broken to correct.");
+            // Nothing to ignore in a file without motion data
+            visible: !!opticalcb.info.has_motion || !!opticalcb.info.ignore_file_motion;
             onCheckedChanged: controller.set_ignore_file_motion(checked);
         }
 
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Tracking");
+            ComboBox {
+                id: opticalTracking;
+                model: [QT_TRANSLATE_NOOP("Popup", "KLT (corners)"), QT_TRANSLATE_NOOP("Popup", "DIS (dense flow)")];
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                tooltip: qsTr("KLT is the most accurate where the image has detail. DIS also follows weak detail like clouds or water, but is slower and loses fast motion more easily.");
+                onCurrentIndexChanged: controller.set_optical_tracking(currentIndex === 1? "dis" : "klt");
+            }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Correction");
+            ComboBox {
+                id: opticalPerFrame;
+                model: [QT_TRANSLATE_NOOP("Popup", "Per row"), QT_TRANSLATE_NOOP("Popup", "Per frame")];
+                font.pixelSize: 12 * dpiScale;
+                width: parent.width;
+                tooltip: qsTr("Per row also removes vibration within a frame (jello). Per frame suits global shutter cameras, frames with large areas without detail, or an unknown rolling shutter time.");
+                onCurrentIndexChanged: controller.set_optical_correction_per_frame(currentIndex === 1);
+            }
+        }
         Label {
             text: qsTr("Strength");
             width: parent.width;
             // Without motion data to correct (none in the file, or ignored), the motion and its correction come from
             // the same tracks: the correction only refines within the frames, the strength changes next to nothing
             visible: !!opticalcb.info.has_motion;
-            tooltip: qsTr("How far the correction may take the motion data from what it says. Lower values only correct small, fast errors like vibration. Higher values let the image override the motion data also where it's off by a lot or for longer, like gyro glitches, but follow the image's own mistakes (moving objects, water) more too.");
+            tooltip: qsTr("Low values only correct small, fast errors like vibration. High values also correct large and long errors like gyro glitches, but follow moving objects in the image more.");
             SliderWithField {
                 id: opticalStrength;
                 defaultValue: 50;
@@ -375,6 +418,32 @@ MenuItem {
                     interval: 150;
                     onTriggered: controller.set_optical_correction_strength(opticalStrength.value / 100);
                 }
+            }
+        }
+        CheckBox {
+            id: editTrackedPoints;
+            text: qsTr("Show/edit tracked points");
+            tooltip: qsTr("Green: used, yellow: counted less, red: rejected. Click or drag to select tracks, Shift adds, Ctrl+drag selects that part of the camera frame through the whole clip (e.g. propellers). Delete removes them, Ctrl+Z brings them back.");
+            // Only after an analysis in this session: a project keeps the correction, not the tracks
+            visible: !!opticalcb.info.tracked_points;
+            checked: false;
+            // Stays checked through files without tracks, for the next analysis
+            readonly property bool shown: checked && opticalcb.checked && !!opticalcb.info.tracked_points;
+            onShownChanged: window.videoArea.opticalPointEditor.active = shown;
+        }
+        Row {
+            spacing: 5 * dpiScale;
+            // Also without the tracks: a project remembers what was taken out, for the next analysis
+            visible: +opticalcb.info.removed_tracks > 0;
+            BasicText {
+                anchors.verticalCenter: parent.verticalCenter;
+                text: opticalcb.info.removed_tracks_pending? qsTr("Updating...") : qsTr("%n track(s) removed", "", +opticalcb.info.removed_tracks);
+            }
+            LinkButton {
+                text: qsTr("Restore all");
+                leftPadding: 6 * dpiScale;
+                rightPadding: 6 * dpiScale;
+                onClicked: controller.restore_optical_tracks();
             }
         }
         Connections {

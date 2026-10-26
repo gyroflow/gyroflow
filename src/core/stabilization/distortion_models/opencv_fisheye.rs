@@ -4,6 +4,7 @@
 // Adapted from OpenCV: https://github.com/opencv/opencv/blob/2b60166e5c65f1caccac11964ad760d847c536e4/modules/calib3d/src/fisheye.cpp#L257-L460
 
 use crate::stabilization::KernelParams;
+use super::{ Real, c };
 
 #[derive(Default, Clone)]
 pub struct OpenCVFisheye { }
@@ -93,8 +94,13 @@ impl OpenCVFisheye {
         if params.k[0] == 0.0 && params.k[1] == 0.0 && params.k[2] == 0.0 && params.k[3] == 0.0 {
             return if z > 1e-9 { (x / z, y / z) } else { (x * 1e9, y * 1e9) };
         }
+        Self::distort(x, y, z, &params.k)
+    }
 
-        let r = (x.powi(2) + y.powi(2)).sqrt();
+    /// The projection itself, in either precision (see `Real`). All-zero `k` is the equidistant lens here: the
+    /// "uncalibrated means pinhole" convention is `distort_point`'s
+    pub fn distort<T: Real>(x: T, y: T, z: T, k: &[T]) -> (T, T) {
+        let r = (x * x + y * y).sqrt();
 
         // atan2 against the ray's own z, so the angle is right past 90° too
         let theta = r.atan2(z);
@@ -103,9 +109,9 @@ impl OpenCVFisheye {
         let theta6 = theta4*theta2;
         let theta8 = theta4*theta4;
 
-        let theta_d = theta * (1.0 + params.k[0]*theta2 + params.k[1]*theta4 + params.k[2]*theta6 + params.k[3]*theta8);
+        let theta_d = theta * (c::<T>(1.0) + k[0]*theta2 + k[1]*theta4 + k[2]*theta6 + k[3]*theta8);
 
-        let scale = if r < 1e-12 { 1.0 } else { theta_d / r };
+        let scale = if r < c(1e-12) { c(1.0) } else { theta_d / r };
 
         (
             x * scale,
