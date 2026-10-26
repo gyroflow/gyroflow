@@ -1865,9 +1865,15 @@ impl StabilizationManager {
             load_options.project_version = obj.get("version").and_then(|x| x.as_u64()).unwrap_or(2);
             let mut org_video_url = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
             if !org_video_url.is_empty() && !org_video_url.contains("://") {
-                org_video_url = filesystem::path_to_url(&org_video_url);
-                if let Some(videofile) = obj.get_mut("videofile") {
-                    *videofile = serde_json::Value::String(org_video_url.clone());
+                // A path that is not valid on this OS (a Windows path opened on Linux) must
+                // stay put. path_to_url returns empty on that failure, and an empty url is
+                // what marks a preset.
+                let converted = filesystem::path_to_url(&org_video_url);
+                if !converted.is_empty() {
+                    org_video_url = converted;
+                    if let Some(videofile) = obj.get_mut("videofile") {
+                        *videofile = serde_json::Value::String(org_video_url.clone());
+                    }
                 }
             }
             #[cfg(any(target_os = "macos", target_os = "ios"))]
@@ -1915,9 +1921,12 @@ impl StabilizationManager {
             if let Some(serde_json::Value::Object(obj)) = obj.get_mut("gyro_source") {
                 let mut org_gyro_url = obj.get("filepath").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
                 if !org_gyro_url.is_empty() && !org_gyro_url.contains("://") {
-                    org_gyro_url = filesystem::path_to_url(&org_gyro_url);
-                    if let Some(filepath) = obj.get_mut("filepath") {
-                        *filepath = serde_json::Value::String(org_gyro_url.clone());
+                    let converted = filesystem::path_to_url(&org_gyro_url);
+                    if !converted.is_empty() {
+                        org_gyro_url = converted;
+                        if let Some(filepath) = obj.get_mut("filepath") {
+                            *filepath = serde_json::Value::String(org_gyro_url.clone());
+                        }
                     }
                 }
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
