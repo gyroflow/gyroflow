@@ -1,0 +1,3 @@
+# Generated from lens profiles and Lensfun. Collapse it in review diffs.
+# Regenerate with _scripts/generate_camera_catalog.py; see resources/CAMERA_CATALOG.md.
+resources/camera_catalog.json linguist-generated=true
