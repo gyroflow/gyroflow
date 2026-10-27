@@ -73,7 +73,8 @@ Item {
         } else {
             urls = [
                 obj.videofile,
-                obj.gyro_source?.filepath || ""
+                obj.gyro_source?.filepath || "",
+                obj.gyro_source?.all_metadata? "1" : ""
             ];
         }
         if ((!urls || !urls[0]) && !vidInfo.filename) {
@@ -100,6 +101,8 @@ Item {
             root.pendingQueueJobId = +queueJobId;
             console.log("Loading gyro file", urls[1]);
             window.motionData.lastSelectedFile = urls[1];
+            // Loaded with all of its metadata if the project was (its frame timing stays, eg. a CRM on its proxy)
+            window.motionData.setAllMetadata(urls[2] == "1");
             controller.load_telemetry(urls[1], urls[0] == urls[1] || window.motionData.allMetadata, window.videoArea.vid, -1, project_version);
             return;
         }
@@ -273,6 +276,10 @@ Item {
                     vidInfo.infoList.model = model;
                     vidInfo.infoList.modelChanged();
                 }
+            }
+            if (camera && additional_data.lens_stabilizer_on) {
+                // Also for a file loaded as the motion data only (a CRM with its proxy)
+                messageBox(Modal.Warning, qsTr("This video was recorded with the lens image stabilizer (IS) on, which Gyroflow doesn't support for Canon cameras.\nTurn the image stabilizer off in order to use Gyroflow."), [ { "text": qsTr("Ok") } ]);
             }
             if (+additional_data.sample_rate > 0.0 && Math.round(+additional_data.sample_rate) < 50) {
                 messageBox(Modal.Warning, qsTr("Motion data sampling rate is too low (%1 Hz).\n50 Hz is an absolute minimum and we recommend at least 200 Hz.").arg(additional_data.sample_rate.toFixed(0)), [ { "text": qsTr("Ok") } ]);

@@ -1532,9 +1532,10 @@ impl Controller {
         }
         version
     }
+    /// The project's video and motion data file, and "1" when the motion data file is loaded with all of its metadata
     fn get_urls_from_gyroflow_file(&mut self, url: QUrl) -> QStringList {
         let url = util::qurl_to_encoded(url);
-        let mut ret = vec![QString::default(); 2];
+        let mut ret = vec![QString::default(); 3];
         if let Ok(data) = filesystem::read(&url) {
             if let Ok(serde_json::Value::Object(obj)) = serde_json::from_slice(&data) {
                 let mut org_video_url = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or("").to_string();
@@ -1572,6 +1573,9 @@ impl Controller {
                     if !gyro_url.is_empty() {
                         let gyro_url = StabilizationManager::get_new_videofile_url(&gyro_url, Some(&url), self.image_sequence_start as u32);
                         ret[1] = QString::from(gyro_url);
+                    }
+                    if gyro.get("all_metadata").and_then(|x| x.as_bool()).unwrap_or_default() {
+                        ret[2] = QString::from("1");
                     }
                 }
             } else {

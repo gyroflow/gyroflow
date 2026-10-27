@@ -80,6 +80,10 @@ pub struct GyroSource {
     offsets_adjusted: BTreeMap<i64, f64>, // <timestamp + offset, offset>
 
     pub file_url: String,
+    /// The file was loaded with all of its metadata, as the video's own (it's the video, or "Load all metadata" was
+    /// on): its per-frame tables (the frame timing) apply to the video's frames
+    #[serde(default)]
+    pub all_metadata: bool,
 
     /// Correction measured from the video, composed onto `quaternions` at the end of `integrate`
     #[serde(default)]
@@ -515,6 +519,8 @@ impl GyroSource {
             Some(m) if is_gyroflow_proto => frame_readout_time.map(|x| x * m.readout_extent(frame_readout_direction)),
             _ => frame_readout_time,
         };
+        // Canon's cameras that don't write their readout time: corrected, and timed (`canon::get_time_offset`), with a typical one
+        let frame_readout_time = frame_readout_time.or((input.camera_type() == "Canon").then_some(canon::DEFAULT_READOUT_MS));
 
         let mut md = FileMetadata {
             imu_orientation,
@@ -611,6 +617,11 @@ impl GyroSource {
                     // --------------------------------- Canon ---------------------------------
                     if input.camera_type() == "Canon" {
                         canon::init_lens_profile(&mut md, &input, tag_map, size, info);
+                        if canon::lens_stabilizer_on(tag_map) {
+                            if let serde_json::Value::Object(o) = &mut md.additional_data {
+                                o.insert("lens_stabilizer_on".into(), true.into());
+                            }
+                        }
                     }
                     // --------------------------------- Canon ---------------------------------
 

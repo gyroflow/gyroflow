@@ -228,12 +228,19 @@ MenuItem {
             }
         }
     }
+    // As a project has it, without loading the file again: the project loads it
+    function setAllMetadata(v: bool): void {
+        allMetadataCb.preventReload = true;
+        allMetadataCb.checked = v;
+        allMetadataCb.preventReload = false;
+    }
     CheckBox {
         id: allMetadataCb;
+        property bool preventReload: false;
         text: qsTr("Load all metadata");
         visible: root.lastSelectedFile.toString() && root.lastSelectedFile != window.videoArea.loadedFileUrl;
         checked: false;
-        onCheckedChanged: allMetadataDebounce.start();
+        onCheckedChanged: if (!preventReload) allMetadataDebounce.start();
         Timer {
             id: allMetadataDebounce;
             interval: 1;

@@ -281,6 +281,7 @@ impl StabilizationManager {
             let mut gyro = self.gyro.write();
             gyro.load_from_telemetry(md);
             gyro.file_load_options = options.clone();
+            gyro.all_metadata = is_main_video;
         }
 
         if let Some(id) = camera_id {
@@ -1684,6 +1685,7 @@ impl StabilizationManager {
             },
             "gyro_source": {
                 "filepath":           gyro.file_url,
+                "all_metadata":       gyro.all_metadata,
                 "lpf":                gyro.imu_transforms.imu_lpf,
                 "mf":                 gyro.imu_transforms.imu_mf,
                 "rotation":           gyro.imu_transforms.imu_rotation_angles,
@@ -1891,7 +1893,9 @@ impl StabilizationManager {
                 use crate::gyro_source::TimeIMU;
 
                 let is_compressed = obj.get("raw_imu").map(|x| x.is_string()).unwrap_or_default();
-                let is_main_video = org_gyro_url == org_video_url;
+                // Another file loaded with all of its metadata is the video's own too, so its frame timing stays (a
+                // CRM on its proxy): a project with no motion data of its own loads it again
+                let is_main_video = org_gyro_url == org_video_url || obj.get("all_metadata").and_then(|x| x.as_bool()).unwrap_or_default();
 
                 let built_in_gyro: std::io::Result<crate::gyro_source::FileMetadata> = util::decompress_from_base91_cbor(obj.get("file_metadata").and_then(|x| x.as_str()).unwrap_or_default());
 
@@ -1982,6 +1986,7 @@ impl StabilizationManager {
                 let mut gyro = self.gyro.write();
                 if !org_gyro_url.is_empty() {
                     gyro.file_url = gyro_url.clone();
+                    gyro.all_metadata = is_main_video;
                 }
 
                 if let Some(v) = obj.get("lpf").and_then(|x| x.as_f64()) { gyro.imu_transforms.imu_lpf = v; }
