@@ -109,7 +109,9 @@ impl OpticalCorrection {
 
     /// Whether it was measured on (uncorrected) quaternions of this `checksum`, in this context (`context_checksum`)
     pub fn measured_on(&self, quats_checksum: u64, context_checksum: u64) -> bool {
-        !self.coeffs.is_empty() && self.quats_checksum == quats_checksum && self.context_checksum == context_checksum
+        // Optical-only analysis can have a measured base but no long-track correction to fit.
+        (!self.coeffs.is_empty() || self.video_base.len() >= 2)
+            && self.quats_checksum == quats_checksum && self.context_checksum == context_checksum
     }
 
     pub fn apply(&self, quats: &mut TimeQuat) {
