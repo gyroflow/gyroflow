@@ -86,6 +86,21 @@ impl LensProfileDatabase {
 
         // `relative` is the file's path in the lens profile folder
         let mut load = |data: DataSource, f_name: &str, relative: &str| {
+            if f_name.ends_with(".xml") {
+                if let DataSource::String(xml) = &data {
+                    for profile in crate::lensfun::parse_xml(xml, f_name) {
+                        let key = profile.identifier.clone();
+                        if !self.map.contains_key(&key) {
+                            if !profile.is_copy {
+                                let depth = relative.split('/').filter(|x| !x.is_empty()).count();
+                                self.files.push(ProfileFile { path: f_name.to_string(), depth, key: key.clone() });
+                            }
+                            self.map.insert(key, profile);
+                        }
+                    }
+                }
+                return;
+            }
             if f_name.ends_with(".gyroflow") {
                 let mut profile = LensProfile::default();
                 profile.name = std::path::Path::new(f_name).file_stem().map(|x| x.to_string_lossy().to_string()).unwrap_or_default();
@@ -162,7 +177,7 @@ impl LensProfileDatabase {
             walkdir::WalkDir::new(&dir).into_iter().for_each(|e| {
                 if let Ok(entry) = e {
                     let f_name = entry.path().to_string_lossy().replace('\\', "/");
-                    if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
+                    if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") || f_name.ends_with(".xml") {
                         if let Ok(data) = std::fs::read_to_string(&f_name) {
                             let relative = entry.path().strip_prefix(&dir).map(|x| x.to_string_lossy().replace('\\', "/")).unwrap_or_else(|_| f_name.clone());
                             load(DataSource::String(data), &f_name, &relative);

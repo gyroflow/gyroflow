@@ -938,7 +938,14 @@ pub fn path_to_url(path: &str) -> String {
         if path.is_empty() { return Ok(String::new()) }
         if path.contains("://") { return Ok(path.to_owned()); } // Already an url
         if path.starts_with("//?/") { path = &path[4..]; } // Windows extended path
-        let mut ret = url::Url::from_file_path(&path).map_err(|_| FilesystemError::NotAFile(path.into()))?.to_string();
+        let url_res = url::Url::from_file_path(&path).or_else(|_| {
+            if path.len() >= 2 && path.as_bytes()[1] == b':' && path.as_bytes()[0].is_ascii_alphabetic() {
+                url::Url::parse(&format!("file:///{}", path.replace('\\', "/"))).map_err(|_| ())
+            } else {
+                Err(())
+            }
+        });
+        let mut ret = url_res.map_err(|_| FilesystemError::NotAFile(path.into()))?.to_string();
         if (path.ends_with('/') || path.ends_with('\\')) && !ret.ends_with('/') {
             ret.push('/');
         }

@@ -38,10 +38,10 @@ MenuItem {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: ["json"];
+        property var extensions: ["json", "xml"];
 
         title: qsTr("Choose a lens profile")
-        nameFilters: [qsTr("Lens profiles") + " (*.json" + (Qt.platform.os == "ios"? " *.txt" : "") + ")"];
+        nameFilters: [qsTr("Lens profiles") + " (*.json *.xml" + (Qt.platform.os == "ios"? " *.txt" : "") + ")"];
         type: "lens";
         onAccepted: loadFile(fileDialog.selectedFile);
     }

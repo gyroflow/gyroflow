@@ -3,9 +3,9 @@
 
 mod opencv_fisheye;
 mod opencv_standard;
-mod poly3;
-mod poly5;
-mod ptlens;
+pub(crate) mod poly3;
+pub(crate) mod poly5;
+pub(crate) mod ptlens;
 mod insta360;
 pub mod sony;
 mod generic_polynomial;
@@ -134,6 +134,25 @@ impl DistortionModel {
         };
         for &i in odd {
             if let Some(v) = k.get_mut(i) { *v = -*v; }
+        }
+    }
+
+    pub fn rescale_coeffs(&self, k: &mut [f64], hugin_scaling: f64) {
+        use DistortionModels as M;
+        match &self.inner {
+            M::Poly3(_) => poly3::Poly3::rescale_coeffs(k, hugin_scaling),
+            M::Poly5(_) => poly5::Poly5::rescale_coeffs(k, hugin_scaling),
+            M::PtLens(_) => ptlens::PtLens::rescale_coeffs(k, hugin_scaling),
+            _ => {}
+        }
+    }
+
+    pub fn rescale_model_coeffs(model: &str, k: &mut [f64], hugin_scaling: f64) {
+        match model {
+            "poly3" => poly3::Poly3::rescale_coeffs(k, hugin_scaling),
+            "poly5" => poly5::Poly5::rescale_coeffs(k, hugin_scaling),
+            "ptlens" => ptlens::PtLens::rescale_coeffs(k, hugin_scaling),
+            _ => {}
         }
     }
 
