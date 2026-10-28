@@ -380,7 +380,13 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                     let mut ok = true;
                     for item in qi.iter() {
                         if item.job_id == *job_id {
-                            ok = item.error_string.is_empty();
+                            let error_string = item.error_string.to_string();
+                            // A warning about the output, which is complete
+                            if let Some(warning) = error_string.strip_prefix("camera_tracks:") {
+                                log::warn!("[{:08x}] Not all of the camera tracks and metadata were copied to the output:\n{warning}", job_id);
+                            } else {
+                                ok = error_string.is_empty();
+                            }
                             break;
                         }
                     }

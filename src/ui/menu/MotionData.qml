@@ -27,7 +27,7 @@ MenuItem {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: [ "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "gcsv", "360", "log", "bin", "braw", "r3d", "nev", "gpmf", "crm", "zraw", "jsonl", "mcraw" ];
+        property var extensions: [ "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "gcsv", "360", "log", "bin", "braw", "r3d", "nev", "gpmf", "crm", "zraw", "jsonl", "mcraw", "dng" ];
 
         title: qsTr("Choose a motion data file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Motion data files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
@@ -228,12 +228,19 @@ MenuItem {
             }
         }
     }
+    // As a project has it, without loading the file again: the project loads it
+    function setAllMetadata(v: bool): void {
+        allMetadataCb.preventReload = true;
+        allMetadataCb.checked = v;
+        allMetadataCb.preventReload = false;
+    }
     CheckBox {
         id: allMetadataCb;
+        property bool preventReload: false;
         text: qsTr("Load all metadata");
         visible: root.lastSelectedFile.toString() && root.lastSelectedFile != window.videoArea.loadedFileUrl;
         checked: false;
-        onCheckedChanged: allMetadataDebounce.start();
+        onCheckedChanged: if (!preventReload) allMetadataDebounce.start();
         Timer {
             id: allMetadataDebounce;
             interval: 1;

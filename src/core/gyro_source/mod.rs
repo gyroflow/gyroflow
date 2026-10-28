@@ -6,6 +6,7 @@ mod imu_transforms;
 mod sony;
 mod canon;
 mod motioncam;
+mod per_frame;
 pub mod splines;
 pub mod optical_correction;
 pub use file_metadata::*;
@@ -41,6 +42,11 @@ pub type TimeVec = BTreeMap<i64, Vector3<f64>>; // key is timestamp_us
 pub struct FileLoadOptions {
     pub sample_index: Option<usize>,
     pub project_version: u64,
+    /// Frames of the video the motion data is loaded for, when they're known. The per-frame tables are by its frames,
+    /// and its frame count bounds the frame numbers the metadata gives them (`per_frame::frame_limit`). The video's,
+    /// not an option of the file, so it isn't stored
+    #[serde(skip)]
+    pub video_frames: Option<usize>,
 }
 
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
@@ -74,6 +80,10 @@ pub struct GyroSource {
     offsets_adjusted: BTreeMap<i64, f64>, // <timestamp + offset, offset>
 
     pub file_url: String,
+    /// The file was loaded with all of its metadata, as the video's own (it's the video, or "Load all metadata" was
+    /// on): its per-frame tables (the frame timing) apply to the video's frames
+    #[serde(default)]
+    pub all_metadata: bool,
 
     /// Correction measured from the video, composed onto `quaternions` at the end of `integrate`
     #[serde(default)]
@@ -215,6 +225,10 @@ impl GyroSource {
             }
         }
 
+        let is_gyroflow_proto = input.parser_name() == "GyroflowProtobuf";
+        // How the video shows the frame the file states its pixel quantities in, for the clip's readout time
+        let mut video_mapping = None;
+
         // Get IMU orientation and quaternions
         if let Some(ref samples) = input.samples {
             let mut quats = TimeQuat::new();
@@ -227,6 +241,10 @@ impl GyroSource {
             for info in samples {
                 let timestamp_us = (info.timestamp_ms * 1000.0).round() as i64;
                 if let Some(ref tag_map) = info.tag_map {
+                    let frame_mapping = FrameMapping::of(tag_map, size);
+                    if let FrameMapping::Mapped { .. } = frame_mapping {
+                        video_mapping.get_or_insert(frame_mapping);
+                    }
                     if let Some(map) = tag_map.get(&GroupId::Quaternion) {
                         if let Some(arr) = map.get_t(TagId::Data) as Option<&Vec<TimeQuaternion<f64>>> {
                             for v in arr {
@@ -243,8 +261,18 @@ impl GyroSource {
                         }
                         if let Some(v) = im.get_t(TagId::FrameReadoutDirection) as Option<&i32> { frame_readout_direction_tag = Some(*v); }
                         if let Some(v) = im.get_t(TagId::PixelPitch) as Option<&(u32, u32)> { lens_info.pixel_pitch = Some(*v); }
-                        if let Some(v) = im.get_t(TagId::CaptureAreaSize) as Option<&(f32, f32)> { lens_info.capture_area_size = Some(*v); }
-                        if let Some(v) = im.get_t(TagId::CaptureAreaOrigin) as Option<&(f32, f32)> { lens_info.capture_area_origin = Some(*v); }
+                        // The sensor area the video shows: the frame's, unless the video is the file's other picture
+                        let capture_origin = (im.get_t(TagId::CaptureAreaOrigin) as Option<&(f32, f32)>).copied();
+                        if let Some(v) = im.get_t(TagId::CaptureAreaSize) as Option<&(f32, f32)> {
+                            let (origin, area) = frame_mapping.capture_area(capture_origin.unwrap_or_default(), *v);
+                            lens_info.capture_area_size = Some(area);
+                            if capture_origin.is_some() { lens_info.capture_area_origin = Some(origin); }
+                            // The Gyroflow protobuf's readout time is that of the rows it shows (gyroflow.proto, and the
+                            // clip's readout time is turned into the video's rows' below), not the sensor's
+                            if is_gyroflow_proto { lens_info.readout_span_rows = Some(area.1); }
+                        } else if let Some(v) = capture_origin {
+                            lens_info.capture_area_origin = Some(v);
+                        }
                         if let Some(v) = im.get_t(TagId::SensorSizePixels) as Option<&(u32, u32)> { lens_info.sensor_size_px = Some(*v); }
                         if let Some(w) = im.get_t(TagId::PixelWidth) as Option<&u32> {
                             if let Some(h) = im.get_t(TagId::PixelHeight) as Option<&u32> {
@@ -285,13 +313,8 @@ impl GyroSource {
                         if let Some(v) = map.get_t(TagId::ZoomRingPosition) as Option<&f32> {
                             lens_info.zoom_ring_position = Some(*v);
                         }
-                        let (pfl_scale, pfl_valid) = match canon::recorded_frame_size(tag_map) {
-                            Some((aw, ah)) if aw > 0 && ah > 0 && size.0 > 0 && size.1 > 0 => {
-                                let aspect_matches = ((aw as f64 / ah as f64) / (size.0 as f64 / size.1 as f64) - 1.0).abs() < 0.02;
-                                (size.0 as f32 / aw as f32, aspect_matches)
-                            }
-                            _ => (1.0, true)
-                        };
+                        // The frame's pixel quantities in the video's pixels (`FrameMapping`)
+                        let (pfl_scale, pfl_valid) = (frame_mapping.scale() as f32, frame_mapping != FrameMapping::Unusable);
                         if !pfl_valid {
                             lens_info.pixel_focal_length = None;
                         }
@@ -309,7 +332,10 @@ impl GyroSource {
                             }
                         }
                         if let Some(v) = map.get_t(TagId::PrincipalPoint) as Option<&(f32, f32)> {
-                            lens_info.principal_point = Some(*v);
+                            lens_info.principal_point = Some(frame_mapping.point(*v));
+                        } else if pfl_valid && map.contains_key(&TagId::PixelFocalLength) {
+                            // Left out where it's the frame's centre, which isn't the video's when the video is the other picture
+                            if let Some(v) = frame_mapping.default_principal_point() { lens_info.principal_point = Some(v); }
                         }
                         // Per-frame distortion coefficients for gyroflow.proto GenericPolynomial
                         if let Some(v) = map.get_t(TagId::DistortionCoefficients) as Option<&Vec<f64>> {
@@ -487,6 +513,14 @@ impl GyroSource {
                 if fr.abs() > 10000.0 { ReadoutDirection::LeftToRight } else { ReadoutDirection::TopToBottom }
             },
         };
+        // The Gyroflow protobuf's readout time is its frame's rows': a video showing more or fewer of them (the file's
+        // other picture) takes their time
+        let frame_readout_time = match video_mapping {
+            Some(m) if is_gyroflow_proto => frame_readout_time.map(|x| x * m.readout_extent(frame_readout_direction)),
+            _ => frame_readout_time,
+        };
+        // Canon's cameras that don't write their readout time: corrected, and timed (`canon::get_time_offset`), with a typical one
+        let frame_readout_time = frame_readout_time.or((input.camera_type() == "Canon").then_some(canon::DEFAULT_READOUT_MS));
 
         let mut md = FileMetadata {
             imu_orientation,
@@ -517,34 +551,56 @@ impl GyroSource {
         let mut original_sample_rate = sample_rate;
         let mut is_temp = sony::ISTemp::default();
         let mut mesh_cache = BTreeMap::new(); // mesh key -> table index, so the frames with the same mesh share one
-        let is_gyroflow_proto = input.parser_name() == "GyroflowProtobuf";
+        let is_red = input.camera_type() == "RED" || input.camera_type() == "RED RAW";
+        let legacy_red_offset = options.project_version > 0 && options.project_version < 4;
+        let (mut red_has_frames, mut red_clip_exposure) = (false, None);
         if let Some(ref samples) = input.samples {
-            for info in samples {
+            // The frame each sample describes (`frame_of_sample`), among the frames the clip can have: one numbered
+            // past them is a broken one, which would size every table (`per_frame::frame_limit`)
+            let mut sample_frames: Vec<Option<usize>> = samples.iter().map(|info| frame_of_sample(&input, info)).collect();
+            per_frame::limit_frames(options.video_frames, &mut sample_frames);
+            // The per-frame tables are put together by the frame each sample describes, never in the order the samples
+            // come: a frame without a sample, or with a sample that lacks the data, stays empty until all of them are
+            // in, and every other frame keeps its own entry (`per_frame::PerFrame`)
+            let mut time_offsets = per_frame::PerFrame::<f64>::new("Per-frame time offsets");
+            let mut mesh_frames = per_frame::PerFrame::<MeshFrame>::new("Mesh correction");
+            for (info, &frame) in samples.iter().zip(&sample_frames) {
                 if let Some(ref tag_map) = info.tag_map {
                     // --------------------------------- Timing -------------------------------
-                    if is_gyroflow_proto {
-                        fn gyroflow_proto_time_offset(tag_map: &GroupedTagMap) -> Option<f64> {
-                            let imager = tag_map.get(&GroupId::Imager)?;
-                            let first_frame_ts = *(imager.get_t(TagId::FirstFrameTimestamp) as Option<&f64>)?;
-                            let exposure_time = *(imager.get_t(TagId::ExposureTime)     as Option<&f64>).unwrap_or(&0.0);
-                            let readout_time  = *(imager.get_t(TagId::FrameReadoutTime) as Option<&f64>).unwrap_or(&0.0);
-
-                            Some(first_frame_ts - exposure_time / 2.0 + readout_time / 2.0)
+                    // One source for all frames: the format's own timing, else the camera's
+                    if let Some(frame) = frame {
+                        let offset = if is_gyroflow_proto {
+                            gyroflow_proto_time_offset(tag_map, &FrameMapping::of(tag_map, size), frame_readout_direction)
+                        } else if let Some((org_sample_rate, offset)) = sony::get_time_offset(&md, &input, tag_map, sample_rate, sony_packet_timed) {
+                            original_sample_rate = org_sample_rate;
+                            Some(offset)
+                        } else if is_red {
+                            red_has_frames = true;
+                            // The middle of the frame's exposure
+                            red_exposure_ms(tag_map).filter(|_| !legacy_red_offset).map(|exposure| -exposure / 2.0)
+                        } else if input.camera_type() == "Canon" {
+                            canon::get_time_offset(&md, &input, tag_map, sample_rate, fps)
+                        } else if input.camera_type() == "MotionCam" {
+                            motioncam::get_time_offset(&md, tag_map, frame, fps)
+                        } else {
+                            None
+                        };
+                        if let Some(offset) = offset {
+                            time_offsets.set(frame, offset);
                         }
-
-                        if let Some(offset) = gyroflow_proto_time_offset(tag_map) {
-                            md.per_frame_time_offsets.push(offset);
-                        }
-                    } else if let Some((org_sample_rate, offset)) = sony::get_time_offset(&md, &input, tag_map, sample_rate, sony_packet_timed) {
-                        original_sample_rate = org_sample_rate;
-                        md.per_frame_time_offsets.push(offset);
+                    } else if is_red {
+                        // The clip's metadata (the RED2 header), which the RED SDK defines as its first frame's
+                        red_clip_exposure = red_exposure_ms(tag_map);
                     }
                     sony::init_lens_profile(&mut md, &input, tag_map, size, info);
-                    sony::stab_collect(&mut is_temp, tag_map, info, fps);
-                    // One entry per sample, the correction is looked up by frame index: empty where the frame has none
-                    // (`MeshCorrections::frame`); the whole thing goes when no frame has one
-                    let mesh_frame = sony::get_mesh_correction(tag_map, size, &mut md.mesh_correction, &mut mesh_cache).unwrap_or_default();
-                    md.mesh_correction.frames.push(mesh_frame);
+                    if let Some(frame) = frame {
+                        sony::stab_collect(&mut is_temp, tag_map, frame, fps);
+                        // The correction is looked up by frame (`MeshCorrections::frame`): a frame the camera wrote no
+                        // correction for has an empty one, a frame without the data is filled in below
+                        if let Some(mesh_frame) = sony::get_mesh_correction(tag_map, size, &mut md.mesh_correction, &mut mesh_cache) {
+                            mesh_frames.set(frame, mesh_frame);
+                        }
+                    }
 
                     if let Some(ois) = tag_map.get(&GroupId::LensOSS).and_then(|x| x.get_t(TagId::Data) as Option<&Vec<TimeVector3<i32>>>) {
                         if ois.len() == 1 && *ois.first().unwrap() == (TimeVector3 { t: -1, x: -1, y: -1, z: -1 }) {
@@ -558,32 +614,19 @@ impl GyroSource {
 
                     // --------------------------------- Sony ---------------------------------
 
-                    // --------------------------------- RED ---------------------------------
-                    if input.camera_type() == "RED" || input.camera_type() == "RED RAW" {
-                        telemetry_parser::try_block!({
-                            let legacy_offset = options.project_version > 0 && options.project_version < 4;
-                            if !legacy_offset {
-                                let exposure_time = (tag_map.get(&GroupId::Default)?.get_t(TagId::ExposureTime) as Option<&f32>)?;
-                                md.per_frame_time_offsets.push(-(*exposure_time as f64 / 1000.0) / 2.0);
-                            }
-                        });
-                    }
-                    // --------------------------------- RED ---------------------------------
-
                     // --------------------------------- Canon ---------------------------------
                     if input.camera_type() == "Canon" {
-                        if let Some(offset) = canon::get_time_offset(&md, &input, tag_map, sample_rate, fps) {
-                            md.per_frame_time_offsets.push(offset);
-                        }
                         canon::init_lens_profile(&mut md, &input, tag_map, size, info);
+                        if canon::lens_stabilizer_on(tag_map) {
+                            if let serde_json::Value::Object(o) = &mut md.additional_data {
+                                o.insert("lens_stabilizer_on".into(), true.into());
+                            }
+                        }
                     }
                     // --------------------------------- Canon ---------------------------------
 
                     // --------------------------------- MotionCam ---------------------------------
                     if input.camera_type() == "MotionCam" {
-                        if let Some(offset) = motioncam::get_time_offset(&md, tag_map, info, fps) {
-                            md.per_frame_time_offsets.push(offset);
-                        }
                         motioncam::init_lens_profile(&mut md, &input, tag_map, size, info);
                     }
                     // --------------------------------- MotionCam ---------------------------------
@@ -611,7 +654,8 @@ impl GyroSource {
                                     // The additional 0.9 ms is a mystery
                                     let diff = (video_ts - x.t) * 1000.0;
 
-                                    md.per_frame_time_offsets.push(-(x.v * 1000.0 / 2.0) - 0.9 - diff - tm_diff - zero_ref.unwrap());
+                                    // Record `i` is video frame `i`: the records are timed from the first frame on
+                                    time_offsets.set(i, -(x.v * 1000.0 / 2.0) - 0.9 - diff - tm_diff - zero_ref.unwrap());
 
                                     video_ts += 1.0 / fps;
                                     prev_t = x.t;
@@ -623,8 +667,22 @@ impl GyroSource {
                     // --------------------------------- Insta360 ---------------------------------
                 }
             }
+            if let Some(exposure) = red_clip_exposure.filter(|_| red_has_frames && !legacy_red_offset && !time_offsets.has(0)) {
+                // The clip's metadata is the first frame's, so the first frame's exposure is known without its own
+                time_offsets.set(0, -exposure / 2.0);
+            }
+            // A frame without an offset of its own: the readers need one for every frame, and the neighbours' is the
+            // offset the frame continues, where a zero would move it by the whole offset against them
+            time_offsets.report();
+            md.per_frame_time_offsets = time_offsets.interpolate();
             if input.camera_type() == "Sony" {
-                md.lens_breathing = sony::breathing::compute(samples);
+                md.lens_breathing = sony::breathing::compute(samples, &sample_frames);
+            }
+            // Only a clip with corrections has the table (and misses any): without one on any frame, it would be all
+            // empty frames
+            if mesh_frames.values().any(|m| !m.is_empty()) {
+                mesh_frames.report();
+                md.mesh_correction.frames = mesh_frames.hold();
             }
             if md.mesh_correction.is_empty() {
                 md.mesh_correction.clear();
@@ -633,6 +691,8 @@ impl GyroSource {
                 log::debug!("Mesh correction: {} tables over {} frames, {} refined against the camera's mesh", tables.len(), md.mesh_correction.frames.len(), tables.iter().filter(|t| !t.refinement.is_empty()).count());
             }
             if !is_temp.ibis.t.is_empty() || !is_temp.ois.t.is_empty() {
+                // Computed for the frames from the first collected one on (a frame the metadata misses among them across
+                // its gap), the frames before it take that one's: laid out by frame as it's computed
                 md.camera_stab_data = sony::stab_calc_splines(&md, &is_temp, sample_rate, fps, size).unwrap_or_default();
                 if !sony_packet_timed {
                     // Uniform gyro timeline: rescale the metadata readout to the measured sample rate, like the per-frame offsets
@@ -797,7 +857,7 @@ impl GyroSource {
             // Lock horizon, then smooth
             horizon_lock.lock(&mut smoothed_quaternions, &self.quaternions, &file_metadata.gravity_vectors, self.use_gravity_vectors, self.integration_method, compute_params);
             let locked_quaternions = smoothed_quaternions;
-            smoothed_quaternions = alg.smooth(&locked_quaternions, self.duration_ms, compute_params);
+            smoothed_quaternions = alg.smooth_with_original(&locked_quaternions, &self.quaternions, self.duration_ms, compute_params);
 
             // "Only within trim range" replaces the motion outside of the trim ranges before smoothing, so it doesn't affect
             // the smoothing inside of them. The result outside of the ranges has nothing to do with the real motion then,
@@ -806,7 +866,7 @@ impl GyroSource {
             if !compute_params.trim_ranges.is_empty() && alg.get_parameter("trim_range_only") > 0.5 {
                 let mut whole_video = compute_params.clone();
                 whole_video.trim_ranges.clear();
-                let whole_smoothed = alg.smooth(&locked_quaternions, self.duration_ms, &whole_video);
+                let whole_smoothed = alg.smooth_with_original(&locked_quaternions, &self.quaternions, self.duration_ms, &whole_video);
                 let duration_us = compute_params.scaled_duration_ms * 1000.0;
                 let ranges = compute_params.trim_ranges.iter().map(|x| ((x.0 * duration_us).round() as i64, (x.1 * duration_us).round() as i64)).collect::<Vec<_>>();
                 for (ts, q) in smoothed_quaternions.iter_mut() {
@@ -1104,22 +1164,50 @@ impl GyroSource {
         hasher.finish()
     }
 
+    /// Readings per second of the motion data: the IMU's, else the quaternions' (`readings_per_second`)
     pub fn get_sample_rate(file_metadata: &FileMetadata) -> f64 {
         if file_metadata.raw_imu.len() > 2 {
-            let len = file_metadata.raw_imu.len() as f64;
-            let duration_ms = file_metadata.raw_imu.last().unwrap().timestamp_ms - file_metadata.raw_imu.first().unwrap().timestamp_ms;
-            let duration_ms = duration_ms * ((len + 1.0) / len.max(1.0));
-            file_metadata.raw_imu.len() as f64 / (duration_ms / 1000.0)
+            Self::readings_per_second(file_metadata.raw_imu.iter().map(|x| x.timestamp_ms))
         } else if file_metadata.quaternions.len() > 2 {
-            let len = file_metadata.quaternions.len() as f64;
-            let first = *file_metadata.quaternions.iter().next().unwrap().0 as f64 / 1000.0;
-            let last = *file_metadata.quaternions.iter().next_back().unwrap().0 as f64 / 1000.0;
-            let duration_ms = last - first;
-            let duration_ms = duration_ms * ((len + 1.0) / len.max(1.0));
-            file_metadata.quaternions.len() as f64 / (duration_ms / 1000.0)
+            Self::readings_per_second(file_metadata.quaternions.keys().map(|ts| *ts as f64 / 1000.0))
         } else {
             0.0
         }
+    }
+
+    /// Readings per second of a timeline of more than two readings, `times` in ms, in order: their count over their
+    /// span. An evenly spaced timeline (telemetry-parser's, of the cameras whose readings it spaces by their sample's
+    /// duration) keeps the time of the frames the metadata misses while their readings aren't there, and counted over
+    /// that time too, the rate would come out low by the share of time the gaps take: Canon's frame offsets (half a
+    /// reading's interval) and the metadata times rescaled to Sony's uniform timeline would move with it. Such a timeline
+    /// tells its gaps apart: every step is its interval (the median step), to the microsecond its readings are timed at,
+    /// or longer than one and a half intervals, nearer two of them than one, with a reading or more missing in it. Its
+    /// rate is then the one over the other steps, as the readings would take one after another. A timeline whose steps
+    /// vary otherwise (the readings' own times, which jitter) can't tell a gap from a late reading, and keeps the rate
+    /// over its span
+    fn readings_per_second(times: impl Iterator<Item = f64> + Clone) -> f64 {
+        let steps = || times.clone().zip(times.clone().skip(1)).map(|(a, b)| b - a);
+        let len = times.clone().count() as f64;
+        let mut duration_ms = times.clone().last().unwrap_or_default() - times.clone().next().unwrap_or_default();
+        // The median is at least the shortest step, so a timeline whose longest step isn't one and a half of its
+        // shortest has no gap, and keeps the rate over its whole span
+        let (shortest, longest) = steps().fold((f64::INFINITY, f64::NEG_INFINITY), |(min, max), step| (min.min(step), max.max(step)));
+        if longest > shortest * 1.5 {
+            let mut sorted: Vec<f64> = steps().collect();
+            let middle = sorted.len() / 2;
+            let interval = *sorted.select_nth_unstable_by(middle, f64::total_cmp).1;
+            let gap = |step: f64| step > interval * 1.5;
+            // The readings telemetry-parser spaces evenly are timed in whole microseconds (`normalized_imu_interpolated`)
+            let even = |step: f64| ((step - interval) * 1000.0).abs().round() <= 1.0;
+            if interval > 0.0 && steps().all(|step| gap(step) || even(step)) {
+                let (gaps, gap_ms) = steps().filter(|step| gap(*step)).fold((0.0, 0.0), |(count, ms), step| (count + 1.0, ms + step));
+                if gaps > 0.0 {
+                    duration_ms = (duration_ms - gap_ms) * (len - 1.0) / (len - 1.0 - gaps);
+                }
+            }
+        }
+        let duration_ms = duration_ms * ((len + 1.0) / len.max(1.0));
+        len / (duration_ms / 1000.0)
     }
 
     pub fn find_bias(&self, timestamp_start: f64, timestamp_stop: f64) -> (f64, f64, f64) {
@@ -1145,5 +1233,229 @@ impl GyroSource {
         }
 
         (bias_vals[0], bias_vals[1], bias_vals[2])
+    }
+}
+
+/// The video frame a sample of per-frame metadata describes, which its entry in the per-frame tables belongs to. The
+/// parsers that write a sample per frame number the samples by their frames (`SampleInfo::sample_index`), so a frame
+/// they have no sample of leaves a gap rather than moving the frames after it: Sony, Canon and the other metadata
+/// tracks by the track's sample, MXF by the frame's ancillary data, RED by the frame atom, MotionCam by the decoded
+/// frame and the Gyroflow protobuf by `frame_number` (its time on the video). `None` for a sample of the clip's
+/// metadata, which RED puts ahead of its frames: those carry a frame timestamp
+fn frame_of_sample(input: &Input, info: &util::SampleInfo) -> Option<usize> {
+    if input.parser_name() == "RedR3d" && !info.tag_map.as_ref().and_then(|x| x.get(&GroupId::Default)).is_some_and(|x| x.contains_key(&TagId::TimestampUs)) {
+        return None;
+    }
+    usize::try_from(info.sample_index).ok()
+}
+
+/// Offset of a frame's capture from its time in the video, by the gyroflow.proto contract: the frame's start on the
+/// camera clock (`FirstFrameTimestamp`, against the video time) to the middle of its exposure and readout. The middle
+/// of the rows the video shows, which is the frame's unless the video is the file's other picture (`FrameMapping`)
+fn gyroflow_proto_time_offset(tag_map: &GroupedTagMap, mapping: &FrameMapping, direction: ReadoutDirection) -> Option<f64> {
+    let imager = tag_map.get(&GroupId::Imager)?;
+    let first_frame_ts = *(imager.get_t(TagId::FirstFrameTimestamp) as Option<&f64>)?;
+    let exposure_time = *(imager.get_t(TagId::ExposureTime)     as Option<&f64>).unwrap_or(&0.0);
+    let readout_time  = *(imager.get_t(TagId::FrameReadoutTime) as Option<&f64>).unwrap_or(&0.0);
+
+    Some(first_frame_ts - exposure_time / 2.0 + readout_time * (0.5 + mapping.centre_shift(direction)))
+}
+
+/// How the video shows the frame a file states its per-frame pixel quantities in (the focal length and the principal
+/// point in pixels, and where that frame is on the sensor): frame pixel `p` is video pixel `(p + origin) · scale`, in
+/// corner coordinates. The video is the decoder's or the host's and the frame the file's, and they needn't agree: a
+/// proxy or a host's own resolution scales the frame, and the frames of some files have two pictures, a decoder showing
+/// either (a DNG's default crop, which Resolve applies and FFmpeg leaves out; the file names the other picture,
+/// `AlternativeFrameSize`, and where the frame is in it, `FrameOriginInAlternative`)
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum FrameMapping {
+    /// The file doesn't say which frame its quantities are in, the video is that frame, or the video is none of the
+    /// file's pictures at their aspect ratio: the quantities are taken as they are, the video's
+    AsIs,
+    Mapped {
+        scale: f64,
+        origin: (f64, f64),
+        /// The frame's size, and how much of it the video shows (from `-origin`), in frame pixels
+        frame: (f64, f64),
+        shown: (f64, f64),
+        /// The file leaves the principal point out where it's the frame's centre (the Gyroflow protobuf)
+        centred_by_default: bool,
+    },
+    /// The video isn't the frame at its aspect ratio, and the quantities don't apply (Canon's recorded frame)
+    Unusable,
+}
+
+impl FrameMapping {
+    /// How far off its aspect ratio a scaled copy of a frame can be, from rounding the scaled size
+    const ASPECT_TOLERANCE: f64 = 0.02;
+
+    fn of(tag_map: &GroupedTagMap, video: (usize, usize)) -> Self {
+        let (vw, vh) = (video.0 as f64, video.1 as f64);
+        if !(vw > 0.0 && vh > 0.0) { return Self::AsIs; }
+        let imager = tag_map.get(&GroupId::Imager);
+        let size_tag = |name: &'static str| imager.and_then(|x| x.get_t(TagId::Custom(name.into())) as Option<&(u32, u32)>)
+            .filter(|x| x.0 > 0 && x.1 > 0).map(|x| (x.0 as f64, x.1 as f64));
+        let aspect_error = |(w, h): (f64, f64)| ((w / h) / (vw / vh) - 1.0).abs();
+        let mapped = |frame: (f64, f64), picture: (f64, f64), origin: (f64, f64), centred_by_default: bool| {
+            if picture == (vw, vh) && picture == frame { return Self::AsIs; }
+            let scale = vw / picture.0;
+            Self::Mapped { scale, origin, frame, shown: (vw / scale, vh / scale), centred_by_default }
+        };
+        if let Some(frame) = size_tag("FrameSize") {
+            // The pictures the video can be: the frame, and the file's other one, with the frame's place in it
+            let mut pictures = vec![(frame, (0.0, 0.0))];
+            let other_origin = imager.and_then(|x| x.get_t(TagId::Custom("FrameOriginInAlternative".into())) as Option<&(f32, f32)>);
+            if let (Some(other), Some(origin)) = (size_tag("AlternativeFrameSize"), other_origin) {
+                pictures.push((other, (origin.0 as f64, origin.1 as f64)));
+            }
+            // The one the video is, else the one closest to its aspect ratio (the frame on a tie)
+            let exact = pictures.iter().find(|(picture, _)| *picture == (vw, vh));
+            let closest = pictures.iter().min_by(|a, b| aspect_error(a.0).total_cmp(&aspect_error(b.0)))
+                .filter(|(picture, _)| aspect_error(*picture) < Self::ASPECT_TOLERANCE);
+            match exact.or(closest) {
+                Some(&(picture, origin)) => mapped(frame, picture, origin, true),
+                None => Self::AsIs,
+            }
+        } else if let Some(frame) = canon::recorded_frame_size(tag_map).filter(|x| x.0 > 0 && x.1 > 0).map(|x| (x.0 as f64, x.1 as f64)) {
+            // Canon's recorded frame: shown scaled, or not at all
+            if aspect_error(frame) < Self::ASPECT_TOLERANCE { mapped(frame, frame, (0.0, 0.0), false) } else { Self::Unusable }
+        } else {
+            Self::AsIs
+        }
+    }
+
+    fn scale(&self) -> f64 {
+        if let Self::Mapped { scale, .. } = self { *scale } else { 1.0 }
+    }
+
+    /// A point of the frame, in the video
+    fn point(&self, p: (f32, f32)) -> (f32, f32) {
+        match self {
+            Self::Mapped { scale, origin, .. } => (((p.0 as f64 + origin.0) * scale) as f32, ((p.1 as f64 + origin.1) * scale) as f32),
+            _ => p,
+        }
+    }
+
+    /// The principal point where the file leaves it out: the frame's centre
+    fn default_principal_point(&self) -> Option<(f32, f32)> {
+        match self {
+            Self::Mapped { frame, centred_by_default: true, .. } => Some(self.point(((frame.0 / 2.0) as f32, (frame.1 / 2.0) as f32))),
+            _ => None,
+        }
+    }
+
+    /// The sensor area the video shows, from the frame's origin and size: as many sensor pixels per frame pixel, over
+    /// the frame pixels the video shows
+    fn capture_area(&self, origin: (f32, f32), size: (f32, f32)) -> ((f32, f32), (f32, f32)) {
+        match self {
+            Self::Mapped { origin: o, frame, shown, .. } => {
+                let k = (size.0 as f64 / frame.0, size.1 as f64 / frame.1);
+                ((origin.0 - (o.0 * k.0) as f32, origin.1 - (o.1 * k.1) as f32), ((shown.0 * k.0) as f32, (shown.1 * k.1) as f32))
+            }
+            _ => (origin, size),
+        }
+    }
+
+    /// The video's extent along the readout over the frame's: the part of the frame's readout time the rows (or the
+    /// columns) the video shows take
+    fn readout_extent(&self, direction: ReadoutDirection) -> f64 {
+        match self {
+            Self::Mapped { frame, shown, .. } => if direction.is_horizontal() { shown.0 / frame.0 } else { shown.1 / frame.1 },
+            _ => 1.0,
+        }
+    }
+
+    /// How far the middle of what the video shows is from the frame's middle along the readout, in frame extents
+    fn centre_shift(&self, direction: ReadoutDirection) -> f64 {
+        match self {
+            Self::Mapped { origin, frame, shown, .. } => {
+                let shift = if direction.is_horizontal() {
+                    (shown.0 / 2.0 - origin.0 - frame.0 / 2.0) / frame.0
+                } else {
+                    (shown.1 / 2.0 - origin.1 - frame.1 / 2.0) / frame.1
+                };
+                if direction.is_inverted() { -shift } else { shift }
+            }
+            _ => 0.0,
+        }
+    }
+}
+
+/// RED's exposure time of a frame (or of the clip), in ms
+fn red_exposure_ms(tag_map: &GroupedTagMap) -> Option<f64> {
+    let exposure_us = *(tag_map.get(&GroupId::Default)?.get_t(TagId::ExposureTime) as Option<&f32>)?;
+    Some(exposure_us as f64 / 1000.0)
+}
+
+#[cfg(test)]
+mod frame_mapping_tests {
+    use super::*;
+    use telemetry_parser::tag;
+    use telemetry_parser::tags_impl::*;
+
+    fn tags(frame: (u32, u32), other: Option<((u32, u32), (f32, f32))>) -> GroupedTagMap {
+        let mut map = GroupedTagMap::new();
+        let options = InputOptions::default();
+        util::insert_tag(&mut map, tag!(parsed GroupId::Imager, TagId::Custom("FrameSize".into()), "", u32x2, |v| format!("{v:?}"), frame, vec![]), &options);
+        if let Some((size, origin)) = other {
+            util::insert_tag(&mut map, tag!(parsed GroupId::Imager, TagId::Custom("AlternativeFrameSize".into()), "", u32x2, |v| format!("{v:?}"), size, vec![]), &options);
+            util::insert_tag(&mut map, tag!(parsed GroupId::Imager, TagId::Custom("FrameOriginInAlternative".into()), "", f32x2, |v| format!("{v:?}"), origin, vec![]), &options);
+        }
+        map
+    }
+
+    fn near(a: (f32, f32), b: (f64, f64)) -> bool { (a.0 as f64 - b.0).abs() < 1e-3 && (a.1 as f64 - b.1).abs() < 1e-3 }
+
+    #[test]
+    fn a_dng_frame_maps_onto_whichever_picture_the_decoder_shows() {
+        // The default crop 3840x2160 at 8, 5 of the active area 3856x2170, on 1.556 sensor pixels a pixel
+        let dng = tags((3840, 2160), Some(((3856, 2170), (8.0, 5.0))));
+        let k = 6000.0 / 3856.0;
+        let (origin, size) = ((8.0 * k, 311.72 + 5.0 * k), (3840.0 * k, 2160.0 * k));
+
+        // Resolve shows the default crop: the frame itself
+        assert_eq!(FrameMapping::of(&dng, (3840, 2160)), FrameMapping::AsIs);
+
+        // FFmpeg shows the active area: the same pixels, the frame 8, 5 in, and the active area's sensor rows
+        let full = FrameMapping::of(&dng, (3856, 2170));
+        assert_eq!(full.scale(), 1.0);
+        assert!(near(full.point((1920.0, 1080.0)), (1928.0, 1085.0)));
+        assert!(near(full.default_principal_point().unwrap(), (1928.0, 1085.0)));
+        let (o, s) = full.capture_area((origin.0 as f32, origin.1 as f32), (size.0 as f32, size.1 as f32));
+        assert!(near(o, (0.0, 311.72)) && near(s, (6000.0, 2170.0 * k)), "{o:?} {s:?}");
+        assert!((full.readout_extent(ReadoutDirection::TopToBottom) - 2170.0 / 2160.0).abs() < 1e-12);
+        assert!(full.centre_shift(ReadoutDirection::TopToBottom).abs() < 1e-12, "the crop is centred");
+
+        // Proxies of either: by their aspect ratio, the frame's on a tie
+        let proxy = FrameMapping::of(&dng, (1920, 1080));
+        assert_eq!((proxy.scale(), proxy.point((1920.0, 1080.0))), (0.5, (960.0, 540.0)));
+        assert_eq!(proxy.readout_extent(ReadoutDirection::TopToBottom), 1.0);
+        let half_full = FrameMapping::of(&dng, (1928, 1085));
+        assert!(near(half_full.point((1920.0, 1080.0)), (964.0, 542.5)));
+
+        // None of the pictures: as it is
+        assert_eq!(FrameMapping::of(&dng, (1080, 1920)), FrameMapping::AsIs);
+        assert_eq!(FrameMapping::of(&GroupedTagMap::new(), (1920, 1080)), FrameMapping::AsIs);
+    }
+
+    #[test]
+    fn an_uneven_other_picture_moves_the_middle_of_the_readout() {
+        // An 80 row frame at the top of a 100 row picture: the video's middle row is 10 rows below the frame's
+        let mapping = FrameMapping::of(&tags((100, 80), Some(((100, 100), (0.0, 0.0)))), (100, 100));
+        assert!((mapping.readout_extent(ReadoutDirection::TopToBottom) - 1.25).abs() < 1e-12);
+        assert!((mapping.centre_shift(ReadoutDirection::TopToBottom) - 0.125).abs() < 1e-12);
+        assert!((mapping.centre_shift(ReadoutDirection::BottomToTop) + 0.125).abs() < 1e-12);
+        assert_eq!(mapping.centre_shift(ReadoutDirection::LeftToRight), 0.0);
+        assert_eq!(mapping.readout_extent(ReadoutDirection::LeftToRight), 1.0);
+    }
+
+    #[test]
+    fn canons_recorded_frame_scales_or_doesnt_apply() {
+        let mut canon = GroupedTagMap::new();
+        util::insert_tag(&mut canon, tag!(parsed GroupId::Imager, TagId::Custom("ActiveAreaAspectRatio".into()), "", u32x2, |v| format!("{v:?}"), (4096, 2160), vec![]), &InputOptions::default());
+        let half = FrameMapping::of(&canon, (2048, 1080));
+        assert_eq!((half.scale(), half.default_principal_point()), (0.5, None));
+        assert_eq!(FrameMapping::of(&canon, (4096, 2160)), FrameMapping::AsIs);
+        assert_eq!(FrameMapping::of(&canon, (1920, 1080)), FrameMapping::Unusable);
     }
 }

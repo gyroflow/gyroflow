@@ -166,7 +166,11 @@ Item {
                         }
                         options.push({ text: qsTr("Ok") });
 
-                        messageBox(Modal.Success, qsTr("Rendering completed. The file was written to: %1.").arg("<br><b>" + filesystem.display_folder_filename(folder, filename) + "</b>"), options);
+                        let text = qsTr("Rendering completed. The file was written to: %1.").arg("<br><b>" + filesystem.display_folder_filename(folder, filename) + "</b>");
+                        const warning = render_queue.get_job_error_string(job_id);
+                        const isWarning = warning.startsWith("camera_tracks:");
+                        if (isWarning) text += "<br><br>" + getReadableError(warning).replace(/\n/g, "<br>");
+                        messageBox(isWarning? Modal.Warning : Modal.Success, text, options);
                     }
                 }
             }
@@ -291,8 +295,10 @@ Item {
             id: dlg;
             property real progress: current_frame / total_frames;
             property bool isFinished: current_frame >= total_frames && total_frames > 0;
-            property bool isError: error_string.length > 0 && !isQuestion && !isInfo;
+            property bool isError: error_string.length > 0 && !isQuestion && !isInfo && !isWarning;
             property bool isInfo: error_string == "uses_cpu";
+            // About the output, so it stays once it's finished
+            property bool isWarning: error_string.startsWith("camera_tracks:");
             property bool isQuestion: error_string.startsWith("convert_format:") || error_string.startsWith("file_exists:");
             property bool isInProgress: (!isFinished && !isError && !isQuestion && total_frames > 0) && (current_frame > 0 || isProcessing);
             property bool isProcessing: processing_progress > 0.0 && processing_progress < 1.0;
@@ -529,7 +535,7 @@ Item {
                 Ease on height { }
                 Loader {
                     id: messageArea;
-                    active: (isError || isQuestion || isInfo) && !isFinished;
+                    active: ((isError || isQuestion || isInfo) && !isFinished) || isWarning;
                     sourceComponent: messageAreaComponent;
                     width: parent.width;
                 }

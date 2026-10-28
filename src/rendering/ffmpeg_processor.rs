@@ -137,6 +137,7 @@ pub struct FfmpegProcessor<'a> {
     pub audio_copy: bool,
 
     input_context: format::context::Input,
+    input_url: String,
 
     pub video: VideoTranscoder<'a>,
 
@@ -145,6 +146,10 @@ pub struct FfmpegProcessor<'a> {
     pub decoder_fps: f64,
 
     pub preserve_other_tracks: bool,
+    /// Camera tracks left out of the render, to append to the output once it's written (set by `render`)
+    pub camera_tracks: Option<super::camera_tracks::CameraTracks>,
+    /// The data tracks to preserve that the output won't have, and why (set by `render`)
+    pub tracks_not_copied: Vec<String>,
 
     #[cfg(target_os = "android")]
     pub android_handles: Option<AndroidHWHandles>,
@@ -165,6 +170,7 @@ pub enum Status {
 #[derive(Debug)]
 pub enum FFmpegError {
     EncoderNotFound,
+    NoWorkingEncoder(String),
     DecoderNotFound,
     NoSupportedFormats,
     NoOutputContext,
@@ -184,12 +190,17 @@ pub enum FFmpegError {
     InternalError(ffmpeg_next::Error),
     CannotOpenInputFile((String, FilesystemError)),
     CannotOpenOutputFile((String, FilesystemError)),
+    /// The output, as it's shown, would write over the input file, or a frame of the input image sequence, shown next
+    OutputIsInput(String, String),
+    /// The output can't be written where it goes, or the complete render couldn't get its name: why
+    Output(String),
 }
 
 impl std::fmt::Display for FFmpegError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             FFmpegError::EncoderNotFound             => write!(f, "Encoder not found"),
+            FFmpegError::NoWorkingEncoder(codec)     => write!(f, "No working encoder for {codec}"),
             FFmpegError::DecoderNotFound             => write!(f, "Decoder not found"),
             FFmpegError::NoSupportedFormats          => write!(f, "No supported formats"),
             FFmpegError::NoOutputContext             => write!(f, "No output context"),
@@ -209,6 +220,8 @@ impl std::fmt::Display for FFmpegError {
             FFmpegError::InternalError(e)     => write!(f, "ffmpeg error: {:?}", e),
             FFmpegError::CannotOpenInputFile((url, e))   => write!(f, "Cannot open input file {url}: {e:?}"),
             FFmpegError::CannotOpenOutputFile((url, e))   => write!(f, "Cannot open output file {url}: {e:?}"),
+            FFmpegError::OutputIsInput(output, input) => write!(f, "Rendering to {output} would write over {input}, which it's rendered from. Choose another name or folder for the output."),
+            FFmpegError::Output(why)                 => write!(f, "{why}"),
         }
     }
 }
@@ -229,6 +242,10 @@ pub struct VideoInfo {
     pub duration_ms: f64,
     pub frame_count: usize,
     pub fps: f64,
+    /// The base frame rate of the video (ffmpeg's `r_frame_rate`, else `fps`), for comparing files, not for timing: the
+    /// rate a recording runs at, which the frames it dropped don't change, where they lower its average (`fps`, which
+    /// times the frames)
+    pub base_fps: f64,
     pub width: u32,
     pub height: u32,
     pub bitrate: f64, // in Mbps
@@ -323,6 +340,8 @@ impl<'a> FfmpegProcessor<'a> {
             ranges_ms: Vec::new(),
 
             preserve_other_tracks: false,
+            camera_tracks: None,
+            tracks_not_copied: Vec::new(),
 
             decoder_fps,
 
@@ -342,6 +361,7 @@ impl<'a> FfmpegProcessor<'a> {
             },
 
             input_context,
+            input_url: url.to_owned(),
         })
     }
 
@@ -395,6 +415,32 @@ impl<'a> FfmpegProcessor<'a> {
             metadata.set(k, v);
         }
 
+        // FFmpeg writes the data tracks it doesn't know with an empty sample description, which nothing can read. From an MP4/MOV
+        // to an MP4/MOV, they're left out, and the camera's tracks are appended to the output once it's written (`camera_tracks`)
+        let is_mp4_input = self.input_context.format().name().split(',').any(|x| x == "mov" || x == "mp4");
+        let mut copy_camera_tracks = self.preserve_other_tracks && is_mp4_input && (output_format == "mov" || output_format == "mp4");
+        let codec_tag = |stream: &Stream| unsafe { (*stream.parameters().as_ptr()).codec_tag }.to_le_bytes();
+        // The only data tracks FFmpeg writes a sample description for
+        let ffmpeg_writes = |tag: &[u8; 4]| tag == b"tmcd" || tag == b"gpmd";
+        // A timecode track stores its frames per second in one byte: above 255 fps, the mov/mp4 muxer fails as it writes the moov,
+        // once the whole video is rendered (`mov_write_tmcd_tag`, "fps 400 is too large"), so the output gets no timecode then
+        let tmcd_fps_too_high = |rate: Rational| (output_format == "mov" || output_format == "mp4") && rate.denominator() != 0 && f64::from(rate).round() > 255.0;
+        // Only the tracks that can be appended are left out, FFmpeg writes the others as before. Why they can't be
+        let not_copyable: HashMap<u32, String> = if copy_camera_tracks {
+            let track_ids: Vec<u32> = self.input_context.streams()
+                .filter(|x| x.parameters().medium() == media::Type::Data && !ffmpeg_writes(&codec_tag(x)))
+                .map(|x| x.id() as u32).collect();
+            super::camera_tracks::check_tracks(&self.input_url, &track_ids).unwrap_or_else(|e| {
+                // Nor its metadata
+                log::warn!("Can't read the input to copy its camera tracks: {e:?}");
+                copy_camera_tracks = false;
+                track_ids.iter().map(|id| (*id, e.to_string())).collect()
+            })
+        } else {
+            HashMap::new()
+        };
+        let mut camera_track_ids = Vec::new();
+
         for (i, stream) in self.input_context.streams().enumerate() {
             // Copy timecode from stream if global metadata doesn't have it
             if let Some(timecode) = stream.metadata().get("timecode") {
@@ -439,7 +485,8 @@ impl<'a> FfmpegProcessor<'a> {
 
                 output_index += 1;
             } else if medium == media::Type::Audio && self.audio_codec != codec::Id::None {
-                let mut copy_audio = self.preserve_other_tracks || self.audio_copy;
+                // Only "Copy" copies it, also with "Preserve other tracks" (which makes a .mov for it, see `RenderQueue::get_output_filename`)
+                let mut copy_audio = self.audio_copy;
                 if copy_audio && !Self::can_copy_stream(&octx, &stream.parameters()) {
                     log::warn!("Output format {} can't store audio codec {:?}, transcoding it to {:?} instead", octx.format().name(), stream.parameters().id(), self.audio_codec);
                     copy_audio = false;
@@ -458,11 +505,36 @@ impl<'a> FfmpegProcessor<'a> {
                 audio_streams.push(i);
                 output_index += 1;
             } else if self.preserve_other_tracks && medium == media::Type::Data {
-                // Direct stream copy
-                let mut ost = octx.add_stream(encoder::find(codec::Id::None))?;
-                ost.set_parameters(stream.parameters());
-                ost.set_avg_frame_rate(stream.avg_frame_rate());
-                output_index += 1;
+                let tag = codec_tag(&stream);
+                let id = stream.id() as u32;
+                let not_copyable = not_copyable.get(&id);
+                if copy_camera_tracks && !ffmpeg_writes(&tag) && not_copyable.is_none() {
+                    // Appended once the output is written
+                    camera_track_ids.push(id);
+                    stream_mapping[i] = -1;
+                } else if output_format == "mp4" && &tag != b"gpmd" {
+                    // Not in the mp4 muxer's tags. It makes the timecode track from the `timecode` metadata
+                    log::info!("Not copying data stream {i} ({}), the .mp4 format can't store it", String::from_utf8_lossy(&tag));
+                    if &tag != b"tmcd" {
+                        let why = not_copyable.cloned().unwrap_or_else(|| "the .mp4 format can't store it".into());
+                        self.tracks_not_copied.push(format!("Track {id} ({}): {why}", String::from_utf8_lossy(&tag)));
+                    }
+                    stream_mapping[i] = -1;
+                } else if &tag == b"tmcd" && tmcd_fps_too_high(stream.avg_frame_rate()) {
+                    // In a .mov. The muxer makes the timecode track from the `timecode` metadata instead, at the video's frame rate
+                    // (left out below if that's too high as well)
+                    log::info!("Not copying data stream {i} (tmcd), its frame rate is above 255 fps");
+                    stream_mapping[i] = -1;
+                } else {
+                    if let Some(why) = not_copyable {
+                        log::warn!("Can't copy track {id} of the camera ({why}), FFmpeg writes it");
+                    }
+                    // Direct stream copy
+                    let mut ost = octx.add_stream(encoder::find(codec::Id::None))?;
+                    ost.set_parameters(stream.parameters());
+                    ost.set_avg_frame_rate(stream.avg_frame_rate());
+                    output_index += 1;
+                }
             } else {
                 // Not in the output (audio disabled)
                 stream_mapping[i] = -1;
@@ -475,6 +547,11 @@ impl<'a> FfmpegProcessor<'a> {
             if start_time != ffi::AV_NOPTS_VALUE {
                 self.frame_ts.first = Some(start_time.rescale(rescale::TIME_BASE, (1, 1000000)));
             }
+        }
+        if copy_camera_tracks {
+            // The streams FFmpeg writes, in its order: they get the output indexes in the order of the input
+            let ffmpeg_track_ids = self.input_context.streams().filter(|x| stream_mapping[x.index()] >= 0).map(|x| x.id() as u32).collect();
+            self.camera_tracks = Some(super::camera_tracks::CameraTracks { track_ids: camera_track_ids, ffmpeg_track_ids, start_us: self.frame_ts.first.unwrap_or_default() });
         }
         let mut updated_creation_time = None;
         if let Some(start_ms) = start_ms {
@@ -493,6 +570,12 @@ impl<'a> FfmpegProcessor<'a> {
         }
         if let Some(updated_creation_time) = updated_creation_time {
             metadata.set("creation_time", &updated_creation_time);
+        }
+        let video_fps = self.video.output_index.and_then(|i| octx.stream(i)).map(|x| x.avg_frame_rate());
+        if let Some(fps) = video_fps.filter(|x| metadata.get("timecode").is_some() && tmcd_fps_too_high(*x)) {
+            log::warn!("Not writing the timecode, a .{output_format} timecode track can't be above 255 fps (the video is {:.3} fps)", f64::from(fps));
+            self.tracks_not_copied.push(format!("Timecode: the .{output_format} format can't store it above 255 fps"));
+            metadata = metadata.iter().filter(|(k, _)| *k != "timecode").collect();
         }
         log::debug!("Output metadata: {:?}", &metadata);
         octx.set_metadata(metadata);
@@ -899,16 +982,19 @@ impl<'a> FfmpegProcessor<'a> {
                 let mut bitrate = video.bit_rate();
                 if bitrate == 0 { bitrate = context.bit_rate() as usize; }
 
+                let fps = Self::average_frame_rate(&stream);
+                let base_fps = Self::base_frame_rate(&stream).unwrap_or(fps);
+                let duration_s = Self::video_duration_s(&context, &stream).unwrap_or_default();
+                // Without a frame count in the container, its duration at its rate, as the player counts them (`MDKPlayer.cpp`)
                 let mut frames = stream.frames() as usize;
-                if frames == 0 { frames = (stream.duration() as f64 * f64::from(stream.time_base()) * f64::from(stream.rate())) as usize; }
+                if frames == 0 { frames = (duration_s * fps) as usize; }
 
                 let rotate_tag = stream.metadata().get("rotate").and_then(|x| x.parse::<f64>().ok()).map(|x| (x, false));
                 let display_matrix = stream.side_data().find(|x| x.kind() == codec::packet::side_data::Type::DisplayMatrix).and_then(|x| Self::display_matrix_rotation(x.data()));
                 let stream_rotation = rotate_tag.filter(|x| x.0 != 0.0).or(display_matrix).filter(|(theta, mirrored)| *theta != 0.0 || *mirrored);
 
                 let stream_index = stream.index();
-                let duration_ms = stream.duration() as f64 * f64::from(stream.time_base()) * 1000.0;
-                let fps = f64::from(stream.rate()); // or avg_frame_rate?
+                let duration_ms = duration_s * 1000.0;
                 let (width, height) = (video.width(), video.height());
 
                 // Same as the player: the stream rotation, otherwise the one on the frames
@@ -923,6 +1009,7 @@ impl<'a> FfmpegProcessor<'a> {
                     duration_ms,
                     frame_count: frames,
                     fps,
+                    base_fps,
                     width,
                     height,
                     bitrate: bitrate as f64 / 1024.0 / 1024.0,
@@ -932,6 +1019,49 @@ impl<'a> FfmpegProcessor<'a> {
             }
         }
         Err(ffmpeg_next::Error::StreamNotFound)
+    }
+
+    /// The frame rate of a video stream as the player (MDK) and gyroflow-core read it: the average one, ffmpeg's
+    /// `avg_frame_rate` (the stream's frames over their duration), so a clip added to the queue maps its frames to the
+    /// same times as in the app. `r_frame_rate`, the base rate its timestamps are at, is the same for a constant frame
+    /// rate, but slower or faster than the frames of a variable one (an iPhone clip: 30 against 30.0021), and can be
+    /// the stream's time base (raw H.264/HEVC); it stands in only when ffmpeg can't tell the average (0/0). 0 when
+    /// neither is known
+    fn average_frame_rate(stream: &Stream) -> f64 {
+        [stream.avg_frame_rate(), stream.rate()].into_iter().find(|rate| rate.numerator() > 0 && rate.denominator() > 0).map_or(0.0, f64::from)
+    }
+
+    /// The base frame rate of a video stream, ffmpeg's `r_frame_rate`: the rate its timestamps are at. For a recording
+    /// it's the rate the camera records at, the same for every part of it. The MP4 demuxer takes it from the frame
+    /// duration when all frames but the last have the same one, else ffmpeg from the first frames' durations (their
+    /// common divisor, or the standard rate nearest them), else from the codec, so frames dropped from a part (longer
+    /// durations) leave it as it is, where they lower the average. `None` when ffmpeg can't tell it
+    fn base_frame_rate(stream: &Stream) -> Option<f64> {
+        let rate = stream.rate();
+        (rate.numerator() > 0 && rate.denominator() > 0).then(|| f64::from(rate))
+    }
+
+    /// The duration of a video stream in seconds, as the file declares it: the stream's own (MP4, MOV, MXF, MPEG-TS),
+    /// else the duration its track's statistics give (the `DURATION` tag the Matroska and WebM muxers write per track,
+    /// ffmpeg's and mkvmerge's, which is the player's, MDK's, value there), else the container's (FLV's `onMetaData`, a
+    /// Matroska file without the tags), which spans all its streams. `None` when nothing declares one: a raw H.264/HEVC
+    /// stream, or a recording that never got its duration written. ffmpeg doesn't know such a duration either, and the
+    /// player has 0; a raw stream's frames have no time at all to be rendered by
+    fn video_duration_s(context: &format::context::Input, stream: &Stream) -> Option<f64> {
+        if stream.duration() > 0 {
+            return Some(stream.duration() as f64 * f64::from(stream.time_base()));
+        }
+        let tag = stream.metadata().iter()
+            .find(|(key, _)| key.eq_ignore_ascii_case("DURATION") || key.get(..9).is_some_and(|key| key.eq_ignore_ascii_case("DURATION-")))
+            .and_then(|(_, value)| Self::duration_tag_s(value));
+        tag.filter(|s| *s > 0.0).or_else(|| (context.duration() > 0).then(|| context.duration() as f64 / f64::from(ffi::AV_TIME_BASE)))
+    }
+
+    /// A Matroska `DURATION` tag, `HH:MM:SS.nnnnnnnnn`, in seconds
+    fn duration_tag_s(value: &str) -> Option<f64> {
+        let mut parts = value.trim().splitn(3, ':');
+        let (hours, minutes, seconds) = (parts.next()?.parse::<u64>().ok()?, parts.next()?.parse::<u64>().ok()?, parts.next()?.parse::<f64>().ok()?);
+        (minutes < 60 && (0.0..60.0).contains(&seconds)).then(|| (hours * 3600 + minutes * 60) as f64 + seconds)
     }
 }
 

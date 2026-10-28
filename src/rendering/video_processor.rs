@@ -41,6 +41,7 @@ impl<'a> VideoProcessor<'a> {
                     info2.duration_ms = duration_ms;
                     info2.frame_count = frame_count as usize;
                     info2.fps = fps;
+                    info2.base_fps = fps; // the player tells only the one rate
                     info2.width = org_width;
                     info2.height = org_height;
                 }

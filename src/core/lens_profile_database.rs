@@ -18,10 +18,21 @@ enum DataSource {
     SerdeValue(serde_json::Value)
 }
 
+/// A loaded lens profile file: its path as loaded, the number of components of its path in the lens profile folder it was
+/// loaded from, and the key of the file's own profile in the map
+#[derive(Clone)]
+struct ProfileFile {
+    path: String,
+    depth: usize,
+    key: String,
+}
+
 #[derive(Default)]
 pub struct LensProfileDatabase {
     preset_map: HashMap<String, String>,
     map: HashMap<String, LensProfile>,
+    // In the order they were loaded
+    files: Vec<ProfileFile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
     list_for_ui: Vec<(String, String, String, bool, f64, i32, String)>,
     pub camera_db: crate::camera_database::CameraDatabase,
@@ -30,7 +41,7 @@ pub struct LensProfileDatabase {
 }
 impl Clone for LensProfileDatabase {
     fn clone(&self) -> Self {
-        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), camera_db: self.camera_db.clone(), loaded: self.loaded, version: self.version, ..Default::default() }
+        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), files: self.files.clone(), camera_db: self.camera_db.clone(), loaded: self.loaded, version: self.version, ..Default::default() }
     }
 }
 
@@ -100,7 +111,8 @@ impl LensProfileDatabase {
             }
         }
 
-        let mut load = |data: DataSource, f_name: &str| {
+        // `relative` is the file's path in the lens profile folder
+        let mut load = |data: DataSource, f_name: &str, relative: &str| {
             if f_name.ends_with(".gyroflow") {
                 let mut profile = LensProfile::default();
                 profile.name = std::path::Path::new(f_name).file_stem().map(|x| x.to_string_lossy().to_string()).unwrap_or_default();
@@ -152,9 +164,17 @@ impl LensProfileDatabase {
                                 log::warn!("Lens profile already present: {}, path_to_file: {} from {}", key, f_name, self.map.get(&key).unwrap().path_to_file);
                             }
                             if !f_name.is_empty() && f_name != key && !self.map.contains_key(f_name) {
+                                if !profile.is_copy {
+                                    let depth = relative.split('/').filter(|x| !x.is_empty()).count();
+                                    self.files.push(ProfileFile { path: f_name.to_string(), depth, key: f_name.to_string() });
+                                }
                                 self.map.insert(f_name.to_string(), profile);
                             }
                         } else {
+                            if !profile.is_copy {
+                                let depth = relative.split('/').filter(|x| !x.is_empty()).count();
+                                self.files.push(ProfileFile { path: f_name.to_string(), depth, key: key.clone() });
+                            }
                             self.map.insert(key, profile);
                         }
                     }
@@ -168,12 +188,13 @@ impl LensProfileDatabase {
         let mut bundle_loaded = false;
 
         let mut load_from_dir = |dir: PathBuf| {
-            walkdir::WalkDir::new(dir).into_iter().for_each(|e| {
+            walkdir::WalkDir::new(&dir).into_iter().for_each(|e| {
                 if let Ok(entry) = e {
                     let f_name = entry.path().to_string_lossy().replace('\\', "/");
                     if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
                         if let Ok(data) = std::fs::read_to_string(&f_name) {
-                            load(DataSource::String(data), &f_name);
+                            let relative = entry.path().strip_prefix(&dir).map(|x| x.to_string_lossy().replace('\\', "/")).unwrap_or_else(|_| f_name.clone());
+                            load(DataSource::String(data), &f_name, &relative);
                         }
                     }
                     if !bundle_loaded && f_name.ends_with(".cbor.gz") {
@@ -186,7 +207,7 @@ impl LensProfileDatabase {
                                     for (f_name, profile) in array {
                                         if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
                                         if f_name.starts_with("__") { continue; }
-                                        load(DataSource::SerdeValue(profile), &f_name);
+                                        load(DataSource::SerdeValue(profile), &f_name, &f_name);
                                     }
                                 }
                             }
@@ -211,7 +232,7 @@ impl LensProfileDatabase {
                     for (f_name, profile) in array {
                         if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
                         if f_name.starts_with("__") { continue; }
-                        load(DataSource::SerdeValue(profile), &f_name);
+                        load(DataSource::SerdeValue(profile), &f_name, &f_name);
                     }
                 }
             }
@@ -260,6 +281,7 @@ impl LensProfileDatabase {
     pub fn set_from_db(&mut self, b: Self) {
         self.map = b.map;
         self.preset_map = b.preset_map;
+        self.files = b.files;
         self.loaded = b.loaded;
         self.camera_db = b.camera_db;
         self.version = b.version;
@@ -287,7 +309,10 @@ impl LensProfileDatabase {
         let mut set = HashSet::with_capacity(self.map.len());
         let mut checksum_map = HashMap::with_capacity(self.map.len());
         self.list_for_ui = Vec::with_capacity(self.map.len());
-        for (k, v) in &self.map {
+        // In key order, so profiles of the same name get the same " by …" and " - 2" every time
+        let mut entries: Vec<_> = self.map.iter().collect();
+        entries.sort_unstable_by(|a, b| a.0.cmp(b.0));
+        for (k, v) in entries {
             if v.path_to_file.ends_with(".gyroflow") {
                 self.list_for_ui.push((v.name.clone(), k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), 0, v.calibrated_by.clone()));
             } else if !v.camera_brand.is_empty() && !v.camera_model.is_empty() {
@@ -433,13 +458,29 @@ impl LensProfileDatabase {
     pub fn get_by_id(&self, id: &str) -> Option<&LensProfile> {
         self.map.get(id)
     }
+    /// The profile a file's lens profile reference names (.gcsv `lensprofile`, Gyroflow protobuf `lens_profile`): the
+    /// profile of that identifier or key, else that of a lens profile file (not a preset) by its path in the lens profile
+    /// folder or by the end of that path (`Brand/name.json`, `Brand/name`, `name`), with or without the extension. That's
+    /// the file's own profile, not one of its compatible settings. Of several files, the one with the fewest folders the
+    /// reference doesn't give, then the one loaded first, as for identifiers. No part of a name matches, so a lens name that
+    /// names no profile, like "unknown" from a RED camera, finds none
     pub fn find(&self, filename_or_id: &str) -> Option<&LensProfile> {
-        if let Some(l) = self.map.get(filename_or_id) {
-            Some(l)
-        } else {
-            let path_normalized = filename_or_id.replace('\\', "/");
-            self.map.iter().find(|(_, v)| v.path_to_file.replace('\\', "/").contains(&path_normalized)).map(|(_, v)| v)
-        }
+        if filename_or_id.trim().is_empty() { return None; }
+        if let Some(l) = self.map.get(filename_or_id) { return Some(l); }
+        let path = filename_or_id.replace('\\', "/");
+        if let Some(l) = self.map.get(&path) { return Some(l); }
+
+        let wanted: Vec<&str> = path.split('/').filter(|x| !x.is_empty() && *x != ".").collect();
+        let (name, folders) = wanted.split_last()?;
+        self.files.iter().filter_map(|file| {
+            let mut components = file.path.rsplit('/').filter(|x| !x.is_empty());
+            let file_name = components.next()?;
+            if file_name != *name && file_name.strip_suffix(".json") != Some(*name) { return None; }
+            for folder in folders.iter().rev() {
+                if components.next()? != *folder { return None; }
+            }
+            Some((file.depth.saturating_sub(wanted.len()), file))
+        }).min_by_key(|(unmatched_folders, _)| *unmatched_folders).and_then(|(_, file)| self.map.get(&file.key))
     }
 
     // -------------------------------------------------------------------

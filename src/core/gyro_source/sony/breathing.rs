@@ -10,7 +10,10 @@ use telemetry_parser::tags_impl::{ GroupedTagMap, GetWithType, GroupId, TagId };
 use telemetry_parser::util::SampleInfo;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use crate::gyro_source::BreathingFrame;
+use crate::gyro_source::per_frame::{ PerFrame, collect_table, par_collect_table };
 
+/// What the table is, for its messages
+const WHAT: &str = "Lens breathing";
 const ROWS: usize = 513;
 const DECAY_DIVISOR: f32 = 5.0;
 const ACTIVATION_FRAMES: u32 = 4;
@@ -300,7 +303,9 @@ fn decay_offset(total: f32, last_total: f32, offset: f32) -> f32 {
     if offset <= 0.0 { (offset + d).min(0.0) } else { (offset - d).max(0.0) }
 }
 
-pub fn compute(samples: &[SampleInfo]) -> Vec<BreathingFrame> {
+/// One `BreathingFrame` per video frame: `frames` has the frame each sample describes (`None` for one that isn't a
+/// frame's)
+pub fn compute(samples: &[SampleInfo], frames: &[Option<usize>]) -> Vec<BreathingFrame> {
     let profile = samples.first().and_then(|s| s.tag_map.as_ref()).and_then(|tm| {
         let g = tm.get(&GroupId::LensBreathing)?;
         let lens_id = *(g.get_t(TagId::Unknown(0xe502)) as Option<&u16>)?;
@@ -308,8 +313,15 @@ pub fn compute(samples: &[SampleInfo]) -> Vec<BreathingFrame> {
     });
     let Some(profile) = profile else { return Vec::new() };
 
-    let frames: Vec<Option<Frame>> = samples.iter().map(|s| s.tag_map.as_ref().and_then(Frame::parse)).collect();
-    compute_frames(&profile, &frames)
+    // By frame, as `compute_frames` reads them (a frame's delayed focus samples are in a later frame's): a frame
+    // without a sample is one without data
+    let mut by_frame = PerFrame::new(WHAT);
+    for (s, f) in samples.iter().zip(frames) {
+        if let (Some(f), Some(frame)) = (*f, s.tag_map.as_ref().and_then(Frame::parse)) {
+            by_frame.set(f, frame);
+        }
+    }
+    compute_frames(&profile, &by_frame.into_options())
 }
 
 /// `None`: a sample without a usable LensBreathing group. Such a frame has no magnification of its own and takes
@@ -318,13 +330,15 @@ pub fn compute(samples: &[SampleInfo]) -> Vec<BreathingFrame> {
 /// come out as a positive finite number is treated the same way: `FrameTransform::at_timestamp` folds the zoom into
 /// the projection, and a zero would collapse the whole frame to its centre
 fn compute_frames(profile: &Profile, frames: &[Option<Frame>]) -> Vec<BreathingFrame> {
-    let analyses: Vec<Analysis> = (0..frames.len()).into_par_iter().map(|f| frames[f].as_ref().map(|fr| analyze(profile, fr, frames, f)).unwrap_or_default()).collect();
+    // Every pass keeps a value per frame, in storage taken like the frames' (`per_frame::collect_table`): a pass the
+    // memory can't hold drops the table, not the load
+    let Some(analyses) = par_collect_table((0..frames.len()).into_par_iter().map(|f| frames[f].as_ref().map(|fr| analyze(profile, fr, frames, f)).unwrap_or_default()), WHAT) else { return Vec::new() };
 
     // Temporal pass: pick the source of each frame's value and let the offset decay with the motion.
     // (value, offset, per row): the frame's magnification, the carried offset, and whether the row table applies.
     // A frame without data leaves the carried state to the next one
     let (mut last_total, mut last_offset, mut counter) = (0.0f32, 0.0f32, 0u32);
-    let per_frame: Vec<Option<(f32, f32, bool)>> = frames.iter().zip(&analyses).map(|(fr, a)| {
+    let Some(per_frame) = collect_table(frames.iter().zip(&analyses).map(|(fr, a)| {
         let fr = fr.as_ref()?;
         if !a.center_valid || !a.cog_valid || fr.crop_h == 0xffff || fr.sensor_h == 0xffff {
             last_total = fr.camera_factor;
@@ -338,7 +352,7 @@ fn compute_frames(profile: &Profile, frames: &[Option<Frame>]) -> Vec<BreathingF
         last_total = value + offset;
         last_offset = offset;
         Some((value, offset, delayed && !a.table.is_empty() && fr.readout != 0.0))
-    }).collect();
+    }), WHAT) else { return Vec::new() };
 
     // The zoom is relative to the largest magnification any applied value reaches, the largest row of a row
     // table included, so no row of any frame is zoomed out past its content: the output samples the source at
@@ -353,14 +367,16 @@ fn compute_frames(profile: &Profile, frames: &[Option<Frame>]) -> Vec<BreathingF
         .fold(f32::MIN, f32::max);
     if !(max > 0.0) { return Vec::new(); }
 
-    let zooms: Vec<Option<BreathingFrame>> = frames.iter().zip(&analyses).zip(&per_frame).map(|((fr, a), pf)| {
+    let Some(zooms) = collect_table(frames.iter().zip(&analyses).zip(&per_frame).map(|((fr, a), pf)| {
         let (fr, (value, offset, per_row)) = (fr.as_ref()?, (*pf)?);
         let s = scale(fr) / max;
         let zoom: Vec<f32> = if per_row { a.table.iter().map(|t| s * (t + offset)).collect() } else { vec![s * (value + offset)] };
         if zoom.iter().any(|k| !(k.is_finite() && *k > 0.0)) { return None; }
         Some(BreathingFrame { scale: zoom, crop_y: fr.crop_y as f32, crop_h: fr.crop_h as f32 })
-    }).collect();
+    }), WHAT) else { return Vec::new() };
+    // The passes the table is made from are done with, before it's laid out in its own storage
+    drop((analyses, per_frame));
     let Some(first) = zooms.iter().find_map(|z| z.clone()) else { return Vec::new() };
     let mut last = first;
-    zooms.into_iter().map(|z| { if let Some(z) = z { last = z; } last.clone() }).collect()
+    collect_table(zooms.into_iter().map(|z| { if let Some(z) = z { last = z; } last.clone() }), WHAT).unwrap_or_default()
 }

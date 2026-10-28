@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2025 Adrian <adrian.eddy at gmail>
 
-use telemetry_parser::tags_impl::{ GroupedTagMap, GetWithType, GroupId, TagId };
+use telemetry_parser::tags_impl::{ GroupedTagMap, GetWithType, GroupId, TagId, TagValue };
 use crate::gyro_source::FileMetadata;
 
 pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input, tag_map: &GroupedTagMap, size: (usize, usize), info: &telemetry_parser::util::SampleInfo) {
@@ -97,10 +97,36 @@ pub fn recorded_frame_size(tag_map: &GroupedTagMap) -> Option<(u32, u32)> {
     Some((*(im.get_t(TagId::PixelWidth) as Option<&u32>)?, *(im.get_t(TagId::PixelHeight) as Option<&u32>)?))
 }
 
+/// Whether the lens image stabilizer was on in this frame (E2.1B: 0 off, 1 on, 3 no information). The camera doesn't
+/// record what it corrected, so the motion data doesn't describe the picture then. Read from the tag's byte, which
+/// telemetry-parser's boolean decode of it can't tell apart from "no information"
+pub fn lens_stabilizer_on(tag_map: &GroupedTagMap) -> bool {
+    let Some(tag) = tag_map.get(&GroupId::Default).and_then(|x| x.get(&TagId::ImageStabilizer)).filter(|x| x.native_id == Some(0xe21b)) else { return false };
+    match &tag.value {
+        TagValue::bool(v) => v.raw_data.first() == Some(&1),
+        TagValue::u8(v)   => v.raw_data.first() == Some(&1),
+        _ => false
+    }
+}
+
+/// Readout time of the cameras that don't write it (E2.09), ms: the R-series bodies (R6 V, R6 Mark III, R5 Mark II).
+/// Their clips fit 14 to 15 ms
+pub const DEFAULT_READOUT_MS: f64 = 14.0;
+
+/// The frame's exposure, ms: the sensor's (E2.0A), else the shutter speed, which is all the cameras that don't write
+/// it have (R5 Mark II)
+fn exposure_ms(tag_map: &GroupedTagMap) -> Option<f64> {
+    if let Some(v) = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::ExposureTime) as Option<&f64>) {
+        return Some(*v);
+    }
+    let (num, den) = *(tag_map.get(&GroupId::Exposure)?.get_t(TagId::ShutterSpeed) as Option<&(u32, u32)>)?;
+    (num > 0 && den > 0).then(|| num as f64 * 1000.0 / den as f64)
+}
+
 pub fn get_time_offset(md: &FileMetadata, _input: &telemetry_parser::Input, tag_map: &GroupedTagMap, sample_rate: f64, fps: f64) -> Option<f64> {
-    let exposure = (tag_map.get(&GroupId::Imager)?.get_t(TagId::ExposureTime) as Option<&f64>)?;
+    let exposure = exposure_ms(tag_map)?;
     let frame_time = 1000.0 / md.frame_rate.unwrap_or(fps);
-    let frame_readout_time = md.frame_readout_time.unwrap_or(14.0); // better approx than nothing
+    let frame_readout_time = md.frame_readout_time.unwrap_or(DEFAULT_READOUT_MS);
     let dt = 1000.0 / sample_rate.max(1.0);
-    Some(frame_time + frame_readout_time / 2.0 - (*exposure) / 2.0 - dt / 2.0)
+    Some(frame_time + frame_readout_time / 2.0 - exposure / 2.0 - dt / 2.0)
 }

@@ -81,7 +81,7 @@ macro_rules! impl_models {
                     $(DistortionModels::$name(m) => m.adjust_lens_profile(profile),)*
                 }
             }
-            /// `d(image radius)/dÎ¸` at ray angle `theta`, â‰¤ 0 where the model's curve folds back
+            /// `d(image radius)/dθ` at ray angle `theta`, ≤ 0 where the model's curve folds back
             pub fn distortion_derivative(&self, theta: f64, k: &[f64]) -> Option<f64> {
                 match &self.inner {
                     $(DistortionModels::$name(x) => x.distortion_derivative(theta, k),)*
@@ -141,7 +141,7 @@ impl DistortionModel {
     /// The largest ray angle the model itself can represent, in radians, `None` when it has no such end.
     /// Not a fold of the calibration - [`Self::radial_distortion_limit`] finds those - but the shape of the
     /// projection: a rectilinear model images the z=1 plane and has nothing at 90°, and the unified sphere
-    /// of the Insta360 model turns over at `acos(-1/Î¾)`
+    /// of the Insta360 model turns over at `acos(-1/ξ)`
     pub fn field_limit(&self, k: &[f64]) -> Option<f64> {
         use DistortionModels as M;
         match &self.inner {

@@ -73,7 +73,8 @@ Item {
         } else {
             urls = [
                 obj.videofile,
-                obj.gyro_source?.filepath || ""
+                obj.gyro_source?.filepath || "",
+                obj.gyro_source?.all_metadata? "1" : ""
             ];
         }
         if ((!urls || !urls[0]) && !vidInfo.filename) {
@@ -100,6 +101,8 @@ Item {
             root.pendingQueueJobId = +queueJobId;
             console.log("Loading gyro file", urls[1]);
             window.motionData.lastSelectedFile = urls[1];
+            // Loaded with all of its metadata if the project was (its frame timing stays, eg. a CRM on its proxy)
+            window.motionData.setAllMetadata(urls[2] == "1");
             controller.load_telemetry(urls[1], urls[0] == urls[1] || window.motionData.allMetadata, window.videoArea.vid, -1, project_version);
             return;
         }
@@ -200,7 +203,7 @@ Item {
                             error_string += "\n" + qsTr("This is often caused by read-only file system.\nMake sure you copied the Gyroflow app to your Applications folder, instead of running from the .dmg directly.");
                         }
                         if (Qt.platform.os == "windows") {
-                            error_string += "\n" + qsTr("This is often caused by read-only file system.\nIf you have Gyroflow in C:\\Program Files\\, then you'll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.");
+                            error_string += "\n" + qsTr("This is often caused by read-only file system.\nIf you have Gyroflow in %1, then you'll need to run Gyroflow as Administrator in order to extract the SDK to the Gyroflow folder.").arg("C:\\Program Files\\");
                         }
                         messageBox(Modal.Error, error_string, [ { text: qsTr("Ok") } ]);
                     }
@@ -221,6 +224,7 @@ Item {
                     if (!error_string) {
                         loadFile(url, true);
                     } else {
+                        root.mergedFiles = []; // Not merged: nothing to offer to delete when the next file is loaded
                         messageBox(Modal.Error, error_string, [ { text: qsTr("Ok") } ]);
                     }
                 }
@@ -272,6 +276,10 @@ Item {
                     vidInfo.infoList.model = model;
                     vidInfo.infoList.modelChanged();
                 }
+            }
+            if (camera && additional_data.lens_stabilizer_on) {
+                // Also for a file loaded as the motion data only (a CRM with its proxy)
+                messageBox(Modal.Warning, qsTr("This video was recorded with the lens image stabilizer (IS) on, which Gyroflow doesn't support for Canon cameras.\nTurn the image stabilizer off in order to use Gyroflow."), [ { "text": qsTr("Ok") } ]);
             }
             if (+additional_data.sample_rate > 0.0 && Math.round(+additional_data.sample_rate) < 50) {
                 messageBox(Modal.Warning, qsTr("Motion data sampling rate is too low (%1 Hz).\n50 Hz is an absolute minimum and we recommend at least 200 Hz.").arg(additional_data.sample_rate.toFixed(0)), [ { "text": qsTr("Ok") } ]);
@@ -397,7 +405,9 @@ Item {
                     } },
                     { text: qsTr("Cancel") },
                 ]);
-                const nf = Qt.createComponent("components/NumberField.qml").createObject(dlg.mainColumn, { precision: 3, unit: "fps", value: +settings.value("imageSequenceFps", "30") });
+                // The frame rate the images record (CinemaDNG), else the last one entered
+                const recordedFps = controller.image_sequence_frame_rate(url);
+                const nf = Qt.createComponent("components/NumberField.qml").createObject(dlg.mainColumn, { precision: 3, unit: "fps", value: recordedFps > 0 ? recordedFps : +settings.value("imageSequenceFps", "30") });
                 nf.anchors.horizontalCenter = dlg.mainColumn.horizontalCenter;
                 return;
             }
@@ -408,8 +418,7 @@ Item {
                     { text: qsTr("Yes"), accent: true, clicked: function() {
                         dlg.btnsRow.children[0].enabled = false;
                         getOutputFile(folder, sequenceList[0], "_joined", "", true, function(outFolder, outFilename, outFullFileUrl) {
-                            root.mergedFiles = sequenceList.map(x => filesystem.get_file_url(folder, x, false).toString());
-                            controller.mp4_merge(sequenceList.map(x => filesystem.get_file_url(folder, x, false).toString()), outFolder, outFilename);
+                            mergeFiles(sequenceList.map(x => filesystem.get_file_url(folder, x, false).toString()), outFolder, outFilename);
                         });
                         return false;
                     } },
@@ -485,8 +494,7 @@ Item {
                     const filename = filesystem.get_filename(urlsCopy[0]);
                     const folder = filesystem.get_folder(urlsCopy[0]);
                     getOutputFile(folder, filename, "_joined", "", true, function(outFolder, outFilename, outFullFileUrl) {
-                        root.mergedFiles = urlsCopy.map(x => x.toString());
-                        controller.mp4_merge(urlsCopy.map(x => x.toString()), outFolder, outFilename);
+                        mergeFiles(urlsCopy.map(x => x.toString()), outFolder, outFilename);
                     });
                     return false;
                 } },
@@ -500,6 +508,32 @@ Item {
         }
     }
 
+    // Merges `urls` into `outFilename` in `outFolder`. One of them is never the output (the controller refuses that too), and
+    // replacing another file is asked first, as when rendering. Asks for the output path again when that's not done
+    function mergeFiles(urls: var, outFolder: url, outFilename: string): void {
+        const askAgain = () => askForOutputLocation(outFolder, outFilename, false, (folder, filename) => mergeFiles(urls, folder, filename));
+        const outUrl = filesystem.get_file_url(outFolder, outFilename, false);
+        if (urls.some(x => filesystem.is_same_file(outUrl, x))) {
+            messageBox(Modal.Error, qsTr("The output file is one of the files being merged. Choose another name or folder for the output."), [
+                { text: qsTr("Ok"), clicked: askAgain },
+            ]);
+            return;
+        }
+        // Uses this call's `urls` and `outFolder`. A JavaScript function: type annotations are allowed only on QML objects' functions
+        const merge = (filename) => {
+            root.mergedFiles = urls;
+            controller.mp4_merge(urls, outFolder, filename);
+        };
+        if (filesystem.exists_in_folder(outFolder, outFilename)) {
+            messageBox(Modal.Question, qsTr("Output file already exists, do you want to overwrite it?"), [
+                { text: qsTr("Yes"), clicked: () => merge(outFilename) },
+                { text: qsTr("Rename"), clicked: () => merge(window.renameOutput(outFilename, outFolder)) },
+                { text: qsTr("No"), accent: true, clicked: askAgain },
+            ]);
+        } else {
+            merge(outFilename);
+        }
+    }
     function askForOutputLocation(folder: url, filename: string, choice: bool, cb: var): void {
         const dlg = messageBox(Modal.Question, qsTr("Please enter the output path:"), [
             { text: qsTr("Ok"), accent: true, clicked: function() {

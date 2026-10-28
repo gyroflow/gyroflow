@@ -55,6 +55,9 @@ pub struct Controller {
     load_telemetry: qt_method!(fn(&self, url: QUrl, is_video: bool, player: QJSValue, sample_index: i32, project_version: u32)),
     load_lens_profile: qt_method!(fn(&mut self, url_or_id: QString)),
     reset_lens_profile: qt_method!(fn(&mut self)),
+    load_focal_length_profile: qt_method!(fn(&mut self, focal_length_35mm: f64)),
+    restore_lens_profile: qt_method!(fn(&mut self)),
+    clear_lens_profile: qt_method!(fn(&mut self)),
     get_preset_contents: qt_method!(fn(&mut self, url_or_id: QString) -> QString),
     export_lens_profile: qt_method!(fn(&mut self, url: QUrl, info: QJsonObject, upload: bool) -> bool),
     export_lens_profile_filename: qt_method!(fn(&mut self, info: QJsonObject) -> QString),
@@ -332,6 +335,8 @@ pub struct Controller {
 
     image_sequence_start: qt_property!(i32),
     image_sequence_fps: qt_property!(f64),
+    image_sequence_frame_rate: qt_method!(fn(&self, url: QUrl) -> f64),
+    output_overwrites_input: qt_method!(fn(&self, folder: QUrl, filename: QString, codec: QString) -> QString),
 
     preview_resolution: i32,
     processing_resolution: i32,
@@ -358,6 +363,9 @@ pub struct Controller {
     /// `remeasure_optical_correction`s running
     optical_remeasures: usize,
 
+    /// The unofficial profile `load_focal_length_profile` replaced, for `restore_lens_profile`
+    replaced_lens_profile: Option<core::lens_profile::LensProfile>,
+
     pub stabilizer: Arc<StabilizationManager>,
 }
 
@@ -372,6 +380,8 @@ impl Controller {
 
     fn load_video(&mut self, url: QUrl, player: QJSValue) {
         self.stabilizer.clear();
+        // The lens stays for the next file, but the profile a generated one replaced was the previous file's
+        self.replaced_lens_profile = None;
         let url = util::qurl_to_encoded(url.clone());
         let filename = filesystem::get_filename(&url);
 
@@ -1007,6 +1017,7 @@ impl Controller {
         }
     }
     fn load_lens_profile(&mut self, url_or_id: QString) {
+        self.replaced_lens_profile = None;
         let (json, filepath, checksum) = {
             if let Err(e) = self.stabilizer.load_lens_profile(&url_or_id.to_string()) {
                 self.error(QString::from("An error occurred: %1"), QString::from(e.to_string()), QString::default());
@@ -1038,6 +1049,46 @@ impl Controller {
         }
         self.lens_loaded = false;
         self.lens_changed();
+        self.request_recompute();
+    }
+    /// Replaces the lens with a distortion-free one of this 35 mm equivalent focal length (`LensProfile::from_focal_length`),
+    /// for a file with no profile or an unofficial one. It's the lens of the project then, saved in it like any profile
+    fn load_focal_length_profile(&mut self, focal_length_35mm: f64) {
+        let size = self.stabilizer.params.read().size;
+        let Some(profile) = core::lens_profile::LensProfile::from_focal_length(size.0, size.1, focal_length_35mm) else { return; };
+        let json = profile.get_json().unwrap_or_default();
+        let replaced = std::mem::replace(&mut *self.stabilizer.lens.write(), profile);
+        // An unofficial profile comes back with `restore_lens_profile`. A generated one is official, so a new focal
+        // length keeps the profile the first one replaced, and one kept from the previous file is nothing to go back to
+        if self.lens_loaded && !replaced.official {
+            self.replaced_lens_profile = Some(replaced);
+        }
+        self.lens_loaded = true;
+        self.lens_changed();
+        self.lens_profile_loaded(QString::from(json), QString::default(), QString::default());
+        self.request_recompute();
+    }
+    /// Puts back the unofficial profile `load_focal_length_profile` replaced, or no profile when it replaced none
+    fn restore_lens_profile(&mut self) {
+        let Some(lens) = self.replaced_lens_profile.take() else {
+            self.reset_lens_profile();
+            return;
+        };
+        let (json, filepath, checksum) = (lens.get_json().unwrap_or_default(), lens.path_to_file.clone(), lens.checksum.clone().unwrap_or_default());
+        *self.stabilizer.lens.write() = lens;
+        self.lens_loaded = true;
+        self.lens_changed();
+        self.lens_profile_loaded(QString::from(json), QString::from(filepath), QString::from(checksum));
+        self.request_recompute();
+    }
+    /// Unloads the profile with everything it brought, stretch and digital lens too (`reset_lens_profile` keeps those for
+    /// the calibrator), so it doesn't stay for the next file either. An empty `lens_profile_loaded` tells the UI there's none
+    fn clear_lens_profile(&mut self) {
+        self.replaced_lens_profile = None;
+        *self.stabilizer.lens.write() = Default::default();
+        self.lens_loaded = false;
+        self.lens_changed();
+        self.lens_profile_loaded(QString::default(), QString::default(), QString::default());
         self.request_recompute();
     }
     fn load_default_preset(&mut self) {
@@ -1488,9 +1539,10 @@ impl Controller {
         }
         version
     }
+    /// The project's video and motion data file, and "1" when the motion data file is loaded with all of its metadata
     fn get_urls_from_gyroflow_file(&mut self, url: QUrl) -> QStringList {
         let url = util::qurl_to_encoded(url);
-        let mut ret = vec![QString::default(); 2];
+        let mut ret = vec![QString::default(); 3];
         if let Ok(data) = filesystem::read(&url) {
             if let Ok(serde_json::Value::Object(obj)) = serde_json::from_slice(&data) {
                 let mut org_video_url = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or("").to_string();
@@ -1528,6 +1580,9 @@ impl Controller {
                     if !gyro_url.is_empty() {
                         let gyro_url = StabilizationManager::get_new_videofile_url(&gyro_url, Some(&url), self.image_sequence_start as u32);
                         ret[1] = QString::from(gyro_url);
+                    }
+                    if gyro.get("all_metadata").and_then(|x| x.as_bool()).unwrap_or_default() {
+                        ret[2] = QString::from("1");
                     }
                 }
             } else {
@@ -1596,9 +1651,14 @@ impl Controller {
         match result {
             Ok(thin_obj) => {
                 if thin_obj.as_object().unwrap().contains_key("calibration_data") {
-                    self.lens_loaded = true;
+                    self.replaced_lens_profile = None;
+                    // A project saved with no profile (never loaded, or cleared) has an empty one
+                    let lens_json = {
+                        let lens = self.stabilizer.lens.read();
+                        self.lens_loaded = !lens.fisheye_params.camera_matrix.is_empty();
+                        if self.lens_loaded { lens.get_json().unwrap_or_default() } else { String::new() }
+                    };
                     self.lens_changed();
-                    let lens_json = self.stabilizer.lens.read().get_json().unwrap_or_default();
                     self.lens_profile_loaded(QString::from(lens_json), QString::default(), QString::default());
                 }
                 self.update_offset_model();
@@ -1951,7 +2011,8 @@ impl Controller {
             cal.method = self.calibration_method.into();
             cal.model = self.calibration_model.into();
             *self.stabilizer.lens_calibrator.write() = Some(cal);
-            self.stabilizer.set_smoothing_method(2); // Plain 3D
+            let plain_3d = self.stabilizer.get_smoothing_algs().iter().position(|x| x == "Plain 3D").unwrap_or(3);
+            self.stabilizer.set_smoothing_method(plain_3d);
             self.stabilizer.set_smoothing_param("time_constant", 2.0);
             self.stabilizer.set_max_zoom(0.0, 0);
             self.stabilizer.set_adaptive_zoom(0.0);
@@ -2236,13 +2297,9 @@ impl Controller {
         }).unwrap_or_default()
     }
 
-    /// A profile generated directly (eg. from the focal length) already carries its camera matrix,
-    /// only the ones coming from the chessboard calibration need to be filled in.
+    /// The lens of the chessboard calibration, into the profile being exported
+    #[cfg_attr(not(feature = "opencv"), allow(unused_variables))]
     fn fill_profile_from_calibrator(&self, profile: &mut core::lens_profile::LensProfile) {
-        if profile.fisheye_params.camera_matrix.len() == 3 && profile.calib_dimension.w > 0 && profile.calib_dimension.h > 0 {
-            profile.finalize();
-            return;
-        }
         #[cfg(feature = "opencv")]
         if let Some(ref cal) = *self.stabilizer.lens_calibrator.read() {
             profile.set_from_calibrator(cal);
@@ -2708,7 +2765,8 @@ impl Controller {
     fn mp4_merge(&self, file_list: QStringList, output_folder: QUrl, output_filename: QString) {
         let output_folder = util::qurl_to_encoded(output_folder);
         let output_filename = output_filename.to_string();
-        let output_url = filesystem::get_file_url(&output_folder, &output_filename, true);
+        // On Android a file that doesn't exist yet has no URL: it's created once every check passed
+        let output_url = filesystem::get_file_url(&output_folder, &output_filename, false);
 
         let mut file_list: Vec<String> = file_list.into_iter().map(QString::to_string).collect();
         file_list.sort_by(|a, b| human_sort::compare(a, b));
@@ -2718,14 +2776,16 @@ impl Controller {
             self.mp4_merge_progress(1.0, QString::from("Not enough files!"), QString::default());
             return;
         }
-        if output_url.is_empty() {
+        if output_folder.is_empty() || output_filename.is_empty() {
             self.mp4_merge_progress(1.0, QString::from("Empty output path!"), QString::default());
             return;
         }
         let first_url = file_list.first().unwrap().clone();
+        // The video loaded here, which its player has open
+        let loaded_url = self.stabilizer.input_file.read().url.clone();
         let out = output_url.clone();
-        let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (percent, error_string): (f64, String)| {
-            this.mp4_merge_progress(percent, QString::from(error_string), QString::from(out.as_str()));
+        let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (percent, error_string, url): (f64, String, Option<String>)| {
+            this.mp4_merge_progress(percent, QString::from(error_string), QString::from(url.as_deref().unwrap_or(out.as_str())));
         });
         core::run_threaded(move || {
             let mut vidinfo = None;
@@ -2737,13 +2797,15 @@ impl Controller {
                             continue;
                         }
                         if let Some(vidinfo) = &vidinfo {
-                            if vidinfo.width != x.width || vidinfo.height != x.height || (vidinfo.fps * 100.0).round() as i32 != (x.fps * 100.0).round() as i32 || vidinfo.rotation != x.rotation {
-                                progress((1.0, format!("Video metadata mismatch: {}x{}@{:.2} {}° vs {}x{}@{:.2} {}°", vidinfo.width, vidinfo.height, vidinfo.fps, vidinfo.rotation, x.width, x.height, x.fps, x.rotation)));
+                            // Parts of one recording: the rate it records at (`base_fps`), as mp4-merge keeps every frame's own
+                            // duration, so a part's dropped frames don't make it another recording
+                            if vidinfo.width != x.width || vidinfo.height != x.height || (vidinfo.base_fps * 100.0).round() as i32 != (x.base_fps * 100.0).round() as i32 || vidinfo.rotation != x.rotation {
+                                progress((1.0, format!("Video metadata mismatch: {}x{}@{:.2} {}° vs {}x{}@{:.2} {}°", vidinfo.width, vidinfo.height, vidinfo.base_fps, vidinfo.rotation, x.width, x.height, x.base_fps, x.rotation), None));
                                 return;
                             }
                         }
                     },
-                    Err(e) => { progress((1.0, format!("Failed to read file metadata: {x}: {e:?}"))); return; }
+                    Err(e) => { progress((1.0, format!("Failed to read file metadata: {x}: {e:?}"), None)); return; }
                 }
             }
 
@@ -2751,15 +2813,26 @@ impl Controller {
             for x in &file_list {
                 match filesystem::open_file(&x, false, false) {
                     Ok(x) => { opened.push(x); },
-                    Err(e) => { progress((1.0, format!("Failed to open file: {x}: {e:?}"))); return; }
+                    Err(e) => { progress((1.0, format!("Failed to open file: {x}: {e:?}"), None)); return; }
                 }
             }
-            let mut file_references: Vec<(&mut std::fs::File, usize)> = opened.iter_mut().map(|x| { let s = x.size; (x.get_file(), s) }).collect();
-            let mut opened_output = match filesystem::open_file(&output_url, true, true) {
-                Ok(x) => { x },
-                Err(e) => { progress((1.0, format!("Failed to create file: {output_url}: {e:?}"))); return; }
+            if let Err(e) = Self::check_merge_outputs(&opened, &file_list, &output_folder, &output_filename) {
+                progress((1.0, e, None));
+                return;
+            }
+            let target = match MergeOutput::check(&output_folder, &output_filename, &loaded_url) {
+                Ok(x) => x,
+                Err(e) => { progress((1.0, e, None)); return; }
             };
-            let res = mp4_merge::join_file_streams(&mut file_references, opened_output.get_file(), |p| progress((p.min(0.9999), String::default())));
+            let mut file_references: Vec<(&mut std::fs::File, usize)> = opened.iter_mut().map(|x| { let s = x.size; (x.get_file(), s) }).collect();
+            let mut output = match MergeOutput::create(target) {
+                Ok(x) => x,
+                Err(e) => { progress((1.0, e, None)); return; }
+            };
+            let output_url = output.url.clone();
+            let res = mp4_merge::join_file_streams(&mut file_references, output.file(), |p| progress((p.min(0.9999), String::default(), Some(output_url.clone()))))
+                .map_err(|e| e.to_string())
+                .and_then(|_| output.commit());
             match res {
                 Ok(_) => {
                     if let Err(e) = Self::merge_gcsv(&file_list, &output_folder, &output_filename) {
@@ -2768,11 +2841,45 @@ impl Controller {
 
                     crate::util::update_file_times(&output_url, &first_url, None);
 
-                    progress((1.0, String::default()))
+                    progress((1.0, String::default(), Some(output_url)))
                 },
-                Err(e) => progress((1.0, e.to_string()))
+                Err(e) => progress((1.0, e, Some(output_url)))
             }
         });
+    }
+    /// Refuses to merge into a file that the merge reads: the output, or the motion data merged next to it (`.gcsv`), when it's
+    /// one of the files merged or their motion data. By file identity, so another spelling of its path, a letter case variant or
+    /// a link of it is refused too. Before anything is created or written
+    fn check_merge_outputs(inputs: &[filesystem::FileWrapper], file_list: &[String], output_folder: &str, output_filename: &str) -> Result<(), String> {
+        let error = |e: filesystem::FilesystemError| format!("Failed to check the output: {e:?}");
+        let mut read = Vec::with_capacity(inputs.len() * 2);
+        for (x, url) in inputs.iter().zip(file_list) {
+            read.push((x.id().map_err(error)?, url.clone()));
+        }
+        // The .gcsv files `merge_gcsv` reads, and the one it writes when there are any
+        let mut written = vec![filesystem::get_file_url(output_folder, output_filename, false)];
+        let mut gcsv = false;
+        for x in file_list {
+            let folder = filesystem::get_folder(x);
+            let gcsv_name = filesystem::filename_with_extension(&filesystem::get_filename(x), "gcsv");
+            if filesystem::exists_in_folder(&folder, &gcsv_name) {
+                let url = filesystem::get_file_url(&folder, &gcsv_name, false);
+                if let Some(id) = filesystem::file_id(&url).map_err(error)? {
+                    read.push((id, url));
+                    gcsv = true;
+                }
+            }
+        }
+        if gcsv {
+            written.push(filesystem::get_file_url(output_folder, &filesystem::filename_with_extension(output_filename, "gcsv"), false));
+        }
+        for out in &written {
+            let Some(id) = filesystem::file_id(out).map_err(error)? else { continue; };
+            if let Some((_, url)) = read.iter().find(|x| x.0 == id) {
+                return Err(format!("Merging into {} would destroy {}, which is being merged. Choose another name or folder for the output.", filesystem::display_url(out), filesystem::display_url(url)));
+            }
+        }
+        Ok(())
     }
     fn merge_gcsv(file_list: &[String], output_folder: &str, output_filename: &str) -> Result<(), gyroflow_core::GyroflowCoreError> {
         use std::io::{ BufRead, Write, Seek, SeekFrom };
@@ -3003,6 +3110,144 @@ impl Controller {
     fn image_to_b64(&self, img: QImage) -> QString { util::image_to_b64(img) }
     fn copy_to_clipboard(&self, text: QString) { util::copy_to_clipboard(text) }
     fn data_folder(&self) -> QUrl { QUrl::from(QString::from(gyroflow_core::filesystem::path_to_url(gyroflow_core::settings::data_dir().to_str().unwrap_or_default()))) }
+
+    /// The frame rate an image of a sequence records (a CinemaDNG frame's FrameRate tag), 0 when it doesn't record one
+    fn image_sequence_frame_rate(&self, url: QUrl) -> f64 {
+        let url = util::qurl_to_encoded(url);
+        if !filesystem::get_filename(&url).to_ascii_lowercase().ends_with(".dng") { return 0.0; }
+        let Ok(mut file) = filesystem::open_file(&url, false, false) else { return 0.0; };
+        let size = file.size as u64;
+        gyroflow_core::telemetry_parser::gyroflow::cdng::frame_rate(file.get_file(), size).unwrap_or_default()
+    }
+
+    /// The input file that rendering the video loaded to `filename` in `folder` with `codec` would write over, as it's shown
+    /// (`rendering::output_overwrites_input`, which the render refuses), empty when it wouldn't
+    fn output_overwrites_input(&self, folder: QUrl, filename: QString, codec: QString) -> QString {
+        let frame_count = self.stabilizer.params.read().frame_count;
+        let output_frames = rendering::is_sequence_codec(&codec.to_string()).then_some(frame_count);
+        let input_file = self.stabilizer.input_file.read().clone();
+        QString::from(rendering::output_overwrites_input(&input_file, frame_count, &util::qurl_to_encoded(folder), &filename.to_string(), output_frames, &AtomicBool::new(false)).unwrap_or_default())
+    }
+}
+
+/// Where the merged file goes, as [`MergeOutput::check`] found it
+struct MergeTarget {
+    folder: String,
+    filename: String,
+    /// The file that gets the merged file: the output, or the file at the end of the symbolic links there
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    path: std::path::PathBuf,
+}
+
+/// The merged file while it's written.
+///
+/// On desktop it's a [`filesystem::TempOutput`]: a new file next to the file that gets the output's name, which it gets only
+/// once it's complete and on disk, so a merge that fails never leaves a partial file under that name, nor truncates the file
+/// that was there (which the user agreed to replace). On Android and iOS, where the render writes in place too, it's the output
+/// itself: removed when the merge fails, unless it was there before
+struct MergeOutput {
+    url: String,
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    temp: filesystem::TempOutput,
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    file: Option<filesystem::FileWrapper>,
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    created: bool,
+}
+impl MergeOutput {
+    /// Checks, before anything is created, that the merged file can get the output's name once it's complete, where creating
+    /// the output could before ([`filesystem::output_target`], as the render does). On desktop:
+    /// - a symbolic link there is followed, as creating the file followed it: the file at the end of its links is the one
+    ///   replaced, or the one created where they point, and the links stay;
+    /// - an existing file is replaced only where it can be written to;
+    /// - on Windows, also only where the rename at the end can replace it: a program that has it open without letting it be
+    ///   deleted keeps it from that. FFmpeg opens files so, and with it the player the video loaded here (`loaded_url`)
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    fn check(folder: &str, filename: &str, loaded_url: &str) -> Result<MergeTarget, String> {
+        let url = filesystem::get_file_url(folder, filename, false);
+        match filesystem::output_target(&url, filesystem::Overwrite::Rename) {
+            Ok(path) => Ok(MergeTarget { folder: folder.to_owned(), filename: filename.to_owned(), path }),
+            Err(filesystem::OutputError::Busy(_)) => Err(Self::busy(&url, loaded_url)),
+            Err(e) => Err(e.to_string())
+        }
+    }
+    /// Android and iOS: the output is written in place, opened as it was before
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    fn check(folder: &str, filename: &str, _loaded_url: &str) -> Result<MergeTarget, String> {
+        Ok(MergeTarget { folder: folder.to_owned(), filename: filename.to_owned() })
+    }
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    fn create(target: MergeTarget) -> Result<Self, String> {
+        let url = filesystem::get_file_url(&target.folder, &target.filename, false);
+        // A name of the merge's own, hidden on Unix: the render writes to `<output>.tmp`
+        let name = |file: &std::ffi::OsStr, n: u32| {
+            let mut name = std::ffi::OsString::from(".");
+            name.push(file);
+            name.push(if n == 0 { ".mp4merge-partial".to_owned() } else { format!(".{n}.mp4merge-partial") });
+            name
+        };
+        let temp = filesystem::TempOutput::create(&url, target.path, name).map_err(|e| e.to_string())?;
+        Ok(Self { url, temp })
+    }
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    fn create(target: MergeTarget) -> Result<Self, String> {
+        let (folder, filename) = (&target.folder, &target.filename);
+        let mut url = filesystem::get_file_url(folder, filename, false);
+        let created = !filesystem::exists(&url);
+        if url.is_empty() {
+            url = filesystem::get_file_url(folder, filename, true);
+        }
+        match filesystem::open_file(&url, true, true) {
+            Ok(file) => Ok(Self { url, file: Some(file), created }),
+            Err(e) => {
+                if created && !url.is_empty() { let _ = filesystem::remove_file(&url); }
+                Err(format!("Failed to create file: {url}: {e:?}"))
+            }
+        }
+    }
+    fn file(&mut self) -> &mut std::fs::File {
+        #[cfg(not(any(target_os = "android", target_os = "ios")))]
+        { self.temp.file() }
+        #[cfg(any(target_os = "android", target_os = "ios"))]
+        { self.file.as_mut().unwrap().get_file() }
+    }
+    /// The merge is complete: on desktop, the output gets its name. Where only that rename fails (a program opened the file
+    /// there while the merge ran), the merged file is kept, and the error says where, as the render keeps its file
+    fn commit(self) -> Result<(), String> {
+        #[cfg(not(any(target_os = "android", target_os = "ios")))]
+        {
+            self.temp.publish().map_err(|e| e.to_string())
+        }
+        #[cfg(any(target_os = "android", target_os = "ios"))]
+        {
+            let mut this = self;
+            this.created = false;
+            Ok(())
+        }
+    }
+}
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+impl MergeOutput {
+    /// The error for an output (`url`) that a program has open, which keeps it from being replaced: it says so where that's the
+    /// player here, with the video loaded (`loaded_url`)
+    fn busy(url: &str, loaded_url: &str) -> String {
+        let output = filesystem::display_url(url);
+        if !loaded_url.is_empty() && filesystem::is_same_file(url, loaded_url).unwrap_or(false) {
+            format!("The output {output} is the video loaded in Gyroflow, which keeps it from being replaced. Load another video first, or choose another name or folder for the output.")
+        } else {
+            filesystem::OutputError::Busy(output).to_string()
+        }
+    }
+}
+/// On desktop the [`filesystem::TempOutput`] removes itself
+#[cfg(any(target_os = "android", target_os = "ios"))]
+impl Drop for MergeOutput {
+    fn drop(&mut self) {
+        drop(self.file.take());
+        if self.created {
+            filesystem::remove_file(&self.url).unwrap_or_else(|e| ::log::error!("Failed to remove the partial merge output {}: {e:?}", self.url));
+        }
+    }
 }
 
 #[derive(Default, QObject)]
@@ -3029,6 +3274,7 @@ pub struct Filesystem {
     save_allowed_folders:     qt_method!(fn(&self)),
     restore_allowed_folders:  qt_method!(fn(&self)),
     get_next_file_url:        qt_method!(fn(&self, current_url: QUrl, index: i32) -> QUrl),
+    is_same_file:             qt_method!(fn(&self, url: QUrl, other: QUrl) -> bool),
     url_opened:               qt_signal!(url: QUrl),
 }
 impl Filesystem {
@@ -3047,6 +3293,8 @@ impl Filesystem {
     fn display_folder_filename(&self, folder: QUrl, filename: QString) -> QString { QString::from(filesystem::display_folder_filename(&util::qurl_to_encoded(folder), &filename.to_string())) }
     fn catch_url_open(&self, url: QUrl) { util::dispatch_url_event(url.clone()); self.url_opened(url); }
     fn remove_file(&self, url: QUrl) { let _ = filesystem::remove_file(&util::qurl_to_encoded(url)); }
+    /// Whether both URLs reach the same file (`filesystem::is_same_file`), `false` when that can't be told
+    fn is_same_file(&self, url: QUrl, other: QUrl) -> bool { filesystem::is_same_file(&util::qurl_to_encoded(url), &util::qurl_to_encoded(other)).unwrap_or_default() }
     fn folder_access_granted(&self, url: QUrl) { filesystem::folder_access_granted(&util::qurl_to_encoded(url)); }
     fn save_allowed_folders(&self) {
         let list = filesystem::get_allowed_folders();

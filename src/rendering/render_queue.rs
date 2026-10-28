@@ -210,6 +210,7 @@ pub struct RenderQueue {
 
     get_job_output_filename: qt_method!(fn(&self, job_id: u32) -> QString),
     get_job_output_folder: qt_method!(fn(&self, job_id: u32) -> QUrl),
+    get_job_error_string: qt_method!(fn(&self, job_id: u32) -> QString),
     set_job_output_filename: qt_method!(fn(&mut self, job_id: u32, new_filename: QString, start: bool)),
 
     set_pixel_format: qt_method!(fn(&mut self, job_id: u32, format: String)),
@@ -248,6 +249,9 @@ pub struct RenderQueue {
     get_next_item_id: qt_method!(fn(&self, job_id: u32) -> u32),
     get_encoder_options: qt_method!(fn(&self, encoder: String) -> String),
     get_default_encoder: qt_method!(fn(&self, codec: String, gpu: bool) -> String),
+    has_encoder: qt_method!(fn(&self, codec: String) -> bool),
+    check_encoders: qt_method!(fn(&self, codec: String)),
+    pub encoders_checked: qt_signal!(codec: String, gpu_encoder: String, cpu_encoder: String),
     get_active_render_count: qt_method!(fn(&self) -> usize),
 
     apply_to_all: qt_method!(fn(&mut self, data: String, additional_data: String, to_job_id: u32)),
@@ -503,6 +507,15 @@ impl RenderQueue {
         if let Some(job) = self.jobs.get(&job_id) {
             if job.queue_index < q.row_count() as usize {
                 return q[job.queue_index].output_filename.clone();
+            }
+        }
+        QString::default()
+    }
+    pub fn get_job_error_string(&self, job_id: u32) -> QString {
+        let q = self.queue.borrow();
+        if let Some(job) = self.jobs.get(&job_id) {
+            if job.queue_index < q.row_count() as usize {
+                return q[job.queue_index].error_string.clone();
             }
         }
         QString::default()
@@ -869,13 +882,19 @@ impl RenderQueue {
             });
             let encoder_initialized = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, encoder_name: String| {
                 if let Some(job) = this.jobs.get(&job_id) {
-                    if job.render_options.use_gpu && (encoder_name == "libx264" || encoder_name == "libx265" || encoder_name == "prores_ks") {
+                    if job.render_options.use_gpu && matches!(encoder_name.as_str(), "libx264" | "libx265" | "prores_ks" | "libsvtav1" | "librav1e" | "libaom-av1") {
                         update_model!(this, job_id, itm {
                             itm.error_string = QString::from("uses_cpu");
                         });
                     }
                 }
                 this.encoder_initialized(job_id, encoder_name);
+            });
+            // The output is complete, but without some of what was asked for. Shown with the finished job
+            let warning = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, msg: String| {
+                update_model!(this, job_id, itm {
+                    itm.error_string = QString::from(msg);
+                });
             });
 
             let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (msg, mut arg): (String, String)| {
@@ -1100,7 +1119,7 @@ impl RenderQueue {
                     if cancel_flag.load(SeqCst) { break; }
                     let mut i = 0;
                     loop {
-                        let result = rendering::render(stab.clone(), progress.clone(), &input_file, &render_options, i, range, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone());
+                        let result = rendering::render(stab.clone(), progress.clone(), &input_file, &render_options, i, range, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone(), warning.clone());
                         if let Err(e) = result {
                             if let rendering::FFmpegError::PixelFormatNotSupported((fmt, supported, candidate)) = e {
                                 let candidate = if let Some(c) = candidate { format!("{c:?}").to_ascii_lowercase().to_string() } else { String::new() };
@@ -1111,7 +1130,8 @@ impl RenderQueue {
                                 stab.gpu_decoding.store(false, SeqCst);
                                 continue;
                             }
-                            if rendered_frames.load(SeqCst) == 0 {
+                            // Another decoder won't make an encoder work, nor another output of the input, nor one that can't be written
+                            if rendered_frames.load(SeqCst) == 0 && !matches!(e, rendering::FFmpegError::NoWorkingEncoder(_) | rendering::FFmpegError::OutputIsInput(..) | rendering::FFmpegError::Output(_)) {
                                 if (0..4).contains(&i) {
                                     // Try 4 times with different GPU decoders
                                     i += 1;
@@ -1156,7 +1176,8 @@ impl RenderQueue {
             "PNG Sequence"  => "_%05d.png",
             _ => ".mp4"
         });
-        if ext == ".mp4" && render_options.preserve_other_tracks {
+        // To copy the audio with the other tracks, which .mp4 can't store when it's PCM. In sync with Export.qml:outputExtension
+        if ext == ".mp4" && render_options.preserve_other_tracks && render_options.audio && render_options.audio_codec == "Copy" {
             ext = ".mov";
         }
         if let Some(pos) = filename.rfind('.') {
@@ -1182,7 +1203,13 @@ impl RenderQueue {
         let is_rendering = self.export_metadata.is_none() && self.export_stmap.is_none();
         let processing_done = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, _: ()| {
             if let Some(job) = this.jobs.get(&job_id) {
-                if is_rendering && filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
+                if let Some(msg) = is_rendering.then(|| Self::output_is_input(job)).flatten() {
+                    update_model!(this, job_id, itm {
+                        itm.error_string = msg.clone();
+                        itm.status = JobStatus::Error;
+                    });
+                    this.error(job_id, msg, QString::default(), QString::default());
+                } else if is_rendering && filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
                     let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
                     update_model!(this, job_id, itm {
                         itm.error_string = msg.clone();
@@ -1721,7 +1748,11 @@ impl RenderQueue {
                         itm.output_filename = QString::from(job.render_options.output_filename.as_str());
                         itm.output_folder   = QString::from(job.render_options.output_folder.as_str());
                         itm.display_output_path = QString::from(filesystem::display_folder_filename(job.render_options.output_folder.as_str(), job.render_options.output_filename.as_str()));
-                        if filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
+                        if let Some(msg) = Self::output_is_input(job) {
+                            itm.error_string = msg.clone();
+                            itm.status = JobStatus::Error;
+                            err((job_id, msg.to_string()));
+                        } else if filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
                             let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
                             itm.error_string = msg.clone();
                             itm.status = JobStatus::Error;
@@ -1750,6 +1781,18 @@ impl RenderQueue {
         }
     }
 
+    /// Why the job can't render to its output: it would write over its input file, or a frame of its input image sequence
+    /// (`rendering::output_overwrites_input`, which `rendering::render` refuses too)
+    fn output_is_input(job: &Job) -> Option<QString> {
+        let (folder, filename) = (&job.render_options.output_folder, &job.render_options.output_filename);
+        let frame_count = job.stab.params.read().frame_count;
+        let output_frames = rendering::is_sequence_codec(&job.render_options.codec).then_some(frame_count);
+        let input_file = job.stab.input_file.read().clone();
+        let input = rendering::output_overwrites_input(&input_file, frame_count, folder, filename, output_frames, &AtomicBool::new(false))?;
+        let output = filesystem::display_url(&filesystem::get_file_url(folder, filename, false));
+        Some(QString::from(rendering::FFmpegError::OutputIsInput(output, input).to_string()))
+    }
+
     fn file_exists_in_folder(&self, folder: QUrl, filename: QString) -> bool {
         let folder = QString::from(folder).to_string();
         let filename = filename.to_string();
@@ -1763,6 +1806,20 @@ impl RenderQueue {
 
     fn get_default_encoder(&self, codec: String, gpu: bool) -> String {
         rendering::get_default_encoder(&codec, gpu)
+    }
+    fn has_encoder(&self, codec: String) -> bool {
+        rendering::has_encoder(&codec)
+    }
+    /// Emits `encoders_checked` with the encoders `codec` is rendered with on the GPU and on the CPU, empty when none works.
+    /// In the background, because the GPU encoders may be opened to find out
+    fn check_encoders(&self, codec: String) {
+        let checked = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (codec, gpu_encoder, cpu_encoder): (String, String, String)| {
+            this.encoders_checked(codec, gpu_encoder, cpu_encoder);
+        });
+        core::run_threaded(move || {
+            let (gpu_encoder, cpu_encoder) = rendering::get_working_encoders(&codec);
+            checked((codec, gpu_encoder.unwrap_or_default().to_string(), cpu_encoder.unwrap_or_default().to_string()));
+        });
     }
     fn get_encoder_options(&self, encoder: String) -> String {
         rendering::get_encoder_options(&encoder)
