@@ -334,8 +334,8 @@ MenuItem {
             text: qsTr("The AKAZE method may be more accurate but is significantly slower than OpenCV. Use only if OpenCV doesn't produce good results");
         }
         InfoMessageSmall {
-            show: syncMethod.currentValue == "Gmflow (AI)";
-            text: qsTr("Gmflow is an experimental AI-based optical flow backend. Requires a build with the ai-optical-flow Cargo feature; the model weights (about 150 MB) are downloaded on first use. It runs on the GPU only (Vulkan, or Metal on Apple systems).");
+            show: syncMethod.currentValue == "GMFlow (AI)";
+            text: qsTr("GMFlow uses an AI model to follow fast motion and weak detail, but is much slower than the other methods. Its model (about 30 MB) is downloaded the first time it's used.");
         }
         Label {
             position: Label.LeftPosition;
@@ -343,7 +343,7 @@ MenuItem {
 
             ComboBox {
                 id: syncMethod;
-                model: controller.has_ai_optical_flow() ? ["AKAZE", "PyrLK", "OpenCV (DIS)", "Gmflow (AI)"] : ["AKAZE", "PyrLK", "OpenCV (DIS)"];
+                model: controller.has_ai_optical_flow() ? ["AKAZE", "PyrLK", "OpenCV (DIS)", "GMFlow (AI)"] : ["AKAZE", "PyrLK", "OpenCV (DIS)"];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 2;

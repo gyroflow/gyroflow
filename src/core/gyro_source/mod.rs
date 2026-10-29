@@ -55,6 +55,12 @@ pub struct FileLoadOptions {
     /// (telemetry-parser's `Input::read_video_segment_table`). The video's, so it isn't stored either
     #[serde(skip)]
     pub video_url: Option<String>,
+    /// The presentation times of the video's frames, when it has them (`StabilizationParams::frame_times`: frames that
+    /// aren't evenly spaced from its start, which it's then looked up by): a Gyroflow protobuf frame's offset is taken
+    /// against its time there, or at `k / fps` without them (`gyroflow_proto_time_offset`). The video's, so it isn't
+    /// stored either
+    #[serde(skip)]
+    pub video_frame_times: Option<Arc<crate::frame_times::FrameTimes>>,
 }
 
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
@@ -418,7 +424,9 @@ impl GyroSource {
     }
 
     pub fn parse_telemetry_file<T: Read + Seek, P: AsRef<std::path::Path>, F: Fn(f64)>(stream: &mut T, filesize: usize, path: P, options: &FileLoadOptions, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Result<FileMetadata, crate::GyroflowCoreError> {
-        let key = format!("{}{options:?}{size:?}{fps}", path.as_ref().display());
+        // The video's frame times by their fingerprint (`FrameTimes::checksum`), not every one of them
+        let frame_times = options.video_frame_times.as_ref().map(|t| t.checksum());
+        let key = format!("{}{:?}{frame_times:?}{size:?}{fps}", path.as_ref().display(), FileLoadOptions { video_frame_times: None, ..options.clone() });
         static CACHE: RwLock<BTreeMap<String, FileMetadata>> = RwLock::new(BTreeMap::new());
         {
             let cache = CACHE.read();
@@ -826,7 +834,13 @@ impl GyroSource {
                     // One source for all frames: the format's own timing, else the camera's
                     if let Some(frame) = frame {
                         let offset = if is_gyroflow_proto {
-                            gyroflow_proto_time_offset(tag_map, &FrameMapping::of(tag_map, size), frame_readout_direction)
+                            // The time the video presents the frame at, which it's looked up at: by its frame times, else `k / fps`
+                            let frame_i32 = i32::try_from(frame).unwrap_or(i32::MAX);
+                            let presented_ms = match &options.video_frame_times {
+                                Some(times) => Some(times.timestamp_at_frame(frame_i32, 1.0)),
+                                None => (fps > 0.0).then(|| crate::timestamp_at_frame(frame_i32, fps)),
+                            };
+                            gyroflow_proto_time_offset(tag_map, &FrameMapping::of(tag_map, size), frame_readout_direction, info.timestamp_ms, presented_ms)
                         } else if let Some((org_sample_rate, offset)) = sony::get_time_offset(&md, &input, tag_map, sample_rate, sony_packet_timed) {
                             original_sample_rate = org_sample_rate;
                             Some(offset)
@@ -1975,15 +1989,25 @@ fn frame_of_sample(input: &Input, info: &util::SampleInfo) -> Option<usize> {
 }
 
 /// Offset of a frame's capture from its time in the video, by the gyroflow.proto contract: the frame's start on the
-/// camera clock (`FirstFrameTimestamp`, against the video time) to the middle of its exposure and readout. The middle
-/// of the rows the video shows, which is the frame's unless the video is the file's other picture (`FrameMapping`)
-fn gyroflow_proto_time_offset(tag_map: &GroupedTagMap, mapping: &FrameMapping, direction: ReadoutDirection) -> Option<f64> {
+/// camera clock to the middle of its exposure and readout. The middle of the rows the video shows, which is the frame's
+/// unless the video is the file's other picture (`FrameMapping`).
+///
+/// The start is `FirstFrameTimestamp` after the time of the frame's message (`message_ms`, the sample's time, which
+/// telemetry-parser takes it against): the frame's ideal time in the video, its index over the file's frame rate, in a
+/// metadata track (`gyroflow_proto_inject`) as in the JSONL, the camera clock's jitter being in `FirstFrameTimestamp`.
+/// The video presents the frame at another time (`presented_ms`, in the file's time): its presentation time where its
+/// frames aren't evenly spaced (D10), with that jitter in it too where it's the frame's capture, or `k / fps`, which is
+/// the ideal time only where the video's rate is the file's frame rate and telemetry-parser times the sample exactly
+/// (it truncates it to whole µs). The offset is taken against the time the frame is presented at, so that every frame
+/// is looked up where its message puts it on the camera clock, however the video times its frames
+fn gyroflow_proto_time_offset(tag_map: &GroupedTagMap, mapping: &FrameMapping, direction: ReadoutDirection, message_ms: f64, presented_ms: Option<f64>) -> Option<f64> {
     let imager = tag_map.get(&GroupId::Imager)?;
     let first_frame_ts = *(imager.get_t(TagId::FirstFrameTimestamp) as Option<&f64>)?;
     let exposure_time = *(imager.get_t(TagId::ExposureTime)     as Option<&f64>).unwrap_or(&0.0);
     let readout_time  = *(imager.get_t(TagId::FrameReadoutTime) as Option<&f64>).unwrap_or(&0.0);
+    let against_presented = presented_ms.map_or(0.0, |presented| message_ms - presented);
 
-    Some(first_frame_ts - exposure_time / 2.0 + readout_time * (0.5 + mapping.centre_shift(direction)))
+    Some(first_frame_ts + against_presented - exposure_time / 2.0 + readout_time * (0.5 + mapping.centre_shift(direction)))
 }
 
 /// How the video shows the frame a file states its per-frame pixel quantities in (the focal length and the principal

@@ -20,7 +20,7 @@ mod coop;
 #[cfg(feature = "use-burn")]
 mod inference {
     use super::kernels;
-    use super::model::{ Features, Gmflow, Ops, Statics };
+    use super::model::{ Features, Gmflow, GruFactored, Ops, Statics };
     use std::io::Read;
     use std::path::PathBuf;
     use std::sync::OnceLock;
@@ -39,7 +39,7 @@ mod inference {
     // the official checkpoint into the parameters of model.rs (ci-gpu/gmflow-dev: convert_weights), hosted separately rather
     // than embedded. The SHA-256 pin defends against tampering on the download path. GYROFLOW_GMFLOW_WEIGHTS=<path> takes
     // the file from there instead of downloading it (offline installs, packaging, tests); it must still match the pin.
-    const MODEL_URL: &str = "https://github.com/yasumorishima/gyroflow-models/releases/download/v1.2.0/gmflow-scale2-regrefine6.bpk";
+    const MODEL_URL: &str = "https://api.gyroflow.xyz/sdk/gmflow-scale2-regrefine6.bpk";
     const MODEL_SHA256: &str = "8d51cb8eaf2c56b6f727ef83534616c4dd98f4ce7ff9b5fa812c132c44db9db7";
     const MODEL_FILENAME: &str = "gmflow-scale2-regrefine6.bpk";
 
@@ -76,6 +76,8 @@ mod inference {
     pub struct Runner {
         model: Gmflow,
         statics: Statics,
+        /// The model's GRU weights split by input (BasicUpdateBlock::factor_gru), made once
+        gru: GruFactored,
     }
 
     fn gpu() -> Result<&'static (Device, String), String> {
@@ -280,9 +282,10 @@ mod inference {
         let loading = Instant::now();
         let model = load_model(device)?;
         let weights_secs = loading.elapsed().as_secs_f64();
-        let mut statics = Statics::new(MODEL_H, MODEL_W, device);
         // Without f32 matrix units: convolutions as im2col, their matmuls (and the GRU's and the transformer's linear
-        // layers) by kernels::gemm (WGSL on the macOS CI GPU: the linear layers too, 3.08 s a pass against 3.29 s)
+        // layers) by kernels::gemm (WGSL on the macOS CI GPU: the linear layers too, 3.08 s a pass against 3.29 s), and
+        // the fused window attention, norms and flow head convolution (WGSL on the macOS CI GPU: 2.25 -> 1.82 s a pass);
+        // with them burn's matmuls use the units
         let own = im2col_is_faster(device);
         let gemm = own && gemm_fits(device);
         // The convolutions of more than 1x1 by implicit GEMM instead of im2col + kernels::gemm, where it was measured:
@@ -301,15 +304,16 @@ mod inference {
         let check_secs = checking.elapsed().as_secs_f64();
         log::info!("gmflow: weights loaded in {:.2} s, cooperative matrices checked in {:.2} s", weights_secs, check_secs);
         *LOAD_TIMES.lock() = Some((weights_secs, check_secs));
-        statics.ops = Ops { conv_im2col: own, own_gemm: gemm, gemm_linear: gemm, fused: own, implicit, coop, ..OPS };
+        let statics = Statics::new(MODEL_H, MODEL_W, Ops { conv_im2col: own, own_gemm: gemm, gemm_linear: gemm, fused: own, implicit, coop }, device);
         log::info!("gmflow: convolutions {}", match (own, gemm, implicit) {
             _ if coop => "and linear layers by cooperative-matrix kernels (coop.rs; the 2 outputs of the flow head by kernels::conv_small)",
-            (true, true, true) => "by implicit GEMM kernels (the GRU's too; 1x1 by burn, the 2 outputs of the flow head by kernels::conv_small), linear layers by kernels::gemm",
-            (true, true, false) => "as im2col + kernels::gemm, linear layers by kernels::gemm too",
-            (true, false, _) => "as im2col + matmul",
+            (true, true, true) => "by implicit GEMM kernels (the 1x1 ones and the GRU's too; the 2 outputs of the flow head by kernels::conv_small), linear layers by kernels::gemm",
+            (true, true, false) => "as im2col + kernels::gemm (the 1x1 ones by the implicit GEMM kernel, the 2 outputs of the flow head by kernels::conv_small), linear layers by kernels::gemm too",
+            (true, false, _) => "as im2col + matmul (1x1 by burn, the 2 outputs of the flow head by kernels::conv_small)",
             _ => "by burn",
         });
-        let r = std::sync::Arc::new(Runner { model, statics });
+        let gru = model.refine.factor_gru();
+        let r = std::sync::Arc::new(Runner { model, statics, gru });
         *slot = Some(r.clone());
         Ok(r)
     }
@@ -325,15 +329,19 @@ mod inference {
         ADAPTER.get().map(|a| a.rsplit(" | ").next().is_some_and(|ids| ids.starts_with("10de:"))).unwrap_or(false)
     }
 
-    // A passed coop_works is kept in the kernel cache's directory with what it held for: the adapter (its driver too) and
-    // the sources of the kernels it checked (coop.rs, and kernels.rs it compares the window attention to). It compiles
-    // kernels the model doesn't run (sizes with edges), 0.8 s of every later start on the macOS CI GPU; a failure is not
-    // kept, so a check that failed once runs again at the next start
+    // A passed coop_works is kept in the kernel cache's directory with what it held for: the adapter (its driver too),
+    // the sources of the kernels it checked (coop.rs, and kernels.rs it compares the window attention to) and the
+    // versions of burn, cubecl and wgpu (naga) Cargo.toml asks for, which compile them. It compiles kernels the model
+    // doesn't run (sizes with edges), 0.8 s of every later start on the macOS CI GPU; a failure is not kept, so a check
+    // that failed once runs again at the next start
     fn coop_marker() -> Option<(PathBuf, String)> {
         let adapter = ADAPTER.get()?;
         let mut hasher = Sha256::new();
         hasher.update(include_str!("gmflow/coop.rs").as_bytes());
         hasher.update(include_str!("gmflow/kernels.rs").as_bytes());
+        for dependency in include_str!("../../Cargo.toml").lines().filter(|l| ["burn", "cubecl", "wgpu"].iter().any(|d| l.starts_with(d))) {
+            hasher.update(dependency.trim_end().as_bytes());
+        }
         let sources: String = hasher.finalize().iter().map(|b| format!("{:02x}", b)).collect();
         let path = crate::settings::data_dir().join("ai_models").join("gpu_cache").join("coop_checked");
         Some((path, format!("{}\n{}\n", adapter, sources)))
@@ -438,11 +446,6 @@ mod inference {
         // own thread, not here; the kernels avoid the one met so far (read-only and read-write views of one buffer)
         std::panic::catch_unwind(std::panic::AssertUnwindSafe(run)).unwrap_or_else(|_| Err("panicked".to_string()))
     }
-
-    // Which implementations run: see model.rs, Ops. The convolutions are chosen per GPU (im2col_is_faster), and so are the
-    // fused window attention and flow head convolution: on GPUs without f32 matrix units (WGSL on the macOS CI GPU: 2.25 ->
-    // 1.82 s a pass); with them burn's matmuls use the units
-    const OPS: Ops = Ops { kernels: true, conv_im2col: false, gru_factored: true, own_gemm: false, gemm_linear: false, fused: false, implicit: false, coop: false };
 
     // burn convolves with implicit GEMM on matrix units only where the device has them for exactly the types of the
     // tensors (f32 inputs, or tf32 that burn stages f32 to, with an f32 accumulator); otherwise its 3x3 convolutions are
@@ -605,7 +608,7 @@ mod inference {
     pub fn forward_frames(f0: &Frame, f1: &Frame) -> Result<Vec<f32>, String> {
         run(|r, device| {
             let (a, b) = (features(r, f0, device), features(r, f1, device));
-            r.model.flow(&a, &b, false, &r.statics, None)
+            r.model.flow(&a, &b, false, &r.statics, &r.gru)
         })
     }
 
@@ -613,7 +616,7 @@ mod inference {
     pub fn forward_both(f0: &Frame, f1: &Frame) -> Result<Vec<f32>, String> {
         run(|r, device| {
             let (a, b) = (features(r, f0, device), features(r, f1, device));
-            r.model.flow(&a, &b, true, &r.statics, None)
+            r.model.flow(&a, &b, true, &r.statics, &r.gru)
         })
     }
 
@@ -621,17 +624,18 @@ mod inference {
     #[cfg(test)]
     pub fn forward(in0: Vec<f32>, in1: Vec<f32>) -> Result<Vec<f32>, String> {
         let shape = [1usize, 3, MODEL_H, MODEL_W];
-        run(|r, device| r.model.forward(Tensor::from_data(TensorData::new(in0, shape), device), Tensor::from_data(TensorData::new(in1, shape), device), &r.statics))
+        run(|r, device| r.model.forward(Tensor::from_data(TensorData::new(in0, shape), device), Tensor::from_data(TensorData::new(in1, shape), device), &r.statics, &r.gru))
     }
 
-    // One pass on a device of the caller's (tests: a GPU set up with smaller limits), weights loaded for it
+    // One pass on a device of the caller's (tests: a GPU set up with smaller limits), weights loaded for it, with burn's
+    // matmuls and convolutions (Ops::default)
     #[cfg(test)]
     pub fn forward_on(device: &Device, in0: Vec<f32>, in1: Vec<f32>) -> Result<Vec<f32>, String> {
         let model = load_model(device)?;
-        let mut statics = Statics::new(MODEL_H, MODEL_W, device);
-        statics.ops = OPS;
+        let statics = Statics::new(MODEL_H, MODEL_W, Ops::default(), device);
+        let gru = model.refine.factor_gru();
         let shape = [1usize, 3, MODEL_H, MODEL_W];
-        let flow = model.forward(Tensor::from_data(TensorData::new(in0, shape), device), Tensor::from_data(TensorData::new(in1, shape), device), &statics);
+        let flow = model.forward(Tensor::from_data(TensorData::new(in0, shape), device), Tensor::from_data(TensorData::new(in1, shape), device), &statics, &gru);
         flow.try_into_data().map_err(|e| short_error(&e.to_string()))?.try_into_vec::<f32>().map_err(|e| format!("output is not f32: {:?}", e))
     }
 

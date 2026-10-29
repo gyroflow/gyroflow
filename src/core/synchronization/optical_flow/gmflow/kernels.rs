@@ -3,8 +3,8 @@
 //
 // CubeCL kernels for the parts of gmflow (model.rs) that burn would otherwise run as many small kernels over large
 // intermediate tensors: the local correlations (the 9x9 window of matching at 1/4 and of each refinement step), the 3x3
-// propagation and the convex upsampling. Each computes in one launch, from the inputs, what model.rs computes with plain
-// tensor operations (kept there as the reference the tests compare these to).
+// propagation and the convex upsampling. Each computes in one launch, from the inputs, what unimatch computes with several
+// tensor operations (the model as a whole is compared with PyTorch: gmflow.rs, gmflow_matches_pytorch).
 
 use burn::backend::cubecl::dtype_to_storage_type;
 use burn::backend::fusion::custom::TensorSpec;
@@ -58,7 +58,7 @@ fn corr_taps_kernel<F: Float>(
     let mut acc = Array::<F>::new(m);
     #[unroll]
     for e in 0..m {
-        acc[e] = F::new(0.0_f32);
+        acc[e] = F::new(0.0);
     }
     if sy >= 0 && sy < h as i32 {
         let row = sy as usize * w;
@@ -77,7 +77,7 @@ fn corr_taps_kernel<F: Float>(
     #[unroll]
     for e in 0..m {
         let sx = x0 + e as i32;
-        let v = if sx >= 0 && sx < wi { acc[e] / scale } else { F::new(0.0_f32) };
+        let v = if sx >= 0 && sx < wi { acc[e] / scale } else { F::new(0.0) };
         taps[(b * m * m + ey * m + e) * hw + p] = v;
     }
 }
@@ -105,7 +105,7 @@ fn corr_weight_kernel<F: Float>(
     let fy = flow[b * 2 * hw + hw + p];
     let ax = fx - fx.floor();
     let ay = fy - fy.floor();
-    let one = F::new(1.0_f32);
+    let one = F::new(1.0);
     // Tap (i, j) of output (dy, dx) = (k / n, k % n) is integer point (dy + i, dx + j) of the (2r+2)^2 window
     let t = (b * m * m + (k / n) * m + k % n) * hw + p;
     let t00 = taps[t];
@@ -139,18 +139,18 @@ fn local_corr_softmax_kernel<F: Float>(
     let n = comptime!(2 * radius + 1);
     let r = comptime!(radius as i32);
     let scale = F::sqrt(F::cast_from(c_n as u32));
-    let mut m = F::new(-1e30_f32);
-    let mut s = F::new(0.0_f32);
-    let mut ax = F::new(0.0_f32);
-    let mut ay = F::new(0.0_f32);
+    let mut m = F::new(-1e30);
+    let mut s = F::new(0.0);
+    let mut ax = F::new(0.0);
+    let mut ay = F::new(0.0);
     for k in 0..n * n {
         let sx = x as i32 + (k % n) as i32 - r;
         let sy = y as i32 + (k / n) as i32 - r;
         let valid = sx >= 0 && sx < w as i32 && sy >= 0 && sy < h as i32;
-        let mut score = F::new(-1e9_f32);
+        let mut score = F::new(-1e9);
         if valid {
             let q = sy as usize * w + sx as usize;
-            let mut acc = F::new(0.0_f32);
+            let mut acc = F::new(0.0);
             for c in 0..c_n {
                 let base = (b * c_n + c) * hw;
                 acc += f0[base + p] * f1[base + q];
@@ -161,7 +161,7 @@ fn local_corr_softmax_kernel<F: Float>(
         let fsy = F::cast_from(sy);
         if score > m {
             let carry = F::exp(m - score);
-            s = s * carry + F::new(1.0_f32);
+            s = s * carry + F::new(1.0);
             ax = ax * carry + fsx;
             ay = ay * carry + fsy;
             m = score;
@@ -200,20 +200,20 @@ fn local_propagation_kernel<F: Float>(
     let n = comptime!(2 * radius + 1);
     let r = comptime!(radius as i32);
     let scale = F::sqrt(F::cast_from(c_n as u32));
-    let mut m = F::new(-1e30_f32);
-    let mut s = F::new(0.0_f32);
-    let mut ax = F::new(0.0_f32);
-    let mut ay = F::new(0.0_f32);
+    let mut m = F::new(-1e30);
+    let mut s = F::new(0.0);
+    let mut ax = F::new(0.0);
+    let mut ay = F::new(0.0);
     for j in 0..n * n {
         let sx = x as i32 + (j % n) as i32 - r;
         let sy = y as i32 + (j / n) as i32 - r;
         let valid = sx >= 0 && sx < w as i32 && sy >= 0 && sy < h as i32;
-        let mut score = F::new(0.0_f32);
-        let mut vx = F::new(0.0_f32);
-        let mut vy = F::new(0.0_f32);
+        let mut score = F::new(0.0);
+        let mut vx = F::new(0.0);
+        let mut vy = F::new(0.0);
         if valid {
             let o = sy as usize * w + sx as usize;
-            let mut acc = F::new(0.0_f32);
+            let mut acc = F::new(0.0);
             for c in 0..c_n {
                 let base = (b * c_n + c) * hw;
                 acc += q[base + p] * k[base + o];
@@ -224,7 +224,7 @@ fn local_propagation_kernel<F: Float>(
         }
         if score > m {
             let carry = F::exp(m - score);
-            s = s * carry + F::new(1.0_f32);
+            s = s * carry + F::new(1.0);
             ax = ax * carry + vx;
             ay = ay * carry + vy;
             m = score;
@@ -268,14 +268,14 @@ fn convex_upsample_kernel<F: Float>(
     let p = y * w + x;
     let ff = comptime!(factor * factor);
     let mbase = b * 9 * ff * hw + sub * hw + p;
-    let mut m = F::new(-1e30_f32);
+    let mut m = F::new(-1e30);
     for j in 0..9usize {
         m = F::max(m, mask[mbase + j * ff * hw]);
     }
     let mult = F::cast_from(factor as u32);
-    let mut s = F::new(0.0_f32);
-    let mut ax = F::new(0.0_f32);
-    let mut ay = F::new(0.0_f32);
+    let mut s = F::new(0.0);
+    let mut ax = F::new(0.0);
+    let mut ay = F::new(0.0);
     for j in 0..9usize {
         let e = F::exp(mask[mbase + j * ff * hw] - m);
         s += e;
@@ -383,10 +383,10 @@ fn flow_double_kernel<F: Float>(
     let y1 = if y0 + 1usize < h { y0 + 1usize } else { y0 };
     let x1 = if x0 + 1usize < w { x0 + 1usize } else { x0 };
     let base = bc * h * w;
-    let one = F::new(1.0_f32);
+    let one = F::new(1.0);
     let top = flow[base + y0 * w + x0] * (one - tx) + flow[base + y0 * w + x1] * tx;
     let bottom = flow[base + y1 * w + x0] * (one - tx) + flow[base + y1 * w + x1] * tx;
-    out[idx] = (top * (one - ty) + bottom * ty) * F::new(2.0_f32);
+    out[idx] = (top * (one - ty) + bottom * ty) * F::new(2.0);
 }
 
 fn doubled_shape(flow: &Shape) -> Shape {
@@ -444,7 +444,7 @@ fn im2col_kernel<F: Float>(
     let c = k / (kw * kh);
     let iy = ((l / ow) * stride + ky) as i32 - ph as i32;
     let ix = ((l % ow) * stride + kx) as i32 - pw as i32;
-    let mut v = F::new(0.0_f32);
+    let mut v = F::new(0.0);
     if iy >= 0 && iy < h as i32 && ix >= 0 && ix < w as i32 {
         v = x[((n * c_n + c) * h + iy as usize) * w + ix as usize];
     }
@@ -469,11 +469,12 @@ fn launch_im2col(x: CubeTensor, kh: usize, kw: usize, stride: usize, ph: usize, 
 
 // ---------------------------------------------------------------- matmul for GPUs without f32 matrix units
 
-/// The tiling of gemm_kernel (gemm_tiled; gemm itself uses gemm4 where it can): rows and columns of the block of the output a cube computes, its k step, and outputs per thread
-/// per side (block / per threads per side, outputs strided by that so that neighbouring threads read neighbouring
-/// values). Measured on the macOS CI GPU (conv / GRU / FFN shapes, GFLOPS), WGSL: 64 / 8 / 4 458 / 480 / 524, 64 / 16 / 4
-/// 257 / 273 / 296, 32 / 16 / 2 340 / 405 / 472, 32 / 32 / 2 286 / 298 / 328, 128 / 8 / 8 143 / 188 / 192 (64 accumulators a
-/// thread); MSL in the same order, 64 / 8 / 4 fastest at 578 / 576 / 633
+/// The tiling of window_attn_gemm_kernel: rows and columns of the block of the output a cube computes, its k step, and
+/// outputs per thread per side (block / per threads per side, outputs strided by that so that neighbouring threads read
+/// neighbouring values). Measured with a scalar matmul kernel of this tiling on the macOS CI GPU (conv / GRU / FFN shapes,
+/// GFLOPS), WGSL: 64 / 8 / 4 458 / 480 / 524, 64 / 16 / 4 257 / 273 / 296, 32 / 16 / 2 340 / 405 / 472, 32 / 32 / 2 286 /
+/// 298 / 328, 128 / 8 / 8 143 / 188 / 192 (64 accumulators a thread); MSL in the same order, 64 / 8 / 4 fastest at 578 /
+/// 576 / 633
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct GemmTile {
     pub block: usize,
@@ -489,135 +490,14 @@ impl GemmTile {
 
 pub const GEMM_DEFAULT: GemmTile = GemmTile { block: 64, kstep: 8, per: 4 };
 /// The tiling of gemm4 that gemm uses. Measured on the macOS CI GPU (conv / GRU / FFN shapes, GFLOPS), WGSL: 4x4 569 / 577 /
-/// 641 (gemm_kernel 64 / 8 / 4: 457 / 498 / 530), 8x4 321 / 405 / 449, 4x8 431 / 472 / 486, 8x8 244 / 329 / 332; MSL 4x4
-/// 599 / 611 / 671, 4x8 fastest at 653 / 662 / 681 (MSL keeps burn's matmuls on its matrix units)
+/// 641 (the scalar 64 / 8 / 4 tiling: 457 / 498 / 530), 8x4 321 / 405 / 449, 4x8 431 / 472 / 486, 8x8 244 / 329 / 332; MSL
+/// 4x4 599 / 611 / 671, 4x8 fastest at 653 / 662 / 681 (MSL keeps burn's matmuls on its matrix units)
 pub const GEMM4_DEFAULT: Gemm4Tile = Gemm4Tile { pm: 4, pn: 4, kstep: 8 };
-/// gemm4_kernel and conv_gemm4_kernel launched unchecked: cubecl then does not clamp each buffer index (both kernels test
-/// their own indices). On WGSL it also turns off naga's loop bounding (cubecl-wgpu sets force_loop_bounding only when
-/// checked), which the WGSL text does not show. Off; the tests set it to measure and check both
-pub static GEMM4_UNCHECKED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 /// Threads per side of every tiling used (the workgroup is GEMM_THREADS squared)
 pub const GEMM_THREADS: usize = 16;
 
-/// out[b] = a[b] @ b[b] (+ bias per row): a [Ba, M, K], b [Bb, K, N], out [B, M, N], a batch of 1 shared by all. Where the
-/// device has no f32 matrix units, burn's own matmuls use 4 x 4 register tiles indexed at run time (cubek-matmul
-/// instruction/register.rs, UNROLL = false), which reach 8-16% of the arithmetic peak on WGSL: here the register tile is
-/// indexed at compile time (unrolled), with the tiles of a and b staged in shared memory, a transposed (k-major) and its
-/// rows padded to 4 more than the block (every block used is a multiple of 32, so with 32 banks a row is 4 banks on from
-/// the one above: the 32 stores of a 32-wide warp, k = idx % kstep and row = idx / kstep, fall in 32 banks for a k step of
-/// exactly 8, in 16 pairs (2-way) for 16, 4-way for 32, and 2-way again for 4 or 2). Fixed order of the sums: the same result every run.
-#[cube(launch)]
-fn gemm_kernel<F: Float>(
-    a: &Tensor<F>,       // [Ba, M, K]
-    b: &Tensor<F>,       // [Bb, K, N]
-    bias: &Tensor<F>,    // [M], read only with has_bias
-    out: &mut Tensor<F>, // [B, M, N]
-    #[comptime] has_bias: bool,
-    #[comptime] block: usize,
-    #[comptime] kstep: usize,
-    #[comptime] per: usize,
-    #[define(F)] _dtype: ElemType,
-) {
-    let (m_n, k_n, n_n) = (a.shape(1), a.shape(2), b.shape(2));
-    let batch = CUBE_POS_Z as usize;
-    let a_off = if a.shape(0) == 1usize { 0usize } else { batch * m_n * k_n };
-    let b_off = if b.shape(0) == 1usize { 0usize } else { batch * k_n * n_n };
-    let bm = block;
-    let bk = kstep;
-    let th = comptime!(block / per);
-    let a_row = comptime!(block + 4);
-    let loads = comptime!(kstep * per * per / block);
-    let m0 = CUBE_POS_Y as usize * bm;
-    let n0 = CUBE_POS_X as usize * bm;
-    let tx = UNIT_POS_X as usize;
-    let ty = UNIT_POS_Y as usize;
-    let t = ty * th + tx;
-    let zero = F::new(0.0_f32);
-    let mut a_s = Shared::<[F]>::new_slice(comptime!(kstep * (block + 4)));
-    let mut b_s = Shared::<[F]>::new_slice(comptime!(kstep * block));
-    let mut acc = Array::<F>::new(comptime!(per * per));
-    let mut bv = Array::<F>::new(per);
-    #[unroll]
-    for i in 0..per * per {
-        acc[i] = zero;
-    }
-    let k_tiles = (k_n + bk - 1usize) / bk;
-    for kt in 0..k_tiles {
-        let k0 = kt * bk;
-        // Every thread loads the same number of values of each tile; out of range: 0
-        #[unroll]
-        for e in 0..loads {
-            let idx = t + e * th * th;
-            let am = idx / bk;
-            let ak = idx % bk;
-            let mut va = zero;
-            if m0 + am < m_n && k0 + ak < k_n {
-                va = a[a_off + (m0 + am) * k_n + k0 + ak];
-            }
-            a_s[ak * a_row + am] = va;
-            let bkk = idx / bm;
-            let bn = idx % bm;
-            let mut vb = zero;
-            if k0 + bkk < k_n && n0 + bn < n_n {
-                vb = b[b_off + (k0 + bkk) * n_n + n0 + bn];
-            }
-            b_s[bkk * bm + bn] = vb;
-        }
-        sync_cube();
-        #[unroll]
-        for kk in 0..bk {
-            #[unroll]
-            for j in 0..per {
-                bv[j] = b_s[kk * bm + tx + j * th];
-            }
-            #[unroll]
-            for i in 0..per {
-                let av = a_s[kk * a_row + ty + i * th];
-                #[unroll]
-                for j in 0..per {
-                    acc[i * per + j] += av * bv[j];
-                }
-            }
-        }
-        sync_cube();
-    }
-    #[unroll]
-    for i in 0..per {
-        let row = m0 + ty + i * th;
-        if row < m_n {
-            let add = if has_bias { bias[row] } else { zero };
-            #[unroll]
-            for j in 0..per {
-                let col = n0 + tx + j * th;
-                if col < n_n {
-                    out[(batch * m_n + row) * n_n + col] = acc[i * per + j] + add;
-                }
-            }
-        }
-    }
-}
-
 fn gemm_shape(a: &Shape, b: &Shape) -> Shape {
     Shape::new([a[0].max(b[0]), a[1], b[2]])
-}
-
-fn launch_gemm(a: CubeTensor, b: CubeTensor, bias: Option<CubeTensor>, tile: GemmTile) -> CubeTensor {
-    let (a, b) = (into_contiguous(a), into_contiguous(b));
-    let (sa, sb) = (a.meta.shape().clone(), b.meta.shape().clone());
-    assert!(sa[2] == sb[1], "gemm: inner dimensions {} and {}", sa[2], sb[1]);
-    assert!(sa[0] == sb[0] || sa[0] == 1 || sb[0] == 1, "gemm: batches {} and {}", sa[0], sb[0]);
-    let shape = gemm_shape(&sa, &sb);
-    let (batch, m, n) = (shape[0], shape[1], shape[2]);
-    let dtype = a.dtype;
-    let buffer = a.client.empty(shape.num_elements() * dtype.size());
-    let out = CubeTensor::new_contiguous(a.client.clone(), a.device.clone(), shape, buffer, dtype);
-    let count = cubecl::CubeCount::Static(n.div_ceil(tile.block) as u32, m.div_ceil(tile.block) as u32, batch as u32);
-    let dim = CubeDim::new_2d(tile.threads() as u32, tile.threads() as u32);
-    let has_bias = bias.is_some();
-    // Without a bias the kernel reads none: any tensor stands in
-    let bias = into_contiguous(bias.unwrap_or_else(|| a.clone()));
-    gemm_kernel::launch(&out.client, count, dim, a.into_tensor_arg(), b.into_tensor_arg(), bias.into_tensor_arg(), out.clone().into_tensor_arg(), has_bias, tile.block, tile.kstep, tile.per, dtype_to_storage_type(dtype));
-    out
 }
 
 /// The tiling of gemm4: rows and columns of outputs per thread (PN a multiple of 4) and the k step; the cube is
@@ -629,11 +509,18 @@ pub struct Gemm4Tile {
     pub kstep: usize,
 }
 
-/// gemm with each thread's outputs contiguous (PM rows x PN columns) and b and out read and written 4 columns at a time
-/// (Vector<F, 4>): per k step a thread reads PM values of a from shared memory (the same for the 16 threads of a row of
-/// the cube) and PN / 4 vectors of b, for PM * PN multiply-adds, where gemm_kernel reads 8 scalars for 16. Each output
-/// is summed over k in the same order as gemm_kernel. The columns of b and out [.., N] must be a multiple of 4
-#[cube(launch, launch_unchecked)]
+/// out[b] = a[b] @ b[b] (+ bias per row): a [Ba, M, K], b [Bb, K, N], out [B, M, N], a batch of 1 shared by all. Where the
+/// device has no f32 matrix units, burn's own matmuls use 4 x 4 register tiles indexed at run time (cubek-matmul
+/// instruction/register.rs, UNROLL = false), which reach 8-16% of the arithmetic peak on WGSL: here the register tile is
+/// indexed at compile time (unrolled), with the tiles of a and b staged in shared memory, a transposed (k-major) and its
+/// rows padded to 4 more than the block (every block used is a multiple of 32, so with 32 banks a row is 4 banks on from
+/// the one above: the 32 stores of a 32-wide warp, k = idx % kstep and row = idx / kstep, fall in 32 banks for a k step of
+/// exactly 8, in 16 pairs (2-way) for 16, 4-way for 32, and 2-way again for 4 or 2). Each thread's outputs are contiguous
+/// (PM rows x PN columns), b and out read and written 4 columns at a time (Vector<F, 4>): per k step a thread reads PM
+/// values of a from shared memory (the same for the 16 threads of a row of the cube) and PN / 4 vectors of b, for PM * PN
+/// multiply-adds. Fixed order of the sums: the same result every run. The columns of b and out [.., N] must be a multiple
+/// of 4
+#[cube(launch)]
 fn gemm4_kernel<F: Float, N: Size>(
     a: &Tensor<F>,                  // [Ba, M, K]
     b: &Tensor<Vector<F, N>>,       // [Bb, K, Nn]
@@ -662,7 +549,7 @@ fn gemm4_kernel<F: Float, N: Size>(
     let tx = UNIT_POS_X as usize;
     let ty = UNIT_POS_Y as usize;
     let t = ty * 16usize + tx;
-    let zero = F::new(0.0_f32);
+    let zero = F::new(0.0);
     let zv = Vector::<F, N>::broadcast(zero);
     let mut a_s = Shared::<[F]>::new_slice(comptime!(kstep * (16 * pm + 4)));
     let mut b_s = Shared::<[Vector<F, N>]>::new_slice(comptime!(kstep * 4 * pn));
@@ -755,13 +642,7 @@ fn launch_gemm4(a: CubeTensor, b: CubeTensor, bias: Option<CubeTensor>, tile: Ge
     let has_bias = bias.is_some();
     let bias = into_contiguous(bias.unwrap_or_else(|| a.clone()));
     let (a, b, bias, o) = (a.into_tensor_arg(), b.into_tensor_arg(), bias.into_tensor_arg(), out.clone().into_tensor_arg());
-    if GEMM4_UNCHECKED.load(std::sync::atomic::Ordering::Relaxed) {
-        // SAFETY: every read and write of gemm4_kernel is inside its own tests of rows, k and columns, the bias read only
-        // with has_bias, the batch offsets 0 for a batch of 1 (the asserts above)
-        unsafe { gemm4_kernel::launch_unchecked(&out.client, count, dim, 4usize, a, b, bias, o, has_bias, tile.pm, tile.pn, tile.kstep, dtype_to_storage_type(dtype)) };
-    } else {
-        gemm4_kernel::launch(&out.client, count, dim, 4usize, a, b, bias, o, has_bias, tile.pm, tile.pn, tile.kstep, dtype_to_storage_type(dtype));
-    }
+    gemm4_kernel::launch(&out.client, count, dim, 4usize, a, b, bias, o, has_bias, tile.pm, tile.pn, tile.kstep, dtype_to_storage_type(dtype));
     out
 }
 
@@ -773,7 +654,7 @@ fn launch_gemm4(a: CubeTensor, b: CubeTensor, bias: Option<CubeTensor>, tile: Ge
 /// of cubecl's metadata: naga binds that buffer in device memory where cubecl's own MSL takes it as constant, and with
 /// wgpu-hal patched to bind it as constant this kernel took 17.2 against 27.6 ms on WGSL (the 3x3 256->192 at 1/4, the
 /// macOS 15 CI GPU)
-#[cube(launch, launch_unchecked)]
+#[cube(launch)]
 fn conv_gemm4_kernel<F: Float, N: Size>(
     a: &Tensor<F>,                  // [1, Co, K]
     x: &Tensor<F>,                  // [N, C, H, W]
@@ -808,7 +689,7 @@ fn conv_gemm4_kernel<F: Float, N: Size>(
     let tx = UNIT_POS_X as usize;
     let ty = UNIT_POS_Y as usize;
     let t = ty * 16usize + tx;
-    let zero = F::new(0.0_f32);
+    let zero = F::new(0.0);
     let zv = Vector::<F, N>::broadcast(zero);
     let mut a_s = Shared::<[F]>::new_slice(comptime!(kstep * (16 * pm + 4)));
     let mut b_s = Shared::<[Vector<F, N>]>::new_slice(comptime!(kstep * 4 * pn));
@@ -931,13 +812,7 @@ fn launch_conv_gemm(w: CubeTensor, x: CubeTensor, kh: usize, kw: usize, stride: 
     let count = cubecl::CubeCount::Static((n / 4).div_ceil(4 * tile.pn) as u32, m.div_ceil(16 * tile.pm) as u32, batch as u32);
     let dim = CubeDim::new_2d(GEMM_THREADS as u32, GEMM_THREADS as u32);
     let (w, x, o) = (w.into_tensor_arg(), x.into_tensor_arg(), out.clone().into_tensor_arg());
-    if GEMM4_UNCHECKED.load(std::sync::atomic::Ordering::Relaxed) {
-        // SAFETY: the weight is read inside the tests of rows and k, x inside k < C KH KW and the map (padding read as
-        // zero), the output written inside the tests of rows and columns (the asserts above)
-        unsafe { conv_gemm4_kernel::launch_unchecked(&out.client, count, dim, 4usize, w, x, o, kh, kw, stride, ph, pw, tile.pm, tile.pn, tile.kstep, m, k, c, h, wd, n / 4, dtype_to_storage_type(dtype)) };
-    } else {
-        conv_gemm4_kernel::launch(&out.client, count, dim, 4usize, w, x, o, kh, kw, stride, ph, pw, tile.pm, tile.pn, tile.kstep, m, k, c, h, wd, n / 4, dtype_to_storage_type(dtype));
-    }
+    conv_gemm4_kernel::launch(&out.client, count, dim, 4usize, w, x, o, kh, kw, stride, ph, pw, tile.pm, tile.pn, tile.kstep, m, k, c, h, wd, n / 4, dtype_to_storage_type(dtype));
     out
 }
 
@@ -984,7 +859,8 @@ fn shift_label(wi: usize, p: usize, #[comptime] h: usize, #[comptime] w: usize, 
     shift_region((wi / splits) * wh + p / ww, h, wh) * 3usize + shift_region((wi % splits) * ww + p % ww, w, ww)
 }
 
-/// The two matmuls of split-window attention, one cube per block of one window (the tiling and inner loop of gemm_kernel):
+/// The two matmuls of split-window attention, one cube per block of one window (GemmTile, staged in shared memory as
+/// gemm4_kernel stages a, the register tile unrolled):
 /// with `scores`, q @ k^T / sqrt(C) of each window [Bw, L, L] (k read transposed: the channel index fastest, so that
 /// neighbouring threads read neighbouring values of one key; staged with rows padded by 4 as a is); otherwise
 /// probabilities [Bw, L, L] @ v of each window, written to the rows of the positions [B*H*W, C]
@@ -1018,7 +894,7 @@ fn window_attn_gemm_kernel<F: Float>(
     let tx = UNIT_POS_X as usize;
     let ty = UNIT_POS_Y as usize;
     let t = ty * th + tx;
-    let zero = F::new(0.0_f32);
+    let zero = F::new(0.0);
     let mut a_s = Shared::<[F]>::new_slice(comptime!(kstep * (block + 4)));
     let mut b_s = Shared::<[F]>::new_slice(comptime!(kstep * (block + 4)));
     let mut acc = Array::<F>::new(comptime!(per * per));
@@ -1121,8 +997,8 @@ fn window_softmax_kernel<F: Float>(
     let label_p = shift_label(wi, p, h, w, splits);
     let per_thread = (l_n + threads - 1usize) / threads;
     let mut red = Shared::<[F]>::new_slice(threads);
-    let minus = F::new(-100.0_f32);
-    let mut m = F::new(-1e30_f32);
+    let minus = F::new(-100.0);
+    let mut m = F::new(-1e30);
     for e in 0..per_thread {
         let j = t + e * threads;
         if j < l_n {
@@ -1147,7 +1023,7 @@ fn window_softmax_kernel<F: Float>(
     }
     let m = red[0];
     sync_cube();
-    let mut sum = F::new(0.0_f32);
+    let mut sum = F::new(0.0);
     for e in 0..per_thread {
         let j = t + e * threads;
         if j < l_n {
@@ -1245,7 +1121,7 @@ fn softmax_flow_kernel<F: Float>(
     let vbase = vb * l_n * 2usize;
     let per_thread = (l_n + threads - 1usize) / threads;
     let mut red = Shared::<[F]>::new_slice(comptime!(3 * SOFTMAX_FLOW_THREADS));
-    let mut m = F::new(-1e30_f32);
+    let mut m = F::new(-1e30);
     for e in 0..per_thread {
         let j = t + e * threads;
         if j < l_n {
@@ -1264,7 +1140,7 @@ fn softmax_flow_kernel<F: Float>(
     }
     let m = red[0];
     sync_cube();
-    let zero = F::new(0.0_f32);
+    let zero = F::new(0.0);
     let mut sum = zero;
     let mut a0 = zero;
     let mut a1 = zero;
@@ -1349,7 +1225,7 @@ fn layer_norm_kernel<F: Float>(
     let live = row < rows;
     let base = row * c;
     let per = comptime!(c.div_ceil(LN_LANES));
-    let zero = F::new(0.0_f32);
+    let zero = F::new(0.0);
     let c_f = F::cast_from(x.shape(1) as u32);
     let mut red = Shared::<[F]>::new_slice(comptime!(LN_THREADS));
     let mut v = Array::<F>::new(per);
@@ -1395,7 +1271,7 @@ fn layer_norm_kernel<F: Float>(
         sync_cube();
         half = half / 2usize;
     }
-    let inv = F::new(1.0_f32) / F::sqrt(red[seg] / c_f + F::new(comptime!(LN_EPS)));
+    let inv = F::new(1.0) / F::sqrt(red[seg] / c_f + F::new(comptime!(f64::from(LN_EPS))));
     #[unroll]
     for e in 0..per {
         let j = lane + e * comptime!(LN_LANES);
@@ -1462,7 +1338,7 @@ fn instance_norm_kernel<F: Float>(
     let live = row < rows;
     let base = row * s_n;
     let iters = (s_n + comptime!(IN_THREADS - 1)) / comptime!(IN_THREADS);
-    let zero = F::new(0.0_f32);
+    let zero = F::new(0.0);
     let s_f = F::cast_from(s_n as u32);
     let mut red = Shared::<[F]>::new_slice(comptime!(IN_THREADS));
     let mut sum = zero;
@@ -1502,7 +1378,7 @@ fn instance_norm_kernel<F: Float>(
         sync_cube();
         half = half / 2usize;
     }
-    let sd = F::sqrt(red[0] / s_f + F::new(comptime!(IN_EPS)));
+    let sd = F::sqrt(red[0] / s_f + F::new(comptime!(f64::from(IN_EPS))));
     for e in 0..iters {
         let j = t + e * comptime!(IN_THREADS);
         if live && j < s_n {
@@ -1597,8 +1473,8 @@ fn gru_gate_kernel<F: Float>(
     let p = idx % l_n;
     let ch = (idx / l_n) % c_n;
     let b = idx / (c_n * l_n);
-    let one = F::new(1.0_f32);
-    let zero = F::new(0.0_f32);
+    let one = F::new(1.0);
+    let zero = F::new(0.0);
     // z at its channel, r C channels further
     let gate = if update { ch } else { c_n + ch };
     let mut s = gate_term::<F>(t0, t1, t2, t3, b, zo0 + gate, p, l_n, 0usize) + gate_term::<F>(t0, t1, t2, t3, b, zo1 + gate, p, l_n, 1usize);
@@ -1679,7 +1555,7 @@ fn conv_small_kernel<F: Float>(
     let mut acc = Array::<F>::new(co);
     #[unroll]
     for o in 0..co {
-        acc[o] = F::new(0.0_f32);
+        acc[o] = F::new(0.0);
     }
     for c in 0..c_n {
         let base = (n * c_n + c) * h * w;
@@ -1762,9 +1638,9 @@ fn preprocess_kernel<I: Int, F: Float>(
     let oy = idx / ow;
     let h0 = frame.shape(0);
     let words = frame.shape(1);
-    let zero = F::new(0.0_f32);
-    let one = F::new(1.0_f32);
-    let half = F::new(0.5_f32);
+    let zero = F::new(0.0);
+    let one = F::new(1.0);
+    let half = F::new(0.5);
     let mut value = zero;
     if ox >= pad_x && ox < pad_x + new_w && oy >= pad_y && oy < pad_y + new_h {
         let x = ox - pad_x;
@@ -1814,7 +1690,7 @@ fn preprocess_kernel<I: Int, F: Float>(
         }
         // f32::round of the image crate rounds half away from zero; WGSL round() rounds half to even: t >= 0, so
         // floor(t + 0.5) is what the CPU does
-        value = (clamp(t, zero, F::new(255.0_f32)) + half).floor();
+        value = (clamp(t, zero, F::new(255.0)) + half).floor();
     }
     let plane = oh * ow;
     let v = value;
@@ -1866,8 +1742,6 @@ pub trait GmflowKernels: burn::backend::Backend {
     #[fusion(dtype = x, shape = im2col_shape(x, *kh, *kw, *stride, *ph, *pw))]
     fn im2col(x: FloatTensor<Self>, kh: usize, kw: usize, stride: usize, ph: usize, pw: usize) -> FloatTensor<Self>;
     #[fusion(dtype = a, shape = gemm_shape(a, b))]
-    fn gemm(a: FloatTensor<Self>, b: FloatTensor<Self>, bias: FloatTensor<Self>, has_bias: bool, block: usize, kstep: usize, per: usize) -> FloatTensor<Self>;
-    #[fusion(dtype = a, shape = gemm_shape(a, b))]
     fn gemm4(a: FloatTensor<Self>, b: FloatTensor<Self>, bias: FloatTensor<Self>, has_bias: bool, pm: usize, pn: usize, kstep: usize) -> FloatTensor<Self>;
     #[fusion(dtype = x, shape = conv_gemm_shape(w, x, *kh, *kw, *stride, *ph, *pw))]
     #[allow(clippy::too_many_arguments)]
@@ -1908,9 +1782,6 @@ impl GmflowKernels for CubeBackend {
     }
     fn im2col(x: FloatTensor<Self>, kh: usize, kw: usize, stride: usize, ph: usize, pw: usize) -> FloatTensor<Self> {
         launch_im2col(x, kh, kw, stride, ph, pw)
-    }
-    fn gemm(a: FloatTensor<Self>, b: FloatTensor<Self>, bias: FloatTensor<Self>, has_bias: bool, block: usize, kstep: usize, per: usize) -> FloatTensor<Self> {
-        launch_gemm(a, b, has_bias.then_some(bias), GemmTile { block, kstep, per })
     }
     fn gemm4(a: FloatTensor<Self>, b: FloatTensor<Self>, bias: FloatTensor<Self>, has_bias: bool, pm: usize, pn: usize, kstep: usize) -> FloatTensor<Self> {
         launch_gemm4(a, b, has_bias.then_some(bias), Gemm4Tile { pm, pn, kstep })
@@ -1976,42 +1847,21 @@ pub fn im2col(x: BurnTensor<4>, kh: usize, kw: usize, stride: usize, ph: usize, 
 }
 
 /// a [Ba, M, K] @ b [Bb, K, N] (+ bias [M] per row) -> [max(Ba, Bb), M, N], a batch of 1 shared by all: the matmul for
-/// devices without f32 matrix units. gemm4_kernel with GEMM4_DEFAULT where N is a multiple of 4, gemm_kernel otherwise
+/// devices without f32 matrix units, gemm4_kernel with GEMM4_DEFAULT. N must be a multiple of 4, as every N of the model
+/// is at the sizes Statics allows (multiples of 32)
 pub fn gemm(a: BurnTensor<3>, b: BurnTensor<3>, bias: Option<BurnTensor<1>>) -> BurnTensor<3> {
-    gemm4_tiled(a, b, bias, GEMM4_DEFAULT)
-}
-
-/// gemm_kernel with a given tiling (the tests measure several)
-pub fn gemm_tiled(a: BurnTensor<3>, b: BurnTensor<3>, bias: Option<BurnTensor<1>>, tile: GemmTile) -> BurnTensor<3> {
-    let th = tile.threads();
-    assert!(tile.block % tile.per == 0 && th == GEMM_THREADS && (tile.block * tile.kstep) % (th * th) == 0, "gemm: tiling {tile:?}");
-    assert!(tile.kstep * (2 * tile.block + 4) * 4 <= 16 << 10, "gemm: tiling {tile:?} needs more than 16 KiB of shared memory");
-    let has_bias = bias.is_some();
-    let bias = match bias { Some(v) => v.into_dispatch(), None => a.clone().into_dispatch() };
-    BurnTensor::from_dispatch(Dispatch::gemm(a.into_dispatch(), b.into_dispatch(), bias, has_bias, tile.block, tile.kstep, tile.per))
-}
-
-/// gemm by gemm4_kernel with a given tiling; columns not a multiple of 4: gemm (the tests measure and check several)
-pub fn gemm4_tiled(a: BurnTensor<3>, b: BurnTensor<3>, bias: Option<BurnTensor<1>>, tile: Gemm4Tile) -> BurnTensor<3> {
+    let tile = GEMM4_DEFAULT;
     assert!(tile.pn % 4 == 0 && (16 * tile.pm * tile.kstep) % 256 == 0, "gemm4: tiling {tile:?}");
     // f32 (the model's type)
     assert!(tile.kstep * (16 * tile.pm + 4 + 16 * tile.pn) * 4 <= 16 << 10, "gemm4: tiling {tile:?} needs more than 16 KiB of shared memory");
-    if b.dims()[2] % 4 != 0 {
-        return gemm_tiled(a, b, bias, GEMM_DEFAULT);
-    }
     let has_bias = bias.is_some();
     let bias = match bias { Some(v) => v.into_dispatch(), None => a.clone().into_dispatch() };
     BurnTensor::from_dispatch(Dispatch::gemm4(a.into_dispatch(), b.into_dispatch(), bias, has_bias, tile.pm, tile.pn, tile.kstep))
 }
 
 /// w [1, Co, C*KH*KW] @ the KH x KW columns of x [N, C, H, W] (stride, symmetric zero padding) -> [N, Co, OH*OW], the
-/// columns gathered in the kernel (conv_gemm4_kernel); OH*OW not a multiple of 4: im2col + gemm
+/// columns gathered in the kernel (conv_gemm4_kernel); OH*OW must be a multiple of 4, as gemm's N
 pub fn conv_gemm(w: BurnTensor<3>, x: BurnTensor<4>, kh: usize, kw: usize, stride: usize, ph: usize, pw: usize) -> BurnTensor<3> {
-    let [_, _, h, ww] = x.dims();
-    let (oh, ow) = ((h + 2 * ph - kh) / stride + 1, (ww + 2 * pw - kw) / stride + 1);
-    if (oh * ow) % 4 != 0 {
-        return gemm(w, im2col(x, kh, kw, stride, ph, pw), None);
-    }
     BurnTensor::from_dispatch(Dispatch::conv_gemm(w.into_dispatch(), x.into_dispatch(), kh, kw, stride, ph, pw))
 }
 

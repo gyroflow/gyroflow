@@ -85,10 +85,10 @@ fn draw_pixel(in_pix: vec4<f32>, x: u32, y: u32, isInput: bool) -> vec4<f32> {
         let color = (data & 0xF8u) >> 3u;
         let alpha = (data & 0x06u) >> 1u;
         let stage = data & 1u;
-        if (((stage == 0u && isInput) || (stage == 1u && !isInput)) && color < 9u) {
+        if (((stage == 0u && isInput) || (stage == 1u && !isInput)) && color < 11u) {
             let color_offs = 448u + (color * 4u);
             let colorf = vec4<f32>(coeffs[color_offs], coeffs[color_offs + 1u], coeffs[color_offs + 2u], coeffs[color_offs + 3u]) * params.max_pixel_value;
-            let alphaf = coeffs[484u + alpha];
+            let alphaf = coeffs[492u + alpha];
             pix = colorf * alphaf + pix * (1.0 - alphaf);
             pix.w = colorf.w;
         }

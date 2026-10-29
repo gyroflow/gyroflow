@@ -82,7 +82,7 @@ struct Opts {
     #[argh(switch)]
     optical_per_frame: bool,
 
-    /// how the optical analysis follows the points: "klt" (default, corners), "dis" (dense optical flow, for low texture like sky or water; slower) or "gmflow" (AI dense optical flow, in builds with ai-optical-flow; runs on the GPU: Vulkan, or Metal on Apple systems) (implies --optical-correction)
+    /// how the optical analysis follows the points: "klt" (default, corners), "dis" (dense optical flow, for low texture like sky or water; slower) or "gmflow" (AI dense optical flow; much slower) (implies --optical-correction)
     #[argh(option)]
     optical_tracking: Option<String>,
 
@@ -289,7 +289,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             }
             if let Some(method) = &opts.optical_tracking {
                 let Some(method) = gyroflow_core::gyro_source::TrackingMethod::from_name(method) else {
-                    let expected = if gyroflow_core::gyro_source::TrackingMethod::Gmflow.available() { "\"klt\", \"dis\" or \"gmflow\"" } else { "\"klt\" or \"dis\" (\"gmflow\" needs a build with ai-optical-flow)" };
+                    let expected = if gyroflow_core::gyro_source::TrackingMethod::Gmflow.available() { "\"klt\", \"dis\" or \"gmflow\"" } else { "\"klt\" or \"dis\" (\"gmflow\" isn't available in this build)" };
                     log::error!("Invalid --optical-tracking value {}. Expected {}.", method, expected);
                     std::process::exit(2);
                 };

@@ -32,7 +32,7 @@ use burn::nn::conv::{ Conv2d, Conv2dConfig };
 use burn::nn::{ InstanceNorm, InstanceNormConfig, LayerNorm, LayerNormConfig, Linear, LinearConfig, PaddingConfig2d };
 use burn::tensor::activation::{ gelu, relu, sigmoid, softmax, tanh };
 use burn::tensor::module::conv2d;
-use burn::tensor::ops::{ ConvOptions, GridSampleOptions, GridSamplePaddingMode, InterpolateMode, PadMode };
+use burn::tensor::ops::{ ConvOptions, GridSampleOptions, GridSamplePaddingMode, InterpolateMode };
 use burn::tensor::{ Device, Tensor, TensorData };
 
 use super::{ coop, kernels };
@@ -44,14 +44,14 @@ const UPSAMPLE: usize = 4;
 /// The largest buffer the im2col convolutions make: Vulkan guarantees 128 MiB for one storage buffer
 const IM2COL_MAX_BYTES: usize = 120 << 20;
 
-/// Which implementation runs the operations that have more than one: the CubeCL kernels of kernels.rs or the plain tensor
-/// operations they replace (the reference), and convolutions as im2col + matmul or as burn convolutions
-#[derive(Clone, Copy, Debug)]
+/// Which implementation runs the operations that have more than one, chosen per GPU (gmflow.rs, runner_on). The local
+/// correlations, the local propagation, the flow doubling and the convex upsampling are always the kernels of kernels.rs,
+/// the GRU always factored (GruFactored). The default, all off: burn's matmuls and convolutions, for devices with f32
+/// matrix units
+#[derive(Clone, Copy, Debug, Default)]
 pub struct Ops {
-    pub kernels: bool,
+    /// Convolutions as im2col + matmul instead of burn's
     pub conv_im2col: bool,
-    /// The GRU of the refinement with its convolutions split by input (GruFactored); needs the im2col kernel
-    pub gru_factored: bool,
     /// The matmuls of the im2col convolutions and of the factored GRU by kernels::gemm instead of burn's (for devices
     /// without f32 matrix units)
     pub own_gemm: bool,
@@ -65,7 +65,7 @@ pub struct Ops {
     /// The im2col convolutions with own_gemm (Co >= 32) and the GRU's by kernels::conv_gemm: the columns gathered in the
     /// matmul instead of made in memory
     pub implicit: bool,
-    /// Every matmul and convolution of the model (the 1x1 ones included; not the attention's, nor the flow head's last
+    /// Every matmul and convolution of the model (the 1x1 ones and the attention's included; not the flow head's last
     /// with `fused`) on the matrix units through WGSL cooperative matrices (coop.rs), before all the flags above: for
     /// devices whose kernels are WGSL and which offer them (Apple GPUs through Metal)
     pub coop: bool,
@@ -93,8 +93,9 @@ impl Ops {
     }
 }
 
-/// A convolution of this model: 1x1 ones and the plain path through burn, the others as im2col + matmul if asked; all
-/// of them (but the flow head's last with `fused`) by coop.rs with `coop`
+/// A convolution of this model: the flow head's last (2 outputs) by kernels::conv_small with `fused`, all the others by
+/// coop.rs with `coop`; otherwise with own_gemm the 1x1 ones by kernels::conv2d_implicit, and with conv_im2col the others
+/// by kernels::conv2d_implicit (`implicit` and own_gemm, 32 outputs or more) or as im2col + matmul; burn's otherwise
 fn conv_fwd(conv: &Conv2d, x: Tensor<4>, ops: Ops) -> Tensor<4> {
     let [kh, kw] = conv.kernel_size;
     // Few output channels (the flow head's last, 256 -> 2): a direct kernel rather than columns 9 times the input for a
@@ -504,12 +505,13 @@ pub struct Windows {
     pub splits: usize,
     /// [1, C, H, W]
     pub position: Tensor<4>,
-    /// [K*K, L, L], 0 or -100, L = (H/K)*(W/K)
-    pub shift_mask: Tensor<3>,
+    /// [K*K, L, L], 0 or -100, L = (H/K)*(W/K): for the attention without `fused` only (the fused kernels find the
+    /// regions as they go), so only made for it: 8.3 MB at each of the two sizes
+    pub shift_mask: Option<Tensor<3>>,
 }
 
 impl Windows {
-    pub fn new(h: usize, w: usize, splits: usize, device: &Device) -> Self {
+    pub fn new(h: usize, w: usize, splits: usize, with_mask: bool, device: &Device) -> Self {
         assert!(h % splits == 0 && w % splits == 0, "{h}x{w} does not split into {splits}x{splits} windows");
         let (wh, ww) = (h / splits, w / splits);
         // PositionEmbeddingSine(num_pos_feats = 64, temperature 10000, normalize, scale 2 pi) of one window, in float32 as
@@ -536,25 +538,27 @@ impl Windows {
 
         // generate_shift_window_attn_mask: regions of the map (3 x 3, split at the shifted window borders), windows of the
         // map, -100 between two positions of a window that are from different regions
-        let (sh, sw) = (wh / 2, ww / 2);
-        let region = |v: usize, n: usize, win: usize, shift: usize| if v < n - win { 0 } else if v < n - shift { 1 } else { 2 };
-        let l = wh * ww;
-        let mut mask = vec![0f32; splits * splits * l * l];
-        for wy in 0..splits {
-            for wx in 0..splits {
-                let labels: Vec<usize> = (0..l).map(|p| {
-                    let (y, x) = (wy * wh + p / ww, wx * ww + p % ww);
-                    region(y, h, wh, sh) * 3 + region(x, w, ww, sw)
-                }).collect();
-                let base = (wy * splits + wx) * l * l;
-                for i in 0..l {
-                    for j in 0..l {
-                        if labels[i] != labels[j] { mask[base + i * l + j] = -100.0; }
+        let shift_mask = with_mask.then(|| {
+            let (sh, sw) = (wh / 2, ww / 2);
+            let region = |v: usize, n: usize, win: usize, shift: usize| if v < n - win { 0 } else if v < n - shift { 1 } else { 2 };
+            let l = wh * ww;
+            let mut mask = vec![0f32; splits * splits * l * l];
+            for wy in 0..splits {
+                for wx in 0..splits {
+                    let labels: Vec<usize> = (0..l).map(|p| {
+                        let (y, x) = (wy * wh + p / ww, wx * ww + p % ww);
+                        region(y, h, wh, sh) * 3 + region(x, w, ww, sw)
+                    }).collect();
+                    let base = (wy * splits + wx) * l * l;
+                    for i in 0..l {
+                        for j in 0..l {
+                            if labels[i] != labels[j] { mask[base + i * l + j] = -100.0; }
+                        }
                     }
                 }
             }
-        }
-        let shift_mask = Tensor::<3>::from_data(TensorData::new(mask, [splits * splits, l, l]), device);
+            Tensor::<3>::from_data(TensorData::new(mask, [splits * splits, l, l]), device)
+        });
         Self { h, w, splits, position, shift_mask }
     }
 }
@@ -595,7 +599,8 @@ pub fn split_window_attention(q: Tensor<3>, k: Tensor<3>, v: Tensor<3>, win: &Wi
     if with_shift {
         let n = splits * splits;
         let l = scores.dims()[1];
-        scores = (scores.reshape([b, n, l, l]) + win.shift_mask.clone().unsqueeze_dim::<4>(0)).reshape([b * n, l, l]);
+        let mask = win.shift_mask.clone().expect("gmflow: the shift mask, made for Ops without `fused` (Statics::new)");
+        scores = (scores.reshape([b, n, l, l]) + mask.unsqueeze_dim::<4>(0)).reshape([b * n, l, l]);
     }
     let out = softmax(scores, 2).matmul(v);
     let out = from_windows(out, b, h, w, splits);
@@ -617,12 +622,6 @@ fn coords(h: usize, w: usize, device: &Device) -> Tensor<4> {
     Tensor::from_data(TensorData::new(v, [1, 2, h, w]), device)
 }
 
-/// The window offsets of radius r in the order of unimatch (generate_window_grid, reshaped): k = (dy + r) * (2r + 1) + (dx + r)
-fn offsets(r: usize) -> Vec<(i32, i32)> {
-    let n = 2 * r as i32 + 1;
-    (0..n * n).map(|k| (k % n - r as i32, k / n - r as i32)).collect()
-}
-
 /// global_correlation_softmax: [B, C, H, W] x 2 -> flow [B, 2, H, W]; bidirectional: [2B, 2, H, W], the flow 1 -> 0 from
 /// the transposed correlation. With `fused` the softmax and its matmul with the grid in one launch (kernels::softmax_flow)
 pub fn global_correlation_softmax(f0: Tensor<4>, f1: Tensor<4>, bidirectional: bool, gemm: Gemm, fused: bool) -> Tensor<4> {
@@ -637,47 +636,6 @@ pub fn global_correlation_softmax(f0: Tensor<4>, f1: Tensor<4>, bidirectional: b
     let correspondence = if fused { kernels::softmax_flow(corr, grid_t) } else { softmax(corr, 2).matmul(grid_t.repeat_dim(0, b)) }; // [B, HW, 2]
     let correspondence = correspondence.swap_dims(1, 2).reshape([b, 2, h, w]);
     correspondence - grid
-}
-
-/// The (2r+1)^2 copies of x moved by the window offsets (the value at p + offset), zero outside: one [B, C, H, W] each
-pub fn shifted(x: Tensor<4>, r: usize) -> Vec<Tensor<4>> {
-    let [_, _, h, w] = x.dims();
-    let padded = x.pad([(r, r), (r, r)], PadMode::Constant(0.0));
-    offsets(r).into_iter().map(|(dx, dy)| {
-        let (y0, x0) = ((r as i32 + dy) as usize, (r as i32 + dx) as usize);
-        padded.clone().narrow(2, y0, h).narrow(3, x0, w)
-    }).collect()
-}
-
-/// local_correlation_softmax (integer offsets, radius r): flow [B, 2, H, W]. Out-of-image offsets get -1e9 before the
-/// softmax, as in unimatch
-pub fn local_correlation_softmax(f0: Tensor<4>, f1: Tensor<4>, r: usize) -> Tensor<4> {
-    let [_, c, h, w] = f0.dims();
-    let device = f0.device();
-    let scale = 1.0 / (c as f32).sqrt();
-    let corr: Vec<Tensor<4>> = shifted(f1, r).into_iter().map(|s| (f0.clone() * s).sum_dim(1).mul_scalar(scale)).collect();
-    let corr = Tensor::cat(corr, 1); // [B, (2r+1)^2, H, W]
-    let n = (2 * r + 1) * (2 * r + 1);
-    let mut invalid = vec![0f32; n * h * w];
-    let mut sx_all = vec![0f32; n * h * w];
-    let mut sy_all = vec![0f32; n * h * w];
-    for (k, (dx, dy)) in offsets(r).into_iter().enumerate() {
-        for y in 0..h {
-            for x in 0..w {
-                let (sx, sy) = (x as i32 + dx, y as i32 + dy);
-                let i = k * h * w + y * w + x;
-                if sx < 0 || sy < 0 || sx >= w as i32 || sy >= h as i32 { invalid[i] = -1e9; }
-                sx_all[i] = sx as f32;
-                sy_all[i] = sy as f32;
-            }
-        }
-    }
-    let t = |v: Vec<f32>| Tensor::<4>::from_data(TensorData::new(v, [1, n, h, w]), &device);
-    let prob = softmax(corr + t(invalid), 1);
-    // The sample coordinates weighted by the probabilities, then the position subtracted (as unimatch: not the offsets)
-    let cx = (prob.clone() * t(sx_all)).sum_dim(1);
-    let cy = (prob * t(sy_all)).sum_dim(1);
-    Tensor::cat(vec![cx, cy], 1) - coords(h, w, &device)
 }
 
 /// Bilinear samples of x at pixel positions [B, 2, H, W] (x then y), zeros outside, as F.grid_sample with align_corners
@@ -701,20 +659,6 @@ pub fn flow_warp(feature: Tensor<4>, flow: Tensor<4>) -> Tensor<4> {
     let [_, _, h, w] = feature.dims();
     let positions = coords(h, w, &feature.device()) + flow;
     sample(feature, positions)
-}
-
-/// local_correlation_with_flow, radius r: [B, (2r+1)^2, H, W]
-pub fn local_correlation_with_flow(f0: Tensor<4>, f1: Tensor<4>, flow: Tensor<4>, r: usize) -> Tensor<4> {
-    let [_, c, h, w] = f0.dims();
-    let device = f0.device();
-    let scale = 1.0 / (c as f32).sqrt();
-    let base = coords(h, w, &device) + flow;
-    let corr: Vec<Tensor<4>> = offsets(r).into_iter().map(|(dx, dy)| {
-        let offset = Tensor::<4>::from_data(TensorData::new(vec![dx as f32, dy as f32], [1, 2, 1, 1]), &device);
-        let s = sample(f1.clone(), base.clone() + offset);
-        (f0.clone() * s).sum_dim(1).mul_scalar(scale)
-    }).collect();
-    Tensor::cat(corr, 1)
 }
 
 #[derive(Module, Debug)]
@@ -744,36 +688,16 @@ impl SelfAttnPropagation {
         out.swap_dims(1, 2).reshape([b, 2, h, w])
     }
 
-    /// Local window of radius r. The window comes from F.unfold with zero padding: a neighbour outside the map has a key of
-    /// zeros (score 0, still in the softmax) and a flow of zeros
-    fn local(&self, feature0: Tensor<4>, flow: Tensor<4>, r: usize, with_kernels: bool, gemm: Gemm) -> Tensor<4> {
+    /// Local window of radius kernels::PROP_RADIUS (kernels::local_propagation). The window comes from F.unfold with zero
+    /// padding: a neighbour outside the map has a key of zeros (score 0, still in the softmax) and a flow of zeros
+    fn local(&self, feature0: Tensor<4>, flow: Tensor<4>, gemm: Gemm) -> Tensor<4> {
         let [b, c, h, w] = feature0.dims();
         let g = gemm;
         let tokens = feature0.reshape([b, c, h * w]).swap_dims(1, 2);
         let as_map = |t: Tensor<3>| t.swap_dims(1, 2).reshape([b, c, h, w]);
         let q = as_map(lin(&self.q_proj, tokens.clone(), g));
         let k = as_map(lin(&self.k_proj, tokens, g));
-        if with_kernels {
-            assert_eq!(r, kernels::PROP_RADIUS);
-            return kernels::local_propagation(q, k, flow);
-        }
-        local_propagation(q, k, flow, r)
-    }
-}
-
-/// The plain form of the local window propagation, q and k projected: [B, C, H, W]
-pub fn local_propagation(q: Tensor<4>, k: Tensor<4>, flow: Tensor<4>, r: usize) -> Tensor<4> {
-    {
-        let c = q.dims()[1];
-        let scale = 1.0 / (c as f32).sqrt();
-        let scores: Vec<Tensor<4>> = shifted(k, r).into_iter().map(|s| (q.clone() * s).sum_dim(1).mul_scalar(scale)).collect();
-        let prob = softmax(Tensor::cat(scores, 1), 1); // [B, (2r+1)^2, H, W]
-        let mut out: Option<Tensor<4>> = None;
-        for (i, f) in shifted(flow, r).into_iter().enumerate() {
-            let term = prob.clone().narrow(1, i, 1) * f;
-            out = Some(match out { Some(o) => o + term, None => term });
-        }
-        out.expect("a window of at least one position")
+        kernels::local_propagation(q, k, flow)
     }
 }
 
@@ -859,27 +783,14 @@ impl BasicUpdateBlock {
         (out, flow)
     }
 
-    fn gru(&self, h: Tensor<4>, x: Tensor<4>, ops: Ops) -> Tensor<4> {
-        let g = &self.gru;
-        let half = |h: Tensor<4>, cz: &Conv2d, cr: &Conv2d, cq: &Conv2d| {
-            let hx = Tensor::cat(vec![h.clone(), x.clone()], 1);
-            let z = sigmoid(conv_fwd(cz, hx.clone(), ops));
-            let r = sigmoid(conv_fwd(cr, hx, ops));
-            let q = tanh(conv_fwd(cq, Tensor::cat(vec![r * h.clone(), x.clone()], 1), ops));
-            // (1 - z) * h + z * q, in the same order of operations as unimatch
-            (z.clone().neg().add_scalar(1.0)) * h + z * q
-        };
-        let h = half(h, &g.convz1, &g.convr1, &g.convq1);
-        half(h, &g.convz2, &g.convr2, &g.convq2)
-    }
-
-    /// One refinement step: the new hidden state and the flow update
-    fn forward(&self, net: Tensor<4>, inp: Tensor<4>, corr: Tensor<4>, flow: Tensor<4>, ops: Ops, factored: Option<(&GruFactored, &GruConstants)>) -> (Tensor<4>, Tensor<4>) {
+    /// One refinement step: the new hidden state and the flow update. The GRU's input [inp, motion] is in `gru` and `c`:
+    /// its part from inp is the same in every step (GruFactored::constants)
+    fn forward(&self, net: Tensor<4>, corr: Tensor<4>, flow: Tensor<4>, ops: Ops, gru: &GruFactored, c: &GruConstants) -> (Tensor<4>, Tensor<4>) {
         let (out, flow) = self.motion(flow, corr, ops);
-        let net = match factored {
-            Some((g, c)) if ops.coop && ops.fused => g.step(c, net, out, Some(flow), ops.conv_gemm(), ops.implicit, ops.fused),
-            Some((g, c)) => g.step(c, net, Tensor::cat(vec![out, flow], 1), None, ops.conv_gemm(), ops.implicit, ops.fused),
-            None => self.gru(net, Tensor::cat(vec![inp, out, flow], 1), ops),
+        let net = if ops.coop && ops.fused {
+            gru.step(c, net, out, Some(flow), ops.conv_gemm(), ops.implicit, ops.fused)
+        } else {
+            gru.step(c, net, Tensor::cat(vec![out, flow], 1), None, ops.conv_gemm(), ops.implicit, ops.fused)
         };
         let delta = conv_fwd(&self.flow_head.conv2, conv_fwd_relu(&self.flow_head.conv1, net.clone(), ops), ops);
         (net, delta)
@@ -890,10 +801,11 @@ impl BasicUpdateBlock {
     }
 }
 
-/// The convolutions of the GRU split by input channels, for `BasicUpdateBlock::forward_factored`. A GRU convolution reads
+/// The convolutions of the GRU split by input channels, for `BasicUpdateBlock::forward`. A GRU convolution reads
 /// [h, inp, motion] (128 channels each; q reads [r * h, inp, motion]): a convolution is linear in its input, so it is the
 /// sum of the convolutions of the three parts. Matrices [Cout, 128 * KH * KW] in im2col order, several outputs stacked
-/// where they read the same columns.
+/// where they read the same columns. Made once per loaded model (BasicUpdateBlock::factor_gru, gmflow.rs keeps it with
+/// the model), not at every pass.
 pub struct GruFactored {
     zr1_h: Tensor<3>, // [1, 256, 640]: z1 and r1 from h (1x5)
     zr1_i: Tensor<3>, // z1 and r1 from inp
@@ -1015,7 +927,7 @@ impl GruFactored {
         }
     }
 
-    /// SepConvGRU(h0, [inp, motion]), the same as `BasicUpdateBlock::gru` up to the order of the sums; with `tail` the
+    /// SepConvGRU(h0, [inp, motion]) of unimatch, up to the order of the sums; with `tail` the
     /// motion is cat([motion, tail], 1), its convolutions gathering from both with coop (coop::conv_gemm_cat)
     #[allow(clippy::too_many_arguments)]
     pub fn step(&self, c: &GruConstants, h0: Tensor<4>, motion: Tensor<4>, tail: Option<Tensor<4>>, gemm: Gemm, implicit: bool, fused: bool) -> Tensor<4> {
@@ -1063,49 +975,6 @@ impl GruFactored {
     }
 }
 
-/// The flow at the next finer level with plain operations (kernels::flow_double): 2 * bilinear(flow), corners aligned, as
-/// one matmul per axis with the interpolation weights (exact; not burn's interpolation, see flow_double_kernel).
-/// flow [B, C, H, W] -> [B, C, 2H, 2W]
-pub fn flow_double(flow: Tensor<4>) -> Tensor<4> {
-    let [b, c, h, w] = flow.dims();
-    let device = flow.device();
-    // [n, 2n]: input index -> output index weights, source position o * (n - 1) / (2n - 1)
-    let weights = |n: usize, scale: f32| {
-        let on = 2 * n;
-        let mut m = vec![0f32; n * on];
-        for o in 0..on {
-            let num = o * (n - 1);
-            let i0 = num / (on - 1);
-            let t = (num - i0 * (on - 1)) as f32 / (on - 1) as f32;
-            m[i0 * on + o] += scale * (1.0 - t);
-            if t > 0.0 { m[(i0 + 1) * on + o] += scale * t; }
-        }
-        Tensor::<2>::from_data(TensorData::new(m, [n, on]), &device)
-    };
-    let rows = flow.reshape([b * c * h, w]).matmul(weights(w, 2.0)).reshape([b * c, h, 2 * w]);
-    let cols = rows.swap_dims(1, 2).reshape([b * c * 2 * w, h]).matmul(weights(h, 1.0)).reshape([b * c, 2 * w, 2 * h]);
-    cols.swap_dims(1, 2).reshape([b, c, 2 * h, 2 * w])
-}
-
-/// upsample_flow_with_mask (convex upsampling, factor 4): flow [B, 2, H, W], mask [B, 9*16, H, W] -> [B, 2, 4H, 4W]
-pub fn convex_upsample(flow: Tensor<4>, mask: Tensor<4>) -> Tensor<4> {
-    let [b, _, h, w] = flow.dims();
-    let k = UPSAMPLE;
-    // mask.view(b, 1, 9, k, k, h, w), softmax over the 9
-    let mask = softmax(mask.reshape([b, 9, k * k, h * w]), 1);
-    // F.unfold(k * flow, 3x3, padding 1): per channel, the 3x3 window row-major, zeros outside
-    let mut up: Option<Tensor<4>> = None; // [B, 2, k*k, h*w]
-    for (i, nb) in shifted(flow.mul_scalar(k as f32), 1).into_iter().enumerate() {
-        let term = mask.clone().narrow(1, i, 1) * nb.reshape([b, 2, 1, h * w]);
-        up = Some(match up { Some(u) => u + term, None => term });
-    }
-    // [B, 2, ky, kx, h, w] -> [B, 2, h, ky, w, kx]
-    up.expect("nine neighbours")
-        .reshape([b * 2, k, k, h, w])
-        .permute([0, 3, 1, 4, 2])
-        .reshape([b, 2, h * k, w * k])
-}
-
 // ---------------------------------------------------------------- The model
 
 #[derive(Module, Debug)]
@@ -1128,41 +997,16 @@ pub struct Statics {
 }
 
 impl Statics {
-    pub fn new(h: usize, w: usize, device: &Device) -> Self {
+    pub fn new(h: usize, w: usize, ops: Ops, device: &Device) -> Self {
         assert!(h % 32 == 0 && w % 32 == 0, "gmflow needs a size divisible by 32 (the 8 window splits at 1/4), got {w}x{h}");
         let c3 = |v: [f32; 3]| Tensor::<4>::from_data(TensorData::new(v.to_vec(), [1, 3, 1, 1]), device);
         Self {
-            eighth: Windows::new(h / 8, w / 8, 2, device),
-            quarter: Windows::new(h / 4, w / 4, 8, device),
+            eighth: Windows::new(h / 8, w / 8, 2, !ops.fused, device),
+            quarter: Windows::new(h / 4, w / 4, 8, !ops.fused, device),
             mean: c3([0.485, 0.456, 0.406]),
             std: c3([0.229, 0.224, 0.225]),
-            ops: Ops { kernels: true, conv_im2col: false, gru_factored: false, own_gemm: false, gemm_linear: false, fused: false, implicit: false, coop: false },
+            ops,
         }
-    }
-}
-
-/// Intermediates of one pass, named as ci-gpu/refs_native.py names those of unimatch, for checking the port stage by stage
-/// or, with `timed`, when each stage was done (the device synced at each point; nothing is kept); with `echo` as well,
-/// "STAGE-MARK <name>" printed at each point, after the sync: in a log of cubecl's profile (each kernel printed as it is
-/// timed), the kernels of a stage are those just before its mark
-#[derive(Default)]
-pub struct Trace {
-    pub tensors: Vec<(String, Tensor<4>)>,
-    pub timed: bool,
-    pub echo: bool,
-    pub marks: Vec<(String, std::time::Instant)>,
-}
-
-fn put(trace: &mut Option<&mut Trace>, name: &str, t: &Tensor<4>) {
-    let Some(tr) = trace.as_deref_mut() else { return };
-    if tr.timed {
-        t.device().sync().expect("gmflow: GPU sync");
-        tr.marks.push((name.to_owned(), std::time::Instant::now()));
-        if tr.echo {
-            println!("STAGE-MARK {name}");
-        }
-    } else {
-        tr.tensors.push((name.to_owned(), t.clone()));
     }
 }
 
@@ -1176,6 +1020,7 @@ pub struct Features {
 }
 
 impl Features {
+    #[cfg(test)]
     fn split(self, b: usize) -> (Features, Features) {
         let (q, e) = (self.quarter, self.eighth);
         (Features { quarter: q.clone().narrow(0, 0, b), eighth: e.clone().narrow(0, 0, b) }, Features { quarter: q.narrow(0, b, b), eighth: e.narrow(0, b, b) })
@@ -1201,39 +1046,29 @@ impl Gmflow {
     }
 
     /// Raw 0-255 images [B, 3, H, W] (B pairs) -> flow img0 -> img1 [B, 2, H, W], the forward of unimatch for the flow task
-    pub fn forward(&self, img0: Tensor<4>, img1: Tensor<4>, st: &Statics) -> Tensor<4> {
-        self.forward_traced(img0, img1, st, None)
-    }
-
-    pub fn forward_traced(&self, img0: Tensor<4>, img1: Tensor<4>, st: &Statics, mut trace: Option<&mut Trace>) -> Tensor<4> {
+    #[cfg(test)]
+    pub fn forward(&self, img0: Tensor<4>, img1: Tensor<4>, st: &Statics, gru: &GruFactored) -> Tensor<4> {
         let b = img0.dims()[0];
         let both = self.features(Tensor::cat(vec![img0, img1], 0), st);
-        put(&mut trace, "backbone0", &both.quarter);
-        put(&mut trace, "backbone1", &both.eighth);
         let (a, bb) = both.split(b);
-        self.flow(&a, &bb, false, st, trace)
+        self.flow(&a, &bb, false, st, gru)
     }
 
     /// The flow from the frames of `a` to those of `b` [B, 2, H, W]; with `bidirectional`, the flows both ways in one pass
     /// [2B, 2, H, W] (a -> b, then b -> a), as unimatch computes them with pred_bidir_flow: the transformer at 1/8 and its
-    /// correlation are shared (the correlation the other way is its transpose), the rest runs on both directions batched
-    pub fn flow(&self, a: &Features, b: &Features, bidirectional: bool, st: &Statics, mut trace: Option<&mut Trace>) -> Tensor<4> {
+    /// correlation are shared (the correlation the other way is its transpose), the rest runs on both directions batched.
+    /// `gru`: this model's refine.factor_gru()
+    pub fn flow(&self, a: &Features, b: &Features, bidirectional: bool, st: &Statics, gru: &GruFactored) -> Tensor<4> {
         // The buffers are sized for one pair (bidirectional: the projections at 1/4 are 113 MiB, the 1/8 correlation 66 MB)
         assert_eq!(a.eighth.dims()[0], 1, "gmflow: one pair at a time");
         let ops = st.ops;
         // 1/8: global matching, global propagation
         let pos = st.eighth.position.clone();
         let (f0, f1) = (a.eighth.clone() + pos.clone(), b.eighth.clone() + pos);
-        put(&mut trace, "pos_f0_0", &f0);
-        put(&mut trace, "pos_f1_0", &f1);
         let (f0, f1) = self.transformer.forward(f0, f1, &st.eighth, ops.linear_gemm(), ops.fused);
-        put(&mut trace, "transformer_f0_0", &f0);
-        put(&mut trace, "transformer_f1_0", &f1);
         let flow = global_correlation_softmax(f0.clone(), f1.clone(), bidirectional, ops.linear_gemm(), ops.fused);
-        put(&mut trace, "global_corr_flow0", &flow);
         let feature0 = if bidirectional { Tensor::cat(vec![f0, f1], 0) } else { f0 };
         let flow = self.feature_flow_attn.global(feature0, flow, ops.linear_gemm(), ops.fused);
-        put(&mut trace, "propagated0", &flow);
 
         // 1/4: the flow doubled in size, feature 1 warped by it, local matching of what remains, local propagation
         let (f0_ori, f1_ori) = if bidirectional {
@@ -1241,52 +1076,29 @@ impl Gmflow {
         } else {
             (a.quarter.clone(), b.quarter.clone())
         };
-        let flow = if st.ops.kernels { kernels::flow_double(flow) } else { flow_double(flow) };
-        put(&mut trace, "warp_flow0", &flow);
+        let flow = kernels::flow_double(flow);
         let f1w = flow_warp(f1_ori.clone(), flow.clone());
-        put(&mut trace, "warped_feature1_0", &f1w);
         let pos = st.quarter.position.clone();
         let (f0, f1) = (f0_ori.clone() + pos.clone(), f1w + pos);
-        put(&mut trace, "pos_f0_1", &f0);
-        put(&mut trace, "pos_f1_1", &f1);
         let (f0, f1) = self.transformer.forward(f0, f1, &st.quarter, ops.linear_gemm(), ops.fused);
-        put(&mut trace, "transformer_f0_1", &f0);
-        put(&mut trace, "transformer_f1_1", &f1);
-        let flow_pred = if ops.kernels { kernels::local_corr_softmax(f0.clone(), f1) } else { local_correlation_softmax(f0.clone(), f1, LOCAL_RADIUS) };
-        put(&mut trace, "local_corr_flow0", &flow_pred);
-        let flow = flow + flow_pred;
-        let mut flow = self.feature_flow_attn.local(f0.clone(), flow, 1, ops.kernels, ops.linear_gemm());
-        put(&mut trace, "propagated1", &flow);
+        let flow = flow + kernels::local_corr_softmax(f0.clone(), f1);
+        let mut flow = self.feature_flow_attn.local(f0.clone(), flow, ops.linear_gemm());
 
         // Refinement: the context comes from feature 0 of the transformer and is the same in every iteration (unimatch
         // computes it again each time), the correlation from the CNN features
-        // A 1x1 convolution: burn's but with `coop`
+        // A 1x1 convolution (conv_fwd: coop.rs, kernels::conv2d_implicit or burn's, as the others)
         let proj = conv_fwd(&self.refine_proj, f0, ops);
-        put(&mut trace, "refine_proj0", &proj);
         let net0 = tanh(proj.clone().narrow(1, 0, 128));
         let inp = relu(proj.narrow(1, 128, 128));
         let mut net = net0.clone();
-        let factored = ops.gru_factored.then(|| {
-            let g = self.refine.factor_gru();
-            let c = g.constants(net0.clone(), inp.clone(), ops.conv_gemm(), ops.implicit);
-            (g, c)
-        });
-        for i in 0..REFINE_ITERATIONS {
-            let corr = if ops.kernels {
-                kernels::corr_with_flow(f0_ori.clone(), f1_ori.clone(), flow.clone())
-            } else {
-                local_correlation_with_flow(f0_ori.clone(), f1_ori.clone(), flow.clone(), LOCAL_RADIUS)
-            };
-            put(&mut trace, &format!("corr_with_flow{i}"), &corr);
-            let (n, delta) = self.refine.forward(net0.clone(), inp.clone(), corr, flow.clone(), ops, factored.as_ref().map(|(g, c)| (g, c)));
-            put(&mut trace, &format!("refine_net{i}"), &n);
-            put(&mut trace, &format!("refine_delta{i}"), &delta);
+        let constants = gru.constants(net0.clone(), inp, ops.conv_gemm(), ops.implicit);
+        for _ in 0..REFINE_ITERATIONS {
+            let corr = kernels::corr_with_flow(f0_ori.clone(), f1_ori.clone(), flow.clone());
+            let (n, delta) = self.refine.forward(net0.clone(), corr, flow.clone(), ops, gru, &constants);
             net = n;
             flow = flow + delta;
         }
         let mask = self.refine.up_mask(net, ops);
-        let up = if ops.kernels { kernels::convex_upsample(flow, mask) } else { convex_upsample(flow, mask) };
-        put(&mut trace, "upsampled0", &up);
-        up
+        kernels::convex_upsample(flow, mask)
     }
 }

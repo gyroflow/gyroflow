@@ -19,6 +19,10 @@ pub enum Color {
     Magenta, // #ff00ff
     Blue2, // #0080ff
     Blue3, // #00C8C8
+
+    // for the tracked points of "Analyze image optically"
+    White, // #ffffff
+    Sky,   // #3fb6ff
 }
 
 #[repr(u8)]
@@ -82,6 +86,15 @@ impl DrawCanvas {
                         ((stage as u8));
                 }
             }
+        }
+    }
+
+    /// A line from `a` to `b` (pixels of `stage`), a pixel of the canvas wide
+    pub fn line(&mut self, a: (f32, f32), b: (f32, f32), color: Color, alpha: Alpha, stage: Stage, y_inverted: bool) {
+        let steps = ((b.0 - a.0).abs().max((b.1 - a.1).abs()) / self.scale.max(1) as f32).ceil().max(1.0) as usize;
+        for i in 0..=steps {
+            let t = i as f32 / steps as f32;
+            self.put_pixel((a.0 + (b.0 - a.0) * t) as i32, (a.1 + (b.1 - a.1) * t) as i32, color, alpha, stage, y_inverted, 1);
         }
     }
 

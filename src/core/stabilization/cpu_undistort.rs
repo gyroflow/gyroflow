@@ -19,7 +19,7 @@ pub fn is_valid_point(p: (f32, f32)) -> bool {
     p.0.is_finite() && p.1.is_finite() && p.0 > INVALID_POINT.0 / 2.0 && p.1 > INVALID_POINT.1 / 2.0
 }
 
-pub const COEFFS: [f32; 64+128+256 + 9*4 + 4] = [
+pub const COEFFS: [f32; 64+128+256 + 11*4 + 4] = [
     // Bilinear
     // offset 0
     1.000000, 0.000000, 0.968750, 0.031250, 0.937500, 0.062500, 0.906250, 0.093750, 0.875000, 0.125000, 0.843750, 0.156250,
@@ -79,13 +79,15 @@ pub const COEFFS: [f32; 64+128+256 + 9*4 + 4] = [
     255.0, 0.0,   255.0, 255.0, // Magenta
     0.0,   128.0, 255.0, 255.0, // Blue2
     0.0,   200.0, 200.0, 255.0, // Blue3
+    255.0, 255.0, 255.0, 255.0, // White
+    63.0,  182.0, 255.0, 255.0, // Sky
 
     // Alphas
-    // offset 484
+    // offset 492
     1.0, 0.75, 0.50, 0.25,
 ];
 
-// const COLORS: [Vector4<f32>; 9] = [
+// const COLORS: [Vector4<f32>; 11] = [
 //     Vector4::new(0.0,   0.0,   0.0,     0.0), // None
 //     Vector4::new(255.0, 0.0,   0.0,   255.0), // Red
 //     Vector4::new(0.0,   255.0, 0.0,   255.0), // Green
@@ -94,7 +96,9 @@ pub const COEFFS: [f32; 64+128+256 + 9*4 + 4] = [
 //     Vector4::new(200.0, 200.0, 0.0,   255.0), // Yellow2
 //     Vector4::new(255.0, 0.0,   255.0, 255.0), // Magenta
 //     Vector4::new(0.0,   128.0, 255.0, 255.0), // Blue2
-//     Vector4::new(0.0,   200.0, 200.0, 255.0)  // Blue3
+//     Vector4::new(0.0,   200.0, 200.0, 255.0), // Blue3
+//     Vector4::new(255.0, 255.0, 255.0, 255.0), // White
+//     Vector4::new(63.0,  182.0, 255.0, 255.0)  // Sky
 // ];
 // const ALPHAS: [f32; 4] = [ 1.0, 0.75, 0.50, 0.25 ];
 

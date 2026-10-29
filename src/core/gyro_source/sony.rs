@@ -642,12 +642,9 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, segments: &[StabSe
         if later > 0 {
             // Its readout start within the frame is between the collected frames' around it, like its time offset
             // (`PerFrame::interpolate`); past the last one of its part, its part's last one's
-            match (entry + 1 < entries.end).then(|| is_temp.frames[entry + 1]) {
-                Some(next) => {
-                    let span = next - is_temp.frames[entry];
-                    top_offset += (top(entry + 1)? - top_offset) * later as f64 / span as f64;
-                }
-                None => {}
+            if entry + 1 < entries.end {
+                let span = is_temp.frames[entry + 1] - is_temp.frames[entry];
+                top_offset += (top(entry + 1)? - top_offset) * later as f64 / span as f64;
             }
             top_offset += later as f64 * is_temp.frame_interval as f64;
         }

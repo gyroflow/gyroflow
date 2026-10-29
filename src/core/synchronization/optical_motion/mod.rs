@@ -926,7 +926,7 @@ impl OpticalMotionAnalysis {
         // where a failure can say why and the wait isn't one frame that never ends
         #[cfg(feature = "use-burn")]
         if tracking == TrackingMethod::Gmflow {
-            let device = crate::synchronization::optical_flow::GmflowDenseFlow::prepare().map_err(|e| format!("gmflow: {e}"))?;
+            let device = crate::synchronization::optical_flow::GmflowDenseFlow::prepare().map_err(|e| format!("GMFlow can't run: {e}"))?;
             ::log::info!("Optical analysis with gmflow on {device}");
         }
         let mut tracker = tracker::Tracker::new(MAX_POINTS, tracking, device)?;

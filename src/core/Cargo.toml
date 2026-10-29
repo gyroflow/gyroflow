@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "47fd021" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "19bc11f" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { version = "0.8", features = ["field_access"] }
 
@@ -80,9 +80,9 @@ rustfft = "6.4.1"
 exr = "1.74"
 opencv = { version = "0.101", default-features = false, features = [ "calib3d", "features2d", "imgproc", "optflow", "clang-runtime" ], optional = true } #"imgcodecs","objdetect","sfm",
 median = "0.3"
-burn-store = { version = "0.22", default-features = false, features = ["std"], optional = true }
-burn-cubecl = { version = "0.22", optional = true }
-cubecl = { version = "0.11", optional = true }
+burn-store = { version = "0.23.0-pre.1", default-features = false, features = ["std"], optional = true }
+burn-cubecl = { version = "0.23.0-pre.1", optional = true }
+cubecl = { version = "0.12.0-pre.1", optional = true }
 sha2 = { version = "0.10", optional = true }
 ureq = { version = "3.3", optional = true }
 
@@ -99,9 +99,9 @@ objc2-foundation = "0.3"
 # burn's native MSL (its metal feature): on the macOS 15 CI GPU WGSL with them ran a pass in 0.86 to 0.90 s, native MSL
 # in 1.05 to 1.14 s
 [target.'cfg(not(target_vendor = "apple"))'.dependencies]
-burn = { version = "0.22", default-features = false, features = ["std", "autotune", "fusion", "cubecl", "extension", "vulkan"], optional = true }
+burn = { version = "0.23.0-pre.1", default-features = false, features = ["std", "autotune", "fusion", "cubecl", "extension", "vulkan"], optional = true }
 [target.'cfg(target_vendor = "apple")'.dependencies]
-burn = { version = "0.22", default-features = false, features = ["std", "autotune", "fusion", "cubecl", "extension", "wgpu"], optional = true }
+burn = { version = "0.23.0-pre.1", default-features = false, features = ["std", "autotune", "fusion", "cubecl", "extension", "wgpu"], optional = true }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.62"
@@ -134,4 +134,4 @@ ndk-sys = { version = "0.6.0" }
 ndk-context = { version = "0.1.1" }
 
 [build-dependencies]
-ureq = "3.4"
+ureq = "3.5"

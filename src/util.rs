@@ -264,14 +264,14 @@ pub fn set_android_context() {
 pub fn init_logging() {
     use simplelog::*;
 
-    let log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "mdk" ]
+    let log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "mdk", "pliron", "cubecl_wgpu" ]
         .into_iter()
         .fold(ConfigBuilder::new(), |mut cfg, x| { cfg.add_filter_ignore_str(x); cfg })
         // Qt and MDK can log while destroying a foreign render thread, after
         // Rust's own thread-local `Thread` has already been destroyed.
         .set_thread_level(LevelFilter::Off)
         .build();
-    let file_log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls" ]
+    let file_log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "pliron", "cubecl_wgpu" ]
         .into_iter()
         .fold(ConfigBuilder::new(), |mut cfg, x| { cfg.add_filter_ignore_str(x); cfg })
         .set_thread_level(LevelFilter::Off)

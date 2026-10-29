@@ -4,7 +4,7 @@
 use glam::{ Vec2, vec4, Vec4 };
 use super::types::*;
 
-const COLORS: [Vec4; 9] = [
+const COLORS: [Vec4; 11] = [
     vec4(0.0   / 255.0, 0.0   / 255.0, 0.0    / 255.0, 0.0   / 255.0), // None
     vec4(255.0 / 255.0, 0.0   / 255.0, 0.0    / 255.0, 255.0 / 255.0), // Red
     vec4(0.0   / 255.0, 255.0 / 255.0, 0.0    / 255.0, 255.0 / 255.0), // Green
@@ -13,7 +13,9 @@ const COLORS: [Vec4; 9] = [
     vec4(200.0 / 255.0, 200.0 / 255.0, 0.0    / 255.0, 255.0 / 255.0), // Yellow2
     vec4(255.0 / 255.0, 0.0   / 255.0, 255.0  / 255.0, 255.0 / 255.0), // Magenta
     vec4(0.0   / 255.0, 128.0 / 255.0, 255.0  / 255.0, 255.0 / 255.0), // Blue2
-    vec4(0.0   / 255.0, 200.0 / 255.0, 200.0  / 255.0, 255.0 / 255.0)  // Blue3
+    vec4(0.0   / 255.0, 200.0 / 255.0, 200.0  / 255.0, 255.0 / 255.0), // Blue3
+    vec4(255.0 / 255.0, 255.0 / 255.0, 255.0  / 255.0, 255.0 / 255.0), // White
+    vec4(63.0  / 255.0, 182.0 / 255.0, 255.0  / 255.0, 255.0 / 255.0)  // Sky
 ];
 const ALPHAS: [f32; 4] = [1.0, 0.75, 0.50, 0.25];
 
@@ -39,7 +41,7 @@ pub fn draw_pixel(in_pix: Vec4, x: f32, y: f32, is_input: bool, params: &KernelP
         let color = ((data & 0xF8) >> 3) as usize;
         let alpha = ((data & 0x06) >> 1) as usize;
         let stage = data & 1;
-        if ((stage == 0 && is_input) || (stage == 1 && !is_input)) && color < 9 {
+        if ((stage == 0 && is_input) || (stage == 1 && !is_input)) && color < COLORS.len() {
             let colorf = COLORS[color] * max_value;
             let alphaf = ALPHAS[alpha];
             pix = colorf * alphaf + pix * (1.0 - alphaf);

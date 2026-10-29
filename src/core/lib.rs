@@ -27,7 +27,7 @@ pub mod stabilization_params;
 pub mod frame_times;
 
 use std::sync::{ Arc, atomic::{ AtomicU64, AtomicBool, Ordering::SeqCst } };
-use std::collections::{ BTreeMap, BTreeSet, HashSet };
+use std::collections::{ BTreeMap, BTreeSet, HashMap, HashSet };
 use keyframes::*;
 use parking_lot::{ RwLock, RwLockUpgradableReadGuard };
 use nalgebra::Vector4;
@@ -78,6 +78,23 @@ impl Default for SyncData {
     }
 }
 
+/// What "Show/edit tracked points" draws on the preview (`StabilizationManager::draw_optical_points`): the points the
+/// optical correction is measured with in the frame shown, and the selected tracks through the frames around it. The
+/// editor (OpticalPointEditor.qml) keeps the selection, and finds the points under the mouse itself
+#[derive(Default)]
+pub struct OpticalPointsOverlay {
+    pub shown: bool,
+    pub selection: HashSet<u32>,
+    /// The selected tracks drawn through the `trail_frames` frames before and after the one shown
+    pub trails: HashSet<u32>,
+    pub trail_frames: usize,
+    /// Where the `trails` tracks are in the stabilized picture of each frame around the one drawn last, placed with the
+    /// parameters, and from the analysis's tracks (`Arc` address), of `placed_with`: kept while they stay, so a step to
+    /// the next frame places just one more
+    placed: HashMap<usize, Vec<(u32, f32, f32)>>,
+    placed_with: Option<(Arc<ComputeParams>, usize)>,
+}
+
 #[derive(Clone)]
 pub struct StabilizationManager {
     pub gyro: Arc<RwLock<GyroSource>>,
@@ -123,6 +140,8 @@ pub struct StabilizationManager {
     /// Tracks the user took out of what "Analyze image optically" measured, by where they start: out of the analysis
     /// kept, and of every analysis after it that tracks them again (see `TrackStart`). Per file, kept in the project
     pub optical_removed_tracks: Arc<RwLock<BTreeSet<synchronization::optical_motion::TrackStart>>>,
+    /// The tracked points the preview shows, see `OpticalPointsOverlay`
+    pub optical_overlay: Arc<parking_lot::Mutex<OpticalPointsOverlay>>,
 }
 
 impl Default for StabilizationManager {
@@ -167,6 +186,7 @@ impl Default for StabilizationManager {
             optical_generation: Arc::new(AtomicU64::new(0)),
             optical_tracking: Arc::new(RwLock::new(Default::default())),
             optical_removed_tracks: Arc::new(RwLock::new(Default::default())),
+            optical_overlay: Arc::new(parking_lot::Mutex::new(Default::default())),
         }
     }
 }
@@ -177,7 +197,8 @@ enum FrameTimesFrom {
     LoadedFile,
     /// The video at this url, the one the file's motion data is for
     Video(String),
-    /// Neither: the caller sets them (a project import, from the project's video)
+    /// Neither: the caller sets them (a project import, from the project's video), and gives them to the parse
+    /// (`FileLoadOptions::video_frame_times`)
     Caller,
 }
 
@@ -292,17 +313,19 @@ impl StabilizationManager {
             let params = self.params.read();
             (params.fps, params.size, params.frame_count)
         };
-        // The per-frame tables are the video's, and so are the segments of a file that isn't the video's own
-        let parse_options = gyro_source::FileLoadOptions {
-            video_frames: options.video_frames.or((frame_count > 0).then_some(frame_count)),
-            video_url: (!is_main_video && !video_url.is_empty()).then(|| video_url.to_owned()),
-            ..options.clone()
-        };
 
         let timing = match frame_times {
             FrameTimesFrom::LoadedFile => Some(Self::video_timing_of(stream, filesize as u64)),
             FrameTimesFrom::Video(video_url) => Some(Self::read_video_timing(&video_url)),
             FrameTimesFrom::Caller => None,
+        };
+        // The per-frame tables are the video's, and so are the segments of a file that isn't the video's own, and the frame
+        // times its frames' offsets are taken against (the caller's, when it sets them)
+        let parse_options = gyro_source::FileLoadOptions {
+            video_frames: options.video_frames.or((frame_count > 0).then_some(frame_count)),
+            video_url: (!is_main_video && !video_url.is_empty()).then(|| video_url.to_owned()),
+            video_frame_times: timing.as_ref().map_or_else(|| options.video_frame_times.clone(), |t| t.frame_times.clone()),
+            ..options.clone()
         };
         // Stored only by a load that wasn't replaced: the next video's frame times are its own load's to set. Checked under
         // the lock `init_from_video_data` clears them under, and the controller cancels a load before the next video's
@@ -922,13 +945,18 @@ impl StabilizationManager {
         ret
     }
 
-    pub fn draw_overlays(&self, drawing: &mut DrawCanvas, timestamp_us: i64) {
+    pub fn draw_overlays(&self, undist: &mut Stabilization, timestamp_us: i64) {
+        // Placed the way the frames are rendered, and only on the preview's
+        let optical = (self.optical_overlay.lock().shown && undist.kernel_flags.contains(KernelParamsFlags::DRAWING_ENABLED)).then(|| undist.upright_params());
+        let drawing = &mut undist.drawing;
         drawing.clear();
 
+        let mut frame_shown = None;
         if let Some(p) = self.params.try_read() {
             let y_inverted = p.framebuffer_inverted;
             let size = p.size;
-            let frame = p.frame_at_timestamp(timestamp_us as f64 / 1000.0).max(0) as usize; // used only to draw features and OF
+            let frame = p.frame_at_timestamp(timestamp_us as f64 / 1000.0).max(0) as usize; // used only to draw features, OF and the tracked points
+            frame_shown = Some((frame, y_inverted));
 
             if p.show_optical_flow {
                 let num_frames = if p.of_method == 2 { 1 } else { 3 };
@@ -976,6 +1004,77 @@ impl StabilizationManager {
                 }
             }
         }
+        // With the parameters' lock let go of: placing the points takes a moment
+        if let (Some(params), Some((frame, y_inverted))) = (&optical, frame_shown) {
+            self.draw_optical_points(drawing, params, frame, y_inverted);
+        }
+    }
+
+    /// The tracked points of "Show/edit tracked points" (`OpticalPointsOverlay`) on the stabilized picture of `frame`,
+    /// placed the way `params` render it: each in the colour of what the analysis made of it, the selected ones over the
+    /// others, and the selected tracks from frame to frame through the frames around, fading out with the frames away
+    fn draw_optical_points(&self, drawing: &mut DrawCanvas, params: &Arc<ComputeParams>, frame: usize, y_inverted: bool) {
+        use synchronization::optical_motion::{ PointState, to_output };
+        let mut guard = self.optical_overlay.lock();
+        let overlay = &mut *guard;
+        if !overlay.shown { return; }
+        // Not waited for: what replaces the analysis has the frame drawn again
+        let Some(m) = self.optical_measurements.try_read().and_then(|m| (*m).clone()) else { return };
+        let place = |index: usize, points: &[(f32, f32)]| to_output(params, index, points);
+        let (ow, oh) = (drawing.output_width as f32, drawing.output_height as f32);
+        let at = |x: f32, y: f32| (x * ow, y * oh);
+
+        let tracks = Arc::as_ptr(&m.tracks) as usize;
+        if !overlay.placed_with.as_ref().is_some_and(|(p, t)| Arc::ptr_eq(p, params) && *t == tracks) {
+            overlay.placed.clear();
+            overlay.placed_with = Some((params.clone(), tracks));
+        }
+        if !overlay.trails.is_empty() {
+            let frames = frame.saturating_sub(overlay.trail_frames)..=frame + overlay.trail_frames;
+            overlay.placed.retain(|f, _| frames.contains(f));
+            let missing: Vec<usize> = frames.clone().filter(|f| !overlay.placed.contains_key(f)).collect();
+            if let (Some(&first), Some(&last)) = (missing.first(), missing.last()) {
+                // Also the frames without any of them, so they aren't looked for again
+                for f in first..=last { overlay.placed.insert(f, Vec::new()); }
+                for (id, path) in m.tracks.paths(&overlay.trails, first..=last, place) {
+                    for (f, x, y) in path { overlay.placed.entry(f).or_default().push((id, x, y)); }
+                }
+            }
+            // Each track from frame to frame, but across a gap in it
+            let mut last: HashMap<u32, (usize, f32, f32)> = HashMap::new();
+            for f in frames {
+                let Some(points) = overlay.placed.get(&f) else { continue };
+                for &(id, x, y) in points {
+                    if let Some(&(pf, px, py)) = last.get(&id) && pf + 1 == f {
+                        let away = (f as f32 - 0.5 - frame as f32).abs() / (overlay.trail_frames + 1) as f32;
+                        let alpha = Alpha::from(((away * 4.0).round() as u8).min(3));
+                        drawing.line(at(px, py), at(x, y), Color::Sky, alpha, Stage::OnOutput, y_inverted);
+                    }
+                    last.insert(id, (f, x, y));
+                }
+            }
+        }
+
+        // A few pixels of the canvas, which has 720 to 1440 rows (`DrawCanvas::scale`) unless the frame has fewer
+        let size = ((drawing.get_size().1 as f32 / 270.0).round() as usize).max(3);
+        let points = self.optical_points_placed(&m, frame, place);
+        for &(id, x, y, state) in &points {
+            if overlay.selection.contains(&id) { continue; }
+            let color = match state {
+                PointState::Used => Color::Green,
+                PointState::Downweighted => Color::Yellow,
+                PointState::Rejected => Color::Red,
+                _ => Color::Blue2,
+            };
+            let (x, y) = at(x, y);
+            drawing.put_pixel(x as i32, y as i32, color, Alpha::Alpha100, Stage::OnOutput, y_inverted, size);
+        }
+        for &(id, x, y, _) in &points {
+            if !overlay.selection.contains(&id) { continue; }
+            let (x, y) = at(x, y);
+            drawing.put_pixel(x as i32, y as i32, Color::White, Alpha::Alpha100, Stage::OnOutput, y_inverted, size + 2);
+            drawing.put_pixel(x as i32, y as i32, Color::Sky, Alpha::Alpha100, Stage::OnOutput, y_inverted, size);
+        }
     }
 
     pub fn process_pixels<T: PixelType>(&self, mut timestamp_us: i64, frame: Option<usize>, buffers: &mut Buffers) -> Result<stabilization::ProcessedInfo, GyroflowCoreError> {
@@ -1019,7 +1118,7 @@ impl StabilizationManager {
 
         if use_cache || hash != current_hash {
             if let Some(mut undist) = self.stabilization.try_write_for(std::time::Duration::from_millis(30000)) {
-                self.draw_overlays(&mut undist.drawing, timestamp_us);
+                self.draw_overlays(&mut undist, timestamp_us);
                 undist.ensure_ready_for_processing::<T>(timestamp_us, frame, buffers);
             } else {
                 return Err(GyroflowCoreError::Unknown);
@@ -1526,14 +1625,29 @@ impl StabilizationManager {
     pub fn optical_tracked_points(&self, file_timestamp_us: i64, stabilized: bool) -> Vec<(u32, f32, f32, synchronization::optical_motion::PointState)> {
         let Some(m) = self.optical_measurements.read().clone() else { return Vec::new() };
         let index = self.optical_frame_at(file_timestamp_us);
-        let mut points = self.optical_points_in_frame(&m, index);
-        if stabilized {
-            let placed = self.optical_placement(true)(index, &points.iter().map(|p| (p.1, p.2)).collect::<Vec<_>>());
-            points = points.into_iter().zip(placed)
-                .filter_map(|(p, at)| at.filter(|(x, y)| (0.0..=1.0).contains(x) && (0.0..=1.0).contains(y)).map(|(x, y)| (p.0, x, y, p.3)))
-                .collect();
+        if !stabilized { return self.optical_points_in_frame(&m, index); }
+        self.optical_points_placed(&m, index, self.optical_placement(true))
+    }
+    /// `optical_points_in_frame` placed by `place` (see `optical_placement`), the ones in the picture
+    fn optical_points_placed(&self, m: &synchronization::optical_motion::OpticalMeasurements, index: usize, place: impl Fn(usize, &[(f32, f32)]) -> Vec<Option<(f32, f32)>>) -> Vec<(u32, f32, f32, synchronization::optical_motion::PointState)> {
+        let points = self.optical_points_in_frame(m, index);
+        let placed = place(index, &points.iter().map(|p| (p.1, p.2)).collect::<Vec<_>>());
+        points.into_iter().zip(placed)
+            .filter_map(|(p, at)| at.filter(|(x, y)| (0.0..=1.0).contains(x) && (0.0..=1.0).contains(y)).map(|(x, y)| (p.0, x, y, p.3)))
+            .collect()
+    }
+    /// What "Show/edit tracked points" draws on the preview (`OpticalPointsOverlay`): whether anything, the tracks
+    /// `selection`, and the first `max_trails` of them through the `trail_frames` frames before and after the one shown
+    pub fn set_optical_points_overlay(&self, shown: bool, selection: &[u32], trail_frames: usize, max_trails: usize) {
+        let mut overlay = self.optical_overlay.lock();
+        let trails: HashSet<u32> = selection.iter().copied().take(max_trails).collect();
+        if !shown || trails != overlay.trails {
+            overlay.placed.clear();
         }
-        points
+        overlay.shown = shown;
+        overlay.selection = selection.iter().copied().collect();
+        overlay.trails = trails;
+        overlay.trail_frames = trail_frames;
     }
     /// The tracks (but the ones taken out) with a point within `rect` (x0, y0, x1, y1, relative to the frame - the
     /// stabilized one with `stabilized`) in the frame at a moment of the file (µs), or with `all_frames`, within the
@@ -1548,15 +1662,6 @@ impl StabilizationManager {
         // picture holds still there
         let place = self.optical_placement(stabilized);
         m.tracks.in_rect(frames, rect, &self.optical_removed_ids(&m), move |_, points: &[(f32, f32)]| place(shown, points), cancelled)
-    }
-    /// Where the tracks `ids` are in the frames up to `reach` away from the one at a moment of the file (µs): per track,
-    /// how many frames from that one, and where, relative to the frame (the stabilized one with `stabilized`)
-    pub fn optical_track_paths(&self, ids: &HashSet<u32>, file_timestamp_us: i64, reach: usize, stabilized: bool) -> Vec<(u32, Vec<(i64, f32, f32)>)> {
-        let Some(m) = self.optical_measurements.read().clone() else { return Vec::new() };
-        let i = self.optical_frame_at(file_timestamp_us);
-        m.tracks.paths(ids, i.saturating_sub(reach)..=i + reach, self.optical_placement(stabilized)).into_iter()
-            .map(|(id, path)| (id, path.into_iter().map(|(f, x, y)| (f as i64 - i as i64, x, y)).collect()))
-            .collect()
     }
     /// State of the correction measured from the video, for the UI
     pub fn optical_correction_info(&self) -> serde_json::Value {
@@ -1713,6 +1818,7 @@ impl StabilizationManager {
             // prevent_recompute
             // camera_id
             // optical_measurements: they take a lot of memory, and a clone has nothing to refit
+            // optical_overlay: the preview's
             ..Default::default()
         }
     }
@@ -2175,6 +2281,8 @@ impl StabilizationManager {
             let mut ignore_file_motion = None;
             // Where the video's frame times are read from: the project's video, or the file loaded as its own metadata
             let mut frame_times_url = if full_data_included { org_video_url.clone() } else { video_url.clone() };
+            // The video's frame times, once read from there (`read_frame_times`)
+            let mut frame_times = None;
             if let Some(serde_json::Value::Object(obj)) = obj.get_mut("gyro_source") {
                 let mut org_gyro_url = obj.get("filepath").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
                 if !org_gyro_url.is_empty() && !org_gyro_url.contains("://") {
@@ -2206,6 +2314,8 @@ impl StabilizationManager {
                 if is_main_video && !gyro_url.is_empty() && filesystem::exists(&gyro_url) {
                     frame_times_url = gyro_url.clone();
                 }
+                // A motion data file loaded below takes its frames' offsets against them (`FileLoadOptions::video_frame_times`)
+                load_options.video_frame_times = frame_times.get_or_insert_with(|| Self::read_frame_times(&frame_times_url)).clone();
 
                 let built_in_gyro: std::io::Result<crate::gyro_source::FileMetadata> = util::decompress_from_base91_cbor(obj.get("file_metadata").and_then(|x| x.as_str()).unwrap_or_default());
 
@@ -2603,7 +2713,7 @@ impl StabilizationManager {
             // reads them with it), only the project's motion data file, when it has one that's there. Stored as
             // `load_motion_file` stores them: not by an import cancelled for the next video, whose own load sets them
             if !*is_preset {
-                let times = Self::read_frame_times(&frame_times_url);
+                let times = frame_times.unwrap_or_else(|| Self::read_frame_times(&frame_times_url));
                 let mut params = self.params.write();
                 if !cancel_flag.load(SeqCst) { params.frame_times = times; }
             }

@@ -558,9 +558,10 @@ impl<'a> FfmpegProcessor<'a> {
             if start_ms > 0.0 {
                 for (k, v) in metadata.iter() {
                     if k == "creation_time" {
-                        if let Ok(v) = chrono::DateTime::parse_from_rfc3339(v) {
+                        if let Some((v, local_form)) = Self::parse_creation_time(v) {
                             if let Some(v) = v.checked_add_signed(chrono::TimeDelta::try_milliseconds(start_ms.round() as i64).unwrap()) {
-                                updated_creation_time = Some(v.to_rfc3339());
+                                // A local time stays one, in its form: its zone isn't known
+                                updated_creation_time = Some(match local_form { Some(form) => v.naive_local().format(form).to_string(), None => v.to_rfc3339() });
                             }
                         }
                         break;
@@ -966,6 +967,21 @@ impl<'a> FfmpegProcessor<'a> {
         get_rotation(&frame)
     }
 
+    /// FFmpeg's `creation_time` in the forms its demuxers give it: RFC 3339, that of the containers' own times
+    /// (`ff_dict_set_timestamp`) and of writers that state a zone, or a date and a time of day without one, a `T` or a
+    /// space between them (HOVERAir's `creation_time` key, which FFmpeg's MOV demuxer gives as written, and an AVI's
+    /// `IDIT`), which is local time, as FFmpeg's `av_parse_time` and the player's `Date.parse` read it. With the
+    /// `strftime` form of a local time, to write one moved from it in
+    fn parse_creation_time(value: &str) -> Option<(chrono::DateTime<chrono::FixedOffset>, Option<&'static str>)> {
+        if let Ok(time) = chrono::DateTime::parse_from_rfc3339(value) {
+            return Some((time, None));
+        }
+        ["%Y-%m-%dT%H:%M:%S%.f", "%Y-%m-%d %H:%M:%S%.f"].into_iter().find_map(|form| {
+            let time = chrono::NaiveDateTime::parse_from_str(value, form).ok()?;
+            Some((time.and_local_timezone(chrono::Local).earliest()?.fixed_offset(), Some(form)))
+        })
+    }
+
     pub fn get_video_info(url: &str) -> Result<VideoInfo, ffmpeg_next::Error> {
         let mut file = FfmpegPathWrapper::new(url, false).map_err(|_| ffmpeg_next::Error::ProtocolNotFound)?;
         let mut dict = Dictionary::new();
@@ -975,7 +991,7 @@ impl<'a> FfmpegProcessor<'a> {
         }
 
         let mut context = format::input_with_dictionary(&file.path, dict)?;
-        let created_at = context.metadata().get("creation_time").and_then(|x| chrono::DateTime::parse_from_rfc3339(x).ok()).map(|x| x.timestamp_millis() as u64 / 1000);
+        let created_at = context.metadata().get("creation_time").and_then(Self::parse_creation_time).map(|x| x.0.timestamp_millis() as u64 / 1000);
         if let Some(stream) = context.streams().best(media::Type::Video) {
             let codec = codec::context::Context::from_parameters(stream.parameters())?;
             if let Ok(mut video) = codec.decoder().video() {

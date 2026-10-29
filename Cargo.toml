@@ -6,7 +6,7 @@ edition = "2024"
 build = "build.rs"
 
 [features]
-default = ["opencv"]
+default = ["opencv", "ai-optical-flow"]
 opencl = ["gyroflow-core/use-opencl"]
 opencv = ["gyroflow-core/use-opencv"]
 ai-optical-flow = ["gyroflow-core/use-burn"]
@@ -44,7 +44,7 @@ pollster = "1.0"
 futures-intrusive = "0.5.0"
 flate2 = "1.1"
 walkdir = "2.5.0"
-mp4-merge = "0.2.0"
+mp4-merge = "0.2.1"
 human-sort = "0.2.2"
 argh = "0.1.19"
 indicatif = "0.18"
@@ -77,6 +77,65 @@ keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "4
 [patch.crates-io]
 qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "ff1e23d" }
 qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "ff1e23d" }
+
+# cubecl 0.12.0-pre.1 + four fixes for AMD's Windows Vulkan driver (Radeon iGPUs), not upstreamed:
+# storage mapped from the iGPU's largest device-local heap, a cooperative matrix zeroed as a
+# composite, the subgroup size pinned where it can vary, and a finite tanh. Every cubecl crate comes
+# from the branch, or its in-repo siblings would enter the graph twice.
+cubecl                 = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-common          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-core            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-cpp             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-cpu             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-cuda            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-environment     = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-hip             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-ir              = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-llvm            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-macros          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-macros-internal = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-metal           = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-monitoring      = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-opt             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-runtime         = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-server          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-spirv           = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-std             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-tile            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-wgpu            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-zspace          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+# burn 0.23.0-pre.1 + conv autotune that benchmarks conv_direct only where it can win (it ran
+# 8-90x slower elsewhere, long enough for Windows to reset an iGPU).
+burn                   = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-autodiff          = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-backend           = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-backend-extension = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-core              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-cpu               = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-cubecl            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-cubecl-fusion     = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-cuda              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-derive            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-dispatch          = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-einsum            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-flex              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-fusion            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-instrument        = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-instrument-macros = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-ir                = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-linalg            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-nn                = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-optim             = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-pack              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-remote            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-rocm              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-router            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-signal            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-std               = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-store             = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-tensor            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-vision            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-wgpu              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.62"
@@ -133,3 +192,6 @@ jni = "0.22"
 ndk = { version = "0.9", features = ["media", "api-level-26"] }
 ndk-sys = { version = "0.6.0" }
 ndk-context = "0.1.1"
+
+[profile.release.build-override]
+opt-level = 2

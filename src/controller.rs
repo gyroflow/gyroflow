@@ -129,7 +129,7 @@ pub struct Controller {
     find_optical_tracks_in_rect: qt_method!(fn(&self, timestamp_us: f64, x0: f64, y0: f64, x1: f64, y1: f64, all_frames: bool, stabilized: bool) -> u32),
     cancel_optical_track_search: qt_method!(fn(&self)),
     optical_tracks_found: qt_signal!(search: u32, ids: QString),
-    optical_track_paths: qt_method!(fn(&self, ids: String, timestamp_us: f64, reach: usize, stabilized: bool) -> QString),
+    set_optical_points_overlay: qt_method!(fn(&self, shown: bool, selection: String, trail_frames: usize, max_trails: usize)),
     remove_optical_tracks: qt_method!(fn(&mut self, ids: String, remove: bool) -> QString),
     restore_optical_tracks: qt_method!(fn(&mut self)),
     optical_tracks_changed: qt_signal!(),
@@ -1805,14 +1805,12 @@ impl Controller {
     fn cancel_optical_track_search(&self) {
         self.optical_track_search.fetch_add(1, SeqCst);
     }
-    /// Where the tracks `ids` (a JSON array) are in the frames up to `reach` away from the one at `timestamp_us`:
-    /// `{ "id": [frames from that one, x, y, ...] }`, relative to the frame (the stabilized one with `stabilized`)
-    fn optical_track_paths(&self, ids: String, timestamp_us: f64, reach: usize, stabilized: bool) -> QString {
-        let ids: std::collections::HashSet<u32> = serde_json::from_str(&ids).unwrap_or_default();
-        let paths: serde_json::Map<String, serde_json::Value> = self.stabilizer.optical_track_paths(&ids, timestamp_us.round() as i64, reach, stabilized).into_iter()
-            .map(|(id, path)| (id.to_string(), path.into_iter().flat_map(|(f, x, y)| [f as f64, x as f64, y as f64]).collect::<Vec<f64>>().into()))
-            .collect();
-        QString::from(serde_json::Value::Object(paths).to_string())
+    /// What the stabilized preview draws of the last analysis's tracked points, for the point editor: whether anything,
+    /// the tracks selected (a JSON array), and the first `max_trails` of them through the `trail_frames` frames before
+    /// and after the one shown. The editor has the frame drawn again
+    fn set_optical_points_overlay(&self, shown: bool, selection: String, trail_frames: usize, max_trails: usize) {
+        let selection: Vec<u32> = serde_json::from_str(&selection).unwrap_or_default();
+        self.stabilizer.set_optical_points_overlay(shown, &selection, trail_frames, max_trails);
     }
     /// Takes the tracks `ids` (a JSON array) out of what the analysis measured, or puts them back (`remove` false).
     /// Returns the ones that weren't already, a JSON array: what an undo changes back

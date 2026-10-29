@@ -279,11 +279,15 @@ pub fn solve_parts(m: &OpticalMeasurements, settings: &OpticalCorrectionSettings
     correction_of(m, settings, &params, fits)
 }
 
+/// A spline fitted to band measurements (`solver::solve`), for `correction_of`: the timestamps (µs) of the motion data it's
+/// for (`None` for all of it), the spline, and the bands it was fitted to
+pub type CorrectionFit<'a> = (Option<Range<i64>>, solver::Solution, &'a [BandMeasurement]);
+
 /// The correction made of splines fitted to the measurements `m` with `params` (`solver::solve`), each with the bands it
 /// was fitted to: one fitted to all of them, for all of the motion data (its timestamps `None`, `optical_motion::solve`),
 /// or one for each part of a video cut from recordings that has one, with the timestamps (µs) of the part's motion data
 /// (`solve_parts`). The one place a correction is put together, so the two can't come to differ in anything but that
-pub fn correction_of(m: &OpticalMeasurements, settings: &OpticalCorrectionSettings, params: &solver::SolverParams, fits: Vec<(Option<Range<i64>>, solver::Solution, &[BandMeasurement])>) -> Result<OpticalCorrection, String> {
+pub fn correction_of(m: &OpticalMeasurements, settings: &OpticalCorrectionSettings, params: &solver::SolverParams, fits: Vec<CorrectionFit<'_>>) -> Result<OpticalCorrection, String> {
     let start_us = fits.first().ok_or_else(|| "Not enough of the image could be tracked".to_string())?.1.start_us;
     let (mut coeffs, mut parts, mut sum, mut count) = (Vec::new(), Vec::new(), 0.0, 0usize);
     for (motion, sol, bands) in &fits {

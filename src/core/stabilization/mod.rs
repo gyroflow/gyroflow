@@ -2,7 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use std::cell::RefCell;
-use std::sync::mpsc;
+use std::sync::{ mpsc, Arc };
 
 use crate::GyroflowCoreError;
 
@@ -236,6 +236,8 @@ pub struct Stabilization {
     pub initialized_backend: BackendType,
 
     compute_params: ComputeParams,
+    /// `compute_params` the right way up, see `upright_params`
+    upright_params: Option<Arc<ComputeParams>>,
 
     pub drawing: DrawCanvas,
     pub pending_device_change: Option<isize>,
@@ -257,6 +259,17 @@ impl Stabilization {
     pub fn set_compute_params(&mut self, params: ComputeParams) {
         self.stab_data.clear();
         self.compute_params = params;
+        self.upright_params = None;
+    }
+    /// What the frames are rendered with, the right way up (`framebuffer_inverted` off), as the point path takes them
+    /// for upright positions (`optical_motion::to_output`). A copy made once per `set_compute_params`: the same one
+    /// until they change
+    pub fn upright_params(&mut self) -> Arc<ComputeParams> {
+        self.upright_params.get_or_insert_with(|| {
+            let mut params = self.compute_params.clone();
+            params.framebuffer_inverted = false;
+            Arc::new(params)
+        }).clone()
     }
 
     fn get_rect(desc: &BufferDescription) -> [i32; 4] {

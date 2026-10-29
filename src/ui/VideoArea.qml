@@ -831,6 +831,7 @@ Item {
                         anchors.fill: parent;
                         timestampUs: vid.timestamp * 1000;
                         stabilized: vid.stabEnabled;
+                        onRedraw: vid.forceRedraw();
                     }
                 }
 

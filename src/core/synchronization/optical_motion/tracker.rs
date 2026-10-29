@@ -5,11 +5,11 @@
 //! survived a forward-backward check, with the id of the track they belong to: the analysis needs whole tracks, to
 //! take the slow parallax of each point out of its motion. KLT starts its points at corners, DIS and gmflow on a
 //! regular grid (see `TrackingMethod`); all away from glare. KLT runs on the GPU when there is one (`gpu_klt`), and with OpenCV
-//! without, or from the frame after the GPU failed. A build without OpenCV has the GPU's KLT only
+//! without, or from the frame after the GPU failed. A build without OpenCV has the GPU's KLT and gmflow, no DIS
 
 use std::{ sync::mpsc, time::{ Duration, Instant } };
 #[cfg(feature = "use-opencv")]
-use opencv::{ core::{ self, Mat, Point2f, Ptr, Rect, Size, TermCriteria, Vec2f, Vector, CV_8UC1 }, prelude::*, imgproc, video };
+use opencv::{ core::{ self, Mat, Point2f, Ptr, Size, TermCriteria, Vec2f, Vector, CV_8UC1 }, prelude::*, imgproc, video };
 use super::{ Observation, TrackingMethod, gpu_klt::GpuKlt };
 
 /// Grid the new corners are spread over, see `Tracker::replenish`
@@ -20,7 +20,7 @@ const QUALITY: f64 = 0.002;
 /// ... or, in a cell with nothing that strong (cloudy sky), against the noise of flat areas, see `replenish`
 const NOISE_MULTIPLE: f64 = 8.0;
 /// DIS's grid: where there's at least this many times the noise of flat areas around a cell's middle, see `replenish_grid`
-#[cfg(feature = "use-opencv")]
+#[cfg(any(feature = "use-opencv", feature = "use-burn"))]
 const DIS_NOISE_MULTIPLE: f64 = 2.0;
 /// No new corners within this many radii of a compact saturated blob (the sun): its glare is a smooth ring the tracker
 /// slides along and its flare is fixed to the lens, neither moves like the scene. Blobs from this many pixels up, at
@@ -61,7 +61,7 @@ const DIS_FINEST_SCALE: i32 = 1;
 /// stretches of 60 frames of a GoPro HERO6 test clip (2 degrees of motion per frame), the frame-to-frame rotation was
 /// off by 0.062 and 0.061 degrees rms at 0.2 px - KLT 0.063 and 0.052, DIS 0.059 and 0.055 - and by 0.067 and 0.20
 /// at DIS's 0.3 px. Below 0.15 px too few tracks last (0.10 px: 0.17 degrees, under 0.07 px nothing to measure)
-#[cfg(all(feature = "use-opencv", feature = "use-burn"))]
+#[cfg(feature = "use-burn")]
 const GMFLOW_FB_MAX: f32 = 0.2;
 /// Without OpenCV there's no KLT but the GPU's
 const NO_GPU: &str = "Optical analysis needs a GPU in this build";
@@ -111,7 +111,7 @@ pub struct Tracker {
     #[cfg(feature = "use-opencv")]
     dis: Option<Ptr<video::DISOpticalFlow>>,
     /// gmflow, when it follows the points through its dense flow (on its own GPU, see `optical_flow::GmflowDenseFlow`)
-    #[cfg(feature = "use-opencv")]
+    #[cfg(feature = "use-burn")]
     gmflow: bool,
     /// Whether to give up on the frame being tracked (cancelled), checked before gmflow's pass
     #[cfg_attr(not(feature = "use-burn"), allow(dead_code))]
@@ -157,14 +157,14 @@ impl Tracker {
                 Some(dis)
             },
         };
-        // gmflow's points are DIS's grid, which OpenCV finds
-        if matches!(method, TrackingMethod::Gmflow) && !cfg!(all(feature = "use-opencv", feature = "use-burn")) {
-            return Err("gmflow tracking needs a build with the ai-optical-flow feature".into());
+        if matches!(method, TrackingMethod::Gmflow) && !cfg!(feature = "use-burn") {
+            return Err("GMFlow tracking isn't available in this build".into());
         }
         #[cfg(not(feature = "use-opencv"))]
         {
             if matches!(method, TrackingMethod::Dis) { return Err("DIS tracking is not available in this build".into()); }
-            if matches!(device, KltDevice::Cpu) { return Err(NO_GPU.into()); }
+            // gmflow picks its own GPU
+            if matches!(method, TrackingMethod::Klt) && matches!(device, KltDevice::Cpu) { return Err(NO_GPU.into()); }
         }
         // Done while the decoder starts
         let finding = match device {
@@ -174,7 +174,7 @@ impl Tracker {
         Ok(Self {
             #[cfg(feature = "use-opencv")]
             dis,
-            #[cfg(feature = "use-opencv")]
+            #[cfg(feature = "use-burn")]
             gmflow: matches!(method, TrackingMethod::Gmflow),
             stop: Box::new(|| false),
             prev: None, size: (0, 0), points: Vec::new(), ids: Vec::new(), next_id: 0, max_points,
@@ -218,15 +218,12 @@ impl Tracker {
         let started = Instant::now();
         let mut out = Vec::new();
         let prev = self.prev.take();
+        #[allow(unused_mut)]
+        let mut dense = None;
         #[cfg(feature = "use-opencv")]
-        let dense = match (self.dis.is_some(), self.gmflow) {
-            (true, _) => Some(self.dis_frame(prev.as_deref(), pixels, stride).map_err(cv)?),
-            #[cfg(feature = "use-burn")]
-            (false, true) => Some(self.gmflow_frame(prev.as_deref(), pixels, stride)?),
-            _ => None,
-        };
-        #[cfg(not(feature = "use-opencv"))]
-        let dense = None;
+        if self.dis.is_some() { dense = Some(self.dis_frame(prev.as_deref(), pixels, stride).map_err(cv)?); }
+        #[cfg(feature = "use-burn")]
+        if self.gmflow { dense = Some(self.gmflow_frame(prev.as_deref(), pixels, stride)?); }
         let moved = match dense {
             Some(moved) => moved,
             None => {
@@ -384,9 +381,9 @@ impl Tracker {
     fn dis_frame(&mut self, prev: Option<&[u8]>, pixels: &[u8], stride: usize) -> opencv::Result<Option<Vec<Option<[f32; 2]>>>> {
         let Some(prev) = prev else { return Ok(None) };
         let (w, h) = self.size;
-        let prev_mat = frame_mat(prev, w as usize, w, h)?;
-        self.replenish_grid(prev, &prev_mat)?;
+        self.replenish_grid(prev);
         if self.points.is_empty() { return Ok(None); }
+        let prev_mat = frame_mat(prev, w as usize, w, h)?;
         let cur = frame_mat(pixels, stride, w, h)?;
         Ok(Some(Self::dense(self.dis.as_mut().unwrap(), &prev_mat, &cur, &self.points)?))
     }
@@ -421,12 +418,11 @@ impl Tracker {
     }
 
     /// gmflow: the grid topped up on the frame before (DIS's, see `replenish_grid`), and its points followed into this one
-    #[cfg(all(feature = "use-opencv", feature = "use-burn"))]
+    #[cfg(feature = "use-burn")]
     fn gmflow_frame(&mut self, prev: Option<&[u8]>, pixels: &[u8], stride: usize) -> Result<Option<Vec<Option<[f32; 2]>>>, String> {
         let Some(prev) = prev else { return Ok(None) };
         let (w, h) = self.size;
-        let prev_mat = frame_mat(prev, w as usize, w, h).map_err(cv)?;
-        self.replenish_grid(prev, &prev_mat).map_err(cv)?;
+        self.replenish_grid(prev);
         if self.points.is_empty() { return Ok(None); }
         if (self.stop)() { return Ok(Some(vec![None; self.points.len()])); }
         let cur = packed(pixels, stride, w as usize, h as usize);
@@ -438,12 +434,12 @@ impl Tracker {
     /// bidirectional pass of the model per frame (the CNN features of the previous frame are reused), on the GPU. An
     /// error when it can't run at all (no usable GPU, no model), which stops the analysis: every frame after it would
     /// fail the same way
-    #[cfg(all(feature = "use-opencv", feature = "use-burn"))]
+    #[cfg(feature = "use-burn")]
     fn gmflow(prev: &[u8], cur: &[u8], w: u32, h: u32, points: &[[f32; 2]]) -> Result<Vec<Option<[f32; 2]>>, String> {
         use crate::synchronization::optical_flow::GmflowDenseFlow;
         let gray = |p: &[u8]| image::GrayImage::from_raw(w, h, p.to_vec()).ok_or_else(|| "gmflow: frame size".to_string());
         let (a, b) = (gray(prev)?, gray(cur)?);
-        let (forward, backward) = GmflowDenseFlow::compute_both(&a, &b).ok_or_else(|| "gmflow could not compute the flow, see the log".to_string())?;
+        let (forward, backward) = GmflowDenseFlow::compute_both(&a, &b).ok_or_else(|| "GMFlow could not compute the motion, see the log".to_string())?;
         let inside = |p: [f32; 2]| p[0] >= 0.0 && p[1] >= 0.0 && p[0] <= (w - 1) as f32 && p[1] <= (h - 1) as f32;
         Ok(points.iter().map(|&a| {
             let (dx, dy) = forward.at(a[0], a[1])?;
@@ -528,9 +524,10 @@ impl Tracker {
     /// DIS's and gmflow's points: a regular grid, a new point in the middle of every cell (of about the size `max_points` of them fill
     /// the frame with) that has none left. The dense flow doesn't need a corner there, only something to see: where
     /// there's no detail at all (clear sky, clipped highlights) it only has what it smoothed in from around, so those
-    /// cells stay empty - a point there would count as a measurement of rows nothing was seen in
-    #[cfg(feature = "use-opencv")]
-    fn replenish_grid(&mut self, pixels: &[u8], img: &Mat) -> opencv::Result<()> {
+    /// cells stay empty - a point there would count as a measurement of rows nothing was seen in. `pixels`: the frame
+    /// without the padding of its rows
+    #[cfg(any(feature = "use-opencv", feature = "use-burn"))]
+    fn replenish_grid(&mut self, pixels: &[u8]) {
         let (w, h) = self.size;
         let spacing = (w as f64 * h as f64 / self.max_points.max(1) as f64).sqrt().max(4.0);
         let (cols, rows) = ((w as f64 / spacing).floor().max(1.0) as i32, (h as f64 / spacing).floor().max(1.0) as i32);
@@ -540,11 +537,11 @@ impl Tracker {
             let (c, r) = ((p[0] as f64 / sx).floor() as i32, (p[1] as f64 / sy).floor() as i32);
             if c >= 0 && r >= 0 && c < cols && r < rows { occupied[(r * cols + c) as usize] = true; }
         }
-        if occupied.iter().all(|o| *o) { return Ok(()); }
+        if occupied.iter().all(|o| *o) { return; }
         let mut free = vec![true; (w * h) as usize];
         for (x, y, r) in glare(pixels, w as usize, w, h) { clear_disc(&mut free, w, h, x as f64, y as f64, r as f64); }
-        let eig = corner_strengths(img)?;
-        let Some(noise) = noise_level(&noise_samples(eig.data_typed::<f32>()?, w, h)) else { return Ok(()) };
+        let eig = min_eigen_values(pixels, w as usize, w, h);
+        let Some(noise) = noise_level(&noise_samples(&eig, w, h)) else { return };
         let floor = DIS_NOISE_MULTIPLE * noise;
         // Detail anywhere around the middle of the cell, not just at it
         let around = (spacing / 4.0).max(2.0) as i32;
@@ -553,13 +550,13 @@ impl Tracker {
                 if occupied[(r * cols + c) as usize] { continue; }
                 let (x, y) = (((c as f64 + 0.5) * sx) as i32, ((r as f64 + 0.5) * sy) as i32);
                 if x < 3 || y < 3 || x >= w - 3 || y >= h - 3 || !free[(y * w + x) as usize] { continue; }
-                let near = Rect::new((x - around).max(0), (y - around).max(0), (2 * around + 1).min(w - (x - around).max(0)), (2 * around + 1).min(h - (y - around).max(0)));
-                let mut detail = 0.0;
-                core::min_max_loc(&Mat::roi(&eig, near)?, None, Some(&mut detail), None, None, &core::no_array())?;
-                if detail >= floor { self.add([x as f32, y as f32]); }
+                let (x0, x1) = ((x - around).max(0) as usize, (x + around).min(w - 1) as usize);
+                let detail = ((y - around).max(0)..=(y + around).min(h - 1))
+                    .flat_map(|yy| &eig[yy as usize * w as usize + x0..=yy as usize * w as usize + x1])
+                    .fold(f32::MIN, |m, &e| m.max(e));
+                if detail as f64 >= floor { self.add([x as f32, y as f32]); }
             }
         }
-        Ok(())
     }
 
     fn add(&mut self, p: [f32; 2]) {
@@ -584,6 +581,58 @@ pub(super) fn corner_strengths(frame: &Mat) -> opencv::Result<Mat> {
     let mut eig = Mat::default();
     imgproc::corner_min_eigen_val(frame, &mut eig, 7, 3, core::BORDER_DEFAULT)?;
     Ok(eig)
+}
+
+/// `corner_strengths` without OpenCV, `w` x `h`: cornerMinEigenVal's, Sobel 3, block 7, past the edge the frame reflected
+/// (BORDER_REFLECT_101), summed in the order `gpu_klt.wgsl` sums them
+#[cfg(any(feature = "use-opencv", feature = "use-burn"))]
+pub(super) fn min_eigen_values(pixels: &[u8], stride: usize, w: i32, h: i32) -> Vec<f32> {
+    let (wu, hu) = (w as usize, h as usize);
+    // Where positions -3 .. n + 3 reflect to: gfedcb|abcdefgh|gfedcba, again and again where n < 4, as OpenCV's
+    // borderInterpolate (not the shader's, which clamps after one reflection)
+    let reflected = |n: i32| -> Vec<usize> { (-3..n + 3).map(|mut p| {
+        if n == 1 { return 0; }
+        while p < 0 || p >= n { p = if p < 0 { -p } else { 2 * n - 2 - p }; }
+        p as usize
+    }).collect() };
+    let (rx, ry) = (reflected(w), reflected(h));
+    // Sobel 3's products xx, xy, yy, scaled as OpenCV scales them for an 8-bit image and block 7
+    let s = 1.0 / (4.0 * 7.0 * 255.0);
+    let mut products = vec![[0f32; 3]; wu * hu];
+    for y in 0..hu {
+        let (up, row, down) = (&pixels[ry[y + 2] * stride..], &pixels[y * stride..], &pixels[ry[y + 4] * stride..]);
+        let column = |x: usize| [up[x] as f32, row[x] as f32, down[x] as f32];
+        for x in 0..wu {
+            let (l, m, r) = (column(rx[x + 2]), column(x), column(rx[x + 4]));
+            let dx = ((r[0] + 2.0 * r[1] + r[2]) - (l[0] + 2.0 * l[1] + l[2])) * s;
+            let dy = ((l[2] + 2.0 * m[2] + r[2]) - (l[0] + 2.0 * m[0] + r[0])) * s;
+            products[y * wu + x] = [dx * dx, dx * dy, dy * dy];
+        }
+    }
+    // Their 7 x 7 sums, along the rows and then down the columns, past the edge the products of the position reflected
+    // to; and the smaller eigenvalue of that
+    let mut rows = vec![[0f32; 3]; wu * hu];
+    for y in 0..hu {
+        let p = &products[y * wu..(y + 1) * wu];
+        for x in 0..wu {
+            let mut sum = [0f32; 3];
+            for &i in &rx[x..x + 7] { for k in 0..3 { sum[k] += p[i][k]; } }
+            rows[y * wu + x] = sum;
+        }
+    }
+    let mut out = vec![0f32; wu * hu];
+    let mut sums = vec![[0f32; 3]; wu];
+    for y in 0..hu {
+        sums.fill([0.0; 3]);
+        for &j in &ry[y..y + 7] {
+            for (sum, r) in sums.iter_mut().zip(&rows[j * wu..(j + 1) * wu]) { for k in 0..3 { sum[k] += r[k]; } }
+        }
+        for (v, sum) in out[y * wu..(y + 1) * wu].iter_mut().zip(&sums) {
+            let (a, c) = (sum[0] * 0.5, sum[2] * 0.5);
+            *v = (a + c) - ((a - c) * (a - c) + sum[1] * sum[1]).sqrt();
+        }
+    }
+    out
 }
 
 /// A frame's pixels without the padding of its rows
@@ -689,7 +738,7 @@ pub(super) fn local_maxima(eig: &[f32], w: i32, h: i32) -> Vec<u64> {
 }
 
 /// The corner strengths of every 8th pixel in both directions, the noise of flat areas is found in
-#[cfg(feature = "use-opencv")]
+#[cfg(any(feature = "use-opencv", feature = "use-burn"))]
 fn noise_samples(eig: &[f32], w: i32, h: i32) -> Vec<f32> {
     (0..h as usize).step_by(8).flat_map(|y| (0..w as usize).step_by(8).map(move |x| eig[y * w as usize + x])).collect()
 }
@@ -903,9 +952,35 @@ pub(super) mod tests {
         }
         assert_eq!(glare(none.data_bytes().unwrap(), W as usize, W, H), Vec::new());
     }
+
+    /// What the grid's corner strengths replaced: OpenCV's, also of a frame with padded rows and of sizes where the
+    /// reflection at the edge reaches past a neighbour
+    #[test]
+    fn min_eigen_values_as_opencv() {
+        let frame = texture();
+        let px = frame.data_bytes().unwrap();
+        for (x0, y0, w, h) in [(0, 0, W, H), (101, 57, 37, 23), (5, 9, 3, 2)] {
+            // A copy: OpenCV filters a view with the pixels around it in the frame, not reflected at its edge
+            let crop = Mat::roi(&frame, core::Rect::new(x0, y0, w, h)).unwrap().try_clone().unwrap();
+            let eig = corner_strengths(&crop).unwrap();
+            let expected = eig.data_typed::<f32>().unwrap();
+            let found = min_eigen_values(&px[(y0 * W + x0) as usize..], W as usize, w, h);
+            let largest = expected.iter().fold(0f32, |m, e| m.max(e.abs()));
+            let worst = found.iter().zip(expected).fold(0f32, |m, (f, e)| m.max((f - e).abs()));
+            eprintln!("{w}x{h}: max |ours - OpenCV's| {worst:e}, strengths up to {largest:e}");
+            assert_eq!(found.len(), expected.len());
+            assert!(worst <= 1e-5 * largest, "{w}x{h}: max |ours - OpenCV's| {worst:e}, strengths up to {largest:e}");
+        }
+        let t = Instant::now();
+        for _ in 0..20 { std::hint::black_box(min_eigen_values(px, W as usize, W, H)); }
+        let ours = t.elapsed().as_secs_f64() * 50.0;
+        let t = Instant::now();
+        for _ in 0..20 { std::hint::black_box(corner_strengths(&frame).unwrap()); }
+        eprintln!("{W}x{H}: {ours:.2} ms (OpenCV's {:.2} ms)", t.elapsed().as_secs_f64() * 50.0);
+    }
 }
 
-#[cfg(all(test, feature = "use-opencv", feature = "use-burn"))]
+#[cfg(all(test, feature = "use-burn"))]
 mod gmflow_tests {
     use super::*;
 

@@ -392,12 +392,12 @@ MenuItem {
                 id: opticalTracking;
                 // gmflow only in builds with the ai-optical-flow feature
                 readonly property var methods: controller.has_ai_optical_flow()? ["klt", "dis", "gmflow"] : ["klt", "dis"];
-                model: controller.has_ai_optical_flow()? [QT_TRANSLATE_NOOP("Popup", "KLT (corners)"), QT_TRANSLATE_NOOP("Popup", "DIS (dense flow)"), QT_TRANSLATE_NOOP("Popup", "gmflow (AI dense flow)")]
+                model: controller.has_ai_optical_flow()? [QT_TRANSLATE_NOOP("Popup", "KLT (corners)"), QT_TRANSLATE_NOOP("Popup", "DIS (dense flow)"), QT_TRANSLATE_NOOP("Popup", "GMFlow (AI dense flow)")]
                                                        : [QT_TRANSLATE_NOOP("Popup", "KLT (corners)"), QT_TRANSLATE_NOOP("Popup", "DIS (dense flow)")];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
-                tooltip: controller.has_ai_optical_flow()? qsTr("KLT is the most accurate where the image has detail. DIS also follows weak detail like clouds or water, but is slower and loses fast motion more easily. gmflow (AI dense flow) runs on the GPU (Vulkan, or Metal on Apple systems); without one it is not available. The model (about 150 MB) is downloaded on first use.")
-                                                         : qsTr("KLT is the most accurate where the image has detail. DIS also follows weak detail like clouds or water, but is slower and loses fast motion more easily.");
+                tooltip: qsTr("KLT is the most accurate where the image has detail. DIS also follows weak detail like clouds or water, but is slower and loses fast motion more easily.")
+                         + (controller.has_ai_optical_flow()? " " + qsTr("GMFlow uses an AI model to follow both weak detail and fast motion, but is much slower. Its model (about 30 MB) is downloaded the first time it's used.") : "");
                 onCurrentIndexChanged: controller.set_optical_tracking(methods[currentIndex] || "klt");
             }
         }
