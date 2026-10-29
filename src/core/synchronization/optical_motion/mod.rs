@@ -690,8 +690,28 @@ pub fn solve(m: &OpticalMeasurements, settings: &OpticalCorrectionSettings) -> R
 
 /// `solve` with the solver's parameters given: one spline fitted to all of the measurements, for all of the motion data
 pub fn solve_with(m: &OpticalMeasurements, settings: &OpticalCorrectionSettings, params: &SolverParams) -> Result<OpticalCorrection, String> {
-    let fits = solver::solve(&m.bands, params).map(|sol| (None, sol, m.bands.as_slice())).into_iter().collect();
-    optical_correction::correction_of(m, settings, params, fits)
+    let bands = &m.bands;
+    let sol = if bands.is_empty() && m.video_base.len() >= 2 {
+        solver::Solution { start_us: 0.0, coeffs: Vec::new() }
+    } else {
+        solver::solve(bands, params).ok_or_else(|| "Not enough of the image could be tracked".to_string())?
+    };
+    let rms_deg = (bands.iter().map(|b| sol.at(b.ta_us, params.spacing_us).norm_squared()).sum::<f64>() / bands.len().max(1) as f64).sqrt().to_degrees();
+    Ok(OpticalCorrection {
+        enabled: true,
+        settings: *settings,
+        start_us: sol.start_us,
+        spacing_us: params.spacing_us,
+        coeffs: sol.coeffs.into_iter().map(|c| [c.x as f32, c.y as f32, c.z as f32]).collect(),
+        quats_checksum: m.quats_checksum,
+        context_checksum: m.context_checksum,
+        video_base: m.video_base.clone(),
+        tracking: m.tracking,
+        frames: m.frames,
+        measured_frames: m.measured_frames,
+        rms_deg,
+        parts: Vec::new(),
+    })
 }
 
 impl OpticalMeasurements {
@@ -749,7 +769,7 @@ impl OpticalMeasurements {
         if stopped { return Err("Cancelled".into()); }
         m.process(true);
         if cancelled() { return Err("Cancelled".into()); }
-        if m.measurements.is_empty() { return Err("Not enough of the image could be tracked".into()); }
+        if !m.has_measurements() { return Err("Not enough of the image could be tracked".into()); }
         let (_, measured) = m.finish(quats_checksum);
         Ok(OpticalMeasurements {
             bands: measured.bands,
@@ -1012,7 +1032,7 @@ impl OpticalMotionAnalysis {
         if self.is_cancelled() { return Err("Cancelled".into()); }
         self.measuring.process(true);
         if self.is_cancelled() { return Err("Cancelled".into()); }
-        if self.measuring.measurements.is_empty() { return Err("Not enough of the image could be tracked".into()); }
+        if !self.measuring.has_measurements() { return Err("Not enough of the image could be tracked".into()); }
         let points = self.tracks.observations;
         let (setup, measured) = self.measuring.finish(self.quats_checksum);
         let tracks = self.tracks.finish(setup);
@@ -1067,6 +1087,9 @@ struct Measuring {
     chained: usize,
     /// ... with too few long tracks, from all of them
     chained_with_short: usize,
+    /// Pairs with enough valid bearings to estimate the optical-only base (not the identity held
+    /// over an untracked pair). They remain useful without any high-pass band measurements.
+    vision_measured_pairs: usize,
     /// The frame pairs each track was in so far, for as long as the rotations aren't chained past it
     lengths: HashMap<u32, u32>,
     /// The first pair the next measurement looks at: as far back as the high-pass reaches
@@ -1092,6 +1115,7 @@ impl Measuring {
             odometry: Default::default(),
             chained: 0,
             chained_with_short: 0,
+            vision_measured_pairs: 0,
             lengths: HashMap::new(),
             held_from: 0,
             measured_upto: 0,
@@ -1139,20 +1163,24 @@ impl Measuring {
     fn finish(self, quats_checksum: u64) -> (Setup, Measured) {
         if self.vision.is_some() { ::log::info!("Optical analysis: the rotation of {} frame pairs measured, {} of them with short tracks too", self.chained, self.chained_with_short); }
         let (quats_checksum, video_base) = match &self.vision {
-            Some(keys) => {
+            Some(keys) if self.vision_measured_pairs > 0 => {
                 let base: Vec<(i64, [f32; 4])> = keys.iter().map(|(t, q)| (*t, [q.w as f32, q.i as f32, q.j as f32, q.k as f32])).collect();
                 (optical_correction::checksum(&optical_correction::base_quats(&base)), base)
             },
-            None => (quats_checksum, Vec::new()),
+            _ => (quats_checksum, Vec::new()),
         };
         (self.setup, Measured {
             bands: self.measurements,
             quats_checksum,
             video_base,
-            measured_pairs: self.measured_pairs,
+            measured_pairs: self.measured_pairs.max(self.vision_measured_pairs),
             excluded: self.excluded,
             states: self.states,
         })
+    }
+
+    fn has_measurements(&self) -> bool {
+        !self.measurements.is_empty() || self.vision_measured_pairs > 0
     }
 
     /// Unit bearings of tracked points of a frame, in the quaternions' frame
@@ -1194,6 +1222,7 @@ impl Measuring {
             if let (Some(x), Some(y)) = (x, y) { va.push(x); vb.push(y); ids.push(o.id); }
         }
         let m = if va.len() >= MIN_BAND_POINTS {
+            self.vision_measured_pairs += 1;
             let m0 = robust_rotation(&va, &vb);
             self.odometry.step(&va, &vb, &ids, m0, 1.0 / self.setup.focal_px.max(1.0))
         } else {
@@ -1559,5 +1588,88 @@ mod tests {
         let got: Vec<Option<PointState>> = (0..11).map(|i| states.get(i)).collect();
         use PointState::*;
         assert_eq!(got, [Some(Used), Some(Unused), Some(Unused), Some(Unused), Some(Unused), Some(Rejected), Some(Unused), Some(Unused), Some(Unused), Some(Downweighted), None]);
+    }
+
+    /// Ten frames of a textured image rolling about its centre, without gyro data. Too short for
+    /// the temporal high-pass, but enough corresponding points to measure every frame's rotation.
+    fn short_optical_analysis(points: usize, from_video: bool) -> Result<OpticalMeasurements, String> {
+        let params = ComputeParams {
+            width: SIZE.0 as usize, height: SIZE.1 as usize,
+            output_width: SIZE.0 as usize, output_height: SIZE.1 as usize,
+            scaled_fps: 50.0, fov_scale: 1.0,
+            ..Default::default()
+        };
+        let setup = Setup { params, from_video, track_size: SIZE, focal_px: SIZE.0 as f64 * 0.8, ..Default::default() };
+        let mut measuring = Measuring::new(setup, Arc::default());
+        let mut tracks = TracksBuilder::default();
+        let frame = |i: usize| Frame { index: i, timestamp_ms: i as f64 * 20.0, start_ms: i as f64 * 20.0, mid_ms: i as f64 * 20.0, per_px_ms: 0.0 };
+        let position = |id: usize, i: usize| {
+            let x = (id % 10) as f32 * 40.0 - 180.0;
+            let y = (id / 10) as f32 * 40.0 - 180.0;
+            let (s, c) = (i as f32 * 0.005).sin_cos();
+            [SIZE.0 as f32 / 2.0 + c * x - s * y, SIZE.1 as f32 / 2.0 + s * x + c * y]
+        };
+        for i in 0..9 {
+            let obs = (0..points).map(|id| Observation { id: id as u32, a: position(id, i), b: position(id, i + 1) }).collect();
+            measuring.push(tracks.push(frame(i), frame(i + 1), obs, SIZE));
+        }
+        measuring.process(true);
+        if !measuring.has_measurements() { return Err("Not enough of the image could be tracked".into()); }
+        let (setup, measured) = measuring.finish(0);
+        let tracks = tracks.finish(setup);
+        Ok(OpticalMeasurements {
+            bands: measured.bands,
+            scaled_fps: 50.0,
+            quats_checksum: measured.quats_checksum,
+            context_checksum: 42,
+            video_base: measured.video_base,
+            tracking: TrackingMethod::Klt,
+            frames: 10,
+            measured_frames: measured.measured_pairs,
+            generation: 0,
+            tracks: Arc::new(tracks),
+            excluded: measured.excluded,
+            states: measured.states,
+        })
+    }
+
+    #[test]
+    fn short_optical_only_clip_keeps_its_measured_rotation() {
+        let m = short_optical_analysis(100, true).expect("short tracks still measure camera motion");
+        assert!(m.bands.is_empty(), "the clip is shorter than the correction's high-pass");
+        assert_eq!(m.video_base.len(), 10);
+        assert_eq!(m.measured_frames, 9);
+        let settings = OpticalCorrectionSettings::default();
+        let correction = solve(&m, &settings).unwrap();
+        assert!(correction.coeffs.is_empty());
+        assert_eq!(correction.rms_deg, 0.0);
+        let base = correction.base_quats();
+        let turn = base.first_key_value().unwrap().1.angle_to(base.last_key_value().unwrap().1);
+        assert!((turn - 0.045).abs() < 0.001, "measured roll: {turn}");
+        assert!(correction.measured_on(m.quats_checksum, m.context_checksum));
+        assert!(!correction.measured_on(m.quats_checksum, m.context_checksum + 1));
+
+        // Project round trip, then the same integration path preview/export use.
+        let restored: OpticalCorrection = serde_json::from_str(&serde_json::to_string(&correction).unwrap()).unwrap();
+        let mut gyro = GyroSource::new();
+        gyro.duration_ms = 180.0;
+        gyro.integration_method = 0;
+        gyro.optical_context = m.context_checksum;
+        gyro.optical_correction = Some(Arc::new(restored));
+        gyro.integrate();
+        assert!(gyro.optical_correction_applied);
+        assert_eq!(*gyro.quaternions, base);
+
+        let again = m.remeasure(HashSet::new(), || false).unwrap();
+        assert_eq!(again.video_base, m.video_base);
+        assert!(solve(&again, &settings).is_ok());
+        assert!(m.remeasure((0..100).collect(), || false).is_err());
+    }
+
+    #[test]
+    fn insufficient_optical_tracks_and_gyro_only_short_clips_still_fail() {
+        assert!(short_optical_analysis(MIN_BAND_POINTS - 1, true).is_err());
+        assert!(short_optical_analysis(100, false).is_err());
+        assert!(solve(&OpticalMeasurements::default(), &OpticalCorrectionSettings::default()).is_err());
     }
 }
