@@ -121,6 +121,17 @@ impl BreathingFrame {
     }
 }
 
+/// What `FileMetadata::lens_focal_length_varies`, `has_per_frame_focal_length` and `lens_breathing_varies` found, each
+/// the first time it's asked: they scan all of the lens metadata (the breathing every row of every frame), for the
+/// renderer per frame and for the UI, the chart and every recompute, and the lens metadata never changes once the file
+/// is read (`ReadOnlyFileMetadata`: only the motion data is replaced, in a copy of the rest)
+#[derive(Default, Clone, Debug)]
+pub struct LensVariation {
+    focal_length_mm: std::sync::OnceLock<bool>,
+    per_frame_focal_length: std::sync::OnceLock<bool>,
+    breathing: std::sync::OnceLock<bool>,
+}
+
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
 pub struct FileMetadata {
@@ -154,9 +165,9 @@ pub struct FileMetadata {
     #[serde(rename = "mesh_correction", skip_serializing)]
     pub legacy_mesh_correction: Vec<(Vec<f64>, Vec<f32>)>,
     pub lens_breathing:      Vec<BreathingFrame>,
-    /// Cache of `lens_focal_length_varies`, the renderer asks per frame
+    /// What the lens metadata's checks for a focal length that changes found (`LensVariation`)
     #[serde(skip)]
-    pub focal_length_varies_cache: std::sync::OnceLock<bool>,
+    pub lens_variation:      LensVariation,
     /// The segments of a video cut from camera recordings, from its segment table (`TrimSegments`): every segment
     /// boundary is a hard boundary for the motion data
     pub trim_segments:       Option<super::TrimSegments>,
@@ -185,7 +196,7 @@ impl FileMetadata {
             mesh_correction:         Default::default(),
             legacy_mesh_correction:  Default::default(),
             lens_breathing:          Default::default(),
-            focal_length_varies_cache: Default::default(),
+            lens_variation:          Default::default(),
             trim_segments:           self.trim_segments.clone(),
         }
     }
@@ -221,10 +232,12 @@ impl FileMetadata {
     /// Whether the lens breathing changes over the clip: the focus moves (the `focal` of any row of any frame, a frame
     /// without any taken as 1, as the focal length sweep takes it), or the crop of the camera's own compensation does
     /// (`applied`). A clip that keeps its focus breathes by as much all through, a constant scale of its focal length:
-    /// nothing changes over it, and any one frame's lens is every frame's
+    /// nothing changes over it, and any one frame's lens is every frame's. Cached (`LensVariation`)
     pub fn lens_breathing_varies(&self) -> bool {
-        Self::varies(&mut self.lens_breathing.iter().flat_map(|b| b.focal.iter().map(|f| *f as f64).chain(b.focal.is_empty().then_some(1.0))))
-            || Self::varies(&mut self.lens_breathing.iter().filter(|b| !b.focal.is_empty()).map(|b| b.camera_scale(false)))
+        *self.lens_variation.breathing.get_or_init(|| {
+            Self::varies(&mut self.lens_breathing.iter().flat_map(|b| b.focal.iter().map(|f| *f as f64).chain(b.focal.is_empty().then_some(1.0))))
+                || Self::varies(&mut self.lens_breathing.iter().filter(|b| !b.focal.is_empty()).map(|b| b.camera_scale(false)))
+        })
     }
     /// More than 0.2% between the smallest and the largest value
     fn varies(it: &mut dyn Iterator<Item = f64>) -> bool {
@@ -237,19 +250,21 @@ impl FileMetadata {
         count > 1 && max > min * 1.002
     }
     /// Whether the lens metadata reports a focal length in millimetres that changes over the clip (a zoom lens
-    /// on a body that records it: Blackmagic, RED, Nikon, Z CAM, Sony). Cached, the projection asks per frame,
-    /// see `FrameTransform::get_lens_data_at_timestamp`
+    /// on a body that records it: Blackmagic, RED, Nikon, Z CAM, Sony). Cached (`LensVariation`), the projection asks
+    /// per frame, see `FrameTransform::get_lens_data_at_timestamp`
     pub fn lens_focal_length_varies(&self) -> bool {
-        *self.focal_length_varies_cache.get_or_init(|| Self::varies(&mut self.lens_params.values().filter_map(|x| x.focal_length.map(|f| f as f64))))
+        *self.lens_variation.focal_length_mm.get_or_init(|| Self::varies(&mut self.lens_params.values().filter_map(|x| x.focal_length.map(|f| f as f64))))
     }
     /// Whether the lens metadata describes a focal length that changes over the clip (zoom lens, dynamic
     /// crop, interpolated lens profiles). A fixed lens reports the same value every frame and has nothing
     /// to stabilize or to chart. The pixel and the millimetre values are compared separately: an entry may
-    /// carry one without the other, and they're not in the same unit
+    /// carry one without the other, and they're not in the same unit. Cached (`LensVariation`)
     pub fn has_per_frame_focal_length(&self) -> bool {
-        Self::varies(&mut self.lens_params.values().filter_map(|x| x.pixel_focal_length.map(|(fx, fy)| (fx as f64 * fy as f64).sqrt())))
-            || self.lens_focal_length_varies()
-            || Self::varies(&mut self.lens_positions.values().copied())
+        *self.lens_variation.per_frame_focal_length.get_or_init(|| {
+            Self::varies(&mut self.lens_params.values().filter_map(|x| x.pixel_focal_length.map(|(fx, fy)| (fx as f64 * fy as f64).sqrt())))
+                || self.lens_focal_length_varies()
+                || Self::varies(&mut self.lens_positions.values().copied())
+        })
     }
     pub fn lens_params_closest(&self, timestamp_us: i64, max_diff: i64, pred: impl Fn(&LensParams) -> bool) -> Option<&LensParams> {
         self.lens_params_closest_in(i64::MIN..=i64::MAX, timestamp_us, max_diff, pred)

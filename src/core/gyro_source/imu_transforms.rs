@@ -4,7 +4,7 @@
 use nalgebra::*;
 use super::DEG2RAD;
 
-#[derive(Default, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
 pub struct IMUTransforms {
     pub imu_orientation: Option<String>,
     pub imu_rotation_angles: Option<[f64; 3]>,
@@ -15,6 +15,23 @@ pub struct IMUTransforms {
     pub imu_mf: i32,
     pub gyro_bias: Option<[f64; 3]>,
 }
+/// The same settings, bit for bit: what tells a change of them (`GyroSource::integrate_shared`), as the motion data's
+/// checksum takes them. A NaN one (an empty field of the UI) is then the same as itself, where `f64`'s `==` never is
+impl PartialEq for IMUTransforms {
+    fn eq(&self, other: &Self) -> bool {
+        fn bits<const N: usize>(v: Option<[f64; N]>) -> Option<[u64; N]> { v.map(|v| v.map(f64::to_bits)) }
+        fn rotation(r: &Option<Rotation3<f64>>) -> Option<[u64; 9]> { r.as_ref().map(|r| std::array::from_fn(|i| r.matrix()[i].to_bits())) }
+        self.imu_orientation == other.imu_orientation
+            && bits(self.imu_rotation_angles) == bits(other.imu_rotation_angles)
+            && bits(self.acc_rotation_angles) == bits(other.acc_rotation_angles)
+            && rotation(&self.imu_rotation) == rotation(&other.imu_rotation)
+            && rotation(&self.acc_rotation) == rotation(&other.acc_rotation)
+            && self.imu_lpf.to_bits() == other.imu_lpf.to_bits()
+            && self.imu_mf == other.imu_mf
+            && bits(self.gyro_bias) == bits(other.gyro_bias)
+    }
+}
+impl Eq for IMUTransforms { }
 impl IMUTransforms {
     /// Gyro samples get the bias first: it's in the frame of the samples, before the orientation
     pub fn transform_gyro(&self, v: &mut [f64; 3]) {

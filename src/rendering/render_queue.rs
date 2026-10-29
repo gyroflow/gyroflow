@@ -1544,12 +1544,11 @@ impl RenderQueue {
                     sync_params.time_per_syncpoint *= 1000.0; // s to ms
                     sync_params.search_size        *= 1000.0; // s to ms
 
-                    // The optical analysis (offset method 3) tracks each frame from the one before
-                    let every_nth_frame = if sync_params.offset_method == 3 { 1 } else { sync_params.every_nth_frame.max(1) };
-
                     let size = stab.params.read().size;
 
                     if let Ok(mut sync) = AutosyncProcess::from_manager(&stab, &timestamps_fract, sync_params, "synchronize".into(), cancel_flag.clone()) {
+                        // Every frame where the optical analysis (offset method 3) tracks them, once it knows it can run
+                        let every_nth_frame = sync.every_nth_frame();
                         let processing_cb2 = processing_cb.clone();
                         sync.on_progress(move |percent, _ready, _total| {
                             processing_cb2(percent);

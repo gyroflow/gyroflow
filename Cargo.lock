@@ -4289,11 +4289,12 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.4.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=bd69820#bd69820eddcd04ce2f525701277e0f0269296068"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=47fd021#47fd021340b95beb86987328531c4c4f3856e7af"
 dependencies = [
  "argh",
  "byteorder",
  "chrono",
+ "crc32fast",
  "csv",
  "fc-blackbox-patched",
  "half",

@@ -50,6 +50,11 @@ pub struct FileLoadOptions {
     /// not an option of the file, so it isn't stored
     #[serde(skip)]
     pub video_frames: Option<usize>,
+    /// The video the motion data is loaded for, when the file loaded isn't the video's own (a telemetry log, another
+    /// camera's recording): the file's segments are then the video's, by its segment table's rule for telemetry logs
+    /// (telemetry-parser's `Input::read_video_segment_table`). The video's, so it isn't stored either
+    #[serde(skip)]
+    pub video_url: Option<String>,
 }
 
 #[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
@@ -434,6 +439,17 @@ impl GyroSource {
             ..Default::default()
         };
         let mut input = Input::from_stream_with_options(stream, filesize, &path, progress_cb, cancel_flag, tpoptions)?;
+        // The motion data of another file than the video, which has no frames of the video's: its segments are the
+        // video's, with the clocks of its table only when the table names this file as the log it was trimmed with
+        if let Some(video_url) = options.video_url.as_deref() {
+            match crate::filesystem::open_file(video_url, false, false) {
+                Ok(mut video) => {
+                    let video_size = video.size;
+                    input.read_video_segment_table(video.get_file(), video_size, stream, filesize, &path);
+                }
+                Err(e) => log::warn!("The video {video_url} the motion data is loaded for can't be opened for its segment table: {e:?}"),
+            }
+        }
         // The video's segment table (`segments`), when it was cut from camera recordings and the table is valid for it
         let segment_table = input.segment_table().cloned();
 
@@ -735,6 +751,7 @@ impl GyroSource {
             let mut segments = TrimSegments::new(table, input.samples.as_deref().unwrap_or_default(), &[(MotionSeries::Imu, &imu), (MotionSeries::Orientations, &quat_origins)]);
             segments.metadata_us = metadata_us;
             segments.unplaced = unplaced;
+            segments.motion_unplaced = !input.readings_at_table_frames();
             segments
         });
 
@@ -779,7 +796,7 @@ impl GyroSource {
             mesh_correction:  Default::default(),
             legacy_mesh_correction: Vec::new(),
             lens_breathing:   Vec::new(),
-            focal_length_varies_cache: Default::default(),
+            lens_variation:   Default::default(),
             trim_segments,
         };
 
@@ -1148,7 +1165,7 @@ impl GyroSource {
         // A video cut from recordings is smoothed segment by segment, each as a clip of its own: the smoothing of one
         // segment doesn't see the motion of another, of another moment, nor the jump in orientation between them
         let mut smoothed_quaternions = TimeQuat::new();
-        match self.segments.as_deref().filter(|s| s.len() > 1) {
+        match self.segments.as_deref().filter(|s| s.len() > 1 && !s.whole) {
             Some(s) => {
                 // Each part is smoothed with the video's parameters, for the part's frames (`smoothing_frames`)
                 let all_frames = compute_params.smoothing_frames.take();
@@ -1466,13 +1483,18 @@ impl GyroSource {
     /// integration method, correction...), it's integrated again from a new copy: what's put in is always the integration
     /// of the motion data there is then, as an integration under the lock would have it
     pub fn integrate_shared(gyro: &RwLock<GyroSource>, integration: Integration) {
-        loop {
+        // Copies a change made stale before it's integrated under the lock, as it was before this: a change that keeps
+        // coming (another thread setting the motion data over and over) would otherwise integrate it again for as long
+        // as it comes, seconds each time, on the caller's thread (the UI's, `StabilizationManager::recompute_gyro`)
+        const ON_A_COPY: usize = 3;
+        let integrate = |g: &mut GyroSource| match integration {
+            Integration::ApplyTransforms => g.apply_transforms(),
+            Integration::Integrate => g.integrate(),
+        };
+        for _ in 0..ON_A_COPY {
             // Shares the readings, the orientations and the metadata (`Arc`s): only the settings are copied
             let mut copy = gyro.read().clone();
-            match integration {
-                Integration::ApplyTransforms => copy.apply_transforms(),
-                Integration::Integrate => copy.integrate(),
-            }
+            integrate(&mut copy);
             let mut gyro = gyro.write();
             if gyro.same_integration_inputs(&copy, integration) {
                 gyro.take_integration(&mut copy);
@@ -1482,6 +1504,8 @@ impl GyroSource {
                 return;
             }
         }
+        log::debug!("The motion data changed under {ON_A_COPY} integrations of a copy of it, integrating it under the lock");
+        integrate(&mut gyro.write());
     }
     /// Whether `self` integrates (`integration`) to what `copy`, a copy of it, did: everything `apply_transforms`,
     /// `integrate` and `apply_optical_correction` read is the same. The shared parts are compared by identity, which is
@@ -1633,7 +1657,8 @@ impl GyroSource {
     /// The sync offset at the motion data's time `timestamp_ms`, of its segment's sync points in a video cut from
     /// recordings (`offset_at_video_timestamp`)
     pub fn offset_at_gyro_timestamp (&self, timestamp_ms: f64) -> f64 {
-        let segment = self.segments.as_ref().map(|s| s.of_motion_us(motion_key(timestamp_ms)));
+        // The motion data's time tells its part, but where it's one piece every part's (`SegmentRanges::whole`)
+        let segment = self.segments.as_ref().filter(|s| !s.whole).map(|s| s.of_motion_us(motion_key(timestamp_ms)));
         match segment.and_then(|r| self.offsets_by_segment.get(r)).filter(|x| !x.0.is_empty()) {
             Some((offsets, _)) => Self::offset_at_timestamp(offsets, timestamp_ms),
             None => Self::offset_at_timestamp(&self.offsets, timestamp_ms),

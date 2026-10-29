@@ -215,7 +215,8 @@ impl MeasuredParts {
     /// less its part's sync offset (`GyroSource::lookup_for_frame`). Takes the `gyro` lock
     pub fn of(params: &ComputeParams) -> Option<Self> {
         let gyro = params.gyro.read();
-        let segments = gyro.segment_ranges()?;
+        // Motion data of one piece (`SegmentRanges::whole`) is measured as one
+        let segments = gyro.segment_ranges().filter(|s| !s.whole)?;
         let md = gyro.file_metadata.read();
         let parts = (0..segments.len()).map(|r| {
             let frames = segments.frames(r);

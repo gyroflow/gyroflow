@@ -63,6 +63,7 @@ const SET_UP_TIMEOUT: Duration = Duration::from_secs(30);
 
 /// Where KLT runs: on the CPU, or on a GPU - the one of the device selected for processing (its index in the device
 /// list, `GPU_LIST`) when that has a wgpu adapter, see `WgpuWrapper::compute_adapter`
+#[derive(Clone, Copy, Debug)]
 pub enum KltDevice {
     Cpu,
     Gpu(Option<usize>),

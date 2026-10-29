@@ -27,6 +27,14 @@
 //! The other metadata of each frame (its time offset, its lens, its distortion mesh, its focus breathing) belongs to the
 //! segment of the frame, and is looked up and filled in within it: the metadata samples of each part are kept with the
 //! segments (`TrimSegments::metadata_us`), as the lens metadata is keyed by their times
+//!
+//! The motion data can be another file's than the video's: a telemetry log beside it or loaded for it, another camera's
+//! recording. Its readings are at the video's frames, and in the parts as above, only where the video's table names the
+//! file as the log the video was trimmed with (telemetry-parser's `Input::readings_at_table_frames`). Otherwise where
+//! each part's readings are in it isn't known (a log the video wasn't trimmed with: its source's untrimmed one is one
+//! recording, of which every part shows another moment, in any order): the segments are the video's frames' only,
+//! each synchronized and looked up on its own in all of the motion data, which is one piece
+//! (`TrimSegments::motion_unplaced`)
 
 use std::ops::{ Range, RangeInclusive };
 use std::sync::Arc;
@@ -111,6 +119,12 @@ pub struct TrimSegments {
     /// Empty for a video whose readings weren't read with it, or whose readings' parts are all known
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub unplaced: Vec<UnplacedValue<usize>>,
+    /// Whether the motion data isn't known to be at the video's frames: another file's (a telemetry log, another
+    /// camera's recording) that the video's table doesn't name as the log the video was trimmed with. The parts are
+    /// then the video's frames' only: each is synchronized and looked up on its own, in all of the motion data, which
+    /// is integrated, filtered and smoothed as one piece (`SegmentRanges::whole`)
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub motion_unplaced: bool,
 }
 
 impl TrimSegments {
@@ -119,7 +133,7 @@ impl TrimSegments {
     /// in `samples`, and its frame where the format records it)
     pub fn new(table: SegmentTable, samples: &[SampleInfo], series: &[(MotionSeries, &[(i64, ReadingOrigin)])]) -> Self {
         let parts = contiguous_parts(&table);
-        let mut segments = Self { table, parts, readings: Vec::new(), metadata_us: Vec::new(), unplaced: Vec::new() };
+        let mut segments = Self { table, parts, readings: Vec::new(), metadata_us: Vec::new(), unplaced: Vec::new(), motion_unplaced: false };
         let sample_part = segments.sample_parts(samples, series);
         // Each series' readings in time order, in runs of one part
         let mut runs: Vec<ReadingRun> = Vec::new();
@@ -252,6 +266,9 @@ pub struct SegmentRanges {
     /// readings of another part than theirs, as the parts are placed here (`TrimSegments::unplaced`): their part has no
     /// reading of the sensor on that side, so they have no value of it, as a reading of a known part has none there
     pub cut_values: Vec<(i64, ImuSensor)>,
+    /// Whether the motion data is one piece, every part's (`motion` is all of it for each): it isn't known to be at the
+    /// video's frames (`TrimSegments::motion_unplaced`), so each part reads it where its sync puts its frames
+    pub whole: bool,
     /// Whether a lookup past its part's motion data was reported (`GyroSource::lookup_for_frame`)
     pub reported: Arc<AtomicBool>,
 }
@@ -316,7 +333,13 @@ impl SegmentRanges {
             starts[r] = match (later_own, timed) { (Some(a), Some(b)) => a.min(b), (a, b) => a.or(b).unwrap_or(captured_from(r)) };
         }
         for r in 2..n { starts[r] = starts[r].max(starts[r - 1]); }
-        let motion: Vec<Range<i64>> = (0..n).map(|r| starts[r]..starts.get(r + 1).copied().unwrap_or(i64::MAX)).collect();
+        // Motion data that isn't known to be at the video's frames is one piece, all of it every part's
+        let whole = segments.motion_unplaced && (!md.raw_imu.is_empty() || !md.quaternions.is_empty());
+        let motion: Vec<Range<i64>> = if whole {
+            vec![i64::MIN..i64::MAX; n]
+        } else {
+            (0..n).map(|r| starts[r]..starts.get(r + 1).copied().unwrap_or(i64::MAX)).collect()
+        };
         let durations_ms = (0..n).map(|r| { let v = segments.video_us(r); segment_duration_ms(md, (v.end - v.start) as f64 / 1000.0 / scale, motion[r].clone()) }).collect();
         // A reading of no known part is of the part its time is in (the readings are keyed by their time as the IMU's
         // are, `motion_key` of the time in ms)
@@ -325,6 +348,7 @@ impl SegmentRanges {
             motion.partition_point(|m| m.start <= key).saturating_sub(1)
         });
         let cut_values = segments.unplaced.iter().filter(|v| {
+            if whole { return false; }
             let p = part_at(v.at_us, v.part);
             part_at(v.before.0, v.before.1) != p || part_at(v.after.0, v.after.1) != p
         }).map(|v| (motion_key(v.at_us as f64 / 1000.0), v.sensor)).collect();
@@ -336,6 +360,7 @@ impl SegmentRanges {
             motion,
             durations_ms,
             cut_values,
+            whole,
             reported: Default::default(),
         };
         if n > 1 {
@@ -380,7 +405,7 @@ impl SegmentRanges {
     /// the same values cut (`cut_values`): what the integration and the IMU filters run on one by one
     /// (`GyroSource::integrate`)
     pub fn same_pieces(&self, other: &Self) -> bool {
-        self.motion == other.motion && self.durations_ms == other.durations_ms && self.cut_values == other.cut_values
+        self.motion == other.motion && self.durations_ms == other.durations_ms && self.cut_values == other.cut_values && self.whole == other.whole
     }
     /// A checksum of what the parts are
     pub fn hash_into(&self, hasher: &mut impl std::hash::Hasher) {
@@ -392,6 +417,7 @@ impl SegmentRanges {
         }
         hasher.write_usize(self.end_frame);
         hasher.write_i64(self.video_end_us);
+        hasher.write_u8(self.whole as u8);
     }
 }
 
@@ -411,7 +437,7 @@ pub(super) fn segment_duration_ms(md: &super::FileMetadata, video_ms: f64, motio
 /// The motion data of a video, split at its segments' boundaries: the timestamps (µs) of each part's data
 /// (`SegmentRanges::motion`), `None` for a video of one segment (or none), whose data is one piece
 pub fn split_ranges(segments: Option<&SegmentRanges>) -> Option<&[Range<i64>]> {
-    segments.filter(|s| s.len() > 1).map(|s| s.motion.as_slice())
+    segments.filter(|s| s.len() > 1 && !s.whole).map(|s| s.motion.as_slice())
 }
 
 /// The key of a motion sample at `ms` in the maps of the motion data (the quaternions'): its time in whole µs, as the

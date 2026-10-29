@@ -113,10 +113,14 @@ pub fn through_host<R>(buffers: &mut Buffers, process: impl FnOnce(&mut Buffers)
     in_host.resize(buffers.input.size.2 * buffers.input.size.1, 0);
     out_host.resize(buffers.output.size.2 * buffers.output.size.1, 0);
 
-    // The host's work on the frame done first. The output is drawn whole (out of its `rect` too), so only the input
-    // goes to the host
+    // The host's work on the frame done first. The output goes to the host too where its `rect` doesn't cover it (a
+    // timeline-sized buffer in Resolve): the CPU and OpenCL kernels draw the rect only, and around it the frame has to
+    // keep what it has, as when it's processed in place, not get the zeros or another frame's pixels of the host copy
+    // (`HOST_FRAMES`). Where the rect covers it, every pixel is drawn
+    let size = buffers.output.size;
+    let covered = buffers.output.rect.is_none_or(|r| r.0 == 0 && r.1 == 0 && r.2 >= size.0 && r.3 >= size.1);
     cuda_synchronize();
-    let result = copy_to_host(&mut in_host, input).and_then(|_| {
+    let result = copy_to_host(&mut in_host, input).and_then(|_| if covered { Ok(()) } else { copy_to_host(&mut out_host, output) }).and_then(|_| {
         let mut host = Buffers { input: on_host(&buffers.input, &mut in_host), output: on_host(&buffers.output, &mut out_host) };
         let ret = process(&mut host)?;
         copy_from_host(output, &out_host)?;

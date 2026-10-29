@@ -208,8 +208,8 @@ impl ComputeParams {
 
     pub fn calculate_camera_fovs(&mut self) {
         // Per frame only when the focal length changes over the clip: the metadata's, in whichever unit the camera reports
-        // it (see `FrameTransform::get_lens_data_at_timestamp`), or the lens's own through its breathing (the crop lenses
-        // are scaled to it, `FrameTransform::effective_camera_matrix`); a fixed lens has one FOV
+        // it (see `FrameTransform::get_lens_data_at_timestamp`), or the lens's own through its breathing (the FOVs and the
+        // crop lenses are scaled to it, `FrameTransform::effective_camera_matrix`); a fixed lens has one FOV
         let frame_count = if self.gyro.read().file_metadata.read().has_varying_focal_length() {
             self.frame_count
         } else {
@@ -223,7 +223,10 @@ impl ComputeParams {
         for f in 0..frame_count as i32 {
             let timestamp = self.timestamp_at_frame(f);
             let lens = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&self, timestamp, false);
-            let camera_matrix = lens.0;
+            // The focal length the render projects with, as the crop lenses take it: the dequantized curve, with the
+            // breathing in it. The lens data's own is the metadata's as it's stated, without any breathing
+            let mut camera_matrix = lens.0;
+            crate::stabilization::FrameTransform::effective_camera_matrix(self, f as usize, &mut camera_matrix);
             let diag_length = ((self.width.pow(2) + self.height.pow(2)) as f64).sqrt();
             // let diag_pixel_focal_length = (camera_matrix[(0, 0)].powi(2) + camera_matrix[(1, 1)].powi(2)).sqrt();
             let d_fov = 2.0 * ((diag_length / (2.0 * camera_matrix[(1, 1)])).atan()) * 180.0 / std::f64::consts::PI;
@@ -231,6 +234,11 @@ impl ComputeParams {
             crop_lenses.push(self, f as usize, &lens);
         }
         crop_lenses.finish();
+        // One FOV when every frame has the same one (a lens whose other per-frame data changes): what the readers take
+        // for a fixed lens, the USD export no per-frame focal length
+        if self.camera_diagonal_fovs.iter().all(|x| x.to_bits() == self.camera_diagonal_fovs[0].to_bits()) {
+            self.camera_diagonal_fovs.truncate(1);
+        }
         self.smoothing_crop_lenses = Some(Arc::new(crop_lenses));
 
         // ... and the time the render reads each frame's orientations at, in the motion's own timeline: the frame's

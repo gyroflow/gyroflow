@@ -215,8 +215,9 @@ impl StabilizationManager {
     /// otherwise the input file's, so a video whose motion is another file's (a render queue job with a gyro file, a
     /// project with a log) has them too
     pub fn load_gyro_data<T: Read + Seek, F: Fn(f64)>(&self, stream: &mut T, filesize: usize, url: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::result::Result<(), GyroflowCoreError> {
-        let frame_times = if is_main_video { FrameTimesFrom::LoadedFile } else { FrameTimesFrom::Video(self.input_file.read().url.clone()) };
-        self.load_motion_file(stream, filesize, url, is_main_video, options, progress_cb, cancel_flag, frame_times)
+        let video_url = self.input_file.read().url.clone();
+        let frame_times = if is_main_video { FrameTimesFrom::LoadedFile } else { FrameTimesFrom::Video(video_url.clone()) };
+        self.load_motion_file(stream, filesize, url, is_main_video, options, progress_cb, cancel_flag, frame_times, &video_url)
     }
 
     /// A video's timing from its file: its frame times (`StabilizationParams::frame_times`) and its frame rate, as the
@@ -261,9 +262,10 @@ impl StabilizationManager {
         }
     }
 
-    /// `load_gyro_data`, the video's frame times taken as `frame_times` says
+    /// `load_gyro_data`, the video's frame times taken as `frame_times` says. `video_url` is the video the motion data
+    /// is for, whose segments a file that isn't the video's own takes (`FileLoadOptions::video_url`)
     #[allow(clippy::too_many_arguments)]
-    fn load_motion_file<T: Read + Seek, F: Fn(f64)>(&self, stream: &mut T, filesize: usize, url: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>, frame_times: FrameTimesFrom) -> std::result::Result<(), GyroflowCoreError> {
+    fn load_motion_file<T: Read + Seek, F: Fn(f64)>(&self, stream: &mut T, filesize: usize, url: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>, frame_times: FrameTimesFrom, video_url: &str) -> std::result::Result<(), GyroflowCoreError> {
         {
             let params = self.params.read();
             let mut gyro = self.gyro.write();
@@ -290,8 +292,12 @@ impl StabilizationManager {
             let params = self.params.read();
             (params.fps, params.size, params.frame_count)
         };
-        // The per-frame tables are the video's
-        let parse_options = gyro_source::FileLoadOptions { video_frames: options.video_frames.or((frame_count > 0).then_some(frame_count)), ..options.clone() };
+        // The per-frame tables are the video's, and so are the segments of a file that isn't the video's own
+        let parse_options = gyro_source::FileLoadOptions {
+            video_frames: options.video_frames.or((frame_count > 0).then_some(frame_count)),
+            video_url: (!is_main_video && !video_url.is_empty()).then(|| video_url.to_owned()),
+            ..options.clone()
+        };
 
         let timing = match frame_times {
             FrameTimesFrom::LoadedFile => Some(Self::video_timing_of(stream, filesize as u64)),
@@ -2285,14 +2291,14 @@ impl StabilizationManager {
                     } else if filesystem::exists(&gyro_url) && blocking {
                         let mut file = filesystem::open_file(&gyro_url, false, false)?;
                         let filesize = file.size;
-                        if let Err(e) = self.load_motion_file(file.get_file(), filesize, &gyro_url, is_main_video, &load_options, progress_cb, cancel_flag.clone(), FrameTimesFrom::Caller) {
+                        if let Err(e) = self.load_motion_file(file.get_file(), filesize, &gyro_url, is_main_video, &load_options, progress_cb, cancel_flag.clone(), FrameTimesFrom::Caller, &video_url) {
                             ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_url, e);
                         }
                     }
                 } else if filesystem::exists(&gyro_url) && blocking {
                     let mut file = filesystem::open_file(&gyro_url, false, false)?;
                     let filesize = file.size;
-                    if let Err(e) = self.load_motion_file(file.get_file(), filesize, &gyro_url, is_main_video, &load_options, progress_cb, cancel_flag.clone(), FrameTimesFrom::Caller) {
+                    if let Err(e) = self.load_motion_file(file.get_file(), filesize, &gyro_url, is_main_video, &load_options, progress_cb, cancel_flag.clone(), FrameTimesFrom::Caller, &video_url) {
                         ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_url, e);
                     }
                 }

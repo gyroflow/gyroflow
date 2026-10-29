@@ -465,15 +465,6 @@ impl Controller {
         sync_params.every_nth_frame     = sync_params.every_nth_frame.max(1);
 
         let for_rs = mode == "estimate_rolling_shutter";
-        let for_lens_delay = mode == "estimate_lens_delay";
-        if for_lens_delay {
-            sync_params.every_nth_frame = 1; // consecutive frames are what the estimate tracks
-        }
-        if mode == "synchronize" && sync_params.offset_method == 3 {
-            sync_params.every_nth_frame = 1; // the optical analysis tracks each frame from the one before
-        }
-
-        let every_nth_frame = sync_params.every_nth_frame;
 
         self.sync_in_progress = true;
         self.sync_in_progress_changed();
@@ -578,6 +569,9 @@ impl Controller {
             });
 
             let ranges = sync.get_ranges();
+            // Every frame where the process needs consecutive ones (the optical analysis, the lens delay estimate), once
+            // it knows it can run
+            let every_nth_frame = sync.every_nth_frame();
             let mut frame_no = 0;
             let mut abs_frame_no = 0;
 
