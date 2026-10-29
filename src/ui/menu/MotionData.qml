@@ -77,6 +77,12 @@ MenuItem {
             if (typeof gyro.optical_tracking === "string") {
                 opticalTracking.currentIndex = gyro.optical_tracking === "dis"? 1 : 0;
             }
+            // A project and the clean state of a new file say whether there's a correction (null: none, so the section
+            // closes like the rest resets), a preset doesn't have the key. Decided like `updateInfo` does, which leaves it
+            // as it was without a correction: for a project ignoring the motion data, its handler would bring it back
+            if (gyro.hasOwnProperty("optical_correction_enabled")) {
+                opticalcb.checked = !!gyro.ignore_file_motion || !!gyro.optical_correction_enabled;
+            }
             // The checkbox from the core, which has the project's correction and whether it's on (`optical_correction_enabled`)
             Qt.callLater(opticalcb.updateInfo);
             if (typeof gyro.sample_index === "number") {

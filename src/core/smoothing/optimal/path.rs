@@ -423,9 +423,10 @@ fn interior_point(q: &BandedMatrix, b: &[f64], cons: &[Active]) -> (Vec<f64>, us
 
 const MAX_IPM: usize = 60;
 
-/// `f` for every index below `n`, spread over threads of its own. Not rayon: the smoothing runs on a rayon pool's
-/// thread holding the gyro lock, and a thread waiting in a rayon join runs other jobs of its pool meanwhile - another
-/// recompute, which then waits for the lock this very thread holds
+/// `f` for every index below `n`, spread over threads of its own. Not rayon: the smoothing may run on a rayon pool's
+/// thread holding the gyro lock (a caller of `GyroSource::recompute_smoothness` holding it; the app's recomputes smooth
+/// a copy), and a thread waiting in a rayon join runs other jobs of its pool meanwhile - another recompute, which then
+/// waits for the lock this very thread holds
 pub(super) fn parallel_map<T: Send>(n: usize, f: impl Fn(usize) -> T + Sync) -> Vec<T> {
     let threads = std::thread::available_parallelism().map(|x| x.get()).unwrap_or(1).min(n / 32).max(1);
     if threads <= 1 { return (0..n).map(&f).collect(); }

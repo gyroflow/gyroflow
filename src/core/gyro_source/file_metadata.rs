@@ -2,11 +2,13 @@
 // Copyright © 2024 Adrian <adrian.eddy at gmail>
 
 use std::collections::BTreeMap;
+use std::ops::RangeInclusive;
 use parking_lot::RwLock;
 use std::sync::Arc;
 
 use crate::camera_identifier::CameraIdentifier;
 use crate::stabilization_params::ReadoutDirection;
+use crate::util::MapClosest;
 use super::{ TimeIMU, TimeQuat, TimeVec, splines };
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -77,24 +79,45 @@ pub struct CameraStabData {
     pub ois_spline: splines::CatmullRom<nalgebra::Vector3<f64>>
 }
 
-// Lens breathing compensation of one frame: output zoom per band of the capture area rows, linearly interpolated
-// between the bands, as many as the frame's focus motion during the readout needs (a single entry when the rows
-// agree or the frame has no rolling-shutter table), see gyro_source::sony::breathing
+// Lens breathing of one frame, see gyro_source::sony::breathing. `focal` is the lens's true focal length relative to
+// the one its metadata states (the focus position's state against the lens tables' reference), per band of the
+// capture area rows, linearly interpolated between the bands, as many as the frame's focus motion during the readout
+// needs (a single entry when the rows agree or the frame has no rolling-shutter table). `applied` is the
+// magnification the camera's own breathing compensation took out of the recorded picture by cropping it, `None`
+// when it didn't: a camera matrix made from the frame's capture area already has that crop in it, a fixed one hasn't
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
 pub struct BreathingFrame {
-    pub scale: Vec<f32>,
+    pub focal: Vec<f32>,
+    pub applied: Option<f32>,
     pub crop_y: f32,
     pub crop_h: f32,
 }
 impl BreathingFrame {
-    pub fn scale_at_row(&self, sensor_row: f64) -> f64 {
-        let n = self.scale.len();
-        if n < 2 { return self.scale.first().copied().unwrap_or(1.0) as f64; }
+    /// `focal` at a sensor row
+    pub fn focal_at_row(&self, sensor_row: f64) -> f64 {
+        let n = self.focal.len();
+        if n < 2 { return self.focal.first().copied().unwrap_or(1.0) as f64; }
         let x = ((sensor_row - self.crop_y as f64) * (n - 1) as f64 / (self.crop_h as f64 - 1.0).max(1.0)).clamp(0.0, (n - 1) as f64);
         let i = (x as usize).min(n - 2);
         let t = x - i as f64;
-        self.scale[i] as f64 * (1.0 - t) + self.scale[i + 1] as f64 * t
+        self.focal[i] as f64 * (1.0 - t) + self.focal[i + 1] as f64 * t
+    }
+    /// `focal` at the centre row of the capture area, the frame's own: its camera matrix is scaled by it, and each
+    /// row by its ratio to it (`FrameTransform::at_timestamp`)
+    pub fn focal_at_centre(&self) -> f64 {
+        self.focal_at_row(self.crop_y as f64 + (self.crop_h as f64 - 1.0).max(0.0) / 2.0)
+    }
+    /// The largest `focal` of the frame's rows
+    pub fn focal_max(&self) -> f64 {
+        self.focal.iter().copied().fold(f32::MIN, f32::max) as f64
+    }
+    /// The scale of a camera matrix of the frame for the breathing: `focal` as it is when the matrix was made from the
+    /// frame's capture area (`capture_area`, see `FrameTransform::get_lens_data_at_lens_timestamp`), which carries the
+    /// crop of the camera's own compensation. A matrix that doesn't (a fixed lens profile) shows the picture the camera
+    /// recorded, with that much of the breathing already taken out
+    pub fn camera_scale(&self, capture_area: bool) -> f64 {
+        if capture_area { 1.0 } else { self.applied.filter(|a| a.is_finite() && *a > 0.0).unwrap_or(1.0) as f64 }
     }
 }
 
@@ -134,6 +157,9 @@ pub struct FileMetadata {
     /// Cache of `lens_focal_length_varies`, the renderer asks per frame
     #[serde(skip)]
     pub focal_length_varies_cache: std::sync::OnceLock<bool>,
+    /// The segments of a video cut from camera recordings, from its segment table (`TrimSegments`): every segment
+    /// boundary is a hard boundary for the motion data
+    pub trim_segments:       Option<super::TrimSegments>,
 }
 impl FileMetadata {
     pub fn thin(&self) -> Self {
@@ -160,6 +186,7 @@ impl FileMetadata {
             legacy_mesh_correction:  Default::default(),
             lens_breathing:          Default::default(),
             focal_length_varies_cache: Default::default(),
+            trim_segments:           self.trim_segments.clone(),
         }
     }
     pub fn has_motion(&self) -> bool {
@@ -182,9 +209,22 @@ impl FileMetadata {
     pub fn camera_stab_at(&self, frame: usize) -> Option<&CameraStabData> {
         per_frame_entry(&self.camera_stab_data, frame)
     }
-    /// The lens breathing compensation of a frame (`lens_breathing`), `None` where it has none
+    /// The lens breathing of a frame (`lens_breathing`), `None` where it has none
     pub fn lens_breathing_at(&self, frame: usize) -> Option<&BreathingFrame> {
-        per_frame_entry(&self.lens_breathing, frame).filter(|b| !b.scale.is_empty())
+        per_frame_entry(&self.lens_breathing, frame).filter(|b| !b.focal.is_empty())
+    }
+    /// Whether the effective focal length changes over the clip: the metadata's (`has_per_frame_focal_length`), or the
+    /// lens's own through its focus breathing (`lens_breathing_varies`)
+    pub fn has_varying_focal_length(&self) -> bool {
+        self.has_per_frame_focal_length() || self.lens_breathing_varies()
+    }
+    /// Whether the lens breathing changes over the clip: the focus moves (the `focal` of any row of any frame, a frame
+    /// without any taken as 1, as the focal length sweep takes it), or the crop of the camera's own compensation does
+    /// (`applied`). A clip that keeps its focus breathes by as much all through, a constant scale of its focal length:
+    /// nothing changes over it, and any one frame's lens is every frame's
+    pub fn lens_breathing_varies(&self) -> bool {
+        Self::varies(&mut self.lens_breathing.iter().flat_map(|b| b.focal.iter().map(|f| *f as f64).chain(b.focal.is_empty().then_some(1.0))))
+            || Self::varies(&mut self.lens_breathing.iter().filter(|b| !b.focal.is_empty()).map(|b| b.camera_scale(false)))
     }
     /// More than 0.2% between the smallest and the largest value
     fn varies(it: &mut dyn Iterator<Item = f64>) -> bool {
@@ -212,28 +252,22 @@ impl FileMetadata {
             || Self::varies(&mut self.lens_positions.values().copied())
     }
     pub fn lens_params_closest(&self, timestamp_us: i64, max_diff: i64, pred: impl Fn(&LensParams) -> bool) -> Option<&LensParams> {
-        let max_diff = max_diff.max(0);
-        let min_ts = timestamp_us.saturating_sub(max_diff);
-        let max_ts = timestamp_us.saturating_add(max_diff);
-
-        // The two ranges overlap on an exact key hit; the tie-break below then picks that same entry
-        let before = self.lens_params.range(min_ts..=timestamp_us).rev().find(|(_, v)| pred(*v));
-        let after  = self.lens_params.range(timestamp_us..=max_ts) .find(|(_, v)| pred(*v));
-
-        // `abs_diff` returns an u64 and can't overflow, unlike `(key - other).abs()`
-        let closest = match (before, after) {
-            (Some(before), Some(after)) => if timestamp_us.abs_diff(*after.0) <= timestamp_us.abs_diff(*before.0) { after } else { before },
-            (Some(before), None)        => before,
-            (None,         Some(after)) => after,
-            (None,         None)        => return None
-        };
-        // The ranges above are inclusive on both ends, so an entry exactly `max_diff` away still needs rejecting.
-        // Anything farther than the closest matching entry is out of range as well, so one check is enough
-        if timestamp_us.abs_diff(*closest.0) < max_diff as u64 {
-            Some(closest.1)
-        } else {
-            None
-        }
+        self.lens_params_closest_in(i64::MIN..=i64::MAX, timestamp_us, max_diff, pred)
+    }
+    /// The keys (µs) of the lens metadata frame `frame` takes its own from: in a video cut from recordings its part's
+    /// (`TrimSegments::lens_keys_of_frame`), as the same frames trimmed on their own have only theirs; all of them
+    /// otherwise
+    pub fn lens_keys_of_frame(&self, frame: usize) -> RangeInclusive<i64> {
+        self.trim_segments.as_ref().map_or(i64::MIN..=i64::MAX, |t| t.lens_keys_of_frame(frame))
+    }
+    /// `lens_params_closest` among the entries of the keys `keys` (`lens_keys_of_frame`), `MapClosest::get_closest_in`
+    pub fn lens_params_closest_in(&self, keys: RangeInclusive<i64>, timestamp_us: i64, max_diff: i64, pred: impl Fn(&LensParams) -> bool) -> Option<&LensParams> {
+        self.lens_params.get_closest_in(keys, timestamp_us, max_diff, pred)
+    }
+    /// The lens position (`lens_positions`) closest to `timestamp_us`, less than `max_diff` away, among the entries of
+    /// the keys `keys` (`lens_keys_of_frame`), as `MapClosest::get_closest` finds it among all of them
+    pub fn lens_position_closest_in(&self, keys: RangeInclusive<i64>, timestamp_us: i64, max_diff: i64) -> Option<f64> {
+        self.lens_positions.get_closest_in(keys, timestamp_us, max_diff, |_| true).copied()
     }
 }
 
@@ -526,3 +560,27 @@ impl<'de> serde::Deserialize<'de> for ReadOnlyFileMetadata {
     }
 }
 // ------------- ReadOnlyFileMetadata -------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn breathing(frames: &[&[f32]]) -> FileMetadata {
+        FileMetadata { lens_breathing: frames.iter().map(|f| BreathingFrame { focal: f.to_vec(), applied: None, crop_y: 0.0, crop_h: 100.0 }).collect(), ..Default::default() }
+    }
+
+    #[test]
+    fn a_clip_that_keeps_its_focus_breathes_by_as_much_all_through() {
+        // A lens breathing 4%, its focus held: its focal length is a constant scale, nothing that changes over the clip
+        let held = breathing(&[&[1.04, 1.04], &[1.04, 1.04], &[1.04, 1.04]]);
+        assert!(!held.lens_breathing_varies() && !held.has_varying_focal_length());
+        // Focused through the readout of a frame, or from one frame to the next
+        assert!(breathing(&[&[1.04, 1.04], &[1.04, 1.02], &[1.02, 1.02]]).has_varying_focal_length());
+        // A frame without breathing is the lens as it's stated, and the frames around it aren't
+        assert!(breathing(&[&[1.04, 1.04], &[], &[1.04, 1.04]]).lens_breathing_varies());
+        // The camera's own compensation cropping more as the focus moves
+        let mut cropped = breathing(&[&[1.04], &[1.04]]);
+        cropped.lens_breathing[1].applied = Some(1.03);
+        assert!(cropped.lens_breathing_varies());
+    }
+}

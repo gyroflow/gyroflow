@@ -4,6 +4,7 @@
 use telemetry_parser::tags_impl::{ GroupedTagMap, TagMap, GetWithType, GroupId, TagId, TagValue, TimeVector3 };
 use super::{ FileMetadata, CameraStabData, TimeIMU, splines, MeshCorrections, MeshTable, MeshFrame, MESH_HEADER };
 use rayon::iter::{ ParallelIterator, ParallelExtend, IntoParallelIterator };
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::sync::atomic::{ AtomicUsize, Ordering };
 use nalgebra::Vector2;
@@ -249,7 +250,8 @@ pub fn gyro_packet_timing(gyro: &TagMap) -> Option<GyroPacketTiming> {
 /// `imu` comes from `normalized_imu_interpolated`, which keeps the packet order with one entry per gyro sample but spaces them
 /// uniformly over the clip; that spacing drifts away from the packets by up to a few milliseconds and jitters by one sample
 /// between frames. Returns false and leaves `imu` untouched when the packets don't add up to the sample list.
-pub fn retime_imu_from_packets(imu: &mut Vec<TimeIMU>, samples: &[telemetry_parser::util::SampleInfo]) -> bool {
+/// `origins`, the sample each reading came from, are kept with their readings.
+pub fn retime_imu_from_packets(imu: &mut Vec<TimeIMU>, origins: &mut Vec<usize>, samples: &[telemetry_parser::util::SampleInfo]) -> bool {
     let started = std::time::Instant::now();
     // Validate the packets frame by frame first, then write the timestamps in place in a single pass over the samples
     struct Packet { start_ms: f64, period_ms: f64, count: usize }
@@ -285,7 +287,9 @@ pub fn retime_imu_from_packets(imu: &mut Vec<TimeIMU>, samples: &[telemetry_pars
     }
     // Consecutive packets can in principle touch or overlap; the list has to stay monotonic for the integrators
     if !monotonic {
-        imu.sort_by(|a, b| a.timestamp_ms.total_cmp(&b.timestamp_ms));
+        let mut pairs: Vec<(TimeIMU, usize)> = std::mem::take(imu).into_iter().zip(std::mem::take(origins).into_iter().chain(std::iter::repeat(0))).collect();
+        pairs.sort_by(|a, b| a.0.timestamp_ms.total_cmp(&b.0.timestamp_ms));
+        (*imu, *origins) = pairs.into_iter().unzip();
     }
     log::debug!("Sony gyro samples re-timed from {} packets in {:?}{}", packets.len(), started.elapsed(), if monotonic { "" } else { " (sorted)" });
     true
@@ -333,8 +337,21 @@ pub fn get_time_offset(md: &FileMetadata, input: &telemetry_parser::Input, tag_m
     Some((original_sample_rate, frame_offset / timing.frequency * sample_rate))
 }
 
+/// Time between the samples at `t[i1]` and `t[i2]` the way the reference measures it (`VibrationProofGL`): both clamped
+/// to the last one, the difference of their times, plus a frame interval when it isn't positive, the second one being in
+/// the next frame (the sample times are within their frame)
+fn sample_time_diff(t: &[i32], frame_interval: i32, i1: usize, i2: usize) -> Option<i64> {
+    let last = t.len().checked_sub(1)?;
+    let (a, b) = (i1.min(i2).min(last), i1.max(i2).min(last));
+    let mut dt = i64::from(*t.get(b)?) - i64::from(*t.get(a)?);
+    if dt <= 0 { // wrapped to the next frame, or a duplicated/clamped sample
+        dt += i64::from(frame_interval);
+    }
+    Some(dt)
+}
+
 /// Sensor (IBIS) or lens (OIS) stabilizer position samples, with their own timing
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct ISSamples {
     pub per_frame_start_idx: Vec<usize>,
     pub t: Vec<i32>,
@@ -345,6 +362,22 @@ pub struct ISSamples {
     pub missing_frames: Vec<u32>,
 }
 impl ISSamples {
+    /// The samples of the collected entries `entries`, alone: those of a segment of a video cut from recordings, whose
+    /// splines are computed as of a clip of their own (the samples of the segments around it are of other moments).
+    /// Entry `entries.start` is the result's entry 0
+    fn segment(&self, entries: std::ops::Range<usize>) -> ISSamples {
+        let start = self.per_frame_start_idx.get(entries.start).copied().unwrap_or(self.t.len());
+        let end = self.per_frame_start_idx.get(entries.end).copied().unwrap_or(self.t.len());
+        let slice = |v: &[i32]| v.get(start..end).unwrap_or_default().to_vec();
+        ISSamples {
+            per_frame_start_idx: self.per_frame_start_idx.get(entries).unwrap_or_default().iter().map(|i| i - start).collect(),
+            t: slice(&self.t),
+            x: slice(&self.x),
+            y: slice(&self.y),
+            a: slice(&self.a),
+            missing_frames: self.missing_frames.get(start..end).unwrap_or_default().to_vec(),
+        }
+    }
     /// The two samples in order, clamped to the last one
     fn sample_pair(&self, i1: usize, i2: usize) -> Option<(usize, usize)> {
         let last = self.t.len().checked_sub(1)?;
@@ -354,12 +387,7 @@ impl ISSamples {
     /// plus a frame interval when it isn't positive, the second one being in the next frame (the sample times are
     /// within their frame). The frames missing from the metadata between the two aren't in it (`calc_time_diff`)
     fn sample_time_diff(&self, frame_interval: i32, i1: usize, i2: usize) -> Option<i64> {
-        let (a, b) = self.sample_pair(i1, i2)?;
-        let mut dt = i64::from(*self.t.get(b)?) - i64::from(*self.t.get(a)?);
-        if dt <= 0 { // wrapped to the next frame, or a duplicated/clamped sample
-            dt += i64::from(frame_interval);
-        }
-        Some(dt)
+        sample_time_diff(&self.t, frame_interval, i1, i2)
     }
     /// The frames missing from the metadata between two samples, as time: whole frame intervals
     fn missing_time(&self, frame_interval: i32, i1: usize, i2: usize) -> Option<i64> {
@@ -417,7 +445,8 @@ impl ISSamples {
     }
 
     /// Builds the per-row spline for one frame, returns the spline and the row offset of its first point, like the reference `VibrationProofGL::set_vp_frame`
-    fn calc_spline(&self, frame_interval: i32, frame: usize, top_offset: f64, readout_time: f64, entry_rate: f64) -> Option<(splines::CatmullRom<nalgebra::Vector3<f64>>, f64)> {
+    /// `spacing`: the sample times of the clip's first samples the points are spaced by, the samples' own when `None`
+    fn calc_spline(&self, frame_interval: i32, frame: usize, top_offset: f64, readout_time: f64, entry_rate: f64, spacing: Option<&[i32]>) -> Option<(splines::CatmullRom<nalgebra::Vector3<f64>>, f64)> {
         let mut spline = splines::CatmullRom::new();
         if self.t.is_empty() { return Some((spline, 0.0)); }
         let bot_offset = top_offset + readout_time;
@@ -432,10 +461,13 @@ impl ISSamples {
         // of the clip's first samples, not the frame's own (`set_vp_frame` sums them from sample 0), and so does this:
         // with the samples at a steady rate that's the frame's spacing, to their jitter. Frames missing from the
         // metadata are left out of that sum, or a gap among the first samples would move every frame's points, and
-        // added where they are: between the frame's own samples, as whole frame intervals
+        // added where they are: between the frame's own samples, as whole frame intervals. A clip cut from a longer one
+        // has another first samples than its source: it spaces them by its source's first samples instead (`spacing`,
+        // the segment table's `sony_ibis_template`), so its splines are its source's
+        let first_samples = spacing.unwrap_or(&self.t);
         let mut spacing = 0; // the intervals of the clip's first `i` samples
         for i in 0..n_entries {
-            if i > 0 { spacing += self.sample_time_diff(frame_interval, i - 1, i)?; }
+            if i > 0 { spacing += sample_time_diff(first_samples, frame_interval, i - 1, i)?; }
             if top_index + i < self.x.len() {
                 let ts = (spacing + self.missing_time(frame_interval, top_index, top_index + i)?) as f64 * entry_rate;
                 spline.add_point(ts, nalgebra::Vector3::new(
@@ -531,35 +563,101 @@ pub fn stab_collect(is: &mut ISTemp, tag_map: &GroupedTagMap, frame: usize, fram
     Some(())
 }
 
+/// A part of a clip whose stabilizer splines are computed as of a clip of their own (a segment of a video cut from
+/// recordings, `segments`): its frames, and the sample times of its recording's first samples that its splines are
+/// spaced by (`ISSamples::calc_spline`), its own first samples' when `None` or for a stabilizer whose list is empty
+pub struct StabSegment {
+    pub frames: std::ops::Range<usize>,
+    pub template: Option<telemetry_parser::segment_table::IbisTemplate>,
+}
+
 /// The stabilizer data of every video frame up to the last one collected (`ISTemp::frames`), laid out by frame:
-/// computed for the frames from the first one collected on, and the frames before it take that one's
-pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, _sample_rate: f64, _frame_rate: f64, _size: (usize, usize)) -> Option<Vec<CameraStabData>> {
+/// computed for the frames from the first one collected on, and the frames before it take that one's. `segments` are
+/// the parts of the clip computed on their own (one covering every frame for a clip of one piece): a frame's splines
+/// are made of its part's samples. A part none of whose frames were collected (their metadata lacks what `stab_collect`
+/// needs) has no stabilizer shift, as the same frames trimmed alone have none: its frames have empty splines, with the
+/// capture area of the frame collected before the part (after it, for a clip's first part), which the shift is scaled
+/// by (`FrameTransform`), so that it stays 0. The table then starts with the clip's first frame when that is of such a
+/// part, and goes on to the first frame of such a last part, which the frames after it read too (`per_frame_entry`)
+pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, segments: &[StabSegment], _sample_rate: f64, _frame_rate: f64, _size: (usize, usize)) -> Option<Vec<CameraStabData>> {
     let (first, last) = (*is_temp.frames.first()?, *is_temp.frames.last()?);
-    let num_frames = last - first + 1;
 
     let readout_time = (md.frame_readout_time.unwrap_or_default() * 1000.0).max(1.0);
+    let describe = |frames: &std::ops::Range<usize>| if frames.end == usize::MAX { format!("from {} on", frames.start) } else { format!("{}..{}", frames.start, frames.end) };
+
+    // Each part's collected entries and their samples, alone. A clip of one piece is one part of all of them, its own.
+    // Its splines are spaced by its template's lists, one per stabilizer; an empty list (the source's first samples had
+    // none of that stabilizer, `sony_ibis_template`) leaves the part's own first samples to space them, as a clip
+    // without a template: those are all there is of the source's timing
+    struct Part<'a> { frames: std::ops::Range<usize>, entries: std::ops::Range<usize>, ibis: Cow<'a, ISSamples>, ois: Cow<'a, ISSamples>, spacing: [Option<&'a [i32]>; 2] }
+    let parts: Vec<Part> = segments.iter().map(|seg| {
+        let entries = is_temp.frames.partition_point(|f| *f < seg.frames.start)..is_temp.frames.partition_point(|f| *f < seg.frames.end);
+        // A part of all of them (a clip of one piece) has the samples as they are
+        let (ibis, ois) = if entries.len() == is_temp.frames.len() {
+            (Cow::Borrowed(&is_temp.ibis), Cow::Borrowed(&is_temp.ois))
+        } else {
+            (Cow::Owned(is_temp.ibis.segment(entries.clone())), Cow::Owned(is_temp.ois.segment(entries.clone())))
+        };
+        let lists = seg.template.as_ref().map(|t| [t.ibis.as_slice(), t.ois.as_slice()]);
+        let spacing = [(0, "IBIS", &ibis), (1, "OIS", &ois)].map(|(i, what, own)| {
+            let list = lists.map(|l| l[i]);
+            if list.is_some_and(|l| l.is_empty()) && !own.t.is_empty() {
+                log::warn!("The segment table's sony_ibis_template has no {what} samples, but the frames {} have: their {what} splines are spaced by their own first samples", describe(&seg.frames));
+            }
+            list.filter(|l| !l.is_empty())
+        });
+        if entries.is_empty() {
+            log::warn!("Sony stabilizer data: the frames {} (a segment of the video) have none, so no in-camera stabilizer shift", describe(&seg.frames));
+        }
+        Part { frames: seg.frames.clone(), entries, ibis, ois, spacing }
+    }).collect();
+
+    // A frame of a part without collected entries: no shift, and the capture area the shift is scaled by
+    let without_samples = |entries: &std::ops::Range<usize>| -> Option<CameraStabData> {
+        let near = entries.start.saturating_sub(1);
+        Some(CameraStabData {
+            offset: 0.0,
+            ois_offset: Some(0.0),
+            sensor_size: is_temp.sensor_size,
+            crop_area: *is_temp.per_frame_crop.get(near)?,
+            pixel_pitch: is_temp.pixel_pitch,
+            ibis_spline: splines::CatmullRom::new(),
+            ois_spline: splines::CatmullRom::new()
+        })
+    };
 
     let frame_data = |frame: usize| -> Option<CameraStabData> {
-        // The collected frame at or before this one. A frame the metadata misses has that one's capture area, and its
-        // own readout, whole frame intervals later: the samples past the gap are on the same timeline
-        // (`ISSamples::calc_time_diff`), so its splines run across the gap, from the samples before it to the ones after
-        let entry = is_temp.frames.partition_point(|f| *f <= frame).checked_sub(1)?;
+        let Part { entries, ibis, ois, spacing, .. } = parts.iter().find(|p| p.frames.contains(&frame))?;
+        if entries.is_empty() { return without_samples(entries); }
+        // The collected frame at or before this one in its part, or its part's first. A frame the metadata misses has
+        // that one's capture area, and its own readout, whole frame intervals later: the samples past the gap are on the
+        // same timeline (`ISSamples::calc_time_diff`), so its splines run across the gap, from the samples before it to
+        // the ones after
+        let entry = is_temp.frames.partition_point(|f| *f <= frame).checked_sub(1).filter(|e| *e >= entries.start).unwrap_or(entries.start);
+        if entry >= entries.end { return None; }
         let crop_area = *is_temp.per_frame_crop.get(entry)?; // (x, y, w, h)
         let top = |entry: usize| Some(is_temp.first_frame_ts.get(entry)? - is_temp.per_frame_exposure.get(entry)? / 2.0);
         let mut top_offset = top(entry)?;
-        let later = frame - is_temp.frames[entry];
+        let later = frame.saturating_sub(is_temp.frames[entry]);
         if later > 0 {
             // Its readout start within the frame is between the collected frames' around it, like its time offset
-            // (`PerFrame::interpolate`); there's one after it, the frames go up to the last collected one
-            let span = is_temp.frames.get(entry + 1)? - is_temp.frames[entry];
-            top_offset += (top(entry + 1)? - top_offset) * later as f64 / span as f64 + later as f64 * is_temp.frame_interval as f64;
+            // (`PerFrame::interpolate`); past the last one of its part, its part's last one's
+            match (entry + 1 < entries.end).then(|| is_temp.frames[entry + 1]) {
+                Some(next) => {
+                    let span = next - is_temp.frames[entry];
+                    top_offset += (top(entry + 1)? - top_offset) * later as f64 / span as f64;
+                }
+                None => {}
+            }
+            top_offset += later as f64 * is_temp.frame_interval as f64;
         }
         let entry_rate = is_temp.sensor_size.1 as f64 / readout_time; // rows per microsecond
 
         // A stabilizer without usable samples for this frame gets an empty spline (no shift); the frame itself is kept so that
         // the per-frame data stays aligned with the video frames
-        let (ibis_spline, offset) = is_temp.ibis.calc_spline(is_temp.frame_interval, entry, top_offset, readout_time, entry_rate).unwrap_or_else(|| (splines::CatmullRom::new(), 0.0));
-        let (ois_spline, ois_offset) = is_temp.ois.calc_spline(is_temp.frame_interval, entry, top_offset, readout_time, entry_rate).unwrap_or_else(|| (splines::CatmullRom::new(), 0.0));
+        let local = entry - entries.start;
+        let (ibis_spline, offset) = ibis.calc_spline(is_temp.frame_interval, local, top_offset, readout_time, entry_rate, spacing[0]).unwrap_or_else(|| (splines::CatmullRom::new(), 0.0));
+        let (ois_spline, ois_offset) = ois.calc_spline(is_temp.frame_interval, local, top_offset, readout_time, entry_rate, spacing[1]).unwrap_or_else(|| (splines::CatmullRom::new(), 0.0));
 
         Some(CameraStabData {
             offset,
@@ -572,11 +670,17 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, _sample_rate: f64,
         })
     };
 
-    // A per-frame table: its storage, for every frame up to the last collected one, is taken in one fallible allocation
+    // The frames computed: from the first collected one (from the clip's first frame when that is of a part without any),
+    // to the last collected one (to the first frame of a last part without any)
+    let from = if parts.first().is_some_and(|p| p.entries.is_empty()) { 0 } else { first };
+    let to = parts.last().filter(|p| p.entries.is_empty()).map_or(last, |p| p.frames.start.max(last));
+    let num_frames = to - from + 1;
+
+    // A per-frame table: its storage, for every frame up to the last computed one, is taken in one fallible allocation
     // (`per_frame::table`) and filled in place, the computed frames first
-    let mut per_frame_data: Vec<CameraStabData> = super::per_frame::table(last + 1, "Sony stabilizer data")?;
+    let mut per_frame_data: Vec<CameraStabData> = super::per_frame::table(to + 1, "Sony stabilizer data")?;
     let incomplete = AtomicUsize::new(0);
-    per_frame_data.par_extend((first..=last).into_par_iter().map(|frame| frame_data(frame).unwrap_or_else(|| {
+    per_frame_data.par_extend((from..=to).into_par_iter().map(|frame| frame_data(frame).unwrap_or_else(|| {
         incomplete.fetch_add(1, Ordering::Relaxed);
         CameraStabData::default()
     })));
@@ -591,8 +695,8 @@ pub fn stab_calc_splines(md: &FileMetadata, is_temp: &ISTemp, _sample_rate: f64,
         return None;
     }
 
-    // The frames before the first collected one, in the storage taken for them
-    super::per_frame::hold_leading(per_frame_data, first, "Camera stabilizer data")
+    // The frames before the first computed one, in the storage taken for them
+    super::per_frame::hold_leading(per_frame_data, from, "Camera stabilizer data")
 }
 
 /// Above this residual of the inverse mesh lookup, `|forward(inverse(q)) - q|` in video pixels at the worst of

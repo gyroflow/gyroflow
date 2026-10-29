@@ -4,7 +4,7 @@
 use nalgebra::*;
 use super::DEG2RAD;
 
-#[derive(Default, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Default, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct IMUTransforms {
     pub imu_orientation: Option<String>,
     pub imu_rotation_angles: Option<[f64; 3]>,

@@ -31,15 +31,68 @@
 //! the projection's as well as this module's, and `synchronization::lens_delay` measures it on the clip's
 //! own zooms.
 //!
+//! Focus breathing is a change of the focal length too, one the metadata doesn't state: Sony records the lens's
+//! breathing tables and focus positions (`gyro_source::sony::breathing`), and the effective focal length is the
+//! dequantized metadata scaled by the frame's breathing. Projecting with it makes the gyro correction right while
+//! focusing, and it's the lens as the picture shows it: left alone, the output breathes with the picture. Lens
+//! breathing compensation holds the field of view at the narrowest frame's instead, a target of the dequantized
+//! metadata times the largest breathing of the clip, so the output zoom is the same crop-only `raw / target` and the
+//! zoom accounts for it the same way. With focal length smoothing on as well, the envelope is made of that target.
+//!
 //! The curves are computed in `StabilizationManager::apply_focal_length_smoothing` and stored in
 //! `StabilizationParams`; every `ComputeParams::from_manager` copy (preview, render, plugins) then sees
 //! the same data, so the preview and the export agree. The per-frame projection sweep is done once per file,
-//! lens and video geometry ([`compute_base_curve`], cached without any setting in its key), and the settings
+//! lens and video geometry ([`compute_base`], cached without any setting in its key), and the settings
 //! act on that base curve in O(frames) ([`derive_curves`]). The zoom accounts for the compensation in
 //! `zooming::calculate_fovs`.
+//!
+//! A video cut from recordings is made of parts that are each a run of frames of one recording ([`parts`]), and
+//! the next part's lens can be in any other state: everything here (the gap filling, the glitch removal, the
+//! dequantization, the delay, the envelope) works in each part on its own, so a part's curves are those of the
+//! same frames trimmed on their own, and a short part zoomed in between two others is never taken for a glitch.
 
+use std::ops::Range;
 use crate::stabilization::{ ComputeParams, FrameTransform };
 use crate::zooming::zoom_dynamic;
+
+/// The lens breathing of one frame, as the scale of its camera matrix's focal length (`BreathingFrame::focal`,
+/// `BreathingFrame::camera_scale`)
+#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct BreathingScale {
+    /// At the centre row of the capture area: the effective focal length is scaled by it
+    pub centre: f64,
+    /// The largest of the frame's rows, which the compensation has to make room for
+    pub max: f64,
+    /// The magnification of the camera's own compensation crop that the camera matrix has in it (a matrix made from
+    /// the frame's capture area follows the crop, `FocalSource::capture_area`), 1 without one. It's the breathing the
+    /// camera took out, not a zoom: the target of the compensation leaves it out of the metadata focal length
+    pub crop: f64,
+}
+impl Default for BreathingScale {
+    fn default() -> Self { Self { centre: 1.0, max: 1.0, crop: 1.0 } }
+}
+
+/// What the curves are derived from (`compute_base`), with no setting in it
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
+pub struct FocalLengthBase {
+    /// Per frame, the delay-free dequantized focal length of the camera matrix, without the breathing: the metadata's
+    /// where the frame has per-frame lens data; in a part of the video without any, the static profile's when the clip
+    /// breathes (there's a focal length to scale then) and `None` otherwise. Empty when no frame has either
+    pub focal: Vec<Option<f64>>,
+    /// Per frame, its lens breathing; empty when the clip has none
+    pub breathing: Vec<BreathingScale>,
+}
+
+/// The projection of every frame (`extract_effective_focal_lengths`)
+pub struct SweptFocalLengths {
+    /// The effective focal length in output pixels where the frame takes it from its lens metadata, `None` where it
+    /// projects with the static profile alone
+    pub metadata: Vec<Option<f64>>,
+    /// The focal length of the frame's camera matrix, whichever way it came
+    pub matrix: Vec<f64>,
+    /// The frame's lens breathing, empty when the clip has none
+    pub breathing: Vec<BreathingScale>,
+}
 
 /// A change between two consecutive values is a genuine jump (Clear Image Zoom switching, a lens change),
 /// kept and never smoothed across, when it's larger than `DEQUANTIZE_JUMP_RATIO` of the focal length (no
@@ -107,22 +160,43 @@ fn quantization_step(v: &[f64]) -> f64 {
 /// Whether a frame has one is the projection's own verdict (`get_lens_data_at_timestamp_with_metadata`), not
 /// a guess from the shape of the metadata: the cameras report the focal length in pixels (Sony, Canon), in
 /// millimetres with the capture area (Sony), in millimetres alone (RED, Blackmagic, Nikon, Z CAM) or as a
-/// lens position to interpolate profiles by, and each reaches the camera matrix along a different path
-pub fn extract_effective_focal_lengths(params: &ComputeParams) -> Vec<Option<f64>> {
+/// lens position to interpolate profiles by, and each reaches the camera matrix along a different path.
+///
+/// The same sweep takes every frame's lens breathing, as the scale of the camera matrix it projects with: whether
+/// that matrix has the camera's own compensation crop in it is the projection's verdict too
+/// (`FocalSource::capture_area`). The breathing is the frame's own, not delayed: its timing is the focus samples',
+/// worked out over each row's exposure, and measured on the picture it lands on the frame it's stamped with
+pub fn extract_effective_focal_lengths(params: &ComputeParams) -> SweptFocalLengths {
     let gyro = params.gyro.read();
     let file_metadata = gyro.file_metadata.read();
-    if file_metadata.lens_params.len() < 2 && file_metadata.lens_positions.len() < 2 {
-        return Vec::new();
+    let breathes = !file_metadata.lens_breathing.is_empty();
+    if file_metadata.lens_params.len() < 2 && file_metadata.lens_positions.len() < 2 && !breathes {
+        return SweptFocalLengths { metadata: Vec::new(), matrix: Vec::new(), breathing: Vec::new() };
     }
-    (0..params.frame_count).map(|frame| {
-        let lens_timestamp_us = ComputeParams::lens_timestamp_us_with_delay(crate::timestamp_at_frame(frame as i32, params.scaled_fps), 0, params.scaled_fps);
+    let mut swept = SweptFocalLengths {
+        metadata: Vec::with_capacity(params.frame_count),
+        matrix: Vec::with_capacity(params.frame_count),
+        breathing: Vec::with_capacity(if breathes { params.frame_count } else { 0 }),
+    };
+    for frame in 0..params.frame_count {
+        let lens_timestamp_us = ComputeParams::lens_timestamp_us_with_delay(params.timestamp_at_frame(frame as i32), 0, params.scaled_fps);
         // On the metadata borrowed above: a second read of a lock this thread already holds deadlocks once a writer queues up
-        let (camera_matrix, _, _, _, _, _, per_frame) = FrameTransform::get_lens_data_at_lens_timestamp(params, &file_metadata, lens_timestamp_us, false);
-        if !per_frame { return None; }
+        let (camera_matrix, _, _, _, _, _, source) = FrameTransform::get_lens_data_at_lens_timestamp(params, &file_metadata, lens_timestamp_us, false);
         // Geometric mean: the compensation is one uniform scale applied to both axes
         let f = (camera_matrix[(0, 0)] * camera_matrix[(1, 1)]).sqrt();
-        (f.is_finite() && f > 0.0).then_some(f)
-    }).collect()
+        let valid = f.is_finite() && f > 0.0;
+        swept.metadata.push((source.per_frame && valid).then_some(f));
+        swept.matrix.push(f);
+        if breathes {
+            let scale = file_metadata.lens_breathing_at(frame).map(|b| {
+                let camera = b.camera_scale(source.capture_area);
+                let centre = b.focal_at_centre() * camera;
+                BreathingScale { centre, max: (b.focal_max() * camera).max(centre), crop: b.camera_scale(false) / camera }
+            }).filter(|b| b.centre.is_finite() && b.centre > 0.0 && b.max.is_finite() && b.crop.is_finite() && b.crop > 0.0);
+            swept.breathing.push(scale.unwrap_or_default());
+        }
+    }
+    swept
 }
 
 /// Zoom ring refinement (Sony tag 0x800B, a 16-bit fraction of the ring travel). On lenses that fill the focal
@@ -149,8 +223,8 @@ pub fn extract_lens_zoom(params: &ComputeParams) -> Vec<Option<(f64, f64)>> {
     let gyro = params.gyro.read();
     let file_metadata = gyro.file_metadata.read();
     (0..params.frame_count).map(|frame| {
-        let timestamp_us = ComputeParams::lens_timestamp_us_with_delay(crate::timestamp_at_frame(frame as i32, params.scaled_fps), 0, params.scaled_fps);
-        let lp = file_metadata.lens_params_closest(timestamp_us, 100000, |v| v.has_projection_data())?;
+        let timestamp_us = ComputeParams::lens_timestamp_us_with_delay(params.timestamp_at_frame(frame as i32), 0, params.scaled_fps);
+        let lp = file_metadata.lens_params_closest_in(file_metadata.lens_keys_of_frame(frame), timestamp_us, 100000, |v| v.has_projection_data())?;
         Some((lp.focal_length? as f64, lp.zoom_ring_position? as f64))
     }).collect()
 }
@@ -387,18 +461,27 @@ pub fn dequantize(v: &[f64], hint: Option<&[Option<f64>]>) -> Vec<f64> {
 /// limit creates are then rounded by [`round_corners`]. Frames outside the trim ranges don't constrain
 /// the envelope, like they don't constrain the zoom.
 pub fn upper_envelope(raw: &[f64], fps: f64, max_zoom_rate: f64, trim_ranges: &[(f64, f64)]) -> Vec<f64> {
+    envelope(raw, fps, max_zoom_rate, trim_mask(raw.len(), trim_ranges).as_deref())
+}
+
+/// Whether each of `n` frames is within the trim ranges, as the zoom takes them (`FovIterative::compute`), `None`
+/// without any
+fn trim_mask(n: usize, trim_ranges: &[(f64, f64)]) -> Option<Vec<bool>> {
+    if trim_ranges.is_empty() || n == 0 { return None; }
+    let l = (n - 1) as f64;
+    Some((0..n).map(|i| trim_ranges.iter().any(|r| i >= (l * r.0).floor() as usize && i <= (l * r.1).ceil() as usize)).collect())
+}
+
+/// [`upper_envelope`] of frames whose place in the trim ranges is `within` (`trim_mask`, `None`: all are in them)
+fn envelope(raw: &[f64], fps: f64, max_zoom_rate: f64, within: Option<&[bool]>) -> Vec<f64> {
     let n = raw.len();
     if n == 0 || !(fps > 0.0) { return raw.to_vec(); }
 
     let mut s: Vec<f64> = raw.iter().map(|f| f.max(1e-9).ln()).collect();
 
-    if !trim_ranges.is_empty() {
-        let l = (n - 1) as f64;
-        let within = |i: usize| trim_ranges.iter().any(|r| i >= (l * r.0).floor() as usize && i <= (l * r.1).ceil() as usize);
-        if let Some(least_restrictive) = s.iter().enumerate().filter(|(i, _)| within(*i)).map(|(_, v)| *v).reduce(f64::min) {
-            for (i, v) in s.iter_mut().enumerate() {
-                if !within(i) { *v = least_restrictive; }
-            }
+    if let Some(within) = within && let Some(least_restrictive) = s.iter().zip(within).filter(|(_, w)| **w).map(|(v, _)| *v).reduce(f64::min) {
+        for (v, w) in s.iter_mut().zip(within) {
+            if !*w { *v = least_restrictive; }
         }
     }
     let floor = s.clone();
@@ -503,11 +586,11 @@ pub fn round_corners(s: &mut [f64], floor: &[f64], max_step: f64, max_accel: f64
     }
 }
 
-/// Digital zoom factor the renderer multiplies into `fov` for `frame`: `raw / target`, never above 1.
+/// Digital zoom factor the renderer multiplies into `fov` for `frame`: `raw / target`, never above 1, and 1
+/// without a target (neither focal length smoothing nor breathing compensation acts, [`derive_curves`]).
 /// Frames past the end of the curves use the last value, like `fovs` do. Anything that draws in the
 /// output space (the zoom debug polygon, overlays) has to scale by the same factor.
-pub fn compensation(focal_lengths: &[Option<f64>], smoothed_focal_lengths: &[Option<f64>], enabled: bool, frame: usize) -> f64 {
-    if !enabled { return 1.0; }
+pub fn compensation(focal_lengths: &[Option<f64>], smoothed_focal_lengths: &[Option<f64>], frame: usize) -> f64 {
     let at = |v: &[Option<f64>]| v.get(frame).or(v.last()).copied().flatten();
     match (at(focal_lengths), at(smoothed_focal_lengths)) {
         (Some(raw), Some(target)) if raw > 0.0 && target > 0.0 => (raw / target).min(1.0),
@@ -517,25 +600,73 @@ pub fn compensation(focal_lengths: &[Option<f64>], smoothed_focal_lengths: &[Opt
 
 /// [`compensation`] for the curves stored in `ComputeParams`
 pub fn compensation_at(params: &ComputeParams, frame: usize) -> f64 {
-    compensation(&params.focal_lengths, &params.smoothed_focal_lengths, params.focal_length_smoothing_enabled, frame)
+    compensation(&params.focal_lengths, &params.smoothed_focal_lengths, frame)
+}
+
+/// The parts of the video that the curves are made in, each on its own, as frame ranges: a video cut from recordings
+/// has one per run of frames of one recording (its segments, `gyro_source::TrimSegments`, as the render looks the
+/// frames' motion up), and any other video is one part
+pub fn parts(params: &ComputeParams) -> Vec<Range<usize>> {
+    let n = params.frame_count;
+    let starts = params.gyro.read().segment_ranges().map(|s| s.first_frames.clone()).unwrap_or_default();
+    let mut parts = Vec::with_capacity(starts.len().max(1));
+    let mut start = 0;
+    for first in starts.into_iter().filter(|f| *f > 0 && *f < n) {
+        if first > start {
+            parts.push(start..first);
+            start = first;
+        }
+    }
+    parts.push(start..n);
+    parts
 }
 
 /// The dequantized effective focal length per frame, without the lens metadata delay: the one expensive step (the
 /// projection of every frame) and what `StabilizationManager::apply_focal_length_smoothing` caches. Every setting
 /// the final curves depend on, the delay, the rate limit and the trim, acts on it afterwards in O(frames)
-/// ([`derive_curves`]), so a slider tick never repeats the sweep. Empty when the clip has no per-frame lens data
-pub fn compute_base_curve(params: &ComputeParams) -> Vec<f64> {
-    let mut raw = extract_effective_focal_lengths(params);
-    if !fill_gaps(&mut raw) {
-        return Vec::new();
+/// ([`derive_curves`]), so a slider tick never repeats the sweep.
+///
+/// Made in each of `parts` ([`parts`]) on its own: the gaps are filled, the glitches removed and the metadata
+/// dequantized from the part's own frames, exactly as for the part trimmed on its own. `None` for the frames of a part
+/// without per-frame lens data, which project with the profile alone, unless the clip breathes: their focal length is
+/// then the profile's, for the breathing to scale. Empty when no frame has any
+pub fn compute_base(params: &ComputeParams, parts: &[Range<usize>]) -> FocalLengthBase {
+    let SweptFocalLengths { metadata: raw, matrix, breathing } = extract_effective_focal_lengths(params);
+    let n = raw.len();
+    let mut base = vec![None; n];
+    let mut lens_zoom = None;
+    let mut removed = 0;
+    for part in parts {
+        let part = part.start.min(n)..part.end.min(n);
+        let mut v = raw[part.clone()].to_vec();
+        if !fill_gaps(&mut v) { continue; }
+        let mut v: Vec<f64> = v.into_iter().map(|x| x.unwrap()).collect();
+        removed += remove_outliers(&mut v, (OUTLIER_MAX_SECONDS * params.scaled_fps).ceil() as usize);
+        let lens_zoom = lens_zoom.get_or_insert_with(|| extract_lens_zoom(params));
+        let hint = ring_hint(&v, &lens_zoom[part.clone()]);
+        for (b, x) in base[part].iter_mut().zip(dequantize(&v, hint.as_deref())) { *b = Some(x); }
     }
-    let mut raw: Vec<f64> = raw.into_iter().map(|x| x.unwrap()).collect();
-    let removed = remove_outliers(&mut raw, (OUTLIER_MAX_SECONDS * params.scaled_fps).ceil() as usize);
     if removed > 0 {
         log::warn!("Focal length metadata: {removed} frames replaced as glitches (isolated excursions of more than {:.0}%)", (OUTLIER_LN_RATIO.exp() - 1.0) * 100.0);
     }
-    let hint = ring_hint(&raw, &extract_lens_zoom(params));
-    dequantize(&raw, hint.as_deref())
+    if !breathing.is_empty() {
+        for (b, f) in base.iter_mut().zip(&matrix) {
+            if b.is_none() && f.is_finite() && *f > 0.0 { *b = Some(*f); }
+        }
+    }
+    if base.iter().all(Option::is_none) { return FocalLengthBase::default(); }
+    FocalLengthBase { focal: base, breathing }
+}
+
+/// [`compute_base`] over the parts of the video, as one curve over all of its frames, the breathing left out: a part
+/// without per-frame lens data of its own takes the values around it, as the frames without any of a video of one part
+/// take theirs. Empty when the clip has no per-frame lens data
+pub fn compute_base_curve(params: &ComputeParams) -> Vec<f64> {
+    let mut base = compute_base(params, &parts(params)).focal;
+    if !fill_gaps(&mut base) {
+        return Vec::new();
+    }
+    base.into_iter().map(|x| x.unwrap()).collect()
 }
 
 /// The curve as the picture sees it with the metadata `delay_frames` late: frame `i` takes the value of frame
@@ -548,29 +679,163 @@ pub fn shift_by_delay(base: &[f64], delay_frames: i32) -> Vec<f64> {
 }
 
 /// The curves stored in `StabilizationParams` and `ComputeParams`, (`focal_lengths`, `smoothed_focal_lengths`), from
-/// the base curve of [`compute_base_curve`] and the settings.
+/// the base curve of [`compute_base`] and the settings, in each of `parts` on its own (the delay holds the part's ends,
+/// the envelope's rate limit never reaches into the part before or after: the next part is another moment).
 ///
-/// `focal_lengths` is the dequantized effective focal length, the renderer's estimate of the true optical state and
-/// the denominator of the compensation. `smoothed_focal_lengths` is the envelope target, empty when smoothing is
-/// disabled. Both are empty when the clip has no per-frame lens data.
-pub fn derive_curves(base: &[f64], delay_frames: i32, enabled: bool, max_zoom_rate: f64, fps: f64, trim_ranges: &[(f64, f64)]) -> (Vec<Option<f64>>, Vec<Option<f64>>) {
-    if base.is_empty() {
+/// `focal_lengths` is the effective focal length: the dequantized metadata times the lens breathing, the renderer's
+/// estimate of the true optical state (`FrameTransform::effective_camera_matrix`) and the numerator of the compensation.
+/// `smoothed_focal_lengths` is the target, empty when neither focal length smoothing (`enabled`) nor breathing
+/// compensation (`breathing_compensation`, on a clip that breathes) acts. Both are empty when the clip has neither
+/// per-frame lens data nor breathing, and `None` in a part without any.
+///
+/// The target is the focal length the output is meant to show: the effective one, or with breathing compensation the
+/// dequantized metadata times the largest breathing any row of the part reaches within the trim, the field of view of
+/// the narrowest frame held all through; with smoothing, the envelope of that. Every frame then zooms in by its
+/// breathing against the narrowest frame's, and no row of any frame reaches past its content. A camera that
+/// compensated itself has cropped most of it away already, and only what's left is zoomed in on
+pub fn derive_curves(base: &FocalLengthBase, parts: &[Range<usize>], delay_frames: i32, enabled: bool, max_zoom_rate: f64, fps: f64, trim_ranges: &[(f64, f64)], breathing_compensation: bool) -> (Vec<Option<f64>>, Vec<Option<f64>>) {
+    if base.focal.is_empty() {
         return (Vec::new(), Vec::new());
     }
-    let dequantized = shift_by_delay(base, delay_frames);
-    if !enabled {
-        return (dequantized.into_iter().map(Some).collect(), Vec::new());
+    let n = base.focal.len();
+    let within = trim_mask(n, trim_ranges);
+    let breathing = (base.breathing.len() == n).then_some(&base.breathing[..]);
+    let compensate = breathing_compensation && breathing.is_some();
+    let mut focal_lengths = vec![None; n];
+    let mut targets = if enabled || compensate { vec![None; n] } else { Vec::new() };
+    for part in parts {
+        let part = part.start.min(n)..part.end.min(n);
+        let Some(values) = base.focal[part.clone()].iter().copied().collect::<Option<Vec<f64>>>() else { continue; };
+        let dequantized = shift_by_delay(&values, delay_frames);
+        let part_breathing = breathing.map(|b| &b[part.clone()]);
+        let effective: Vec<f64> = match part_breathing {
+            Some(b) => dequantized.iter().zip(b).map(|(f, b)| f * b.centre).collect(),
+            None => dequantized.clone()
+        };
+        if enabled || compensate {
+            let part_within = within.as_ref().map(|w| &w[part.clone()]);
+            // The field of view to hold, the narrowest of the part, judged by the frames the trim keeps (like the zoom
+            // is), all of them when it keeps none. Where the camera compensated itself, the metadata focal length has
+            // its crop in it, which is breathing taken out and no zoom: the held focal length is the metadata without
+            // it, times the largest breathing left with it (`max * crop`, the breathing against the recorded picture)
+            let intended = match part_breathing.filter(|_| compensate) {
+                Some(b) => {
+                    let largest = |all: bool| b.iter().enumerate().filter(|(i, _)| all || part_within.map_or(true, |w| w[*i])).map(|(_, b)| b.max * b.crop).fold(f64::MIN, f64::max);
+                    let reference = Some(largest(false)).filter(|r| *r > 0.0).unwrap_or_else(|| largest(true));
+                    dequantized.iter().zip(b).map(|(f, b)| f / b.crop * reference).collect()
+                },
+                None => effective.clone()
+            };
+            let target = if enabled {
+                // The envelope follows the dequantized curve only. The renderer's magnification is `target / effective`
+                // (the metadata focal length cancels out of the projection), so `target >= effective` is all that keeps
+                // the compensated view inside the frame, and an envelope above the raw staircase would inherit every
+                // step edge as a sawtooth in the compensation: a lens that reports whole millimetres would visibly jump
+                // on every step while the optics zoom smoothly
+                envelope(&intended, fps, max_zoom_rate, part_within)
+            } else {
+                intended
+            };
+            for (t, x) in targets[part.clone()].iter_mut().zip(target) { *t = Some(x); }
+        }
+        for (f, x) in focal_lengths[part].iter_mut().zip(effective) { *f = Some(x); }
     }
-    // The envelope follows the dequantized curve only. The renderer's magnification is `target / dequantized`
-    // (the metadata focal length cancels out of the projection), so `target >= dequantized` is all that keeps
-    // the compensated view inside the frame, and an envelope above the raw staircase would inherit every step
-    // edge as a sawtooth in the compensation: a lens that reports whole millimetres would visibly jump on
-    // every step while the optics zoom smoothly
-    let target = upper_envelope(&dequantized, fps, max_zoom_rate, trim_ranges);
-    (dequantized.into_iter().map(Some).collect(), target.into_iter().map(Some).collect())
+    (focal_lengths, targets)
 }
 
-/// [`derive_curves`] of a fresh [`compute_base_curve`], with the delay and the trim of `params`
+/// [`derive_curves`] of a fresh [`compute_base`], with the parts, the delay, the trim and the breathing compensation of `params`
 pub fn compute_curves(params: &ComputeParams, enabled: bool, max_zoom_rate: f64) -> (Vec<Option<f64>>, Vec<Option<f64>>) {
-    derive_curves(&compute_base_curve(params), params.lens_metadata_delay_frames, enabled, max_zoom_rate, params.scaled_fps, &params.trim_ranges)
+    let parts = parts(params);
+    derive_curves(&compute_base(params, &parts), &parts, params.lens_metadata_delay_frames, enabled, max_zoom_rate, params.scaled_fps, &params.trim_ranges, params.lens_breathing_enabled)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // A prime focusing from near (focal length 6% longer than stated) to far (1%) and back, at 100 fps
+    fn breathing_base() -> FocalLengthBase {
+        let breathing = (0..300).map(|i| {
+            let far = if i < 100 { 0.0 } else if i < 120 { (i - 100) as f64 / 20.0 } else if i < 200 { 1.0 } else if i < 220 { 1.0 - (i - 200) as f64 / 20.0 } else { 0.0 };
+            let centre = 1.06 - 0.05 * far;
+            // The rows differ while the focus moves during the readout
+            BreathingScale { centre, max: centre + if (100..120).contains(&i) { 0.002 } else { 0.0 }, crop: 1.0 }
+        }).collect();
+        FocalLengthBase { focal: vec![Some(1000.0); 300], breathing }
+    }
+    fn comp(curves: &(Vec<Option<f64>>, Vec<Option<f64>>), i: usize) -> f64 { compensation(&curves.0, &curves.1, i) }
+
+    #[test]
+    fn breathing_scales_the_effective_focal_length() {
+        let base = breathing_base();
+        // Without compensation the output follows the lens: no target, and the effective focal length breathes
+        let off = derive_curves(&base, &[0..300], 0, false, 0.5, 100.0, &[], false);
+        assert!(off.1.is_empty());
+        assert!((off.0[0].unwrap() - 1060.0).abs() < 1e-9 && (off.0[150].unwrap() - 1010.0).abs() < 1e-9);
+        assert!((0..300).all(|i| comp(&off, i) == 1.0));
+        // The metadata delay shifts the metadata, not the breathing: that is the frame's own
+        let delayed = derive_curves(&base, &[0..300], 3, false, 0.5, 100.0, &[], false);
+        assert_eq!(delayed.0, off.0);
+    }
+
+    #[test]
+    fn compensation_holds_the_narrowest_field_of_view() {
+        let base = breathing_base();
+        let on = derive_curves(&base, &[0..300], 0, false, 0.5, 100.0, &[], true);
+        // The target is the metadata times the largest breathing of any row
+        assert!(on.1.iter().all(|t| (t.unwrap() - 1062.0).abs() < 1e-9));
+        for i in 0..300 {
+            let c = comp(&on, i);
+            // Crop-only, and every frame shows the same field of view: the output's focal length `effective / comp`
+            assert!(c <= 1.0 && c > 0.9);
+            assert!((on.0[i].unwrap() / c - 1062.0).abs() < 1e-6);
+            // ... and no row of the frame reaches past its content
+            assert!(c * base.breathing[i].max / base.breathing[i].centre <= 1.0 + 1e-12);
+        }
+        // The far frames, the widest, zoom in the most
+        assert!(comp(&on, 150) < comp(&on, 50));
+        // The reference is judged by the frames the trim keeps: keeping only the far ones, they hold their own
+        let trimmed = derive_curves(&base, &[0..300], 0, false, 0.5, 100.0, &[(130.5 / 299.0, 189.5 / 299.0)], true);
+        assert!((comp(&trimmed, 150) - 1.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn a_camera_that_compensated_itself_is_left_alone() {
+        // The camera cropped by its estimate of m, and the camera matrix made from the capture area follows the crop:
+        // the lens's focal length over m cancels it (A7S3-1043: capture width ~ e537^-1.01)
+        let m: Vec<f64> = (0..200).map(|i| 1.0 + 0.04 * (i as f64 / 199.0)).collect();
+        let base = FocalLengthBase {
+            focal: m.iter().map(|m| Some(1000.0 * m)).collect(),
+            breathing: m.iter().map(|m| BreathingScale { centre: 1.0 / m, max: 1.0 / m, crop: *m }).collect(),
+        };
+        let on = derive_curves(&base, &[0..200], 0, false, 0.5, 100.0, &[], true);
+        for i in 0..200 {
+            // The true lens doesn't move, and there's nothing left to zoom in on
+            assert!((on.0[i].unwrap() - 1000.0).abs() < 1e-9);
+            assert!((comp(&on, i) - 1.0).abs() < 1e-9, "frame {i}: {}", comp(&on, i));
+        }
+        // Nor is the crop a zoom for the focal length smoothing
+        let smooth = derive_curves(&base, &[0..200], 0, true, 0.01, 100.0, &[], false);
+        assert!((0..200).all(|i| (comp(&smooth, i) - 1.0).abs() < 1e-9));
+    }
+
+    #[test]
+    fn compensation_with_smoothing_is_the_envelope_of_the_held_field_of_view() {
+        let mut base = breathing_base();
+        // A zoom on top: the metadata focal length rises 20% over the middle frames
+        for (i, f) in base.focal.iter_mut().enumerate() { *f = Some(1000.0 * (1.0 + 0.2 * ((i as f64 - 100.0) / 100.0).clamp(0.0, 1.0))); }
+        let both = derive_curves(&base, &[0..300], 0, true, 5.0, 100.0, &[], true);
+        for i in 0..300 {
+            let (f, t) = (both.0[i].unwrap(), both.1[i].unwrap());
+            assert!(t >= f - 1e-9);
+            // The zoom (20%/s, below the limit) passes through, the breathing doesn't
+            let target = base.focal[i].unwrap() * 1.062;
+            assert!((t - target).abs() < 1e-6, "frame {i}: {t} vs {target}");
+        }
+        // Smoothing alone smooths the breathing as any other change of the focal length: it's the lens's. The focus
+        // pulls change it by 24%/s, a limit of 10%/s spreads them out
+        let smooth = derive_curves(&breathing_base(), &[0..300], 0, true, 0.1, 100.0, &[], false);
+        assert!((0..300).all(|i| smooth.1[i].unwrap() >= smooth.0[i].unwrap() - 1e-9));
+        assert!(comp(&smooth, 115) < 1.0);
+    }
 }

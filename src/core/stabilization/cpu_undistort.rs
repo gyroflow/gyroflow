@@ -430,7 +430,7 @@ impl Stabilization {
             }
 
             let mut uv = distortion_model.distort_point(_x, _y, _w, &params);
-            // Focus breathing: this row's magnification of the source image (`gyro_source::sony::breathing`)
+            // Focus breathing: this row's focal length against the frame's camera matrix (`gyro_source::sony::breathing`)
             if matrices[14] > 0.0 { uv = (uv.0 * matrices[14], uv.1 * matrices[14]); }
             uv = (uv.0 * params.f[0], uv.1 * params.f[1]);
 
@@ -883,8 +883,8 @@ pub fn undistort_points_for_optical_flow(distorted: &[(f32, f32)], timestamp_us:
         .collect()
 }
 /// [`undistort_points_for_optical_flow`] with everything else the render undoes on the source side of `frame`: its
-/// mesh correction, the sensor and lens shifts of in-body and optical stabilization, and lens breathing (when it's
-/// on). What the picture moved by beyond these is the camera's own rotation, which is what `optical_motion`
+/// mesh correction, the sensor and lens shifts of in-body and optical stabilization, and the lens breathing of every
+/// row. What the picture moved by beyond these is the camera's own rotation, which is what `optical_motion`
 /// measures - a sensor shift taken for one would be corrected twice, once as the shift and once as the rotation.
 ///
 /// The per-frame data is in pixels of the frame itself, so the features are taken there first.
@@ -893,9 +893,8 @@ pub fn undistort_points_for_optical_motion(distorted: &[(f32, f32)], timestamp_m
     let scale = (params.width as f32 / points_dims.0.max(1) as f32, params.height as f32 / points_dims.1.max(1) as f32);
     let full: Vec<(f32, f32)> = distorted.iter().map(|p| (p.0 * scale.0, p.1 * scale.1)).collect();
 
-    // `use_fovs` is what brings lens breathing in, the magnification `at_timestamp` applies on the source side; the
-    // zoom it's otherwise about isn't read here
-    let (camera_matrix, distortion_coeffs, _, _, shifts, mesh, _, _, breathing) = FrameTransform::at_timestamp_for_points(params, &full, timestamp_ms, Some(frame), true);
+    // The camera matrix has the frame's breathing in it and the rows their ratio to it; the zoom isn't read here
+    let (camera_matrix, distortion_coeffs, _, _, shifts, mesh, _, _, breathing) = FrameTransform::at_timestamp_for_points(params, &full, timestamp_ms, Some(frame), false);
     // Without rolling shutter correction the shift is looked up once, for the whole frame
     let shifts = shifts.map(|s| if s.len() == 1 { vec![s[0]; full.len()] } else { s });
 
@@ -1026,8 +1025,8 @@ fn undistort_points_to_rays(distorted: &[(f32, f32)], kernel_params: &KernelPara
         }
 
         let mut pw = ((x - c.0) / f.0, (y - c.1) / f.1); // normalized image point
-        // Focus breathing is a magnification of the source image (`at_timestamp` applies it there too), so
-        // undoing it is a division, before the lens model is asked for the ray
+        // The row's focus breathing scales the source image against the camera matrix (`at_timestamp` applies it there
+        // too), so undoing it is a division, before the lens model is asked for the ray
         if let Some(bz) = breathing_per_point.and_then(|v| v.get(index).or(v.first())).filter(|k| **k > 0.0) {
             pw = (pw.0 / bz, pw.1 / bz);
         }

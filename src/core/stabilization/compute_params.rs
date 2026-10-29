@@ -46,6 +46,10 @@ pub struct ComputeParams {
     pub trim_ranges: Vec<(f64, f64)>,
     pub scaled_fps: f64,
     pub scaled_duration_ms: f64,
+    /// The video's frame times and the frame rate scale (`StabilizationParams::frame_times`, `fps_scale`), which
+    /// `frame_at_timestamp` and `timestamp_at_frame` map frames by
+    pub frame_times: Option<Arc<crate::frame_times::FrameTimes>>,
+    pub fps_scale: f64,
     pub adaptive_zoom_window: f64,
     pub adaptive_zoom_center_offset: (f64, f64),
     pub adaptive_zoom_method: i32,
@@ -59,6 +63,9 @@ pub struct ComputeParams {
     pub smoothing_crop_lenses: Option<Arc<crate::smoothing::optimal::crop::CropLenses>>,
     /// Per frame, the time (ms) the render reads its orientations at, in the motion's own timeline, see `calculate_camera_fovs`
     pub smoothing_frame_times: Option<Arc<Vec<f64>>>,
+    /// The frames being smoothed, when they're a segment of a video cut from recordings, smoothed on its own
+    /// (`GyroSource::recompute_smoothness`); all of them when `None`
+    pub smoothing_frames: Option<std::ops::Range<usize>>,
     pub max_zoom: Option<f64>,
     pub max_zoom_iterations: usize,
     pub fixed_zoom: bool,
@@ -72,12 +79,12 @@ pub struct ComputeParams {
 
     // Focal length stabilization, see smoothing::focal_length. Per frame, in output pixels
     pub focal_lengths: Vec<Option<f64>>,          // effective focal length the renderer projects with (dequantized)
-    pub smoothed_focal_lengths: Vec<Option<f64>>, // upper-envelope target, empty when disabled
+    pub smoothed_focal_lengths: Vec<Option<f64>>, // target of the output zoom (smoothing envelope, breathing compensation), empty: no zoom (`focal_length::compensation`)
     pub focal_length_smoothing_enabled: bool,
     pub focal_length_max_zoom_rate: f64,          // d ln(f) / dt in 1/s, 0.5 is roughly 50% of magnification per second
     pub lens_metadata_delay_frames: i32,          // every per-frame lens lookup is shifted by this many frames, see synchronization::lens_delay
 
-    pub lens_breathing_enabled: bool,
+    pub lens_breathing_enabled: bool,             // breathing compensation: the target holds the narrowest field of view (the breathing itself is in `focal_lengths` either way)
 }
 impl ComputeParams {
     /// Time (µs) the lens metadata of the picture at `timestamp_ms` is looked up at: the frame time shifted by
@@ -90,6 +97,21 @@ impl ComputeParams {
     /// `lens_timestamp_us` for a given delay
     pub fn lens_timestamp_us_with_delay(timestamp_ms: f64, delay_frames: i32, fps: f64) -> i64 {
         ((timestamp_ms + crate::timestamp_at_frame(delay_frames, fps.max(1e-9))) * 1000.0).round() as i64
+    }
+
+    /// The frame (its ordinal) presented at the video's time `timestamp_ms`, `StabilizationParams::frame_at_timestamp`
+    pub fn frame_at_timestamp(&self, timestamp_ms: f64) -> i32 {
+        match &self.frame_times {
+            Some(times) => times.frame_at_timestamp(timestamp_ms, if self.fps_scale > 0.0 { self.fps_scale } else { 1.0 }),
+            None => crate::frame_at_timestamp(timestamp_ms, self.scaled_fps),
+        }
+    }
+    /// The video's time (ms) frame `frame` is presented at, `StabilizationParams::timestamp_at_frame`
+    pub fn timestamp_at_frame(&self, frame: i32) -> f64 {
+        match &self.frame_times {
+            Some(times) => times.timestamp_at_frame(frame, if self.fps_scale > 0.0 { self.fps_scale } else { 1.0 }),
+            None => crate::timestamp_at_frame(frame, self.scaled_fps),
+        }
     }
 
     pub fn from_manager(mgr: &StabilizationManager) -> Self {
@@ -110,6 +132,7 @@ impl ComputeParams {
             smoothing_fov_limit_per_frame: Vec::new(),
             smoothing_crop_lenses: None,
             smoothing_frame_times: None,
+            smoothing_frames: None,
             max_zoom: params.max_zoom.clone(),
             max_zoom_iterations: params.max_zoom_iterations,
             fixed_zoom: params.fixed_zoom,
@@ -139,6 +162,8 @@ impl ComputeParams {
             trim_ranges: params.trim_ranges.clone(),
             scaled_fps: params.get_scaled_fps(),
             scaled_duration_ms: params.get_scaled_duration_ms(),
+            frame_times: params.frame_times.clone(),
+            fps_scale: params.get_fps_scale(),
             adaptive_zoom_window: params.adaptive_zoom_window,
             adaptive_zoom_center_offset: params.adaptive_zoom_center_offset,
             additional_rotation: params.additional_rotation,
@@ -182,19 +207,21 @@ impl ComputeParams {
     }
 
     pub fn calculate_camera_fovs(&mut self) {
-        // Per frame only when the metadata's focal length changes over the clip, in whichever unit the camera reports
-        // it (see `FrameTransform::get_lens_data_at_timestamp`); a fixed lens has one FOV
-        let frame_count = if self.gyro.read().file_metadata.read().has_per_frame_focal_length() {
+        // Per frame only when the focal length changes over the clip: the metadata's, in whichever unit the camera reports
+        // it (see `FrameTransform::get_lens_data_at_timestamp`), or the lens's own through its breathing (the crop lenses
+        // are scaled to it, `FrameTransform::effective_camera_matrix`); a fixed lens has one FOV
+        let frame_count = if self.gyro.read().file_metadata.read().has_varying_focal_length() {
             self.frame_count
         } else {
             1 // FOV is constant (ie. lens is fixed focal length)
         };
         self.camera_diagonal_fovs = Vec::with_capacity(frame_count);
-        // The smoothing runs under the gyro lock and can't look the lens up itself, so the crop constraint of the
-        // optimal smoothing takes it from here, the same lookups
+        // The smoothing doesn't look the lens up itself (it may run where the gyro lock is held, by a caller of
+        // `GyroSource::recompute_smoothness`), so the crop constraint of the optimal smoothing takes it from here, the
+        // same lookups
         let mut crop_lenses = crate::smoothing::optimal::crop::CropLenses::default();
         for f in 0..frame_count as i32 {
-            let timestamp = crate::timestamp_at_frame(f, self.scaled_fps);
+            let timestamp = self.timestamp_at_frame(f);
             let lens = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&self, timestamp, false);
             let camera_matrix = lens.0;
             let diag_length = ((self.width.pow(2) + self.height.pow(2)) as f64).sqrt();
@@ -212,8 +239,8 @@ impl ComputeParams {
             let gyro = self.gyro.read();
             let file_metadata = gyro.file_metadata.read();
             (0..self.frame_count).map(|f| {
-                let t = crate::timestamp_at_frame(f as i32, self.scaled_fps) + file_metadata.frame_time_offset(f);
-                t - gyro.offset_at_video_timestamp(t)
+                let t = self.timestamp_at_frame(f as i32) + file_metadata.frame_time_offset(f);
+                t - gyro.offset_at_frame(f, t)
             }).collect()
         };
         self.smoothing_frame_times = Some(Arc::new(times));

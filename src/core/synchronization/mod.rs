@@ -6,7 +6,6 @@ use std::ops::Range;
 use std::sync::Arc;
 use std::sync::atomic::{ AtomicBool, AtomicU32, Ordering::SeqCst };
 use parking_lot::RwLock;
-use std::cell::RefCell;
 use std::collections::BTreeMap;
 use rayon::iter::{ ParallelIterator, IntoParallelRefIterator };
 
@@ -15,7 +14,7 @@ use crate::stabilization::ComputeParams;
 
 mod optical_flow; pub use optical_flow::*;
 mod estimate_pose; pub use estimate_pose::*;
-mod find_offset { pub mod rs_sync; pub mod essential_matrix; pub mod visual_features; }
+mod find_offset { pub mod rs_sync; pub mod essential_matrix; pub mod visual_features; pub mod bands; }
 
 use super::gyro_source::TimeIMU;
 
@@ -48,7 +47,6 @@ pub struct SyncParams {
     pub auto_sync_points: bool
 }
 
-#[derive(Clone)]
 pub struct FrameResult {
     pub of_method: OpticalFlowMethod,
     pub frame_no: usize,
@@ -59,10 +57,27 @@ pub struct FrameResult {
     pub quat: Option<Quat64>,
     pub euler: Option<(f64, f64, f64)>,
 
-    optical_flow: RefCell<BTreeMap<usize, OpticalFlowPairWithTs>>
+    /// Filled by the synchronization (`cache_optical_flow`) while the preview draws it (`get_of_lines_for_timestamp`),
+    /// both under a shared lock of the results: its own lock, taken with `try_` (busy is skipped), as a `RefCell` was
+    optical_flow: RwLock<BTreeMap<usize, OpticalFlowPairWithTs>>
 }
 unsafe impl Send for FrameResult {}
 unsafe impl Sync for FrameResult {}
+impl Clone for FrameResult {
+    fn clone(&self) -> Self {
+        Self {
+            of_method: self.of_method.clone(),
+            frame_no: self.frame_no,
+            timestamp_us: self.timestamp_us,
+            gyro_timestamp_us: self.gyro_timestamp_us,
+            frame_size: self.frame_size,
+            rotation: self.rotation,
+            quat: self.quat,
+            euler: self.euler,
+            optical_flow: RwLock::new(self.optical_flow.read().clone()),
+        }
+    }
+}
 
 #[derive(Default)]
 pub struct PoseEstimator {
@@ -82,12 +97,13 @@ impl PoseEstimator {
         self.estimated_quats.write().clear();
     }
 
-    pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32, of_method: u32) {
+    /// `klt`: where KLT tracks, for an `of_method` that uses it (see `OpticalFlowMethod::uses_klt`)
+    pub fn detect_features(&self, frame_no: usize, timestamp_us: i64, img: Arc<image::GrayImage>, width: u32, height: u32, of_method: u32, klt: Option<Arc<optical_motion::PairKlt>>) {
         let frame_size = (width, height);
         let contains = self.sync_results.read().contains_key(&timestamp_us);
         if !contains {
             let result = FrameResult {
-                of_method: OpticalFlowMethod::detect_features(of_method, timestamp_us, img, width, height),
+                of_method: OpticalFlowMethod::detect_features(of_method, timestamp_us, img, width, height, klt),
                 frame_no,
                 frame_size,
                 timestamp_us,
@@ -199,7 +215,7 @@ impl PoseEstimator {
         let keys: Vec<i64> = l.keys().copied().collect();
         for (i, k) in keys.iter().enumerate() {
             if let Some(from_fr) = l.get(k) {
-                if from_fr.optical_flow.try_borrow().map(|of| !of.is_empty()).unwrap_or_default() {
+                if from_fr.optical_flow.try_read().map(|of| !of.is_empty()).unwrap_or_default() {
                     // We already have OF for this frame
                     continue;
                 }
@@ -208,7 +224,7 @@ impl PoseEstimator {
                         if let Some(to_item) = l.get(to_key) {
                             if from_fr.frame_no + d == to_item.frame_no {
                                 let of = from_fr.of_method.optical_flow_to(&to_item.of_method);
-                                if let Ok(mut from_of) = from_fr.optical_flow.try_borrow_mut() {
+                                if let Some(mut from_of) = from_fr.optical_flow.try_write() {
                                     from_of.insert(d,
                                         of.map(|of| ((from_fr.timestamp_us, of.0), (to_item.timestamp_us, of.1)))
                                     );
@@ -233,7 +249,7 @@ impl PoseEstimator {
                 let mut iter = l.range(first_ts..);
                 for _ in 0..next_no { iter.next(); }
                 if let Some((_, curr)) = iter.next() {
-                    if let Ok(of) = curr.optical_flow.try_borrow() {
+                    if let Some(of) = curr.optical_flow.try_read() {
                         if let Some(opt_pts) = of.get(&num_frames) {
                             return (if filter {
                                 Self::filter_of_lines(opt_pts, scale)
@@ -385,7 +401,9 @@ impl PoseEstimator {
         match self.offset_method.load(SeqCst) {
             0 => find_offset::essential_matrix::find_offsets(&self, ranges, sync_params, params, progress_cb, cancel_flag),
             1 => find_offset::visual_features::find_offsets(&self, ranges,  sync_params, params, false, progress_cb, cancel_flag),
-            2 => find_offset::rs_sync::find_offsets(&self, ranges, sync_params, params, progress_cb, cancel_flag),
+            // 3, the optical analysis' (`find_offset::bands`), doesn't go through the pose estimator: where it comes here
+            // (no motion data to sync, no tracker for it) it's rs-sync
+            2 | 3 => find_offset::rs_sync::find_offsets(&self, ranges, sync_params, params, progress_cb, cancel_flag),
             v => { log::error!("Unknown offset method: {v}"); Vec::new() }
         }
     }

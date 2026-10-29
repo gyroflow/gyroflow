@@ -7,6 +7,9 @@
 //! values are put at the frame their sample describes, never appended, and a frame without a value of its own is
 //! filled in explicitly once all of them are known.
 //!
+//! In a video cut from recordings, a frame is filled in from the values of its own part only (`interpolate_within`,
+//! `hold_within`): the frames of another part are of another moment, or of another recording.
+//!
 //! Which frame numbers count and what a table costs are separate. `limit_frames` decides the first, from evidence the
 //! frame numbers can't make up themselves: the video's frame count, or without it the gaps a stream can have. A table
 //! keeps only the values it's given while the samples are walked (`PerFrame`), whatever frames they're spread over,
@@ -15,6 +18,7 @@
 //! needs by frame, not only the first one: a table computed for every frame of a run is laid out in its own storage
 //! (`hold_leading`), and a pass over a table's frames collects into storage taken the same way (`collect_table`)
 
+use std::ops::Range;
 use rayon::iter::{ IndexedParallelIterator, ParallelExtend };
 
 /// The longest run of frames without metadata the frame numbers of a clip of unknown length can have, telemetry-parser's
@@ -219,17 +223,65 @@ impl<T: Clone> PerFrame<T> {
     /// trajectory, a distortion mesh, a zoom) change little from one frame to the next, so the neighbour's is the
     /// closest the metadata comes to the missing one, where none would be the uncorrected frame popping out of the
     /// sequence. Empty when no frame has a value, or when the memory can't hold it (`table`). A frame's own value is
-    /// moved, only the filled in ones are copies
-    pub fn hold(mut self) -> Vec<T> {
-        self.settle();
-        let Some(mut out) = table::<T>(self.frames(), self.what) else { return Vec::new() };
-        for (frame, v) in self.values {
-            // The frames before this one without a value: the leading ones take this one, the others the one before
-            match out.len().checked_sub(1) {
+    /// moved, only the filled in ones are copies.
+    ///
+    /// Within each part of a video cut from recordings (`parts`, see `lay_out`; none or one for a video of one piece):
+    /// a frame takes its part's previous frame's or its part's first value, never another part's, and a part none of
+    /// whose frames has one has `none`, what a frame without the data has
+    pub fn hold_within(self, parts: &[Range<usize>], none: T) -> Vec<T> {
+        self.lay_out(parts, none, |out, start, v, frame| {
+            // The frames before this one without a value: the part's leading ones take this one, the others the one
+            // before
+            match out.len().checked_sub(1).filter(|last| *last >= start) {
                 Some(last) => while out.len() < frame { out.push(out[last].clone()); },
-                None => out.extend(std::iter::repeat_n(&v, frame).cloned()),
+                None => out.extend(std::iter::repeat_n(&v, frame - out.len()).cloned()),
             }
             out.push(v);
+        })
+    }
+
+    /// The table laid out by frame, `place` putting each value (`v` of `frame`) after the frames before it that the table
+    /// has so far (`out`), its part's from `start` on. With more than one part (`parts`: the frames of each part of a
+    /// video cut from recordings, in order, the first from frame 0, the last open-ended), each part's frames are laid
+    /// out from its own values: the frames of a part after its last value take that value, as the frames past a table
+    /// continue its last one (`file_metadata::per_frame_entry`), and a part without a value has `none`. Empty when no
+    /// frame has a value, or when the memory can't hold it (`table`)
+    fn lay_out(mut self, parts: &[Range<usize>], none: T, mut place: impl FnMut(&mut Vec<T>, usize, T, usize)) -> Vec<T> {
+        self.settle();
+        let frames = self.frames();
+        if frames == 0 { return Vec::new(); }
+        let parts = if parts.len() > 1 { parts } else { &[] };
+        // Up to the last value, and a last part without a value to its end
+        let end = parts.last().map_or(frames, |last| if frames > last.start { frames } else { last.end.max(last.start) });
+        let Some(mut out) = table::<T>(end, self.what) else { return Vec::new() };
+        let starts: Vec<usize> = parts.iter().map(|p| p.start).collect();
+        // The frames of the parts before `upto` that the table doesn't have yet, from their own values (`done` of them
+        // are laid out)
+        let close = |out: &mut Vec<T>, upto: usize, done: &mut usize| {
+            while *done < upto {
+                let (start, next) = (starts[*done], starts[*done + 1]);
+                match out.len().checked_sub(1).filter(|last| *last >= start) {
+                    Some(last) => while out.len() < next { out.push(out[last].clone()); },
+                    None => while out.len() < next { out.push(none.clone()); },
+                }
+                *done += 1;
+            }
+        };
+        let mut done = 0;
+        for (frame, v) in self.values {
+            let start = match starts.len() {
+                0 => 0,
+                _ => {
+                    let part = starts.partition_point(|s| *s <= frame).saturating_sub(1);
+                    close(&mut out, part, &mut done);
+                    starts[part]
+                }
+            };
+            place(&mut out, start, v, frame);
+        }
+        if let Some(&last) = starts.last() {
+            close(&mut out, starts.len() - 1, &mut done);
+            if out.len() <= last { while out.len() < end { out.push(none.clone()); } }
         }
         out
     }
@@ -240,22 +292,24 @@ impl PerFrame<f64> {
     /// nearest frames before and after it that have one, and the frames before the first value take that one. The
     /// values are times (exposure and readout midpoints, clock offsets), which stay constant or drift: the line through
     /// the neighbours is exact for both, and off by less than the step where they jump. Empty when no frame has a
-    /// value, or when the memory can't hold it (`table`)
-    pub fn interpolate(mut self) -> Vec<f64> {
-        self.settle();
-        let Some(mut out) = table::<f64>(self.frames(), self.what) else { return Vec::new() };
+    /// value, or when the memory can't hold it (`table`).
+    ///
+    /// Within each part of a video cut from recordings (`parts`, as `hold_within` takes them): a frame is linear between
+    /// its part's values around it, takes its part's first value before them and its last one after them, and 0 in a
+    /// part without any, as a frame of a video without the table (`frame_time_offset`)
+    pub fn interpolate_within(self, parts: &[Range<usize>]) -> Vec<f64> {
         let mut prev: Option<(usize, f64)> = None;
-        for (j, b) in self.values {
-            // The frames before this one without a value, between the one before and this one
+        self.lay_out(parts, 0.0, |out, start, b, j| {
+            // The frames before this one without a value, between the one before in the part and this one
+            let before = prev.filter(|(p, _)| *p >= start);
             for k in out.len()..j {
-                out.push(match prev {
+                out.push(match before {
                     Some((p, a)) => a + (b - a) * (k - p) as f64 / (j - p) as f64,
                     None => b,
                 });
             }
             out.push(b);
             prev = Some((j, b));
-        }
-        out
+        })
     }
 }

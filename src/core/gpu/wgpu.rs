@@ -17,6 +17,8 @@ pub enum WgpuError {
     RequestDevice(wgpu::RequestDeviceError),
     ParamCheck,
     NoAvailableAdapter,
+    /// The CUDA device of this UUID has no Vulkan adapter (see `WgpuWrapper::cuda_adapter`)
+    NoAdapterForCudaDevice(String),
 }
 
 enum PipelineType {
@@ -150,6 +152,34 @@ impl WgpuWrapper {
             .find_map(|t| adapters.iter().find(|a| a.get_info().device_type == *t))).cloned()
     }
 
+    /// The Vulkan adapter of the GPU of the thread's CUDA context: the CUDA memory can only be shared with a device of
+    /// that GPU (see `wgpu_interop_cuda`), never of another. One of `ADAPTERS`, or else of all the instance's, as those
+    /// may be just the one adapter of `initialize_context`, while a host renders on each GPU, on a thread per GPU
+    /// (Premiere's export, Resolve). None when no Vulkan adapter is that GPU (in TCC mode, or without a Vulkan driver),
+    /// for `wgpu_interop_cuda::through_host`
+    #[cfg(any(target_os = "windows", target_os = "linux"))]
+    pub fn cuda_adapter() -> Option<Adapter> {
+        use super::wgpu_interop_cuda::{ current_device_uuid, vulkan_device_uuid, uuid_string };
+        // Per GPU, also without one, so a render doesn't list the adapters on every frame
+        static FOUND: Mutex<Vec<([u8; 16], Option<Adapter>)>> = Mutex::new(Vec::new());
+
+        let uuid = current_device_uuid()?;
+        let mut found = FOUND.lock();
+        if let Some((_, adapter)) = found.iter().find(|(u, _)| *u == uuid) {
+            return adapter.clone();
+        }
+        let is_it = |a: &Adapter| vulkan_device_uuid(a) == Some(uuid);
+        // The read lock released before the instance's: `initialize_context` takes them the other way round
+        let listed = ADAPTERS.read().iter().find(|a| is_it(a)).cloned();
+        let adapter = listed.or_else(|| pollster::block_on(INSTANCE.lock().enumerate_adapters(wgpu::Backends::VULKAN)).into_iter().find(|a| is_it(a)));
+        match &adapter {
+            Some(a) => log::info!("CUDA device {}: {:?}", uuid_string(&uuid), a.get_info()),
+            None => log::warn!("CUDA device {} has no Vulkan adapter, its frames go through the host memory", uuid_string(&uuid)),
+        }
+        found.push((uuid, adapter.clone()));
+        adapter
+    }
+
     pub fn initialize_context() -> Option<(String, String)> {
         let instance = INSTANCE.lock();
 
@@ -190,19 +220,19 @@ impl WgpuWrapper {
 
         let drawing_enabled = (params.flags & 8) == 8;
 
-        let mut adapter_id = ADAPTER.load(SeqCst);
-        let adapter_initialized = ADAPTERS.read().get(adapter_id).is_some();
+        let adapter_initialized = ADAPTERS.read().get(ADAPTER.load(SeqCst)).is_some();
         if !adapter_initialized { Self::initialize_context(); }
-        let lock = ADAPTERS.read();
-        adapter_id = ADAPTER.load(SeqCst);
 
-        #[cfg(any(target_os = "windows", target_os = "linux"))]
-        if let BufferSource::CUDABuffer { .. } = buffers.input.data {
-            adapter_id = super::wgpu_interop_cuda::get_current_device_id_by_uuid(&lock);
-        }
+        let adapter = match &buffers.input.data {
+            #[cfg(any(target_os = "windows", target_os = "linux"))]
+            BufferSource::CUDABuffer { .. } => Some(Self::cuda_adapter().ok_or_else(|| {
+                WgpuError::NoAdapterForCudaDevice(super::wgpu_interop_cuda::current_device_uuid().map(|x| super::wgpu_interop_cuda::uuid_string(&x)).unwrap_or_default())
+            })?),
+            _ => ADAPTERS.read().get(ADAPTER.load(SeqCst)).cloned()
+        };
 
-        if let Some(adapter) = lock.get(adapter_id) {
-            log::debug!("WGPU initializing adapter #{adapter_id}: {:?}", adapter.get_info());
+        if let Some(adapter) = adapter {
+            log::debug!("WGPU initializing adapter: {:?}", adapter.get_info());
             let (device, queue) = match &buffers.input.data {
                 #[cfg(any(target_os = "macos", target_os = "ios"))]
                 BufferSource::Metal { command_queue, .. } |
@@ -604,5 +634,35 @@ pub fn is_buffer_supported(buffers: &Buffers) -> bool {
         BufferSource::CUDABuffer{ .. } => true,
         #[cfg(any(target_os = "macos", target_os = "ios"))]
         BufferSource::Metal { .. } | BufferSource::MetalBuffer { .. } => true,
+    }
+}
+
+#[cfg(all(test, any(target_os = "windows", target_os = "linux")))]
+mod tests {
+    use super::*;
+    use super::super::wgpu_interop_cuda::{ current_device_uuid, vulkan_device_uuid };
+
+    /// Premiere's export renders on every GPU, and `ADAPTERS` were the one adapter `initialize_context` picked, of
+    /// another GPU than a render thread's CUDA device: the device's adapter is found among all of the instance's, and
+    /// never one of another GPU, which can't import the CUDA memory. Needs an NVIDIA GPU:
+    /// `cargo test --lib cuda_adapter -- --ignored --nocapture`
+    #[test]
+    #[ignore = "needs an NVIDIA GPU"]
+    fn cuda_adapter_of_a_gpu_missing_from_the_adapters() {
+        let _cuda = unsafe {
+            let lib = libloading::Library::new(if cfg!(windows) { "nvcuda.dll" } else { "libcuda.so.1" }).expect("the CUDA driver");
+            let init: unsafe extern "C" fn(u32) -> i32 = *lib.get(b"cuInit\0").unwrap();
+            assert_eq!(init(0), 0, "cuInit");
+            lib
+        };
+        let uuid = current_device_uuid().expect("the CUDA device's UUID");
+
+        let all = pollster::block_on(INSTANCE.lock().enumerate_adapters(wgpu::Backends::all()));
+        *ADAPTERS.write() = all.into_iter().filter(|a| vulkan_device_uuid(a) != Some(uuid)).collect();
+        println!("Adapters: {:?}", ADAPTERS.read().iter().map(|a| { let i = a.get_info(); format!("{} ({:?})", i.name, i.backend) }).collect::<Vec<_>>());
+
+        let adapter = WgpuWrapper::cuda_adapter().expect("the CUDA device's Vulkan adapter");
+        println!("Found: {:?}", adapter.get_info());
+        assert_eq!(vulkan_device_uuid(&adapter), Some(uuid));
     }
 }

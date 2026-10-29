@@ -67,7 +67,7 @@ pub fn max_zoom_out_fov(params: &ComputeParams, amount: f64, output_width: usize
 /// The lens data [`max_zoom_out_fov`] reads, exactly as `FrameTransform::get_lens_data_at_timestamp` hands
 /// it out: camera matrix, coefficients, field limit, the two anamorphic stretches, and the focal length
 /// bookkeeping this doesn't use
-pub type LensData = (nalgebra::Matrix3<f64>, [f64; 24], f64, f64, f64, Option<f64>, bool);
+pub type LensData = (nalgebra::Matrix3<f64>, [f64; 24], f64, f64, f64, Option<f64>, crate::stabilization::FocalSource);
 
 /// [`max_zoom_out_fov`] on lens data the caller already holds. The answer depends on the timestamp only
 /// through this, so the per-frame zoom sweep keys a cache on it (`FovIterative::max_fov_at`) rather than
@@ -193,7 +193,7 @@ pub fn is_manual_zoom(params: &ComputeParams) -> bool {
 /// The zoom limit (`max_zoom`, keyframed, scaled by the video speed when linked and `with_speed`) at `frame` as a fov in
 /// the units [`calculate_fovs`] returns, `None` when there's no limit
 fn zoom_limit_fov_at(params: &ComputeParams, frame: usize, with_speed: bool) -> Option<f64> {
-    let ts = crate::timestamp_at_frame(frame as i32, params.scaled_fps);
+    let ts = params.timestamp_at_frame(frame as i32);
     let max_zoom = params.max_zoom.unwrap_or(0.0);
     let mut zoom_limit = params.keyframes.value_at_video_timestamp(&KeyframeType::MaxZoom, ts).unwrap_or(max_zoom);
     if zoom_limit <= 50.0 { return None; }
@@ -256,14 +256,14 @@ pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)
     let measured = fov_estimator.compute(timestamps, &compute_params.trim_ranges);
     let debug_points = fov_estimator.get_debug_points();
 
-    // Focal length stabilization: the renderer multiplies `fov` by `comp = raw / target <= 1`
-    // (crop-only, see smoothing::focal_length). `coverage` is the largest zoom fov that still keeps the
-    // compensated view inside the source, so the zoom may use the pixels that crop hides anyway, but it
-    // must never zoom out past the target further than it would without compensation (`max(P, 1)`),
-    // otherwise it would fit the frame around the crop and undo the smoothing.
+    // Focal length stabilization and lens breathing compensation: the renderer multiplies `fov` by
+    // `comp = raw / target <= 1` (crop-only, see smoothing::focal_length). `coverage` is the largest zoom fov
+    // that still keeps the compensated view inside the source, so the zoom may use the pixels that crop hides
+    // anyway instead of cropping on top of it, but it must never zoom out past the target further than it would
+    // without compensation (`max(P, 1)`), otherwise it would fit the frame around the crop and undo it.
     let mut fov_values = measured.clone();
     let mut coverage = measured;
-    if compute_params.focal_length_smoothing_enabled && !compute_params.smoothed_focal_lengths.is_empty() {
+    if !compute_params.smoothed_focal_lengths.is_empty() {
         for (i, &(frame, _)) in timestamps.iter().enumerate() {
             let comp = crate::smoothing::focal_length::compensation_at(&compute_params, frame);
             let p = coverage[i];
@@ -278,13 +278,19 @@ pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)
     // against 1.0; with focal length smoothing that's `coverage`, the frame relative to the compensated view
     let final_fovs_minimal = coverage;
     let static_zoom = compute_params.adaptive_zoom_window < -0.9;
+    // A video cut from recordings is zoomed in each of its parts on its own, the way its motion is smoothed: the next part
+    // is another moment, whose crop says nothing about this one's. A static zoom stays one zoom for the whole video
+    let runs = part_runs(&compute_params, timestamps);
     // How the zoom limit judges the frames of a static zoom. Not by the fov they each need: the crop a frame needs builds up
     // over the frames before it, so lowering the smoothing on that frame alone takes many iterations and cuts it in jerks.
     // A dynamic zoom curve spreads it over the moment around, the way the dynamic zoom gets judged. It's always the same
     // curve, whatever the zooming method and its keyframes, as those are settings of the dynamic zoom only.
     // `zoom_limit_whole_clip` keeps the behavior from before: every frame judged by the worst one
     let mut limit_fovs = if judge_by_curve {
-        Some(zoom_dynamic::limit_curve(&fov_values, STATIC_ZOOM_LIMIT_WINDOW, compute_params.scaled_fps))
+        Some(match runs.as_slice() {
+            [_] => zoom_dynamic::limit_curve(&fov_values, STATIC_ZOOM_LIMIT_WINDOW, compute_params.scaled_fps),
+            _ => runs.iter().flat_map(|r| zoom_dynamic::limit_curve(&fov_values[r.clone()], STATIC_ZOOM_LIMIT_WINDOW, compute_params.scaled_fps)).collect(),
+        })
     } else {
         None
     };
@@ -292,8 +298,11 @@ pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)
         // Static zoom, set to the worst frame below, after the margin
         fov_values
     } else if compute_params.adaptive_zoom_window > 0.0001 {
-        // Dynamic zoom
-        zoom_dynamic::compute(&compute_params, fov_values, timestamps, method).0
+        // Dynamic zoom, in each part on its own (a video of one part all at once, as it is)
+        match runs.as_slice() {
+            [_] => zoom_dynamic::compute(&compute_params, fov_values, timestamps, method).0,
+            _ => runs.iter().flat_map(|r| zoom_dynamic::compute(&compute_params, fov_values[r.clone()].to_vec(), &timestamps[r.clone()], method).0).collect(),
+        }
     } else {
         // Disabled zoom
         vec![1.0; fov_values.len()]
@@ -339,6 +348,22 @@ pub fn calculate_fovs(compute_params: &ComputeParams, timestamps: &[(usize, f64)
     (final_fovs, final_fovs_minimal, debug_points, limit_fovs)
 }
 
+/// The runs of `timestamps` (their indices) whose frames are in one part of the video (`focal_length::parts`)
+fn part_runs(compute_params: &ComputeParams, timestamps: &[(usize, f64)]) -> Vec<std::ops::Range<usize>> {
+    let parts = crate::smoothing::focal_length::parts(compute_params);
+    let part_of = |frame: usize| parts.partition_point(|p| p.end <= frame);
+    let mut runs = Vec::new();
+    let mut start = 0;
+    for (i, pair) in timestamps.windows(2).enumerate() {
+        if part_of(pair[1].0) != part_of(pair[0].0) {
+            runs.push(start..i + 1);
+            start = i + 1;
+        }
+    }
+    runs.push(start..timestamps.len());
+    runs
+}
+
 /// Key of everything the zoom pass reads, so `recompute_threaded` can tell whether the stored fovs are stale.
 /// `smoothing_checksum` is the smoothing state key (`Smoothing::get_state_checksum`): the zoom fits the output
 /// frame around the smoothed quaternions, so it has to follow them as well
@@ -360,6 +385,8 @@ pub fn get_checksum(compute_params: &ComputeParams, smoothing_checksum: u64) -> 
     hasher.write_usize(compute_params.output_width);
     hasher.write_usize(compute_params.output_height);
     hasher.write_u64(compute_params.scaled_fps.to_bits());
+    // The time each frame is zoomed at
+    if let Some(times) = &compute_params.frame_times { hasher.write_u64(times.checksum()); }
     hasher.write_u64(compute_params.frame_readout_time.to_bits());
     hasher.write_i32(compute_params.frame_readout_direction as i32);
     for x in compute_params.trim_ranges.iter() {
@@ -370,6 +397,10 @@ pub fn get_checksum(compute_params: &ComputeParams, smoothing_checksum: u64) -> 
     hasher.write_u64(compute_params.video_speed.to_bits());
     hasher.write_u8(compute_params.video_speed_affects_zooming as u8);
     hasher.write_u8(compute_params.video_speed_affects_zooming_limit as u8);
+    // The parts of a video cut from recordings, each zoomed on its own
+    for part in crate::smoothing::focal_length::parts(compute_params) {
+        hasher.write_usize(part.start);
+    }
 
     // Zoom settings
     hasher.write_u64(compute_params.adaptive_zoom_window.to_bits());

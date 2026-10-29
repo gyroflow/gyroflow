@@ -122,6 +122,9 @@ impl Smoothing {
         hasher.write_u64(self.horizon_lock.get_checksum());
         hasher.write_usize(compute_params.camera_diagonal_fovs.len());
         for fov in &compute_params.camera_diagonal_fovs { hasher.write_u64(fov.to_bits()); }
+        // What's per frame (the frames' zoom limits, their crop and their times for the crop constraint) is by the
+        // frames' times
+        if let Some(times) = &compute_params.frame_times { hasher.write_u64(times.checksum()); }
         hasher.finish()
     }
 
@@ -192,4 +195,22 @@ impl Smoothing {
         const RAD2DEG: f64 = 180.0 / std::f64::consts::PI;
         (max_pitch * RAD2DEG, max_yaw * RAD2DEG, max_roll * RAD2DEG)
     }
+}
+
+/// `from` turned toward `to` by `t` of the rotation between them, along the shorter arc: their slerp at `t`, a unit
+/// quaternion to rounding at any angle. A smoothing pass takes a step like this toward every sample, each from the one
+/// before, thousands in a row, so each step has to be exact or the pass's result depends on the rounding of its input:
+/// nalgebra's `slerp` takes the angle from the `acos` of the quaternions' dot product and doesn't normalize what it
+/// returns, so a pass's state drifts off unit length with every step (by 1e-8 to 4e-8 over a thousand steps), the angle
+/// it takes from the drifted dot product is the wrong one, and where that product comes out at 1 or above it returns its
+/// input unchanged: the step isn't taken. Here the angle is the `atan2` of the rotation between the two, which is exact
+/// to rounding however small it is, and the result is normalized
+pub fn slerp_toward(from: &Quat64, to: &Quat64, t: f64) -> Quat64 {
+    let d = from.quaternion().conjugate() * to.quaternion();
+    // q and −q are the same rotation: the shorter arc is the one with a non-negative real part
+    let (w, v) = if d.w < 0.0 { (-d.w, -d.imag()) } else { (d.w, d.imag()) };
+    let sin_half = v.norm();
+    if sin_half == 0.0 { return *from; }
+    let half = sin_half.atan2(w) * t;
+    UnitQuaternion::new_normalize(from.quaternion() * Quaternion::from_parts(half.cos(), v * (half.sin() / sin_half)))
 }

@@ -6,8 +6,8 @@
 
 use wgpu::hal::api::Vulkan;
 use ash::vk::{ self, ImageCreateInfo, BufferCreateInfo };
-use std::collections::HashMap;
-use parking_lot::RwLock;
+use crate::gpu::{ Buffers, BufferDescription, BufferSource };
+use crate::GyroflowCoreError;
 
 use CUmemAllocationType::*;
 use CUmemAllocationHandleType::*;
@@ -22,10 +22,6 @@ macro_rules! cuda {
             log::error!("Call to {} failed: {:?}", stringify!($func), err);
         }
     };
-}
-
-lazy_static::lazy_static! {
-    static ref UUIDMAP: RwLock<HashMap<String, usize>> = RwLock::new(HashMap::new());
 }
 
 pub struct CudaSharedMemory {
@@ -63,63 +59,89 @@ pub fn get_current_cuda_device() -> i32 {
     }
     dev
 }
-pub fn get_device_uuid(device: usize) -> String {
+/// The UUID of the GPU of the thread's CUDA context: the one Vulkan reports as `deviceUUID` for it. A host which
+/// renders on several GPUs makes another one current on each of its render threads (Premiere, Resolve)
+pub fn current_device_uuid() -> Option<[u8; 16]> {
+    let cuda = CUDA.as_ref().ok()?;
     let mut uuid = CUuuid::default();
-    if let Ok(cuda) = CUDA.as_ref() {
-        unsafe { (cuda.cuDeviceGetUuid)(&mut uuid, device as _); }
-    }
-    uuid.bytes.iter().map(|x| format!("{:02x}", x)).collect()
+    let err = unsafe { (cuda.cuDeviceGetUuid)(&mut uuid, get_current_cuda_device()) };
+    (err == CUresult::CUDA_SUCCESS).then(|| uuid.bytes.map(|x| x as u8))
 }
 
-pub fn get_current_device_id_by_uuid(adapters: &Vec<wgpu::Adapter>) -> usize {
-    let mut adapter_id = get_current_cuda_device() as usize;
-
-    let uuid = get_device_uuid(adapter_id);
-    log::debug!("Current device UUID: {uuid}, adapter_id: {adapter_id}");
-
-    let mut found = false;
-    {
-        let uuidmap = UUIDMAP.read();
-        if !uuidmap.is_empty() {
-            if let Some(id) = uuidmap.get(&uuid) {
-                adapter_id = *id;
-                found = true;
-            }
-        }
+/// The UUID of the GPU of a Vulkan adapter, which CUDA memory can be shared with when it's the CUDA device's. Read
+/// from the physical device, without a device of it
+pub fn vulkan_device_uuid(adapter: &wgpu::Adapter) -> Option<[u8; 16]> {
+    if adapter.get_info().backend != wgpu::Backend::Vulkan { return None; }
+    unsafe {
+        let adapter = adapter.as_hal::<Vulkan>()?;
+        let instance = adapter.shared_instance();
+        // Core from Vulkan 1.1, which the import of CUDA memory needs anyway
+        if instance.instance_api_version() < vk::API_VERSION_1_1 { return None; }
+        let mut id_props = vk::PhysicalDeviceIDProperties::default();
+        let mut properties = vk::PhysicalDeviceProperties2::default().push_next(&mut id_props);
+        instance.raw_instance().get_physical_device_properties2(adapter.raw_physical_device(), &mut properties);
+        Some(id_props.device_uuid)
     }
+}
 
-    if !found {
-        for (i, adapter) in adapters.iter().enumerate() {
-            if adapter.get_info().backend != wgpu::Backend::Vulkan {
-                continue;
-            }
-            let device = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
-                label: None,
-                required_features: wgpu::Features::empty(),
-                required_limits: wgpu::Limits::default(),
-                memory_hints: wgpu::MemoryHints::Performance,
-                trace: wgpu::Trace::Off,
-                experimental_features: wgpu::ExperimentalFeatures::disabled(),
-            }));
-            if let Ok((device, _q)) = device {
-                unsafe {
-                    if let Some(device) = device.as_hal::<Vulkan>() {
-                        let mut id_props = ash::vk::PhysicalDeviceIDProperties::default();
-                        let mut device_properties = ash::vk::PhysicalDeviceProperties2::default().push_next(&mut id_props);
-                        device.shared_instance().raw_instance().get_physical_device_properties2(device.raw_physical_device(), &mut device_properties);
+pub fn uuid_string(uuid: &[u8; 16]) -> String {
+    uuid.iter().map(|x| format!("{:02x}", x)).collect()
+}
 
-                        let dev_uuid = id_props.device_uuid.iter().map(|x| format!("{:02x}", x)).collect::<String>();
-                        UUIDMAP.write().insert(dev_uuid.clone(), i);
-                        log::debug!("Device #{i} uuid: {dev_uuid}");
-                        if dev_uuid == uuid {
-                            adapter_id = i;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    adapter_id
+/// Whether the frame in `buffers` can only be processed on a copy in the host memory (see `through_host`): it's in
+/// CUDA memory of a GPU without a Vulkan adapter, which no wgpu device can share it with
+pub fn needs_host_copy(buffers: &Buffers) -> bool {
+    matches!((&buffers.input.data, &buffers.output.data), (BufferSource::CUDABuffer { .. }, BufferSource::CUDABuffer { .. }))
+        && super::wgpu::WgpuWrapper::cuda_adapter().is_none()
+}
+
+std::thread_local! {
+    /// The host copies of `through_host`, kept for the thread's next frame
+    static HOST_FRAMES: std::cell::Cell<(Vec<u8>, Vec<u8>)> = Default::default();
+}
+
+/// Runs `process` on copies of the CUDA frames of `buffers` in the host memory: for a GPU which no wgpu device can
+/// share its memory with (`needs_host_copy`), one in TCC mode or without a Vulkan driver among the GPUs a host renders
+/// on. Slower by the frame's way to the host and back, but the frame is stabilized, rather than left as it was
+pub fn through_host<R>(buffers: &mut Buffers, process: impl FnOnce(&mut Buffers) -> Result<R, GyroflowCoreError>) -> Result<R, GyroflowCoreError> {
+    let (BufferSource::CUDABuffer { buffer: input }, BufferSource::CUDABuffer { buffer: output }) = (&buffers.input.data, &buffers.output.data) else {
+        return process(buffers);
+    };
+    let (input, output) = (*input as CUdeviceptr, *output as CUdeviceptr);
+
+    let (mut in_host, mut out_host) = HOST_FRAMES.take();
+    in_host.resize(buffers.input.size.2 * buffers.input.size.1, 0);
+    out_host.resize(buffers.output.size.2 * buffers.output.size.1, 0);
+
+    // The host's work on the frame done first. The output is drawn whole (out of its `rect` too), so only the input
+    // goes to the host
+    cuda_synchronize();
+    let result = copy_to_host(&mut in_host, input).and_then(|_| {
+        let mut host = Buffers { input: on_host(&buffers.input, &mut in_host), output: on_host(&buffers.output, &mut out_host) };
+        let ret = process(&mut host)?;
+        copy_from_host(output, &out_host)?;
+        Ok(ret)
+    });
+    HOST_FRAMES.set((in_host, out_host));
+    result
+}
+fn on_host<'a>(desc: &BufferDescription, buffer: &'a mut [u8]) -> BufferDescription<'a> {
+    BufferDescription { size: desc.size, rect: desc.rect, rotation: desc.rotation, data: BufferSource::Cpu { buffer }, texture_copy: desc.texture_copy }
+}
+
+fn copy_to_host(dst: &mut [u8], src: CUdeviceptr) -> Result<(), GyroflowCoreError> {
+    let cuda = CUDA.as_ref().map_err(|e| GyroflowCoreError::Cuda(e.to_string()))?;
+    let err = unsafe { (cuda.cuMemcpyDtoH_v2)(dst.as_mut_ptr() as *mut c_void, src, dst.len()) };
+    if err != CUresult::CUDA_SUCCESS { return Err(GyroflowCoreError::Cuda(format!("cuMemcpyDtoH_v2: {err:?}"))); }
+    Ok(())
+}
+fn copy_from_host(dst: CUdeviceptr, src: &[u8]) -> Result<(), GyroflowCoreError> {
+    let cuda = CUDA.as_ref().map_err(|e| GyroflowCoreError::Cuda(e.to_string()))?;
+    let err = unsafe { (cuda.cuMemcpyHtoD_v2)(dst, src.as_ptr() as *const c_void, src.len()) };
+    if err != CUresult::CUDA_SUCCESS { return Err(GyroflowCoreError::Cuda(format!("cuMemcpyHtoD_v2: {err:?}"))); }
+    // From pageable memory the call returns once the data is staged, not on the device yet
+    cuda_synchronize();
+    Ok(())
 }
 
 fn align(a: usize, b: usize) -> usize { ((a + b - 1) / b) * b }
@@ -757,7 +779,9 @@ pub struct CudaFunctions {
     pub cuMemRelease:                    dl::Symbol<unsafe extern "C" fn(handle: CUmemGenericAllocationHandle) -> CUresult>,
     pub cuMemcpy:                        dl::Symbol<unsafe extern "C" fn(dst: CUdeviceptr, src: CUdeviceptr, ByteCount: usize) -> CUresult>,
     pub cuMemcpy2D_v2:                   dl::Symbol<unsafe extern "C" fn(pCopy: *const CUDA_MEMCPY2D_st) -> CUresult>,
-    pub cuMemAddressFree:                dl::Symbol<unsafe extern "C" fn(ptr: CUdeviceptr, size: usize) -> CUresult>,
+    pub cuMemcpyDtoH_v2:                 dl::Symbol<unsafe extern "C" fn(dstHost: *mut c_void, srcDevice: CUdeviceptr, ByteCount: usize) -> CUresult>,
+    pub cuMemcpyHtoD_v2:                 dl::Symbol<unsafe extern "C" fn(dstDevice: CUdeviceptr, srcHost: *const c_void, ByteCount: usize) -> CUresult>,
+    pub cuMemAddressFree:               dl::Symbol<unsafe extern "C" fn(ptr: CUdeviceptr, size: usize) -> CUresult>,
     pub cuCtxSynchronize:                dl::Symbol<unsafe extern "C" fn() -> CUresult>,
     pub cuMemGetAddressRange_v2:         dl::Symbol<unsafe extern "C" fn(pbase: *mut CUdeviceptr, psize: *mut usize, dptr: CUdeviceptr) -> CUresult>,
 
@@ -820,6 +844,8 @@ impl CudaFunctions {
                 cuMemRelease:                    nvcuda.get(b"cuMemRelease")?,
                 cuMemcpy:                        nvcuda.get(b"cuMemcpy")?,
                 cuMemcpy2D_v2:                   nvcuda.get(b"cuMemcpy2D_v2")?,
+                cuMemcpyDtoH_v2:                 nvcuda.get(b"cuMemcpyDtoH_v2")?,
+                cuMemcpyHtoD_v2:                 nvcuda.get(b"cuMemcpyHtoD_v2")?,
                 cuMemAddressFree:                nvcuda.get(b"cuMemAddressFree")?,
                 cuCtxSynchronize:                nvcuda.get(b"cuCtxSynchronize")?,
                 cuMemGetAddressRange_v2:         nvcuda.get(b"cuMemGetAddressRange_v2")?,

@@ -72,16 +72,24 @@ pub fn similarity_ln_scale(from: &[(f32, f32)], to: &[(f32, f32)]) -> Option<(f6
 /// The lag that best aligns the metadata with the picture. `image`: `(t1 ms, t2 ms, ln scale)` per analyzed
 /// frame pair, `meta_ln`: log focal length per frame of the metadata without any delay applied (`NaN` where
 /// unknown). The lag is searched frame by frame within `MAX_LAG_FRAMES` and refined to a fraction of a frame
-/// with a parabola through the RMS differences of the neighbouring lags
-pub fn estimate_from_steps(image: &[(f64, f64, f64)], meta_ln: &[f64], fps: f64) -> Option<LensDelayEstimate> {
+/// with a parabola through the RMS differences of the neighbouring lags. A time is a frame by the video's frame times
+/// (`ComputeParams::frame_at_timestamp`), and a lag moves it as the render moves a frame's lens lookup
+/// (`ComputeParams::lens_timestamp_us`). In a video cut from recordings a pair's metadata at a lag is its own part's
+/// (`GyroSource::frames_of_one_part`): the next part's is another moment's lens, which the render never gives the pair's
+/// frames either, so a lag reaching it has no metadata there, as past the end of the video
+pub fn estimate_from_steps(image: &[(f64, f64, f64)], meta_ln: &[f64], params: &ComputeParams) -> Option<LensDelayEstimate> {
+    let fps = params.scaled_fps;
     if image.len() < MIN_PAIRS || meta_ln.len() < 2 || !(fps > 0.0) { return None; }
+    let gyro = params.gyro.read();
     let frame_of = |ts_ms: f64| -> Option<usize> {
-        let f = crate::frame_at_timestamp(ts_ms, fps);
+        let f = params.frame_at_timestamp(ts_ms);
         (f >= 0 && (f as usize) < meta_ln.len() && meta_ln[f as usize].is_finite()).then(|| f as usize)
     };
     let meta_step = |t1: f64, t2: f64, lag: i64| -> Option<f64> {
         let shift = crate::timestamp_at_frame(lag as i32, fps);
-        Some(meta_ln[frame_of(t2 + shift)?] - meta_ln[frame_of(t1 + shift)?])
+        let (f1, f2) = (frame_of(t1 + shift)?, frame_of(t2 + shift)?);
+        let own = |t: f64, f: usize| gyro.frames_of_one_part(params.frame_at_timestamp(t).max(0) as usize, f);
+        (own(t1, f1) && own(t2, f2)).then(|| meta_ln[f2] - meta_ln[f1])
     };
     let zoom_span: f64 = image.iter().filter_map(|(t1, t2, _)| meta_step(*t1, *t2, 0)).map(f64::abs).sum();
     if zoom_span < MIN_ZOOM_SPAN { return None; }
@@ -115,32 +123,41 @@ pub fn estimate_from_steps(image: &[(f64, f64, f64)], meta_ln: &[f64], fps: f64)
     Some(LensDelayEstimate { delay_frames: lag.round() as i32, delay_frames_exact: lag, correlation: best.2, pairs: best.3, zoom_span })
 }
 
-/// Where to look: up to `max_windows` windows of `window_ms` (in the same time base as `fps`) around the
-/// strongest zooms of the metadata, non-overlapping, each holding at least `MIN_ZOOM_SPAN / 2` of zoom.
-/// `meta_ln`: log focal length per frame (`NaN` where unknown). Returns `(from_ms, to_ms)` pairs
-pub fn zoom_ranges(meta_ln: &[f64], fps: f64, window_ms: f64, max_windows: usize) -> Vec<(f64, f64)> {
+/// Where to look: up to `max_windows` windows of `window_ms` (in the video's time, `ComputeParams::scaled_fps`)
+/// around the strongest zooms of the metadata, non-overlapping, each holding at least `MIN_ZOOM_SPAN / 2` of zoom.
+/// `meta_ln`: log focal length per frame (`NaN` where unknown). In a video cut from recordings a window is of one
+/// part's frames (`GyroSource::segment_ranges`), as long as the part has them: the next part's metadata is of another
+/// moment, and the step to it no zoom. Returns `(from_ms, to_ms)` pairs, the video's times of the window's first frame
+/// and of the frame after it (`ComputeParams::timestamp_at_frame`)
+pub fn zoom_ranges(meta_ln: &[f64], params: &ComputeParams, window_ms: f64, max_windows: usize) -> Vec<(f64, f64)> {
+    let fps = params.scaled_fps;
     let n = meta_ln.len();
     let w = ((window_ms / 1000.0 * fps).round() as usize).max(2).min(n);
     if n < 2 || !(fps > 0.0) || max_windows == 0 { return Vec::new(); }
     let step = |i: usize| if meta_ln[i].is_finite() && meta_ln[i + 1].is_finite() { (meta_ln[i + 1] - meta_ln[i]).abs() } else { 0.0 };
-    // Zoom inside every window, by a running sum
-    let mut sum = 0.0;
-    let mut scores: Vec<(f64, usize)> = Vec::with_capacity(n);
-    for i in 0..n - 1 {
-        sum += step(i);
-        if i + 1 >= w { sum -= step(i + 1 - w); }
-        if i + 1 >= w - 1 { scores.push((sum, i + 2 - w)); } // window starts at i + 2 - w, covers w frames
+    // The frames of each part, all of them without parts
+    let starts: Vec<usize> = params.gyro.read().segment_ranges().map(|s| s.first_frames.clone()).unwrap_or_else(|| vec![0]);
+    let parts = starts.iter().enumerate().map(|(r, a)| ((*a).min(n), starts.get(r + 1).map_or(n, |b| (*b).min(n))));
+    // Zoom inside every window of a part, by a running sum: (zoom, first frame, frame after it)
+    let mut scores: Vec<(f64, usize, usize)> = Vec::with_capacity(n);
+    for (p, end) in parts.filter(|(p, end)| end - p >= 2) {
+        let w = w.min(end - p);
+        let mut sum = 0.0;
+        for i in p..end - 1 {
+            sum += step(i);
+            if i + 1 >= p + w { sum -= step(i + 1 - w); }
+            if i + 1 >= p + w - 1 { scores.push((sum, i + 2 - w, i + 2)); } // window starts at i + 2 - w, covers w frames
+        }
     }
     scores.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap());
     let mut taken: Vec<(usize, usize)> = Vec::new();
-    for (score, start) in scores {
+    for (score, a, b) in scores {
         if taken.len() >= max_windows || score < MIN_ZOOM_SPAN / 2.0 { break; }
-        let (a, b) = (start, (start + w).min(n));
         if taken.iter().any(|(ta, tb)| a < *tb && *ta < b) { continue; }
         taken.push((a, b));
     }
     taken.sort_unstable();
-    taken.into_iter().map(|(a, b)| (crate::timestamp_at_frame(a as i32, fps), crate::timestamp_at_frame(b as i32, fps))).collect()
+    taken.into_iter().map(|(a, b)| (params.timestamp_at_frame(a as i32), params.timestamp_at_frame(b as i32))).collect()
 }
 
 /// The synchronization stamps every frame it analyzes with the frame's own time offset added
@@ -149,18 +166,21 @@ pub fn zoom_ranges(meta_ln: &[f64], fps: f64, window_ms: f64, max_windows: usize
 /// whose own stamp reproduces it wins, the nearest of them should the offsets make two frames collide. The
 /// offsets don't have to vary slowly for this (a capture area change moves Sony's by more than a frame between
 /// two neighbours, which would send a single subtraction to the wrong frame), and a stamp no frame explains is
-/// `None` rather than a guess
-pub fn frame_of_stamp(stamp_us: i64, per_frame_time_offsets: &[f64], fps: f64) -> Option<usize> {
-    if !(fps > 0.0) { return None; }
+/// `None` rather than a guess. Frames are found as the stamping finds them, by the video's frame times
+/// (`ComputeParams::frame_at_timestamp`): a frame's own time is within the largest offset of its stamp, so it's one of
+/// the frames presented there
+pub fn frame_of_stamp(stamp_us: i64, per_frame_time_offsets: &[f64], params: &ComputeParams) -> Option<usize> {
+    if !(params.scaled_fps > 0.0) { return None; }
     // Looked up like the stamping looks it up (`FileMetadata::frame_time_offset`)
     let offset_us = |f: usize| (crate::gyro_source::per_frame_entry(per_frame_time_offsets, f).copied().unwrap_or(0.0) * 1000.0).round() as i64;
-    let guess = crate::frame_at_timestamp(stamp_us as f64 / 1000.0, fps).max(0) as usize;
-    let reach = per_frame_time_offsets.iter().fold(0.0f64, |m, o| m.max(o.abs()));
-    let reach = crate::frame_at_timestamp(reach, fps).max(0) as usize + 1;
-    (guess.saturating_sub(reach)..=guess + reach).filter_map(|f| {
+    // The largest offset, and the µs it's rounded to
+    let reach = per_frame_time_offsets.iter().fold(0.0f64, |m, o| m.max(o.abs())) + 1e-3;
+    let stamp_ms = stamp_us as f64 / 1000.0;
+    let (first, last) = (params.frame_at_timestamp(stamp_ms - reach).max(0) as usize, params.frame_at_timestamp(stamp_ms + reach).max(0) as usize);
+    (first..=last).filter_map(|f| {
         let own_ms = (stamp_us - offset_us(f)) as f64 / 1000.0; // the frame's own timestamp, before the offset was added
-        let error = (own_ms - crate::timestamp_at_frame(f as i32, fps)).abs();
-        (crate::frame_at_timestamp(own_ms, fps) == f as i32).then_some((f, error))
+        let error = (own_ms - params.timestamp_at_frame(f as i32)).abs();
+        (params.frame_at_timestamp(own_ms) == f as i32).then_some((f, error))
     }).min_by(|a, b| a.1.total_cmp(&b.1)).map(|(f, _)| f)
 }
 
@@ -170,7 +190,6 @@ pub fn frame_of_stamp(stamp_us: i64, per_frame_time_offsets: &[f64], fps: f64) -
 /// frames hold no zoom to speak of, when the tracks are too few, or when the picture and the metadata don't agree
 pub fn estimate(estimator: &PoseEstimator, params: &ComputeParams, meta_ln: &[f64]) -> Option<LensDelayEstimate> {
     if meta_ln.is_empty() { return None; }
-    let fps = params.scaled_fps;
     let offsets: Vec<f64> = params.gyro.read().file_metadata.read().per_frame_time_offsets.clone();
 
     // Stamp and decode counter of every analyzed frame. The counter runs over the decoded frames (from the first
@@ -187,13 +206,15 @@ pub fn estimate(estimator: &PoseEstimator, params: &ComputeParams, meta_ln: &[f6
         let (lines, frame_size) = [1usize, 2].iter().map(|d| estimator.get_of_lines_for_timestamp(ts, 0, 1.0, *d, false)).find(|x| x.0.is_some()).unwrap_or((None, None));
         let (Some(((ts1, pts1), (ts2, pts2))), Some(frame_size)) = (lines, frame_size) else { continue };
         if pts1.len() != pts2.len() || pts1.len() < MIN_INLIERS || frame_size.0 == 0 { continue; }
-        let (Some(f1), Some(no1), Some(no2)) = (frame_of_stamp(ts1, &offsets, fps), frame_no_of(ts1), frame_no_of(ts2)) else { continue };
+        let (Some(f1), Some(no1), Some(no2)) = (frame_of_stamp(ts1, &offsets, params), frame_no_of(ts1), frame_no_of(ts2)) else { continue };
         if no2 <= no1 { continue; }
         let f2 = f1 + (no2 - no1);
+        // A video cut from recordings: two frames of two parts are a cut to another moment, not a zoom step
+        if !params.gyro.read().frames_of_one_part(f1, f2) { continue; }
         let scale = params.width as f32 / frame_size.0 as f32;
         let scaled = |pts: &[(f32, f32)]| pts.iter().map(|p| (p.0 * scale, p.1 * scale)).collect::<Vec<_>>();
         // Frame-exact times, the renderer's convention (it adds the per-frame offset itself for the gyro lookup)
-        let (t1, t2) = (crate::timestamp_at_frame(f1 as i32, fps), crate::timestamp_at_frame(f2 as i32, fps));
+        let (t1, t2) = (params.timestamp_at_frame(f1 as i32), params.timestamp_at_frame(f2 as i32));
         // No field clamp: these are tracked image features, and a feature the lens has no image of has to
         // drop out of `inside()` below rather than come back as a stand-in at the edge of the field
         let u1 = undistort_points_with_rolling_shutter(&scaled(&pts1), t1, Some(f1), params, 1.0, false, false);
@@ -203,5 +224,5 @@ pub fn estimate(estimator: &PoseEstimator, params: &ComputeParams, meta_ln: &[f6
             steps.push((t1, t2, ln_scale));
         }
     }
-    estimate_from_steps(&steps, meta_ln, fps)
+    estimate_from_steps(&steps, meta_ln, params)
 }

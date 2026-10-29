@@ -197,6 +197,7 @@ pub struct Controller {
 
     has_gravity_vectors: qt_property!(bool; READ has_gravity_vectors NOTIFY gyro_changed),
     has_per_frame_focal_length: qt_property!(bool; READ has_per_frame_focal_length NOTIFY gyro_changed),
+    has_varying_focal_length: qt_property!(bool; READ has_varying_focal_length NOTIFY gyro_changed),
 
     compute_progress: qt_signal!(id: u64, progress: f64),
     sync_progress: qt_signal!(progress: f64, ready: usize, total: usize),
@@ -467,6 +468,9 @@ impl Controller {
         let for_lens_delay = mode == "estimate_lens_delay";
         if for_lens_delay {
             sync_params.every_nth_frame = 1; // consecutive frames are what the estimate tracks
+        }
+        if mode == "synchronize" && sync_params.offset_method == 3 {
+            sync_params.every_nth_frame = 1; // the optical analysis tracks each frame from the one before
         }
 
         let every_nth_frame = sync_params.every_nth_frame;
@@ -964,11 +968,10 @@ impl Controller {
                     additional_obj.insert("sample_rate".to_owned(),       serde_json::to_value(gyroflow_core::gyro_source::GyroSource::get_sample_rate(&*file_metadata)).unwrap());
                     let has_builtin_profile = file_metadata.lens_profile.as_ref().map(|y| y.is_object()).unwrap_or_default();
                     let md_data = file_metadata.additional_data.clone();
-                    if let Some(md_fps) = file_metadata.frame_rate {
-                        let fps = stab.params.read().fps;
-                        if (md_fps - fps).abs() > 1.0 {
-                            additional_obj.insert("realtime_fps".to_owned(), serde_json::Number::from_f64(md_fps).unwrap().into());
-                        }
+                    // The rate the motion data was captured at, where the video presents its frames at another one, as the
+                    // load decided it (`StabilizationManager::capture_frame_rate`)
+                    if let Some(md_fps) = gyro.capture_frame_rate {
+                        additional_obj.insert("realtime_fps".to_owned(), serde_json::Number::from_f64(md_fps).unwrap().into());
                     }
                     drop(file_metadata);
                     drop(gyro);
@@ -1142,14 +1145,9 @@ impl Controller {
         }
 
         core::run_threaded(move || {
-            {
-                stab.invalidate_ongoing_computations();
-
-                let mut gyro = stab.gyro.write();
-                gyro.integration_method = index;
-                gyro.integrate();
-            }
-            stab.invalidate_smoothing();
+            stab.invalidate_ongoing_computations();
+            // Integrated with the lock released (`GyroSource::integrate_shared`)
+            stab.set_integration_method(index);
             finished(());
         });
     }
@@ -2620,6 +2618,11 @@ impl Controller {
     }
     fn has_per_frame_focal_length(&self) -> bool {
         self.stabilizer.gyro.read().file_metadata.read().has_per_frame_focal_length()
+    }
+    /// The metadata's focal length changes, or the lens's own through its breathing: there's a focal length curve to
+    /// chart and to smooth
+    fn has_varying_focal_length(&self) -> bool {
+        self.stabilizer.gyro.read().file_metadata.read().has_varying_focal_length()
     }
     fn has_lens_breathing(&self) -> bool {
         !self.stabilizer.gyro.read().file_metadata.read().lens_breathing.is_empty()

@@ -97,6 +97,11 @@ pub struct StabilizationParams {
     pub frame_count: usize,
     pub duration_ms: f64,
     pub video_created_at: Option<u64>,
+    /// The presentation times of the video's frames, when they aren't evenly spaced from its start (`FrameTimes`): the
+    /// frames are then mapped by their times, `frame_at_timestamp` and `timestamp_at_frame`. Read from the video file
+    /// whenever it's loaded
+    #[serde(skip)]
+    pub frame_times: Option<std::sync::Arc<crate::frame_times::FrameTimes>>,
 
     pub trim_ranges: Vec<(f64, f64)>,
 
@@ -129,16 +134,17 @@ pub struct StabilizationParams {
     // Focal length smoothing
     pub focal_lengths: Vec<Option<f64>>,
     pub smoothed_focal_lengths: Vec<Option<f64>>,
-    /// The delay-free dequantized curve the two above are derived from (`smoothing::focal_length::compute_base_curve`),
-    /// with a hash of everything it depends on: the file's lens metadata, the lens profile and the video geometry, no
-    /// setting. A recompute reuses it and only re-derives the curves, so a slider tick never repeats the per-frame sweep
-    pub focal_length_base: Vec<f64>,
+    /// The delay-free dequantized curve and the lens breathing the two above are derived from
+    /// (`smoothing::focal_length::compute_base`), with a hash of everything it depends on: the file's lens metadata, the
+    /// lens profile, the video geometry and its parts, no setting. A recompute reuses it and only re-derives the curves,
+    /// so a slider tick never repeats the per-frame sweep
+    pub focal_length_base: crate::smoothing::focal_length::FocalLengthBase,
     pub focal_length_base_key: u64,
     pub focal_length_smoothing_enabled: bool,
     pub focal_length_max_zoom_rate: f64,
     pub lens_metadata_delay_frames: i32, // how many frames the lens metadata lags the picture
 
-    pub lens_breathing_enabled: bool, // Sony lens breathing compensation, when the file carries the lens tables
+    pub lens_breathing_enabled: bool, // Sony lens breathing compensation, when the file carries the lens tables: the output holds the narrowest frame's field of view
 }
 impl Default for StabilizationParams {
     fn default() -> Self {
@@ -204,10 +210,11 @@ impl Default for StabilizationParams {
             frame_count: 0,
             duration_ms: 0.0,
             video_created_at: None,
+            frame_times: None,
 
             focal_lengths: vec![],
             smoothed_focal_lengths: vec![],
-            focal_length_base: vec![],
+            focal_length_base: Default::default(),
             focal_length_base_key: 0,
             focal_length_smoothing_enabled: false,
             focal_length_max_zoom_rate: 0.5,
@@ -248,6 +255,34 @@ impl StabilizationParams {
         match self.fps_scale {
             Some(scale) if Self::is_valid_fps_scale(scale) => self.fps * scale,
             _ => self.fps
+        }
+    }
+    /// The frame rate scale, 1 when there's none
+    pub fn get_fps_scale(&self) -> f64 {
+        self.fps_scale.filter(|x| Self::is_valid_fps_scale(*x)).unwrap_or(1.0)
+    }
+    /// The frame (its ordinal among the video's frames) presented at the video's time `timestamp_ms`: by the video's
+    /// frame times when it has them (`frame_times`), `round(t · fps)` otherwise
+    pub fn frame_at_timestamp(&self, timestamp_ms: f64) -> i32 {
+        match &self.frame_times {
+            Some(times) => times.frame_at_timestamp(timestamp_ms, self.get_fps_scale()),
+            None => crate::frame_at_timestamp(timestamp_ms, self.get_scaled_fps()),
+        }
+    }
+    /// The first frame presented at or after the video's time `timestamp_ms`: by the video's frame times when it has
+    /// them (`frame_times`), `ceil(t · fps)` otherwise
+    pub fn first_frame_at_or_after(&self, timestamp_ms: f64) -> i32 {
+        match &self.frame_times {
+            Some(times) => times.first_frame_at_or_after(timestamp_ms, self.get_fps_scale()),
+            None => (timestamp_ms * (self.get_scaled_fps() / 1000.0)).ceil() as i32,
+        }
+    }
+    /// The video's time (ms) frame `frame` is presented at: by the video's frame times when it has them
+    /// (`frame_times`), `frame / fps` otherwise
+    pub fn timestamp_at_frame(&self, frame: i32) -> f64 {
+        match &self.frame_times {
+            Some(times) => times.timestamp_at_frame(frame, self.get_fps_scale()),
+            None => crate::timestamp_at_frame(frame, self.get_scaled_fps()),
         }
     }
 

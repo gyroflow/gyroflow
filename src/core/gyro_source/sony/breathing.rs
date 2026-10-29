@@ -1,16 +1,24 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2026 Adrian <adrian.eddy at gmail>
 
-// Lens breathing compensation.
-// The focus and zoom positions recorded per frame are looked up in the lens tables from the MP4 meta box,
-// weighted over each row's exposure window and turned into an output zoom that keeps the field of view
-// constant while focusing. Values are magnifications relative to the lens' reference focus position.
+// Lens breathing.
+// The focus and zoom positions recorded per frame are looked up in the lens tables from the MP4 meta box and
+// weighted over each row's exposure window. The tables' "magnification" m is relative to the lens's reference focus
+// position and goes with the field of view, not with the picture: the picture scales by 1/m. Measured on an a7 IV
+// clip whose focus moves between the foreground and the background (85 mm, e536 0.941 <-> 0.992): the picture's
+// scale changes by -0.97 x the change of ln m over the clean focus pulls, and when the camera compensates itself it
+// crops by e537 = m x e539 (A7S3-1043: capture width ~ e537^-1.01). So the lens's true focal length is the metadata's
+// divided by m, which is what this hands out (`BreathingFrame::focal`); the camera matrices are scaled by it, and the
+// compensation, keeping the field of view constant, is an output zoom on top (`smoothing::focal_length`). Sony's
+// stabilizer applies its factor to the output positions of a forward warp, which is the inverse of where gyroflow's
+// kernels sample.
 
 use telemetry_parser::tags_impl::{ GroupedTagMap, GetWithType, GroupId, TagId };
 use telemetry_parser::util::SampleInfo;
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
 use crate::gyro_source::BreathingFrame;
-use crate::gyro_source::per_frame::{ PerFrame, collect_table, par_collect_table };
+use crate::gyro_source::per_frame::{ PerFrame, collect_table, par_collect_table, table };
+use std::ops::Range;
 
 /// What the table is, for its messages
 const WHAT: &str = "Lens breathing";
@@ -110,6 +118,7 @@ struct Frame {
     scale: f32,
     camera_factor: f32,
     applied: f32,
+    reference: Option<f32>,
 }
 
 impl Frame {
@@ -146,7 +155,16 @@ impl Frame {
             scale: f32v(0xe533),
             camera_factor: f32v(0xe536),
             applied: f32v(0xe537),
+            reference: (g.get_t(TagId::Unknown(0xe539)) as Option<&f32>).copied(),
         })
+    }
+
+    /// The magnification the camera's own compensation took out of this frame, `None` when it didn't compensate: it
+    /// crops by e537 = e536 x e539, the reference ratio being the crop at the reference focus position
+    fn applied_magnification(&self) -> Option<f32> {
+        if !self.in_camera { return None; }
+        let m = match self.reference { Some(r) if r > 0.0 => self.applied / r, _ => self.camera_factor };
+        (m.is_finite() && m > 0.0).then_some(m)
     }
 
     // Time of a row's exposure window in units of the sample spacing. Samples are stored newest first,
@@ -199,7 +217,6 @@ impl Frame {
 #[derive(Default)]
 struct Analysis {
     table: Vec<f32>, // per row band of the capture area (compacted, see `compact_table`), empty when unavailable
-    max: f32,        // largest row value, the one the normalization has to make room for
     cog: f32,
     cog_valid: bool,
     center: f32,
@@ -236,7 +253,6 @@ fn analyze(profile: &Profile, fr: &Frame, frames: &[Option<Frame>], f: usize) ->
             } else {
                 (0..ROWS as i32).map(|r| fr.cog_window(&factors, dt, crop_y + (((crop_h - 1) * r) >> 9))).collect()
             };
-            a.max = a.table.iter().copied().fold(f32::MIN, f32::max);
         }
     }
 
@@ -258,7 +274,6 @@ fn analyze(profile: &Profile, fr: &Frame, frames: &[Option<Frame>], f: usize) ->
         if !later.focus_next.is_empty() && later.focus_next.len() == fr.zoom.len() {
             let factors: Vec<f32> = fr.zoom.iter().zip(&later.focus_next).map(|(&z, &p)| profile.factor(z, p as u32)).collect();
             a.center = fr.cog_point(&factors, dt_low(factors.len()), center);
-            a.max = a.center;
             a.center_valid = true;
         }
     }
@@ -268,7 +283,7 @@ fn analyze(profile: &Profile, fr: &Frame, frames: &[Option<Frame>], f: usize) ->
 }
 
 // Largest difference between `table` and its linear interpolation from every `stride`-th row (the ends kept),
-// the lookup `BreathingFrame::scale_at_row` does on the stored table
+// the lookup `BreathingFrame::focal_at_row` does on the stored table
 fn subsampling_error(table: &[f32], stride: usize) -> f32 {
     let last = table.len() - 1;
     table.iter().enumerate().fold(0.0f32, |worst, (i, &v)| {
@@ -281,7 +296,7 @@ fn subsampling_error(table: &[f32], stride: usize) -> f32 {
 
 // The coarsest subsampling of `table` that reproduces it within `TABLE_TOLERANCE`: one value when the rows agree
 // to it, otherwise every 2^k-th row down to the full table. The subsampled rows keep their exact values, so the
-// normalization over the largest row still holds
+// largest row (the one the compensation makes room for) is still in it
 fn compact_table(table: &[f32]) -> Vec<f32> {
     let full = table.len().saturating_sub(1);
     if full == 0 { return table.to_vec(); }
@@ -304,8 +319,11 @@ fn decay_offset(total: f32, last_total: f32, offset: f32) -> f32 {
 }
 
 /// One `BreathingFrame` per video frame: `frames` has the frame each sample describes (`None` for one that isn't a
-/// frame's)
-pub fn compute(samples: &[SampleInfo], frames: &[Option<usize>]) -> Vec<BreathingFrame> {
+/// frame's). A video cut from recordings is computed part by part (`parts`: the frames of each, in order, the first from
+/// frame 0, as `PerFrame::hold_within` takes them): a part's frames from its own samples alone, the zoom of one without
+/// data from its part's frames and relative to its part's largest magnification, as the part trimmed on its own has
+/// them; a part without any data has no compensation. The lens tables are the clip's, its first sample's
+pub fn compute(samples: &[SampleInfo], frames: &[Option<usize>], parts: &[Range<usize>]) -> Vec<BreathingFrame> {
     let profile = samples.first().and_then(|s| s.tag_map.as_ref()).and_then(|tm| {
         let g = tm.get(&GroupId::LensBreathing)?;
         let lens_id = *(g.get_t(TagId::Unknown(0xe502)) as Option<&u16>)?;
@@ -321,14 +339,36 @@ pub fn compute(samples: &[SampleInfo], frames: &[Option<usize>]) -> Vec<Breathin
             by_frame.set(f, frame);
         }
     }
-    compute_frames(&profile, &by_frame.into_options())
+    let frames = by_frame.into_options();
+    if parts.len() < 2 { return compute_frames(&profile, &frames); }
+    let parts: Vec<(Range<usize>, Vec<BreathingFrame>)> = parts.iter().enumerate().map(|(r, part)| {
+        // The last part goes on to the last frame with a sample
+        let end = if r + 1 == parts.len() { frames.len().max(part.end) } else { part.end };
+        let own = &frames[part.start.min(frames.len())..end.min(frames.len())];
+        (part.start..end, compute_frames(&profile, own))
+    }).collect();
+    if parts.iter().all(|(_, zooms)| zooms.is_empty()) { return Vec::new(); }
+    // Every part's frames, but those of the last one after its last sample: the table ends there, as without parts
+    let count = parts.len();
+    let length: usize = parts.iter().enumerate().map(|(r, (frames, zooms))| if r + 1 == count && !zooms.is_empty() { zooms.len() } else { frames.len() }).sum();
+    let Some(mut out) = table::<BreathingFrame>(length, WHAT) else { return Vec::new() };
+    for (r, (frames, zooms)) in parts.into_iter().enumerate() {
+        let n = zooms.len();
+        if r + 1 == count && n > 0 { out.extend(zooms); continue; }
+        // The part's frames after its last sample continue its last one, as the frames past a table do; a part without
+        // data has none
+        let held = zooms.last().cloned().unwrap_or_default();
+        out.extend(zooms);
+        out.extend(std::iter::repeat_n(held, frames.len().saturating_sub(n)));
+    }
+    out
 }
 
-/// `None`: a sample without a usable LensBreathing group. Such a frame has no magnification of its own and takes
-/// the zoom of the nearest frame that has one (the previous one, or the first one for the leading frames), so the
-/// picture stays continuous across it instead of popping to the raw framing for a frame. A frame whose zoom doesn't
-/// come out as a positive finite number is treated the same way: `FrameTransform::at_timestamp` folds the zoom into
-/// the projection, and a zero would collapse the whole frame to its centre
+/// `None`: a sample without a usable LensBreathing group. Such a frame has no breathing of its own and takes that of
+/// the nearest frame that has one (the previous one, or the first one for the leading frames), so the projection stays
+/// continuous across it instead of popping to the metadata's focal length for a frame. A frame whose focal length
+/// scale doesn't come out as a positive finite number is treated the same way: the camera matrix is scaled by it, and
+/// a zero would collapse the whole frame to its centre
 fn compute_frames(profile: &Profile, frames: &[Option<Frame>]) -> Vec<BreathingFrame> {
     // Every pass keeps a value per frame, in storage taken like the frames' (`per_frame::collect_table`): a pass the
     // memory can't hold drops the table, not the load
@@ -354,29 +394,68 @@ fn compute_frames(profile: &Profile, frames: &[Option<Frame>]) -> Vec<BreathingF
         Some((value, offset, delayed && !a.table.is_empty() && fr.readout != 0.0))
     }), WHAT) else { return Vec::new() };
 
-    // The zoom is relative to the largest magnification any applied value reaches, the largest row of a row
-    // table included, so no row of any frame is zoomed out past its content: the output samples the source at
-    // `scale`, a scale above 1 reaches outside the frame the adaptive zoom validated (it knows nothing of this
-    // zoom, see `FrameTransform::at_timestamp`), and the rows of one frame differ by the focus motion during
-    // the readout
-    let scale = |fr: &Frame| if fr.in_camera && fr.applied > 0.0 { fr.scale / fr.applied } else { fr.scale };
-    let max = frames.iter().zip(&analyses).zip(&per_frame)
-        .filter_map(|((fr, a), pf)| Some((fr.as_ref()?, a, (*pf)?)))
-        .map(|(fr, a, (v, o, per_row))| scale(fr) * (o + if per_row { a.max } else { v }))
-        .filter(|m| m.is_finite())
-        .fold(f32::MIN, f32::max);
-    if !(max > 0.0) { return Vec::new(); }
-
-    let Some(zooms) = collect_table(frames.iter().zip(&analyses).zip(&per_frame).map(|((fr, a), pf)| {
+    // The magnification `s * m` (e533 scales the computed one, 1 in every sample clip) is the field of view against the
+    // reference focus position: the lens's focal length is the metadata's divided by it. Nothing is normalized here:
+    // the lens is what it is in every frame, and what the output makes of it - the field of view held at the
+    // narrowest frame's, or left to breathe - is the compensation's business (`smoothing::focal_length`). The
+    // camera's own compensation isn't divided out either: it crops the recorded picture by its estimate of the same
+    // magnification, and the camera matrix made from that crop has it in already (`BreathingFrame::camera_scale`)
+    let Some(focals) = collect_table(frames.iter().zip(&analyses).zip(&per_frame).map(|((fr, a), pf)| {
         let (fr, (value, offset, per_row)) = (fr.as_ref()?, (*pf)?);
-        let s = scale(fr) / max;
-        let zoom: Vec<f32> = if per_row { a.table.iter().map(|t| s * (t + offset)).collect() } else { vec![s * (value + offset)] };
-        if zoom.iter().any(|k| !(k.is_finite() && *k > 0.0)) { return None; }
-        Some(BreathingFrame { scale: zoom, crop_y: fr.crop_y as f32, crop_h: fr.crop_h as f32 })
+        let focal: Vec<f32> = if per_row { a.table.iter().map(|t| 1.0 / (fr.scale * (t + offset))).collect() } else { vec![1.0 / (fr.scale * (value + offset))] };
+        if focal.iter().any(|k| !(k.is_finite() && *k > 0.0)) { return None; }
+        Some(BreathingFrame { focal, applied: fr.applied_magnification(), crop_y: fr.crop_y as f32, crop_h: fr.crop_h as f32 })
     }), WHAT) else { return Vec::new() };
     // The passes the table is made from are done with, before it's laid out in its own storage
     drop((analyses, per_frame));
-    let Some(first) = zooms.iter().find_map(|z| z.clone()) else { return Vec::new() };
+    let Some(first) = focals.iter().find_map(|z| z.clone()) else { return Vec::new() };
     let mut last = first;
-    collect_table(zooms.into_iter().map(|z| { if let Some(z) = z { last = z; } last.clone() }), WHAT).unwrap_or_default()
+    collect_table(focals.into_iter().map(|z| { if let Some(z) = z { last = z; } last.clone() }), WHAT).unwrap_or_default()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // A prime whose magnification falls from 1 to 0.952 over its focus travel (the field of view narrowing as it
+    // focuses away from the reference position, like the a7 IV's 85 mm)
+    fn profile() -> Profile {
+        Profile { zoom_positions: 1, entries: 3, curve: vec![100, 200, 300], magnification: vec![4096, 4000, 3900], usable: vec![3] }
+    }
+    fn frame(focus: u16, in_camera: bool) -> Frame {
+        Frame {
+            period: 16683.0, span_before: 1, span_after: 1, sensor_h: 4000, crop_y: 0, crop_h: 4000,
+            zoom: vec![0; 3], focus: vec![focus; 3], focus_next: vec![focus; 3], delay: 1,
+            scale: 1.0, camera_factor: 0.9766, in_camera, applied: 0.9766 * 1.25, reference: Some(1.25),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn focal_length_is_the_metadata_over_the_magnification() {
+        let p = profile();
+        assert!((p.factor(0, 200) - 4000.0 / 4096.0).abs() < 1e-6);
+        let frames: Vec<Option<Frame>> = [100, 200, 300, 200].iter().map(|f| Some(frame(*f, false))).collect();
+        let out = compute_frames(&p, &frames);
+        assert_eq!(out.len(), 4);
+        // The picture scales by 1/m, so the lens's focal length is the metadata's over m: longer where m is smaller
+        let expected = [1.0, 4096.0 / 4000.0, 4096.0 / 3900.0, 4096.0 / 4000.0];
+        for (b, e) in out.iter().zip(expected) {
+            assert!((b.focal_at_centre() - e).abs() < 1e-4, "{} vs {e}", b.focal_at_centre());
+            assert_eq!(b.applied, None);
+            assert_eq!(b.camera_scale(false), 1.0);
+        }
+    }
+
+    #[test]
+    fn in_camera_compensation_is_kept_apart() {
+        let out = compute_frames(&profile(), &[Some(frame(200, true))]);
+        let b = &out[0];
+        // Not divided out of the lens: the camera matrix made from the crop has it in already
+        assert!((b.focal_at_centre() - 4096.0 / 4000.0).abs() < 1e-4);
+        // e537 / e539, what the crop took out; a fixed camera matrix shows the picture with that much taken out
+        assert!((b.applied.unwrap() - 0.9766).abs() < 1e-4);
+        assert_eq!(b.camera_scale(true), 1.0);
+        assert!((b.camera_scale(false) * b.focal_at_centre() - 1.0).abs() < 1e-3);
+    }
 }

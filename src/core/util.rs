@@ -8,13 +8,39 @@ pub static NvOptimusEnablement: i32 = 1;
 #[unsafe(no_mangle)]
 pub static AmdPowerXpressRequestHighPerformance: i32 = 1;
 
+/// The video's size, frame rate, duration and rotation, as gyroflow's player decodes the file (`load_video_file`, the
+/// plugins' footage): telemetry-parser's, and a Blackmagic RAW clip timed as Blackmagic's SDK presents it
+/// (`braw_clip_timing`)
 pub fn get_video_metadata<T: Read + Seek>(stream: &mut T, filesize: usize, url: &str) -> std::result::Result<telemetry_parser::util::VideoMetadata, crate::GyroflowCoreError> {
     let filename = crate::filesystem::get_filename(url);
     let extensions = ["mp4", "mov", "braw", "insv", "360", "mxf"];
     if !extensions.into_iter().any(|ext| filename.to_ascii_lowercase().ends_with(ext)) {
         return Err(crate::GyroflowCoreError::UnsupportedFormat(filename));
     }
-    Ok(telemetry_parser::util::get_video_metadata(stream, filesize)?)
+    let mut md = telemetry_parser::util::get_video_metadata(stream, filesize)?;
+    if filename.to_ascii_lowercase().ends_with(".braw") {
+        braw_clip_timing(stream, filesize as u64, &mut md);
+    }
+    Ok(md)
+}
+
+/// A Blackmagic RAW clip's frame rate and duration as Blackmagic's SDK presents the clip, which decodes it in gyroflow's
+/// player and render queue (MDK's BRAW reader) and in the plugins' hosts (DaVinci Resolve): its frames at the clip's
+/// frame rate, the one they're presented at (the most common frame duration), a frame that lasts longer held for its
+/// whole frames. An off-speed recording ends with a frame that lasts until the recording's end (2370 frames of 1/24 s,
+/// then one of 197.6 s, of an 8 fps recording in a 24 fps clip), which the SDK presents as that frame held (7113 frames
+/// at 24 fps), where the frames' average rate (`VideoMetadata::fps`, 8 fps) puts frame `k` at `k / 8` s, not at the
+/// `k / 24` s it's presented at. A clip whose frames all last as long, or whose frames aren't evenly spaced from its
+/// start, is left as telemetry-parser has it
+fn braw_clip_timing<T: Read + Seek>(stream: &mut T, filesize: u64, md: &mut telemetry_parser::util::VideoMetadata) {
+    let Some(v) = telemetry_parser::segment_table::video_frame_times(stream, filesize) else { return };
+    let Some(&last) = v.starts.last() else { return };
+    let even = v.starts.iter().enumerate().all(|(k, t)| *t == k as i64 * v.nominal);
+    if v.timescale == 0 || v.nominal <= 0 || !even || v.is_constant() { return; }
+    // The frames before the last one, and the last one held for its whole frames, at least itself
+    let frames = (v.starts.len() - 1) as f64 + ((v.end - last) / v.nominal).max(1) as f64;
+    md.fps = v.timescale as f64 / v.nominal as f64;
+    md.duration_s = frames * v.nominal as f64 / v.timescale as f64;
 }
 
 pub fn compress_to_base91<T>(value: &T) -> Option<String>
@@ -69,14 +95,25 @@ where T: serde::de::DeserializeOwned {
 
 use std::collections::BTreeMap;
 pub trait MapClosest<V> {
+    /// The entry closest to `key` and less than `max_diff` away (one at `key` itself always), the later of two as close
     fn get_closest(&self, key: &i64, max_diff: i64) -> Option<&V>;
+    /// `get_closest` among the entries of the keys `keys` that `pred` takes
+    fn get_closest_in(&self, keys: std::ops::RangeInclusive<i64>, key: i64, max_diff: i64, pred: impl Fn(&V) -> bool) -> Option<&V>;
 }
 impl<V> MapClosest<V> for BTreeMap<i64, V> {
     fn get_closest(&self, key: &i64, max_diff: i64) -> Option<&V> {
-        if let Some(exact) = self.get(key) { return Some(exact); }
+        self.get_closest_in(i64::MIN..=i64::MAX, *key, max_diff, |_| true)
+    }
+    fn get_closest_in(&self, keys: std::ops::RangeInclusive<i64>, key: i64, max_diff: i64, pred: impl Fn(&V) -> bool) -> Option<&V> {
+        // Only the entries within `max_diff` are looked through: the closest ones `pred` doesn't take may be followed by
+        // many more it doesn't
+        let max_diff = max_diff.max(0);
+        let (lo, hi) = (key.saturating_sub(max_diff).max(*keys.start()), key.saturating_add(max_diff).min(*keys.end()));
 
-        let after  = self.range(key..).next();      // First entry after `key`
-        let before = self.range(..key).next_back(); // Last entry before `key`
+        // A range whose start is past its end panics: past the last key nothing is after, before the first nothing before.
+        // The two ranges overlap on an exact key hit; the tie-break below then picks that same entry
+        let before = (lo <= key.min(hi)).then(|| self.range(lo..=key.min(hi)).rev().find(|(_, v)| pred(v))).flatten();
+        let after  = (key.max(lo) <= hi).then(|| self.range(key.max(lo)..=hi).find(|(_, v)| pred(v))).flatten();
 
         // `abs_diff` returns an u64 and can't overflow, unlike `(key - other).abs()`
         let closest = match (before, after) {
@@ -86,12 +123,10 @@ impl<V> MapClosest<V> for BTreeMap<i64, V> {
             (None,         None)        => return None
         };
 
+        // The ranges above are inclusive on both ends, so an entry exactly `max_diff` away still needs rejecting.
         // Anything farther than the closest entry is out of range as well, so one check is enough
-        if key.abs_diff(*closest.0) < max_diff.max(0) as u64 {
-            Some(closest.1)
-        } else {
-            None
-        }
+        let distance = key.abs_diff(*closest.0);
+        (distance == 0 || distance < max_diff as u64).then_some(closest.1)
     }
 }
 pub fn merge_json(a: &mut serde_json::Value, b: &serde_json::Value) {
@@ -145,6 +180,33 @@ pub fn init_telemetry_parser() {
 pub fn map_coord<T>(x: T, in_min: T, in_max: T, out_min: T, out_max: T) -> T
 where T: std::ops::Sub<Output = T> + std::ops::Mul<Output = T> + std::ops::Div<Output = T> + std::ops::Add<Output = T> + Copy {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_closest_entry_is_less_than_max_diff_away_and_the_later_of_two() {
+        let map: BTreeMap<i64, char> = [(0, 'a'), (100, 'b'), (200, 'c'), (1000, 'd')].into_iter().collect();
+        assert_eq!(map.get_closest(&150, 60), Some(&'c'), "the later of two as close");
+        assert_eq!(map.get_closest(&140, 60), Some(&'b'));
+        assert_eq!(map.get_closest(&600, 400), None, "exactly max_diff away is out");
+        assert_eq!(map.get_closest(&600, 401), Some(&'d'));
+        assert_eq!(map.get_closest(&100, 0), Some(&'b'), "an entry at the key itself always");
+        assert_eq!(map.get_closest(&-5, 10), Some(&'a'));
+        assert_eq!(map.get_closest(&2000, i64::MAX), Some(&'d'));
+    }
+
+    #[test]
+    fn a_closest_entry_in_keys_is_one_of_them_that_pred_takes() {
+        let map: BTreeMap<i64, char> = [(0, 'a'), (100, 'b'), (200, 'c'), (1000, 'd')].into_iter().collect();
+        assert_eq!(map.get_closest_in(i64::MIN..=i64::MAX, 110, 500, |v| *v != 'b'), Some(&'c'));
+        assert_eq!(map.get_closest_in(i64::MIN..=150, 190, 500, |_| true), Some(&'b'), "past the last key: the last one");
+        assert_eq!(map.get_closest_in(300..=900, 500, 500, |_| true), None);
+        assert_eq!(map.get_closest_in(500..=100, 100, 500, |_| true), None, "no keys");
+        assert_eq!(map.get_closest_in(150..=2000, 0, 300, |_| true), Some(&'c'), "before the first key: the first one");
+    }
 }
 
 /*

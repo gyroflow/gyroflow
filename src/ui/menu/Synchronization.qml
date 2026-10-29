@@ -258,7 +258,7 @@ MenuItem {
             anchors.verticalCenter: parent.verticalCenter;
             contentItem.visible: false;
             scale: 0.7;
-            visible: offsetMethod.currentIndex > 0;
+            visible: offsetMethod.currentIndex == 1 || offsetMethod.currentIndex == 2; // "Optical analysis" finds it on its own
             tooltip: qsTr("Calculate initial offset first (using essential matrix method), then refine using slower but more accurate rs-sync method.");
         }
     }
@@ -339,7 +339,7 @@ MenuItem {
 
             ComboBox {
                 id: syncMethod;
-                model: ["AKAZE", "OpenCV (PyrLK)", "OpenCV (DIS)"];
+                model: ["AKAZE", "PyrLK", "OpenCV (DIS)"];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
                 currentIndex: 2;
@@ -366,14 +366,15 @@ MenuItem {
 
             ComboBox {
                 id: offsetMethod;
-                model: [QT_TRANSLATE_NOOP("Popup", "Essential matrix"), QT_TRANSLATE_NOOP("Popup", "Visual features"), QT_TRANSLATE_NOOP("Popup", "rs-sync")];
+                model: [QT_TRANSLATE_NOOP("Popup", "Essential matrix"), QT_TRANSLATE_NOOP("Popup", "Visual features"), QT_TRANSLATE_NOOP("Popup", "rs-sync"), QT_TRANSLATE_NOOP("Popup", "Optical analysis")];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
-                currentIndex: 2;
+                currentIndex: 3;
                 property var tooltips: ([
                     qsTr("Calculate camera transformation matrix from optical flow to get the rotation angles of the camera.\nThen try to match these angles to gyroscope angles."),
                     qsTr("Undistort optical flow points using gyro and candidate offset.\nThen calculate lengths of the optical flow lines.\nResulting offset is the one where lines were the shortest, meaning the video was moving the least visually."),
-                    qsTr("Rolling shutter video to gyro synchronization algorithm.\nMake sure you have proper rolling shutter value set before syncing.")
+                    qsTr("Rolling shutter video to gyro synchronization algorithm.\nMake sure you have proper rolling shutter value set before syncing."),
+                    qsTr("Track the sync points the way \"Analyze image optically\" does.\nFind the rough offset by matching the video's own rotation to the motion data, then refine it at each sync point by fitting the rotation of every band of rows, rolling shutter included.\nThe most accurate method. The optical flow and pose methods don't apply to it.")
                 ]);
                 tooltip: tooltips[currentIndex];
             }

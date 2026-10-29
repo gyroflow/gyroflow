@@ -23,6 +23,9 @@ pub mod solver;
 mod odometry;
 mod tracker;
 mod gpu_klt;
+mod pair_klt;
+pub use tracker::{ KltDevice, Tracker };
+pub use pair_klt::PairKlt;
 
 use std::collections::{ BTreeSet, HashMap, HashSet };
 use std::ops::{ ControlFlow, RangeInclusive };
@@ -31,7 +34,7 @@ use nalgebra::{ DMatrix, Matrix3, Rotation3, UnitQuaternion, Vector3 };
 use rayon::prelude::*;
 
 use crate::StabilizationManager;
-use crate::gyro_source::{ GyroSource, OpticalCorrection, OpticalCorrectionSettings, TimeQuat, TrackingMethod, optical_correction::{ self, Fnv } };
+use crate::gyro_source::{ GyroSource, MotionLookup, OpticalCorrection, OpticalCorrectionSettings, TimeQuat, TrackingMethod, optical_correction::{ self, Fnv } };
 use crate::stabilization::{ ComputeParams, FrameTransform, undistort_points_for_optical_motion };
 use solver::{ BandMeasurement, SolverParams };
 
@@ -491,6 +494,17 @@ impl Tracks {
             self.long.len() * (std::mem::size_of::<TrackInfo>() + 4)
     }
 
+    /// The frames of each pair, in the order `for_each_pair` gives them (`Pair::seq`): a pair ends at every entry with
+    /// points that came from the one before
+    fn pair_frames(&self) -> Vec<(usize, usize)> {
+        self.entries.windows(2).filter(|w| w[1].continued > 0).map(|w| (w[0].frame.index, w[1].frame.index)).collect()
+    }
+
+    /// The frame at the middle of each frame's readout, µs, as `Measuring::chain_vision` keys the rotation it chains
+    fn frames_by_time(&self) -> HashMap<i64, usize> {
+        self.entries.iter().map(|e| ((e.frame.mid_ms * 1000.0).round() as i64, e.frame.index)).collect()
+    }
+
     /// Long enough to count and to be shown, see `MIN_TRACK_PAIRS`
     fn track(&self, id: u32) -> Option<&TrackInfo> {
         self.long.binary_search_by_key(&id, |t| t.id).ok().map(|i| &self.long[i])
@@ -644,7 +658,7 @@ struct FramePoint {
 /// where the lens has no image of a point. `params` the right way up, like `measurement_params`, for upright positions
 pub fn to_output(params: &ComputeParams, index: usize, points: &[(f32, f32)]) -> Vec<Option<(f32, f32)>> {
     if points.is_empty() { return Vec::new(); }
-    let ts = crate::timestamp_at_frame(index as i32, params.scaled_fps);
+    let ts = params.timestamp_at_frame(index as i32);
     let (w, h) = (params.width as f32, params.height as f32);
     let px: Vec<(f32, f32)> = points.iter().map(|p| (p.0 * w, p.1 * h)).collect();
     let amount = params.keyframes.value_at_video_timestamp(&crate::KeyframeType::LensCorrectionStrength, ts).unwrap_or(params.lens_correction_amount);
@@ -674,31 +688,57 @@ pub fn solve(m: &OpticalMeasurements, settings: &OpticalCorrectionSettings) -> R
     solve_with(m, settings, &solver_params(settings, m.scaled_fps))
 }
 
+/// `solve` with the solver's parameters given: one spline fitted to all of the measurements, for all of the motion data
 pub fn solve_with(m: &OpticalMeasurements, settings: &OpticalCorrectionSettings, params: &SolverParams) -> Result<OpticalCorrection, String> {
-    let bands = &m.bands;
-    let sol = solver::solve(bands, params).ok_or_else(|| "Not enough of the image could be tracked".to_string())?;
-    let rms_deg = (bands.iter().map(|b| sol.at(b.ta_us, params.spacing_us).norm_squared()).sum::<f64>() / bands.len().max(1) as f64).sqrt().to_degrees();
-    Ok(OpticalCorrection {
-        enabled: true,
-        settings: *settings,
-        start_us: sol.start_us,
-        spacing_us: params.spacing_us,
-        coeffs: sol.coeffs.iter().map(|c| [c.x as f32, c.y as f32, c.z as f32]).collect(),
-        quats_checksum: m.quats_checksum,
-        context_checksum: m.context_checksum,
-        video_base: m.video_base.clone(),
-        tracking: m.tracking,
-        frames: m.frames,
-        measured_frames: m.measured_frames,
-        rms_deg,
-    })
+    let fits = solver::solve(&m.bands, params).map(|sol| (None, sol, m.bands.as_slice())).into_iter().collect();
+    optical_correction::correction_of(m, settings, params, fits)
 }
 
 impl OpticalMeasurements {
     /// Measures the same tracks again, without the ones `excluded`: everything the analysis does after the tracking, a
     /// small part of its time. `cancelled` is asked every so often, and stops it ("Cancelled")
     pub fn remeasure(&self, excluded: HashSet<u32>, cancelled: impl Fn() -> bool) -> Result<OpticalMeasurements, String> {
-        let mut m = Measuring::new(self.tracks.setup.clone(), Arc::new(excluded));
+        self.measure(self.tracks.setup.clone(), excluded, self.quats_checksum, cancelled)
+    }
+
+    /// The same tracks measured against other motion data: `gyro` with its sync points (and without an optical
+    /// correction, as `motion` gives it), or, with `from_video`, against the picture's own rotation chained from the
+    /// frames, which is then in `video_base`. What the synchronization measures each offset it tries with
+    pub fn remeasure_against(&self, mut gyro: GyroSource, from_video: bool, cancelled: impl Fn() -> bool) -> Result<OpticalMeasurements, String> {
+        let mut setup = self.tracks.setup.clone();
+        if from_video { gyro.quaternions = Default::default(); }
+        let quats_checksum = optical_correction::checksum(&gyro.quaternions);
+        setup.params.gyro = Arc::new(parking_lot::RwLock::new(gyro));
+        setup.from_video = from_video;
+        self.measure(setup, self.excluded.as_ref().clone(), quats_checksum, cancelled)
+    }
+
+    /// `remeasure_against` motion data shared with the caller, which it can go on looking orientations up in (and set
+    /// other sync points on) between the measurements, without a copy of it for each. With `from_video` its orientations
+    /// aren't read: the picture's own rotation stands in for them
+    pub fn remeasure_against_shared(&self, gyro: Arc<parking_lot::RwLock<GyroSource>>, from_video: bool, cancelled: impl Fn() -> bool) -> Result<OpticalMeasurements, String> {
+        let mut setup = self.tracks.setup.clone();
+        // Of the picture's chained rotation with `from_video` (`Measuring::finish`), whatever these are
+        let quats_checksum = optical_correction::checksum(&gyro.read().quaternions);
+        setup.params.gyro = gyro;
+        setup.from_video = from_video;
+        self.measure(setup, self.excluded.as_ref().clone(), quats_checksum, cancelled)
+    }
+
+    /// The motion data the tracks were measured against: with the sync points it had, without any optical correction
+    pub fn motion(&self) -> GyroSource { self.tracks.setup.params.gyro.read().clone() }
+    /// `motion` to look orientations up in, without what only its integration and smoothing read, and without the
+    /// orientations too unless `orientations` (`GyroSource::clone_for_lookups`)
+    pub fn motion_for_lookups(&self, orientations: bool) -> GyroSource { self.tracks.setup.params.gyro.read().clone_for_lookups(orientations) }
+    /// The video's frames each frame pair the tracks were measured in is of (`BandMeasurement::pair`), in order: its first
+    /// and its second frame
+    pub fn pair_frames(&self) -> Vec<(usize, usize)> { self.tracks.pair_frames() }
+    /// The video's frame at each time the picture's own rotation is keyed at (`video_base`, µs: the middle of the frame's
+    /// readout, as `Measuring::chain_vision` keys it)
+    pub fn frames_by_time(&self) -> HashMap<i64, usize> { self.tracks.frames_by_time() }
+
+    fn measure(&self, setup: Setup, excluded: HashSet<u32>, quats_checksum: u64, cancelled: impl Fn() -> bool) -> Result<OpticalMeasurements, String> {
+        let mut m = Measuring::new(setup, Arc::new(excluded));
         let mut stopped = false;
         self.tracks.for_each_pair(|pair| {
             let n = pair.seq + 1;
@@ -710,7 +750,7 @@ impl OpticalMeasurements {
         m.process(true);
         if cancelled() { return Err("Cancelled".into()); }
         if m.measurements.is_empty() { return Err("Not enough of the image could be tracked".into()); }
-        let (_, measured) = m.finish(self.quats_checksum);
+        let (_, measured) = m.finish(quats_checksum);
         Ok(OpticalMeasurements {
             bands: measured.bands,
             scaled_fps: self.scaled_fps,
@@ -763,6 +803,10 @@ pub fn context_checksum(params: &ComputeParams) -> u64 {
     h.eat(params.width as u64);
     h.eat(params.height as u64);
     h.eat_rounded(params.scaled_fps, 1e6);
+    // The frames' own times, when they aren't evenly spaced (`ComputeParams::frame_times`): every frame is read out at
+    // its time, and the frames sampled below can't tell a table that moves the others. Only then, so a correction of
+    // evenly spaced frames keeps the context it was measured in
+    if let Some(times) = &params.frame_times { h.eat(times.checksum()); }
     for (ts, offset) in params.gyro.read().get_offsets() {
         h.eat(*ts as u64);
         h.eat_rounded(*offset, 1e3);
@@ -771,10 +815,9 @@ pub fn context_checksum(params: &ComputeParams) -> u64 {
     let rows = if params.frame_readout_direction.is_horizontal() { size.0 } else { size.1 };
     let at = [0.1f32, 0.5, 0.9];
     let grid: Vec<(f32, f32)> = at.iter().flat_map(|y| at.map(|x| (x * size.0 as f32, y * size.1 as f32))).collect();
-    let fps = params.scaled_fps.max(1e-9);
     for t in at {
-        let index = crate::frame_at_timestamp(t as f64 * params.scaled_duration_ms, fps).max(0) as usize;
-        let ts = crate::timestamp_at_frame(index as i32, fps);
+        let index = params.frame_at_timestamp(t as f64 * params.scaled_duration_ms).max(0) as usize;
+        let ts = params.timestamp_at_frame(index as i32);
         let frame = frame_timing(params, index, ts, rows);
         h.eat(index as u64);
         h.eat_rounded(frame.start_ms, 1e3);
@@ -830,25 +873,34 @@ pub struct OpticalMotionAnalysis {
 
 impl OpticalMotionAnalysis {
     pub fn from_manager(stab: &StabilizationManager, cancel_flag: Arc<AtomicBool>) -> Result<Self, String> {
+        Self::new(stab, None, cancel_flag)
+    }
+
+    /// An analysis for the synchronization (`find_offset::bands`): of the parts of the file given (its own ms) instead
+    /// of the trim ranges, tracked with KLT whatever the correction tracks with (DIS needs OpenCV), and on a GPU when the
+    /// build has no other KLT, even with the CPU chosen for processing. What it measures is measured again against the
+    /// offsets tried, `OpticalMeasurements::remeasure_against`
+    pub fn for_sync(stab: &StabilizationManager, ranges_ms: Vec<(f64, f64)>, cancel_flag: Arc<AtomicBool>) -> Result<Self, String> {
+        Self::new(stab, Some(ranges_ms), cancel_flag)
+    }
+
+    fn new(stab: &StabilizationManager, sync_ranges_ms: Option<Vec<(f64, f64)>>, cancel_flag: Arc<AtomicBool>) -> Result<Self, String> {
         // Before anything is read: whatever changes it from here on is a reason to stop
         let generation = stab.optical_generation.load(SeqCst);
         let mut params = measurement_params(stab);
 
-        let mut gyro = stab.gyro.read().clone();
         // Without motion data in the file (also after an analysis of such a file: its orientation is only in the
-        // correction) the analysis measures the motion itself
-        let from_video = !gyro.file_metadata.read().has_motion();
-        if gyro.optical_correction.take().is_some() {
-            gyro.integrate();
-        }
-        if from_video {
-            gyro.quaternions.clear();
-        } else if gyro.quaternions.len() < 2 {
+        // correction) the analysis measures the motion itself. It only looks the motion data up: not a copy of all of it,
+        // which would copy a long clip's IMU readings and smoothed orientations
+        let from_video = !stab.gyro.read().file_metadata.read().has_motion();
+        let gyro = GyroSource::uncorrected_for_lookups(&stab.gyro, !from_video);
+        if !from_video && gyro.quaternions.len() < 2 {
             return Err("No motion data to correct".into());
         }
         let quats_checksum = optical_correction::checksum(&gyro.quaternions);
         params.gyro = Arc::new(parking_lot::RwLock::new(gyro));
-        let tracking = *stab.optical_tracking.read();
+        let for_sync = sync_ranges_ms.is_some();
+        let tracking = if for_sync { TrackingMethod::Klt } else { *stab.optical_tracking.read() };
         let context_checksum = context_checksum(&params);
 
         let (fps_scale, scaled_fps, horizontal_readout, ranges_ms, total_frames) = {
@@ -857,13 +909,18 @@ impl OpticalMotionAnalysis {
             let ranges: Vec<(f64, f64)> = if p.trim_ranges.is_empty() { vec![(0.0, 1.0)] } else { p.trim_ranges.clone() };
             let ranges_ms = ranges.iter().map(|(a, b)| (a * p.duration_ms, b * p.duration_ms)).collect::<Vec<_>>();
             let total_frames = ranges.iter().map(|(a, b)| ((b - a) * p.frame_count as f64).round() as usize).sum();
-            (p.fps_scale, p.get_scaled_fps(), p.frame_readout_direction.is_horizontal(), ranges_ms, total_frames)
+            match sync_ranges_ms {
+                Some(r) => {
+                    let total = r.iter().map(|(a, b)| ((b - a) / 1000.0 * p.fps).round() as usize).sum();
+                    (p.fps_scale, p.get_scaled_fps(), p.frame_readout_direction.is_horizontal(), r, total)
+                },
+                None => (p.fps_scale, p.get_scaled_fps(), p.frame_readout_direction.is_horizontal(), ranges_ms, total_frames),
+            }
         };
         let setup = Setup { params, horizontal_readout, track_size: (0, 0), focal_px: 0.0, from_video };
-        // KLT on the GPU selected for processing (or another one), on the CPU when that's what's selected
-        let device = match stab.params.read().current_device {
-            i if i < 0 || !std::env::var("NO_WGPU").unwrap_or_default().is_empty() => tracker::KltDevice::Cpu,
-            i => tracker::KltDevice::Gpu(Some(i as usize)),
+        let device = match KltDevice::for_processing(stab.params.read().current_device) {
+            KltDevice::Cpu if !cfg!(feature = "use-opencv") && for_sync => KltDevice::Gpu(None),
+            d => d,
         };
         Ok(Self {
             fps_scale, scaled_fps, quats_checksum, context_checksum,
@@ -904,7 +961,9 @@ impl OpticalMotionAnalysis {
         if !self.ranges_ms.iter().any(|(a, b)| file_ms >= *a - 0.5 && file_ms <= *b + 0.5) { return Ok(()); }
         let mut ts_ms = file_ms;
         if let Some(scale) = self.fps_scale { ts_ms /= scale; }
-        let index = crate::frame_at_timestamp(ts_ms, self.scaled_fps).max(0) as usize;
+        // Numbered as the render, the point editor and the per-frame metadata number it: by the video's frame times
+        // when it has them (`ComputeParams::frame_at_timestamp`)
+        let index = self.measuring.setup.params.frame_at_timestamp(ts_ms).max(0) as usize;
         if self.last.map(|l| index <= l.index).unwrap_or(false) { return Ok(()); } // a repeated frame
 
         let setup = &mut self.measuring.setup;
@@ -914,7 +973,7 @@ impl OpticalMotionAnalysis {
             setup.focal_px = k[(0, 0)] * width as f64 / setup.params.width.max(1) as f64;
         }
         let frame = self.measuring.frame(index, ts_ms);
-        let continuous = self.last.map(|l| index == l.index + 1).unwrap_or(false);
+        let continuous = self.last.map(|l| index == l.index + 1 && self.measuring.setup.params.gyro.read().frames_of_one_part(l.index, index)).unwrap_or(false);
 
         if !continuous { self.tracker.reset(); }
         let obs = self.tracker.track(width, height, stride, pixels)?;
@@ -1171,9 +1230,11 @@ impl Measuring {
         let floor = SIGMA_FLOOR_PX / self.setup.focal_px.max(1.0);
         let gyro = self.setup.params.gyro.clone();
         let vision = &self.vision;
+        let (window, window_from) = (&self.window, self.window_from);
         let fits: Vec<(usize, BandMeasurement, &Vec<usize>, Vec<f64>)> = groups.par_iter().filter_map(|(&(seq, _), idx)| {
             let gyro = gyro.read();
-            fit_band(&derived, &rhp, idx, floor, &gyro, vision).map(|(mut m, w)| { m.pair = seq; (seq, m, idx, w) })
+            let pair = &window[seq - window_from];
+            fit_band(&derived, &rhp, idx, floor, &gyro, vision, (pair.a.index, pair.b.index)).map(|(mut m, w)| { m.pair = seq; (seq, m, idx, w) })
         }).collect();
 
         // What became of each point, for "Show/edit tracked points"
@@ -1221,7 +1282,9 @@ impl Measuring {
             let ba = undistort_points_for_optical_motion(&pts_a, pair.a.timestamp_ms, pair.a.index, params, size);
             let bb = undistort_points_for_optical_motion(&pts_b, pair.b.timestamp_ms, pair.b.index, params, size);
             let gyro = params.gyro.read();
-            let orient = |t: f64| orientation(vision, &gyro, t);
+            // Each frame's rows of its own part's motion data, as the render reads them (`GyroSource::lookup_for_frame`)
+            let (la, lb) = (gyro.lookup_for_frame(pair.a.index), gyro.lookup_for_frame(pair.b.index));
+            let orient = |t: f64, lookup: &MotionLookup| orientation(vision, &gyro, t, lookup);
             let mut out = Vec::with_capacity(obs.len());
             for (i, (k, o)) in obs.iter().enumerate() {
                 let (Some(a), Some(b)) = (ba.get(i).copied().flatten(), bb.get(i).copied().flatten()) else { continue };
@@ -1229,7 +1292,7 @@ impl Measuring {
                 let pos_b = if horizontal { o.b[0] } else { o.b[1] };
                 let ta = pair.a.start_ms + pair.a.per_px_ms * pos_a as f64;
                 let tb = pair.b.start_ms + pair.b.per_px_ms * pos_b as f64;
-                let m = (orient(tb).inverse() * orient(ta)).to_rotation_matrix().into_inner();
+                let m = (orient(tb, &lb).inverse() * orient(ta, &la)).to_rotation_matrix().into_inner();
                 let (va, vb) = (to_quat_frame(a), to_quat_frame(b));
                 let p = m * va;
                 let band = ((pos_a / track_rows) * BANDS as f32).floor().clamp(0.0, (BANDS - 1) as f32) as u8;
@@ -1268,10 +1331,11 @@ impl Measuring {
     }
 }
 
-/// The orientation the image is compared against at a moment of the video: the motion data's, or for a file without
-/// any the one chained from the frames (along the geodesic between them, as `optical_correction::densify` has it)
-fn orientation(vision: &Option<TimeQuat>, gyro: &GyroSource, t_ms: f64) -> UnitQuaternion<f64> {
-    let Some(keys) = vision else { return gyro.org_quat_at_timestamp(t_ms) };
+/// The orientation the image is compared against at a moment of the video read out in a frame: the motion data's that
+/// the frame may read (`lookup`, `GyroSource::lookup_for_frame`), or for a file without any the one chained from the
+/// frames (along the geodesic between them, as `optical_correction::densify` has it)
+fn orientation(vision: &Option<TimeQuat>, gyro: &GyroSource, t_ms: f64, lookup: &MotionLookup) -> UnitQuaternion<f64> {
+    let Some(keys) = vision else { return gyro.org_quat_at(t_ms, lookup) };
     let t = (t_ms * 1000.0).round() as i64;
     match (keys.range(..=t).next_back(), keys.range(t..).next()) {
         (Some((&a, qa)), Some((&b, qb))) => if b == a { *qa } else { qa.slerp(qb, (t - a) as f64 / (b - a) as f64) },
@@ -1308,9 +1372,10 @@ fn sg_projection(l: usize) -> DMatrix<f64> {
     &x * inv * x.transpose()
 }
 
-/// One band of one frame pair: the rotation its points moved by beyond the quaternions, `r ≈ ρ × p`, robustly, and
-/// the weight each point ended up with in it
-fn fit_band(derived: &[Derived], rhp: &[Option<Vector3<f64>>], idx: &[usize], sigma_floor: f64, gyro: &GyroSource, vision: &Option<TimeQuat>) -> Option<(BandMeasurement, Vec<f64>)> {
+/// One band of one frame pair, of the video's frames `frames`: the rotation its points moved by beyond the quaternions,
+/// `r ≈ ρ × p`, robustly, and the weight each point ended up with in it
+#[allow(clippy::too_many_arguments)]
+fn fit_band(derived: &[Derived], rhp: &[Option<Vector3<f64>>], idx: &[usize], sigma_floor: f64, gyro: &GyroSource, vision: &Option<TimeQuat>, frames: (usize, usize)) -> Option<(BandMeasurement, Vec<f64>)> {
     if idx.len() < MIN_BAND_POINTS { return None; }
     let mut w = vec![1.0f64; idx.len()];
     let mut rho = Vector3::zeros();
@@ -1341,9 +1406,12 @@ fn fit_band(derived: &[Derived], rhp: &[Option<Vector3<f64>>], idx: &[usize], si
 
     let ta = idx.iter().zip(&w).map(|(&i, w)| derived[i].ta_ms * w).sum::<f64>() / sw;
     let tb = idx.iter().zip(&w).map(|(&i, w)| derived[i].tb_ms * w).sum::<f64>() / sw;
-    let m = (orientation(vision, gyro, tb).inverse() * orientation(vision, gyro, ta)).to_rotation_matrix().into_inner();
-    let to_gyro_us = |t: f64| (t - gyro.offset_at_video_timestamp(t)) * 1000.0;
-    Some((BandMeasurement { pair: 0, ta_us: to_gyro_us(ta), tb_us: to_gyro_us(tb), rho, info, m }, w))
+    // Each frame's times in its own part's motion data, with its sync, as the render reads them: a frame read out after
+    // the next part's video starts (a per-frame offset of more than a frame) is still of its own part
+    let (la, lb) = (gyro.lookup_for_frame(frames.0), gyro.lookup_for_frame(frames.1));
+    let m = (orientation(vision, gyro, tb, &lb).inverse() * orientation(vision, gyro, ta, &la)).to_rotation_matrix().into_inner();
+    let to_gyro_us = |t: f64, lookup: &MotionLookup| (t - gyro.offset_at_video_timestamp_in(t, lookup.segment)) * 1000.0;
+    Some((BandMeasurement { pair: 0, ta_us: to_gyro_us(ta, &la), tb_us: to_gyro_us(tb, &lb), rho, info, m }, w))
 }
 
 #[cfg(test)]

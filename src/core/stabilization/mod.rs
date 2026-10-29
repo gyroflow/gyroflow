@@ -19,7 +19,7 @@ pub mod distortion_models;
 pub mod projection;
 pub use pixel_formats::*;
 pub use compute_params::ComputeParams;
-pub use frame_transform::FrameTransform;
+pub use frame_transform::{ FrameTransform, FocalSource };
 pub use cpu_undistort::*;
 
 #[derive(Default, Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
@@ -299,7 +299,12 @@ impl Stabilization {
 
     pub fn get_frame_transform_at<T: PixelType>(&self, timestamp_us: i64, frame: Option<usize>, buffers: &Buffers) -> FrameTransform {
         let timestamp_ms = (timestamp_us as f64) / 1000.0;
-        let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, self.compute_params.scaled_fps) as usize);
+        // The frame the video presents at the time. A video whose frames aren't evenly spaced has it by its own frame
+        // times, the only ones that give it (a frame number given with the time counts the frames as if they were)
+        let frame = match frame {
+            Some(frame) if self.compute_params.frame_times.is_none() => frame,
+            _ => self.compute_params.frame_at_timestamp(timestamp_ms).max(0) as usize,
+        };
 
         let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
         transform.kernel_params.pixel_value_limit = T::default_max_value().unwrap_or(f32::MAX);
@@ -748,6 +753,11 @@ impl Stabilization {
                         log::error!("No wgpu instance!");
                     }
                 }
+            }
+
+            // The memory of a GPU, which only a GPU backend could have processed: not the CPU
+            if !matches!((&buffers.input.data, &buffers.output.data), (BufferSource::Cpu { .. }, BufferSource::Cpu { .. })) {
+                return Err(GyroflowCoreError::NoBackendForBuffers(self.get_current_key(buffers)));
             }
 
             //let ok = Self::undistort_image_cpu_spirv::<T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer);

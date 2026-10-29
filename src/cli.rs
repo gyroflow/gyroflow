@@ -696,7 +696,7 @@ fn setup_defaults(stab: &Arc<StabilizationManager>, queue: &mut RenderQueue) -> 
             "every_nth_frame":    1,
             "time_per_syncpoint": 1,
             "of_method":          2,
-            "offset_method":      2,
+            "offset_method":      3,
             "auto_sync_points":   true,
         }
     })

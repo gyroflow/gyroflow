@@ -271,7 +271,7 @@ Item {
             }
             checked: chart.getAxisVisible(10) || chart.getAxisVisible(11);
             tooltip: qsTr("Focal length");
-            visible: controller.has_per_frame_focal_length;
+            visible: controller.has_varying_focal_length;
         }
     }
     Column {

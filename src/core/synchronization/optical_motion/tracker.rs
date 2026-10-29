@@ -68,6 +68,36 @@ pub enum KltDevice {
     Gpu(Option<usize>),
 }
 
+impl KltDevice {
+    /// The GPU selected for processing (`current_device`, or another one), the CPU when that's what's selected
+    pub fn for_processing(current_device: i32) -> Self {
+        match current_device {
+            i if i < 0 || !std::env::var("NO_WGPU").unwrap_or_default().is_empty() => Self::Cpu,
+            i => Self::Gpu(Some(i as usize)),
+        }
+    }
+}
+
+/// Looks for the adapter of the GPU `selected` (see `KltDevice`) and makes its device and pipelines, on a thread: the
+/// first time in a process looking for an adapter can take seconds (the wgpu instance is made then, with every backend),
+/// and making the device and the pipelines a tenth of one. `found_gpu` waits for it
+pub(super) fn find_gpu(selected: Option<usize>) -> mpsc::Receiver<Result<wgpu::Adapter, String>> {
+    let (found, finding) = mpsc::channel();
+    std::thread::spawn(move || {
+        let adapter = crate::gpu::wgpu::WgpuWrapper::compute_adapter(selected).ok_or_else(|| "no GPU to use".to_string());
+        let _ = found.send(adapter.and_then(|a| GpuKlt::prepare(&a).map(|_| a)));
+    });
+    finding
+}
+
+/// What `find_gpu` found, or why there's nothing
+pub(super) fn found_gpu(finding: mpsc::Receiver<Result<wgpu::Adapter, String>>) -> Result<wgpu::Adapter, String> {
+    finding.recv_timeout(SET_UP_TIMEOUT).unwrap_or_else(|e| Err(match e {
+        mpsc::RecvTimeoutError::Timeout => format!("it took over {} s to set up", SET_UP_TIMEOUT.as_secs()),
+        mpsc::RecvTimeoutError::Disconnected => "looking for it failed".into(),
+    }))
+}
+
 pub struct Tracker {
     /// DIS, when it follows the points through the dense flow; KLT without
     #[cfg(feature = "use-opencv")]
@@ -86,6 +116,9 @@ pub struct Tracker {
     candidates: Vec<u64>,
     noise: Vec<f32>,
     glare: Vec<(i32, i32, i32)>,
+    /// Whether `candidates` are sorted yet: from the GPU they're sorted only once needed, while it makes the next frame's
+    /// levels
+    sorted: bool,
     /// KLT on a GPU: whether it's wanted (not after it failed), its adapter or why there's none (looked for and its device
     /// made on a thread from the start, see `new`) and what's set up on it for the frame size
     gpu_wanted: bool,
@@ -115,24 +148,16 @@ impl Tracker {
             if matches!(method, TrackingMethod::Dis) { return Err("DIS tracking is not available in this build".into()); }
             if matches!(device, KltDevice::Cpu) { return Err(NO_GPU.into()); }
         }
-        // The first time in a process looking for an adapter can take seconds (the wgpu instance is made then, with every
-        // backend), and making the device and the pipelines a tenth of one: done while the decoder starts
+        // Done while the decoder starts
         let finding = match device {
-            KltDevice::Gpu(selected) if matches!(method, TrackingMethod::Klt) => {
-                let (found, finding) = mpsc::channel();
-                std::thread::spawn(move || {
-                    let adapter = crate::gpu::wgpu::WgpuWrapper::compute_adapter(selected).ok_or_else(|| "no GPU to use".to_string());
-                    let _ = found.send(adapter.and_then(|a| GpuKlt::prepare(&a).map(|_| a)));
-                });
-                Some(finding)
-            },
+            KltDevice::Gpu(selected) if matches!(method, TrackingMethod::Klt) => Some(find_gpu(selected)),
             _ => None,
         };
         Ok(Self {
             #[cfg(feature = "use-opencv")]
             dis,
             prev: None, size: (0, 0), points: Vec::new(), ids: Vec::new(), next_id: 0, max_points,
-            candidates: Vec::new(), noise: Vec::new(), glare: Vec::new(),
+            candidates: Vec::new(), noise: Vec::new(), glare: Vec::new(), sorted: true,
             gpu_wanted: finding.is_some(), finding, adapter: Err("no GPU to use".into()), gpu: None, device: "the CPU".into(), setup: 0.0, busy: 0.0, frames: 0,
         })
     }
@@ -142,6 +167,7 @@ impl Tracker {
         let setup = if self.setup > 0.0 { format!(" (set up in {:.0} ms)", self.setup * 1000.0) } else { String::new() };
         format!("tracked on {} in {:.1} ms a frame{setup}", self.device, self.busy * 1000.0 / self.frames.max(1) as f64)
     }
+
 
     /// Forget everything: the next frame starts new tracks (a gap in the decoded frames, a cut)
     pub fn reset(&mut self) {
@@ -176,9 +202,16 @@ impl Tracker {
         let moved = match dense {
             Some(moved) => moved,
             None => {
-                if prev.is_some() { self.replenish(); }
+                // On the GPU this frame goes up and its levels are made while the CPU picks the points to track into it:
+                // the candidates of the frame before sorted and topped up from. All at once after that, the GPU sat idle
+                // meanwhile, clocked down and took 1.5 times as long (a phone, Adreno 650)
+                let levels = self.gpu.as_mut().map(|gpu| gpu.submit_levels(pixels));
+                if prev.is_some() {
+                    self.sort_candidates();
+                    self.replenish();
+                }
                 let tracking = prev.is_some() && !self.points.is_empty();
-                self.klt_frame(prev.as_deref(), pixels, stride, tracking)?
+                self.klt_frame(prev.as_deref(), pixels, stride, tracking, levels)?
             }
         };
         if let Some(moved) = moved {
@@ -208,10 +241,7 @@ impl Tracker {
     fn set_up_gpu(&mut self, width: u32, height: u32, stride: usize) -> Result<(), String> {
         self.gpu = None;
         if let Some(finding) = self.finding.take() {
-            self.adapter = finding.recv_timeout(SET_UP_TIMEOUT).unwrap_or_else(|e| Err(match e {
-                mpsc::RecvTimeoutError::Timeout => format!("it took over {} s to set up", SET_UP_TIMEOUT.as_secs()),
-                mpsc::RecvTimeoutError::Disconnected => "looking for it failed".into(),
-            }));
+            self.adapter = found_gpu(finding);
         }
         // Room for every point: `replenish` tops each cell up to its share, so up to twice `max_points`, with fewer than
         // that before it
@@ -238,22 +268,30 @@ impl Tracker {
         }
     }
 
+    /// The candidates in the order `replenish` takes them: the strongest first
+    fn sort_candidates(&mut self) {
+        if self.sorted { return; }
+        self.candidates.sort_unstable_by(|a, b| b.cmp(a));
+        self.sorted = true;
+    }
+
     /// KLT: the points of `prev` tracked into this frame (with `tracking`), and this frame's candidate corners, noise and
-    /// glare found for the next `replenish`. On the GPU, the glare found while it works; with OpenCV when there's no
-    /// GPU, and from the frame after the one it failed on
-    fn klt_frame(&mut self, prev: Option<&[u8]>, pixels: &[u8], stride: usize, tracking: bool) -> Result<Option<Vec<Option<[f32; 2]>>>, String> {
+    /// glare found for the next `replenish`. On the GPU (`levels`: this frame's gone up, see `track`), the glare found
+    /// while it works; with OpenCV when there's no GPU, and from the frame after the one it failed on
+    fn klt_frame(&mut self, prev: Option<&[u8]>, pixels: &[u8], stride: usize, tracking: bool, levels: Option<Result<(), String>>) -> Result<Option<Vec<Option<[f32; 2]>>>, String> {
         let (w, h) = self.size;
         if let Some(gpu) = &mut self.gpu {
             let points = if tracking { &self.points[..] } else { &[] };
-            let submitted = gpu.submit(pixels, points.iter().copied());
+            let submitted = levels.unwrap_or_else(|| gpu.submit_levels(pixels)).and_then(|_| gpu.submit_lk(points.iter().copied()));
             self.glare = glare(pixels, stride, w, h);
-            match submitted.and_then(|_| gpu.finish()) {
+            let finished = submitted.and_then(|_| gpu.finish());
+            match finished {
                 Ok(()) => {
                     // Taking them over gives `gpu` the old ones to fill again
                     std::mem::swap(&mut self.candidates, &mut gpu.candidates);
                     std::mem::swap(&mut self.noise, &mut gpu.noise);
-                    self.candidates.sort_unstable_by(|a, b| b.cmp(a));
-                    return Ok(tracking.then(|| checked(&self.points, &gpu.fwd, &gpu.bwd)));
+                    self.sorted = false;
+                    return Ok(tracking.then(|| checked(&self.points, &gpu.fwd, &gpu.bwd, FB_MAX)));
                 },
                 Err(e) if cfg!(feature = "use-opencv") => {
                     log::warn!("Optical analysis: tracking on the CPU from the next frame, the GPU failed: {e}");
@@ -280,21 +318,22 @@ impl Tracker {
         let (w, h) = self.size;
         let cur = frame_mat(pixels, stride, w, h)?;
         let moved = match prev {
-            Some(prev) if tracking => Some(Self::klt(&frame_mat(prev, w as usize, w, h)?, &cur, &self.points)?),
+            Some(prev) if tracking => Some(Self::klt(&frame_mat(prev, w as usize, w, h)?, &cur, &self.points, FB_MAX)?),
             _ => None,
         };
-        let mut eig = Mat::default();
-        imgproc::corner_min_eigen_val(&cur, &mut eig, 7, 3, core::BORDER_DEFAULT)?;
+        let eig = corner_strengths(&cur)?;
         let eig = eig.data_typed::<f32>()?;
         self.candidates = local_maxima(eig, w, h);
+        self.sorted = true;
         self.noise = noise_samples(eig, w, h);
         self.glare = glare(pixels, stride, w, h);
         Ok(moved)
     }
 
-    /// Where each point went, by pyramidal Lucas-Kanade: None where it lost it, or didn't come back to where it started
+    /// Where each point went, by pyramidal Lucas-Kanade: None where it lost it, or didn't come back within `fb_max` px of
+    /// where it started
     #[cfg(feature = "use-opencv")]
-    fn klt(prev: &Mat, cur: &Mat, points: &[[f32; 2]]) -> opencv::Result<Vec<Option<[f32; 2]>>> {
+    pub(super) fn klt(prev: &Mat, cur: &Mat, points: &[[f32; 2]], fb_max: f32) -> opencv::Result<Vec<Option<[f32; 2]>>> {
         let pa: Vector<Point2f> = points.iter().map(|p| Point2f::new(p[0], p[1])).collect();
         let mut pb = Vector::<Point2f>::new();
         let mut pa2 = Vector::<Point2f>::new();
@@ -308,7 +347,7 @@ impl Tracker {
         (0..pa.len()).map(|i| {
             let (a, b, a2) = (pa.get(i)?, pb.get(i)?, pa2.get(i)?);
             let fb = ((a2.x - a.x).powi(2) + (a2.y - a.y).powi(2)).sqrt();
-            Ok((st.get(i)? == 1 && st2.get(i)? == 1 && fb < FB_MAX).then_some([b.x, b.y]))
+            Ok((st.get(i)? == 1 && st2.get(i)? == 1 && fb < fb_max).then_some([b.x, b.y]))
         }).collect()
     }
 
@@ -441,8 +480,7 @@ impl Tracker {
         if occupied.iter().all(|o| *o) { return Ok(()); }
         let mut free = vec![true; (w * h) as usize];
         for (x, y, r) in glare(pixels, w as usize, w, h) { clear_disc(&mut free, w, h, x as f64, y as f64, r as f64); }
-        let mut eig = Mat::default();
-        imgproc::corner_min_eigen_val(img, &mut eig, 7, 3, core::BORDER_DEFAULT)?;
+        let eig = corner_strengths(img)?;
         let Some(noise) = noise_level(&noise_samples(eig.data_typed::<f32>()?, w, h)) else { return Ok(()) };
         let floor = DIS_NOISE_MULTIPLE * noise;
         // Detail anywhere around the middle of the cell, not just at it
@@ -469,12 +507,20 @@ impl Tracker {
 }
 
 #[cfg(feature = "use-opencv")]
-fn cv(e: opencv::Error) -> String { format!("OpenCV error: {e}") }
+pub(super) fn cv(e: opencv::Error) -> String { format!("OpenCV error: {e}") }
 
 /// A frame's pixels as a Mat, borrowed: kept no longer than `pixels`
 #[cfg(feature = "use-opencv")]
-fn frame_mat(pixels: &[u8], stride: usize, w: i32, h: i32) -> opencv::Result<Mat> {
+pub(super) fn frame_mat(pixels: &[u8], stride: usize, w: i32, h: i32) -> opencv::Result<Mat> {
     unsafe { Mat::new_size_with_data_unsafe(Size::new(w, h), CV_8UC1, pixels.as_ptr() as *mut std::ffi::c_void, stride) }
+}
+
+/// A frame's corner strengths, as `gpu_klt.wgsl` makes them: cornerMinEigenVal, Sobel 3, block 7
+#[cfg(feature = "use-opencv")]
+pub(super) fn corner_strengths(frame: &Mat) -> opencv::Result<Mat> {
+    let mut eig = Mat::default();
+    imgproc::corner_min_eigen_val(frame, &mut eig, 7, 3, core::BORDER_DEFAULT)?;
+    Ok(eig)
 }
 
 /// A frame's pixels without the padding of its rows
@@ -484,10 +530,10 @@ fn packed(pixels: &[u8], stride: usize, w: usize, h: usize) -> Vec<u8> {
 }
 
 /// Where the GPU's KLT took each point, with `klt`'s forward-backward check
-fn checked(points: &[[f32; 2]], fwd: &[[f32; 4]], bwd: &[[f32; 4]]) -> Vec<Option<[f32; 2]>> {
+pub(super) fn checked(points: &[[f32; 2]], fwd: &[[f32; 4]], bwd: &[[f32; 4]], fb_max: f32) -> Vec<Option<[f32; 2]>> {
     points.iter().zip(fwd.iter().zip(bwd)).map(|(a, (f, b))| {
         let fb = ((b[0] - a[0]).powi(2) + (b[1] - a[1]).powi(2)).sqrt();
-        (f[2] > 0.5 && b[2] > 0.5 && fb < FB_MAX).then_some([f[0], f[1]])
+        (f[2] > 0.5 && b[2] > 0.5 && fb < fb_max).then_some([f[0], f[1]])
     }).collect()
 }
 
@@ -597,7 +643,7 @@ fn noise_level(samples: &[f32]) -> Option<f64> {
 
 /// Takes a disc out of `free` (`w` x `h`): new corners stay out of it. The pixels closer than `r` to the centre, as
 /// good_features_to_track keeps corners apart: one exactly the minimum distance away is fine
-fn clear_disc(free: &mut [bool], w: i32, h: i32, cx: f64, cy: f64, r: f64) {
+pub(super) fn clear_disc(free: &mut [bool], w: i32, h: i32, cx: f64, cy: f64, r: f64) {
     for y in ((cy - r).floor() as i32 + 1).max(0)..=((cy + r).ceil() as i32 - 1).min(h - 1) {
         let half = (r * r - (y as f64 - cy).powi(2)).sqrt();
         let (x0, x1) = (((cx - half).floor() as i32 + 1).max(0), ((cx + half).ceil() as i32 - 1).min(w - 1));
@@ -606,14 +652,14 @@ fn clear_disc(free: &mut [bool], w: i32, h: i32, cx: f64, cy: f64, r: f64) {
 }
 
 #[cfg(all(test, feature = "use-opencv"))]
-mod tests {
+pub(super) mod tests {
     use super::*;
 
-    const W: i32 = 960;
-    const H: i32 = 540;
+    pub(crate) const W: i32 = 960;
+    pub(crate) const H: i32 = 540;
 
     /// Detail like footage has: noise blurred into blobs of a few pixels
-    fn texture() -> Mat {
+    pub(crate) fn texture() -> Mat {
         let mut state = 0x2545_f491_4f6c_dd1du64;
         let noise: Vec<u8> = (0..W * H).map(|_| { state ^= state << 13; state ^= state >> 7; state ^= state << 17; (state >> 56) as u8 }).collect();
         let noise = Mat::new_rows_cols_with_data(H, W, &noise).unwrap().try_clone().unwrap();
@@ -624,7 +670,7 @@ mod tests {
     }
 
     /// The frame turned by `angle` degrees around its middle and moved by `shift`, and that affine transform
-    fn moved(frame: &Mat, angle: f64, shift: (f64, f64)) -> (Mat, [f64; 6]) {
+    pub(crate) fn moved(frame: &Mat, angle: f64, shift: (f64, f64)) -> (Mat, [f64; 6]) {
         let mut m = imgproc::get_rotation_matrix_2d(Point2f::new(W as f32 / 2.0, H as f32 / 2.0), angle, 1.0).unwrap();
         *m.at_2d_mut::<f64>(0, 2).unwrap() += shift.0;
         *m.at_2d_mut::<f64>(1, 2).unwrap() += shift.1;
@@ -633,9 +679,9 @@ mod tests {
         (out, std::array::from_fn(|i| *m.at_2d::<f64>(i as i32 / 3, i as i32 % 3).unwrap()))
     }
 
-    fn apply(m: &[f64; 6], p: (f64, f64)) -> (f64, f64) { (m[0] * p.0 + m[1] * p.1 + m[2], m[3] * p.0 + m[4] * p.1 + m[5]) }
+    pub(crate) fn apply(m: &[f64; 6], p: (f64, f64)) -> (f64, f64) { (m[0] * p.0 + m[1] * p.1 + m[2], m[3] * p.0 + m[4] * p.1 + m[5]) }
 
-    fn invert(m: &[f64; 6]) -> [f64; 6] {
+    pub(crate) fn invert(m: &[f64; 6]) -> [f64; 6] {
         let d = m[0] * m[4] - m[1] * m[3];
         let (a, b, c, e) = (m[4] / d, -m[1] / d, -m[3] / d, m[0] / d);
         [a, b, -(a * m[2] + b * m[5]), c, e, -(c * m[2] + e * m[5])]
@@ -658,13 +704,13 @@ mod tests {
         }
     }
 
-    fn gpu() -> Option<wgpu::Adapter> {
+    pub(crate) fn gpu() -> Option<wgpu::Adapter> {
         let adapter = crate::gpu::wgpu::WgpuWrapper::compute_adapter(None);
         if adapter.is_none() { eprintln!("no GPU, nothing to test"); }
         adapter
     }
 
-    fn median(mut v: Vec<f32>) -> f32 { v.sort_by(f32::total_cmp); v[v.len() / 2] }
+    pub(crate) fn median(mut v: Vec<f32>) -> f32 { v.sort_by(f32::total_cmp); v[v.len() / 2] }
 
     #[test]
     fn gpu_finds_and_tracks_as_opencv() {
@@ -700,8 +746,8 @@ mod tests {
         let points: Vec<[f32; 2]> = expected[..1500].iter().map(|k| [(k & 0xffff) as f32, (k >> 16 & 0xffff) as f32]).collect();
         gpu.submit(b.data_bytes().unwrap(), points.iter().copied()).unwrap();
         gpu.finish().unwrap();
-        let on_gpu = checked(&points, &gpu.fwd, &gpu.bwd);
-        let on_cpu = Tracker::klt(&a, &b, &points).unwrap();
+        let on_gpu = checked(&points, &gpu.fwd, &gpu.bwd, FB_MAX);
+        let on_cpu = Tracker::klt(&a, &b, &points, FB_MAX).unwrap();
         let both: Vec<([f32; 2], [f32; 2], [f32; 2])> = points.iter().zip(on_gpu.iter().zip(&on_cpu)).filter_map(|(p, (g, c))| Some((truth(*p), (*g)?, (*c)?))).collect();
         let kept = (on_gpu.iter().filter(|p| p.is_some()).count(), on_cpu.iter().filter(|p| p.is_some()).count());
         assert!(both.len() * 100 >= kept.0.max(kept.1) * 99, "kept by both {} of {kept:?}", both.len());

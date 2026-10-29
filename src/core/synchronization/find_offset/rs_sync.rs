@@ -2,7 +2,7 @@
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 use super::super::{ PoseEstimator, OpticalFlowPoints, FrameResult, SyncParams };
-use crate::gyro_source::{ Quat64, TimeQuat, GyroSource };
+use crate::gyro_source::{ Quat64, GyroSource };
 use crate::stabilization::{ undistort_points_for_optical_flow, ComputeParams };
 use nalgebra::Vector3;
 use rs_sync::SyncProblem;
@@ -53,6 +53,9 @@ pub struct FindOffsetsRssync<'a> {
     gyro_source: Arc<RwLock<GyroSource>>,
     frame_readout_time: f64,
     sync_points: Vec::<(i64, i64)>,
+    /// In a video cut from recordings, a frame of each sync point: its frames are compared against the motion data of
+    /// that frame's part (`GyroSource::quaternions_of_frame`). `None` without parts
+    sync_frames: Vec<Option<usize>>,
     sync_params: &'a SyncParams,
     is_guess_orient: Arc<AtomicBool>,
 
@@ -85,6 +88,7 @@ impl FindOffsetsRssync<'_> {
             gyro_source: params.gyro.clone(),
             frame_readout_time: frame_readout_time,
             sync_points: Vec::new(),
+            sync_frames: Vec::new(),
             sync_params,
             is_guess_orient: Arc::new(AtomicBool::new(false)),
             current_sync_point: Arc::new(AtomicUsize::new(0)),
@@ -104,6 +108,18 @@ impl FindOffsetsRssync<'_> {
             });
         }
 
+        // A video cut from recordings: a frame pair is of the part its frames are of (`GyroSource::part_of_frame`), found
+        // from their stamps (the pose estimator stamps a frame with its time offset added, `lens_delay::frame_of_stamp`).
+        // A sync point takes the pairs of its first pair's part: one across a cut is of two moments, and the frames of
+        // another part read another part's motion data
+        let offsets = { let gyro = params.gyro.read(); gyro.segment_ranges().is_some().then(|| gyro.file_metadata.read().per_frame_time_offsets.clone()) };
+        let pair_of_one_part = |a: i64, b: i64| -> Option<(usize, usize)> {
+            let frame = |ts: i64| super::super::lens_delay::frame_of_stamp(ts, offsets.as_deref()?, params);
+            let (fa, fb) = (frame(a)?, frame(b)?);
+            let gyro = params.gyro.read();
+            if gyro.frames_of_one_part(fa, fb) { Some((fa, gyro.part_of_frame(fa)?)) } else { None }
+        };
+
         for range in matched_points {
             if range.len() < 2 {
                 log::warn!("Not enough data for sync! range.len: {}", range.len());
@@ -112,13 +128,19 @@ impl FindOffsetsRssync<'_> {
 
             let mut from_ts = -1;
             let mut to_ts = 0;
+            let mut first: Option<(usize, usize)> = None; // a frame of the sync point's part, and the part
             for (((a_t, a_p), (b_t, b_p)), frame_size) in range {
+                if offsets.is_some() {
+                    let Some((frame, part)) = pair_of_one_part(a_t, b_t) else { continue };
+                    if first.get_or_insert((frame, part)).1 != part { continue; }
+                }
                 if from_ts == -1 {
                     from_ts = a_t;
                 }
                 to_ts = b_t;
-                let a = undistort_points_for_optical_flow(&a_p, from_ts, &params, frame_size);
-                let b = undistort_points_for_optical_flow(&b_p, to_ts,   &params, frame_size);
+                // Each frame with its own lens: a zoom changes it from frame to frame
+                let a = undistort_points_for_optical_flow(&a_p, a_t, &params, frame_size);
+                let b = undistort_points_for_optical_flow(&b_p, b_t, &params, frame_size);
 
                 let mut points3d_a = Vec::new();
                 let mut points3d_b = Vec::new();
@@ -146,7 +168,12 @@ impl FindOffsetsRssync<'_> {
 
                 ret.sync.set_track_result(a_t, &tss_a, &tss_b, &points3d_a, &points3d_b);
             }
+            if from_ts == -1 {
+                log::warn!("Not enough data for sync! No frame pair of one part of the video");
+                continue;
+            }
             ret.sync_points.push((from_ts, to_ts));
+            ret.sync_frames.push(first.map(|f| f.0));
 
         }
         ret
@@ -156,12 +183,22 @@ impl FindOffsetsRssync<'_> {
         self.is_guess_orient.store(false, SeqCst);
 
         let mut offsets = Vec::new();
-        {
+        let whole = self.sync_frames.iter().all(Option::is_none);
+        if whole {
             let gyro = self.gyro_source.read();
-            set_quats(&mut self.sync, &gyro.quaternions);
+            set_quats(&mut self.sync, gyro.quaternions.iter());
         }
 
-        for (from_ts, to_ts) in &self.sync_points {
+        for ((from_ts, to_ts), frame) in self.sync_points.iter().zip(&self.sync_frames) {
+            // A video cut from recordings: the motion data of the sync point's part alone, which rs-sync reads as the part
+            // trimmed on its own has it, its ends included (the next part's, right after them, is of another moment)
+            if !whole {
+                let gyro = self.gyro_source.read();
+                match frame {
+                    Some(frame) => set_quats(&mut self.sync, gyro.quaternions_of_frame(*frame)),
+                    None => set_quats(&mut self.sync, gyro.quaternions.iter()),
+                }
+            }
 
             let presync_step = 3.0;
             let presync_radius = self.sync_params.search_size;
@@ -205,17 +242,28 @@ impl FindOffsetsRssync<'_> {
             clone_source.imu_transforms.imu_orientation = Some(orient.to_string());
             clone_source.apply_transforms();
 
-            set_quats(&mut self.sync, &clone_source.quaternions);
-
-            let total_cost: f64 = self.sync_points.iter().map(|(from_ts, to_ts)| {
-                self.sync.pre_sync(
+            let cost = |sync: &SyncProblem, (from_ts, to_ts): &(i64, i64)| {
+                sync.pre_sync(
                     -self.sync_params.initial_offset / 1000.0,
                     *from_ts,
                     *to_ts,
                     3.0 / 1000.0,
                     self.sync_params.search_size / 1000.0
                 ).unwrap_or((0.0,0.0))
-            }).map(|v| {v.0}).sum();
+            };
+            let total_cost: f64 = if self.sync_frames.iter().all(Option::is_none) {
+                set_quats(&mut self.sync, clone_source.quaternions.iter());
+                self.sync_points.iter().map(|p| cost(&self.sync, p)).map(|v| {v.0}).sum()
+            } else {
+                // Each sync point against its part's motion data, as `full_sync`
+                self.sync_points.iter().zip(&self.sync_frames).map(|(p, frame)| {
+                    match frame {
+                        Some(frame) => set_quats(&mut self.sync, clone_source.quaternions_of_frame(*frame)),
+                        None => set_quats(&mut self.sync, clone_source.quaternions.iter()),
+                    }
+                    cost(&self.sync, p)
+                }).map(|v| {v.0}).sum()
+            };
 
             self.current_orientation.fetch_add(1, SeqCst);
 
@@ -230,7 +278,7 @@ impl FindOffsetsRssync<'_> {
             if to_ts > from_ts {
                 let l = sync_results.read();
                 for (_ts, x) in l.range(from_ts..to_ts) {
-                    if let Ok(of) = x.optical_flow.try_borrow() {
+                    if let Some(of) = x.optical_flow.try_read() {
                         if let Some(Some(opt_pts)) = of.get(&1) {
                             points_per_range.push((opt_pts.clone(), x.frame_size));
                         }
@@ -244,7 +292,7 @@ impl FindOffsetsRssync<'_> {
 
 }
 
-fn set_quats(sync: &mut SyncProblem, source_quats: &TimeQuat) {
+fn set_quats<'q>(sync: &mut SyncProblem, source_quats: impl IntoIterator<Item = (&'q i64, &'q Quat64)>) {
     let mut quats = Vec::new();
     let mut timestamps = Vec::new();
     let rotation = *Quat64::from_scaled_axis(Vector3::new(PI, 0.0, 0.0)).quaternion();

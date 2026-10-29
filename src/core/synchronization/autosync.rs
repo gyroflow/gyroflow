@@ -8,8 +8,9 @@ use parking_lot::RwLock;
 
 use crate::StabilizationManager;
 use crate::stabilization::ComputeParams;
-use super::PoseEstimator;
-use super::SyncParams;
+use super::{ PoseEstimator, SyncParams, OpticalFlowMethod, OFPyrLK };
+use super::optical_motion::{ PairKlt, KltDevice };
+use super::optical_motion::OpticalMotionAnalysis;
 
 /// What a finished process delivers, depending on its mode
 pub enum AutosyncResult {
@@ -47,9 +48,15 @@ pub struct AutosyncProcess {
     finished_cb: Option<Arc<Box<dyn Fn(AutosyncResult) + Send + Sync + 'static>>>,
 
     sync_params: SyncParams,
+    /// Where KLT tracks, for an optical flow method that uses it
+    klt: Option<Arc<PairKlt>>,
     /// `estimate_lens_delay`: log focal length per frame of the metadata without any delay applied (`NaN` where
     /// unknown), the curve the analyzed windows were picked on and the estimate is aligned against
     lens_delay_meta_ln: Vec<f64>,
+    /// `synchronize` by the optical analysis (offset method 3, `find_offset::bands`): the frames go to its tracking
+    /// instead of to the pose estimator. None again once finished, or after it failed
+    band_sync: bool,
+    optical: parking_lot::Mutex<Option<OpticalMotionAnalysis>>,
 
     thread_pool: rayon::ThreadPool,
 }
@@ -64,6 +71,7 @@ impl AutosyncProcess {
         let org_duration_ms = params.duration_ms;
         let fps_scale = params.fps_scale;
         let duration_ms = params.get_scaled_duration_ms();
+        let klt_device = KltDevice::for_processing(params.current_device);
 
         let SyncParams {
             search_size,
@@ -74,6 +82,15 @@ impl AutosyncProcess {
 
         if let Some(scale) = &fps_scale {
             time_per_syncpoint *= scale;
+        }
+        // Offset method 3 tracks every frame of a sync point, and needs them long enough for its tracks
+        if mode == "synchronize" && sync_params.offset_method == 3 && stab.gyro.read().has_motion() {
+            let min = super::find_offset::bands::min_window_ms(org_fps);
+            if time_per_syncpoint < min {
+                log::info!("Optical sync: {time_per_syncpoint:.0} ms per sync point is too short for its tracks, {min:.0} ms instead");
+                time_per_syncpoint = min;
+            }
+            every_nth_frame = 1;
         }
         let mut frame_count = ((timestamps_fract.len() as f64 * (time_per_syncpoint / 1000.0) * org_fps).ceil() as usize).min(params.frame_count) / every_nth_frame as usize;
 
@@ -88,6 +105,35 @@ impl AutosyncProcess {
             );
             ((range.0 * 1000.0).round() as i64, (range.1 * 1000.0).round() as i64)
         }).collect();
+
+        // The frames of a sync point of a video cut from recordings are those of its segment: across a segment boundary
+        // the video and the motion jump to another moment. A window that reaches past the segment of the time asked for
+        // is moved into it, with its length as far as the segment has it: the offsets are fitted per segment, and a window
+        // cut short can be too short to be measured (offset method 3 lengthens its windows for its tracks). A frame is
+        // taken by its time in the file (the optical analysis, `OpticalMotionAnalysis::feed_frame`) or by its time with
+        // its time offset (the pose estimator, `feed_frame`), so a segment's frames are those between the midpoints to the
+        // frames around it, by both times
+        {
+            let params = stab.params.read();
+            let gyro = stab.gyro.read();
+            let md = gyro.file_metadata.read();
+            if let Some(segments) = md.trim_segments.as_ref().filter(|s| s.len() > 1) {
+                let scale = params.get_fps_scale();
+                // Frame `k`'s time in the file (ms), and with its time offset
+                let at = |k: usize| { let t = params.timestamp_at_frame(k as i32); (t * scale, (t + md.frame_time_offset(k)) * scale) };
+                for (range, x) in ranges_us.iter_mut().zip(timestamps_fract) {
+                    let r = segments.segment_of_video_us((x * org_duration_ms * 1000.0).round() as i64);
+                    let frames = segments.frames(r);
+                    let (first, last) = (at(frames.start), at(frames.end - 1));
+                    let from = if r == 0 { 0.0 } else { let p = at(frames.start - 1); ((p.0 + first.0) / 2.0).max((p.1 + first.1) / 2.0) };
+                    let to = if r + 1 == segments.len() { org_duration_ms } else { let n = at(frames.end); ((last.0 + n.0) / 2.0).min((last.1 + n.1) / 2.0) };
+                    let (from, to) = ((from * 1000.0).ceil() as i64, (to * 1000.0).floor() as i64);
+                    let len = (range.1 - range.0).min(to - from).max(0);
+                    let start = range.0.clamp(from, (to - len).max(from));
+                    *range = (start, start + len);
+                }
+            }
+        }
 
         if mode == "synchronize" && !stab.gyro.read().has_motion() {
             // If no gyro data in file, analyze the entire video
@@ -110,7 +156,7 @@ impl AutosyncProcess {
             comp_params.fovs.clear();
             comp_params.minimal_fovs.clear();
             lens_delay_meta_ln = crate::smoothing::focal_length::compute_base_curve(&comp_params).iter().map(|x| x.ln()).collect();
-            let windows = super::lens_delay::zoom_ranges(&lens_delay_meta_ln, scaled_fps, 1500.0, 3);
+            let windows = super::lens_delay::zoom_ranges(&lens_delay_meta_ln, &comp_params, 1500.0, 3);
             if windows.is_empty() {
                 log::warn!("Lens metadata delay: the lens metadata holds no zoom to estimate it from");
                 return Err(AutosyncError::NoZoomInMetadata);
@@ -125,6 +171,19 @@ impl AutosyncProcess {
             (*f as f64 / fps_scale.unwrap_or(1.0)) as i64,
             (*t as f64 / fps_scale.unwrap_or(1.0)) as i64)
         ).collect();
+
+        // Offset method 3 for a file with motion data: the optical analysis tracks the sync points. Where it can't be
+        // set up (DIS-only builds have none, a build without OpenCV no CPU tracker), rs-sync instead
+        let mut sync_params = sync_params;
+        let optical = if mode == "synchronize" && sync_params.offset_method == 3 && stab.gyro.read().has_motion() {
+            let ranges_ms = ranges_us.iter().map(|(a, b)| (*a as f64 / 1000.0, *b as f64 / 1000.0)).collect();
+            OpticalMotionAnalysis::for_sync(stab, ranges_ms, cancel_flag.clone()).map_err(|e| log::warn!("Optical sync can't be set up, rs-sync instead: {e}")).ok()
+        } else {
+            None
+        };
+        let band_sync = optical.is_some();
+        // Without motion data the pose estimator's own path, for which method 3 is rs-sync
+        if sync_params.offset_method == 3 && !band_sync { sync_params.offset_method = 2; }
 
         let estimator = stab.pose_estimator.clone();
 
@@ -146,12 +205,19 @@ impl AutosyncProcess {
             })
             .build().unwrap();
 
+        // Its GPU is looked for and set up while the decoder starts. Not for the optical analysis, which has its own: a
+        // second set-up at the same time made a second device, and one hung in the driver held the other's lock
+        let klt = (!band_sync && OpticalFlowMethod::uses_klt(sync_params.of_method as u32)).then(|| Arc::new(PairKlt::new(klt_device, OFPyrLK::MAX_FEATURES)));
+
         Ok(Self {
             frame_count,
             org_fps,
             scaled_fps,
             sync_params,
+            klt,
             lens_delay_meta_ln,
+            band_sync,
+            optical: parking_lot::Mutex::new(optical),
             mode,
             ranges_us,
             scaled_ranges_us,
@@ -172,12 +238,14 @@ impl AutosyncProcess {
     }
 
     pub fn feed_frame(&self, mut timestamp_us: i64, frame_no: usize, mut width: u32, height: u32, stride: usize, pixels: &[u8]) {
+        if self.band_sync { return self.feed_optical(timestamp_us, width, height, stride, pixels); }
         let img = PoseEstimator::yuv_to_gray(width, height, stride as u32, pixels).map(Arc::new);
         if width > stride as u32 {
             width = stride as u32;
         }
 
         let method = self.sync_params.of_method as u32;
+        let klt = self.klt.clone();
         let estimator = self.estimator.clone();
         let total_detected_frames = self.total_detected_frames.clone();
         let total_read_frames = self.total_read_frames.clone();
@@ -194,7 +262,7 @@ impl AutosyncProcess {
 
         {
             let compute_params = compute_params.read();
-            let frame = crate::frame_at_timestamp(timestamp_us as f64 / 1000.0, compute_params.scaled_fps) as usize;
+            let frame = compute_params.frame_at_timestamp(timestamp_us as f64 / 1000.0).max(0) as usize;
             timestamp_us += (compute_params.gyro.read().file_metadata.read().frame_time_offset(frame) * 1000.0).round() as i64;
         }
 
@@ -207,7 +275,7 @@ impl AutosyncProcess {
                     return;
                 }
                 if let Some(img) = img {
-                    estimator.detect_features(frame_no, timestamp_us, img, width, height, method);
+                    estimator.detect_features(frame_no, timestamp_us, img, width, height, method, klt);
                     total_detected_frames.fetch_add(1, SeqCst);
 
                     if needs_poses && frame_no % 7 == 0 {
@@ -224,6 +292,67 @@ impl AutosyncProcess {
                     log::warn!("Failed to get image {:?}", img);
                 }
             });
+        }
+    }
+
+    /// Offset method 3: the frame to the optical analysis, in decoding order on the caller's thread (it tracks each frame
+    /// from the one before), at about the width it's made for
+    fn feed_optical(&self, timestamp_us: i64, width: u32, height: u32, stride: usize, pixels: &[u8]) {
+        if !self.cancel_flag.load(Relaxed) {
+            let mut optical = self.optical.lock();
+            if let Some(analysis) = optical.as_mut() {
+                let fed = match super::find_offset::bands::shrink(width, height, stride, pixels) {
+                    Some((w, h, small)) => analysis.feed_frame(timestamp_us, w, h, w as usize, &small),
+                    None => analysis.feed_frame(timestamp_us, width, height, stride, pixels),
+                };
+                if let Err(e) = fed {
+                    log::error!("Optical sync: {e}");
+                    *optical = None;
+                }
+            }
+        }
+        // Read and done at once: `finished_feeding_frames` has nothing to wait for
+        self.total_read_frames.fetch_add(1, SeqCst);
+        let d = self.total_detected_frames.fetch_add(1, SeqCst) + 1;
+        if let Some(cb) = &self.progress_cb {
+            let t = self.frame_count.max(d);
+            cb((d as f64 / t.max(1) as f64) * 0.58, d, t);
+        }
+    }
+
+    /// Offset method 3: the offsets from what the optical analysis tracked, also from the negated initial offset when
+    /// that's asked for (the one with more sync points found wins, then the one that fits better)
+    fn finish_band_sync(&self) {
+        let total = self.total_detected_frames.load(SeqCst);
+        let progress = |p: f64| if let Some(cb) = &self.progress_cb { cb(0.6 + 0.4 * p, total, total) };
+        progress(0.0);
+        let analysis = self.optical.lock().take();
+        let measured = analysis.filter(|_| !self.cancel_flag.load(SeqCst)).map(|a| a.finish());
+        let offsets = match measured {
+            Some(Ok(meas)) => {
+                use super::find_offset::bands::find_offsets;
+                let frame_ms = 1000.0 / self.scaled_fps.max(1e-9);
+                let check_negative = self.sync_params.initial_offset_inv && self.sync_params.initial_offset.abs() > 1.0;
+                let share = if check_negative { 0.5 } else { 1.0 };
+                let offsets = find_offsets(&meas, &self.scaled_ranges_us, &self.sync_params, frame_ms, |p| progress(p * share), self.cancel_flag.clone());
+                if check_negative {
+                    let mut sync_params = self.sync_params.clone();
+                    sync_params.initial_offset = -sync_params.initial_offset;
+                    let negative = find_offsets(&meas, &self.scaled_ranges_us, &sync_params, frame_ms, |p| progress(0.5 + p * 0.5), self.cancel_flag.clone());
+                    let cost = |o: &[(f64, f64, f64)]| o.iter().map(|x| x.2).sum::<f64>();
+                    if negative.len() > offsets.len() || (negative.len() == offsets.len() && cost(&negative) < cost(&offsets)) { negative } else { offsets }
+                } else {
+                    offsets
+                }
+            },
+            Some(Err(e)) => { log::warn!("Optical sync: {e}"); Vec::new() },
+            None => Vec::new(),
+        };
+        if let Some(cb) = &self.finished_cb {
+            cb(AutosyncResult::Offsets(offsets));
+        }
+        if let Some(cb) = &self.progress_cb {
+            cb(1.0, total, total);
         }
     }
 
@@ -258,6 +387,8 @@ impl AutosyncProcess {
             return;
         }
 
+        if self.band_sync { return self.finish_band_sync(); }
+
         self.estimator.process_detected_frames(self.org_fps, self.scaled_fps, &self.compute_params.read());
         self.estimator.recalculate_gyro_data(self.org_fps, true);
         self.estimator.cache_optical_flow(if offset_method == 1 { 2 } else { 1 });
@@ -268,20 +399,21 @@ impl AutosyncProcess {
         if self.mode == "synchronize" && !self.compute_params.read().gyro.read().has_motion() {
             // If no gyro data in file, set the computed optical flow as gyro data
             let compute_params = self.compute_params.write();
-            let mut gyro = compute_params.gyro.write();
-
-            gyro.file_metadata.set_raw_imu(self.estimator.estimated_gyro.read().values().cloned().collect::<Vec<_>>());
-            gyro.apply_transforms();
+            let estimated = self.estimator.estimated_gyro.read().values().cloned().collect::<Vec<_>>();
+            compute_params.gyro.write().file_metadata.set_raw_imu(estimated);
+            // The app's motion data: integrated with its lock released
+            crate::gyro_source::GyroSource::integrate_shared(&compute_params.gyro, crate::gyro_source::Integration::ApplyTransforms);
             /*gyro.file_metadata.quaternions = self.estimator.estimated_quats.read().clone();
             gyro.integration_method = 0;
             gyro.integrate();*/
+            let duration_ms = compute_params.gyro.read().duration_ms;
 
             let timestamps_fract = [0.5];
             let time_per_syncpoint = 500.0;
 
             scaled_ranges_us = Cow::Owned(timestamps_fract.into_iter().map(|x| (
-                (((x * gyro.duration_ms) - (time_per_syncpoint / 2.0)).max(0.0)              * 1000.0 / self.fps_scale.unwrap_or(1.0)).round() as i64,
-                (((x * gyro.duration_ms) + (time_per_syncpoint / 2.0)).min(gyro.duration_ms) * 1000.0 / self.fps_scale.unwrap_or(1.0)).round() as i64
+                (((x * duration_ms) - (time_per_syncpoint / 2.0)).max(0.0)         * 1000.0 / self.fps_scale.unwrap_or(1.0)).round() as i64,
+                (((x * duration_ms) + (time_per_syncpoint / 2.0)).min(duration_ms) * 1000.0 / self.fps_scale.unwrap_or(1.0)).round() as i64
             )).collect());
         }
 

@@ -24,16 +24,36 @@ pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64
 
     let keys: Vec<i64> = estimator.sync_results.read().keys().copied().collect();
 
+    // A video cut from recordings: the frames of a pair, from their stamps (the pose estimator stamps a frame with its
+    // time offset added, `lens_delay::frame_of_stamp`). A sync point takes the pairs of its first pair's part, and each
+    // frame is looked up in its own part (`GyroSource::lookup_for_frame`): looked up by a time shifted by the offset
+    // tried, a frame near a cut would read the next frame's part, of another moment
+    let offsets = { let gyro = params.gyro.read(); gyro.segment_ranges().is_some().then(|| gyro.file_metadata.read().per_frame_time_offsets.clone()) };
+    let frames_of_pair = |a: i64, b: i64| -> Option<(usize, usize, Option<usize>)> {
+        let frame = |ts: i64| super::super::lens_delay::frame_of_stamp(ts, offsets.as_deref()?, &params);
+        let (fa, fb) = (frame(a)?, frame(b)?);
+        let gyro = params.gyro.read();
+        gyro.frames_of_one_part(fa, fb).then(|| (fa, fb, gyro.part_of_frame(fa)))
+    };
+
     for (i, (from_ts, to_ts)) in ranges.iter().enumerate() {
         if cancel_flag.load(Relaxed) { break; }
         progress_cb(i as f64 / ranges_len);
 
         let mut matched_points = Vec::new();
+        let (mut matched_frames, mut part) = (Vec::new(), None);
         for ts in &keys {
             if (*from_ts..*to_ts).contains(ts) {
                 match estimator.get_of_lines_for_timestamp(&ts, 0, 1.0, next_frame_no, true) {
                     (Some(lines), Some(_frame_size)) => {
                         if !lines.0.1.is_empty() && lines.0.1.len() == lines.1.1.len() {
+                            if offsets.is_some() {
+                                let Some((fa, fb, p)) = frames_of_pair(lines.0.0, lines.1.0) else { continue };
+                                if *part.get_or_insert(p) != p { continue; }
+                                matched_frames.push((Some(fa), Some(fb)));
+                            } else {
+                                matched_frames.push((None, None));
+                            }
                             matched_points.push(lines);
                         } else {
                             log::warn!("Invalid point pairs {} {}", lines.0.1.len(), lines.1.1.len());
@@ -56,14 +76,14 @@ pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64
                 params_ref = _params2.as_ref().unwrap();
             }
 
-            for ((ts, pts1), (next_ts, pts2)) in &matched_points {
+            for (((ts, pts1), (next_ts, pts2)), (frame1, frame2)) in matched_points.iter().zip(&matched_frames) {
                 let timestamp_ms  = *ts as f64 / 1000.0;
                 let timestamp_ms2 = *next_ts as f64 / 1000.0;
 
                 // No field clamp: these are tracked image features, and a feature the lens has no image of
                 // has to drop out of the search rather than come back as a stand-in at the edge of the field
-                let undistorted_points1 = stabilization::undistort_points_with_rolling_shutter(&pts1, timestamp_ms - offs, None, params_ref, 1.0, false, false);
-                let undistorted_points2 = stabilization::undistort_points_with_rolling_shutter(&pts2, timestamp_ms2 - offs, None, params_ref, 1.0, false, false);
+                let undistorted_points1 = stabilization::undistort_points_with_rolling_shutter(&pts1, timestamp_ms - offs, *frame1, params_ref, 1.0, false, false);
+                let undistorted_points2 = stabilization::undistort_points_with_rolling_shutter(&pts2, timestamp_ms2 - offs, *frame2, params_ref, 1.0, false, false);
 
                 let mut distances = Vec::with_capacity(undistorted_points1.len());
                 for (p1, p2) in undistorted_points1.iter().zip(undistorted_points2.iter()) {
