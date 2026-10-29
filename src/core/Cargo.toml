@@ -80,6 +80,11 @@ rustfft = "6.4.1"
 exr = "1.74"
 opencv = { version = "0.101", default-features = false, features = [ "calib3d", "features2d", "imgproc", "optflow", "clang-runtime" ], optional = true } #"imgcodecs","objdetect","sfm",
 median = "0.3"
+burn-store = { version = "0.22", default-features = false, features = ["std"], optional = true }
+burn-cubecl = { version = "0.22", optional = true }
+cubecl = { version = "0.11", optional = true }
+sha2 = { version = "0.10", optional = true }
+ureq = { version = "3.3", optional = true }
 
 wgpu = { version = "30", features = ["spirv", "naga-ir"] }
 
@@ -88,6 +93,15 @@ objc2 = "0.6"
 objc2-metal = "0.3"
 objc2-core-foundation = "0.3"
 objc2-foundation = "0.3"
+
+# gmflow (feature use-burn) runs on the GPU only: Vulkan (SPIR-V kernels), or Metal on Apple systems with WGSL kernels,
+# whose matmuls and convolutions use the GPU's matrix units through wgpu's cooperative matrices (gmflow/coop.rs). Without
+# burn's native MSL (its metal feature): on the macOS 15 CI GPU WGSL with them ran a pass in 0.86 to 0.90 s, native MSL
+# in 1.05 to 1.14 s
+[target.'cfg(not(target_vendor = "apple"))'.dependencies]
+burn = { version = "0.22", default-features = false, features = ["std", "autotune", "fusion", "cubecl", "extension", "vulkan"], optional = true }
+[target.'cfg(target_vendor = "apple")'.dependencies]
+burn = { version = "0.22", default-features = false, features = ["std", "autotune", "fusion", "cubecl", "extension", "wgpu"], optional = true }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.62"
@@ -100,6 +114,7 @@ features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemSer
 default = []
 use-opencl = ["ocl", "ocl-interop"]
 use-opencv = ["opencv"]
+use-burn = ["dep:burn", "dep:burn-store", "dep:burn-cubecl", "dep:cubecl", "dep:sha2", "dep:ureq"]
 bundle-lens-profiles = []
 cache-gyro-metadata = []
 

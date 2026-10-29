@@ -922,9 +922,20 @@ impl OpticalMotionAnalysis {
             KltDevice::Cpu if !cfg!(feature = "use-opencv") && for_sync => KltDevice::Gpu(None),
             d => d,
         };
+        // gmflow downloads its model on first use and needs a GPU: both settled here, before the first frame,
+        // where a failure can say why and the wait isn't one frame that never ends
+        #[cfg(feature = "use-burn")]
+        if tracking == TrackingMethod::Gmflow {
+            let device = crate::synchronization::optical_flow::GmflowDenseFlow::prepare().map_err(|e| format!("gmflow: {e}"))?;
+            ::log::info!("Optical analysis with gmflow on {device}");
+        }
+        let mut tracker = tracker::Tracker::new(MAX_POINTS, tracking, device)?;
+        // A frame of gmflow is a pass of the model: cancelling waits for one at most
+        let (cancel, optical_generation) = (cancel_flag.clone(), stab.optical_generation.clone());
+        tracker.set_stop(Box::new(move || cancel.load(Relaxed) || optical_generation.load(SeqCst) != generation));
         Ok(Self {
             fps_scale, scaled_fps, quats_checksum, context_checksum,
-            tracker: tracker::Tracker::new(MAX_POINTS, tracking, device)?,
+            tracker,
             tracking,
             last: None,
             tracks: Default::default(),
