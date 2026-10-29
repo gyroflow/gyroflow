@@ -104,6 +104,16 @@ impl LensProfile {
     }
 
     pub fn load_from_data(&mut self, data: &str) -> std::result::Result<(), crate::GyroflowCoreError> {
+        let trimmed = data.trim_start();
+        if trimmed.starts_with('<') {
+            let profiles = crate::lensfun::parse_xml(data, "lensfun.xml");
+            if let Some(first) = profiles.into_iter().next() {
+                *self = first;
+                self.official = true;
+                return Ok(());
+            }
+            return Err(crate::GyroflowCoreError::InvalidData);
+        }
         *self = Self::from_json(&data)?;
 
         // Trust lens profiles loaded from file
