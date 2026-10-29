@@ -83,8 +83,12 @@ struct Opts {
     optical_per_frame: bool,
 
     /// how the optical analysis follows the points: "klt" (default, corners) or "dis" (dense optical flow, for low texture like sky or water; slower) (implies --optical-correction)
+    /// after the optical analysis, also correct the residual it leaves per group of pixels (a local mesh, off by default), eg. --optical-residual on:0.8 (implies --optical-correction)
     #[argh(option)]
     optical_tracking: Option<String>,
+    /// --optical-residual on/off:strength: after the optical analysis, also correct the residual it leaves, with a
+    /// local per-frame mesh (off by default)
+    optical_residual: Option<String>,
 
     /// export project file instead of rendering: 1 - default project, 2 - with gyro data, 3 - with processed gyro data, 4 - video + project file
     #[argh(option, default = "0")]
@@ -296,6 +300,16 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             }
             if opts.ignore_file_motion {
                 sync["ignore_file_motion"] = true.into();
+            }
+            if let Some(residual) = &opts.optical_residual {
+                let (on, strength) = match residual.split_once(':') {
+                    Some(("on", s)) => (true, s.parse::<f64>().unwrap_or(1.0)),
+                    Some(("off", _)) | None if residual == "off" => (false, 1.0),
+                    None if residual == "on" => (true, 1.0),
+                    _ => { log::error!("Invalid --optical-residual value {residual}. Expected \"on[:strength]\" or \"off\"."); std::process::exit(2); }
+                };
+                sync["optical_residual_enabled"] = on.into();
+                if on { sync["optical_residual_strength"] = strength.clamp(0.0, 1.0).into(); }
             }
         }
 

@@ -345,8 +345,12 @@ impl FrameTransform {
         let gyro = params.gyro.read().clone();
         let file_metadata = gyro.file_metadata.read();
 
-        // Undistorting mesh of the frame, empty when it has none (the kernel flags say so, the buffer is then not uploaded)
-        let mesh_data = file_metadata.mesh_correction.kernel_buffer(frame);
+        // Undistorting mesh of the frame, empty when it has none (the kernel flags say so, the buffer is then not uploaded).
+        // The residual mesh only ever fills an empty slot: the camera's own mesh (Sony IBIS) always wins
+        let mut mesh_data = file_metadata.mesh_correction.kernel_buffer(frame);
+        if mesh_data.is_empty() {
+            mesh_data = crate::synchronization::optical_motion::residual::compose_residual_mesh(mesh_data, frame, &file_metadata.residual_mesh);
+        }
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(&params, true, timestamp_ms, &file_metadata);

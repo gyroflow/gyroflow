@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
-mod file_metadata;
+pub mod file_metadata;
 mod imu_transforms;
 mod sony;
 mod canon;
@@ -795,6 +795,7 @@ impl GyroSource {
             camera_stab_data: Vec::new(),
             mesh_correction:  Default::default(),
             legacy_mesh_correction: Vec::new(),
+            residual_mesh:    None,
             lens_breathing:   Vec::new(),
             lens_variation:   Default::default(),
             trim_segments,
