@@ -8,6 +8,7 @@ use std::sync::Arc;
 mod akaze;        pub use self::akaze::*;
 mod opencv_dis;   pub use opencv_dis::*;
 mod pyrlk;        pub use pyrlk::*;
+mod gmflow;       pub use self::gmflow::*;
 
 #[enum_delegate::register]
 pub trait OpticalFlowTrait {
@@ -24,6 +25,7 @@ pub enum OpticalFlowMethod {
     OFAkaze(OFAkaze),
     OFPyrLK(OFPyrLK),
     OFOpenCVDis(OFOpenCVDis),
+    OFGmflow(OFGmflow),
 }
 impl OpticalFlowMethod {
     /// Whether `method` tracks with KLT, `OFPyrLK`: then `detect_features` takes the `PairKlt` of the synchronization.
@@ -37,6 +39,7 @@ impl OpticalFlowMethod {
             0 => Self::OFAkaze(OFAkaze::detect_features(timestamp_us, img, width, height)),
             _ if Self::uses_klt(method) => Self::OFPyrLK(OFPyrLK::detect_features(timestamp_us, img, width, height, klt)),
             2 => Self::OFOpenCVDis(OFOpenCVDis::detect_features(timestamp_us, img, width, height)),
+            3 => Self::OFGmflow(OFGmflow::detect_features(timestamp_us, img, width, height)),
             _ => { log::error!("Unknown OF method {method}", ); Self::OFAkaze(OFAkaze::detect_features(timestamp_us, img, width, height)) }
         }
     }

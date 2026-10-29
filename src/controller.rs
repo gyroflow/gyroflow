@@ -317,6 +317,7 @@ pub struct Controller {
     nle_plugins_result: qt_signal!(command: QString, result: QString),
 
     has_per_frame_lens_data: qt_method!(fn(&self) -> bool),
+    has_ai_optical_flow: qt_method!(fn(&self) -> bool),
     export_stmap: qt_method!(fn(&self, folder_url: QUrl, per_frame: bool)),
     stmap_progress: qt_signal!(progress: f64, ready: usize, total: usize),
 
@@ -1743,7 +1744,7 @@ impl Controller {
         let refit = self.stabilizer.set_optical_correction_per_frame(per_frame);
         self.refit_optical_correction(refit);
     }
-    /// "klt" or "dis", for the next analysis
+    /// "klt", "dis" or "gmflow", for the next analysis
     fn set_optical_tracking(&mut self, method: String) {
         if self.stabilizer.set_optical_tracking(&method) {
             self.optical_correction_changed();
@@ -2929,6 +2930,7 @@ impl Controller {
         let md = gyro.file_metadata.read();
         md.camera_stab_data.len() > 1 || md.lens_geometry_count() > 1 || md.lens_positions.len() > 1 || md.has_mesh_correction()
     }
+    fn has_ai_optical_flow(&self) -> bool { cfg!(feature = "ai-optical-flow") }
     fn export_stmap(&self, folder_url: QUrl, per_frame: bool) {
         let folder_url = util::qurl_to_encoded(folder_url);
         let frame_count = self.stabilizer.params.read().frame_count;
