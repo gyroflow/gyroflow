@@ -85,6 +85,7 @@ burn-cubecl = { version = "0.22", optional = true }
 cubecl = { version = "0.11", optional = true }
 sha2 = { version = "0.10", optional = true }
 ureq = { version = "3.3", optional = true }
+roxmltree = "0.20"
 
 wgpu = { version = "30", features = ["spirv", "naga-ir"] }
 
