@@ -35,6 +35,8 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, frame: usize, width:
         }
     }
 
+    // What the overlays take a while to place, placed with the stabilization not locked
+    stab.prepare_overlays(timestamp_us);
     if let Some(mut undist) = stab.stabilization.try_write() {
         undist.ensure_stab_data_at_timestamp::<RGBA8>(timestamp_us, Some(frame), buffers, true);
         stab.draw_overlays(&mut undist, timestamp_us);

@@ -828,17 +828,24 @@ impl GyroSource {
             // A video cut from recordings fills each part's frames from its own (`PerFrame::interpolate_within`): another
             // part's frames are of another moment, or another recording
             let part_frames: Vec<std::ops::Range<usize>> = md.trim_segments.as_ref().map(|t| (0..t.len()).map(|r| t.frames(r)).collect()).unwrap_or_default();
+            // The video's frames are looked up on the timeline the load puts the video on: its file's times over the frame
+            // rate scale of an off-speed recording, whose motion data is timed by its capture (`capture_frame_rate`, set
+            // with `override_video_fps` right after this)
+            let video_time_scale = crate::StabilizationManager::capture_frame_rate(md.frame_rate, fps, None)
+                .filter(|_| fps > 0.0).map(|rate| rate / fps)
+                .filter(|scale| StabilizationParams::is_valid_fps_scale(*scale)).unwrap_or(1.0);
             for (info, &frame) in samples.iter().zip(&sample_frames) {
                 if let Some(ref tag_map) = info.tag_map {
                     // --------------------------------- Timing -------------------------------
                     // One source for all frames: the format's own timing, else the camera's
                     if let Some(frame) = frame {
                         let offset = if is_gyroflow_proto {
-                            // The time the video presents the frame at, which it's looked up at: by its frame times, else `k / fps`
+                            // The time the video presents the frame at, which it's looked up at: by its frame times, else `k / fps`,
+                            // on the timeline it's looked up on
                             let frame_i32 = i32::try_from(frame).unwrap_or(i32::MAX);
                             let presented_ms = match &options.video_frame_times {
-                                Some(times) => Some(times.timestamp_at_frame(frame_i32, 1.0)),
-                                None => (fps > 0.0).then(|| crate::timestamp_at_frame(frame_i32, fps)),
+                                Some(times) => Some(times.timestamp_at_frame(frame_i32, video_time_scale)),
+                                None => (fps > 0.0).then(|| crate::timestamp_at_frame(frame_i32, fps * video_time_scale)),
                             };
                             gyroflow_proto_time_offset(tag_map, &FrameMapping::of(tag_map, size), frame_readout_direction, info.timestamp_ms, presented_ms)
                         } else if let Some((org_sample_rate, offset)) = sony::get_time_offset(&md, &input, tag_map, sample_rate, sony_packet_timed) {
@@ -1679,6 +1686,22 @@ impl GyroSource {
         }
     }
 
+    /// A fingerprint of the sync points the video's frames look the motion up with (`offset_at_video_timestamp_in`), the
+    /// segments' own too. With the orientations, which are replaced rather than changed (`quaternions`,
+    /// `smoothed_quaternions`), what the motion of a frame depends on
+    pub fn sync_checksum(&self) -> u64 {
+        use std::hash::Hasher;
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        for points in std::iter::once(&self.offsets_adjusted).chain(self.offsets_by_segment.iter().map(|(_, adjusted)| adjusted)) {
+            hasher.write_usize(points.len());
+            for (ts, v) in points {
+                hasher.write_i64(*ts);
+                hasher.write_u64(v.to_bits());
+            }
+        }
+        hasher.finish()
+    }
+
     pub fn get_checksum(&self) -> u64 {
         use std::hash::Hasher;
         let file_metadata = self.file_metadata.read();
@@ -1995,11 +2018,14 @@ fn frame_of_sample(input: &Input, info: &util::SampleInfo) -> Option<usize> {
 /// The start is `FirstFrameTimestamp` after the time of the frame's message (`message_ms`, the sample's time, which
 /// telemetry-parser takes it against): the frame's ideal time in the video, its index over the file's frame rate, in a
 /// metadata track (`gyroflow_proto_inject`) as in the JSONL, the camera clock's jitter being in `FirstFrameTimestamp`.
-/// The video presents the frame at another time (`presented_ms`, in the file's time): its presentation time where its
-/// frames aren't evenly spaced (D10), with that jitter in it too where it's the frame's capture, or `k / fps`, which is
-/// the ideal time only where the video's rate is the file's frame rate and telemetry-parser times the sample exactly
-/// (it truncates it to whole µs). The offset is taken against the time the frame is presented at, so that every frame
-/// is looked up where its message puts it on the camera clock, however the video times its frames
+/// The video presents the frame at another time (`presented_ms`, on the timeline it's looked up on: the file's time, over
+/// the frame rate scale of an off-speed recording): its presentation time where its frames aren't evenly spaced (D10),
+/// with that jitter in it too where it's the frame's capture, or `k / fps`, which is the ideal time only where the video's
+/// rate is the file's frame rate and telemetry-parser times the sample exactly (it truncates it to whole µs). The offset
+/// is taken against the time the frame is looked up at, so that every frame is looked up where its message puts it on the
+/// camera clock, however the video times its frames. A 120 fps recording in a 30 fps file has its messages at the file's
+/// `k / 30`, and the jitter (`FirstFrameTimestamp`) takes them to the capture's `k / 120`, where the scaled video looks
+/// frame `k` up: against the file's time, frame 100 would be looked up 2.5 s off
 fn gyroflow_proto_time_offset(tag_map: &GroupedTagMap, mapping: &FrameMapping, direction: ReadoutDirection, message_ms: f64, presented_ms: Option<f64>) -> Option<f64> {
     let imager = tag_map.get(&GroupId::Imager)?;
     let first_frame_ts = *(imager.get_t(TagId::FirstFrameTimestamp) as Option<&f64>)?;

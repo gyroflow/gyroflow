@@ -133,6 +133,9 @@ pub struct Tracker {
     /// Whether `candidates` are sorted yet: from the GPU they're sorted only once needed, while it makes the next frame's
     /// levels
     sorted: bool,
+    /// DIS's and gmflow's grid: the corner strengths of the frame it's topped up on, see `replenish_grid`
+    #[cfg(any(feature = "use-opencv", feature = "use-burn"))]
+    strengths: CornerStrengths,
     /// KLT on a GPU: whether it's wanted (not after it failed), its adapter or why there's none (looked for and its device
     /// made on a thread from the start, see `new`) and what's set up on it for the frame size
     gpu_wanted: bool,
@@ -179,6 +182,8 @@ impl Tracker {
             stop: Box::new(|| false),
             prev: None, size: (0, 0), points: Vec::new(), ids: Vec::new(), next_id: 0, max_points,
             candidates: Vec::new(), noise: Vec::new(), glare: Vec::new(), sorted: true,
+            #[cfg(any(feature = "use-opencv", feature = "use-burn"))]
+            strengths: Default::default(),
             gpu_wanted: finding.is_some(), finding, adapter: Err("no GPU to use".into()), gpu: None, device: "the CPU".into(), setup: 0.0, busy: 0.0, frames: 0,
         })
     }
@@ -540,23 +545,27 @@ impl Tracker {
         if occupied.iter().all(|o| *o) { return; }
         let mut free = vec![true; (w * h) as usize];
         for (x, y, r) in glare(pixels, w as usize, w, h) { clear_disc(&mut free, w, h, x as f64, y as f64, r as f64); }
-        let eig = min_eigen_values(pixels, w as usize, w, h);
-        let Some(noise) = noise_level(&noise_samples(&eig, w, h)) else { return };
-        let floor = DIS_NOISE_MULTIPLE * noise;
-        // Detail anywhere around the middle of the cell, not just at it
-        let around = (spacing / 4.0).max(2.0) as i32;
-        for r in 0..rows {
-            for c in 0..cols {
-                if occupied[(r * cols + c) as usize] { continue; }
-                let (x, y) = (((c as f64 + 0.5) * sx) as i32, ((r as f64 + 0.5) * sy) as i32);
-                if x < 3 || y < 3 || x >= w - 3 || y >= h - 3 || !free[(y * w + x) as usize] { continue; }
-                let (x0, x1) = ((x - around).max(0) as usize, (x + around).min(w - 1) as usize);
-                let detail = ((y - around).max(0)..=(y + around).min(h - 1))
-                    .flat_map(|yy| &eig[yy as usize * w as usize + x0..=yy as usize * w as usize + x1])
-                    .fold(f32::MIN, |m, &e| m.max(e));
-                if detail as f64 >= floor { self.add([x as f32, y as f32]); }
+        // Out of `self` while the points are added
+        let mut strengths = std::mem::take(&mut self.strengths);
+        let eig = strengths.of(pixels, w as usize, w, h);
+        if let Some(noise) = noise_level(&noise_samples(eig, w, h)) {
+            let floor = DIS_NOISE_MULTIPLE * noise;
+            // Detail anywhere around the middle of the cell, not just at it
+            let around = (spacing / 4.0).max(2.0) as i32;
+            for r in 0..rows {
+                for c in 0..cols {
+                    if occupied[(r * cols + c) as usize] { continue; }
+                    let (x, y) = (((c as f64 + 0.5) * sx) as i32, ((r as f64 + 0.5) * sy) as i32);
+                    if x < 3 || y < 3 || x >= w - 3 || y >= h - 3 || !free[(y * w + x) as usize] { continue; }
+                    let (x0, x1) = ((x - around).max(0) as usize, (x + around).min(w - 1) as usize);
+                    let detail = ((y - around).max(0)..=(y + around).min(h - 1))
+                        .flat_map(|yy| &eig[yy as usize * w as usize + x0..=yy as usize * w as usize + x1])
+                        .fold(f32::MIN, |m, &e| m.max(e));
+                    if detail as f64 >= floor { self.add([x as f32, y as f32]); }
+                }
             }
         }
+        self.strengths = strengths;
     }
 
     fn add(&mut self, p: [f32; 2]) {
@@ -583,56 +592,86 @@ pub(super) fn corner_strengths(frame: &Mat) -> opencv::Result<Mat> {
     Ok(eig)
 }
 
-/// `corner_strengths` without OpenCV, `w` x `h`: cornerMinEigenVal's, Sobel 3, block 7, past the edge the frame reflected
-/// (BORDER_REFLECT_101), summed in the order `gpu_klt.wgsl` sums them
+/// `corner_strengths` without OpenCV: cornerMinEigenVal's, Sobel 3, block 7, past the edge the frame reflected
+/// (BORDER_REFLECT_101). The gradients of an 8-bit frame are whole numbers before OpenCV's scale (up to 1020, so their
+/// products' 7 x 7 sums stay under 51 million, within an `i32`): summed exactly, by running sums along the rows and down
+/// the columns, and scaled for the eigenvalue only. Every buffer is kept from frame to frame
 #[cfg(any(feature = "use-opencv", feature = "use-burn"))]
-pub(super) fn min_eigen_values(pixels: &[u8], stride: usize, w: i32, h: i32) -> Vec<f32> {
-    let (wu, hu) = (w as usize, h as usize);
-    // Where positions -3 .. n + 3 reflect to: gfedcb|abcdefgh|gfedcba, again and again where n < 4, as OpenCV's
-    // borderInterpolate (not the shader's, which clamps after one reflection)
-    let reflected = |n: i32| -> Vec<usize> { (-3..n + 3).map(|mut p| {
-        if n == 1 { return 0; }
-        while p < 0 || p >= n { p = if p < 0 { -p } else { 2 * n - 2 - p }; }
-        p as usize
-    }).collect() };
-    let (rx, ry) = (reflected(w), reflected(h));
-    // Sobel 3's products xx, xy, yy, scaled as OpenCV scales them for an 8-bit image and block 7
-    let s = 1.0 / (4.0 * 7.0 * 255.0);
-    let mut products = vec![[0f32; 3]; wu * hu];
-    for y in 0..hu {
-        let (up, row, down) = (&pixels[ry[y + 2] * stride..], &pixels[y * stride..], &pixels[ry[y + 4] * stride..]);
-        let column = |x: usize| [up[x] as f32, row[x] as f32, down[x] as f32];
-        for x in 0..wu {
-            let (l, m, r) = (column(rx[x + 2]), column(x), column(rx[x + 4]));
-            let dx = ((r[0] + 2.0 * r[1] + r[2]) - (l[0] + 2.0 * l[1] + l[2])) * s;
-            let dy = ((l[2] + 2.0 * m[2] + r[2]) - (l[0] + 2.0 * m[0] + r[0])) * s;
-            products[y * wu + x] = [dx * dx, dx * dy, dy * dy];
+#[derive(Default)]
+pub(super) struct CornerStrengths {
+    /// The frame size the rest is for, and where positions -3 .. n + 3 reflect to along a row and down a column
+    size: (i32, i32),
+    rx: Vec<usize>,
+    ry: Vec<usize>,
+    /// Sobel 3's products xx, xy, yy of a row, and their 7-wide sums along every row; the 7 x 7 sums of a row
+    products: Vec<[i32; 3]>,
+    rows: Vec<[i32; 3]>,
+    sums: Vec<[i32; 3]>,
+    out: Vec<f32>,
+}
+
+#[cfg(any(feature = "use-opencv", feature = "use-burn"))]
+impl CornerStrengths {
+    /// The smaller eigenvalue of each pixel of the frame `pixels` (`w` x `h`, its rows `stride` apart)
+    pub(super) fn of(&mut self, pixels: &[u8], stride: usize, w: i32, h: i32) -> &[f32] {
+        let (wu, hu) = (w.max(0) as usize, h.max(0) as usize);
+        if wu == 0 || hu == 0 { return &[]; }
+        if self.size != (w, h) {
+            // gfedcb|abcdefgh|gfedcba, again and again where n < 4, as OpenCV's borderInterpolate (not the shader's,
+            // which clamps after one reflection)
+            let reflected = |n: i32| -> Vec<usize> { (-3..n + 3).map(|mut p| {
+                if n == 1 { return 0; }
+                while p < 0 || p >= n { p = if p < 0 { -p } else { 2 * n - 2 - p }; }
+                p as usize
+            }).collect() };
+            (self.size, self.rx, self.ry) = ((w, h), reflected(w), reflected(h));
+            self.products.resize(wu, [0; 3]);
+            self.rows.resize(wu * hu, [0; 3]);
+            self.sums.resize(wu, [0; 3]);
+            self.out.resize(wu * hu, 0.0);
         }
+        let (rx, ry) = (&self.rx, &self.ry);
+        for y in 0..hu {
+            let (up, row, down) = (&pixels[ry[y + 2] * stride..], &pixels[y * stride..], &pixels[ry[y + 4] * stride..]);
+            let column = |x: usize| [up[x] as i32, row[x] as i32, down[x] as i32];
+            for x in 0..wu {
+                let (l, m, r) = (column(rx[x + 2]), column(x), column(rx[x + 4]));
+                let dx = (r[0] + 2 * r[1] + r[2]) - (l[0] + 2 * l[1] + l[2]);
+                let dy = (l[2] + 2 * m[2] + r[2]) - (l[0] + 2 * m[0] + r[0]);
+                self.products[x] = [dx * dx, dx * dy, dy * dy];
+            }
+            // Along the row: the positions `rx[x..x + 7]`, past the edge the products of the position reflected to
+            let (p, sums) = (&self.products, &mut self.rows[y * wu..(y + 1) * wu]);
+            let mut sum = [0i32; 3];
+            for &i in &rx[..7] { for k in 0..3 { sum[k] += p[i][k]; } }
+            sums[0] = sum;
+            for x in 1..wu {
+                let (enter, leave) = (p[rx[x + 6]], p[rx[x - 1]]);
+                for k in 0..3 { sum[k] += enter[k] - leave[k]; }
+                sums[x] = sum;
+            }
+        }
+        // Down the columns, the rows `ry[y..y + 7]`; and the smaller eigenvalue of that, with OpenCV's scale for an 8-bit
+        // frame and block 7 (`s` for each gradient)
+        let s = 1.0 / (4.0 * 7.0 * 255.0);
+        let k = (s * s) as f32;
+        let row = |j: usize| j * wu..(j + 1) * wu;
+        self.sums.fill([0; 3]);
+        for &j in &ry[..7] {
+            for (sum, r) in self.sums.iter_mut().zip(&self.rows[row(j)]) { for c in 0..3 { sum[c] += r[c]; } }
+        }
+        for y in 0..hu {
+            if y > 0 {
+                let (enter, leave) = (&self.rows[row(ry[y + 6])], &self.rows[row(ry[y - 1])]);
+                for (sum, (e, l)) in self.sums.iter_mut().zip(enter.iter().zip(leave)) { for c in 0..3 { sum[c] += e[c] - l[c]; } }
+            }
+            for (v, sum) in self.out[row(y)].iter_mut().zip(&self.sums) {
+                let (a, b, c) = (sum[0] as f32 * (0.5 * k), sum[1] as f32 * k, sum[2] as f32 * (0.5 * k));
+                *v = (a + c) - ((a - c) * (a - c) + b * b).sqrt();
+            }
+        }
+        &self.out
     }
-    // Their 7 x 7 sums, along the rows and then down the columns, past the edge the products of the position reflected
-    // to; and the smaller eigenvalue of that
-    let mut rows = vec![[0f32; 3]; wu * hu];
-    for y in 0..hu {
-        let p = &products[y * wu..(y + 1) * wu];
-        for x in 0..wu {
-            let mut sum = [0f32; 3];
-            for &i in &rx[x..x + 7] { for k in 0..3 { sum[k] += p[i][k]; } }
-            rows[y * wu + x] = sum;
-        }
-    }
-    let mut out = vec![0f32; wu * hu];
-    let mut sums = vec![[0f32; 3]; wu];
-    for y in 0..hu {
-        sums.fill([0.0; 3]);
-        for &j in &ry[y..y + 7] {
-            for (sum, r) in sums.iter_mut().zip(&rows[j * wu..(j + 1) * wu]) { for k in 0..3 { sum[k] += r[k]; } }
-        }
-        for (v, sum) in out[y * wu..(y + 1) * wu].iter_mut().zip(&sums) {
-            let (a, c) = (sum[0] * 0.5, sum[2] * 0.5);
-            *v = (a + c) - ((a - c) * (a - c) + sum[1] * sum[1]).sqrt();
-        }
-    }
-    out
 }
 
 /// A frame's pixels without the padding of its rows
@@ -959,12 +998,14 @@ pub(super) mod tests {
     fn min_eigen_values_as_opencv() {
         let frame = texture();
         let px = frame.data_bytes().unwrap();
-        for (x0, y0, w, h) in [(0, 0, W, H), (101, 57, 37, 23), (5, 9, 3, 2)] {
+        // One set of buffers for all of the sizes, back to the first one again
+        let mut strengths = CornerStrengths::default();
+        for (x0, y0, w, h) in [(0, 0, W, H), (101, 57, 37, 23), (5, 9, 3, 2), (0, 0, W, H)] {
             // A copy: OpenCV filters a view with the pixels around it in the frame, not reflected at its edge
             let crop = Mat::roi(&frame, core::Rect::new(x0, y0, w, h)).unwrap().try_clone().unwrap();
             let eig = corner_strengths(&crop).unwrap();
             let expected = eig.data_typed::<f32>().unwrap();
-            let found = min_eigen_values(&px[(y0 * W + x0) as usize..], W as usize, w, h);
+            let found = strengths.of(&px[(y0 * W + x0) as usize..], W as usize, w, h);
             let largest = expected.iter().fold(0f32, |m, e| m.max(e.abs()));
             let worst = found.iter().zip(expected).fold(0f32, |m, (f, e)| m.max((f - e).abs()));
             eprintln!("{w}x{h}: max |ours - OpenCV's| {worst:e}, strengths up to {largest:e}");
@@ -972,7 +1013,7 @@ pub(super) mod tests {
             assert!(worst <= 1e-5 * largest, "{w}x{h}: max |ours - OpenCV's| {worst:e}, strengths up to {largest:e}");
         }
         let t = Instant::now();
-        for _ in 0..20 { std::hint::black_box(min_eigen_values(px, W as usize, W, H)); }
+        for _ in 0..20 { std::hint::black_box(strengths.of(px, W as usize, W, H)); }
         let ours = t.elapsed().as_secs_f64() * 50.0;
         let t = Instant::now();
         for _ in 0..20 { std::hint::black_box(corner_strengths(&frame).unwrap()); }

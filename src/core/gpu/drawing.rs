@@ -70,32 +70,61 @@ impl DrawCanvas {
         self.has_any_pixels = false;
     }
 
-    pub fn put_pixel(&mut self, x: i32, mut y: i32, color: Color, alpha: Alpha, stage: Stage, y_inverted: bool, size: usize) {
+    /// A square of `size` pixels of the canvas at `(x, y)` (a pixel of `stage`), centred on it from 3 up: the part of it
+    /// on the canvas. Each row and column is checked, not just the place in the buffer, which a column past the side
+    /// would wrap into the row above or below
+    pub fn put_pixel(&mut self, x: i32, y: i32, color: Color, alpha: Alpha, stage: Stage, y_inverted: bool, size: usize) {
+        let (x, y) = self.to_canvas((x as f64, y as f64), stage, y_inverted);
+        let adj = if size > 2 { size as f64 / -2.0 } else { 0.0 };
+        let (x0, y0) = ((x + adj).floor() as i64, (y + adj).floor() as i64);
         let (w, h) = self.get_size();
-        if y_inverted { y = match stage { Stage::OnInput => self.height, Stage::OnOutput => self.output_height } as i32 - y; }
-        if x < 0 || y < 0 || x > w as i32 * self.scale as i32 || y > h as i32 * self.scale as i32 { return; }
-        let adj = if size > 2 { size as f32 / -2.0 } else { 0.0 };
-        for xstep in 0..size {
-            for ystep in 0..size {
-                let pos = (((y as f32 / self.scale as f32 + ystep as f32 + adj).floor()) * w as f32 + (x as f32 / self.scale as f32 + xstep as f32 + adj).floor()).round() as i32;
-                if pos >= 0 && pos < self.buffer.len() as i32 {
-                    self.has_any_pixels = true;
-                    self.buffer[pos as usize] =
-                        ((color as u8) << 3) |
-                        ((alpha as u8) << 1) |
-                        ((stage as u8));
-                }
+        let cols = x0.clamp(0, w as i64) as usize..(x0 + size as i64).clamp(0, w as i64) as usize;
+        let rows = y0.clamp(0, h as i64) as usize..(y0 + size as i64).clamp(0, h as i64) as usize;
+        if cols.is_empty() { return; }
+        let value = Self::value(color, alpha, stage);
+        for row in rows {
+            if let Some(pixels) = self.buffer.get_mut(row * w + cols.start..row * w + cols.end) {
+                pixels.fill(value);
+                self.has_any_pixels = true;
             }
         }
     }
 
-    /// A line from `a` to `b` (pixels of `stage`), a pixel of the canvas wide
+    /// A line from `a` to `b` (pixels of `stage`), a pixel of the canvas wide: the part of it on the canvas. Clipped to
+    /// the canvas first (Liang-Barsky), so an end however far off it (a point the lens throws far out of the picture) costs
+    /// no more than one on it, and then rasterized (Bresenham)
     pub fn line(&mut self, a: (f32, f32), b: (f32, f32), color: Color, alpha: Alpha, stage: Stage, y_inverted: bool) {
-        let steps = ((b.0 - a.0).abs().max((b.1 - a.1).abs()) / self.scale.max(1) as f32).ceil().max(1.0) as usize;
-        for i in 0..=steps {
-            let t = i as f32 / steps as f32;
-            self.put_pixel((a.0 + (b.0 - a.0) * t) as i32, (a.1 + (b.1 - a.1) * t) as i32, color, alpha, stage, y_inverted, 1);
+        let (w, h) = self.get_size();
+        if w == 0 || h == 0 { return; }
+        let a = self.to_canvas((a.0 as f64, a.1 as f64), stage, y_inverted);
+        let b = self.to_canvas((b.0 as f64, b.1 as f64), stage, y_inverted);
+        // Within the canvas's pixels, which end just before `w` and `h`, as `put_pixel`'s do: an end off the canvas is then in
+        // the last pixel the line goes through, not one it touches at a corner
+        const INSIDE: f64 = 1e-6;
+        let Some((a, b)) = clip_segment(a, b, w as f64 - INSIDE, h as f64 - INSIDE) else { return };
+        // The pixels the ends are in (clamped too: rounding can't take them off the canvas)
+        let pixel = |p: (f64, f64)| ((p.0.floor() as i64).clamp(0, w as i64 - 1), (p.1.floor() as i64).clamp(0, h as i64 - 1));
+        let value = Self::value(color, alpha, stage);
+        for (x, y) in line_drawing::Bresenham::new(pixel(a), pixel(b)) {
+            if let Some(px) = self.buffer.get_mut(y as usize * w + x as usize) {
+                *px = value;
+                self.has_any_pixels = true;
+            }
         }
+    }
+
+    /// Where `(x, y)`, a pixel of `stage`, is on the canvas, in its pixels
+    fn to_canvas(&self, (x, y): (f64, f64), stage: Stage, y_inverted: bool) -> (f64, f64) {
+        let y = if y_inverted { (match stage { Stage::OnInput => self.height, Stage::OnOutput => self.output_height }) as f64 - y } else { y };
+        let scale = self.scale.max(1) as f64;
+        (x / scale, y / scale)
+    }
+
+    /// A pixel of the canvas: the colour, its alpha and the stage
+    fn value(color: Color, alpha: Alpha, stage: Stage) -> u8 {
+        ((color as u8) << 3) |
+        ((alpha as u8) << 1) |
+        ((stage as u8))
     }
 
     pub fn get_size(&self) -> (usize, usize) {
@@ -115,5 +144,73 @@ impl DrawCanvas {
         };
         self.drawing_cleared.store(!self.has_any_pixels, SeqCst);
         buf
+    }
+}
+
+/// The part of the segment from `a` to `b` within `0..=w` x `0..=h` (Liang-Barsky): None when there's none, or an end
+/// isn't a number
+fn clip_segment(a: (f64, f64), b: (f64, f64), w: f64, h: f64) -> Option<((f64, f64), (f64, f64))> {
+    let (dx, dy) = (b.0 - a.0, b.1 - a.1);
+    if !(a.0.is_finite() && a.1.is_finite() && dx.is_finite() && dy.is_finite()) { return None; }
+    let (mut t0, mut t1) = (0.0f64, 1.0f64);
+    // Each edge: which way the segment crosses it (`p` < 0 going in, > 0 going out) and how far inside it `a` is (`q`)
+    for (p, q) in [(-dx, a.0), (dx, w - a.0), (-dy, a.1), (dy, h - a.1)] {
+        if p == 0.0 {
+            // Along the edge, outside of it
+            if q < 0.0 { return None; }
+        } else if p < 0.0 {
+            t0 = t0.max(q / p);
+        } else {
+            t1 = t1.min(q / p);
+        }
+    }
+    (t0 <= t1).then(|| ((a.0 + t0 * dx, a.1 + t0 * dy), (a.0 + t1 * dx, a.1 + t1 * dy)))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn canvas(w: usize, h: usize, scale: usize) -> DrawCanvas { DrawCanvas::new(w, h, w, h, scale) }
+    fn drawn(c: &DrawCanvas) -> Vec<(usize, usize)> {
+        let (w, _) = c.get_size();
+        c.buffer.iter().enumerate().filter(|(_, v)| **v != 0).map(|(i, _)| (i % w, i / w)).collect()
+    }
+
+    #[test]
+    fn a_square_at_the_side_stays_on_its_rows() {
+        let mut c = canvas(16, 8, 1);
+        // A point at the last column, 6 wide: 4 columns of it on the canvas, none at the start of the next row
+        c.put_pixel(15, 4, Color::Red, Alpha::Alpha100, Stage::OnOutput, false, 6);
+        assert!(drawn(&c).iter().all(|&(x, y)| x >= 12 && (1..7).contains(&y)), "{:?}", drawn(&c));
+        assert_eq!(drawn(&c).len(), 4 * 6);
+        // ... and at the first one, none at the end of the row above
+        let mut c = canvas(16, 8, 1);
+        c.put_pixel(0, 4, Color::Red, Alpha::Alpha100, Stage::OnOutput, false, 6);
+        assert!(drawn(&c).iter().all(|&(x, _)| x < 3), "{:?}", drawn(&c));
+        // Off the canvas: nothing
+        let mut c = canvas(16, 8, 1);
+        c.put_pixel(16, 4, Color::Red, Alpha::Alpha100, Stage::OnOutput, false, 1);
+        c.put_pixel(-1, 4, Color::Red, Alpha::Alpha100, Stage::OnOutput, false, 1);
+        assert!(drawn(&c).is_empty() && !c.has_any_pixels);
+    }
+
+    #[test]
+    fn a_line_far_off_the_canvas_is_clipped_to_it() {
+        // From the middle to a point a hundred million pixels away: the part to the edge, a pixel of each column (of the
+        // canvas, at half the frame's size)
+        let mut c = canvas(64, 32, 2);
+        c.line((32.0, 16.0), (1e8, 16.0), Color::Sky, Alpha::Alpha100, Stage::OnOutput, false);
+        assert_eq!(drawn(&c), (16..32).map(|x| (x, 8)).collect::<Vec<_>>());
+        // Both ends off it, across it
+        let mut c = canvas(64, 32, 1);
+        c.line((-1e9, -1e9), (1e9, 1e9), Color::Sky, Alpha::Alpha100, Stage::OnOutput, false);
+        assert_eq!(drawn(&c), (0..32).map(|i| (i, i)).collect::<Vec<_>>());
+        // Past it, not through it, and not a number
+        let mut c = canvas(64, 32, 1);
+        c.line((70.0, -5.0), (1e7, 40.0), Color::Sky, Alpha::Alpha100, Stage::OnOutput, false);
+        c.line((10.0, 10.0), (f32::NAN, 10.0), Color::Sky, Alpha::Alpha100, Stage::OnOutput, false);
+        c.line((10.0, 10.0), (f32::INFINITY, 10.0), Color::Sky, Alpha::Alpha100, Stage::OnOutput, false);
+        assert!(drawn(&c).is_empty());
     }
 }

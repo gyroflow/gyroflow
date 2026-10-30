@@ -237,7 +237,7 @@ pub struct Stabilization {
 
     compute_params: ComputeParams,
     /// `compute_params` the right way up, see `upright_params`
-    upright_params: Option<Arc<ComputeParams>>,
+    upright_params: std::sync::OnceLock<Arc<ComputeParams>>,
 
     pub drawing: DrawCanvas,
     pub pending_device_change: Option<isize>,
@@ -259,18 +259,21 @@ impl Stabilization {
     pub fn set_compute_params(&mut self, params: ComputeParams) {
         self.stab_data.clear();
         self.compute_params = params;
-        self.upright_params = None;
+        self.upright_params = Default::default();
     }
     /// What the frames are rendered with, the right way up (`framebuffer_inverted` off), as the point path takes them
-    /// for upright positions (`optical_motion::to_output`). A copy made once per `set_compute_params`: the same one
-    /// until they change
-    pub fn upright_params(&mut self) -> Arc<ComputeParams> {
-        self.upright_params.get_or_insert_with(|| {
+    /// for upright positions (`optical_motion::to_output`): what the preview's tracked points are drawn with, and found
+    /// under the mouse with (`StabilizationManager::optical_placement`). A copy made once per `set_compute_params`, also
+    /// behind a read lock: the same one until they change
+    pub fn upright_params(&self) -> Arc<ComputeParams> {
+        self.upright_params.get_or_init(|| {
             let mut params = self.compute_params.clone();
             params.framebuffer_inverted = false;
             Arc::new(params)
         }).clone()
     }
+    /// Whether the frames are rendered upside down (`ComputeParams::framebuffer_inverted`): the drawing is turned with them
+    pub fn framebuffer_inverted(&self) -> bool { self.compute_params.framebuffer_inverted }
 
     fn get_rect(desc: &BufferDescription) -> [i32; 4] {
         let mut ret = [0i32; 4];

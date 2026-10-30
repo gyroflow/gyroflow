@@ -125,10 +125,11 @@ build-and-package profile is_dist:
     export OPENCV_LINK_PATHS={{ProjectDir}}/ext/vcpkg/installed/arm64-ios/lib
     export OPENCV_INCLUDE_PATHS={{ProjectDir}}/ext/vcpkg/installed/arm64-ios/include/opencv4/
 
+    # Without the AI optical flow (ai-optical-flow, GMFlow): it's for desktop GPUs, and its model is downloaded on first use
     if [ "{{profile}}" == "debug" ]; then
-        cargo build --target aarch64-apple-ios
+        cargo build --target aarch64-apple-ios --no-default-features --features opencv
     else
-        cargo build --target aarch64-apple-ios --profile {{profile}}
+        cargo build --target aarch64-apple-ios --profile {{profile}} --no-default-features --features opencv
     fi
 
     if [ -z "$SIGN_KEY" ] && [ -z "$PROVISIONING_PROFILE" ]; then

@@ -558,12 +558,13 @@ impl<'a> FfmpegProcessor<'a> {
             if start_ms > 0.0 {
                 for (k, v) in metadata.iter() {
                     if k == "creation_time" {
-                        if let Some((v, local_form)) = Self::parse_creation_time(v) {
-                            if let Some(v) = v.checked_add_signed(chrono::TimeDelta::try_milliseconds(start_ms.round() as i64).unwrap()) {
-                                // A local time stays one, in its form: its zone isn't known
-                                updated_creation_time = Some(match local_form { Some(form) => v.naive_local().format(form).to_string(), None => v.to_rfc3339() });
-                            }
-                        }
+                        let start = chrono::TimeDelta::try_milliseconds(start_ms.round() as i64).unwrap();
+                        // A local time stays one, in its form, moved on its own: its zone isn't known, and needn't be
+                        updated_creation_time = match Self::parse_creation_time(v) {
+                            Some(CreationTime::Zoned(time)) => time.checked_add_signed(start).map(|t| t.to_rfc3339()),
+                            Some(CreationTime::Local(time, form)) => time.checked_add_signed(start).map(|t| t.format(form).to_string()),
+                            None => None,
+                        };
                         break;
                     }
                 }
@@ -970,15 +971,14 @@ impl<'a> FfmpegProcessor<'a> {
     /// FFmpeg's `creation_time` in the forms its demuxers give it: RFC 3339, that of the containers' own times
     /// (`ff_dict_set_timestamp`) and of writers that state a zone, or a date and a time of day without one, a `T` or a
     /// space between them (HOVERAir's `creation_time` key, which FFmpeg's MOV demuxer gives as written, and an AVI's
-    /// `IDIT`), which is local time, as FFmpeg's `av_parse_time` and the player's `Date.parse` read it. With the
-    /// `strftime` form of a local time, to write one moved from it in
-    fn parse_creation_time(value: &str) -> Option<(chrono::DateTime<chrono::FixedOffset>, Option<&'static str>)> {
+    /// `IDIT`), which is local time, as FFmpeg's `av_parse_time` and the player's `Date.parse` read it. A local time
+    /// with the `strftime` form it's in, to write one moved from it in
+    fn parse_creation_time(value: &str) -> Option<CreationTime> {
         if let Ok(time) = chrono::DateTime::parse_from_rfc3339(value) {
-            return Some((time, None));
+            return Some(CreationTime::Zoned(time));
         }
         ["%Y-%m-%dT%H:%M:%S%.f", "%Y-%m-%d %H:%M:%S%.f"].into_iter().find_map(|form| {
-            let time = chrono::NaiveDateTime::parse_from_str(value, form).ok()?;
-            Some((time.and_local_timezone(chrono::Local).earliest()?.fixed_offset(), Some(form)))
+            chrono::NaiveDateTime::parse_from_str(value, form).ok().map(|time| CreationTime::Local(time, form))
         })
     }
 
@@ -991,7 +991,7 @@ impl<'a> FfmpegProcessor<'a> {
         }
 
         let mut context = format::input_with_dictionary(&file.path, dict)?;
-        let created_at = context.metadata().get("creation_time").and_then(Self::parse_creation_time).map(|x| x.0.timestamp_millis() as u64 / 1000);
+        let created_at = context.metadata().get("creation_time").and_then(Self::parse_creation_time).and_then(|x| x.instant()).and_then(|x| u64::try_from(x.timestamp()).ok());
         if let Some(stream) = context.streams().best(media::Type::Video) {
             let codec = codec::context::Context::from_parameters(stream.parameters())?;
             if let Ok(mut video) = codec.decoder().video() {
@@ -1078,6 +1078,38 @@ impl<'a> FfmpegProcessor<'a> {
         let mut parts = value.trim().splitn(3, ':');
         let (hours, minutes, seconds) = (parts.next()?.parse::<u64>().ok()?, parts.next()?.parse::<u64>().ok()?, parts.next()?.parse::<f64>().ok()?);
         (minutes < 60 && (0.0..60.0).contains(&seconds)).then(|| (hours * 3600 + minutes * 60) as f64 + seconds)
+    }
+}
+
+/// A `creation_time` (`FfmpegProcessor::parse_creation_time`): with its zone, or a local time with the `strftime` form
+/// it's written in
+enum CreationTime {
+    Zoned(chrono::DateTime<chrono::FixedOffset>),
+    Local(chrono::NaiveDateTime, &'static str),
+}
+
+impl CreationTime {
+    /// The moment it is: a local time in this computer's zone, see `local_instant`
+    fn instant(&self) -> Option<chrono::DateTime<chrono::FixedOffset>> {
+        match self {
+            Self::Zoned(time) => Some(*time),
+            Self::Local(time, _) => local_instant(time, &chrono::Local),
+        }
+    }
+}
+
+/// The moment the local time `time` of `zone` is, as `Date` (Temporal's "compatible") and `mktime` take it: of an hour
+/// the clocks went back over, the first one; in an hour they skipped going forward, which has no local time, with the
+/// offset from before the change, so 02:30 of a change at 02:00 is 03:30 of the new time. Not None there: FFmpeg and the
+/// player read the time all the same
+fn local_instant<Tz: chrono::TimeZone>(time: &chrono::NaiveDateTime, zone: &Tz) -> Option<chrono::DateTime<chrono::FixedOffset>> {
+    use chrono::{ Offset, TimeZone, offset::MappedLocalTime };
+    match zone.from_local_datetime(time) {
+        MappedLocalTime::Single(t) | MappedLocalTime::Ambiguous(t, _) => Some(t.fixed_offset()),
+        // The offset an hour before the time, or more for a longer gap (a day skipped, Samoa 2011)
+        MappedLocalTime::None => [1, 3, 25, 49].into_iter()
+            .find_map(|hours| zone.from_local_datetime(&time.checked_sub_signed(chrono::TimeDelta::hours(hours))?).earliest())
+            .and_then(|before| before.offset().fix().from_local_datetime(time).single()),
     }
 }
 
@@ -1175,3 +1207,61 @@ fn has_display_orientation_sei(codec_id: codec::Id, extradata: &[u8], data: &[u8
     ::log::error!("Failed to get HW surface format.");
     ffi::AVPixelFormat::AV_PIX_FMT_NONE
 } */
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::{ FixedOffset, NaiveDate, NaiveDateTime, TimeZone, offset::MappedLocalTime };
+
+    /// Central European time around the change to summer time of 2026: +01:00 until 2026-03-29 01:00 UTC (02:00 local),
+    /// +02:00 from then, and back at 2026-10-25 01:00 UTC (03:00 local)
+    #[derive(Clone, Copy)]
+    struct Cet;
+    fn utc(y: i32, m: u32, d: u32, h: u32) -> NaiveDateTime { NaiveDate::from_ymd_opt(y, m, d).unwrap().and_hms_opt(h, 0, 0).unwrap() }
+    impl TimeZone for Cet {
+        type Offset = FixedOffset;
+        fn from_offset(_: &FixedOffset) -> Self { Cet }
+        fn offset_from_local_date(&self, local: &NaiveDate) -> MappedLocalTime<FixedOffset> { self.offset_from_local_datetime(&local.and_hms_opt(12, 0, 0).unwrap()) }
+        fn offset_from_local_datetime(&self, local: &NaiveDateTime) -> MappedLocalTime<FixedOffset> {
+            let (winter, summer) = (FixedOffset::east_opt(3600).unwrap(), FixedOffset::east_opt(7200).unwrap());
+            let fits = |offset: FixedOffset| self.offset_from_utc_datetime(&(*local - offset)) == offset;
+            match (fits(winter), fits(summer)) {
+                (true, true) => MappedLocalTime::Ambiguous(summer, winter),
+                (true, false) => MappedLocalTime::Single(winter),
+                (false, true) => MappedLocalTime::Single(summer),
+                (false, false) => MappedLocalTime::None,
+            }
+        }
+        fn offset_from_utc_date(&self, utc: &NaiveDate) -> FixedOffset { self.offset_from_utc_datetime(&utc.and_hms_opt(0, 0, 0).unwrap()) }
+        fn offset_from_utc_datetime(&self, at: &NaiveDateTime) -> FixedOffset {
+            let summer = *at >= utc(2026, 3, 29, 1) && *at < utc(2026, 10, 25, 1);
+            FixedOffset::east_opt(if summer { 7200 } else { 3600 }).unwrap()
+        }
+    }
+
+    #[test]
+    fn a_local_creation_time_is_a_moment_even_in_the_skipped_hour() {
+        let local = |s: &str| match FfmpegProcessor::parse_creation_time(s) { Some(CreationTime::Local(t, _)) => t, _ => panic!("{s} isn't a local time") };
+        let at = |s: &str| local_instant(&local(s), &Cet).map(|t| t.to_rfc3339());
+        assert_eq!(at("2026-03-29 01:30:00").as_deref(), Some("2026-03-29T01:30:00+01:00"));
+        // Skipped: 03:30 of summer time, the moment of 02:30 of winter time
+        assert_eq!(at("2026-03-29 02:30:00").as_deref(), Some("2026-03-29T02:30:00+01:00"));
+        assert_eq!(at("2026-03-29T03:30:00").as_deref(), Some("2026-03-29T03:30:00+02:00"));
+        // Twice: the first
+        assert_eq!(at("2026-10-25 02:30:00").as_deref(), Some("2026-10-25T02:30:00+02:00"));
+    }
+
+    #[test]
+    fn a_creation_time_moves_in_its_own_form() {
+        let moved = |s: &str, ms: i64| match FfmpegProcessor::parse_creation_time(s) {
+            Some(CreationTime::Zoned(t)) => t.checked_add_signed(chrono::TimeDelta::milliseconds(ms)).unwrap().to_rfc3339(),
+            Some(CreationTime::Local(t, form)) => t.checked_add_signed(chrono::TimeDelta::milliseconds(ms)).unwrap().format(form).to_string(),
+            None => panic!("{s} isn't a time"),
+        };
+        // A local time in the skipped hour moves too, without its zone
+        assert_eq!(moved("2026-03-29 02:30:00", 1500), "2026-03-29 02:30:01.500");
+        assert_eq!(moved("2026-03-29T02:30:00", 60_000), "2026-03-29T02:31:00");
+        assert_eq!(moved("2026-03-29T00:30:00.000000Z", 1000), "2026-03-29T00:30:01+00:00");
+        assert!(FfmpegProcessor::parse_creation_time("yesterday").is_none());
+    }
+}

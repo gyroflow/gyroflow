@@ -233,6 +233,8 @@ pub struct Tracks {
     by_start: Vec<u32>,
     /// The block decoded last: playing or stepping through the frames looks at one after another of the same block
     cache: parking_lot::Mutex<Option<(usize, Arc<Vec<CodedFrame>>)>>,
+    /// See `serial`
+    serial: u64,
 }
 
 /// A frame of `Tracks`
@@ -481,12 +483,18 @@ impl TracksBuilder {
         self.long.sort_unstable_by_key(|t| t.id);
         let mut by_start: Vec<u32> = (0..self.long.len() as u32).collect();
         by_start.sort_unstable_by_key(|i| self.long[*i as usize].start);
-        Tracks { setup, entries: self.entries, blocks: self.blocks, long: self.long, by_start, cache: Default::default() }
+        static SERIAL: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+        let serial = SERIAL.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        Tracks { setup, entries: self.entries, blocks: self.blocks, long: self.long, by_start, cache: Default::default(), serial }
     }
 }
 
 impl Tracks {
     pub fn is_empty(&self) -> bool { self.entries.is_empty() }
+
+    /// Which analysis tracked them: a number no other tracks of this run of the program have (0 for none tracked). Not
+    /// their address, which tracks of another analysis can have once these are gone
+    pub fn serial(&self) -> u64 { self.serial }
 
     /// The memory it takes, bytes
     pub fn size(&self) -> usize {

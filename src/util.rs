@@ -261,35 +261,56 @@ pub fn set_android_context() {
     }
 }
 
+/// The crates that log a lot (`init_logging`): only their warnings and errors are logged. Those are what the log is read
+/// for when something of theirs fails (a GPU's device lost, kernels that don't compile)
+const NOISY_CRATES: [&str; 8] = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "pliron", "cubecl_wgpu" ];
+
+/// A logger without the debug and info records of `NOISY_CRATES`, which simplelog's own filters can't keep warnings of
+struct WithoutNoise(Box<dyn simplelog::SharedLogger>);
+impl WithoutNoise {
+    fn wrap(logger: Box<dyn simplelog::SharedLogger>) -> Box<dyn simplelog::SharedLogger> { Box::new(Self(logger)) }
+    fn is_noise(metadata: &::log::Metadata) -> bool {
+        metadata.level() > ::log::Level::Warn && NOISY_CRATES.iter().any(|x| metadata.target().starts_with(x))
+    }
+}
+impl ::log::Log for WithoutNoise {
+    fn enabled(&self, metadata: &::log::Metadata) -> bool { !Self::is_noise(metadata) && self.0.enabled(metadata) }
+    fn log(&self, record: &::log::Record) { if !Self::is_noise(record.metadata()) { self.0.log(record); } }
+    fn flush(&self) { self.0.flush(); }
+}
+impl simplelog::SharedLogger for WithoutNoise {
+    fn level(&self) -> simplelog::LevelFilter { self.0.level() }
+    fn config(&self) -> Option<&simplelog::Config> { self.0.config() }
+    fn as_log(self: Box<Self>) -> Box<dyn ::log::Log> { self }
+}
+
 pub fn init_logging() {
     use simplelog::*;
 
-    let log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "mdk", "pliron", "cubecl_wgpu" ]
-        .into_iter()
-        .fold(ConfigBuilder::new(), |mut cfg, x| { cfg.add_filter_ignore_str(x); cfg })
+    // MDK's own log only in the file
+    let log_config = ConfigBuilder::new()
+        .add_filter_ignore_str("mdk")
         // Qt and MDK can log while destroying a foreign render thread, after
         // Rust's own thread-local `Thread` has already been destroyed.
         .set_thread_level(LevelFilter::Off)
         .build();
-    let file_log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "pliron", "cubecl_wgpu" ]
-        .into_iter()
-        .fold(ConfigBuilder::new(), |mut cfg, x| { cfg.add_filter_ignore_str(x); cfg })
+    let file_log_config = ConfigBuilder::new()
         .set_thread_level(LevelFilter::Off)
         .build();
 
     #[cfg(target_os = "android")]
-    WriteLogger::init(LevelFilter::Debug, log_config, crate::util::AndroidLog::default()).unwrap();
+    CombinedLogger::init(vec![WithoutNoise::wrap(WriteLogger::new(LevelFilter::Debug, log_config, crate::util::AndroidLog::default()))]).unwrap();
 
     #[cfg(not(target_os = "android"))]
     {
         let exe_loc = gyroflow_core::settings::data_dir().join("gyroflow.log");
         if let Ok(file_log) = std::fs::File::create(exe_loc) {
             let _ = CombinedLogger::init(vec![
-                TermLogger::new(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto),
-                WriteLogger::new(LevelFilter::Debug, file_log_config, file_log)
+                WithoutNoise::wrap(TermLogger::new(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto)),
+                WithoutNoise::wrap(WriteLogger::new(LevelFilter::Debug, file_log_config, file_log))
             ]);
         } else {
-            let _ = TermLogger::init(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto);
+            let _ = CombinedLogger::init(vec![WithoutNoise::wrap(TermLogger::new(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto))]);
         }
     }
 
