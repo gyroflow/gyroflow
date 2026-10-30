@@ -331,17 +331,20 @@ mod inference {
 
     // A passed coop_works is kept in the kernel cache's directory with what it held for: the adapter (its driver too),
     // the sources of the kernels it checked (coop.rs, and kernels.rs it compares the window attention to) and the
-    // versions of burn, cubecl and wgpu (naga) Cargo.toml asks for, which compile them. It compiles kernels the model
-    // doesn't run (sizes with edges), 0.8 s of every later start on the macOS CI GPU; a failure is not kept, so a check
-    // that failed once runs again at the next start
+    // versions of burn, cubecl and wgpu (naga) Cargo.toml asks for, which compile them - and the program's size: those
+    // versions don't move with another commit of a patched branch or a `cargo update` within them, and another build of
+    // them is another program. It compiles kernels the model doesn't run (sizes with edges), 0.8 s of every later start on
+    // the macOS CI GPU; a failure is not kept, so a check that failed once runs again at the next start
     fn coop_marker() -> Option<(PathBuf, String)> {
         let adapter = ADAPTER.get()?;
+        let program_size = std::fs::metadata(std::env::current_exe().ok()?).ok()?.len();
         let mut hasher = Sha256::new();
         hasher.update(include_str!("gmflow/coop.rs").as_bytes());
         hasher.update(include_str!("gmflow/kernels.rs").as_bytes());
         for dependency in include_str!("../../Cargo.toml").lines().filter(|l| ["burn", "cubecl", "wgpu"].iter().any(|d| l.starts_with(d))) {
             hasher.update(dependency.trim_end().as_bytes());
         }
+        hasher.update(program_size.to_le_bytes());
         let sources: String = hasher.finalize().iter().map(|b| format!("{:02x}", b)).collect();
         let path = crate::settings::data_dir().join("ai_models").join("gpu_cache").join("coop_checked");
         Some((path, format!("{}\n{}\n", adapter, sources)))
