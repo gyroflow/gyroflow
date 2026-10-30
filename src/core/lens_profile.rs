@@ -81,7 +81,7 @@ pub struct LensProfile {
     pub is_copy: bool,
     pub rating: Option<f64>,
     pub checksum: Option<String>,
-    parsed_interpolations: BTreeMap<i64, LensProfile>,
+    pub(crate) parsed_interpolations: BTreeMap<i64, LensProfile>,
 }
 
 impl LensProfile {
@@ -118,6 +118,71 @@ impl LensProfile {
 
     pub fn load_from_file(&mut self, url: &str) -> std::result::Result<(), crate::GyroflowCoreError> {
         self.load_from_data(&crate::filesystem::read_to_string(url)?)
+    }
+    pub fn validate_for_submission(&self) -> Result<(), &'static str> {
+        let brand = self.camera_brand.trim();
+        let model = self.camera_model.trim();
+        let lens = self.lens_model.trim();
+        let setting = self.camera_setting.trim();
+        let note = self.note.trim();
+
+        let is_placeholder = |s: &str| {
+            s.is_empty()
+                || s.eq_ignore_ascii_case("unknown")
+                || s.eq_ignore_ascii_case("none")
+                || s.eq_ignore_ascii_case("other")
+                || s.eq_ignore_ascii_case("---")
+                || s.eq_ignore_ascii_case("n/a")
+        };
+
+        if is_placeholder(brand) {
+            return Err("Camera brand must be specified.");
+        }
+        if is_placeholder(model) {
+            return Err("Camera model must be specified.");
+        }
+        if is_placeholder(lens) {
+            return Err("Lens model must be specified.");
+        }
+
+        let fixed_lens_brands = ["gopro", "dji", "insta360", "runcam", "caddx", "hawkeye", "walksnail", "betafpv", "foxwhoop", "sjcam", "xiaomi", "garmin"];
+        let is_fixed_lens_brand = fixed_lens_brands.iter().any(|b| brand.to_ascii_lowercase().contains(b));
+        let vague_lens_terms = ["standard", "default", "kit", "kit lens", "lens", "prime", "zoom", "wide", "stock"];
+        if !is_fixed_lens_brand && (lens.len() < 2 || vague_lens_terms.iter().any(|v| lens.eq_ignore_ascii_case(v))) {
+            return Err("Interchangeable-lens / mirrorless camera requires explicit lens model and focal parameters.");
+        }
+
+        let lens_lower = lens.to_ascii_lowercase();
+        let has_zoom_range = {
+            let bytes = lens_lower.as_bytes();
+            let mut found = false;
+            for i in 1..bytes.len().saturating_sub(1) {
+                if bytes[i] == b'-' && bytes[i - 1].is_ascii_digit() && bytes[i + 1].is_ascii_digit() {
+                    if lens_lower.contains("mm") || lens_lower.contains("f/") || lens_lower.contains("f2") || lens_lower.contains("f4") {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            found
+        };
+        if has_zoom_range {
+            let has_focal = self.focal_length.unwrap_or(0.0) > 0.0
+                || setting.to_ascii_lowercase().contains("mm")
+                || note.to_ascii_lowercase().contains("mm")
+                || !self.parsed_interpolations.is_empty();
+            if !has_focal {
+                return Err("Zoom lens requires specific focal length information (in focal_length, camera setting, or note).");
+            }
+        }
+
+        if self.calib_dimension.w == 0 || self.calib_dimension.h == 0 {
+            return Err("Calibration dimensions must be greater than zero.");
+        }
+        if self.fisheye_params.camera_matrix.is_empty() {
+            return Err("Camera matrix must not be empty.");
+        }
+        Ok(())
     }
 
     pub fn load_from_json_value(&mut self, v: &serde_json::Value) -> Option<()> {

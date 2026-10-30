@@ -21,6 +21,7 @@ use super::KernelParams;
 
 // The models a chessboard calibration can fit (`calibration::solver`), which calls their `distort` directly
 pub use self::{ opencv_fisheye::OpenCVFisheye, opencv_standard::OpenCVStandard, generic_polynomial::GenericPolynomial };
+pub use self::{ poly3::Poly3, poly5::Poly5, ptlens::PtLens };
 
 /// The float types a model's math is written for: `f32` in the render, `f64` in the calibration solver, whose
 /// Jacobian is a finite difference that single precision would drown. A model writes its projection once, generic

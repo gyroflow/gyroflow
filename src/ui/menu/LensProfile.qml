@@ -97,6 +97,13 @@ MenuItem {
                 lensBreathing.checked = controller.lens_breathing_enabled;
                 lensDelay.value = controller.lens_metadata_delay_frames;
                 outputProjection.setValue(controller.output_projection);
+                if (additional_data && additional_data.camera_identifier) {
+                    const cid = additional_data.camera_identifier;
+                    const normBrand = cid.brand ? controller.normalize_camera_brand(cid.brand) : "";
+                    const normModel = cid.model ? controller.normalize_camera_model(normBrand, cid.model) : "";
+                    const lensName = cid.lens_model || cid.lens_info || "";
+                    root.syncSelectors(normBrand, normModel, lensName, cid.identifier || "");
+                }
             }
             // A generated lens stays for the next file like any profile, made again for its size. Motion data with the
             // focal length of every frame in its lens metadata gets none: with no profile, that's the lens already
@@ -125,6 +132,7 @@ MenuItem {
             }
 
             lensProfilesListPrepared = true;
+            root.refreshBrands();
 
             root.loadFavorites();
             if (!root.fetched_from_github) {
@@ -140,6 +148,7 @@ MenuItem {
             if (json_str) {
                 const obj = JSON.parse(json_str);
                 if (obj) {
+                    root.syncSelectors(obj.camera_brand || "", obj.camera_model || "", obj.lens_model || "", obj.identifier || "");
                     let lensInfo = {
                         "Camera":          obj.camera_brand + " " + obj.camera_model,
                         "Lens":            obj.lens_model,
@@ -254,6 +263,14 @@ MenuItem {
     }
     function lensCleared(): void {
         focalLengthOnly.syncNone();
+        root.updatingSelectors = true;
+        brandSelector.currentIndex = 0;
+        modelSelector.currentIndex = 0;
+        lensSelector.currentIndex = 0;
+        root.compatibleCameras = [];
+        root.submittedProfiles = [];
+        root.currentCandidateIndex = 0;
+        root.updatingSelectors = false;
         info.model = ({});
         officialInfo.show = false;
         root.calibWidth = 0;
@@ -267,6 +284,52 @@ MenuItem {
     property int currentVideoAspectRatioSwapped: Math.round((root.videoHeight / Math.max(1, root.videoWidth)) * 1000);
 
     property var favorites: ({});
+    property var brandList: [qsTr("Select brand...")];
+    property var modelList: [qsTr("Select model...")];
+    property var lensList: [qsTr("Select lens...")];
+    property var compatibleCameras: [];
+    property var submittedProfiles: [];
+    property int currentCandidateIndex: 0;
+    property bool updatingSelectors: false;
+
+    function refreshBrands(): void {
+        root.updatingSelectors = true;
+        const brands = controller.get_camera_brands();
+        root.brandList = [qsTr("Select brand...")].concat(brands);
+        root.updatingSelectors = false;
+    }
+
+    function syncSelectors(brand: string, model: string, lens: string, identifier: string): void {
+        if (!root.lensProfilesListPrepared) return;
+        root.updatingSelectors = true;
+        const normBrand = brand ? controller.normalize_camera_brand(brand) : "";
+        const normModel = (normBrand && model) ? controller.normalize_camera_model(normBrand, model) : model;
+
+        if (root.brandList.length <= 1) {
+            root.brandList = [qsTr("Select brand...")].concat(controller.get_camera_brands());
+        }
+        const bIdx = normBrand ? root.brandList.indexOf(normBrand) : -1;
+        if (bIdx > 0) {
+            brandSelector.currentIndex = bIdx;
+            root.modelList = [qsTr("Select model...")].concat(controller.get_camera_models(normBrand));
+            const mIdx = normModel ? root.modelList.indexOf(normModel) : -1;
+            if (mIdx > 0) {
+                modelSelector.currentIndex = mIdx;
+                root.lensList = [qsTr("Select lens...")].concat(controller.get_camera_lenses(normBrand, normModel));
+                const lIdx = lens ? root.lensList.indexOf(lens) : -1;
+                lensSelector.currentIndex = lIdx > 0 ? lIdx : 0;
+            } else {
+                modelSelector.currentIndex = 0;
+                root.lensList = [qsTr("Select lens...")];
+                lensSelector.currentIndex = 0;
+            }
+        }
+        root.compatibleCameras = (normBrand && normModel) ? controller.get_compatible_cameras(normBrand, normModel) : [];
+        root.submittedProfiles = controller.get_submitted_profiles(normBrand, normModel, lens, identifier);
+        root.currentCandidateIndex = 0;
+        root.updatingSelectors = false;
+    }
+
     function loadFavorites(): void {
         const list = settings.value("lensProfileFavorites", "");
         let fav = {};
@@ -278,6 +341,128 @@ MenuItem {
     }
     function updateFavorites(): void {
         settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
+    }
+
+    Column {
+        width: parent.width;
+        spacing: 6 * dpiScale;
+
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Camera brand");
+            ComboBox {
+                id: brandSelector;
+                width: parent.width;
+                height: 25 * dpiScale;
+                model: root.brandList;
+                onCurrentIndexChanged: {
+                    if (root.updatingSelectors) return;
+                    if (currentIndex > 0) {
+                        const b = root.brandList[currentIndex];
+                        root.modelList = [qsTr("Select model...")].concat(controller.get_camera_models(b));
+                        modelSelector.currentIndex = 0;
+                        root.lensList = [qsTr("Select lens...")];
+                        lensSelector.currentIndex = 0;
+                        search.text = b;
+                    }
+                }
+            }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Camera model");
+            ComboBox {
+                id: modelSelector;
+                width: parent.width;
+                height: 25 * dpiScale;
+                enabled: brandSelector.currentIndex > 0;
+                model: root.modelList;
+                onCurrentIndexChanged: {
+                    if (root.updatingSelectors) return;
+                    if (brandSelector.currentIndex > 0 && currentIndex > 0) {
+                        const b = root.brandList[brandSelector.currentIndex];
+                        const m = root.modelList[currentIndex];
+                        root.lensList = [qsTr("Select lens...")].concat(controller.get_camera_lenses(b, m));
+                        lensSelector.currentIndex = 0;
+                        root.compatibleCameras = controller.get_compatible_cameras(b, m);
+                        root.submittedProfiles = controller.get_submitted_profiles(b, m, "", "");
+                        root.currentCandidateIndex = 0;
+                        search.text = b + " " + m;
+                    }
+                }
+            }
+        }
+        Label {
+            position: Label.LeftPosition;
+            text: qsTr("Lens model");
+            ComboBox {
+                id: lensSelector;
+                width: parent.width;
+                height: 25 * dpiScale;
+                enabled: modelSelector.currentIndex > 0;
+                model: root.lensList;
+                onCurrentIndexChanged: {
+                    if (root.updatingSelectors) return;
+                    if (brandSelector.currentIndex > 0 && modelSelector.currentIndex > 0 && currentIndex > 0) {
+                        const b = root.brandList[brandSelector.currentIndex];
+                        const m = root.modelList[modelSelector.currentIndex];
+                        const l = root.lensList[currentIndex];
+                        root.submittedProfiles = controller.get_submitted_profiles(b, m, l, "");
+                        root.currentCandidateIndex = 0;
+                        if (root.submittedProfiles.length > 0) {
+                            root.selected_manually = true;
+                            controller.load_lens_profile(root.submittedProfiles[0][1]);
+                        } else {
+                            search.text = b + " " + m + " " + l;
+                        }
+                    }
+                }
+            }
+        }
+        BasicText {
+            width: parent.width;
+            wrapMode: Text.WordWrap;
+            font.pixelSize: 11 * dpiScale;
+            opacity: 0.75;
+            visible: root.compatibleCameras.length > 0;
+            text: qsTr("Compatible mount/sensor cameras: %1").arg(root.compatibleCameras.slice(0, 6).join(", "));
+        }
+        Row {
+            width: parent.width;
+            spacing: 6 * dpiScale;
+            visible: root.submittedProfiles.length > 1;
+            Button {
+                text: "<";
+                height: 24 * dpiScale;
+                enabled: root.currentCandidateIndex > 0;
+                tooltip: qsTr("Previous submitted lens profile for this camera setup");
+                onClicked: {
+                    if (root.currentCandidateIndex > 0) {
+                        root.currentCandidateIndex--;
+                        root.selected_manually = true;
+                        controller.load_lens_profile(root.submittedProfiles[root.currentCandidateIndex][1]);
+                    }
+                }
+            }
+            BasicText {
+                anchors.verticalCenter: parent.verticalCenter;
+                font.pixelSize: 11 * dpiScale;
+                text: root.submittedProfiles.length > 0 ? qsTr("Profile %1 / %2: %3").arg(root.currentCandidateIndex + 1).arg(root.submittedProfiles.length).arg(root.submittedProfiles[root.currentCandidateIndex][0]) : "";
+            }
+            Button {
+                text: ">";
+                height: 24 * dpiScale;
+                enabled: root.currentCandidateIndex + 1 < root.submittedProfiles.length;
+                tooltip: qsTr("Next submitted lens profile for this camera setup");
+                onClicked: {
+                    if (root.currentCandidateIndex + 1 < root.submittedProfiles.length) {
+                        root.currentCandidateIndex++;
+                        root.selected_manually = true;
+                        controller.load_lens_profile(root.submittedProfiles[root.currentCandidateIndex][1]);
+                    }
+                }
+            }
+        }
     }
 
     SearchField {

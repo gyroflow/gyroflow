@@ -106,6 +106,13 @@ pub struct Controller {
     search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
     fetch_profiles_from_github: qt_method!(fn(&self)),
     lens_profiles_updated: qt_signal!(reload_from_disk: bool),
+    get_camera_brands: qt_method!(fn(&self) -> QStringList),
+    get_camera_models: qt_method!(fn(&self, brand: QString) -> QStringList),
+    get_camera_lenses: qt_method!(fn(&self, brand: QString, model: QString) -> QStringList),
+    get_compatible_cameras: qt_method!(fn(&self, brand: QString, model: QString) -> QStringList),
+    get_submitted_profiles: qt_method!(fn(&self, brand: QString, model: QString, lens: QString, identifier: QString) -> QVariantList),
+    normalize_camera_brand: qt_method!(fn(&self, brand: QString) -> QString),
+    normalize_camera_model: qt_method!(fn(&self, brand: QString, model: QString) -> QString),
 
     set_sync_lpf: qt_method!(fn(&self, lpf: f64)),
     set_imu_lpf: qt_method!(fn(&self, lpf: f64)),
@@ -2295,6 +2302,12 @@ impl Controller {
 
         if let Ok(mut profile) = core::lens_profile::LensProfile::from_json(&info_json) {
             self.fill_profile_from_calibrator(&mut profile);
+                if upload {
+                    if let Err(err_msg) = profile.validate_for_submission() {
+                        self.error(QString::from("Cannot upload lens profile: %1"), QString::from(err_msg), QString::default());
+                        return false;
+                    }
+                }
             let name = profile.get_name()
                 .replace([':', '|', '*', ':'], "_")
                 .replace(['<', '"', '>', '/', '\\'], "");
@@ -2310,6 +2323,12 @@ impl Controller {
         match core::lens_profile::LensProfile::from_json(&info_json) {
             Ok(mut profile) => {
                 self.fill_profile_from_calibrator(&mut profile);
+                if upload {
+                    if let Err(err_msg) = profile.validate_for_submission() {
+                        self.error(QString::from("Cannot upload lens profile: %1"), QString::from(err_msg), QString::default());
+                        return false;
+                    }
+                }
 
                 match profile.save_to_file(&url) {
                     Ok(json) => {
@@ -2376,6 +2395,53 @@ impl Controller {
         });
     }
 
+    fn get_camera_brands(&self) -> QStringList {
+        let db = self.stabilizer.lens_profile_db.read();
+        QStringList::from_iter(db.get_brands().into_iter().map(QString::from))
+    }
+
+    fn get_camera_models(&self, brand: QString) -> QStringList {
+        let db = self.stabilizer.lens_profile_db.read();
+        QStringList::from_iter(db.get_models(&brand.to_string()).into_iter().map(QString::from))
+    }
+
+    fn get_camera_lenses(&self, brand: QString, model: QString) -> QStringList {
+        let db = self.stabilizer.lens_profile_db.read();
+        QStringList::from_iter(db.get_lenses(&brand.to_string(), &model.to_string()).into_iter().map(QString::from))
+    }
+
+    fn get_compatible_cameras(&self, brand: QString, model: QString) -> QStringList {
+        let db = self.stabilizer.lens_profile_db.read();
+        QStringList::from_iter(db.get_compatible_cameras(&brand.to_string(), &model.to_string()).into_iter().map(QString::from))
+    }
+
+    fn get_submitted_profiles(&self, brand: QString, model: QString, lens: QString, identifier: QString) -> QVariantList {
+        let db = self.stabilizer.lens_profile_db.read();
+        db.get_submitted_profiles_for_setup(&brand.to_string(), &model.to_string(), &lens.to_string(), &identifier.to_string())
+            .into_iter()
+            .map(|(label, key, author, official, rating)| {
+                let mut item = QVariantList::from_iter([
+                    QString::from(label),
+                    QString::from(key),
+                    QString::from(author),
+                ].into_iter());
+                item.push(official.into());
+                item.push(rating.into());
+                item.into()
+            })
+            .collect()
+    }
+
+    fn normalize_camera_brand(&self, brand: QString) -> QString {
+        let db = self.stabilizer.lens_profile_db.read();
+        QString::from(db.camera_db.normalize_brand(&brand.to_string()))
+    }
+
+    fn normalize_camera_model(&self, brand: QString, model: QString) -> QString {
+        let db = self.stabilizer.lens_profile_db.read();
+        QString::from(db.camera_db.normalize_model(&brand.to_string(), &model.to_string()))
+    }
+
     #[allow(unreachable_code)]
     fn fetch_profiles_from_github(&self) {
         use crate::core::lens_profile_database::LensProfileDatabase;
@@ -2392,6 +2458,7 @@ impl Controller {
         let current_version = self.stabilizer.lens_profile_db.read().version;
 
         let db_path = LensProfileDatabase::get_path().join("profiles.cbor.gz");
+        let cam_db_path = LensProfileDatabase::get_path().join("camera_database.json");
         if db_path.exists() || gyroflow_core::settings::data_dir().join("lens_profiles").exists() {
             core::run_threaded(move || {
                 if let Ok(Ok(body)) = ureq::get("https://api.github.com/repos/gyroflow/lens_profiles/releases").call().map(|x| x.into_body().read_to_string()) {
@@ -2402,6 +2469,25 @@ impl Controller {
                             if let Ok(tag) = obj.get("tag_name")?.as_str()?.trim_start_matches("v").parse::<u32>() {
                                 if tag > current_version {
                                     ::log::info!("Updating lens profile database from v{current_version} to v{tag}.");
+                                    if let Some(assets) = obj.get("assets").and_then(|a| a.as_array()) {
+                                        for asset in assets {
+                                            let asset_name = asset.get("name").and_then(|n| n.as_str()).unwrap_or("");
+                                            if asset_name == "camera_database.json" {
+                                                if let Some(cam_url) = asset.get("browser_download_url").and_then(|u| u.as_str()) {
+                                                    if let Ok(mut cam_content) = ureq::get(cam_url).call().map(|x| x.into_body().into_reader()) {
+                                                        let target_cam = if cam_db_path.parent().map_or(false, |p| p.exists()) {
+                                                            cam_db_path.clone()
+                                                        } else {
+                                                            gyroflow_core::settings::data_dir().join("lens_profiles").join("camera_database.json")
+                                                        };
+                                                        if let Ok(mut f) = std::fs::File::create(target_cam) {
+                                                            let _ = std::io::copy(&mut cam_content, &mut f);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                     if let Some(download_url) = obj["assets"][0]["browser_download_url"].as_str() {
                                         if let Ok(mut content) = ureq::get(download_url).call().map(|x| x.into_body().into_reader()) {
                                             let mut updated = false;
