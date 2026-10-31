@@ -104,6 +104,14 @@ pub struct Controller {
     all_profiles_loaded: qt_signal!(),
     search_lens_profile_finished: qt_signal!(profiles: QVariantList),
     search_lens_profile: qt_method!(fn(&self, text: QString, favorites: QVariantList, aspect_ratio: i32, aspect_ratio_swapped: i32)),
+    get_camera_brands: qt_method!(fn(&self) -> QVariantList),
+    get_camera_models: qt_method!(fn(&self, brand: QString) -> QVariantList),
+    get_camera_info: qt_method!(fn(&self, brand: QString, model: QString) -> QJsonObject),
+    get_lenses_for_camera: qt_method!(fn(&self, brand: QString, model: QString) -> QVariantList),
+    get_compatible_cameras: qt_method!(fn(&self, brand: QString, model: QString) -> QVariantList),
+    search_profiles_by_setup: qt_method!(fn(&self, brand: QString, model: QString, lens: QString)),
+    search_profiles_by_setup_finished: qt_signal!(profiles: QVariantList),
+    get_review_profiles: qt_method!(fn(&self, current_id: QString) -> QVariantList),
     fetch_profiles_from_github: qt_method!(fn(&self)),
     lens_profiles_updated: qt_signal!(reload_from_disk: bool),
 
@@ -2315,7 +2323,39 @@ impl Controller {
                     Ok(json) => {
                         ::log::debug!("Lens profile json: {}", json);
                         if upload {
-                            core::run_threaded(move || {
+                        let brand = profile.camera_brand.trim();
+                        let model = profile.camera_model.trim();
+                        let lens = profile.lens_model.trim();
+
+                        if brand.is_empty() || brand.eq_ignore_ascii_case("other") || brand.eq_ignore_ascii_case("unknown") {
+                            self.error(QString::from("Invalid lens profile: camera brand is required for database submission."), QString::default(), QString::default());
+                            return false;
+                        }
+                        if model.is_empty() || model.eq_ignore_ascii_case("other") || model.eq_ignore_ascii_case("unknown") {
+                            self.error(QString::from("Invalid lens profile: camera model is required for database submission."), QString::default(), QString::default());
+                            return false;
+                        }
+
+                        let db = self.stabilizer.lens_profile_db.read();
+                        let cam_details = db.camera_db.get_camera(brand, model);
+                        let mount = cam_details.and_then(|c| c.mount.as_deref()).unwrap_or("");
+                        let is_fixed = mount == "Fixed / Integrated"
+                            || ["gopro", "insta360", "runcam", "caddx", "foxeer", "hawkeye"].iter().any(|b| brand.to_ascii_lowercase().contains(b));
+
+                        if !is_fixed && (lens.is_empty() || lens.eq_ignore_ascii_case("other") || lens.eq_ignore_ascii_case("unknown")) {
+                            self.error(QString::from("Invalid lens profile: interchangeable lens camera requires a specific lens model."), QString::default(), QString::default());
+                            return false;
+                        }
+
+                        let is_zoom = lens.contains('-') || lens.to_ascii_lowercase().contains("zoom");
+                        let has_focal = profile.focal_length.is_some_and(|f| f > 0.0)
+                            || profile.camera_setting.chars().any(|c| c.is_ascii_digit());
+                        if is_zoom && !has_focal {
+                            self.error(QString::from("Invalid lens profile: zoom lens requires specific focal length info (focal length or in camera setting)."), QString::default(), QString::default());
+                            return false;
+                        }
+
+                        core::run_threaded(move || {
                                 if let Ok(Ok(body)) = ureq::post("https://api.gyroflow.xyz/upload_profile").header("Content-Type", "application/json; charset=utf-8").send(&json).map(|x| x.into_body().read_to_string()) {
                                     ::log::debug!("Lens profile uploaded: {}", body.as_str());
                                 }
@@ -2376,6 +2416,102 @@ impl Controller {
         });
     }
 
+    fn get_camera_brands(&self) -> QVariantList {
+        let db = self.stabilizer.lens_profile_db.read();
+        let brands = db.camera_db.get_brands();
+        let mut list = QVariantList::default();
+        for b in brands {
+            list.push(QString::from(b).into());
+        }
+        list
+    }
+
+    fn get_camera_models(&self, brand: QString) -> QVariantList {
+        let db = self.stabilizer.lens_profile_db.read();
+        let models = db.camera_db.get_models(&brand.to_string());
+        let mut list = QVariantList::default();
+        for m in models {
+            list.push(QString::from(m).into());
+        }
+        list
+    }
+
+    fn get_camera_info(&self, brand: QString, model: QString) -> QJsonObject {
+        let db = self.stabilizer.lens_profile_db.read();
+        let mut obj = QJsonObject::default();
+        if let Some(c) = db.camera_db.get_camera(&brand.to_string(), &model.to_string()) {
+            if let Some(m) = &c.mount { obj.insert(QString::from("mount"), QString::from(m.as_str()).into()); }
+            if let Some(cf) = c.crop_factor { obj.insert(QString::from("crop_factor"), cf.into()); }
+            if let Some(s) = &c.sensor { obj.insert(QString::from("sensor"), QString::from(s.as_str()).into()); }
+        }
+        obj
+    }
+
+    fn get_lenses_for_camera(&self, brand: QString, model: QString) -> QVariantList {
+        let db = self.stabilizer.lens_profile_db.read();
+        let lenses = db.camera_db.get_lenses_for_camera(&brand.to_string(), &model.to_string());
+        let mut list = QVariantList::default();
+        for l in lenses {
+            list.push(QString::from(l).into());
+        }
+        list
+    }
+
+    fn get_compatible_cameras(&self, brand: QString, model: QString) -> QVariantList {
+        let db = self.stabilizer.lens_profile_db.read();
+        let compats = db.camera_db.get_compatible_cameras(&brand.to_string(), &model.to_string());
+        let mut list = QVariantList::default();
+        for (b, m) in compats {
+            list.push(QString::from(format!("{} {}", b, m)).into());
+        }
+        list
+    }
+
+    fn search_profiles_by_setup(&self, brand: QString, model: QString, lens: QString) {
+        let finished = util::qt_queued_callback_mut(QPointer::from(self as &Self), |this, profiles: QVariantList| {
+            this.search_profiles_by_setup_finished(profiles);
+        });
+        let db = self.stabilizer.lens_profile_db.clone();
+        let brand = brand.to_string();
+        let model = model.to_string();
+        let lens = lens.to_string();
+        core::run_threaded(move || {
+            let res = db.read().search_by_setup(&brand, &model, &lens);
+            let profiles: QVariantList = res.into_iter().map(|(name, file, crc, official, rating, aspect_ratio, author, is_compat)| {
+                let mut list = QVariantList::from_iter([
+                    QString::from(name),
+                    QString::from(file),
+                    QString::from(crc)
+                ].into_iter());
+                list.push(official.into());
+                list.push(rating.into());
+                list.push(aspect_ratio.into());
+                list.push(QString::from(author).into());
+                list.push(is_compat.into());
+                list
+            }).collect();
+            finished(profiles);
+        });
+    }
+
+    fn get_review_profiles(&self, current_id: QString) -> QVariantList {
+        let db = self.stabilizer.lens_profile_db.read();
+        let res = db.get_review_profiles(&current_id.to_string());
+        let profiles: QVariantList = res.into_iter().map(|(name, file, crc, official, rating, aspect_ratio, author)| {
+            let mut list = QVariantList::from_iter([
+                QString::from(name),
+                QString::from(file),
+                QString::from(crc)
+            ].into_iter());
+            list.push(official.into());
+            list.push(rating.into());
+            list.push(aspect_ratio.into());
+            list.push(QString::from(author).into());
+            list
+        }).collect();
+        profiles
+    }
+
     #[allow(unreachable_code)]
     fn fetch_profiles_from_github(&self) {
         use crate::core::lens_profile_database::LensProfileDatabase;
@@ -2410,6 +2546,21 @@ impl Controller {
                                                     if std::io::copy(&mut content, &mut file).is_ok() {
                                                         updated = true;
                                                         update(());
+                                                    }
+                                                }
+                                            }
+
+                                            for asset in obj["assets"].as_array().unwrap_or(&Vec::new()) {
+                                                if let Some(asset_name) = asset.get("name").and_then(|x| x.as_str()) {
+                                                    if asset_name == "cameras.json.gz" {
+                                                        if let Some(dl_url) = asset.get("browser_download_url").and_then(|x| x.as_str()) {
+                                                            if let Ok(mut cam_content) = ureq::get(dl_url).call().map(|x| x.into_body().into_reader()) {
+                                                                let target = gyroflow_core::settings::data_dir().join("lens_profiles").join("cameras.json.gz");
+                                                                if let Ok(mut f) = std::fs::File::create(&target) {
+                                                                    let _ = std::io::copy(&mut cam_content, &mut f);
+                                                                }
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }

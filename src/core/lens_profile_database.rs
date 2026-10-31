@@ -6,9 +6,172 @@ use std::collections::{ HashSet, HashMap, BTreeMap };
 use crate::LensProfile;
 use std::path::PathBuf;
 use std::io::Read;
+use serde::{ Serialize, Deserialize };
 
 #[cfg(any(target_os = "android", target_os = "ios", feature = "bundle-lens-profiles"))]
 static LENS_PROFILES_STATIC: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../resources/camera_presets/profiles.cbor.gz"));
+
+
+static CAMERAS_DB_STATIC: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../resources/camera_presets/cameras.json.gz"));
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct CameraDetails {
+    pub mount: Option<String>,
+    pub crop_factor: Option<f64>,
+    pub sensor: Option<String>,
+    #[serde(default)]
+    pub source: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct LensCalibration {
+    pub model: String,
+    pub focal: f64,
+    pub coeffs: Vec<f64>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct LensDetails {
+    pub mount: Option<String>,
+    pub crop_factor: Option<f64>,
+    pub sensor_coverage: Option<String>,
+    #[serde(default)]
+    pub is_zoom: bool,
+    pub min_focal: Option<f64>,
+    pub max_focal: Option<f64>,
+    #[serde(default)]
+    pub has_calibration: bool,
+    #[serde(default)]
+    pub calibrations: Vec<LensCalibration>,
+    #[serde(default)]
+    pub source: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct MountDetails {
+    #[serde(default)]
+    pub compatible_mounts: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+pub struct CameraDatabase {
+    pub version: u32,
+    #[serde(default)]
+    pub mounts: HashMap<String, MountDetails>,
+    #[serde(default)]
+    pub cameras: BTreeMap<String, BTreeMap<String, CameraDetails>>,
+    #[serde(default)]
+    pub lenses: BTreeMap<String, BTreeMap<String, LensDetails>>,
+}
+
+impl CameraDatabase {
+    pub fn get_brands(&self) -> Vec<String> {
+        self.cameras.keys().cloned().collect()
+    }
+
+    pub fn get_models(&self, brand: &str) -> Vec<String> {
+        self.cameras.get(brand).map(|m| m.keys().cloned().collect()).unwrap_or_default()
+    }
+
+    pub fn get_camera(&self, brand: &str, model: &str) -> Option<&CameraDetails> {
+        self.cameras.get(brand).and_then(|m| m.get(model))
+    }
+
+    pub fn get_compatible_cameras(&self, brand: &str, model: &str) -> Vec<(String, String)> {
+        let mut result = Vec::new();
+        let Some(target) = self.get_camera(brand, model) else { return result; };
+        let target_mount = target.mount.as_deref().unwrap_or("Unknown");
+        if target_mount == "Fixed / Integrated" || target_mount == "Unknown" {
+            return result;
+        }
+        let target_crop = target.crop_factor.unwrap_or(1.0);
+        let target_sensor = target.sensor.as_deref().unwrap_or("");
+
+        let mut comp_mounts = vec![target_mount.to_string()];
+        if let Some(m) = self.mounts.get(target_mount) {
+            comp_mounts.extend(m.compatible_mounts.clone());
+        }
+
+        for (b, models) in &self.cameras {
+            for (m, details) in models {
+                if b == brand && m == model { continue; }
+                let mount = details.mount.as_deref().unwrap_or("");
+                if comp_mounts.iter().any(|cm| cm.eq_ignore_ascii_case(mount)) {
+                    let crop = details.crop_factor.unwrap_or(1.0);
+                    let sensor = details.sensor.as_deref().unwrap_or("");
+                    if (crop - target_crop).abs() < 0.1 || (!target_sensor.is_empty() && sensor == target_sensor) {
+                        result.push((b.clone(), m.clone()));
+                    }
+                }
+            }
+        }
+        result
+    }
+
+    pub fn get_lenses_for_camera(&self, brand: &str, model: &str) -> Vec<String> {
+        let mut brand_lenses = Vec::new();
+        let mut other_lenses = Vec::new();
+
+        let target_mount = self.get_camera(brand, model)
+            .and_then(|c| c.mount.as_deref())
+            .unwrap_or("Interchangeable");
+
+        let mut comp_mounts = vec![target_mount.to_string()];
+        if let Some(m) = self.mounts.get(target_mount) {
+            comp_mounts.extend(m.compatible_mounts.clone());
+        }
+
+        for (lens_maker, models) in &self.lenses {
+            for (lens_name, details) in models {
+                let lens_mount = details.mount.as_deref().unwrap_or("");
+                let is_match = target_mount == "Interchangeable"
+                    || lens_mount == "Interchangeable"
+                    || lens_mount.is_empty()
+                    || comp_mounts.iter().any(|cm| cm.eq_ignore_ascii_case(lens_mount));
+
+                if is_match {
+                    let formatted = if lens_name.starts_with(lens_maker) {
+                        lens_name.clone()
+                    } else {
+                        format!("{} {}", lens_maker, lens_name)
+                    };
+                    if lens_maker.eq_ignore_ascii_case(brand) {
+                        brand_lenses.push(formatted);
+                    } else {
+                        other_lenses.push(formatted);
+                    }
+                }
+            }
+        }
+        brand_lenses.sort_unstable();
+        brand_lenses.dedup();
+        other_lenses.sort_unstable();
+        other_lenses.dedup();
+        brand_lenses.extend(other_lenses);
+        brand_lenses
+    }
+
+    pub fn create_lensfun_profile(camera_brand: &str, camera_model: &str, lens_maker: &str, lens_model: &str, calib: &LensCalibration, crop_factor: f64) -> crate::LensProfile {
+        let mut lp = crate::LensProfile::default();
+        lp.name = format!("{} - {} (LensFun)", camera_model, lens_model);
+        lp.camera_brand = camera_brand.to_string();
+        lp.camera_model = camera_model.to_string();
+        lp.lens_model = format!("{} {}", lens_maker, lens_model).trim().to_string();
+        lp.calibrated_by = "LensFun DB".to_string();
+        lp.official = true;
+        lp.focal_length = Some(calib.focal);
+        lp.crop_factor = Some(crop_factor);
+        lp.distortion_model = Some("ptlens".to_string());
+        lp.fisheye_params.distortion_coeffs = calib.coeffs.clone();
+        let w = (3840.0 / crop_factor.max(0.1)).round() as usize;
+        let h = (2160.0 / crop_factor.max(0.1)).round() as usize;
+        lp.calib_dimension = crate::lens_profile::Dimensions { w, h };
+        lp.orig_dimension = crate::lens_profile::Dimensions { w, h };
+        lp.identifier = format!("lensfun_{}_{}_{}_{}", camera_brand, camera_model, lens_model, calib.focal).replace(' ', "_");
+        lp.checksum = Some(format!("{:08x}", crc32fast::hash(lp.identifier.as_bytes())));
+        lp
+    }
+}
 
 #[allow(dead_code)]
 enum DataSource {
@@ -35,10 +198,11 @@ pub struct LensProfileDatabase {
     list_for_ui: Vec<(String, String, String, bool, f64, i32, String)>,
     pub loaded: bool,
     pub version: u32,
+    pub camera_db: CameraDatabase,
 }
 impl Clone for LensProfileDatabase {
     fn clone(&self) -> Self {
-        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), files: self.files.clone(), loaded: self.loaded, ..Default::default() }
+        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), files: self.files.clone(), loaded: self.loaded, version: self.version, camera_db: self.camera_db.clone(), ..Default::default() }
     }
 }
 
@@ -219,6 +383,50 @@ impl LensProfileDatabase {
             v.resolve_interpolations(&copy);
         }
 
+        
+        // Load CameraDatabase
+        let load_cam_from_slice = |bytes: &[u8]| -> Option<CameraDatabase> {
+            let mut gz = flate2::read::GzDecoder::new(bytes);
+            let mut decompressed = Vec::new();
+            if gz.read_to_end(&mut decompressed).is_ok() {
+                serde_json::from_slice(&decompressed).ok()
+            } else {
+                None
+            }
+        };
+
+        let mut loaded_cam_db = None;
+        let user_cam_gz = crate::settings::data_dir().join("lens_profiles").join("cameras.json.gz");
+        if user_cam_gz.exists() {
+            if let Ok(bytes) = std::fs::read(&user_cam_gz) {
+                loaded_cam_db = load_cam_from_slice(&bytes);
+            }
+        }
+        if loaded_cam_db.is_none() {
+            let local_cam_gz = Self::get_path().join("cameras.json.gz");
+            if local_cam_gz.exists() {
+                if let Ok(bytes) = std::fs::read(&local_cam_gz) {
+                    loaded_cam_db = load_cam_from_slice(&bytes);
+                }
+            }
+        }
+        if loaded_cam_db.is_none() {
+            let local_cam_json = Self::get_path().join("cameras.json");
+            if local_cam_json.exists() {
+                if let Ok(s) = std::fs::read_to_string(&local_cam_json) {
+                    loaded_cam_db = serde_json::from_str(&s).ok();
+                }
+            }
+        }
+        if loaded_cam_db.is_none() {
+            loaded_cam_db = load_cam_from_slice(CAMERAS_DB_STATIC);
+        }
+
+        if let Some(cdb) = loaded_cam_db {
+            ::log::info!("Loaded camera database: {} brands, {} lenses", cdb.cameras.len(), cdb.lenses.len());
+            self.camera_db = cdb;
+        }
+
         ::log::info!("Loaded {} lens profiles in {:.3}ms", self.map.len(), _time.elapsed().as_micros() as f64 / 1000.0);
         self.loaded = true;
     }
@@ -229,6 +437,7 @@ impl LensProfileDatabase {
         self.files = b.files;
         self.loaded = b.loaded;
         self.version = b.version;
+        self.camera_db = b.camera_db;
         if self.loaded {
             let cbs: Vec<_> = self.loaded_callbacks.drain(..).collect();
             for cb in cbs {
@@ -384,6 +593,78 @@ impl LensProfileDatabase {
                 }
             }
         }
+    }
+
+    
+    pub fn search_by_setup(&self, brand: &str, model: &str, lens_model: &str) -> Vec<(String, String, String, bool, f64, i32, String, bool)> {
+        let brand_clean = brand.trim();
+        let model_clean = model.trim();
+        let lens_clean = lens_model.trim().to_ascii_lowercase();
+
+        let mut direct_matches = Vec::new();
+        let mut compat_matches = Vec::new();
+
+        // 1. Direct matches
+        for (k, v) in &self.map {
+            if v.is_copy { continue; }
+            let brand_match = v.camera_brand.eq_ignore_ascii_case(brand_clean);
+            let model_match = v.camera_model.eq_ignore_ascii_case(model_clean);
+            if brand_match && model_match {
+                if lens_clean.is_empty() || v.lens_model.to_ascii_lowercase().contains(&lens_clean) || lens_clean.contains(&v.lens_model.to_ascii_lowercase()) {
+                    let hstretch = if v.input_horizontal_stretch > 0.01 { v.input_horizontal_stretch } else { 1.0 };
+                    let vstretch = if v.input_vertical_stretch   > 0.01 { v.input_vertical_stretch   } else { 1.0 };
+                    let aspect_ratio = (((v.calib_dimension.w as f64 / hstretch) / (v.calib_dimension.h.max(1) as f64 / vstretch)) * 1000.0).round() as i32;
+                    direct_matches.push((v.get_display_name(), k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.unwrap_or_default(), aspect_ratio, v.calibrated_by.clone(), false));
+                }
+            }
+        }
+
+        // 2. Compatible matches (e.g. Sony A7 III profiles on Sony A7 IV)
+        let compatible_cameras = self.camera_db.get_compatible_cameras(brand_clean, model_clean);
+        for (comp_brand, comp_model) in &compatible_cameras {
+            for (k, v) in &self.map {
+                if v.is_copy { continue; }
+                if v.camera_brand.eq_ignore_ascii_case(comp_brand) && v.camera_model.eq_ignore_ascii_case(comp_model) {
+                    if !lens_clean.is_empty() && (v.lens_model.to_ascii_lowercase().contains(&lens_clean) || lens_clean.contains(&v.lens_model.to_ascii_lowercase())) {
+                        let hstretch = if v.input_horizontal_stretch > 0.01 { v.input_horizontal_stretch } else { 1.0 };
+                        let vstretch = if v.input_vertical_stretch   > 0.01 { v.input_vertical_stretch   } else { 1.0 };
+                        let aspect_ratio = (((v.calib_dimension.w as f64 / hstretch) / (v.calib_dimension.h.max(1) as f64 / vstretch)) * 1000.0).round() as i32;
+                        compat_matches.push((format!("{} (Compatible: {})", v.get_display_name(), comp_model), k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.unwrap_or_default(), aspect_ratio, v.calibrated_by.clone(), true));
+                    }
+                }
+            }
+        }
+
+        direct_matches.sort_by(|a, b| b.3.cmp(&a.3).then_with(|| a.0.cmp(&b.0)));
+        compat_matches.sort_by(|a, b| b.3.cmp(&a.3).then_with(|| a.0.cmp(&b.0)));
+
+        direct_matches.extend(compat_matches);
+        direct_matches
+    }
+
+    pub fn get_review_profiles(&self, current_key_or_checksum: &str) -> Vec<(String, String, String, bool, f64, i32, String)> {
+        let current = self.map.get(current_key_or_checksum)
+            .or_else(|| self.map.values().find(|p| p.checksum.as_deref() == Some(current_key_or_checksum)));
+
+        let Some(current) = current else { return Vec::new(); };
+        let brand = current.camera_brand.trim();
+        let model = current.camera_model.trim();
+        let lens = current.lens_model.trim().to_ascii_lowercase();
+
+        let mut matches = Vec::new();
+        for (k, v) in &self.map {
+            if v.is_copy { continue; }
+            if v.camera_brand.eq_ignore_ascii_case(brand) && v.camera_model.eq_ignore_ascii_case(model) {
+                if lens.is_empty() || v.lens_model.to_ascii_lowercase() == lens {
+                    let hstretch = if v.input_horizontal_stretch > 0.01 { v.input_horizontal_stretch } else { 1.0 };
+                    let vstretch = if v.input_vertical_stretch   > 0.01 { v.input_vertical_stretch   } else { 1.0 };
+                    let aspect_ratio = (((v.calib_dimension.w as f64 / hstretch) / (v.calib_dimension.h.max(1) as f64 / vstretch)) * 1000.0).round() as i32;
+                    matches.push((v.get_display_name(), k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.unwrap_or_default(), aspect_ratio, v.calibrated_by.clone()));
+                }
+            }
+        }
+        matches.sort_by(|a, b| b.3.cmp(&a.3).then_with(|| a.0.cmp(&b.0)));
+        matches
     }
 
     pub fn on_loaded<F: FnOnce(&Self) + Send + Sync + 'static>(&mut self, cb: F) {
