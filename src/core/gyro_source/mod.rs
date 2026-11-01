@@ -727,10 +727,36 @@ impl GyroSource {
         if sony_packet_timed { log::debug!("Sony gyro samples re-timed from the metadata packets"); }
         // Where each reading came from, in the readings' order. Sony's readings come with their frame's sample, none
         // with a frame of its own, and re-timing them can reorder them, with their samples
-        let imu_origins: Vec<ReadingOrigin> = if sony_packet_timed {
+        let mut imu_origins: Vec<ReadingOrigin> = if sony_packet_timed {
             imu_origins.into_iter().map(|sample| ReadingOrigin { sample, frame: None }).collect()
         } else {
             origins
+        };
+
+        // An off-speed Blackmagic RAW clip's readings are timed by its frames' capture (telemetry-parser's `CaptureRate`),
+        // whatever its frames' durations: where a frame is held mid-video, the parts after it have their readings where
+        // their frames look them up only moved by that frame's hold (`TrimSegments::held_after_capture`), the rates as
+        // the files state them (`StabilizationManager::capture_frame_rate`)
+        let held_ms = match (&reading_parts, options.video_frame_times.as_deref()) {
+            (Some((parts, sample_parts)), Some(times)) if input.camera_type().starts_with("Blackmagic") && input.readings_at_table_frames() => {
+                let scale = crate::StabilizationManager::capture_frame_rate(frame_rate, fps, Some(times.frame_rate()))
+                    .filter(|_| fps > 0.0).map(|rate| rate / fps).filter(|scale| StabilizationParams::is_valid_fps_scale(*scale));
+                let held = scale.map(|scale| parts.held_after_capture(times, scale)).filter(|held| held.iter().any(|ms| *ms != 0.0)).unwrap_or_default();
+                if !held.is_empty() {
+                    for (x, origin) in raw_imu.iter_mut().zip(&imu_origins) {
+                        if let Some(ms) = parts.part_of_reading(sample_parts, origin).and_then(|r| held.get(r)) { x.timestamp_ms += *ms; }
+                    }
+                    // A frame shorter than the others moves the frames after it earlier, which can bring a part's readings
+                    // before the last ones of the part before: the readings stay in time order
+                    if raw_imu.windows(2).any(|w| w[1].timestamp_ms < w[0].timestamp_ms) {
+                        let mut by_time: Vec<_> = std::mem::take(&mut raw_imu).into_iter().zip(std::mem::take(&mut imu_origins)).collect();
+                        by_time.sort_by(|a, b| a.0.timestamp_ms.total_cmp(&b.0.timestamp_ms));
+                        (raw_imu, imu_origins) = by_time.into_iter().unzip();
+                    }
+                }
+                held
+            }
+            _ => Vec::new(),
         };
 
         if (input.camera_type() == "RED" || input.camera_type() == "RED RAW") && options.project_version > 0 && options.project_version < 4 { // Legacy gyro offset
@@ -760,6 +786,7 @@ impl GyroSource {
             segments.metadata_us = metadata_us;
             segments.unplaced = unplaced;
             segments.motion_unplaced = !input.readings_at_table_frames();
+            segments.held_ms = held_ms;
             segments
         });
 

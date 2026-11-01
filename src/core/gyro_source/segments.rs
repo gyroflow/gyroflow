@@ -125,6 +125,10 @@ pub struct TrimSegments {
     /// is integrated, filtered and smoothed as one piece (`SegmentRanges::whole`)
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub motion_unplaced: bool,
+    /// How far each part's readings are moved from their times in the file, ms (`held_after_capture`), empty where
+    /// none is
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub held_ms: Vec<f64>,
 }
 
 impl TrimSegments {
@@ -133,7 +137,7 @@ impl TrimSegments {
     /// in `samples`, and its frame where the format records it)
     pub fn new(table: SegmentTable, samples: &[SampleInfo], series: &[(MotionSeries, &[(i64, ReadingOrigin)])]) -> Self {
         let parts = contiguous_parts(&table);
-        let mut segments = Self { table, parts, readings: Vec::new(), metadata_us: Vec::new(), unplaced: Vec::new(), motion_unplaced: false };
+        let mut segments = Self { table, parts, readings: Vec::new(), metadata_us: Vec::new(), unplaced: Vec::new(), motion_unplaced: false, held_ms: Vec::new() };
         let sample_part = segments.sample_parts(samples, series);
         // Each series' readings in time order, in runs of one part
         let mut runs: Vec<ReadingRun> = Vec::new();
@@ -210,6 +214,20 @@ impl TrimSegments {
             // An empty range: no key is in it
             None => RangeInclusive::new(1, 0),
         }
+    }
+
+    /// How far the readings of each part of an off-speed recording timed by its frames' capture are moved on the motion
+    /// data's timeline, ms, to be where the part's frames look them up: the time its first frame is held after its place
+    /// among the frames (`FrameTimes::held_before_ms`). gyroflow looks a frame up at its time in the file over the frame
+    /// rate scale `scale`, which is its capture time for frames evenly spaced from the file's start. A camera that
+    /// captures a frame `1 / rate` after the one before and writes its frames at another rate holds the last one until
+    /// the recording's end (Blackmagic RAW's undercranked clips), so a part after such a frame is presented that much
+    /// later than it's captured: its frames' times over the scale are past all its readings, which go on from the part
+    /// before's by the frames' capture. A part's readings are its own however far they are from another part's: its
+    /// motion is integrated, filtered and looked up on its own (`SegmentRanges`), so nothing reads across the time between
+    /// them. All 0 for a video without such a frame
+    pub fn held_after_capture(&self, times: &crate::frame_times::FrameTimes, scale: f64) -> Vec<f64> {
+        (0..self.len()).map(|r| times.held_before_ms(self.frames(r).start, scale)).collect()
     }
 
     /// How many parts the video has (`parts`)

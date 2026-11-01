@@ -14,12 +14,14 @@ use telemetry_parser::segment_table::VideoFrameTimes;
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct FrameTimes {
-    /// Where each frame starts, ms, in the file's time
-    starts_ms: Vec<f64>,
+    /// Ticks per second of the times below, the file's video track's
+    timescale: u64,
+    /// Where each frame starts, in the file's time
+    starts: Vec<i64>,
     /// Where the last frame ends: the end of the video (`of_video`)
-    end_ms: f64,
+    end: i64,
     /// The video's most common frame duration, for times outside of it
-    nominal_ms: f64,
+    nominal: i64,
 }
 
 impl FrameTimes {
@@ -32,41 +34,63 @@ impl FrameTimes {
         let even = v.starts.iter().enumerate().all(|(k, t)| *t == k as i64 * v.nominal);
         let last = *v.starts.last()?;
         if even || v.timescale == 0 || v.nominal <= 0 { return None; }
-        let ms = |t: i64| t as f64 * 1000.0 / v.timescale as f64;
         // A last frame that lasts 0 is one whose duration the file leaves unknown, which the decoders make a nominal
         // frame's (FFmpeg's demuxer gives a packet without a duration one frame of the stream's rate, `demux.c`
         // `compute_pkt_fields`): it's presented, and the video ends, a frame after its start. Ended at its start, the
         // video would have its last frame and the frame after the end at one time, and lookups there the one past the end
         let end = if v.end > last { v.end } else { last + v.nominal };
-        Some(Self { starts_ms: v.starts.iter().map(|t| ms(*t)).collect(), end_ms: ms(end), nominal_ms: ms(v.nominal) })
+        Some(Self { timescale: v.timescale, starts: v.starts.clone(), end, nominal: v.nominal })
     }
 
-    pub fn frames(&self) -> usize { self.starts_ms.len() }
+    pub fn frames(&self) -> usize { self.starts.len() }
+
+    /// The video's frame rate as its file states it, its timescale over its most common frame duration
+    pub fn frame_rate(&self) -> f64 { self.timescale as f64 / self.nominal as f64 }
+
+    /// How much later than its place among the frames frame `frame` is presented, ms in the video's time (the file's over
+    /// `scale`): the time frames before it last longer than a nominal frame, less what any lasts shorter. An off-speed
+    /// Blackmagic RAW recording ends with a frame that lasts until the recording's end, so a video cut from recordings
+    /// has that frame wherever its cut puts it, and the frames after it this much after their place
+    pub fn held_before_ms(&self, frame: usize, scale: f64) -> f64 {
+        let frame = frame.min(self.starts.len().saturating_sub(1));
+        let (first, start) = (self.starts.first().copied().unwrap_or(0), self.starts.get(frame).copied().unwrap_or(0));
+        self.ms(start - first - frame as i64 * self.nominal) / scale
+    }
+
+    /// A time of the file, in ticks, in ms
+    fn ms(&self, ticks: i64) -> f64 { ticks as f64 * 1000.0 / self.timescale as f64 }
 
     /// The time (ms) frame `frame` is presented at, in the video's time: the file's over `scale` (the frame rate scale,
     /// `StabilizationParams::fps_scale`). Frames before the first one or after the last one are a nominal frame duration
     /// apart
     pub fn timestamp_at_frame(&self, frame: i32, scale: f64) -> f64 {
-        let n = self.starts_ms.len() as i64;
+        let n = self.starts.len() as i64;
         let file_ms = match frame as i64 {
-            f if f < 0 => self.starts_ms[0] + f as f64 * self.nominal_ms,
-            f if f >= n => self.end_ms + (f - n) as f64 * self.nominal_ms,
-            f => self.starts_ms[f as usize],
+            f if f < 0 => self.ms(self.starts[0]) + f as f64 * self.ms(self.nominal),
+            f if f >= n => self.ms(self.end) + (f - n) as f64 * self.ms(self.nominal),
+            f => self.ms(self.starts[f as usize]),
         };
         file_ms / scale
     }
 
     /// The frame presented at the video's time `timestamp_ms` (the file's over `scale`): the one whose time is the nearest,
-    /// the later one on a tie, as `round(t · fps)` takes it for evenly spaced frames
+    /// the later one on a tie, as `round(t · fps)` takes it for evenly spaced frames, where that's within half a nominal
+    /// frame. A frame is presented until the next one starts, so a time further from both is the earlier one's: a frame
+    /// that lasts for several of the video's frame durations (a Blackmagic RAW clip's frame held for its whole frames,
+    /// each of which Blackmagic's SDK counts a frame of the clip and reads none of but the first; a frame before one the
+    /// camera dropped) is the frame at each of its times but the half frame before the next one. A time half way is
+    /// the later frame's exactly: twice the time is compared with the sum of the two times it's half way between, in
+    /// the file's ticks, which a single rounding takes to ms
     pub fn frame_at_timestamp(&self, timestamp_ms: f64, scale: f64) -> i32 {
         let t = timestamp_ms * scale;
-        let (first, n) = (self.starts_ms[0], self.starts_ms.len());
-        if t < first { return ((t - first) / self.nominal_ms).round() as i32; }
-        if t >= self.end_ms { return (n as f64 + ((t - self.end_ms) / self.nominal_ms).round()) as i32; }
-        // The last frame starting at or before `t`, or the next one when that's nearer
-        let k = self.starts_ms.partition_point(|s| *s <= t).saturating_sub(1);
-        let next = self.starts_ms.get(k + 1).copied().unwrap_or(self.end_ms);
-        let k = if next - t <= t - self.starts_ms[k] { k + 1 } else { k };
+        let (first, end, nominal, n) = (self.ms(self.starts[0]), self.ms(self.end), self.ms(self.nominal), self.starts.len());
+        if t < first { return ((t - first) / nominal).round() as i32; }
+        if t >= end { return (n as f64 + ((t - end) / nominal).round()) as i32; }
+        // The last frame starting at or before `t`, or the next one from half way between its start and the later of
+        // this one's and a nominal frame before it: when that's nearer, and within half a frame
+        let k = self.starts.partition_point(|s| self.ms(*s) <= t).saturating_sub(1);
+        let next = self.starts.get(k + 1).copied().unwrap_or(self.end);
+        let k = if 2.0 * t >= self.ms(next + self.starts[k].max(next - self.nominal)) { k + 1 } else { k };
         k as i32
     }
 
@@ -74,10 +98,10 @@ impl FrameTimes {
     /// takes it for evenly spaced frames
     pub fn first_frame_at_or_after(&self, timestamp_ms: f64, scale: f64) -> i32 {
         let t = timestamp_ms * scale;
-        let (first, n) = (self.starts_ms[0], self.starts_ms.len());
-        if t <= first { return ((t - first) / self.nominal_ms).ceil() as i32; }
-        if t > self.starts_ms[n - 1] { return (n as f64 + ((t - self.end_ms) / self.nominal_ms).ceil().max(0.0)) as i32; }
-        self.starts_ms.partition_point(|s| *s < t) as i32
+        let (first, n) = (self.ms(self.starts[0]), self.starts.len());
+        if t <= first { return ((t - first) / self.ms(self.nominal)).ceil() as i32; }
+        if t > self.ms(self.starts[n - 1]) { return (n as f64 + ((t - self.ms(self.end)) / self.ms(self.nominal)).ceil().max(0.0)) as i32; }
+        self.starts.partition_point(|s| self.ms(*s) < t) as i32
     }
 
     /// A fingerprint of the times, to the µs, for the keys of everything computed per frame (the zoom, the smoothing, the
@@ -86,9 +110,9 @@ impl FrameTimes {
     /// project files
     pub fn checksum(&self) -> u64 {
         let mut h = crate::gyro_source::optical_correction::Fnv::default();
-        h.eat(self.starts_ms.len() as u64);
-        for t in &self.starts_ms { h.eat_rounded(*t, 1e3); }
-        h.eat_rounded(self.end_ms, 1e3);
+        h.eat(self.starts.len() as u64);
+        for t in &self.starts { h.eat_rounded(self.ms(*t), 1e3); }
+        h.eat_rounded(self.ms(self.end), 1e3);
         h.0
     }
 }
