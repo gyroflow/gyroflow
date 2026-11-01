@@ -2700,7 +2700,7 @@ impl Controller {
         core::run_threaded(move || {
             let mut vidinfo = None;
             for x in &file_list {
-                match rendering::ffmpeg_processor::FfmpegProcessor::get_video_info(x) {
+                match rendering::ffmpeg_processor::FfmpegProcessor::get_video_info(x, None) {
                     Ok(x) => {
                         if vidinfo.is_none() {
                             vidinfo = Some(x);
@@ -3024,11 +3024,7 @@ impl Controller {
 
     /// The frame rate an image of a sequence records (a CinemaDNG frame's FrameRate tag), 0 when it doesn't record one
     fn image_sequence_frame_rate(&self, url: QUrl) -> f64 {
-        let url = util::qurl_to_encoded(url);
-        if !filesystem::get_filename(&url).to_ascii_lowercase().ends_with(".dng") { return 0.0; }
-        let Ok(mut file) = filesystem::open_file(&url, false, false) else { return 0.0; };
-        let size = file.size as u64;
-        gyroflow_core::telemetry_parser::gyroflow::cdng::frame_rate(file.get_file(), size).unwrap_or_default()
+        rendering::image_sequence_frame_rate(&util::qurl_to_encoded(url))
     }
 
     /// The input file that rendering the video loaded to `filename` in `folder` with `codec` would write over, as it's shown

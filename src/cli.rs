@@ -38,7 +38,7 @@ Exit codes: 0 - success, 1 - render failure, 2 - invalid arguments
 */
 #[derive(FromArgs)]
 struct Opts {
-    /// input files: videos, project files, lens profiles, presets
+    /// input files: videos, image sequences (PNG, JPEG, EXR, DNG: their first frame, or all of them as eg. "A001_%06d.dng"), project files, lens profiles, presets
     #[argh(positional)]
     input: Vec<String>,
 
@@ -118,6 +118,10 @@ struct Opts {
     #[argh(option, short = 'g')]
     gyro_file: Option<String>,
 
+    /// frame rate of the image sequences. Default: the one their frames record (CinemaDNG), otherwise the last one entered in the GUI (30)
+    #[argh(option)]
+    image_sequence_fps: Option<f64>,
+
     /// processing device index. By default it uses the one set in the GUI
     #[argh(option, short = 'b')]
     processing_device: Option<i32>,
@@ -160,13 +164,25 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
         let absolute_paths: Vec<String> = opts.input.iter().map(|file| {
             let path = std::path::PathBuf::from(file);
             if path.is_relative() {
-                std::fs::canonicalize(&path).unwrap_or_else(|_| path).to_string_lossy().to_string()
+                // The frames of an image sequence (`A001_%06d.dng`) aren't a file that can be resolved
+                std::fs::canonicalize(&path).or_else(|_| std::path::absolute(&path)).unwrap_or(path).to_string_lossy().to_string()
             } else {
                 file.clone()
             }
         }).collect();
 
         let (videos, mut lens_profiles, mut presets) = detect_types(&absolute_paths);
+        // An image sequence is loaded as FFmpeg reads it, from its frames' pattern
+        let videos: Vec<(String, Option<ImageSequence>)> = videos.into_iter().map(|file| match ImageSequence::detect(&file) {
+            Some(sequence) => (sequence.pattern.clone(), Some(sequence)),
+            None => (file, None)
+        }).collect();
+        if let Some(fps) = opts.image_sequence_fps {
+            if !(fps > 0.0 && fps.is_finite()) {
+                log::error!("Invalid --image-sequence-fps value {}.", fps);
+                std::process::exit(2);
+            }
+        }
         if let Some(mut preset) = opts.preset {
             if !preset.is_empty() {
                 if preset.starts_with('{') { preset = preset.replace('\'', "\""); }
@@ -191,7 +207,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             }
         }
 
-        for file in videos.iter().chain(lens_profiles.iter()) {
+        for file in videos.iter().map(|(file, sequence)| sequence.as_ref().map_or(file, |x| &x.first_frame)).chain(lens_profiles.iter()) {
             if !std::path::Path::new(&file).exists() {
                 log::error!("File {} doesn't exist.", file);
                 std::process::exit(2);
@@ -209,7 +225,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                 std::process::exit(2);
             }
 
-            log::info!("Videos: {:?}", videos);
+            log::info!("Videos: {:?}", videos.iter().map(|x| &x.0).collect::<Vec<_>>());
             if !lens_profiles.is_empty() { log::info!("Lens profiles: {:?}", lens_profiles); }
             if !presets.is_empty() { log::info!("Presets: {:?}", presets); }
         }
@@ -560,7 +576,17 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                     file.clone()
                 }
             }).unwrap_or_default();
-            for file in &videos {
+            for (file, sequence) in &videos {
+                let mut additional_data = additional_data.clone();
+                if let Some(sequence) = sequence {
+                    // As the GUI asks for it: the frame rate the frames record, otherwise the last one entered
+                    let fps = opts.image_sequence_fps
+                        .or_else(|| Some(rendering::image_sequence_frame_rate(&path_to_url(&sequence.first_frame))).filter(|x| *x > 0.0))
+                        .unwrap_or_else(|| settings::get_f64("imageSequenceFps", 30.0));
+                    log::info!("Image sequence {} from frame {} at {} fps", file, sequence.start, fps);
+                    additional_data["image_sequence_start"] = sequence.start.into();
+                    additional_data["image_sequence_fps"] = fps.into();
+                }
                 queue.add_file(path_to_url(file), path_to_url(&gyro_file), additional_data.to_string());
             }
             if queue.jobs_added.is_empty() {
@@ -611,6 +637,40 @@ fn detect_types(all_files: &[String]) -> (Vec<String>, Vec<String>, Vec<String>)
         }
     }
     (videos, lens_profiles, presets)
+}
+
+/// An image sequence among the input files: its frames as FFmpeg's image2 demuxer reads them (`A001_%06d.dng`), and the number
+/// and path of the first one
+struct ImageSequence {
+    pattern: String,
+    start: usize,
+    first_frame: String,
+}
+impl ImageSequence {
+    /// The image sequence of PNG, JPEG, EXR or DNG images `file` is: as the GUI finds it (`VideoArea.qml:detectImageSequence`), a
+    /// frame numbered like the 4 files after it, which the sequence starts with. Or the frames' pattern (`%06d`, `FramePath`), with
+    /// the lowest one there
+    fn detect(file: &str) -> Option<Self> {
+        use gyroflow_core::filesystem::FramePath;
+        let (stem, ext) = file.rsplit_once('.')?;
+        if !["png", "jpg", "exr", "dng"].iter().any(|x| ext.eq_ignore_ascii_case(x)) { return None; }
+
+        // FFmpeg's start_number is an int
+        let numbers = 0..=i32::MAX as usize;
+        if let Some(frames) = FramePath::parse(file) {
+            let folder = std::path::Path::new(file).parent()?.to_string_lossy().to_string();
+            let start = frames.find(&numbers, &path_to_url(&folder), &std::sync::atomic::AtomicBool::new(false))?.into_iter().find(|x| x.1)?.0;
+            return Some(Self { pattern: file.to_owned(), start, first_frame: frames.frame(start) });
+        }
+        let prefix = stem.trim_end_matches(|x: char| x.is_ascii_digit());
+        let digits = &stem[prefix.len()..];
+        let start = digits.parse::<usize>().ok().filter(|x| numbers.contains(x))?;
+        // A % in the rest of the path is one for FFmpeg too
+        let pattern = format!("{}%0{}d.{ext}", prefix.replace('%', "%%"), digits.len());
+        let frames = FramePath::parse(&pattern)?;
+        if !(start + 1..start + 5).all(|n| std::path::Path::new(&frames.frame(n)).exists()) { return None; }
+        Some(Self { pattern, start, first_frame: file.to_owned() })
+    }
 }
 
 fn parse_type_and_path(value: &str) -> Option<(usize, String)> { // "3:camera.json" -> (3, "camera.json")

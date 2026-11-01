@@ -982,9 +982,10 @@ impl<'a> FfmpegProcessor<'a> {
         })
     }
 
-    pub fn get_video_info(url: &str) -> Result<VideoInfo, ffmpeg_next::Error> {
+    /// `options` for the demuxer, eg. an image sequence's (`rendering::image_sequence_options`)
+    pub fn get_video_info(url: &str, options: Option<Dictionary>) -> Result<VideoInfo, ffmpeg_next::Error> {
         let mut file = FfmpegPathWrapper::new(url, false).map_err(|_| ffmpeg_next::Error::ProtocolNotFound)?;
-        let mut dict = Dictionary::new();
+        let mut dict = options.unwrap_or_else(Dictionary::new);
         if file.path.starts_with("fd:") {
             dict.set("fd", &file.path[3..]);
             file.path = "fd:".into();

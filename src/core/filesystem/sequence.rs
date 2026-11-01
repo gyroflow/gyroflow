@@ -49,6 +49,12 @@ impl FramePath {
     pub fn too_long(&self) -> bool {
         self.widths.iter().any(|&x| x > 32767)
     }
+    /// The path without its numbers, nor the separators before them, as the name of the video the frames make up:
+    /// `A001_%06d.dng` is `A001.dng`
+    pub fn without_numbers(&self) -> String {
+        let last = self.text.len() - 1;
+        self.text.iter().enumerate().map(|(i, x)| if i < last { x.trim_end_matches(['_', '-', '.', ' ']) } else { x.as_str() }).collect()
+    }
     /// The name of frame `n`
     pub fn frame(&self, n: usize) -> String {
         let mut ret = self.text[0].clone();

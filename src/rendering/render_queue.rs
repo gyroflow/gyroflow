@@ -1167,6 +1167,10 @@ impl RenderQueue {
             return render_options.output_filename.to_owned();
         }
         let mut filename = filesystem::get_filename(input_url);
+        // The video an image sequence's frames make up is named without their number
+        if let Some(frames) = filesystem::FramePath::parse(&filename) {
+            filename = frames.without_numbers();
+        }
 
         let mut ext = override_ext.unwrap_or(match render_options.codec.as_ref() {
             "ProRes"        => ".mov",
@@ -1239,6 +1243,9 @@ impl RenderQueue {
             if let Some(sync) = additional_data.get("synchronization") {
                 sync_options = sync.clone();
             }
+            // An image sequence (`url` names its frames, eg. `A001_%06d.dng`): its first frame and frame rate, as a project has them
+            let image_sequence_start = additional_data.get("image_sequence_start").and_then(|x| x.as_i64()).unwrap_or_default() as i32;
+            let image_sequence_fps = additional_data.get("image_sequence_fps").and_then(|x| x.as_f64()).unwrap_or_default();
             if let Some(out) = additional_data.get("output") {
                 let has_output_width  = out.as_object().map(|x| x.contains_key("output_width")).unwrap_or_default() && out.get("output_width").and_then(|x| x.as_i64()).unwrap_or_default() > 0;
                 let has_output_height = out.as_object().map(|x| x.contains_key("output_height")).unwrap_or_default() && out.get("output_height").and_then(|x| x.as_i64()).unwrap_or_default() > 0;
@@ -1273,7 +1280,7 @@ impl RenderQueue {
                             zoom_limit_whole_clip:     params.zoom_limit_whole_clip,
                             ..Default::default()
                         })),
-                        input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { url: if is_gf_data { String::new() } else { url.clone() }, project_file_url: None, image_sequence_start: 0, image_sequence_fps: 0.0, preset_name: None, preset_output_size: None })),
+                        input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { url: if is_gf_data { String::new() } else { url.clone() }, project_file_url: None, image_sequence_start, image_sequence_fps, preset_name: None, preset_output_size: None })),
                         lens_profile_db: stabilizer.lens_profile_db.clone(),
                         ..Default::default()
                     };
@@ -1295,10 +1302,12 @@ impl RenderQueue {
                     });
 
                     core::run_threaded(move || {
+                        // How FFmpeg reads the input where it's an image sequence (a project's, once it's loaded)
+                        let sequence_options = || rendering::image_sequence_options(&stab.input_file.read());
                         let fetch_thumb = |video_url: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
                             let mut fetched = false;
                             if !crate::cli::will_run_in_console() { // Don't fetch thumbs in the CLI
-                                let mut proc = rendering::VideoProcessor::from_file(video_url, false, 0, None)?;
+                                let mut proc = rendering::VideoProcessor::from_file(video_url, false, 0, Some(sequence_options()))?;
                                 proc.on_frame(move |_timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                                     let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
 
@@ -1375,7 +1384,7 @@ impl RenderQueue {
                                     processing_failed(());
                                 }
                             }
-                        } else if let Ok(info) = rendering::VideoProcessor::get_video_info(&url) {
+                        } else if let Ok(info) = rendering::VideoProcessor::get_video_info(&url, Some(sequence_options())) {
                             ::log::debug!("Loaded {:?}", &info);
 
                             render_options.bitrate = render_options.bitrate.max(info.bitrate);
@@ -1401,7 +1410,11 @@ impl RenderQueue {
                                 stab.input_file.write().url = url.clone();
 
                                 let is_main_video = gyro_url.is_empty();
-                                let gyro_url = if !gyro_url.is_empty() { &gyro_url } else { &url };
+                                // An image sequence's own metadata is read from its first frame, as the app reads it (a CinemaDNG
+                                // sequence's from all of them, which telemetry-parser finds from there)
+                                let first_frame = (image_sequence_fps > 0.0).then(|| filesystem::FramePath::parse(&filesystem::url_to_path(&url))).flatten()
+                                    .map(|frames| filesystem::path_to_url(&frames.frame(image_sequence_start.max(0) as usize)));
+                                let gyro_url = if !gyro_url.is_empty() { &gyro_url } else { first_frame.as_ref().unwrap_or(&url) };
                                 {
                                     if let Ok(mut file) = filesystem::open_file(&gyro_url, false, false) {
                                         let filesize = file.size;

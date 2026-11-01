@@ -830,6 +830,29 @@ pub fn is_sequence_codec(codec: &str) -> bool {
     matches!(codec, "PNG Sequence" | "EXR Sequence")
 }
 
+/// The demuxer options that read `input_file` as the image sequence it is (FFmpeg's image2): its frame rate and the number of
+/// its first frame. Empty for a video
+pub fn image_sequence_options(input_file: &gyroflow_core::InputFile) -> ffmpeg_next::Dictionary<'static> {
+    let mut options = ffmpeg_next::Dictionary::new();
+    if input_file.image_sequence_fps > 0.0 {
+        let fps = fps_to_rational(input_file.image_sequence_fps);
+        options.set("framerate", &format!("{}/{}", fps.numerator(), fps.denominator()));
+    }
+    if input_file.image_sequence_start > 0 {
+        options.set("start_number", &format!("{}", input_file.image_sequence_start));
+    }
+    options
+}
+
+/// The frame rate an image of a sequence records (a CinemaDNG frame's FrameRate tag), 0 when it doesn't record one
+pub fn image_sequence_frame_rate(url: &str) -> f64 {
+    use gyroflow_core::filesystem;
+    if !filesystem::get_filename(url).to_ascii_lowercase().ends_with(".dng") { return 0.0; }
+    let Ok(mut file) = filesystem::open_file(url, false, false) else { return 0.0; };
+    let size = file.size as u64;
+    gyroflow_core::telemetry_parser::gyroflow::cdng::frame_rate(file.get_file(), size).unwrap_or_default()
+}
+
 /// The input file that rendering `input_file` (`frame_count` frames) to `filename` in `folder` would destroy, writing over it,
 /// as it's shown. The output is an image sequence where `output_frames` is `Some`, its frames 1 to that. See
 /// `filesystem::output_overwrites_input`; the frames of an input image sequence are the ones FFmpeg's image2 demuxer can read:
