@@ -137,6 +137,20 @@ impl DistortionModel {
         }
     }
 
+    /// LensFun/hugin coefficient rescaling for the models that share its parameterization: converts
+    /// coefficients normalized to the calibration image's half-height into this model's tan(angle)
+    /// domain, where `hugin_scaling` = effective focal mm / half-height mm. Models with no LensFun
+    /// correspondence leave `k` untouched.
+    pub fn rescale_coeffs(&self, k: &mut [f64], hugin_scaling: f64) {
+        use DistortionModels as M;
+        match &self.inner {
+            M::Poly3(_)  => poly3::Poly3::rescale_coeffs(k, hugin_scaling),
+            M::Poly5(_)  => poly5::Poly5::rescale_coeffs(k, hugin_scaling),
+            M::PtLens(_) => ptlens::PtLens::rescale_coeffs(k, hugin_scaling),
+            _ => {}
+        }
+    }
+
     /// The largest ray angle the model itself can represent, in radians, `None` when it has no such end.
     /// Not a fold of the calibration - [`Self::radial_distortion_limit`] finds those - but the shape of the
     /// projection: a rectilinear model images the z=1 plane and has nothing at 90°, and the unified sphere
