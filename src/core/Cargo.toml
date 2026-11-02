@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "a9d05d0" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "7743443" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { version = "0.8", features = ["field_access"] }
 
@@ -33,7 +33,7 @@ regex = "1.13"
 bincode = { version = "2.0", features = ["serde"] }
 serde = { version = "1.0", features = ["rc"] }
 serde_json = "1.0"
-crc32fast = "1.5.2"
+crc32fast = "1.5.4"
 byteorder = "1.5.0"
 line_drawing = "1.0.1"
 rand = "0.10.3"
