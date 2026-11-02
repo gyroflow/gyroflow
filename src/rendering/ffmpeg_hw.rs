@@ -158,10 +158,13 @@ pub fn init_device_for_decoding(index: usize, codec: *const ffi::AVCodec, decode
             }
         }
     }
-    if let Some(pos) = decoders.iter().position(|(_, type_)| *type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA) {
-        // Move CUDA to first position
-        let cuda = decoders.remove(pos);
-        decoders.insert(0, cuda);
+    // Move CUDA to first position. Not on Windows on ARM: NVDEC of the RTX Spark fails to copy its first frame (cuMemcpy2DAsync:
+    // CUDA_ERROR_INVALID_VALUE) and then to map the next ones (CUDA_ERROR_MAP_FAILED), while D3D11VA decodes them
+    if !cfg!(all(target_os = "windows", target_arch = "aarch64")) {
+        if let Some(pos) = decoders.iter().position(|(_, type_)| *type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA) {
+            let cuda = decoders.remove(pos);
+            decoders.insert(0, cuda);
+        }
     }
     if is_vulkan_enabled() {
         if let Some(pos) = decoders.iter().position(|(_, type_)| *type_ == ffi::AVHWDeviceType::AV_HWDEVICE_TYPE_VULKAN) {
