@@ -1970,7 +1970,7 @@ dependencies = [
 [[package]]
 name = "cubecl"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "cubecl-core",
  "cubecl-cpu",
@@ -1989,7 +1989,7 @@ dependencies = [
 [[package]]
 name = "cubecl-common"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "bytemuck",
  "cfg_aliases",
@@ -2013,7 +2013,7 @@ dependencies = [
 [[package]]
 name = "cubecl-core"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "bitflags 2.13.2",
  "bytemuck",
@@ -2043,7 +2043,7 @@ dependencies = [
 [[package]]
 name = "cubecl-cpp"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "bytemuck",
  "cubecl-common",
@@ -2065,7 +2065,7 @@ dependencies = [
 [[package]]
 name = "cubecl-cpu"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "bytemuck",
  "crossbeam-utils",
@@ -2087,7 +2087,7 @@ dependencies = [
 [[package]]
 name = "cubecl-cuda"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "bytemuck",
  "cubecl-common",
@@ -2107,7 +2107,7 @@ dependencies = [
 [[package]]
 name = "cubecl-environment"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "async-channel",
  "backtrace",
@@ -2145,7 +2145,7 @@ dependencies = [
 [[package]]
 name = "cubecl-hip"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "bytemuck",
  "cubecl-common",
@@ -2177,7 +2177,7 @@ dependencies = [
 [[package]]
 name = "cubecl-ir"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "bumpalo",
  "cubecl-common",
@@ -2208,7 +2208,7 @@ dependencies = [
 [[package]]
 name = "cubecl-llvm"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "cc",
  "cubecl-core",
@@ -2228,7 +2228,7 @@ dependencies = [
 [[package]]
 name = "cubecl-macros"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "darling 0.24.1",
  "derive-new",
@@ -2245,7 +2245,7 @@ dependencies = [
 [[package]]
 name = "cubecl-macros-internal"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "darling 0.24.1",
  "inflections",
@@ -2257,7 +2257,7 @@ dependencies = [
 [[package]]
 name = "cubecl-metal"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "block2",
  "bytemuck",
@@ -2281,7 +2281,7 @@ dependencies = [
 [[package]]
 name = "cubecl-monitoring"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "cfg_aliases",
  "cubecl-ir",
@@ -2294,7 +2294,7 @@ dependencies = [
 [[package]]
 name = "cubecl-opt"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "cubecl-common",
  "cubecl-core",
@@ -2316,7 +2316,7 @@ dependencies = [
 [[package]]
 name = "cubecl-runtime"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "buildid",
  "bytemuck",
@@ -2347,7 +2347,7 @@ dependencies = [
 [[package]]
 name = "cubecl-server"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "buildid",
  "bytemuck",
@@ -2375,7 +2375,7 @@ dependencies = [
 [[package]]
 name = "cubecl-spirv"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "bitflags 2.13.2",
  "cubecl-common",
@@ -2398,7 +2398,7 @@ dependencies = [
 [[package]]
 name = "cubecl-std"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "cubecl-common",
  "cubecl-core",
@@ -2415,7 +2415,7 @@ dependencies = [
 [[package]]
 name = "cubecl-tile"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "cubecl-core",
  "cubecl-ir",
@@ -2429,7 +2429,7 @@ dependencies = [
 [[package]]
 name = "cubecl-wgpu"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "ash",
  "bytemuck",
@@ -2461,7 +2461,7 @@ dependencies = [
 [[package]]
 name = "cubecl-zspace"
 version = "0.12.0-pre.1"
-source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#5f6e8ad0f45f2c526cf80f181c49d96a50a45ce0"
+source = "git+https://github.com/AdrianEddy/cubecl.git?branch=diem%2Ffixes-v0.12.0-pre.1#3651b11e43da786cd1ef831a3986693becd6b701"
 dependencies = [
  "derive-new",
  "serde",

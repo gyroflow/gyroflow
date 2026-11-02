@@ -80,8 +80,10 @@ qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = 
 
 # cubecl 0.12.0-pre.1 + four fixes for AMD's Windows Vulkan driver (Radeon iGPUs), not upstreamed:
 # storage mapped from the iGPU's largest device-local heap, a cooperative matrix zeroed as a
-# composite, the subgroup size pinned where it can vary, and a finite tanh. Every cubecl crate comes
-# from the branch, or its in-repo siblings would enter the graph twice.
+# composite, the subgroup size pinned where it can vary, and a finite tanh. Plus two more: a comptime
+# enum's variant hashed into its kernel's cache key, and a multi-dimensional cube run as a
+# one-dimensional workgroup (Intel's Arc walked 2-D workgroups in tiles, so planes mixed rows). Every
+# cubecl crate comes from the branch, or its in-repo siblings would enter the graph twice.
 cubecl                 = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
 cubecl-common          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
 cubecl-core            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
