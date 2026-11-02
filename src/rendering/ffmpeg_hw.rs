@@ -241,9 +241,11 @@ pub fn find_encoder_that_works(encoders: &[(&'static str, bool)], device: Option
             if !x.1 { return Some((x.0, x.1, None)); } // If not HW encoder
 
             if let Some(type_) = encoder_device(&enc, x.0, device, device_hash) {
-                if !needs_probe(x.0) || probe_encoder(&enc, x.0, type_, device, device_hash) {
+                if !needs_probe(x.0) || probe_encoder(&enc, x.0, Some(type_), device, device_hash) {
                     return Some((x.0, x.1, Some(type_)));
                 }
+            } else if is_media_foundation(x.0) && probe_encoder(&enc, x.0, None, device, device_hash) {
+                return Some((x.0, x.1, None));
             }
         } else {
             super::append_log(&format!("Codec not found: {:?}\n", x.0));
@@ -298,15 +300,25 @@ fn encoder_device(enc: &codec::codec::Codec, name: &str, device: Option<&str>, d
 }
 
 /// Whether it takes opening the encoder to know if it works here. Every GPU of a vendor has the device of its encoders,
-/// but only the newer ones encode AV1: NVIDIA RTX 40, AMD Radeon RX 7000, Intel Arc and Core Ultra, and later
+/// but only the newer ones encode AV1: NVIDIA RTX 40, AMD Radeon RX 7000, Intel Arc and Core Ultra, and later.
+/// Media Foundation encoders work only when the GPU driver has a hardware MFT for the codec
 pub fn needs_probe(encoder_name: &str) -> bool {
-    encoder_name.starts_with("av1_")
+    encoder_name.starts_with("av1_") || is_media_foundation(encoder_name)
 }
 
-/// Options the encoder needs, in the render and in `probe_encoder`: on Android MediaCodec is used through the NDK
+/// Media Foundation encoders have no FFmpeg device, they reach the GPU through the driver's MFT.
+/// On Windows on ARM they're the only hardware encoders of Snapdragon GPUs, and of NVIDIA ones with an FFmpeg without NVENC
+pub fn is_media_foundation(encoder_name: &str) -> bool {
+    encoder_name.ends_with("_mf")
+}
+
+/// Options the encoder needs, in the render and in `probe_encoder`: on Android MediaCodec is used through the NDK,
+/// and Media Foundation picks the software MFT unless it's told to use the hardware one
 pub fn encoder_required_options(encoder_name: &str) -> &'static [(&'static str, &'static str)] {
     if encoder_name.contains("mediacodec") {
         &[("ndk_codec", "1"), ("ndk_async", "1")]
+    } else if is_media_foundation(encoder_name) {
+        &[("hw_encoding", "1")]
     } else {
         &[]
     }
@@ -314,8 +326,8 @@ pub fn encoder_required_options(encoder_name: &str) -> &'static [(&'static str, 
 
 /// Opens the encoder for a 1080p video on the device, like the render does. A GPU without the codec fails here.
 /// The result is kept until the devices are cleared
-fn probe_encoder(enc: &codec::codec::Codec, name: &'static str, type_: DeviceType, device: Option<&str>, device_hash: u64) -> bool {
-    let key = (name, type_ as u64 + device_hash);
+fn probe_encoder(enc: &codec::codec::Codec, name: &'static str, type_: Option<DeviceType>, device: Option<&str>, device_hash: u64) -> bool {
+    let key = (name, type_.map_or(0, |x| x as u64) + device_hash);
     if let Some(&works) = PROBED_ENCODERS.lock().get(&key) { return works; }
     let generation = DEVICES_GENERATION.load(Ordering::SeqCst);
 
@@ -333,7 +345,9 @@ fn probe_encoder(enc: &codec::codec::Codec, name: &'static str, type_: DeviceTyp
         // Vulkan, D3D12 and VAAPI encoders take only frames on the device
         let hw_frames_only = unsafe { codec_pix_formats(ptr::null(), enc.as_ptr()) }.iter().all(|x| is_hardware_format((*x).into()));
         // Without its frames, an encoder that takes only frames on the device can't encode
-        initialize_hwframes_context(unsafe { encoder.as_mut_ptr() }, ptr::null_mut(), type_, format::Pixel::NV12.into(), size, hw_frames_only, device)?;
+        if let Some(type_) = type_ {
+            initialize_hwframes_context(unsafe { encoder.as_mut_ptr() }, ptr::null_mut(), type_, format::Pixel::NV12.into(), size, hw_frames_only, device)?;
+        }
         let mut options = ffmpeg_next::Dictionary::new();
         for (k, v) in encoder_required_options(name) {
             options.set(k, v);
