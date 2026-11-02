@@ -213,6 +213,42 @@ impl LensProfile {
         format!("{}_{}_{}_{}_{}_{}_{}x{}-{:.2}fps", self.camera_brand, self.camera_model, self.lens_model, setting, self.get_size_str(), self.get_aspect_ratio().replace(':', "by"), self.calib_dimension.w, self.calib_dimension.h, self.fps)
     }
 
+    /// Validates that camera brand, camera model, lens model, and calibration dimensions
+    /// are properly populated before profile export or official database submission (#742).
+    pub fn validate_for_submission(&self) -> Result<(), Vec<&'static str>> {
+        let mut errors = Vec::new();
+        if self.camera_brand.trim().is_empty() {
+            errors.push("missing_camera_brand");
+        }
+        if self.camera_model.trim().is_empty() {
+            errors.push("missing_camera_model");
+        }
+        if self.lens_model.trim().is_empty() {
+            errors.push("missing_lens_model");
+        }
+        if self.calib_dimension.w == 0 || self.calib_dimension.h == 0 {
+            errors.push("invalid_calib_dimension");
+        }
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors)
+        }
+    }
+
+    pub fn normalized_hierarchy_tuple(&self) -> (String, String, String, String) {
+        (
+            self.camera_brand.trim().to_string(),
+            self.camera_model.trim().to_string(),
+            self.lens_model.trim().to_string(),
+            if self.camera_setting.trim().is_empty() {
+                self.note.trim().to_string()
+            } else {
+                self.camera_setting.trim().to_string()
+            },
+        )
+    }
+
     pub fn get_aspect_ratio(&self) -> String {
         if self.calib_dimension.w == 0 || self.calib_dimension.h == 0 {
             return String::new();

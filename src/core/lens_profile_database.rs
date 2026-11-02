@@ -396,6 +396,47 @@ impl LensProfileDatabase {
     pub fn contains_id(&self, id: &str) -> bool {
         self.map.contains_key(id)
     }
+
+    pub fn list_camera_brands(&self) -> Vec<String> {
+        let mut brands: Vec<String> = self.map.values()
+            .map(|p| p.camera_brand.trim().to_string())
+            .filter(|b| !b.is_empty())
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
+        brands.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        brands
+    }
+
+    pub fn list_camera_models_for_brand(&self, brand: &str) -> Vec<String> {
+        let target = brand.trim().to_lowercase();
+        let mut models: Vec<String> = self.map.values()
+            .filter(|p| p.camera_brand.trim().to_lowercase() == target)
+            .map(|p| p.camera_model.trim().to_string())
+            .filter(|m| !m.is_empty())
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
+        models.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        models
+    }
+
+    pub fn list_lens_models_for_camera(&self, brand: &str, model: &str) -> Vec<String> {
+        let target_brand = brand.trim().to_lowercase();
+        let target_model = model.trim().to_lowercase();
+        let mut lenses: Vec<String> = self.map.values()
+            .filter(|p| {
+                p.camera_brand.trim().to_lowercase() == target_brand
+                    && p.camera_model.trim().to_lowercase() == target_model
+            })
+            .map(|p| p.lens_model.trim().to_string())
+            .filter(|l| !l.is_empty())
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
+        lenses.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        lenses
+    }
     pub fn get_preset_by_id(&self, id: &str) -> Option<String> {
         self.preset_map.get(id).cloned()
     }
