@@ -112,7 +112,7 @@ pub fn stop_accessing_url(_url: &str, _is_folder: bool) {
 }
 
 pub struct FileWrapper {
-    pub size: usize,
+    pub size: u64,
     pub url: String,
 
     file: Option<std::fs::File>,
@@ -403,7 +403,8 @@ pub fn read(url: &str) -> Result<Vec<u8>> {
     start_accessing_url(url, false);
     let buf = {
         let mut f = open_file(&url, false, false)?;
-        let mut buf = Vec::with_capacity(f.size);
+        // Only a hint: a size a `usize` can't hold (a 32-bit target) reserves nothing, and reading it fails
+        let mut buf = Vec::with_capacity(usize::try_from(f.size).unwrap_or(0));
         f.get_file().read_to_end(&mut buf)?;
         buf
     };
@@ -503,7 +504,7 @@ pub fn open_file(url: &str, writing: bool, truncate: bool) -> Result<FileWrapper
     {
         let path = url_to_path(url);
         let file = if (writing && truncate) || (writing && !exists(url)) { File::create(path)? } else if writing { OpenOptions::new().read(true).write(true).open(path)? } else { File::open(path)? };
-        let size = file.metadata()?.len() as usize;
+        let size = file.metadata()?.len();
         Ok(FileWrapper { file: Some(file), size, url: url.to_owned() })
     }
 }

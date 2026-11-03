@@ -423,7 +423,7 @@ impl GyroSource {
         Some((first, data.next_back().map_or(first, |(t, _)| *t)))
     }
 
-    pub fn parse_telemetry_file<T: Read + Seek, P: AsRef<std::path::Path>, F: Fn(f64)>(stream: &mut T, filesize: usize, path: P, options: &FileLoadOptions, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Result<FileMetadata, crate::GyroflowCoreError> {
+    pub fn parse_telemetry_file<T: Read + Seek, P: AsRef<std::path::Path>, F: Fn(f64)>(stream: &mut T, filesize: u64, path: P, options: &FileLoadOptions, size: (usize, usize), fps: f64, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> Result<FileMetadata, crate::GyroflowCoreError> {
         // The video's frame times by their fingerprint (`FrameTimes::checksum`), not every one of them
         let frame_times = options.video_frame_times.as_ref().map(|t| t.checksum());
         let key = format!("{}{:?}{frame_times:?}{size:?}{fps}", path.as_ref().display(), FileLoadOptions { video_frame_times: None, ..options.clone() });

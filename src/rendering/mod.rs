@@ -849,7 +849,7 @@ pub fn image_sequence_frame_rate(url: &str) -> f64 {
     use gyroflow_core::filesystem;
     if !filesystem::get_filename(url).to_ascii_lowercase().ends_with(".dng") { return 0.0; }
     let Ok(mut file) = filesystem::open_file(url, false, false) else { return 0.0; };
-    let size = file.size as u64;
+    let size = file.size;
     gyroflow_core::telemetry_parser::gyroflow::cdng::frame_rate(file.get_file(), size).unwrap_or_default()
 }
 

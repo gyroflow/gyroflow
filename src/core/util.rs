@@ -11,7 +11,7 @@ pub static AmdPowerXpressRequestHighPerformance: i32 = 1;
 /// The video's size, frame rate, duration and rotation, as gyroflow's player decodes the file (`load_video_file`, the
 /// plugins' footage): telemetry-parser's, and a Blackmagic RAW clip timed as Blackmagic's SDK presents it
 /// (`braw_clip_timing`)
-pub fn get_video_metadata<T: Read + Seek>(stream: &mut T, filesize: usize, url: &str) -> std::result::Result<telemetry_parser::util::VideoMetadata, crate::GyroflowCoreError> {
+pub fn get_video_metadata<T: Read + Seek>(stream: &mut T, filesize: u64, url: &str) -> std::result::Result<telemetry_parser::util::VideoMetadata, crate::GyroflowCoreError> {
     let filename = crate::filesystem::get_filename(url);
     let extensions = ["mp4", "mov", "braw", "insv", "360", "mxf"];
     if !extensions.into_iter().any(|ext| filename.to_ascii_lowercase().ends_with(ext)) {
@@ -19,7 +19,7 @@ pub fn get_video_metadata<T: Read + Seek>(stream: &mut T, filesize: usize, url: 
     }
     let mut md = telemetry_parser::util::get_video_metadata(stream, filesize)?;
     if filename.to_ascii_lowercase().ends_with(".braw") {
-        braw_clip_timing(stream, filesize as u64, &mut md);
+        braw_clip_timing(stream, filesize, &mut md);
     }
     Ok(md)
 }
@@ -224,7 +224,7 @@ pub fn rename_calib_videos() {
             if f_name.ends_with(".MP4") {
                 let (w, h, fps, _dur) = get_video_metadata(&f_name).unwrap();
                 let mut stream = File::open(&f_name).unwrap();
-                let filesize = stream.metadata().unwrap().len() as usize;
+                let filesize = stream.metadata().unwrap().len();
 
                 let input = Input::from_stream(&mut stream, filesize, &f_name, |_|(), Arc::new(AtomicBool::new(false))).unwrap();
 

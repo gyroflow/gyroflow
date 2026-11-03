@@ -300,7 +300,7 @@ impl StabilizationManager {
     /// The video's frame times (`StabilizationParams::frame_times`) come with it: the file's when it's the video's own,
     /// otherwise the input file's, so a video whose motion is another file's (a render queue job with a gyro file, a
     /// project with a log) has them too
-    pub fn load_gyro_data<T: Read + Seek, F: Fn(f64)>(&self, stream: &mut T, filesize: usize, url: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::result::Result<(), GyroflowCoreError> {
+    pub fn load_gyro_data<T: Read + Seek, F: Fn(f64)>(&self, stream: &mut T, filesize: u64, url: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::result::Result<(), GyroflowCoreError> {
         let video_url = self.input_file.read().url.clone();
         let frame_times = if is_main_video { FrameTimesFrom::LoadedFile } else { FrameTimesFrom::Video(video_url.clone()) };
         self.load_motion_file(stream, filesize, url, is_main_video, options, progress_cb, cancel_flag, frame_times, &video_url)
@@ -321,7 +321,7 @@ impl StabilizationManager {
     fn read_video_timing(url: &str) -> VideoTiming {
         if url.is_empty() { return VideoTiming::default(); }
         let Ok(mut file) = filesystem::open_file(url, false, false) else { return VideoTiming::default() };
-        let filesize = file.size as u64;
+        let filesize = file.size;
         Self::video_timing_of(file.get_file(), filesize)
     }
     /// The frame times of the video at `url` (`read_video_timing`)
@@ -351,7 +351,7 @@ impl StabilizationManager {
     /// `load_gyro_data`, the video's frame times taken as `frame_times` says. `video_url` is the video the motion data
     /// is for, whose segments a file that isn't the video's own takes (`FileLoadOptions::video_url`)
     #[allow(clippy::too_many_arguments)]
-    fn load_motion_file<T: Read + Seek, F: Fn(f64)>(&self, stream: &mut T, filesize: usize, url: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>, frame_times: FrameTimesFrom, video_url: &str) -> std::result::Result<(), GyroflowCoreError> {
+    fn load_motion_file<T: Read + Seek, F: Fn(f64)>(&self, stream: &mut T, filesize: u64, url: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>, frame_times: FrameTimesFrom, video_url: &str) -> std::result::Result<(), GyroflowCoreError> {
         {
             let params = self.params.read();
             let mut gyro = self.gyro.write();
@@ -380,7 +380,7 @@ impl StabilizationManager {
         };
 
         let timing = match frame_times {
-            FrameTimesFrom::LoadedFile => Some(Self::video_timing_of(stream, filesize as u64)),
+            FrameTimesFrom::LoadedFile => Some(Self::video_timing_of(stream, filesize)),
             FrameTimesFrom::Video(video_url) => Some(Self::read_video_timing(&video_url)),
             FrameTimesFrom::Caller => None,
         };
@@ -409,7 +409,7 @@ impl StabilizationManager {
                 // A video without motion data of its own still has its segments, when it was cut from recordings: the
                 // motion measured from it is handled segment by segment like a file's (`gyro_source::TrimSegments`)
                 if is_main_video && !cancel_flag.load(SeqCst)
-                    && let Some(Ok(table)) = telemetry_parser::segment_table::read(stream, filesize as u64) {
+                    && let Some(Ok(table)) = telemetry_parser::segment_table::read(stream, filesize) {
                     let md = gyro_source::FileMetadata { trim_segments: Some(gyro_source::TrimSegments::new(table, &[], &[])), ..Default::default() };
                     let integration = self.gyro.write().load_from_telemetry_unintegrated(md);
                     if let Some(integration) = integration { GyroSource::integrate_shared(&self.gyro, integration); }
@@ -2864,7 +2864,7 @@ impl StabilizationManager {
         false
     }
 
-    pub fn load_video_file<T: Read + Seek>(&self, stream: &mut T, filesize: usize, url: &str, mut metadata: Option<telemetry_parser::util::VideoMetadata>, is_plugin: bool) -> Result<telemetry_parser::util::VideoMetadata, GyroflowCoreError> {
+    pub fn load_video_file<T: Read + Seek>(&self, stream: &mut T, filesize: u64, url: &str, mut metadata: Option<telemetry_parser::util::VideoMetadata>, is_plugin: bool) -> Result<telemetry_parser::util::VideoMetadata, GyroflowCoreError> {
         if metadata.is_none() {
             metadata = Some(util::get_video_metadata(stream, filesize, url)?);
         }

@@ -2734,7 +2734,7 @@ impl Controller {
                 Ok(x) => x,
                 Err(e) => { progress((1.0, e, None)); return; }
             };
-            let mut file_references: Vec<(&mut std::fs::File, usize)> = opened.iter_mut().map(|x| { let s = x.size; (x.get_file(), s) }).collect();
+            let mut file_references: Vec<(&mut std::fs::File, usize)> = opened.iter_mut().map(|x| { let s = x.size as usize; (x.get_file(), s) }).collect();
             let mut output = match MergeOutput::create(target) {
                 Ok(x) => x,
                 Err(e) => { progress((1.0, e, None)); return; }
