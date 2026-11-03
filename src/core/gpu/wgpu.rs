@@ -283,13 +283,17 @@ impl WgpuWrapper {
                     limits.max_buffer_size = ((1 << max_buffer_bits) - 1).min(adapter_limits.max_buffer_size);
                     limits.max_storage_buffer_binding_size = ((1 << max_storage_buffer_bits) - 1+5).min(adapter_limits.max_storage_buffer_binding_size);
 
+                    // An integrated GPU's memory is the system's: with Performance, each device (one per wrapper) reserves
+                    // large blocks of it, several GB with a few wrappers per thread
+                    let memory_hints = if adapter.get_info().device_type == wgpu::DeviceType::IntegratedGpu { wgpu::MemoryHints::MemoryUsage } else { wgpu::MemoryHints::Performance };
+
                     let mut result = Err(WgpuError::NoAvailableAdapter);
                     for _ in 0..4 {
                         let device = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
                             label: None,
                             required_features: wgpu::Features::empty(),
                             required_limits: limits.clone(),
-                            memory_hints: wgpu::MemoryHints::Performance,
+                            memory_hints: memory_hints.clone(),
                             trace: wgpu::Trace::Off,
                             experimental_features: wgpu::ExperimentalFeatures::disabled(),
                         }));
