@@ -1758,18 +1758,18 @@ dependencies = [
 
 [[package]]
 name = "cpp"
-version = "0.5.11"
+version = "0.5.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1f6422bf20bc0654eac481a29a03e6d9121ad9f12345a03773b8a76a8701915"
+checksum = "166a75232f818668601ea99ca31ccbcf58995278c16a84d31bd90d49428e7f59"
 dependencies = [
  "cpp_macros",
 ]
 
 [[package]]
 name = "cpp_build"
-version = "0.5.11"
+version = "0.5.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f6fed3200ba0708c2adca5f6ed5ae202edd824bd4cbac7935a85edac9bcddce"
+checksum = "6664c806dfe12ee1f7880e2e222864fa51e5e10f057d96f3c4456c9598937a42"
 dependencies = [
  "cc",
  "cpp_common",
@@ -1781,9 +1781,9 @@ dependencies = [
 
 [[package]]
 name = "cpp_common"
-version = "0.5.11"
+version = "0.5.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7280a73ef92e18d27d2ec3005b57fe0043b51d1b506be86b0bf66f588f9857b"
+checksum = "e98b897a9cfc5e7f375119c59ebbd97972f47c1d3deb219ce1d838624e16dd80"
 dependencies = [
  "proc-macro2",
  "syn 2.0.119",
@@ -1791,9 +1791,9 @@ dependencies = [
 
 [[package]]
 name = "cpp_macros"
-version = "0.5.11"
+version = "0.5.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffc7fd49a5b246251229ea4d4bf94c8d418689a1f9986ef96e00b64992922169"
+checksum = "e084170be9fabcaa4d473ae245a3cbbea50043530feed57b7d59ce25865fdca9"
 dependencies = [
  "aho-corasick",
  "byteorder",
@@ -7779,7 +7779,7 @@ dependencies = [
 [[package]]
 name = "telemetry-parser"
 version = "0.4.0"
-source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=c45ace0#c45ace05234278581144418fd43947709e3b9d49"
+source = "git+https://github.com/AdrianEddy/telemetry-parser.git?rev=8af4ee3#8af4ee31c971c9cff6bf80f794fd111671a32531"
 dependencies = [
  "argh",
  "byteorder",
