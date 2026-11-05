@@ -705,7 +705,7 @@ MenuItem {
     CheckBoxWithContent {
         id: flEnable;
         text: qsTr("Stabilize focal length");
-        visible: controller.has_per_frame_focal_length;
+        visible: controller.has_varying_focal_length;
         tooltip: qsTr("Limits how fast the picture may zoom when the lens metadata records a changing focal length.") + "\n" +
                  qsTr("Zooms slower than the limit pass through untouched. Faster zooms are spread out by cropping ahead of a zoom-in and after a zoom-out. Lower values give a smoother zoom and more crop.");
         cb.checked: controller.focal_length_smoothing_enabled;

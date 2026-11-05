@@ -54,8 +54,7 @@ pub fn draw_chessboard_corners(org_width: usize, org_height: usize, w: usize, h:
 }
 
 fn line(drawing: &mut DrawCanvas, p1: (f32, f32), p2: (f32, f32), color: Color) {
-    let points = line_drawing::Bresenham::new((p1.0 as isize, p1.1 as isize), (p2.0 as isize, p2.1 as isize));
-    draw_pixels(drawing, color, points);
+    drawing.line(p1, p2, color, Alpha::Alpha100, Stage::OnInput, false);
 }
 fn circle(drawing: &mut DrawCanvas, center: (f32, f32), radius: f32, color: Color) {
     let points = line_drawing::BresenhamCircle::new(center.0 as isize, center.1 as isize, radius as isize);

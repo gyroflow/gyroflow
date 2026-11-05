@@ -107,7 +107,7 @@ impl SmoothingAlgorithm for Plain {
         let mut scalers: BTreeMap<i64, f64> = quats.iter().map(|x| {
             let mut scale = 1.0;
 
-            let frame = crate::frame_at_timestamp(*x.0 as f64 / 1000.0, compute_params.scaled_fps) as usize;
+            let frame = compute_params.frame_at_timestamp(*x.0 as f64 / 1000.0) as usize;
             if let Some(fov_limit_ratio) = compute_params.smoothing_fov_limit_per_frame.get(frame) {
                 scale *= *fov_limit_ratio;
             }
@@ -134,7 +134,7 @@ impl SmoothingAlgorithm for Plain {
             if let Some(scaler) = scalers.get(x.0) {
                 alpha /= *scaler;
             }
-            q = q.slerp(x.1, alpha);
+            q = slerp_toward(&q, x.1, alpha);
             (*x.0, q)
         }).collect();
 
@@ -147,7 +147,7 @@ impl SmoothingAlgorithm for Plain {
                 alpha /= *scaler;
             }
 
-            q = q.slerp(x.1, alpha);
+            q = slerp_toward(&q, x.1, alpha);
             (*x.0, q)
         }).collect()
     }

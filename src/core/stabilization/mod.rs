@@ -2,7 +2,7 @@
 // Copyright © 2021-2022 Adrian <adrian.eddy at gmail>
 
 use std::cell::RefCell;
-use std::sync::mpsc;
+use std::sync::{ mpsc, Arc };
 
 use crate::GyroflowCoreError;
 
@@ -19,7 +19,7 @@ pub mod distortion_models;
 pub mod projection;
 pub use pixel_formats::*;
 pub use compute_params::ComputeParams;
-pub use frame_transform::FrameTransform;
+pub use frame_transform::{ FrameTransform, FocalSource };
 pub use cpu_undistort::*;
 
 #[derive(Default, Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
@@ -236,6 +236,8 @@ pub struct Stabilization {
     pub initialized_backend: BackendType,
 
     compute_params: ComputeParams,
+    /// `compute_params` the right way up, see `upright_params`
+    upright_params: std::sync::OnceLock<Arc<ComputeParams>>,
 
     pub drawing: DrawCanvas,
     pub pending_device_change: Option<isize>,
@@ -257,7 +259,21 @@ impl Stabilization {
     pub fn set_compute_params(&mut self, params: ComputeParams) {
         self.stab_data.clear();
         self.compute_params = params;
+        self.upright_params = Default::default();
     }
+    /// What the frames are rendered with, the right way up (`framebuffer_inverted` off), as the point path takes them
+    /// for upright positions (`optical_motion::to_output`): what the preview's tracked points are drawn with, and found
+    /// under the mouse with (`StabilizationManager::optical_placement`). A copy made once per `set_compute_params`, also
+    /// behind a read lock: the same one until they change
+    pub fn upright_params(&self) -> Arc<ComputeParams> {
+        self.upright_params.get_or_init(|| {
+            let mut params = self.compute_params.clone();
+            params.framebuffer_inverted = false;
+            Arc::new(params)
+        }).clone()
+    }
+    /// Whether the frames are rendered upside down (`ComputeParams::framebuffer_inverted`): the drawing is turned with them
+    pub fn framebuffer_inverted(&self) -> bool { self.compute_params.framebuffer_inverted }
 
     fn get_rect(desc: &BufferDescription) -> [i32; 4] {
         let mut ret = [0i32; 4];
@@ -290,7 +306,7 @@ impl Stabilization {
             let file_metadata = gyro.file_metadata.read();
             kernel_flags.set(KernelParamsFlags::HAS_MESH_DATA, file_metadata.mesh_correction.has_mesh(frame));
             kernel_flags.set(KernelParamsFlags::HAS_FPD_DATA, file_metadata.mesh_correction.has_focal_plane(frame));
-            if file_metadata.camera_stab_data.len() > frame {
+            if file_metadata.camera_stab_at(frame).is_some() {
                 kernel_flags.set(KernelParamsFlags::HAS_IBIS_DATA, true);
             }
         }
@@ -299,7 +315,12 @@ impl Stabilization {
 
     pub fn get_frame_transform_at<T: PixelType>(&self, timestamp_us: i64, frame: Option<usize>, buffers: &Buffers) -> FrameTransform {
         let timestamp_ms = (timestamp_us as f64) / 1000.0;
-        let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, self.compute_params.scaled_fps) as usize);
+        // The frame the video presents at the time. A video whose frames aren't evenly spaced has it by its own frame
+        // times, the only ones that give it (a frame number given with the time counts the frames as if they were)
+        let frame = match frame {
+            Some(frame) if self.compute_params.frame_times.is_none() => frame,
+            _ => self.compute_params.frame_at_timestamp(timestamp_ms).max(0) as usize,
+        };
 
         let mut transform = FrameTransform::at_timestamp(&self.compute_params, timestamp_ms, frame);
         transform.kernel_params.pixel_value_limit = T::default_max_value().unwrap_or(f32::MAX);
@@ -748,6 +769,11 @@ impl Stabilization {
                         log::error!("No wgpu instance!");
                     }
                 }
+            }
+
+            // The memory of a GPU, which only a GPU backend could have processed: not the CPU
+            if !matches!((&buffers.input.data, &buffers.output.data), (BufferSource::Cpu { .. }, BufferSource::Cpu { .. })) {
+                return Err(GyroflowCoreError::NoBackendForBuffers(self.get_current_key(buffers)));
             }
 
             //let ok = Self::undistort_image_cpu_spirv::<T>(buffers, &itm.kernel_params, &self.compute_params.distortion_model, self.compute_params.digital_lens.as_ref(), &itm.matrices, drawing_buffer);

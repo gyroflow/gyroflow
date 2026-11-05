@@ -32,8 +32,11 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
     compute_params.fov_algorithm_margin = 0.0;
     compute_params.fovs.clear();
     compute_params.minimal_fovs.clear();
-    // The maps describe the lens and the motion per frame; the focal length envelope is a zoom on top of
-    // that and would only shrink the bounding box computed below
+    // The maps describe the lens and the motion per frame, the lens as the frame was taken through it (its breathing is in
+    // `focal_lengths`). The zoom of the focal length smoothing and of the breathing compensation is a zoom on top of that,
+    // `raw / target` (`focal_length::compensation`), which the render's fov takes and the bounding box below, measured at
+    // fov 1, doesn't: without a target there's none
+    compute_params.smoothed_focal_lengths.clear();
     compute_params.focal_length_smoothing_enabled = false;
     // The maps are upright pictures. The GUI hands over the preview's parameters, whose framebuffer is upside down
     // on OpenGL: left on, that mirrors the lens of the undistort map and flips the readout and sensor shift per frame
@@ -44,7 +47,7 @@ pub fn generate_stmaps(stab: &StabilizationManager, per_frame: bool) -> impl Ite
     kernel_flags.set(KernelParamsFlags::HORIZONTAL_RS, compute_params.frame_readout_direction.is_horizontal());
 
     (0..compute_params.frame_count).map(move |frame| {
-        let timestamp = crate::timestamp_at_frame(frame as i32, compute_params.scaled_fps);
+        let timestamp = compute_params.timestamp_at_frame(frame as i32);
 
         let org_output_size = (width, height);
         compute_params.fov_scale = 1.0;

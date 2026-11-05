@@ -175,6 +175,7 @@ impl SmoothingAlgorithm for Optimal {
         hasher.write_u64(p.scaled_fps.to_bits());
         hasher.write_usize(p.frame_count);
         hasher.write_u64(p.scaled_duration_ms.to_bits());
+        if let Some(f) = &p.smoothing_frames { hasher.write_usize(f.start); hasher.write_usize(f.end); }
         for r in &p.trim_ranges { hasher.write_u64(r.0.to_bits()); hasher.write_u64(r.1.to_bits()); }
         hasher.write_u8(p.video_speed_affects_smoothing as u8);
         hasher.write_u64(p.video_speed.to_bits());
@@ -245,8 +246,10 @@ impl SmoothingAlgorithm for Optimal {
         let frames: Vec<(usize, f64)> = if fps > 0.0 && fps.is_finite() {
             let times = compute_params.smoothing_frame_times.as_deref();
             let duration = compute_params.scaled_duration_ms;
-            (0..compute_params.frame_count).filter_map(|f| {
-                let video_ms = crate::timestamp_at_frame(f as i32, fps);
+            // The frames of the segment being smoothed, of a video cut from recordings (`ComputeParams::smoothing_frames`)
+            let frames = compute_params.smoothing_frames.clone().unwrap_or(0..compute_params.frame_count);
+            (frames.start..frames.end.min(compute_params.frame_count)).filter_map(|f| {
+                let video_ms = compute_params.timestamp_at_frame(f as i32);
                 if trim && !compute_params.trim_ranges.iter().any(|r| video_ms >= r.0 * duration && video_ms <= r.1 * duration) { return None; }
                 Some((f, times.and_then(|t| t.get(f)).copied().unwrap_or(video_ms)))
             }).collect()

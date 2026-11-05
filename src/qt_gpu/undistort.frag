@@ -62,7 +62,7 @@ layout(binding = 3) uniform sampler2D texParams;
 layout(binding = 4) uniform sampler2D texCanvas;
 layout(binding = 5) uniform sampler2D texMeshData;
 
-const vec4 colors[9] = vec4[9](
+const vec4 colors[11] = vec4[11](
     vec4(0.0,   0.0,   0.0,     0.0), // None
     vec4(255.0, 0.0,   0.0,   255.0), // Red
     vec4(0.0,   255.0, 0.0,   255.0), // Green
@@ -71,7 +71,9 @@ const vec4 colors[9] = vec4[9](
     vec4(200.0, 200.0, 0.0,   255.0), // Yellow2
     vec4(255.0, 0.0,   255.0, 255.0), // Magenta
     vec4(0.0,   128.0, 255.0, 255.0), // Blue2
-    vec4(0.0,   200.0, 200.0, 255.0)  // Blue3
+    vec4(0.0,   200.0, 200.0, 255.0), // Blue3
+    vec4(255.0, 255.0, 255.0, 255.0), // White
+    vec4(63.0,  182.0, 255.0, 255.0)  // Sky
 );
 const float alphas[4] = float[4](1.0, 0.75, 0.50, 0.25);
 void draw_pixel(inout vec4 out_pix, float x, float y, bool isInput) {
@@ -86,7 +88,7 @@ void draw_pixel(inout vec4 out_pix, float x, float y, bool isInput) {
         int color = (data & 0xF8) >> 3;
         int alpha = (data & 0x06) >> 1;
         int stage = data & 1;
-        if (((stage == 0 && isInput) || (stage == 1 && !isInput)) && color < 9) {
+        if (((stage == 0 && isInput) || (stage == 1 && !isInput)) && color < 11) {
             vec4 colorf = colors[color] / 255.0;
             float alphaf = alphas[alpha];
             out_pix = colorf * alphaf + out_pix * (1.0 - alphaf);

@@ -106,7 +106,7 @@ __constant float coeffs[256] = {
 };
 #endif
 
-__constant float4 colors[9] = {
+__constant float4 colors[11] = {
     (float4)(0.0f,   0.0f,   0.0f,     0.0f), // None
     (float4)(255.0f, 0.0f,   0.0f,   255.0f), // Red
     (float4)(0.0f,   255.0f, 0.0f,   255.0f), // Green
@@ -115,7 +115,9 @@ __constant float4 colors[9] = {
     (float4)(200.0f, 200.0f, 0.0f,   255.0f), // Yellow2
     (float4)(255.0f, 0.0f,   255.0f, 255.0f), // Magenta
     (float4)(0.0f,   128.0f, 255.0f, 255.0f), // Blue2
-    (float4)(0.0f,   200.0f, 200.0f, 255.0f)  // Blue3
+    (float4)(0.0f,   200.0f, 200.0f, 255.0f), // Blue3
+    (float4)(255.0f, 255.0f, 255.0f, 255.0f), // White
+    (float4)(63.0f,  182.0f, 255.0f, 255.0f)  // Sky
 };
 __constant float alphas[4] = { 1.0f, 0.75f, 0.50f, 0.25f };
 void draw_pixel(DATA_TYPE *out_pix, int x, int y, bool isInput, int width, __global KernelParams *params, __global const uchar *drawing) {
@@ -128,7 +130,7 @@ void draw_pixel(DATA_TYPE *out_pix, int x, int y, bool isInput, int width, __glo
         uchar color = (data & 0xF8) >> 3;
         uchar alpha = (data & 0x06) >> 1;
         uchar stage = data & 1;
-        if (((stage == 0 && isInput) || (stage == 1 && !isInput)) && color < 9 && alpha < 4) {
+        if (((stage == 0 && isInput) || (stage == 1 && !isInput)) && color < 11 && alpha < 4) {
             float4 colorf4 = colors[color];
             DATA_TYPEF colorf = *(DATA_TYPEF *)&colorf4;
 

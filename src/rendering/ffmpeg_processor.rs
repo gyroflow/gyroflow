@@ -190,6 +190,10 @@ pub enum FFmpegError {
     InternalError(ffmpeg_next::Error),
     CannotOpenInputFile((String, FilesystemError)),
     CannotOpenOutputFile((String, FilesystemError)),
+    /// The output, as it's shown, would write over the input file, or a frame of the input image sequence, shown next
+    OutputIsInput(String, String),
+    /// The output can't be written where it goes, or the complete render couldn't get its name: why
+    Output(String),
 }
 
 impl std::fmt::Display for FFmpegError {
@@ -216,6 +220,8 @@ impl std::fmt::Display for FFmpegError {
             FFmpegError::InternalError(e)     => write!(f, "ffmpeg error: {:?}", e),
             FFmpegError::CannotOpenInputFile((url, e))   => write!(f, "Cannot open input file {url}: {e:?}"),
             FFmpegError::CannotOpenOutputFile((url, e))   => write!(f, "Cannot open output file {url}: {e:?}"),
+            FFmpegError::OutputIsInput(output, input) => write!(f, "Rendering to {output} would write over {input}, which it's rendered from. Choose another name or folder for the output."),
+            FFmpegError::Output(why)                 => write!(f, "{why}"),
         }
     }
 }
@@ -236,6 +242,10 @@ pub struct VideoInfo {
     pub duration_ms: f64,
     pub frame_count: usize,
     pub fps: f64,
+    /// The base frame rate of the video (ffmpeg's `r_frame_rate`, else `fps`), for comparing files, not for timing: the
+    /// rate a recording runs at, which the frames it dropped don't change, where they lower its average (`fps`, which
+    /// times the frames)
+    pub base_fps: f64,
     pub width: u32,
     pub height: u32,
     pub bitrate: f64, // in Mbps
@@ -412,6 +422,9 @@ impl<'a> FfmpegProcessor<'a> {
         let codec_tag = |stream: &Stream| unsafe { (*stream.parameters().as_ptr()).codec_tag }.to_le_bytes();
         // The only data tracks FFmpeg writes a sample description for
         let ffmpeg_writes = |tag: &[u8; 4]| tag == b"tmcd" || tag == b"gpmd";
+        // A timecode track stores its frames per second in one byte: above 255 fps, the mov/mp4 muxer fails as it writes the moov,
+        // once the whole video is rendered (`mov_write_tmcd_tag`, "fps 400 is too large"), so the output gets no timecode then
+        let tmcd_fps_too_high = |rate: Rational| (output_format == "mov" || output_format == "mp4") && rate.denominator() != 0 && f64::from(rate).round() > 255.0;
         // Only the tracks that can be appended are left out, FFmpeg writes the others as before. Why they can't be
         let not_copyable: HashMap<u32, String> = if copy_camera_tracks {
             let track_ids: Vec<u32> = self.input_context.streams()
@@ -507,6 +520,11 @@ impl<'a> FfmpegProcessor<'a> {
                         self.tracks_not_copied.push(format!("Track {id} ({}): {why}", String::from_utf8_lossy(&tag)));
                     }
                     stream_mapping[i] = -1;
+                } else if &tag == b"tmcd" && tmcd_fps_too_high(stream.avg_frame_rate()) {
+                    // In a .mov. The muxer makes the timecode track from the `timecode` metadata instead, at the video's frame rate
+                    // (left out below if that's too high as well)
+                    log::info!("Not copying data stream {i} (tmcd), its frame rate is above 255 fps");
+                    stream_mapping[i] = -1;
                 } else {
                     if let Some(why) = not_copyable {
                         log::warn!("Can't copy track {id} of the camera ({why}), FFmpeg writes it");
@@ -540,11 +558,13 @@ impl<'a> FfmpegProcessor<'a> {
             if start_ms > 0.0 {
                 for (k, v) in metadata.iter() {
                     if k == "creation_time" {
-                        if let Ok(v) = chrono::DateTime::parse_from_rfc3339(v) {
-                            if let Some(v) = v.checked_add_signed(chrono::TimeDelta::try_milliseconds(start_ms.round() as i64).unwrap()) {
-                                updated_creation_time = Some(v.to_rfc3339());
-                            }
-                        }
+                        let start = chrono::TimeDelta::try_milliseconds(start_ms.round() as i64).unwrap();
+                        // A local time stays one, in its form, moved on its own: its zone isn't known, and needn't be
+                        updated_creation_time = match Self::parse_creation_time(v) {
+                            Some(CreationTime::Zoned(time)) => time.checked_add_signed(start).map(|t| t.to_rfc3339()),
+                            Some(CreationTime::Local(time, form)) => time.checked_add_signed(start).map(|t| t.format(form).to_string()),
+                            None => None,
+                        };
                         break;
                     }
                 }
@@ -552,6 +572,12 @@ impl<'a> FfmpegProcessor<'a> {
         }
         if let Some(updated_creation_time) = updated_creation_time {
             metadata.set("creation_time", &updated_creation_time);
+        }
+        let video_fps = self.video.output_index.and_then(|i| octx.stream(i)).map(|x| x.avg_frame_rate());
+        if let Some(fps) = video_fps.filter(|x| metadata.get("timecode").is_some() && tmcd_fps_too_high(*x)) {
+            log::warn!("Not writing the timecode, a .{output_format} timecode track can't be above 255 fps (the video is {:.3} fps)", f64::from(fps));
+            self.tracks_not_copied.push(format!("Timecode: the .{output_format} format can't store it above 255 fps"));
+            metadata = metadata.iter().filter(|(k, _)| *k != "timecode").collect();
         }
         log::debug!("Output metadata: {:?}", &metadata);
         octx.set_metadata(metadata);
@@ -722,9 +748,13 @@ impl<'a> FfmpegProcessor<'a> {
         {
             self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.send_eof()?;
             // self.video.decoder.as_mut().ok_or(Error::DecoderNotFound)?.flush();
-            let encoding_status = self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, start_ms, end_ms, &mut self.frame_ts)?;
-            if encoding_status == Status::Finish && self.frame_ts.range_end.is_none() {
-                self.frame_ts.end_range();
+            // Once the video of the last range ended, the decoder holds only frames past it (decoded ahead), and none of them
+            // goes in the output: the audio ends where that video ended
+            if self.frame_ts.range_end.is_none() {
+                let encoding_status = self.video.receive_and_process_video_frames(output_size, bitrate, Some(&mut octx), &mut self.ost_time_bases, start_ms, end_ms, &mut self.frame_ts)?;
+                if encoding_status == Status::Finish {
+                    self.frame_ts.end_range();
+                }
             }
             self.video.encoder.as_mut().ok_or(Error::EncoderNotFound)?.send_eof()?;
             if let Err(e) = self.video.receive_and_process_encoded_packets(&mut octx, &mut self.ost_time_bases) {
@@ -942,32 +972,50 @@ impl<'a> FfmpegProcessor<'a> {
         get_rotation(&frame)
     }
 
-    pub fn get_video_info(url: &str) -> Result<VideoInfo, ffmpeg_next::Error> {
+    /// FFmpeg's `creation_time` in the forms its demuxers give it: RFC 3339, that of the containers' own times
+    /// (`ff_dict_set_timestamp`) and of writers that state a zone, or a date and a time of day without one, a `T` or a
+    /// space between them (HOVERAir's `creation_time` key, which FFmpeg's MOV demuxer gives as written, and an AVI's
+    /// `IDIT`), which is local time, as FFmpeg's `av_parse_time` and the player's `Date.parse` read it. A local time
+    /// with the `strftime` form it's in, to write one moved from it in
+    fn parse_creation_time(value: &str) -> Option<CreationTime> {
+        if let Ok(time) = chrono::DateTime::parse_from_rfc3339(value) {
+            return Some(CreationTime::Zoned(time));
+        }
+        ["%Y-%m-%dT%H:%M:%S%.f", "%Y-%m-%d %H:%M:%S%.f"].into_iter().find_map(|form| {
+            chrono::NaiveDateTime::parse_from_str(value, form).ok().map(|time| CreationTime::Local(time, form))
+        })
+    }
+
+    /// `options` for the demuxer, eg. an image sequence's (`rendering::image_sequence_options`)
+    pub fn get_video_info(url: &str, options: Option<Dictionary>) -> Result<VideoInfo, ffmpeg_next::Error> {
         let mut file = FfmpegPathWrapper::new(url, false).map_err(|_| ffmpeg_next::Error::ProtocolNotFound)?;
-        let mut dict = Dictionary::new();
+        let mut dict = options.unwrap_or_else(Dictionary::new);
         if file.path.starts_with("fd:") {
             dict.set("fd", &file.path[3..]);
             file.path = "fd:".into();
         }
 
         let mut context = format::input_with_dictionary(&file.path, dict)?;
-        let created_at = context.metadata().get("creation_time").and_then(|x| chrono::DateTime::parse_from_rfc3339(x).ok()).map(|x| x.timestamp_millis() as u64 / 1000);
+        let created_at = context.metadata().get("creation_time").and_then(Self::parse_creation_time).and_then(|x| x.instant()).and_then(|x| u64::try_from(x.timestamp()).ok());
         if let Some(stream) = context.streams().best(media::Type::Video) {
             let codec = codec::context::Context::from_parameters(stream.parameters())?;
             if let Ok(mut video) = codec.decoder().video() {
                 let mut bitrate = video.bit_rate();
                 if bitrate == 0 { bitrate = context.bit_rate() as usize; }
 
+                let fps = Self::average_frame_rate(&stream);
+                let base_fps = Self::base_frame_rate(&stream).unwrap_or(fps);
+                let duration_s = Self::video_duration_s(&context, &stream).unwrap_or_default();
+                // Without a frame count in the container, its duration at its rate, as the player counts them (`MDKPlayer.cpp`)
                 let mut frames = stream.frames() as usize;
-                if frames == 0 { frames = (stream.duration() as f64 * f64::from(stream.time_base()) * f64::from(stream.rate())) as usize; }
+                if frames == 0 { frames = (duration_s * fps) as usize; }
 
                 let rotate_tag = stream.metadata().get("rotate").and_then(|x| x.parse::<f64>().ok()).map(|x| (x, false));
                 let display_matrix = stream.side_data().find(|x| x.kind() == codec::packet::side_data::Type::DisplayMatrix).and_then(|x| Self::display_matrix_rotation(x.data()));
                 let stream_rotation = rotate_tag.filter(|x| x.0 != 0.0).or(display_matrix).filter(|(theta, mirrored)| *theta != 0.0 || *mirrored);
 
                 let stream_index = stream.index();
-                let duration_ms = stream.duration() as f64 * f64::from(stream.time_base()) * 1000.0;
-                let fps = f64::from(stream.rate()); // or avg_frame_rate?
+                let duration_ms = duration_s * 1000.0;
                 let (width, height) = (video.width(), video.height());
 
                 // Same as the player: the stream rotation, otherwise the one on the frames
@@ -982,6 +1030,7 @@ impl<'a> FfmpegProcessor<'a> {
                     duration_ms,
                     frame_count: frames,
                     fps,
+                    base_fps,
                     width,
                     height,
                     bitrate: bitrate as f64 / 1024.0 / 1024.0,
@@ -991,6 +1040,81 @@ impl<'a> FfmpegProcessor<'a> {
             }
         }
         Err(ffmpeg_next::Error::StreamNotFound)
+    }
+
+    /// The frame rate of a video stream as the player (MDK) and gyroflow-core read it: the average one, ffmpeg's
+    /// `avg_frame_rate` (the stream's frames over their duration), so a clip added to the queue maps its frames to the
+    /// same times as in the app. `r_frame_rate`, the base rate its timestamps are at, is the same for a constant frame
+    /// rate, but slower or faster than the frames of a variable one (an iPhone clip: 30 against 30.0021), and can be
+    /// the stream's time base (raw H.264/HEVC); it stands in only when ffmpeg can't tell the average (0/0). 0 when
+    /// neither is known
+    fn average_frame_rate(stream: &Stream) -> f64 {
+        [stream.avg_frame_rate(), stream.rate()].into_iter().find(|rate| rate.numerator() > 0 && rate.denominator() > 0).map_or(0.0, f64::from)
+    }
+
+    /// The base frame rate of a video stream, ffmpeg's `r_frame_rate`: the rate its timestamps are at. For a recording
+    /// it's the rate the camera records at, the same for every part of it. The MP4 demuxer takes it from the frame
+    /// duration when all frames but the last have the same one, else ffmpeg from the first frames' durations (their
+    /// common divisor, or the standard rate nearest them), else from the codec, so frames dropped from a part (longer
+    /// durations) leave it as it is, where they lower the average. `None` when ffmpeg can't tell it
+    fn base_frame_rate(stream: &Stream) -> Option<f64> {
+        let rate = stream.rate();
+        (rate.numerator() > 0 && rate.denominator() > 0).then(|| f64::from(rate))
+    }
+
+    /// The duration of a video stream in seconds, as the file declares it: the stream's own (MP4, MOV, MXF, MPEG-TS),
+    /// else the duration its track's statistics give (the `DURATION` tag the Matroska and WebM muxers write per track,
+    /// ffmpeg's and mkvmerge's, which is the player's, MDK's, value there), else the container's (FLV's `onMetaData`, a
+    /// Matroska file without the tags), which spans all its streams. `None` when nothing declares one: a raw H.264/HEVC
+    /// stream, or a recording that never got its duration written. ffmpeg doesn't know such a duration either, and the
+    /// player has 0; a raw stream's frames have no time at all to be rendered by
+    fn video_duration_s(context: &format::context::Input, stream: &Stream) -> Option<f64> {
+        if stream.duration() > 0 {
+            return Some(stream.duration() as f64 * f64::from(stream.time_base()));
+        }
+        let tag = stream.metadata().iter()
+            .find(|(key, _)| key.eq_ignore_ascii_case("DURATION") || key.get(..9).is_some_and(|key| key.eq_ignore_ascii_case("DURATION-")))
+            .and_then(|(_, value)| Self::duration_tag_s(value));
+        tag.filter(|s| *s > 0.0).or_else(|| (context.duration() > 0).then(|| context.duration() as f64 / f64::from(ffi::AV_TIME_BASE)))
+    }
+
+    /// A Matroska `DURATION` tag, `HH:MM:SS.nnnnnnnnn`, in seconds
+    fn duration_tag_s(value: &str) -> Option<f64> {
+        let mut parts = value.trim().splitn(3, ':');
+        let (hours, minutes, seconds) = (parts.next()?.parse::<u64>().ok()?, parts.next()?.parse::<u64>().ok()?, parts.next()?.parse::<f64>().ok()?);
+        (minutes < 60 && (0.0..60.0).contains(&seconds)).then(|| (hours * 3600 + minutes * 60) as f64 + seconds)
+    }
+}
+
+/// A `creation_time` (`FfmpegProcessor::parse_creation_time`): with its zone, or a local time with the `strftime` form
+/// it's written in
+enum CreationTime {
+    Zoned(chrono::DateTime<chrono::FixedOffset>),
+    Local(chrono::NaiveDateTime, &'static str),
+}
+
+impl CreationTime {
+    /// The moment it is: a local time in this computer's zone, see `local_instant`
+    fn instant(&self) -> Option<chrono::DateTime<chrono::FixedOffset>> {
+        match self {
+            Self::Zoned(time) => Some(*time),
+            Self::Local(time, _) => local_instant(time, &chrono::Local),
+        }
+    }
+}
+
+/// The moment the local time `time` of `zone` is, as `Date` (Temporal's "compatible") and `mktime` take it: of an hour
+/// the clocks went back over, the first one; in an hour they skipped going forward, which has no local time, with the
+/// offset from before the change, so 02:30 of a change at 02:00 is 03:30 of the new time. Not None there: FFmpeg and the
+/// player read the time all the same
+fn local_instant<Tz: chrono::TimeZone>(time: &chrono::NaiveDateTime, zone: &Tz) -> Option<chrono::DateTime<chrono::FixedOffset>> {
+    use chrono::{ Offset, TimeZone, offset::MappedLocalTime };
+    match zone.from_local_datetime(time) {
+        MappedLocalTime::Single(t) | MappedLocalTime::Ambiguous(t, _) => Some(t.fixed_offset()),
+        // The offset an hour before the time, or more for a longer gap (a day skipped, Samoa 2011)
+        MappedLocalTime::None => [1, 3, 25, 49].into_iter()
+            .find_map(|hours| zone.from_local_datetime(&time.checked_sub_signed(chrono::TimeDelta::hours(hours))?).earliest())
+            .and_then(|before| before.offset().fix().from_local_datetime(time).single()),
     }
 }
 
@@ -1088,3 +1212,61 @@ fn has_display_orientation_sei(codec_id: codec::Id, extradata: &[u8], data: &[u8
     ::log::error!("Failed to get HW surface format.");
     ffi::AVPixelFormat::AV_PIX_FMT_NONE
 } */
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::{ FixedOffset, NaiveDate, NaiveDateTime, TimeZone, offset::MappedLocalTime };
+
+    /// Central European time around the change to summer time of 2026: +01:00 until 2026-03-29 01:00 UTC (02:00 local),
+    /// +02:00 from then, and back at 2026-10-25 01:00 UTC (03:00 local)
+    #[derive(Clone, Copy)]
+    struct Cet;
+    fn utc(y: i32, m: u32, d: u32, h: u32) -> NaiveDateTime { NaiveDate::from_ymd_opt(y, m, d).unwrap().and_hms_opt(h, 0, 0).unwrap() }
+    impl TimeZone for Cet {
+        type Offset = FixedOffset;
+        fn from_offset(_: &FixedOffset) -> Self { Cet }
+        fn offset_from_local_date(&self, local: &NaiveDate) -> MappedLocalTime<FixedOffset> { self.offset_from_local_datetime(&local.and_hms_opt(12, 0, 0).unwrap()) }
+        fn offset_from_local_datetime(&self, local: &NaiveDateTime) -> MappedLocalTime<FixedOffset> {
+            let (winter, summer) = (FixedOffset::east_opt(3600).unwrap(), FixedOffset::east_opt(7200).unwrap());
+            let fits = |offset: FixedOffset| self.offset_from_utc_datetime(&(*local - offset)) == offset;
+            match (fits(winter), fits(summer)) {
+                (true, true) => MappedLocalTime::Ambiguous(summer, winter),
+                (true, false) => MappedLocalTime::Single(winter),
+                (false, true) => MappedLocalTime::Single(summer),
+                (false, false) => MappedLocalTime::None,
+            }
+        }
+        fn offset_from_utc_date(&self, utc: &NaiveDate) -> FixedOffset { self.offset_from_utc_datetime(&utc.and_hms_opt(0, 0, 0).unwrap()) }
+        fn offset_from_utc_datetime(&self, at: &NaiveDateTime) -> FixedOffset {
+            let summer = *at >= utc(2026, 3, 29, 1) && *at < utc(2026, 10, 25, 1);
+            FixedOffset::east_opt(if summer { 7200 } else { 3600 }).unwrap()
+        }
+    }
+
+    #[test]
+    fn a_local_creation_time_is_a_moment_even_in_the_skipped_hour() {
+        let local = |s: &str| match FfmpegProcessor::parse_creation_time(s) { Some(CreationTime::Local(t, _)) => t, _ => panic!("{s} isn't a local time") };
+        let at = |s: &str| local_instant(&local(s), &Cet).map(|t| t.to_rfc3339());
+        assert_eq!(at("2026-03-29 01:30:00").as_deref(), Some("2026-03-29T01:30:00+01:00"));
+        // Skipped: 03:30 of summer time, the moment of 02:30 of winter time
+        assert_eq!(at("2026-03-29 02:30:00").as_deref(), Some("2026-03-29T02:30:00+01:00"));
+        assert_eq!(at("2026-03-29T03:30:00").as_deref(), Some("2026-03-29T03:30:00+02:00"));
+        // Twice: the first
+        assert_eq!(at("2026-10-25 02:30:00").as_deref(), Some("2026-10-25T02:30:00+02:00"));
+    }
+
+    #[test]
+    fn a_creation_time_moves_in_its_own_form() {
+        let moved = |s: &str, ms: i64| match FfmpegProcessor::parse_creation_time(s) {
+            Some(CreationTime::Zoned(t)) => t.checked_add_signed(chrono::TimeDelta::milliseconds(ms)).unwrap().to_rfc3339(),
+            Some(CreationTime::Local(t, form)) => t.checked_add_signed(chrono::TimeDelta::milliseconds(ms)).unwrap().format(form).to_string(),
+            None => panic!("{s} isn't a time"),
+        };
+        // A local time in the skipped hour moves too, without its zone
+        assert_eq!(moved("2026-03-29 02:30:00", 1500), "2026-03-29 02:30:01.500");
+        assert_eq!(moved("2026-03-29T02:30:00", 60_000), "2026-03-29T02:31:00");
+        assert_eq!(moved("2026-03-29T00:30:00.000000Z", 1000), "2026-03-29T00:30:01+00:00");
+        assert!(FfmpegProcessor::parse_creation_time("yesterday").is_none());
+    }
+}

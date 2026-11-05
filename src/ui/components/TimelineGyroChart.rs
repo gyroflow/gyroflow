@@ -71,6 +71,8 @@ pub struct TimelineGyroChart {
     series: [Series; SERIES_COUNT],
 
     sync_points: BTreeMap<i64, (f64, f64)>, // timestamp, (offset, fitted offset)
+    /// Where the segments of a video cut from recordings start, but the first: the video's time, µs
+    segment_starts: Vec<i64>,
 
     gyro: Vec<ChartData<3>>,
     accl: Vec<ChartData<3>>,
@@ -260,6 +262,26 @@ impl TimelineGyroChart {
             }
         }
     }
+    /// The boundaries of the segments of a video cut from recordings, where the video and the motion jump to another
+    /// moment: a dashed line across the chart
+    fn drawSegmentBoundaries(&mut self, p: &mut QPainter, color: &str) {
+        let rect = (self as &dyn QQuickItem).bounding_rect();
+        let duration_us = self.duration_ms * 1000.0;
+        if rect.width <= 0.0 || rect.height <= 0.0 || duration_us <= 0.0 || self.segment_starts.is_empty() { return; }
+        let map_to_visible_area = |v: f64| -> f64 { (v - self.visibleAreaLeft) / (self.visibleAreaRight - self.visibleAreaLeft) };
+
+        let mut pen = QPen::from_color(QColor::from_name(color));
+        pen.set_width_f(1.0);
+        pen.set_style(PenStyle::DashLine);
+        p.set_pen(pen);
+        for ts in &self.segment_starts {
+            let x = map_to_visible_area(*ts as f64 / duration_us) * rect.width;
+            if x >= 0.0 && x <= rect.width {
+                p.draw_line(QLineF { pt1: QPointF { x, y: 0.0 }, pt2: QPointF { x, y: rect.height } });
+            }
+        }
+    }
+
     fn drawSyncPoints(&mut self, p: &mut QPainter) {
         p.set_pen(QPen::default());
 
@@ -351,6 +373,7 @@ impl TimelineGyroChart {
             self.quats.clear();
             self.smoothed_quats.clear();
             self.sync_points = gyro.get_offsets_plus_linear();
+            self.segment_starts = gyro.segment_ranges().map(|s| s.video_starts_us.iter().skip(1).copied().collect()).unwrap_or_default();
 
             {
                 let file_metadata = gyro.file_metadata.read();
@@ -406,10 +429,7 @@ impl TimelineGyroChart {
 
                 // Reverse the smoothed rotation to get original smoothed quaternions.
                 // This is the inverse of gyro_source.rs:recompute_smoothness
-                let mut org_smoothed_quats = gyro.smoothed_quaternions.clone();
-                for (sq, q) in org_smoothed_quats.iter_mut().zip(gyro.quaternions.iter()) {
-                    *sq.1 = (*sq.1 / q.1).inverse();
-                }
+                let org_smoothed_quats: TimeQuat = gyro.smoothed_quaternions.iter().zip(gyro.quaternions.iter()).map(|((ts, sq), (_, q))| (*ts, (*sq / q).inverse())).collect();
                 add_quats(&org_smoothed_quats, &mut self.smoothed_quats);
             }
 
@@ -428,10 +448,11 @@ impl TimelineGyroChart {
             Self::normalize_height(&mut self.sync_results, self.gyro_max);
         }
         if series.is_empty() || series == "8" {
-            let fps = params.get_scaled_fps();
+            // Every series here is per frame: at the frames' times, as the render applies them (`StabilizationParams::frame_times`)
+            let ts = |i: usize| (params.timestamp_at_frame(i as i32) * 1000.0).round() as i64;
             let max = *params.fovs.iter().max_by(|a, b| a.total_cmp(b)).unwrap_or(&1.0);
             self.fovs = params.fovs.iter().enumerate().map(|(i, x)| ChartData {
-                timestamp_us: (gyroflow_core::timestamp_at_frame(i as i32, fps) * 1000.0).round() as i64,
+                timestamp_us: ts(i),
                 values: [max - *x]
             }).collect();
             Self::normalize_height(&mut self.fovs, None);
@@ -443,7 +464,7 @@ impl TimelineGyroChart {
             self.uncovered_fov_threshold = 1.0 - 0.5 / params.size.0.max(1) as f64;
 
             self.minimal_fovs = params.minimal_fovs.iter().zip(params.fovs.iter()).enumerate().map(|(i, (min_fov, fov))| {
-                let timestamp_us = (gyroflow_core::timestamp_at_frame(i as i32, fps) * 1000.0).round() as i64;
+                let timestamp_us = ts(i);
 
                 let fov_scale = keyframes.value_at_video_timestamp(&KeyframeType::Fov, timestamp_us as f64 / 1000.0).unwrap_or(params.fov);
 
@@ -456,8 +477,7 @@ impl TimelineGyroChart {
             // Populate focal length series
             self.focal_lengths.clear();
             self.smoothed_focal_lengths.clear();
-            if gyro.file_metadata.read().has_per_frame_focal_length() {
-                let ts = |i: usize| (gyroflow_core::timestamp_at_frame(i as i32, fps) * 1000.0).round() as i64;
+            if gyro.file_metadata.read().has_varying_focal_length() {
                 self.focal_lengths = params.focal_lengths.iter().enumerate()
                     .filter_map(|(i, v)| v.map(|x| ChartData { timestamp_us: ts(i), values: [x] }))
                     .collect();
@@ -619,5 +639,7 @@ impl QQuickPaintedItem for TimelineGyroChart {
         if self.series[SERIES_FOCAL_LENGTH_SM].visible { self.drawAxis(p, SERIES_FOCAL_LENGTH_SM, "#cccc66"); } // smoothed FL (drawn on top)
 
         if self.series[SERIES_SYNC_POINTS].visible { self.drawSyncPoints(p); }
+
+        self.drawSegmentBoundaries(p, if self.theme == "light" { "#a0000000" } else { "#a0ffffff" });
     }
 }

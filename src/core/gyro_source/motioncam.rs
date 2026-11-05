@@ -8,13 +8,15 @@ use crate::gyro_source::FileMetadata;
 /// Offset of the frame's capture time from its time in the video. The capture time (the middle of the exposure of
 /// the frame's centre row, on the motion data's time base) follows the camera's real frame rate and its dropped
 /// frames, while the video's frames are evenly spaced: at the video's frame rate, or the file's when the two differ
-/// by more than 1 fps (`override_video_fps`)
-pub fn get_time_offset(md: &FileMetadata, tag_map: &GroupedTagMap, info: &SampleInfo, fps: f64) -> Option<f64> {
+/// by more than 1 fps (`override_video_fps`). `frame` is the frame's number in the video, the sample's: the video is
+/// rendered from the file's frames one by one, in time order, and a frame the parser leaves out (one an unfinished
+/// recording states no time of) is one the decoders leave out too
+pub fn get_time_offset(md: &FileMetadata, tag_map: &GroupedTagMap, frame: usize, fps: f64) -> Option<f64> {
     if !md.has_accurate_timestamps { return None; }
     let capture_time = *(tag_map.get(&GroupId::Imager)?.get_t(TagId::Custom("CaptureTime".into())) as Option<&f64>)?;
     let fps = md.frame_rate.filter(|x| (x - fps).abs() > 1.0).unwrap_or(fps);
     if fps <= 0.0 { return None; }
-    Some(capture_time - crate::timestamp_at_frame(info.sample_index as i32, fps))
+    Some(capture_time - crate::timestamp_at_frame(frame as i32, fps))
 }
 
 /// Without a lens profile, the camera's own calibration which MotionCam keeps with every frame: a pinhole camera

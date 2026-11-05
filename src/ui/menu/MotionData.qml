@@ -27,7 +27,7 @@ MenuItem {
 
     FileDialog {
         id: fileDialog;
-        property var extensions: [ "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "gcsv", "360", "log", "bin", "braw", "r3d", "nev", "gpmf", "crm", "zraw", "jsonl", "mcraw" ];
+        property var extensions: [ "csv", "txt", "bbl", "bfl", "mp4", "mov", "mxf", "insv", "gcsv", "360", "log", "bin", "braw", "r3d", "nev", "gpmf", "crm", "zraw", "jsonl", "mcraw", "dng" ];
 
         title: qsTr("Choose a motion data file")
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Motion data files") + " (*." + extensions.concat(extensions.map(x => x.toUpperCase())).join(" *.") + ")"];
@@ -75,7 +75,13 @@ MenuItem {
                 opticalPerFrame.currentIndex = gyro.optical_correction_per_frame? 1 : 0;
             }
             if (typeof gyro.optical_tracking === "string") {
-                opticalTracking.currentIndex = gyro.optical_tracking === "dis"? 1 : 0;
+                opticalTracking.currentIndex = Math.max(0, opticalTracking.methods.indexOf(gyro.optical_tracking));
+            }
+            // A project and the clean state of a new file say whether there's a correction (null: none, so the section
+            // closes like the rest resets), a preset doesn't have the key. Decided like `updateInfo` does, which leaves it
+            // as it was without a correction: for a project ignoring the motion data, its handler would bring it back
+            if (gyro.hasOwnProperty("optical_correction_enabled")) {
+                opticalcb.checked = !!gyro.ignore_file_motion || !!gyro.optical_correction_enabled;
             }
             // The checkbox from the core, which has the project's correction and whether it's on (`optical_correction_enabled`)
             Qt.callLater(opticalcb.updateInfo);
@@ -139,7 +145,7 @@ MenuItem {
             controller.set_imu_median_filter(mfcb.checked? mf.value : 0);
             controller.set_optical_correction_strength(opticalStrength.value / 100);
             controller.set_optical_correction_per_frame(opticalPerFrame.currentIndex === 1);
-            controller.set_optical_tracking(opticalTracking.currentIndex === 1? "dis" : "klt");
+            controller.set_optical_tracking(opticalTracking.methods[opticalTracking.currentIndex] || "klt");
             Qt.callLater(opticalcb.updateInfo);
             controller.set_imu_rotation(rot.checked? p.value : 0, rot.checked? r.value : 0, rot.checked? y.value : 0);
             controller.set_acc_rotation(arot.checked? ap.value : 0, arot.checked? ar.value : 0, arot.checked? ay.value : 0);
@@ -228,12 +234,19 @@ MenuItem {
             }
         }
     }
+    // As a project has it, without loading the file again: the project loads it
+    function setAllMetadata(v: bool): void {
+        allMetadataCb.preventReload = true;
+        allMetadataCb.checked = v;
+        allMetadataCb.preventReload = false;
+    }
     CheckBox {
         id: allMetadataCb;
+        property bool preventReload: false;
         text: qsTr("Load all metadata");
         visible: root.lastSelectedFile.toString() && root.lastSelectedFile != window.videoArea.loadedFileUrl;
         checked: false;
-        onCheckedChanged: allMetadataDebounce.start();
+        onCheckedChanged: if (!preventReload) allMetadataDebounce.start();
         Timer {
             id: allMetadataDebounce;
             interval: 1;
@@ -377,11 +390,15 @@ MenuItem {
             text: qsTr("Tracking");
             ComboBox {
                 id: opticalTracking;
-                model: [QT_TRANSLATE_NOOP("Popup", "KLT (corners)"), QT_TRANSLATE_NOOP("Popup", "DIS (dense flow)")];
+                // gmflow only in builds with the ai-optical-flow feature
+                readonly property var methods: controller.has_ai_optical_flow()? ["klt", "dis", "gmflow"] : ["klt", "dis"];
+                model: controller.has_ai_optical_flow()? [QT_TRANSLATE_NOOP("Popup", "KLT (corners)"), QT_TRANSLATE_NOOP("Popup", "DIS (dense flow)"), QT_TRANSLATE_NOOP("Popup", "GMFlow (AI dense flow)")]
+                                                       : [QT_TRANSLATE_NOOP("Popup", "KLT (corners)"), QT_TRANSLATE_NOOP("Popup", "DIS (dense flow)")];
                 font.pixelSize: 12 * dpiScale;
                 width: parent.width;
-                tooltip: qsTr("KLT is the most accurate where the image has detail. DIS also follows weak detail like clouds or water, but is slower and loses fast motion more easily.");
-                onCurrentIndexChanged: controller.set_optical_tracking(currentIndex === 1? "dis" : "klt");
+                tooltip: qsTr("KLT is the most accurate where the image has detail. DIS also follows weak detail like clouds or water, but is slower and loses fast motion more easily.")
+                         + (controller.has_ai_optical_flow()? " " + qsTr("GMFlow uses an AI model to follow both weak detail and fast motion, but is much slower. Its model (about 30 MB) is downloaded the first time it's used.") : "");
+                onCurrentIndexChanged: controller.set_optical_tracking(methods[currentIndex] || "klt");
             }
         }
         Label {

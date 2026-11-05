@@ -1130,8 +1130,8 @@ impl RenderQueue {
                                 stab.gpu_decoding.store(false, SeqCst);
                                 continue;
                             }
-                            // Another decoder won't make an encoder work
-                            if rendered_frames.load(SeqCst) == 0 && !matches!(e, rendering::FFmpegError::NoWorkingEncoder(_)) {
+                            // Another decoder won't make an encoder work, nor another output of the input, nor one that can't be written
+                            if rendered_frames.load(SeqCst) == 0 && !matches!(e, rendering::FFmpegError::NoWorkingEncoder(_) | rendering::FFmpegError::OutputIsInput(..) | rendering::FFmpegError::Output(_)) {
                                 if (0..4).contains(&i) {
                                     // Try 4 times with different GPU decoders
                                     i += 1;
@@ -1167,6 +1167,10 @@ impl RenderQueue {
             return render_options.output_filename.to_owned();
         }
         let mut filename = filesystem::get_filename(input_url);
+        // The video an image sequence's frames make up is named without their number
+        if let Some(frames) = filesystem::FramePath::parse(&filename) {
+            filename = frames.without_numbers();
+        }
 
         let mut ext = override_ext.unwrap_or(match render_options.codec.as_ref() {
             "ProRes"        => ".mov",
@@ -1203,7 +1207,13 @@ impl RenderQueue {
         let is_rendering = self.export_metadata.is_none() && self.export_stmap.is_none();
         let processing_done = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, _: ()| {
             if let Some(job) = this.jobs.get(&job_id) {
-                if is_rendering && filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
+                if let Some(msg) = is_rendering.then(|| Self::output_is_input(job)).flatten() {
+                    update_model!(this, job_id, itm {
+                        itm.error_string = msg.clone();
+                        itm.status = JobStatus::Error;
+                    });
+                    this.error(job_id, msg, QString::default(), QString::default());
+                } else if is_rendering && filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
                     let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
                     update_model!(this, job_id, itm {
                         itm.error_string = msg.clone();
@@ -1233,6 +1243,9 @@ impl RenderQueue {
             if let Some(sync) = additional_data.get("synchronization") {
                 sync_options = sync.clone();
             }
+            // An image sequence (`url` names its frames, eg. `A001_%06d.dng`): its first frame and frame rate, as a project has them
+            let image_sequence_start = additional_data.get("image_sequence_start").and_then(|x| x.as_i64()).unwrap_or_default() as i32;
+            let image_sequence_fps = additional_data.get("image_sequence_fps").and_then(|x| x.as_f64()).unwrap_or_default();
             if let Some(out) = additional_data.get("output") {
                 let has_output_width  = out.as_object().map(|x| x.contains_key("output_width")).unwrap_or_default() && out.get("output_width").and_then(|x| x.as_i64()).unwrap_or_default() > 0;
                 let has_output_height = out.as_object().map(|x| x.contains_key("output_height")).unwrap_or_default() && out.get("output_height").and_then(|x| x.as_i64()).unwrap_or_default() > 0;
@@ -1267,7 +1280,7 @@ impl RenderQueue {
                             zoom_limit_whole_clip:     params.zoom_limit_whole_clip,
                             ..Default::default()
                         })),
-                        input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { url: if is_gf_data { String::new() } else { url.clone() }, project_file_url: None, image_sequence_start: 0, image_sequence_fps: 0.0, preset_name: None, preset_output_size: None })),
+                        input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { url: if is_gf_data { String::new() } else { url.clone() }, project_file_url: None, image_sequence_start, image_sequence_fps, preset_name: None, preset_output_size: None })),
                         lens_profile_db: stabilizer.lens_profile_db.clone(),
                         ..Default::default()
                     };
@@ -1289,10 +1302,12 @@ impl RenderQueue {
                     });
 
                     core::run_threaded(move || {
+                        // How FFmpeg reads the input where it's an image sequence (a project's, once it's loaded)
+                        let sequence_options = || rendering::image_sequence_options(&stab.input_file.read());
                         let fetch_thumb = |video_url: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
                             let mut fetched = false;
                             if !crate::cli::will_run_in_console() { // Don't fetch thumbs in the CLI
-                                let mut proc = rendering::VideoProcessor::from_file(video_url, false, 0, None)?;
+                                let mut proc = rendering::VideoProcessor::from_file(video_url, false, 0, Some(sequence_options()))?;
                                 proc.on_frame(move |_timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                                     let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
 
@@ -1369,7 +1384,7 @@ impl RenderQueue {
                                     processing_failed(());
                                 }
                             }
-                        } else if let Ok(info) = rendering::VideoProcessor::get_video_info(&url) {
+                        } else if let Ok(info) = rendering::VideoProcessor::get_video_info(&url, Some(sequence_options())) {
                             ::log::debug!("Loaded {:?}", &info);
 
                             render_options.bitrate = render_options.bitrate.max(info.bitrate);
@@ -1395,7 +1410,11 @@ impl RenderQueue {
                                 stab.input_file.write().url = url.clone();
 
                                 let is_main_video = gyro_url.is_empty();
-                                let gyro_url = if !gyro_url.is_empty() { &gyro_url } else { &url };
+                                // An image sequence's own metadata is read from its first frame, as the app reads it (a CinemaDNG
+                                // sequence's from all of them, which telemetry-parser finds from there)
+                                let first_frame = (image_sequence_fps > 0.0).then(|| filesystem::FramePath::parse(&filesystem::url_to_path(&url))).flatten()
+                                    .map(|frames| filesystem::path_to_url(&frames.frame(image_sequence_start.max(0) as usize)));
+                                let gyro_url = if !gyro_url.is_empty() { &gyro_url } else { first_frame.as_ref().unwrap_or(&url) };
                                 {
                                     if let Ok(mut file) = filesystem::open_file(&gyro_url, false, false) {
                                         let filesize = file.size;
@@ -1403,18 +1422,19 @@ impl RenderQueue {
                                     }
                                 }
 
-                                let camera_id = stab.camera_id.read();
-
                                 let has_builtin_profile = {
                                     let gyro = stab.gyro.read();
                                     let file_metadata = gyro.file_metadata.read();
                                     file_metadata.lens_profile.as_ref().map(|y| y.is_object()).unwrap_or_default()
                                 };
 
-                                let id_str = camera_id.as_ref().map(|v| v.get_identifier_for_autoload()).unwrap_or_default();
+                                // Neither lock is held over `load_lens_profile`, which reads both again: a second read of a
+                                // parking_lot lock this thread holds deadlocks as soon as a writer queues up in between (the
+                                // lens database is the app's, written by every load of a main video)
+                                let id_str = stab.camera_id.read().as_ref().map(|v| v.get_identifier_for_autoload()).unwrap_or_default();
                                 if !id_str.is_empty() && !has_builtin_profile {
-                                    let db = stab.lens_profile_db.read();
-                                    if db.contains_id(&id_str) {
+                                    let in_db = stab.lens_profile_db.read().contains_id(&id_str);
+                                    if in_db {
                                         match stab.load_lens_profile(&id_str) {
                                             Ok(_) => {
                                                 let (fr, frd) = { let lens = stab.lens.read(); (lens.frame_readout_time, lens.frame_readout_direction) };
@@ -1537,11 +1557,11 @@ impl RenderQueue {
                     sync_params.time_per_syncpoint *= 1000.0; // s to ms
                     sync_params.search_size        *= 1000.0; // s to ms
 
-                    let every_nth_frame = sync_params.every_nth_frame.max(1);
-
                     let size = stab.params.read().size;
 
                     if let Ok(mut sync) = AutosyncProcess::from_manager(&stab, &timestamps_fract, sync_params, "synchronize".into(), cancel_flag.clone()) {
+                        // Every frame where the optical analysis (offset method 3) tracks them, once it knows it can run
+                        let every_nth_frame = sync.every_nth_frame();
                         let processing_cb2 = processing_cb.clone();
                         sync.on_progress(move |percent, _ready, _total| {
                             processing_cb2(percent);
@@ -1742,7 +1762,11 @@ impl RenderQueue {
                         itm.output_filename = QString::from(job.render_options.output_filename.as_str());
                         itm.output_folder   = QString::from(job.render_options.output_folder.as_str());
                         itm.display_output_path = QString::from(filesystem::display_folder_filename(job.render_options.output_folder.as_str(), job.render_options.output_filename.as_str()));
-                        if filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
+                        if let Some(msg) = Self::output_is_input(job) {
+                            itm.error_string = msg.clone();
+                            itm.status = JobStatus::Error;
+                            err((job_id, msg.to_string()));
+                        } else if filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
                             let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
                             itm.error_string = msg.clone();
                             itm.status = JobStatus::Error;
@@ -1769,6 +1793,18 @@ impl RenderQueue {
                 }
             }
         }
+    }
+
+    /// Why the job can't render to its output: it would write over its input file, or a frame of its input image sequence
+    /// (`rendering::output_overwrites_input`, which `rendering::render` refuses too)
+    fn output_is_input(job: &Job) -> Option<QString> {
+        let (folder, filename) = (&job.render_options.output_folder, &job.render_options.output_filename);
+        let frame_count = job.stab.params.read().frame_count;
+        let output_frames = rendering::is_sequence_codec(&job.render_options.codec).then_some(frame_count);
+        let input_file = job.stab.input_file.read().clone();
+        let input = rendering::output_overwrites_input(&input_file, frame_count, folder, filename, output_frames, &AtomicBool::new(false))?;
+        let output = filesystem::display_url(&filesystem::get_file_url(folder, filename, false));
+        Some(QString::from(rendering::FFmpegError::OutputIsInput(output, input).to_string()))
     }
 
     fn file_exists_in_folder(&self, folder: QUrl, filename: QString) -> bool {

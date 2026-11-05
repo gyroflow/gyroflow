@@ -12,5 +12,6 @@ gyroflow.log
 *.provisionprofile
 *.pfx
 resources/camera_presets
+resources/gmflow/*.onnx
 *.exe
 .qmlls.ini

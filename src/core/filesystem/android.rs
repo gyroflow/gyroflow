@@ -110,7 +110,7 @@ pub fn open_file(jvm: &jni::JavaVM, url: &str, open_mode: &str) -> Result<Androi
 #[derive(Debug, Default, Clone)]
 pub struct AndroidFileInfo {
     pub filename: Option<String>,
-    pub size: Option<usize>,
+    pub size: Option<u64>,
     pub path: Option<String>,
     pub url: Option<String>,
     pub is_dir: bool
@@ -134,7 +134,7 @@ pub fn get_url_info(url: &str) -> Result<AndroidFileInfo> {
                         "_data"         => { ret.path = Some(v); }
                         "_display_name" => { ret.filename = Some(v); ret.url = Some(url.to_string()); }
                         "mime_type"     => { ret.is_dir = v == "vnd.android.document/directory"; }
-                        "_size"         => { ret.size = Some(v.parse::<usize>().unwrap()); }
+                        "_size"         => { ret.size = Some(v.parse::<u64>().unwrap()); }
                         _ => { panic!("Unhandled projection {k}"); }
                     }
                 }
@@ -171,7 +171,7 @@ pub fn list_files(url: &str) -> Result<Vec<AndroidFileInfo>> {
                         "_data"         => { file.path = Some(v); }
                         "_display_name" => { file.filename = Some(v); }
                         "mime_type"     => { file.is_dir = v == "vnd.android.document/directory"; }
-                        "_size"         => { file.size = Some(v.parse::<usize>().unwrap()); }
+                        "_size"         => { file.size = Some(v.parse::<u64>().unwrap()); }
                         _ => { panic!("Unhandled projection {k}"); }
                     }
                 }

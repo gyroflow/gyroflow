@@ -25,13 +25,14 @@ pub mod gpu;
 
 pub mod util;
 pub mod stabilization_params;
+pub mod frame_times;
 
 use std::sync::{ Arc, atomic::{ AtomicU64, AtomicBool, Ordering::SeqCst } };
-use std::collections::{ BTreeMap, BTreeSet, HashSet };
+use std::collections::{ BTreeMap, BTreeSet, HashMap, HashSet };
 use keyframes::*;
 use parking_lot::{ RwLock, RwLockUpgradableReadGuard };
 use nalgebra::Vector4;
-use gyro_source::{ GyroSource, Quat64, TimeQuat, TimeVec };
+use gyro_source::{ GyroSource, Integration, Quat64, TimeQuat, TimeVec };
 use stabilization_params::{ ReadoutDirection, StabilizationParams };
 use lens_profile::LensProfile;
 use lens_profile_database::LensProfileDatabase;
@@ -76,6 +77,88 @@ impl Default for SyncData {
             rank: vec![],
             ratio: 0.016,
         }
+    }
+}
+
+/// What "Show/edit tracked points" draws on the preview (`StabilizationManager::draw_optical_points`): the points the
+/// optical correction is measured with in the frame shown, and the selected tracks through the frames around it. The
+/// editor (OpticalPointEditor.qml) keeps the selection, and finds the points under the mouse itself
+#[derive(Default)]
+pub struct OpticalPointsOverlay {
+    pub shown: bool,
+    pub selection: HashSet<u32>,
+    /// The selected tracks drawn through the `trail_frames` frames before and after the one shown
+    pub trails: HashSet<u32>,
+    pub trail_frames: usize,
+    /// Where the `trails` tracks are in the stabilized picture of each frame around the one drawn last, placed as
+    /// `placed_with` says: kept while that stays, so a step to the next frame places just one more
+    placed: HashMap<usize, Vec<(u32, f32, f32)>>,
+    placed_with: Option<PlacedWith>,
+    /// How many times `placed` was emptied: what's placed without the lock (`StabilizationManager::prepare_overlays`) is
+    /// kept only where it wasn't emptied meanwhile
+    cleared: u64,
+}
+
+impl OpticalPointsOverlay {
+    /// The frames the trails drawn with `frame` go through
+    fn trail_window(&self, frame: usize) -> std::ops::RangeInclusive<usize> {
+        frame.saturating_sub(self.trail_frames)..=frame + self.trail_frames
+    }
+    /// What's to be placed of the trails drawn with `frame`, placed as `with` says: from the first frame without them to
+    /// the last one. Everything placed otherwise is forgotten first, and so are the frames away from it
+    fn missing_trails(&mut self, with: PlacedWith, frame: usize) -> Option<std::ops::RangeInclusive<usize>> {
+        if self.placed_with.as_ref() != Some(&with) {
+            self.clear_placed();
+            self.placed_with = Some(with);
+        }
+        if self.trails.is_empty() { return None; }
+        let frames = self.trail_window(frame);
+        self.placed.retain(|f, _| frames.contains(f));
+        let mut missing = frames.filter(|f| !self.placed.contains_key(f));
+        let first = missing.next()?;
+        Some(first..=missing.last().unwrap_or(first))
+    }
+    /// The trails through `frames`, as `Tracks::paths` places them: also the frames without any of them, so they aren't
+    /// looked for again
+    fn insert_trails(&mut self, frames: std::ops::RangeInclusive<usize>, paths: HashMap<u32, Vec<(usize, f32, f32)>>) {
+        for f in frames { self.placed.insert(f, Vec::new()); }
+        for (id, path) in paths {
+            for (f, x, y) in path { self.placed.entry(f).or_default().push((id, x, y)); }
+        }
+    }
+    fn clear_placed(&mut self) {
+        self.placed.clear();
+        self.cleared += 1;
+    }
+}
+
+/// What the trails of `OpticalPointsOverlay` are placed with: the render's parameters, the analysis's tracks
+/// (`Tracks::serial`), and the motion data the parameters share with the manager (`ComputeParams::gyro`), which changes in
+/// place: its orientations, which are replaced rather than changed, and its sync points. The orientations are held
+/// weakly, so they can't be freed and others take their address while they're compared with
+struct PlacedWith {
+    params: Arc<ComputeParams>,
+    tracks: u64,
+    quaternions: std::sync::Weak<TimeQuat>,
+    smoothed_quaternions: std::sync::Weak<TimeQuat>,
+    sync: u64,
+}
+impl PlacedWith {
+    fn of(params: &Arc<ComputeParams>, tracks: &synchronization::optical_motion::Tracks) -> Self {
+        let gyro = params.gyro.read();
+        Self {
+            params: params.clone(),
+            tracks: tracks.serial(),
+            quaternions: Arc::downgrade(&gyro.quaternions),
+            smoothed_quaternions: Arc::downgrade(&gyro.smoothed_quaternions),
+            sync: gyro.sync_checksum(),
+        }
+    }
+}
+impl PartialEq for PlacedWith {
+    fn eq(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.params, &other.params) && self.tracks == other.tracks && self.sync == other.sync &&
+            self.quaternions.ptr_eq(&other.quaternions) && self.smoothed_quaternions.ptr_eq(&other.smoothed_quaternions)
     }
 }
 
@@ -124,6 +207,8 @@ pub struct StabilizationManager {
     /// Tracks the user took out of what "Analyze image optically" measured, by where they start: out of the analysis
     /// kept, and of every analysis after it that tracks them again (see `TrackStart`). Per file, kept in the project
     pub optical_removed_tracks: Arc<RwLock<BTreeSet<synchronization::optical_motion::TrackStart>>>,
+    /// The tracked points the preview shows, see `OpticalPointsOverlay`
+    pub optical_overlay: Arc<parking_lot::Mutex<OpticalPointsOverlay>>,
 }
 
 impl Default for StabilizationManager {
@@ -168,8 +253,31 @@ impl Default for StabilizationManager {
             optical_generation: Arc::new(AtomicU64::new(0)),
             optical_tracking: Arc::new(RwLock::new(Default::default())),
             optical_removed_tracks: Arc::new(RwLock::new(Default::default())),
+            optical_overlay: Arc::new(parking_lot::Mutex::new(Default::default())),
         }
     }
+}
+
+/// Where loading motion data takes the video's frame times (`StabilizationParams::frame_times`) from
+enum FrameTimesFrom {
+    /// The file loaded: it's the video, or its own metadata (`GyroSource::all_metadata`)
+    LoadedFile,
+    /// The video at this url, the one the file's motion data is for
+    Video(String),
+    /// Neither: the caller sets them (a project import, from the project's video), and gives them to the parse
+    /// (`FileLoadOptions::video_frame_times`)
+    Caller,
+}
+
+/// A video's timing as its file states it (`StabilizationManager::video_timing_of`)
+#[derive(Default)]
+struct VideoTiming {
+    /// Its frame times (`StabilizationParams::frame_times`): `None` for a video whose frames are evenly spaced from its
+    /// start, which `round(t · fps)` maps exactly
+    frame_times: Option<Arc<frame_times::FrameTimes>>,
+    /// The frame rate it presents its frames at, exactly as the file states it: its most common frame duration's
+    /// (`VideoFrameTimes::nominal`)
+    frame_rate: Option<f64>,
 }
 
 impl StabilizationManager {
@@ -180,18 +288,78 @@ impl StabilizationManager {
             params.frame_count = frame_count;
             params.duration_ms = duration_ms;
             params.size = video_size;
+            // The new video's frame times are read with its motion data (`load_gyro_data`) or its project
+            // (`import_gyroflow_data`)
+            params.frame_times = None;
         }
 
         self.pose_estimator.sync_results.write().clear();
         self.keyframes.write().clear();
     }
 
-    pub fn load_gyro_data<T: Read + Seek, F: Fn(f64)>(&self, stream: &mut T, filesize: usize, url: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::result::Result<(), GyroflowCoreError> {
+    /// Loads the motion data of the file `url` (`stream`) for the video: the video's own (`is_main_video`: the video itself,
+    /// or a file loaded with all of its metadata as the video's), or an external motion log for the video `input_file`.
+    /// The video's frame times (`StabilizationParams::frame_times`) come with it: the file's when it's the video's own,
+    /// otherwise the input file's, so a video whose motion is another file's (a render queue job with a gyro file, a
+    /// project with a log) has them too
+    pub fn load_gyro_data<T: Read + Seek, F: Fn(f64)>(&self, stream: &mut T, filesize: u64, url: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>) -> std::result::Result<(), GyroflowCoreError> {
+        let video_url = self.input_file.read().url.clone();
+        let frame_times = if is_main_video { FrameTimesFrom::LoadedFile } else { FrameTimesFrom::Video(video_url.clone()) };
+        self.load_motion_file(stream, filesize, url, is_main_video, options, progress_cb, cancel_flag, frame_times, &video_url)
+    }
+
+    /// A video's timing from its file: its frame times (`StabilizationParams::frame_times`) and its frame rate, as the
+    /// file states them
+    fn video_timing_of<T: Read + Seek>(stream: &mut T, filesize: u64) -> VideoTiming {
+        let Some(v) = telemetry_parser::segment_table::video_frame_times(stream, filesize) else { return VideoTiming::default() };
+        let times = frame_times::FrameTimes::of_video(&v);
+        if let Some(times) = &times {
+            log::info!("The video's {} frames aren't evenly spaced: they're mapped by their presentation times", times.frames());
+        }
+        VideoTiming { frame_times: times.map(Arc::new), frame_rate: (v.timescale > 0 && v.nominal > 0).then(|| v.timescale as f64 / v.nominal as f64) }
+    }
+    /// `video_timing_of` the video at `url`, nothing too when it can't be opened (an image sequence, a file that isn't
+    /// there)
+    fn read_video_timing(url: &str) -> VideoTiming {
+        if url.is_empty() { return VideoTiming::default(); }
+        let Ok(mut file) = filesystem::open_file(url, false, false) else { return VideoTiming::default() };
+        let filesize = file.size;
+        Self::video_timing_of(file.get_file(), filesize)
+    }
+    /// The frame times of the video at `url` (`read_video_timing`)
+    fn read_frame_times(url: &str) -> Option<Arc<frame_times::FrameTimes>> {
+        Self::read_video_timing(url).frame_times
+    }
+
+    /// The rate a video's motion data was captured at, when the video presents its frames at another one: an off-speed
+    /// recording's, whose motion data is timed by its capture, so the video is put on the motion data's timeline at that
+    /// rate (`override_video_fps`). `rate` is the one the motion data's file states (`FileMetadata::frame_rate`), `fps`
+    /// the video's frame rate as its decoder gives it, and `exact_rate` the video's as its file states it, where both are
+    /// exact ratios of the file:
+    /// - Blackmagic RAW states the rate each frame was captured at (`sensor_rate`) and the clip's frame rate (its frame
+    ///   duration) as ratios, so any difference is an off-speed clip, however small: 25 fps in a 24 fps clip is 4 % slow,
+    ///   its frame 96, presented at 4 s, captured at 3.84 s. They're compared as the file has them, not with the decoder's
+    ///   rate, a float a few of its last bits off the clip's (Blackmagic's SDK and gyroflow's player on it: 29.970032 for
+    ///   30000/1001, the sensor rate of such a clip)
+    /// - Otherwise a rate is another one when it's more than a frame per second from the video's
+    pub fn capture_frame_rate(rate: Option<f64>, fps: f64, exact_rate: Option<f64>) -> Option<f64> {
+        let rate = rate?;
+        match exact_rate {
+            Some(video) => (rate != video).then_some(rate),
+            None => ((rate - fps).abs() > 1.0).then_some(rate),
+        }
+    }
+
+    /// `load_gyro_data`, the video's frame times taken as `frame_times` says. `video_url` is the video the motion data
+    /// is for, whose segments a file that isn't the video's own takes (`FileLoadOptions::video_url`)
+    #[allow(clippy::too_many_arguments)]
+    fn load_motion_file<T: Read + Seek, F: Fn(f64)>(&self, stream: &mut T, filesize: u64, url: &str, is_main_video: bool, options: &gyro_source::FileLoadOptions, progress_cb: F, cancel_flag: Arc<AtomicBool>, frame_times: FrameTimesFrom, video_url: &str) -> std::result::Result<(), GyroflowCoreError> {
         {
             let params = self.params.read();
             let mut gyro = self.gyro.write();
-            gyro.init_from_params(&params);
+            // Cleared first: the scale taken in moves no segments of the file before, so nothing is integrated again for it
             gyro.clear();
+            gyro.init_from_params(&params);
             gyro.file_url = url.to_string();
             gyro.file_metadata = Default::default();
         }
@@ -208,23 +376,68 @@ impl StabilizationManager {
             }
         };
 
-        let (fps, size) = {
+        let (fps, size, frame_count) = {
             let params = self.params.read();
-            (params.fps, params.size)
+            (params.fps, params.size, params.frame_count)
+        };
+
+        let timing = match frame_times {
+            FrameTimesFrom::LoadedFile => Some(Self::video_timing_of(stream, filesize)),
+            FrameTimesFrom::Video(video_url) => Some(Self::read_video_timing(&video_url)),
+            FrameTimesFrom::Caller => None,
+        };
+        // The per-frame tables are the video's, and so are the segments of a file that isn't the video's own, and the frame
+        // times its frames' offsets are taken against (the caller's, when it sets them)
+        let parse_options = gyro_source::FileLoadOptions {
+            video_frames: options.video_frames.or((frame_count > 0).then_some(frame_count)),
+            video_url: (!is_main_video && !video_url.is_empty()).then(|| video_url.to_owned()),
+            video_frame_times: timing.as_ref().map_or_else(|| options.video_frame_times.clone(), |t| t.frame_times.clone()),
+            ..options.clone()
+        };
+        // Stored only by a load that wasn't replaced: the next video's frame times are its own load's to set. Checked under
+        // the lock `init_from_video_data` clears them under, and the controller cancels a load before the next video's
+        // init, so a load cancelled while it read can't write over the next one's
+        let store_frame_times = || if let Some(timing) = &timing {
+            let mut params = self.params.write();
+            if !cancel_flag.load(SeqCst) { params.frame_times = timing.frame_times.clone(); }
         };
 
         let cancel_flag2 = cancel_flag.clone();
-        let mut md = GyroSource::parse_telemetry_file(stream, filesize, &url, options, size, fps, progress_cb, cancel_flag2)?;
+        let mut md = match GyroSource::parse_telemetry_file(stream, filesize, &url, &parse_options, size, fps, progress_cb, cancel_flag2) {
+            Ok(md) => md,
+            Err(e) => {
+                // A video without motion data still has its frame times
+                store_frame_times();
+                // A video without motion data of its own still has its segments, when it was cut from recordings: the
+                // motion measured from it is handled segment by segment like a file's (`gyro_source::TrimSegments`)
+                if is_main_video && !cancel_flag.load(SeqCst)
+                    && let Some(Ok(table)) = telemetry_parser::segment_table::read(stream, filesize) {
+                    let md = gyro_source::FileMetadata { trim_segments: Some(gyro_source::TrimSegments::new(table, &[], &[])), ..Default::default() };
+                    let integration = self.gyro.write().load_from_telemetry_unintegrated(md);
+                    if let Some(integration) = integration { GyroSource::integrate_shared(&self.gyro, integration); }
+                }
+                return Err(e);
+            }
+        };
         // The parsers return what they read until then, but a cancelled load (eg. replaced by the next video) mustn't set any of it
         if cancel_flag.load(SeqCst) { return Ok(()); }
+        store_frame_times();
+        // The rate the file's motion data was captured at, when the video presents its frames at another one. A
+        // Blackmagic RAW clip's rates are both exact (`capture_frame_rate`), the video's as its file states it (the clip's
+        // own, or its proxy's when the clip is another video's motion data)
+        let braw = filesystem::get_filename(url).to_ascii_lowercase().ends_with(".braw");
+        let exact_rate = timing.as_ref().and_then(|t| t.frame_rate).filter(|_| braw);
+        let capture_rate = Self::capture_frame_rate(md.frame_rate, self.params.read().fps, exact_rate);
         if md.detected_source.as_ref().map(|v| v.starts_with("GoPro ")).unwrap_or_default() {
             // If gopro reports rolling shutter value, it already applied it, ie. the video is already corrected
             md.frame_readout_time = None;
         }
 
+        // The profile of the database the file names (a .gcsv `lensprofile`, a Gyroflow protobuf `lens_profile`), set up
+        // for the video at the end, once the file's camera is known
+        let mut referenced_lens = None;
         if is_main_video {
             if let Some(ref lens) = md.lens_profile {
-                let mut l = self.lens.write();
                 if let Some(lens_str) = lens.as_str() {
                     let mut db = self.lens_profile_db.read();
                     if !db.loaded {
@@ -235,21 +448,17 @@ impl StabilizationManager {
                         }
                         db = self.lens_profile_db.read();
                     }
-                    if let Some(found) = db.find(lens_str) {
-                        *l = found.clone();
-                    }
+                    referenced_lens = db.find(lens_str).cloned();
                 } else if lens.is_object() {
+                    let mut l = self.lens.write();
                     l.load_from_json_value(lens);
                     l.path_to_file = filesystem::url_to_path(url);
                     let db = self.lens_profile_db.read();
                     l.resolve_interpolations(&db);
                 }
             }
-            if let Some(md_fps) = md.frame_rate {
-                let fps = self.params.read().fps;
-                if (md_fps - fps).abs() > 1.0 {
-                    self.override_video_fps(md_fps, false);
-                }
+            if let Some(rate) = capture_rate {
+                self.override_video_fps(rate, false);
             }
             self.params.write().frame_readout_direction = md.frame_readout_direction;
             if md.detected_source.as_ref().map(|v| v.starts_with("Blackmagic ")).unwrap_or_default() {
@@ -277,15 +486,36 @@ impl StabilizationManager {
         }
         let camera_id = md.camera_identifier.clone();
         if !cancel_flag.load(SeqCst) {
-            let mut gyro = self.gyro.write();
-            gyro.load_from_telemetry(md);
-            gyro.file_load_options = options.clone();
+            let integration = {
+                let mut gyro = self.gyro.write();
+                let integration = gyro.load_from_telemetry_unintegrated(md);
+                gyro.file_load_options = options.clone();
+                gyro.all_metadata = is_main_video;
+                gyro.capture_frame_rate = capture_rate;
+                integration
+            };
+            // With the lock released: every reader of the motion data would wait for the whole integration
+            if let Some(integration) = integration { GyroSource::integrate_shared(&self.gyro, integration); }
         }
 
         if let Some(id) = camera_id {
             *self.camera_id.write() = Some(id);
         }
+        if let Some(mut lens) = referenced_lens {
+            // As `load_lens_profile` sets up every profile it loads: a profile gives the same lens whichever way it's
+            // loaded, picked or named by the file
+            let (size, fps, camera_id) = self.lens_video_context();
+            lens.adapt_to_video(size, fps, &camera_id);
+            *self.lens.write() = lens;
+        }
         Ok(())
+    }
+
+    /// What a lens profile is set up for when it's loaded (`LensProfile::adapt_to_video`): the video's size and frame
+    /// rate, and the autoload identifier of the camera of the motion data loaded last
+    fn lens_video_context(&self) -> ((usize, usize), f64, String) {
+        let params = self.params.read();
+        (params.size, params.fps, self.camera_id.read().as_ref().map(|x| x.get_identifier_for_autoload()).unwrap_or_default())
     }
 
     pub fn load_lens_profile(&self, url: &str) -> Result<(), crate::GyroflowCoreError> {
@@ -294,81 +524,23 @@ impl StabilizationManager {
         } else {
             url.to_owned()
         };
-        let db = self.lens_profile_db.read();
-        let (result, from_db) = if let Some(lens) = db.get_by_id(&url) {
-            *self.lens.write() = lens.clone();
+        // The database's lock isn't held while the lens's is taken (the loads take them the other way round), nor over
+        // the file read: a copy of its profile
+        let in_db = self.lens_profile_db.read().get_by_id(&url).cloned();
+        let (result, from_db) = if let Some(lens) = in_db {
+            *self.lens.write() = lens;
             (Ok(()), true)
         } else if url.starts_with('{') {
             (self.lens.write().load_from_data(&url), false)
         } else {
             (self.lens.write().load_from_file(&url), false)
         };
-        let (width, height, aspect, id, fps) = {
-            let params = self.params.read();
-            (params.size.0, params.size.1, ((params.size.0 * 100) as f64 / params.size.1.max(1) as f64).round() as u32, self.camera_id.read().as_ref().map(|x| x.get_identifier_for_autoload()).unwrap_or_default(), (params.fps * 100.0).round() as i32)
-        };
+        let (size, fps, camera_id) = self.lens_video_context();
 
         let mut lens = self.lens.write();
-
-        // Check if the lens profile needs to be swapped for vertical
-        let lens_aspect_swapped = ((lens.calib_dimension.h * 100) as f64 / lens.calib_dimension.w.max(1) as f64).round() as u32;
-        if (width == lens.calib_dimension.h && height == lens.calib_dimension.w) || lens_aspect_swapped == aspect {
-            log::info!("Lens profile swapped from {}x{} to {}x{} to match the video aspect", lens.calib_dimension.w, lens.calib_dimension.h, lens.calib_dimension.h, lens.calib_dimension.w);
-            *lens = lens.swapped();
-        }
-
-        let matching = lens.get_all_matching_profiles();
-        if matching.len() > 1 {
-            let mut found = false;
-            if !id.is_empty() && lens.identifier == id {
-                found = true;
-            }
-            // Find best match for:
-            if !found {
-                // 1. Identifier
-                for x in &matching {
-                    if !id.is_empty() && x.identifier == id {
-                        *lens = x.clone(); found = true; break;
-                    }
-                }
-            }
-            if !found {
-                // 2. Resolution and fps
-                for x in &matching {
-                    if width == x.calib_dimension.w && height == x.calib_dimension.h && fps == (x.fps * 100.0).round() as i32 {
-                        *lens = x.clone(); found = true; break;
-                    }
-                }
-            }
-            if !found {
-                // 3. Aspect ratio and fps
-                for x in &matching {
-                    let a = ((x.calib_dimension.w * 100) as f64 / x.calib_dimension.h.max(1) as f64).round() as u32;
-                    if a == aspect && fps == (x.fps * 100.0).round() as i32 {
-                        *lens = x.clone(); break;
-                    }
-                }
-            }
-            if !found {
-                // 4. Resolution
-                for x in &matching {
-                    if width == x.calib_dimension.w && height == x.calib_dimension.h {
-                        *lens = x.clone(); found = true; break;
-                    }
-                }
-            }
-            if !found {
-                // 5. Aspect ratio
-                for x in &matching {
-                    let a = ((x.calib_dimension.w * 100) as f64 / x.calib_dimension.h.max(1) as f64).round() as u32;
-                    if a == aspect {
-                        *lens = x.clone(); break;
-                    }
-                }
-            }
-        }
+        lens.adapt_to_video(size, fps, &camera_id);
         if !from_db {
-            lens.resolve_interpolations(&db);
+            lens.resolve_interpolations(&self.lens_profile_db.read());
         }
         result
     }
@@ -433,17 +605,23 @@ impl StabilizationManager {
         false
     }
 
+    /// The focal length curves (`smoothing::focal_length`): the effective focal length the camera matrices are scaled to,
+    /// and the target of the focal length smoothing and the lens breathing compensation. Before anything that projects
+    /// with the lens: the crop lenses of `ComputeParams::calculate_camera_fovs`, the smoothing, the zoom
     fn apply_focal_length_smoothing(params: &mut ComputeParams, stabilization_params: &RwLock<StabilizationParams>) {
-        let (enabled, max_zoom_rate) = {
+        let (enabled, max_zoom_rate, breathing_compensation) = {
             let sp = stabilization_params.read();
-            (sp.focal_length_smoothing_enabled, sp.focal_length_max_zoom_rate)
+            (sp.focal_length_smoothing_enabled, sp.focal_length_max_zoom_rate, sp.lens_breathing_enabled)
         };
         // The base curve evaluates the projection for every frame (a third of a second per minute of 60 fps footage),
         // and a recompute is requested on every slider change, so it's reused while nothing it depends on changed:
         // the file and its lens metadata, the lens profile and the video geometry. The settings (the delay, the rate
-        // limit, whether smoothing is on) and the trim only act on the curves derived from it, in O(frames), so
-        // none of them is part of the key and a change of theirs never repeats the sweep
-        use crate::smoothing::focal_length::{ compute_base_curve, derive_curves };
+        // limit, whether smoothing or the breathing compensation is on) and the trim only act on the curves derived from
+        // it, in O(frames), so none of them is part of the key and a change of theirs never repeats the sweep. The
+        // boundaries of the parts of a video cut from recordings are: the curve is made in each part on its own
+        // (`focal_length::parts`)
+        use crate::smoothing::focal_length::{ compute_base, derive_curves, parts, FocalLengthBase };
+        let parts = parts(params);
         let base_key = {
             use std::hash::Hasher;
             let mut h = std::collections::hash_map::DefaultHasher::new();
@@ -452,15 +630,19 @@ impl StabilizationManager {
             h.write(gyro.file_url.as_bytes());
             h.write_usize(md.lens_params.len());
             h.write_usize(md.lens_positions.len());
+            h.write_usize(md.lens_breathing.len());
             h.write_u64(md.digital_zoom.unwrap_or_default().to_bits());
             h.write_u64(params.lens.get_checksum());
             h.write_usize(params.width);
             h.write_usize(params.height);
             h.write_u64(params.scaled_fps.to_bits());
             h.write_usize(params.frame_count);
+            // Where each frame's lens is looked up: its time
+            if let Some(times) = &params.frame_times { h.write_u64(times.checksum()); }
+            for part in &parts { h.write_usize(part.start); }
             h.finish()
         };
-        let derive = |base: &[f64]| derive_curves(base, params.lens_metadata_delay_frames, enabled, max_zoom_rate, params.scaled_fps, &params.trim_ranges);
+        let derive = |base: &FocalLengthBase| derive_curves(base, &parts, params.lens_metadata_delay_frames, enabled, max_zoom_rate, params.scaled_fps, &params.trim_ranges, breathing_compensation);
         let cached = {
             let sp = stabilization_params.read();
             (sp.focal_length_base_key == base_key).then(|| derive(&sp.focal_length_base))
@@ -468,7 +650,7 @@ impl StabilizationManager {
         let (base, (focal_lengths, smoothed)) = match cached {
             Some(curves) => (None, curves),
             None => {
-                let base = compute_base_curve(params);
+                let base = compute_base(params, &parts);
                 let curves = derive(&base);
                 (Some(base), curves)
             }
@@ -476,6 +658,7 @@ impl StabilizationManager {
 
         params.focal_length_smoothing_enabled = enabled && !smoothed.is_empty();
         params.focal_length_max_zoom_rate = max_zoom_rate;
+        params.lens_breathing_enabled = breathing_compensation;
         params.focal_lengths = focal_lengths.clone();
         params.smoothed_focal_lengths = smoothed.clone();
 
@@ -489,11 +672,10 @@ impl StabilizationManager {
     }
 
     pub fn recompute_adaptive_zoom_static(compute_params: &ComputeParams, params: &RwLock<StabilizationParams>) -> (Vec<f64>, Vec<f64>, BTreeMap<i64, Vec<(f64, f64)>>, Vec<f64>) {
-        let (frames, fps, method) = {
+        let (timestamps, method) = {
             let params = params.read();
-            (params.frame_count, params.get_scaled_fps(), params.adaptive_zoom_method)
+            ((0..params.frame_count).map(|i| (i, params.timestamp_at_frame(i as i32))).collect::<Vec<(usize, f64)>>(), params.adaptive_zoom_method)
         };
-        let timestamps = (0..frames).map(|i| (i, i as f64 * 1000.0 / fps)).collect::<Vec<(usize, f64)>>();
 
         zooming::calculate_fovs(compute_params, &timestamps, method.into())
     }
@@ -517,9 +699,8 @@ impl StabilizationManager {
     }
     pub fn recompute_adaptive_zoom(&self) {
         let mut params = stabilization::ComputeParams::from_manager(self);
-        params.calculate_camera_fovs();
-
         Self::apply_focal_length_smoothing(&mut params, &self.params);
+        params.calculate_camera_fovs();
 
         let lens_fov_adjustment = params.lens.optimal_fov.unwrap_or(1.0);
         let (fovs, minimal_fovs, debug_points, mut limit_fovs) = Self::recompute_adaptive_zoom_static(&params, &self.params);
@@ -551,15 +732,7 @@ impl StabilizationManager {
                 }
 
                 // Smoothing
-                {
-                    let smoothing = self.smoothing.read();
-                    let horizon_lock = smoothing.horizon_lock.clone();
-
-                    let (quats, max_angles) = self.gyro.read().recompute_smoothness(smoothing.current().as_ref(), horizon_lock, &params);
-                    let mut gyro = self.gyro.write();
-                    gyro.max_angles = max_angles;
-                    gyro.smoothed_quaternions = quats;
-                }
+                self.smooth_blocking(&mut params);
 
 
                 // Zooming
@@ -580,15 +753,33 @@ impl StabilizationManager {
 
     pub fn recompute_smoothness(&self) {
         let mut params = stabilization::ComputeParams::from_manager(self);
+        Self::apply_focal_length_smoothing(&mut params, &self.params);
         params.calculate_camera_fovs();
 
-        let smoothing = self.smoothing.read();
-        let horizon_lock = smoothing.horizon_lock.clone();
-
-        let (quats, max_angles) = self.gyro.read().recompute_smoothness(smoothing.current().as_ref(), horizon_lock, &params);
-        let mut gyro = self.gyro.write();
-        gyro.max_angles = max_angles;
-        gyro.smoothed_quaternions = quats;
+        self.smooth_blocking(&mut params);
+    }
+    /// Smooths the motion data (`GyroSource::recompute_smoothness`) and puts the result in. On a copy, with the lock
+    /// released: the smoothing of a long clip takes seconds, and every reader of the motion data (the preview's frames)
+    /// would wait for it behind the next writer. Smoothed again when the orientations were replaced meanwhile (another
+    /// integration), so what's put in is always the smoothing of the orientations there are
+    fn smooth_blocking(&self, params: &mut stabilization::ComputeParams) {
+        // A copy of the algorithm, as `recompute_threaded` takes it: the smoothing's lock isn't held over the motion data's
+        let (smoothing, horizon_lock) = {
+            let lock = self.smoothing.read();
+            (lock.current().clone(), lock.horizon_lock.clone())
+        };
+        loop {
+            // Shares the orientations and the metadata (`Arc`s)
+            let source = self.gyro.read().clone();
+            let (quats, max_angles) = source.recompute_smoothness(smoothing.as_ref(), horizon_lock.clone(), params);
+            let mut gyro = self.gyro.write();
+            if !Arc::ptr_eq(&gyro.quaternions, &source.quaternions) { continue; }
+            gyro.max_angles = max_angles;
+            // The smoothing it replaces is freed with the lock released
+            let _replaced = std::mem::replace(&mut gyro.smoothed_quaternions, Arc::new(quats));
+            drop(gyro);
+            return;
+        }
     }
 
     pub fn recompute_undistortion(&self) {
@@ -613,7 +804,6 @@ impl StabilizationManager {
         // Before the gyro checksum below, which says whether the correction is applied
         self.refresh_optical_correction();
         let mut params = stabilization::ComputeParams::from_manager(self);
-        params.calculate_camera_fovs();
 
         let smoothing = self.smoothing.clone();
         let stabilization_params = self.params.clone();
@@ -641,6 +831,13 @@ impl StabilizationManager {
                 true
             };
 
+            // The focal length curves first: the camera matrices are scaled to them (the lens breathing is in them), and
+            // the crop lenses the smoothing reads are made with those matrices. Here and not before spawning, as the
+            // first sweep of a file projects every frame
+            Self::apply_focal_length_smoothing(&mut params, &stabilization_params);
+            params.calculate_camera_fovs();
+            if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
+
             let mut smoothing_recomputed = false;
             if smoothing.read().get_state_checksum(gyro_checksum, &params) != smoothing_checksum.load(SeqCst) {
                 let (mut smoothing, horizon_lock) = {
@@ -648,28 +845,33 @@ impl StabilizationManager {
                     (lock.current().clone(), lock.horizon_lock.clone())
                 };
 
-                let (quats, max_angles) = gyro.read().recompute_smoothness(smoothing.as_mut(), horizon_lock, &params);
+                // On a copy, with the lock released (`smooth_blocking`). It shares the orientations and the metadata
+                let source = gyro.read().clone();
+                let (quats, max_angles) = source.recompute_smoothness(smoothing.as_mut(), horizon_lock, &mut params);
 
                 if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
-                if gyro_checksum != gyro.read().get_checksum() { return cb((compute_id, true)); }
 
-                {
+                // Only onto the motion data it smoothed: whatever changed it meanwhile asks for a recompute of its own. The
+                // smoothing it replaces is freed with the lock released
+                let replaced = {
                     let mut lib_gyro = gyro.write();
-                    lib_gyro.max_angles = max_angles;
-                    lib_gyro.smoothed_quaternions = quats;
-                    lib_gyro.smoothing_status = smoothing.get_status_json();
-                    gyro_checksum = lib_gyro.get_checksum();
-                }
+                    let same = gyro_checksum == lib_gyro.get_checksum() && Arc::ptr_eq(&lib_gyro.quaternions, &source.quaternions);
+                    same.then(|| {
+                        lib_gyro.max_angles = max_angles;
+                        lib_gyro.smoothing_status = smoothing.get_status_json();
+                        let replaced = std::mem::replace(&mut lib_gyro.smoothed_quaternions, Arc::new(quats));
+                        gyro_checksum = lib_gyro.get_checksum();
+                        replaced
+                    })
+                };
+                if replaced.is_none() { return cb((compute_id, true)); }
+                drop(replaced);
                 smoothing_recomputed = true;
             }
             let smoothing_state = smoothing.read().get_state_checksum(gyro_checksum, &params);
             if smoothing_recomputed && !commit(&*smoothing_checksum, smoothing_state) { return cb((compute_id, true)); }
 
-            // Before the zoom: it accounts for the focal length compensation
-            Self::apply_focal_length_smoothing(&mut params, &stabilization_params);
-
-            if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
-
+            // The zoom accounts for the focal length compensation, made above
             let zoom_key = zooming::get_checksum(&params, smoothing_state);
             // Freshly recomputed quaternions are the plain smoothing output, and the max zoom folds its limit back into
             // them inside the zoom pass, so a smoothing recompute needs the zoom pass again even when the zoom key still
@@ -718,16 +920,21 @@ impl StabilizationManager {
                             let lock = smoothing.read();
                             (lock.current().clone(), lock.horizon_lock.clone())
                         };
-                        let (quats, max_angles) = gyro.read().recompute_smoothness(smoothing.as_mut(), horizon_lock, &params);
+                        let source = gyro.read().clone();
+                        let (quats, max_angles) = source.recompute_smoothness(smoothing.as_mut(), horizon_lock, &mut params);
 
                         if current_compute_id.load(SeqCst) != compute_id { return cb((compute_id, true)); }
 
-                        {
+                        let replaced = {
                             let mut lib_gyro = gyro.write();
-                            lib_gyro.max_angles = max_angles;
-                            lib_gyro.smoothed_quaternions = quats;
-                            lib_gyro.smoothing_status = smoothing.get_status_json();
-                        }
+                            Arc::ptr_eq(&lib_gyro.quaternions, &source.quaternions).then(|| {
+                                lib_gyro.max_angles = max_angles;
+                                lib_gyro.smoothing_status = smoothing.get_status_json();
+                                std::mem::replace(&mut lib_gyro.smoothed_quaternions, Arc::new(quats))
+                            })
+                        };
+                        if replaced.is_none() { return cb((compute_id, true)); }
+                        drop(replaced);
 
                         // The focal length curves don't change within max-zoom iterations:
                         // settings and raw metadata are the same, so the outer apply is reused
@@ -805,13 +1012,48 @@ impl StabilizationManager {
         ret
     }
 
-    pub fn draw_overlays(&self, drawing: &mut DrawCanvas, timestamp_us: i64) {
+    /// What drawing the overlays of the frame at `timestamp_us` takes a while for, done before `draw_overlays`, with no
+    /// lock held while it's done: the trails of the selected tracked points placed through the frames around it (up to 61
+    /// frames of hundreds of tracks, `OpticalPointsOverlay`). `draw_overlays` runs under the stabilization's write lock,
+    /// which the recompute waits on, and draws the points under the overlay's, which the editor waits on: it then just
+    /// draws them. Nothing on a frame that isn't drawn on, or while the stabilization is busy
+    pub fn prepare_overlays(&self, timestamp_us: i64) {
+        use synchronization::optical_motion::to_output;
+        let params = {
+            let Some(undist) = self.stabilization.try_read() else { return };
+            if !undist.kernel_flags.contains(KernelParamsFlags::DRAWING_ENABLED) { return; }
+            undist.upright_params()
+        };
+        if !self.optical_overlay.lock().shown { return; }
+        let Some(m) = self.optical_measurements.try_read().and_then(|m| (*m).clone()) else { return };
+        let frame = params.frame_at_timestamp(timestamp_us as f64 / 1000.0).max(0) as usize;
+        let with = PlacedWith::of(&params, &m.tracks);
+        let (missing, trails, cleared) = {
+            let mut overlay = self.optical_overlay.lock();
+            let Some(missing) = overlay.missing_trails(with, frame) else { return };
+            (missing, overlay.trails.clone(), overlay.cleared)
+        };
+        let paths = m.tracks.paths(&trails, missing.clone(), |index, points| to_output(&params, index, points));
+        let mut overlay = self.optical_overlay.lock();
+        // Not if they were forgotten meanwhile: another selection, or other parameters drawn with
+        if overlay.cleared == cleared {
+            overlay.insert_trails(missing, paths);
+        }
+    }
+
+    /// Draws what's shown over the frame at `timestamp_us` on the drawing canvas of `undist`, which is locked for it:
+    /// what takes a while to place is placed before, without the lock (`prepare_overlays`)
+    pub fn draw_overlays(&self, undist: &mut Stabilization, timestamp_us: i64) {
+        // Placed the way the frames are rendered, and only on the preview's
+        let optical = (self.optical_overlay.lock().shown && undist.kernel_flags.contains(KernelParamsFlags::DRAWING_ENABLED)).then(|| undist.upright_params());
+        let render_inverted = undist.framebuffer_inverted();
+        let drawing = &mut undist.drawing;
         drawing.clear();
 
         if let Some(p) = self.params.try_read() {
             let y_inverted = p.framebuffer_inverted;
             let size = p.size;
-            let frame = frame_at_timestamp(timestamp_us as f64 / 1000.0, p.get_scaled_fps()) as usize; // used only to draw features and OF
+            let frame = p.frame_at_timestamp(timestamp_us as f64 / 1000.0).max(0) as usize; // used only to draw the overlays below
 
             if p.show_optical_flow {
                 let num_frames = if p.of_method == 2 { 1 } else { 3 };
@@ -845,7 +1087,7 @@ impl StabilizationManager {
                         // Same total zoom as FrameTransform::at_timestamp: the polygon is measured at fov = 1
                         let mut fov = ((p.fov + if p.fov_overview { 1.0 } else { 0.0 }) * p.fovs.get(frame).unwrap_or(&1.0)).max(0.0001);
                         fov *= p.size.0 as f64 / p.output_size.0.max(1) as f64;
-                        fov *= smoothing::focal_length::compensation(&p.focal_lengths, &p.smoothed_focal_lengths, p.focal_length_smoothing_enabled, frame);
+                        fov *= smoothing::focal_length::compensation(&p.focal_lengths, &p.smoothed_focal_lengths, frame);
                         let mut pt = points[i];
                         let width_ratio = p.size.0 as f64 / p.output_size.0 as f64;
                         let height_ratio = p.size.1 as f64 / p.output_size.1 as f64;
@@ -859,9 +1101,81 @@ impl StabilizationManager {
                 }
             }
         }
+        // The frame, and which way up, as the render has them: not through the parameters' lock, which a change of a setting
+        // holds, and a frame drawn meanwhile would miss the points
+        if let Some(params) = &optical {
+            let frame = params.frame_at_timestamp(timestamp_us as f64 / 1000.0).max(0) as usize;
+            self.draw_optical_points(drawing, params, frame, render_inverted);
+        }
+    }
+
+    /// The tracked points of "Show/edit tracked points" (`OpticalPointsOverlay`) on the stabilized picture of `frame`,
+    /// placed the way `params` render it: each in the colour of what the analysis made of it, the selected ones over the
+    /// others, and the selected tracks from frame to frame through the frames around, fading out with the frames away
+    fn draw_optical_points(&self, drawing: &mut DrawCanvas, params: &Arc<ComputeParams>, frame: usize, y_inverted: bool) {
+        use synchronization::optical_motion::{ PointState, to_output };
+        // Not waited for: what replaces the analysis has the frame drawn again
+        let Some(m) = self.optical_measurements.try_read().and_then(|m| (*m).clone()) else { return };
+        let place = |index: usize, points: &[(f32, f32)]| to_output(params, index, points);
+        // The frame's own points, before the editor's lock is taken
+        let points = self.optical_points_placed(&m, frame, place);
+        let with = PlacedWith::of(params, &m.tracks);
+        let (ow, oh) = (drawing.output_width as f32, drawing.output_height as f32);
+        let at = |x: f32, y: f32| (x * ow, y * oh);
+
+        let mut guard = self.optical_overlay.lock();
+        let overlay = &mut *guard;
+        if !overlay.shown { return; }
+        if let Some(missing) = overlay.missing_trails(with, frame) {
+            // Placed before without the locks (`prepare_overlays`), here just what that couldn't: the parameters changed
+            // in between, or the caller doesn't prepare
+            let paths = m.tracks.paths(&overlay.trails, missing.clone(), place);
+            overlay.insert_trails(missing, paths);
+        }
+        if !overlay.trails.is_empty() {
+            // Each track from frame to frame, but across a gap in it
+            let mut last: HashMap<u32, (usize, f32, f32)> = HashMap::new();
+            for f in overlay.trail_window(frame) {
+                let Some(points) = overlay.placed.get(&f) else { continue };
+                for &(id, x, y) in points {
+                    if let Some(&(pf, px, py)) = last.get(&id) && pf + 1 == f {
+                        let away = (f as f32 - 0.5 - frame as f32).abs() / (overlay.trail_frames + 1) as f32;
+                        let alpha = Alpha::from(((away * 4.0).round() as u8).min(3));
+                        drawing.line(at(px, py), at(x, y), Color::Sky, alpha, Stage::OnOutput, y_inverted);
+                    }
+                    last.insert(id, (f, x, y));
+                }
+            }
+        }
+
+        // A few pixels of the canvas, which has 720 to 1440 rows (`DrawCanvas::scale`) unless the frame has fewer
+        let size = ((drawing.get_size().1 as f32 / 270.0).round() as usize).max(3);
+        for &(id, x, y, state) in &points {
+            if overlay.selection.contains(&id) { continue; }
+            let color = match state {
+                PointState::Used => Color::Green,
+                PointState::Downweighted => Color::Yellow,
+                PointState::Rejected => Color::Red,
+                _ => Color::Blue2,
+            };
+            let (x, y) = at(x, y);
+            drawing.put_pixel(x as i32, y as i32, color, Alpha::Alpha100, Stage::OnOutput, y_inverted, size);
+        }
+        for &(id, x, y, _) in &points {
+            if !overlay.selection.contains(&id) { continue; }
+            let (x, y) = at(x, y);
+            drawing.put_pixel(x as i32, y as i32, Color::White, Alpha::Alpha100, Stage::OnOutput, y_inverted, size + 2);
+            drawing.put_pixel(x as i32, y as i32, Color::Sky, Alpha::Alpha100, Stage::OnOutput, y_inverted, size);
+        }
     }
 
     pub fn process_pixels<T: PixelType>(&self, mut timestamp_us: i64, frame: Option<usize>, buffers: &mut Buffers) -> Result<stabilization::ProcessedInfo, GyroflowCoreError> {
+        // A frame of a GPU which wgpu can't share the CUDA memory with: on a copy in the host memory
+        #[cfg(any(target_os = "windows", target_os = "linux"))]
+        if gpu::wgpu_interop_cuda::needs_host_copy(buffers) {
+            return gpu::wgpu_interop_cuda::through_host(buffers, |buffers| self.process_pixels::<T>(timestamp_us, frame, buffers));
+        }
+
         if let gpu::BufferSource::Cpu { buffer } = &buffers.input.data  { if buffer.is_empty() { return Err(GyroflowCoreError::InputBufferEmpty); } }
         if let gpu::BufferSource::Cpu { buffer } = &buffers.output.data { if buffer.is_empty() { return Err(GyroflowCoreError::OutputBufferEmpty); } }
 
@@ -895,8 +1209,9 @@ impl StabilizationManager {
         };
 
         if use_cache || hash != current_hash {
+            self.prepare_overlays(timestamp_us);
             if let Some(mut undist) = self.stabilization.try_write_for(std::time::Duration::from_millis(30000)) {
-                self.draw_overlays(&mut undist.drawing, timestamp_us);
+                self.draw_overlays(&mut undist, timestamp_us);
                 undist.ensure_ready_for_processing::<T>(timestamp_us, frame, buffers);
             } else {
                 return Err(GyroflowCoreError::Unknown);
@@ -1055,19 +1370,27 @@ impl StabilizationManager {
         self.invalidate_zooming();
     }
 
+    // The motion data's lock before the keyframes', as everywhere: `self.keyframes.write().update_gyro(&self.gyro.read())`
+    // takes them the other way round (the receiver first), and two threads taking them in opposite orders deadlock
     pub fn remove_offset(&self, timestamp_us: i64) {
-        self.gyro.write().remove_offset(timestamp_us);
-        self.keyframes.write().update_gyro(&self.gyro.read());
+        let mut gyro = self.gyro.write();
+        gyro.remove_offset(timestamp_us);
+        self.keyframes.write().update_gyro(&gyro);
+        drop(gyro);
         self.invalidate_zooming();
     }
     pub fn set_offset(&self, timestamp_us: i64, offset_ms: f64) {
-        self.gyro.write().set_offset(timestamp_us, offset_ms);
-        self.keyframes.write().update_gyro(&self.gyro.read());
+        let mut gyro = self.gyro.write();
+        gyro.set_offset(timestamp_us, offset_ms);
+        self.keyframes.write().update_gyro(&gyro);
+        drop(gyro);
         self.invalidate_zooming();
     }
     pub fn clear_offsets(&self) {
-        self.gyro.write().clear_offsets();
-        self.keyframes.write().update_gyro(&self.gyro.read());
+        let mut gyro = self.gyro.write();
+        gyro.clear_offsets();
+        self.keyframes.write().update_gyro(&gyro);
+        drop(gyro);
         self.invalidate_zooming();
     }
     pub fn offset_at_video_timestamp(&self, timestamp_us: i64) -> f64 {
@@ -1093,7 +1416,13 @@ impl StabilizationManager {
         self.gyro.write().imu_transforms.gyro_bias = Some([bx, by, bz]);
     }
     pub fn recompute_gyro(&self) {
-        self.gyro.write().apply_transforms();
+        GyroSource::integrate_shared(&self.gyro, Integration::ApplyTransforms);
+        self.invalidate_smoothing();
+    }
+    /// Integrates the motion data again with another method (`GyroSource::integration_method`)
+    pub fn set_integration_method(&self, method: usize) {
+        self.gyro.write().integration_method = method;
+        GyroSource::integrate_shared(&self.gyro, Integration::Integrate);
         self.invalidate_smoothing();
     }
 
@@ -1103,12 +1432,13 @@ impl StabilizationManager {
         {
             let mut gyro = self.gyro.write();
             if let Some(context) = context { gyro.optical_context = context; }
-            gyro.optical_correction = correction;
+            gyro.optical_correction = correction.map(Arc::new);
         }
         self.recompute_gyro();
     }
     pub fn set_optical_correction_enabled(&self, enabled: bool) {
-        let changed = self.gyro.write().optical_correction.as_mut().map(|c| std::mem::replace(&mut c.enabled, enabled) != enabled).unwrap_or_default();
+        // A copy of the correction when another copy of the motion data shares it (`Arc::make_mut`), only when it changes
+        let changed = self.gyro.write().optical_correction.as_mut().filter(|c| c.enabled != enabled).map(|c| Arc::make_mut(c).enabled = enabled).is_some();
         if changed { self.recompute_gyro(); }
     }
     pub fn clear_optical_correction(&self) {
@@ -1133,20 +1463,28 @@ impl StabilizationManager {
     pub fn refresh_optical_correction(&self) -> bool {
         if self.gyro.read().optical_correction.is_none() { return false; }
         let context = self.optical_context();
-        let mut gyro = self.gyro.write();
-        gyro.optical_context = context;
-        if gyro.optical_correction_applies() == gyro.optical_correction_applied { return false; }
-        gyro.integrate();
-        drop(gyro);
+        // Every recompute asks, on the UI thread: a write would wait for any smoothing still reading the motion data
+        {
+            let gyro = self.gyro.read();
+            if gyro.optical_context == context && gyro.optical_correction_applies() == gyro.optical_correction_applied { return false; }
+        }
+        {
+            let mut gyro = self.gyro.write();
+            gyro.optical_context = context;
+            if gyro.optical_correction_applies() == gyro.optical_correction_applied { return false; }
+        }
+        GyroSource::integrate_shared(&self.gyro, Integration::Integrate);
         self.invalidate_smoothing();
         true
     }
     /// See `GyroSource::set_ignore_file_motion`. True when anything changed
     pub fn set_ignore_file_motion(&self, ignore: bool) -> bool {
-        let mut gyro = self.gyro.write();
-        if !gyro.set_ignore_file_motion(ignore) { return false; }
-        self.keyframes.write().update_gyro(&gyro);
-        drop(gyro);
+        {
+            let mut gyro = self.gyro.write();
+            if !gyro.set_ignore_file_motion_unintegrated(ignore) { return false; }
+            self.keyframes.write().update_gyro(&gyro);
+        }
+        GyroSource::integrate_shared(&self.gyro, Integration::ApplyTransforms);
         self.invalidate_smoothing();
         true
     }
@@ -1178,7 +1516,7 @@ impl StabilizationManager {
         loop {
             // A copy: the strength slider would wait for the fit on the settings lock
             let settings = *self.optical_settings.read();
-            let correction = synchronization::optical_motion::solve(&m, &settings)?;
+            let correction = self.fit_optical_correction(&m, &settings)?;
             let mut kept = self.optical_measurements.write();
             if self.optical_generation.load(SeqCst) != m.generation { return Err("Cancelled".into()); }
             // Moved during the fit: the refit that asked for found no measurements to refit yet, so it's up to this one
@@ -1186,11 +1524,20 @@ impl StabilizationManager {
             *kept = Some(m);
             let mut gyro = self.gyro.write();
             gyro.optical_context = context;
-            gyro.optical_correction = Some(correction);
+            gyro.optical_correction = Some(Arc::new(correction));
             break;
         }
         self.recompute_gyro();
         Ok(())
+    }
+    /// Fits the correction to the measurements with `settings` (`optical_motion::solve`): in a video cut from recordings,
+    /// each part on its own, from the bands measured between its own frames (`optical_correction::solve_parts`), as the
+    /// part trimmed on its own would have it
+    fn fit_optical_correction(&self, m: &synchronization::optical_motion::OpticalMeasurements, settings: &gyro_source::OpticalCorrectionSettings) -> Result<gyro_source::OpticalCorrection, String> {
+        match gyro_source::optical_correction::MeasuredParts::of(&synchronization::optical_motion::measurement_params(self)) {
+            Some(parts) => gyro_source::optical_correction::solve_parts(m, settings, &parts),
+            None => synchronization::optical_motion::solve(m, settings),
+        }
     }
     /// The kept measurements, as long as the correction they gave still sits on what they were measured on: the same
     /// quaternions (uncorrected), in the same context
@@ -1220,19 +1567,20 @@ impl StabilizationManager {
     pub fn refit_optical_correction(&self) -> Result<bool, String> {
         let Some(m) = self.valid_optical_measurements() else { return Ok(false) };
         let settings = *self.optical_settings.read();
-        let mut c = synchronization::optical_motion::solve(&m, &settings)?;
+        let mut c = self.fit_optical_correction(&m, &settings)?;
         {
             let kept = self.optical_measurements.read();
             if !kept.as_ref().is_some_and(|k| Arc::ptr_eq(k, &m)) || *self.optical_settings.read() != settings { return Ok(false); }
             let mut gyro = self.gyro.write();
             let Some(fitted) = &gyro.optical_correction else { return Ok(false) };
             c.enabled = fitted.enabled;
-            gyro.optical_correction = Some(c);
+            gyro.optical_correction = Some(Arc::new(c));
         }
         self.recompute_gyro();
         Ok(true)
     }
-    /// How the next "Analyze image optically" follows the points, "klt" or "dis". False for neither
+    /// How the next "Analyze image optically" follows the points, "klt", "dis" or "gmflow". False for none of them, or
+    /// for one this build doesn't have
     pub fn set_optical_tracking(&self, name: &str) -> bool {
         let Some(method) = gyro_source::TrackingMethod::from_name(name) else { return false };
         *self.optical_tracking.write() = method;
@@ -1289,7 +1637,7 @@ impl StabilizationManager {
         loop {
             // A copy: the strength slider would wait for the fit on the settings lock
             let settings = *self.optical_settings.read();
-            let mut c = match synchronization::optical_motion::solve(&new, &settings) {
+            let mut c = match self.fit_optical_correction(&new, &settings) {
                 Ok(c) => c,
                 Err(e) => return failed(e),
             };
@@ -1300,7 +1648,7 @@ impl StabilizationManager {
             let mut gyro = self.gyro.write();
             let Some(fitted) = &gyro.optical_correction else { return Ok(false) };
             c.enabled = fitted.enabled;
-            gyro.optical_correction = Some(c);
+            gyro.optical_correction = Some(Arc::new(c));
             *kept = Some(new);
             break;
         }
@@ -1334,8 +1682,8 @@ impl StabilizationManager {
     }
     /// The frame at a moment of the file (µs), numbered as the analysis numbers them (`OpticalMotionAnalysis::feed_frame`)
     fn optical_frame_at(&self, file_timestamp_us: i64) -> usize {
-        let (scale, fps) = { let p = self.params.read(); (p.fps_scale, p.get_scaled_fps()) };
-        frame_at_timestamp(file_timestamp_us as f64 / 1000.0 / scale.unwrap_or(1.0), fps).max(0) as usize
+        let p = self.params.read();
+        p.frame_at_timestamp(file_timestamp_us as f64 / 1000.0 / p.get_fps_scale()).max(0) as usize
     }
     /// The tracks of the analysis `m` taken out now: until measuring again catches up, not quite the ones it left out
     fn optical_removed_ids(&self, m: &synchronization::optical_motion::OpticalMeasurements) -> HashSet<u32> {
@@ -1352,12 +1700,16 @@ impl StabilizationManager {
             .collect()
     }
     /// Where points of the input frame `index` (relative to it) are in the stabilized picture as the preview renders it,
-    /// upright, relative to it: see `optical_motion::to_output`
+    /// upright, relative to it: see `optical_motion::to_output`. With the preview's own parameters, which its points are
+    /// drawn with (`draw_optical_points`): during a recompute the ones it's still drawn with, so what's found under the
+    /// mouse is what's drawn there. The manager's until the preview has any
     fn optical_placement(&self, stabilized: bool) -> impl Fn(usize, &[(f32, f32)]) -> Vec<Option<(f32, f32)>> + Send + Sync + 'static {
         let params = stabilized.then(|| {
+            let rendered = self.stabilization.read().upright_params();
+            if rendered.width > 0 { return rendered; }
             let mut params = ComputeParams::from_manager(self);
             params.framebuffer_inverted = false;
-            params
+            Arc::new(params)
         });
         move |index, points| match &params {
             Some(params) => synchronization::optical_motion::to_output(params, index, points),
@@ -1370,14 +1722,29 @@ impl StabilizationManager {
     pub fn optical_tracked_points(&self, file_timestamp_us: i64, stabilized: bool) -> Vec<(u32, f32, f32, synchronization::optical_motion::PointState)> {
         let Some(m) = self.optical_measurements.read().clone() else { return Vec::new() };
         let index = self.optical_frame_at(file_timestamp_us);
-        let mut points = self.optical_points_in_frame(&m, index);
-        if stabilized {
-            let placed = self.optical_placement(true)(index, &points.iter().map(|p| (p.1, p.2)).collect::<Vec<_>>());
-            points = points.into_iter().zip(placed)
-                .filter_map(|(p, at)| at.filter(|(x, y)| (0.0..=1.0).contains(x) && (0.0..=1.0).contains(y)).map(|(x, y)| (p.0, x, y, p.3)))
-                .collect();
+        if !stabilized { return self.optical_points_in_frame(&m, index); }
+        self.optical_points_placed(&m, index, self.optical_placement(true))
+    }
+    /// `optical_points_in_frame` placed by `place` (see `optical_placement`), the ones in the picture
+    fn optical_points_placed(&self, m: &synchronization::optical_motion::OpticalMeasurements, index: usize, place: impl Fn(usize, &[(f32, f32)]) -> Vec<Option<(f32, f32)>>) -> Vec<(u32, f32, f32, synchronization::optical_motion::PointState)> {
+        let points = self.optical_points_in_frame(m, index);
+        let placed = place(index, &points.iter().map(|p| (p.1, p.2)).collect::<Vec<_>>());
+        points.into_iter().zip(placed)
+            .filter_map(|(p, at)| at.filter(|(x, y)| (0.0..=1.0).contains(x) && (0.0..=1.0).contains(y)).map(|(x, y)| (p.0, x, y, p.3)))
+            .collect()
+    }
+    /// What "Show/edit tracked points" draws on the preview (`OpticalPointsOverlay`): whether anything, the tracks
+    /// `selection`, and the first `max_trails` of them through the `trail_frames` frames before and after the one shown
+    pub fn set_optical_points_overlay(&self, shown: bool, selection: &[u32], trail_frames: usize, max_trails: usize) {
+        let mut overlay = self.optical_overlay.lock();
+        let trails: HashSet<u32> = selection.iter().copied().take(max_trails).collect();
+        if !shown || trails != overlay.trails {
+            overlay.clear_placed();
         }
-        points
+        overlay.shown = shown;
+        overlay.selection = selection.iter().copied().collect();
+        overlay.trails = trails;
+        overlay.trail_frames = trail_frames;
     }
     /// The tracks (but the ones taken out) with a point within `rect` (x0, y0, x1, y1, relative to the frame - the
     /// stabilized one with `stabilized`) in the frame at a moment of the file (µs), or with `all_frames`, within the
@@ -1392,15 +1759,6 @@ impl StabilizationManager {
         // picture holds still there
         let place = self.optical_placement(stabilized);
         m.tracks.in_rect(frames, rect, &self.optical_removed_ids(&m), move |_, points: &[(f32, f32)]| place(shown, points), cancelled)
-    }
-    /// Where the tracks `ids` are in the frames up to `reach` away from the one at a moment of the file (µs): per track,
-    /// how many frames from that one, and where, relative to the frame (the stabilized one with `stabilized`)
-    pub fn optical_track_paths(&self, ids: &HashSet<u32>, file_timestamp_us: i64, reach: usize, stabilized: bool) -> Vec<(u32, Vec<(i64, f32, f32)>)> {
-        let Some(m) = self.optical_measurements.read().clone() else { return Vec::new() };
-        let i = self.optical_frame_at(file_timestamp_us);
-        m.tracks.paths(ids, i.saturating_sub(reach)..=i + reach, self.optical_placement(stabilized)).into_iter()
-            .map(|(id, path)| (id, path.into_iter().map(|(f, x, y)| (f as i64 - i as i64, x, y)).collect()))
-            .collect()
     }
     /// State of the correction measured from the video, for the UI
     pub fn optical_correction_info(&self) -> serde_json::Value {
@@ -1434,7 +1792,7 @@ impl StabilizationManager {
         info["tracked_points"] = kept.as_ref().is_some_and(|m| !m.tracks.is_empty()).into();
         // Which analysis's tracks they are: the same through measuring again, another for another analysis, which numbers
         // its tracks anew
-        info["tracks_key"] = kept.as_ref().map(|m| Arc::as_ptr(&m.tracks) as usize as u64).unwrap_or_default().into();
+        info["tracks_key"] = kept.as_ref().map(|m| m.tracks.serial()).unwrap_or_default().into();
         // Only measurements the correction still sits on can be measured again without some of the tracks
         let editable = kept.is_some() && self.valid_optical_measurements().is_some();
         info["tracks_editable"] = editable.into();
@@ -1453,7 +1811,8 @@ impl StabilizationManager {
         info["tracking"] = tracking.name().into();
         if let Some((fitted, fitted_tracking)) = fitted_with {
             // Tracked another way than the one set now: still a correction, the new one applies from the next analysis
-            info["tracking_changed"] = (fitted_tracking != tracking).into();
+            // Not when it was fitted with a method this build doesn't have: nothing was changed to apply
+            info["tracking_changed"] = (fitted_tracking != tracking && fitted_tracking.available()).into();
             // Fitted with other settings than the ones set, and the measurements to refit aren't here any more (a
             // project loaded from disk keeps only the correction): only another analysis applies the new ones. The
             // strength doesn't count without motion data to correct: the motion and its correction come from the same
@@ -1509,12 +1868,15 @@ impl StabilizationManager {
         self.smoothing.write().horizon_lock.set_horizon(lock_percent, roll, lock_pitch, pitch, automatic_lock, turn_threshold, turn_smoothing_ms, turn_multiplier, tilt_accel_limit);
         self.invalidate_smoothing();
     }
+    // As `GyroSource::set_use_gravity_vectors` and `set_horizon_lock_integration_method`, integrated with the lock released
     pub fn set_use_gravity_vectors(&self, v: bool) {
-        self.gyro.write().set_use_gravity_vectors(v);
+        let changed = std::mem::replace(&mut self.gyro.write().use_gravity_vectors, v) != v;
+        if changed { GyroSource::integrate_shared(&self.gyro, Integration::Integrate); }
         self.invalidate_smoothing();
     }
     pub fn set_horizon_lock_integration_method(&self, v: i32) {
-        self.gyro.write().set_horizon_lock_integration_method(v);
+        let changed = std::mem::replace(&mut self.gyro.write().horizon_lock_integration_method, v) != v;
+        if changed { GyroSource::integrate_shared(&self.gyro, Integration::Integrate); }
         self.invalidate_smoothing();
     }
     pub fn get_smoothing_max_angles(&self) -> (f64, f64, f64) {
@@ -1553,6 +1915,7 @@ impl StabilizationManager {
             // prevent_recompute
             // camera_id
             // optical_measurements: they take a lot of memory, and a clone has nothing to refit
+            // optical_overlay: the preview's
             ..Default::default()
         }
     }
@@ -1598,9 +1961,16 @@ impl StabilizationManager {
             } else {
                 params.set_fps_scale(None);
             }
-            self.gyro.write().init_from_params(&params);
             self.keyframes.write().timestamp_scale = params.fps_scale;
         }
+        // The motion data takes the new timing in while the parameters can't change (`set_video_timing`; the params locked
+        // before the gyro, as everywhere), and is integrated again where that needs it (segments the scale moves) with
+        // neither lock held: every reader of them would wait on the whole integration
+        let integrate = {
+            let params = self.params.read();
+            self.gyro.write().set_video_timing(&params)
+        };
+        if integrate { GyroSource::integrate_shared(&self.gyro, Integration::ApplyTransforms); }
 
         if recompute {
             self.stabilization.write().set_compute_params(stabilization::ComputeParams::from_manager(self));
@@ -1631,8 +2001,13 @@ impl StabilizationManager {
         Ok(())
     }
     pub fn export_gyroflow_data(&self, typ: GyroflowProjectType, additional_data: &str, _project_url: Option<&str>) -> Result<String, GyroflowCoreError> {
-        let gyro = self.gyro.read();
-        let params = self.params.read();
+        // Copies of one moment (the parameters locked before the motion data, as everywhere), and not the locks: the motion
+        // data is serialized and compressed below, which takes seconds for a long high-rate log, and every reader would
+        // wait for that behind the next writer. The motion data's copy shares its readings and orientations (`Arc`s)
+        let (params, gyro) = {
+            let params = self.params.read();
+            (params.clone(), self.gyro.read().clone())
+        };
 
         let (smoothing_name, smoothing_params, horizon_amount, horizon_lock) = {
             let smoothing_lock = self.smoothing.read();
@@ -1729,6 +2104,7 @@ impl StabilizationManager {
             },
             "gyro_source": {
                 "filepath":           gyro.file_url,
+                "all_metadata":       gyro.all_metadata,
                 "lpf":                gyro.imu_transforms.imu_lpf,
                 "mf":                 gyro.imu_transforms.imu_mf,
                 "rotation":           gyro.imu_transforms.imu_rotation_angles,
@@ -1775,7 +2151,7 @@ impl StabilizationManager {
             let file_metadata = gyro.file_metadata.read();
 
             // The analysis took a pass over every frame, so it's kept with the project whatever its type
-            if let Some(c) = gyro.optical_correction.as_ref().and_then(util::compress_to_base91_cbor) {
+            if let Some(c) = gyro.optical_correction.as_deref().and_then(util::compress_to_base91_cbor) {
                 obj.insert("optical_correction".into(), serde_json::Value::String(c));
             }
 
@@ -1801,24 +2177,108 @@ impl StabilizationManager {
 
                 let mut imu_timestamps = Vec::with_capacity(gyro.quaternions.len());
                 let mut imu_timestamps_final = Vec::with_capacity(gyro.quaternions.len());
-                for (t, _) in &gyro.quaternions {
+                for (t, _) in gyro.quaternions.iter() {
                     let mut timestamp_ms = *t as f64 / 1000.0;
                     timestamp_ms += gyro.offset_at_gyro_timestamp(timestamp_ms);
 
                     imu_timestamps.push(timestamp_ms);
 
-                    let frame = ((timestamp_ms - params.frame_readout_time / 2.0) * (params.get_scaled_fps() / 1000.0)).ceil() as usize;
-                    imu_timestamps_final.push(timestamp_ms - file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0));
+                    let frame = params.first_frame_at_or_after(timestamp_ms - params.frame_readout_time / 2.0).max(0) as usize;
+                    imu_timestamps_final.push(timestamp_ms - file_metadata.frame_time_offset(frame));
                 }
                 util::compress_to_base91_cbor(&imu_timestamps)           .and_then(|s| obj.insert("synced_imu_timestamps" .into(), serde_json::Value::String(s)));
                 util::compress_to_base91_cbor(&imu_timestamps_final)     .and_then(|s| obj.insert("synced_imu_timestamps_with_per_frame_offset".into(), serde_json::Value::String(s)));
-                util::compress_to_base91_cbor(&gyro.quaternions)         .and_then(|s| obj.insert("integrated_quaternions".into(), serde_json::Value::String(s)));
-                util::compress_to_base91_cbor(&gyro.smoothed_quaternions).and_then(|s| obj.insert("smoothed_quaternions"  .into(), serde_json::Value::String(s)));
+                util::compress_to_base91_cbor(&*gyro.quaternions)         .and_then(|s| obj.insert("integrated_quaternions".into(), serde_json::Value::String(s)));
+                util::compress_to_base91_cbor(&*gyro.smoothed_quaternions).and_then(|s| obj.insert("smoothed_quaternions"  .into(), serde_json::Value::String(s)));
                 util::compress_to_base91_cbor(&params.fovs)              .and_then(|s| obj.insert("adaptive_zoom_fovs"    .into(), serde_json::Value::String(s)));
             }
         }
 
         Ok(serde_json::to_string_pretty(&obj)?)
+    }
+
+    /// The project files of the recordings the video was cut from, when it has a segment table that names them and their
+    /// projects are next to the video, as Gyroflow saves a video's project (`<name>.gyroflow`): `(source name, project
+    /// url)`
+    pub fn source_project_urls(&self, video_url: &str) -> Vec<(String, String)> {
+        let gyro = self.gyro.read();
+        let md = gyro.file_metadata.read();
+        let Some(segments) = md.trim_segments.as_ref() else { return Vec::new() };
+        let folder = filesystem::get_folder(video_url);
+        let mut out = Vec::new();
+        for source in &segments.table.sources {
+            let stem = source.name.rsplit_once('.').map_or(source.name.as_str(), |x| x.0);
+            let url = filesystem::get_file_url(&folder, &format!("{stem}.gyroflow"), false);
+            if !url.is_empty() && filesystem::exists(&url) && !out.iter().any(|(n, _): &(String, String)| *n == source.name) {
+                out.push((source.name.clone(), url));
+            }
+        }
+        out
+    }
+
+    /// The sync points of `project`, a project made on the recording `source_name` the video was cut from (its data, as
+    /// `export_gyroflow_data` writes it), as this video's: each point at its moment of the recording in the video, through
+    /// the segments of the video's table that are of it, and left out where the video doesn't have that moment.
+    ///
+    /// A sync point pairs a moment of the picture, the video's time at its key plus its offset (the file's time over its
+    /// project's frame rate scale, `video_info.fps_scale`), with the motion data's time there, its key. A cut keeps the
+    /// file's own metadata with the picture: the picture moves by the segment's shift in the file's time, and the motion
+    /// data by the same shift on its own timeline (the file's time over the scale its metadata states, which gyroflow
+    /// applies by itself, `load_gyro_data`: the same in the recording and in the video cut from it). So each point keeps
+    /// its picture and its motion sample, and its offset follows from the two, whatever scale either project uses.
+    /// A motion log of another file isn't cut with the video, its points would be off by the cut, and the video's segments
+    /// don't apply to it (`load_gyro_data`): `None` unless the motion data of both is the files' own, and `None` for a
+    /// project of another video than the recording
+    pub fn offsets_from_source(&self, source_name: &str, project: &serde_json::Value) -> Option<BTreeMap<i64, f64>> {
+        let url_of = |v: Option<&serde_json::Value>| -> String {
+            let s = v.and_then(|x| x.as_str()).unwrap_or_default();
+            if !s.is_empty() && !s.contains("://") { filesystem::path_to_url(s) } else { s.to_string() }
+        };
+        let project_video = url_of(project.get("videofile"));
+        if project_video.is_empty() || filesystem::get_filename(&project_video) != source_name { return None; }
+        let project_gyro = project.get("gyro_source")?;
+        let project_motion = url_of(project_gyro.get("filepath"));
+        // As `import_gyroflow_data` tells the video's own metadata from another file's
+        if project_motion != project_video && !project_gyro.get("all_metadata").and_then(|x| x.as_bool()).unwrap_or_default() { return None; }
+        let source_scale = project.get("video_info").and_then(|x| x.get("fps_scale")).and_then(|x| x.as_f64())
+            .filter(|x| StabilizationParams::is_valid_fps_scale(*x)).unwrap_or(1.0);
+        let offsets = project.get("offsets")?.as_object()?.iter().filter_map(|(k, v)| Some((k.parse::<i64>().ok()?, v.as_f64()?)));
+
+        let (scale, fps) = { let p = self.params.read(); (p.get_fps_scale(), p.fps) };
+        let gyro = self.gyro.read();
+        let md = gyro.file_metadata.read();
+        if !gyro.all_metadata || !md.has_motion() { return None; }
+        let segments = md.trim_segments.as_ref()?;
+        // The motion data's timeline is the file's time over this, as `load_gyro_data` scales the video for it (motion
+        // data a project holds, not loaded from its file, as a load without the file's own frame rate scales it)
+        let motion_scale = gyro.capture_frame_rate.or_else(|| Self::capture_frame_rate(md.frame_rate, fps, None))
+            .filter(|_| fps > 0.0).map(|r| r / fps).filter(|x| StabilizationParams::is_valid_fps_scale(*x)).unwrap_or(1.0);
+        let mut out = BTreeMap::new();
+        for (key_us, offset_ms) in offsets {
+            // The point's picture, in the recording file's µs
+            let picture_us = (key_us as f64 + offset_ms * 1000.0) * source_scale;
+            for s in segments.table.segments.iter().filter(|s| segments.table.source_of(s).name == source_name) {
+                if picture_us >= s.src_start_us as f64 && picture_us < (s.src_start_us + s.duration_us) as f64 {
+                    let shift_us = (s.out_start_us - s.src_start_us) as f64;
+                    let video_us = (picture_us + shift_us) / scale;
+                    let motion_us = (key_us as f64 + shift_us / motion_scale).round();
+                    out.insert(motion_us as i64, (video_us - motion_us) / 1000.0);
+                }
+            }
+        }
+        Some(out)
+    }
+
+    /// The lens profile of `project`, a project made on a recording the video was cut from (`offsets_from_source`), for this
+    /// video: a cut keeps the recording's picture, so the lens calibrated for it is this video's, while the picture is the
+    /// same size (the lens metadata per frame is the video's own). `None` when the project has no profile or its video is
+    /// of another size
+    pub fn lens_from_source(&self, project: &serde_json::Value) -> Option<serde_json::Value> {
+        let lens = project.get("calibration_data")?;
+        let calibrated = lens.get("fisheye_params").and_then(|x| x.get("camera_matrix")).and_then(|x| x.as_array()).is_some_and(|x| !x.is_empty());
+        let info = project.get("video_info")?;
+        let size = (info.get("width")?.as_u64()? as usize, info.get("height")?.as_u64()? as usize);
+        (calibrated && size == self.params.read().size).then(|| lens.clone())
     }
 
     pub fn get_new_videofile_url(org_video_url: &str, gf_file_url: Option<&str>, sequence_start: u32) -> String {
@@ -1914,10 +2374,18 @@ impl StabilizationManager {
                 if let Some(v) = vid_info.get("duration_ms").and_then(|x| x.as_f64()) { params.duration_ms    = v; }
                 if let Some(v) = vid_info.get("fps_scale") { params.set_fps_scale(v.as_f64()); }
 
-                self.gyro.write().init_from_params(&params);
+                // The motion data takes the project's timing in, but isn't integrated again for it here, under the lock
+                // every reader of the parameters waits on: the project's own motion data and integration settings are
+                // loaded below, and every import ends with an integration of all of it (`recompute_gyro`: here when
+                // `blocking`, the app's and the render queue's after it)
+                let _ = self.gyro.write().set_video_timing(&params);
                 self.keyframes.write().timestamp_scale = params.fps_scale;
             }
             let mut ignore_file_motion = None;
+            // Where the video's frame times are read from: the project's video, or the file loaded as its own metadata
+            let mut frame_times_url = if full_data_included { org_video_url.clone() } else { video_url.clone() };
+            // The video's frame times, once read from there (`read_frame_times`)
+            let mut frame_times = None;
             if let Some(serde_json::Value::Object(obj)) = obj.get_mut("gyro_source") {
                 let mut org_gyro_url = obj.get("filepath").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
                 if !org_gyro_url.is_empty() && !org_gyro_url.contains("://") {
@@ -1945,7 +2413,15 @@ impl StabilizationManager {
                 use crate::gyro_source::TimeIMU;
 
                 let is_compressed = obj.get("raw_imu").map(|x| x.is_string()).unwrap_or_default();
-                let is_main_video = org_gyro_url == org_video_url;
+                // Another file loaded with all of its metadata is the video's own too, so its frame timing stays (a
+                // CRM on its proxy): a project with no motion data of its own loads it again
+                let is_main_video = org_gyro_url == org_video_url || obj.get("all_metadata").and_then(|x| x.as_bool()).unwrap_or_default();
+                // The video's own where that file isn't there anymore (the project has its motion data)
+                if is_main_video && !gyro_url.is_empty() && filesystem::exists(&gyro_url) {
+                    frame_times_url = gyro_url.clone();
+                }
+                // A motion data file loaded below takes its frames' offsets against them (`FileLoadOptions::video_frame_times`)
+                load_options.video_frame_times = frame_times.get_or_insert_with(|| Self::read_frame_times(&frame_times_url)).clone();
 
                 let built_in_gyro: std::io::Result<crate::gyro_source::FileMetadata> = util::decompress_from_base91_cbor(obj.get("file_metadata").and_then(|x| x.as_str()).unwrap_or_default());
 
@@ -2003,60 +2479,82 @@ impl StabilizationManager {
                     }
 
                     if !raw_imu.is_empty() {
-                        let md = crate::gyro_source::FileMetadata {
-                            imu_orientation: obj.get("imu_orientation").and_then(|x| x.as_str().map(|x| x.to_string())),
-                            detected_source: Some(obj.get("detected_source").and_then(|x| x.as_str()).unwrap_or("Gyroflow file").to_string()),
-                            quaternions,
-                            gravity_vectors,
-                            image_orientations,
-                            raw_imu,
-                            ..Default::default()
+                        let md = match built_in_gyro {
+                            // The motion data is the arrays', the rest of the file's metadata (its segments, lens and
+                            // per-frame data) is what the project has of it
+                            Ok(mut md) => {
+                                md.raw_imu = raw_imu;
+                                md.quaternions = quaternions;
+                                md.gravity_vectors = gravity_vectors;
+                                md.image_orientations = image_orientations;
+                                md
+                            }
+                            Err(_) => crate::gyro_source::FileMetadata {
+                                imu_orientation: obj.get("imu_orientation").and_then(|x| x.as_str().map(|x| x.to_string())),
+                                detected_source: Some(obj.get("detected_source").and_then(|x| x.as_str()).unwrap_or("Gyroflow file").to_string()),
+                                quaternions,
+                                gravity_vectors,
+                                image_orientations,
+                                raw_imu,
+                                ..Default::default()
+                            },
                         };
 
-                        let mut gyro = self.gyro.write();
-                        gyro.load_from_telemetry(md);
+                        // Integrated with the lock released: every reader of the motion data would wait for it
+                        let integration = self.gyro.write().load_from_telemetry_unintegrated(md);
+                        if let Some(integration) = integration { GyroSource::integrate_shared(&self.gyro, integration); }
                     } else if let Ok(md) = built_in_gyro {
-                        let mut gyro = self.gyro.write();
-                        gyro.load_from_telemetry(md);
+                        let integration = self.gyro.write().load_from_telemetry_unintegrated(md);
+                        if let Some(integration) = integration { GyroSource::integrate_shared(&self.gyro, integration); }
                     } else if filesystem::exists(&gyro_url) && blocking {
                         let mut file = filesystem::open_file(&gyro_url, false, false)?;
                         let filesize = file.size;
-                        if let Err(e) = self.load_gyro_data(file.get_file(), filesize, &gyro_url, is_main_video, &load_options, progress_cb, cancel_flag) {
+                        if let Err(e) = self.load_motion_file(file.get_file(), filesize, &gyro_url, is_main_video, &load_options, progress_cb, cancel_flag.clone(), FrameTimesFrom::Caller, &video_url) {
                             ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_url, e);
                         }
                     }
                 } else if filesystem::exists(&gyro_url) && blocking {
                     let mut file = filesystem::open_file(&gyro_url, false, false)?;
                     let filesize = file.size;
-                    if let Err(e) = self.load_gyro_data(file.get_file(), filesize, &gyro_url, is_main_video, &load_options, progress_cb, cancel_flag) {
+                    if let Err(e) = self.load_motion_file(file.get_file(), filesize, &gyro_url, is_main_video, &load_options, progress_cb, cancel_flag.clone(), FrameTimesFrom::Caller, &video_url) {
                         ::log::warn!("Failed to load gyro data from {:?}: {:?}", gyro_url, e);
                     }
                 }
 
-                let mut gyro = self.gyro.write();
-                if !org_gyro_url.is_empty() {
-                    gyro.file_url = gyro_url.clone();
-                }
+                // The settings under the lock, the integration the correction needs with it released, and before the
+                // parameters' lock is taken: the parameters are locked before the motion data, as everywhere
+                let correction_loaded = {
+                    let mut gyro = self.gyro.write();
+                    if !org_gyro_url.is_empty() {
+                        gyro.file_url = gyro_url.clone();
+                        gyro.all_metadata = is_main_video;
+                    }
 
-                if let Some(v) = obj.get("lpf").and_then(|x| x.as_f64()) { gyro.imu_transforms.imu_lpf = v; }
-                if let Some(v) = obj.get("mf").and_then(|x| x.as_i64()) { gyro.imu_transforms.imu_mf = v as _; }
-                if let Some(v) = obj.get("integration_method").and_then(|x| x.as_u64()) { gyro.integration_method = v as usize; }
-                if let Some(v) = obj.get("imu_orientation").and_then(|x| x.as_str()) { gyro.imu_transforms.imu_orientation = Some(v.to_string()); }
-                if let Some(v) = obj.get("rotation")     { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_imu_rotation(v[0], v[1], v[2]); }
-                if let Some(v) = obj.get("acc_rotation") { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_acc_rotation(v[0], v[1], v[2]); }
-                if let Some(v) = obj.get("gyro_bias")    { gyro.imu_transforms.gyro_bias = serde_json::from_value(v.clone()).ok(); }
-                if let Some(v) = obj.get("optical_correction_strength").and_then(|x| x.as_f64()) { self.optical_settings.write().strength = v; }
-                if let Some(v) = obj.get("optical_correction_per_frame").and_then(|x| x.as_bool()) { self.optical_settings.write().per_frame = v; }
-                if let Some(v) = obj.get("optical_tracking").and_then(|x| x.as_str()).and_then(gyro_source::TrackingMethod::from_name) { *self.optical_tracking.write() = v; }
-                if let Some(v) = obj.get("optical_removed_tracks") { *self.optical_removed_tracks.write() = serde_json::from_value(v.clone()).unwrap_or_default(); }
-                ignore_file_motion = obj.get("ignore_file_motion").and_then(|x| x.as_bool());
-                if let Ok(mut c) = util::decompress_from_base91_cbor::<crate::gyro_source::OpticalCorrection>(obj.get("optical_correction").and_then(|x| x.as_str()).unwrap_or_default()) {
-                    if let Some(v) = obj.get("optical_correction_enabled").and_then(|x| x.as_bool()) { c.enabled = v; }
-                    gyro.optical_correction = Some(c);
+                    if let Some(v) = obj.get("lpf").and_then(|x| x.as_f64()) { gyro.imu_transforms.imu_lpf = v; }
+                    if let Some(v) = obj.get("mf").and_then(|x| x.as_i64()) { gyro.imu_transforms.imu_mf = v as _; }
+                    if let Some(v) = obj.get("integration_method").and_then(|x| x.as_u64()) { gyro.integration_method = v as usize; }
+                    if let Some(v) = obj.get("imu_orientation").and_then(|x| x.as_str()) { gyro.imu_transforms.imu_orientation = Some(v.to_string()); }
+                    if let Some(v) = obj.get("rotation")     { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_imu_rotation(v[0], v[1], v[2]); }
+                    if let Some(v) = obj.get("acc_rotation") { let v: [f64; 3] = serde_json::from_value(v.clone()).unwrap_or_default(); gyro.imu_transforms.set_acc_rotation(v[0], v[1], v[2]); }
+                    if let Some(v) = obj.get("gyro_bias")    { gyro.imu_transforms.gyro_bias = serde_json::from_value(v.clone()).ok(); }
+                    if let Some(v) = obj.get("optical_correction_strength").and_then(|x| x.as_f64()) { self.optical_settings.write().strength = v; }
+                    if let Some(v) = obj.get("optical_correction_per_frame").and_then(|x| x.as_bool()) { self.optical_settings.write().per_frame = v; }
+                    if let Some(v) = obj.get("optical_tracking").and_then(|x| x.as_str()).and_then(gyro_source::TrackingMethod::from_name) { *self.optical_tracking.write() = v; }
+                    if let Some(v) = obj.get("optical_removed_tracks") { *self.optical_removed_tracks.write() = serde_json::from_value(v.clone()).unwrap_or_default(); }
+                    ignore_file_motion = obj.get("ignore_file_motion").and_then(|x| x.as_bool());
+                    if let Ok(mut c) = util::decompress_from_base91_cbor::<crate::gyro_source::OpticalCorrection>(obj.get("optical_correction").and_then(|x| x.as_str()).unwrap_or_default()) {
+                        if let Some(v) = obj.get("optical_correction_enabled").and_then(|x| x.as_bool()) { c.enabled = v; }
+                        gyro.optical_correction = Some(Arc::new(c));
+                        true
+                    } else {
+                        false
+                    }
+                };
+                if correction_loaded {
                     // Integrated with the settings just read, for the checksum it's matched against. Whether it applies
                     // also depends on what the rest of the project sets (the sync, the lens, the frame timing): the next
                     // recompute brings that up to date, see `refresh_optical_correction`
-                    gyro.apply_transforms();
+                    GyroSource::integrate_shared(&self.gyro, Integration::ApplyTransforms);
                 }
 
                 {
@@ -2071,7 +2569,7 @@ impl StabilizationManager {
                     if let Ok(fls) = util::decompress_from_base91_cbor::<Vec<Option<f64>>>(obj.get("smoothed_focal_lengths").and_then(|x| x.as_str()).unwrap_or_default()) {
                         params.smoothed_focal_lengths = fls;
                     }
-                    params.focal_length_base.clear();
+                    params.focal_length_base = Default::default();
                     params.focal_length_base_key = 0;
                 }
 
@@ -2091,6 +2589,8 @@ impl StabilizationManager {
                 let db = self.lens_profile_db.read();
                 l.resolve_interpolations(&db);
             }
+            // Set once the parameters' and the smoothing's locks are let go of: either may integrate the motion data again
+            let (mut use_gravity_vectors, mut horizon_lock_integration_method) = (None, None);
             if let Some(serde_json::Value::Object(obj)) = obj.get_mut("stabilization") {
                 let mut params = self.params.write();
                 if let Some(v) = obj.get("fov")                   .and_then(|x| x.as_f64()) { params.fov                     = v; }
@@ -2185,12 +2685,8 @@ impl StabilizationManager {
                         smoothing.horizon_lock.set_horizon(horizon_amount, horizon_roll, horizon_pitch_enabled, horizon_pitch, automatic_lock, turn_threshold, turn_smoothing_ms, turn_multiplier, tilt_accel_limit);
                     }
                 }
-                if let Some(v) = obj.get("use_gravity_vectors").and_then(|x| x.as_bool()) {
-                    self.gyro.write().set_use_gravity_vectors(v);
-                }
-                if let Some(v) = obj.get("horizon_lock_integration_method").and_then(|x| x.as_i64()) {
-                    self.gyro.write().set_horizon_lock_integration_method(v as i32);
-                }
+                use_gravity_vectors = obj.get("use_gravity_vectors").and_then(|x| x.as_bool());
+                horizon_lock_integration_method = obj.get("horizon_lock_integration_method").and_then(|x| x.as_i64()).map(|v| v as i32);
 
                 if let Some(v) = obj.get("focal_length_smoothing_enabled") .and_then(|x| x.as_bool()) { params.focal_length_smoothing_enabled  = v; }
                 if let Some(v) = obj.get("focal_length_max_zoom_rate").and_then(|x| x.as_f64()) { params.focal_length_max_zoom_rate = v.clamp(0.01, 10.0); }
@@ -2199,6 +2695,8 @@ impl StabilizationManager {
 
                 obj.remove("adaptive_zoom_fovs");
             }
+            if let Some(v) = use_gravity_vectors { self.set_use_gravity_vectors(v); }
+            if let Some(v) = horizon_lock_integration_method { self.set_horizon_lock_integration_method(v); }
             if let Some(serde_json::Value::Object(obj)) = obj.get_mut("output") {
                 if let Some(w) =  obj.get("output_width").and_then(|x| x.as_u64()) {
                     if let Some(h) =  obj.get("output_height").and_then(|x| x.as_u64()) {
@@ -2315,6 +2813,16 @@ impl StabilizationManager {
                     }
                 }
             }
+            // The project's video replaces the one before, and its frame times with it, read here however the project is
+            // loaded: a blocking import is all a render of the project loads (the render queue, the CLI, a plugin), and the
+            // app, which loads the project's video first, doesn't load the video's own metadata then (`load_gyro_data`
+            // reads them with it), only the project's motion data file, when it has one that's there. Stored as
+            // `load_motion_file` stores them: not by an import cancelled for the next video, whose own load sets them
+            if !*is_preset {
+                let times = frame_times.unwrap_or_else(|| Self::read_frame_times(&frame_times_url));
+                let mut params = self.params.write();
+                if !cancel_flag.load(SeqCst) { params.frame_times = times; }
+            }
 
             if blocking {
                 self.recompute_gyro();
@@ -2367,7 +2875,7 @@ impl StabilizationManager {
         false
     }
 
-    pub fn load_video_file<T: Read + Seek>(&self, stream: &mut T, filesize: usize, url: &str, mut metadata: Option<telemetry_parser::util::VideoMetadata>, is_plugin: bool) -> Result<telemetry_parser::util::VideoMetadata, GyroflowCoreError> {
+    pub fn load_video_file<T: Read + Seek>(&self, stream: &mut T, filesize: u64, url: &str, mut metadata: Option<telemetry_parser::util::VideoMetadata>, is_plugin: bool) -> Result<telemetry_parser::util::VideoMetadata, GyroflowCoreError> {
         if metadata.is_none() {
             metadata = Some(util::get_video_metadata(stream, filesize, url)?);
         }
@@ -2376,9 +2884,17 @@ impl StabilizationManager {
 
         if metadata.width > 0 && metadata.height > 0 && metadata.duration_s > 0.0 && metadata.fps > 0.0 {
             let video_size = (metadata.width as usize, metadata.height as usize);
-            let frame_count = (metadata.duration_s * metadata.fps).ceil() as usize;
+            // The video's duration at its frame rate is a whole number of frames, which the product misses by the
+            // rounding of the two (13.847166666666666 s at 29.970029970029973 fps is 415.00000000000006 frames): less
+            // than a millionth of a frame over a whole one is that rounding, not a frame more
+            let frames = metadata.duration_s * metadata.fps;
+            let frame_count = (frames - 1e-6).ceil().max(1.0) as usize;
 
             self.init_from_video_data(metadata.duration_s * 1000.0, metadata.fps, frame_count, video_size);
+            // The camera identifier is this video's, from its own metadata: a video without one (no metadata the parser
+            // reads) isn't the previous video's camera, and mustn't autoload its lens profile below. The app starts every
+            // video the same way (`clear`)
+            *self.camera_id.write() = None;
             let _ = self.load_gyro_data(stream, filesize, url, true, &Default::default(), |_|(), Arc::new(AtomicBool::new(false)));
 
             let has_builtin_profile = {
@@ -2389,16 +2905,14 @@ impl StabilizationManager {
 
             let id_str = self.camera_id.read().as_ref().map(|v| v.get_identifier_for_autoload()).unwrap_or_default();
             if !id_str.is_empty() && !has_builtin_profile {
-                let mut db = self.lens_profile_db.read();
-                if !db.loaded {
-                    drop(db);
-                    {
-                        let mut db = self.lens_profile_db.write();
-                        db.load_all();
-                    }
-                    db = self.lens_profile_db.read();
+                if !self.lens_profile_db.read().loaded {
+                    let mut db = self.lens_profile_db.write();
+                    db.load_all();
                 }
-                if db.contains_id(&id_str) {
+                // Not held over `load_lens_profile`, which reads the database again: a second read of a parking_lot lock
+                // this thread holds deadlocks as soon as a writer queues up in between
+                let in_db = self.lens_profile_db.read().contains_id(&id_str);
+                if in_db {
                     match self.load_lens_profile(&id_str) {
                         Ok(_) => {
                             let (fr, frd) = { let lens = self.lens.read(); (lens.frame_readout_time, lens.frame_readout_direction) };
@@ -2503,7 +3017,7 @@ impl StabilizationManager {
 
     pub fn get_optimal_sync_points(&self, target_sync_points: usize, initial_offset: f64) -> Vec<f64> {
         let dur_ms = self.params.read().get_scaled_duration_ms();
-        let trim_ranges = {
+        let mut trim_ranges: Vec<(f64, f64)> = {
             let params = self.params.read();
             if params.trim_ranges.is_empty() {
                 vec![((0.0 - initial_offset)/1000.0, (dur_ms - initial_offset) / 1000.0)]
@@ -2511,6 +3025,14 @@ impl StabilizationManager {
                 params.trim_ranges.iter().map(|x| ((x.0 * dur_ms - initial_offset) / 1000.0, (x.1 * dur_ms - initial_offset) / 1000.0)).collect()
             }
         };
+        // In a video cut from recordings, the sync points are within its segments: the ranges are split at their boundaries
+        if let Some(segments) = self.gyro.read().segment_ranges() {
+            let boundaries: Vec<f64> = segments.video_starts_us.iter().skip(1).map(|t| (*t as f64 / 1000.0 - initial_offset) / 1000.0).collect();
+            trim_ranges = trim_ranges.into_iter().flat_map(|(from, to)| {
+                let cuts: Vec<f64> = std::iter::once(from).chain(boundaries.iter().copied().filter(|b| *b > from && *b < to)).chain(std::iter::once(to)).collect();
+                cuts.windows(2).map(|w| (w[0], w[1])).collect::<Vec<_>>()
+            }).collect();
+        }
 
         if let Some(mut optsync) = synchronization::optimsync::OptimSync::new(&self.gyro.read()) {
             let (points, rank, ratio) = optsync.run(target_sync_points, trim_ranges);
@@ -2581,6 +3103,12 @@ pub enum GyroflowCoreError {
 
     #[error("Failed to find cached wgpu in process_pixels. Key: {0}")]
     NoCachedWgpuInstance(String),
+
+    #[error("No GPU backend for the GPU buffers, which the CPU can't read. Key: {0}")]
+    NoBackendForBuffers(String),
+
+    #[error("CUDA error {0}")]
+    Cuda(String),
 
     #[error("Unsupported file format {0}")]
     UnsupportedFormat(String),

@@ -296,7 +296,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
             let smoothness_roll  = smoothness_roll_per_timestamp .get(ts).unwrap_or(&self.smoothness_roll);
             let smoothness       = smoothness_per_timestamp      .get(ts).unwrap_or(&self.smoothness);
 
-            let frame = crate::frame_at_timestamp(*ts as f64 / 1000.0, compute_params.scaled_fps) as usize;
+            let frame = compute_params.frame_at_timestamp(*ts as f64 / 1000.0) as usize;
             let mut fov_ratio = if compute_params.camera_diagonal_fovs.len() == 1 {
                 compute_params.camera_diagonal_fovs[0] / FOV_REFERENCE
             } else {
@@ -355,7 +355,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 q *= quat_rot;
             } else {
                 let val = alpha_smoothness * (1.0 - ratio[0]) + alpha_0_1s * ratio[0];
-                q = q.slerp(x, val.min(1.0));
+                q = slerp_toward(&q, x, val.min(1.0));
             }
             (*ts, q)
         }).collect();
@@ -381,7 +381,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 q *= quat_rot;
             } else {
                 let val = alpha_smoothness * (1.0 - ratio[0]) + alpha_0_1s * ratio[0];
-                q = q.slerp(&x, val.min(1.0));
+                q = slerp_toward(&q, &x, val.min(1.0));
             }
             (ts, q)
         }).collect();
@@ -479,7 +479,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 q *= quat_rot;
             } else {
                 let val = alpha_smoothness * (1.0 - vel_ratio[0] * dist_ratio[0]) + alpha_0_1s * vel_ratio[0] * dist_ratio[0];
-                q = q.slerp(&x, val.min(1.0));
+                q = slerp_toward(&q, &x, val.min(1.0));
             }
             (ts, q)
         }).collect();
@@ -506,7 +506,7 @@ impl SmoothingAlgorithm for DefaultAlgo {
                 q *= quat_rot;
             } else {
                 let val = alpha_smoothness * (1.0 - vel_ratio[0] * dist_ratio[0]) + alpha_0_1s * vel_ratio[0] * dist_ratio[0];
-                q = q.slerp(&x, val.min(1.0));
+                q = slerp_toward(&q, &x, val.min(1.0));
             }
             (ts, q)
         }).collect()

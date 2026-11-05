@@ -131,7 +131,7 @@ pub struct Controller {
     find_optical_tracks_in_rect: qt_method!(fn(&self, timestamp_us: f64, x0: f64, y0: f64, x1: f64, y1: f64, all_frames: bool, stabilized: bool) -> u32),
     cancel_optical_track_search: qt_method!(fn(&self)),
     optical_tracks_found: qt_signal!(search: u32, ids: QString),
-    optical_track_paths: qt_method!(fn(&self, ids: String, timestamp_us: f64, reach: usize, stabilized: bool) -> QString),
+    set_optical_points_overlay: qt_method!(fn(&self, shown: bool, selection: String, trail_frames: usize, max_trails: usize)),
     remove_optical_tracks: qt_method!(fn(&mut self, ids: String, remove: bool) -> QString),
     restore_optical_tracks: qt_method!(fn(&mut self)),
     optical_tracks_changed: qt_signal!(),
@@ -199,6 +199,7 @@ pub struct Controller {
 
     has_gravity_vectors: qt_property!(bool; READ has_gravity_vectors NOTIFY gyro_changed),
     has_per_frame_focal_length: qt_property!(bool; READ has_per_frame_focal_length NOTIFY gyro_changed),
+    has_varying_focal_length: qt_property!(bool; READ has_varying_focal_length NOTIFY gyro_changed),
 
     compute_progress: qt_signal!(id: u64, progress: f64),
     sync_progress: qt_signal!(progress: f64, ready: usize, total: usize),
@@ -318,6 +319,7 @@ pub struct Controller {
     nle_plugins_result: qt_signal!(command: QString, result: QString),
 
     has_per_frame_lens_data: qt_method!(fn(&self) -> bool),
+    has_ai_optical_flow: qt_method!(fn(&self) -> bool),
     export_stmap: qt_method!(fn(&self, folder_url: QUrl, per_frame: bool)),
     stmap_progress: qt_signal!(progress: f64, ready: usize, total: usize),
 
@@ -330,6 +332,8 @@ pub struct Controller {
 
     image_sequence_start: qt_property!(i32),
     image_sequence_fps: qt_property!(f64),
+    image_sequence_frame_rate: qt_method!(fn(&self, url: QUrl) -> f64),
+    output_overwrites_input: qt_method!(fn(&self, folder: QUrl, filename: QString, codec: QString) -> QString),
 
     preview_resolution: i32,
     processing_resolution: i32,
@@ -464,12 +468,6 @@ impl Controller {
         sync_params.every_nth_frame     = sync_params.every_nth_frame.max(1);
 
         let for_rs = mode == "estimate_rolling_shutter";
-        let for_lens_delay = mode == "estimate_lens_delay";
-        if for_lens_delay {
-            sync_params.every_nth_frame = 1; // consecutive frames are what the estimate tracks
-        }
-
-        let every_nth_frame = sync_params.every_nth_frame;
 
         self.sync_in_progress = true;
         self.sync_in_progress_changed();
@@ -574,6 +572,9 @@ impl Controller {
             });
 
             let ranges = sync.get_ranges();
+            // Every frame where the process needs consecutive ones (the optical analysis, the lens delay estimate), once
+            // it knows it can run
+            let every_nth_frame = sync.every_nth_frame();
             let mut frame_no = 0;
             let mut abs_frame_no = 0;
 
@@ -964,11 +965,10 @@ impl Controller {
                     additional_obj.insert("sample_rate".to_owned(),       serde_json::to_value(gyroflow_core::gyro_source::GyroSource::get_sample_rate(&*file_metadata)).unwrap());
                     let has_builtin_profile = file_metadata.lens_profile.as_ref().map(|y| y.is_object()).unwrap_or_default();
                     let md_data = file_metadata.additional_data.clone();
-                    if let Some(md_fps) = file_metadata.frame_rate {
-                        let fps = stab.params.read().fps;
-                        if (md_fps - fps).abs() > 1.0 {
-                            additional_obj.insert("realtime_fps".to_owned(), serde_json::Number::from_f64(md_fps).unwrap().into());
-                        }
+                    // The rate the motion data was captured at, where the video presents its frames at another one, as the
+                    // load decided it (`StabilizationManager::capture_frame_rate`)
+                    if let Some(md_fps) = gyro.capture_frame_rate {
+                        additional_obj.insert("realtime_fps".to_owned(), serde_json::Number::from_f64(md_fps).unwrap().into());
                     }
                     drop(file_metadata);
                     drop(gyro);
@@ -1142,14 +1142,9 @@ impl Controller {
         }
 
         core::run_threaded(move || {
-            {
-                stab.invalidate_ongoing_computations();
-
-                let mut gyro = stab.gyro.write();
-                gyro.integration_method = index;
-                gyro.integrate();
-            }
-            stab.invalidate_smoothing();
+            stab.invalidate_ongoing_computations();
+            // Integrated with the lock released (`GyroSource::integrate_shared`)
+            stab.set_integration_method(index);
             finished(());
         });
     }
@@ -1532,9 +1527,10 @@ impl Controller {
         }
         version
     }
+    /// The project's video and motion data file, and "1" when the motion data file is loaded with all of its metadata
     fn get_urls_from_gyroflow_file(&mut self, url: QUrl) -> QStringList {
         let url = util::qurl_to_encoded(url);
-        let mut ret = vec![QString::default(); 2];
+        let mut ret = vec![QString::default(); 3];
         if let Ok(data) = filesystem::read(&url) {
             if let Ok(serde_json::Value::Object(obj)) = serde_json::from_slice(&data) {
                 let mut org_video_url = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or("").to_string();
@@ -1572,6 +1568,9 @@ impl Controller {
                     if !gyro_url.is_empty() {
                         let gyro_url = StabilizationManager::get_new_videofile_url(&gyro_url, Some(&url), self.image_sequence_start as u32);
                         ret[1] = QString::from(gyro_url);
+                    }
+                    if gyro.get("all_metadata").and_then(|x| x.as_bool()).unwrap_or_default() {
+                        ret[2] = QString::from("1");
                     }
                 }
             } else {
@@ -1747,7 +1746,7 @@ impl Controller {
         let refit = self.stabilizer.set_optical_correction_per_frame(per_frame);
         self.refit_optical_correction(refit);
     }
-    /// "klt" or "dis", for the next analysis
+    /// "klt", "dis" or "gmflow", for the next analysis
     fn set_optical_tracking(&mut self, method: String) {
         if self.stabilizer.set_optical_tracking(&method) {
             self.optical_correction_changed();
@@ -1808,14 +1807,12 @@ impl Controller {
     fn cancel_optical_track_search(&self) {
         self.optical_track_search.fetch_add(1, SeqCst);
     }
-    /// Where the tracks `ids` (a JSON array) are in the frames up to `reach` away from the one at `timestamp_us`:
-    /// `{ "id": [frames from that one, x, y, ...] }`, relative to the frame (the stabilized one with `stabilized`)
-    fn optical_track_paths(&self, ids: String, timestamp_us: f64, reach: usize, stabilized: bool) -> QString {
-        let ids: std::collections::HashSet<u32> = serde_json::from_str(&ids).unwrap_or_default();
-        let paths: serde_json::Map<String, serde_json::Value> = self.stabilizer.optical_track_paths(&ids, timestamp_us.round() as i64, reach, stabilized).into_iter()
-            .map(|(id, path)| (id.to_string(), path.into_iter().flat_map(|(f, x, y)| [f as f64, x as f64, y as f64]).collect::<Vec<f64>>().into()))
-            .collect();
-        QString::from(serde_json::Value::Object(paths).to_string())
+    /// What the stabilized preview draws of the last analysis's tracked points, for the point editor: whether anything,
+    /// the tracks selected (a JSON array), and the first `max_trails` of them through the `trail_frames` frames before
+    /// and after the one shown. The editor has the frame drawn again
+    fn set_optical_points_overlay(&self, shown: bool, selection: String, trail_frames: usize, max_trails: usize) {
+        let selection: Vec<u32> = serde_json::from_str(&selection).unwrap_or_default();
+        self.stabilizer.set_optical_points_overlay(shown, &selection, trail_frames, max_trails);
     }
     /// Takes the tracks `ids` (a JSON array) out of what the analysis measured, or puts them back (`remove` false).
     /// Returns the ones that weren't already, a JSON array: what an undo changes back
@@ -2641,6 +2638,11 @@ impl Controller {
     fn has_per_frame_focal_length(&self) -> bool {
         self.stabilizer.gyro.read().file_metadata.read().has_per_frame_focal_length()
     }
+    /// The metadata's focal length changes, or the lens's own through its breathing: there's a focal length curve to
+    /// chart and to smooth
+    fn has_varying_focal_length(&self) -> bool {
+        self.stabilizer.gyro.read().file_metadata.read().has_varying_focal_length()
+    }
     fn has_lens_breathing(&self) -> bool {
         !self.stabilizer.gyro.read().file_metadata.read().lens_breathing.is_empty()
     }
@@ -2699,7 +2701,8 @@ impl Controller {
     fn mp4_merge(&self, file_list: QStringList, output_folder: QUrl, output_filename: QString) {
         let output_folder = util::qurl_to_encoded(output_folder);
         let output_filename = output_filename.to_string();
-        let output_url = filesystem::get_file_url(&output_folder, &output_filename, true);
+        // On Android a file that doesn't exist yet has no URL: it's created once every check passed
+        let output_url = filesystem::get_file_url(&output_folder, &output_filename, false);
 
         let mut file_list: Vec<String> = file_list.into_iter().map(QString::to_string).collect();
         file_list.sort_by(|a, b| human_sort::compare(a, b));
@@ -2709,32 +2712,36 @@ impl Controller {
             self.mp4_merge_progress(1.0, QString::from("Not enough files!"), QString::default());
             return;
         }
-        if output_url.is_empty() {
+        if output_folder.is_empty() || output_filename.is_empty() {
             self.mp4_merge_progress(1.0, QString::from("Empty output path!"), QString::default());
             return;
         }
         let first_url = file_list.first().unwrap().clone();
+        // The video loaded here, which its player has open
+        let loaded_url = self.stabilizer.input_file.read().url.clone();
         let out = output_url.clone();
-        let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (percent, error_string): (f64, String)| {
-            this.mp4_merge_progress(percent, QString::from(error_string), QString::from(out.as_str()));
+        let progress = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (percent, error_string, url): (f64, String, Option<String>)| {
+            this.mp4_merge_progress(percent, QString::from(error_string), QString::from(url.as_deref().unwrap_or(out.as_str())));
         });
         core::run_threaded(move || {
             let mut vidinfo = None;
             for x in &file_list {
-                match rendering::ffmpeg_processor::FfmpegProcessor::get_video_info(x) {
+                match rendering::ffmpeg_processor::FfmpegProcessor::get_video_info(x, None) {
                     Ok(x) => {
                         if vidinfo.is_none() {
                             vidinfo = Some(x);
                             continue;
                         }
                         if let Some(vidinfo) = &vidinfo {
-                            if vidinfo.width != x.width || vidinfo.height != x.height || (vidinfo.fps * 100.0).round() as i32 != (x.fps * 100.0).round() as i32 || vidinfo.rotation != x.rotation {
-                                progress((1.0, format!("Video metadata mismatch: {}x{}@{:.2} {}° vs {}x{}@{:.2} {}°", vidinfo.width, vidinfo.height, vidinfo.fps, vidinfo.rotation, x.width, x.height, x.fps, x.rotation)));
+                            // Parts of one recording: the rate it records at (`base_fps`), as mp4-merge keeps every frame's own
+                            // duration, so a part's dropped frames don't make it another recording
+                            if vidinfo.width != x.width || vidinfo.height != x.height || (vidinfo.base_fps * 100.0).round() as i32 != (x.base_fps * 100.0).round() as i32 || vidinfo.rotation != x.rotation {
+                                progress((1.0, format!("Video metadata mismatch: {}x{}@{:.2} {}° vs {}x{}@{:.2} {}°", vidinfo.width, vidinfo.height, vidinfo.base_fps, vidinfo.rotation, x.width, x.height, x.base_fps, x.rotation), None));
                                 return;
                             }
                         }
                     },
-                    Err(e) => { progress((1.0, format!("Failed to read file metadata: {x}: {e:?}"))); return; }
+                    Err(e) => { progress((1.0, format!("Failed to read file metadata: {x}: {e:?}"), None)); return; }
                 }
             }
 
@@ -2742,15 +2749,26 @@ impl Controller {
             for x in &file_list {
                 match filesystem::open_file(&x, false, false) {
                     Ok(x) => { opened.push(x); },
-                    Err(e) => { progress((1.0, format!("Failed to open file: {x}: {e:?}"))); return; }
+                    Err(e) => { progress((1.0, format!("Failed to open file: {x}: {e:?}"), None)); return; }
                 }
             }
-            let mut file_references: Vec<(&mut std::fs::File, usize)> = opened.iter_mut().map(|x| { let s = x.size; (x.get_file(), s) }).collect();
-            let mut opened_output = match filesystem::open_file(&output_url, true, true) {
-                Ok(x) => { x },
-                Err(e) => { progress((1.0, format!("Failed to create file: {output_url}: {e:?}"))); return; }
+            if let Err(e) = Self::check_merge_outputs(&opened, &file_list, &output_folder, &output_filename) {
+                progress((1.0, e, None));
+                return;
+            }
+            let target = match MergeOutput::check(&output_folder, &output_filename, &loaded_url) {
+                Ok(x) => x,
+                Err(e) => { progress((1.0, e, None)); return; }
             };
-            let res = mp4_merge::join_file_streams(&mut file_references, opened_output.get_file(), |p| progress((p.min(0.9999), String::default())));
+            let mut file_references: Vec<(&mut std::fs::File, usize)> = opened.iter_mut().map(|x| { let s = x.size as usize; (x.get_file(), s) }).collect();
+            let mut output = match MergeOutput::create(target) {
+                Ok(x) => x,
+                Err(e) => { progress((1.0, e, None)); return; }
+            };
+            let output_url = output.url.clone();
+            let res = mp4_merge::join_file_streams(&mut file_references, output.file(), |p| progress((p.min(0.9999), String::default(), Some(output_url.clone()))))
+                .map_err(|e| e.to_string())
+                .and_then(|_| output.commit());
             match res {
                 Ok(_) => {
                     if let Err(e) = Self::merge_gcsv(&file_list, &output_folder, &output_filename) {
@@ -2759,11 +2777,45 @@ impl Controller {
 
                     crate::util::update_file_times(&output_url, &first_url, None);
 
-                    progress((1.0, String::default()))
+                    progress((1.0, String::default(), Some(output_url)))
                 },
-                Err(e) => progress((1.0, e.to_string()))
+                Err(e) => progress((1.0, e, Some(output_url)))
             }
         });
+    }
+    /// Refuses to merge into a file that the merge reads: the output, or the motion data merged next to it (`.gcsv`), when it's
+    /// one of the files merged or their motion data. By file identity, so another spelling of its path, a letter case variant or
+    /// a link of it is refused too. Before anything is created or written
+    fn check_merge_outputs(inputs: &[filesystem::FileWrapper], file_list: &[String], output_folder: &str, output_filename: &str) -> Result<(), String> {
+        let error = |e: filesystem::FilesystemError| format!("Failed to check the output: {e:?}");
+        let mut read = Vec::with_capacity(inputs.len() * 2);
+        for (x, url) in inputs.iter().zip(file_list) {
+            read.push((x.id().map_err(error)?, url.clone()));
+        }
+        // The .gcsv files `merge_gcsv` reads, and the one it writes when there are any
+        let mut written = vec![filesystem::get_file_url(output_folder, output_filename, false)];
+        let mut gcsv = false;
+        for x in file_list {
+            let folder = filesystem::get_folder(x);
+            let gcsv_name = filesystem::filename_with_extension(&filesystem::get_filename(x), "gcsv");
+            if filesystem::exists_in_folder(&folder, &gcsv_name) {
+                let url = filesystem::get_file_url(&folder, &gcsv_name, false);
+                if let Some(id) = filesystem::file_id(&url).map_err(error)? {
+                    read.push((id, url));
+                    gcsv = true;
+                }
+            }
+        }
+        if gcsv {
+            written.push(filesystem::get_file_url(output_folder, &filesystem::filename_with_extension(output_filename, "gcsv"), false));
+        }
+        for out in &written {
+            let Some(id) = filesystem::file_id(out).map_err(error)? else { continue; };
+            if let Some((_, url)) = read.iter().find(|x| x.0 == id) {
+                return Err(format!("Merging into {} would destroy {}, which is being merged. Choose another name or folder for the output.", filesystem::display_url(out), filesystem::display_url(url)));
+            }
+        }
+        Ok(())
     }
     fn merge_gcsv(file_list: &[String], output_folder: &str, output_filename: &str) -> Result<(), gyroflow_core::GyroflowCoreError> {
         use std::io::{ BufRead, Write, Seek, SeekFrom };
@@ -2902,6 +2954,7 @@ impl Controller {
         let md = gyro.file_metadata.read();
         md.camera_stab_data.len() > 1 || md.lens_geometry_count() > 1 || md.lens_positions.len() > 1 || md.has_mesh_correction()
     }
+    fn has_ai_optical_flow(&self) -> bool { cfg!(feature = "ai-optical-flow") }
     fn export_stmap(&self, folder_url: QUrl, per_frame: bool) {
         let folder_url = util::qurl_to_encoded(folder_url);
         let frame_count = self.stabilizer.params.read().frame_count;
@@ -2994,6 +3047,140 @@ impl Controller {
     fn image_to_b64(&self, img: QImage) -> QString { util::image_to_b64(img) }
     fn copy_to_clipboard(&self, text: QString) { util::copy_to_clipboard(text) }
     fn data_folder(&self) -> QUrl { QUrl::from(QString::from(gyroflow_core::filesystem::path_to_url(gyroflow_core::settings::data_dir().to_str().unwrap_or_default()))) }
+
+    /// The frame rate an image of a sequence records (a CinemaDNG frame's FrameRate tag), 0 when it doesn't record one
+    fn image_sequence_frame_rate(&self, url: QUrl) -> f64 {
+        rendering::image_sequence_frame_rate(&util::qurl_to_encoded(url))
+    }
+
+    /// The input file that rendering the video loaded to `filename` in `folder` with `codec` would write over, as it's shown
+    /// (`rendering::output_overwrites_input`, which the render refuses), empty when it wouldn't
+    fn output_overwrites_input(&self, folder: QUrl, filename: QString, codec: QString) -> QString {
+        let frame_count = self.stabilizer.params.read().frame_count;
+        let output_frames = rendering::is_sequence_codec(&codec.to_string()).then_some(frame_count);
+        let input_file = self.stabilizer.input_file.read().clone();
+        QString::from(rendering::output_overwrites_input(&input_file, frame_count, &util::qurl_to_encoded(folder), &filename.to_string(), output_frames, &AtomicBool::new(false)).unwrap_or_default())
+    }
+}
+
+/// Where the merged file goes, as [`MergeOutput::check`] found it
+struct MergeTarget {
+    folder: String,
+    filename: String,
+    /// The file that gets the merged file: the output, or the file at the end of the symbolic links there
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    path: std::path::PathBuf,
+}
+
+/// The merged file while it's written.
+///
+/// On desktop it's a [`filesystem::TempOutput`]: a new file next to the file that gets the output's name, which it gets only
+/// once it's complete and on disk, so a merge that fails never leaves a partial file under that name, nor truncates the file
+/// that was there (which the user agreed to replace). On Android and iOS, where the render writes in place too, it's the output
+/// itself: removed when the merge fails, unless it was there before
+struct MergeOutput {
+    url: String,
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    temp: filesystem::TempOutput,
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    file: Option<filesystem::FileWrapper>,
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    created: bool,
+}
+impl MergeOutput {
+    /// Checks, before anything is created, that the merged file can get the output's name once it's complete, where creating
+    /// the output could before ([`filesystem::output_target`], as the render does). On desktop:
+    /// - a symbolic link there is followed, as creating the file followed it: the file at the end of its links is the one
+    ///   replaced, or the one created where they point, and the links stay;
+    /// - an existing file is replaced only where it can be written to;
+    /// - on Windows, also only where the rename at the end can replace it: a program that has it open without letting it be
+    ///   deleted keeps it from that. FFmpeg opens files so, and with it the player the video loaded here (`loaded_url`)
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    fn check(folder: &str, filename: &str, loaded_url: &str) -> Result<MergeTarget, String> {
+        let url = filesystem::get_file_url(folder, filename, false);
+        match filesystem::output_target(&url, filesystem::Overwrite::Rename) {
+            Ok(path) => Ok(MergeTarget { folder: folder.to_owned(), filename: filename.to_owned(), path }),
+            Err(filesystem::OutputError::Busy(_)) => Err(Self::busy(&url, loaded_url)),
+            Err(e) => Err(e.to_string())
+        }
+    }
+    /// Android and iOS: the output is written in place, opened as it was before
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    fn check(folder: &str, filename: &str, _loaded_url: &str) -> Result<MergeTarget, String> {
+        Ok(MergeTarget { folder: folder.to_owned(), filename: filename.to_owned() })
+    }
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    fn create(target: MergeTarget) -> Result<Self, String> {
+        let url = filesystem::get_file_url(&target.folder, &target.filename, false);
+        // A name of the merge's own, hidden on Unix: the render writes to `<output>.tmp`
+        let name = |file: &std::ffi::OsStr, n: u32| {
+            let mut name = std::ffi::OsString::from(".");
+            name.push(file);
+            name.push(if n == 0 { ".mp4merge-partial".to_owned() } else { format!(".{n}.mp4merge-partial") });
+            name
+        };
+        let temp = filesystem::TempOutput::create(&url, target.path, name).map_err(|e| e.to_string())?;
+        Ok(Self { url, temp })
+    }
+    #[cfg(any(target_os = "android", target_os = "ios"))]
+    fn create(target: MergeTarget) -> Result<Self, String> {
+        let (folder, filename) = (&target.folder, &target.filename);
+        let mut url = filesystem::get_file_url(folder, filename, false);
+        let created = !filesystem::exists(&url);
+        if url.is_empty() {
+            url = filesystem::get_file_url(folder, filename, true);
+        }
+        match filesystem::open_file(&url, true, true) {
+            Ok(file) => Ok(Self { url, file: Some(file), created }),
+            Err(e) => {
+                if created && !url.is_empty() { let _ = filesystem::remove_file(&url); }
+                Err(format!("Failed to create file: {url}: {e:?}"))
+            }
+        }
+    }
+    fn file(&mut self) -> &mut std::fs::File {
+        #[cfg(not(any(target_os = "android", target_os = "ios")))]
+        { self.temp.file() }
+        #[cfg(any(target_os = "android", target_os = "ios"))]
+        { self.file.as_mut().unwrap().get_file() }
+    }
+    /// The merge is complete: on desktop, the output gets its name. Where only that rename fails (a program opened the file
+    /// there while the merge ran), the merged file is kept, and the error says where, as the render keeps its file
+    fn commit(self) -> Result<(), String> {
+        #[cfg(not(any(target_os = "android", target_os = "ios")))]
+        {
+            self.temp.publish().map_err(|e| e.to_string())
+        }
+        #[cfg(any(target_os = "android", target_os = "ios"))]
+        {
+            let mut this = self;
+            this.created = false;
+            Ok(())
+        }
+    }
+}
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+impl MergeOutput {
+    /// The error for an output (`url`) that a program has open, which keeps it from being replaced: it says so where that's the
+    /// player here, with the video loaded (`loaded_url`)
+    fn busy(url: &str, loaded_url: &str) -> String {
+        let output = filesystem::display_url(url);
+        if !loaded_url.is_empty() && filesystem::is_same_file(url, loaded_url).unwrap_or(false) {
+            format!("The output {output} is the video loaded in Gyroflow, which keeps it from being replaced. Load another video first, or choose another name or folder for the output.")
+        } else {
+            filesystem::OutputError::Busy(output).to_string()
+        }
+    }
+}
+/// On desktop the [`filesystem::TempOutput`] removes itself
+#[cfg(any(target_os = "android", target_os = "ios"))]
+impl Drop for MergeOutput {
+    fn drop(&mut self) {
+        drop(self.file.take());
+        if self.created {
+            filesystem::remove_file(&self.url).unwrap_or_else(|e| ::log::error!("Failed to remove the partial merge output {}: {e:?}", self.url));
+        }
+    }
 }
 
 #[derive(Default, QObject)]
@@ -3020,6 +3207,7 @@ pub struct Filesystem {
     save_allowed_folders:     qt_method!(fn(&self)),
     restore_allowed_folders:  qt_method!(fn(&self)),
     get_next_file_url:        qt_method!(fn(&self, current_url: QUrl, index: i32) -> QUrl),
+    is_same_file:             qt_method!(fn(&self, url: QUrl, other: QUrl) -> bool),
     url_opened:               qt_signal!(url: QUrl),
 }
 impl Filesystem {
@@ -3038,6 +3226,8 @@ impl Filesystem {
     fn display_folder_filename(&self, folder: QUrl, filename: QString) -> QString { QString::from(filesystem::display_folder_filename(&util::qurl_to_encoded(folder), &filename.to_string())) }
     fn catch_url_open(&self, url: QUrl) { util::dispatch_url_event(url.clone()); self.url_opened(url); }
     fn remove_file(&self, url: QUrl) { let _ = filesystem::remove_file(&util::qurl_to_encoded(url)); }
+    /// Whether both URLs reach the same file (`filesystem::is_same_file`), `false` when that can't be told
+    fn is_same_file(&self, url: QUrl, other: QUrl) -> bool { filesystem::is_same_file(&util::qurl_to_encoded(url), &util::qurl_to_encoded(other)).unwrap_or_default() }
     fn folder_access_granted(&self, url: QUrl) { filesystem::folder_access_granted(&util::qurl_to_encoded(url)); }
     fn save_allowed_folders(&self) {
         let list = filesystem::get_allowed_folders();

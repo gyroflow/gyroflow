@@ -315,6 +315,13 @@ Rectangle {
                                 ]);
                                 return;
                             }
+                            const overwrittenInput = controller.output_overwrites_input(outputFile.folderUrl, outputFile.filename, window.exportSettings.outCodec);
+                            if (overwrittenInput) {
+                                messageBox(Modal.Error, qsTr("Rendering to this output would write over %1, which it's rendered from. Choose another name or folder for the output.").arg(overwrittenInput), [
+                                    { text: qsTr("Ok"), accent: true }
+                                ]);
+                                return;
+                            }
                             const exists = filesystem.exists_in_folder(outputFile.folderUrl, outputFile.filename.replace("_%05d", "_00001"));
                             if ((exists || render_queue.file_exists_in_folder(outputFile.folderUrl, outputFile.filename)) && !allowFile) {
                                 function overwrite() {

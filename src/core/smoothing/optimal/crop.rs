@@ -7,9 +7,10 @@
 //! - so the lens, its correction strength, the output projection and the rolling shutter are all those of the picture.
 //! Each frame is held at the time the render reads it at (sync offset and per-frame time offsets included), against the
 //! camera's own orientation there, which is what the render corrects - not the horizon-locked, additionally rotated
-//! motion the smoothing smooths. Left out, as they need the file metadata the smoothing can't lock: the camera's own
-//! IBIS/OIS shifts, mesh correction and lens breathing. Where they move the frame, the zoom limit's iterations
-//! (`smoothing_fov_limit_per_frame`) still catch what's left.
+//! motion the smoothing smooths. The lens breathing is in as far as the frame's camera matrix has it
+//! (`FrameTransform::effective_camera_matrix`). Left out, as they need the file metadata the smoothing doesn't lock: the
+//! camera's own IBIS/OIS shifts, mesh correction and the breathing's differences between the rows of a frame. Where they
+//! move the frame, the zoom limit's iterations (`smoothing_fov_limit_per_frame`) still catch what's left.
 
 use std::collections::HashMap;
 use nalgebra::{ Matrix3, Vector2 };
@@ -19,7 +20,8 @@ use crate::stabilization::{ ComputeParams, KernelParams, KernelParamsFlags, Fram
 use crate::keyframes::KeyframeType;
 
 /// The lens part of the kernel parameters per lens state, taken where the gyro lock may be held
-/// (`ComputeParams::calculate_camera_fovs`): `smooth` runs under it and can't ask the lens itself
+/// (`ComputeParams::calculate_camera_fovs`): `smooth` may run under it (a caller of `GyroSource::recompute_smoothness`
+/// holding it) and doesn't ask the lens itself
 #[derive(Clone, Default)]
 pub struct CropLenses {
     pub states: Vec<KernelParams>,
@@ -31,7 +33,7 @@ impl CropLenses {
     /// the lens changes over the clip, otherwise just the first
     pub fn push(&mut self, params: &ComputeParams, frame: usize, lens: &crate::zooming::LensData) {
         let (mut camera_matrix, coeffs, field_limit, h_stretch, v_stretch) = (lens.0, lens.1, lens.2, lens.3, lens.4);
-        FrameTransform::dequantize_camera_matrix(params, frame, &mut camera_matrix);
+        FrameTransform::effective_camera_matrix(params, frame, &mut camera_matrix);
         let mut kp = KernelParams {
             f: [camera_matrix[(0, 0)] as f32, camera_matrix[(1, 1)] as f32],
             c: [camera_matrix[(0, 2)] as f32, camera_matrix[(1, 2)] as f32],
@@ -167,7 +169,7 @@ impl<'a> CropModel<'a> {
         let setups: Vec<Setup> = frames.iter().filter_map(|&(frame, time)| {
             let state = lenses.state_at(frame)?;
             let state = *repr.entry(lens_key(&lenses.states[state as usize])).or_insert(state);
-            let ts = crate::timestamp_at_frame(frame as i32, params.scaled_fps);
+            let ts = params.timestamp_at_frame(frame as i32);
             let kf = |t: KeyframeType, def: f64| params.keyframes.value_at_video_timestamp(&t, ts).unwrap_or(def);
             Some(Setup {
                 frame, time, state,
