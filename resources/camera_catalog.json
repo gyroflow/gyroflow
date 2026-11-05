@@ -2,8 +2,8 @@
   "schema_version": 1,
   "sources": {
     "gyroflow_revision": "886fc616c9c2c788856f54c21d451b9cb7fc4f44",
-    "lensfun_revision": "bbd4332a9ec566fd9aa548c9e0d8ced238c56261",
-    "input_sha256": "f2d5f34b3c2378d01e52a04ce66c1492dbf31f57caf75ef9d4dce9deae7c5bd1",
+    "lensfun_revision": "52cf1a7b0e82e07e0ecaa3391ee5106a6dd1ee54",
+    "input_sha256": "71f5acd1db17ed91d9150696ef0e4cf1ab39c339ddc025d35de66fe174886db0",
     "profile_count": 9810,
     "lensfun_xml_count": 56
   },
@@ -24739,6 +24739,22 @@
     },
     {
       "brand": "Sigma",
+      "model": "Sigma FP2",
+      "aliases": [
+        "FP2",
+        "Sigma FP2"
+      ],
+      "mounts": [
+        "Leica L"
+      ],
+      "sources": [
+        "lensfun"
+      ],
+      "crop_factor": 1.0,
+      "equivalent_sensor_diagonal_mm": 43.266615
+    },
+    {
+      "brand": "Sigma",
       "model": "Sigma SD1 Merrill",
       "aliases": [
         "SD1 Merrill",
@@ -25608,6 +25624,21 @@
       ],
       "crop_factor": 6.0,
       "equivalent_sensor_diagonal_mm": 7.211103
+    },
+    {
+      "brand": "Sony",
+      "model": "DSC-HX200V",
+      "aliases": [
+        "DSC-HX200V"
+      ],
+      "mounts": [
+        "sonyHX300"
+      ],
+      "sources": [
+        "lensfun"
+      ],
+      "crop_factor": 5.58,
+      "equivalent_sensor_diagonal_mm": 7.753874
     },
     {
       "brand": "Sony",
@@ -38903,6 +38934,23 @@
     },
     {
       "brand": "Fujifilm",
+      "model": "GF63mmF2.8 R WR",
+      "aliases": [
+        "GF63mmF2.8 R WR"
+      ],
+      "mounts": [
+        "Fujifilm G"
+      ],
+      "sources": [
+        "lensfun"
+      ],
+      "crop_factor": 0.79,
+      "sampled_focal_lengths": [
+        63.0
+      ]
+    },
+    {
+      "brand": "Fujifilm",
       "model": "GF80mmF1.7 R WR",
       "aliases": [
         "GF80mmF1.7 R WR"
@@ -43766,6 +43814,27 @@
     },
     {
       "brand": "Nikon",
+      "model": "Nikkor Z 24-70mm f/2.8 S II",
+      "aliases": [
+        "Nikkor Z 24-70mm f/2.8 S II"
+      ],
+      "mounts": [
+        "Nikon Z"
+      ],
+      "sources": [
+        "lensfun"
+      ],
+      "crop_factor": 1.0,
+      "sampled_focal_lengths": [
+        24.0,
+        28.0,
+        35.0,
+        50.0,
+        70.0
+      ]
+    },
+    {
+      "brand": "Nikon",
       "model": "Nikkor Z 24-70mm f/2.8 S",
       "aliases": [
         "Nikkor Z 24-70mm f/2.8 S"
@@ -43808,6 +43877,23 @@
         35.0,
         50.0,
         70.0
+      ]
+    },
+    {
+      "brand": "Nikon",
+      "model": "Nikkor Z 24mm f/1.8 S",
+      "aliases": [
+        "Nikkor Z 24mm f/1.8 S"
+      ],
+      "mounts": [
+        "Nikon Z"
+      ],
+      "sources": [
+        "lensfun"
+      ],
+      "crop_factor": 1.0,
+      "sampled_focal_lengths": [
+        24.0
       ]
     },
     {
@@ -44695,6 +44781,31 @@
       "crop_factor": 1.0,
       "sampled_focal_lengths": [
         85.0
+      ]
+    },
+    {
+      "brand": "Nikon",
+      "model": "Nikon AF VR Zoom-Nikkor 80-400mm f/4.5-5.6D ED",
+      "aliases": [
+        "Nikkor AF 80-400mm f/4.5-5.6D ED VR",
+        "Nikon AF VR Zoom-Nikkor 80-400mm f/4.5-5.6D ED"
+      ],
+      "mounts": [
+        "Nikon F AF"
+      ],
+      "sources": [
+        "lensfun"
+      ],
+      "crop_factor": 1.0,
+      "sampled_focal_lengths": [
+        80.0,
+        86.0,
+        135.0,
+        165.0,
+        230.0,
+        280.0,
+        360.0,
+        400.0
       ]
     },
     {
@@ -49088,6 +49199,7 @@
       "brand": "Olympus",
       "model": "OM 17mm F1.8 II",
       "aliases": [
+        "M.Zuiko Digital 17mm F1.8 II",
         "OM 17mm F1.8 II"
       ],
       "mounts": [
@@ -49230,6 +49342,7 @@
       "brand": "OM Digital Solutions",
       "model": "OM 12-100mm F4.0",
       "aliases": [
+        "M.Zuiko Digital ED 12-100mm F4.0 IS PRO",
         "OM 12-100mm F4.0"
       ],
       "mounts": [
@@ -49254,6 +49367,7 @@
       "brand": "OM Digital Solutions",
       "model": "OM 12-45mm F4.0",
       "aliases": [
+        "M.Zuiko Digital ED 12-45mm F4.0 PRO",
         "OM 12-45mm F4.0"
       ],
       "mounts": [
@@ -49276,8 +49390,31 @@
     },
     {
       "brand": "OM Digital Solutions",
+      "model": "OM 14-42mm F3.5-5.6 EZ",
+      "aliases": [
+        "M.Zuiko Digital ED 14-42mm F3.5-5.6 EZ",
+        "OM 14-42mm F3.5-5.6 EZ"
+      ],
+      "mounts": [
+        "Micro 4/3 System"
+      ],
+      "sources": [
+        "lensfun"
+      ],
+      "crop_factor": 2.0,
+      "sampled_focal_lengths": [
+        14.0,
+        18.0,
+        22.0,
+        30.0,
+        42.0
+      ]
+    },
+    {
+      "brand": "OM Digital Solutions",
       "model": "OM 20mm F1.4",
       "aliases": [
+        "M.Zuiko Digital ED 20mm F1.4 PRO",
         "OM 20mm F1.4"
       ],
       "mounts": [
@@ -49315,6 +49452,56 @@
         100.0,
         140.0,
         150.0
+      ]
+    },
+    {
+      "brand": "OM Digital Solutions",
+      "model": "OM 40-150mm F4.0-5.6 R",
+      "aliases": [
+        "M.Zuiko Digital ED 40-150mm F4.0-5.6 R",
+        "OM 40-150mm F4.0-5.6 R"
+      ],
+      "mounts": [
+        "Micro 4/3 System"
+      ],
+      "sources": [
+        "lensfun"
+      ],
+      "crop_factor": 2.0,
+      "sampled_focal_lengths": [
+        40.0,
+        45.0,
+        49.0,
+        58.0,
+        70.0,
+        85.0,
+        102.0,
+        114.0,
+        123.0,
+        138.0,
+        150.0
+      ]
+    },
+    {
+      "brand": "OM Digital Solutions",
+      "model": "OM 75-300mm F4.8-6.7 II",
+      "aliases": [
+        "M.Zuiko Digital ED 75-300mm F4.8-6.7 II",
+        "OM 75-300mm F4.8-6.7 II"
+      ],
+      "mounts": [
+        "Micro 4/3 System"
+      ],
+      "sources": [
+        "lensfun"
+      ],
+      "crop_factor": 2.0,
+      "sampled_focal_lengths": [
+        75.0,
+        132.0,
+        187.0,
+        246.0,
+        300.0
       ]
     },
     {
@@ -52370,6 +52557,23 @@
       "crop_factor": 1.529,
       "sampled_focal_lengths": [
         50.0
+      ]
+    },
+    {
+      "brand": "Pentax",
+      "model": "Super-Multi-Coated Takumar 28mm f/3.5",
+      "aliases": [
+        "Super-Multi-Coated Takumar 28mm f/3.5"
+      ],
+      "mounts": [
+        "M42"
+      ],
+      "sources": [
+        "lensfun"
+      ],
+      "crop_factor": 1.526,
+      "sampled_focal_lengths": [
+        28.0
       ]
     },
     {
@@ -56805,6 +57009,27 @@
     },
     {
       "brand": "Sigma",
+      "model": "Sigma 70mm f/2.8 DG Macro | Art 018",
+      "aliases": [
+        "Sigma 70mm f/2.8 DG Macro | Art 018"
+      ],
+      "mounts": [
+        "Canon EF",
+        "Leica L",
+        "Nikon F AF",
+        "Sigma SA",
+        "Sony E"
+      ],
+      "sources": [
+        "lensfun"
+      ],
+      "crop_factor": 1.0,
+      "sampled_focal_lengths": [
+        70.0
+      ]
+    },
+    {
+      "brand": "Sigma",
       "model": "Sigma 70mm f/2.8 EX DG Macro",
       "aliases": [
         "Sigma 70mm f/2.8 EX DG Macro"
@@ -59820,6 +60045,58 @@
         40.0,
         50.0,
         70.0
+      ]
+    },
+    {
+      "brand": "Tamron",
+      "model": "Tamron 70-180mm F2.8 A065 Z/E",
+      "aliases": [
+        "Tamron 70-180mm F2.8 A065 Z/E",
+        "Tamron 70-180mm f/2.8 Di III VC VXD G2"
+      ],
+      "mounts": [
+        "Nikon Z",
+        "Sony E"
+      ],
+      "sources": [
+        "lensfun"
+      ],
+      "crop_factor": 1.0,
+      "sampled_focal_lengths": [
+        70.0,
+        88.0,
+        92.0,
+        99.0,
+        109.0,
+        116.0,
+        120.0,
+        134.0,
+        148.0,
+        151.0,
+        180.0
+      ]
+    },
+    {
+      "brand": "Tamron",
+      "model": "Tamron 70-300mm F/4.5-6.3 Di III RXD A047Z/E",
+      "aliases": [
+        "Tamron 70-300mm F/4.5-6.3 Di III RXD",
+        "Tamron 70-300mm F/4.5-6.3 Di III RXD A047Z/E"
+      ],
+      "mounts": [
+        "Nikon Z",
+        "Sony E"
+      ],
+      "sources": [
+        "lensfun"
+      ],
+      "crop_factor": 1.0,
+      "sampled_focal_lengths": [
+        70.0,
+        100.0,
+        135.0,
+        200.0,
+        300.0
       ]
     },
     {

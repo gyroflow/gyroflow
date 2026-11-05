@@ -13,7 +13,7 @@ python3 _scripts/generate_camera_catalog.py \
   --profiles /path/to/lens_profiles \
   --lensfun /path/to/lensfun/data/db \
   --profiles-revision 886fc616c9c2c788856f54c21d451b9cb7fc4f44 \
-  --lensfun-revision bbd4332a9ec566fd9aa548c9e0d8ced238c56261 \
+  --lensfun-revision 52cf1a7b0e82e07e0ecaa3391ee5106a6dd1ee54 \
   --output resources/camera_catalog.json
 ```
 
