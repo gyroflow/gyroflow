@@ -1,0 +1,51 @@
+{
+  "version": "2.5.0",
+  "updated_at": "2026-09-09T00:00:00Z",
+  "description": "Canonical Camera, Lens, and Mount Database for Gyroflow Lens Profile Management (#742)",
+  "mounts": [
+    { "id": "integrated", "name": "Integrated Lens", "type": "Fixed" },
+    { "id": "sony_e", "name": "Sony E", "type": "Interchangeable", "flange_focal_distance_mm": 18.0 },
+    { "id": "canon_rf", "name": "Canon RF", "type": "Interchangeable", "flange_focal_distance_mm": 20.0 },
+    { "id": "canon_ef", "name": "Canon EF", "type": "Interchangeable", "flange_focal_distance_mm": 44.0 },
+    { "id": "fuji_x", "name": "Fujifilm X", "type": "Interchangeable", "flange_focal_distance_mm": 17.7 },
+    { "id": "l_mount", "name": "Leica/Panasonic/Sigma L", "type": "Interchangeable", "flange_focal_distance_mm": 20.0 },
+    { "id": "mft", "name": "Micro Four Thirds (MFT)", "type": "Interchangeable", "flange_focal_distance_mm": 19.25 },
+    { "id": "nikon_z", "name": "Nikon Z", "type": "Interchangeable", "flange_focal_distance_mm": 16.0 }
+  ],
+  "cameras": [
+    { "brand": "Sony", "model": "FX3", "mount": "Sony E", "sensor_size": "Full Frame", "crop_factor": 1.0, "sensor_width_mm": 35.6, "sensor_height_mm": 23.8 },
+    { "brand": "Sony", "model": "A7S III", "mount": "Sony E", "sensor_size": "Full Frame", "crop_factor": 1.0, "sensor_width_mm": 35.6, "sensor_height_mm": 23.8 },
+    { "brand": "Sony", "model": "A7 IV", "mount": "Sony E", "sensor_size": "Full Frame", "crop_factor": 1.0, "sensor_width_mm": 35.9, "sensor_height_mm": 23.9 },
+    { "brand": "Sony", "model": "A7R V", "mount": "Sony E", "sensor_size": "Full Frame", "crop_factor": 1.0, "sensor_width_mm": 35.7, "sensor_height_mm": 23.8 },
+    { "brand": "Sony", "model": "ZV-E1", "mount": "Sony E", "sensor_size": "Full Frame", "crop_factor": 1.0, "sensor_width_mm": 35.6, "sensor_height_mm": 23.8 },
+    { "brand": "Sony", "model": "FX30", "mount": "Sony E", "sensor_size": "APS-C", "crop_factor": 1.53, "sensor_width_mm": 23.3, "sensor_height_mm": 15.5 },
+    { "brand": "Sony", "model": "A6700", "mount": "Sony E", "sensor_size": "APS-C", "crop_factor": 1.53, "sensor_width_mm": 23.3, "sensor_height_mm": 15.5 },
+    { "brand": "Canon", "model": "EOS R5", "mount": "Canon RF", "sensor_size": "Full Frame", "crop_factor": 1.0, "sensor_width_mm": 36.0, "sensor_height_mm": 24.0 },
+    { "brand": "Canon", "model": "EOS R6 Mark II", "mount": "Canon RF", "sensor_size": "Full Frame", "crop_factor": 1.0, "sensor_width_mm": 35.9, "sensor_height_mm": 23.9 },
+    { "brand": "Canon", "model": "EOS R7", "mount": "Canon RF", "sensor_size": "APS-C", "crop_factor": 1.6, "sensor_width_mm": 22.3, "sensor_height_mm": 14.9 },
+    { "brand": "Canon", "model": "EOS C70", "mount": "Canon RF", "sensor_size": "Super 35", "crop_factor": 1.45, "sensor_width_mm": 26.2, "sensor_height_mm": 13.8 },
+    { "brand": "GoPro", "model": "HERO12 Black", "mount": "Integrated", "sensor_size": "1/1.9 inch", "crop_factor": 5.6, "sensor_width_mm": 6.4, "sensor_height_mm": 5.6 },
+    { "brand": "GoPro", "model": "HERO11 Black", "mount": "Integrated", "sensor_size": "1/1.9 inch", "crop_factor": 5.6, "sensor_width_mm": 6.4, "sensor_height_mm": 5.6 },
+    { "brand": "GoPro", "model": "HERO10 Black", "mount": "Integrated", "sensor_size": "1/2.3 inch", "crop_factor": 5.62, "sensor_width_mm": 6.17, "sensor_height_mm": 4.55 },
+    { "brand": "DJI", "model": "Avata 2", "mount": "Integrated", "sensor_size": "1/1.3 inch", "crop_factor": 3.75, "sensor_width_mm": 9.6, "sensor_height_mm": 7.2 },
+    { "brand": "DJI", "model": "Osmo Action 4", "mount": "Integrated", "sensor_size": "1/1.3 inch", "crop_factor": 3.75, "sensor_width_mm": 9.6, "sensor_height_mm": 7.2 },
+    { "brand": "DJI", "model": "Action 2", "mount": "Integrated", "sensor_size": "1/1.7 inch", "crop_factor": 4.5, "sensor_width_mm": 7.6, "sensor_height_mm": 5.7 },
+    { "brand": "Blackmagic", "model": "BMPCC 6K Pro", "mount": "Canon EF", "sensor_size": "Super 35", "crop_factor": 1.55, "sensor_width_mm": 23.1, "sensor_height_mm": 12.99 },
+    { "brand": "Blackmagic", "model": "BMPCC 4K", "mount": "Micro Four Thirds", "sensor_size": "Micro Four Thirds", "crop_factor": 1.9, "sensor_width_mm": 18.96, "sensor_height_mm": 10.0 },
+    { "brand": "Panasonic", "model": "Lumix S5 II", "mount": "L Mount", "sensor_size": "Full Frame", "crop_factor": 1.0, "sensor_width_mm": 35.6, "sensor_height_mm": 23.8 },
+    { "brand": "Panasonic", "model": "Lumix GH6", "mount": "Micro Four Thirds", "sensor_size": "Micro Four Thirds", "crop_factor": 2.0, "sensor_width_mm": 17.3, "sensor_height_mm": 13.0 },
+    { "brand": "Fujifilm", "model": "X-T5", "mount": "Fujifilm X", "sensor_size": "APS-C", "crop_factor": 1.53, "sensor_width_mm": 23.5, "sensor_height_mm": 15.7 },
+    { "brand": "RED", "model": "KOMODO 6K", "mount": "Canon RF", "sensor_size": "Super 35", "crop_factor": 1.33, "sensor_width_mm": 27.03, "sensor_height_mm": 14.26 }
+  ],
+  "lenses": [
+    { "brand": "Sony", "model": "FE 24-70mm F2.8 GM II", "mount": "Sony E", "coverage": "Full Frame", "focal_range": [24, 70] },
+    { "brand": "Sony", "model": "FE 16-35mm F2.8 GM II", "mount": "Sony E", "coverage": "Full Frame", "focal_range": [16, 35] },
+    { "brand": "Sony", "model": "FE 20mm F1.8 G", "mount": "Sony E", "coverage": "Full Frame", "focal_range": [20, 20] },
+    { "brand": "Sony", "model": "E 11mm F1.8", "mount": "Sony E", "coverage": "APS-C", "focal_range": [11, 11] },
+    { "brand": "Sigma", "model": "24-70mm F2.8 DG DN Art", "mount": "Sony E", "coverage": "Full Frame", "focal_range": [24, 70] },
+    { "brand": "Tamron", "model": "28-75mm F2.8 Di III VXD G2", "mount": "Sony E", "coverage": "Full Frame", "focal_range": [28, 75] },
+    { "brand": "Canon", "model": "RF 24-70mm F2.8 L IS USM", "mount": "Canon RF", "coverage": "Full Frame", "focal_range": [24, 70] },
+    { "brand": "Canon", "model": "RF 15-35mm F2.8 L IS USM", "mount": "Canon RF", "coverage": "Full Frame", "focal_range": [15, 35] },
+    { "brand": "Sirui", "model": "Night Walker 24mm T1.2 S35", "mount": "Sony E", "coverage": "Super 35", "focal_range": [24, 24] }
+  ]
+}
