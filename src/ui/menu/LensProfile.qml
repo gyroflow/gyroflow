@@ -35,6 +35,89 @@ MenuItem {
     property bool restoring: false;
 
     property bool isSony: false;
+    property bool updatingSelectors: false;
+    property var compatibleCameraSources: [];
+    property var reviewGroup: [];
+    property int reviewIndex: 0;
+    property string currentLoadedId: "";
+
+    function selectedBrand(): string {
+        return brandSelector.currentIndex > 0 ? brandSelector.currentText : "";
+    }
+    function selectedModel(): string {
+        return modelSelector.currentIndex > 0 ? modelSelector.currentText : "";
+    }
+    function selectedLens(): string {
+        return lensSelector.visible && lensSelector.currentIndex > 0 ? lensSelector.currentText : "";
+    }
+    function refreshBrands(): void {
+        root.updatingSelectors = true;
+        const brands = controller.get_camera_brands();
+        brandSelector.model = ["---"].concat(brands);
+        brandSelector.currentIndex = 0;
+        modelSelector.model = ["---"];
+        modelSelector.currentIndex = 0;
+        lensSelector.model = ["---"];
+        lensSelector.currentIndex = 0;
+        root.updatingSelectors = false;
+    }
+    function refreshModels(): void {
+        root.updatingSelectors = true;
+        const b = root.selectedBrand();
+        const models = b ? controller.get_camera_models(b) : [];
+        modelSelector.model = ["---"].concat(models);
+        modelSelector.currentIndex = 0;
+        lensSelector.model = ["---"];
+        lensSelector.currentIndex = 0;
+        root.updatingSelectors = false;
+    }
+    function refreshLenses(): void {
+        root.updatingSelectors = true;
+        const b = root.selectedBrand();
+        const m = root.selectedModel();
+        const lenses = (b && m) ? controller.get_lens_models(b, m) : [];
+        lensSelector.isFixedLens = (b && m) ? controller.is_fixed_lens_camera(b, m) : false;
+        lensSelector.model = ["---"].concat(lenses);
+        lensSelector.currentIndex = 0;
+        root.updatingSelectors = false;
+    }
+    function triggerSearch(filterText: string): void {
+        const b = root.selectedBrand();
+        const m = root.selectedModel();
+        const l = root.selectedLens();
+        if (b || m || l) {
+            controller.search_lens_profile_by_selectors(b, m, l, filterText, Object.keys(root.favorites), root.currentVideoAspectRatio, root.currentVideoAspectRatioSwapped);
+        } else {
+            root.compatibleCameraSources = [];
+            controller.search_lens_profile(filterText, Object.keys(root.favorites), root.currentVideoAspectRatio, root.currentVideoAspectRatioSwapped);
+        }
+    }
+    function prepopulateFromCameraId(camera_id: var): void {
+        if (!camera_id || !camera_id.brand) return;
+        const norm = controller.normalize_camera_identifier(camera_id.brand || "", camera_id.model || "", camera_id.lens_model || camera_id.lens_info || "");
+        const b = norm[0] || "";
+        const m = norm[1] || "";
+        const l = norm[2] || "";
+        root.updatingSelectors = true;
+        const bIdx = brandSelector.model.indexOf(b);
+        if (bIdx > 0) {
+            brandSelector.currentIndex = bIdx;
+            const models = controller.get_camera_models(b);
+            modelSelector.model = ["---"].concat(models);
+            const mIdx = modelSelector.model.indexOf(m);
+            if (mIdx > 0) {
+                modelSelector.currentIndex = mIdx;
+                const lenses = controller.get_lens_models(b, m);
+                lensSelector.isFixedLens = controller.is_fixed_lens_camera(b, m);
+                lensSelector.model = ["---"].concat(lenses);
+                const lIdx = lensSelector.model.indexOf(l);
+                if (lIdx > 0) {
+                    lensSelector.currentIndex = lIdx;
+                }
+            }
+        }
+        root.updatingSelectors = false;
+    }
 
     FileDialog {
         id: fileDialog;
@@ -98,6 +181,9 @@ MenuItem {
                 lensDelay.value = controller.lens_metadata_delay_frames;
                 outputProjection.setValue(controller.output_projection);
             }
+                if (additional_data && additional_data.camera_identifier) {
+                    root.prepopulateFromCameraId(additional_data.camera_identifier);
+                }
             // A generated lens stays for the next file like any profile, made again for its size. Motion data with the
             // focal length of every frame in its lens metadata gets none: with no profile, that's the lens already
             if (focalLengthOnly.checked) {
@@ -119,6 +205,9 @@ MenuItem {
                 messageBox(Modal.Warning, qsTr("The lens metadata delay could not be estimated. The clip needs a zoom recorded in the lens metadata, and the picture has to follow it clearly."), [ { text: qsTr("Ok"), accent: true } ]);
             }
         }
+        function onCompatible_cameras_used(cameras: list<string>): void {
+            root.compatibleCameraSources = cameras;
+        }
         function onAll_profiles_loaded(): void {
             if (!lensProfilesListPrepared) { // If it's the first load
                 controller.request_profile_ratings();
@@ -131,6 +220,7 @@ MenuItem {
                 root.fetched_from_github = true;
                 controller.fetch_profiles_from_github();
             }
+            root.refreshBrands();
         }
         function onLens_profiles_updated(fromDisk: bool): void {
             profilesUpdateTimer.fromDisk = fromDisk;
@@ -161,6 +251,17 @@ MenuItem {
                     if (focalLengthOnlyMm > 0) { // The checkbox tells the rest
                         lensInfo = { "Dimensions": lensInfo["Dimensions"], "Output projection": lensInfo["Output projection"] };
                     }
+                    root.currentLoadedId = filepath || obj.identifier || obj.name || "";
+                    const group = controller.get_review_group(root.currentLoadedId);
+                    root.reviewGroup = group;
+                    let idx = 0;
+                    for (let i = 0; i < group.length; ++i) {
+                        if (group[i][1] === root.currentLoadedId || group[i][1] === obj.identifier) {
+                            idx = i;
+                            break;
+                        }
+                    }
+                    root.reviewIndex = idx;
 
                     info.model = lensInfo;
 
@@ -279,6 +380,59 @@ MenuItem {
     function updateFavorites(): void {
         settings.setValue("lensProfileFavorites", Object.keys(favorites).filter(v => v).join(","));
     }
+    Label {
+        position: Label.LeftPosition;
+        text: qsTr("Camera brand");
+        ComboBox {
+            id: brandSelector;
+            model: ["---"];
+            width: parent.width;
+            font.pixelSize: 12 * dpiScale;
+            onCurrentIndexChanged: {
+                if (root.updatingSelectors) return;
+                root.refreshModels();
+                if (currentIndex > 0) root.triggerSearch(search.text);
+            }
+        }
+    }
+    Label {
+        position: Label.LeftPosition;
+        text: qsTr("Camera model");
+        visible: brandSelector.currentIndex > 0;
+        ComboBox {
+            id: modelSelector;
+            model: ["---"];
+            width: parent.width;
+            font.pixelSize: 12 * dpiScale;
+            onCurrentIndexChanged: {
+                if (root.updatingSelectors) return;
+                root.refreshLenses();
+                root.triggerSearch(search.text);
+            }
+        }
+    }
+    Label {
+        position: Label.LeftPosition;
+        text: lensSelector.isFixedLens ? qsTr("Lens / Mode") : qsTr("Lens");
+        visible: modelSelector.currentIndex > 0 && (!lensSelector.isFixedLens || lensSelector.model.length > 1);
+        ComboBox {
+            id: lensSelector;
+            property bool isFixedLens: false;
+            model: ["---"];
+            width: parent.width;
+            font.pixelSize: 12 * dpiScale;
+            onCurrentIndexChanged: {
+                if (root.updatingSelectors) return;
+                root.triggerSearch(search.text);
+            }
+        }
+    }
+    InfoMessageSmall {
+        type: InfoMessage.Info;
+        show: root.compatibleCameraSources.length > 0;
+        text: qsTr("Also showing compatible profiles from: %1").arg(root.compatibleCameraSources.slice(0, 6).join(", "));
+    }
+
 
     SearchField {
         id: search;
@@ -299,6 +453,52 @@ MenuItem {
         popup.lv.delegate: LensProfileSearchDelegate {
             popup: search.popup;
             profilesMenu: root;
+        }
+    }
+    Row {
+        visible: root.reviewGroup.length > 1;
+        anchors.horizontalCenter: parent.horizontalCenter;
+        spacing: 8 * dpiScale;
+        Button {
+            text: qsTr("Previous");
+            enabled: root.reviewGroup.length > 1;
+            onClicked: {
+                const n = root.reviewGroup.length;
+                if (n <= 1) return;
+                root.reviewIndex = (root.reviewIndex - 1 + n) % n;
+                root.selected_manually = true;
+                controller.load_lens_profile(root.reviewGroup[root.reviewIndex][1]);
+            }
+        }
+        BasicText {
+            anchors.verticalCenter: parent.verticalCenter;
+            text: (root.reviewIndex + 1) + " / " + root.reviewGroup.length;
+        }
+        Button {
+            text: qsTr("Next");
+            enabled: root.reviewGroup.length > 1;
+            onClicked: {
+                const n = root.reviewGroup.length;
+                if (n <= 1) return;
+                root.reviewIndex = (root.reviewIndex + 1) % n;
+                root.selected_manually = true;
+                controller.load_lens_profile(root.reviewGroup[root.reviewIndex][1]);
+            }
+        }
+        Button {
+            text: qsTr("Hide");
+            tooltip: qsTr("Hide this profile from search and review results");
+            onClicked: {
+                const currentId = root.currentLoadedId;
+                const n = root.reviewGroup.length;
+                const nextIdx = n > 1 ? (root.reviewIndex + 1) % n : -1;
+                const nextId = nextIdx >= 0 ? root.reviewGroup[nextIdx][1] : "";
+                controller.hide_lens_profile(currentId);
+                if (nextId && nextId !== currentId) {
+                    root.selected_manually = true;
+                    controller.load_lens_profile(nextId);
+                }
+            }
         }
     }
     Row {

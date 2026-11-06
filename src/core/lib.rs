@@ -6,6 +6,8 @@ pub mod gyro_source;
 pub mod imu_integration;
 pub mod lens_profile;
 pub mod lens_profile_database;
+pub mod camera_registry;
+pub mod lensfun;
 pub mod calibration;
 pub mod synchronization;
 pub mod stabilization;

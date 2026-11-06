@@ -1,0 +1,2954 @@
+{
+  "version": 1,
+  "mounts": [
+    {
+      "name": "Sony E",
+      "flange_distance_mm": 18.0,
+      "compatible_mounts": [
+        "Sony E",
+        "Sony A",
+        "Canon EF",
+        "Canon EF-S",
+        "Nikon F",
+        "ARRI PL",
+        "Leica M"
+      ]
+    },
+    {
+      "name": "Sony A",
+      "flange_distance_mm": 44.5,
+      "compatible_mounts": [
+        "Sony A",
+        "Minolta AF"
+      ]
+    },
+    {
+      "name": "Canon RF",
+      "flange_distance_mm": 20.0,
+      "compatible_mounts": [
+        "Canon RF",
+        "Canon RF-S",
+        "Canon EF",
+        "Canon EF-S",
+        "ARRI PL",
+        "Leica M"
+      ]
+    },
+    {
+      "name": "Canon EF",
+      "flange_distance_mm": 44.0,
+      "compatible_mounts": [
+        "Canon EF",
+        "Canon EF-S"
+      ]
+    },
+    {
+      "name": "Canon EF-M",
+      "flange_distance_mm": 18.0,
+      "compatible_mounts": [
+        "Canon EF-M",
+        "Canon EF",
+        "Canon EF-S"
+      ]
+    },
+    {
+      "name": "Nikon Z",
+      "flange_distance_mm": 16.0,
+      "compatible_mounts": [
+        "Nikon Z",
+        "Nikon F",
+        "Sony E",
+        "Canon EF",
+        "Canon EF-S",
+        "ARRI PL",
+        "Leica M"
+      ]
+    },
+    {
+      "name": "Nikon F",
+      "flange_distance_mm": 46.5,
+      "compatible_mounts": [
+        "Nikon F"
+      ]
+    },
+    {
+      "name": "Fujifilm X",
+      "flange_distance_mm": 17.7,
+      "compatible_mounts": [
+        "Fujifilm X",
+        "Canon EF",
+        "Canon EF-S",
+        "Nikon F",
+        "Leica M"
+      ]
+    },
+    {
+      "name": "Fujifilm G",
+      "flange_distance_mm": 26.7,
+      "compatible_mounts": [
+        "Fujifilm G",
+        "Canon EF",
+        "ARRI PL"
+      ]
+    },
+    {
+      "name": "Micro Four Thirds",
+      "flange_distance_mm": 19.25,
+      "compatible_mounts": [
+        "Micro Four Thirds",
+        "Canon EF",
+        "Canon EF-S",
+        "Nikon F",
+        "ARRI PL",
+        "Leica M"
+      ]
+    },
+    {
+      "name": "L-Mount",
+      "flange_distance_mm": 20.0,
+      "compatible_mounts": [
+        "L-Mount",
+        "Canon EF",
+        "Canon EF-S",
+        "ARRI PL",
+        "Leica M"
+      ]
+    },
+    {
+      "name": "DJI DL",
+      "flange_distance_mm": 16.84,
+      "compatible_mounts": [
+        "DJI DL",
+        "Sony E",
+        "Leica M"
+      ]
+    },
+    {
+      "name": "ARRI PL",
+      "flange_distance_mm": 52.0,
+      "compatible_mounts": [
+        "ARRI PL"
+      ]
+    },
+    {
+      "name": "Leica M",
+      "flange_distance_mm": 27.8,
+      "compatible_mounts": [
+        "Leica M"
+      ]
+    },
+    {
+      "name": "Pentax K",
+      "flange_distance_mm": 45.46,
+      "compatible_mounts": [
+        "Pentax K"
+      ]
+    },
+    {
+      "name": "Fixed",
+      "flange_distance_mm": 0.0,
+      "compatible_mounts": [
+        "Fixed"
+      ]
+    }
+  ],
+  "brands": [
+    {
+      "name": "Sony",
+      "aliases": [
+        "SONY",
+        "sony",
+        "Sony Corp"
+      ]
+    },
+    {
+      "name": "GoPro",
+      "aliases": [
+        "GOPRO",
+        "gopro",
+        "GoPro, Inc."
+      ]
+    },
+    {
+      "name": "DJI",
+      "aliases": [
+        "Dji",
+        "dji",
+        "SZ DJI Technology"
+      ]
+    },
+    {
+      "name": "Insta360",
+      "aliases": [
+        "INSTA360",
+        "insta360",
+        "Arashi Vision"
+      ]
+    },
+    {
+      "name": "Blackmagic",
+      "aliases": [
+        "Blackmagic Design",
+        "BLACKMAGIC",
+        "blackmagic",
+        "BMD"
+      ]
+    },
+    {
+      "name": "Canon",
+      "aliases": [
+        "CANON",
+        "canon",
+        "Canon Inc."
+      ]
+    },
+    {
+      "name": "Nikon",
+      "aliases": [
+        "NIKON",
+        "nikon",
+        "Nikon Corporation"
+      ]
+    },
+    {
+      "name": "Fujifilm",
+      "aliases": [
+        "FUJIFILM",
+        "fujifilm",
+        "FujiFilm",
+        "Fufifilm"
+      ]
+    },
+    {
+      "name": "Panasonic",
+      "aliases": [
+        "PANASONIC",
+        "panasonic",
+        "Lumix"
+      ]
+    },
+    {
+      "name": "RED",
+      "aliases": [
+        "Red",
+        "red",
+        "RED Digital Cinema",
+        "RED RAW"
+      ]
+    },
+    {
+      "name": "Z CAM",
+      "aliases": [
+        "ZCAM",
+        "Z-CAM",
+        "zcam"
+      ]
+    },
+    {
+      "name": "OM System",
+      "aliases": [
+        "Olympus",
+        "OLYMPUS",
+        "olympus",
+        "OM Digital Solutions"
+      ]
+    },
+    {
+      "name": "Sigma",
+      "aliases": [
+        "SIGMA",
+        "sigma"
+      ]
+    },
+    {
+      "name": "Leica",
+      "aliases": [
+        "LEICA",
+        "leica"
+      ]
+    },
+    {
+      "name": "ARRI",
+      "aliases": [
+        "Arri",
+        "arri"
+      ]
+    },
+    {
+      "name": "Kinefinity",
+      "aliases": [
+        "KINEFINITY",
+        "kinefinity"
+      ]
+    },
+    {
+      "name": "Freefly",
+      "aliases": [
+        "FREEFLY",
+        "freefly"
+      ]
+    },
+    {
+      "name": "Hasselblad",
+      "aliases": [
+        "HASSELBLAD",
+        "hasselblad"
+      ]
+    },
+    {
+      "name": "Pentax",
+      "aliases": [
+        "PENTAX",
+        "pentax",
+        "Ricoh"
+      ]
+    },
+    {
+      "name": "RunCam",
+      "aliases": [
+        "Runcam",
+        "RUNCAM",
+        "runcam"
+      ]
+    },
+    {
+      "name": "Caddx",
+      "aliases": [
+        "CADDX",
+        "caddx",
+        "CaddxFPV"
+      ]
+    },
+    {
+      "name": "Walksnail",
+      "aliases": [
+        "WALKSNAIL",
+        "walksnail",
+        "Walksnail Avatar V2",
+        "Walksnail Avatar V2 Pro"
+      ]
+    },
+    {
+      "name": "Foxeer",
+      "aliases": [
+        "FOXEER",
+        "foxeer"
+      ]
+    },
+    {
+      "name": "Hawkeye",
+      "aliases": [
+        "HAWKEYE",
+        "hawkeye"
+      ]
+    },
+    {
+      "name": "BetaFPV",
+      "aliases": [
+        "BETAFPV",
+        "betafpv"
+      ]
+    },
+    {
+      "name": "HDZero",
+      "aliases": [
+        "HDZERO",
+        "hdzero"
+      ]
+    },
+    {
+      "name": "SJCAM",
+      "aliases": [
+        "SJCam",
+        "sjcam"
+      ]
+    },
+    {
+      "name": "AKASO",
+      "aliases": [
+        "Akaso",
+        "akaso"
+      ]
+    },
+    {
+      "name": "Apple",
+      "aliases": [
+        "APPLE",
+        "apple"
+      ]
+    },
+    {
+      "name": "Samsung",
+      "aliases": [
+        "SAMSUNG",
+        "samsung"
+      ]
+    },
+    {
+      "name": "Google",
+      "aliases": [
+        "GOOGLE",
+        "google"
+      ]
+    },
+    {
+      "name": "Xiaomi",
+      "aliases": [
+        "XIAOMI",
+        "xiaomi",
+        "Mi",
+        "MI",
+        "Redmi",
+        "POCO",
+        "Poco",
+        "XIAOMI (POCO)"
+      ]
+    },
+    {
+      "name": "OnePlus",
+      "aliases": [
+        "ONEPLUS",
+        "Oneplus",
+        "oneplus"
+      ]
+    },
+    {
+      "name": "Huawei",
+      "aliases": [
+        "HUAWEI",
+        "huawei"
+      ]
+    },
+    {
+      "name": "Honor",
+      "aliases": [
+        "HONOR",
+        "honor"
+      ]
+    },
+    {
+      "name": "Oppo",
+      "aliases": [
+        "OPPO",
+        "oppo"
+      ]
+    },
+    {
+      "name": "Vivo",
+      "aliases": [
+        "VIVO",
+        "vivo",
+        "iQOO",
+        "IQOO",
+        "iqoo"
+      ]
+    },
+    {
+      "name": "Motorola",
+      "aliases": [
+        "MOTOROLA",
+        "motorola"
+      ]
+    },
+    {
+      "name": "ASUS",
+      "aliases": [
+        "Asus",
+        "asus"
+      ]
+    },
+    {
+      "name": "Nothing",
+      "aliases": [
+        "NOTHING",
+        "nothing"
+      ]
+    },
+    {
+      "name": "Garmin",
+      "aliases": [
+        "GARMIN",
+        "garmin"
+      ]
+    },
+    {
+      "name": "Tamron",
+      "aliases": [
+        "TAMRON",
+        "tamron"
+      ]
+    },
+    {
+      "name": "Samyang",
+      "aliases": [
+        "SAMYANG",
+        "samyang",
+        "Rokinon",
+        "ROKINON"
+      ]
+    },
+    {
+      "name": "Viltrox",
+      "aliases": [
+        "VILTROX",
+        "viltrox"
+      ]
+    },
+    {
+      "name": "Laowa",
+      "aliases": [
+        "LAOWA",
+        "laowa",
+        "Venus Optics"
+      ]
+    },
+    {
+      "name": "Sirui",
+      "aliases": [
+        "SIRUI",
+        "sirui"
+      ]
+    },
+    {
+      "name": "Zeiss",
+      "aliases": [
+        "ZEISS",
+        "zeiss",
+        "Carl Zeiss"
+      ]
+    }
+  ],
+  "cameras": [
+    {
+      "brand": "Sony",
+      "model": "A7S III",
+      "aliases": [
+        "ILCE-7SM3",
+        "A7sIII",
+        "a7s3",
+        "a7siii",
+        "Alpha 7S III"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.6,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "FX3",
+      "aliases": [
+        "ILME-FX3",
+        "fx3"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.6,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "FX6",
+      "aliases": [
+        "ILME-FX6",
+        "ILME-FX6V",
+        "fx6"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.6,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "FX9",
+      "aliases": [
+        "PXW-FX9",
+        "PXW-FX9V",
+        "fx9"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.7,
+      "sensor_height_mm": 18.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "ZV-E1",
+      "aliases": [
+        "ILCE-ZVE1",
+        "zve1",
+        "ZV-E1"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.6,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A7 IV",
+      "aliases": [
+        "ILCE-7M4",
+        "A7iv",
+        "A7IV",
+        "a74",
+        "a7iv",
+        "Alpha 7 IV"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 23.9,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A7 III",
+      "aliases": [
+        "ILCE-7M3",
+        "A7III",
+        "a73",
+        "a7iii",
+        "Alpha 7 III"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.6,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A7C",
+      "aliases": [
+        "ILCE-7C",
+        "a7c"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.6,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A7C II",
+      "aliases": [
+        "ILCE-7CM2",
+        "7CII",
+        "A7CII",
+        "a7c2",
+        "a7cii"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 23.9,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A7CR",
+      "aliases": [
+        "ILCE-7CR",
+        "a7cr"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.7,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A7R IV",
+      "aliases": [
+        "ILCE-7RM4",
+        "ILCE-7RM4A",
+        "A7RIV",
+        "a7r4",
+        "a7riv"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.7,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A7R V",
+      "aliases": [
+        "ILCE-7RM5",
+        "A7RV",
+        "a7r5",
+        "a7rv"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.7,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A1",
+      "aliases": [
+        "ILCE-1",
+        "a1"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 24.0,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A1 II",
+      "aliases": [
+        "ILCE-1M2",
+        "a1ii"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 24.0,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A9",
+      "aliases": [
+        "ILCE-9",
+        "a9"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.6,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A9 II",
+      "aliases": [
+        "ILCE-9M2",
+        "a9ii"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.6,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A9 III",
+      "aliases": [
+        "ILCE-9M3",
+        "a9iii"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 35.6,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "FX30",
+      "aliases": [
+        "ILME-FX30",
+        "ILME-FX30B",
+        "fx30"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 23.3,
+      "sensor_height_mm": 15.5,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A6700",
+      "aliases": [
+        "ILCE-6700",
+        "6700",
+        "a6700"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 23.3,
+      "sensor_height_mm": 15.5,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A6600",
+      "aliases": [
+        "ILCE-6600",
+        "6600",
+        "a6600"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 23.5,
+      "sensor_height_mm": 15.6,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A6500",
+      "aliases": [
+        "ILCE-6500",
+        "6500",
+        "a6500"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 23.5,
+      "sensor_height_mm": 15.6,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A6400",
+      "aliases": [
+        "ILCE-6400",
+        "6400",
+        "a6400"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 23.5,
+      "sensor_height_mm": 15.6,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A6300",
+      "aliases": [
+        "ILCE-6300",
+        "6300",
+        "a6300"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 23.5,
+      "sensor_height_mm": 15.6,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "A6000",
+      "aliases": [
+        "ILCE-6000",
+        "6000",
+        "a6000"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 23.5,
+      "sensor_height_mm": 15.6,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "ZV-E10",
+      "aliases": [
+        "ILCE-ZVE10",
+        "ZVE10",
+        "zve10"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 23.5,
+      "sensor_height_mm": 15.6,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "ZV-E10 II",
+      "aliases": [
+        "ILCE-ZVE10M2",
+        "ZV-E10M2",
+        "zve10ii"
+      ],
+      "mount": "Sony E",
+      "sensor_width_mm": 23.3,
+      "sensor_height_mm": 15.5,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Sony",
+      "model": "ZV-1",
+      "aliases": [
+        "DCZV1",
+        "DSC-ZV1",
+        "zv1"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 13.2,
+      "sensor_height_mm": 8.8,
+      "crop_factor": 2.7,
+      "fixed_lens": true,
+      "lens_options": [
+        "Standard",
+        "Wide Adapter"
+      ]
+    },
+    {
+      "brand": "Sony",
+      "model": "ZV-1 II",
+      "aliases": [
+        "ZV-1M2",
+        "DSC-ZV1M2",
+        "zv1ii"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 13.2,
+      "sensor_height_mm": 8.8,
+      "crop_factor": 2.7,
+      "fixed_lens": true,
+      "lens_options": [
+        "Standard"
+      ]
+    },
+    {
+      "brand": "Sony",
+      "model": "RX100 VII",
+      "aliases": [
+        "DSC-RX100M7",
+        "RX100M7"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 13.2,
+      "sensor_height_mm": 8.8,
+      "crop_factor": 2.7,
+      "fixed_lens": true,
+      "lens_options": [
+        "Standard"
+      ]
+    },
+    {
+      "brand": "Sony",
+      "model": "RX0 II",
+      "aliases": [
+        "DSC-RX0M2",
+        "RX0M2"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 13.2,
+      "sensor_height_mm": 8.8,
+      "crop_factor": 2.7,
+      "fixed_lens": true,
+      "lens_options": [
+        "Standard"
+      ]
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO13 Black",
+      "aliases": [
+        "HERO13",
+        "GoPro 13",
+        "gopro13"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.4,
+      "sensor_height_mm": 5.6,
+      "crop_factor": 5.0,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Linear",
+        "HyperView",
+        "SuperView",
+        "Ultra Wide Lens Mod",
+        "Macro Lens Mod",
+        "Anamorphic Lens Mod"
+      ]
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO12 Black",
+      "aliases": [
+        "HERO12",
+        "GoPro 12",
+        "gopro12"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.4,
+      "sensor_height_mm": 5.6,
+      "crop_factor": 5.0,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Linear",
+        "HyperView",
+        "SuperView",
+        "Max Lens Mod 2.0",
+        "Max Lens Mod 1.0"
+      ]
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO11 Black",
+      "aliases": [
+        "HERO11",
+        "GoPro 11",
+        "gopro11"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.4,
+      "sensor_height_mm": 5.6,
+      "crop_factor": 5.0,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Linear",
+        "HyperView",
+        "SuperView",
+        "Max Lens Mod"
+      ]
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO11 Black Mini",
+      "aliases": [
+        "HERO11 Mini",
+        "hero11blackmini"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.4,
+      "sensor_height_mm": 5.6,
+      "crop_factor": 5.0,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Linear",
+        "HyperView",
+        "SuperView",
+        "Max Lens Mod"
+      ]
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO10 Black",
+      "aliases": [
+        "HERO10",
+        "GoPro 10",
+        "gopro10"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.17,
+      "sensor_height_mm": 4.55,
+      "crop_factor": 5.6,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Linear",
+        "SuperView",
+        "Narrow",
+        "Max Lens Mod"
+      ]
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO9 Black",
+      "aliases": [
+        "HERO9",
+        "GoPro 9",
+        "gopro9"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.17,
+      "sensor_height_mm": 4.55,
+      "crop_factor": 5.6,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Linear",
+        "SuperView",
+        "Narrow",
+        "Max Lens Mod"
+      ]
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO8 Black",
+      "aliases": [
+        "HERO8",
+        "GoPro 8",
+        "gopro8"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.17,
+      "sensor_height_mm": 4.55,
+      "crop_factor": 5.6,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Linear",
+        "SuperView",
+        "Narrow"
+      ]
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO7 Black",
+      "aliases": [
+        "HERO7",
+        "GoPro 7",
+        "gopro7"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.17,
+      "sensor_height_mm": 4.55,
+      "crop_factor": 5.6,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Linear",
+        "SuperView"
+      ]
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO6 Black",
+      "aliases": [
+        "HERO6",
+        "GoPro 6",
+        "gopro6"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.17,
+      "sensor_height_mm": 4.55,
+      "crop_factor": 5.6,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Linear",
+        "SuperView"
+      ]
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO5 Black",
+      "aliases": [
+        "HERO5",
+        "GoPro 5",
+        "gopro5"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.17,
+      "sensor_height_mm": 4.55,
+      "crop_factor": 5.6,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Linear",
+        "SuperView",
+        "Narrow"
+      ]
+    },
+    {
+      "brand": "GoPro",
+      "model": "HERO5 Session",
+      "aliases": [
+        "Session 5",
+        "session5"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.17,
+      "sensor_height_mm": 4.55,
+      "crop_factor": 5.6,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Linear",
+        "SuperView",
+        "Narrow"
+      ]
+    },
+    {
+      "brand": "DJI",
+      "model": "Osmo Action 5 Pro",
+      "aliases": [
+        "Action 5 Pro",
+        "Action 5"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 10.0,
+      "sensor_height_mm": 7.5,
+      "crop_factor": 3.4,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Standard (Dewarp)",
+        "Ultra Wide"
+      ]
+    },
+    {
+      "brand": "DJI",
+      "model": "Osmo Action 4",
+      "aliases": [
+        "Action 4"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 10.0,
+      "sensor_height_mm": 7.5,
+      "crop_factor": 3.4,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Standard (Dewarp)",
+        "Ultra Wide",
+        "FOV Boost Lens"
+      ]
+    },
+    {
+      "brand": "DJI",
+      "model": "Osmo Action 3",
+      "aliases": [
+        "Action 3"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 7.4,
+      "sensor_height_mm": 5.55,
+      "crop_factor": 4.6,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Standard (Dewarp)",
+        "Ultra Wide"
+      ]
+    },
+    {
+      "brand": "DJI",
+      "model": "Action 2",
+      "aliases": [
+        "DJI Action 2"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 7.4,
+      "sensor_height_mm": 5.55,
+      "crop_factor": 4.6,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "Standard (Dewarp)",
+        "Macro Lens"
+      ]
+    },
+    {
+      "brand": "DJI",
+      "model": "Osmo Pocket 3",
+      "aliases": [
+        "Pocket 3"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 13.2,
+      "sensor_height_mm": 8.8,
+      "crop_factor": 2.7,
+      "fixed_lens": true,
+      "lens_options": [
+        "Standard",
+        "Wide-Angle Lens"
+      ]
+    },
+    {
+      "brand": "DJI",
+      "model": "Avata 2",
+      "aliases": [
+        "DJI Avata 2"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 10.0,
+      "sensor_height_mm": 7.5,
+      "crop_factor": 3.4,
+      "fixed_lens": true,
+      "lens_options": [
+        "Ultra Wide",
+        "Wide",
+        "Normal"
+      ]
+    },
+    {
+      "brand": "DJI",
+      "model": "Avata",
+      "aliases": [
+        "DJI Avata"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 7.4,
+      "sensor_height_mm": 5.55,
+      "crop_factor": 4.6,
+      "fixed_lens": true,
+      "lens_options": [
+        "Ultra Wide",
+        "Wide",
+        "Normal"
+      ]
+    },
+    {
+      "brand": "DJI",
+      "model": "O3 Air Unit",
+      "aliases": [
+        "O3",
+        "DJI O3"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 7.4,
+      "sensor_height_mm": 5.55,
+      "crop_factor": 4.6,
+      "fixed_lens": true,
+      "lens_options": [
+        "Ultra Wide",
+        "Wide",
+        "Normal"
+      ]
+    },
+    {
+      "brand": "DJI",
+      "model": "O4 Air Unit Pro",
+      "aliases": [
+        "O4 Pro",
+        "DJI O4 Pro"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 10.0,
+      "sensor_height_mm": 7.5,
+      "crop_factor": 3.4,
+      "fixed_lens": true,
+      "lens_options": [
+        "Ultra Wide",
+        "Wide",
+        "Normal"
+      ]
+    },
+    {
+      "brand": "DJI",
+      "model": "O4 Air Unit",
+      "aliases": [
+        "O4",
+        "DJI O4"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.4,
+      "sensor_height_mm": 4.8,
+      "crop_factor": 5.4,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide"
+      ]
+    },
+    {
+      "brand": "DJI",
+      "model": "Air 2S",
+      "aliases": [
+        "AIR 2S",
+        "AIR2s",
+        "Air2s"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 13.2,
+      "sensor_height_mm": 8.8,
+      "crop_factor": 2.7,
+      "fixed_lens": true,
+      "lens_options": [
+        "Standard"
+      ]
+    },
+    {
+      "brand": "DJI",
+      "model": "Air 3",
+      "aliases": [
+        "AIR 3"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 9.6,
+      "sensor_height_mm": 7.2,
+      "crop_factor": 3.6,
+      "fixed_lens": true,
+      "lens_options": [
+        "24mm Wide",
+        "70mm Tele"
+      ]
+    },
+    {
+      "brand": "DJI",
+      "model": "Mini 4 Pro",
+      "aliases": [
+        "MINI 4 PRO"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 9.6,
+      "sensor_height_mm": 7.2,
+      "crop_factor": 3.6,
+      "fixed_lens": true,
+      "lens_options": [
+        "Standard",
+        "Wide-Angle Lens"
+      ]
+    },
+    {
+      "brand": "DJI",
+      "model": "Ronin 4D 6K",
+      "aliases": [
+        "4D",
+        "Ronin 4D"
+      ],
+      "mount": "DJI DL",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 24.0,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Insta360",
+      "model": "Ace Pro 2",
+      "aliases": [
+        "AcePro2"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 10.0,
+      "sensor_height_mm": 7.5,
+      "crop_factor": 3.4,
+      "fixed_lens": true,
+      "lens_options": [
+        "ActionView",
+        "MegaView",
+        "UltraWide",
+        "Dewarp"
+      ]
+    },
+    {
+      "brand": "Insta360",
+      "model": "Ace Pro",
+      "aliases": [
+        "AcePro"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 10.0,
+      "sensor_height_mm": 7.5,
+      "crop_factor": 3.4,
+      "fixed_lens": true,
+      "lens_options": [
+        "ActionView",
+        "UltraWide",
+        "Dewarp"
+      ]
+    },
+    {
+      "brand": "Insta360",
+      "model": "GO 3S",
+      "aliases": [
+        "GO3S",
+        "Go 3S"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.4,
+      "sensor_height_mm": 4.8,
+      "crop_factor": 5.4,
+      "fixed_lens": true,
+      "lens_options": [
+        "ActionView",
+        "MegaView",
+        "UltraWide",
+        "Dewarp"
+      ]
+    },
+    {
+      "brand": "Insta360",
+      "model": "GO 3",
+      "aliases": [
+        "GO3",
+        "Go 3"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 5.6,
+      "sensor_height_mm": 4.2,
+      "crop_factor": 6.1,
+      "fixed_lens": true,
+      "lens_options": [
+        "ActionView",
+        "UltraWide",
+        "Dewarp"
+      ]
+    },
+    {
+      "brand": "Insta360",
+      "model": "GO 2",
+      "aliases": [
+        "GO2",
+        "Go 2"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 5.6,
+      "sensor_height_mm": 4.2,
+      "crop_factor": 6.1,
+      "fixed_lens": true,
+      "lens_options": [
+        "Pro Video",
+        "UltraWide",
+        "ActionView",
+        "Linear"
+      ]
+    },
+    {
+      "brand": "Insta360",
+      "model": "ONE RS",
+      "aliases": [
+        "One RS",
+        "OneRS"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.4,
+      "sensor_height_mm": 4.8,
+      "crop_factor": 5.4,
+      "fixed_lens": true,
+      "lens_options": [
+        "4K Boost Wide",
+        "1-Inch Wide",
+        "360 Mod"
+      ]
+    },
+    {
+      "brand": "Insta360",
+      "model": "ONE R",
+      "aliases": [
+        "One R",
+        "OneR",
+        "oneR"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.4,
+      "sensor_height_mm": 4.8,
+      "crop_factor": 5.4,
+      "fixed_lens": true,
+      "lens_options": [
+        "4K Wide",
+        "1-Inch Wide",
+        "360 Mod"
+      ]
+    },
+    {
+      "brand": "Insta360",
+      "model": "SMO 4K",
+      "aliases": [
+        "SMO 4k",
+        "SMO4K"
+      ],
+      "mount": "Fixed",
+      "sensor_width_mm": 6.4,
+      "sensor_height_mm": 4.8,
+      "crop_factor": 5.4,
+      "fixed_lens": true,
+      "lens_options": [
+        "Wide",
+        "SuperView",
+        "Linear"
+      ]
+    },
+    {
+      "brand": "Blackmagic",
+      "model": "Pocket Cinema Camera 4K",
+      "aliases": [
+        "Pocket Cinema Camera 4k",
+        "Pocker Cinema Camera 4k",
+        "Pocket CInema Camera 4K",
+        "Pocket Cinema Camera  4k",
+        "BMPCC 4K",
+        "BMPCC4K"
+      ],
+      "mount": "Micro Four Thirds",
+      "sensor_width_mm": 18.96,
+      "sensor_height_mm": 10.0,
+      "crop_factor": 1.9,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Blackmagic",
+      "model": "Pocket Cinema Camera 6K",
+      "aliases": [
+        "Pocket Cinema Camera 6k",
+        "BMPCC 6K",
+        "BMPCC6K"
+      ],
+      "mount": "Canon EF",
+      "sensor_width_mm": 23.1,
+      "sensor_height_mm": 12.99,
+      "crop_factor": 1.55,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Blackmagic",
+      "model": "Pocket Cinema Camera 6K Pro",
+      "aliases": [
+        "BMPCC 6K Pro",
+        "Pocket 6K Pro"
+      ],
+      "mount": "Canon EF",
+      "sensor_width_mm": 23.1,
+      "sensor_height_mm": 12.99,
+      "crop_factor": 1.55,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Blackmagic",
+      "model": "Pocket Cinema Camera 6K G2",
+      "aliases": [
+        "Cinema Pocket Camera 6K G2",
+        "BMPCC 6K G2"
+      ],
+      "mount": "Canon EF",
+      "sensor_width_mm": 23.1,
+      "sensor_height_mm": 12.99,
+      "crop_factor": 1.55,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Blackmagic",
+      "model": "Cinema Camera 6K",
+      "aliases": [
+        "BMCC 6K",
+        "BMCC6K"
+      ],
+      "mount": "L-Mount",
+      "sensor_width_mm": 36.0,
+      "sensor_height_mm": 24.0,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Blackmagic",
+      "model": "PYXIS 6K",
+      "aliases": [
+        "Pyxis 6K"
+      ],
+      "mount": "L-Mount",
+      "sensor_width_mm": 36.0,
+      "sensor_height_mm": 24.0,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Blackmagic",
+      "model": "Micro Studio Camera 4K G2",
+      "aliases": [
+        "Micro Studio Camera 4k G2"
+      ],
+      "mount": "Micro Four Thirds",
+      "sensor_width_mm": 17.78,
+      "sensor_height_mm": 10.0,
+      "crop_factor": 2.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS R5",
+      "aliases": [
+        "R5",
+        "Canon EOS R5"
+      ],
+      "mount": "Canon RF",
+      "sensor_width_mm": 36.0,
+      "sensor_height_mm": 24.0,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS R5 Mark II",
+      "aliases": [
+        "R5 Mark II",
+        "EOS R5 II",
+        "R5II"
+      ],
+      "mount": "Canon RF",
+      "sensor_width_mm": 36.0,
+      "sensor_height_mm": 24.0,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS R5 C",
+      "aliases": [
+        "R5C",
+        "EOS R5C"
+      ],
+      "mount": "Canon RF",
+      "sensor_width_mm": 36.0,
+      "sensor_height_mm": 24.0,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS R6",
+      "aliases": [
+        "R6",
+        "Canon EOS R6"
+      ],
+      "mount": "Canon RF",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 23.9,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS R6 Mark II",
+      "aliases": [
+        "R6 Mark II",
+        "EOS R6 II",
+        "R6II"
+      ],
+      "mount": "Canon RF",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 23.9,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS R3",
+      "aliases": [
+        "R3",
+        "Canon EOS R3"
+      ],
+      "mount": "Canon RF",
+      "sensor_width_mm": 36.0,
+      "sensor_height_mm": 24.0,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS R8",
+      "aliases": [
+        "R8",
+        "Canon EOS R8"
+      ],
+      "mount": "Canon RF",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 23.9,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS R7",
+      "aliases": [
+        "R7",
+        "Canon EOS R7"
+      ],
+      "mount": "Canon RF",
+      "sensor_width_mm": 22.3,
+      "sensor_height_mm": 14.8,
+      "crop_factor": 1.6,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS R10",
+      "aliases": [
+        "R10",
+        "Canon EOS R10"
+      ],
+      "mount": "Canon RF",
+      "sensor_width_mm": 22.3,
+      "sensor_height_mm": 14.9,
+      "crop_factor": 1.6,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS C70",
+      "aliases": [
+        "C70",
+        "Canon C70"
+      ],
+      "mount": "Canon RF",
+      "sensor_width_mm": 26.2,
+      "sensor_height_mm": 13.8,
+      "crop_factor": 1.46,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS C80",
+      "aliases": [
+        "C80",
+        "Canon C80"
+      ],
+      "mount": "Canon RF",
+      "sensor_width_mm": 36.0,
+      "sensor_height_mm": 19.0,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS 5D Mark IV",
+      "aliases": [
+        "5D Mark IV",
+        "5D Mark 4",
+        "5D4"
+      ],
+      "mount": "Canon EF",
+      "sensor_width_mm": 36.0,
+      "sensor_height_mm": 24.0,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS 5D Mark III",
+      "aliases": [
+        "5D Mark III",
+        "5D Mark iii",
+        "5D3"
+      ],
+      "mount": "Canon EF",
+      "sensor_width_mm": 36.0,
+      "sensor_height_mm": 24.0,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Nikon",
+      "model": "Z6",
+      "aliases": [
+        "NIKON Z 6",
+        "Z 6"
+      ],
+      "mount": "Nikon Z",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 23.9,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Nikon",
+      "model": "Z6 II",
+      "aliases": [
+        "NIKON Z 6_2",
+        "Z 6II",
+        "Z6II"
+      ],
+      "mount": "Nikon Z",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 23.9,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Nikon",
+      "model": "Z6 III",
+      "aliases": [
+        "NIKON Z6_3",
+        "Z 6III",
+        "Z6III"
+      ],
+      "mount": "Nikon Z",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 23.9,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Nikon",
+      "model": "Z7",
+      "aliases": [
+        "NIKON Z 7",
+        "Z 7"
+      ],
+      "mount": "Nikon Z",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 23.9,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Nikon",
+      "model": "Z7 II",
+      "aliases": [
+        "NIKON Z 7_2",
+        "Z 7II",
+        "Z7II"
+      ],
+      "mount": "Nikon Z",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 23.9,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Nikon",
+      "model": "Z8",
+      "aliases": [
+        "NIKON Z 8",
+        "Z 8"
+      ],
+      "mount": "Nikon Z",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 23.9,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Nikon",
+      "model": "Z9",
+      "aliases": [
+        "NIKON Z 9",
+        "Z 9"
+      ],
+      "mount": "Nikon Z",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 23.9,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Nikon",
+      "model": "Zf",
+      "aliases": [
+        "NIKON Z f",
+        "Z f"
+      ],
+      "mount": "Nikon Z",
+      "sensor_width_mm": 35.9,
+      "sensor_height_mm": 23.9,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Nikon",
+      "model": "Z30",
+      "aliases": [
+        "NIKON Z 30",
+        "Z 30"
+      ],
+      "mount": "Nikon Z",
+      "sensor_width_mm": 23.5,
+      "sensor_height_mm": 15.7,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Nikon",
+      "model": "Z50",
+      "aliases": [
+        "NIKON Z 50",
+        "Z 50"
+      ],
+      "mount": "Nikon Z",
+      "sensor_width_mm": 23.5,
+      "sensor_height_mm": 15.7,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Fujifilm",
+      "model": "X-H2S",
+      "aliases": [
+        "X-H2s",
+        "XH2S",
+        "H2S"
+      ],
+      "mount": "Fujifilm X",
+      "sensor_width_mm": 23.5,
+      "sensor_height_mm": 15.6,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Fujifilm",
+      "model": "X-H2",
+      "aliases": [
+        "XH2"
+      ],
+      "mount": "Fujifilm X",
+      "sensor_width_mm": 23.5,
+      "sensor_height_mm": 15.6,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Fujifilm",
+      "model": "X-T5",
+      "aliases": [
+        "XT5"
+      ],
+      "mount": "Fujifilm X",
+      "sensor_width_mm": 23.5,
+      "sensor_height_mm": 15.6,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Fujifilm",
+      "model": "X-T4",
+      "aliases": [
+        "XT4"
+      ],
+      "mount": "Fujifilm X",
+      "sensor_width_mm": 23.5,
+      "sensor_height_mm": 15.6,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Fujifilm",
+      "model": "X-S20",
+      "aliases": [
+        "XS20"
+      ],
+      "mount": "Fujifilm X",
+      "sensor_width_mm": 23.5,
+      "sensor_height_mm": 15.6,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Fujifilm",
+      "model": "X-S10",
+      "aliases": [
+        "XS10"
+      ],
+      "mount": "Fujifilm X",
+      "sensor_width_mm": 23.5,
+      "sensor_height_mm": 15.6,
+      "crop_factor": 1.53,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Fujifilm",
+      "model": "GFX100 II",
+      "aliases": [
+        "GFX100ii",
+        "GFX 100 II"
+      ],
+      "mount": "Fujifilm G",
+      "sensor_width_mm": 43.8,
+      "sensor_height_mm": 32.9,
+      "crop_factor": 0.79,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Fujifilm",
+      "model": "GFX100S",
+      "aliases": [
+        "GFX 100S"
+      ],
+      "mount": "Fujifilm G",
+      "sensor_width_mm": 43.8,
+      "sensor_height_mm": 32.9,
+      "crop_factor": 0.79,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Panasonic",
+      "model": "Lumix S5 II",
+      "aliases": [
+        "DC-S5M2",
+        "S5 II",
+        "S5M2"
+      ],
+      "mount": "L-Mount",
+      "sensor_width_mm": 35.6,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Panasonic",
+      "model": "Lumix S5 IIX",
+      "aliases": [
+        "DC-S5M2X",
+        "S5 IIX",
+        "S5M2X"
+      ],
+      "mount": "L-Mount",
+      "sensor_width_mm": 35.6,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Panasonic",
+      "model": "Lumix S5",
+      "aliases": [
+        "DC-S5",
+        "S5"
+      ],
+      "mount": "L-Mount",
+      "sensor_width_mm": 35.6,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Panasonic",
+      "model": "Lumix S1H",
+      "aliases": [
+        "DC-S1H",
+        "S1H"
+      ],
+      "mount": "L-Mount",
+      "sensor_width_mm": 35.6,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Panasonic",
+      "model": "Lumix BS1H",
+      "aliases": [
+        "DC-BS1H",
+        "BS1H"
+      ],
+      "mount": "L-Mount",
+      "sensor_width_mm": 35.6,
+      "sensor_height_mm": 23.8,
+      "crop_factor": 1.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Panasonic",
+      "model": "Lumix GH7",
+      "aliases": [
+        "DC-GH7",
+        "GH7"
+      ],
+      "mount": "Micro Four Thirds",
+      "sensor_width_mm": 17.3,
+      "sensor_height_mm": 13.0,
+      "crop_factor": 2.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Panasonic",
+      "model": "Lumix GH6",
+      "aliases": [
+        "DC-GH6",
+        "GH6"
+      ],
+      "mount": "Micro Four Thirds",
+      "sensor_width_mm": 17.3,
+      "sensor_height_mm": 13.0,
+      "crop_factor": 2.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Panasonic",
+      "model": "Lumix GH5",
+      "aliases": [
+        "DC-GH5",
+        "GH5"
+      ],
+      "mount": "Micro Four Thirds",
+      "sensor_width_mm": 17.3,
+      "sensor_height_mm": 13.0,
+      "crop_factor": 2.0,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Panasonic",
+      "model": "Lumix GH5S",
+      "aliases": [
+        "DC-GH5S",
+        "GH5S"
+      ],
+      "mount": "Micro Four Thirds",
+      "sensor_width_mm": 18.9,
+      "sensor_height_mm": 13.0,
+      "crop_factor": 1.9,
+      "fixed_lens": false
+    },
+    {
+      "brand": "Panasonic",
+      "model": "Lumix BGH1",
+      "aliases": [
+        "DC-BGH1",
+        "BGH1",
+        "BGH-1"
+      ],
+      "mount": "Micro Four Thirds",
+      "sensor_width_mm": 18.9,
+      "sensor_height_mm": 13.0,
+      "crop_factor": 1.9,
+      "fixed_lens": false
+    },
+    {
+      "brand": "RED",
+      "model": "KOMODO 6K",
+      "aliases": [
+        "KOMODO",
+        "KOMODO 6k",
+        "Komodo 6K"
+      ],
+      "mount": "Canon RF",
+      "sensor_width_mm": 27.03,
+      "sensor_height_mm": 14.26,
+      "crop_factor": 1.4,
+      "fixed_lens": false
+    },
+    {
+      "brand": "RED",
+      "model": "KOMODO-X",
+      "aliases": [
+        "KOMODO X",
+        "Komodo X",
+        "KOMODO-X 6K S35"
+      ],
+      "mount": "Canon RF",
+      "sensor_width_mm": 27.03,
+      "sensor_height_mm": 14.26,
+      "crop_factor": 1.4,
+      "fixed_lens": false
+    },
+    {
+      "brand": "RED",
+      "model": "V-RAPTOR 8K VV",
+      "aliases": [
+        "Raptor",
+        "8k vv"
+      ],
+      "mount": "Canon RF",
+      "sensor_width_mm": 40.96,
+      "sensor_height_mm": 21.6,
+      "crop_factor": 0.93,
+      "fixed_lens": false
+    }
+  ],
+  "lenses": [
+    {
+      "brand": "Sony",
+      "model": "FE 16-35mm F2.8 GM",
+      "aliases": [
+        "SEL1635GM",
+        "FE 16-35mm F2.8 GM (SEL1635GM)"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 16.0,
+      "focal_max_mm": 35.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 16-35mm F2.8 GM II",
+      "aliases": [
+        "SEL1635GM2"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 16.0,
+      "focal_max_mm": 35.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sony",
+      "model": "FE PZ 16-35mm F4 G",
+      "aliases": [
+        "SELP1635G",
+        "FE 16-35mm F4 PZ G"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 16.0,
+      "focal_max_mm": 35.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 24-70mm F2.8 GM",
+      "aliases": [
+        "SEL2470GM"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 24.0,
+      "focal_max_mm": 70.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 24-70mm F2.8 GM II",
+      "aliases": [
+        "SEL2470GM2"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 24.0,
+      "focal_max_mm": 70.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 24-105mm F4 G OSS",
+      "aliases": [
+        "SEL24105G"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 24.0,
+      "focal_max_mm": 105.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 20-70mm F4 G",
+      "aliases": [
+        "SEL2070G"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 20.0,
+      "focal_max_mm": 70.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 12-24mm F2.8 GM",
+      "aliases": [
+        "SEL1224GM"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 12.0,
+      "focal_max_mm": 24.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 70-200mm F2.8 GM OSS II",
+      "aliases": [
+        "SEL70200GM2"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 70.0,
+      "focal_max_mm": 200.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 14mm F1.8 GM",
+      "aliases": [
+        "SEL14F18GM"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 14.0,
+      "focal_max_mm": 14.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 20mm F1.8 G",
+      "aliases": [
+        "SEL20F18G"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 20.0,
+      "focal_max_mm": 20.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 24mm F1.4 GM",
+      "aliases": [
+        "SEL24F14GM"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 24.0,
+      "focal_max_mm": 24.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 35mm F1.4 GM",
+      "aliases": [
+        "SEL35F14GM"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 35.0,
+      "focal_max_mm": 35.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 35mm F1.8",
+      "aliases": [
+        "SEL35F18F"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 35.0,
+      "focal_max_mm": 35.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 50mm F1.2 GM",
+      "aliases": [
+        "SEL50F12GM"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 50.0,
+      "focal_max_mm": 50.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 50mm F1.4 GM",
+      "aliases": [
+        "SEL50F14GM"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 50.0,
+      "focal_max_mm": 50.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sony",
+      "model": "FE 85mm F1.4 GM II",
+      "aliases": [
+        "SEL85F14GM2"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 85.0,
+      "focal_max_mm": 85.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sony",
+      "model": "E PZ 10-20mm F4 G",
+      "aliases": [
+        "SELP1020G"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.5,
+      "focal_min_mm": 10.0,
+      "focal_max_mm": 20.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sony",
+      "model": "E 11mm F1.8",
+      "aliases": [
+        "SEL11F18"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.5,
+      "focal_min_mm": 11.0,
+      "focal_max_mm": 11.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sony",
+      "model": "E 15mm F1.4 G",
+      "aliases": [
+        "SEL15F14G"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.5,
+      "focal_min_mm": 15.0,
+      "focal_max_mm": 15.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sony",
+      "model": "E 16-55mm F2.8 G",
+      "aliases": [
+        "SEL1655G"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.5,
+      "focal_min_mm": 16.0,
+      "focal_max_mm": 55.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sony",
+      "model": "E PZ 18-105mm F4 G OSS",
+      "aliases": [
+        "SELP18105G"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.5,
+      "focal_min_mm": 18.0,
+      "focal_max_mm": 105.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sigma",
+      "model": "24-70mm F2.8 DG DN Art",
+      "aliases": [
+        "Sigma 24-70mm F2.8 DG DN",
+        "24-70mm F2.8 DG DN"
+      ],
+      "mounts": [
+        "Sony E",
+        "L-Mount"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 24.0,
+      "focal_max_mm": 70.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sigma",
+      "model": "14-24mm F2.8 DG DN Art",
+      "aliases": [
+        "Sigma 14-24mm F2.8 DG DN"
+      ],
+      "mounts": [
+        "Sony E",
+        "L-Mount"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 14.0,
+      "focal_max_mm": 24.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sigma",
+      "model": "16-28mm F2.8 DG DN Contemporary",
+      "aliases": [
+        "Sigma 16-28mm F2.8 DG DN"
+      ],
+      "mounts": [
+        "Sony E",
+        "L-Mount"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 16.0,
+      "focal_max_mm": 28.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sigma",
+      "model": "28-70mm F2.8 DG DN Contemporary",
+      "aliases": [
+        "Sigma 28-70mm F2.8 DG DN"
+      ],
+      "mounts": [
+        "Sony E",
+        "L-Mount"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 28.0,
+      "focal_max_mm": 70.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sigma",
+      "model": "18-50mm F2.8 DC DN Contemporary",
+      "aliases": [
+        "Sigma 18-50mm F2.8 DC DN"
+      ],
+      "mounts": [
+        "Sony E",
+        "L-Mount",
+        "Fujifilm X",
+        "Canon RF"
+      ],
+      "crop_factor": 1.5,
+      "focal_min_mm": 18.0,
+      "focal_max_mm": 50.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Sigma",
+      "model": "16mm F1.4 DC DN Contemporary",
+      "aliases": [
+        "Sigma 16mm F1.4 DC DN"
+      ],
+      "mounts": [
+        "Sony E",
+        "L-Mount",
+        "Fujifilm X",
+        "Canon RF",
+        "Micro Four Thirds"
+      ],
+      "crop_factor": 1.5,
+      "focal_min_mm": 16.0,
+      "focal_max_mm": 16.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sigma",
+      "model": "30mm F1.4 DC DN Contemporary",
+      "aliases": [
+        "Sigma 30mm F1.4 DC DN"
+      ],
+      "mounts": [
+        "Sony E",
+        "L-Mount",
+        "Fujifilm X",
+        "Canon RF",
+        "Micro Four Thirds"
+      ],
+      "crop_factor": 1.5,
+      "focal_min_mm": 30.0,
+      "focal_max_mm": 30.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sigma",
+      "model": "56mm F1.4 DC DN Contemporary",
+      "aliases": [
+        "Sigma 56mm F1.4 DC DN"
+      ],
+      "mounts": [
+        "Sony E",
+        "L-Mount",
+        "Fujifilm X",
+        "Canon RF",
+        "Micro Four Thirds"
+      ],
+      "crop_factor": 1.5,
+      "focal_min_mm": 56.0,
+      "focal_max_mm": 56.0,
+      "is_zoom": false
+    },
+    {
+      "brand": "Sigma",
+      "model": "18-35mm F1.8 DC HSM Art",
+      "aliases": [
+        "Sigma 18-35mm F1.8",
+        "18-35mm F1.8"
+      ],
+      "mounts": [
+        "Canon EF",
+        "Nikon F",
+        "Sony A",
+        "Pentax K"
+      ],
+      "crop_factor": 1.5,
+      "focal_min_mm": 18.0,
+      "focal_max_mm": 35.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Tamron",
+      "model": "17-28mm F2.8 Di III RXD",
+      "aliases": [
+        "Tamron 17-28mm F2.8"
+      ],
+      "mounts": [
+        "Sony E"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 17.0,
+      "focal_max_mm": 28.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Tamron",
+      "model": "28-75mm F2.8 Di III VXD G2",
+      "aliases": [
+        "Tamron 28-75mm F2.8 G2",
+        "Tamron 28-75mm F2.8"
+      ],
+      "mounts": [
+        "Sony E",
+        "Nikon Z"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 28.0,
+      "focal_max_mm": 75.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Tamron",
+      "model": "17-70mm F2.8 Di III-A VC RXD",
+      "aliases": [
+        "Tamron 17-70mm F2.8"
+      ],
+      "mounts": [
+        "Sony E",
+        "Fujifilm X"
+      ],
+      "crop_factor": 1.5,
+      "focal_min_mm": 17.0,
+      "focal_max_mm": 70.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Canon",
+      "model": "RF 15-35mm F2.8 L IS USM",
+      "aliases": [
+        "RF15-35mm F2.8 L IS USM"
+      ],
+      "mounts": [
+        "Canon RF"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 15.0,
+      "focal_max_mm": 35.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Canon",
+      "model": "RF 24-70mm F2.8 L IS USM",
+      "aliases": [
+        "RF24-70mm F2.8 L IS USM"
+      ],
+      "mounts": [
+        "Canon RF"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 24.0,
+      "focal_max_mm": 70.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Canon",
+      "model": "RF 24-105mm F4 L IS USM",
+      "aliases": [
+        "RF24-105mm F4 L IS USM"
+      ],
+      "mounts": [
+        "Canon RF"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 24.0,
+      "focal_max_mm": 105.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Canon",
+      "model": "EF 16-35mm F2.8L III USM",
+      "aliases": [
+        "EF16-35mm f/2.8L III USM"
+      ],
+      "mounts": [
+        "Canon EF"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 16.0,
+      "focal_max_mm": 35.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Canon",
+      "model": "EF 24-70mm F2.8L II USM",
+      "aliases": [
+        "EF24-70mm f/2.8L II USM"
+      ],
+      "mounts": [
+        "Canon EF"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 24.0,
+      "focal_max_mm": 70.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Canon",
+      "model": "EF 24-105mm F4L IS II USM",
+      "aliases": [
+        "EF24-105mm f/4L IS II USM"
+      ],
+      "mounts": [
+        "Canon EF"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 24.0,
+      "focal_max_mm": 105.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Nikon",
+      "model": "NIKKOR Z 14-24mm f/2.8 S",
+      "aliases": [
+        "Z 14-24mm f/2.8 S"
+      ],
+      "mounts": [
+        "Nikon Z"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 14.0,
+      "focal_max_mm": 24.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Nikon",
+      "model": "NIKKOR Z 24-70mm f/2.8 S",
+      "aliases": [
+        "Z 24-70mm f/2.8 S"
+      ],
+      "mounts": [
+        "Nikon Z"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 24.0,
+      "focal_max_mm": 70.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Nikon",
+      "model": "NIKKOR Z 24-120mm f/4 S",
+      "aliases": [
+        "Z 24-120mm f/4 S"
+      ],
+      "mounts": [
+        "Nikon Z"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 24.0,
+      "focal_max_mm": 120.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Fujifilm",
+      "model": "XF 16-55mm F2.8 R LM WR",
+      "aliases": [
+        "XF16-55mmF2.8 R LM WR"
+      ],
+      "mounts": [
+        "Fujifilm X"
+      ],
+      "crop_factor": 1.5,
+      "focal_min_mm": 16.0,
+      "focal_max_mm": 55.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Fujifilm",
+      "model": "XF 18-55mm F2.8-4 R LM OIS",
+      "aliases": [
+        "XF18-55mmF2.8-4 R LM OIS"
+      ],
+      "mounts": [
+        "Fujifilm X"
+      ],
+      "crop_factor": 1.5,
+      "focal_min_mm": 18.0,
+      "focal_max_mm": 55.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Panasonic",
+      "model": "Lumix S PRO 24-70mm F2.8",
+      "aliases": [
+        "S-E2470"
+      ],
+      "mounts": [
+        "L-Mount"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 24.0,
+      "focal_max_mm": 70.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Panasonic",
+      "model": "Lumix S 20-60mm F3.5-5.6",
+      "aliases": [
+        "S-R2060"
+      ],
+      "mounts": [
+        "L-Mount"
+      ],
+      "crop_factor": 1.0,
+      "focal_min_mm": 20.0,
+      "focal_max_mm": 60.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "Panasonic",
+      "model": "Leica DG Vario-Elmarit 12-60mm F2.8-4.0",
+      "aliases": [
+        "H-ES12060"
+      ],
+      "mounts": [
+        "Micro Four Thirds"
+      ],
+      "crop_factor": 2.0,
+      "focal_min_mm": 12.0,
+      "focal_max_mm": 60.0,
+      "is_zoom": true
+    },
+    {
+      "brand": "OM System",
+      "model": "M.Zuiko Digital ED 12-40mm F2.8 PRO",
+      "aliases": [
+        "Olympus 12-40mm F2.8 PRO",
+        "12-40mm F2.8 PRO"
+      ],
+      "mounts": [
+        "Micro Four Thirds"
+      ],
+      "crop_factor": 2.0,
+      "focal_min_mm": 12.0,
+      "focal_max_mm": 40.0,
+      "is_zoom": true
+    }
+  ]
+}
