@@ -5,7 +5,7 @@ vec2 undistort_point(vec2 pos) {
     float NEWTON_EPS = 0.00001;
 
     float rd = length(pos);
-    if (rd == 0.0) { return vec2(0.0, 0.0); }
+    if (rd == 0.0) { return pos; }
 
     float ru = rd;
     for (int i = 0; i < 10; ++i) {
@@ -15,22 +15,22 @@ vec2 undistort_point(vec2 pos) {
         }
         if (i > 5) {
             // Does not converge, no real solution in this area?
-            return vec2(0.0, 0.0);
+            return vec2(-99999.0, -99999.0);
         }
 
         ru -= fru / (4.0 * params.k1.x * ru * ru * ru + 3.0 * params.k1.y * ru * ru + 2.0 * params.k1.z * ru + 1.0);
     }
     if (ru < 0.0) {
-        return vec2(0.0, 0.0);
+        return vec2(-99999.0, -99999.0);
     }
 
-    ru /= rd;
-
-    return pos * ru;
+    // `ru` is the radius in the z=1 plane; the pipeline carries rays as angle vectors
+    return pos * (atan(ru) / rd);
 }
 
 vec2 distort_point(float x, float y, float z) {
-    vec2 pos = vec2(x, y) / z;
+    // A rectilinear model has no image of a ray at or past 90°: send it far outside the frame
+    vec2 pos = z > 1e-9? vec2(x, y) / z : vec2(x, y) * 1e9;
     float ru2 = (pos.x * pos.x + pos.y * pos.y);
     float r = sqrt(ru2);
     float poly3 = params.k1.x * ru2 * r + params.k1.y * ru2 + params.k1.z * r + 1.0;

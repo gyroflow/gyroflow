@@ -164,6 +164,11 @@ Item {
         chart.viewMode = i;
         triggerUpdateChart("");
     }
+    function setFocalLengthVisible(v: bool): void {
+        a10.checked = v;
+        chart.setAxisVisible(10, v);
+        chart.setAxisVisible(11, v);
+    }
     function triggerUpdateChart(series: string): void {
         if (series == "8") chartUpdateTimer.zooming = true;
         else chartUpdateTimer.axes = true;
@@ -266,7 +271,7 @@ Item {
             }
             checked: chart.getAxisVisible(10) || chart.getAxisVisible(11);
             tooltip: qsTr("Focal length");
-            visible: controller.has_per_frame_focal_length;
+            visible: controller.has_varying_focal_length;
         }
     }
     Column {
@@ -410,25 +415,37 @@ Item {
                                 iconName: "ease_in";
                                 text: qsTr("Ease in");
                                 checkable: true;
-                                onTriggered: keyframeContextMenu.updateEasing();
+                                onTriggered: { if (easeIn.checked || easeOut.checked) smoothKf.checked = false; keyframeContextMenu.updateEasing(); }
                             }
                             Action {
                                 id: easeOut;
                                 iconName: "ease_out";
                                 text: qsTr("Ease out");
                                 checkable: true;
-                                onTriggered: keyframeContextMenu.updateEasing();
+                                onTriggered: { if (easeIn.checked || easeOut.checked) smoothKf.checked = false; keyframeContextMenu.updateEasing(); }
+                            }
+                            Action {
+                                id: smoothKf;
+                                iconName: "ease_smooth";
+                                text: qsTr("Smooth");
+                                checkable: true;
+                                onTriggered: { if (smoothKf.checked) { easeIn.checked = false; easeOut.checked = false; } keyframeContextMenu.updateEasing(); }
                             }
                             function updateEasingMenu(): void {
                                 let e = controller.keyframe_easing(pressedKeyframe, pressedKeyframeTs);
-                                easeIn.checked  = e == "EaseIn"  || e == "EaseInOut";
-                                easeOut.checked = e == "EaseOut" || e == "EaseInOut";
+                                easeIn.checked   = e == "EaseIn"  || e == "EaseInOut";
+                                easeOut.checked  = e == "EaseOut" || e == "EaseInOut";
+                                smoothKf.checked = e == "Smooth";
                             }
                             function updateEasing(): void {
                                 let e = "NoEasing";
-                                if (easeIn.checked) e = "EaseIn";
-                                if (easeOut.checked) e = "EaseOut";
-                                if (easeIn.checked && easeOut.checked) e = "EaseInOut";
+                                if (smoothKf.checked) {
+                                    e = "Smooth";
+                                } else {
+                                    if (easeIn.checked) e = "EaseIn";
+                                    if (easeOut.checked) e = "EaseOut";
+                                    if (easeIn.checked && easeOut.checked) e = "EaseInOut";
+                                }
                                 controller.set_keyframe_easing(pressedKeyframe, pressedKeyframeTs, e);
                             }
                         }
@@ -664,6 +681,8 @@ Item {
                     id: addCalibAction;
                     iconName: "plus";
                     text: qsTr("Add calibration point");
+                    // One calibration at a time (`Controller::add_calibration_point`)
+                    enabled: !controller.calib_in_progress;
                     onTriggered: {
                         const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
                         controller.add_calibration_point(pos * root.durationMs * 1000, calibrator_window.lensCalib.noMarker);

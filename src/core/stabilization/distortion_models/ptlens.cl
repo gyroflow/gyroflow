@@ -5,7 +5,7 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
     float NEWTON_EPS = 0.00001;
 
     float rd = length(pos);
-    if (rd == 0.0) { return (float2)(0.0f, 0.0f); }
+    if (rd == 0.0) { return pos; }
 
     float ru = rd;
     for (int i = 0; i < 10; ++i) {
@@ -15,22 +15,22 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
         }
         if (i > 5) {
             // Does not converge, no real solution in this area?
-            return (float2)(0.0f, 0.0f);
+            return (float2)(-99999.0f, -99999.0f);
         }
 
         ru -= fru / (4.0 * params->k[0] * ru * ru * ru + 3.0 * params->k[1] * ru * ru + 2.0 * params->k[2] * ru + 1.0);
     }
     if (ru < 0.0) {
-        return (float2)(0.0f, 0.0f);
+        return (float2)(-99999.0f, -99999.0f);
     }
 
-    ru /= rd;
-
-    return pos * ru;
+    // `ru` is the radius in the z=1 plane; the pipeline carries rays as angle vectors
+    return pos * (atan(ru) / rd);
 }
 
 float2 distort_point(float x, float y, float z, __global KernelParams *params) {
-    float2 pos = (float2)(x, y) / z;
+    // A rectilinear model has no image of a ray at or past 90°: send it far outside the frame
+    float2 pos = z > 1e-9f? (float2)(x, y) / z : (float2)(x, y) * 1e9f;
     float ru2 = (pos.x * pos.x + pos.y * pos.y);
     float r = sqrt(ru2);
     float poly3 = params->k[0] * ru2 * r + params->k[1] * ru2 + params->k[2] * r + 1.0;

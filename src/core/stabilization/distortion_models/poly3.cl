@@ -7,7 +7,7 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
     float inv_k1 = (1.0 / params->k[0]);
 
     float rd = length(pos);
-    if (rd == 0.0) { return (float2)(0.0f, 0.0f); }
+    if (rd == 0.0) { return pos; }
 
     float rd_div_k1 = rd * inv_k1;
 
@@ -26,22 +26,22 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
         }
         if (i > 5) {
             // Does not converge, no real solution in this area?
-            return (float2)(0.0f, 0.0f);
+            return (float2)(-99999.0f, -99999.0f);
         }
 
         ru -= fru / (3.0 * ru * ru + inv_k1);
     }
     if (ru < 0.0) {
-        return (float2)(0.0f, 0.0f);
+        return (float2)(-99999.0f, -99999.0f);
     }
 
-    ru /= rd;
-
-    return pos * ru;
+    // `ru` is the radius in the z=1 plane; the pipeline carries rays as angle vectors
+    return pos * (atan(ru) / rd);
 }
 
 float2 distort_point(float x, float y, float z, __global KernelParams *params) {
-    float2 pos = (float2)(x, y) / z;
+    // A rectilinear model has no image of a ray at or past 90°: send it far outside the frame
+    float2 pos = z > 1e-9f? (float2)(x, y) / z : (float2)(x, y) * 1e9f;
     float poly2 = params->k[0] * (pos.x * pos.x + pos.y * pos.y) + 1.0;
     return pos * poly2;
 }

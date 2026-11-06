@@ -315,6 +315,13 @@ Rectangle {
                                 ]);
                                 return;
                             }
+                            const overwrittenInput = controller.output_overwrites_input(outputFile.folderUrl, outputFile.filename, window.exportSettings.outCodec);
+                            if (overwrittenInput) {
+                                messageBox(Modal.Error, qsTr("Rendering to this output would write over %1, which it's rendered from. Choose another name or folder for the output.").arg(overwrittenInput), [
+                                    { text: qsTr("Ok"), accent: true }
+                                ]);
+                                return;
+                            }
                             const exists = filesystem.exists_in_folder(outputFile.folderUrl, outputFile.filename.replace("_%05d", "_00001"));
                             if ((exists || render_queue.file_exists_in_folder(outputFile.folderUrl, outputFile.filename)) && !allowFile) {
                                 function overwrite() {
@@ -521,20 +528,27 @@ Rectangle {
         videoArea: videoArea;
     }
 
-    function showNotification(type: int, text: string, textFormat: var): void {
+    function showNotification(type: int, text: string, textFormat: var, container: var, timeoutMs: var): void {
         if (typeof textFormat === "undefined" || !textFormat) textFormat = text.includes("<b>")? Text.StyledText : Text.AutoText; // default
-        const im = Qt.createComponent("components/InfoMessage.qml").createObject(window.videoArea.infoMessages, {
+        const im = Qt.createComponent("components/InfoMessage.qml").createObject(container || window.videoArea.infoMessages, {
             text: text,
             type: type - 1,
             opacity: 0
         });
         im.t.textFormat = textFormat;
         im.opacity = 1;
-        Qt.createQmlObject("import QtQuick; Timer { interval: 5000; running: true; }", im, "t1").onTriggered.connect(() => {
+        Qt.createQmlObject("import QtQuick; Timer { interval: " + (+timeoutMs || 5000) + "; running: true; }", im, "t1").onTriggered.connect(() => {
             im.opacity = 0;
             im.height = -5 * dpiScale;
             im.destroy(700);
         });
+    }
+
+    // Notification container of the window that owns `parentItem`, falling back to the main window
+    function notificationContainer(parentItem: var): var {
+        const win = parentItem && parentItem.Window? parentItem.Window.window : null;
+        if (win && win.videoArea && win.videoArea.infoMessages) return win.videoArea.infoMessages;
+        return window.videoArea.infoMessages;
     }
 
     function messageBox(type: int, text: string, buttons: list<var>, parent: QtObject, textFormat: var, identifier: var): Modal {
@@ -551,7 +565,7 @@ Rectangle {
                 });
             }
             if (buttons.length == 1) {
-                showNotification(type, text, textFormat);
+                showNotification(type, text, textFormat, notificationContainer(parent));
                 return null;
             } else {
                 console.log("previously clicked", clickedButton);
@@ -631,6 +645,36 @@ Rectangle {
             const el = messageBox(Modal.Info, heading + changelog, [ { text: qsTr("Download"),accent: true, clicked: () => openUpdatePage() },{ text: qsTr("Close") }], undefined, Text.MarkdownText);
             el.t.horizontalAlignment = Text.AlignLeft;
         }
+        function onServer_message(json: string): void {
+            const msg = JSON.parse(json);
+            const identifier = msg.id? "message-" + msg.id : "";
+            if (identifier && +settings.value("dontShowAgain-" + identifier, 0)) return;
+            if (identifier && msg.once) settings.setValue("dontShowAgain-" + identifier, 1);
+
+            const icons = { none: Modal.NoIcon, info: Modal.Info, warning: Modal.Warning, error: Modal.Error, success: Modal.Success, question: Modal.Question };
+            const icon = icons[msg.icon] ?? Modal.Info;
+            const text = (msg.text || "").replace(/\n/g, "<br>");
+            switch (msg.type) {
+                case "notification":
+                    showNotification(icon, text, Text.StyledText, undefined, (msg.timeout || 0) * 1000);
+                    break;
+                case "popup": {
+                    const buttons = (msg.buttons || [{ text: qsTr("Close") }]).map(b => ({ text: b.text, accent: b.accent, clicked: () => { if (b.url) Qt.openUrlExternally(b.url); } }));
+                    const el = messageBox(icon, text, buttons, undefined, Text.StyledText, msg.dont_show_again? identifier : "");
+                    el.dontShowAgain.text = qsTr("Don't show again");
+                    break;
+                }
+                case "image": {
+                    const el = Qt.createComponent("components/ImageModal.qml").createObject(window, { source: msg.image, url: msg.url || "", links: msg.links || [], showDontShowAgain: !!(identifier && msg.dont_show_again) });
+                    window.isDialogOpened = true;
+                    el.closed.connect((dontShowAgain) => {
+                        window.isDialogOpened = false;
+                        if (dontShowAgain) settings.setValue("dontShowAgain-" + identifier, 1);
+                    });
+                    break;
+                }
+            }
+        }
         function onRequest_location(url: string, type: string): void {
             gfFileDialog.projectType = type;
             gfFileDialog.currentFolder = filesystem.get_folder(url);
@@ -643,6 +687,9 @@ Rectangle {
         title: qsTr("Select file destination");
         nameFilters: ["*.json"];
         type: "output-profile";
+        property var cb: null;
+        onAccepted: { const f = cb; cb = null; if (f) f(selectedFile); }
+        onRejected: cb = null;
     }
     FileDialog {
         id: gfFileDialog;
@@ -669,8 +716,9 @@ Rectangle {
 
     Component.onCompleted: {
         controller.check_updates();
+        controller.check_server_message();
 
-        QT_TRANSLATE_NOOP("App", "An error occured: %1");
+        QT_TRANSLATE_NOOP("App", "An error occurred: %1");
         QT_TRANSLATE_NOOP("App", "Gyroflow file exported to %1.");
         QT_TRANSLATE_NOOP("App", "--REPLACE_WITH_NATIVE_NAME_OF_YOUR_LANGUAGE_IN_YOUR_LANGUAGE--", "Translate this to the native name of your language");
         QT_TRANSLATE_NOOP("App", "Gyroflow will shut down the computer in 60 seconds because all tasks have been completed.");
@@ -716,11 +764,17 @@ Rectangle {
         if (text.startsWith("file_exists:")) {
             return qsTr("Output file already exists, do you want to overwrite it?");
         }
+        if (text.startsWith("camera_tracks:")) {
+            return qsTr("Not all of the camera's tracks and metadata could be copied to the output:") + "\n" + text.substring(14);
+        }
         if (text.startsWith("uses_cpu")) {
             return qsTr("GPU encoder failed to initialize and rendering is done on the CPU, which is much slower.\nIf you have a modern device, latest GPU drivers and you think this shouldn't happen, report this on GitHub including gyroflow.log file.");
         }
         if (text.includes("hevc") && text.includes("-12912")) {
             return qsTr("Your GPU doesn't support H.265/HEVC encoding, try to use H.264/AVC or disable GPU encoding in Export settings.");
+        }
+        if (text.includes("No working encoder for AV1")) {
+            return qsTr("Your GPU can't encode AV1. AV1 encoding requires NVIDIA GeForce RTX 40, AMD Radeon RX 7000, Intel Arc or a newer GPU.\nIf your computer has more than one GPU, select another one in \"Device for rendering\" in the advanced export settings.");
         }
         if (text.includes("failed to decode picture") && text.includes("-12909")) {
             return qsTr("GPU decoder failed to decode this file. Disable GPU decoding in \"Advanced\" and try again.") + "\n\n" + text;
@@ -810,9 +864,11 @@ Rectangle {
             ], undefined, Text.MarkdownText);
         }
     }
-    function getSaveFileUrl(folder: url, filename: string, cb, type: string): void {
+    function getSaveFileUrl(folder: url, filename: string, cb, type: string, parentItem: var): void {
+        const parentItm = parentItem || window;
         if (isSandboxed) {
-            const opf = Qt.createComponent("components/OutputPathField.qml").createObject(window, { visible: false });
+            const opf = Qt.createComponent("components/OutputPathField.qml").createObject(parentItm, { visible: false });
+            opf.folderSelectionCanceled.connect(function() { opf.destroy(); });
             opf.selectFolder(folder, function(folder_url) {
                 cb(filesystem.get_file_url(folder_url, filename, true));
                 opf.destroy();
@@ -822,18 +878,14 @@ Rectangle {
         if (filesystem.can_create_file(folder, filename)) {
             cb(filesystem.get_file_url(folder, filename, true));
         } else {
-            if (type == "Lens profile") {
-                profileFileDialog.currentFolder = folder;
-                profileFileDialog.selectedFile = filesystem.get_file_url(folder, filename, true);
-                profileFileDialog.accepted.disconnect();
-                profileFileDialog.accepted.connect(function() { cb(profileFileDialog.selectedFile); });
-                profileFileDialog.open();
-            } else {
-                gfFileDialog.projectType = type;
-                gfFileDialog.currentFolder = folder;
-                gfFileDialog.selectedFile = filesystem.get_file_url(folder, filename, true);
-                gfFileDialog.open();
-            }
+            const dialog = type == "Lens profile"? profileFileDialog : gfFileDialog;
+            if (type == "Lens profile") { profileFileDialog.cb = cb; }
+            else                        { gfFileDialog.projectType = type; }
+            // Present the dialog on top of the window that asked for it, not always the main one
+            dialog.parentWindow = (parentItm.Window && parentItm.Window.window) || window.Window.window;
+            dialog.currentFolder = folder;
+            dialog.selectedFile = filesystem.get_file_url(folder, filename, true);
+            dialog.open();
         }
     }
 

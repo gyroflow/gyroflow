@@ -6,12 +6,18 @@
 // Trailing zero slots are a mathematical no-op for shorter calibrations.
 
 use crate::types::*;
-use crate::glam::{ Vec2, vec2, Vec3 };
+use crate::glam::{ Vec2, vec2, Vec3, Vec4 };
 pub struct GenericPolynomial { }
 
 impl GenericPolynomial {
     pub fn undistort_point(point: Vec2, params: &KernelParams) -> Vec2 {
         const EPS: f32 = 1e-6;
+
+        // No calibration: a pinhole, so the image radius is `tan θ`
+        if params.k1 == Vec4::ZERO && params.k2 == Vec4::ZERO && params.k3 == Vec4::ZERO {
+            let r = point.length();
+            return if r < 1e-12 { point } else { point * (r.atan() / r) };
+        }
 
         let theta_d = point.length();
 
@@ -23,7 +29,7 @@ impl GenericPolynomial {
         if theta_d.abs() > EPS {
             theta = 0.0;
 
-            let mut i = 0; while i < 10 {
+            let mut i = 0; while i < 15 {
                 let theta2  = theta*theta;
                 let theta3  = theta2*theta;
                 let theta4  = theta2*theta2;
@@ -46,9 +52,11 @@ impl GenericPolynomial {
                 let k9_theta9   = params.k3.y * theta9;
                 let k10_theta10 = params.k3.z * theta10;
                 let k11_theta11 = params.k3.w * theta11;
-                let theta_fix = (theta * (k0 + k1_theta1 + k2_theta2 + k3_theta3 + k4_theta4 + k5_theta5 + k6_theta6 + k7_theta7 + k8_theta8 + k9_theta9 + k10_theta10 + k11_theta11) - theta_d)
+                let mut theta_fix = (theta * (k0 + k1_theta1 + k2_theta2 + k3_theta3 + k4_theta4 + k5_theta5 + k6_theta6 + k7_theta7 + k8_theta8 + k9_theta9 + k10_theta10 + k11_theta11) - theta_d)
                                 /
                                 (k0 + 2.0 * k1_theta1 + 3.0 * k2_theta2 + 4.0 * k3_theta3 + 5.0 * k4_theta4 + 6.0 * k5_theta5 + 7.0 * k6_theta6 + 8.0 * k7_theta7 + 9.0 * k8_theta8 + 10.0 * k9_theta9 + 11.0 * k10_theta10 + 12.0 * k11_theta11);
+
+                theta_fix = theta_fix.max(-0.9).min(0.9);
 
                 theta = theta - theta_fix;
                 if theta_fix.abs() < EPS {
@@ -58,12 +66,16 @@ impl GenericPolynomial {
                 i += 1;
             }
 
-            scale = theta.tan() / theta_d;
+            scale = theta / theta_d;
         } else {
             converged = true;
         }
 
         let theta_flipped = (theta_d < 0.0 && theta > 0.0) || (theta_d > 0.0 && theta < 0.0);
+
+        // Nothing past 180° is a ray the pipeline can carry: `ray_to_dir` builds the direction out of
+        // `sin θ`, which turns over there. See `distortion_models::generic_polynomial`
+        if theta.abs() >= 3.1415927 { return vec2(-99999.0, -99999.0); }
 
         if converged && !theta_flipped {
             return point * scale;
@@ -72,11 +84,16 @@ impl GenericPolynomial {
     }
 
     pub fn distort_point(point: Vec3, params: &KernelParams) -> Vec2 {
-        let pt = vec2(point.x / point.z, point.y / point.z);
+        // No calibration: a pinhole, which has no image of a ray at or past 90°
+        if params.k1 == Vec4::ZERO && params.k2 == Vec4::ZERO && params.k3 == Vec4::ZERO {
+            return if point.z > 1e-9 { vec2(point.x / point.z, point.y / point.z) } else { vec2(point.x * 1e9, point.y * 1e9) };
+        }
+        let pt = vec2(point.x, point.y);
 
         let r = pt.length();
 
-        let theta = r.atan();
+        // atan2 against the ray's own z, so the angle is right past 90° too
+        let theta = r.atan2(point.z);
         let theta2  = theta*theta;
         let theta3  = theta2*theta;
         let theta4  = theta2*theta2;
@@ -102,7 +119,7 @@ impl GenericPolynomial {
                     + theta11 * params.k3.z
                     + theta12 * params.k3.w;
 
-        let scale = if r == 0.0 { 1.0 } else { theta_d / r };
+        let scale = if r < 1e-12 { 1.0 } else { theta_d / r };
 
         pt * scale
     }

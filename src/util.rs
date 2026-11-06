@@ -61,6 +61,33 @@ pub fn qt_queued_callback_mut<T: QObject + 'static, T2: Send + 'static, F: FnMut
     })
 }
 
+/// Runs jobs one after another in the order they were queued, on a thread of its own, started with the first job.
+/// For jobs that wait for the previous one to finish: a job of the rayon pool (`core::run_threaded`) waiting for its turn
+/// blocks a worker of the pool, and a worker that waits for its own parallel work runs other jobs of the pool meanwhile,
+/// so the next job waiting for the turn can start on the very thread that holds it, and wait forever
+#[derive(Default)]
+pub struct SerialQueue {
+    sender: std::sync::OnceLock<std::sync::mpsc::Sender<Box<dyn FnOnce() + Send>>>,
+}
+impl SerialQueue {
+    pub fn run(&self, job: impl FnOnce() + Send + 'static) {
+        let sender = self.sender.get_or_init(|| {
+            let (sender, receiver) = std::sync::mpsc::channel::<Box<dyn FnOnce() + Send>>();
+            std::thread::Builder::new().name("SerialQueue".into()).spawn(move || {
+                // Ends when the queue is dropped
+                for job in receiver {
+                    // A panic would end the thread, and every job queued after it would never run
+                    if std::panic::catch_unwind(std::panic::AssertUnwindSafe(job)).is_err() {
+                        ::log::error!("A job of the serial queue panicked");
+                    }
+                }
+            }).expect("Failed to start the serial queue thread");
+            sender
+        });
+        let _ = sender.send(Box::new(job));
+    }
+}
+
 #[macro_export]
 macro_rules! wrap_simple_method {
     ($name:ident, $($param:ident:$type:ty),*) => {
@@ -234,31 +261,56 @@ pub fn set_android_context() {
     }
 }
 
+/// The crates that log a lot (`init_logging`): only their warnings and errors are logged. Those are what the log is read
+/// for when something of theirs fails (a GPU's device lost, kernels that don't compile)
+const NOISY_CRATES: [&str; 8] = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "pliron", "cubecl_wgpu" ];
+
+/// A logger without the debug and info records of `NOISY_CRATES`, which simplelog's own filters can't keep warnings of
+struct WithoutNoise(Box<dyn simplelog::SharedLogger>);
+impl WithoutNoise {
+    fn wrap(logger: Box<dyn simplelog::SharedLogger>) -> Box<dyn simplelog::SharedLogger> { Box::new(Self(logger)) }
+    fn is_noise(metadata: &::log::Metadata) -> bool {
+        metadata.level() > ::log::Level::Warn && NOISY_CRATES.iter().any(|x| metadata.target().starts_with(x))
+    }
+}
+impl ::log::Log for WithoutNoise {
+    fn enabled(&self, metadata: &::log::Metadata) -> bool { !Self::is_noise(metadata) && self.0.enabled(metadata) }
+    fn log(&self, record: &::log::Record) { if !Self::is_noise(record.metadata()) { self.0.log(record); } }
+    fn flush(&self) { self.0.flush(); }
+}
+impl simplelog::SharedLogger for WithoutNoise {
+    fn level(&self) -> simplelog::LevelFilter { self.0.level() }
+    fn config(&self) -> Option<&simplelog::Config> { self.0.config() }
+    fn as_log(self: Box<Self>) -> Box<dyn ::log::Log> { self }
+}
+
 pub fn init_logging() {
     use simplelog::*;
 
-    let log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls", "mdk" ]
-        .into_iter()
-        .fold(ConfigBuilder::new(), |mut cfg, x| { cfg.add_filter_ignore_str(x); cfg })
+    // MDK's own log only in the file
+    let log_config = ConfigBuilder::new()
+        .add_filter_ignore_str("mdk")
+        // Qt and MDK can log while destroying a foreign render thread, after
+        // Rust's own thread-local `Thread` has already been destroyed.
+        .set_thread_level(LevelFilter::Off)
         .build();
-    let file_log_config = [ "mp4parse", "wgpu", "naga", "akaze", "ureq", "rustls" ]
-        .into_iter()
-        .fold(ConfigBuilder::new(), |mut cfg, x| { cfg.add_filter_ignore_str(x); cfg })
+    let file_log_config = ConfigBuilder::new()
+        .set_thread_level(LevelFilter::Off)
         .build();
 
     #[cfg(target_os = "android")]
-    WriteLogger::init(LevelFilter::Debug, log_config, crate::util::AndroidLog::default()).unwrap();
+    CombinedLogger::init(vec![WithoutNoise::wrap(WriteLogger::new(LevelFilter::Debug, log_config, crate::util::AndroidLog::default()))]).unwrap();
 
     #[cfg(not(target_os = "android"))]
     {
         let exe_loc = gyroflow_core::settings::data_dir().join("gyroflow.log");
         if let Ok(file_log) = std::fs::File::create(exe_loc) {
             let _ = CombinedLogger::init(vec![
-                TermLogger::new(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto),
-                WriteLogger::new(LevelFilter::Debug, file_log_config, file_log)
+                WithoutNoise::wrap(TermLogger::new(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto)),
+                WithoutNoise::wrap(WriteLogger::new(LevelFilter::Debug, file_log_config, file_log))
             ]);
         } else {
-            let _ = TermLogger::init(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto);
+            let _ = CombinedLogger::init(vec![WithoutNoise::wrap(TermLogger::new(LevelFilter::Debug, log_config, TerminalMode::Mixed, ColorChoice::Auto))]);
         }
     }
 
@@ -471,6 +523,19 @@ pub fn image_to_b64(img: QImage) -> QString {
         b64.append(QString::fromLatin1(byteArray.toBase64().data()));
         return b64;
     })
+}
+
+pub fn download_as_data_url(url: &str) -> Option<String> {
+    let mut response = ureq::get(url).call().ok()?;
+    let mime = response.body().mime_type()?.to_owned();
+    if !mime.starts_with("image/") { return None; }
+    let data = response.body_mut().read_to_vec().ok()?;
+    let ptr = data.as_ptr();
+    let len = data.len();
+    let b64 = cpp!(unsafe [ptr as "const char *", len as "size_t"] -> QString as "QString" {
+        return QString::fromLatin1(QByteArray::fromRawData(ptr, len).toBase64());
+    });
+    Some(format!("data:{mime};base64,{b64}"))
 }
 
 pub fn update_file_times(output_url: &str, input_url: &str, additional_ms: Option<f64>) {

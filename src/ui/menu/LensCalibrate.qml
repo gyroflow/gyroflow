@@ -21,6 +21,8 @@ MenuItem {
     property alias infoList: infoList;
     property alias maxSharpness: maxSharpness;
     property var calibrationInfo: ({});
+    // OpenCV's random sets of frames are what runs: its method, on a model OpenCV has (`LensCalibrator::calibrate`)
+    readonly property bool opencvSearch: calibMethod.currentIndex == 0 && calibModel.currentIndex != 2;
 
     property int videoWidth: 0;
     property int videoHeight: 0;
@@ -51,6 +53,12 @@ MenuItem {
             xStretch.valueChanged();
             yStretch.valueChanged();
         }
+    }
+    // Every file gets a new calibrator controller (`ui_tools.init_calibrator`), which starts from the defaults: give it
+    // the choices made here
+    function applyCalibrationChoice(): void {
+        controller.calibration_model = calibModel.currentIndex;
+        controller.calibration_method = calibMethod.currentIndex;
     }
     function resetMetadata(): void {
         calib.calibrationInfo = {
@@ -133,9 +141,27 @@ MenuItem {
         property alias calib_everyNthFrame: everyNthFrame.value;
         property alias calib_iterations: iterations.value;
         property alias calib_maxSharpness: maxSharpness.value;
+        property alias calib_method: calibMethod.currentIndex;
+        property alias calib_model: calibModel.currentIndex;
 
         Component.onCompleted: settings.init(sett);
         function propChanged() { settings.propChanged(sett); }
+    }
+
+    function exportProfile(fileUrl: url, notify: bool): void {
+        const save = (upload) => {
+            // `export_lens_profile` reports failures itself, via `error()` -> a message box
+            if (controller.export_lens_profile(fileUrl, calib.calibrationInfo, upload) && notify)
+                calibrator_window.showNotification(Modal.Info, qsTr("Lens profile exported to %1.").arg("<b>" + filesystem.display_url(fileUrl) + "</b>"));
+        };
+        if (uploadProfile.checked) {
+            messageBox(Modal.Info, qsTr("By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.\nDo you want to submit your profile?"), [
+                { text: qsTr("Yes"), accent: true, clicked: () => save(true) },
+                { text: qsTr("No"),                clicked: () => save(false) }
+            ]);
+        } else {
+            save(false);
+        }
     }
 
     FileDialog {
@@ -146,16 +172,7 @@ MenuItem {
         title: qsTr("Export lens profile");
         nameFilters: Qt.platform.os == "android"? undefined : [qsTr("Lens profiles") + " (*.json)"];
         type: "output-preset";
-        onAccepted: {
-            if (uploadProfile.checked) {
-                messageBox(Modal.Info, qsTr("By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.\nDo you want to submit your profile?"), [
-                    { text: qsTr("Yes"), accent: true, clicked: () => controller.export_lens_profile(selectedFile, calib.calibrationInfo, true) },
-                    { text: qsTr("No"),                clicked: () => controller.export_lens_profile(selectedFile, calib.calibrationInfo, false) }
-                ]);
-            } else {
-                controller.export_lens_profile(selectedFile, calib.calibrationInfo, uploadProfile.checked);
-            }
-        }
+        onAccepted: calib.exportProfile(selectedFile, false);
         Component.onCompleted: {
             if (Qt.platform.os != "android" && Qt.platform.os != "ios") {
                 currentFolder = filesystem.path_to_url(settings.dataDir("lens_profiles"));
@@ -195,6 +212,8 @@ MenuItem {
     Label {
         position: Label.LeftPosition;
         text: qsTr("Max calibration points");
+        // Only OpenCV's search picks sets of frames; Gyroflow's fits them all
+        visible: calib.opencvSearch;
 
         NumberField {
             id: maxPoints;
@@ -267,6 +286,78 @@ MenuItem {
             }
         });
     }
+    Label {
+        position: Label.LeftPosition;
+        text: qsTr("Distortion model");
+        tooltip: qsTr("The distortion model the lens profile is fitted to. Switching it fits the patterns already found again, without analyzing the video again.");
+
+        LinkButton {
+            id: calibModel;
+            // `calibration::CalibrationModel` as i32
+            property var options: [QT_TRANSLATE_NOOP("Popup", "OpenCV fisheye"), QT_TRANSLATE_NOOP("Popup", "OpenCV standard"), QT_TRANSLATE_NOOP("Popup", "Generic polynomial")];
+            property var tooltips: ([
+                qsTr("Fisheye model (Kannala-Brandt). Right for action cameras, drones and any wide lens."),
+                qsTr("Pinhole with radial and tangential distortion. For rectilinear lenses with little distortion: it can't describe anything 90° or more from the center."),
+                qsTr("Fisheye model with both odd and even powers of the angle, for lenses the fisheye model doesn't fit well. Always calibrated with Gyroflow's method.")
+            ]);
+            property int currentIndex: 0;
+            text: qsTranslate("Popup", options[currentIndex]);
+            tooltip: tooltips[currentIndex];
+            leftPadding: 6 * dpiScale;
+            rightPadding: 6 * dpiScale;
+            onCurrentIndexChanged: controller.calibration_model = currentIndex;
+            Component.onCompleted: controller.calibration_model = currentIndex;
+            onClicked: if (modelPopup.visible) { modelPopup.close(); } else { modelPopup.open(); }
+            Popup {
+                id: modelPopup;
+                model: parent.options;
+                currentIndex: parent.currentIndex;
+                width: maxItemWidth + 10 * dpiScale;
+                y: parent.height;
+                itemHeight: 25 * dpiScale;
+                font.pixelSize: 11 * dpiScale;
+                onClicked: i => calibModel.currentIndex = i;
+            }
+        }
+    }
+
+    Label {
+        position: Label.LeftPosition;
+        text: qsTr("Calibration method");
+        tooltip: qsTr("Switching it fits the patterns already found again, without analyzing the video again.");
+
+        LinkButton {
+            id: calibMethod;
+            // `calibration::CalibrationMethod` as i32
+            property var options: [QT_TRANSLATE_NOOP("Popup", "OpenCV"), QT_TRANSLATE_NOOP("Popup", "Gyroflow")];
+            property var tooltips: ([
+                qsTr("OpenCV's own calibration of the model, on random sets of frames. Its fisheye calibration can't take a lens that sees more than 180°, and often fails close to it."),
+                qsTr("Gyroflow's own calibration, on all frames at once. With a fisheye model it also calibrates lenses that see more than 180°, and it leaves out frames that don't agree with the rest, like ones bent by the rolling shutter of a fast move.")
+            ]);
+            property int currentIndex: 0;
+            text: qsTranslate("Popup", options[currentIndex]);
+            tooltip: tooltips[currentIndex];
+            leftPadding: 6 * dpiScale;
+            rightPadding: 6 * dpiScale;
+            onCurrentIndexChanged: controller.calibration_method = currentIndex;
+            Component.onCompleted: controller.calibration_method = currentIndex;
+            onClicked: if (methodPopup.visible) { methodPopup.close(); } else { methodPopup.open(); }
+            Popup {
+                id: methodPopup;
+                model: parent.options;
+                currentIndex: parent.currentIndex;
+                width: maxItemWidth + 10 * dpiScale;
+                y: parent.height;
+                itemHeight: 25 * dpiScale;
+                font.pixelSize: 11 * dpiScale;
+                onClicked: i => calibMethod.currentIndex = i;
+            }
+        }
+    }
+    InfoMessageSmall {
+        show: calibMethod.currentIndex == 0 && calibModel.currentIndex == 2;
+        text: qsTr("OpenCV has no generic polynomial model, so it's calibrated with Gyroflow's method.");
+    }
     CheckBoxWithContent {
         id: shutterCb;
         text: qsTr("Rolling shutter correction");
@@ -311,7 +402,14 @@ MenuItem {
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
             list.commitAll();
-            fileDialog.selectedFile = controller.export_lens_profile_filename(calib.calibrationInfo);
+            const filename = controller.export_lens_profile_filename(calib.calibrationInfo);
+            if (Qt.platform.os == "ios") {
+                calibrator_window.getSaveFileUrl(filesystem.get_folder(calibrator_window.videoArea.loadedFileUrl), filename, function(url) {
+                    calib.exportProfile(url, true);
+                }, "Lens profile");
+                return;
+            }
+            fileDialog.selectedFile = filename;
             fileDialog.open2();
         }
     }
@@ -484,6 +582,7 @@ MenuItem {
         Label {
             position: Label.LeftPosition;
             text: qsTr("Iterations");
+            visible: calib.opencvSearch;
 
             NumberField {
                 id: iterations;

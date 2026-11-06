@@ -17,6 +17,7 @@ echo F | xcopy /y translations\pl\gyroflow.ts pl.ts
 echo F | xcopy /y translations\gl\gyroflow.ts gl.ts
 echo F | xcopy /y translations\pt-PT\gyroflow.ts pt.ts
 echo F | xcopy /y translations\pt-BR\gyroflow.ts pt_BR.ts
+echo F | xcopy /y translations\sr-CS\gyroflow.ts sr_CS.ts
 echo F | xcopy /y translations\sk\gyroflow.ts sk.ts
 echo F | xcopy /y translations\uk\gyroflow.ts uk.ts
 echo F | xcopy /y translations\ru\gyroflow.ts ru.ts

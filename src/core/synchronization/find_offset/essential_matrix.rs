@@ -14,10 +14,25 @@ pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64
     let estimated_gyro = estimator.estimated_gyro.read().clone();
 
     let mut offsets = Vec::new();
-    let gyro = params.gyro.read();
+    // A copy, not the lock: the search below runs in parallel, and a rayon worker waiting for it runs other jobs of its
+    // pool meanwhile - a recompute that writes the motion data, on this very thread holding it. The copy shares the
+    // readings and the orientations (`Arc`s)
+    let gyro = params.gyro.read().clone();
     let ranges_len = ranges.len() as f64;
 
     let raw_imu_len = gyro.raw_imu(&gyro.file_metadata.read()).len();
+
+    // A video cut from recordings: the first frame of each frame pair the picture's rotation was estimated over, by the
+    // key of that rotation (`FrameResult::gyro_timestamp_us`, between the two frames' stamps), `None` for a pair across a
+    // cut. A frame is found from its stamp (the pose estimator stamps a frame with its time offset added,
+    // `lens_delay::frame_of_stamp`)
+    let pair_frames: Option<BTreeMap<i64, Option<usize>>> = gyro.segment_ranges().is_some().then(|| {
+        let offsets = gyro.file_metadata.read().per_frame_time_offsets.clone();
+        let frame = |ts: i64| super::super::lens_delay::frame_of_stamp(ts, &offsets, params);
+        let results = estimator.sync_results.read();
+        let stamps: Vec<(i64, i64)> = results.values().map(|r| (r.timestamp_us, r.gyro_timestamp_us)).collect();
+        stamps.windows(2).map(|w| (w[0].1, frame(w[0].0).zip(frame(w[1].0)).filter(|(a, b)| gyro.frames_of_one_part(*a, *b)).map(|(a, _)| a))).collect()
+    });
 
     if !estimated_gyro.is_empty() && gyro.duration_ms > 0.0 && raw_imu_len > 0 {
         for (i, (from_ts, to_ts)) in ranges.iter().enumerate() {
@@ -25,10 +40,16 @@ pub fn find_offsets<F: Fn(f64) + Sync>(estimator: &PoseEstimator, ranges: &[(i64
             progress_cb(i as f64 / ranges_len);
             if to_ts <= from_ts { continue; }
 
-            let mut of_item: Vec<TimeIMU> = estimated_gyro.range(from_ts..to_ts).map(|v| v.1.clone()).collect();
+            // In a video cut from recordings, the rotations of the frame pairs of the sync point's first pair's part,
+            // against that part's readings (`GyroSource::lookup_for_frame`), as the part trimmed on its own has them
+            let pair_frame = |k: &i64| pair_frames.as_ref().and_then(|frames| frames.get(k).copied().flatten());
+            let first = pair_frames.as_ref().map(|_| estimated_gyro.range(from_ts..to_ts).find_map(|(k, _)| pair_frame(k)));
+            let part = first.map(|f| f.and_then(|f| gyro.part_of_frame(f)));
+            let motion = first.flatten().map(|f| gyro.lookup_for_frame(f).motion);
+            let mut of_item: Vec<TimeIMU> = estimated_gyro.range(from_ts..to_ts).filter(|(k, _)| part.is_none_or(|p| p.is_some() && pair_frame(k).and_then(|f| gyro.part_of_frame(f)) == p)).map(|v| v.1.clone()).collect();
             if !of_item.is_empty() {
                 let last_of_timestamp = of_item.last().map(|x| x.timestamp_ms).unwrap_or_default();
-                let mut gyro_item: Vec<TimeIMU> = gyro.raw_imu(&gyro.file_metadata.read()).iter().filter_map(|x| {
+                let mut gyro_item: Vec<TimeIMU> = gyro.raw_imu(&gyro.file_metadata.read()).iter().filter(|x| motion.as_ref().is_none_or(|m| m.contains(&crate::gyro_source::motion_key(x.timestamp_ms)))).filter_map(|x| {
                     let ts = x.timestamp_ms + sync_params.initial_offset;
                     if ts >= of_item[0].timestamp_ms - sync_params.search_size && ts <= last_of_timestamp + sync_params.search_size {
                         Some(x.clone())

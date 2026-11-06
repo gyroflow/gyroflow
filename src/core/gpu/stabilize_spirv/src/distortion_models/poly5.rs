@@ -12,7 +12,7 @@ const NEWTON_EPS: f32 = 0.00001;
 impl Poly5 {
     pub fn undistort_point(point: Vec2, params: &KernelParams) -> Vec2 {
         let rd = point.length();
-        if rd == 0.0 { return vec2(-99999.0, -99999.0); }
+        if rd == 0.0 { return point; }
 
         let mut ru = rd;
         let mut i = 0; while i < 6 {
@@ -31,14 +31,15 @@ impl Poly5 {
             return vec2(-99999.0, -99999.0);
         }
 
-        ru = ru / rd;
-
-        point * ru
+        // `ru` is the radius in the z=1 plane; the pipeline carries rays as angle vectors
+        point * (ru.atan() / rd)
     }
 
     pub fn distort_point(point: Vec3, params: &KernelParams) -> Vec2 {
-        let x = point.x / point.z;
-        let y = point.y / point.z;
+        // A rectilinear model has no image of a ray at or past 90°: send it far outside the frame
+        let inv_z = if point.z > 1e-9 { 1.0 / point.z } else { 1e9 };
+        let x = point.x * inv_z;
+        let y = point.y * inv_z;
         let ru2 = x.powi(2) + y.powi(2);
         let poly4 = 1.0 + params.k1.x * ru2 + params.k1.y * ru2 * ru2;
 

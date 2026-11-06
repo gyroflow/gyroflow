@@ -4,13 +4,25 @@
 use nalgebra::Matrix3;
 use super::{ ComputeParams, KernelParams };
 use rayon::iter::{ ParallelIterator, IntoParallelIterator };
-use crate::gyro_source::FileMetadata;
+use crate::gyro_source::{ FileMetadata, Quat64 };
 use crate::keyframes::KeyframeType;
-use crate::util::{ MapClosest, map_coord };
+use crate::util::map_coord;
+
+/// Where the focal length of a frame's camera matrix comes from (`FrameTransform::get_lens_data_at_lens_timestamp`)
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+pub struct FocalSource {
+    /// From the lens metadata of this frame (an interpolated lens profile, the camera's pixel focal length, or a
+    /// millimetre focal length scaled into the profile) rather than from the static profile alone
+    pub per_frame: bool,
+    /// From the camera's own description of the recorded frame (its pixel focal length, or the focal length over its
+    /// capture area), so it has whatever crop the camera made in that frame in it - Sony's in-camera breathing
+    /// compensation among them (`BreathingFrame::camera_scale`)
+    pub capture_area: bool,
+}
 
 #[derive(Default, Clone)]
 pub struct FrameTransform {
-    pub matrices: Vec<[f32; 14]>,
+    pub matrices: Vec<[f32; 16]>,
     pub kernel_params: super::KernelParams,
     pub fov: f64,
     pub minimal_fov: f64,
@@ -19,12 +31,13 @@ pub struct FrameTransform {
 }
 
 impl FrameTransform {
-    fn get_frame_readout_time(params: &ComputeParams, can_invert: bool, timestamp_ms: f64, file_metadata: &FileMetadata) -> f64 {
+    pub(crate) fn get_frame_readout_time(params: &ComputeParams, can_invert: bool, timestamp_ms: f64, file_metadata: &FileMetadata) -> f64 {
         let mut frame_readout_time = params.frame_readout_time.abs();
         let mut scale = 1.0;
         telemetry_parser::try_block!({
-            let val = file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000)?; // closest within 100ms
-            scale = val.capture_area_size?.1 as f64 / val.sensor_size_px?.1 as f64;
+            let keys = file_metadata.lens_keys_of_frame(params.frame_at_timestamp(timestamp_ms).max(0) as usize);
+            let val = file_metadata.lens_params_closest_in(keys, (timestamp_ms * 1000.0).round() as i64, 100000, |v| v.has_readout_scale())?; // closest within 100ms
+            scale = val.readout_scale()?;
         });
         if can_invert && params.framebuffer_inverted && !params.frame_readout_direction.is_horizontal() {
             frame_readout_time *= -1.0;
@@ -57,51 +70,104 @@ impl FrameTransform {
         fov
     }
 
-    /// Focal length smoothing compensation factor to apply to `fov`.
+    /// Rescales the camera matrix to the frame's effective focal length (`ComputeParams::focal_lengths`, see
+    /// `smoothing::focal_length`), the lens as it really is in that frame:
     ///
-    /// Returns `dequantized_fl / smoothed_fl`. When the estimated true optical focal length is
-    /// longer than the smoothed target, we zoom out digitally (larger fov) so the apparent zoom
-    /// tracks the smoothed curve. The compensation is applied to `fov` only — `scaled_k` keeps
-    /// the raw pixel focal length, so the scaling lands on `new_k` but not the forward
-    /// projection, producing a visible digital zoom.
+    /// - The metadata focal length is often quantized (whole millimetres on many Sony lenses) while the optics
+    ///   zoom smoothly. Projecting with the stepped value makes the gyro correction jump at every step, because the
+    ///   correction shift scales with the focal length, so the curve is the dequantized metadata. It stays within the
+    ///   dequantization band of the metadata (a fraction of a quantization step) everywhere except across a confirmed
+    ///   metadata glitch, where it bridges the levels around it (`focal_length::remove_outliers`).
+    /// - The lens breathing (`gyro_source::sony::breathing`): focusing changes the focal length by several percent
+    ///   while the metadata keeps stating the same one. The curve is scaled by the frame's breathing at the centre
+    ///   row of the capture area, and the rows by their ratio to it in `at_timestamp`.
     ///
-    /// Using the DEQUANTIZED curve (rather than raw metadata) as the denominator avoids
-    /// stairstep jumps in the sampling position when the camera quantizes the focal length
-    /// metadata to coarse steps. Both curves are frame-indexed, so the timestamps stay aligned.
-    fn focal_length_fov_compensation(params: &ComputeParams, frame: usize) -> f64 {
-        if !params.focal_length_smoothing_enabled { return 1.0; }
-        let Some(Some(dequantized_fl)) = params.focal_lengths.get(frame).copied() else { return 1.0; };
-        let Some(Some(smoothed_fl)) = params.smoothed_focal_lengths.get(frame).copied() else { return 1.0; };
-        if dequantized_fl > 0.0 && smoothed_fl > 0.0 {
-            dequantized_fl / smoothed_fl
-        } else {
-            1.0
-        }
+    /// Aspect and center are kept, and the distortion coefficients stay normalized as the camera delivered them; the
+    /// clamp only guards against a curve that doesn't belong to this lens data at all. Returns the scale
+    pub fn effective_camera_matrix(params: &ComputeParams, frame: usize, camera_matrix: &mut Matrix3<f64>) -> f64 {
+        let Some(Some(dequantized)) = params.focal_lengths.get(frame).or(params.focal_lengths.last()).copied() else { return 1.0; };
+        let raw = (camera_matrix[(0, 0)] * camera_matrix[(1, 1)]).sqrt();
+        if !(raw > 0.0) || !(dequantized > 0.0) { return 1.0; }
+        let scale = (dequantized / raw).clamp(0.1, 10.0);
+        camera_matrix[(0, 0)] *= scale;
+        camera_matrix[(1, 1)] *= scale;
+        scale
     }
 
-    pub fn get_lens_data_at_timestamp(params: &ComputeParams, timestamp_ms: f64, invert_asym_lens: bool) -> (Matrix3<f64>, [f64; 12], f64, f64, f64, Option<f64>) {
-        let mut interpolated_lens = None;
+    /// Sensor row the picture row `y_source` sits at within the capture area `crop_y .. crop_y + crop_h`, for the
+    /// per-row data (sensor and lens shift, lens breathing). `y_source` indexes the rows of the framebuffer the
+    /// matrices are looked up by: inverted, row `y` holds picture row `height - y`, which sits at the mirrored
+    /// position within the capture area, not within the sensor (the two differ as soon as the crop is off-centre,
+    /// as it is with a moving EIS crop)
+    fn sensor_row(params: &ComputeParams, y_source: f64, crop_y: f64, crop_h: f64) -> f64 {
+        let y_sensor = map_coord(y_source, 0.0, params.height as f64, crop_y, crop_y + crop_h);
+        if params.framebuffer_inverted { 2.0 * crop_y + crop_h - y_sensor } else { y_sensor }
+    }
+
+
+    /// Camera matrix, distortion coefficients, radial distortion limit, input stretches, focal length in millimetres,
+    /// and where the camera matrix's focal length came from (see `get_lens_data_at_timestamp_with_metadata`)
+    pub fn get_lens_data_at_timestamp(params: &ComputeParams, timestamp_ms: f64, invert_asym_lens: bool) -> (Matrix3<f64>, [f64; 24], f64, f64, f64, Option<f64>, FocalSource) {
         let gyro = params.gyro.read();
         let file_metadata = gyro.file_metadata.read();
-        if !file_metadata.lens_positions.is_empty() {
-            if let Some(val) = file_metadata.lens_positions.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
-                interpolated_lens = Some(params.lens.get_interpolated_lens_at(*val));
+        Self::get_lens_data_at_timestamp_with_metadata(params, &file_metadata, timestamp_ms, invert_asym_lens)
+    }
+
+    /// `get_lens_data_at_timestamp` on file metadata the caller already holds. Anything that holds the `gyro` or
+    /// the `file_metadata` read guard has to come through here: both are parking_lot locks, and a second `read()`
+    /// of a lock this thread already reads is not a re-entry but a deadlock as soon as a writer has queued up
+    /// behind the first guard (the lock is writer-fair: the new reader waits for the writer, the writer waits for
+    /// the first guard, and the first guard waits for the new reader).
+    ///
+    /// The last element tells where the focal length of the camera matrix came from (`FocalSource`): whether from the
+    /// lens metadata of this frame (an interpolated lens profile, the camera's pixel focal length, or a millimetre focal
+    /// length scaled into the profile) rather than from the static profile alone, and whether from the frame's capture
+    /// area. The per-frame focal length curves (`smoothing::focal_length`) follow exactly this, so they can never disagree
+    /// with the projection about which frames have a focal length of their own, whichever way the camera reports it
+    pub fn get_lens_data_at_timestamp_with_metadata(params: &ComputeParams, file_metadata: &FileMetadata, timestamp_ms: f64, invert_asym_lens: bool) -> (Matrix3<f64>, [f64; 24], f64, f64, f64, Option<f64>, FocalSource) {
+        // The lens metadata may lag the picture by a few frames (per lens, see synchronization::lens_delay): every lookup uses the corrected time,
+        // in the metadata of the frame's part of a video cut from recordings
+        let keys = file_metadata.lens_keys_of_frame(params.frame_at_timestamp(timestamp_ms).max(0) as usize);
+        Self::get_lens_data_at_lens_timestamp_in(params, file_metadata, params.lens_timestamp_us(timestamp_ms), keys, invert_asym_lens)
+    }
+
+    /// `get_lens_data_at_timestamp_with_metadata` at a lens metadata time already shifted by the delay
+    /// (`ComputeParams::lens_timestamp_us`), for callers that apply a delay of their own choosing (the focal length
+    /// curves are extracted without one and shifted by frames afterwards): the metadata of the part of the frame at that
+    /// time
+    pub fn get_lens_data_at_lens_timestamp(params: &ComputeParams, file_metadata: &FileMetadata, lens_timestamp_us: i64, invert_asym_lens: bool) -> (Matrix3<f64>, [f64; 24], f64, f64, f64, Option<f64>, FocalSource) {
+        let keys = file_metadata.lens_keys_of_frame(params.frame_at_timestamp(lens_timestamp_us as f64 / 1000.0).max(0) as usize);
+        Self::get_lens_data_at_lens_timestamp_in(params, file_metadata, lens_timestamp_us, keys, invert_asym_lens)
+    }
+
+    /// `get_lens_data_at_lens_timestamp` among the lens metadata of the keys `keys`: a frame's own part's in a video cut
+    /// from recordings (`FileMetadata::lens_keys_of_frame`), so a delayed lookup at a part's last frames is held at the
+    /// part's last metadata instead of reading another moment's lens
+    fn get_lens_data_at_lens_timestamp_in(params: &ComputeParams, file_metadata: &FileMetadata, lens_timestamp_us: i64, keys: std::ops::RangeInclusive<i64>, invert_asym_lens: bool) -> (Matrix3<f64>, [f64; 24], f64, f64, f64, Option<f64>, FocalSource) {
+        let mut interpolated_lens = None;
+        let mut per_frame = false;
+        let mut capture_area = false;
+        if !file_metadata.lens_positions.is_empty() && params.lens.has_interpolations() {
+            if let Some(val) = file_metadata.lens_position_closest_in(keys.clone(), lens_timestamp_us, 100000) { // closest within 100ms
+                interpolated_lens = Some(params.lens.get_interpolated_lens_at(val));
+                per_frame = true;
             }
         }
         let lens = interpolated_lens.as_ref().unwrap_or(&params.lens);
 
         let mut focal_length = lens.focal_length;
 
-        let mut camera_matrix = lens.get_camera_matrix((params.width, params.height), invert_asym_lens);
+        let mut camera_matrix = lens.get_camera_matrix((params.width, params.height));
         let mut distortion_coeffs = lens.get_distortion_coeffs();
 
-        let mut radial_distortion_limit = lens.fisheye_params.radial_distortion_limit.unwrap_or_default();
+        let mut radial_distortion_limit = lens.radial_distortion_limit_rad().unwrap_or_default();
 
         let mut stretch_lens = true;
+        let mut zoom_scale = 1.0;
         let digital_zoom = file_metadata.digital_zoom.unwrap_or_default();
 
-        if !file_metadata.lens_params.is_empty() && lens.fisheye_params.distortion_coeffs.len() < 4 {
-            if let Some(val) = file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
+        if lens.fisheye_params.distortion_coeffs.len() < 4 {
+            if let Some(val) = file_metadata.lens_params_closest_in(keys.clone(), lens_timestamp_us, 100000, |v| v.has_projection_data()) { // closest within 100ms
                 let pixel_focal_length = val.pixel_focal_length.map(|f| (f.0 as f64, f.1 as f64)).or_else(|| {
                     let fl_mm = val.focal_length? as f64;
                     focal_length = Some(fl_mm);
@@ -120,12 +186,14 @@ impl FrameTransform {
                         camera_matrix[(1, 2)] = cy as f64;
                     }
                     stretch_lens = false;
+                    per_frame = true;
+                    capture_area = true;
 
                     if let Some(fl) = val.focal_length {
                         focal_length = Some(fl as f64);
                     }
                 }
-                if !val.distortion_coefficients.is_empty() && val.distortion_coefficients.len() <= 12 {
+                if !val.distortion_coefficients.is_empty() && val.distortion_coefficients.len() <= 24 {
                     for (i, x) in val.distortion_coefficients.iter().enumerate() {
                         distortion_coeffs[i] = *x;
                     }
@@ -133,9 +201,36 @@ impl FrameTransform {
                     radial_distortion_limit = params.distortion_model.radial_distortion_limit(&distortion_coeffs).unwrap_or_default();
                 }
             }
+        } else if !params.lens.has_interpolations() && file_metadata.lens_focal_length_varies() {
+            // A single calibration for a lens whose metadata records a changing focal length in millimetres (a zoom
+            // lens on a Blackmagic, RED, Nikon or Z CAM body): the projection follows the zoom by scaling the
+            // calibrated focal length with the metadata, relative to the focal length the profile declares or,
+            // failing that, the one its camera matrix implies on this sensor. The distortion coefficients stay those
+            // of the calibration. Cameras that also report the focal length in pixels (Canon) are left to that value.
+            //
+            // The profile asked here is `params.lens`, not the `lens` this frame projects with: a profile with
+            // calibrations at several lens positions already follows the zoom through them, and scaling one of those
+            // again would apply the zoom twice. `get_interpolated_lens_at` hands out the calibration of the position
+            // itself - a profile of its own, with no interpolations left - whenever the lookup lands on a knot or
+            // outside their range, and a blend that keeps them everywhere in between, so asking `lens` would turn
+            // the branch on and off along the lens travel and jump the projection at every knot
+            if let Some(val) = file_metadata.lens_params_closest_in(keys, lens_timestamp_us, 100000, |v| v.focal_length.is_some() && v.pixel_focal_length.is_none()) {
+                let mm = val.focal_length.unwrap_or_default() as f64;
+                let calib_w = if lens.calib_dimension.w > 0 { lens.calib_dimension.w as f64 } else { params.width.max(1) as f64 };
+                let reference = lens.focal_length.filter(|f| *f > 0.0).or_else(|| {
+                    let (pp, crop) = (val.pixel_pitch?, val.capture_area_size?);
+                    if pp.0 == 0 || crop.0 <= 0.0 { return None; }
+                    Some(camera_matrix[(0, 0)] * (pp.0 as f64 / 1_000_000.0) * crop.0 as f64 / calib_w)
+                });
+                if let Some(reference) = reference {
+                    if mm > 0.0 && reference > 0.0 {
+                        zoom_scale = mm / reference;
+                        focal_length = Some(mm);
+                        per_frame = true;
+                    }
+                }
+            }
         }
-        drop(file_metadata);
-        drop(gyro);
 
         let (calib_width, calib_height) = if lens.calib_dimension.w > 0 && lens.calib_dimension.h > 0 {
             (lens.calib_dimension.w as f64, lens.calib_dimension.h as f64)
@@ -158,8 +253,45 @@ impl FrameTransform {
             camera_matrix[(0, 0)] *= digital_zoom;
             camera_matrix[(1, 1)] *= digital_zoom;
         }
+        if zoom_scale != 1.0 {
+            camera_matrix[(0, 0)] *= zoom_scale;
+            camera_matrix[(1, 1)] *= zoom_scale;
+        }
 
-        (camera_matrix, distortion_coeffs, radial_distortion_limit, input_horizontal_stretch, input_vertical_stretch, focal_length)
+        // The frame upside down (`framebuffer_inverted`, the kernel's frame then) is the image mirrored vertically: the
+        // principal point, and the terms of the distortion that are odd in y. The kernel divides `y` by the vertical
+        // stretch after adding the principal point, so `y -> height - y` is `cy -> stretch * height - cy`. Mirrored here,
+        // once, on the finished matrix, it holds wherever the matrix came from: a profile, the default or the metadata
+        if invert_asym_lens {
+            camera_matrix[(1, 2)] = params.height as f64 * input_vertical_stretch - camera_matrix[(1, 2)];
+            params.distortion_model.mirror_coefficients_y(&mut distortion_coeffs);
+        }
+
+        // The largest ray angle this lens has an image for: where its calibration folds, and where the
+        // model's own projection ends (`DistortionModel::field_limit`), whichever comes first
+        let mut field_limit = radial_distortion_limit;
+        if let Some(fl) = params.distortion_model.field_limit(&distortion_coeffs) {
+            field_limit = if field_limit > 0.0 { field_limit.min(fl) } else { fl };
+        }
+
+        (camera_matrix, distortion_coeffs, field_limit, input_horizontal_stretch, input_vertical_stretch, focal_length, FocalSource { per_frame, capture_area })
+    }
+
+    /// The rotation of one kernel matrix row: `quat` takes the output camera to the source camera at that row (gyro
+    /// axes), the video rotation turns it, it's flipped into the image axes (y down - or, for an upside-down framebuffer,
+    /// mirrored the other way) and transposed. The kernel carries rays as directions, not as points of the z=1 plane, so
+    /// the output camera matrix isn't folded in: `undistort_coord` turns the output pixel into a ray before this.
+    /// The flipped matrix is orthonormal (a rotation conjugated by a diagonal ±1 flip), so its inverse is its transpose
+    pub fn kernel_rotation(quat: &Quat64, image_rotation: &Matrix3<f64>, framebuffer_inverted: bool) -> Matrix3<f32> {
+        let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
+        if framebuffer_inverted {
+            r[(0, 2)] *= -1.0; r[(1, 2)] *= -1.0;
+            r[(2, 0)] *= -1.0; r[(2, 1)] *= -1.0;
+        } else {
+            r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
+            r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
+        }
+        nalgebra::convert(r.transpose())
     }
 
     pub fn at_timestamp(params: &ComputeParams, timestamp_ms: f64, frame: usize) -> Self {
@@ -179,17 +311,22 @@ impl FrameTransform {
         // ----------- Keyframes -----------
 
         // ----------- Lens -----------
-        let (camera_matrix,
+        let (mut camera_matrix,
             distortion_coeffs,
-            radial_distortion_limit,
+            field_limit,
             input_horizontal_stretch,
             input_vertical_stretch,
-            focal_length) = Self::get_lens_data_at_timestamp(params, timestamp_ms, false);
+            focal_length, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, params.framebuffer_inverted);
+        let focal_scale = Self::effective_camera_matrix(params, frame, &mut camera_matrix);
+        let focal_length = focal_length.map(|f| f * focal_scale);
         // ----------- Lens -----------
 
-        let fl_compensation = Self::focal_length_fov_compensation(params, frame);
+        // Focal length stabilization and lens breathing compensation: a uniform digital zoom (never above 1, so never
+        // past the frame) on top of the adaptive zoom, see smoothing::focal_length. It's part of the applied zoom, so the
+        // UI readout includes it too: the overlay then shows the true total zoom and the apparent focal length
+        let fl_compensation = crate::smoothing::focal_length::compensation_at(params, frame);
         let mut fov = Self::get_fov(params, frame, true, timestamp_ms, false) * fl_compensation;
-        let mut ui_fov = Self::get_fov(params, frame, true, timestamp_ms, true);
+        let mut ui_fov = Self::get_fov(params, frame, true, timestamp_ms, true) * fl_compensation;
         if let Some(adj) = params.lens.optimal_fov {
             if params.fovs.is_empty() {
                 fov *= adj;
@@ -198,37 +335,31 @@ impl FrameTransform {
             }
         }
 
-        // Report the smoothed focal length to the UI readout so the "Focal length: X mm"
-        // overlay tracks the smoothed curve, matching what the viewer sees.
-        let reported_focal_length = if params.focal_length_smoothing_enabled {
-            params.smoothed_focal_lengths.get(frame).copied().flatten().or(focal_length)
-        } else {
-            focal_length
-        };
-
         let scaled_k = camera_matrix;
-        let new_k = Self::get_new_k(&params, &camera_matrix, fov);
+        // No `get_new_k` here: the kernel builds the output plane itself, from `f`, `fov` and the output
+        // size, because the lens-correction blend needs it before the rotation (`undistort_coord`)
 
-        let gyro = params.gyro.read();
+        // A copy to look the rows up in, not the lock: they're looked up in parallel, and a rayon worker waiting for them
+        // runs other jobs of its pool meanwhile - a recompute that writes the motion data, on this very thread holding it.
+        // The copy shares the orientations and the metadata (`Arc`s), whose lock is never written (`ReadOnlyFileMetadata`)
+        let gyro = params.gyro.read().clone();
         let file_metadata = gyro.file_metadata.read();
 
-        let mut mesh_data = Vec::new();
-        if let Some(mc) = file_metadata.mesh_correction.get(frame) {
-            mesh_data = mc.1.clone(); // undistorting mesh
-        }
+        // Undistorting mesh of the frame, empty when it has none (the kernel flags say so, the buffer is then not uploaded)
+        let mesh_data = file_metadata.mesh_correction.kernel_buffer(frame);
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(&params, true, timestamp_ms, &file_metadata);
 
         let row_readout_time = frame_readout_time / if params.frame_readout_direction.is_horizontal() { params.width } else { params.height } as f64;
-        let timestamp_ms = timestamp_ms + file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
+        let timestamp_ms = timestamp_ms + file_metadata.frame_time_offset(frame);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
 
         // let frame_period = 1000.0 / params.scaled_fps as f64;
         // dbg!(frame_period);
 
-        let is_scale = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
+        let is_scale = if let Some(is) = file_metadata.camera_stab_at(frame) {
             (
                 params.width  as f64 / is.crop_area.2 as f64 / is.pixel_pitch.0 as f64,
                 params.height as f64 / is.crop_area.3 as f64 / is.pixel_pitch.1 as f64 * (if params.framebuffer_inverted { -1.0 } else { 1.0 }),
@@ -240,11 +371,23 @@ impl FrameTransform {
 
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
-        let quat1 = gyro.org_quat_at_timestamp(timestamp_ms).inverse();
-        let smoothed_quat1 = gyro.smoothed_quat_at_timestamp(timestamp_ms);
+        // The motion data of the frame's segment, for every row of it (`GyroSource::lookup_for_frame`)
+        let lookup = gyro.lookup_for_frame(frame);
+        let quat1 = gyro.org_quat_at(timestamp_ms, &lookup).inverse();
+        let smoothed_quat1 = gyro.smoothed_quat_at(timestamp_ms, &lookup);
 
         // Only compute 1 matrix if not using rolling shutter correction
         let rows = if frame_readout_time.abs() > 0.0 { if params.frame_readout_direction.is_horizontal() { params.width } else { params.height } } else { 1 };
+
+        // Lens breathing: the camera matrix has the frame's own (`effective_camera_matrix`), each row gets its ratio to it
+        let breathing = file_metadata.lens_breathing_at(frame).map(|b| (b, b.focal_at_centre())).filter(|(_, c)| c.is_finite() && *c > 0.0);
+
+        // Sensor row a matrix row is looked up at, for the per-row data (sensor and lens shift, lens breathing).
+        // Without rolling shutter correction the single matrix stands for the whole frame and is evaluated at its
+        // centre row
+        let sensor_row = |y: usize, crop_y: f64, crop_h: f64| -> f64 {
+            Self::sensor_row(params, if rows > 1 { y as f64 } else { params.height as f64 / 2.0 }, crop_y, crop_h)
+        };
 
         let matrices = (0..rows).into_par_iter().map(|y| {
             let quat_time = if frame_readout_time.abs() > 0.0 {
@@ -254,29 +397,17 @@ impl FrameTransform {
             };
             let quat = smoothed_quat1
                      * quat1
-                     * gyro.org_quat_at_timestamp(quat_time);
+                     * gyro.org_quat_at(quat_time, &lookup);
 
-
-            let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
-            if params.framebuffer_inverted {
-                r[(0, 2)] *= -1.0; r[(1, 2)] *= -1.0;
-                r[(2, 0)] *= -1.0; r[(2, 1)] *= -1.0;
-            } else {
-                r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
-                r[(1, 0)] *= -1.0; r[(2, 0)] *= -1.0;
-            }
-
-            let (mut sx, mut sy, mut ra, mut ox, mut oy) = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
-                // let ts = ((row_readout_time * y as f64 + frame_period * frame as f64) * 1000.0).round() as i64;
-                let y_sensor = map_coord(y as f64, 0.0, params.height as f64, is.crop_area.1 as f64, is.crop_area.1 as f64 + is.crop_area.3 as f64);
-                let y_sensor = if params.framebuffer_inverted { is.sensor_size.1 as f64 - y_sensor } else { y_sensor };
+            let (mut sx, mut sy, mut ra, mut ox, mut oy) = if let Some(is) = file_metadata.camera_stab_at(frame) {
+                let y_sensor = sensor_row(y, is.crop_area.1 as f64, is.crop_area.3 as f64);
 
                 let s = is.ibis_spline.interpolate(y_sensor + is.offset).unwrap_or_default();
                 let sx = s.x * is_scale.0;
                 let sy = s.y * is_scale.1;
                 let ra = s.z / 1000.0 * (if params.framebuffer_inverted { -1.0 } else { 1.0 });
 
-                let o = is.ois_spline.interpolate(y_sensor + is.offset).unwrap_or_default();
+                let o = is.ois_spline.interpolate(y_sensor + is.ois_offset.unwrap_or(is.offset)).unwrap_or_default();
                 let ox = o.x * is_scale.0;
                 let oy = o.y * is_scale.1;
 
@@ -286,32 +417,36 @@ impl FrameTransform {
                 (0.0, 0.0, 0.0, 0.0, 0.0)
             };
 
-            if params.suppress_rotation {
-                r = Matrix3::identity();
+            let i_r = if params.suppress_rotation {
                 if params.frame_readout_time == 0.0 {
                     sx = 0.0; sy = 0.0; ra = 0.0; ox = 0.0; oy = 0.0;
                 }
-            }
-
-            let i_r = (new_k * r).pseudo_inverse(0.000001);
-            if let Err(err) = i_r {
-                log::error!("Failed to multiply matrices: {:?} * {:?}: {}", new_k, r, err);
-            }
-            let i_r: Matrix3<f32> = nalgebra::convert(i_r.unwrap_or_default());
+                Matrix3::identity()
+            } else {
+                Self::kernel_rotation(&quat, &image_rotation, params.framebuffer_inverted)
+            };
+            // Lens breathing: the row's focal length against the frame's, which the camera matrix has. The focus moving
+            // during the readout gives every row its own (`gyro_source::sony::breathing`); it's a change of the source
+            // lens's focal length, so it's applied where the lens images the ray, on the source side of the rotation
+            let bz = breathing
+                .map(|(b, centre)| b.focal_at_row(sensor_row(y, b.crop_y as f64, b.crop_h as f64)) / centre)
+                .filter(|k| k.is_finite() && *k > 0.0)
+                .unwrap_or(1.0) as f32;
             [
                 i_r[(0, 0)], i_r[(0, 1)], i_r[(0, 2)],
                 i_r[(1, 0)], i_r[(1, 1)], i_r[(1, 2)],
                 i_r[(2, 0)], i_r[(2, 1)], i_r[(2, 2)],
                 sx, sy, ra,
-                ox, oy
+                ox, oy,
+                bz, 0.0
             ]
-        }).collect::<Vec<[f32; 14]>>();
+        }).collect::<Vec<[f32; 16]>>();
         drop(file_metadata);
         drop(gyro);
 
-        let mut digital_lens_params = [0f32; 4];
+        let mut digital_lens_params = [0f32; 16];
         if let Some(p) = &params.digital_lens_params {
-            for (i, v) in p.iter().enumerate() {
+            for (i, v) in p.iter().take(16).enumerate() {
                 digital_lens_params[i] = *v as f32;
             }
         }
@@ -325,7 +460,8 @@ impl FrameTransform {
             c:             [scaled_k[(0, 2)] as f32, scaled_k[(1, 2)] as f32],
             k:             distortion_coeffs.iter().map(|x| *x as f32).collect::<Vec<f32>>().try_into().unwrap(),
             fov:           fov as f32,
-            r_limit:       radial_distortion_limit as f32,
+            field_limit:   field_limit as f32,
+            output_projection: params.output_projection,
             lens_correction_amount:   lens_correction_amount as f32,
             input_vertical_stretch:   input_vertical_stretch as f32,
             input_horizontal_stretch: input_horizontal_stretch as f32,
@@ -344,21 +480,26 @@ impl FrameTransform {
             kernel_params,
             fov: ui_fov,
             minimal_fov: *params.minimal_fovs.get(frame).unwrap_or(&1.0),
-            focal_length: reported_focal_length,
+            focal_length,
             mesh_data
         }
     }
 
-    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, use_fovs: bool) -> (Matrix3<f64>, [f64; 12], Matrix3<f64>, Vec<Matrix3<f64>>, Option<Vec<(f32, f32, f32, f32, f32)>>, Option<Vec<f64>>) { // camera_matrix, dist_coeffs, p, rotations_per_point
+    pub fn at_timestamp_for_points(params: &ComputeParams, points: &[(f32, f32)], timestamp_ms: f64, frame: Option<usize>, use_fovs: bool) -> (Matrix3<f64>, [f64; 24], Matrix3<f64>, Vec<Matrix3<f64>>, Option<Vec<(f32, f32, f32, f32, f32)>>, Option<Vec<f64>>, f64, f64, Option<Vec<f32>>) { // camera_matrix, dist_coeffs, output camera matrix, rotations_per_point, shifts, mesh, fov, field_limit, breathing_per_point
         // ----------- Keyframes -----------
         let video_rotation = params.keyframes.value_at_video_timestamp(&KeyframeType::VideoRotation, timestamp_ms).unwrap_or(params.video_rotation);
         // ----------- Keyframes -----------
 
-        let frame = frame.unwrap_or_else(|| crate::frame_at_timestamp(timestamp_ms, params.scaled_fps) as usize);
+        let frame = frame.unwrap_or_else(|| params.frame_at_timestamp(timestamp_ms).max(0) as usize);
 
-        let (camera_matrix, distortion_coeffs, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, params.framebuffer_inverted);
+        // Points are always the right way up, like the rotations and the readout below
+        let (mut camera_matrix, distortion_coeffs, field_limit, _, _, _, _) = Self::get_lens_data_at_timestamp(params, timestamp_ms, false);
+        Self::effective_camera_matrix(params, frame, &mut camera_matrix);
 
-        let fl_compensation = Self::focal_length_fov_compensation(params, frame);
+        // The focal length compensation (and the breathing compensation, which is one) is part of the applied zoom,
+        // not of the base projection: measurements at fov = 1 (zoom polygon, sync, features) must not include it, or
+        // the zoom would fit the frame around the crop and undo it, see zooming::calculate_fovs
+        let fl_compensation = if use_fovs { crate::smoothing::focal_length::compensation_at(params, frame) } else { 1.0 };
         let fov = Self::get_fov(params, frame, use_fovs, timestamp_ms, false) * fl_compensation;
 
         let scaled_k = camera_matrix;
@@ -367,28 +508,35 @@ impl FrameTransform {
         let gyro = params.gyro.read();
         let file_metadata = gyro.file_metadata.read();
 
-        let mut mesh_correction = None;
-        if let Some(mc) = file_metadata.mesh_correction.get(frame) {
-            mesh_correction = Some(mc.0.clone()); // distorting mesh
-        }
+        let mesh_correction = file_metadata.mesh_correction.forward_mesh(frame); // distorting mesh, none when the frame has none
 
         // ----------- Rolling shutter correction -----------
         let frame_readout_time = Self::get_frame_readout_time(params, false, timestamp_ms, &file_metadata);
 
         let row_readout_time = frame_readout_time / if params.frame_readout_direction.is_horizontal() { params.width } else { params.height } as f64;
-        let timestamp_ms = timestamp_ms + gyro.file_metadata.read().per_frame_time_offsets.get(frame).unwrap_or(&0.0);
+        let timestamp_ms = timestamp_ms + file_metadata.frame_time_offset(frame);
         let start_ts = timestamp_ms - (frame_readout_time / 2.0);
         // ----------- Rolling shutter correction -----------
 
         let image_rotation = Matrix3::new_rotation(video_rotation * (std::f64::consts::PI / 180.0));
 
-        let quat1 = gyro.org_quat_at_timestamp(timestamp_ms).inverse();
-        let smoothed_quat1 = gyro.smoothed_quat_at_timestamp(timestamp_ms);
+        // The motion data of the frame's segment, for every row of it (`GyroSource::lookup_for_frame`)
+        let lookup = gyro.lookup_for_frame(frame);
+        let quat1 = gyro.org_quat_at(timestamp_ms, &lookup).inverse();
+        let smoothed_quat1 = gyro.smoothed_quat_at(timestamp_ms, &lookup);
 
-        // Only compute 1 matrix if not using rolling shutter correction
-        let points_iter = if frame_readout_time.abs() > 0.0 { points } else { &[(0.0, 0.0)] };
+        // Only compute 1 matrix if not using rolling shutter correction; it stands for the whole frame, so the
+        // per-row data (sensor and lens shift, lens breathing) is looked up at the centre row, like `at_timestamp` does
+        let centre = [(params.width as f32 / 2.0, params.height as f32 / 2.0)];
+        let points_iter: &[(f32, f32)] = if frame_readout_time.abs() > 0.0 { points } else { &centre };
 
-        let rotations: Vec<Matrix3<f64>> = points_iter.iter().map(|&(x, y)| {
+        // Lens breathing, the rows' focal lengths against the frame's that `at_timestamp` puts in its matrices, so this
+        // direction can undo them and the two stay invertible (the STMap export writes a map from each). It's the lens
+        // itself, part of the base projection like the camera matrix that has the frame's own: the measurements at
+        // fov = 1 see it too. What the compensation makes of it is the zoom above
+        let breathing = file_metadata.lens_breathing_at(frame).map(|b| (b, b.focal_at_centre())).filter(|(_, c)| c.is_finite() && *c > 0.0);
+
+        let rotations_breathing: Vec<(Matrix3<f64>, f32)> = points_iter.iter().map(|&(x, y)| {
             let quat_time = if frame_readout_time.abs() > 0.0 {
                 start_ts + row_readout_time * if params.frame_readout_direction.is_horizontal() { x } else { y } as f64
             } else {
@@ -396,7 +544,7 @@ impl FrameTransform {
             };
             let quat = smoothed_quat1
                      * quat1
-                     * gyro.org_quat_at_timestamp(quat_time);
+                     * gyro.org_quat_at(quat_time, &lookup);
 
             let mut r = image_rotation * *quat.to_rotation_matrix().matrix();
             r[(0, 1)] *= -1.0; r[(0, 2)] *= -1.0;
@@ -406,10 +554,28 @@ impl FrameTransform {
                 r = Matrix3::identity();
             }
 
-            new_k * r
+            // The rotation alone: `undistort_points` projects the rotated ray itself and applies `new_k`
+            // to the projected point, so the output camera matrix must not be folded in here. The row's
+            // breathing travels beside it and is undone on the source side, where `at_timestamp` applies it
+            let p = r;
+            let mut bz = 1.0f32;
+            if let Some((b, centre)) = breathing {
+                // Looked up by the same index `at_timestamp` looks its matrices up by: the point's readout position
+                let readout_pos = if frame_readout_time.abs() > 0.0 {
+                    (if params.frame_readout_direction.is_horizontal() { x } else { y }) as f64
+                } else {
+                    params.height as f64 / 2.0
+                };
+                let k = b.focal_at_row(Self::sensor_row(params, readout_pos, b.crop_y as f64, b.crop_h as f64)) / centre;
+                if k.is_finite() && k > 0.0 { bz = k as f32; }
+            }
+            (p, bz)
         }).collect();
+        let rotations: Vec<Matrix3<f64>> = rotations_breathing.iter().map(|x| x.0).collect();
+        // `None` when nothing breathes, so the common path carries no per-point vector at all
+        let breathing_per_point: Option<Vec<f32>> = breathing.map(|_| rotations_breathing.iter().map(|x| x.1).collect());
 
-        let mut shifts: Option<Vec<(f32, f32, f32, f32, f32)>> = if let Some(is) = file_metadata.camera_stab_data.get(frame) {
+        let mut shifts: Option<Vec<(f32, f32, f32, f32, f32)>> = if let Some(is) = file_metadata.camera_stab_at(frame) {
             let is_scale = (
                 params.width  as f64 / is.crop_area.2 as f64 / is.pixel_pitch.0 as f64,
                 params.height as f64 / is.crop_area.3 as f64 / is.pixel_pitch.1 as f64,
@@ -421,7 +587,7 @@ impl FrameTransform {
                 let sy = s.y * is_scale.1;
                 let ra = s.z / 1000.0;
 
-                let o = is.ois_spline.interpolate(y + is.offset).unwrap_or_default();
+                let o = is.ois_spline.interpolate(y + is.ois_offset.unwrap_or(is.offset)).unwrap_or_default();
                 let ox = o.x * is_scale.0;
                 let oy = o.y * is_scale.1;
 
@@ -434,6 +600,6 @@ impl FrameTransform {
             shifts = None;
         }
 
-        (scaled_k, distortion_coeffs, new_k, rotations, shifts, mesh_correction)
+        (scaled_k, distortion_coeffs, new_k, rotations, shifts, mesh_correction, fov, field_limit, breathing_per_point)
     }
 }

@@ -9,7 +9,7 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
         float r2 = pos.x * pos.x + pos.y * pos.y;
         float icdist = (1.0 + ((params->k[7] * r2 + params->k[6]) * r2 + params->k[5]) * r2)/(1.0 + ((params->k[4] * r2 + params->k[1]) * r2 + params->k[0]) * r2);
         if (icdist < 0.0) {
-            return (float2)(0.0f, 0.0f);
+            return (float2)(-99999.0f, -99999.0f);
         }
         float delta_x = 2.0 * params->k[2] * pos.x * pos.y + params->k[3] * (r2 + 2.0 * pos.x * pos.x) + params->k[8]  * r2 + params->k[9]  * r2 * r2;
         float delta_y = params->k[2] * (r2 + 2.0 * pos.y * pos.y) + 2.0 * params->k[3] * pos.x * pos.y + params->k[10] * r2 + params->k[11] * r2 * r2;
@@ -19,11 +19,15 @@ float2 undistort_point(float2 pos, __global KernelParams *params) {
         );
     }
 
-    return pos;
+    // The solve runs in the z=1 plane; the pipeline carries rays as angle vectors
+    float r = length(pos);
+    if (r < 1e-12f) return pos;
+    return pos * (atan(r) / r);
 }
 
 float2 distort_point(float x, float y, float z, __global KernelParams *params) {
-    float2 pos = (float2)(x, y) / z;
+    // A rectilinear model has no image of a ray at or past 90°: send it far outside the frame
+    float2 pos = z > 1e-9f? (float2)(x, y) / z : (float2)(x, y) * 1e9f;
     float r2 = pos.x * pos.x + pos.y * pos.y;
     float r4 = r2 * r2;
     float r6 = r4 * r2;

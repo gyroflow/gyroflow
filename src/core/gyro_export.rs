@@ -35,7 +35,6 @@ pub fn export_full_metadata(gyro_url: &str, _stab: &Arc<crate::StabilizationMana
 
 pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::StabilizationManager>) -> String {
     use std::fmt::Write;
-    use crate::util::MapClosest;
     const RAD2DEG: f64 = 180.0 / std::f64::consts::PI;
     enum TimestampType {
         Milliseconds(f64),
@@ -68,6 +67,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
     let ogyro = original.get("gyroscope")      .and_then(|x| x.as_bool()).unwrap_or_default();
     let oquat = original.get("quaternion")     .and_then(|x| x.as_bool()).unwrap_or_default();
     let ofd   = original.get("focus_distances").and_then(|x| x.as_bool()).unwrap_or_default();
+    let oiris = original.get("iris")           .and_then(|x| x.as_bool()).unwrap_or_default();
 
     let seulr = stabilized.get("euler_angles").and_then(|x| x.as_bool()).unwrap_or_default();
     let squat = stabilized.get("quaternion")  .and_then(|x| x.as_bool()).unwrap_or_default();
@@ -86,6 +86,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
         if ogyro { let _ = write!(output, ",org_gyro_x,org_gyro_y,org_gyro_z"); }
         if oquat { let _ = write!(output, ",org_quat_w,org_quat_x,org_quat_y,org_quat_z"); }
         if ofd   { let _ = write!(output, ",focus_distance"); }
+        if oiris { let _ = write!(output, ",iris_fstop,iris_tstop"); }
         if seulr { let _ = write!(output, ",stab_pitch,stab_yaw,stab_roll"); }
         if squat { let _ = write!(output, ",stab_quat_w,stab_quat_x,stab_quat_y,stab_quat_z"); }
         if focal_length { let _ = write!(output, ",focal_length"); }
@@ -94,39 +95,65 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
         let _ = write!(output, "\n");
     }
 
-    let params = stab.params.read();
+    // Copies of one moment (the parameters locked before the motion data, as everywhere), not the locks: the export
+    // takes a while, and `ComputeParams::from_manager` and the lens lookups below take them again - a second read of a
+    // parking_lot lock this thread holds deadlocks as soon as a writer queues up in between. The motion data's copy shares
+    // its readings and orientations (`Arc`s)
+    let (params, gyro) = {
+        let params = stab.params.read();
+        (params.clone(), stab.gyro.read().clone())
+    };
     let scaled_fps = params.get_scaled_fps();
     let frame_duration = 1000.0 / scaled_fps;
 
-    let gyro = stab.gyro.read();
     let file_metadata = gyro.file_metadata.read();
     let mut focal_length_value = stab.lens.read().focal_length;
 
+    let raw_imu = gyro.raw_imu(&file_metadata);
+
+    // Index of the raw IMU sample closest to `gyro_ts` (in gyro timestamps), or None if there's no sample within `max_diff_ms`
+    let closest_imu_index = |gyro_ts: f64, max_diff_ms: f64| -> Option<usize> {
+        let next = raw_imu.partition_point(|x| x.timestamp_ms < gyro_ts);
+        let index = match (next.checked_sub(1), raw_imu.get(next)) {
+            (Some(prev), Some(n)) => if (gyro_ts - raw_imu[prev].timestamp_ms).abs() <= (n.timestamp_ms - gyro_ts).abs() { prev } else { next },
+            (Some(prev), None)    => prev,
+            (None,       Some(_)) => next,
+            (None,       None)    => return None
+        };
+        if (raw_imu[index].timestamp_ms - gyro_ts).abs() <= max_diff_ms { Some(index) } else { None }
+    };
+
     let timestamps: Vec<(Option<usize>, usize, TimestampType, f64)> = if all_samples {
         let mut frame = 0;
-        gyro.quaternions.keys().enumerate().map(|(i, ts)| {
-            let mut timestamp_ms = *ts as f64 / 1000.0;
+        gyro.quaternions.keys().map(|ts| {
+            let gyro_timestamp_ms = *ts as f64 / 1000.0;
+            let mut timestamp_ms = gyro_timestamp_ms;
             timestamp_ms += gyro.offset_at_gyro_timestamp(timestamp_ms);
 
-            let final_timestamp = timestamp_ms - file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
-            if final_timestamp >= (frame + 1) as f64 * frame_duration {
+            let final_timestamp = timestamp_ms - file_metadata.frame_time_offset(frame);
+            if final_timestamp >= params.timestamp_at_frame(frame as i32 + 1) {
                 frame += 1;
             }
 
-            (Some(i), frame, TimestampType::Microseconds(*ts), final_timestamp)
+            (closest_imu_index(gyro_timestamp_ms, frame_duration), frame, TimestampType::Microseconds(*ts), final_timestamp)
         }).collect()
     } else {
         (0..params.frame_count).map(|frame| {
-            let timestamp_ms = frame as f64 / scaled_fps * 1000.0 + (params.frame_readout_time / 2.0);
+            let timestamp_ms = params.timestamp_at_frame(frame as i32) + (params.frame_readout_time / 2.0);
 
-            let middle_timestamp = timestamp_ms + file_metadata.per_frame_time_offsets.get(frame).unwrap_or(&0.0);
+            let middle_timestamp = timestamp_ms + file_metadata.frame_time_offset(frame);
 
-            (None, frame, TimestampType::Milliseconds(middle_timestamp), timestamp_ms)
+            // Raw IMU is only available at the actual sample times, so take the sample closest to the middle of the frame readout,
+            // in the motion data of the frame's part (of a video cut from recordings: a frame is read out after its time, which
+            // can be the next part's)
+            let gyro_timestamp_ms = middle_timestamp - gyro.offset_at_frame(frame, middle_timestamp);
+
+            (closest_imu_index(gyro_timestamp_ms, frame_duration), frame, TimestampType::Milliseconds(middle_timestamp), timestamp_ms)
         }).collect()
     };
     let num_frames = params.frame_count;
     let fps = params.get_scaled_fps();
-    let frame_times = (0..num_frames).map(|i| i as f64 / fps).collect::<Vec<_>>();
+    let frame_times = (0..num_frames).map(|i| params.timestamp_at_frame(i as i32) / 1000.0).collect::<Vec<_>>();
 
     if format == Format::Usd {
         output.push_str(&format!(r#"#usda 1.0
@@ -161,11 +188,9 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
         jsx.insert("orientations", Vec::<serde_json::Value>::new().into());
     }
 
-    let raw_imu = gyro.raw_imu(&file_metadata);
-
     for (i, frame, ts, timestamp_ms) in timestamps {
         let raw_imu = raw_imu.get(i.unwrap_or(usize::MAX)).cloned().unwrap_or_default();
-        let quat_org = match ts { TimestampType::Microseconds(ts) => *gyro.quaternions.get(&ts).unwrap(), TimestampType::Milliseconds(ts) => gyro.org_quat_at_timestamp(ts) };
+        let quat_org = match ts { TimestampType::Microseconds(ts) => *gyro.quaternions.get(&ts).unwrap(), TimestampType::Milliseconds(ts) => gyro.org_quat_at_frame(frame, ts) };
         let quate = quat_org.euler_angles();
         let quatv = quat_org.as_vector();
         let val_oaccl = [get(raw_imu.accl, 0), get(raw_imu.accl, 1), get(raw_imu.accl, 2)];
@@ -173,6 +198,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
         let val_ogyro = [get(raw_imu.gyro, 0), get(raw_imu.gyro, 1), get(raw_imu.gyro, 2)];
         let val_oquat = [quatv[3], quatv[0], quatv[1], quatv[2]];
         let mut val_ofd = 0.0_f32;
+        let mut val_iris = (0.0_f32, 0.0_f32); // (f-stop, T-stop)
 
         if format == Format::Jsx && !(seulr && !oeulr) {
             jsx.get_mut("orientations").unwrap().as_array_mut().unwrap().push(serde_json::to_value([val_oeulr[0], -val_oeulr[2], val_oeulr[1]]).unwrap());
@@ -187,7 +213,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
             ));
         }
 
-        let quat_smooth = match ts { TimestampType::Microseconds(ts) => *gyro.smoothed_quaternions.get(&ts).unwrap(), TimestampType::Milliseconds(ts) => gyro.smoothed_quat_at_timestamp(ts) };
+        let quat_smooth = match ts { TimestampType::Microseconds(ts) => *gyro.smoothed_quaternions.get(&ts).unwrap(), TimestampType::Milliseconds(ts) => gyro.smoothed_quat_at_frame(frame, ts) };
 
         // smoothed_quaternions is the quaternion needed to stabilize, but in this case we want to get the stabilized camera motion
         // we need to reverse the calculation done by gyroflow to get original smoothed quaternion
@@ -211,13 +237,18 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
             ));
         }
 
-        if let Some(val) = file_metadata.lens_params.get_closest(&((timestamp_ms * 1000.0).round() as i64), 100000) { // closest within 100ms
+        let lens_ts_us = (timestamp_ms * 1000.0).round() as i64;
+        // The frame's part's lens metadata, of a video cut from recordings
+        let lens_keys = file_metadata.lens_keys_of_frame(frame);
+        if let Some(val) = file_metadata.lens_params_closest_in(lens_keys.clone(), lens_ts_us, 100000, |v| v.focal_length.is_some()) { // closest within 100ms
             if let Some(fl) = val.focal_length {
                 focal_length_value = Some(fl as f64);
             }
-            if let Some(fd) = val.focus_distance {
-		        val_ofd = fd;
-            }
+        }
+        if let Some(val) = file_metadata.lens_params_closest_in(lens_keys, lens_ts_us, 100000, |v| v.has_descriptive_data()) { // closest within 100ms
+            if let Some(fd) = val.focus_distance { val_ofd = fd; }
+            if let Some(v)  = val.iris_fstop     { val_iris.0 = v; }
+            if let Some(v)  = val.iris_tstop     { val_iris.1 = v; }
         }
         let val_fl = focal_length_value.unwrap_or(0.0);
         let val_fov = *params.fovs.get(frame).unwrap_or(&0.0);
@@ -230,6 +261,7 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
             if ogyro { let _ = write!(output, ",{:.6},{:.6},{:.6}",       val_ogyro[0], val_ogyro[1], val_ogyro[2]); }
             if oquat { let _ = write!(output, ",{:.6},{:.6},{:.6},{:.6}", val_oquat[0], val_oquat[1], val_oquat[2], val_oquat[3]); }
             if ofd   { let _ = write!(output, ",{:.3}", val_ofd); }
+            if oiris { let _ = write!(output, ",{:.3},{:.3}", val_iris.0, val_iris.1); }
             if seulr { let _ = write!(output, ",{:.3},{:.3},{:.3}",       val_seulr[0], val_seulr[1], val_seulr[2]); }
             if squat { let _ = write!(output, ",{:.6},{:.6},{:.6},{:.6}", val_squat[0], val_squat[1], val_squat[2], val_squat[3]); }
             if focal_length { let _ = write!(output, ",{val_fl:.3}");  }
@@ -245,6 +277,10 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
             if ogyro { obj.insert("org_gyro",   serde_json::to_value(val_ogyro).unwrap()); }
             if oquat { obj.insert("org_quat",   serde_json::to_value(val_oquat).unwrap()); }
             if ofd   { obj.insert("focus_distance", serde_json::to_value(val_ofd).unwrap()); }
+            if oiris {
+                obj.insert("iris_fstop", serde_json::to_value(val_iris.0).unwrap());
+                obj.insert("iris_tstop", serde_json::to_value(val_iris.1).unwrap());
+            }
             if seulr { obj.insert("stab_euler", serde_json::to_value(val_seulr).unwrap()); }
             if squat { obj.insert("stab_quat",  serde_json::to_value(val_squat).unwrap()); }
             if focal_length { obj.insert("focal_length",      val_fl.into()); }
@@ -259,13 +295,13 @@ pub fn export_gyro_data(filename: &str, fields_json: &str, stab: &Arc<crate::Sta
         output = output.trim_end_matches(",\n").to_string();
         output.push_str("]);\n");
 
-        let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&comp_params, 0.0, false);
+        let (camera_matrix, _, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&comp_params, 0.0, false);
         jsx.insert("zoom", camera_matrix[(0, 0)].into());
-        if comp_params.gyro.read().file_metadata.read().lens_params.len() > 1 {
+        if comp_params.gyro.read().file_metadata.read().lens_geometry_count() > 1 {
             jsx.insert("zooms", Vec::<serde_json::Value>::new().into());
             for f in 0..num_frames as i32 {
-                let timestamp = crate::timestamp_at_frame(f, fps);
-                let (camera_matrix, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&comp_params, timestamp, false);
+                let timestamp = comp_params.timestamp_at_frame(f);
+                let (camera_matrix, _, _, _, _, _, _) = crate::stabilization::FrameTransform::get_lens_data_at_timestamp(&comp_params, timestamp, false);
                 jsx.get_mut("zooms").unwrap().as_array_mut().unwrap().push(camera_matrix[(0, 0)].into());
             }
         }

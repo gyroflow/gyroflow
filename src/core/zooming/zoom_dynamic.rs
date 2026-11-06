@@ -28,7 +28,7 @@ pub fn compute(compute_params: &ComputeParams, mut fov_values: Vec<f64>, timesta
                 let vid_speed = keyframes.value_at_video_timestamp(&KeyframeType::VideoSpeed, *ts).unwrap_or(compute_params.video_speed).abs();
                 window *= vid_speed;
             }
-            let frames = get_frames_per_window(compute_params);
+            let frames = get_frames_per_window(window, compute_params.scaled_fps, timestamps.len());
             if frames > max_window { max_window = frames; }
             DataPerTimestamp {
                 window,
@@ -57,7 +57,7 @@ pub fn compute(compute_params: &ComputeParams, mut fov_values: Vec<f64>, timesta
         match method {
             ZoomMethod::GaussianFilter => {
                 // Static window
-                let frames = get_frames_per_window(compute_params);
+                let frames = get_frames_per_window(window, compute_params.scaled_fps, fov_values.len());
 
                 let fov_values_pad = pad_edge(&fov_values, (frames / 2, frames / 2));
                 let fov_min = min_rolling(&fov_values_pad, frames);
@@ -79,8 +79,27 @@ pub fn compute(compute_params: &ComputeParams, mut fov_values: Vec<f64>, timesta
     (fov_values, fov_minimal)
 }
 
-fn get_frames_per_window(compute_params: &ComputeParams) -> usize {
-    let mut frames = (compute_params.adaptive_zoom_window * compute_params.scaled_fps).floor() as usize;
+/// The curve the zoom limit judges a static zoom by (see `zooming::calculate_fovs`): the envelope follower at a fixed
+/// `window` (s), never zoomed out wider than a frame needs itself
+pub fn limit_curve(fov_values: &[f64], window: f64, fps: f64) -> Vec<f64> {
+    let first_pass_alpha  = 1.0 - (-(1.0 / fps) / window).exp();
+    let second_pass_alpha = 1.0 - (-(1.0 / fps) / 0.2).exp();
+
+    let curve = envelope_follower(fov_values, &[], Some(first_pass_alpha));
+    let curve = envelope_follower(&curve, &[], Some(second_pass_alpha));
+    curve.into_iter().zip(fov_values).map(|(c, need)| c.min(*need)).collect()
+}
+
+pub(crate) fn get_frames_per_window(window: f64, fps: f64, max_frames: usize) -> usize {
+    let exact = window * fps;
+    let mut frames = if exact.is_finite() && exact > 0.0 {
+        (exact.floor() as usize).min(max_frames)
+    } else {
+        if !exact.is_finite() {
+            log::error!("Invalid zooming window: {window} s at {fps} fps");
+        }
+        0
+    };
     if frames % 2 == 0 {
         frames += 1;
     }
@@ -93,7 +112,7 @@ fn min_rolling(a: &[f64], window: usize) -> Vec<f64> {
     }).collect()
 }
 
-fn convolve(v: &[f64], filter: &[f64]) -> Vec<f64> {
+pub(crate) fn convolve(v: &[f64], filter: &[f64]) -> Vec<f64> {
     v.windows(filter.len()).map(|window| {
         window.iter().zip(filter).map(|(x, y)| x * y).sum()
     }).collect()
@@ -104,22 +123,21 @@ fn gaussian_window(width: isize, std: f64) -> Vec<f64> {
     (-width / 2..=width / 2).map(|x| (-(x.pow(2) as f64) / sig2).exp()).collect()
 }
 
-fn gaussian_window_normalized(m: usize, std: f64) -> Vec<f64> {
+pub(crate) fn gaussian_window_normalized(m: usize, std: f64) -> Vec<f64> {
     let mut w = gaussian_window(m as isize, std);
     let sum: f64 = w.iter().sum();
     w.iter_mut().for_each(|v| *v /= sum);
     w
 }
 
-fn pad_edge(arr: &[f64], pad_to: (usize, usize)) -> Vec<f64> {
+pub(crate) fn pad_edge(arr: &[f64], pad_to: (usize, usize)) -> Vec<f64> {
     let first = *arr.first().unwrap_or(&0.0);
     let last = *arr.last().unwrap_or(&0.0);
 
-    let mut new_arr = vec![0.0; arr.len() + pad_to.0 + pad_to.1];
-    new_arr[pad_to.0..pad_to.0 + arr.len()].copy_from_slice(arr);
-
-    for i in 0..pad_to.0 { new_arr[i] = first; }
-    for i in pad_to.0 + arr.len()..new_arr.len() { new_arr[i] = last; }
+    let mut new_arr = Vec::with_capacity(arr.len() + pad_to.0 + pad_to.1);
+    new_arr.resize(pad_to.0, first);
+    new_arr.extend_from_slice(arr);
+    new_arr.resize(new_arr.len() + pad_to.1, last);
 
     new_arr
 }

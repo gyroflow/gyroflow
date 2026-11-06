@@ -15,13 +15,34 @@ pub struct IMUTransforms {
     pub imu_mf: i32,
     pub gyro_bias: Option<[f64; 3]>,
 }
+/// The same settings, bit for bit: what tells a change of them (`GyroSource::integrate_shared`), as the motion data's
+/// checksum takes them. A NaN one (an empty field of the UI) is then the same as itself, where `f64`'s `==` never is
+impl PartialEq for IMUTransforms {
+    fn eq(&self, other: &Self) -> bool {
+        fn bits<const N: usize>(v: Option<[f64; N]>) -> Option<[u64; N]> { v.map(|v| v.map(f64::to_bits)) }
+        fn rotation(r: &Option<Rotation3<f64>>) -> Option<[u64; 9]> { r.as_ref().map(|r| std::array::from_fn(|i| r.matrix()[i].to_bits())) }
+        self.imu_orientation == other.imu_orientation
+            && bits(self.imu_rotation_angles) == bits(other.imu_rotation_angles)
+            && bits(self.acc_rotation_angles) == bits(other.acc_rotation_angles)
+            && rotation(&self.imu_rotation) == rotation(&other.imu_rotation)
+            && rotation(&self.acc_rotation) == rotation(&other.acc_rotation)
+            && self.imu_lpf.to_bits() == other.imu_lpf.to_bits()
+            && self.imu_mf == other.imu_mf
+            && bits(self.gyro_bias) == bits(other.gyro_bias)
+    }
+}
+impl Eq for IMUTransforms { }
 impl IMUTransforms {
-    pub fn transform(&self, v: &mut [f64; 3], is_acc: bool) {
+    /// Gyro samples get the bias first: it's in the frame of the samples, before the orientation
+    pub fn transform_gyro(&self, v: &mut [f64; 3]) {
         if let Some(bias) = self.gyro_bias {
             v[0] += bias[0];
             v[1] += bias[1];
             v[2] += bias[2];
         }
+        self.transform(v, false);
+    }
+    pub fn transform(&self, v: &mut [f64; 3], is_acc: bool) {
         if let Some(ref orientation) = self.imu_orientation {
             if orientation != "XYZ" {
                 *v = Self::orient(v, orientation.as_bytes());

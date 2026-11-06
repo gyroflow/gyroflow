@@ -60,6 +60,7 @@ Row {
                 BasicText {
                     id: t2;
                     text: modelData;
+                    visible: (tl.editableFields[col1.keys[index]] || {}).type !== "choice";
                     onTextChanged: Qt.callLater(updateHeights);
                     font.bold: true;
                     MouseArea {
@@ -72,7 +73,8 @@ Row {
                 Loader {
                     height: parent.height;
                     property var name: col1.keys[index];
-                    sourceComponent: editableKeys.includes(col1.keys[index])? editable : undefined;
+                    property Item valueText: t2;
+                    sourceComponent: editableKeys.includes(name)? (tl.editableFields[name].type === "choice"? choice : editable) : undefined;
                 }
             }
         }
@@ -154,6 +156,45 @@ Row {
                 if (desc.hasOwnProperty("unit"))      newValue.unit      = desc.unit;
                 if (desc.hasOwnProperty("precision")) newValue.precision = desc.precision;
                 if (desc["type"] == "text")           newValue.allowText = true;
+            }
+        }
+    }
+
+    // The value is a link that opens a list of `options`, `onChange` gets the picked index
+    Component {
+        id: choice;
+        Item {
+            property var desc: tl.editableFields[name];
+            width: choiceBtn.x + choiceBtn.width;
+            LinkButton {
+                id: choiceBtn;
+                // Text starts where the value text would
+                x: valueText.leftPadding - leftPadding;
+                anchors.verticalCenter: parent.verticalCenter;
+                leftPadding: 6 * dpiScale;
+                rightPadding: 6 * dpiScale;
+                text: valueText.text;
+                font.bold: true;
+                tooltip: (desc.tooltips || [])[desc.value()] || "";
+                onClicked: {
+                    if (choicePopup.visible) {
+                        choicePopup.close();
+                    } else {
+                        choicePopup.currentIndex = desc.value();
+                        choicePopup.open();
+                    }
+                }
+                // Like a value's text: the first click opened the list, the second press closed it
+                onDoubleClicked: if (tl.copyable) controller.copy_to_clipboard(valueText.text);
+                Popup {
+                    id: choicePopup;
+                    model: desc.options;
+                    width: maxItemWidth + 10 * dpiScale;
+                    y: parent.height;
+                    itemHeight: 25 * dpiScale;
+                    font.pixelSize: 11 * dpiScale;
+                    onClicked: i => desc.onChange(i);
+                }
             }
         }
     }

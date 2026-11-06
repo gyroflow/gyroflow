@@ -44,6 +44,13 @@ Rectangle {
         anchors.centerIn: parent;
         wrapMode: Text.WordWrap;
         onTextChanged: Qt.callLater(root.updateSize);
+        linkColor: color;
+        onLinkActivated: (link) => Qt.openUrlExternally(link);
+        MouseArea {
+            anchors.fill: parent;
+            cursorShape: parent.hoveredLink? Qt.PointingHandCursor : Qt.ArrowCursor;
+            acceptedButtons: Qt.NoButton;
+        }
     }
     Text { // used to calculate width of the text before wrapping
         id: tm;

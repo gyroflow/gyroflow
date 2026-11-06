@@ -11,7 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 #telemetry-parser = { path = "../../../telemetry-parser" }
-telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "dcf8bfb" }
+telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "eb2bcba" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
 ahrs = { version = "0.8", features = ["field_access"] }
 
@@ -26,27 +26,27 @@ argmin-math = { version = "0.5.1", default-features = false, features = ["nalgeb
 nalgebra = { version = "0.34", features = ["serde-serialize"] }
 rayon = "1.12"
 biquad = "0.6.0"
-fastrand = "2.4"
-lazy_static = "1.5.0"
-parking_lot = "0.12.5"
-regex = "1.12"
+fastrand = "2.5"
+lazy_static = "1.5.1"
+parking_lot = "0.13"
+regex = "1.13"
 bincode = { version = "2.0", features = ["serde"] }
-serde = "1.0"
+serde = { version = "1.0", features = ["rc"] }
 serde_json = "1.0"
-crc32fast = "1.5.0"
+crc32fast = "1.5.4"
 byteorder = "1.5.0"
 line_drawing = "1.0.1"
-rand = "0.10.1"
-time = { version = "0.3.47", features = ["local-offset"] }
-itertools = "0.14.0"
+rand = "0.10.3"
+time = { version = "0.3.53", features = ["local-offset"] }
+itertools = "0.15.0"
 num = "0.4.3"
 base91 = "0.1.0"
-bitflags = "2.11"
+bitflags = "2.13"
 enum_delegate = "0.2.0"
-simple-easing = "1.0.2"
+simple-easing = "1.1.1"
 half = "2.7"
-lru = "0.18"
-thiserror = "2.0.18"
+lru = "0.19"
+thiserror = "2.0.21"
 ciborium = "0.2.2"
 dyn-clone = "1.0"
 app_dirs2 = { git = "https://github.com/app-dirs-rs/app_dirs2.git", version = "2.5" }
@@ -67,7 +67,7 @@ libloading = "0.9"
 libc = "0.2"
 bytemuck = "1.25"
 ash = "0.38.0"
-pollster = "0.4.0"
+pollster = "1.0.1"
 futures-intrusive = "0.5.0"
 flate2 = "1.1"
 walkdir = "2.5.0"
@@ -79,10 +79,15 @@ ocl = { version = "0.19.7", optional = true }
 ocl-interop = { version = "0.1.6", optional = true }
 rustfft = "6.4.1"
 exr = "1.74"
-opencv = { version = "0.98", default-features = false, features = [ "calib3d", "features2d", "imgproc", "optflow", "clang-runtime" ], optional = true } #"imgcodecs","objdetect","sfm",
+opencv = { version = "0.101", default-features = false, features = [ "calib3d", "features2d", "imgproc", "optflow", "clang-runtime" ], optional = true } #"imgcodecs","objdetect","sfm",
 median = "0.3"
+burn-store = { version = "0.23.0-pre.1", default-features = false, features = ["std"], optional = true }
+burn-cubecl = { version = "0.23.0-pre.1", optional = true }
+cubecl = { version = "0.12.0-pre.1", optional = true }
+sha2 = { version = "0.10", optional = true }
+ureq = { version = "3.3", optional = true }
 
-wgpu = { version = "29", features = ["spirv", "naga-ir"] }
+wgpu = { version = "30", features = ["spirv", "naga-ir"] }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 objc2 = "0.6"
@@ -90,17 +95,27 @@ objc2-metal = "0.3"
 objc2-core-foundation = "0.3"
 objc2-foundation = "0.3"
 
+# gmflow (feature use-burn) runs on the GPU only: Vulkan (SPIR-V kernels), or Metal on Apple systems with WGSL kernels,
+# whose matmuls and convolutions use the GPU's matrix units through wgpu's cooperative matrices (gmflow/coop.rs). Without
+# burn's native MSL (its metal feature): on the macOS 15 CI GPU WGSL with them ran a pass in 0.86 to 0.90 s, native MSL
+# in 1.05 to 1.14 s
+[target.'cfg(not(target_vendor = "apple"))'.dependencies]
+burn = { version = "0.23.0-pre.1", default-features = false, features = ["std", "autotune", "fusion", "cubecl", "extension", "vulkan"], optional = true }
+[target.'cfg(target_vendor = "apple")'.dependencies]
+burn = { version = "0.23.0-pre.1", default-features = false, features = ["std", "autotune", "fusion", "cubecl", "extension", "wgpu"], optional = true }
+
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.62"
 features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_Shell", "Win32_Foundation", "Wdk_Foundation", "Win32_System_LibraryLoader",
              "Win32_Graphics_Dwm", "Win32_Graphics_Direct3D", "Win32_Graphics_Direct3D11", "Win32_Graphics_Dxgi_Common", "Win32_Graphics_Dxgi",
              "Win32_Security", "Win32_Security_Authorization", "Win32_System_WindowsProgramming", "Win32_System_Threading", "Win32_System_Registry",
-             "Win32_Storage_Packaging_Appx", "Win32_Storage_FileSystem" ]
+             "Win32_Storage_Packaging_Appx", "Win32_Storage_FileSystem", "Win32_System_IO" ]
 
 [features]
 default = []
 use-opencl = ["ocl", "ocl-interop"]
 use-opencv = ["opencv"]
+use-burn = ["dep:burn", "dep:burn-store", "dep:burn-cubecl", "dep:cubecl", "dep:sha2", "dep:ureq"]
 bundle-lens-profiles = []
 cache-gyro-metadata = []
 
@@ -120,4 +135,4 @@ ndk-sys = { version = "0.6.0" }
 ndk-context = { version = "0.1.1" }
 
 [build-dependencies]
-ureq = "3.3"
+ureq = "3.5"
