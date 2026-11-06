@@ -6,6 +6,7 @@ pub mod gyro_source;
 pub mod imu_integration;
 pub mod lens_profile;
 pub mod lens_profile_database;
+pub mod lensfun_import;
 pub mod calibration;
 pub mod synchronization;
 pub mod stabilization;
@@ -522,10 +523,18 @@ impl StabilizationManager {
         } else {
             url.to_owned()
         };
-        // The database's lock isn't held while the lens's is taken (the loads take them the other way round), nor over
-        // the file read: a copy of its profile
+        let (size, fps, camera_id) = self.lens_video_context();
+        // Copy the database profile before taking the lens lock, preserving upstream lock order.
         let in_db = self.lens_profile_db.read().get_by_id(&url).cloned();
-        let (result, from_db) = if let Some(lens) = in_db {
+        let (result, from_db) = if crate::lensfun_import::is_lensfun_identifier(&url) {
+            match crate::lensfun_import::import_from_identifier(&url, size.0, size.1) {
+                Ok(lens) => {
+                    *self.lens.write() = lens;
+                    (Ok(()), true)
+                },
+                Err(err) => (Err(err), false)
+            }
+        } else if let Some(lens) = in_db {
             *self.lens.write() = lens;
             (Ok(()), true)
         } else if url.starts_with('{') {
@@ -533,7 +542,6 @@ impl StabilizationManager {
         } else {
             (self.lens.write().load_from_file(&url), false)
         };
-        let (size, fps, camera_id) = self.lens_video_context();
 
         let mut lens = self.lens.write();
         lens.adapt_to_video(size, fps, &camera_id);
@@ -3113,6 +3121,18 @@ pub enum GyroflowCoreError {
 
     #[error("IO error {0:?}")]
     IOError(#[from] std::io::Error),
+
+    #[error("Failed to load Lensfun database: {0}")]
+    LensfunDbLoadFailed(String),
+
+    #[error("Invalid Lensfun profile identifier: {0}")]
+    InvalidLensfunIdentifier(String),
+
+    #[error("Lensfun profile not found: {0}")]
+    LensfunProfileNotFound(String),
+
+    #[error("Lensfun profile has no supported distortion calibration: {0}")]
+    LensfunProfileUnsupported(String),
 
     #[error("Unknown error")]
     Unknown
