@@ -278,20 +278,9 @@
       ]
     },
     {
-      "aliases": [],
-      "brand": "AKASO",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "V50 X",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
+      "aliases": [
+        "V50 X"
+      ],
       "brand": "AKASO",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -344,7 +333,7 @@
     },
     {
       "aliases": [],
-      "brand": "apeman",
+      "brand": "Apeman",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -383,7 +372,7 @@
     },
     {
       "aliases": [],
-      "brand": "apeman",
+      "brand": "Apeman",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -577,7 +566,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "iPhone 13pro"
+      ],
       "brand": "Apple",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -609,19 +600,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "iPhone 13 Pro Max",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Apple",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "iPhone 13pro",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -707,7 +685,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "iPhone 15pro"
+      ],
       "brand": "Apple",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -752,19 +732,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "iPhone 15 Pro MAX",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Apple",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "iPhone 15pro",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -1661,25 +1628,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "BabyTurtle"
+      ],
       "brand": "Caddx",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "Baby Turtle",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Caddx",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "BabyTurtle",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -5203,7 +5159,8 @@
     },
     {
       "aliases": [
-        "Canon EOS R5 C"
+        "Canon EOS R5 C",
+        "EOS R5C"
       ],
       "brand": "Canon",
       "brand_aliases": [],
@@ -5223,7 +5180,8 @@
       ],
       "sensor_size": "Full frame",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
@@ -5300,19 +5258,6 @@
       "sensor_size": "APS-C",
       "source": [
         "lensfun"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Canon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "EOS R5C",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
       ]
     },
     {
@@ -8594,7 +8539,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "R5C"
+      ],
       "brand": "Canon",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -8613,19 +8560,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "R50",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Canon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "R5C",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -8659,25 +8593,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "R6 MarkII"
+      ],
       "brand": "Canon",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "R6 MARK II",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Canon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "R6 MarkII",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -8698,7 +8621,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "r6 mkii"
+      ],
       "brand": "Canon",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -8717,19 +8642,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "R6 mk2",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Canon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "r6 mkii",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -9502,21 +9414,9 @@
       ]
     },
     {
-      "aliases": [],
-      "brand": "DJI",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Air 2",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
       "aliases": [
-        "FC3411"
+        "FC3411",
+        "AIR2s"
       ],
       "brand": "DJI",
       "brand_aliases": [],
@@ -9559,25 +9459,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "Air 2"
+      ],
       "brand": "DJI",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "AIR2",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "DJI",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "AIR2s",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -9717,7 +9606,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "mavic 2pro"
+      ],
       "brand": "DJI",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -9736,19 +9627,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "Mavic 2 Zoom",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "DJI",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "mavic 2pro",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -9968,7 +9846,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "Mini2"
+      ],
       "brand": "DJI",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -10007,7 +9887,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "mini3"
+      ],
       "brand": "DJI",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -10057,32 +9939,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "Mini Pro 3",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "DJI",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Mini2",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "DJI",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "mini3",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -10672,25 +10528,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "BOX2"
+      ],
       "brand": "Foxeer",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "BOX 2",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Foxeer",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "BOX2",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -10737,7 +10582,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "Legend1"
+      ],
       "brand": "Foxeer",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -10756,19 +10603,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "Legend 2+",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Foxeer",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Legend1",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -11449,7 +11283,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "GFX100ii"
+      ],
       "brand": "Fujifilm",
       "brand_aliases": [],
       "compatible_mounts": [
@@ -11462,19 +11298,7 @@
       ],
       "sensor_size": "Medium format",
       "source": [
-        "lensfun"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Fujifilm",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "GFX100ii",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
+        "lensfun",
         "gyroflow"
       ]
     },
@@ -11937,19 +11761,6 @@
       "aliases": [],
       "brand": "Fujifilm",
       "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "x-pro 3",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Fujifilm",
-      "brand_aliases": [],
       "compatible_mounts": [
         "M42",
         "M39/1",
@@ -11989,7 +11800,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "x-pro 3"
+      ],
       "brand": "Fujifilm",
       "brand_aliases": [],
       "compatible_mounts": [
@@ -12873,25 +12686,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "Virb Ultra30"
+      ],
       "brand": "Garmin",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "Virb Ultra 30",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Garmin",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Virb Ultra30",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -12912,25 +12714,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "GM22Pro"
+      ],
       "brand": "General Mobile",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "GM22 pro",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "General Mobile",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "GM22Pro",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -13570,7 +13361,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "Pixel 4XL"
+      ],
       "brand": "Google",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -13602,19 +13395,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "Pixel 4a 5g",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Google",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Pixel 4XL",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -13845,33 +13625,9 @@
       ]
     },
     {
-      "aliases": [],
-      "brand": "GoPro",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "HERO 3+ black",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "GoPro",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "HERO 3+black",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
+      "aliases": [
+        "HERO4 Session"
+      ],
       "brand": "GoPro",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -14020,7 +13776,11 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "HERO 3+ black",
+        "HERO 3+black",
+        "Hero3+Black"
+      ],
       "brand": "GoPro",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -14054,19 +13814,6 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
-      "model": "Hero3+Black",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "GoPro",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
       "model": "HERO4",
       "mounts": [],
       "sensor_size": null,
@@ -14087,19 +13834,6 @@
       "sensor_size": "1/2.3-inch",
       "source": [
         "lensfun",
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "GoPro",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "HERO4 Session",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
         "gyroflow"
       ]
     },
@@ -14318,25 +14052,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "Session4"
+      ],
       "brand": "GoPro",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "Session 4",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "GoPro",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Session4",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -14770,7 +14493,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "FireflyXLite II"
+      ],
       "brand": "Hawkeye",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -14789,19 +14514,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "FireFlyV4",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Hawkeye",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "FireflyXLite II",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -14835,7 +14547,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "Naked4K"
+      ],
       "brand": "Hawkeye",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -14866,19 +14580,6 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
-      "model": "Naked4K",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Hawkeye",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
       "model": "Split 4k mini",
       "mounts": [],
       "sensor_size": null,
@@ -14887,25 +14588,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "SplitCam4K"
+      ],
       "brand": "Hawkeye",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "Split Cam 4K",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Hawkeye",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "SplitCam4K",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -15178,7 +14868,7 @@
     },
     {
       "aliases": [],
-      "brand": "honor",
+      "brand": "Honor",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -15191,7 +14881,7 @@
     },
     {
       "aliases": [],
-      "brand": "honor",
+      "brand": "Honor",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -15255,25 +14945,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "ac100"
+      ],
       "brand": "HP",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "AC 100",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "HP",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "ac100",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -15346,7 +15025,11 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "mate 50pro",
+        "mate50 pro",
+        "mate50pro"
+      ],
       "brand": "Huawei",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -15359,20 +15042,9 @@
       ]
     },
     {
-      "aliases": [],
-      "brand": "Huawei",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "mate 50pro",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
+      "aliases": [
+        "Mate60 Pro"
+      ],
       "brand": "Huawei",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -15391,45 +15063,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "mate30",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Huawei",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "mate50 pro",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Huawei",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "mate50pro",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Huawei",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Mate60 Pro",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -15724,7 +15357,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "P60PRO"
+      ],
       "brand": "Huawei",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -15756,19 +15391,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "p60 pro sony main lens",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Huawei",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "P60PRO",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -15971,7 +15593,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "OneR"
+      ],
       "brand": "Insta360",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -15984,7 +15608,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "OneRS"
+      ],
       "brand": "Insta360",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -16028,33 +15654,7 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
-      "model": "OneR",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Insta360",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
       "model": "OneR 1inch",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Insta360",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "OneRS",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -16246,25 +15846,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "Terra4k"
+      ],
       "brand": "Kinefinity",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "TERRA 4K",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "kinefinity",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Terra4k",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -18596,7 +18185,7 @@
     },
     {
       "aliases": [],
-      "brand": "NICEBOY",
+      "brand": "Niceboy",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -19540,19 +19129,6 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
-      "model": "D 3300",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
       "model": "D-750",
       "mounts": [],
       "sensor_size": null,
@@ -19984,7 +19560,8 @@
     },
     {
       "aliases": [
-        "Nikon D3300"
+        "Nikon D3300",
+        "D 3300"
       ],
       "brand": "Nikon",
       "brand_aliases": [
@@ -21123,32 +20700,6 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
-      "model": "NIKON Z5",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "NIKON Z6",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
       "model": "p950",
       "mounts": [],
       "sensor_size": null,
@@ -21158,7 +20709,8 @@
     },
     {
       "aliases": [
-        "Nikon Z 30"
+        "Nikon Z 30",
+        "Z30"
       ],
       "brand": "Nikon",
       "brand_aliases": [
@@ -21182,12 +20734,15 @@
       ],
       "sensor_size": "APS-C",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
       "aliases": [
-        "Nikon Z 5"
+        "Nikon Z 5",
+        "NIKON Z5",
+        "Z5"
       ],
       "brand": "Nikon",
       "brand_aliases": [
@@ -21211,12 +20766,14 @@
       ],
       "sensor_size": "Full frame",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
       "aliases": [
-        "Nikon Z 50"
+        "Nikon Z 50",
+        "Z50"
       ],
       "brand": "Nikon",
       "brand_aliases": [
@@ -21246,7 +20803,9 @@
     },
     {
       "aliases": [
-        "Nikon Z 6"
+        "Nikon Z 6",
+        "Z6",
+        "NIKON Z6"
       ],
       "brand": "Nikon",
       "brand_aliases": [
@@ -21275,21 +20834,11 @@
       ]
     },
     {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Z 6 II",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
       "aliases": [
-        "Nikon Z 6_2"
+        "Nikon Z 6_2",
+        "Z 6 II",
+        "Z6 II",
+        "Z6II"
       ],
       "brand": "Nikon",
       "brand_aliases": [
@@ -21319,7 +20868,8 @@
     },
     {
       "aliases": [
-        "Nikon Z 7"
+        "Nikon Z 7",
+        "Z7"
       ],
       "brand": "Nikon",
       "brand_aliases": [
@@ -21343,12 +20893,14 @@
       ],
       "sensor_size": "Full frame",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
       "aliases": [
-        "Nikon Z 7_2"
+        "Nikon Z 7_2",
+        "Z7II"
       ],
       "brand": "Nikon",
       "brand_aliases": [
@@ -21372,12 +20924,14 @@
       ],
       "sensor_size": "Full frame",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
       "aliases": [
-        "Nikon Z 8"
+        "Nikon Z 8",
+        "Z8"
       ],
       "brand": "Nikon",
       "brand_aliases": [
@@ -21407,7 +20961,8 @@
     },
     {
       "aliases": [
-        "Nikon Z 9"
+        "Nikon Z 9",
+        "Z9"
       ],
       "brand": "Nikon",
       "brand_aliases": [
@@ -21431,12 +20986,14 @@
       ],
       "sensor_size": "Full frame",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
       "aliases": [
-        "Nikon Z f"
+        "Nikon Z f",
+        "ZF"
       ],
       "brand": "Nikon",
       "brand_aliases": [
@@ -21460,12 +21017,15 @@
       ],
       "sensor_size": "Full frame",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
       "aliases": [
-        "Nikon Z fc"
+        "Nikon Z fc",
+        "ZFC",
+        "zf c"
       ],
       "brand": "Nikon",
       "brand_aliases": [
@@ -21499,46 +21059,7 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
-      "model": "Z30",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
       "model": "Z30 DX",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Z5",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Z50",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -21609,19 +21130,6 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
-      "model": "Z6",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
       "model": "Z6 I",
       "mounts": [],
       "sensor_size": null,
@@ -21635,33 +21143,7 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
-      "model": "Z6 II",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
       "model": "Z62",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Z6II",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -21703,98 +21185,7 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
-      "model": "Z7",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
       "model": "Z7i",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Z7II",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Z8",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Z9",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "ZF",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "zf c",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Nikon",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "ZFC",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -27063,25 +26454,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "G100"
+      ],
       "brand": "Panasonic",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "G 100",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Panasonic",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "G100",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -27271,25 +26651,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "GH5M2"
+      ],
       "brand": "Panasonic",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "GH5 m2",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Panasonic",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "GH5M2",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -27596,25 +26965,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "Lumix GH5ii"
+      ],
       "brand": "Panasonic",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "Lumix GH5 II",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Panasonic",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Lumix GH5ii",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -27739,7 +27097,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "Lumix S5II"
+      ],
       "brand": "Panasonic",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -27771,19 +27131,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "LUMIX S52X",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Panasonic",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Lumix S5II",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -29561,25 +28908,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "x3 Pro"
+      ],
       "brand": "POCO",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "X 3 pro",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "POCO",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "x3 Pro",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -29692,7 +29028,7 @@
     },
     {
       "aliases": [],
-      "brand": "Realme",
+      "brand": "REALME",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -29705,7 +29041,7 @@
     },
     {
       "aliases": [],
-      "brand": "Realme",
+      "brand": "REALME",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -29718,7 +29054,7 @@
     },
     {
       "aliases": [],
-      "brand": "Realme",
+      "brand": "REALME",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -29731,7 +29067,7 @@
     },
     {
       "aliases": [],
-      "brand": "Realme",
+      "brand": "REALME",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -29744,7 +29080,7 @@
     },
     {
       "aliases": [],
-      "brand": "Realme",
+      "brand": "REALME",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -29757,7 +29093,7 @@
     },
     {
       "aliases": [],
-      "brand": "Realme",
+      "brand": "REALME",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -29770,7 +29106,7 @@
     },
     {
       "aliases": [],
-      "brand": "Realme",
+      "brand": "REALME",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -29783,7 +29119,7 @@
     },
     {
       "aliases": [],
-      "brand": "Realme",
+      "brand": "REALME",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -29796,7 +29132,7 @@
     },
     {
       "aliases": [],
-      "brand": "Realme",
+      "brand": "REALME",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -29809,7 +29145,7 @@
     },
     {
       "aliases": [],
-      "brand": "Realme",
+      "brand": "REALME",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -29835,7 +29171,7 @@
     },
     {
       "aliases": [],
-      "brand": "Realme",
+      "brand": "REALME",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -29848,7 +29184,7 @@
     },
     {
       "aliases": [],
-      "brand": "Realme",
+      "brand": "REALME",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -29861,7 +29197,7 @@
     },
     {
       "aliases": [],
-      "brand": "Realme",
+      "brand": "REALME",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -30928,7 +30264,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "Nano3"
+      ],
       "brand": "RunCam",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -30947,19 +30285,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "Nano2",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "RunCam",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Nano3",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -31136,7 +30461,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "split2"
+      ],
       "brand": "RunCam",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -31149,7 +30476,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "split3 lite"
+      ],
       "brand": "RunCam",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -31214,7 +30543,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "split4k"
+      ],
       "brand": "RunCam",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -31336,46 +30667,7 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
-      "model": "split2",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "RunCam",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
       "model": "split3",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "RunCam",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "split3 lite",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "RunCam",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "split4k",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -31396,7 +30688,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "ThumbPro"
+      ],
       "brand": "RunCam",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -31409,7 +30703,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "Thumb ProW"
+      ],
       "brand": "RunCam",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -31427,33 +30723,7 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
-      "model": "Thumb ProW",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "RunCam",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
       "model": "Thumb2",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "RunCam",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "ThumbPro",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -31721,25 +30991,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "A9Pro (2016)"
+      ],
       "brand": "Samsung",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "A9 pro(2016)",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Samsung",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "A9Pro (2016)",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -31905,20 +31164,9 @@
       ]
     },
     {
-      "aliases": [],
-      "brand": "Samsung",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "galaxy note 10",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
+      "aliases": [
+        "Galaxy Note10+"
+      ],
       "brand": "Samsung",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -31987,25 +31235,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "galaxy note 10"
+      ],
       "brand": "Samsung",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "Galaxy Note10",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Samsung",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Galaxy Note10+",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -32640,19 +31877,6 @@
       "aliases": [],
       "brand": "Samsung",
       "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "NX 500",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Samsung",
-      "brand_aliases": [],
       "compatible_mounts": [
         "M42",
         "M39/1",
@@ -33002,7 +32226,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "NX 500"
+      ],
       "brand": "Samsung",
       "brand_aliases": [],
       "compatible_mounts": [
@@ -33076,7 +32302,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "S20FE"
+      ],
       "brand": "Samsung",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -33095,19 +32323,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "S20+",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Samsung",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "S20FE",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -33660,7 +32875,7 @@
     },
     {
       "aliases": [],
-      "brand": "SHARP",
+      "brand": "Sharp",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -33875,7 +33090,8 @@
     },
     {
       "aliases": [
-        "Sigma fp L"
+        "Sigma fp L",
+        "FPL"
       ],
       "brand": "Sigma",
       "brand_aliases": [],
@@ -33895,19 +33111,6 @@
       "sensor_size": "Full frame",
       "source": [
         "lensfun",
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sigma",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "FPL",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
         "gyroflow"
       ]
     },
@@ -34145,7 +33348,7 @@
     },
     {
       "aliases": [],
-      "brand": "sioeye",
+      "brand": "Sioeye",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -34196,25 +33399,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "4000air"
+      ],
       "brand": "SJCam",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "4000 AIR",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "SJCam",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "4000air",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -34235,25 +33427,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "8Pro"
+      ],
       "brand": "SJCam",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "8 Pro",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "SJCam",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "8Pro",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -34404,7 +33585,10 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "SJ8 PRO",
+        "SJ8PRO"
+      ],
       "brand": "SJCam",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -34417,25 +33601,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "sj10pro"
+      ],
       "brand": "SJCam",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "SJ10 Pro",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "SJCam",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "sj10pro",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -34508,25 +33681,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "sj6legend"
+      ],
       "brand": "SJCam",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "SJ6 Legend",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "SJCam",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "sj6legend",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -34579,32 +33741,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "SJ8 PLUS",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "SJCam",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "SJ8 PRO",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "SJCam",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "SJ8PRO",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -34683,32 +33819,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "a58 18-55 kit",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "A7 IV",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "A99 II",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -35712,7 +34822,8 @@
     {
       "aliases": [
         "ILCE-7M4",
-        "a7IV"
+        "a7IV",
+        "A7 IV"
       ],
       "brand": "Sony",
       "brand_aliases": [],
@@ -36341,7 +35452,8 @@
     {
       "aliases": [
         "ILCA-99M2",
-        "a99II"
+        "a99II",
+        "A99 II"
       ],
       "brand": "Sony",
       "brand_aliases": [],
@@ -36361,7 +35473,8 @@
       ],
       "sensor_size": "Full frame",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
@@ -36422,25 +35535,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "DSC WX50"
+      ],
       "brand": "Sony",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "DSC WX 50",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "DSC WX50",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -37628,7 +36730,8 @@
     },
     {
       "aliases": [
-        "DSC-RX0M2"
+        "DSC-RX0M2",
+        "RX0II"
       ],
       "brand": "Sony",
       "brand_aliases": [],
@@ -37641,19 +36744,6 @@
       "sensor_size": "1-inch",
       "source": [
         "lensfun",
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "RX0II",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
         "gyroflow"
       ]
     },
@@ -37729,7 +36819,8 @@
     },
     {
       "aliases": [
-        "DSC-RX10M2"
+        "DSC-RX10M2",
+        "RX10II"
       ],
       "brand": "Sony",
       "brand_aliases": [],
@@ -37741,12 +36832,14 @@
       ],
       "sensor_size": "1-inch",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
       "aliases": [
-        "DSC-RX10M3"
+        "DSC-RX10M3",
+        "RX10III"
       ],
       "brand": "Sony",
       "brand_aliases": [],
@@ -37758,12 +36851,14 @@
       ],
       "sensor_size": "1-inch",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
       "aliases": [
-        "DSC-RX10M4"
+        "DSC-RX10M4",
+        "RX10IV"
       ],
       "brand": "Sony",
       "brand_aliases": [],
@@ -37798,7 +36893,8 @@
     },
     {
       "aliases": [
-        "DSC-RX100M2"
+        "DSC-RX100M2",
+        "RX100II"
       ],
       "brand": "Sony",
       "brand_aliases": [],
@@ -37810,12 +36906,14 @@
       ],
       "sensor_size": "1-inch",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
       "aliases": [
-        "DSC-RX100M3"
+        "DSC-RX100M3",
+        "RX100III"
       ],
       "brand": "Sony",
       "brand_aliases": [],
@@ -37827,12 +36925,14 @@
       ],
       "sensor_size": "1-inch",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
       "aliases": [
-        "DSC-RX100M4"
+        "DSC-RX100M4",
+        "RX100IV"
       ],
       "brand": "Sony",
       "brand_aliases": [],
@@ -37844,12 +36944,14 @@
       ],
       "sensor_size": "1-inch",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
       "aliases": [
-        "DSC-RX100M5"
+        "DSC-RX100M5",
+        "RX100V"
       ],
       "brand": "Sony",
       "brand_aliases": [],
@@ -37861,7 +36963,8 @@
       ],
       "sensor_size": "1-inch",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
@@ -37883,7 +36986,8 @@
     },
     {
       "aliases": [
-        "DSC-RX100M6"
+        "DSC-RX100M6",
+        "RX100VI"
       ],
       "brand": "Sony",
       "brand_aliases": [],
@@ -37895,7 +36999,8 @@
       ],
       "sensor_size": "1-inch",
       "source": [
-        "lensfun"
+        "lensfun",
+        "gyroflow"
       ]
     },
     {
@@ -37938,45 +37043,6 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
-      "model": "RX100II",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "RX100III",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "RX100IV",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
       "model": "RX100M4",
       "mounts": [],
       "sensor_size": null,
@@ -37991,71 +37057,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "RX100M5A",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "RX100V",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "RX100VI",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "RX10II",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "RX10III",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "RX10IV",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -38257,7 +37258,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "Xperia 5II"
+      ],
       "brand": "Sony",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -38315,19 +37318,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "Xperia 5 V",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Xperia 5II",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -38516,7 +37506,8 @@
     },
     {
       "aliases": [
-        "ZV-E10M2"
+        "ZV-E10M2",
+        "ZV-E10II"
       ],
       "brand": "Sony",
       "brand_aliases": [],
@@ -38535,19 +37526,6 @@
       "sensor_size": "APS-C",
       "source": [
         "lensfun",
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Sony",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "ZV-E10II",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
         "gyroflow"
       ]
     },
@@ -38722,7 +37700,7 @@
     },
     {
       "aliases": [],
-      "brand": "ulefone",
+      "brand": "Ulefone",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -38800,7 +37778,7 @@
     },
     {
       "aliases": [],
-      "brand": "VIVITAR",
+      "brand": "Vivitar",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
@@ -38942,25 +37920,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "X100Pro"
+      ],
       "brand": "Vivo",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "X100 Pro",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Vivo",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "X100Pro",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -39020,25 +37987,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "X90Pro+"
+      ],
       "brand": "Vivo",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "x90 Pro+",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Vivo",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "X90Pro+",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -39724,7 +38680,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "12SU"
+      ],
       "brand": "Xiaomi",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -39756,21 +38714,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "12s ultra",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Xiaomi",
-      "brand_aliases": [
-        "Mi"
-      ],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "12SU",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -39830,7 +38773,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "13ultra"
+      ],
       "brand": "Xiaomi",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -39939,19 +38884,6 @@
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
-      "model": "13ultra",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Xiaomi",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
       "model": "13u\u5e7f\u89d2",
       "mounts": [],
       "sensor_size": null,
@@ -39999,7 +38931,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "14ultra"
+      ],
       "brand": "Xiaomi",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -40044,19 +38978,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "14u",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Xiaomi",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "14ultra",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -40209,7 +39130,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "mi10"
+      ],
       "brand": "Xiaomi",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -40274,7 +39197,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "mi10tpro"
+      ],
       "brand": "Xiaomi",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -40443,7 +39368,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "mi14"
+      ],
       "brand": "Xiaomi",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -40592,45 +39519,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "Mi Note 10 Pro",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Xiaomi",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "mi10",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Xiaomi",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "mi10tpro",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Xiaomi",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "mi14",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -41015,25 +39903,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "Redmi Note 11Pro+ 5G"
+      ],
       "brand": "Xiaomi",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "Redmi Note 11 Pro+ 5G",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Xiaomi",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "Redmi Note 11Pro+ 5G",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -41587,25 +40464,14 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "S2PRO"
+      ],
       "brand": "XTU",
       "brand_aliases": [],
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "S2 PRO",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "XTU",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "S2PRO",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -41842,7 +40708,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "E2-M4"
+      ],
       "brand": "Z CAM",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -41855,7 +40723,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "E2M4"
+      ],
       "brand": "Z CAM",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -41868,7 +40738,9 @@
       ]
     },
     {
-      "aliases": [],
+      "aliases": [
+        "E2S6"
+      ],
       "brand": "Z CAM",
       "brand_aliases": [],
       "compatible_mounts": [],
@@ -41900,19 +40772,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "E2-F6",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Z CAM",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "E2-M4",
       "mounts": [],
       "sensor_size": null,
       "source": [
@@ -41965,32 +40824,6 @@
       "compatible_mounts": [],
       "crop_factor": null,
       "model": "E2F6",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Z CAM",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "E2M4",
-      "mounts": [],
-      "sensor_size": null,
-      "source": [
-        "gyroflow"
-      ]
-    },
-    {
-      "aliases": [],
-      "brand": "Z CAM",
-      "brand_aliases": [],
-      "compatible_mounts": [],
-      "crop_factor": null,
-      "model": "E2S6",
       "mounts": [],
       "sensor_size": null,
       "source": [

@@ -60,6 +60,7 @@ pub struct CameraDatabase {
     cameras: BTreeMap<(String, String), CameraEntry>,
     camera_lenses: BTreeMap<(String, String), BTreeSet<String>>,
     mount_lenses: BTreeMap<String, BTreeSet<String>>,
+    community_lenses: BTreeMap<String, (String, bool)>,
     brand_search_keys: BTreeMap<String, BTreeSet<(String, String)>>,
     brands: Vec<String>,
     models: BTreeMap<String, Vec<String>>,
@@ -136,34 +137,29 @@ impl CameraDatabase {
 
     pub fn from_lens_profile_database(profiles: &LensProfileDatabase) -> Self {
         let mut db = Self::from_static();
+        db.add_profile_observations(profiles.iter_profiles());
+        db
+    }
 
-        for profile in profiles.iter_profiles() {
+    fn add_profile_observations<'a>(&mut self, profiles: impl Iterator<Item = &'a crate::lens_profile::LensProfile>) {
+        for profile in profiles {
             if profile.is_copy || profile.camera_brand.is_empty() || profile.camera_model.is_empty() {
                 continue;
             }
 
-            let camera = CameraEntry {
-                brand: profile.camera_brand.clone(),
-                model: profile.camera_model.clone(),
-                // A profile's crop factor can describe a recording mode or speed
-                // booster, so it is not reliable camera sensor metadata.
-                source: vec!["gyroflow".to_owned()],
-                ..Default::default()
+            let Some((camera_key, _)) = self.find_camera(&profile.camera_brand, &profile.camera_model) else {
+                continue;
             };
-            db.merge_camera(camera);
 
-            if !profile.lens_model.is_empty() {
-                let key = db.find_camera(&profile.camera_brand, &profile.camera_model)
-                    .map(|(key, _)| key)
-                    .unwrap_or_else(|| Self::camera_key(&profile.camera_brand, &profile.camera_model));
-                db.camera_lenses.entry(key)
+            let lens_key = Self::key(&profile.lens_model);
+            if let Some((lens_name, _)) = self.community_lenses.get(&lens_key) {
+                self.camera_lenses.entry(camera_key)
                     .or_default()
-                    .insert(profile.lens_model.clone());
+                    .insert(lens_name.clone());
             }
         }
 
-        db.rebuild_indexes();
-        db
+        self.rebuild_indexes();
     }
 
     pub fn brands(&self) -> Vec<String> {
@@ -246,6 +242,7 @@ impl CameraDatabase {
             cameras: BTreeMap::new(),
             camera_lenses: BTreeMap::new(),
             mount_lenses: BTreeMap::new(),
+            community_lenses: BTreeMap::new(),
             brand_search_keys: BTreeMap::new(),
             brands: Vec::new(),
             models: BTreeMap::new(),
@@ -319,6 +316,21 @@ impl CameraDatabase {
         } else {
             format!("{} {}", lens.brand, lens.model)
         };
+        let identity = Self::key(&name);
+        let is_lensfun = lens.source.iter().any(|source| Self::key(source) == "lensfun");
+        match self.community_lenses.get_mut(&identity) {
+            Some((existing, existing_is_lensfun)) if is_lensfun && !*existing_is_lensfun => {
+                *existing = name.clone();
+                *existing_is_lensfun = true;
+            }
+            Some((existing, existing_is_lensfun)) if is_lensfun == *existing_is_lensfun && name.as_str() < existing.as_str() => {
+                *existing = name.clone();
+            }
+            Some(_) => {}
+            None => {
+                self.community_lenses.insert(identity, (name.clone(), is_lensfun));
+            }
+        }
 
         for mount in lens.mounts {
             self.mount_lenses.entry(Self::key(&mount)).or_default().insert(name.clone());
@@ -382,12 +394,17 @@ impl CameraDatabase {
 
         let brand_key = Self::key(&Self::camera_brand_name(brand, model));
         let model_key = Self::key(&Self::model_name(brand, model));
-        self.cameras.iter()
-            .find(|((candidate_brand, _), camera)| {
+        let candidates = self.cameras.iter()
+            .filter(|((candidate_brand, _), camera)| {
                 (candidate_brand == &brand_key || camera.brand_aliases.iter().any(|alias| Self::key(alias) == brand_key)) &&
                 (Self::key(&camera.model) == model_key || camera.aliases.iter().any(|alias| Self::key(alias) == model_key))
             })
-            .map(|(key, camera)| (key.clone(), camera))
+            .collect::<Vec<_>>();
+        if candidates.len() == 1 {
+            let (key, camera) = candidates[0];
+            return Some((key.clone(), camera));
+        }
+        None
     }
 
     fn camera_search_keys(camera: &CameraEntry) -> BTreeSet<(String, String)> {
@@ -414,11 +431,16 @@ impl CameraDatabase {
     }
 
     fn sensor_compatible(selected: &CameraEntry, candidate: &CameraEntry) -> bool {
-        match (&selected.sensor_size, &candidate.sensor_size) {
-            (Some(a), Some(b)) if Self::key(a) == Self::key(b) => true,
-            (Some(_), Some(_)) => false,
-            _ => match (selected.crop_factor, candidate.crop_factor) {
-                (Some(a), Some(b)) => a.is_finite() && b.is_finite() && a > 0.0 && b > 0.0 && (a - b).abs() <= 0.15,
+        if let (Some(a), Some(b)) = (&selected.sensor_size, &candidate.sensor_size) {
+            if Self::key(a) != Self::key(b) {
+                return false;
+            }
+        }
+
+        match (selected.crop_factor, candidate.crop_factor) {
+            (Some(a), Some(b)) => a.is_finite() && b.is_finite() && a > 0.0 && b > 0.0 && (a - b).abs() <= 0.15,
+            _ => match (&selected.sensor_size, &candidate.sensor_size) {
+                (Some(a), Some(b)) => Self::key(a) == Self::key(b),
                 _ => false,
             },
         }
@@ -566,6 +588,13 @@ mod tests {
         for crop in [0.0, -1.0, f64::NAN, f64::INFINITY] {
             assert!(!CameraDatabase::sensor_compatible(&known, &CameraEntry { crop_factor: Some(crop), ..Default::default() }));
         }
+        let medium_format_645 = CameraEntry { sensor_size: Some("Medium format".to_owned()), crop_factor: Some(0.577), ..Default::default() };
+        let medium_format_iq140 = CameraEntry { sensor_size: Some("Medium format".to_owned()), crop_factor: Some(0.789), ..Default::default() };
+        assert!(!CameraDatabase::sensor_compatible(&medium_format_645, &medium_format_iq140));
+        assert!(!CameraDatabase::sensor_compatible(
+            &CameraEntry { sensor_size: Some("Full frame".to_owned()), crop_factor: Some(1.0), ..Default::default() },
+            &CameraEntry { sensor_size: Some("APS-C".to_owned()), crop_factor: Some(1.5), ..Default::default() }
+        ));
     }
 
     #[test]
@@ -606,6 +635,48 @@ mod tests {
         }
 
         assert!(checked > 10);
+    }
+
+    #[test]
+    fn local_profiles_only_attach_known_lenses_to_catalog_camera_aliases() {
+        let mut db = CameraDatabase::from_file(CameraDatabaseFile {
+            version: 1,
+            cameras: vec![CameraEntry {
+                brand: "Sony".to_owned(),
+                model: "Alpha 7 IV".to_owned(),
+                aliases: vec!["A7 IV".to_owned()],
+                ..Default::default()
+            }],
+            lenses: vec![LensEntry {
+                model: "fe 35mm f1.4 gm".to_owned(),
+                source: vec!["gyroflow".to_owned()],
+                ..Default::default()
+            }, LensEntry {
+                model: "FE 35mm F1.4 GM".to_owned(),
+                source: vec!["lensfun".to_owned()],
+                ..Default::default()
+            }],
+            ..Default::default()
+        });
+
+        let profile = |brand: &str, model: &str, lens: &str| {
+            let mut profile = crate::lens_profile::LensProfile::default();
+            profile.camera_brand = brand.to_owned();
+            profile.camera_model = model.to_owned();
+            profile.lens_model = lens.to_owned();
+            profile
+        };
+        let known_alias = profile("Sony", "A7 IV", "fe 35mm f1.4 gm");
+        let unknown_model = profile("Sony", "New Body", "FE 35mm F1.4 GM");
+        let unknown_brand = profile("NewBrand", "New Body", "FE 35mm F1.4 GM");
+        let unknown_lens = profile("Sony", "Alpha 7 IV", "Unlisted Lens");
+        db.add_profile_observations([&known_alias, &unknown_model, &unknown_brand, &unknown_lens].into_iter());
+
+        assert_eq!(db.models("Sony"), vec!["Alpha 7 IV"]);
+        assert!(db.brands().iter().all(|brand| brand != "NewBrand"));
+        let lenses = db.lenses("Sony", "Alpha 7 IV");
+        assert!(lenses.iter().any(|lens| lens == "FE 35mm F1.4 GM"));
+        assert!(!lenses.iter().any(|lens| lens == "Unlisted Lens"));
     }
 
     #[test]
