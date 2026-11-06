@@ -14,4 +14,14 @@ fn main() {
             }
         }
     }
+
+    let cam_path = format!("{project_dir}/../../resources/camera_presets/cameras.json.gz");
+    if !std::path::Path::new(&cam_path).exists() {
+        std::fs::create_dir_all(&format!("{project_dir}/../../resources/camera_presets")).unwrap();
+        if let Ok(mut body) = ureq::get("https://github.com/gyroflow/lens_profiles/releases/latest/download/cameras.json.gz").call().map(|x| x.into_body().into_reader()) {
+            if let Ok(mut file) = std::fs::File::create(&cam_path) {
+                let _ = std::io::copy(&mut body, &mut file);
+            }
+        }
+    }
 }

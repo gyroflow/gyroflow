@@ -150,7 +150,31 @@ MenuItem {
 
     function exportProfile(fileUrl: url, notify: bool): void {
         const save = (upload) => {
-            // `export_lens_profile` reports failures itself, via `error()` -> a message box
+            if (upload) {
+                const brand = (calib.calibrationInfo.camera_brand || "").trim();
+                const model = (calib.calibrationInfo.camera_model || "").trim();
+                const lens = (calib.calibrationInfo.lens_model || "").trim();
+                if (!brand || brand.toLowerCase() === "other") {
+                    messageBox(Modal.Error, qsTr("Please select or enter a valid camera brand."), [ { text: qsTr("Ok") } ]);
+                    return;
+                }
+                if (!model || model.toLowerCase() === "other") {
+                    messageBox(Modal.Error, qsTr("Please select or enter a valid camera model."), [ { text: qsTr("Ok") } ]);
+                    return;
+                }
+                const camInfo = controller.get_camera_info(brand, model);
+                const isFixed = camInfo.mount === "Fixed / Integrated" || ["GoPro", "Insta360", "DJI"].some(b => brand.indexOf(b) !== -1);
+                if (!isFixed && (!lens || lens.toLowerCase() === "other")) {
+                    messageBox(Modal.Error, qsTr("For interchangeable lens cameras, please specify the lens model."), [ { text: qsTr("Ok") } ]);
+                    return;
+                }
+                const isZoom = lens.indexOf("-") !== -1 || lens.toLowerCase().indexOf("zoom") !== -1;
+                const hasFocal = (flcb.checked && fl.value > 0) || (calib.calibrationInfo.camera_setting && /\d/.test(calib.calibrationInfo.camera_setting));
+                if (isZoom && !hasFocal) {
+                    messageBox(Modal.Error, qsTr("For zoom lenses, please specify the exact focal length (enable Focal length checkbox or add to Camera setting)."), [ { text: qsTr("Ok") } ]);
+                    return;
+                }
+            }
             if (controller.export_lens_profile(fileUrl, calib.calibrationInfo, upload) && notify)
                 calibrator_window.showNotification(Modal.Info, qsTr("Lens profile exported to %1.").arg("<b>" + filesystem.display_url(fileUrl) + "</b>"));
         };
@@ -221,6 +245,116 @@ MenuItem {
             height: 25 * dpiScale;
             value: 15;
             from: 1;
+        }
+    }
+
+
+    AdvancedSection {
+        title: qsTr("Camera and lens selector");
+        expanded: true;
+
+        Column {
+            width: parent.width;
+            spacing: 6 * dpiScale;
+
+            Row {
+                width: parent.width;
+                spacing: 5 * dpiScale;
+
+                ComboBox {
+                    id: calibBrandCombo;
+                    width: Math.floor((parent.width - 5 * dpiScale) / 2);
+                    height: 25 * dpiScale;
+                    model: [qsTr("Select brand...")].concat(controller.get_camera_brands()).concat([qsTr("Other...")]);
+                    onCurrentTextChanged: {
+                        if (currentIndex > 0 && currentText !== qsTr("Other...")) {
+                            calib.calibrationInfo.camera_brand = currentText;
+                            calibModelCombo.model = [qsTr("Select model...")].concat(controller.get_camera_models(currentText)).concat([qsTr("Other...")]);
+                            calibModelCombo.currentIndex = 0;
+                            customBrandField.visible = false;
+                        } else if (currentText === qsTr("Other...")) {
+                            customBrandField.visible = true;
+                        }
+                        list.updateEntry("Camera brand", calib.calibrationInfo.camera_brand || "");
+                    }
+                }
+
+                ComboBox {
+                    id: calibModelCombo;
+                    width: Math.floor((parent.width - 5 * dpiScale) / 2);
+                    height: 25 * dpiScale;
+                    model: [qsTr("Select model...")];
+                    onCurrentTextChanged: {
+                        if (currentIndex > 0 && currentText !== qsTr("Other...")) {
+                            calib.calibrationInfo.camera_model = currentText;
+                            calibLensCombo.model = [qsTr("Select lens...")].concat(controller.get_lenses_for_camera(calibBrandCombo.currentText, currentText)).concat([qsTr("Other...")]);
+                            calibLensCombo.currentIndex = 0;
+                            customModelField.visible = false;
+
+                            const info = controller.get_camera_info(calibBrandCombo.currentText, currentText);
+                            if (info.crop_factor) {
+                                calib.calibrationInfo.note = (calib.calibrationInfo.note ? calib.calibrationInfo.note + " " : "") + info.sensor + " (crop " + info.crop_factor + ")";
+                                list.updateEntry("Additional info", calib.calibrationInfo.note);
+                            }
+                        } else if (currentText === qsTr("Other...")) {
+                            customModelField.visible = true;
+                        }
+                        list.updateEntry("Camera model", calib.calibrationInfo.camera_model || "");
+                    }
+                }
+            }
+
+            TextField {
+                id: customBrandField;
+                visible: false;
+                width: parent.width;
+                height: 25 * dpiScale;
+                placeholderText: qsTr("Type custom camera brand...");
+                onTextChanged: {
+                    calib.calibrationInfo.camera_brand = text;
+                    list.updateEntry("Camera brand", text);
+                }
+            }
+
+            TextField {
+                id: customModelField;
+                visible: false;
+                width: parent.width;
+                height: 25 * dpiScale;
+                placeholderText: qsTr("Type custom camera model...");
+                onTextChanged: {
+                    calib.calibrationInfo.camera_model = text;
+                    list.updateEntry("Camera model", text);
+                }
+            }
+
+            ComboBox {
+                id: calibLensCombo;
+                width: parent.width;
+                height: 25 * dpiScale;
+                model: [qsTr("Select lens...")];
+                onCurrentTextChanged: {
+                    if (currentIndex > 0 && currentText !== qsTr("Other...")) {
+                        calib.calibrationInfo.lens_model = currentText;
+                        customLensField.visible = false;
+                    } else if (currentText === qsTr("Other...")) {
+                        customLensField.visible = true;
+                    }
+                    list.updateEntry("Lens model", calib.calibrationInfo.lens_model || "");
+                }
+            }
+
+            TextField {
+                id: customLensField;
+                visible: false;
+                width: parent.width;
+                height: 25 * dpiScale;
+                placeholderText: qsTr("Type custom lens model...");
+                onTextChanged: {
+                    calib.calibrationInfo.lens_model = text;
+                    list.updateEntry("Lens model", text);
+                }
+            }
         }
     }
 
