@@ -18921,6 +18921,23 @@
       "source_url": "https://docs.red.com/955-0190_v1.5/955-0196_V1.5%20Rev-A_RED_PS_KOMODO_Operation_Guide/Content/A_TechSpecs/Specs_KOMODO_6K.htm"
     },
     {
+      "aliases": [],
+      "brand": "RED",
+      "brand_aliases": [],
+      "compatible_mounts": [],
+      "crop_factor": 0.934,
+      "model": "V-RAPTOR 8K VV",
+      "mounts": [
+        "Canon RF"
+      ],
+      "sensor_size": "Full frame",
+      "source": [
+        "curated",
+        "gyroflow"
+      ],
+      "source_url": "https://docs.red.com/955-0199/955-0199_V1.3_Rev-A_RED_PS_V-RAPTOR_8K_VV_Operation_Guide/Content/C_TechSpecs/Specs_V-RAPTOR.htm"
+    },
+    {
       "aliases": [
         "Pentax 645Z"
       ],
@@ -23201,6 +23218,40 @@
       "source": [
         "lensfun"
       ]
+    },
+    {
+      "aliases": [],
+      "brand": "Z CAM",
+      "brand_aliases": [],
+      "compatible_mounts": [],
+      "crop_factor": 1.88,
+      "model": "E2",
+      "mounts": [
+        "Micro 4/3 System"
+      ],
+      "sensor_size": "Micro Four Thirds",
+      "source": [
+        "curated",
+        "gyroflow"
+      ],
+      "source_url": "https://www.z-cam.com/products/professional-cameras/e2/"
+    },
+    {
+      "aliases": [],
+      "brand": "Z CAM",
+      "brand_aliases": [],
+      "compatible_mounts": [],
+      "crop_factor": 1.88,
+      "model": "E2-M4",
+      "mounts": [
+        "Micro 4/3 System"
+      ],
+      "sensor_size": "Micro Four Thirds",
+      "source": [
+        "curated",
+        "gyroflow"
+      ],
+      "source_url": "https://www.z-cam.com/products/professional-cameras/e2-m4/"
     }
   ],
   "lenses": [
@@ -41792,6 +41843,10 @@
     },
     {
       "name": "Curated manufacturer identities",
+      "url": "https://docs.red.com/955-0199/955-0199_V1.3_Rev-A_RED_PS_V-RAPTOR_8K_VV_Operation_Guide/Content/C_TechSpecs/Specs_V-RAPTOR.htm"
+    },
+    {
+      "name": "Curated manufacturer identities",
       "url": "https://documents.blackmagicdesign.com/UserManuals/BlackmagicPocketCinemaCamera6KManual.pdf"
     },
     {
@@ -41936,7 +41991,23 @@
     },
     {
       "name": "Curated manufacturer identities",
+      "url": "https://www.usa.canon.com/shop/p/eos-r5-c-body"
+    },
+    {
+      "name": "Curated manufacturer identities",
+      "url": "https://www.usa.canon.com/shop/p/eos-r5?iframe=yes"
+    },
+    {
+      "name": "Curated manufacturer identities",
       "url": "https://www.vivo.com.cn/vivo/param/iqooz3"
+    },
+    {
+      "name": "Curated manufacturer identities",
+      "url": "https://www.z-cam.com/products/professional-cameras/e2-m4/"
+    },
+    {
+      "name": "Curated manufacturer identities",
+      "url": "https://www.z-cam.com/products/professional-cameras/e2/"
     }
   ],
   "version": 1
