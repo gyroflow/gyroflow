@@ -2497,7 +2497,7 @@ impl Controller {
 
     fn fetch_profiles_from_github(&self) {
         use core::camera_database::CameraDatabase;
-        use core::database_update::{install, DatabaseFormat};
+        use core::database_update::{camera_catalog_needs_update, install, DatabaseFormat};
         use core::lens_profile_database::LensProfileDatabase;
 
         if LensProfileDatabase::get_path().join("noupdate").exists() {
@@ -2516,26 +2516,27 @@ impl Controller {
                 let tag = release["tag_name"].as_str().ok_or("Missing release tag")?.trim_start_matches('v').parse::<u32>()?;
                 if tag < current_version { return Ok(false); }
                 let assets = release["assets"].as_array().ok_or("Missing release assets")?;
-                let asset_url = |name: &str| assets.iter()
-                    .find(|asset| asset["name"].as_str() == Some(name))
-                    .and_then(|asset| asset["browser_download_url"].as_str());
-                let install_asset = |url: &str, path: &std::path::Path, format| -> Result<(), Box<dyn std::error::Error>> {
+                let find_asset = |name: &str| assets.iter().find(|asset| asset["name"].as_str() == Some(name));
+                let install_asset = |asset: &serde_json::Value, path: &std::path::Path, format| -> Result<(), Box<dyn std::error::Error>> {
+                    let url = asset["browser_download_url"].as_str().ok_or("Missing database download URL")?;
                     let content = ureq::get(url).call()?.into_body().into_reader();
-                    Ok(install(content, path, format)?)
+                    Ok(install(content, path, format, asset["digest"].as_str())?)
                 };
 
                 let catalog = CameraDatabase::get_path();
                 let mut updated = false;
-                if let Some(url) = asset_url("camera_database.json") {
-                    if tag > current_version || std::fs::read_to_string(&catalog).ok().and_then(|data| CameraDatabase::parse_file(&data).ok()).is_none() {
-                        install_asset(url, &catalog, DatabaseFormat::Cameras)?;
+                if let Some(asset) = find_asset("camera_database.json") {
+                    let cached_catalog = std::fs::read(&catalog).ok();
+                    if camera_catalog_needs_update(current_version, tag, cached_catalog.as_deref(), asset["digest"].as_str())? {
+                        install_asset(asset, &catalog, DatabaseFormat::Cameras)?;
                         updated = true;
                     }
                 }
                 if tag > current_version {
                     // The loader prefers the user's copy over the packaged profiles.
                     let profiles = catalog.with_file_name("profiles.cbor.gz");
-                    install_asset(asset_url("profiles.cbor.gz").ok_or("Missing profiles.cbor.gz")?, &profiles, DatabaseFormat::Profiles(tag))?;
+                    let asset = find_asset("profiles.cbor.gz").ok_or("Missing profiles.cbor.gz")?;
+                    install_asset(asset, &profiles, DatabaseFormat::Profiles(tag))?;
                     updated = true;
                 }
                 Ok(updated)

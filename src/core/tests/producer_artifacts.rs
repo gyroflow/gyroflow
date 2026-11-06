@@ -17,12 +17,12 @@ fn producer_artifacts_install_through_native_consumer() -> Result<(), Box<dyn Er
     let dir = tempfile::tempdir()?;
     let cameras = dir.path().join("camera_database.json");
     let profiles = dir.path().join("profiles.cbor.gz");
-    install(fs::File::open(&catalog)?, &cameras, DatabaseFormat::Cameras)?;
-    install(fs::File::open(&bundle)?, &profiles, DatabaseFormat::Profiles(version))?;
+    install(fs::File::open(&catalog)?, &cameras, DatabaseFormat::Cameras, None)?;
+    install(fs::File::open(&bundle)?, &profiles, DatabaseFormat::Profiles(version), None)?;
     assert!(fs::read(cameras)? == fs::read(catalog)?, "catalog changed during installation");
 
     // A stale release manifest must leave the usable profile bundle in place.
-    assert!(install(fs::File::open(&bundle)?, &profiles, DatabaseFormat::Profiles(version ^ 1)).is_err());
+    assert!(install(fs::File::open(&bundle)?, &profiles, DatabaseFormat::Profiles(version ^ 1), None).is_err());
     assert!(fs::read(profiles)? == fs::read(bundle)?, "bundle changed after a rejected update");
     assert_eq!(fs::read_dir(dir.path())?.count(), 2);
     Ok(())
