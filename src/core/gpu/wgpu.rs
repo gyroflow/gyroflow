@@ -84,12 +84,13 @@ fn instance_with(backends: wgpu::Backends) -> wgpu::Instance {
 
 lazy_static::lazy_static! {
     static ref INSTANCE: Mutex<wgpu::Instance> = Mutex::new(instance_with(BACKENDS));
-    /// OpenGL, made only when `INSTANCE` has no GPU adapter (see `BACKENDS`)
-    #[cfg(target_os = "windows")]
-    static ref GL_INSTANCE: Mutex<wgpu::Instance> = Mutex::new(instance_with(wgpu::Backends::GL));
     static ref ADAPTERS: RwLock<Vec<Adapter>> = RwLock::new(Vec::new());
     static ref ADAPTER: AtomicUsize = AtomicUsize::new(0);
 }
+/// OpenGL, made only when `INSTANCE` has no GPU adapter (see `BACKENDS`). Not in `lazy_static!`: it puts the `cfg` on
+/// the type it makes but not on that type's impls, which then fail to build elsewhere
+#[cfg(target_os = "windows")]
+static GL_INSTANCE: std::sync::LazyLock<Mutex<wgpu::Instance>> = std::sync::LazyLock::new(|| Mutex::new(instance_with(wgpu::Backends::GL)));
 
 const EXCLUSIONS: &[&'static str] = &["Microsoft Basic Render Driver"];
 
