@@ -87,7 +87,7 @@ impl KltDevice {
 }
 
 /// Looks for the adapter of the GPU `selected` (see `KltDevice`) and makes its device and pipelines, on a thread: the
-/// first time in a process looking for an adapter can take seconds (the wgpu instance is made then, with every backend),
+/// first time in a process looking for an adapter can take seconds (the wgpu instance is made then, see `BACKENDS`),
 /// and making the device and the pipelines a tenth of one. `found_gpu` waits for it
 pub(super) fn find_gpu(selected: Option<usize>) -> mpsc::Receiver<Result<wgpu::Adapter, String>> {
     let (found, finding) = mpsc::channel();
