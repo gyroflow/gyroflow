@@ -67,11 +67,30 @@ impl Drop for WgpuWrapper {
     }
 }
 
+/// The backends of `INSTANCE`. Not OpenGL on Windows: an OpenGL instance loads the OpenGL driver of every GPU, and on a
+/// PC with an NVIDIA and an AMD GPU the AMD one crashed the app at the start, in that (inferred: it takes the other
+/// driver's per-thread context for its own). Every such GPU has a Vulkan or DX12 driver too, and for one with only
+/// OpenGL there's `GL_INSTANCE`
+#[cfg(target_os = "windows")]
+const BACKENDS: wgpu::Backends = wgpu::Backends::VULKAN.union(wgpu::Backends::DX12);
+#[cfg(not(target_os = "windows"))]
+const BACKENDS: wgpu::Backends = wgpu::Backends::all();
+
+fn instance_with(backends: wgpu::Backends) -> wgpu::Instance {
+    let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
+    desc.backends = backends;
+    wgpu::Instance::new(desc)
+}
+
 lazy_static::lazy_static! {
-    static ref INSTANCE: Mutex<wgpu::Instance> = Mutex::new(wgpu::Instance::new(wgpu::InstanceDescriptor::new_without_display_handle()));
+    static ref INSTANCE: Mutex<wgpu::Instance> = Mutex::new(instance_with(BACKENDS));
     static ref ADAPTERS: RwLock<Vec<Adapter>> = RwLock::new(Vec::new());
     static ref ADAPTER: AtomicUsize = AtomicUsize::new(0);
 }
+/// OpenGL, made only when `INSTANCE` has no GPU adapter (see `BACKENDS`). Not in `lazy_static!`: it puts the `cfg` on
+/// the type it makes but not on that type's impls, which then fail to build elsewhere
+#[cfg(target_os = "windows")]
+static GL_INSTANCE: std::sync::LazyLock<Mutex<wgpu::Instance>> = std::sync::LazyLock::new(|| Mutex::new(instance_with(wgpu::Backends::GL)));
 
 const EXCLUSIONS: &[&'static str] = &["Microsoft Basic Render Driver"];
 
@@ -79,7 +98,13 @@ impl WgpuWrapper {
     pub fn list_devices() -> Vec<String> {
         if ADAPTERS.read().is_empty() {
             let devices = std::panic::catch_unwind(|| -> Vec<Adapter> {
-                pollster::block_on(INSTANCE.lock().enumerate_adapters(wgpu::Backends::all())).into_iter().filter(|x| !EXCLUSIONS.iter().any(|e| x.get_info().name.contains(e))).collect()
+                let usable = |all: Vec<Adapter>| all.into_iter().filter(|x| !EXCLUSIONS.iter().any(|e| x.get_info().name.contains(e)));
+                let adapters: Vec<Adapter> = usable(pollster::block_on(INSTANCE.lock().enumerate_adapters(BACKENDS))).collect();
+                #[cfg(target_os = "windows")]
+                if !adapters.iter().any(|a| a.get_info().device_type != wgpu::DeviceType::Cpu) {
+                    return adapters.into_iter().chain(usable(pollster::block_on(GL_INSTANCE.lock().enumerate_adapters(wgpu::Backends::GL)))).collect();
+                }
+                adapters
             });
             match devices {
                 Ok(devices) => { *ADAPTERS.write() = devices; },
@@ -183,12 +208,20 @@ impl WgpuWrapper {
     pub fn initialize_context() -> Option<(String, String)> {
         let instance = INSTANCE.lock();
 
-        let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+        let options = wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::HighPerformance,
             force_fallback_adapter: false,
             compatible_surface: None,
             apply_limit_buckets: false,
-        })).ok()?;
+        };
+        let adapter = pollster::block_on(instance.request_adapter(&options)).ok();
+        #[cfg(target_os = "windows")]
+        let adapter = if adapter.as_ref().is_some_and(|a| a.get_info().device_type != wgpu::DeviceType::Cpu) {
+            adapter
+        } else {
+            pollster::block_on(GL_INSTANCE.lock().request_adapter(&options)).ok().or(adapter)
+        };
+        let adapter = adapter?;
         let info = adapter.get_info();
         log::debug!("WGPU adapter: {:?}", &info);
         if info.device_type == wgpu::DeviceType::Cpu {
