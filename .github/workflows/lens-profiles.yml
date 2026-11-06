@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - ".github/workflows/lens-profiles.yml"
+      - ".cargo/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
       - "resources/camera_database/**"
       - "src/controller.rs"
       - "src/core/**"
@@ -31,3 +34,28 @@ jobs:
             qml6-module-qtquick-controls qml6-module-qtquick-layouts \
             qml6-module-qtquick-templates qml6-module-qtquick-window
           /usr/lib/qt6/bin/qmltestrunner -input tests/qml -import src/ui/components
+
+  profile-installer:
+    runs-on: macos-15
+    permissions:
+      contents: read
+    env:
+      GYROFLOW_PROFILE_RELEASE_VERSION: "41"
+      GYROFLOW_PROFILES_BUNDLE: ${{ github.workspace }}/resources/camera_presets/profiles.cbor.gz
+      GYROFLOW_CAMERA_DATABASE: ${{ github.workspace }}/resources/camera_database/camera_database.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src/core
+      - name: Fetch the released bundle used by the compatibility test
+        run: |
+          mkdir -p "$(dirname "$GYROFLOW_PROFILES_BUNDLE")"
+          curl --fail --location --retry 3 --output "$GYROFLOW_PROFILES_BUNDLE" \
+            "https://github.com/gyroflow/lens_profiles/releases/download/v$GYROFLOW_PROFILE_RELEASE_VERSION/profiles.cbor.gz"
+          echo "5b9136697b75ddf9cda20965f17e786b6c8530e3d59109f87505069602e7f676  $GYROFLOW_PROFILES_BUNDLE" | shasum -a 256 --check
+      - name: Test the native catalog and profile installer
+        run: |
+          cargo test --manifest-path src/core/Cargo.toml --locked --lib
+          cargo test --manifest-path src/core/Cargo.toml --locked --test producer_artifacts -- --ignored
