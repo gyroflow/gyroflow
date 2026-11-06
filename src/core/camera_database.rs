@@ -61,8 +61,8 @@ pub struct CameraDatabase {
     cameras: BTreeMap<(String, String), CameraEntry>,
     camera_lenses: BTreeMap<(String, String), BTreeSet<String>>,
     mount_lenses: BTreeMap<String, BTreeSet<String>>,
-    community_lenses: BTreeMap<String, (String, bool)>,
-    community_lens_aliases: BTreeMap<String, Option<String>>,
+    lens_names: BTreeMap<String, (String, bool)>,
+    lens_aliases: BTreeMap<String, Option<String>>,
     brand_search_keys: BTreeMap<String, BTreeSet<(String, String)>>,
     brands: Vec<String>,
     models: BTreeMap<String, Vec<String>>,
@@ -116,14 +116,14 @@ impl CameraDatabase {
         if file.cameras.iter().any(|camera| camera.brand.trim().is_empty() || camera.model.trim().is_empty()) {
             return Err("Camera database contains an unnamed camera".to_owned());
         }
-        if file.lenses.iter().any(|lens| lens.model.trim().is_empty()) {
-            return Err("Camera database contains an unnamed lens".to_owned());
+        if file.lenses.iter().any(|lens| lens.brand.trim().is_empty() || lens.model.trim().is_empty()) {
+            return Err("Camera database contains a lens without a make and model".to_owned());
         }
         Ok(file)
     }
 
     fn bundled_file() -> CameraDatabaseFile {
-        match serde_json::from_str::<CameraDatabaseFile>(CAMERA_DATABASE_JSON) {
+        match Self::parse_file(CAMERA_DATABASE_JSON) {
             Ok(file) => file,
             Err(e) => {
                 log::warn!("Failed to load bundled camera database: {:?}", e);
@@ -153,8 +153,9 @@ impl CameraDatabase {
                 continue;
             };
 
-            let lens_key = Self::key(&profile.lens_model);
-            if let Some((lens_name, _)) = self.community_lenses.get(&lens_key) {
+            let lens_name = self.resolve_profile_lens_identity(&profile.lens_model)
+                .and_then(|identity| self.lens_names.get(&identity));
+            if let Some((lens_name, _)) = lens_name {
                 self.camera_lenses.entry(camera_key)
                     .or_default()
                     .insert(lens_name.clone());
@@ -250,7 +251,7 @@ impl CameraDatabase {
         }
 
         let identity = self.resolve_profile_lens_identity(raw)?;
-        let canonical = &self.community_lenses.get(&identity)?.0;
+        let canonical = &self.lens_names.get(&identity)?.0;
         available.iter().find(|lens| Self::key(lens) == Self::key(canonical)).cloned()
     }
 
@@ -264,20 +265,20 @@ impl CameraDatabase {
         let identity = if let Some(canonical) = available.iter().find(|lens| Self::key(lens) == selected_key) {
             Self::key(canonical)
         } else {
-            match self.community_lens_aliases.get(&selected_key) {
+            match self.lens_aliases.get(&selected_key) {
                 Some(Some(identity)) => identity.clone(),
                 Some(None) => return Some(BTreeSet::new()),
                 None => return None,
             }
         };
-        let canonical = self.community_lenses.get(&identity)?.0.as_str();
+        let canonical = self.lens_names.get(&identity)?.0.as_str();
         if !available.iter().any(|lens| Self::key(lens) == Self::key(canonical)) {
             return None;
         }
 
         let mut keys = BTreeSet::from([identity.clone()]);
-        keys.extend(self.community_lens_aliases.iter().filter_map(|(alias, candidate)| {
-            (candidate.as_deref() == Some(identity.as_str()) && !self.community_lenses.contains_key(alias))
+        keys.extend(self.lens_aliases.iter().filter_map(|(alias, candidate)| {
+            (candidate.as_deref() == Some(identity.as_str()) && !self.lens_names.contains_key(alias))
                 .then(|| alias.clone())
         }));
         Some(keys)
@@ -288,8 +289,8 @@ impl CameraDatabase {
             cameras: BTreeMap::new(),
             camera_lenses: BTreeMap::new(),
             mount_lenses: BTreeMap::new(),
-            community_lenses: BTreeMap::new(),
-            community_lens_aliases: BTreeMap::new(),
+            lens_names: BTreeMap::new(),
+            lens_aliases: BTreeMap::new(),
             brand_search_keys: BTreeMap::new(),
             brands: Vec::new(),
             models: BTreeMap::new(),
@@ -365,7 +366,7 @@ impl CameraDatabase {
         };
         let identity = Self::key(&name);
         let is_lensfun = lens.source.iter().any(|source| Self::key(source) == "lensfun");
-        match self.community_lenses.get_mut(&identity) {
+        match self.lens_names.get_mut(&identity) {
             Some((existing, existing_is_lensfun)) if is_lensfun && !*existing_is_lensfun => {
                 *existing = name.clone();
                 *existing_is_lensfun = true;
@@ -375,13 +376,13 @@ impl CameraDatabase {
             }
             Some(_) => {}
             None => {
-                self.community_lenses.insert(identity.clone(), (name.clone(), is_lensfun));
+                self.lens_names.insert(identity.clone(), (name.clone(), is_lensfun));
             }
         }
 
         for alias in lens.aliases.iter().map(|alias| Self::key(alias)).filter(|alias| !alias.is_empty()) {
             use std::collections::btree_map::Entry;
-            match self.community_lens_aliases.entry(alias) {
+            match self.lens_aliases.entry(alias) {
                 Entry::Vacant(entry) => { entry.insert(Some(identity.clone())); }
                 Entry::Occupied(mut entry) => {
                     if entry.get().as_deref() != Some(identity.as_str()) {
@@ -627,16 +628,22 @@ impl CameraDatabase {
 
     fn resolve_profile_lens_identity(&self, raw: &str) -> Option<String> {
         let key = Self::key(raw);
-        if self.community_lenses.contains_key(&key) {
+        if self.lens_names.contains_key(&key) {
             return Some(key);
         }
-        self.community_lens_aliases.get(&key).and_then(Clone::clone)
+        self.lens_aliases.get(&key).and_then(Clone::clone)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn rejects_legacy_catalogs_that_treat_unidentified_lenses_as_models() {
+        let legacy = r#"{"version":1,"cameras":[{"brand":"Sony","model":"Alpha 7C"}],"lenses":[{"model":"35mm"}]}"#;
+        assert!(CameraDatabase::parse_file(legacy).is_err());
+    }
 
     #[test]
     fn rejects_incomplete_or_unsupported_updates() {
@@ -715,11 +722,9 @@ mod tests {
                 ..Default::default()
             }],
             lenses: vec![LensEntry {
-                model: "fe 35mm f1.4 gm".to_owned(),
-                source: vec!["gyroflow".to_owned()],
-                ..Default::default()
-            }, LensEntry {
+                brand: "Sony".to_owned(),
                 model: "FE 35mm F1.4 GM".to_owned(),
+                aliases: vec!["FE 35mm F1.4 GM".to_owned()],
                 source: vec!["lensfun".to_owned()],
                 ..Default::default()
             }],
@@ -742,7 +747,7 @@ mod tests {
         assert_eq!(db.models("Sony"), vec!["Alpha 7 IV"]);
         assert!(db.brands().iter().all(|brand| brand != "NewBrand"));
         let lenses = db.lenses("Sony", "Alpha 7 IV");
-        assert!(lenses.iter().any(|lens| lens == "FE 35mm F1.4 GM"));
+        assert!(lenses.iter().any(|lens| lens == "Sony FE 35mm F1.4 GM"));
         assert!(!lenses.iter().any(|lens| lens == "Unlisted Lens"));
     }
 
