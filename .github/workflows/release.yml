@@ -12,7 +12,7 @@ jobs:
       matrix:
         targets: [
           { os: ubuntu-latest, type: linux },
-          { os: macos-14,      type: macos },
+          { os: macos-15,      type: macos },
           { os: macos-26,      type: macstore },
           { os: windows-2022,  type: windows },
           { os: windows-2022,  type: windows-arm },
@@ -59,7 +59,7 @@ jobs:
           rm -r -force ${{ github.workspace }}/target/release/build/qml-video-rs* -ErrorAction SilentlyContinue
 
       - name: Install Mac certificates
-        if: ${{ matrix.targets.os == 'macos-13' || matrix.targets.os == 'macos-14' || matrix.targets.os == 'macos-15' || matrix.targets.os == 'macos-26' }}
+        if: ${{ matrix.targets.os == 'macos-13' || matrix.targets.os == 'macos-15' || matrix.targets.os == 'macos-15' || matrix.targets.os == 'macos-26' }}
         uses: apple-actions/import-codesign-certs@v3
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATES }}
@@ -93,13 +93,15 @@ jobs:
           certutil -decode ${{ github.workspace }}/android_release.keystore.b64 ${{ github.workspace }}/android_release.keystore
           certutil -decode ${{ github.workspace }}/_deployment/windows/msix_signing_key.pfx.b64 ${{ github.workspace }}/_deployment/windows/msix_signing_key.pfx
 
-      - uses: extractions/setup-just@v2
+      - uses: extractions/setup-just@v4
 
       - name: Build Gyroflow (macOS)
         if: ${{ matrix.targets.type == 'macos' }}
         env:
           SIGNING_FINGERPRINT: ${{ secrets.MACOS_CERTIFICATE_FINGERPRINT }}
         run: |
+          echo "block return out quick proto udp from any to any port 443" | sudo pfctl -f -
+          sudo pfctl -E
           just install-deps
           just deploy universal
           xcrun notarytool submit --wait --apple-id ${{ secrets.MACOS_ACCOUNT_USER }} --team-id ${{ secrets.MACOS_TEAM }} --password ${{ secrets.MACOS_ACCOUNT_PASS }} ${{ github.workspace }}/_deployment/_binaries/Gyroflow-mac-universal.dmg

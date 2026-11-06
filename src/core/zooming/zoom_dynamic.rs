@@ -79,6 +79,17 @@ pub fn compute(compute_params: &ComputeParams, mut fov_values: Vec<f64>, timesta
     (fov_values, fov_minimal)
 }
 
+/// The curve the zoom limit judges a static zoom by (see `zooming::calculate_fovs`): the envelope follower at a fixed
+/// `window` (s), never zoomed out wider than a frame needs itself
+pub fn limit_curve(fov_values: &[f64], window: f64, fps: f64) -> Vec<f64> {
+    let first_pass_alpha  = 1.0 - (-(1.0 / fps) / window).exp();
+    let second_pass_alpha = 1.0 - (-(1.0 / fps) / 0.2).exp();
+
+    let curve = envelope_follower(fov_values, &[], Some(first_pass_alpha));
+    let curve = envelope_follower(&curve, &[], Some(second_pass_alpha));
+    curve.into_iter().zip(fov_values).map(|(c, need)| c.min(*need)).collect()
+}
+
 pub(crate) fn get_frames_per_window(window: f64, fps: f64, max_frames: usize) -> usize {
     let exact = window * fps;
     let mut frames = if exact.is_finite() && exact > 0.0 {

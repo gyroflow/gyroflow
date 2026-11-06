@@ -125,10 +125,11 @@ build-and-package profile is_dist:
     export OPENCV_LINK_PATHS={{ProjectDir}}/ext/vcpkg/installed/arm64-ios/lib
     export OPENCV_INCLUDE_PATHS={{ProjectDir}}/ext/vcpkg/installed/arm64-ios/include/opencv4/
 
+    # Without the AI optical flow (ai-optical-flow, GMFlow): it's for desktop GPUs, and its model is downloaded on first use
     if [ "{{profile}}" == "debug" ]; then
-        cargo build --target aarch64-apple-ios
+        cargo build --target aarch64-apple-ios --no-default-features --features opencv
     else
-        cargo build --target aarch64-apple-ios --profile {{profile}}
+        cargo build --target aarch64-apple-ios --profile {{profile}} --no-default-features --features opencv
     fi
 
     if [ -z "$SIGN_KEY" ] && [ -z "$PROVISIONING_PROFILE" ]; then
@@ -199,7 +200,7 @@ build-and-package profile is_dist:
         # Bundle BRAW SDK
         FrameworksDir={{AppBundle}}/Frameworks
         if [ ! -f "$FrameworksDir/BlackmagicRawAPI.framework/Versions/A/BlackmagicRawAPI" ]; then
-            curl -L https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_iOS_5.0.0.tar.gz -o tmp.tar.gz
+            curl -L https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_iOS_6.0.0.tar.gz -o tmp.tar.gz
             7z x -aoa tmp.tar.gz
             7z x -o"$FrameworksDir/" tmp.tar
             rm tmp.tar tmp.tar.gz

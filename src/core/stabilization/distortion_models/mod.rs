@@ -19,6 +19,38 @@ mod digital_stretch;
 
 use super::KernelParams;
 
+// The models a chessboard calibration can fit (`calibration::solver`), which calls their `distort` directly
+pub use self::{ opencv_fisheye::OpenCVFisheye, opencv_standard::OpenCVStandard, generic_polynomial::GenericPolynomial };
+
+/// The float types a model's math is written for: `f32` in the render, `f64` in the calibration solver, whose
+/// Jacobian is a finite difference that single precision would drown. A model writes its projection once, generic
+/// over this, and `distort_point` calls it with `f32`.
+///
+/// The functions are std's own, so the render's `f32` math is what it was before it was generic. nalgebra's
+/// `RealField` would route them through `libm` here, because `ahrs` builds nalgebra with `libm-force`: an `atan2`
+/// a few ulp off std's, and a fisheye `distort_point` about twice as slow in a release build
+pub trait Real: Copy + PartialOrd
+    + std::ops::Add<Output = Self> + std::ops::Sub<Output = Self> + std::ops::Mul<Output = Self> + std::ops::Div<Output = Self>
+{
+    fn from_f64(v: f64) -> Self;
+    fn sqrt(self) -> Self;
+    fn atan2(self, x: Self) -> Self;
+}
+macro_rules! impl_real {
+    ($($t:ty),*) => {$(
+        impl Real for $t {
+            #[inline(always)] fn from_f64(v: f64) -> Self { v as $t }
+            #[inline(always)] fn sqrt(self) -> Self { <$t>::sqrt(self) }
+            #[inline(always)] fn atan2(self, x: Self) -> Self { <$t>::atan2(self, x) }
+        }
+    )*};
+}
+impl_real!(f32, f64);
+
+/// A constant in the model's precision
+#[inline(always)]
+pub fn c<T: Real>(v: f64) -> T { T::from_f64(v) }
+
 macro_rules! impl_models {
     ($($name:ident => $class:ty,)*) => {
         #[derive(Clone)]
@@ -91,16 +123,45 @@ impl_models! {
 }
 
 impl DistortionModel {
-    /// Largest usable ray radius `tan θ` before the curve folds back (its derivative stops being positive),
-    /// `None` when it rises all the way to 90° or the model has no derivative. The generic way samples the
-    /// derivative up to 90° and bisects the first non-positive step; the Sony spline solves its fold from the
-    /// coefficients, since each of its derivative samples would be a Newton solve and the renderer asks per frame
-    /// when the file records a lens curve per frame
+    /// The coefficients of the image mirrored vertically (`y` -> `-y`, a framebuffer upside down): the terms odd in
+    /// `y` change sign, the tangential `p1` and the thin prism of the `y` offset. Radial models are symmetric
+    pub fn mirror_coefficients_y(&self, k: &mut [f64]) {
+        use DistortionModels as M;
+        let odd: &[usize] = match &self.inner {
+            M::OpenCVStandard(_) => &[2, 10, 11], // p1, s3, s4
+            M::Insta360(_) => &[3],               // p1
+            _ => &[],
+        };
+        for &i in odd {
+            if let Some(v) = k.get_mut(i) { *v = -*v; }
+        }
+    }
+
+    /// The largest ray angle the model itself can represent, in radians, `None` when it has no such end.
+    /// Not a fold of the calibration - [`Self::radial_distortion_limit`] finds those - but the shape of the
+    /// projection: a rectilinear model images the z=1 plane and has nothing at 90°, and the unified sphere
+    /// of the Insta360 model turns over at `acos(-1/ξ)`
+    pub fn field_limit(&self, k: &[f64]) -> Option<f64> {
+        use DistortionModels as M;
+        match &self.inner {
+            M::OpenCVStandard(_) | M::Poly3(_) | M::Poly5(_) | M::PtLens(_) => Some(std::f64::consts::FRAC_PI_2 - 1e-4),
+            M::Insta360(_) => insta360::Insta360::field_limit(k),
+            _ => None
+        }
+    }
+
+    /// Largest usable ray angle (radians) before the curve folds back (its derivative stops being positive),
+    /// `None` when it rises all the way. The generic way samples the derivative up to 180° and bisects the
+    /// first non-positive step; the Sony spline solves its fold from the coefficients, since each of its
+    /// derivative samples would be a Newton solve and the renderer asks per frame when the file records a
+    /// lens curve per frame
     pub fn radial_distortion_limit(&self, k: &[f64]) -> Option<f64> {
         if let DistortionModels::Sony(m) = &self.inner {
             return m.radial_distortion_limit(k);
         }
-        let max_theta = std::f64::consts::FRAC_PI_2; // PI/2
+        // A fisheye can see well past 90°, so the sweep runs to 180° - the pipeline carries rays as angles
+        // and no longer stops at the old z=1 plane asymptote
+        let max_theta = std::f64::consts::PI;
 
         const STEPS: usize = 256;
         let mut low = 0.0;
@@ -128,25 +189,9 @@ impl DistortionModel {
 
         let theta_max = (low + high) / 2.0;
         if (theta_max - max_theta).abs() > 0.001 {
-            Some(theta_max.tan())
+            Some(theta_max)
         } else {
             None
-        }
-    }
-
-    /// Whether `undistort_point` keeps every point on its ray from the principal point, ie. the map is a pure
-    /// function of the radius. The lens-correction solve in `cpu_undistort::invert_lens_correction_blend`
-    /// bisects along that ray when it is, and has to solve in two dimensions when it isn't: tangential and
-    /// thin-prism terms move a point off its ray, and the digital warps are not radial at all
-    pub fn is_radial(&self, params: &KernelParams) -> bool {
-        use DistortionModels as M;
-        match &self.inner {
-            M::OpenCVFisheye(_) | M::Poly3(_) | M::Poly5(_) | M::PtLens(_) | M::Sony(_) | M::GenericPolynomial(_) | M::GoPro(_) => true,
-            // k = [k1 k2 p1 p2 k3 k4 k5 k6 s1 s2 s3 s4 ...]: p1 p2 tangential, s1..s4 thin prism
-            M::OpenCVStandard(_) => params.k[2] == 0.0 && params.k[3] == 0.0 && params.k[8..12].iter().all(|k| *k == 0.0),
-            // k = [k1 k2 k3 p1 p2 xi]
-            M::Insta360(_) => params.k[3] == 0.0 && params.k[4] == 0.0,
-            M::GoProSuperview(_) | M::GoPro6Superview(_) | M::GoProHyperview(_) | M::GoProWarp(_) | M::DigitalStretch(_) => false,
         }
     }
 }

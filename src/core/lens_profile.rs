@@ -63,6 +63,8 @@ pub struct LensProfile {
 
     pub sync_settings: Option<serde_json::Value>,
 
+    pub rig: Option<serde_json::Value>,
+
     pub distortion_model: Option<String>,
     pub digital_lens: Option<String>,
     pub digital_lens_params: Option<Vec<f64>>,
@@ -136,21 +138,57 @@ impl LensProfile {
         self.optimal_fov = None;
 
         self.asymmetrical = cal.asymmetrical;
+        // The model the coefficients came from, which the one picked for the next fit may not be yet
+        self.distortion_model = cal.fitted_model.distortion_model().map(str::to_string);
 
         self.fisheye_params = CameraParams {
             RMS_error: cal.rms,
             camera_matrix: cal.k.row_iter().map(|x| [x[0], x[1], x[2]]).collect(),
-            distortion_coeffs: cal.d.as_slice().to_vec(),
+            distortion_coeffs: cal.d.clone(),
             radial_distortion_limit: None
         };
 
         self.finalize();
+        // The field limit, where the curve folds, as a loaded profile has it: without it the calibrator's own preview
+        // has no limit for a fit whose curve folds inside the frame
+        self.init();
     }
 
     pub fn finalize(&mut self) {
         self.calibrator_version = env!("CARGO_PKG_VERSION").to_string();
         self.date = time::OffsetDateTime::now_local().map(|v| v.date().to_string()).unwrap_or_default();
         self.name = self.get_name();
+    }
+
+    /// A distortion-free (rectilinear) lens of a 35 mm equivalent focal length, in place of a calibration, for a video
+    /// that has no distortion to correct: a rectilinear lens, or one corrected in camera. The 35 mm equivalent is the
+    /// diagonal field of view of a 36x24 mm frame
+    pub fn from_focal_length(width: usize, height: usize, focal_length_35mm: f64) -> Option<Self> {
+        if width == 0 || height == 0 || !focal_length_35mm.is_finite() || focal_length_35mm <= 0.0 { return None; }
+        let (w, h) = (width as f64, height as f64);
+        let f = focal_length_35mm * (w * w + h * h).sqrt() / (36.0f64 * 36.0 + 24.0 * 24.0).sqrt();
+
+        let mut profile = Self {
+            calib_dimension: Dimensions { w: width, h: height },
+            orig_dimension:  Dimensions { w: width, h: height },
+            input_horizontal_stretch: 1.0,
+            input_vertical_stretch:   1.0,
+            official: true,
+            distortion_model: Some("opencv_standard".into()),
+            focal_length: Some(focal_length_35mm),
+            crop_factor: Some(1.0),
+            fisheye_params: CameraParams {
+                camera_matrix: vec![[f, 0.0, w / 2.0], [0.0, f, h / 2.0], [0.0, 0.0, 1.0]],
+                // Zero, but there: with fewer than 4 the focal length in the lens metadata of the file takes over
+                // (`FrameTransform::get_lens_data_at_lens_timestamp`)
+                distortion_coeffs: vec![0.0; 8],
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        profile.init();
+        profile.finalize();
+        Some(profile)
     }
 
     pub fn get_json_value(&self) -> Result<serde_json::Value, serde_json::error::Error> {
@@ -269,7 +307,8 @@ impl LensProfile {
         ret
     }
 
-    fn get_camera_matrix_internal(&self, invert_h: bool) -> Option<nalgebra::Matrix3<f64>> {
+    /// The calibration's camera matrix, upright. An upside-down framebuffer mirrors it in `FrameTransform::get_lens_data_at_lens_timestamp`
+    fn get_camera_matrix_internal(&self) -> Option<nalgebra::Matrix3<f64>> {
         if self.fisheye_params.camera_matrix.len() == 3 {
             let mut mat = nalgebra::Matrix3::from_rows(&[
                 self.fisheye_params.camera_matrix[0].into(),
@@ -279,8 +318,6 @@ impl LensProfile {
             if !self.asymmetrical {
                 mat[(0, 2)] = self.calib_dimension.w as f64 / 2.0;
                 mat[(1, 2)] = self.calib_dimension.h as f64 / 2.0;
-            } else if invert_h {
-                mat[(1, 2)] = self.calib_dimension.h as f64 - mat[(1, 2)];
             }
             if let Some(crop) = self.crop {
                 mat[(0, 0)] /= crop;
@@ -291,9 +328,9 @@ impl LensProfile {
             None
         }
     }
-    pub fn get_camera_matrix(&self, size: (usize, usize), invert_h: bool) -> nalgebra::Matrix3<f64> {
+    pub fn get_camera_matrix(&self, size: (usize, usize)) -> nalgebra::Matrix3<f64> {
         if self.fisheye_params.camera_matrix.len() == 3 {
-            let mat = self.get_camera_matrix_internal(invert_h).unwrap();
+            let mat = self.get_camera_matrix_internal().unwrap();
 
             // TODO: this didn't really work, try to figure it out and re-enable
             // if self.optimal_fov.is_none() && self.num_images > 3 {
@@ -312,6 +349,19 @@ impl LensProfile {
             mat
         }
     }
+    /// The largest ray angle this calibration is good for, in radians - the fold `init` solved from the
+    /// coefficients, or whatever the profile itself declared.
+    ///
+    /// The one profile that stores something else is GoPro's: `init` leaves its `radial_distortion_limit`
+    /// alone (the POLY radial map has no fold to solve for), and telemetry-parser writes the recorded
+    /// frame's corner angle there as `tan(ZFOV/2)` - the units `r_limit` had before the pipeline started
+    /// carrying rays as angles. Read through here rather than off the field, or a 150° body comes out as a
+    /// 3.73 radian field limit, which is past 180° and so clips nothing at all.
+    pub fn radial_distortion_limit_rad(&self) -> Option<f64> {
+        let limit = self.fisheye_params.radial_distortion_limit.filter(|l| *l > 0.0)?;
+        Some(if self.distortion_model.as_deref() == Some("gopro") { limit.atan() } else { limit })
+    }
+
     pub fn get_distortion_coeffs(&self) -> [f64; 24] {
         let mut ret = [0.0; 24];
         for (i, x) in self.fisheye_params.distortion_coeffs.iter().enumerate() {
@@ -414,6 +464,90 @@ impl LensProfile {
             }
         }
         ret
+    }
+
+    /// Sets the profile up for the video it's loaded for, `size` and `fps` the video's and `camera_id` the autoload
+    /// identifier of its camera (`CameraIdentifier::get_identifier_for_autoload`, empty when it has none): swapped when
+    /// the video is the profile turned by 90°, and of its compatible settings, the one the camera's identifier names,
+    /// else the first one of the video's resolution and frame rate, then of its aspect ratio and frame rate, of its
+    /// resolution, of its aspect ratio. A profile that is the camera's (by its identifier), or has no compatible
+    /// settings, stays as it is. Every way a profile is loaded for a video goes through this: picked by the user or
+    /// by the camera's identifier (`StabilizationManager::load_lens_profile`), or named by the file
+    /// (`StabilizationManager::load_gyro_data`)
+    pub fn adapt_to_video(&mut self, size: (usize, usize), fps: f64, camera_id: &str) {
+        let (width, height) = size;
+        let aspect = ((width * 100) as f64 / height.max(1) as f64).round() as u32;
+        let fps = (fps * 100.0).round() as i32;
+
+        // Check if the lens profile needs to be swapped for vertical: the video is the profile turned, by its size or
+        // else by its aspect ratio. A (nearly) square profile has the video's aspect ratio both ways, and stays as it
+        // is unless the video has its size turned: turning it would swap its axes (the focal lengths, the centre, the
+        // stretch of an anamorphic lens) for nothing
+        let (w, h) = (self.calib_dimension.w, self.calib_dimension.h);
+        let lens_aspect = ((w * 100) as f64 / h.max(1) as f64).round() as u32;
+        let lens_aspect_swapped = ((h * 100) as f64 / w.max(1) as f64).round() as u32;
+        let turned = if width == w && height == h {
+            false
+        } else if width == h && height == w {
+            true
+        } else {
+            lens_aspect_swapped == aspect && lens_aspect != aspect
+        };
+        if turned {
+            log::info!("Lens profile swapped from {}x{} to {}x{} to match the video aspect", w, h, h, w);
+            *self = self.swapped();
+        }
+
+        let matching = self.get_all_matching_profiles();
+        if matching.len() > 1 {
+            let mut found = false;
+            if !camera_id.is_empty() && self.identifier == camera_id {
+                found = true;
+            }
+            // Find best match for:
+            if !found {
+                // 1. Identifier
+                for x in &matching {
+                    if !camera_id.is_empty() && x.identifier == camera_id {
+                        *self = x.clone(); found = true; break;
+                    }
+                }
+            }
+            if !found {
+                // 2. Resolution and fps
+                for x in &matching {
+                    if width == x.calib_dimension.w && height == x.calib_dimension.h && fps == (x.fps * 100.0).round() as i32 {
+                        *self = x.clone(); found = true; break;
+                    }
+                }
+            }
+            if !found {
+                // 3. Aspect ratio and fps
+                for x in &matching {
+                    let a = ((x.calib_dimension.w * 100) as f64 / x.calib_dimension.h.max(1) as f64).round() as u32;
+                    if a == aspect && fps == (x.fps * 100.0).round() as i32 {
+                        *self = x.clone(); found = true; break;
+                    }
+                }
+            }
+            if !found {
+                // 4. Resolution
+                for x in &matching {
+                    if width == x.calib_dimension.w && height == x.calib_dimension.h {
+                        *self = x.clone(); found = true; break;
+                    }
+                }
+            }
+            if !found {
+                // 5. Aspect ratio
+                for x in &matching {
+                    let a = ((x.calib_dimension.w * 100) as f64 / x.calib_dimension.h.max(1) as f64).round() as u32;
+                    if a == aspect {
+                        *self = x.clone(); break;
+                    }
+                }
+            }
+        }
     }
 
     pub fn get_display_name(&self) -> String {

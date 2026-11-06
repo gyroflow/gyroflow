@@ -66,28 +66,23 @@ float sony_radius_at(int n, float theta) {
 
 vec2 undistort_point(vec2 pos) {
     int n = sony_segments();
-    if (n == 0) return pos;
     float r = length(pos);
+    // No lens curve: a pinhole, so the image radius is `tan θ`
+    if (n == 0) return r < 1e-12? pos : pos * (atan(r) / r);
     if (r < 1e-9) return pos;
     float theta = sony_angle_at(n, r);
     if (theta <= 0.0) return vec2(-99999.0, -99999.0);
-    // Clamp the angle just under tan()'s 90° asymptote and continue the radius linearly past it, so over-FOV rays
-    // stay large and monotonic (no fold back into the frame) and r_limit clips them. See sony.rs / gopro.rs.
-    const float TMAX = 1.5533; const float tt = 57.14902; // TMAX ≈ 89°, tt = tan(TMAX)
-    float rr = theta < TMAX ? tan(theta) : tt + (theta - TMAX) * (1.0 + tt * tt);
-    if (params.r_limit > 0.0 && rr > params.r_limit) return vec2(-99999.0, -99999.0);
-    return pos * (rr / r);
+    return pos * (theta / r);
 }
 
 vec2 distort_point(float x, float y, float z) {
-    vec2 pos = vec2(x, y) / z;
     int n = sony_segments();
-    if (n == 0) return pos;
+    // No lens curve: a pinhole, which has no image of a ray at or past 90°
+    if (n == 0) return z > 1e-9? vec2(x, y) / z : vec2(x, y) * 1e9;
+    vec2 pos = vec2(x, y);
     float r = length(pos);
-    if (r < 1e-9) return pos;
-    // Inverse of undistort_point's angle clamp
-    const float TMAX = 1.5533; const float tt = 57.14902;
-    float theta = r < tt ? atan(r) : TMAX + (r - tt) / (1.0 + tt * tt);
+    if (r < 1e-12) return vec2(0.0, 0.0);
+    float theta = atan(r, z);
     return pos * (sony_radius_at(n, theta) / r);
 }
 
@@ -204,14 +199,16 @@ vec2 process_coord(vec2 uv, float idx) {
         uv.x = map_coord(uv.x, 0.0, params.width,  origin.x, origin.x + crop_size.x);
         uv.y = map_coord(uv.y, 0.0, params.height, origin.y, origin.y + crop_size.y);
 
+        // The shear of every band above this one in full, and of this one down to the row. A fixed loop with no
+        // branch in it, as in the OpenCL kernel (issue 1255)
         int idx = min(7, max(0, int(floor(uv.y / stblz_grid))));
         float delta = uv.y - stblz_grid * float(idx);
-        uv.x -= get_mesh_data(o + 4 + idx * 2 + 0) * delta;
-        uv.y -= get_mesh_data(o + 4 + idx * 2 + 1) * delta;
-        for (int j = 0; j < idx; j++) {
-            uv.x -= get_mesh_data(o + 4 + j * 2 + 0) * stblz_grid;
-            uv.y -= get_mesh_data(o + 4 + j * 2 + 1) * stblz_grid;
+        vec2 shift = vec2(0.0);
+        for (int j = 0; j < 8; j++) {
+            float w = j < idx ? stblz_grid : (j == idx ? delta : 0.0);
+            shift += vec2(get_mesh_data(o + 4 + j * 2 + 0), get_mesh_data(o + 4 + j * 2 + 1)) * w;
         }
+        uv -= shift;
 
         uv.x = map_coord(uv.x, origin.x, origin.x + crop_size.x, 0.0, params.width);
         uv.y = map_coord(uv.y, origin.y, origin.y + crop_size.y, 0.0, params.height);

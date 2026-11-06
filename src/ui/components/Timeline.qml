@@ -271,7 +271,7 @@ Item {
             }
             checked: chart.getAxisVisible(10) || chart.getAxisVisible(11);
             tooltip: qsTr("Focal length");
-            visible: controller.has_per_frame_focal_length;
+            visible: controller.has_varying_focal_length;
         }
     }
     Column {
@@ -681,6 +681,8 @@ Item {
                     id: addCalibAction;
                     iconName: "plus";
                     text: qsTr("Add calibration point");
+                    // One calibration at a time (`Controller::add_calibration_point`)
+                    enabled: !controller.calib_in_progress;
                     onTriggered: {
                         const pos = root.position; // (root.mapFromVisibleArea(timelineContextMenu.pressedX / ma.width));
                         controller.add_calibration_point(pos * root.durationMs * 1000, calibrator_window.lensCalib.noMarker);

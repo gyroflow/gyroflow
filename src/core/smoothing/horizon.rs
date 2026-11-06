@@ -72,6 +72,7 @@ impl HorizonLock {
         hasher.write_u64(self.horizonroll.to_bits());
         hasher.write_u8(self.lock_pitch as u8);
         hasher.write_u64(self.horizonpitch.to_bits());
+        hasher.write_u8(self.automatic_lock as u8);
         hasher.write_u64(self.turn_threshold.to_bits());
         hasher.write_u64(self.turn_smoothing_ms.to_bits());
         hasher.write_u64(self.turn_multiplier.to_bits());
@@ -264,6 +265,31 @@ impl HorizonLock {
 
                 None
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn checksum_changes_with_every_setting() {
+        let checksum = |f: fn(&mut HorizonLock)| { let mut h = HorizonLock::default(); f(&mut h); h.get_checksum() };
+        let default = HorizonLock::default().get_checksum();
+        let changes: [fn(&mut HorizonLock); 9] = [
+            |h| h.horizonlockpercent = 50.0,
+            |h| h.horizonroll = 10.0,
+            |h| h.lock_pitch = true,
+            |h| h.horizonpitch = 10.0,
+            |h| h.automatic_lock = true,
+            |h| h.turn_threshold = 10.0,
+            |h| h.turn_smoothing_ms = 100.0,
+            |h| h.turn_multiplier = 2.0,
+            |h| h.tilt_accel_limit = 100.0,
+        ];
+        for f in changes {
+            assert_ne!(checksum(f), default);
         }
     }
 }

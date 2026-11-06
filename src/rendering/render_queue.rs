@@ -54,7 +54,9 @@ struct Job {
     additional_data: String,
     cancel_flag: Arc<AtomicBool>,
     project_data: Option<String>,
-    stab: Arc<StabilizationManager>
+    stab: Arc<StabilizationManager>,
+    /// Settings were applied to the job, but the motion data wasn't processed with them yet. It's done when the job starts rendering
+    gyro_outdated: Arc<AtomicBool>
 }
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -208,6 +210,7 @@ pub struct RenderQueue {
 
     get_job_output_filename: qt_method!(fn(&self, job_id: u32) -> QString),
     get_job_output_folder: qt_method!(fn(&self, job_id: u32) -> QUrl),
+    get_job_error_string: qt_method!(fn(&self, job_id: u32) -> QString),
     set_job_output_filename: qt_method!(fn(&mut self, job_id: u32, new_filename: QString, start: bool)),
 
     set_pixel_format: qt_method!(fn(&mut self, job_id: u32, format: String)),
@@ -246,6 +249,9 @@ pub struct RenderQueue {
     get_next_item_id: qt_method!(fn(&self, job_id: u32) -> u32),
     get_encoder_options: qt_method!(fn(&self, encoder: String) -> String),
     get_default_encoder: qt_method!(fn(&self, codec: String, gpu: bool) -> String),
+    has_encoder: qt_method!(fn(&self, codec: String) -> bool),
+    check_encoders: qt_method!(fn(&self, codec: String)),
+    pub encoders_checked: qt_signal!(codec: String, gpu_encoder: String, cpu_encoder: String),
     get_active_render_count: qt_method!(fn(&self) -> usize),
 
     apply_to_all: qt_method!(fn(&mut self, data: String, additional_data: String, to_job_id: u32)),
@@ -403,8 +409,10 @@ impl RenderQueue {
                     }
                     let stab = self.stabilizer.get_cloned();
 
-                    // If it's added from main UI, never do the additional autosync
-                    if let Some(ref mut obj) = stab.lens.write().sync_settings { obj.as_object_mut().and_then(|x| x.remove("do_autosync")); }
+                    // If it's added from main UI, never do the additional autosync, nor the optical analysis (it's done there)
+                    if let Some(ref mut obj) = stab.lens.write().sync_settings {
+                        if let Some(x) = obj.as_object_mut() { x.remove("do_autosync"); x.remove("do_optical_correction"); }
+                    }
 
                     self.add_internal(job_id, Arc::new(stab), render_options, additional_data, thumbnail_url);
                 }
@@ -476,7 +484,8 @@ impl RenderQueue {
             additional_data,
             cancel_flag: Default::default(),
             project_data,
-            stab: stab.clone()
+            stab: stab.clone(),
+            gyro_outdated: Default::default()
         });
         self.update_queue_indices();
 
@@ -498,6 +507,15 @@ impl RenderQueue {
         if let Some(job) = self.jobs.get(&job_id) {
             if job.queue_index < q.row_count() as usize {
                 return q[job.queue_index].output_filename.clone();
+            }
+        }
+        QString::default()
+    }
+    pub fn get_job_error_string(&self, job_id: u32) -> QString {
+        let q = self.queue.borrow();
+        if let Some(job) = self.jobs.get(&job_id) {
+            if job.queue_index < q.row_count() as usize {
+                return q[job.queue_index].error_string.clone();
             }
         }
         QString::default()
@@ -864,13 +882,19 @@ impl RenderQueue {
             });
             let encoder_initialized = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, encoder_name: String| {
                 if let Some(job) = this.jobs.get(&job_id) {
-                    if job.render_options.use_gpu && (encoder_name == "libx264" || encoder_name == "libx265" || encoder_name == "prores_ks") {
+                    if job.render_options.use_gpu && matches!(encoder_name.as_str(), "libx264" | "libx265" | "prores_ks" | "libsvtav1" | "librav1e" | "libaom-av1") {
                         update_model!(this, job_id, itm {
                             itm.error_string = QString::from("uses_cpu");
                         });
                     }
                 }
                 this.encoder_initialized(job_id, encoder_name);
+            });
+            // The output is complete, but without some of what was asked for. Shown with the finished job
+            let warning = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, msg: String| {
+                update_model!(this, job_id, itm {
+                    itm.error_string = QString::from(msg);
+                });
             });
 
             let err = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (msg, mut arg): (String, String)| {
@@ -949,8 +973,24 @@ impl RenderQueue {
                 }
             }
 
+            let processing2 = processing.clone();
+            let gyro_outdated = job.gyro_outdated.clone();
             core::run_threaded(move || {
+                if gyro_outdated.swap(false, SeqCst) {
+                    stab.recompute_gyro();
+                }
+                // Before the sync: motion data set aside has nothing to sync
+                let optical = Self::optical_correction_requested(&stab);
                 Self::do_autosync(stab.clone(), processing, &input_file, err2, proc_height);
+                if optical {
+                    if let Err(e) = Self::do_optical_correction(&stab, processing2, cancel_flag.clone(), pause_flag.clone()) {
+                        return if cancel_flag.load(SeqCst) {
+                            err(("Optical analysis cancelled%1".to_string(), String::new()))
+                        } else {
+                            err(("An error occurred: %1".to_string(), e))
+                        };
+                    }
+                }
                 stab.recompute_blocking();
 
                 if let Some((opt, path, fields)) = export_metadata {
@@ -977,7 +1017,7 @@ impl RenderQueue {
                         Ok(())
                     };
                     if let Err(e) = result() {
-                        err(("An error occured: %1".to_string(), e.to_string()));
+                        err(("An error occurred: %1".to_string(), e.to_string()));
                     } else {
                         progress((1.0, 1, 1, true, false));
                     }
@@ -1043,7 +1083,7 @@ impl RenderQueue {
                         let mut frame = 0;
                         let r3d_progress = |(percent, error_str, out_url): (f64, String, String)| {
                             if !error_str.is_empty() {
-                                err(("An error occured: %1".to_string(), error_str));
+                                err(("An error occurred: %1".to_string(), error_str));
                             } else {
                                 progress((percent * 0.98, frame, total_frame_count + 1, false, true));
                                 input_file.url = out_url;
@@ -1079,7 +1119,7 @@ impl RenderQueue {
                     if cancel_flag.load(SeqCst) { break; }
                     let mut i = 0;
                     loop {
-                        let result = rendering::render(stab.clone(), progress.clone(), &input_file, &render_options, i, range, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone());
+                        let result = rendering::render(stab.clone(), progress.clone(), &input_file, &render_options, i, range, cancel_flag.clone(), pause_flag.clone(), encoder_initialized.clone(), warning.clone());
                         if let Err(e) = result {
                             if let rendering::FFmpegError::PixelFormatNotSupported((fmt, supported, candidate)) = e {
                                 let candidate = if let Some(c) = candidate { format!("{c:?}").to_ascii_lowercase().to_string() } else { String::new() };
@@ -1090,7 +1130,8 @@ impl RenderQueue {
                                 stab.gpu_decoding.store(false, SeqCst);
                                 continue;
                             }
-                            if rendered_frames.load(SeqCst) == 0 {
+                            // Another decoder won't make an encoder work, nor another output of the input, nor one that can't be written
+                            if rendered_frames.load(SeqCst) == 0 && !matches!(e, rendering::FFmpegError::NoWorkingEncoder(_) | rendering::FFmpegError::OutputIsInput(..) | rendering::FFmpegError::Output(_)) {
                                 if (0..4).contains(&i) {
                                     // Try 4 times with different GPU decoders
                                     i += 1;
@@ -1102,7 +1143,7 @@ impl RenderQueue {
                                     continue;
                                 }
                             }
-                            err(("An error occured: %1".to_string(), e.to_string()));
+                            err(("An error occurred: %1".to_string(), e.to_string()));
                             break 'ranges;
                         } else {
                             // Render ok
@@ -1126,6 +1167,10 @@ impl RenderQueue {
             return render_options.output_filename.to_owned();
         }
         let mut filename = filesystem::get_filename(input_url);
+        // The video an image sequence's frames make up is named without their number
+        if let Some(frames) = filesystem::FramePath::parse(&filename) {
+            filename = frames.without_numbers();
+        }
 
         let mut ext = override_ext.unwrap_or(match render_options.codec.as_ref() {
             "ProRes"        => ".mov",
@@ -1135,7 +1180,8 @@ impl RenderQueue {
             "PNG Sequence"  => "_%05d.png",
             _ => ".mp4"
         });
-        if ext == ".mp4" && render_options.preserve_other_tracks {
+        // To copy the audio with the other tracks, which .mp4 can't store when it's PCM. In sync with Export.qml:outputExtension
+        if ext == ".mp4" && render_options.preserve_other_tracks && render_options.audio && render_options.audio_codec == "Copy" {
             ext = ".mov";
         }
         if let Some(pos) = filename.rfind('.') {
@@ -1161,7 +1207,13 @@ impl RenderQueue {
         let is_rendering = self.export_metadata.is_none() && self.export_stmap.is_none();
         let processing_done = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, _: ()| {
             if let Some(job) = this.jobs.get(&job_id) {
-                if is_rendering && filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
+                if let Some(msg) = is_rendering.then(|| Self::output_is_input(job)).flatten() {
+                    update_model!(this, job_id, itm {
+                        itm.error_string = msg.clone();
+                        itm.status = JobStatus::Error;
+                    });
+                    this.error(job_id, msg, QString::default(), QString::default());
+                } else if is_rendering && filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
                     let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
                     update_model!(this, job_id, itm {
                         itm.error_string = msg.clone();
@@ -1191,6 +1243,9 @@ impl RenderQueue {
             if let Some(sync) = additional_data.get("synchronization") {
                 sync_options = sync.clone();
             }
+            // An image sequence (`url` names its frames, eg. `A001_%06d.dng`): its first frame and frame rate, as a project has them
+            let image_sequence_start = additional_data.get("image_sequence_start").and_then(|x| x.as_i64()).unwrap_or_default() as i32;
+            let image_sequence_fps = additional_data.get("image_sequence_fps").and_then(|x| x.as_f64()).unwrap_or_default();
             if let Some(out) = additional_data.get("output") {
                 let has_output_width  = out.as_object().map(|x| x.contains_key("output_width")).unwrap_or_default() && out.get("output_width").and_then(|x| x.as_i64()).unwrap_or_default() > 0;
                 let has_output_height = out.as_object().map(|x| x.contains_key("output_height")).unwrap_or_default() && out.get("output_height").and_then(|x| x.as_i64()).unwrap_or_default() > 0;
@@ -1207,6 +1262,7 @@ impl RenderQueue {
                             background:             params.background,
                             adaptive_zoom_window:   params.adaptive_zoom_window,
                             lens_correction_amount: params.lens_correction_amount,
+                            output_projection:      params.output_projection,
                             light_refraction_coefficient: params.light_refraction_coefficient,
                             background_mode:           params.background_mode,
                             background_margin:         params.background_margin,
@@ -1220,9 +1276,11 @@ impl RenderQueue {
                             adaptive_zoom_method:      params.adaptive_zoom_method,
                             max_zoom:                  params.max_zoom,
                             max_zoom_iterations:       params.max_zoom_iterations,
+                            fixed_zoom:                params.fixed_zoom,
+                            zoom_limit_whole_clip:     params.zoom_limit_whole_clip,
                             ..Default::default()
                         })),
-                        input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { url: if is_gf_data { String::new() } else { url.clone() }, project_file_url: None, image_sequence_start: 0, image_sequence_fps: 0.0, preset_name: None, preset_output_size: None })),
+                        input_file: Arc::new(RwLock::new(gyroflow_core::InputFile { url: if is_gf_data { String::new() } else { url.clone() }, project_file_url: None, image_sequence_start, image_sequence_fps, preset_name: None, preset_output_size: None })),
                         lens_profile_db: stabilizer.lens_profile_db.clone(),
                         ..Default::default()
                     };
@@ -1244,10 +1302,12 @@ impl RenderQueue {
                     });
 
                     core::run_threaded(move || {
+                        // How FFmpeg reads the input where it's an image sequence (a project's, once it's loaded)
+                        let sequence_options = || rendering::image_sequence_options(&stab.input_file.read());
                         let fetch_thumb = |video_url: &str, ratio: f64| -> Result<(), rendering::FFmpegError> {
                             let mut fetched = false;
                             if !crate::cli::will_run_in_console() { // Don't fetch thumbs in the CLI
-                                let mut proc = rendering::VideoProcessor::from_file(video_url, false, 0, None)?;
+                                let mut proc = rendering::VideoProcessor::from_file(video_url, false, 0, Some(sequence_options()))?;
                                 proc.on_frame(move |_timestamp_us, input_frame, _output_frame, converter, _rate_control| {
                                     let sf = converter.scale(input_frame, ffmpeg_next::format::Pixel::RGBA, (50.0 * ratio).round() as u32, 50)?;
 
@@ -1276,7 +1336,7 @@ impl RenderQueue {
                                     if let Ok(data) = filesystem::read_to_string(&url) {
                                         apply_preset((data, 0));
                                     } else {
-                                        err(("An error occured: %1".to_string(), format!("Unable to read the preset file {}", url)));
+                                        err(("An error occurred: %1".to_string(), format!("Unable to read the preset file {}", url)));
                                     }
                                     // The preset is applied to the already queued jobs, this job itself never enters the queue
                                     processing_failed(());
@@ -1306,7 +1366,7 @@ impl RenderQueue {
                                         };
 
                                         if let Err(e) = fetch_thumb(out, ratio) {
-                                            err(("An error occured: %1".to_string(), e.to_string()));
+                                            err(("An error occurred: %1".to_string(), e.to_string()));
                                         }
                                     }
 
@@ -1320,11 +1380,11 @@ impl RenderQueue {
                                     processing_done(());
                                 },
                                 Err(e) => {
-                                    err(("An error occured: %1".to_string(), format!("Error loading {}: {:?}", url, e)));
+                                    err(("An error occurred: %1".to_string(), format!("Error loading {}: {:?}", url, e)));
                                     processing_failed(());
                                 }
                             }
-                        } else if let Ok(info) = rendering::VideoProcessor::get_video_info(&url) {
+                        } else if let Ok(info) = rendering::VideoProcessor::get_video_info(&url, Some(sequence_options())) {
                             ::log::debug!("Loaded {:?}", &info);
 
                             render_options.bitrate = render_options.bitrate.max(info.bitrate);
@@ -1350,7 +1410,11 @@ impl RenderQueue {
                                 stab.input_file.write().url = url.clone();
 
                                 let is_main_video = gyro_url.is_empty();
-                                let gyro_url = if !gyro_url.is_empty() { &gyro_url } else { &url };
+                                // An image sequence's own metadata is read from its first frame, as the app reads it (a CinemaDNG
+                                // sequence's from all of them, which telemetry-parser finds from there)
+                                let first_frame = (image_sequence_fps > 0.0).then(|| filesystem::FramePath::parse(&filesystem::url_to_path(&url))).flatten()
+                                    .map(|frames| filesystem::path_to_url(&frames.frame(image_sequence_start.max(0) as usize)));
+                                let gyro_url = if !gyro_url.is_empty() { &gyro_url } else { first_frame.as_ref().unwrap_or(&url) };
                                 {
                                     if let Ok(mut file) = filesystem::open_file(&gyro_url, false, false) {
                                         let filesize = file.size;
@@ -1358,18 +1422,19 @@ impl RenderQueue {
                                     }
                                 }
 
-                                let camera_id = stab.camera_id.read();
-
                                 let has_builtin_profile = {
                                     let gyro = stab.gyro.read();
                                     let file_metadata = gyro.file_metadata.read();
                                     file_metadata.lens_profile.as_ref().map(|y| y.is_object()).unwrap_or_default()
                                 };
 
-                                let id_str = camera_id.as_ref().map(|v| v.get_identifier_for_autoload()).unwrap_or_default();
+                                // Neither lock is held over `load_lens_profile`, which reads both again: a second read of a
+                                // parking_lot lock this thread holds deadlocks as soon as a writer queues up in between (the
+                                // lens database is the app's, written by every load of a main video)
+                                let id_str = stab.camera_id.read().as_ref().map(|v| v.get_identifier_for_autoload()).unwrap_or_default();
                                 if !id_str.is_empty() && !has_builtin_profile {
-                                    let db = stab.lens_profile_db.read();
-                                    if db.contains_id(&id_str) {
+                                    let in_db = stab.lens_profile_db.read().contains_id(&id_str);
+                                    if in_db {
                                         match stab.load_lens_profile(&id_str) {
                                             Ok(_) => {
                                                 let (fr, frd) = { let lens = stab.lens.read(); (lens.frame_readout_time, lens.frame_readout_direction) };
@@ -1380,7 +1445,7 @@ impl RenderQueue {
                                                 }
                                             }
                                             Err(e) => {
-                                                err(("An error occured: %1".to_string(), e.to_string()));
+                                                err(("An error occurred: %1".to_string(), e.to_string()));
                                                 processing_failed(());
                                                 return;
                                             }
@@ -1417,16 +1482,16 @@ impl RenderQueue {
                                 }
 
                                 if let Err(e) = fetch_thumb(&url, ratio) {
-                                    err(("An error occured: %1".to_string(), e.to_string()));
+                                    err(("An error occurred: %1".to_string(), e.to_string()));
                                 }
 
                                 processing_done(());
                             } else {
-                                err(("An error occured: %1".to_string(), format!("Unable to determine the video duration ({} ms) or frame rate ({} fps).", info.duration_ms, info.fps)));
+                                err(("An error occurred: %1".to_string(), format!("Unable to determine the video duration ({} ms) or frame rate ({} fps).", info.duration_ms, info.fps)));
                                 processing_failed(());
                             }
                         } else {
-                            err(("An error occured: %1".to_string(), "Unable to read the video file.".to_string()));
+                            err(("An error occurred: %1".to_string(), "Unable to read the video file.".to_string()));
                             processing_failed(());
                         }
                     });
@@ -1456,7 +1521,10 @@ impl RenderQueue {
         let fps = stab.params.read().fps;
 
         let sync_settings = stab.lens.read().sync_settings.clone().unwrap_or_default();
-        if !has_sync_points && !has_accurate_timestamps && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
+        // Without motion data there's nothing to sync: the optical analysis measures it instead, as Auto sync does in the
+        // app, see `optical_correction_requested`
+        let has_motion = stab.gyro.read().has_motion();
+        if has_motion && !has_sync_points && !has_accurate_timestamps && sync_settings.get("do_autosync").and_then(|v| v.as_bool()).unwrap_or_default() {
             // ----------------------------------------------------------------------------
             // --------------------------------- Autosync ---------------------------------
             processing_cb(0.01);
@@ -1489,11 +1557,11 @@ impl RenderQueue {
                     sync_params.time_per_syncpoint *= 1000.0; // s to ms
                     sync_params.search_size        *= 1000.0; // s to ms
 
-                    let every_nth_frame = sync_params.every_nth_frame.max(1);
-
                     let size = stab.params.read().size;
 
                     if let Ok(mut sync) = AutosyncProcess::from_manager(&stab, &timestamps_fract, sync_params, "synchronize".into(), cancel_flag.clone()) {
+                        // Every frame where the optical analysis (offset method 3) tracks them, once it knows it can run
+                        let every_nth_frame = sync.every_nth_frame();
                         let processing_cb2 = processing_cb.clone();
                         sync.on_progress(move |percent, _ready, _total| {
                             processing_cb2(percent);
@@ -1567,7 +1635,7 @@ impl RenderQueue {
                                                 sync2.feed_frame(timestamp_us, frame_no, width, height, stride, pixels);
                                             },
                                             Err(e) => {
-                                                err2(("An error occured: %1".to_string(), e.to_string()))
+                                                err2(("An error occurred: %1".to_string(), e.to_string()))
                                             }
                                         }
                                         frame_no += 1;
@@ -1576,17 +1644,17 @@ impl RenderQueue {
                                     Ok(())
                                 });
                                 if let Err(e) = proc.start_decoder_only(sync.get_ranges(), cancel_flag) {
-                                    err(("An error occured: %1".to_string(), e.to_string()));
+                                    err(("An error occurred: %1".to_string(), e.to_string()));
                                 }
 
                                 sync.finished_feeding_frames();
                             }
                             Err(error) => {
-                                err(("An error occured: %1".to_string(), error.to_string()));
+                                err(("An error occurred: %1".to_string(), error.to_string()));
                             }
                         };
                     } else {
-                        err(("An error occured: %1".to_string(), "Invalid parameters".to_string()));
+                        err(("An error occurred: %1".to_string(), "Invalid parameters".to_string()));
                     }
 
                     stab.recompute_blocking();
@@ -1595,6 +1663,57 @@ impl RenderQueue {
             processing_cb(1.0);
             // --------------------------------- Autosync ---------------------------------
             // ----------------------------------------------------------------------------
+        }
+    }
+
+    /// Whether the job's synchronization settings ask for "Analyze image optically" (`do_optical_correction`, from the
+    /// CLI's --optical-correction or a preset), with a file without motion data asking for it with autosync too. Applies
+    /// `ignore_file_motion`, `optical_correction_strength`, `optical_correction_per_frame` and `optical_tracking` along with it
+    fn optical_correction_requested(stab: &StabilizationManager) -> bool {
+        let sync_settings = stab.lens.read().sync_settings.clone().unwrap_or_default();
+        let flag = |key: &str| sync_settings.get(key).and_then(|v| v.as_bool()).unwrap_or_default();
+        let requested = flag("do_optical_correction") || flag("ignore_file_motion");
+        if !requested && !(flag("do_autosync") && !stab.gyro.read().has_motion()) { return false; }
+        if let Some(strength) = sync_settings.get("optical_correction_strength").and_then(|v| v.as_f64()) {
+            stab.set_optical_correction_strength(strength);
+        }
+        if let Some(per_frame) = sync_settings.get("optical_correction_per_frame").and_then(|v| v.as_bool()) {
+            stab.set_optical_correction_per_frame(per_frame);
+        }
+        if let Some(method) = sync_settings.get("optical_tracking").and_then(|v| v.as_str()) {
+            if !stab.set_optical_tracking(method) { ::log::warn!("Unknown optical tracking method: {method}"); }
+        }
+        if flag("ignore_file_motion") {
+            stab.set_ignore_file_motion(true);
+        }
+        true
+    }
+
+    /// "Analyze image optically" before the render, see `optical_correction_requested`, with the job's cancel and pause.
+    /// Where it only corrects the file's motion data, a render without it is still one with that data as it is, so a
+    /// failed analysis only goes to the log. Where it's all the motion there is (a file without any, or with its own
+    /// ignored) the render would come out unstabilized: that fails the job instead
+    fn do_optical_correction<F: Fn(f64) + Send + Sync + Clone + 'static>(stab: &StabilizationManager, processing_cb: F, cancel_flag: Arc<AtomicBool>, pause_flag: Arc<AtomicBool>) -> Result<(), String> {
+        #[cfg(not(any(target_os = "ios", target_os = "android")))]
+        let _prevent_system_sleep = keep_awake::inhibit_system("Gyroflow", "Analyzing the video");
+        processing_cb(0.01);
+        let cb = processing_cb.clone();
+        let result = rendering::analyze_optically(stab, cancel_flag.clone(), Some(pause_flag), move |percent, _, _| cb(percent));
+        // Done either way: the queue only starts jobs whose processing isn't halfway
+        processing_cb(1.0);
+        match result {
+            Ok(()) => {
+                let info = stab.optical_correction_info();
+                ::log::info!("Optical correction: measured in {} of {} frames, correction {:.3} deg", info["measured_frames"], info["frames"], info["rms_deg"].as_f64().unwrap_or_default());
+                // The job renders with the correction: the tracks it was measured from are for editing, in the app
+                stab.release_optical_measurements();
+                Ok(())
+            },
+            Err(e) if cancel_flag.load(SeqCst) || !stab.gyro.read().has_motion() => Err(format!("Optical analysis failed: {e}")),
+            Err(e) => {
+                ::log::error!("Optical analysis failed, rendering with the motion data as it is: {e}");
+                Ok(())
+            },
         }
     }
 
@@ -1643,7 +1762,11 @@ impl RenderQueue {
                         itm.output_filename = QString::from(job.render_options.output_filename.as_str());
                         itm.output_folder   = QString::from(job.render_options.output_folder.as_str());
                         itm.display_output_path = QString::from(filesystem::display_folder_filename(job.render_options.output_folder.as_str(), job.render_options.output_filename.as_str()));
-                        if filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
+                        if let Some(msg) = Self::output_is_input(job) {
+                            itm.error_string = msg.clone();
+                            itm.status = JobStatus::Error;
+                            err((job_id, msg.to_string()));
+                        } else if filesystem::exists_in_folder(&job.render_options.output_folder, &job.render_options.output_filename.replace("_%05d", "_00001")) {
                             let msg = QString::from(format!("file_exists:{}", serde_json::json!({ "filename": job.render_options.output_filename, "folder": job.render_options.output_folder })));
                             itm.error_string = msg.clone();
                             itm.status = JobStatus::Error;
@@ -1651,10 +1774,16 @@ impl RenderQueue {
                         }
                     }
 
+                    // Only store the settings here. Processing the motion data and computing the smoothing and zooming
+                    // happens when the job starts rendering, so applying settings to a long queue doesn't stall the UI
                     let mut is_preset = false;
-                    if let Err(e) = job.stab.import_gyroflow_data(&data_vec, true, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset, false) {
+                    if let Err(e) = job.stab.import_gyroflow_data(&data_vec, false, None, |_|(), Arc::new(AtomicBool::new(false)), &mut is_preset, false) {
                         ::log::error!("Failed to update queue stab data: {:?}", e);
                     }
+                    job.gyro_outdated.store(true, SeqCst);
+                    // The render options are the source of the output size, the stabilizer needs it for the FOV and zooming
+                    job.stab.set_output_size(job.render_options.output_width, job.render_options.output_height);
+                    job.stab.init_size();
 
                     Self::update_sync_settings(&job.stab, &sync_options);
                     job.project_data = Self::get_gyroflow_data_internal(&job.stab, &job.additional_data, &job.render_options);
@@ -1664,6 +1793,18 @@ impl RenderQueue {
                 }
             }
         }
+    }
+
+    /// Why the job can't render to its output: it would write over its input file, or a frame of its input image sequence
+    /// (`rendering::output_overwrites_input`, which `rendering::render` refuses too)
+    fn output_is_input(job: &Job) -> Option<QString> {
+        let (folder, filename) = (&job.render_options.output_folder, &job.render_options.output_filename);
+        let frame_count = job.stab.params.read().frame_count;
+        let output_frames = rendering::is_sequence_codec(&job.render_options.codec).then_some(frame_count);
+        let input_file = job.stab.input_file.read().clone();
+        let input = rendering::output_overwrites_input(&input_file, frame_count, folder, filename, output_frames, &AtomicBool::new(false))?;
+        let output = filesystem::display_url(&filesystem::get_file_url(folder, filename, false));
+        Some(QString::from(rendering::FFmpegError::OutputIsInput(output, input).to_string()))
     }
 
     fn file_exists_in_folder(&self, folder: QUrl, filename: QString) -> bool {
@@ -1679,6 +1820,20 @@ impl RenderQueue {
 
     fn get_default_encoder(&self, codec: String, gpu: bool) -> String {
         rendering::get_default_encoder(&codec, gpu)
+    }
+    fn has_encoder(&self, codec: String) -> bool {
+        rendering::has_encoder(&codec)
+    }
+    /// Emits `encoders_checked` with the encoders `codec` is rendered with on the GPU and on the CPU, empty when none works.
+    /// In the background, because the GPU encoders may be opened to find out
+    fn check_encoders(&self, codec: String) {
+        let checked = util::qt_queued_callback_mut(QPointer::from(self as &Self), move |this, (codec, gpu_encoder, cpu_encoder): (String, String, String)| {
+            this.encoders_checked(codec, gpu_encoder, cpu_encoder);
+        });
+        core::run_threaded(move || {
+            let (gpu_encoder, cpu_encoder) = rendering::get_working_encoders(&codec);
+            checked((codec, gpu_encoder.unwrap_or_default().to_string(), cpu_encoder.unwrap_or_default().to_string()));
+        });
     }
     fn get_encoder_options(&self, encoder: String) -> String {
         rendering::get_encoder_options(&encoder)

@@ -5,7 +5,7 @@ use std::path::Path;
 
 pub enum DatabaseFormat {
     Cameras,
-    Profiles,
+    Profiles(u32),
 }
 
 /// Keep the previous database intact until the complete replacement is validated.
@@ -23,15 +23,17 @@ pub fn install(mut source: impl Read, destination: &Path, format: DatabaseFormat
             crate::camera_database::CameraDatabase::parse_file(&data)
                 .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))?;
         }
-        DatabaseFormat::Profiles => {
+        DatabaseFormat::Profiles(version) => {
             // Read to EOF before parsing, so gzip footer/truncation errors are checked too.
             let mut data = Vec::new();
             flate2::read::GzDecoder::new(temporary.as_file_mut()).read_to_end(&mut data)?;
-            let profiles: Vec<(String, serde_json::Value)> = ciborium::from_reader(data.as_slice())
+            let mut bytes = data.as_slice();
+            let profiles: Vec<(String, serde_json::Value)> = ciborium::from_reader(&mut bytes)
                 .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))?;
-            if !profiles.iter().any(|(name, value)| name == "__version" && value.as_u64().is_some()) ||
+            let versions = profiles.iter().filter(|(name, _)| name == "__version").map(|(_, value)| value.as_u64());
+            if !bytes.is_empty() || !versions.eq([Some(u64::from(version))]) ||
                !profiles.iter().any(|(name, value)| !name.starts_with("__") && value.is_object()) {
-                return Err(io::Error::new(io::ErrorKind::InvalidData, "Empty or unversioned profile database"));
+                return Err(io::Error::new(io::ErrorKind::InvalidData, "Invalid profile database or release version"));
             }
         }
     }
@@ -49,7 +51,7 @@ mod tests {
         let directory = tempfile::tempdir().unwrap();
         let path = directory.path().join("database");
         std::fs::write(&path, b"previous database").unwrap();
-        for (bytes, format) in [(b"{}".as_slice(), DatabaseFormat::Cameras), (b"broken gzip".as_slice(), DatabaseFormat::Profiles)] {
+        for (bytes, format) in [(b"{}".as_slice(), DatabaseFormat::Cameras), (b"broken gzip".as_slice(), DatabaseFormat::Profiles(42))] {
             assert!(install(bytes, &path, format).is_err());
             assert_eq!(std::fs::read(&path).unwrap(), b"previous database");
             assert_eq!(std::fs::read_dir(directory.path()).unwrap().count(), 1);
@@ -84,9 +86,10 @@ mod tests {
         let mut encoder = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::default());
         encoder.write_all(&cbor).unwrap();
         let compressed = encoder.finish().unwrap();
-        install(compressed.as_slice(), &path, DatabaseFormat::Profiles).unwrap();
+        install(compressed.as_slice(), &path, DatabaseFormat::Profiles(42)).unwrap();
         assert_eq!(std::fs::read(&path).unwrap(), compressed);
-        assert!(install(&compressed[..compressed.len() - 4], &path, DatabaseFormat::Profiles).is_err());
+        assert!(install(compressed.as_slice(), &path, DatabaseFormat::Profiles(43)).is_err());
+        assert!(install(&compressed[..compressed.len() - 4], &path, DatabaseFormat::Profiles(42)).is_err());
         assert_eq!(std::fs::read(&path).unwrap(), compressed);
     }
 }

@@ -10,6 +10,7 @@
 // (mathematical no-op: 0·θⁿ = 0).
 
 use crate::stabilization::KernelParams;
+use super::{ Real, c };
 
 #[derive(Default, Clone)]
 pub struct GenericPolynomial { }
@@ -18,7 +19,13 @@ impl GenericPolynomial {
     pub fn undistort_point(&self, point: (f32, f32), params: &KernelParams) -> Option<(f32, f32)> {
         if params.k[0]  == 0.0 && params.k[1]  == 0.0 && params.k[2]  == 0.0 && params.k[3]  == 0.0
         && params.k[4]  == 0.0 && params.k[5]  == 0.0 && params.k[6]  == 0.0 && params.k[7]  == 0.0
-        && params.k[8]  == 0.0 && params.k[9]  == 0.0 && params.k[10] == 0.0 && params.k[11] == 0.0 { return Some(point); }
+        && params.k[8]  == 0.0 && params.k[9]  == 0.0 && params.k[10] == 0.0 && params.k[11] == 0.0 {
+            // No calibration: a pinhole, so the image radius is `tan θ`
+            let r = (point.0 * point.0 + point.1 * point.1).sqrt();
+            if r < 1e-12 { return Some(point); }
+            let s = r.atan() / r;
+            return Some((point.0 * s, point.1 * s));
+        }
 
         const EPS: f32 = 1e-6;
 
@@ -69,31 +76,46 @@ impl GenericPolynomial {
                 }
             }
 
-            scale = theta.tan() / theta_d;
+            scale = theta / theta_d;
         } else {
             converged = true;
         }
 
         let theta_flipped = (theta_d < 0.0 && theta > 0.0) || (theta_d > 0.0 && theta < 0.0);
 
-        let out_of_range = theta.abs() >= std::f32::consts::FRAC_PI_2 || (params.r_limit > 0.0 && (scale * theta_d).abs() > params.r_limit);
+        // Nothing past 180° is a ray the pipeline can carry: `projection::ray_to_dir` builds the direction
+        // out of `sin θ`, which turns over there, so an angle the Newton wandered past it comes back as a
+        // bearing from *behind* the camera - and the sync, which reads these as bearings with no field
+        // clamp at all, would then fit a rotation to it. Unlike the OpenCV fisheye this model does not
+        // even cap `theta_d` at π first, so the solve is handed whatever radius the caller had. The
+        // rejection this replaces stopped at 90°, where the old z=1 plane ray ran out of `tan`; how far
+        // the lens itself reaches is `radial_distortion_limit`'s business, and this is only where the
+        // representation ends
+        if theta.abs() >= std::f32::consts::PI { return None; }
 
-        if converged && !theta_flipped && !out_of_range {
+        if converged && !theta_flipped {
             return Some((point.0 * scale, point.1 * scale));
         }
         None
     }
 
+    /// `(x, y, z)`: the ray direction; returns the normalized image coordinate (× f + c → recorded pixel)
     pub fn distort_point(&self, x: f32, y: f32, z: f32, params: &KernelParams) -> (f32, f32) {
-        let x = x / z;
-        let y = y / z;
         if params.k[0]  == 0.0 && params.k[1]  == 0.0 && params.k[2]  == 0.0 && params.k[3]  == 0.0
         && params.k[4]  == 0.0 && params.k[5]  == 0.0 && params.k[6]  == 0.0 && params.k[7]  == 0.0
-        && params.k[8]  == 0.0 && params.k[9]  == 0.0 && params.k[10] == 0.0 && params.k[11] == 0.0 { return (x, y); }
+        && params.k[8]  == 0.0 && params.k[9]  == 0.0 && params.k[10] == 0.0 && params.k[11] == 0.0 {
+            // No calibration: a pinhole, which has no image of a ray at or past 90°
+            return if z > 1e-9 { (x / z, y / z) } else { (x * 1e9, y * 1e9) };
+        }
+        Self::distort(x, y, z, &params.k)
+    }
 
-        let r = (x.powi(2) + y.powi(2)).sqrt();
+    /// The projection itself, in either precision (see `Real`)
+    pub fn distort<T: Real>(x: T, y: T, z: T, k: &[T]) -> (T, T) {
+        let r = (x * x + y * y).sqrt();
 
-        let theta = r.atan();
+        // atan2 against the ray's own z, so the angle is right past 90° too
+        let theta = r.atan2(z);
 
         let theta2  = theta*theta;
         let theta3  = theta2*theta;
@@ -107,20 +129,20 @@ impl GenericPolynomial {
         let theta11 = theta5*theta6;
         let theta12 = theta6*theta6;
 
-        let theta_d = theta   * params.k[0]
-                    + theta2  * params.k[1]
-                    + theta3  * params.k[2]
-                    + theta4  * params.k[3]
-                    + theta5  * params.k[4]
-                    + theta6  * params.k[5]
-                    + theta7  * params.k[6]
-                    + theta8  * params.k[7]
-                    + theta9  * params.k[8]
-                    + theta10 * params.k[9]
-                    + theta11 * params.k[10]
-                    + theta12 * params.k[11];
+        let theta_d = theta   * k[0]
+                    + theta2  * k[1]
+                    + theta3  * k[2]
+                    + theta4  * k[3]
+                    + theta5  * k[4]
+                    + theta6  * k[5]
+                    + theta7  * k[6]
+                    + theta8  * k[7]
+                    + theta9  * k[8]
+                    + theta10 * k[9]
+                    + theta11 * k[10]
+                    + theta12 * k[11];
 
-        let scale = if r == 0.0 { 1.0 } else { theta_d / r };
+        let scale = if r < c(1e-12) { c(1.0) } else { theta_d / r };
 
         (x * scale, y * scale)
     }

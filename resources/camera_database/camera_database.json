@@ -1275,10 +1275,10 @@
       "brand": "Blackmagic",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 2.88,
+      "crop_factor": null,
       "model": "Micro Cinema Camera",
       "mounts": [],
-      "sensor_size": "1-inch",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -1379,10 +1379,10 @@
       "brand": "Blackmagic",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 0.75,
+      "crop_factor": null,
       "model": "Pocket Cinema Camera 4K",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -1405,10 +1405,10 @@
       "brand": "Blackmagic",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.55,
+      "crop_factor": null,
       "model": "Pocket Cinema Camera 6K",
       "mounts": [],
-      "sensor_size": "APS-C",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -1431,10 +1431,10 @@
       "brand": "Blackmagic",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "Pocket Cinema Camera 6K Pro",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -1587,10 +1587,10 @@
       "brand": "Blackvue",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "DR900x Plus",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -2198,10 +2198,10 @@
       "brand": "Canon",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.6,
+      "crop_factor": null,
       "model": "200D",
       "mounts": [],
-      "sensor_size": "APS-C",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -2211,10 +2211,10 @@
       "brand": "Canon",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.6,
+      "crop_factor": null,
       "model": "200D / SL2",
       "mounts": [],
-      "sensor_size": "APS-C",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -8624,10 +8624,10 @@
       "brand": "Canon",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.6,
+      "crop_factor": null,
       "model": "R5C",
       "mounts": [],
-      "sensor_size": "APS-C",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -10871,10 +10871,10 @@
       "brand": "Fujifilm",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "100S 0.7X",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -11409,7 +11409,7 @@
       "mounts": [
         "Fujifilm G"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -11426,7 +11426,7 @@
       "mounts": [
         "Fujifilm G"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -11443,7 +11443,7 @@
       "mounts": [
         "Fujifilm G"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -11460,7 +11460,7 @@
       "mounts": [
         "Fujifilm G"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -11488,7 +11488,7 @@
       "mounts": [
         "fujiGFX100RF"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -11505,7 +11505,7 @@
       "mounts": [
         "Fujifilm G"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun",
         "gyroflow"
@@ -11523,7 +11523,7 @@
       "mounts": [
         "Fujifilm G"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -11540,7 +11540,7 @@
       "mounts": [
         "Fujifilm G"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -12786,10 +12786,10 @@
       "brand": "Fujifilm",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.77,
+      "crop_factor": null,
       "model": "XT3",
       "mounts": [],
-      "sensor_size": "Micro Four Thirds",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -13001,7 +13001,7 @@
       "mounts": [
         "Generic"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -14407,7 +14407,7 @@
       "mounts": [
         "Hasselblad X"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -14424,7 +14424,7 @@
       "mounts": [
         "Hasselblad X"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -14488,7 +14488,7 @@
       "mounts": [
         "Hasselblad 500"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -14505,7 +14505,7 @@
       "mounts": [
         "Hasselblad H"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -14522,7 +14522,7 @@
       "mounts": [
         "Hasselblad X"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -14539,7 +14539,7 @@
       "mounts": [
         "Hasselblad X"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -14556,7 +14556,7 @@
       "mounts": [
         "Hasselblad X"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -17967,7 +17967,7 @@
       "mounts": [
         "Mamiya 645"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -17984,7 +17984,7 @@
       "mounts": [
         "Mamiya 645"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -18378,10 +18378,10 @@
       "brand": "Motorola",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "Edge+",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -21498,10 +21498,10 @@
       "brand": "Nikon",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.5,
+      "crop_factor": null,
       "model": "Z30",
       "mounts": [],
-      "sensor_size": "APS-C",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -21634,10 +21634,10 @@
       "brand": "Nikon",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "Z6 II",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -23338,10 +23338,10 @@
       "brand": "Olympus",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 2.0,
+      "crop_factor": null,
       "model": "OM-D E-M10 Mark III",
       "mounts": [],
-      "sensor_size": "Micro Four Thirds",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -24180,10 +24180,10 @@
       "brand": "OnePlus",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 0.6,
+      "crop_factor": null,
       "model": "Nord 2T",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -24544,10 +24544,10 @@
       "brand": "Panasonic",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 2.0,
+      "crop_factor": null,
       "model": "BGH1",
       "mounts": [],
-      "sensor_size": "Micro Four Thirds",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -27145,10 +27145,10 @@
       "brand": "Panasonic",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 2.0,
+      "crop_factor": null,
       "model": "G9",
       "mounts": [],
-      "sensor_size": "Micro Four Thirds",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -27990,10 +27990,10 @@
       "brand": "Panasonic",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.5,
+      "crop_factor": null,
       "model": "S9",
       "mounts": [],
-      "sensor_size": "APS-C",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -28194,7 +28194,7 @@
       "mounts": [
         "Pentax 645AF2"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -29378,7 +29378,7 @@
       "mounts": [
         "Mamiya 645"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -29395,7 +29395,7 @@
       "mounts": [
         "Mamiya 645"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -29412,7 +29412,7 @@
       "mounts": [
         "Mamiya 645"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -29903,10 +29903,10 @@
       "brand": "RED",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "DSMC2 GEMINI 5K S35",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -29994,10 +29994,10 @@
       "brand": "RED",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.5,
+      "crop_factor": null,
       "model": "KOMODO",
       "mounts": [],
-      "sensor_size": "APS-C",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -30007,10 +30007,10 @@
       "brand": "RED",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "KOMODO 6K",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -30033,10 +30033,10 @@
       "brand": "RED",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.33,
+      "crop_factor": null,
       "model": "KOMODO-X 6K S35",
       "mounts": [],
-      "sensor_size": "APS-H",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -30395,7 +30395,7 @@
       "mounts": [
         "Pentax 645AF2"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -30675,7 +30675,7 @@
       "mounts": [
         "Rollei 6x6"
       ],
-      "sensor_size": "Full frame",
+      "sensor_size": "Medium format",
       "source": [
         "lensfun"
       ]
@@ -33275,10 +33275,10 @@
       "brand": "Samsung",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 0.6,
+      "crop_factor": null,
       "model": "S23+",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -37218,10 +37218,10 @@
       "brand": "Sony",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.24,
+      "crop_factor": null,
       "model": "ILX-LR1",
       "mounts": [],
-      "sensor_size": "APS-H",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -37561,10 +37561,10 @@
       "brand": "Sony",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "PXW-FS7M2",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -38738,10 +38738,10 @@
       "brand": "Ulefone",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 5.41,
+      "crop_factor": null,
       "model": "Armor 7 Rear IMX586",
       "mounts": [],
-      "sensor_size": "1/2.3-inch",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -38933,10 +38933,10 @@
       "brand": "Vivo",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 3.0,
+      "crop_factor": null,
       "model": "Vivo x90 Pro+",
       "mounts": [],
-      "sensor_size": "1-inch",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -39024,10 +39024,10 @@
       "brand": "Vivo",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 3.0,
+      "crop_factor": null,
       "model": "x90 Pro+",
       "mounts": [],
-      "sensor_size": "1-inch",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -39808,10 +39808,10 @@
       "brand": "Xiaomi",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "13",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -39964,10 +39964,10 @@
       "brand": "Xiaomi",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "14",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -41820,10 +41820,10 @@
       "brand": "Z CAM",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "E1",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -42028,10 +42028,10 @@
       "brand": "Z CAM",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "S6",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -42054,10 +42054,10 @@
       "brand": "ZTE",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "Axon",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -42080,10 +42080,10 @@
       "brand": "ZTE",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "Nubia z50 ultra",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -42093,10 +42093,10 @@
       "brand": "ZTE",
       "brand_aliases": [],
       "compatible_mounts": [],
-      "crop_factor": 1.0,
+      "crop_factor": null,
       "model": "nubia z60 Ultra 35mm",
       "mounts": [],
-      "sensor_size": "Full frame",
+      "sensor_size": null,
       "source": [
         "gyroflow"
       ]
@@ -106024,6 +106024,14 @@
       ]
     }
   ],
-  "updated_at": "2026-09-08",
+  "sources": [
+    {
+      "license": "CC BY-SA 3.0",
+      "license_file": "LENSFUN-DATABASE-LICENSE.txt",
+      "name": "Lensfun camera and lens database",
+      "revision": "a5e2caeb6b646b7a0bb9ed76033b56f8c0499e86",
+      "url": "https://github.com/lensfun/lensfun/tree/a5e2caeb6b646b7a0bb9ed76033b56f8c0499e86/data/db"
+    }
+  ],
   "version": 1
 }

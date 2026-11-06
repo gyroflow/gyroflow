@@ -104,30 +104,11 @@ impl AudioResampler {
         None
     }
 
+    /// The samples left over, as a shorter last frame. Padding it here would count as audio and make the track longer than its source.
+    /// PCM stores it as it is. AAC encodes a whole frame anyway, but the duration of its last packet ends the track at the real last sample
     pub fn flush(&mut self) -> Option<&frame::Audio> {
         if self.buffer_frame_offset > 0 {
-            let missing_samples = self.chunk_size - self.buffer_frame_offset;
-            if missing_samples > 0 {
-                let bytes_per_sample = self.resampler.output().format.bytes();
-                let dest_byte_offset = self.buffer_frame_offset * bytes_per_sample;
-
-                let channels = self.resampler.output().channel_layout.channels().max(1) as usize;
-                if self.resampler.output().format.is_planar() {
-                    for c in 0..channels {
-                        unsafe {
-                            let dst_ptr = (*self.buffer_frame.as_mut_ptr()).data[c].add(dest_byte_offset);
-                            std::ptr::write_bytes::<u8>(dst_ptr, 0,missing_samples * bytes_per_sample);
-                        }
-                    }
-                } else {
-                    unsafe {
-                        let dst_ptr = (*self.buffer_frame.as_mut_ptr()).data[0].add(dest_byte_offset * channels);
-                        std::ptr::write_bytes::<u8>(dst_ptr, 0, missing_samples * bytes_per_sample * channels);
-                    }
-                }
-            }
-
-            self.buffer_frame.set_samples(self.chunk_size);
+            self.buffer_frame.set_samples(self.buffer_frame_offset);
 
             self.buffer_frame_offset = 0;
             Some(&self.buffer_frame)

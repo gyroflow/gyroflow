@@ -12,7 +12,6 @@ static CAMERA_DATABASE_JSON: &str = include_str!(concat!(env!("CARGO_MANIFEST_DI
 #[serde(default)]
 pub struct CameraDatabaseFile {
     pub version: u32,
-    pub updated_at: String,
     pub cameras: Vec<CameraEntry>,
     pub lenses: Vec<LensEntry>,
 }
@@ -61,6 +60,7 @@ pub struct CameraDatabase {
     cameras: BTreeMap<(String, String), CameraEntry>,
     camera_lenses: BTreeMap<(String, String), BTreeSet<String>>,
     mount_lenses: BTreeMap<String, BTreeSet<String>>,
+    brand_search_keys: BTreeMap<String, BTreeSet<(String, String)>>,
     brands: Vec<String>,
     models: BTreeMap<String, Vec<String>>,
     lenses: BTreeMap<(String, String), Vec<String>>,
@@ -113,6 +113,9 @@ impl CameraDatabase {
         if file.cameras.iter().any(|camera| camera.brand.trim().is_empty() || camera.model.trim().is_empty()) {
             return Err("Camera database contains an unnamed camera".to_owned());
         }
+        if file.lenses.iter().any(|lens| lens.model.trim().is_empty()) {
+            return Err("Camera database contains an unnamed lens".to_owned());
+        }
         Ok(file)
     }
 
@@ -126,6 +129,11 @@ impl CameraDatabase {
         }
     }
 
+    #[cfg(test)]
+    pub(crate) fn from_bundled() -> Self {
+        Self::from_file(Self::bundled_file())
+    }
+
     pub fn from_lens_profile_database(profiles: &LensProfileDatabase) -> Self {
         let mut db = Self::from_static();
 
@@ -137,7 +145,8 @@ impl CameraDatabase {
             let camera = CameraEntry {
                 brand: profile.camera_brand.clone(),
                 model: profile.camera_model.clone(),
-                crop_factor: profile.crop_factor,
+                // A profile's crop factor can describe a recording mode or speed
+                // booster, so it is not reliable camera sensor metadata.
                 source: vec!["gyroflow".to_owned()],
                 ..Default::default()
             };
@@ -180,6 +189,16 @@ impl CameraDatabase {
                     BTreeSet::from([key])
                 }
             })
+    }
+
+    /// Profile camera keys for every catalog model under a selected canonical brand.
+    /// Brand aliases stay paired with their model so manufacturer names that map to
+    /// both Pentax and Ricoh cannot make one brand's profiles appear under the other.
+    pub fn brand_camera_keys(&self, brand: &str) -> BTreeSet<(String, String)> {
+        let Some(brand) = self.resolve_brand(brand) else {
+            return BTreeSet::new();
+        };
+        self.brand_search_keys.get(&Self::key(&brand)).cloned().unwrap_or_default()
     }
 
     pub fn compatible_camera_keys(&self, brand: &str, model: &str) -> BTreeSet<(String, String)> {
@@ -227,6 +246,7 @@ impl CameraDatabase {
             cameras: BTreeMap::new(),
             camera_lenses: BTreeMap::new(),
             mount_lenses: BTreeMap::new(),
+            brand_search_keys: BTreeMap::new(),
             brands: Vec::new(),
             models: BTreeMap::new(),
             lenses: BTreeMap::new(),
@@ -281,7 +301,7 @@ impl CameraDatabase {
             entry.crop_factor = camera.crop_factor;
         }
         if entry.sensor_size.is_none() {
-            entry.sensor_size = camera.sensor_size.or_else(|| Self::sensor_size(entry.crop_factor).map(str::to_owned));
+            entry.sensor_size = camera.sensor_size;
         }
     }
 
@@ -309,10 +329,12 @@ impl CameraDatabase {
         let mut brands = BTreeSet::new();
         let mut models: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
         let mut lenses = self.camera_lenses.clone();
+        let mut brand_search_keys: BTreeMap<String, BTreeSet<(String, String)>> = BTreeMap::new();
 
         for ((brand_key, model_key), camera) in &self.cameras {
             brands.insert(camera.brand.clone());
             models.entry(brand_key.clone()).or_default().insert(camera.model.clone());
+            brand_search_keys.entry(brand_key.clone()).or_default().extend(Self::camera_search_keys(camera));
 
             let camera_lenses = lenses.entry((brand_key.clone(), model_key.clone())).or_default();
             for mount in camera.mounts.iter().chain(camera.compatible_mounts.iter()) {
@@ -323,6 +345,7 @@ impl CameraDatabase {
         }
 
         self.brands = brands.into_iter().collect();
+        self.brand_search_keys = brand_search_keys;
         self.models = models.into_iter()
             .map(|(k, v)| (k, v.into_iter().collect()))
             .collect();
@@ -499,29 +522,6 @@ impl CameraDatabase {
         model
     }
 
-    fn sensor_size(crop_factor: Option<f64>) -> Option<&'static str> {
-        let crop = crop_factor?;
-        if !crop.is_finite() || crop <= 0.0 { return None; }
-        let size = if crop <= 1.1 {
-            "Full frame"
-        } else if crop <= 1.35 {
-            "APS-H"
-        } else if crop <= 1.7 {
-            "APS-C"
-        } else if crop <= 2.2 {
-            "Micro Four Thirds"
-        } else if crop <= 3.0 {
-            "1-inch"
-        } else if crop <= 4.8 {
-            "1/1.7-inch"
-        } else if crop <= 6.2 {
-            "1/2.3-inch"
-        } else {
-            "Small sensor"
-        };
-        Some(size)
-    }
-
     fn resolve_brand(&self, brand: &str) -> Option<String> {
         let brand_key = Self::key(brand);
         if brand_key.is_empty() {
@@ -554,6 +554,7 @@ mod tests {
         for data in ["{}", "{\"version\":1}", "{\"version\":2,\"cameras\":[{}],\"lenses\":[{}]}"] {
             assert!(CameraDatabase::parse_file(data).is_err());
         }
+        assert!(CameraDatabase::parse_file(r#"{"version":1,"cameras":[{"brand":"Sony","model":"FX3"}],"lenses":[{}]}"#).is_err());
         assert!(CameraDatabase::parse_file(CAMERA_DATABASE_JSON).is_ok());
     }
 
@@ -563,7 +564,7 @@ mod tests {
         assert!(!CameraDatabase::sensor_compatible(&known, &CameraEntry::default()));
         assert!(!CameraDatabase::sensor_compatible(&CameraEntry::default(), &CameraEntry::default()));
         for crop in [0.0, -1.0, f64::NAN, f64::INFINITY] {
-            assert!(CameraDatabase::sensor_size(Some(crop)).is_none());
+            assert!(!CameraDatabase::sensor_compatible(&known, &CameraEntry { crop_factor: Some(crop), ..Default::default() }));
         }
     }
 

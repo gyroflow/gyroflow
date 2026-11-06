@@ -382,6 +382,8 @@ deploy *param:
     sudo chmod 755 squashfs-root
     find ./squashfs-root -type d -exec sudo chmod 755 {} \;
     mv squashfs-root Gyroflow.AppDir
+    # appimage-builder links .DirIcon to the SVG, appimagetool requires a PNG and relinks it to gyroflow.png
+    cp -f $PROJECT_DIR/_deployment/linux/gyroflow.png Gyroflow.AppDir/
     ARCH={{Arch}} appimagetool ./Gyroflow.AppDir
     rm -rf Gyroflow.AppDir
 

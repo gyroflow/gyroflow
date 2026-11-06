@@ -2,11 +2,16 @@
 // Copyright © 2022 Adrian <adrian.eddy at gmail>
 
 vec2 superview(vec2 uv) {
-    float x2 = uv.x * uv.x;
-    float y2 = uv.y * uv.y;
+    // The polynomials are a fit over the recorded frame [-0.5, 0.5]; outside it the high-order terms run
+    // away and the inversion below diverges to NaN. Clamp the argument to the frame and continue with slope
+    // 1 past it - identical in-domain, monotonic outside it. See gopro_superview.rs
+    float x = clamp(uv.x, -0.5, 0.5);
+    float y = clamp(uv.y, -0.5, 0.5);
+    float x2 = x * x;
+    float y2 = y * y;
     return vec2(
-        uv.x * (1.2100393 + x2 * (-1.2758402 + x2 * 1.7751845)),
-        uv.y * (0.9364505 + (0.4465308 - 0.7683315 * y2) * y2 + (-0.3574087 + 1.1584653 * y2 + 0.3529348 * x2) * x2)
+        x * (1.2100393 + x2 * (-1.2758402 + x2 * 1.7751845)) + (uv.x - x),
+        y * (0.9364505 + (0.4465308 - 0.7683315 * y2) * y2 + (-0.3574087 + 1.1584653 * y2 + 0.3529348 * x2) * x2) + (uv.y - y)
     );
 }
 
@@ -22,19 +27,17 @@ vec2 digital_undistort_point(vec2 uv) {
 }
 vec2 digital_distort_point(vec2 uv) {
     vec2 size = vec2(params.width, params.height);
-    uv = (uv / size) - 0.5;
-    uv.x = uv.x * 1.333333333;
+    vec2 n = (uv / size) - 0.5;
+    vec2 target = vec2(n.x * 1.333333333, n.y);
 
-    vec2 P = uv;
+    vec2 P = n; // seed inside the recorded domain [-0.5,0.5]
     for (int i = 0; i < 12; ++i) {
-        vec2 diff = superview(P) - uv;
+        vec2 diff = superview(P) - target;
         if (abs(diff.x) < 1e-6 && abs(diff.y) < 1e-6) {
             break;
         }
         P -= diff;
     }
 
-    uv = (P + 0.5) * size;
-
-    return uv;
+    return (P + 0.5) * size;
 }

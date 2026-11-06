@@ -2,11 +2,13 @@
 // Copyright © 2024 Adrian <adrian.eddy at gmail>
 
 use std::collections::BTreeMap;
+use std::ops::RangeInclusive;
 use parking_lot::RwLock;
 use std::sync::Arc;
 
 use crate::camera_identifier::CameraIdentifier;
 use crate::stabilization_params::ReadoutDirection;
+use crate::util::MapClosest;
 use super::{ TimeIMU, TimeQuat, TimeVec, splines };
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -25,7 +27,11 @@ pub struct LensParams {
     pub focus_distance: Option<f32>, // meters
     pub iris_fstop: Option<f32>, // f-number
     pub iris_tstop: Option<f32>, // T-number
-    pub zoom_ring_position: Option<f32> // percent of the zoom ring travel
+    pub zoom_ring_position: Option<f32>, // percent of the zoom ring travel
+    /// Sensor rows the clip's frame readout time spans, when not the sensor's whole height (`sensor_size_px`, which Sony
+    /// and Android report the readout time for): the Gyroflow protobuf's readout time is the picture's, the capture area
+    /// it shows (`gyroflow.proto`)
+    pub readout_span_rows: Option<f32>,
 }
 impl LensParams {
     /// Whether the imager geometry is complete enough to be used for the stabilization
@@ -41,7 +47,12 @@ impl LensParams {
             || !self.distortion_coefficients.is_empty()
     }
     pub fn has_readout_scale(&self) -> bool {
-        self.capture_area_size.is_some() && self.sensor_size_px.is_some()
+        self.capture_area_size.is_some() && (self.readout_span_rows.is_some() || self.sensor_size_px.is_some())
+    }
+    /// The part of the clip's readout time the capture area's rows take
+    pub fn readout_scale(&self) -> Option<f64> {
+        let span = self.readout_span_rows.or(self.sensor_size_px.map(|x| x.1 as f32))?;
+        (span > 0.0).then(|| self.capture_area_size.map(|x| x.1 as f64 / span as f64)).flatten()
     }
 }
 
@@ -68,25 +79,57 @@ pub struct CameraStabData {
     pub ois_spline: splines::CatmullRom<nalgebra::Vector3<f64>>
 }
 
-// Lens breathing compensation of one frame: output zoom per band of the capture area rows, linearly interpolated
-// between the bands, as many as the frame's focus motion during the readout needs (a single entry when the rows
-// agree or the frame has no rolling-shutter table), see gyro_source::sony::breathing
+// Lens breathing of one frame, see gyro_source::sony::breathing. `focal` is the lens's true focal length relative to
+// the one its metadata states (the focus position's state against the lens tables' reference), per band of the
+// capture area rows, linearly interpolated between the bands, as many as the frame's focus motion during the readout
+// needs (a single entry when the rows agree or the frame has no rolling-shutter table). `applied` is the
+// magnification the camera's own breathing compensation took out of the recorded picture by cropping it, `None`
+// when it didn't: a camera matrix made from the frame's capture area already has that crop in it, a fixed one hasn't
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(default)]
 pub struct BreathingFrame {
-    pub scale: Vec<f32>,
+    pub focal: Vec<f32>,
+    pub applied: Option<f32>,
     pub crop_y: f32,
     pub crop_h: f32,
 }
 impl BreathingFrame {
-    pub fn scale_at_row(&self, sensor_row: f64) -> f64 {
-        let n = self.scale.len();
-        if n < 2 { return self.scale.first().copied().unwrap_or(1.0) as f64; }
+    /// `focal` at a sensor row
+    pub fn focal_at_row(&self, sensor_row: f64) -> f64 {
+        let n = self.focal.len();
+        if n < 2 { return self.focal.first().copied().unwrap_or(1.0) as f64; }
         let x = ((sensor_row - self.crop_y as f64) * (n - 1) as f64 / (self.crop_h as f64 - 1.0).max(1.0)).clamp(0.0, (n - 1) as f64);
         let i = (x as usize).min(n - 2);
         let t = x - i as f64;
-        self.scale[i] as f64 * (1.0 - t) + self.scale[i + 1] as f64 * t
+        self.focal[i] as f64 * (1.0 - t) + self.focal[i + 1] as f64 * t
     }
+    /// `focal` at the centre row of the capture area, the frame's own: its camera matrix is scaled by it, and each
+    /// row by its ratio to it (`FrameTransform::at_timestamp`)
+    pub fn focal_at_centre(&self) -> f64 {
+        self.focal_at_row(self.crop_y as f64 + (self.crop_h as f64 - 1.0).max(0.0) / 2.0)
+    }
+    /// The largest `focal` of the frame's rows
+    pub fn focal_max(&self) -> f64 {
+        self.focal.iter().copied().fold(f32::MIN, f32::max) as f64
+    }
+    /// The scale of a camera matrix of the frame for the breathing: `focal` as it is when the matrix was made from the
+    /// frame's capture area (`capture_area`, see `FrameTransform::get_lens_data_at_lens_timestamp`), which carries the
+    /// crop of the camera's own compensation. A matrix that doesn't (a fixed lens profile) shows the picture the camera
+    /// recorded, with that much of the breathing already taken out
+    pub fn camera_scale(&self, capture_area: bool) -> f64 {
+        if capture_area { 1.0 } else { self.applied.filter(|a| a.is_finite() && *a > 0.0).unwrap_or(1.0) as f64 }
+    }
+}
+
+/// What `FileMetadata::lens_focal_length_varies`, `has_per_frame_focal_length` and `lens_breathing_varies` found, each
+/// the first time it's asked: they scan all of the lens metadata (the breathing every row of every frame), for the
+/// renderer per frame and for the UI, the chart and every recompute, and the lens metadata never changes once the file
+/// is read (`ReadOnlyFileMetadata`: only the motion data is replaced, in a copy of the rest)
+#[derive(Default, Clone, Debug)]
+pub struct LensVariation {
+    focal_length_mm: std::sync::OnceLock<bool>,
+    per_frame_focal_length: std::sync::OnceLock<bool>,
+    breathing: std::sync::OnceLock<bool>,
 }
 
 #[derive(Default, Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -108,6 +151,11 @@ pub struct FileMetadata {
     pub digital_zoom:        Option<f64>,
     pub has_accurate_timestamps: bool,
     pub additional_data:     serde_json::Value,
+    // The per-frame tables below (and `MeshCorrections::frames`) have entry k for video frame k, every frame up to the
+    // last one the metadata describes: a frame without data of its own has its neighbours' (`gyro_source::per_frame`).
+    // They're read through `frame_time_offset`, `camera_stab_at`, `lens_breathing_at` and `MeshCorrections::frame`
+    /// Offset of each frame's capture (the middle of its exposure and readout, in the motion data's time) from its time
+    /// in the video, in ms
     pub per_frame_time_offsets: Vec<f64>,
     pub camera_stab_data:    Vec<CameraStabData>,
     #[serde(rename = "mesh_corrections")]
@@ -117,9 +165,12 @@ pub struct FileMetadata {
     #[serde(rename = "mesh_correction", skip_serializing)]
     pub legacy_mesh_correction: Vec<(Vec<f64>, Vec<f32>)>,
     pub lens_breathing:      Vec<BreathingFrame>,
-    /// Cache of `lens_focal_length_varies`, the renderer asks per frame
+    /// What the lens metadata's checks for a focal length that changes found (`LensVariation`)
     #[serde(skip)]
-    pub focal_length_varies_cache: std::sync::OnceLock<bool>,
+    pub lens_variation:      LensVariation,
+    /// The segments of a video cut from camera recordings, from its segment table (`TrimSegments`): every segment
+    /// boundary is a hard boundary for the motion data
+    pub trim_segments:       Option<super::TrimSegments>,
 }
 impl FileMetadata {
     pub fn thin(&self) -> Self {
@@ -145,7 +196,8 @@ impl FileMetadata {
             mesh_correction:         Default::default(),
             legacy_mesh_correction:  Default::default(),
             lens_breathing:          Default::default(),
-            focal_length_varies_cache: Default::default(),
+            lens_variation:          Default::default(),
+            trim_segments:           self.trim_segments.clone(),
         }
     }
     pub fn has_motion(&self) -> bool {
@@ -160,6 +212,33 @@ impl FileMetadata {
     pub fn has_mesh_correction(&self) -> bool {
         !self.mesh_correction.is_empty()
     }
+    /// Offset of a frame's capture from its time in the video (`per_frame_time_offsets`), 0 without the table
+    pub fn frame_time_offset(&self, frame: usize) -> f64 {
+        per_frame_entry(&self.per_frame_time_offsets, frame).copied().unwrap_or(0.0)
+    }
+    /// The in-camera stabilizer's sensor and lens shift of a frame (`camera_stab_data`)
+    pub fn camera_stab_at(&self, frame: usize) -> Option<&CameraStabData> {
+        per_frame_entry(&self.camera_stab_data, frame)
+    }
+    /// The lens breathing of a frame (`lens_breathing`), `None` where it has none
+    pub fn lens_breathing_at(&self, frame: usize) -> Option<&BreathingFrame> {
+        per_frame_entry(&self.lens_breathing, frame).filter(|b| !b.focal.is_empty())
+    }
+    /// Whether the effective focal length changes over the clip: the metadata's (`has_per_frame_focal_length`), or the
+    /// lens's own through its focus breathing (`lens_breathing_varies`)
+    pub fn has_varying_focal_length(&self) -> bool {
+        self.has_per_frame_focal_length() || self.lens_breathing_varies()
+    }
+    /// Whether the lens breathing changes over the clip: the focus moves (the `focal` of any row of any frame, a frame
+    /// without any taken as 1, as the focal length sweep takes it), or the crop of the camera's own compensation does
+    /// (`applied`). A clip that keeps its focus breathes by as much all through, a constant scale of its focal length:
+    /// nothing changes over it, and any one frame's lens is every frame's. Cached (`LensVariation`)
+    pub fn lens_breathing_varies(&self) -> bool {
+        *self.lens_variation.breathing.get_or_init(|| {
+            Self::varies(&mut self.lens_breathing.iter().flat_map(|b| b.focal.iter().map(|f| *f as f64).chain(b.focal.is_empty().then_some(1.0))))
+                || Self::varies(&mut self.lens_breathing.iter().filter(|b| !b.focal.is_empty()).map(|b| b.camera_scale(false)))
+        })
+    }
     /// More than 0.2% between the smallest and the largest value
     fn varies(it: &mut dyn Iterator<Item = f64>) -> bool {
         let (mut min, mut max, mut count) = (f64::MAX, 0.0f64, 0usize);
@@ -171,44 +250,48 @@ impl FileMetadata {
         count > 1 && max > min * 1.002
     }
     /// Whether the lens metadata reports a focal length in millimetres that changes over the clip (a zoom lens
-    /// on a body that records it: Blackmagic, RED, Nikon, Z CAM, Sony). Cached, the projection asks per frame,
-    /// see `FrameTransform::get_lens_data_at_timestamp`
+    /// on a body that records it: Blackmagic, RED, Nikon, Z CAM, Sony). Cached (`LensVariation`), the projection asks
+    /// per frame, see `FrameTransform::get_lens_data_at_timestamp`
     pub fn lens_focal_length_varies(&self) -> bool {
-        *self.focal_length_varies_cache.get_or_init(|| Self::varies(&mut self.lens_params.values().filter_map(|x| x.focal_length.map(|f| f as f64))))
+        *self.lens_variation.focal_length_mm.get_or_init(|| Self::varies(&mut self.lens_params.values().filter_map(|x| x.focal_length.map(|f| f as f64))))
     }
     /// Whether the lens metadata describes a focal length that changes over the clip (zoom lens, dynamic
     /// crop, interpolated lens profiles). A fixed lens reports the same value every frame and has nothing
     /// to stabilize or to chart. The pixel and the millimetre values are compared separately: an entry may
-    /// carry one without the other, and they're not in the same unit
+    /// carry one without the other, and they're not in the same unit. Cached (`LensVariation`)
     pub fn has_per_frame_focal_length(&self) -> bool {
-        Self::varies(&mut self.lens_params.values().filter_map(|x| x.pixel_focal_length.map(|(fx, fy)| (fx as f64 * fy as f64).sqrt())))
-            || self.lens_focal_length_varies()
-            || Self::varies(&mut self.lens_positions.values().copied())
+        *self.lens_variation.per_frame_focal_length.get_or_init(|| {
+            Self::varies(&mut self.lens_params.values().filter_map(|x| x.pixel_focal_length.map(|(fx, fy)| (fx as f64 * fy as f64).sqrt())))
+                || self.lens_focal_length_varies()
+                || Self::varies(&mut self.lens_positions.values().copied())
+        })
     }
     pub fn lens_params_closest(&self, timestamp_us: i64, max_diff: i64, pred: impl Fn(&LensParams) -> bool) -> Option<&LensParams> {
-        let max_diff = max_diff.max(0);
-        let min_ts = timestamp_us.saturating_sub(max_diff);
-        let max_ts = timestamp_us.saturating_add(max_diff);
-
-        // The two ranges overlap on an exact key hit; the tie-break below then picks that same entry
-        let before = self.lens_params.range(min_ts..=timestamp_us).rev().find(|(_, v)| pred(*v));
-        let after  = self.lens_params.range(timestamp_us..=max_ts) .find(|(_, v)| pred(*v));
-
-        // `abs_diff` returns an u64 and can't overflow, unlike `(key - other).abs()`
-        let closest = match (before, after) {
-            (Some(before), Some(after)) => if timestamp_us.abs_diff(*after.0) <= timestamp_us.abs_diff(*before.0) { after } else { before },
-            (Some(before), None)        => before,
-            (None,         Some(after)) => after,
-            (None,         None)        => return None
-        };
-        // The ranges above are inclusive on both ends, so an entry exactly `max_diff` away still needs rejecting.
-        // Anything farther than the closest matching entry is out of range as well, so one check is enough
-        if timestamp_us.abs_diff(*closest.0) < max_diff as u64 {
-            Some(closest.1)
-        } else {
-            None
-        }
+        self.lens_params_closest_in(i64::MIN..=i64::MAX, timestamp_us, max_diff, pred)
     }
+    /// The keys (µs) of the lens metadata frame `frame` takes its own from: in a video cut from recordings its part's
+    /// (`TrimSegments::lens_keys_of_frame`), as the same frames trimmed on their own have only theirs; all of them
+    /// otherwise
+    pub fn lens_keys_of_frame(&self, frame: usize) -> RangeInclusive<i64> {
+        self.trim_segments.as_ref().map_or(i64::MIN..=i64::MAX, |t| t.lens_keys_of_frame(frame))
+    }
+    /// `lens_params_closest` among the entries of the keys `keys` (`lens_keys_of_frame`), `MapClosest::get_closest_in`
+    pub fn lens_params_closest_in(&self, keys: RangeInclusive<i64>, timestamp_us: i64, max_diff: i64, pred: impl Fn(&LensParams) -> bool) -> Option<&LensParams> {
+        self.lens_params.get_closest_in(keys, timestamp_us, max_diff, pred)
+    }
+    /// The lens position (`lens_positions`) closest to `timestamp_us`, less than `max_diff` away, among the entries of
+    /// the keys `keys` (`lens_keys_of_frame`), as `MapClosest::get_closest` finds it among all of them
+    pub fn lens_position_closest_in(&self, keys: RangeInclusive<i64>, timestamp_us: i64, max_diff: i64) -> Option<f64> {
+        self.lens_positions.get_closest_in(keys, timestamp_us, max_diff, |_| true).copied()
+    }
+}
+
+/// Entry `frame` of a per-frame table. The readers ask for every frame of the video, which can go on past the last
+/// frame the metadata describes (a camera that stops writing it a frame or two early, a video longer than the motion
+/// file): those frames continue the last one, like a frame without metadata inside the table continues its
+/// neighbours'. `None` for an empty table
+pub fn per_frame_entry<T>(table: &[T], frame: usize) -> Option<&T> {
+    table.get(frame).or_else(|| table.last())
 }
 
 // ------------- Mesh correction -------------
@@ -274,13 +357,13 @@ impl MeshCorrections {
     pub fn is_empty(&self) -> bool {
         !self.frames.iter().any(|f| !f.is_empty())
     }
+    /// No corrections, and none of the storage they took
     pub fn clear(&mut self) {
-        self.tables.clear();
-        self.frames.clear();
+        *self = Self::default();
     }
     /// The correction of a frame, `None` when it has none
     pub fn frame(&self, frame: usize) -> Option<&MeshFrame> {
-        self.frames.get(frame).filter(|f| !f.is_empty())
+        per_frame_entry(&self.frames, frame).filter(|f| !f.is_empty())
     }
     pub fn has_mesh(&self, frame: usize) -> bool {
         self.frame(frame).map_or(false, |f| f.table.is_some())
@@ -415,6 +498,23 @@ impl MeshCorrections {
 }
 
 // ------------- ReadOnlyFileMetadata -------------
+/// The motion data of a file, taken out of its metadata while it's ignored, see `GyroSource::set_ignore_file_motion`
+#[derive(Default, Clone, Debug)]
+pub struct FileMotion {
+    pub raw_imu:            Vec<TimeIMU>,
+    pub quaternions:        TimeQuat,
+    pub gravity_vectors:    Option<TimeVec>,
+    pub image_orientations: Option<TimeQuat>,
+}
+impl FileMotion {
+    fn put_into(self, md: &mut FileMetadata) {
+        md.raw_imu = self.raw_imu;
+        md.quaternions = self.quaternions;
+        md.gravity_vectors = self.gravity_vectors;
+        md.image_orientations = self.image_orientations;
+    }
+}
+
 // Make a thread-safe read-only wrapper for FileMetadata, because once it's read, it's never changed
 #[derive(Clone)]
 pub struct ReadOnlyFileMetadata(pub Arc<RwLock<FileMetadata>>);
@@ -432,8 +532,36 @@ impl ReadOnlyFileMetadata {
     pub fn read(&self) -> parking_lot::RwLockReadGuard<'_, FileMetadata> {
         self.0.read()
     }
+    /// Changes the metadata into a copy of its own, never in place: every clone of a `GyroSource` shares the one it
+    /// was cloned with (a render queue job's, a running analysis's), and a change is only ever meant for this one
+    fn modify(&mut self, f: impl FnOnce(&mut FileMetadata)) {
+        let mut md = self.0.read().clone();
+        f(&mut md);
+        self.0 = Arc::new(RwLock::new(md));
+    }
     pub fn set_raw_imu(&mut self, v: Vec<TimeIMU>) {
-        self.0.write().raw_imu = v;
+        self.modify(|md| md.raw_imu = v);
+    }
+    /// Takes the motion data out: from then on it's metadata of a file without any
+    pub fn take_motion(&mut self) -> FileMotion {
+        let mut motion = FileMotion::default();
+        self.modify(|md| motion = FileMotion {
+            raw_imu:            std::mem::take(&mut md.raw_imu),
+            quaternions:        std::mem::take(&mut md.quaternions),
+            gravity_vectors:    md.gravity_vectors.take(),
+            image_orientations: md.image_orientations.take(),
+        });
+        motion
+    }
+    /// Puts back what `take_motion` took out
+    pub fn restore_motion(&mut self, motion: FileMotion) {
+        self.modify(|md| motion.put_into(md));
+    }
+    /// A copy of the metadata with `motion` back in
+    pub fn with_motion(&self, motion: &FileMotion) -> FileMetadata {
+        let mut md = self.0.read().clone();
+        motion.clone().put_into(&mut md);
+        md
     }
 }
 impl serde::Serialize for ReadOnlyFileMetadata {
@@ -447,3 +575,27 @@ impl<'de> serde::Deserialize<'de> for ReadOnlyFileMetadata {
     }
 }
 // ------------- ReadOnlyFileMetadata -------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn breathing(frames: &[&[f32]]) -> FileMetadata {
+        FileMetadata { lens_breathing: frames.iter().map(|f| BreathingFrame { focal: f.to_vec(), applied: None, crop_y: 0.0, crop_h: 100.0 }).collect(), ..Default::default() }
+    }
+
+    #[test]
+    fn a_clip_that_keeps_its_focus_breathes_by_as_much_all_through() {
+        // A lens breathing 4%, its focus held: its focal length is a constant scale, nothing that changes over the clip
+        let held = breathing(&[&[1.04, 1.04], &[1.04, 1.04], &[1.04, 1.04]]);
+        assert!(!held.lens_breathing_varies() && !held.has_varying_focal_length());
+        // Focused through the readout of a frame, or from one frame to the next
+        assert!(breathing(&[&[1.04, 1.04], &[1.04, 1.02], &[1.02, 1.02]]).has_varying_focal_length());
+        // A frame without breathing is the lens as it's stated, and the frames around it aren't
+        assert!(breathing(&[&[1.04, 1.04], &[], &[1.04, 1.04]]).lens_breathing_varies());
+        // The camera's own compensation cropping more as the focus moves
+        let mut cropped = breathing(&[&[1.04], &[1.04]]);
+        cropped.lens_breathing[1].applied = Some(1.03);
+        assert!(cropped.lens_breathing_varies());
+    }
+}

@@ -9,11 +9,21 @@ use crate::{ stabilization::KernelParams, lens_profile::LensProfile };
 pub struct GoPro6Superview { }
 
 impl GoPro6Superview {
-    fn superview(mut uv: (f32, f32)) -> (f32, f32) {
-        uv.0 *= 1.0 - 0.48 * uv.0.abs();
-        uv.0 *= 0.943396 * (1.0 + 0.157895 * uv.0.abs());
-        uv.1 *= 0.943396 * (1.0 + 0.060000 * (uv.1 * 2.0).abs());
-        uv
+    fn superview(uv: (f32, f32)) -> (f32, f32) {
+        // The polynomials are a fit over the recorded frame, [-0.5, 0.5]; outside it the high-order terms
+        // run away and the fixed-point inversion in `distort_point` leaves for infinity and then for NaN -
+        // which the point path hands straight to the zoom search, where a frame corner that is NaN is a
+        // corner the search never sees. Clamp the argument to the frame and continue with slope 1 past it:
+        // identical inside it, and outside the map stays smooth and strictly increasing, so a coordinate
+        // off the frame cleanly stays off it (background) instead of folding back in. Exactly the
+        // continuation `gopro_warp` already gives the camera's own MAPX/MAPY
+        let (cx, cy) = (uv.0.clamp(-0.5, 0.5), uv.1.clamp(-0.5, 0.5));
+        let mut x = cx;
+        x *= 1.0 - 0.48 * x.abs();
+        x *= 0.943396 * (1.0 + 0.157895 * x.abs());
+        let mut y = cy;
+        y *= 0.943396 * (1.0 + 0.060000 * (y * 2.0).abs());
+        (x + (uv.0 - cx), y + (uv.1 - cy))
     }
 
     /// `uv` range: (0,0)...(width, height)
@@ -67,10 +77,14 @@ impl GoPro6Superview {
     pub fn opencl_functions(&self) -> &'static str {
         r#"
         float2 superview(float2 uv) {
-			uv.x *= 1.0f - 0.48f * fabs(uv.x);
-			uv.x *= 0.943396f * (1.0f + 0.157895f * fabs(uv.x));
-			uv.y *= 0.943396f * (1.0f + 0.060000f * fabs(uv.y * 2.0f));
-            return uv;
+            // Clamp the polynomial argument to the recorded frame and continue linearly past it, so the map
+            // stays smooth & monotonic everywhere (no divergence to NaN). See gopro6_superview.rs
+            float2 c = clamp(uv, -0.5f, 0.5f);
+            float x = c.x, y = c.y;
+            x *= 1.0f - 0.48f * fabs(x);
+            x *= 0.943396f * (1.0f + 0.157895f * fabs(x));
+            y *= 0.943396f * (1.0f + 0.060000f * fabs(y * 2.0f));
+            return (float2)(x, y) + (uv - c);
         }
 
         float2 digital_undistort_point(float2 uv, __global KernelParams *params) {
@@ -103,11 +117,14 @@ impl GoPro6Superview {
     pub fn wgsl_functions(&self) -> &'static str {
         r#"
         fn superview(_uv: vec2<f32>) -> vec2<f32> {
-            var uv = _uv;
-			uv.x *= 1.0 - 0.48 * abs(uv.x);
-			uv.x *= 0.943396 * (1.0 + 0.157895 * abs(uv.x));
-			uv.y *= 0.943396 * (1.0 + 0.060000 * abs(uv.y * 2.0));
-            return uv;
+            // Clamp the polynomial argument to the recorded frame and continue linearly past it, so the map
+            // stays smooth & monotonic everywhere (no divergence to NaN). See gopro6_superview.rs
+            let c = clamp(_uv, vec2<f32>(-0.5, -0.5), vec2<f32>(0.5, 0.5));
+            var uv = c;
+            uv.x *= 1.0 - 0.48 * abs(uv.x);
+            uv.x *= 0.943396 * (1.0 + 0.157895 * abs(uv.x));
+            uv.y *= 0.943396 * (1.0 + 0.060000 * abs(uv.y * 2.0));
+            return uv + (_uv - c);
         }
         fn digital_undistort_point(_uv: vec2<f32>) -> vec2<f32> {
             let out_c2 = vec2<f32>(f32(params.output_width), f32(params.output_height));

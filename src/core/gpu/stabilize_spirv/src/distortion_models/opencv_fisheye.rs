@@ -11,6 +11,12 @@ impl OpenCVFisheye {
     pub fn undistort_point(point: Vec2, params: &KernelParams) -> Vec2 {
         const EPS: f32 = 1e-6;
 
+        // No calibration: a pinhole, so the image radius is `tan θ`
+        if params.k1.x == 0.0 && params.k1.y == 0.0 && params.k1.z == 0.0 && params.k1.w == 0.0 {
+            let r = point.length();
+            return if r < 1e-12 { point } else { point * (r.atan() / r) };
+        }
+
         let mut theta_d = point.length();
 
         // the current camera model is only valid up to 180 FOV
@@ -52,7 +58,7 @@ impl OpenCVFisheye {
                 i += 1;
             }
 
-            scale = theta.tan() / theta_d;
+            scale = theta / theta_d;
         } else {
             converged = true;
         }
@@ -62,20 +68,27 @@ impl OpenCVFisheye {
         // so we can check whether theta has changed the sign during the optimization
         let theta_flipped = (theta_d < 0.0 && theta > 0.0) || (theta_d > 0.0 && theta < 0.0);
 
-        let out_of_range = theta.abs() >= core::f32::consts::FRAC_PI_2 || (params.r_limit > 0.0 && (scale * theta_d).abs() > params.r_limit);
+        // Nothing past 180° is a ray the pipeline can carry: `ray_to_dir` builds the direction out of
+        // `sin θ`, which turns over there. See `distortion_models::opencv_fisheye`
+        if theta.abs() >= 3.1415927 { return vec2(-99999.0, -99999.0); }
 
-        if converged && !theta_flipped && !out_of_range {
+        if converged && !theta_flipped {
             return point * scale;
         }
         vec2(-99999.0, -99999.0)
     }
 
     pub fn distort_point(point: Vec3, params: &KernelParams) -> Vec2 {
-        let pt = vec2(point.x / point.z, point.y / point.z);
+        // No calibration: a pinhole, which has no image of a ray at or past 90°
+        if params.k1.x == 0.0 && params.k1.y == 0.0 && params.k1.z == 0.0 && params.k1.w == 0.0 {
+            return if point.z > 1e-9 { vec2(point.x / point.z, point.y / point.z) } else { vec2(point.x * 1e9, point.y * 1e9) };
+        }
+        let pt = vec2(point.x, point.y);
 
         let r = pt.length();
 
-        let theta = r.atan();
+        // atan2 against the ray's own z, so the angle is right past 90° too
+        let theta = r.atan2(point.z);
         let theta2 = theta*theta;
         let theta4 = theta2*theta2;
         let theta6 = theta4*theta2;
@@ -83,7 +96,7 @@ impl OpenCVFisheye {
 
         let theta_d = theta * (1.0 + params.k1.x * theta2 + params.k1.y * theta4 + params.k1.z * theta6 + params.k1.w * theta8);
 
-        let scale = if r == 0.0 { 1.0 } else { theta_d / r };
+        let scale = if r < 1e-12 { 1.0 } else { theta_d / r };
 
         pt * scale
     }

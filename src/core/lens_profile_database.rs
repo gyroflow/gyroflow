@@ -17,11 +17,21 @@ enum DataSource {
 }
 
 pub type LensProfileUiItem = (String, String, String, bool, f64, i32, String);
+/// A loaded lens profile file: its path as loaded, the number of components of its path in the lens profile folder it was
+/// loaded from, and the key of the file's own profile in the map
+#[derive(Clone)]
+struct ProfileFile {
+    path: String,
+    depth: usize,
+    key: String,
+}
 
 #[derive(Default)]
 pub struct LensProfileDatabase {
     preset_map: HashMap<String, String>,
     map: HashMap<String, LensProfile>,
+    // In the order they were loaded
+    files: Vec<ProfileFile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
     list_for_ui: Vec<LensProfileUiItem>,
     pub loaded: bool,
@@ -29,7 +39,7 @@ pub struct LensProfileDatabase {
 }
 impl Clone for LensProfileDatabase {
     fn clone(&self) -> Self {
-        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), loaded: self.loaded, ..Default::default() }
+        Self { map: self.map.clone(), preset_map: self.preset_map.clone(), files: self.files.clone(), loaded: self.loaded, ..Default::default() }
     }
 }
 
@@ -75,7 +85,8 @@ impl LensProfileDatabase {
 
         let _time = std::time::Instant::now();
 
-        let mut load = |data: DataSource, f_name: &str| {
+        // `relative` is the file's path in the lens profile folder
+        let mut load = |data: DataSource, f_name: &str, relative: &str| {
             if f_name.ends_with(".gyroflow") {
                 let mut profile = LensProfile::default();
                 profile.name = std::path::Path::new(f_name).file_stem().map(|x| x.to_string_lossy().to_string()).unwrap_or_default();
@@ -132,6 +143,10 @@ impl LensProfileDatabase {
                                 profile.checksum = Some(format!("{:08x}", crc32fast::hash(to_checksum.as_bytes())));
                                 Some(())
                             })();
+                            if !profile.is_copy {
+                                let depth = relative.split('/').filter(|x| !x.is_empty()).count();
+                                self.files.push(ProfileFile { path: f_name.to_string(), depth, key: key.clone() });
+                            }
                             self.map.insert(key, profile);
                         }
                     }
@@ -145,12 +160,16 @@ impl LensProfileDatabase {
         let mut bundle_loaded = false;
 
         let mut load_from_dir = |dir: PathBuf| {
-            walkdir::WalkDir::new(dir).into_iter().for_each(|e| {
+            walkdir::WalkDir::new(&dir).into_iter().for_each(|e| {
                 if let Ok(entry) = e {
                     let f_name = entry.path().to_string_lossy().replace('\\', "/");
                     if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
-                        if let Ok(data) = std::fs::read_to_string(&f_name) {
-                            load(DataSource::String(data), &f_name);
+                        // The camera catalog is installed beside profiles but is not a profile.
+                        if entry.file_name() != "camera_database.json" {
+                            if let Ok(data) = std::fs::read_to_string(&f_name) {
+                                let relative = entry.path().strip_prefix(&dir).map(|x| x.to_string_lossy().replace('\\', "/")).unwrap_or_else(|_| f_name.clone());
+                                load(DataSource::String(data), &f_name, &relative);
+                            }
                         }
                     }
                     if !bundle_loaded && f_name.ends_with(".cbor.gz") {
@@ -163,7 +182,7 @@ impl LensProfileDatabase {
                                     for (f_name, profile) in array {
                                         if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
                                         if f_name.starts_with("__") { continue; }
-                                        load(DataSource::SerdeValue(profile), &f_name);
+                                        load(DataSource::SerdeValue(profile), &f_name, &f_name);
                                     }
                                 }
                             }
@@ -188,7 +207,7 @@ impl LensProfileDatabase {
                     for (f_name, profile) in array {
                         if f_name == "__version" { self.version = profile.as_u64().unwrap_or(0) as u32; continue; }
                         if f_name.starts_with("__") { continue; }
-                        load(DataSource::SerdeValue(profile), &f_name);
+                        load(DataSource::SerdeValue(profile), &f_name, &f_name);
                     }
                 }
             }
@@ -211,6 +230,7 @@ impl LensProfileDatabase {
     pub fn set_from_db(&mut self, b: Self) {
         self.map = b.map;
         self.preset_map = b.preset_map;
+        self.files = b.files;
         self.loaded = b.loaded;
         self.version = b.version;
         if self.loaded {
@@ -241,7 +261,10 @@ impl LensProfileDatabase {
         let mut set = HashSet::with_capacity(self.map.len());
         let mut checksum_map = HashMap::with_capacity(self.map.len());
         self.list_for_ui = Vec::with_capacity(self.map.len());
-        for (k, v) in &self.map {
+        // In key order, so profiles of the same name get the same " by …" and " - 2" every time
+        let mut entries: Vec<_> = self.map.iter().collect();
+        entries.sort_unstable_by(|a, b| a.0.cmp(b.0));
+        for (k, v) in entries {
             if v.path_to_file.ends_with(".gyroflow") {
                 self.list_for_ui.push((v.name.clone(), k.clone(), v.checksum.clone().unwrap_or_default(), v.official, v.rating.clone().unwrap_or_default(), 0, v.calibrated_by.clone()));
             } else if !v.camera_brand.is_empty() && !v.camera_model.is_empty() {
@@ -309,7 +332,7 @@ impl LensProfileDatabase {
         let Some(candidate) = profile.map(|value| Self::key(&value.lens_model)).filter(|value| !value.is_empty()) else {
             return false;
         };
-        candidate == requested || candidate.contains(requested) || requested.contains(&candidate)
+        candidate == Self::key(requested)
     }
 
     pub fn search_by_camera(
@@ -319,6 +342,7 @@ impl LensProfileDatabase {
         lens: &str,
         text: &str,
         selected_camera_keys: &HashSet<(String, String)>,
+        brand_camera_keys: &HashSet<(String, String)>,
         compatible_camera_keys: &HashSet<(String, String)>,
         hidden_profiles: &HashSet<String>,
         favorites: &HashSet<String>,
@@ -355,8 +379,11 @@ impl LensProfileDatabase {
                     if !camera_keys.contains(&profile_key) {
                         return false;
                     }
-                } else if Self::key(&profile.camera_brand) != brand_key {
-                    return false;
+                } else {
+                    let profile_key = Self::profile_camera_key(profile);
+                    if !brand_camera_keys.contains(&profile_key) && Self::key(&profile.camera_brand) != brand_key {
+                        return false;
+                    }
                 }
             }
 
@@ -483,13 +510,29 @@ impl LensProfileDatabase {
     pub fn get_by_id(&self, id: &str) -> Option<&LensProfile> {
         self.map.get(id)
     }
+    /// The profile a file's lens profile reference names (.gcsv `lensprofile`, Gyroflow protobuf `lens_profile`): the
+    /// profile of that identifier or key, else that of a lens profile file (not a preset) by its path in the lens profile
+    /// folder or by the end of that path (`Brand/name.json`, `Brand/name`, `name`), with or without the extension. That's
+    /// the file's own profile, not one of its compatible settings. Of several files, the one with the fewest folders the
+    /// reference doesn't give, then the one loaded first, as for identifiers. No part of a name matches, so a lens name that
+    /// names no profile, like "unknown" from a RED camera, finds none
     pub fn find(&self, filename_or_id: &str) -> Option<&LensProfile> {
-        if let Some(l) = self.map.get(filename_or_id) {
-            Some(l)
-        } else {
-            let path_normalized = filename_or_id.replace('\\', "/");
-            self.map.iter().find(|(_, v)| v.path_to_file.replace('\\', "/").contains(&path_normalized)).map(|(_, v)| v)
-        }
+        if filename_or_id.trim().is_empty() { return None; }
+        if let Some(l) = self.map.get(filename_or_id) { return Some(l); }
+        let path = filename_or_id.replace('\\', "/");
+        if let Some(l) = self.map.get(&path) { return Some(l); }
+
+        let wanted: Vec<&str> = path.split('/').filter(|x| !x.is_empty() && *x != ".").collect();
+        let (name, folders) = wanted.split_last()?;
+        self.files.iter().filter_map(|file| {
+            let mut components = file.path.rsplit('/').filter(|x| !x.is_empty());
+            let file_name = components.next()?;
+            if file_name != *name && file_name.strip_suffix(".json") != Some(*name) { return None; }
+            for folder in folders.iter().rev() {
+                if components.next()? != *folder { return None; }
+            }
+            Some((file.depth.saturating_sub(wanted.len()), file))
+        }).min_by_key(|(unmatched_folders, _)| *unmatched_folders).and_then(|(_, file)| self.map.get(&file.key))
     }
 
     // -------------------------------------------------------------------
@@ -638,6 +681,7 @@ impl LensProfileDatabase {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::camera_database::CameraDatabase;
 
     fn profile(brand: &str, model: &str, lens: &str, checksum: &str) -> LensProfile {
         let mut profile = LensProfile::default();
@@ -662,7 +706,7 @@ mod tests {
         }
         let selected = HashSet::from([("maker".to_owned(), "body".to_owned())]);
         assert_eq!(db.search_by_camera(
-            "Maker", "Body", "Prime", "", &selected, &HashSet::new(), &HashSet::new(), &HashSet::new(), 0, 0
+            "Maker", "Body", "Prime", "", &selected, &HashSet::new(), &HashSet::new(), &HashSet::new(), &HashSet::new(), 0, 0
         ).len(), 205);
     }
 
@@ -686,6 +730,7 @@ mod tests {
             "",
             "",
             &HashSet::from([(String::from("brand"), String::from("primary"))]),
+            &HashSet::from([(String::from("brand"), String::from("primary"))]),
             &HashSet::from([(String::from("brand"), String::from("compatible"))]),
             &HashSet::from([String::from("hidden")]),
             &HashSet::new(),
@@ -695,6 +740,28 @@ mod tests {
 
         let result_checksums = results.into_iter().map(|item| item.2).collect::<Vec<_>>();
         assert_eq!(result_checksums, vec!["selected", "compatible"]);
+    }
+
+    #[test]
+    fn brand_search_resolves_model_scoped_aliases_without_cross_brand_matches() {
+        let camera_db = CameraDatabase::from_bundled();
+        let pentax_keys = HashSet::from_iter(camera_db.brand_camera_keys("Pentax"));
+        assert!(pentax_keys.contains(&("ricoh imaging company, ltd.".to_owned(), "k-1".to_owned())));
+        assert!(!pentax_keys.contains(&("ricoh imaging company, ltd.".to_owned(), "gr iii".to_owned())));
+
+        let mut db = LensProfileDatabase::default();
+        db.map.insert("pentax.json".to_owned(), profile("Ricoh Imaging Company, Ltd.", "K-1", "Prime", "pentax"));
+        db.map.insert("ricoh.json".to_owned(), profile("Ricoh Imaging Company, Ltd.", "GR III", "Prime", "ricoh"));
+        db.list_for_ui = vec![
+            item("Pentax K-1 Prime", "pentax.json", "pentax"),
+            item("Ricoh GR III Prime", "ricoh.json", "ricoh"),
+        ];
+
+        let results = db.search_by_camera(
+            "Pentax", "", "", "", &HashSet::new(), &pentax_keys,
+            &HashSet::new(), &HashSet::new(), &HashSet::new(), 0, 0,
+        );
+        assert_eq!(results.iter().map(|item| item.1.as_str()).collect::<Vec<_>>(), vec!["pentax.json"]);
     }
 
     #[test]
@@ -708,7 +775,7 @@ mod tests {
         let hidden = HashSet::from(["profiles/resolved.json".to_owned()]);
         let selected = HashSet::from([("maker".to_owned(), "body".to_owned())]);
         let matches = db.search_by_camera(
-            "Maker", "Body", "Prime", "", &selected, &HashSet::new(), &hidden, &HashSet::new(), 0, 0
+            "Maker", "Body", "Prime", "", &selected, &HashSet::new(), &HashSet::new(), &hidden, &HashSet::new(), 0, 0
         );
 
         assert!(matches.is_empty());
@@ -726,9 +793,30 @@ mod tests {
 
         let selected = HashSet::from([("maker".to_owned(), "body".to_owned())]);
         let checksums = db.search_by_camera(
-            "Maker", "Body", "Prime 24mm", "", &selected, &HashSet::new(), &HashSet::new(), &HashSet::new(), 0, 0
+            "Maker", "Body", "Prime 24mm", "", &selected, &HashSet::new(), &HashSet::new(), &HashSet::new(), &HashSet::new(), 0, 0
         ).into_iter().map(|entry| entry.2).collect::<Vec<_>>();
 
         assert_eq!(checksums, ["prime"]);
+    }
+
+    #[test]
+    fn selected_lens_matches_its_exact_identity_only() {
+        let mut db = LensProfileDatabase::default();
+        for (path, lens) in [
+            ("35mm", "FE 35mm F1.4 GM"),
+            ("135mm", "FE 135mm F1.8 GM"),
+            ("35mm-ii", "FE 35mm F1.4 GM II"),
+        ] {
+            db.map.insert(path.to_owned(), profile("Sony", "A7 IV", lens, path));
+            db.list_for_ui.push(item(&format!("Sony A7 IV {lens}"), path, path));
+        }
+
+        let selected = HashSet::from([("sony".to_owned(), "a7 iv".to_owned())]);
+        let results = db.search_by_camera(
+            "Sony", "A7 IV", "fe 35mm f1.4 gm", "", &selected, &selected,
+            &HashSet::new(), &HashSet::new(), &HashSet::new(), 0, 0,
+        );
+
+        assert_eq!(results.iter().map(|item| item.1.as_str()).collect::<Vec<_>>(), vec!["35mm"]);
     }
 }

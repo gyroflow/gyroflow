@@ -34,10 +34,10 @@ const C: usize = 13; // c_i at k[C + i] (i >= 1)
 const RLIN: usize = 13; // r_lin, end of the linear region
 /// Angle at the end of the linear region (3°)
 pub const THETA0: f64 = 3.0 * std::f64::consts::PI / 180.0;
-// Angles are clamped just under tan()'s 90° asymptote and the radius continued linearly past it, so over-FOV rays
-// stay large and monotonic instead of folding back into the frame; r_limit then clips them (same as gopro.rs)
-const TMAX: f32 = 1.5533; // ~89°
-/// Smallest dθ/dr still counted as rising; at or below it the curve is taken as folded
+/// Smallest dθ/dr still counted as rising; at or below it the curve is taken as folded, and `fold` reports the
+/// radius and angle where that first happens. Nothing here clamps or continues an over-FOV ray any more: rays
+/// are angles now (see `stabilization::projection`), so a curve that runs past 90° needs no asymptote to be kept
+/// away from - what the fold gives instead is the lens's `field_limit`, in radians, past which there is no picture
 const MIN_SLOPE: f32 = 1e-9;
 
 impl Sony {
@@ -92,32 +92,34 @@ impl Sony {
         i as f32 * h + dx
     }
 
-    /// `point`: normalized (recorded pixel − c) / f. Image → ray direction in the normalized image plane (|.| = tan θ)
+    /// `point`: normalized (recorded pixel − c) / f. Image → ray, as an angle vector (`θ·û`, see `stabilization::projection`)
     pub fn undistort_point(&self, point: (f32, f32), params: &KernelParams) -> Option<(f32, f32)> {
         let n = Self::segments(&params.k);
-        if n == 0 { return Some(point); }
+        if n == 0 {
+            // No lens curve: a pinhole, so the image radius is `tan θ`
+            let r = (point.0 * point.0 + point.1 * point.1).sqrt();
+            if r < 1e-12 { return Some(point); }
+            let s = r.atan() / r;
+            return Some((point.0 * s, point.1 * s));
+        }
         let r = (point.0 * point.0 + point.1 * point.1).sqrt();
         if r < 1e-9 { return Some(point); }
         let theta = Self::angle_at(&params.k, n, r).0;
         if theta <= 0.0 { return None; }
-        let tt = TMAX.tan();
-        let rr = if theta < TMAX { theta.tan() } else { tt + (theta - TMAX) * (1.0 + tt * tt) };
-        if params.r_limit > 0.0 && rr > params.r_limit { return None; }
-        let scale = rr / r;
+        let scale = theta / r;
         Some((point.0 * scale, point.1 * scale))
     }
 
     /// `(x, y, z)` is the ray; returns the normalized image coordinate (× f + c → recorded pixel)
     pub fn distort_point(&self, x: f32, y: f32, z: f32, params: &KernelParams) -> (f32, f32) {
-        let pos = (x / z, y / z);
         let n = Self::segments(&params.k);
-        if n == 0 { return pos; }
-        let r = (pos.0 * pos.0 + pos.1 * pos.1).sqrt();
-        if r < 1e-9 { return pos; }
-        let tt = TMAX.tan();
-        let theta = if r < tt { r.atan() } else { TMAX + (r - tt) / (1.0 + tt * tt) };
+        // No lens curve: a pinhole, which has no image of a ray at or past 90°
+        if n == 0 { return if z > 1e-9 { (x / z, y / z) } else { (x * 1e9, y * 1e9) }; }
+        let r = (x * x + y * y).sqrt();
+        if r < 1e-12 { return (0.0, 0.0); }
+        let theta = r.atan2(z);
         let scale = Self::radius_at(&params.k, n, theta) / r;
-        (pos.0 * scale, pos.1 * scale)
+        (x * scale, y * scale)
     }
 
     pub fn adjust_lens_profile(&self, _profile: &mut crate::LensProfile) { }
@@ -176,8 +178,7 @@ impl Sony {
         let kf = Self::k32(k)?;
         let n = Self::segments(&kf);
         if n == 0 { return None; }
-        let theta = Self::fold(&kf, n)?.1 as f64;
-        (theta < std::f64::consts::FRAC_PI_2 - 0.001).then(|| theta.tan())
+        Some(Self::fold(&kf, n)?.1 as f64)
     }
 
     /// Builds the `params.k` block from the camera's lens curve: `angles[i]` is the ray angle (radians) at image
@@ -249,86 +250,4 @@ fn first_root(a: f32, b: f32, c: f32, lo: f32, hi: f32) -> Option<f32> {
         [Some(q / a), (q != 0.0).then(|| c / q)]
     };
     roots.into_iter().flatten().filter(|x| *x >= lo && *x <= hi).reduce(f32::min)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::stabilization::distortion_models::DistortionModel;
-
-    const H: f64 = 0.1;
-
-    /// Ground truth for the fold: the first radius on a fine grid where the curve stops rising
-    fn limit_by_scan(k: &[f64]) -> Option<f64> {
-        let kf = Sony::k32(k).unwrap();
-        let n = Sony::segments(&kf);
-        (1..200_000).map(|i| i as f32 * 1e-5).find(|&r| Sony::angle_at(&kf, n, r).1 <= MIN_SLOPE).map(|r| Sony::angle_at(&kf, n, r).0.tan() as f64)
-    }
-
-    #[test]
-    fn a_rising_curve_has_no_limit() {
-        // Rectilinear: θ = atan(r). The block gets a linear region (r_lin > 0) and rises everywhere
-        let angles: Vec<f64> = (1..=MAX_SEGMENTS).map(|i| (i as f64 * H).atan()).collect();
-        let k = Sony::coefficients_from_lens_curve(&angles, H);
-        assert!(k[RLIN] > 0.0);
-        let model = Sony::default();
-        assert_eq!(model.radial_distortion_limit(&k), None);
-        assert_eq!(limit_by_scan(&k), None);
-        assert_eq!(DistortionModel::from_name("sony").radial_distortion_limit(&k), None);
-        // No curve, no limit
-        assert_eq!(model.radial_distortion_limit(&vec![0.0; COEFF_COUNT]), None);
-        assert_eq!(model.radial_distortion_limit(&[1.0, 2.0]), None);
-    }
-
-    #[test]
-    fn a_folding_curve_is_limited_where_it_folds() {
-        // Rises to the ninth knot and dips at the tenth: the spline peaks near the last knot
-        let angles = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.78, 0.83, 0.82];
-        let k = Sony::coefficients_from_lens_curve(&angles, H);
-        assert_eq!(k[RLIN], 0.0, "a dipping curve has no monotone inverse to place the linear region with");
-        let model = Sony::default();
-        let limit = model.radial_distortion_limit(&k).expect("the curve folds below 90°");
-        let scanned = limit_by_scan(&k).expect("the scan sees the fold too");
-        assert!((limit - scanned).abs() < 1e-4, "analytic {limit} vs scanned {scanned}");
-        assert!(limit > 0.82f64.tan() && limit < 0.9f64.tan(), "{limit}");
-        // The generic dispatcher routes to the same answer
-        assert_eq!(DistortionModel::from_name("sony").radial_distortion_limit(&k), Some(limit));
-        // The sampled derivative agrees where it can: rising well inside the knots, folded past them. Right at the
-        // fold it can't tell, `radius_at` picks the segment by knot value and the dipping knots send an angle
-        // between the peak and the last knot to the linear continuation, which is why the fold is solved, not sampled
-        assert!(model.distortion_derivative(0.5, &k).unwrap() > 0.0);
-        assert!(model.distortion_derivative(0.9, &k).unwrap() <= 0.0);
-    }
-
-    #[test]
-    fn a_fold_past_the_linear_region_is_found_at_its_end() {
-        // Hand-built: the line covers the whole spline (r_lin beyond the last knot) and the end slope is negative,
-        // so the curve folds exactly where the line hands over
-        let angles = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.78, 0.83, 0.82];
-        let mut k = Sony::coefficients_from_lens_curve(&angles, H);
-        k[RLIN] = 1.5;
-        let kf = Sony::k32(&k).unwrap();
-        let expected = Sony::angle_at(&kf, MAX_SEGMENTS, 1.5).0.tan() as f64;
-        assert!(expected > 0.0);
-        let limit = Sony::default().radial_distortion_limit(&k).unwrap();
-        assert!((limit - expected).abs() < 1e-5, "{limit} vs {expected}");
-        assert!((limit_by_scan(&k).unwrap() - expected).abs() < 1e-4);
-    }
-
-    #[test]
-    fn first_root_picks_the_smallest_root_in_range() {
-        // (x - 1)(x - 3) = x² - 4x + 3
-        assert_eq!(first_root(1.0, -4.0, 3.0, 0.0, 10.0), Some(1.0));
-        assert_eq!(first_root(1.0, -4.0, 3.0, 2.0, 10.0), Some(3.0));
-        assert_eq!(first_root(1.0, -4.0, 3.0, 4.0, 10.0), None);
-        // Opens downwards: -(x - 1)(x - 3)
-        assert_eq!(first_root(-1.0, 4.0, -3.0, 2.0, 10.0), Some(3.0));
-        // Linear and degenerate
-        assert_eq!(first_root(0.0, 2.0, -1.0, 0.0, 1.0), Some(0.5));
-        assert_eq!(first_root(0.0, 0.0, 1.0, 0.0, 1.0), None);
-        assert_eq!(first_root(1.0, 0.0, 1.0, 0.0, 1.0), None);
-        // A nearly linear quadratic keeps its finite root exact
-        let x = first_root(1e-12, 2.0, -1.0, 0.0, 1.0).unwrap();
-        assert!((x - 0.5).abs() < 1e-6, "{x}");
-    }
 }

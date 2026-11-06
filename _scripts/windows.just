@@ -307,19 +307,26 @@ bundle:
     }
 
     # Bundle BRAW and RED SDK
-    if ("{{Arch}}" -eq "x86_64") {
-        if (-not (Test-Path -Path "$TargetDir\REDR3D-x64.dll")) {
-            Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/RED_SDK_Windows_9.1.2.tar.gz" -OutFile tmp.tar.gz
+    if ("{{Arch}}" -eq "aarch64") {
+        $RedSdk  = "RED_SDK_Windows_arm64_9.2.1.tar.gz"
+        $RedDll  = "REDR3D-a64.dll"
+        $BrawSdk = "Blackmagic_RAW_SDK_Windows_arm64_6.0.0.tar.gz"
+    } else {
+        $RedSdk  = "RED_SDK_Windows_9.2.1.tar.gz"
+        $RedDll  = "REDR3D-x64.dll"
+        $BrawSdk = "Blackmagic_RAW_SDK_Windows_6.0.0.tar.gz"
+    }
+    if (-not (Test-Path -Path "$TargetDir\$RedDll")) {
+        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/$RedSdk" -OutFile tmp.tar.gz
             7z x tmp.tar.gz
             7z x -o"$TargetDir\" tmp.tar
             Remove-Item -Path tmp.ta* -Force
         }
         if (-not (Test-Path -Path "$TargetDir\BlackmagicRawAPI.dll")) {
-            Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/Blackmagic_RAW_SDK_Windows_5.0.0.tar.gz" -OutFile tmp.tar.gz
+        Invoke-WebRequest -URI "https://api.gyroflow.xyz/sdk/$BrawSdk" -OutFile tmp.tar.gz
             7z x tmp.tar.gz
             7z x -o"$TargetDir\" tmp.tar
             Remove-Item -Path tmp.ta* -Force
-        }
     }
 
     # Generate self-signed key

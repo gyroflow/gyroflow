@@ -30,25 +30,29 @@ impl GoPro {
 
     /// From image to ray
     pub fn undistort_point(point: Vec2, params: &KernelParams) -> Vec2 {
-        if params.k1.y == 0.0 { return point; }
         let r_norm = point.length();
+        // No POLY block: a pinhole, so the image radius is `tan θ`
+        if params.k1.y == 0.0 { return if r_norm < 1e-12 { point } else { point * (r_norm.atan() / r_norm) }; }
         if r_norm < 1e-9 { return point; }
         let p = r_norm / params.k1.y;
         let theta = Self::poly_eval(p, params);
-        let scale = theta.tan() / r_norm;
-        point * scale
+        // Outside its fit range the POLY is free to run negative or past 180°, and neither is an angle
+        // this pipeline can carry - a negative θ hands back the ray from the opposite side of the frame,
+        // and past 180° `ray_to_dir`'s `sin θ` has turned over. See `distortion_models::gopro`
+        if !(theta > 0.0 && theta < 3.1415927) { return vec2(-99999.0, -99999.0); }
+        point * (theta / r_norm)
     }
 
     /// From ray to image
     pub fn distort_point(point: Vec3, params: &KernelParams) -> Vec2 {
-        let pos = vec2(point.x / point.z, point.y / point.z);
-        if params.k1.y == 0.0 { return pos; }
+        // No POLY block: a pinhole, which has no image of a ray at or past 90°
+        if params.k1.y == 0.0 { return if point.z > 1e-9 { vec2(point.x / point.z, point.y / point.z) } else { vec2(point.x * 1e9, point.y * 1e9) }; }
+        let pos = vec2(point.x, point.y);
         let r = pos.length();
-        let theta = r.atan();
-        let p = Self::poly_invert(theta, params);
-        let r_norm = params.k1.y * p;
-        let scale = if r == 0.0 { 1.0 } else { r_norm / r };
-        pos * scale
+        if r < 1e-12 { return vec2(0.0, 0.0); }
+        // atan2 against the ray's own z: a GoPro's 150°+ field needs the angle, not a z=1 plane radius
+        let theta = r.atan2(point.z);
+        pos * (params.k1.y * Self::poly_invert(theta, params) / r)
     }
 
     #[cfg(not(target_arch = "spirv"))]

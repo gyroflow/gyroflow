@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright © 2025 Adrian <adrian.eddy at gmail>
 
-use telemetry_parser::tags_impl::{ GroupedTagMap, GetWithType, GroupId, TagId };
+use telemetry_parser::tags_impl::{ GroupedTagMap, GetWithType, GroupId, TagId, TagValue };
 use crate::gyro_source::FileMetadata;
 
 pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input, tag_map: &GroupedTagMap, size: (usize, usize), info: &telemetry_parser::util::SampleInfo) {
@@ -31,70 +31,102 @@ pub fn init_lens_profile(md: &mut FileMetadata, input: &telemetry_parser::Input,
     }
 
     if md.lens_profile.is_none() {
-        if let Some(im) = tag_map.get(&GroupId::Imager) {
-            if let Some(_w) = im.get_t(TagId::PixelWidth) as Option<&u32> {
-                if let Some(_h) = im.get_t(TagId::PixelHeight) as Option<&u32> {
-                    if let Some(map) = tag_map.get(&GroupId::Lens) {
-                        if let Some(v) = map.get_t(TagId::PixelFocalLength) as Option<&Vec<f32>> {
-                            if v.len() == 2 {
-                                let (fx, fy) = (v[0], v[1]);
+        let pixel_focal_length = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::PixelFocalLength) as Option<&Vec<f32>>);
+        if let (Some(v), Some((rec_w, _))) = (pixel_focal_length, recorded_frame_size(tag_map)) {
+            if v.len() == 2 && rec_w > 0 {
+                // In pixels of the recording, which the loaded video (a proxy) may show at another size
+                let scale = size.0 as f32 / rec_w as f32;
+                let (fx, fy) = (v[0] * scale, v[1] * scale);
 
-                                let video_rotation = info.video_rotation.unwrap_or_default().abs();
-                                let is_vertical = video_rotation == 90 || video_rotation == 270;
+                let video_rotation = info.video_rotation.unwrap_or_default().abs();
+                let is_vertical = video_rotation == 90 || video_rotation == 270;
 
-                                let focal_length_str = tag_map.get(&GroupId::Lens)
-                                    .and_then(|x| x.get_t(TagId::FocalLength) as Option<&f32>)
-                                    .map(|x| format!("{:.2} mm", *x));
+                let focal_length_str = tag_map.get(&GroupId::Lens)
+                    .and_then(|x| x.get_t(TagId::FocalLength) as Option<&f32>)
+                    .map(|x| format!("{:.2} mm", *x));
 
-                                let mut lens_name = String::new();
-                                if let Some(v) = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::DisplayName) as Option<&String>) {
-                                    lens_name = v.clone();
-                                }
-                                md.lens_profile = Some(serde_json::json!({
-                                    "calibrated_by": "Canon",
-                                    "camera_brand": "Canon",
-                                    "camera_model": input.camera_model().map(|x| x.as_str()).unwrap_or(&""),
-                                    "lens_model":   if !lens_name.is_empty() && focal_length_str.is_some() { format!("{lens_name} ({})", focal_length_str.unwrap()) } else if !lens_name.is_empty() { lens_name } else { focal_length_str.unwrap_or_default() },
-                                    "calib_dimension":  { "w": size.0, "h": size.1 },
-                                    "orig_dimension":   { "w": size.0, "h": size.1 },
-                                    "output_dimension": { "w": if is_vertical { size.1 } else { size.0 }, "h": if is_vertical { size.0 } else { size.1 } },
-                                    "frame_readout_time": md.frame_readout_time,
-                                    "official": true,
-                                    "asymmetrical": false,
-                                    "note": "",
-                                    "fisheye_params": {
-                                        "camera_matrix": [
-                                            [ fx, 0.0, size.0 / 2 ],
-                                            [ 0.0, fy, size.1 / 2 ],
-                                            [ 0.0, 0.0, 1.0 ]
-                                        ],
-                                        "distortion_coeffs": []
-                                    },
-                                    "distortion_model": "opencv_standard",
-                                    "sync_settings": {
-                                        "initial_offset": 0,
-                                        "initial_offset_inv": false,
-                                        "search_size": 0.3,
-                                        "max_sync_points": 5,
-                                        "every_nth_frame": 1,
-                                        "time_per_syncpoint": 0.5,
-                                        "do_autosync": false
-                                    },
-                                    "calibrator_version": "---"
-                                }));
-                            }
-                        }
-                    }
+                let mut lens_name = String::new();
+                if let Some(v) = tag_map.get(&GroupId::Lens).and_then(|map| map.get_t(TagId::DisplayName) as Option<&String>) {
+                    lens_name = v.clone();
                 }
+                md.lens_profile = Some(serde_json::json!({
+                    "calibrated_by": "Canon",
+                    "camera_brand": "Canon",
+                    "camera_model": input.camera_model().map(|x| x.as_str()).unwrap_or(&""),
+                    "lens_model":   if !lens_name.is_empty() && focal_length_str.is_some() { format!("{lens_name} ({})", focal_length_str.unwrap()) } else if !lens_name.is_empty() { lens_name } else { focal_length_str.unwrap_or_default() },
+                    "calib_dimension":  { "w": size.0, "h": size.1 },
+                    "orig_dimension":   { "w": size.0, "h": size.1 },
+                    "output_dimension": { "w": if is_vertical { size.1 } else { size.0 }, "h": if is_vertical { size.0 } else { size.1 } },
+                    "frame_readout_time": md.frame_readout_time,
+                    "official": true,
+                    "asymmetrical": false,
+                    "note": "",
+                    "fisheye_params": {
+                        "camera_matrix": [
+                            [ fx, 0.0, size.0 / 2 ],
+                            [ 0.0, fy, size.1 / 2 ],
+                            [ 0.0, 0.0, 1.0 ]
+                        ],
+                        "distortion_coeffs": []
+                    },
+                    "distortion_model": "opencv_standard",
+                    "sync_settings": {
+                        "initial_offset": 0,
+                        "initial_offset_inv": false,
+                        "search_size": 0.3,
+                        "max_sync_points": 5,
+                        "every_nth_frame": 1,
+                        "time_per_syncpoint": 0.5,
+                        "do_autosync": false
+                    },
+                    "calibrator_version": "---"
+                }));
             }
         }
     }
 }
 
+/// The frame Canon's pixel quantities (focal length in pixels, distortion center) are stated in: the recorded
+/// frame. Cameras that write the active area (C80: 4096x2160 in an MP4, 6000x3164 in a CRM) give it there; the
+/// R6 V leaves it out and records the whole effective area (6960x3672), which it does write
+pub fn recorded_frame_size(tag_map: &GroupedTagMap) -> Option<(u32, u32)> {
+    let im = tag_map.get(&GroupId::Imager)?;
+    if let Some(v) = im.get_t(TagId::Custom("ActiveAreaAspectRatio".into())) as Option<&(u32, u32)> {
+        return Some(*v);
+    }
+    Some((*(im.get_t(TagId::PixelWidth) as Option<&u32>)?, *(im.get_t(TagId::PixelHeight) as Option<&u32>)?))
+}
+
+/// Whether the lens image stabilizer was on in this frame (E2.1B: 0 off, 1 on, 3 no information). The camera doesn't
+/// record what it corrected, so the motion data doesn't describe the picture then. Read from the tag's byte, which
+/// telemetry-parser's boolean decode of it can't tell apart from "no information"
+pub fn lens_stabilizer_on(tag_map: &GroupedTagMap) -> bool {
+    let Some(tag) = tag_map.get(&GroupId::Default).and_then(|x| x.get(&TagId::ImageStabilizer)).filter(|x| x.native_id == Some(0xe21b)) else { return false };
+    match &tag.value {
+        TagValue::bool(v) => v.raw_data.first() == Some(&1),
+        TagValue::u8(v)   => v.raw_data.first() == Some(&1),
+        _ => false
+    }
+}
+
+/// Readout time of the cameras that don't write it (E2.09), ms: the R-series bodies (R6 V, R6 Mark III, R5 Mark II).
+/// Their clips fit 14 to 15 ms
+pub const DEFAULT_READOUT_MS: f64 = 14.0;
+
+/// The frame's exposure, ms: the sensor's (E2.0A), else the shutter speed, which is all the cameras that don't write
+/// it have (R5 Mark II)
+fn exposure_ms(tag_map: &GroupedTagMap) -> Option<f64> {
+    if let Some(v) = tag_map.get(&GroupId::Imager).and_then(|x| x.get_t(TagId::ExposureTime) as Option<&f64>) {
+        return Some(*v);
+    }
+    let (num, den) = *(tag_map.get(&GroupId::Exposure)?.get_t(TagId::ShutterSpeed) as Option<&(u32, u32)>)?;
+    (num > 0 && den > 0).then(|| num as f64 * 1000.0 / den as f64)
+}
+
 pub fn get_time_offset(md: &FileMetadata, _input: &telemetry_parser::Input, tag_map: &GroupedTagMap, sample_rate: f64, fps: f64) -> Option<f64> {
-    let exposure = (tag_map.get(&GroupId::Imager)?.get_t(TagId::ExposureTime) as Option<&f64>)?;
+    let exposure = exposure_ms(tag_map)?;
     let frame_time = 1000.0 / md.frame_rate.unwrap_or(fps);
-    let frame_readout_time = md.frame_readout_time.unwrap_or(14.0); // better approx than nothing
+    let frame_readout_time = md.frame_readout_time.unwrap_or(DEFAULT_READOUT_MS);
     let dt = 1000.0 / sample_rate.max(1.0);
-    Some(frame_time + frame_readout_time / 2.0 - (*exposure) / 2.0 - dt / 2.0)
+    Some(frame_time + frame_readout_time / 2.0 - exposure / 2.0 - dt / 2.0)
 }

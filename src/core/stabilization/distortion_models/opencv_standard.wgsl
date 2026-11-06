@@ -21,11 +21,16 @@ fn undistort_point(pos_param: vec2<f32>) -> vec2<f32> {
         );
     }
 
-    return pos;
+    // The solve runs in the z=1 plane; the pipeline carries rays as angle vectors
+    let r = length(pos);
+    if (r < 1e-12) { return pos; }
+    return pos * (atan(r) / r);
 }
 
 fn distort_point(x: f32, y: f32, z: f32) -> vec2<f32> {
-    let pos = vec2<f32>(x, y) / z;
+    // A rectilinear model has no image of a ray at or past 90°: send it far outside the frame
+    var pos = vec2<f32>(x, y) * 1e9;
+    if (z > 1e-9) { pos = vec2<f32>(x, y) / z; }
     let r2 = pos.x * pos.x + pos.y * pos.y;
     let r4 = r2 * r2;
     let r6 = r4 * r2;

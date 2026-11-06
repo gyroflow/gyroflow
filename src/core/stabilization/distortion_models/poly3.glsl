@@ -35,13 +35,13 @@ vec2 undistort_point(vec2 pos) {
         return vec2(-99999.0, -99999.0);
     }
 
-    ru /= rd;
-
-    return pos * ru;
+    // `ru` is the radius in the z=1 plane; the pipeline carries rays as angle vectors
+    return pos * (atan(ru) / rd);
 }
 
 vec2 distort_point(float x, float y, float z) {
-    vec2 pos = vec2(x, y) / z;
+    // A rectilinear model has no image of a ray at or past 90°: send it far outside the frame
+    vec2 pos = z > 1e-9? vec2(x, y) / z : vec2(x, y) * 1e9;
     float poly2 = params.k1.x * (pos.x * pos.x + pos.y * pos.y) + 1.0;
     return pos * poly2;
 }

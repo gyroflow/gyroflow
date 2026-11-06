@@ -12,7 +12,11 @@ float get_mesh_data(int idx);
 float map_coord(float x, float in_min, float in_max, float out_min, float out_max);
 
 vec2 undistort_point(vec2 pos) {
-    if (params.k1 == vec4(0.0) && params.k2 == vec4(0.0) && params.k3 == vec4(0.0)) return pos;
+    // No calibration: a pinhole, so the image radius is `tan θ`
+    if (params.k1 == vec4(0.0) && params.k2 == vec4(0.0) && params.k3 == vec4(0.0)) {
+        float r = length(pos);
+        return r < 1e-12? pos : pos * (atan(r) / r);
+    }
 
     float theta_d = length(pos);
 
@@ -57,26 +61,31 @@ vec2 undistort_point(vec2 pos) {
             }
         }
 
-        scale = tan(theta) / theta_d;
+        scale = theta / theta_d;
     } else {
         converged = true;
     }
     bool theta_flipped = (theta_d < 0.0 && theta > 0.0) || (theta_d > 0.0 && theta < 0.0);
 
-    bool out_of_range = abs(theta) >= 1.5707963267948966 || (params.r_limit > 0.0 && abs(scale * theta_d) > params.r_limit);
+    // Nothing past 180 degrees is a ray the pipeline can carry: the direction is built out of sin(theta),
+    // which turns over there, so an angle the Newton wandered past it comes back from behind the camera.
+    // See generic_polynomial.rs
+    if (abs(theta) >= 3.14159265) { return vec2(-99999.0, -99999.0); }
 
-    if (converged && !theta_flipped && !out_of_range) {
+    if (converged && !theta_flipped) {
         return pos * scale;
     }
     return vec2(-99999.0, -99999.0);
 }
 
 vec2 distort_point(float x, float y, float z) {
-    vec2 pos = vec2(x, y) / z;
-    if (params.k1 == vec4(0.0) && params.k2 == vec4(0.0) && params.k3 == vec4(0.0)) return pos;
+    // No calibration: a pinhole, which has no image of a ray at or past 90°
+    if (params.k1 == vec4(0.0) && params.k2 == vec4(0.0) && params.k3 == vec4(0.0)) return z > 1e-9? vec2(x, y) / z : vec2(x, y) * 1e9;
+    vec2 pos = vec2(x, y);
 
     float r = length(pos);
-    float theta = atan(r);
+    // atan2 against the ray's own z, so the angle is right past 90° too
+    float theta = atan(r, z);
 
     float theta2  = theta*theta,
           theta3  = theta2*theta,
@@ -103,7 +112,7 @@ vec2 distort_point(float x, float y, float z) {
                   + theta11 * params.k3.z
                   + theta12 * params.k3.w;
 
-    float scale = r == 0? 1.0 : theta_d / r;
+    float scale = r < 1e-12? 1.0 : theta_d / r;
 
     return pos * scale;
 }

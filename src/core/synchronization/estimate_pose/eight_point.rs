@@ -19,20 +19,22 @@ impl EstimatePoseTrait for PoseEightPoint {
     fn init(&mut self, _: &ComputeParams) { }
 
     fn estimate_pose(&self, pairs: &OpticalFlowPair, size: (u32, u32), params: &ComputeParams, timestamp_us: i64, next_timestamp_us: i64) -> Option<nalgebra::Rotation3<f64>> {
-        use cv_core::nalgebra::{ UnitVector3, Point2 };
+        use cv_core::nalgebra::{ UnitVector3, Vector3 };
 
         let (pts1, pts2) = pairs.as_ref()?;
 
+        // Bearings, not image-plane points: the essential matrix is about directions, and these keep their
+        // meaning past 90° too, where a plane point has none
         let pts1 = crate::stabilization::undistort_points_for_optical_flow(&pts1, timestamp_us, params, size);
         let pts2 = crate::stabilization::undistort_points_for_optical_flow(&pts2, next_timestamp_us, params, size);
 
         let matches: Vec<Match> = pts1.into_iter().zip(pts2.into_iter())
-            .filter(|(i1, i2)| is_valid_point(*i1) && is_valid_point(*i2))
-            .map(|(i1, i2)| {
-                FeatureMatch(
-                    UnitVector3::new_normalize(Point2::new(i1.0 as f64, i1.1 as f64).to_homogeneous()),
-                    UnitVector3::new_normalize(Point2::new(i2.0 as f64, i2.1 as f64).to_homogeneous())
-                )
+            .filter_map(|(i1, i2)| {
+                let (i1, i2) = (i1?, i2?);
+                Some(FeatureMatch(
+                    UnitVector3::new_normalize(Vector3::new(i1.0 as f64, i1.1 as f64, i1.2 as f64)),
+                    UnitVector3::new_normalize(Vector3::new(i2.0 as f64, i2.1 as f64, i2.2 as f64))
+                ))
             })
             .collect();
 

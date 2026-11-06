@@ -82,6 +82,8 @@ Rectangle {
                 }
                 Action {
                     text: isCalibPoint? qsTr("Delete calibration point") : qsTr("Delete sync point");
+                    // Removing one fits the lens again, and one calibration runs at a time
+                    enabled: !isCalibPoint || !controller.calib_in_progress;
                     iconName: "bin;#f67575";
                     onTriggered: root.remove(root.org_timestamp_us);
                 }

@@ -8,8 +8,6 @@ use crate::types::*;
 use crate::glam::{ Vec2, vec2, Vec3, Vec4 };
 pub struct Sony { }
 
-const TMAX: f32 = 1.5533; // ~89°
-const TT: f32 = 57.14902; // tan(TMAX)
 const THETA0: f32 = 0.052359879; // 3°, end of the linear region near the optical axis (k[13] = its radius r_lin)
 
 impl Sony {
@@ -71,23 +69,23 @@ impl Sony {
 
     pub fn undistort_point(point: Vec2, params: &KernelParams) -> Vec2 {
         let n = Self::segments(params);
-        if n == 0 { return point; }
         let r = point.length();
+        // No lens curve: a pinhole, so the image radius is `tan θ`
+        if n == 0 { return if r < 1e-12 { point } else { point * (r.atan() / r) }; }
         if r < 1e-9 { return point; }
         let theta = Self::angle_at(params, n, r);
         if theta <= 0.0 { return vec2(-99999.0, -99999.0); }
-        let rr = if theta < TMAX { theta.tan() } else { TT + (theta - TMAX) * (1.0 + TT * TT) };
-        if params.r_limit > 0.0 && rr > params.r_limit { return vec2(-99999.0, -99999.0); }
-        point * (rr / r)
+        point * (theta / r)
     }
 
     pub fn distort_point(point: Vec3, params: &KernelParams) -> Vec2 {
-        let pt = vec2(point.x / point.z, point.y / point.z);
         let n = Self::segments(params);
-        if n == 0 { return pt; }
+        // No lens curve: a pinhole, which has no image of a ray at or past 90°
+        if n == 0 { return if point.z > 1e-9 { vec2(point.x / point.z, point.y / point.z) } else { vec2(point.x * 1e9, point.y * 1e9) }; }
+        let pt = vec2(point.x, point.y);
         let r = pt.length();
-        if r < 1e-9 { return pt; }
-        let theta = if r < TT { r.atan() } else { TMAX + (r - TT) / (1.0 + TT * TT) };
+        if r < 1e-12 { return vec2(0.0, 0.0); }
+        let theta = r.atan2(point.z);
         pt * (Self::radius_at(params, n, theta) / r)
     }
 

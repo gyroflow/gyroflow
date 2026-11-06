@@ -34,10 +34,11 @@ macro_rules! connect {
 
 /** Gyroflow v1.6.3
 Video stabilization using gyroscope data
+Exit codes: 0 - success, 1 - render failure, 2 - invalid arguments
 */
 #[derive(FromArgs)]
 struct Opts {
-    /// input files: videos, project files, lens profiles, presets
+    /// input files: videos, image sequences (PNG, JPEG, EXR, DNG: their first frame, or all of them as eg. "A001_%06d.dng"), project files, lens profiles, presets
     #[argh(positional)]
     input: Vec<String>,
 
@@ -53,7 +54,7 @@ struct Opts {
     #[argh(option, short = 'd', default = "0")]
     when_done: i32,
 
-    /// output parameters, eg. "{{ 'codec': 'H.265/HEVC', 'bitrate': 150, 'use_gpu': true, 'audio': true }}"
+    /// output parameters. Keys: codec ("H.264/AVC", "H.265/HEVC", "ProRes", "DNxHD", "CineForm", "EXR Sequence", "PNG Sequence", "AV1"), codec_options (eg. "ProRes 422 HQ"), output_path (or output_folder + output_filename, both absolute), output_width, output_height, bitrate (Mbps), use_gpu, audio, pixel_format (eg. "P210LE"), audio_codec ("AAC", "PCM (s16le)", "PCM (s16be)", "PCM (s24le)", "PCM (s24be)", "Copy" - keeps the original audio, encodes AAC if the output format can't store it),interpolation ("Bilinear", "Bicubic", "Lanczos4", "EWA: RobidouxSharp", "EWA: Robidoux", "EWA: Mitchell", "EWA: Catmull-Rom"), encoder_options, keyframe_distance, preserve_other_tracks, pad_with_black, export_trims_separately, metadata ({{ 'comment': "..." }}). Eg. "{{ 'codec': 'ProRes', 'codec_options': 'ProRes 422 HQ', 'pixel_format': 'P210LE', 'output_path': '/path/out.mov' }}"
     #[argh(option, short = 'p')]
     out_params: Option<String>,
 
@@ -68,6 +69,22 @@ struct Opts {
     /// print progress to stdout in addition to progress bars
     #[argh(switch)]
     stdout_progress: bool,
+
+    /// analyze the video optically before rendering and correct the motion data with it (Motion data -> Optical correction), with this strength in %, eg. 50. Files without motion data get all of their motion measured from the video
+    #[argh(option)]
+    optical_correction: Option<f64>,
+
+    /// ignore the motion data in the files and measure all of the motion from the video (implies --optical-correction)
+    #[argh(switch)]
+    ignore_file_motion: bool,
+
+    /// correct the motion data once per frame instead of per band of rows, eg. for a global shutter or a rolling shutter time that's unknown (implies --optical-correction)
+    #[argh(switch)]
+    optical_per_frame: bool,
+
+    /// how the optical analysis follows the points: "klt" (default, corners), "dis" (dense optical flow, for low texture like sky or water; slower) or "gmflow" (AI dense optical flow; much slower) (implies --optical-correction)
+    #[argh(option)]
+    optical_tracking: Option<String>,
 
     /// export project file instead of rendering: 1 - default project, 2 - with gyro data, 3 - with processed gyro data, 4 - video + project file
     #[argh(option, default = "0")]
@@ -100,6 +117,10 @@ struct Opts {
     /// gyro file path
     #[argh(option, short = 'g')]
     gyro_file: Option<String>,
+
+    /// frame rate of the image sequences. Default: the one their frames record (CinemaDNG), otherwise the last one entered in the GUI (30)
+    #[argh(option)]
+    image_sequence_fps: Option<f64>,
 
     /// processing device index. By default it uses the one set in the GUI
     #[argh(option, short = 'b')]
@@ -143,13 +164,25 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
         let absolute_paths: Vec<String> = opts.input.iter().map(|file| {
             let path = std::path::PathBuf::from(file);
             if path.is_relative() {
-                std::fs::canonicalize(&path).unwrap_or_else(|_| path).to_string_lossy().to_string()
+                // The frames of an image sequence (`A001_%06d.dng`) aren't a file that can be resolved
+                std::fs::canonicalize(&path).or_else(|_| std::path::absolute(&path)).unwrap_or(path).to_string_lossy().to_string()
             } else {
                 file.clone()
             }
         }).collect();
 
         let (videos, mut lens_profiles, mut presets) = detect_types(&absolute_paths);
+        // An image sequence is loaded as FFmpeg reads it, from its frames' pattern
+        let videos: Vec<(String, Option<ImageSequence>)> = videos.into_iter().map(|file| match ImageSequence::detect(&file) {
+            Some(sequence) => (sequence.pattern.clone(), Some(sequence)),
+            None => (file, None)
+        }).collect();
+        if let Some(fps) = opts.image_sequence_fps {
+            if !(fps > 0.0 && fps.is_finite()) {
+                log::error!("Invalid --image-sequence-fps value {}.", fps);
+                std::process::exit(2);
+            }
+        }
         if let Some(mut preset) = opts.preset {
             if !preset.is_empty() {
                 if preset.starts_with('{') { preset = preset.replace('\'', "\""); }
@@ -174,10 +207,10 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             }
         }
 
-        for file in videos.iter().chain(lens_profiles.iter()) {
+        for file in videos.iter().map(|(file, sequence)| sequence.as_ref().map_or(file, |x| &x.first_frame)).chain(lens_profiles.iter()) {
             if !std::path::Path::new(&file).exists() {
                 log::error!("File {} doesn't exist.", file);
-                return true;
+                std::process::exit(2);
             }
         }
         let mut watching = opts.watch.as_ref().map(|x| !x.is_empty()).unwrap_or_default();
@@ -185,14 +218,14 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
         if !watching {
             if lens_profiles.len() > 1 {
                 log::error!("More than one lens profile!");
-                return true;
+                std::process::exit(2);
             }
             if videos.is_empty() {
                 log::error!("No videos provided!");
-                return true;
+                std::process::exit(2);
             }
 
-            log::info!("Videos: {:?}", videos);
+            log::info!("Videos: {:?}", videos.iter().map(|x| &x.0).collect::<Vec<_>>());
             if !lens_profiles.is_empty() { log::info!("Lens profiles: {:?}", lens_profiles); }
             if !presets.is_empty() { log::info!("Presets: {:?}", presets); }
         }
@@ -218,6 +251,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
 
         let time = Instant::now();
         let mut queue_printed = false;
+        let render_failed = std::cell::Cell::new(false);
 
         let stab = Arc::new(StabilizationManager::default());
         stab.lens_profile_db.write().load_all();
@@ -259,6 +293,29 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             }
         }
 
+        if opts.optical_correction.is_some() || opts.ignore_file_motion || opts.optical_per_frame || opts.optical_tracking.is_some() {
+            // In the synchronization settings: they reach every job like autosync's, and presets can have them too
+            let sync = additional_data.get_mut("synchronization").unwrap();
+            sync["do_optical_correction"] = true.into();
+            if let Some(strength) = opts.optical_correction {
+                sync["optical_correction_strength"] = (strength / 100.0).clamp(0.0, 1.0).into();
+            }
+            if opts.optical_per_frame {
+                sync["optical_correction_per_frame"] = true.into();
+            }
+            if let Some(method) = &opts.optical_tracking {
+                let Some(method) = gyroflow_core::gyro_source::TrackingMethod::from_name(method) else {
+                    let expected = if gyroflow_core::gyro_source::TrackingMethod::Gmflow.available() { "\"klt\", \"dis\" or \"gmflow\"" } else { "\"klt\" or \"dis\" (\"gmflow\" isn't available in this build)" };
+                    log::error!("Invalid --optical-tracking value {}. Expected {}.", method, expected);
+                    std::process::exit(2);
+                };
+                sync["optical_tracking"] = method.name().into();
+            }
+            if opts.ignore_file_motion {
+                sync["ignore_file_motion"] = true.into();
+            }
+        }
+
         let export_metadata_fields = serde_json::from_str(
             &opts.export_metadata_fields.unwrap_or(
                 "{ 'original':   { 'quaternion': true, 'euler_angles': true, 'gyroscope': true, 'accelerometer': true },
@@ -276,23 +333,21 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
         }
         if let Some(export_metadata) = opts.export_metadata {
             if !export_metadata.is_empty() {
-                if let Some((opt, path)) = export_metadata.split_once(':') {
-                    if let Ok(opt) = opt.parse::<usize>() {
-                        if !path.is_empty() {
-                            queue.export_metadata = Some((opt, path.to_string(), export_metadata_fields));
-                        }
-                    }
+                if let Some((opt, path)) = parse_type_and_path(&export_metadata) {
+                    queue.export_metadata = Some((opt, path, export_metadata_fields));
+                } else {
+                    log::error!("Invalid --export-metadata value {}. Expected <type>:<path>, eg. \"3:camera.json\".", export_metadata);
+                    std::process::exit(2);
                 }
             }
         }
         if let Some(export_stmap) = opts.export_stmap {
             if !export_stmap.is_empty() {
-                if let Some((opt, path)) = export_stmap.split_once(':') {
-                    if let Ok(opt) = opt.parse::<usize>() {
-                        if !path.is_empty() {
-                            queue.export_stmap = Some((opt, path.to_string()));
-                        }
-                    }
+                if let Some((opt, path)) = parse_type_and_path(&export_stmap) {
+                    queue.export_stmap = Some((opt, path));
+                } else {
+                    log::error!("Invalid --export-stmap value {}. Expected <type>:<path>, eg. \"1:C:/stmaps/\".", export_stmap);
+                    std::process::exit(2);
                 }
             }
         }
@@ -319,7 +374,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
             }) {
                 // Nothing is being watched and nothing was queued, so the event loop would just hang forever
                 log::error!("{}", e);
-                return true;
+                std::process::exit(1);
             }
             watching = true;
         }
@@ -342,7 +397,13 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                     let mut ok = true;
                     for item in qi.iter() {
                         if item.job_id == *job_id {
-                            ok = item.error_string.is_empty();
+                            let error_string = item.error_string.to_string();
+                            // A warning about the output, which is complete
+                            if let Some(warning) = error_string.strip_prefix("camera_tracks:") {
+                                log::warn!("[{:08x}] Not all of the camera tracks and metadata were copied to the output:\n{warning}", job_id);
+                            } else {
+                                ok = error_string.is_empty();
+                            }
                             break;
                         }
                     }
@@ -421,6 +482,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                 }
             });
             connect!(queue_ptr, q, convert_format, |job_id: &u32, format: &QString, supported: &QString, _candidate: &QString| {
+                render_failed.set(true);
                 log::error!("[{:08x}] Pixel format {} is not supported. Supported are: {}", job_id, format.to_string(), supported.to_string());
             });
             connect!(queue_ptr, q, error, |job_id: &u32, text: &QString, arg: &QString, _callback: &QString| {
@@ -430,6 +492,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                     log::warn!("[{:08x}] File exists, overwriting: {}", job_id, text.to_string().strip_prefix("file_exists:").unwrap());
                     return;
                 }
+                render_failed.set(true);
                 log::error!("[{:08x}] Error: {}", job_id, text.to_string().replace("%1", &arg.to_string()));
             });
             connect!(queue_ptr, q, added, |job_id: &u32| {
@@ -513,13 +576,23 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
                     file.clone()
                 }
             }).unwrap_or_default();
-            for file in &videos {
+            for (file, sequence) in &videos {
+                let mut additional_data = additional_data.clone();
+                if let Some(sequence) = sequence {
+                    // As the GUI asks for it: the frame rate the frames record, otherwise the last one entered
+                    let fps = opts.image_sequence_fps
+                        .or_else(|| Some(rendering::image_sequence_frame_rate(&path_to_url(&sequence.first_frame))).filter(|x| *x > 0.0))
+                        .unwrap_or_else(|| settings::get_f64("imageSequenceFps", 30.0));
+                    log::info!("Image sequence {} from frame {} at {} fps", file, sequence.start, fps);
+                    additional_data["image_sequence_start"] = sequence.start.into();
+                    additional_data["image_sequence_fps"] = fps.into();
+                }
                 queue.add_file(path_to_url(file), path_to_url(&gyro_file), additional_data.to_string());
             }
             if queue.jobs_added.is_empty() {
                 // Nothing was queued, so `processing_done` will never fire, the queue would never start and the event loop would hang forever
                 log::error!("None of the input files could be added to the render queue.");
-                return true;
+                std::process::exit(1);
             }
         }
 
@@ -533,6 +606,7 @@ pub fn run(open_file: &mut String, open_preset: &mut String) -> bool {
 
         log::info!("Done in {:.3}s", time.elapsed().as_millis() as f64 / 1000.0);
 
+        if render_failed.get() { std::process::exit(1); }
         return true;
     }
 
@@ -563,6 +637,47 @@ fn detect_types(all_files: &[String]) -> (Vec<String>, Vec<String>, Vec<String>)
         }
     }
     (videos, lens_profiles, presets)
+}
+
+/// An image sequence among the input files: its frames as FFmpeg's image2 demuxer reads them (`A001_%06d.dng`), and the number
+/// and path of the first one
+struct ImageSequence {
+    pattern: String,
+    start: usize,
+    first_frame: String,
+}
+impl ImageSequence {
+    /// The image sequence of PNG, JPEG, EXR or DNG images `file` is: as the GUI finds it (`VideoArea.qml:detectImageSequence`), a
+    /// frame numbered like the 4 files after it, which the sequence starts with. Or the frames' pattern (`%06d`, `FramePath`), with
+    /// the lowest one there
+    fn detect(file: &str) -> Option<Self> {
+        use gyroflow_core::filesystem::FramePath;
+        let (stem, ext) = file.rsplit_once('.')?;
+        if !["png", "jpg", "exr", "dng"].iter().any(|x| ext.eq_ignore_ascii_case(x)) { return None; }
+
+        // FFmpeg's start_number is an int
+        let numbers = 0..=i32::MAX as usize;
+        if let Some(frames) = FramePath::parse(file) {
+            let folder = std::path::Path::new(file).parent()?.to_string_lossy().to_string();
+            let start = frames.find(&numbers, &path_to_url(&folder), &std::sync::atomic::AtomicBool::new(false))?.into_iter().find(|x| x.1)?.0;
+            return Some(Self { pattern: file.to_owned(), start, first_frame: frames.frame(start) });
+        }
+        let prefix = stem.trim_end_matches(|x: char| x.is_ascii_digit());
+        let digits = &stem[prefix.len()..];
+        let start = digits.parse::<usize>().ok().filter(|x| numbers.contains(x))?;
+        // A % in the rest of the path is one for FFmpeg too
+        let pattern = format!("{}%0{}d.{ext}", prefix.replace('%', "%%"), digits.len());
+        let frames = FramePath::parse(&pattern)?;
+        if !(start + 1..start + 5).all(|n| std::path::Path::new(&frames.frame(n)).exists()) { return None; }
+        Some(Self { pattern, start, first_frame: file.to_owned() })
+    }
+}
+
+fn parse_type_and_path(value: &str) -> Option<(usize, String)> { // "3:camera.json" -> (3, "camera.json")
+    let (opt, path) = value.split_once(':')?;
+    let opt = opt.parse::<usize>().ok()?;
+    if path.is_empty() { return None; }
+    Some((opt, path.to_string()))
 }
 
 fn setup_defaults(stab: &Arc<StabilizationManager>, queue: &mut RenderQueue) -> serde_json::Value {
@@ -607,7 +722,7 @@ fn setup_defaults(stab: &Arc<StabilizationManager>, queue: &mut RenderQueue) -> 
     let codec = (settings::get_u64("defaultCodec", 0) as usize).min(codecs.len() - 1);
     let codec_name = codecs[codec];
 
-    let audio_codecs = ["AAC", "PCM (s16le)", "PCM (s16be)", "PCM (s24le)", "PCM (s24be)"];
+    let audio_codecs = ["AAC", "PCM (s16le)", "PCM (s16be)", "PCM (s24le)", "PCM (s24be)", "Copy"];
     let interpolations = ["Bilinear", "Bicubic", "Lanczos4", "EWA: RobidouxSharp", "EWA: Robidoux", "EWA: Mitchell", "EWA: Catmull-Rom"];
 
     // Sync and export settings
@@ -642,7 +757,7 @@ fn setup_defaults(stab: &Arc<StabilizationManager>, queue: &mut RenderQueue) -> 
             "every_nth_frame":    1,
             "time_per_syncpoint": 1,
             "of_method":          2,
-            "offset_method":      2,
+            "offset_method":      3,
             "auto_sync_points":   true,
         }
     })

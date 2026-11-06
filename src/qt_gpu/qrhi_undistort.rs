@@ -35,9 +35,11 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, frame: usize, width:
         }
     }
 
+    // What the overlays take a while to place, placed with the stabilization not locked
+    stab.prepare_overlays(timestamp_us);
     if let Some(mut undist) = stab.stabilization.try_write() {
         undist.ensure_stab_data_at_timestamp::<RGBA8>(timestamp_us, Some(frame), buffers, true);
-        stab.draw_overlays(&mut undist.drawing, timestamp_us);
+        stab.draw_overlays(&mut undist, timestamp_us);
     }
 
     if let Some(undist) = stab.stabilization.try_read() {
@@ -46,7 +48,7 @@ pub fn render(mdkplayer: &MDKPlayerWrapper, timestamp: f64, frame: usize, width:
             let params_ptr = params.as_ptr();
             let params_len = params.len() as u32;
             let matrices_ptr = itm.matrices.as_ptr();
-            let matrices_len = (itm.matrices.len() * 14 * std::mem::size_of::<f32>()) as u32;
+            let matrices_len = (itm.matrices.len() * 16 * std::mem::size_of::<f32>()) as u32;
             let canvas = undist.drawing.get_buffer();
             let canvas_ptr = canvas.as_ptr();
             let canvas_len = canvas.len() as u32;

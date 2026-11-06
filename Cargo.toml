@@ -6,9 +6,10 @@ edition = "2024"
 build = "build.rs"
 
 [features]
-default = ["opencv"]
+default = ["opencv", "ai-optical-flow"]
 opencl = ["gyroflow-core/use-opencl"]
 opencv = ["gyroflow-core/use-opencv"]
+ai-optical-flow = ["gyroflow-core/use-burn"]
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 gyroflow-core = { path = "src/core/", features = ["use-opencv", "use-opencl"] }
@@ -43,32 +44,32 @@ pollster = "1.0"
 futures-intrusive = "0.5.0"
 flate2 = "1.1"
 walkdir = "2.5.0"
-mp4-merge = "0.1.10"
+mp4-merge = "0.2.1"
 human-sort = "0.2.2"
 argh = "0.1.19"
 indicatif = "0.18"
 rustfft = "6.4.1"
-crc32fast = "1.5.1"
-rodio = { default-features = false, features = ["vorbis", "playback"], version = "0.22" }
+crc32fast = "1.5.3"
+rodio = { default-features = false, features = ["vorbis", "playback"], version = "0.23" }
 filetime_creation = "0.2"
 
 qmetaobject = { version = "0.2.10", default-features = false, features = ["log"] }
 qttypes     = { version = "0.2.12", default-features = false, features = ["required", "qtquick", "qtquickcontrols2"]}
-qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "855130d" }
+qml-video-rs = { git = "https://github.com/AdrianEddy/qml-video-rs.git", rev = "6c7e6ff" }
 #qml-video-rs = { path = "../qml-video-rs" }
 
 ffmpeg-next = { version = "9.0.0", default-features = false, features = ["codec", "filter", "format", "software-resampling", "software-scaling"] }
 lazy_static = "1.5.0"
-parking_lot = "0.12.5"
+parking_lot = "0.13"
 
 simplelog = "0.12.2"
 log = "0.4"
 
-ureq = "3.4"
+ureq = "3.5"
 url = "2.5.7"
 whoami = "2.1"
 tar = "0.4.45"
-lru = "0.18"
+lru = "0.19"
 chrono = "0.4"
 
 keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "4f2a93f" }
@@ -76,6 +77,67 @@ keep-awake = { git = "https://github.com/AdrianEddy/keep-awake-rs.git", rev = "4
 [patch.crates-io]
 qmetaobject = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "ff1e23d" }
 qttypes     = { git = "https://github.com/AdrianEddy/qmetaobject-rs.git", rev = "ff1e23d" }
+
+# cubecl 0.12.0-pre.1 + four fixes for AMD's Windows Vulkan driver (Radeon iGPUs), not upstreamed:
+# storage mapped from the iGPU's largest device-local heap, a cooperative matrix zeroed as a
+# composite, the subgroup size pinned where it can vary, and a finite tanh. Plus two more: a comptime
+# enum's variant hashed into its kernel's cache key, and a multi-dimensional cube run as a
+# one-dimensional workgroup (Intel's Arc walked 2-D workgroups in tiles, so planes mixed rows). Every
+# cubecl crate comes from the branch, or its in-repo siblings would enter the graph twice.
+cubecl                 = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-common          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-core            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-cpp             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-cpu             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-cuda            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-environment     = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-hip             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-ir              = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-llvm            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-macros          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-macros-internal = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-metal           = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-monitoring      = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-opt             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-runtime         = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-server          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-spirv           = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-std             = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-tile            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-wgpu            = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+cubecl-zspace          = { git = "https://github.com/AdrianEddy/cubecl.git", branch = "diem/fixes-v0.12.0-pre.1" }
+# burn 0.23.0-pre.1 + conv autotune that benchmarks conv_direct only where it can win (it ran
+# 8-90x slower elsewhere, long enough for Windows to reset an iGPU).
+burn                   = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-autodiff          = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-backend           = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-backend-extension = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-core              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-cpu               = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-cubecl            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-cubecl-fusion     = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-cuda              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-derive            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-dispatch          = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-einsum            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-flex              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-fusion            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-instrument        = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-instrument-macros = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-ir                = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-linalg            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-nn                = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-optim             = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-pack              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-remote            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-rocm              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-router            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-signal            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-std               = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-store             = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-tensor            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-vision            = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
+burn-wgpu              = { git = "https://github.com/AdrianEddy/burn.git", branch = "diem/fixes-v0.23.0-pre.1" }
 
 [target.'cfg(target_os = "windows")'.dependencies.windows]
 version = "0.62"
@@ -95,7 +157,7 @@ objc2-metal = "0.3"
 cpp_build = "0.5.11"
 winres = "0.1.12"
 walkdir = "2.5.0"
-cc = "1.4"
+cc = "1.7"
 
 [[bin]]
 name = "gyroflow"
@@ -111,7 +173,7 @@ lto = true
 codegen-units = 1
 
 [dev-dependencies]
-test-case = "3.3.1"
+test-case = "3.4.0"
 
 # -------------------------- Android stuff --------------------------
 
@@ -132,3 +194,6 @@ jni = "0.22"
 ndk = { version = "0.9", features = ["media", "api-level-26"] }
 ndk-sys = { version = "0.6.0" }
 ndk-context = "0.1.1"
+
+[profile.release.build-override]
+opt-level = 2
