@@ -35,6 +35,7 @@ pub struct CameraEntry {
 pub struct LensEntry {
     pub brand: String,
     pub model: String,
+    pub aliases: Vec<String>,
     pub mounts: Vec<String>,
     pub crop_factor: Option<f64>,
     pub source: Vec<String>,
@@ -61,6 +62,7 @@ pub struct CameraDatabase {
     camera_lenses: BTreeMap<(String, String), BTreeSet<String>>,
     mount_lenses: BTreeMap<String, BTreeSet<String>>,
     community_lenses: BTreeMap<String, (String, bool)>,
+    community_lens_aliases: BTreeMap<String, Option<String>>,
     brand_search_keys: BTreeMap<String, BTreeSet<(String, String)>>,
     brands: Vec<String>,
     models: BTreeMap<String, Vec<String>>,
@@ -237,12 +239,57 @@ impl CameraDatabase {
         Some((brand.clone(), Self::model_name(&brand, model)))
     }
 
+    /// Resolve a profile or video metadata lens string to an available canonical lens label.
+    /// Exact canonical labels take precedence; other spellings must be an unambiguous catalog alias.
+    pub fn resolve_lens(&self, brand: &str, model: &str, raw: &str) -> Option<String> {
+        let (camera_key, _) = self.find_camera(brand, model)?;
+        let available = self.lenses.get(&camera_key)?;
+        let raw_key = Self::key(raw);
+        if let Some(canonical) = available.iter().find(|lens| Self::key(lens) == raw_key) {
+            return Some(canonical.clone());
+        }
+
+        let identity = self.resolve_profile_lens_identity(raw)?;
+        let canonical = &self.community_lenses.get(&identity)?.0;
+        available.iter().find(|lens| Self::key(lens) == Self::key(canonical)).cloned()
+    }
+
+    /// Profile lens spellings that identify the selected canonical lens.
+    /// `Some(empty)` means a known but ambiguous catalog alias; `None` means free text.
+    pub fn lens_profile_keys(&self, brand: &str, model: &str, selected: &str) -> Option<BTreeSet<String>> {
+        let (camera_key, _) = self.find_camera(brand, model)?;
+        let available = self.lenses.get(&camera_key)?;
+        let selected_key = Self::key(selected);
+
+        let identity = if let Some(canonical) = available.iter().find(|lens| Self::key(lens) == selected_key) {
+            Self::key(canonical)
+        } else {
+            match self.community_lens_aliases.get(&selected_key) {
+                Some(Some(identity)) => identity.clone(),
+                Some(None) => return Some(BTreeSet::new()),
+                None => return None,
+            }
+        };
+        let canonical = self.community_lenses.get(&identity)?.0.as_str();
+        if !available.iter().any(|lens| Self::key(lens) == Self::key(canonical)) {
+            return None;
+        }
+
+        let mut keys = BTreeSet::from([identity.clone()]);
+        keys.extend(self.community_lens_aliases.iter().filter_map(|(alias, candidate)| {
+            (candidate.as_deref() == Some(identity.as_str()) && !self.community_lenses.contains_key(alias))
+                .then(|| alias.clone())
+        }));
+        Some(keys)
+    }
+
     fn empty() -> Self {
         Self {
             cameras: BTreeMap::new(),
             camera_lenses: BTreeMap::new(),
             mount_lenses: BTreeMap::new(),
             community_lenses: BTreeMap::new(),
+            community_lens_aliases: BTreeMap::new(),
             brand_search_keys: BTreeMap::new(),
             brands: Vec::new(),
             models: BTreeMap::new(),
@@ -328,7 +375,19 @@ impl CameraDatabase {
             }
             Some(_) => {}
             None => {
-                self.community_lenses.insert(identity, (name.clone(), is_lensfun));
+                self.community_lenses.insert(identity.clone(), (name.clone(), is_lensfun));
+            }
+        }
+
+        for alias in lens.aliases.iter().map(|alias| Self::key(alias)).filter(|alias| !alias.is_empty()) {
+            use std::collections::btree_map::Entry;
+            match self.community_lens_aliases.entry(alias) {
+                Entry::Vacant(entry) => { entry.insert(Some(identity.clone())); }
+                Entry::Occupied(mut entry) => {
+                    if entry.get().as_deref() != Some(identity.as_str()) {
+                        entry.insert(None);
+                    }
+                }
             }
         }
 
@@ -565,6 +624,14 @@ impl CameraDatabase {
             None
         }
     }
+
+    fn resolve_profile_lens_identity(&self, raw: &str) -> Option<String> {
+        let key = Self::key(raw);
+        if self.community_lenses.contains_key(&key) {
+            return Some(key);
+        }
+        self.community_lens_aliases.get(&key).and_then(Clone::clone)
+    }
 }
 
 #[cfg(test)]
@@ -677,6 +744,63 @@ mod tests {
         let lenses = db.lenses("Sony", "Alpha 7 IV");
         assert!(lenses.iter().any(|lens| lens == "FE 35mm F1.4 GM"));
         assert!(!lenses.iter().any(|lens| lens == "Unlisted Lens"));
+    }
+
+    #[test]
+    fn lens_aliases_resolve_only_when_unambiguous_and_camera_scoped() {
+        let mut db = CameraDatabase::from_file(CameraDatabaseFile {
+            version: 1,
+            cameras: vec![
+                CameraEntry {
+                    brand: "Sony".to_owned(),
+                    model: "Alpha 7 IV".to_owned(),
+                    mounts: vec!["E mount".to_owned()],
+                    ..Default::default()
+                },
+                CameraEntry {
+                    brand: "Canon".to_owned(),
+                    model: "EOS R5".to_owned(),
+                    mounts: vec!["RF mount".to_owned()],
+                    ..Default::default()
+                },
+            ],
+            lenses: vec![
+                LensEntry {
+                    brand: "Sony".to_owned(),
+                    model: "FE 35mm F1.4 GM".to_owned(),
+                    aliases: vec!["35 Sony GM".to_owned(), "35mm prime".to_owned()],
+                    mounts: vec!["E mount".to_owned()],
+                    ..Default::default()
+                },
+                LensEntry {
+                    brand: "Sony".to_owned(),
+                    model: "FE 50mm F1.2 GM".to_owned(),
+                    aliases: vec!["50 GM".to_owned(), "35mm prime".to_owned()],
+                    mounts: vec!["E mount".to_owned()],
+                    ..Default::default()
+                },
+                LensEntry {
+                    brand: "Canon".to_owned(),
+                    model: "RF 35mm F1.8".to_owned(),
+                    aliases: vec!["35 GM".to_owned(), "RF prime".to_owned()],
+                    mounts: vec!["RF mount".to_owned()],
+                    ..Default::default()
+                },
+            ],
+        });
+        db.rebuild_indexes();
+
+        assert_eq!(db.resolve_lens("Sony", "Alpha 7 IV", "  35 Sony GM "), Some("Sony FE 35mm F1.4 GM".to_owned()));
+        assert_eq!(db.resolve_lens("Sony", "Alpha 7 IV", "35 GM"), None);
+        assert_eq!(db.resolve_lens("Sony", "Alpha 7 IV", "35mm prime"), None);
+        assert_eq!(db.resolve_lens("Sony", "Alpha 7 IV", "Sony FE 35mm F1.4 GM"), Some("Sony FE 35mm F1.4 GM".to_owned()));
+        assert_eq!(db.resolve_lens("Sony", "Alpha 7 IV", "RF prime"), None);
+        assert_eq!(db.resolve_lens("Canon", "EOS R5", "RF prime"), Some("Canon RF 35mm F1.8".to_owned()));
+
+        let keys = db.lens_profile_keys("Sony", "Alpha 7 IV", "Sony FE 35mm F1.4 GM").unwrap();
+        assert!(keys.contains("sony fe 35mm f1.4 gm"));
+        assert!(keys.contains("35 sony gm"));
+        assert!(!keys.contains("35mm prime"));
     }
 
     #[test]

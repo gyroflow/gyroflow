@@ -183,7 +183,10 @@ MenuItem {
             const resolvedModel = controller.camera_database_resolve_model(brand, model) || model;
             if (resolvedModel && setSelectorValue(cameraModel, resolvedModel)) {
                 cameraLensModel = selectorModel(controller.camera_database_lenses(brand, resolvedModel));
-                setSelectorValue(cameraLens, lens);
+                const resolvedLens = controller.camera_database_resolve_lens(brand, resolvedModel, lens);
+                if (resolvedLens && setSelectorValue(cameraLens, resolvedLens)) {
+                    calib.setMetadataField("lens_model", "Lens model", calib.selectorValue(cameraLens));
+                }
             }
         }
         updatingCameraSelectors = false;
@@ -239,45 +242,36 @@ MenuItem {
         const fixedLensBrands = ["gopro", "insta360", "runcam", "caddx", "foxeer", "garmin", "sjcam", "aee"];
         return fixedLensBrands.indexOf(normalizedBrand) === -1;
     }
-    function cameraIsKnown(brand: string, model: string): bool {
-        return !!controller.camera_database_resolve_model(brand, model);
+    function isZoomLens(lens: string): bool {
+        if (/\bzoom\b|\d+(?:\.\d+)?\s*(?:mm\s*)?[-–—]\s*\d+(?:\.\d+)?\s*mm/i.test(lens)) return true;
+        // Community profiles also use names like "18-105 F4", without units.
+        const range = /(?:^|[\s(])([1-9]\d{0,2})\s*[-–—]\s*([1-9]\d{0,3})(?=$|[\s/@(]|f\d)/i.exec(lens);
+        return !!range && +range[2] > +range[1];
     }
-    function lensIsKnown(brand: string, model: string, lens: string): bool {
-        if (!brand || !model || !lens) {
-            return true;
-        }
-
-        const lenses = controller.camera_database_lenses(brand, model);
-        const needle = lens.toLowerCase();
-        for (const item of lenses) {
-            const value = item.toLowerCase();
-            if (value === needle) {
-                return true;
-            }
-        }
-        return false;
+    function hasSetupName(value: string): bool {
+        return !!value && !/^(?:[-?]+|other|unknown|none|n\/?a|unspecified)$/i.test(value);
     }
-    function validateProfileMetadata(): bool {
+    function validateProfileMetadata(upload: bool): bool {
         list.commitAll();
-        if (!calib.uploadProfile.checked || !calib.uploadProfile.enabled) {
-            return true;
-        }
+        if (!upload) return true;
 
         const brand = (calib.calibrationInfo.camera_brand || "").trim();
         const model = (calib.calibrationInfo.camera_model || "").trim();
         const lens = (calib.calibrationInfo.lens_model || "").trim();
         let errors = [];
 
-        if (!brand) errors.push(qsTr("Camera brand is required."));
-        if (!model) errors.push(qsTr("Camera model is required."));
-        if (brand && model && !cameraIsKnown(brand, model) && cameraModel.currentIndex > 0) {
-            errors.push(qsTr("Select Other before entering a camera that is not in the list."));
+        if (!hasSetupName(brand)) errors.push(qsTr("Camera brand is required."));
+        if (!hasSetupName(model)) errors.push(qsTr("Camera model is required."));
+        if ((cameraBrand.currentIndex > 0 && brand !== selectorValue(cameraBrand)) ||
+            (cameraModel.currentIndex > 0 && model !== selectorValue(cameraModel))) {
+            errors.push(qsTr("Select Other before entering a different camera."));
         }
-        if (brand && model && !lens && cameraNeedsLens(brand, model)) errors.push(qsTr("Lens model is required for this camera."));
-        if (brand && model && lens && !lensIsKnown(brand, model, lens) && cameraLens.currentIndex > 0) {
-            errors.push(qsTr("Select Other before entering a lens that is not in the list."));
+        if (brand && model && !hasSetupName(lens) && cameraNeedsLens(brand, model)) errors.push(qsTr("Lens model is required for this camera."));
+        if (cameraLens.currentIndex > 0 && lens !== selectorValue(cameraLens)) {
+            errors.push(qsTr("Select Other before entering a different lens."));
         }
-        if (lens && /[0-9]+(\.[0-9]+)?\s*[-–—]\s*[0-9]+(\.[0-9]+)?\s*mm|\bzoom\b/i.test(lens) && (!flcb.checked || !(+calib.calibrationInfo.focal_length > 0))) {
+        const focal = +calib.calibrationInfo.focal_length;
+        if (isZoomLens(lens) && (!flcb.checked || !Number.isFinite(focal) || focal <= 0)) {
             errors.push(qsTr("Zoom lenses require a focal length."));
         }
 
@@ -300,6 +294,10 @@ MenuItem {
             calib.applySelectorsFromMetadata();
         }
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
+            // Only the main video owns camera and lens identity. Loading a separate gyro source
+            // must not reset metadata that was already read from the video.
+            if (!is_main_video) return;
+
             shutter.value = Math.abs(additional_data.frame_readout_time);
             shutterCb.checked = Math.abs(additional_data.frame_readout_time) > 0;
             if (additional_data.frame_readout_direction) {
@@ -358,18 +356,30 @@ MenuItem {
         function propChanged() { settings.propChanged(sett); }
     }
 
+    function prepareProfileExport(upload: bool): var {
+        if (!calib.validateProfileMetadata(upload)) return null;
+        return { metadata: JSON.parse(JSON.stringify(calib.calibrationInfo)), upload: upload };
+    }
     function exportProfile(fileUrl: url, notify: bool): void {
-        if (!calib.validateProfileMetadata()) return;
-        const metadata = JSON.parse(JSON.stringify(calib.calibrationInfo));
-        const save = (upload) => {
-            // `export_lens_profile` reports failures itself, via `error()` -> a message box
-            if (controller.export_lens_profile(fileUrl, metadata, upload) && notify)
-                calibrator_window.showNotification(Modal.Info, qsTr("Lens profile exported to %1.").arg("<b>" + filesystem.display_url(fileUrl) + "</b>"));
+        const profile = calib.prepareProfileExport(calib.uploadProfile.checked);
+        if (profile) calib.savePreparedProfile(fileUrl, profile, notify, null);
+    }
+    function savePreparedProfile(fileUrl: url, profile: var, notify: bool, onComplete: var): void {
+        const complete = () => { if (onComplete) onComplete(); };
+        const save = (submit) => {
+            try {
+                // `export_lens_profile` reports failures itself, via `error()` -> a message box
+                if (controller.export_lens_profile(fileUrl, profile.metadata, submit) && notify)
+                    calibrator_window.showNotification(Modal.Info, qsTr("Lens profile exported to %1.").arg("<b>" + filesystem.display_url(fileUrl) + "</b>"));
+            } finally {
+                complete();
+            }
         };
-        if (calib.uploadProfile.checked) {
+        if (profile.upload) {
             messageBox(Modal.Info, qsTr("By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.\nDo you want to submit your profile?"), [
                 { text: qsTr("Yes"), accent: true, clicked: () => save(true) },
-                { text: qsTr("No"),                clicked: () => save(false) }
+                { text: qsTr("No"), clicked: () => save(false) },
+                { text: qsTr("Cancel"), clicked: complete }
             ]);
         } else {
             save(false);
@@ -516,6 +526,13 @@ MenuItem {
     TableList {
         id: list;
         columnSpacing: 10 * dpiScale;
+        // A catalog choice is edited with its selector. Other exposes the text editor.
+        editableKeys: Object.keys(editableFields).filter(key => {
+            if (key === "Camera brand") return cameraBrand.currentIndex <= 0;
+            if (key === "Camera model") return cameraModel.currentIndex <= 0;
+            if (key === "Lens model") return cameraLens.currentIndex <= 0;
+            return true;
+        });
         editableFields: ({
             "Camera brand": {
                 "type": "text",
@@ -690,7 +707,7 @@ MenuItem {
         enabled: infoList.rms > 0 && infoList.rms < 100 && calibrator_window.videoArea.vid.loaded;
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
-            if (!calib.validateProfileMetadata()) return;
+            if (!calib.validateProfileMetadata(calib.uploadProfile.checked)) return;
             const filename = controller.export_lens_profile_filename(calib.calibrationInfo);
             if (Qt.platform.os == "ios") {
                 calibrator_window.getSaveFileUrl(filesystem.get_folder(calibrator_window.videoArea.loadedFileUrl), filename, function(url) {

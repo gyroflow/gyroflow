@@ -1,0 +1,33 @@
+name: Lens profiles
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/lens-profiles.yml"
+      - "resources/camera_database/**"
+      - "src/controller.rs"
+      - "src/core/**"
+      - "src/ui/**"
+      - "tests/**"
+
+jobs:
+  lens-profile-tests:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test profile selection and calibration
+        run: node --test tests/*.mjs
+      - name: Test camera selector with Qt Quick
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QT_QUICK_BACKEND: software
+          QT_QUICK_CONTROLS_STYLE: Material
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends qt6-declarative-dev-tools \
+            qml6-module-qttest qml6-module-qtqml-workerscript qml6-module-qtquick \
+            qml6-module-qtquick-controls qml6-module-qtquick-layouts \
+            qml6-module-qtquick-templates qml6-module-qtquick-window
+          /usr/lib/qt6/bin/qmltestrunner -input tests/qml -import src/ui/components

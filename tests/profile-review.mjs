@@ -1,15 +1,10 @@
 // Execute QML review logic with explicit doubles for the native loading boundary.
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import { qmlMethod as methodFrom } from './helpers/qml-method.mjs';
 import assert from 'node:assert/strict';
 const source = readFileSync(new URL('../src/ui/menu/LensProfile.qml', import.meta.url), 'utf8');
 const videoSource = readFileSync(new URL('../src/ui/VideoArea.qml', import.meta.url), 'utf8');
-function methodFrom(code, name, indent = '    ') {
-    const start = code.indexOf(`${indent}function ${name}(`);
-    assert.ok(start >= 0, `Missing ${name}`);
-    const end = code.indexOf(`\n${indent}}`, start) + indent.length + 2;
-    return code.slice(start, end).replace(/: (string|bool|var|void|int|list<var>)(?=[,)\s{])/g, '');
-}
 function method(name, indent = '    ') {
     return methodFrom(source, name, indent);
 }

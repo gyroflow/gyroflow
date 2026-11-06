@@ -68,8 +68,8 @@ Window {
         window.showNotification(type, text, textFormat, videoArea.infoMessages);
     }
     // Same as `window.getSaveFileUrl`, but any dialog is presented on top of the calibrator window instead of the main one.
-    function getSaveFileUrl(folder: url, filename: string, cb, type: string): void {
-        window.getSaveFileUrl(folder, filename, cb, type, calibrator_window.contentItem);
+    function getSaveFileUrl(folder: url, filename: string, cb, type: string, onCancel: var): void {
+        window.getSaveFileUrl(folder, filename, cb, type, calibrator_window.contentItem, onCancel);
     }
 
     Connections {
@@ -161,6 +161,7 @@ Window {
         id: batch;
         property var queue: [];
         property bool active: false;
+        property bool finalizing: false;
         property url currentFile;
         function runIn(ms: int, cb: var): void {
             batchTimer.cb = cb;
@@ -170,11 +171,64 @@ Window {
         function start(): void {
             if (queue.length) {
                 active = true;
+                finalizing = false;
                 batch.currentFile = batch.queue.shift();
                 calibrator_window.loadFile(batch.currentFile);
             } else {
                 active = false;
+                finalizing = false;
             }
+        }
+        function completeCurrent(): void {
+            batch.runIn(1000, function() {
+                batch.finalizing = false;
+                batch.start();
+            });
+        }
+        function saveResult(rms: real): void {
+            if (!batch.active || !batch.finalizing) return;
+
+            let completed = false;
+            const complete = () => {
+                if (completed) return;
+                completed = true;
+                batch.completeCurrent();
+            };
+            if (!(rms > 0 && rms < 5)) {
+                complete();
+                return;
+            }
+
+            const file = batch.currentFile;
+            const upload = lensCalib.uploadProfile.checked;
+            // Commit, validate and snapshot before any picker or consent callback can run.
+            const profile = lensCalib.prepareProfileExport(upload);
+            if (!profile) {
+                complete();
+                return;
+            }
+
+            const metadata = profile.metadata;
+            const folder = filesystem.get_folder(file);
+            let filename = filesystem.filename_with_extension(filesystem.get_filename(file), "json");
+            if (metadata.camera_brand && metadata.camera_model && metadata.lens_model) {
+                filename = controller.export_lens_profile_filename(metadata);
+            }
+
+            let output = filename;
+            let i = 1;
+            while (filesystem.exists_in_folder(folder, output)) {
+                output = filename.replace(/(_\d+)?\.json/, "_" + i++ + ".json");
+                if (i > 2000) break;
+            }
+
+            calibrator_window.getSaveFileUrl(folder, output, function(url) {
+                if (!url) {
+                    complete();
+                    return;
+                }
+                lensCalib.savePreparedProfile(url, profile, false, complete);
+            }, "Lens profile", complete);
         }
         Connections {
             target: controller;
@@ -189,32 +243,9 @@ Window {
                 });
             }
             function onCalib_progress(progress: real, rms: real, ready: int, total: int, good: int, sharpness: real): void {
-                if (!batch.active) return;
-                if (ready > 0 && rms > 0) {
-                    batch.runIn(2000, function() {
-                        console.log('rms', rms);
-                        if (rms < 5) {
-                            const folder = filesystem.get_folder(batch.currentFile);
-                            let filename = filesystem.filename_with_extension(filesystem.get_filename(batch.currentFile), "json");
-
-                            if (lensCalib.calibrationInfo.camera_brand && lensCalib.calibrationInfo.camera_model && lensCalib.calibrationInfo.lens_model) {
-                                filename = controller.export_lens_profile_filename(lensCalib.calibrationInfo);
-                            }
-
-                            let output = filename;
-                            let i = 1;
-                            while (filesystem.exists_in_folder(folder, output)) {
-                                output = filename.replace(/(_\d+)?\.json/, "_" + i++ + ".json");
-                                if (i > 2000) break;
-                            }
-
-                            calibrator_window.getSaveFileUrl(folder, output, function(url) {
-                                controller.export_lens_profile(url, lensCalib.calibrationInfo, lensCalib.uploadProfile.checked);
-                            }, "Lens profile");
-                        }
-                        batch.runIn(1000, function() { batch.start(); });
-                    });
-                }
+                if (!batch.active || batch.finalizing || progress < 1) return;
+                batch.finalizing = true;
+                batch.runIn(2000, function() { batch.saveResult(rms); });
             }
         }
         Timer {

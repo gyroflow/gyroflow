@@ -111,6 +111,7 @@ pub struct Controller {
     camera_database_compatible_models: qt_method!(fn(&self, brand: QString, model: QString) -> QStringList),
     camera_database_resolve_camera: qt_method!(fn(&self, brand: QString, model: QString) -> QJsonObject),
     camera_database_resolve_model: qt_method!(fn(&self, brand: QString, model: QString) -> QString),
+    camera_database_resolve_lens: qt_method!(fn(&self, brand: QString, model: QString, raw: QString) -> QString),
     camera_database_info: qt_method!(fn(&self, brand: QString, model: QString) -> QJsonObject),
     fetch_profiles_from_github: qt_method!(fn(&self)),
     lens_profiles_updated: qt_signal!(reload_from_disk: bool),
@@ -2400,6 +2401,10 @@ impl Controller {
         QString::from(self.camera_database.read().resolve_model(&brand.to_string(), &model.to_string()).unwrap_or_default())
     }
 
+    fn camera_database_resolve_lens(&self, brand: QString, model: QString, raw: QString) -> QString {
+        QString::from(self.camera_database.read().resolve_lens(&brand.to_string(), &model.to_string(), &raw.to_string()).unwrap_or_default())
+    }
+
     fn camera_database_info(&self, brand: QString, model: QString) -> QJsonObject {
         let info = self.camera_database.read().camera_info(&brand.to_string(), &model.to_string());
         util::serde_json_to_qt_object(&serde_json::to_value(info).unwrap_or_default())
@@ -2456,7 +2461,7 @@ impl Controller {
         let text = text.to_string();
         let hidden_profiles = HashSet::<String>::from_iter(hidden_profiles.into_iter().map(|x| x.to_qbytearray().to_string()).filter(|x| !x.is_empty()));
         let favorites = HashSet::<String>::from_iter(favorites.into_iter().map(|x| x.to_qbytearray().to_string()));
-        let (selected_camera_keys, brand_camera_keys, compatible_camera_keys) = {
+        let (selected_camera_keys, brand_camera_keys, compatible_camera_keys, lens_profile_keys) = {
             let camera_database = self.camera_database.read();
             (
                 HashSet::<(String, String)>::from_iter(camera_database.selected_camera_keys(&brand, &model)),
@@ -2465,12 +2470,13 @@ impl Controller {
                 } else {
                     HashSet::<(String, String)>::from_iter(camera_database.brand_camera_keys(&brand))
                 },
-                HashSet::<(String, String)>::from_iter(camera_database.compatible_camera_keys(&brand, &model))
+                HashSet::<(String, String)>::from_iter(camera_database.compatible_camera_keys(&brand, &model)),
+                camera_database.lens_profile_keys(&brand, &model, &lens).map(HashSet::<String>::from_iter)
             )
         };
 
         core::run_threaded(move || {
-            let profiles = Self::lens_profile_results_to_qvariant(db.read().search_by_camera(
+            let profiles = Self::lens_profile_results_to_qvariant(db.read().search_by_camera_with_lens_keys(
                 &brand,
                 &model,
                 &lens,
@@ -2481,7 +2487,8 @@ impl Controller {
                 &hidden_profiles,
                 &favorites,
                 aspect_ratio,
-                aspect_ratio_swapped
+                aspect_ratio_swapped,
+                lens_profile_keys.as_ref()
             ));
 
             finished(profiles);

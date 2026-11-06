@@ -688,8 +688,9 @@ Rectangle {
         nameFilters: ["*.json"];
         type: "output-profile";
         property var cb: null;
-        onAccepted: { const f = cb; cb = null; if (f) f(selectedFile); }
-        onRejected: cb = null;
+        property var cancelCb: null;
+        onAccepted: { const f = cb; cb = null; cancelCb = null; if (f) f(selectedFile); }
+        onRejected: { const f = cancelCb; cb = null; cancelCb = null; if (f) f(); }
     }
     FileDialog {
         id: gfFileDialog;
@@ -864,13 +865,14 @@ Rectangle {
             ], undefined, Text.MarkdownText);
         }
     }
-    function getSaveFileUrl(folder: url, filename: string, cb, type: string, parentItem: var): void {
+    function getSaveFileUrl(folder: url, filename: string, cb, type: string, parentItem: var, onCancel: var): void {
         const parentItm = parentItem || window;
         if (isSandboxed) {
             const opf = Qt.createComponent("components/OutputPathField.qml").createObject(parentItm, { visible: false });
-            opf.folderSelectionCanceled.connect(function() { opf.destroy(); });
+            opf.folderSelectionCanceled.connect(function() { if (onCancel) onCancel(); opf.destroy(); });
             opf.selectFolder(folder, function(folder_url) {
-                cb(filesystem.get_file_url(folder_url, filename, true));
+                if (folder_url) cb(filesystem.get_file_url(folder_url, filename, true));
+                else if (onCancel) onCancel();
                 opf.destroy();
             });
             return;
@@ -879,7 +881,7 @@ Rectangle {
             cb(filesystem.get_file_url(folder, filename, true));
         } else {
             const dialog = type == "Lens profile"? profileFileDialog : gfFileDialog;
-            if (type == "Lens profile") { profileFileDialog.cb = cb; }
+            if (type == "Lens profile") { profileFileDialog.cb = cb; profileFileDialog.cancelCb = onCancel; }
             else                        { gfFileDialog.projectType = type; }
             // Present the dialog on top of the window that asked for it, not always the main one
             dialog.parentWindow = (parentItm.Window && parentItm.Window.window) || window.Window.window;

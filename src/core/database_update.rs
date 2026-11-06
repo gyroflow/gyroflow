@@ -8,12 +8,23 @@ pub enum DatabaseFormat {
     Profiles(u32),
 }
 
+// The current assets are a few MiB; cap both the download and gzip expansion before parsing.
+const MAX_DOWNLOAD_BYTES: u64 = 64 * 1024 * 1024;
+const MAX_PROFILE_BYTES: u64 = 128 * 1024 * 1024;
+
+fn copy_limited(reader: impl Read, writer: &mut impl Write, limit: u64) -> io::Result<()> {
+    if io::copy(&mut reader.take(limit + 1), writer)? > limit {
+        return Err(io::Error::new(io::ErrorKind::InvalidData, "Database exceeds its size limit"));
+    }
+    Ok(())
+}
+
 /// Keep the previous database intact until the complete replacement is validated.
-pub fn install(mut source: impl Read, destination: &Path, format: DatabaseFormat) -> io::Result<()> {
+pub fn install(source: impl Read, destination: &Path, format: DatabaseFormat) -> io::Result<()> {
     let parent = destination.parent().ok_or_else(|| io::Error::other("Missing database directory"))?;
     std::fs::create_dir_all(parent)?;
     let mut temporary = tempfile::NamedTempFile::new_in(parent)?;
-    io::copy(&mut source, &mut temporary)?;
+    copy_limited(source, &mut temporary, MAX_DOWNLOAD_BYTES)?;
     temporary.flush()?;
     temporary.seek(SeekFrom::Start(0))?;
     match format {
@@ -26,7 +37,7 @@ pub fn install(mut source: impl Read, destination: &Path, format: DatabaseFormat
         DatabaseFormat::Profiles(version) => {
             // Read to EOF before parsing, so gzip footer/truncation errors are checked too.
             let mut data = Vec::new();
-            flate2::read::GzDecoder::new(temporary.as_file_mut()).read_to_end(&mut data)?;
+            copy_limited(flate2::read::MultiGzDecoder::new(temporary.as_file_mut()), &mut data, MAX_PROFILE_BYTES)?;
             let mut bytes = data.as_slice();
             let profiles: Vec<(String, serde_json::Value)> = ciborium::from_reader(&mut bytes)
                 .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))?;
@@ -45,6 +56,15 @@ pub fn install(mut source: impl Read, destination: &Path, format: DatabaseFormat
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn stops_reading_when_the_size_limit_is_exceeded() {
+        let mut output = Vec::new();
+        assert!(copy_limited(io::repeat(0), &mut output, 16).is_err());
+        assert_eq!(output.len(), 17);
+        output.clear();
+        copy_limited(&[0; 16][..], &mut output, 16).unwrap();
+    }
 
     #[test]
     fn invalid_updates_preserve_existing_database() {
@@ -90,6 +110,9 @@ mod tests {
         assert_eq!(std::fs::read(&path).unwrap(), compressed);
         assert!(install(compressed.as_slice(), &path, DatabaseFormat::Profiles(43)).is_err());
         assert!(install(&compressed[..compressed.len() - 4], &path, DatabaseFormat::Profiles(42)).is_err());
+        let mut trailing = compressed.clone();
+        trailing.extend_from_slice(b"trailing data");
+        assert!(install(trailing.as_slice(), &path, DatabaseFormat::Profiles(42)).is_err());
         assert_eq!(std::fs::read(&path).unwrap(), compressed);
     }
 }

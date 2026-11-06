@@ -38,6 +38,7 @@ MenuItem {
     property var compatibleCameras: [];
     property var detectedCamera: ({});
     property var reviewProfiles: [];
+    property bool searchComplete: false;
     property int reviewIndex: -1;
     property var activeProfileLoad: null;
     property bool presetLoadBusy: false;
@@ -192,6 +193,7 @@ MenuItem {
             if (root.lensProfilesListPrepared) root.applyDetectedCamera();
         }
         function onSearch_lens_profile_finished(profiles: list<var>): void {
+            root.searchComplete = true;
             root.reviewProfiles = profiles;
             root.reviewIndex = profiles.findIndex(item =>
                 item[1] === root.profilePath || (!!root.profileChecksum && item[2] === root.profileChecksum));
@@ -465,6 +467,7 @@ MenuItem {
         searchProfiles();
     }
     function searchProfiles(): void {
+        root.searchComplete = false;
         const text = search.text.trim();
         controller.search_lens_profile_for_camera(
             selectorValue(cameraBrand),
@@ -483,7 +486,7 @@ MenuItem {
         if (root.compatibleCameras.length > visible.length) {
             summary += qsTr(" +%1 more").arg(root.compatibleCameras.length - visible.length);
         }
-        return qsTr("Compatible: %1").arg(summary);
+        return qsTr("Similar cameras: %1").arg(summary);
     }
     function selectorPopupWidth(combo: var): real {
         const parentWidth = combo.parent? combo.parent.width : combo.width;
@@ -513,7 +516,8 @@ MenuItem {
                 cameraLensModel = selectorModel(qsTr("Any lens"), controller.camera_database_lenses(brand, model));
                 compatibleCameras = controller.camera_database_compatible_models(brand, model);
                 if (detectedCamera.lens) {
-                    setSelectorValue(cameraLens, detectedCamera.lens);
+                    const lens = controller.camera_database_resolve_lens(brand, model, detectedCamera.lens);
+                    if (lens) setSelectorValue(cameraLens, lens);
                 }
             }
         }
@@ -633,6 +637,13 @@ MenuItem {
         color: Qt.darker(styleTextColor, 1.25);
         font.pixelSize: 11 * dpiScale;
         elide: Text.ElideRight;
+    }
+
+    BasicText {
+        visible: root.searchComplete && root.reviewProfiles.length === 0 && !!root.selectorValue(cameraLens);
+        width: parent.width;
+        text: qsTr("No matching profiles for this selection.");
+        wrapMode: Text.WordWrap;
     }
 
     SearchField {

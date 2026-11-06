@@ -3,11 +3,42 @@
 import QtQuick
 import QtQuick.Controls as QQC
 
-ComboBox {
+QQC.ComboBox {
     id: control;
     property string fieldLabel: "";
     Accessible.name: fieldLabel + ": " + displayText;
-    tooltip: displayText;
+    QQC.ToolTip.text: displayText;
+    QQC.ToolTip.visible: !isMobile && control.hovered && displayText.length > 0;
+
+    implicitWidth: 150 * dpiScale;
+    height: 35 * dpiScale;
+    font.pixelSize: 13 * dpiScale;
+    font.family: styleFont;
+    hoverEnabled: enabled;
+    indicator: DropdownChevron {
+        opened: choices.visible;
+        height: choices.itemHeight / 2.4;
+    }
+    contentItem: Text {
+        text: qsTranslate("Popup", control.displayText);
+        color: styleTextColor;
+        font: control.font;
+        anchors.left: parent.left;
+        anchors.leftMargin: 10 * dpiScale;
+        verticalAlignment: Text.AlignVCenter;
+        opacity: control.enabled ? 1.0 : 0.5;
+        anchors.right: parent.right;
+        anchors.rightMargin: 20 * dpiScale;
+        elide: Text.ElideRight;
+    }
+    background: Rectangle {
+        color: control.hovered || control.activeFocus ? Qt.lighter(styleButtonColor, 1.2) : styleButtonColor;
+        opacity: control.down || !control.enabled ? 0.75 : 1.0;
+        radius: 6 * dpiScale;
+        anchors.fill: parent;
+        border.width: style === "light" ? 1 * dpiScale : 0;
+        border.color: "#cccccc";
+    }
 
     Keys.onPressed: (event) => {
         if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {

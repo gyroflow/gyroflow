@@ -335,6 +335,13 @@ impl LensProfileDatabase {
         candidate == Self::key(requested)
     }
 
+    fn lens_matches_keys(profile: Option<&LensProfile>, keys: &HashSet<String>) -> bool {
+        let Some(candidate) = profile.map(|value| Self::key(&value.lens_model)).filter(|value| !value.is_empty()) else {
+            return false;
+        };
+        keys.contains(&candidate)
+    }
+
     pub fn search_by_camera(
         &self,
         brand: &str,
@@ -348,6 +355,30 @@ impl LensProfileDatabase {
         favorites: &HashSet<String>,
         aspect_ratio: i32,
         aspect_ratio_swapped: i32
+    ) -> Vec<LensProfileUiItem> {
+        self.search_by_camera_with_lens_keys(
+            brand, model, lens, text, selected_camera_keys, brand_camera_keys,
+            compatible_camera_keys, hidden_profiles, favorites, aspect_ratio,
+            aspect_ratio_swapped, None
+        )
+    }
+
+    /// Search camera profiles using an optional set of normalized profile lens keys.
+    /// `None` preserves exact free-text filtering; `Some(empty)` intentionally matches none.
+    pub fn search_by_camera_with_lens_keys(
+        &self,
+        brand: &str,
+        model: &str,
+        lens: &str,
+        text: &str,
+        selected_camera_keys: &HashSet<(String, String)>,
+        brand_camera_keys: &HashSet<(String, String)>,
+        compatible_camera_keys: &HashSet<(String, String)>,
+        hidden_profiles: &HashSet<String>,
+        favorites: &HashSet<String>,
+        aspect_ratio: i32,
+        aspect_ratio_swapped: i32,
+        lens_profile_keys: Option<&HashSet<String>>
     ) -> Vec<LensProfileUiItem> {
         let text = Self::normalize_search_text(text);
         let words = text.split_ascii_whitespace().map(str::trim).filter(|x| !x.is_empty()).collect::<Vec<_>>();
@@ -387,8 +418,12 @@ impl LensProfileDatabase {
                 }
             }
 
-            if !lens_key.is_empty() && !Self::lens_matches(profile, &lens_key) {
-                return false;
+            if !lens_key.is_empty() {
+                let matches = match lens_profile_keys {
+                    Some(keys) => Self::lens_matches_keys(profile, keys),
+                    None => Self::lens_matches(profile, &lens_key),
+                };
+                if !matches { return false; }
             }
 
             words.is_empty() || Self::matches_words(name, author, &words)
@@ -818,5 +853,34 @@ mod tests {
         );
 
         assert_eq!(results.iter().map(|item| item.1.as_str()).collect::<Vec<_>>(), vec!["35mm"]);
+    }
+
+    #[test]
+    fn selected_catalog_lens_searches_legacy_alias_profiles() {
+        let mut db = LensProfileDatabase::default();
+        db.map.insert("canonical".to_owned(), profile("Sony", "A7 IV", "Sony FE 35mm F1.4 GM", "canonical"));
+        db.map.insert("legacy-alias".to_owned(), profile("Sony", "A7 IV", "35 GM", "legacy-alias"));
+        db.map.insert("other".to_owned(), profile("Sony", "A7 IV", "FE 135mm F1.8 GM", "other"));
+        db.list_for_ui = vec![
+            item("Sony A7 IV FE 35mm F1.4 GM", "canonical", "canonical"),
+            item("Sony A7 IV 35 GM", "legacy-alias", "legacy-alias"),
+            item("Sony A7 IV FE 135mm F1.8 GM", "other", "other"),
+        ];
+
+        let selected = HashSet::from([("sony".to_owned(), "a7 iv".to_owned())]);
+        let keys = HashSet::from(["sony fe 35mm f1.4 gm".to_owned(), "35 gm".to_owned()]);
+        let results = db.search_by_camera_with_lens_keys(
+            "Sony", "A7 IV", "Sony FE 35mm F1.4 GM", "", &selected, &HashSet::new(),
+            &HashSet::new(), &HashSet::new(), &HashSet::new(), 0, 0, Some(&keys),
+        );
+
+        let result_paths = results.iter().map(|item| item.1.as_str()).collect::<HashSet<_>>();
+        assert_eq!(result_paths, HashSet::from(["canonical", "legacy-alias"]));
+
+        let ambiguous = HashSet::new();
+        assert!(db.search_by_camera_with_lens_keys(
+            "Sony", "A7 IV", "35mm", "", &selected, &HashSet::new(),
+            &HashSet::new(), &HashSet::new(), &HashSet::new(), 0, 0, Some(&ambiguous),
+        ).is_empty());
     }
 }
