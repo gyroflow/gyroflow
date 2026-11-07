@@ -1,0 +1,77 @@
+name: Lens profiles
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/lens-profiles.yml"
+      - ".cargo/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "resources/camera_database/**"
+      - "src/controller.rs"
+      - "src/core/**"
+      - "src/ui/**"
+      - "tests/**"
+
+jobs:
+  lens-profile-tests:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test profile selection and calibration
+        run: node --test tests/*.mjs
+      - name: Test camera selector with Qt Quick
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QT_QUICK_BACKEND: software
+          QT_QUICK_CONTROLS_STYLE: Material
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends qt6-declarative-dev-tools \
+            qml6-module-qttest qml6-module-qtqml-workerscript qml6-module-qtquick \
+            qml6-module-qtquick-controls qml6-module-qtquick-layouts \
+            qml6-module-qtquick-templates qml6-module-qtquick-window
+          /usr/lib/qt6/bin/qmltestrunner -input tests/qml
+
+  profile-installer:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022, macos-15]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    permissions:
+      contents: read
+    env:
+      GYROFLOW_PROFILE_RELEASE_VERSION: "41"
+      GYROFLOW_PROFILES_BUNDLE: ${{ github.workspace }}/resources/camera_presets/profiles.cbor.gz
+      GYROFLOW_CAMERA_DATABASE: ${{ github.workspace }}/resources/camera_database/camera_database.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src/core
+      - name: Fetch the released bundle used by the compatibility test
+        run: |
+          node -e "require('node:fs').mkdirSync(require('node:path').dirname(process.env.GYROFLOW_PROFILES_BUNDLE), { recursive: true })"
+          curl --fail --location --retry 3 --output "$GYROFLOW_PROFILES_BUNDLE" \
+            "https://github.com/gyroflow/lens_profiles/releases/download/v$GYROFLOW_PROFILE_RELEASE_VERSION/profiles.cbor.gz"
+          node --input-type=module <<'NODE'
+          import { createHash } from 'node:crypto';
+          import { readFile } from 'node:fs/promises';
+
+          const bundle = await readFile(process.env.GYROFLOW_PROFILES_BUNDLE);
+          const digest = createHash('sha256').update(bundle).digest('hex');
+          if (digest !== '5b9136697b75ddf9cda20965f17e786b6c8530e3d59109f87505069602e7f676') {
+            throw new Error(`Profile bundle checksum mismatch: ${digest}`);
+          }
+          NODE
+      - name: Test the native catalog and profile installer
+        run: |
+          cargo test --manifest-path src/core/Cargo.toml --locked --lib
+          cargo test --manifest-path src/core/Cargo.toml --locked --test producer_artifacts -- --ignored

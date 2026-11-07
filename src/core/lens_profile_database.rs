@@ -16,6 +16,32 @@ enum DataSource {
     SerdeValue(serde_json::Value)
 }
 
+pub type LensProfileUiItem = (String, String, String, bool, f64, i32, String);
+
+/// Catalog-derived identities used to filter camera-related profile results.
+#[derive(Default)]
+pub struct CameraProfileFilter {
+    pub brand: String,
+    pub model: String,
+    pub lens: String,
+    pub selected_camera_keys: HashSet<(String, String)>,
+    pub brand_camera_keys: HashSet<(String, String)>,
+    pub compatible_camera_keys: HashSet<(String, String)>,
+    /// Some(empty) represents a known ambiguous lens alias.
+    pub lens_profile_keys: Option<HashSet<String>>,
+}
+
+/// All filters and sort preferences for one profile search.
+#[derive(Default)]
+pub struct ProfileSearchQuery {
+    pub camera: CameraProfileFilter,
+    pub text: String,
+    pub hidden_profiles: HashSet<String>,
+    pub favorites: HashSet<String>,
+    pub aspect_ratio: i32,
+    pub aspect_ratio_swapped: i32,
+}
+
 /// A loaded lens profile file: its path as loaded, the number of components of its path in the lens profile folder it was
 /// loaded from, and the key of the file's own profile in the map
 #[derive(Clone)]
@@ -32,7 +58,7 @@ pub struct LensProfileDatabase {
     // In the order they were loaded
     files: Vec<ProfileFile>,
     loaded_callbacks: Vec<Box<dyn FnOnce(&Self) + Send + Sync + 'static>>,
-    list_for_ui: Vec<(String, String, String, bool, f64, i32, String)>,
+    list_for_ui: Vec<LensProfileUiItem>,
     pub loaded: bool,
     pub version: u32,
 }
@@ -163,9 +189,12 @@ impl LensProfileDatabase {
                 if let Ok(entry) = e {
                     let f_name = entry.path().to_string_lossy().replace('\\', "/");
                     if f_name.ends_with(".json") || f_name.ends_with(".gyroflow") {
-                        if let Ok(data) = std::fs::read_to_string(&f_name) {
-                            let relative = entry.path().strip_prefix(&dir).map(|x| x.to_string_lossy().replace('\\', "/")).unwrap_or_else(|_| f_name.clone());
-                            load(DataSource::String(data), &f_name, &relative);
+                        // The camera catalog is installed beside profiles but is not a profile.
+                        if entry.file_name() != "camera_database.json" {
+                            if let Ok(data) = std::fs::read_to_string(&f_name) {
+                                let relative = entry.path().strip_prefix(&dir).map(|x| x.to_string_lossy().replace('\\', "/")).unwrap_or_else(|_| f_name.clone());
+                                load(DataSource::String(data), &f_name, &relative);
+                            }
                         }
                     }
                     if !bundle_loaded && f_name.ends_with(".cbor.gz") {
@@ -248,6 +277,10 @@ impl LensProfileDatabase {
         }).collect()
     }
 
+    pub fn iter_profiles(&self) -> impl Iterator<Item = &LensProfile> {
+        self.map.values()
+    }
+
     pub fn prepare_list_for_ui(&mut self) {
         // (name, path_to_file, crc32, official, rating, aspect_ratio*1000, author)
         let mut set = HashSet::with_capacity(self.map.len());
@@ -297,8 +330,112 @@ impl LensProfileDatabase {
         self.list_for_ui.sort_by(|a, b| a.0.to_ascii_lowercase().cmp(&b.0.to_ascii_lowercase()));
     }
 
-    pub fn search(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<(String, String, String, bool, f64, i32, String)> {
-        let text = text.to_ascii_lowercase()
+    pub fn search(&self, text: &str, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Vec<LensProfileUiItem> {
+        let text = Self::normalize_search_text(text);
+        let words = text.split_ascii_whitespace().map(str::trim).filter(|x| !x.is_empty()).collect::<Vec<_>>();
+        if words.is_empty() {
+            return Vec::new();
+        }
+
+        let mut filtered = self.list_for_ui.iter().filter(|(name, _, _, _, _, _, author)| {
+            Self::matches_words(name, author, &words)
+        }).collect::<Vec<_>>();
+
+        Self::sort_ui_items(&mut filtered, favorites, aspect_ratio, aspect_ratio_swapped);
+
+        filtered.into_iter().take(200).cloned().collect()
+    }
+
+    fn profile_is_hidden(profile: Option<&LensProfile>, path: &str, checksum: &str, hidden: &HashSet<String>) -> bool {
+        [Some(path), Some(checksum), profile.map(|value| value.path_to_file.as_str())]
+            .into_iter()
+            .flatten()
+            .any(|value| !value.is_empty() && hidden.contains(value))
+    }
+
+    fn lens_matches(profile: Option<&LensProfile>, requested: &str) -> bool {
+        let Some(candidate) = profile.map(|value| Self::key(&value.lens_model)).filter(|value| !value.is_empty()) else {
+            return false;
+        };
+        candidate == Self::key(requested)
+    }
+
+    fn lens_matches_keys(profile: Option<&LensProfile>, keys: &HashSet<String>) -> bool {
+        let Some(candidate) = profile.map(|value| Self::key(&value.lens_model)).filter(|value| !value.is_empty()) else {
+            return false;
+        };
+        keys.contains(&candidate)
+    }
+
+    /// Search camera profiles using catalog-derived camera and lens identities.
+    /// A missing lens key set preserves exact filtering; an empty set matches none.
+    pub fn search_by_camera(&self, query: &ProfileSearchQuery) -> Vec<LensProfileUiItem> {
+        let camera = &query.camera;
+        let text = Self::normalize_search_text(&query.text);
+        let words = text.split_ascii_whitespace().map(str::trim).filter(|x| !x.is_empty()).collect::<Vec<_>>();
+        let brand_key = Self::key(&camera.brand);
+        let model_key = Self::key(&camera.model);
+        let lens_key = Self::key(&camera.lens);
+        let has_selector_filter = !brand_key.is_empty() || !model_key.is_empty() || !lens_key.is_empty();
+        if !has_selector_filter && words.is_empty() {
+            return Vec::new();
+        }
+
+        let mut camera_keys = camera.selected_camera_keys.clone();
+        camera_keys.extend(camera.compatible_camera_keys.iter().cloned());
+
+        let mut filtered = self.list_for_ui.iter().filter(|item| {
+            let (name, path, checksum, _, _, _, author) = item;
+            let profile = self.map.get(path);
+            if Self::profile_is_hidden(profile, path, checksum, &query.hidden_profiles) {
+                return false;
+            }
+
+            if !brand_key.is_empty() {
+                let Some(profile) = profile else {
+                    return false;
+                };
+
+                if !model_key.is_empty() {
+                    let profile_key = Self::profile_camera_key(profile);
+                    if !camera_keys.contains(&profile_key) {
+                        return false;
+                    }
+                } else {
+                    let profile_key = Self::profile_camera_key(profile);
+                    if !camera.brand_camera_keys.contains(&profile_key) && Self::key(&profile.camera_brand) != brand_key {
+                        return false;
+                    }
+                }
+            }
+
+            if !lens_key.is_empty() {
+                let matches = match camera.lens_profile_keys.as_ref() {
+                    Some(keys) => Self::lens_matches_keys(profile, keys),
+                    None => Self::lens_matches(profile, &lens_key),
+                };
+                if !matches { return false; }
+            }
+
+            words.is_empty() || Self::matches_words(name, author, &words)
+        }).collect::<Vec<_>>();
+
+        filtered.sort_by(|a, b| {
+            let a_exact = self.map.get(&a.1).map(|profile| camera.selected_camera_keys.contains(&Self::profile_camera_key(profile))).unwrap_or(false);
+            let b_exact = self.map.get(&b.1).map(|profile| camera.selected_camera_keys.contains(&Self::profile_camera_key(profile))).unwrap_or(false);
+            if a_exact && !b_exact { return Ordering::Less; }
+            if b_exact && !a_exact { return Ordering::Greater; }
+
+            Self::compare_ui_items(a, b, &query.favorites, query.aspect_ratio, query.aspect_ratio_swapped)
+        });
+
+        // A selected setup is also the review list; do not silently omit its profiles.
+        let limit = if model_key.is_empty() { 200 } else { usize::MAX };
+        filtered.into_iter().take(limit).cloned().collect()
+    }
+
+    fn normalize_search_text(text: &str) -> String {
+        text.to_ascii_lowercase()
             .replace("bmpcc4k",  "blackmagic pocket cinema camera 4k")
             .replace("bmpcc6k",  "blackmagic pocket cinema camera 6k")
             .replace("bmpcc",    "blackmagic pocket cinema camera")
@@ -321,47 +458,44 @@ impl LensProfileDatabase {
             .replace("a7s2",     "a7sii")
             .replace("a7s3",     "a7siii")
             .replace(",", " ")
-            .replace(";", " ");
+            .replace(";", " ")
+    }
 
-        let words = text.split_ascii_whitespace().map(str::trim).filter(|x| !x.is_empty()).collect::<Vec<_>>();
-        if words.is_empty() {
-            return Vec::new();
-        }
+    fn matches_words(name: &str, author: &str, words: &[&str]) -> bool {
+        let name = name.to_ascii_lowercase();
+        let author = author.to_ascii_lowercase();
+        words.iter().all(|word| name.contains(word) || author.contains(word))
+    }
 
-        let mut filtered = self.list_for_ui.iter().filter(|(name, _, _, _, _, _, author)| {
-            let name = name.to_ascii_lowercase();
-            let author = author.to_ascii_lowercase();
-            for word in &words {
-                if !name.contains(word) && !author.contains(word) {
-                    return false;
-                }
-            }
-            return true;
-        }).collect::<Vec<_>>();
+    fn sort_ui_items(filtered: &mut Vec<&LensProfileUiItem>, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) {
+        filtered.sort_by(|a, b| Self::compare_ui_items(a, b, favorites, aspect_ratio, aspect_ratio_swapped));
+    }
 
-        filtered.sort_by(|a, b| {
-            // Is preset or favorited
-            let a_priority = a.1.ends_with(".gyroflow") || favorites.contains(&a.2);
-            let b_priority = b.1.ends_with(".gyroflow") || favorites.contains(&b.2);
-            if a_priority && !b_priority { return Ordering::Less; }
-            if b_priority && !a_priority { return Ordering::Greater; }
+    fn compare_ui_items(a: &LensProfileUiItem, b: &LensProfileUiItem, favorites: &HashSet<String>, aspect_ratio: i32, aspect_ratio_swapped: i32) -> Ordering {
+        let a_priority = a.1.ends_with(".gyroflow") || favorites.contains(&a.2);
+        let b_priority = b.1.ends_with(".gyroflow") || favorites.contains(&b.2);
+        if a_priority && !b_priority { return Ordering::Less; }
+        if b_priority && !a_priority { return Ordering::Greater; }
 
-            // Check aspect match
-            let a_priority2 = a.5 != 0 && aspect_ratio == a.5;
-            let b_priority2 = b.5 != 0 && aspect_ratio == b.5;
-            if a_priority2 && !b_priority2 { return Ordering::Less; }
-            if b_priority2 && !a_priority2 { return Ordering::Greater; }
+        let a_priority2 = a.5 != 0 && aspect_ratio == a.5;
+        let b_priority2 = b.5 != 0 && aspect_ratio == b.5;
+        if a_priority2 && !b_priority2 { return Ordering::Less; }
+        if b_priority2 && !a_priority2 { return Ordering::Greater; }
 
-            // Check swapped aspect match
-            let a_priority3 = a.5 != 0 && aspect_ratio_swapped == a.5;
-            let b_priority3 = b.5 != 0 && aspect_ratio_swapped == b.5;
-            if a_priority3 && !b_priority3 { return Ordering::Less; }
-            if b_priority3 && !a_priority3 { return Ordering::Greater; }
+        let a_priority3 = a.5 != 0 && aspect_ratio_swapped == a.5;
+        let b_priority3 = b.5 != 0 && aspect_ratio_swapped == b.5;
+        if a_priority3 && !b_priority3 { return Ordering::Less; }
+        if b_priority3 && !a_priority3 { return Ordering::Greater; }
 
-            a.0.cmp(&b.0)
-        });
+        a.0.cmp(&b.0)
+    }
 
-        filtered.into_iter().take(200).cloned().collect()
+    fn profile_camera_key(profile: &LensProfile) -> (String, String) {
+        (Self::key(&profile.camera_brand), Self::key(&profile.camera_model))
+    }
+
+    fn key(value: &str) -> String {
+        value.split_whitespace().collect::<Vec<_>>().join(" ").to_ascii_lowercase()
     }
 
     pub fn set_profile_ratings(&mut self, json: &str) {
@@ -567,5 +701,177 @@ impl LensProfileDatabase {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::camera_database::CameraDatabase;
+
+    fn profile(brand: &str, model: &str, lens: &str, checksum: &str) -> LensProfile {
+        let mut profile = LensProfile::default();
+        profile.camera_brand = brand.to_owned();
+        profile.camera_model = model.to_owned();
+        profile.lens_model = lens.to_owned();
+        profile.checksum = Some(checksum.to_owned());
+        profile
+    }
+
+    fn item(name: &str, path: &str, checksum: &str) -> LensProfileUiItem {
+        (name.to_owned(), path.to_owned(), checksum.to_owned(), false, 0.0, 0, String::new())
+    }
+
+    fn camera_query(brand: &str, model: &str, lens: &str) -> ProfileSearchQuery {
+        ProfileSearchQuery {
+            camera: CameraProfileFilter {
+                brand: brand.to_owned(),
+                model: model.to_owned(),
+                lens: lens.to_owned(),
+                ..Default::default()
+            },
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn selected_setup_review_includes_every_matching_profile() {
+        let mut db = LensProfileDatabase::default();
+        for i in 0..205 {
+            let path = format!("profile-{i}");
+            db.map.insert(path.clone(), profile("Maker", "Body", "Prime", &path));
+            db.list_for_ui.push(item("Maker Body Prime", &path, &path));
+        }
+        let mut query = camera_query("Maker", "Body", "Prime");
+        query.camera.selected_camera_keys.insert(("maker".to_owned(), "body".to_owned()));
+        assert_eq!(db.search_by_camera(&query).len(), 205);
+    }
+
+    #[test]
+    fn structured_search_includes_compatible_profiles_and_hides_rejected_ones() {
+        let mut db = LensProfileDatabase::default();
+        db.map.insert("selected.json".to_owned(), profile("Brand", "Primary", "Wide", "selected"));
+        db.map.insert("compatible.json".to_owned(), profile("Brand", "Compatible", "Wide", "compatible"));
+        db.map.insert("hidden.json".to_owned(), profile("Brand", "Compatible", "Wide", "hidden"));
+        db.map.insert("other.json".to_owned(), profile("Brand", "Other", "Wide", "other"));
+        db.list_for_ui = vec![
+            item("Brand Primary Wide", "selected.json", "selected"),
+            item("Brand Compatible Wide", "compatible.json", "compatible"),
+            item("Brand Compatible Hidden", "hidden.json", "hidden"),
+            item("Brand Other Wide", "other.json", "other"),
+        ];
+
+        let mut query = camera_query("Brand", "Primary", "");
+        query.camera.selected_camera_keys.insert(("brand".to_owned(), "primary".to_owned()));
+        query.camera.brand_camera_keys.insert(("brand".to_owned(), "primary".to_owned()));
+        query.camera.compatible_camera_keys.insert(("brand".to_owned(), "compatible".to_owned()));
+        query.hidden_profiles.insert("hidden".to_owned());
+        let results = db.search_by_camera(&query);
+
+        let result_checksums = results.into_iter().map(|item| item.2).collect::<Vec<_>>();
+        assert_eq!(result_checksums, vec!["selected", "compatible"]);
+    }
+
+    #[test]
+    fn brand_search_resolves_model_scoped_aliases_without_cross_brand_matches() {
+        let camera_db = CameraDatabase::from_bundled();
+        let pentax_keys = HashSet::from_iter(camera_db.brand_camera_keys("Pentax"));
+        assert!(pentax_keys.contains(&("ricoh imaging company, ltd.".to_owned(), "k-1".to_owned())));
+        assert!(!pentax_keys.contains(&("ricoh imaging company, ltd.".to_owned(), "gr iii".to_owned())));
+
+        let mut db = LensProfileDatabase::default();
+        db.map.insert("pentax.json".to_owned(), profile("Ricoh Imaging Company, Ltd.", "K-1", "Prime", "pentax"));
+        db.map.insert("ricoh.json".to_owned(), profile("Ricoh Imaging Company, Ltd.", "GR III", "Prime", "ricoh"));
+        db.list_for_ui = vec![
+            item("Pentax K-1 Prime", "pentax.json", "pentax"),
+            item("Ricoh GR III Prime", "ricoh.json", "ricoh"),
+        ];
+
+        let mut query = camera_query("Pentax", "", "");
+        query.camera.brand_camera_keys = pentax_keys;
+        let results = db.search_by_camera(&query);
+        assert_eq!(results.iter().map(|item| item.1.as_str()).collect::<Vec<_>>(), vec!["pentax.json"]);
+    }
+
+    #[test]
+    fn structured_search_honors_the_profile_resolved_path() {
+        let mut db = LensProfileDatabase::default();
+        let mut candidate = profile("Maker", "Body", "Prime", "candidate");
+        candidate.path_to_file = "profiles/resolved.json".to_owned();
+        db.map.insert("catalog-key".to_owned(), candidate);
+        db.list_for_ui.push(item("Maker Body Prime", "catalog-key", "candidate"));
+
+        let hidden = HashSet::from(["profiles/resolved.json".to_owned()]);
+        let mut query = camera_query("Maker", "Body", "Prime");
+        query.camera.selected_camera_keys.insert(("maker".to_owned(), "body".to_owned()));
+        query.hidden_profiles = hidden;
+        let matches = db.search_by_camera(&query);
+
+        assert!(matches.is_empty());
+    }
+
+    #[test]
+    fn structured_search_requires_lens_metadata_for_a_lens_filter() {
+        let mut db = LensProfileDatabase::default();
+        db.map.insert("unnamed".to_owned(), profile("Maker", "Body", "", "unnamed"));
+        db.map.insert("prime".to_owned(), profile("Maker", "Body", "Prime 24mm", "prime"));
+        db.list_for_ui.extend([
+            item("Maker Body", "unnamed", "unnamed"),
+            item("Maker Body Prime", "prime", "prime"),
+        ]);
+
+        let mut query = camera_query("Maker", "Body", "Prime 24mm");
+        query.camera.selected_camera_keys.insert(("maker".to_owned(), "body".to_owned()));
+        let checksums = db.search_by_camera(&query).into_iter().map(|entry| entry.2).collect::<Vec<_>>();
+
+        assert_eq!(checksums, ["prime"]);
+    }
+
+    #[test]
+    fn selected_lens_matches_its_exact_identity_only() {
+        let mut db = LensProfileDatabase::default();
+        for (path, lens) in [
+            ("35mm", "FE 35mm F1.4 GM"),
+            ("135mm", "FE 135mm F1.8 GM"),
+            ("35mm-ii", "FE 35mm F1.4 GM II"),
+        ] {
+            db.map.insert(path.to_owned(), profile("Sony", "A7 IV", lens, path));
+            db.list_for_ui.push(item(&format!("Sony A7 IV {lens}"), path, path));
+        }
+
+        let mut query = camera_query("Sony", "A7 IV", "fe 35mm f1.4 gm");
+        query.camera.selected_camera_keys.insert(("sony".to_owned(), "a7 iv".to_owned()));
+        query.camera.brand_camera_keys.insert(("sony".to_owned(), "a7 iv".to_owned()));
+        let results = db.search_by_camera(&query);
+
+        assert_eq!(results.iter().map(|item| item.1.as_str()).collect::<Vec<_>>(), vec!["35mm"]);
+    }
+
+    #[test]
+    fn selected_catalog_lens_searches_legacy_alias_profiles() {
+        let mut db = LensProfileDatabase::default();
+        db.map.insert("canonical".to_owned(), profile("Sony", "A7 IV", "Sony FE 35mm F1.4 GM", "canonical"));
+        db.map.insert("legacy-alias".to_owned(), profile("Sony", "A7 IV", "35 GM", "legacy-alias"));
+        db.map.insert("other".to_owned(), profile("Sony", "A7 IV", "FE 135mm F1.8 GM", "other"));
+        db.list_for_ui = vec![
+            item("Sony A7 IV FE 35mm F1.4 GM", "canonical", "canonical"),
+            item("Sony A7 IV 35 GM", "legacy-alias", "legacy-alias"),
+            item("Sony A7 IV FE 135mm F1.8 GM", "other", "other"),
+        ];
+
+        let mut query = camera_query("Sony", "A7 IV", "Sony FE 35mm F1.4 GM");
+        query.camera.selected_camera_keys.insert(("sony".to_owned(), "a7 iv".to_owned()));
+        query.camera.lens_profile_keys = Some(HashSet::from([
+            "sony fe 35mm f1.4 gm".to_owned(),
+            "35 gm".to_owned(),
+        ]));
+        let results = db.search_by_camera(&query);
+
+        let result_paths = results.iter().map(|item| item.1.as_str()).collect::<HashSet<_>>();
+        assert_eq!(result_paths, HashSet::from(["canonical", "legacy-alias"]));
+
+        query.camera.lens = "35mm".to_owned();
+        query.camera.lens_profile_keys = Some(HashSet::new());
+        assert!(db.search_by_camera(&query).is_empty());
     }
 }

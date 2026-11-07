@@ -49,7 +49,7 @@ Item {
 
     property Menu.VideoInformation vidInfo: null;
 
-    function loadGyroflowData(obj: var, queueJobId: var): void {
+    function loadGyroflowData(obj: var, queueJobId: var): bool {
         root.pendingGyroflowData = null;
         root.pendingQueueJobId = 0;
 
@@ -58,7 +58,7 @@ Item {
             root.pendingQueueJobId = +queueJobId;
             controller.cancel_current_operation();
             // we'll get called again from telemetry_loaded
-            return;
+            return true;
         }
 
         let urls = null;
@@ -79,7 +79,7 @@ Item {
         }
         if ((!urls || !urls[0]) && !vidInfo.filename) {
             messageBox(Modal.Error, qsTr("Preset can be applied only after loading a video."), [ { text: qsTr("Ok") } ]);
-            return;
+            return false;
         }
 
         const isCorrectVideoLoaded = urls[0] && vidInfo.filename == filesystem.get_filename(urls[0]);
@@ -94,7 +94,7 @@ Item {
             if (controller.image_sequence_fps > 0) {
                 vid.setFrameRate(controller.image_sequence_fps);
             }
-            return;
+            return true;
         }
         if (urls[1] && !isCorrectGyroLoaded && filesystem.exists(urls[1])) {
             root.pendingGyroflowData = obj;
@@ -104,7 +104,7 @@ Item {
             // Loaded with all of its metadata if the project was (its frame timing stays, eg. a CRM on its proxy)
             window.motionData.setAllMetadata(urls[2] == "1");
             controller.load_telemetry(urls[1], urls[0] == urls[1] || window.motionData.allMetadata, window.videoArea.vid, -1, project_version);
-            return;
+            return true;
         }
 
         controller.set_prevent_recompute(true);
@@ -117,6 +117,7 @@ Item {
             controller.import_gyroflow_data(JSON.stringify(obj));
         }
         render_queue.editing_job_id = +queueJobId;
+        return true;
     }
     Connections {
         target: controller;
@@ -334,7 +335,8 @@ Item {
         let folder = filesystem.get_folder(url);
 
         if (filename.endsWith(".gyroflow")) {
-            return loadGyroflowData(url, queueJobId);
+            loadGyroflowData(url, queueJobId);
+            return;
         }
         if (filename.endsWith(".RDC")) {
             // Assumes regular filesystem
@@ -679,19 +681,18 @@ Item {
                     anchors.fill: parent;
                     property bool loaded: false;
 
-                    property bool stabEnabled: root.showStabilized;
                     transform: [
                         Scale {
                             readonly property real r: vidInfo.videoRotation * (Math.PI / 180);
                             readonly property real rotW: Math.abs(vidParent.width * Math.cos(r)) + Math.abs(vidParent.height * Math.sin(r));
                             readonly property real rotH: Math.abs(vidParent.width * Math.sin(r)) + Math.abs(vidParent.height * Math.cos(r));
                             origin.x: vid.width / 2; origin.y: vid.height / 2;
-                            xScale: vid.stabEnabled? 1 : Math.min(vidParent.h / rotH, vidParent.w / rotW) * (fovOverviewBtn.checked? 0.5 : 1);
+                            xScale: root.showStabilized? 1 : Math.min(vidParent.h / rotH, vidParent.w / rotW) * (fovOverviewBtn.checked? 0.5 : 1);
                             yScale: xScale;
                         },
                         Rotation {
                             origin.x: vid.width / 2; origin.y: vid.height / 2;
-                            angle: vid.stabEnabled? 0 : -vidInfo.videoRotation;
+                            angle: root.showStabilized? 0 : -vidInfo.videoRotation;
                         }
                     ]
 
@@ -830,7 +831,7 @@ Item {
                         id: opticalPointEditor;
                         anchors.fill: parent;
                         timestampUs: vid.timestamp * 1000;
-                        stabilized: vid.stabEnabled;
+                        stabilized: root.showStabilized;
                         onRedraw: vid.forceRedraw();
                     }
                 }

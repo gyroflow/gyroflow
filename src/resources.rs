@@ -9,6 +9,9 @@ qrc!(pub rsrc,
         "src/ui/menu/qmldir",
         "src/ui/qmldir",
 
+        "resources/camera_database/DATA-SOURCES.md",
+        "resources/camera_database/LENSFUN-DATABASE-LICENSE.txt",
+
         "resources/shadow.png",
         "resources/icon.png",
         "resources/logo_black.svg",

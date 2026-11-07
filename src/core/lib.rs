@@ -6,6 +6,8 @@ pub mod gyro_source;
 pub mod imu_integration;
 pub mod lens_profile;
 pub mod lens_profile_database;
+pub mod camera_database;
+pub mod database_update;
 pub mod calibration;
 pub mod synchronization;
 pub mod stabilization;
@@ -2322,7 +2324,9 @@ impl StabilizationManager {
             let mut output_size = None;
             load_options.project_version = obj.get("version").and_then(|x| x.as_u64()).unwrap_or(2);
             let mut org_video_url = obj.get("videofile").and_then(|x| x.as_str()).unwrap_or(&"").to_string();
-            if !org_video_url.is_empty() && !org_video_url.contains("://") {
+            // A project from another OS can have a video path we cannot resolve locally.
+            let has_video_file = !org_video_url.is_empty();
+            if has_video_file && !org_video_url.contains("://") {
                 org_video_url = filesystem::path_to_url(&org_video_url);
                 if let Some(videofile) = obj.get_mut("videofile") {
                     *videofile = serde_json::Value::String(org_video_url.clone());
@@ -2346,7 +2350,7 @@ impl StabilizationManager {
             if let Some(videofile) = obj.get_mut("videofile") {
                 *videofile = serde_json::Value::String(video_url.clone());
             }
-            *is_preset = org_video_url.is_empty();
+            *is_preset = !has_video_file && org_video_url.is_empty();
             if !*is_preset {
                 // A project replaces what an analysis still running measures, and what the last one measured
                 self.invalidate_optical_measurements();

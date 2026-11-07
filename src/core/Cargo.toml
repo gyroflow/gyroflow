@@ -10,6 +10,7 @@ name = "gyroflow_core"
 path = "lib.rs"
 
 [dependencies]
+tempfile = "3"
 #telemetry-parser = { path = "../../../telemetry-parser" }
 telemetry-parser = { git = "https://github.com/AdrianEddy/telemetry-parser.git", rev = "eb2bcba" }
 #ahrs = { version = "0.5.0", features = ["field_access"] }
@@ -83,7 +84,7 @@ median = "0.3"
 burn-store = { version = "0.23.0-pre.1", default-features = false, features = ["std"], optional = true }
 burn-cubecl = { version = "0.23.0-pre.1", optional = true }
 cubecl = { version = "0.12.0-pre.1", optional = true }
-sha2 = { version = "0.10", optional = true }
+sha2 = "0.10"
 ureq = { version = "3.3", optional = true }
 
 wgpu = { version = "30", features = ["spirv", "naga-ir"] }
@@ -114,7 +115,7 @@ features = [ "Win32_System_Com", "Win32_System_Console", "Win32_System_SystemSer
 default = []
 use-opencl = ["ocl", "ocl-interop"]
 use-opencv = ["opencv"]
-use-burn = ["dep:burn", "dep:burn-store", "dep:burn-cubecl", "dep:cubecl", "dep:sha2", "dep:ureq"]
+use-burn = ["dep:burn", "dep:burn-store", "dep:burn-cubecl", "dep:cubecl", "dep:ureq"]
 bundle-lens-profiles = []
 cache-gyro-metadata = []
 

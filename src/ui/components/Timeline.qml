@@ -366,7 +366,6 @@ Item {
                         visibleAreaRight: root.visibleAreaRight;
                         anchors.topMargin: (root.fullScreen || window.isMobileLayout? 0 : 5) * dpiScale;
                         anchors.bottomMargin: (root.fullScreen || window.isMobileLayout? 0 : 5) * dpiScale;
-                        property Menu ctxMenu: keyframeContextMenu;
                         function handleMouseMove(x: real, y: real, pressed: bool, pressedButtons: int): bool {
                             const pt = ma.mapToItem(keyframesInner, x, y);
                             const kf = keyframesInner.keyframeAtXY(pt.x, pt.y);

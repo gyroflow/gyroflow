@@ -3647,6 +3647,7 @@ dependencies = [
  "space",
  "stabilize_spirv",
  "telemetry-parser",
+ "tempfile",
  "thiserror 2.0.21",
  "time",
  "ureq",

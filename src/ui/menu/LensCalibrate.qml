@@ -5,6 +5,8 @@ import QtQuick
 import QtQuick.Dialogs
 
 import "../components/"
+import "CameraIdentity.js" as CameraIdentity
+import "ProfileSubmission.js" as ProfileSubmission
 
 MenuItem {
     id: calib;
@@ -21,6 +23,11 @@ MenuItem {
     property alias infoList: infoList;
     property alias maxSharpness: maxSharpness;
     property var calibrationInfo: ({});
+    property bool metadataControlsReady: false;
+    property bool updatingCameraSelectors: false;
+    property var cameraBrandModel: [qsTr("Other")];
+    property var cameraModelModel: [qsTr("Other")];
+    property var cameraLensModel: [qsTr("Other")];
     // OpenCV's random sets of frames are what runs: its method, on a model OpenCV has (`LensCalibrator::calibrate`)
     readonly property bool opencvSearch: calibMethod.currentIndex == 0 && calibModel.currentIndex != 2;
 
@@ -87,13 +94,167 @@ MenuItem {
         }
         list.model = model;
     }
+    function selectorModel(values: var): var {
+        return CameraIdentity.selectorModel(qsTr("Other"), values, "");
+    }
+    function selectorValue(combo: var): string {
+        return CameraIdentity.selectorValue(combo.currentIndex, combo.model, false);
+    }
+    function setSelectorValue(combo: var, value: string): bool {
+        const index = CameraIdentity.selectorIndex(combo.model, value);
+        combo.currentIndex = index >= 0 ? index : 0;
+        return index >= 0;
+    }
+    function setMetadataField(key: string, label: string, value: string): void {
+        calib.calibrationInfo[key] = value || "";
+        list.updateEntry(label, value || "---");
+    }
+    function refreshCameraBrands(): void {
+        updatingCameraSelectors = true;
+        cameraBrand.popup.maxItemWidth = 0;
+        cameraModel.popup.maxItemWidth = 0;
+        cameraLens.popup.maxItemWidth = 0;
+        cameraBrandModel = selectorModel(controller.camera_database_brands());
+        cameraBrand.currentIndex = 0;
+        cameraModelModel = selectorModel([]);
+        cameraModel.currentIndex = 0;
+        cameraLensModel = selectorModel([]);
+        cameraLens.currentIndex = 0;
+        updatingCameraSelectors = false;
+    }
+    function refreshCameraModels(): void {
+        const brand = selectorValue(cameraBrand);
+        updatingCameraSelectors = true;
+        cameraModel.popup.maxItemWidth = 0;
+        cameraLens.popup.maxItemWidth = 0;
+        cameraModelModel = selectorModel(brand? controller.camera_database_models(brand) : []);
+        cameraModel.currentIndex = 0;
+        cameraLensModel = selectorModel([]);
+        cameraLens.currentIndex = 0;
+        updatingCameraSelectors = false;
+    }
+    function refreshCameraLenses(): void {
+        const brand = selectorValue(cameraBrand);
+        const model = selectorValue(cameraModel);
+        updatingCameraSelectors = true;
+        cameraLens.popup.maxItemWidth = 0;
+        cameraLensModel = selectorModel(brand && model? controller.camera_database_lenses(brand, model) : []);
+        cameraLens.currentIndex = 0;
+        updatingCameraSelectors = false;
+    }
+    function applySelectorsFromMetadata(): void {
+        if (!metadataControlsReady) {
+            return;
+        }
+
+        const originalBrand = calib.calibrationInfo.camera_brand || "";
+        const originalModel = calib.calibrationInfo.camera_model || "";
+        const lens = calib.calibrationInfo.lens_model || "";
+        const resolvedCamera = controller.camera_database_resolve_camera(originalBrand, originalModel);
+        const brand = resolvedCamera.brand || originalBrand;
+        const model = resolvedCamera.model || originalModel;
+
+        if (brand && brand !== originalBrand) {
+            calib.setMetadataField("camera_brand", "Camera brand", brand);
+        }
+        if (model && model !== originalModel) {
+            calib.setMetadataField("camera_model", "Camera model", model);
+        }
+
+        updatingCameraSelectors = true;
+        cameraBrand.popup.maxItemWidth = 0;
+        cameraModel.popup.maxItemWidth = 0;
+        cameraLens.popup.maxItemWidth = 0;
+        cameraBrand.currentIndex = 0;
+        cameraModelModel = selectorModel([]);
+        cameraModel.currentIndex = 0;
+        cameraLensModel = selectorModel([]);
+        cameraLens.currentIndex = 0;
+        if (setSelectorValue(cameraBrand, brand)) {
+            cameraModelModel = selectorModel(controller.camera_database_models(brand));
+            const resolvedModel = controller.camera_database_resolve_model(brand, model) || model;
+            if (resolvedModel && setSelectorValue(cameraModel, resolvedModel)) {
+                cameraLensModel = selectorModel(controller.camera_database_lenses(brand, resolvedModel));
+                const resolvedLens = controller.camera_database_resolve_lens(brand, resolvedModel, lens);
+                if (resolvedLens && setSelectorValue(cameraLens, resolvedLens)) {
+                    calib.setMetadataField("lens_model", "Lens model", calib.selectorValue(cameraLens));
+                }
+            }
+        }
+        updatingCameraSelectors = false;
+    }
+    function updateCropFromCamera(): void {
+        const brand = selectorValue(cameraBrand);
+        const model = selectorValue(cameraModel);
+        if (!brand || !model) {
+            return;
+        }
+
+        const info = controller.camera_database_info(brand, model);
+        if (+info.crop_factor > 0) {
+            crop.value = +info.crop_factor;
+            if (flcb.checked) {
+                calib.calibrationInfo.crop_factor = crop.value;
+            }
+        }
+    }
+    function selectorPopupWidth(combo: var): real {
+        const parentWidth = combo.parent? combo.parent.width : combo.width;
+        const desiredWidth = Math.max(combo.width, combo.popup.maxItemWidth + 16 * dpiScale);
+        return Math.min(desiredWidth, parentWidth);
+    }
+    function selectorPopupX(combo: var): real {
+        const parentWidth = combo.parent? combo.parent.width : combo.width;
+        return Math.max(-combo.x, Math.min(0, parentWidth - combo.x - combo.popup.width));
+    }
+    function cameraNeedsLens(brand: string, model: string): bool {
+        return CameraIdentity.cameraNeedsLens(controller.camera_database_info(brand, model));
+    }
+    function validateProfileMetadata(upload: bool): bool {
+        list.commitAll();
+        if (!upload) return true;
+
+        const brand = calib.calibrationInfo.camera_brand || "";
+        const model = calib.calibrationInfo.camera_model || "";
+        const needsLens = !!brand && !!model && cameraNeedsLens(brand, model);
+        const errors = ProfileSubmission.validationErrors(calib.calibrationInfo, {
+            brandIndex: cameraBrand.currentIndex, brandValue: selectorValue(cameraBrand),
+            modelIndex: cameraModel.currentIndex, modelValue: selectorValue(cameraModel),
+            lensIndex: cameraLens.currentIndex, lensValue: selectorValue(cameraLens), hasFocalLength: flcb.checked
+        }, needsLens);
+
+        if (errors.length > 0) {
+            const messages = {
+                camera_brand_required: qsTr("Camera brand is required."),
+                camera_model_required: qsTr("Camera model is required."),
+                camera_other_required: qsTr("Select Other before entering a different camera."),
+                lens_required: qsTr("Lens model is required for this camera."),
+                lens_name_required: qsTr("Enter a lens name; focal length and aperture alone do not identify it."),
+                lens_other_required: qsTr("Select Other before entering a different lens."),
+                zoom_focal_length_required: qsTr("Zoom lenses require a focal length.")
+            };
+            messageBox(Modal.Error, qsTr("Complete the camera setup before uploading this lens profile.") + "\n\n" + errors.map(code => messages[code]).join("\n"), [ { text: qsTr("Ok") } ]);
+            return false;
+        }
+        return true;
+    }
     Component.onCompleted: {
         calib.resetMetadata();
         calib.updateTable();
+        calib.refreshCameraBrands();
+        calib.metadataControlsReady = true;
     }
     Connections {
         target: controller;
+        function onAll_profiles_loaded(): void {
+            calib.refreshCameraBrands();
+            calib.applySelectorsFromMetadata();
+        }
         function onTelemetry_loaded(is_main_video: bool, filename: string, camera: string, additional_data: var): void {
+            // Only the main video owns camera and lens identity. Loading a separate gyro source
+            // must not reset metadata that was already read from the video.
+            if (!is_main_video) return;
+
             shutter.value = Math.abs(additional_data.frame_readout_time);
             shutterCb.checked = Math.abs(additional_data.frame_readout_time) > 0;
             if (additional_data.frame_readout_direction) {
@@ -103,6 +264,9 @@ MenuItem {
             }
 
             calib.resetMetadata();
+            flcb.checked = false;
+            fl.value = 0;
+            crop.value = 1;
             if (additional_data.camera_identifier) {
                 const camera_id = additional_data.camera_identifier;
                 if (camera_id) {
@@ -120,12 +284,13 @@ MenuItem {
                     if (camera_id.brand === "GoPro" && camera_id.lens_info === "Hyper") digitalLens.currentIndex = 2;
 
                     // RED KOMODO is global shutter
-                    gs.checked = camera_id.model.startsWith("KOMODO");
+                    gs.checked = (camera_id.model || "").startsWith("KOMODO");
                 }
             }
             if (+additional_data.horizontal_stretch > 0.01) xStretch.value = +additional_data.horizontal_stretch;
             if (+additional_data.vertical_stretch   > 0.01) yStretch.value = +additional_data.vertical_stretch;
             calib.updateTable();
+            calib.applySelectorsFromMetadata();
             sizeTimer.start();
         }
         function onRolling_shutter_estimated(rolling_shutter: real): void {
@@ -148,16 +313,30 @@ MenuItem {
         function propChanged() { settings.propChanged(sett); }
     }
 
+    function prepareProfileExport(upload: bool): var {
+        if (!calib.validateProfileMetadata(upload)) return null;
+        return { metadata: ProfileSubmission.metadataSnapshot(calib.calibrationInfo), upload: upload };
+    }
     function exportProfile(fileUrl: url, notify: bool): void {
-        const save = (upload) => {
-            // `export_lens_profile` reports failures itself, via `error()` -> a message box
-            if (controller.export_lens_profile(fileUrl, calib.calibrationInfo, upload) && notify)
-                calibrator_window.showNotification(Modal.Info, qsTr("Lens profile exported to %1.").arg("<b>" + filesystem.display_url(fileUrl) + "</b>"));
+        const profile = calib.prepareProfileExport(calib.uploadProfile.checked);
+        if (profile) calib.savePreparedProfile(fileUrl, profile, notify, null);
+    }
+    function savePreparedProfile(fileUrl: url, profile: var, notify: bool, onComplete: var): void {
+        const complete = () => { if (onComplete) onComplete(); };
+        const save = (submit) => {
+            try {
+                // `export_lens_profile` reports failures itself, via `error()` -> a message box
+                if (controller.export_lens_profile(fileUrl, profile.metadata, submit) && notify)
+                    calibrator_window.showNotification(Modal.Info, qsTr("Lens profile exported to %1.").arg("<b>" + filesystem.display_url(fileUrl) + "</b>"));
+            } finally {
+                complete();
+            }
         };
-        if (uploadProfile.checked) {
+        if (profile.upload) {
             messageBox(Modal.Info, qsTr("By uploading your lens profile to the database, you agree to publish and distribute it with Gyroflow under GPLv3 terms.\nDo you want to submit your profile?"), [
                 { text: qsTr("Yes"), accent: true, clicked: () => save(true) },
-                { text: qsTr("No"),                clicked: () => save(false) }
+                { text: qsTr("No"), clicked: () => save(false) },
+                { text: qsTr("Cancel"), clicked: complete }
             ]);
         } else {
             save(false);
@@ -224,9 +403,93 @@ MenuItem {
         }
     }
 
+    Grid {
+        width: parent.width;
+        columns: width >= 600 * dpiScale? 3 : 1;
+        columnSpacing: 5 * dpiScale;
+        rowSpacing: 8 * dpiScale;
+
+        Label {
+            text: qsTr("Camera brand");
+            width: (parent.width - (parent.columns - 1) * parent.columnSpacing) / parent.columns;
+            spacing: 4 * dpiScale;
+            CameraSelector {
+                id: cameraBrand;
+                model: calib.cameraBrandModel;
+                width: parent.width;
+                font.pixelSize: 12 * dpiScale;
+                fieldLabel: qsTr("Camera brand");
+                popup.x: calib.selectorPopupX(cameraBrand);
+                popup.width: calib.selectorPopupWidth(cameraBrand);
+                popup.height: popup.implicitHeight;
+                onCurrentIndexChanged: {
+                    if (calib.metadataControlsReady && !calib.updatingCameraSelectors) {
+                        list.commitAll();
+                        calib.setMetadataField("camera_brand", "Camera brand", calib.selectorValue(cameraBrand));
+                        calib.setMetadataField("camera_model", "Camera model", "");
+                        calib.setMetadataField("lens_model", "Lens model", "");
+                        calib.refreshCameraModels();
+                    }
+                }
+            }
+        }
+        Label {
+            text: qsTr("Camera model");
+            width: (parent.width - (parent.columns - 1) * parent.columnSpacing) / parent.columns;
+            spacing: 4 * dpiScale;
+            CameraSelector {
+                id: cameraModel;
+                model: calib.cameraModelModel;
+                width: parent.width;
+                font.pixelSize: 12 * dpiScale;
+                fieldLabel: qsTr("Camera model");
+                popup.x: calib.selectorPopupX(cameraModel);
+                popup.width: calib.selectorPopupWidth(cameraModel);
+                popup.height: popup.implicitHeight;
+                onCurrentIndexChanged: {
+                    if (calib.metadataControlsReady && !calib.updatingCameraSelectors) {
+                        list.commitAll();
+                        calib.setMetadataField("camera_model", "Camera model", calib.selectorValue(cameraModel));
+                        calib.setMetadataField("lens_model", "Lens model", "");
+                        calib.refreshCameraLenses();
+                        calib.updateCropFromCamera();
+                    }
+                }
+            }
+        }
+        Label {
+            text: qsTr("Lens model");
+            width: (parent.width - (parent.columns - 1) * parent.columnSpacing) / parent.columns;
+            spacing: 4 * dpiScale;
+            CameraSelector {
+                id: cameraLens;
+                model: calib.cameraLensModel;
+                width: parent.width;
+                font.pixelSize: 12 * dpiScale;
+                fieldLabel: qsTr("Lens model");
+                popup.x: calib.selectorPopupX(cameraLens);
+                popup.width: calib.selectorPopupWidth(cameraLens);
+                popup.height: popup.implicitHeight;
+                onCurrentIndexChanged: {
+                    if (calib.metadataControlsReady && !calib.updatingCameraSelectors) {
+                        list.commitAll();
+                        calib.setMetadataField("lens_model", "Lens model", calib.selectorValue(cameraLens));
+                    }
+                }
+            }
+        }
+    }
+
     TableList {
         id: list;
         columnSpacing: 10 * dpiScale;
+        // A catalog choice is edited with its selector. Other exposes the text editor.
+        editableKeys: Object.keys(editableFields).filter(key => {
+            if (key === "Camera brand") return cameraBrand.currentIndex <= 0;
+            if (key === "Camera model") return cameraModel.currentIndex <= 0;
+            if (key === "Lens model") return cameraLens.currentIndex <= 0;
+            return true;
+        });
         editableFields: ({
             "Camera brand": {
                 "type": "text",
@@ -401,7 +664,7 @@ MenuItem {
         enabled: infoList.rms > 0 && infoList.rms < 100 && calibrator_window.videoArea.vid.loaded;
         anchors.horizontalCenter: parent.horizontalCenter;
         onClicked: {
-            list.commitAll();
+            if (!calib.validateProfileMetadata(calib.uploadProfile.checked)) return;
             const filename = controller.export_lens_profile_filename(calib.calibrationInfo);
             if (Qt.platform.os == "ios") {
                 calibrator_window.getSaveFileUrl(filesystem.get_folder(calibrator_window.videoArea.loadedFileUrl), filename, function(url) {
@@ -619,6 +882,10 @@ MenuItem {
         CheckBoxWithContent {
             id: flcb;
             text: qsTr("Focal length");
+            onCheckedChanged: {
+                calib.calibrationInfo.focal_length = checked? fl.value : null;
+                calib.calibrationInfo.crop_factor = checked? crop.value : null;
+            }
             Label {
                 text: qsTr("Lens native focal length");
                 position: Label.LeftPosition;
