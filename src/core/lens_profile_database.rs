@@ -43,6 +43,23 @@ impl Clone for LensProfileDatabase {
 }
 
 impl LensProfileDatabase {
+    #[cfg(feature = "lensfun-import")]
+    pub fn search_lensfun(&self, query: &str) -> Vec<(String, String, f64)> {
+        let db = match lensfun::Database::load_bundled() {
+            Ok(db) => db,
+            Err(_) => return Vec::new(),
+        };
+        db.find_lenses(None, None, Some(query), lensfun::FindFlags::LOOSE)
+            .into_iter()
+            .map(|lens| {
+                let maker = lens.maker.clone().unwrap_or_default();
+                let model = lens.model.clone();
+                let crop = lens.crop_factor;
+                (format!("{maker} {model}").trim().to_string(), format!("lensfun:{model}"), crop)
+            })
+            .collect()
+    }
+
     pub fn get_path() -> PathBuf {
         // return std::fs::canonicalize("D:/lens_review/").unwrap_or_default();
 
