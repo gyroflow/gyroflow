@@ -19836,6 +19836,21 @@
       "brand": "RED",
       "brand_aliases": [],
       "compatible_mounts": [],
+      "crop_factor": null,
+      "model": "Raven",
+      "mounts": [],
+      "sensor_size": null,
+      "source": [
+        "curated",
+        "gyroflow"
+      ],
+      "source_url": "https://docs.red.com/955-0127/RED_RAVEN_Operation_Guide_v7_1.pdf"
+    },
+    {
+      "aliases": [],
+      "brand": "RED",
+      "brand_aliases": [],
+      "compatible_mounts": [],
       "crop_factor": 0.934,
       "model": "V-RAPTOR 8K VV",
       "mounts": [
@@ -24593,6 +24608,21 @@
       "brand": "Z CAM",
       "brand_aliases": [],
       "compatible_mounts": [],
+      "crop_factor": null,
+      "model": "E2-F6",
+      "mounts": [],
+      "sensor_size": null,
+      "source": [
+        "curated",
+        "gyroflow"
+      ],
+      "source_url": "https://www.z-cam.com/support/about/"
+    },
+    {
+      "aliases": [],
+      "brand": "Z CAM",
+      "brand_aliases": [],
+      "compatible_mounts": [],
       "crop_factor": 1.88,
       "model": "E2-M4",
       "mounts": [
@@ -24604,6 +24634,21 @@
         "gyroflow"
       ],
       "source_url": "https://www.z-cam.com/products/professional-cameras/e2-m4/"
+    },
+    {
+      "aliases": [],
+      "brand": "Z CAM",
+      "brand_aliases": [],
+      "compatible_mounts": [],
+      "crop_factor": null,
+      "model": "E2-S6",
+      "mounts": [],
+      "sensor_size": null,
+      "source": [
+        "curated",
+        "gyroflow"
+      ],
+      "source_url": "https://www.z-cam.com/support/about/"
     }
   ],
   "lenses": [
@@ -44107,6 +44152,10 @@
     },
     {
       "name": "Curated manufacturer identities",
+      "url": "https://docs.red.com/955-0127/RED_RAVEN_Operation_Guide_v7_1.pdf"
+    },
+    {
+      "name": "Curated manufacturer identities",
       "url": "https://docs.red.com/955-0190_v1.5/955-0196_V1.5%20Rev-A_RED_PS_KOMODO_Operation_Guide/Content/A_TechSpecs/Specs_KOMODO_6K.htm"
     },
     {
@@ -44264,6 +44313,10 @@
     {
       "name": "Curated manufacturer identities",
       "url": "https://www.caddxfpv.com/products/walksnail-moonlight-camera-with-rec-board"
+    },
+    {
+      "name": "Curated manufacturer identities",
+      "url": "https://www.canon-europe.com/cameras/eos-5d-mark-iv/specifications/"
     },
     {
       "name": "Curated manufacturer identities",
@@ -44432,6 +44485,10 @@
     {
       "name": "Curated manufacturer identities",
       "url": "https://www.z-cam.com/products/professional-cameras/e2/"
+    },
+    {
+      "name": "Curated manufacturer identities",
+      "url": "https://www.z-cam.com/support/about/"
     },
     {
       "name": "Curated manufacturer identities",
